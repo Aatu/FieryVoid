@@ -32,14 +32,14 @@ class DeploymentGamePhase implements Phase
     {
         $moves = $this->validateDeployment($gameData, $ships);
 		
-		foreach ($gameData->ships as $currShip){ //generate system-specific information if necessary
+		foreach ($ships as $currShip){ //generate system-specific information if necessary
 			$currShip->generateIndividualNotes($gameData, $dbManager);
 		}		
-		foreach ($gameData->ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+		foreach ($ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
 			$currShip->saveIndividualNotes($dbManager);
         }
 
-        //New segment to allow boosting in Deployment Phase.
+        /*//Attempted segment when boosting in other phases was allowed
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer)
                 continue;
@@ -64,7 +64,8 @@ class DeploymentGamePhase implements Phase
             }    
 		
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
-        }
+            
+        }*/
         
 		
         foreach ($moves as $shipid=>$move)

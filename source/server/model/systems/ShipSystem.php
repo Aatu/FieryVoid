@@ -15,7 +15,7 @@ class ShipSystem {
     public $boostable = false;
     public $boostEfficiency = null;
     public $maxBoostLevel = null;
-	public $boostOtherPhases = array(); //To allow boosting in other Phases by listing phase number in this array.	
+	//public $boostOtherPhases = array(); //To allow boosting in other Phases by listing phase numbers in this array. Not used anymore
 	public $preFires = false; //Denotes whether weapon fires in pre-firing phase on normal firing phase
     public $power = array();
     public $fireOrders = array();
@@ -54,7 +54,8 @@ class ShipSystem {
 	
 	protected $tagList = array(); //tags for TAG hit chart entry; REMEMBER TAGS SHOULD BE MADE USING CAPITAL LETTERS!
 	
-	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.		
+	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.
+	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted	
 
 
     function __construct($armour, $maxhealth, $powerReq, $output){
@@ -93,7 +94,7 @@ class ShipSystem {
 			}
 		}	
 
-		if($ship->getSystemByName("MindriderEngine")){ //Mind's Eye Contraction CAN increase armour!
+		if ($ship->getSystemByName("MindriderEngine")){ //Mind's Eye Contraction CAN increase armour!
 			$strippedSystem->armour = $this->armour;
 		}			
 							
@@ -123,8 +124,10 @@ class ShipSystem {
 	public function doIndividualNotesTransfer(){//optionally to be redefined if system can receive any private data from front endthat need immediate attention		
 	}
 
+	/*//Not currently used
 	public function doIndividualNotesTransferGD($gamedata){
 	}		
+	*/
 
     public function onConstructed($ship, $turn, $phase){
         if($ship->getAdvancedArmor()==true){

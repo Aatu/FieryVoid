@@ -163,7 +163,7 @@ window.ShipTooltip = function () {
 		toDisplay += 'Half-Phased; ';
 		rollPivotModifier -= 50;
 	}
-    if(gamedata.gamephase != -1){
+    //if(gamedata.gamephase != -1){
         if (shipManager.isStealthShip(ship)){
             if(shipManager.isDetected(ship)) {
                 toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
@@ -171,7 +171,7 @@ window.ShipTooltip = function () {
                 toDisplay += '<span style="color:green;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
             }
         }
-    }            
+    //}            
 	if (ship.flight === true){		
 		if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
 	}else if (ship.osat){

@@ -406,6 +406,23 @@ class TacGamedata {
         return [];
     }
     
+    //New check at end fo firing phase to see f we run Deployment Phase next turn as a Pre-Turn ORders phase for systems like Shading Field
+    public function checkDeploymentPhaseForPlayer($playerId){
+        foreach($this->ships as $ship){
+            if ($ship->userid != $playerId) continue; //Not players ship
+            if(!$ship->canPreOrder) continue; //Can't pre-Order, filters out irreleveant ships and Terrain
+            
+            //Torvalus Block, other blocks could be added.
+            if($ship->faction == "Torvalus Speculators"){
+                $shadingField = $ship->getSystemByName("ShadingField");
+                if(!$shadingField->isDestroyed() && !$shadingField->isOfflineOnTurn()){
+                    return true; //At least one undestroyed, online Shading Field, do Pre-Orders
+                }
+            } 
+        }
+        return false;
+    }
+
     private $shipsById = array();
 
     /**
@@ -836,6 +853,23 @@ private function setWaiting() {
       
         return $blockedHexes;
     } //endof function getBlockedHexes
+
+    
+    public function getEnormousHexes() {
+        $enormousHexes = [];
+        
+        foreach ($this->ships as $ship) {
+            if($ship->isDestroyed()) continue;
+
+            if ($ship->Enormous) { // Only enormous units block LoS
+                $position = $ship->getHexPos(); 
+                $enormousHexes[] = $position;
+            }    
+
+        }
+      
+        return $enormousHexes;
+    } //endof function enormousHexes    
            
 
     public function getMinTurnDeployedSlot($slotid, $depavailable) {

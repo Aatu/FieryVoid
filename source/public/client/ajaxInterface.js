@@ -54,6 +54,9 @@ window.ajaxInterface = {
 
         if (factionRequest === this.currentFaction) return;
 
+        // Caching disabled to fix ship display issues. 
+        // Relies on HTTP Caching (ETag/304) implemented in gamelobbyloader.php
+        /*
         // Check client-side cache first
         const cacheKey = 'fv_ships_' + factionRequest;
         try {
@@ -68,6 +71,7 @@ window.ajaxInterface = {
             // Cache read failed, proceed with request
             console.warn('Cache read failed:', e);
         }
+        */
 
         this._sendRequest(factionRequest, callback);
     },
@@ -84,14 +88,15 @@ window.ajaxInterface = {
         this.nextFaction = null;
         this.submiting = true;
 
-        // Use direct AJAX (not ajaxWithRetry) - faction loading has its own queue management
-        $.ajax({
+        // Use _doAjaxWithRetry to handle transient 507 errors
+        this._doAjaxWithRetry({
             type: 'POST',
             url: 'gamelobbyloader.php',
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({ faction: String(factionRequest) }),
             timeout: 15000,
+            retryCodes: [400, 503, 507], // Explicitly retry these codes for faction loading
 
             success: (data) => {
                 if (data.error) {
@@ -143,7 +148,7 @@ window.ajaxInterface = {
                     this._sendRequest(nextF, nextCb);
                 }
             }
-        }).fail(() => { /* Cleanly handle rejection to prevent console noise */ });
+        });
     },
 
 
@@ -182,10 +187,12 @@ window.ajaxInterface = {
             },
 
             error: function (xhr, textStatus, errorThrown) {
-                // Retry on 507 if attempts remain
-                if (xhr && xhr.status === 507 && attempt < maxAttempts) {
+                // Retry if status matches allowed codes and attempts remain
+                const retryCodes = options.retryCodes || [503, 507];
+
+                if (xhr && retryCodes.includes(xhr.status) && attempt < maxAttempts) {
                     const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
-                    console.warn(`507 error, retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
+                    console.warn(`${xhr.status} error, retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
                     isRetrying = true;
 
                     setTimeout(() => {
@@ -942,6 +949,15 @@ window.ajaxInterface = {
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+
+        // OPTIMIZATION: Throttling for background tabs
+        if (document.hidden && !isLocal) {
+            if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
+            // Slow down to 1 minute, don't increment pollcount (pause decay)
+            ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, 60000);
+            return;
+        }
+
         var phase = gamedata.gamephase;
 
         if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
@@ -973,8 +989,8 @@ window.ajaxInterface = {
         } else {
             // In-Game timings
             time = 6000;
-            if (ajaxInterface.pollcount > 1) time = 12000;
-            if (ajaxInterface.pollcount > 3) time = 15000;
+            if (ajaxInterface.pollcount > 1) time = 8000;
+            if (ajaxInterface.pollcount > 3) time = 10000;
             if (ajaxInterface.pollcount > 10) time = 60000;
             if (ajaxInterface.pollcount > 40) time = 1800000;
         }
@@ -1004,6 +1020,7 @@ window.ajaxInterface = {
                 activeship: gamedata.activeship,
                 gameid: gamedata.gameid,
                 playerid: gamedata.thisplayer,
+                last_time: gamedata.lastUpdateTimestamp || 0,
                 time: Date.now()
             },
             success: ajaxInterface.successRequest,

@@ -1430,6 +1430,35 @@ shipManager.movement = {
         return shipNames;
     },
 
+    hasNegativeThrust: function hasNegativeThrust(ship) {
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+            if (ship.unavailable) return false;
+            if (ship.flight) return false;
+            if (ship.userid != gamedata.thisplayer) return false;
+            if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) return false;
+
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if (deployTurn > gamedata.turn) return false;  //Don't bother checking for ships that haven't deployed yet.
+
+            // Get the list of engine systems
+            var engines = shipManager.systems.getSystemListByName(ship, "engine");
+            if (!engines || engines.length === 0) return false; // Skip if no engines are found
+
+            // Check if all engines are destroyed or offline
+            var allEnginesDestroyedOrOffline = engines.every(engine =>
+                shipManager.systems.isDestroyed(ship, engine) ||
+                shipManager.power.isOffline(ship, engine)
+            );
+            if (allEnginesDestroyedOrOffline) return false; // Skip if all engines are destroyed or offline
+
+            // Check if the remaining thrust is negative for any engine
+            var hasNegativeThrust = engines.some(engine =>
+                shipManager.movement.getRemainingEngineThrust(ship, engine) < 0
+            );
+
+        return hasNegativeThrust;
+    },
+
 
     getFullEngineThrust: function getRemainingEngineThrust(ship) {
         var rem = 0;

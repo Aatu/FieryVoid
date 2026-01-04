@@ -227,7 +227,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>A hex-targeted weapon, which causes heavy damage to everything on hex hit and splash to everything in adjacent hexes, including allied units.  Devastating against fighters, and when used en masse (6+ Energy Mine launchers can easily saturate an area).</li>
             <li>Opponents will not be able to see where you have targeted your Energy Mines until after firing is resolved, just the fact that they've been launched. Launched mines also have a 25% chance to scatter or dissipate harmlessly.</li> 
         <h5>Pulsar Mines</h5>
-            <li>An automated short-range weapon that fires at passing fighters.  The weapon will automatically track enemy fighters during the Movement Phase, and attack any that came within arc and range during their movement in the Firing Phase.  It can fire up to 18 shots per turn.</li> 
+            <li>An automated short-range weapon that fires at passing fighters.  The weapon will automatically track enemy fighters during the Movement Phase, and attack any that came within arc and range before the Firing Phase begins.  Each Pulsar Mine can fire up to 18 shots per turn.</li> 
     <a class="back-to-top" href="#top">↩ Back to Top</a>            
 
 
@@ -455,9 +455,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>The Hyach player is free to distribute these points as desired among the three fire control categories (capital ships/heavy combat vessels, medium ships, and fighters/shuttles) each turn, but cannot allocate more than two to any given category.</li>    
         <h5>Hyach Specialists</h5>
             <li>Some Hyach crewmen receive special training as Specialists. In addition to their usual functions at their posts, they can provide their singular expertise at key moments in battle.</li>
-            <li>Ships with at least one Specialist slot on-board must select these on the first turn the ship is deployed.  
-                To do so, in Initial Orders use the 'Specialists' technical system to equip Specialists on each applicable ship, up to their maximum allowance. 
-                Only one of each Specialist type can be picked per ship. You can then use Specialist on any Initial Orders phase (including the turn they were selected) using the + button on the Specialist System.</li>
+            <li>Ships with at least one Specialist slot on-board must select these on the turn the ship is deployed.  
+                To do so, in Deployment phase use the 'Specialists' technical system to select Specialists on each applicable ship, up to their maximum allowance. 
+                Only one of each Specialist type can be picked per ship. You can then use your Specialists using the + button on the Specialist System in the game phase you want to use them. 
+                Note, different Specialists can be used at different times e.g. Power/Sensor Specialists can only be used in Initail Orders phase, whereas Thruster/Engine Specialists could also be used in Movement Phase and Targeting/Weapon Specilists could be used in any phase up to Firing.</li>
             <li>Specialists come in a range of different types,and these have been summarised below:
                 <ul class="circle-list">
                     <li><strong>Computer:</strong> Generates two extra Bonus Fire Control Points (BFCP) this turn.</li>
@@ -952,13 +953,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
                 <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
-                <li>Shading Mode- During Firing phase (and Deployment Phase) the Shading Field can be boosted to make its vessel 'Shaded' the FOLLOWING turn.  
+                <li>Shading Mode - During Deployment and Pre-Turn Order phases the Shading Field can be activated to make its vessel 'Shaded' that turn.  
                     Whilst Shaded the vessel retains the Jammer effect, doubles the EM shield rating to on its defence profile and, if it is more than 15 hexes away from all enemy units, it becomes invisible to opponents.
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
             </ul>
         </li>         
         <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
-            This can also be toggled on and off during Firing/Deployment phases but it does not reduce the profile of the fighter flight (by 15) unless they are Shaded.</li>         
+            This can also be toggled on and off during Deployment and Pre-Turn Order phases but onl provides the Jammer effect in Normal Made.  In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
