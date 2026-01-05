@@ -144,6 +144,147 @@ GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, targ
 	return mod; 
 };
 
+var GravityNet = function GravityNet(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+GravityNet.prototype = Object.create(Gravitic.prototype);
+GravityNet.prototype.constructor = GravityNet;
+
+GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
+	var mod = 0;
+    if(shooter.team !== target.team){
+        if(target.gravitic || target.factionAge >= 3) mod = -3;
+    }    
+	return mod; 
+};
+
+GravityNet.prototype.initializationUpdate = function() {
+    if(gamedata.gamephase == 1 || gamedata.gamephase == 5){ //update weapon data field to show this gravity net's max movement distance or return to TBD
+        this.data["Move Distance"] = this.moveDistance;
+    } 
+    if (this.fireOrders.length > 0) {
+        this.hextarget = true;
+        this.ignoresLoS = false;
+
+        
+    }else{
+        this.hextarget = false;
+        this.ignoresLoS = false; 
+        if(this.target){   
+            webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this});
+        }                
+    } 
+
+    return this;
+};
+
+GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 0) {
+        return;
+    } 
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //No called shots.     
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        if(chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'prefiring',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'gravitic', 
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        }; 
+        this.target = target; //store current target to this gravity net object.       
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+
+    webglScene.customEvent("ShowTargetedHexagonInArc", {shooter: shooter, target: target, system: this});
+    this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.
+    
+    return fireOrdersArray; // Return all fire orders
+};    
+
+GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
+    
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
+
+    if (this.fireOrders.length > 1) {
+        return;
+    }         
+    var targetMoveHexValid = this.validateTargetMoveHex(hexpos, this.moveDistance);
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    if(targetMoveHexValid){
+        for (var s = 0; s < shotsOnTarget; s++) {
+                var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+                var fire = {
+                    id: fireid,
+                    type: 'prefiring',
+                    shooterid: shooter.id,
+                    targetid: -1,
+                    weaponid: this.id,
+                    calledid: -1,
+                    turn: gamedata.turn,
+                    firingMode: this.firingMode,
+                    shots: this.defaultShots,
+                    x: hexpos.q,
+                    y: hexpos.r,
+                    damageclass: 'gravNetMoveHex', 
+                    notes: "split"                
+                };
+            fireOrdersArray.push(fire);
+        }  
+        webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this}); 
+    }
+    return fireOrdersArray; // Return all fire orders
+};  
+
+GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //function to validate desired target movement hex, will check LOS from target ship to move hex and range and make sure no collisions occur.
+
+    //get gravNetTargetHex to check range and LOS for gravNetTargetMovementHex
+    //Target of grav net which will be used as shooter for grav net target hex.
+    var valid = false; //default to false
+    var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex), this should always be the first fire order
+    if (gravNetTargetFireOrder){	// check that the grav net firing ship set a fire order
+        var targetShip = gamedata.getShip(gravNetTargetFireOrder.targetid);
+        var targetShipHex = shipManager.getShipPosition(targetShip);
+        var targetMoveHex = hexpos;
+        var dist = targetShipHex.distanceTo(targetMoveHex);
+        if(dist <= maxmoverange){            
+            var blockedHexes = weaponManager.getBlockedHexes();
+            var loSBlocked = mathlib.checkLineOfSight(targetShipHex, targetMoveHex, blockedHexes);
+            if(!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)){//make sure hexpos is a not a blocked hex and LOS is not blocked      
+                valid = true ;  
+            }    
+        }                 
+    }
+
+    return valid;
+};             
+
+GravityNet.prototype.checkFinished = function () {
+	if(this.fireOrders.length > 1) return true;
+    return false;
+};
+
 var LightGraviticBolt = function LightGraviticBolt(json, ship) {
     Gravitic.call(this, json, ship);
 };

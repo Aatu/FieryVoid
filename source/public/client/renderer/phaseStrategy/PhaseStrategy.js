@@ -809,7 +809,7 @@ window.PhaseStrategy = function () {
         if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
             this.shipTooltip.update(payload.target, this.selectedShip);
         }
-
+        
         this.shipWindowManager.update();
     };
 

@@ -386,7 +386,9 @@ spl_autoload_register(
                 'gravitonbeam' => '/server/model/weapons/gravitic.php',
                 'gravitonpulsar' => '/server/model/weapons/gravitic.php',
                 'gravlance' => '/server/model/weapons/gravitic.php',
-                'graviticshifter' => '/server/model/weapons/gravitic.php',                
+                'graviticshifter' => '/server/model/weapons/gravitic.php',
+                'gravitynet' => '/server/model/weapons/gravitic.php',
+                'gravitynethandler' => '/server/model/weapons/gravitic.php',
                 'greysharlin' => '/server/model/ships/minbari/greySharlin.php',
                 'gsten' => '/server/model/ships/narn/gsten.php',
                 'gstor' => '/server/model/ships/narn/gstor.php',
@@ -394,7 +396,7 @@ spl_autoload_register(
                 'guardhawk' => '/server/model/ships/drazi/guardhawk.php',
                 'guardianarray' => '/server/model/weapons/defensive.php',
                 'halfefficiency' => '/server/model/cricialClasses.php',
-		    'gravthrustercritignored' => '/server/model/cricialClasses.php',		    
+		        'gravthrustercritignored' => '/server/model/cricialClasses.php',		    
                 'halik' => '/server/model/ships/brakiri/halik.php',
                 'halos' => '/server/model/ships/brakiri/halos.php',
                 'halosearly' => '/server/model/ships/brakiri/halosEarly.php',
@@ -817,7 +819,7 @@ spl_autoload_register(
                 //'righteous1894' => '/server/model/ships/orieni/righteous1894.php',
                 'rishekar' => '/server/model/ships/dilgar/rishekar.php',
                 'rmissilerack' => '/server/model/weapons/missile.php',
-				
+				'rogata' => '/server/model/ships/minbari/rogata.php',
 				//Rogolon units
 				'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
                 'rogolonchelekftr' => '/server/model/ships/rogolon/rogolonChelekFtr.php',
@@ -1112,6 +1114,7 @@ spl_autoload_register(
                 'trathartig' => '/server/model/ships/dilgar/trathartiG.php',
                 'trathor' => '/server/model/ships/llort/trathor.php',
                 'trolata' => '/server/model/ships/minbari/trolata.php',
+                'troligan' => '/server/model/ships/minbari/troligan.php',
                 'tulati' => '/server/model/ships/abbai/tulati.php',
                 'turgon' => '/server/model/ships/llort/turgon.php',
                 'turlisk' => '/server/model/ships/llort/turlisk.php',
@@ -2246,6 +2249,7 @@ spl_autoload_register(
                 'protectoratenial' => '/server/model/ships/minbari_protectorate/ProtectorateNial.php',
                 'protectoratenorgath' => '/server/model/ships/minbari_protectorate/ProtectorateNorgath.php',
                 'protectorateretlata' => '/server/model/ships/minbari_protectorate/ProtectorateRetlata.php',
+                'protectoraterogata' => '/server/model/ships/minbari_protectorate/ProtectorateRogata.php',
                 'protectoraterolentha' => '/server/model/ships/minbari_protectorate/ProtectorateRolentha.php',
                 'protectoratesheganna' => '/server/model/ships/minbari_protectorate/ProtectorateSheganna.php',
                 'protectoratetigara' => '/server/model/ships/minbari_protectorate/ProtectorateTigara.php',
@@ -2255,6 +2259,9 @@ spl_autoload_register(
                 'protectoratetishat' => '/server/model/ships/minbari_protectorate/ProtectorateTishat.php',
                 'protectoratetorotha' => '/server/model/ships/minbari_protectorate/ProtectorateTorotha.php',
                 'protectoratetradana' => '/server/model/ships/minbari_protectorate/ProtectorateTradana.php',
+                'protectoratetroligan' => '/server/model/ships/minbari_protectorate/ProtectorateTroligan.php',
+              
+                
 
 
 
