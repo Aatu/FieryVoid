@@ -634,6 +634,7 @@ window.weaponManager = {
     },
 
     isOnWeaponArc: function isOnWeaponArc(shooter, target, weapon) {
+        if(weapon.splitArcs) return weaponManager.isOnWeaponArcMultiple(shooter, target, weapon);
         //console.log("is on arc");
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
@@ -653,6 +654,40 @@ window.weaponManager = {
 
         return mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end);
     },
+
+    //Weapons like Shadow Heavy Slicer have two distinct arcs to check
+    isOnWeaponArcMultiple: function isOnWeaponArcMultiple(shooter, target, weapon) {
+        const shooterFacing = shipManager.getShipHeadingAngle(shooter);
+        const targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
+
+        const oPos = shipManager.getShipPosition(shooter);
+        const tPos = shipManager.getShipPosition(target);
+
+        /* Range-0 ballistic exception */
+        if (weapon.ballistic && oPos.equals(tPos)) return true;
+
+        // Get all weapon arcs (already roll-corrected)
+        const arcs = shipManager.systems.getMultipleArcs(shooter, weapon);
+
+        // No arcs = cannot fire
+        if (!arcs.length) return false;
+
+        // Check against ANY arc
+        for (let i = 0; i < arcs.length; i++) {
+            const arc = arcs[i];
+
+            const start = mathlib.addToDirection(arc.start, shooterFacing);
+            const end   = mathlib.addToDirection(arc.end, shooterFacing);
+
+            if (mathlib.isInArc(targetCompassHeading, start, end)) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;

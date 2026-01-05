@@ -75,7 +75,7 @@ class Weapon extends ShipSystem
 	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
 	public $canSplitShotsArray = array(); 
     protected $multiModeSplit = false; //If you want the Front End to see this, pass it in strpForJson() in weapon :)
-
+    protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
     public $overloadable = false;
 
     public $normalload = 0;

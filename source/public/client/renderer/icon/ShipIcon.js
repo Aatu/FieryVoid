@@ -513,20 +513,19 @@ window.ShipIcon = function () {
 
             this.showThrusterIcon(ship, weapon); //Creates small thruster icon on relevant side of ship on hover over system.
 
-        } else { //Normal weapons, not thrusters
-
+        } else if (weapon.shootsStraight) { //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             var arcs = shipManager.systems.getArcs(ship, weapon);
-            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
-            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-
-            //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
-            if (weapon.shootsStraight) {
-
-                this.showStraightArcs(weapon, hexDistance, arcs);
-
-            } else { //Normal circular weapon arcs
+            this.showStraightArcs(weapon, hexDistance, arcs);
+            
+        } else if (weapon.splitArcs){ //Some weapons might have two separate arcs, like Shadow Battlecruiser.
+            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
+                        
+            for (const arcs of allArcs) { 
+                var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+                var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+                var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);                
                 var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
                 var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
                 var circle = new THREE.Mesh(geometry, material);
@@ -535,6 +534,22 @@ window.ShipIcon = function () {
                 this.mesh.add(circle);
                 this.weaponArcs.push(circle);
             }
+        
+        } else { //Normal weapons with circular weapon arcs
+            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            var arcs = shipManager.systems.getArcs(ship, weapon);
+            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+
+            var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
+            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
+            var circle = new THREE.Mesh(geometry, material);
+            circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+            circle.position.z = -1;
+            this.mesh.add(circle);
+            this.weaponArcs.push(circle);
+            
         }
 
         return null;
