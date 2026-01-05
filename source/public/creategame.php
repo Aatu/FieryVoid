@@ -185,15 +185,7 @@
             <!-- Scenario Description (Right Column) -->
             <div class="scenario-form">
                 <div class="split-header">SCENARIO DESCRIPTION:</div>
-            
-                <div class="scenario-row">
-                    <label for="req">FLEET REQUIREMENTS:</label>
-                    <select id="req">
-                        <option value="Pass the fleet checker">Pass the fleet checker</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="text" id="req_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter requirements...">
-                </div>
+
                 <div class="scenario-row">
                     <label for="tier">EXPECTED POWER LEVEL:</label>
                     <select id="tier">
@@ -205,18 +197,31 @@
                         <option value="Other">Other</option>
                     </select>
                     <input type="text" id="tier_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter power level...">
-                </div>
+                </div>      
+
                 <div class="scenario-row">
-                    <label for="forbidden">FORBIDDEN FACTIONS:</label>
-                    <input type="text" id="forbidden" value="None" class="forbiddenText">
-                </div>                
+                    <label for="req">FLEET REQUIREMENTS:</label>
+                    <select id="req">
+                        <option value="Pass the fleet checker">Pass the fleet checker</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="req_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter requirements...">
+                </div>
+
                 <div class="scenario-row">
                     <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
                     <select id="customfactions">
                         <option value="Allowed">Allowed</option>
+                        <option value="Semi-Custom Only">Semi-Custom Only</option>                        
                         <option value="Not allowed" selected>Not allowed</option>
                     </select>
                 </div>
+
+                <div class="scenario-row">
+                    <label for="forbidden">FORBIDDEN FACTIONS:</label>
+                    <input type="text" id="forbidden" value="None" class="forbiddenText">
+                </div> 
+
                 <div class="scenario-row">
                     <label for="enhancements">ENHANCEMENTS:</label>
                     <select id="enhancements">
