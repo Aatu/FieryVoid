@@ -773,20 +773,11 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
     };
 
-    ShipIcon.prototype.showHexagonAroundShip = function(shooter, shooterIcon, target, system, size) {
+    ShipIcon.prototype.showTargetedHexagonInArc = function(shooter, shooterIcon, system, size) {
         var hexDistance = window.coordinateConverter.getHexDistance();
         var systemArcs = shipManager.systems.getArcs(shooter, system);
-        
-        // 1. Arc Math (relative to the shooter's orientation)
-            /*
-             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
-            var arcs = shipManager.systems.getArcs(ship, weapon);
-            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
-            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-            */       
-
-        // 2. Setup the Hexagon Geometry
+                
+        //Setup the Hexagon Geometry
         var dis = (size + 0.6) * hexDistance;
         var hexShape = new THREE.Shape();
         for (let i = 0; i < 6; i++) {
@@ -802,7 +793,6 @@ window.ShipIcon = function () {
         var plane2 = new THREE.Plane();
         var shooterRotation = shooterIcon.mesh.rotation.z;
 
-        // Normalize angles to 0 -> 2PI range
         const TWO_PI = Math.PI * 2;
         var offset = 0;
         var angleStart = mathlib.degreeToRadian(systemArcs.start + offset) + shooterRotation;
@@ -834,7 +824,6 @@ window.ShipIcon = function () {
             clipIntersection: !isLargeArc
         });
 
-        // 5. Create and Attach to TARGET
         var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);       
         hexagon.position.set(0, 0, -1); 
         this.mesh.add(hexagon);
@@ -848,12 +837,12 @@ window.ShipIcon = function () {
         */
     };
 
-    ShipIcon.prototype.hideHexagonAroundShip = function(system){
+    ShipIcon.prototype.removeTargetedHexagonInArc = function(system){
         this.mesh.remove(this.shipHexagonSpritesMap.get(system));
         this.shipHexagonSpritesMap.delete(system);
     }
 
-    ShipIcon.prototype.hideHexagonArcs = function () {
+    ShipIcon.prototype.removeHexagonArcs = function () {
         this.shipHexagonSpritesMap.forEach(function (system, arc, map) {
             this.mesh.remove(system);
         }, this);

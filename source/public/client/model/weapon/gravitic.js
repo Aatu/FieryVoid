@@ -171,7 +171,7 @@ GravityNet.prototype.initializationUpdate = function() {
         this.hextarget = false;
         this.ignoresLoS = false; 
         if(this.target){   
-            webglScene.customEvent("RemoveGravityNetHexagon", {ship: this.target, system: this});
+            webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this});
         }                
     } 
 
@@ -215,7 +215,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         fireOrdersArray.push(fire); // Store each fire order
     }
 
-    webglScene.customEvent("AddGravityNetHexagon", {shooter: shooter, target: target, system: this});
+    webglScene.customEvent("ShowTargetedHexagonInArc", {shooter: shooter, target: target, system: this});
     this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.
     
     return fireOrdersArray; // Return all fire orders
@@ -252,7 +252,7 @@ GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
                 };
             fireOrdersArray.push(fire);
         }  
-        webglScene.customEvent("RemoveGravityNetHexagon", {target: this.target, system: this}); 
+        webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this}); 
     }
     return fireOrdersArray; // Return all fire orders
 };  

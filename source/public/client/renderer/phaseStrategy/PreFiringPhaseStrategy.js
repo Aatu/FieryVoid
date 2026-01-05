@@ -31,7 +31,7 @@ window.PreFiringPhaseStrategy = function () {
     PreFiringPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
         this.shipIconContainer.getArray().forEach(function (icon) {
-            icon.hideHexagonArcs();
+            icon.removeHexagonArcs();
         });
     };
 
@@ -116,21 +116,15 @@ window.PreFiringPhaseStrategy = function () {
         this.shipWindowManager.update();
     };
 
-    PreFiringPhaseStrategy.prototype.onAddGravityNetHexagon = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship. 
-        var shooter = payload.shooter;
-        var target = payload.target;        
-        var system = payload.system;        
-        var shooterIcon = this.shipIconContainer.getByShip(shooter);
-        var targetIcon = this.shipIconContainer.getByShip(target);
-        var hexagonSize = system.moveDistance;
-        targetIcon.showHexagonAroundShip(shooter, shooterIcon, target, system, hexagonSize);
+    PreFiringPhaseStrategy.prototype.onShowTargetedHexagonInArc = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship.              
+        var shooterIcon = this.shipIconContainer.getByShip(payload.shooter);
+        var targetIcon = this.shipIconContainer.getByShip(payload.target);
+        targetIcon.showTargetedHexagonInArc(payload.shooter, shooterIcon, payload.system, payload.system.moveDistance);
     };  
 
-    PreFiringPhaseStrategy.prototype.onRemoveGravityNetHexagon = function(payload){ //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
-        var target = payload.target;    
-        var system = payload.system;    
-        var iconTarget = this.shipIconContainer.getByShip(target);        
-        iconTarget.hideHexagonAroundShip(system);
+    PreFiringPhaseStrategy.prototype.onRemoveTargetedHexagonInArc = function(payload){ //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
+        var targetIcon = this.shipIconContainer.getByShip(payload.target);        
+        targetIcon.removeTargetedHexagonInArc(payload.system);
     };
 
     return PreFiringPhaseStrategy;
