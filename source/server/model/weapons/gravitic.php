@@ -1086,15 +1086,14 @@ class GravityNet extends Weapon implements SpecialAbility{
 	}
 
      public function setSystemDataWindow($turn){
-        $this->data["Special"] = "Select"; 
-        $this->data["Special"] .= "<br>Each Gravity Net has a max movement range (Move Distance) determined by a D6 roll made for each weapon at start of each pre-fire phase.";
-        $this->data["Special"] .= "<br>Only ONE Gravity Net may affect a ship per turn, but any number may be fired at a target.;           
-        $this->data["Special"] .= "<br>Default "Standard (S)" mode: The Gravity Net that hits a given target with the largest "Move Distance" will take priority";
-        $this->data["Special"] .= "<br>"Priorty (P)" mode: The Priorty set Gravity Net that hits a given target with the largest "Move Distance" will take priority over all other Gravity Nets.;
-        $this->data["Special"] .= "<br>If no priority Gravity Nets hit than largest "Standard" mode Gravity Net will take priority";
+        $this->data["Special"] = "<br>Each Gravity Net has a max movement range (Move Distance) determined by a D6 roll made for each weapon at start of pre-fire phase.";
+        $this->data["Special"] .= "<br>Move Distance is reported on mouse over and can be visualized when targeting with overlay.";
+        $this->data["Special"] .= "<br>Only ONE Gravity Net may affect a ship per turn, more may be fired at target.";           
+        $this->data["Special"] .= "<br>Standard (S) mode: Gravity Net hitting target with the largest Move Distance will take priority";
+        $this->data["Special"] .= "<br>Priorty (P) mode: Gravity Net hitting target will take priority over all other Gravity Nets.";
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives (Does NOT include allies).";        
         $this->data["Special"] .= "<br>Can target allies.";
-        $this->data["Special"] .= "<br>No effect on units smaller then fireing ship.";	        	        		
+        $this->data["Special"] .= "<br>No effect on units bigger then firing ship.";	        	        		
 		parent::setSystemDataWindow($turn);  
     }   
 
