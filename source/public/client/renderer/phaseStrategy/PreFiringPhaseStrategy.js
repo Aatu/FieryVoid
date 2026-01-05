@@ -107,15 +107,6 @@ window.PreFiringPhaseStrategy = function () {
         PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
     };
 
-    PreFiringPhaseStrategy.prototype.onSplitOrderRemoved = function(payload) {
-
-        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
-            this.shipTooltip.update(payload.target, this.selectedShip);
-        }
-
-        this.shipWindowManager.update();
-    };
-
     PreFiringPhaseStrategy.prototype.onShowTargetedHexagonInArc = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship.              
         var shooterIcon = this.shipIconContainer.getByShip(payload.shooter);
         var targetIcon = this.shipIconContainer.getByShip(payload.target);
