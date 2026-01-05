@@ -1334,14 +1334,15 @@ class SuperHeavyMolecularDisruptor extends Raking
 	    public $modeLetters = 1;	
         public $rangePenalty = 0.33;//-1/3 hexes
         public $fireControl = array(0, 2, 4); // fighters, <=mediums, <=capitals 
-        public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8), 3=>array(0,2,4), 4=>array(4, 6, 8));
-
+        //public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8), 3=>array(0,2,4), 4=>array(4, 6, 8));
+        public $fireControlArray = array(1=>array(0,2,4), 2=>array(4, 6, 8));
 		public $priority = 2;//primary mode being Piercing! otherwise heavy Raking weapon - with armor-ignoring 
-		public $priorityArray = array(1=>2, 2=>3, 3=>2, 4=>3);
+		//public $priorityArray = array(1=>2, 2=>3, 3=>2, 4=>3);
+		public $priorityArray = array(1=>2, 2=>3);        
 
 		public $raking = 15;
         public $damageType = "Piercing"; 
-        public $damageTypeArray = array(1=>"Piercing", 2=>"Raking", 3=>"Piercing", 4=>"Raking");
+        //public $damageTypeArray = array(1=>"Piercing", 2=>"Raking", 3=>"Piercing", 4=>"Raking");
         public $weaponClass = "Molecular"; 
         public $startArcArray = array(); 
         public $endArcArray = array();        
@@ -1349,29 +1350,32 @@ class SuperHeavyMolecularDisruptor extends Raking
         //New variables to allow sweeping split shots.
         public $maxVariableShots = 24; //Default value, will be amended in front end anyway.
 		public $canSplitShots = true; //Allows weapon to split shots.
-        public $canSplitShotsArray = array(1=>true, 2=>true, 3=>true, 4=>true);
-	    protected $multiModeSplit = true; //Can split shots across different modes 
+        //public $canSplitShotsArray = array(1=>true, 2=>true, 3=>true, 4=>true);
+        public $canSplitShotsArray = array(1=>true, 2=>true);        
+	    protected $multiModeSplit = true; //Can split shots across different modes
+        protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End
         private $damageDice = array();  
         private $maxDiceArray = array(1=> 8, 2=> 16, 3=> 24);         			
         private $uniqueIntercepts = array();	
 
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){			
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){           			
             if ( $maxhealth == 0 ) $maxhealth = 18;
-            if ( $powerReq == 0 ) $powerReq = 16;
-            $this->startArcArray[1] = $startArc; //Normal arcs
-            $this->endArcArray[1] = $endArc;
-            $this->startArcArray[2] = $startArc;
-            $this->endArcArray[2] = $endArc; 
+            if ( $powerReq == 0 ) $powerReq = 16;     
+            //$this->startArcArray[1] = $startArc; //Normal arcs
+            //$this->endArcArray[1] = $endArc;
+            //$this->startArcArray[2] = $startArc;
+            //$this->endArcArray[2] = $endArc; 
 
             if($startArc2 !== null || $endArc2 !== null){      
-                $this->startArcArray[3] = $startArc2; //Set rear arcs manually
-                $this->endArcArray[3] = $endArc2; 
-                $this->startArcArray[4] = $startArc2;
-                $this->endArcArray[4] = $endArc2;  
-                $this->firingModes = array(1=>'FP - Front Piercing', 2 =>'FR - Front Raking', 3=>'RP - Rear Piercing', 4=>'RR - Rear Raking');
-                $this->modeLetters = 2;                           
+                $this->startArcArray[0] = $startArc; //Set rear arcs manually
+                $this->endArcArray[0] = $endArc; 
+                $this->startArcArray[1] = $startArc2;
+                $this->endArcArray[1] = $endArc2; 
+                $this->splitArcs = true; 
+                //$this->firingModes = array(1=>'FP - Front Piercing', 2 =>'FR - Front Raking', 3=>'RP - Rear Piercing', 4=>'RR - Rear Raking');
+                //$this->modeLetters = 2;                           
             }                                   
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -1379,7 +1383,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 		//if charged for 3 turns and mode is Piercing - set doOverkill; otherwise unset it
 		public function changeFiringMode($newMode){
 			parent::changeFiringMode($newMode); 
-			if (($this->turnsloaded >=3) && ($this->firingMode ==1 || $this->firingMode == 3)){
+			//if (($this->turnsloaded >=3) && ($this->firingMode ==1 || $this->firingMode == 3)){
+			if (($this->turnsloaded >=3) && $this->firingMode ==1){                
 				$this->doOverkill=true;
 			}else{
 				$this->doOverkill=false;
@@ -1387,14 +1392,11 @@ class SuperHeavyMolecularDisruptor extends Raking
 		}
 	    
 		public function setSystemDataWindow($turn){			
-			parent::setSystemDataWindow($turn);   
+			parent::setSystemDataWindow($turn);                 
 			$this->data["Special"] = "Uninterceptable. Ignores armor. 15-point rakes.";
 			$this->data["Special"] .= "<br>Full power (3 turns armed) can be fired ONLY in Piercing mode, but it will become Piercing(Standard), with ability to overkill.  Raking Mode can still be used (at 2 turns output)";           
 			$this->data["Special"] .= "<br>May choose to split shots between multiple targets, allocating a number to d10 damage dice to each one.";
-			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";   			
-            if(count($this->firingModes) > 2){
-                $this->data["Special"] .= "<br>Weapon can also fire in rear arcs (150..210), and can be combined with split shots in forward arcs.";			  			  
-            }    
+			$this->data["Special"] .= "<br>Each shot after the first attracts a cumulative -5% to hit modifier.";   			 
 			$this->data["Special"] .= "<br>Can fire accelerated for less damage:";  
 			$this->data["Special"] .= "<br> - 1 turn: 8d10+12"; 
 			$this->data["Special"] .= "<br> - 2 turns: 16d10+24"; 
@@ -1410,7 +1412,8 @@ class SuperHeavyMolecularDisruptor extends Raking
             //$interceptsAllowed = 0;           
             $loadedDice = $this->maxDiceArray[$this->turnsloaded] ?? 8;
 
-            if ($this->firingMode == 2 || $this->firingMode == 4) {
+            //if ($this->firingMode == 2 || $this->firingMode == 4) {
+            if ($this->firingMode == 2) {                
                 $maxDice = min($this->maxDiceArray[2], $loadedDice);
             } else {
                 $maxDice = min($this->maxDiceArray[3], $loadedDice);
@@ -1476,7 +1479,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 		    $fireOrder->needed -= $hitmod; // Modify fireOrder->needed based on hitmod 		     
             
             //If piercing mode used on less than full charge, should use Raking Fire Control, so add +20%
-            if($this->turnsloaded < 3 && ($fireOrder->firingMode == 1 || $fireOrder->firingMode == 3)){
+            //if($this->turnsloaded < 3 && ($fireOrder->firingMode == 1 || $fireOrder->firingMode == 3)){
+            if($this->turnsloaded < 3 && $fireOrder->firingMode == 1){                
                 $fireOrder->needed += 20; // Modify fireOrder->needed based on hitmod              
             }            
             
@@ -1512,7 +1516,8 @@ class SuperHeavyMolecularDisruptor extends Raking
         $noOfShots = 0;
         $loadedtime = $this->turnsloaded;
 
-		if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing
+		//if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing
+		if($this->firingMode == 2){//cannot use 3-turns power for shots other than Piercing            
 			$loadedtime = min(2,$loadedtime);
 		}
 
@@ -1550,7 +1555,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 
         public function setMinDamage(){
 			$loadedtime = $this->turnsloaded;
-			if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing
+			//if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing
+			if($this->firingMode == 2){//cannot use 3-turns power for shots other than Piercing                
 				$loadedtime = min(2,$loadedtime);
 			}
             switch($loadedtime){
@@ -1568,7 +1574,8 @@ class SuperHeavyMolecularDisruptor extends Raking
              
         public function setMaxDamage(){
 			$loadedtime = $this->turnsloaded;
-			if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing
+			//if($this->firingMode == 2 || $this->firingMode == 4){//cannot use 3-turns power for shots other than Piercing
+			if($this->firingMode == 2){//cannot use 3-turns power for shots other than Piercing                
 				$loadedtime = min(2,$loadedtime);
 			}
             switch($loadedtime){
@@ -1587,7 +1594,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();    
-        $strippedSystem->multiModeSplit = $this->multiModeSplit;						                                        
+        $strippedSystem->multiModeSplit = $this->multiModeSplit;
+        $strippedSystem->splitArcs = $this->splitArcs;        						                                        
         return $strippedSystem;
 	}	        
 		

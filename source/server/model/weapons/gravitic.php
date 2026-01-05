@@ -956,7 +956,7 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         $this->data["Special"] .= "<br>Select firing mode based on direction you wish to move ship and target a unit.";
         $this->data["Special"] .= "<br>Only ONE Gravitic Shifter can be used on a ship per turn, any other attempts will automatically miss.";           
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
-        $this->data["Special"] .= "<br>Can target allies.";
+        $this->data["Special"] .= "<br>Can target allies without suffering double range penalty for no EW Lock.";
         $this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
 		parent::setSystemDataWindow($turn);     
     }
@@ -976,10 +976,18 @@ class GraviticShifter extends Weapon implements SpecialAbility{
 
 		$target = $gamedata->getShipById($fireOrder->targetid);
         $shooter = $this->getUnit();
-        if($shooter->team !== $target->team){ //Let's make penalty only for enemy units
-            if($target->gravitic || $target->factionAge >= 3){//Gravitic or Ancient
-                $fireOrder->needed -= 15; //+15% chance to miss.
-            }
+
+        if($target->gravitic || $target->factionAge >= 3){ 
+            $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
+        }
+
+        if($shooter->team == $target->team){ //Let's make penalty only for enemy units
+		    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
+		    $targetPos = $target->getHexPos();                       
+            $distance = mathlib::getDistanceHex($launchPos, $targetPos);
+
+            $rangePen = $this->calculateRangePenalty($distance);
+            $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
         }    
 	}    
         
@@ -1061,8 +1069,8 @@ class GravityNet extends Weapon implements SpecialAbility{
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
     public $firingModes = array(
-		1 => "Standard",
-        2 => "Priorty"
+		1 => "Standard - GN",
+        2 => "Priorty - GN"
 	);
 	    
     protected $possibleCriticals = array(14 => "ReducedRange");
@@ -1105,13 +1113,21 @@ class GravityNet extends Weapon implements SpecialAbility{
             parent::calculateHitBase($gamedata, $fireOrder);
 
             if($fireOrder->targetid != -1){
-                    $target = $gamedata->getShipById($fireOrder->targetid);
+                $target = $gamedata->getShipById($fireOrder->targetid);
                 $shooter = $this->getUnit();
-                if($shooter->team !== $target->team){ //Let's make penalty only for enemy units
-                    if($target->gravitic || $target->factionAge >= 3){//Gravitic or Ancient
-                        $fireOrder->needed -= 15; //+15% chance to miss.
-                    }
-                }    
+
+                if($target->gravitic || $target->factionAge >= 3){ 
+                    $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
+                }
+
+                if($shooter->team == $target->team){ //Let's make penalty only for enemy units
+                    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
+                    $targetPos = $target->getHexPos();                       
+                    $distance = mathlib::getDistanceHex($launchPos, $targetPos);
+
+                    $rangePen = $this->calculateRangePenalty($distance);
+                    $fireOrder->needed += $rangePen * 5; //refund range penalty for friendly units since OEW lock on allies not possible.            
+                }   
             }
         }
 	}    

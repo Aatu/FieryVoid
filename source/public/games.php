@@ -92,7 +92,8 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
         <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggle on/off during Deployment phase and the new Pre-Orders phase, which occurs at the start of every turn.</li>       
         <li><strong>Hyach Specialists</strong> - Specialists are selected during Deployment Phase, and some can now be used in Movement/Firing Phases.</li>                                  
         <li><strong>Sustained Weapons</strong> - Sustained weapons now display their current target in weapon tooltip after firing their first shot.</li>                                            
-        <li><strong>Pulsar Mine</strong> - Pulsar Mine now checks LoS and fires before the Firing phase starts.</li>        
+        <li><strong>Pulsar Mine</strong> - Pulsar Mine now checks LoS and fires before the Firing phase starts.</li>  
+        <li><strong>Heavy Slicer</strong> - Now displays split arcs without needing to change Firing modes.</li>                
         <li><strong>General Fixes</strong> - More server performance/stability updates, plus other small fixes. Thanks for all the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
