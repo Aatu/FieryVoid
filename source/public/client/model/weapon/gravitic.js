@@ -138,9 +138,15 @@ GraviticShifter.prototype.constructor = GraviticShifter;
 
 GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
 	var mod = 0;
-    if(shooter.team !== target.team){
-        if(target.gravitic || target.factionAge >= 3) mod = -3;
+
+    if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
+    
+    if(shooter.team == target.team){
+        var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
+        mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
     }    
+    
 	return mod; 
 };
 
@@ -152,9 +158,15 @@ GravityNet.prototype.constructor = GravityNet;
 
 GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 	var mod = 0;
-    if(shooter.team !== target.team){
-        if(target.gravitic || target.factionAge >= 3) mod = -3;
+
+    if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
+    
+    if(shooter.team == target.team){
+        var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
+        mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
     }    
+    
 	return mod; 
 };
 
