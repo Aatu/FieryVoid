@@ -6,7 +6,7 @@ class ProtectorateTroligan extends BaseShip{
 
         $this->pointCost = 855;
         $this->faction = "Minbari Protectorate";
-        $this->phpclass = "Protectorate Troligan";
+        $this->phpclass = "ProtectorateTroligan";
         $this->imagePath = "img/ships/troligan.png";
         $this->shipClass = "Troligan Armored Cruiser";
         $this->shipSizeClass = 3;
