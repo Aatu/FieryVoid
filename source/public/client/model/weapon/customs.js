@@ -28,7 +28,7 @@ CustomMatterStream.prototype.constructor = CustomMatterStream;
 
 CustomMatterStream.prototype.initializationUpdate = function() {
     var ship = this.ship;
-	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+	if(gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
         const targetId = Object.keys(this.sustainedTarget)[0];
         const target = gamedata.getShip(targetId);
 		this.data["Current Target"] = target.name;
@@ -231,7 +231,7 @@ CustomLtParticleCutter.prototype.constructor = CustomLtParticleCutter;
 
 CustomLtParticleCutter.prototype.initializationUpdate = function() {
     var ship = this.ship;
-	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+	if(gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
         const targetId = Object.keys(this.sustainedTarget)[0];
         const target = gamedata.getShip(targetId);
 		this.data["Current Target"] = target.name;
