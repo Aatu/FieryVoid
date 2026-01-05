@@ -1,16 +1,15 @@
 <?php
-class Rolentha extends HeavyCombatVessel{
+class ProtectorateRogata extends HeavyCombatVessel{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 800;
-        $this->faction = "Minbari Federation";
-        $this->phpclass = "Rolentha";
+        $this->pointCost = 585;
+        $this->faction = "Minbari Protectorate";
+        $this->phpclass = "Rogata";
         $this->imagePath = "img/ships/rogata.png";
-        $this->shipClass = "Rolentha Combat Tug";
+        $this->shipClass = "Rogata Tug";
         $this->gravitic = true;
-        $this->occurence = "rare";
         $this->forwardDefense = 17;
         $this->sideDefense = 17;
         $this->turncost = 1.33;
@@ -19,31 +18,30 @@ class Rolentha extends HeavyCombatVessel{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 25;
-        $this->isd = 2267;
-        $this->variantOf = "Rogata Tug";
+        $this->isd = 2105;
         $this->fighters = array("shuttles"=>2);
 
+        $this->addPrimarySystem(new GravityNet(4, 8, 5, 240, 0));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addPrimarySystem(new Reactor(5, 30, 0, 0));
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 8));
         $this->addPrimarySystem(new Engine(5, 28, 0, 14, 3));
-        $this->addPrimarySystem(new Jammer(4, 8, 5));
         $this->addPrimarySystem(new Hangar(4, 2));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 4));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 0, 180));
+        $this->addPrimarySystem(new GravityNet(4, 8, 5, 0, 120));
 
-        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 240, 0));
-        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 240, 0));
+        $this->addFrontSystem(new TractorBeam(4, 10, 0, 0));       
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
         $this->addFrontSystem(new GraviticThruster(4, 20, 0, 8, 1));
         $this->addFrontSystem(new ElectroPulseGun(2, 6, 3, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 0, 120));
-        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 0, 120));
+        $this->addFrontSystem(new TractorBeam(4, 10, 0, 0));
+      
 
         $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
         $this->addAftSystem(new TractorBeam(4, 10, 0, 0));
@@ -58,11 +56,11 @@ class Rolentha extends HeavyCombatVessel{
 		
 		$this->hitChart = array(
             0=> array(
-                    7 => "Structure",
-					9 => "Jammer",
-					11 => "Fusion Cannon",
+                    9 => "Structure",
+                    10 => "Fusion Cannon",
+                    11 => "Gravity Net",
 					13 => "Thruster",
-					15 => "Scanner",
+					15 => "Scanner",					
                     16 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
@@ -71,8 +69,8 @@ class Rolentha extends HeavyCombatVessel{
             1=> array(
                     4 => "Thruster",
                     6 => "Fusion Cannon",
-					10 => "Neutron Laser",
-					12 => "Electro-Pulse Gun",
+					8 => "Tractor Beam",
+					10 => "Electro-Pulse Gun",
                     18 => "Structure",
                     20 => "Primary",
             ),

@@ -818,7 +818,7 @@ spl_autoload_register(
                 //'righteous1894' => '/server/model/ships/orieni/righteous1894.php',
                 'rishekar' => '/server/model/ships/dilgar/rishekar.php',
                 'rmissilerack' => '/server/model/weapons/missile.php',
-				
+				'rogata' => '/server/model/ships/minbari/rogata.php',
 				//Rogolon units
 				'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
                 'rogolonchelekftr' => '/server/model/ships/rogolon/rogolonChelekFtr.php',
@@ -2248,6 +2248,7 @@ spl_autoload_register(
                 'protectoratenial' => '/server/model/ships/minbari_protectorate/ProtectorateNial.php',
                 'protectoratenorgath' => '/server/model/ships/minbari_protectorate/ProtectorateNorgath.php',
                 'protectorateretlata' => '/server/model/ships/minbari_protectorate/ProtectorateRetlata.php',
+                'protectoraterogata' => '/server/model/ships/minbari_protectorate/ProtectorateRogata.php',
                 'protectoraterolentha' => '/server/model/ships/minbari_protectorate/ProtectorateRolentha.php',
                 'protectoratesheganna' => '/server/model/ships/minbari_protectorate/ProtectorateSheganna.php',
                 'protectoratetigara' => '/server/model/ships/minbari_protectorate/ProtectorateTigara.php',
@@ -2257,6 +2258,9 @@ spl_autoload_register(
                 'protectoratetishat' => '/server/model/ships/minbari_protectorate/ProtectorateTishat.php',
                 'protectoratetorotha' => '/server/model/ships/minbari_protectorate/ProtectorateTorotha.php',
                 'protectoratetradana' => '/server/model/ships/minbari_protectorate/ProtectorateTradana.php',
+                'protectoratetroligan' => '/server/model/ships/minbari_protectorate/ProtectorateTroligan.php',
+
+                
 
 
 
