@@ -79,6 +79,14 @@ Guardian Array - primarily defensive weapon that can intercept fire directed at 
 	Also, definition of "between" was changed. In FV weapon is "between" firing unit and its target if bearing difference on them is at least 120 degrees (2 hex sides).
 
 
+CENTAURI REPUBLIC - HOUSE VALHERU - Custom
+House Valheru, led by Drem Valheru, had little clout or power. However, Drem had mysterious backers that provided financial backing and shipyard
+space. Valheru's concepts used existing Centauri hulls, but adapted them to use recent technologies and capabilities, regarless of the 
+developer of said technologies were politically well connected or not. 
+    House Valheru designs are considered rare variants if used in a traditional Centauri force. If only House Valheru units are used, these
+	are considered common hulls.
+
+
 CENTAURI REPUBLIC (WotCR)
 Centauri fleet a few hundred years before the show era, representing Wars of the Centauri Republic period.
 Sentinel Point Defense - Guardian Array precursor, with the same comments (except it doesn't have offensive mode available at all).

@@ -31,6 +31,7 @@ window.ShipIcon = function () {
         this.weaponArcs = [];
         this.hidden = false;
         this.BDEWSprite = null;
+        this.shipHexagonSpritesMap = new Map();
         this.NotMovedSprite = null;
 
         this.selected = false;
@@ -504,6 +505,7 @@ window.ShipIcon = function () {
         return null;
     };
 
+
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
         var hexDistance = window.coordinateConverter.getHexDistance();
 
@@ -686,7 +688,6 @@ window.ShipIcon = function () {
                     this.weaponArcs.push(hexMesh);
                 }
                 */
-
             } else { //Normal circular weapon arcs
                 var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
                 var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
@@ -706,7 +707,6 @@ window.ShipIcon = function () {
             this.mesh.remove(arc);
         }, this);
     };
-
     /* //Old method for displaying BDEW as a circle - DK 12.2.25
         ShipIcon.prototype.showBDEW = function () {
     
@@ -771,6 +771,81 @@ window.ShipIcon = function () {
     ShipIcon.prototype.hideBDEW = function () {
         this.mesh.remove(this.BDEWSprite);
         this.BDEWSprite = null;
+    };
+
+    ShipIcon.prototype.showTargetedHexagonInArc = function(shooter, shooterIcon, system, size) {
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        var systemArcs = shipManager.systems.getArcs(shooter, system);
+                
+        //Setup the Hexagon Geometry
+        var dis = (size + 0.6) * hexDistance;
+        var hexShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) hexShape.moveTo(x, y);
+            else hexShape.lineTo(x, y);
+        }
+        hexShape.closePath();
+
+        var plane1 = new THREE.Plane();
+        var plane2 = new THREE.Plane();
+        var shooterRotation = shooterIcon.mesh.rotation.z;
+
+        const TWO_PI = Math.PI * 2;
+        var offset = 0;
+        var angleStart = mathlib.degreeToRadian(systemArcs.start + offset) + shooterRotation;
+        var angleEnd = mathlib.degreeToRadian(systemArcs.end + offset) + shooterRotation;
+        var isLargeArc = false;
+        if(angleStart-angleEnd != 360){ //360 edge case needs isLargeArc to be false
+            // Calculate the angular span
+            var span = angleEnd - angleStart;
+            while (span < 0) span += TWO_PI;
+            //while (span > TWO_PI) span -= TWO_PI;
+            isLargeArc = span < Math.PI;
+        }
+
+        var shooterWorldPos = new THREE.Vector3();
+        shooterIcon.mesh.getWorldPosition(shooterWorldPos);
+
+        var normal1 = new THREE.Vector3(Math.cos(angleStart + Math.PI/2), -Math.sin(angleStart + Math.PI/2), 0);
+        plane1.setFromNormalAndCoplanarPoint(normal1, shooterWorldPos);        
+
+        var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI/2), -Math.sin(angleEnd - Math.PI/2), 0);
+        plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
+
+        var hexMaterial = new THREE.MeshBasicMaterial({ 
+            color: new THREE.Color(0.1, 0.5, 0.1), 
+            opacity: 0.3, 
+            transparent: true,
+            side: THREE.DoubleSide,
+            clippingPlanes: [plane1, plane2],
+            clipIntersection: !isLargeArc
+        });
+
+        var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);       
+        hexagon.position.set(0, 0, -1); 
+        this.mesh.add(hexagon);
+        this.shipHexagonSpritesMap.set(system, hexagon);
+        /*
+        //plane/arc helpers to troubleshoot arc placement.
+        var helper1 = new THREE.PlaneHelper(plane1, 1000, 0xff0000); // Red
+        var helper2 = new THREE.PlaneHelper(plane2, 1000, 0x00ff00); // Green
+        shooterIcon.mesh.parent.add(helper1);
+        shooterIcon.mesh.parent.add(helper2);
+        */
+    };
+
+    ShipIcon.prototype.removeTargetedHexagonInArc = function(system){
+        this.mesh.remove(this.shipHexagonSpritesMap.get(system));
+        this.shipHexagonSpritesMap.delete(system);
+    }
+
+    ShipIcon.prototype.removeHexagonArcs = function () {
+        this.shipHexagonSpritesMap.forEach(function (system, arc, map) {
+            this.mesh.remove(system);
+        }, this);
     };
 
     ShipIcon.prototype.positionAndFaceIcon = function (offset) {

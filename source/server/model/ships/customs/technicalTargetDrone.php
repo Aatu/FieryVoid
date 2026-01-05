@@ -42,6 +42,7 @@ class technicalTargetDrone extends VreeCapital
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
 
+        $this->addFrontSystem(new SniperCannon(5, 10, 12, 300, 60));	
         $this->addFrontSystem(new AncientMatterGun(5, 10, 5, 300, 60));	
         $this->addFrontSystem(new AncientPlasmaGun(5, 10, 5, 300, 60));	
         $this->addFrontSystem(new AncientParticleGun(5, 10, 5, 300, 60));	
