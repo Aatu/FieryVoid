@@ -1047,7 +1047,6 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $animation = "laser";
     public $animationColor = array(102, 255, 00);	
     public $animationExplosionScale = 1.0; //single hex explosion
-    public $noProjectile = true;
     public $priority = 1; 
 	public $hextarget = false; //Toggle to switch between hexTarget and normalTarget modes
 	public $hidetarget = true;   
@@ -1235,7 +1234,6 @@ class GravityNet extends Weapon implements SpecialAbility{
     public function stripForJson() {
         $strippedSystem = parent::stripForJson(); 
         $strippedSystem->showHexagonArc = $this->showHexagonArc;  
-        $strippedSystem->canTargetAll = $this->canTargetAll;
         $strippedSystem->canTargetAll = $this->canTargetAll;
         $strippedSystem->moveDistance = $this->moveDistance;                                        
         return $strippedSystem;
