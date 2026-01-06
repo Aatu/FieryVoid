@@ -584,7 +584,7 @@ class TacGamedata {
                 for ($i=(sizeof($ship->movement)-1);$i>=0;$i--)
                 {
                     $move = $ship->movement[$i];
-                    if ($move->type == "deploy")
+                    if ($move->type == "deploy" && $move->turn == $this->turn)
                         unset($ship->movement[$i]);
                 }
             }
