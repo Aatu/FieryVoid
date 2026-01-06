@@ -140,8 +140,8 @@ window.createGame = {
     gamespace_data: { width: 42, height: 30 },
     rules: {},
     slots: [
-        { id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 },
-        { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }
+        { id: 1, team: 1, name: "Team 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 },
+        { id: 2, team: 2, name: "Team 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }
     ],
     slotid: 2,
 
