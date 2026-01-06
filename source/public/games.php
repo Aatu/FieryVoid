@@ -88,12 +88,12 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->            
         <li><strong>Create Game Screen</strong> - First part of the Create Game refresh is complete, let me know what you think of the new page on Discord!</li>
-        <li><strong>Gravity Nets</strong> - Minbari now have Gravity Nets and some new ships equipped with this weapon, thanks to Jonathan.</li>                 
-        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggle on/off during Deployment phase and the new Pre-Orders phase, which occurs at the start of every turn.</li>       
+        <li><strong>Gravity Nets</strong> - Minbari now have access to Gravity Nets and new ships equipped with this system have been added to their roster, thanks to Jonathan!</li>                 
+        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggled on and off during the Deployment phase and during a new Pre-Orders phase for turns after they've deployed.</li>       
         <li><strong>Hyach Specialists</strong> - Specialists are selected during Deployment Phase, and some can now be used in Movement/Firing Phases.</li>                                  
         <li><strong>Sustained Weapons</strong> - Sustained weapons now display their current target in weapon tooltip after firing their first shot.</li>                                            
-        <li><strong>Pulsar Mine</strong> - Pulsar Mine now checks LoS and fires before the Firing phase starts.</li>  
-        <li><strong>Heavy Slicer</strong> - Now displays split arcs without needing to change Firing modes.</li>                
+        <li><strong>Pulsar Mine</strong> - Pulsar Mine now checks Line of Sight and fires before the Firing phase starts.</li>  
+        <li><strong>Heavy Slicer</strong> - Shadow Battlecrusier now displays split Heavy Slicer arcs without the need to change Firing modes.</li>                
         <li><strong>General Fixes</strong> - More server performance/stability updates, plus other small fixes. Thanks for all the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
