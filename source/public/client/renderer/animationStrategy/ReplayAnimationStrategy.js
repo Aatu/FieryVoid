@@ -133,6 +133,7 @@ window.ReplayAnimationStrategy = function () {
         });
 
         shipList.forEach(function (ship) {
+            var handledMovements = []; // Track movements animated in the incoming fire block
             var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
                 ship,
                 this.shipIconContainer,
@@ -199,6 +200,7 @@ window.ReplayAnimationStrategy = function () {
 
                                     currentStartState = endState;
                                     scheduled = true;
+                                    handledMovements.push(movement.id); // Mark as handled
                                     break;
                                 }
                             }
@@ -256,7 +258,11 @@ window.ReplayAnimationStrategy = function () {
                         // Animate all preFire movements for this ship
                         for (var i in shooterIcon.preFireMovements) {
                             var movement = shooterIcon.preFireMovements[i];
-                            
+
+                            if (handledMovements.indexOf(movement.id) !== -1) {
+                                continue;
+                            }
+
                             var endState = {
                                 position: new hexagon.Offset(movement.position),
                                 facing: movement.facing,
@@ -456,14 +462,24 @@ window.ReplayAnimationStrategy = function () {
         var endPos = window.coordinateConverter.fromHexToGame(this.endState.position);
         var pos = mathlib.getPointBetween(startPos, endPos, t);
 
-        // Simple linear interpolation of facing / heading in hex-angle space.
+        // Shortest path interpolation of facing / heading in hex-angle space.
         var startFacingAngle = mathlib.hexFacingToAngle(this.startState.facing);
         var endFacingAngle = mathlib.hexFacingToAngle(this.endState.facing);
-        var facingAngle = startFacingAngle + (endFacingAngle - startFacingAngle) * t;
+
+        var facingDiff = endFacingAngle - startFacingAngle;
+        if (facingDiff > 180) facingDiff -= 360;
+        if (facingDiff < -180) facingDiff += 360;
+
+        var facingAngle = startFacingAngle + facingDiff * t;
 
         var startHeadingAngle = mathlib.hexFacingToAngle(this.startState.heading);
         var endHeadingAngle = mathlib.hexFacingToAngle(this.endState.heading);
-        var headingAngle = startHeadingAngle + (endHeadingAngle - startHeadingAngle) * t;
+
+        var headingDiff = endHeadingAngle - startHeadingAngle;
+        if (headingDiff > 180) headingDiff -= 360;
+        if (headingDiff < -180) headingDiff += 360;
+
+        var headingAngle = startHeadingAngle + headingDiff * t;
 
         this.shipIcon.setPosition(pos);
         this.shipIcon.setFacing(-facingAngle);

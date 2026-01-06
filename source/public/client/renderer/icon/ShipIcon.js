@@ -517,15 +517,15 @@ window.ShipIcon = function () {
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             var arcs = shipManager.systems.getArcs(ship, weapon);
             this.showStraightArcs(weapon, hexDistance, arcs);
-            
-        } else if (weapon.splitArcs){ //Some weapons might have two separate arcs, like Shadow Battlecruiser.
+
+        } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
-                        
-            for (const arcs of allArcs) { 
+
+            for (const arcs of allArcs) {
                 var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
                 var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
-                var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);                
+                var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
                 var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
                 var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
                 var circle = new THREE.Mesh(geometry, material);
@@ -534,7 +534,7 @@ window.ShipIcon = function () {
                 this.mesh.add(circle);
                 this.weaponArcs.push(circle);
             }
-        
+
         } else { //Normal weapons with circular weapon arcs
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             var arcs = shipManager.systems.getArcs(ship, weapon);
@@ -549,65 +549,65 @@ window.ShipIcon = function () {
             circle.position.z = -1;
             this.mesh.add(circle);
             this.weaponArcs.push(circle);
-            
+
         }
 
         return null;
     };
 
-    ShipIcon.prototype.showThrusterIcon = function(ship, weapon){
-            var graphicSize = 32;
-            var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
-            var material = new THREE.MeshBasicMaterial({
-                map: THRUSTER_TEXTURE, // Use the preloaded texture
-                transparent: true,
-                opacity: 0.7
-            });
+    ShipIcon.prototype.showThrusterIcon = function (ship, weapon) {
+        var graphicSize = 32;
+        var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
+        var material = new THREE.MeshBasicMaterial({
+            map: THRUSTER_TEXTURE, // Use the preloaded texture
+            transparent: true,
+            opacity: 0.7
+        });
 
-            var meshGraphic = new THREE.Mesh(geometry, material);
+        var meshGraphic = new THREE.Mesh(geometry, material);
 
-            var shipFacing = this.getFacing();
-            var offsetDistance = 80;
-            var offsetX = 0;
-            var offsetY = 0;
-            var rolled = shipManager.movement.isRolled(ship);
-            var rollAdd = rolled ? 180 : 0;
+        var shipFacing = this.getFacing();
+        var offsetDistance = 80;
+        var offsetX = 0;
+        var offsetY = 0;
+        var rolled = shipManager.movement.isRolled(ship);
+        var rollAdd = rolled ? 180 : 0;
 
-            switch (weapon.direction) {
-                case 1:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
-                    break;
-                case 2:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
-                    break;
-                case 3:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
-                    break;
-                case 4:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
-                    break;
-                default:
-                    offsetX = 0;
-                    offsetY = 0;
-            }
+        switch (weapon.direction) {
+            case 1:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+                break;
+            case 2:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
+                break;
+            case 3:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
+                break;
+            case 4:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
+                break;
+            default:
+                offsetX = 0;
+                offsetY = 0;
+        }
 
-            meshGraphic.position.set(offsetX, offsetY, 1);
+        meshGraphic.position.set(offsetX, offsetY, 1);
 
-            var arcs = shipManager.systems.getArcs(ship, weapon);
-            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-            meshGraphic.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+        var arcs = shipManager.systems.getArcs(ship, weapon);
+        var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+        var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+        meshGraphic.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
 
-            this.mesh.add(meshGraphic);
-            this.weaponArcs.push(meshGraphic);        
+        this.mesh.add(meshGraphic);
+        this.weaponArcs.push(meshGraphic);
     };
 
 
-    ShipIcon.prototype.showStraightArcs = function(weapon, hexDistance, arcs) {
+    ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
         const dis = weapon.rangePenalty === 0
             ? hexDistance * (weapon.range + 0.5)
             : 50 / weapon.rangePenalty * hexDistance;
@@ -625,8 +625,8 @@ window.ShipIcon = function () {
         ];
         // Arc start/end relative to ship's facing
         let arcStart = arcs.start % 360;
-        let arcEnd   = arcs.end   % 360;
-                
+        let arcEnd = arcs.end % 360;
+
         if (arcStart === arcEnd) {
             arcStart = 0;
             arcEnd = 360;
@@ -761,10 +761,10 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
     };
 
-    ShipIcon.prototype.showTargetedHexagonInArc = function(shooter, shooterIcon, system, size) {
+    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size) {
         var hexDistance = window.coordinateConverter.getHexDistance();
         var systemArcs = shipManager.systems.getArcs(shooter, system);
-                
+
         //Setup the Hexagon Geometry
         var dis = (size + 0.6) * hexDistance;
         var hexShape = new THREE.Shape();
@@ -783,37 +783,48 @@ window.ShipIcon = function () {
 
         const TWO_PI = Math.PI * 2;
         var offset = 0;
-        var angleStart = mathlib.degreeToRadian(systemArcs.start + offset) + shooterRotation;
-        var angleEnd = mathlib.degreeToRadian(systemArcs.end + offset) + shooterRotation;
-        var isLargeArc = false;
-        if(angleStart-angleEnd != 360){ //360 edge case needs isLargeArc to be false
+        // Logic angles are CW (0=East, +CW). Visual are CCW. 
+        // We define CCW visual arc From -> To.
+        // VisStart = -LogicEnd. VisEnd = -LogicStart.
+        // Use the sprite's rotation, as the parent mesh doesn't rotate.
+        var shooterRotation = shooterIcon.shipSprite.mesh.rotation.z;
+
+        var angleStart = mathlib.degreeToRadian(-(systemArcs.end + offset)) + shooterRotation;
+        var angleEnd = mathlib.degreeToRadian(-(systemArcs.start + offset)) + shooterRotation;
+
+        var isSmallArc = false;
+
+        // If start != end, we clips. If start == end, it's a 360 circle (no clips).
+        if (systemArcs.start !== systemArcs.end) {
             // Calculate the angular span
             var span = angleEnd - angleStart;
             while (span < 0) span += TWO_PI;
-            //while (span > TWO_PI) span -= TWO_PI;
-            isLargeArc = span < Math.PI;
+            while (span > TWO_PI) span -= TWO_PI;
+            isSmallArc = span < Math.PI;
         }
 
         var shooterWorldPos = new THREE.Vector3();
         shooterIcon.mesh.getWorldPosition(shooterWorldPos);
 
-        var normal1 = new THREE.Vector3(Math.cos(angleStart + Math.PI/2), -Math.sin(angleStart + Math.PI/2), 0);
-        plane1.setFromNormalAndCoplanarPoint(normal1, shooterWorldPos);        
+        // Plane 1: Start Edge. Point IN (CCW +90).
+        var normal1 = new THREE.Vector3(Math.cos(angleStart + Math.PI / 2), Math.sin(angleStart + Math.PI / 2), 0);
+        plane1.setFromNormalAndCoplanarPoint(normal1, shooterWorldPos);
 
-        var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI/2), -Math.sin(angleEnd - Math.PI/2), 0);
+        // Plane 2: End Edge. Point IN (CW -90).
+        var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
         plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
 
-        var hexMaterial = new THREE.MeshBasicMaterial({ 
-            color: new THREE.Color(0.1, 0.5, 0.1), 
-            opacity: 0.3, 
+        var hexMaterial = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(0.1, 0.5, 0.1),
+            opacity: 0.3,
             transparent: true,
             side: THREE.DoubleSide,
-            clippingPlanes: [plane1, plane2],
-            clipIntersection: !isLargeArc
+            clippingPlanes: systemArcs.start !== systemArcs.end ? [plane1, plane2] : [],
+            clipIntersection: !isSmallArc
         });
 
-        var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);       
-        hexagon.position.set(0, 0, -1); 
+        var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);
+        hexagon.position.set(0, 0, -1);
         this.mesh.add(hexagon);
         this.shipHexagonSpritesMap.set(system, hexagon);
         /*
@@ -825,7 +836,7 @@ window.ShipIcon = function () {
         */
     };
 
-    ShipIcon.prototype.removeTargetedHexagonInArc = function(system){
+    ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {
         this.mesh.remove(this.shipHexagonSpritesMap.get(system));
         this.shipHexagonSpritesMap.delete(system);
     }
