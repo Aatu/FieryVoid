@@ -1132,8 +1132,12 @@ class GravityNet extends Weapon implements SpecialAbility{
         }
 	}    
 
-    public function fire($gamedata, $fireOrder){                   
-        parent::fire($gamedata, $fireOrder);      
+    public function fire($gamedata, $fireOrder){   
+		if($fireOrder->damageclass == 'gravNetMoveHex'){		
+			return; //Don't roll targeting shots, to remove them from animations.
+		}else{	                        
+            parent::fire($gamedata, $fireOrder);  
+        }        
     }
     
     protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){   
