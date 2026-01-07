@@ -12,6 +12,18 @@ $combinedFile = $fileBase . 'Combined.js';
 // Initialize combined file with empty object
 file_put_contents($combinedFile, 'window.staticShips = {};' . PHP_EOL);
 
+// Clear server-side cache (ShipLoader)
+$cacheDir = sys_get_temp_dir() . '/fv_cache';
+if (is_dir($cacheDir)) {
+    $files = glob($cacheDir . '/*');
+    foreach ($files as $file) {
+        if (is_file($file)) {
+            @unlink($file);
+        }
+    }
+    print("Server-side cache cleared.\n");
+}
+
 // Ensure JSON directory exists
 $jsonDir = './source/public/static/json';
 if (!is_dir($jsonDir)) {
@@ -49,7 +61,7 @@ foreach($allFactions as $factionName){
 
 // Update ships.php to point to the combined file
 $fileName = $fileBase . '.php'; // c:\FV_env\FieryVoid\source\public\static\ships.php
-$includeText = '<script src="static/shipsCombined.js"></script>';
+$includeText = '<script src="static/shipsCombined.js?v=' . time() . '"></script>';
 file_put_contents($fileName, $includeText);
 
 print("\n ships generated!\n\n");
