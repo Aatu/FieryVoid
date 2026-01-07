@@ -86,6 +86,7 @@ class BaseShip {
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
     
     public $slotid;
+    public $canPreOrder = false; //Marker for ships equipped with systems that are used every turn in Deployment/Pre-Orders Phase.
 
     public $movement = array();
     	    
@@ -522,7 +523,11 @@ class BaseShip {
         $strippedShip->phpclass = $this->phpclass;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
-		
+
+        //With changes to how we cache ships, we sadly have to re-do this each time. DK - Dec 2025
+        $this->notesFill();
+		$strippedShip->notes = $this->notes;                
+
 		$strippedShip->combatValue = $this->calculateCombatValue();
 		$strippedShip->pointCostEnh = $this->pointCostEnh;
 		
@@ -605,8 +610,8 @@ class BaseShip {
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
 		   if($this->faction == "Hyach Gerontocracy"){
-		                return $this->doHyachInitiativeBonus($gamedata);
-		        }            
+		        return $this->doHyachInitiativeBonus($gamedata);
+		    }            
 			if(($this->faction == "Gaim Intelligence") && ($this instanceOf gaimMoas)){  //GTS
                 return $this->doGaimInitiativeBonus($gamedata);
             }
@@ -805,7 +810,18 @@ class BaseShip {
             $system->generateIndividualNotes($gamedata, $dbManager);
         }
 	}
-	
+
+    //Used in FireGamePhase->process to generate extra notes for Hyach Specialists, but could have other applications - DK - 27.12.25
+	public function generateAdditionalNotes($gameData, $dbManager) {
+        
+        if($gameData->phase == 3){        
+            $specialists = $this->getSystemByName("HyachSpecialists");
+            if ($specialists){ //Does ship have Specialists system?            
+                $specialists->generateIndividualNotes($gameData, $dbManager); //Generate notes for Specialists system
+                $this->saveIndividualNotes($dbManager); //Save ship notes. 
+            }
+        }
+    }                
 	
 	/*calls systems to act on notes just loaded if necessary*/
 	public function onIndividualNotesLoaded($gamedata) {
@@ -903,7 +919,7 @@ class BaseShip {
         $readyToFire = false;
         foreach($this->systems as $system){
             if($system instanceof Weapon){
-                if($system->preFires && ($system->turnsloaded >= $system->loadingtime)){ //ready to fire!
+                if($system->preFires && ($system->turnsloaded >= $system->loadingtime) && !$system->autoFireOnly){ //ready to fire!
                     $readyToFire = true;
                     break; //At least one weapon can pre fire, exit loop.
                 }    
@@ -981,7 +997,7 @@ class BaseShip {
 			}
 		}
 
-			$this->notesFill(); //add miscellanous info to notes!
+			//$this->notesFill(); //add miscellanous info to notes! //Moved to strpForJson after cache changes - DK DEc 2025
 	   }//endof adding PRIMARY Structure (with specials attached)
 	   
             $this->addSystem($system, 0);
@@ -996,9 +1012,9 @@ class BaseShip {
 		
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
 		protected function notesFill($sampleFighter = null){
-			if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
-				return;
-			}
+			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
+			//	return;
+			//}
 			//add to Notes information about miscellanous attributes
 			if($this->notes!='')$this->notes .= '<br>';
 				//faction age - if older than Young

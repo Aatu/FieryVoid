@@ -1,0 +1,584 @@
+/* Create Game Specific Styles */
+
+/* Panel Sizing */
+.panel.large.create {
+  width: 1600px;
+  /* Widened to fit split view */
+  max-width: 100%;
+  margin: 0px auto 10px auto;
+  background: rgba(23, 39, 54, 0.9);
+  border: 1px solid #215a7a;
+  box-sizing: border-box;
+  /* Ensure padding doesn't overflow */
+}
+
+/* Headers */
+.createheader {
+  color: #DEEBFF;
+  display: block;
+  font-size: 1.17em;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  font-weight: bold;
+  unicode-bidi: isolate;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #215a7a;
+}
+
+.createsubheader {
+  color: #e0e7ef;
+  display: block;
+  font-size: 1.17em;
+  margin-block-start: 0.5em;
+  margin-block-end: 0.5em;
+  margin-inline-start: 0px;
+  margin-inline-end: 0px;
+  font-weight: bold;
+  unicode-bidi: isolate;
+  margin-top: 15px;
+  margin-bottom: 5px;
+  margin-left: 5px;
+}
+
+.split-header {
+  margin-top: 5px;
+  margin-bottom: 15px;
+  color: #deebffc5;
+  display: block;
+  font-size: 1.17em;
+  font-weight: bold;
+  border-bottom: 2px solid #215a7a;
+  text-transform: uppercase;
+  text-align: left;
+  /* Default left */
+}
+
+/* Buttons */
+.btn-create-submit {
+  background: #3c7a3c;
+  color: white;
+  font-size: 1.2em;
+  border: 1px solid #66b266;
+  width: 200px;
+  text-align: center;
+  box-sizing: border-box;
+  height: 30px;
+  line-height: normal;
+  margin-top: 20px;
+  float: right;
+  padding: 5px;
+}
+
+.create-game-btn {
+  margin-top: 15px;
+}
+
+/* Wrapper for Side-by-Side Layout */
+.slots-map-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.slots-map-wrapper .slots-column {
+  flex: 1;
+  min-width: 300px;
+}
+
+.slots-map-wrapper .map-preview-column {
+  flex: 0 0 575px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.map-preview-column .split-header {
+  text-align: center;
+  margin-top: 15px;
+}
+
+/* Slot Card Styling */
+.slot-card {
+  background: #0f2538;
+  border: 2px solid #215a7a;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+  font-size: 14px;
+}
+
+.slotName {
+  margin-right: 10px;
+  color: #8bcaf2;
+  font-weight: bold;
+}
+
+
+.slot-card .header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #215a7a;
+  padding-bottom: 10px;
+  margin-bottom: 0px;
+}
+
+.slot-card .header-title {
+  font-weight: bold;
+  color: #8bcaf2;
+  text-transform: uppercase;
+}
+
+.slot-card .create-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  padding-top: 10px;
+}
+
+.slot-card .create-row2 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  padding-top: 15px;
+  margin-top: 5px;
+  border-top: 1px solid #215a7a;
+}
+
+.slot-card label {
+  font-size: 14px;
+  color: #a0b8c8;
+}
+
+.slot-card .remove-btn {
+  color: #DEEBFF !important;
+  cursor: pointer;
+  font-size: 11px;
+  border: 1px solid #215a7a;
+  padding: 5px 5px;
+  border-radius: 3px;
+  transition: background 0.2s;
+  margin-top: -5px !important;
+}
+
+.slot-card .remove-btn:hover {
+  background: rgba(229, 115, 115, 0.2);
+}
+
+.add-slot {
+  margin-left: 5px;
+  margin-top: 5px;
+  color: #8bcaf2
+}
+
+.mapPreviewContainer {
+  margin-top: 10px;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.mapPreviewContainerBox {
+  border: 3px solid #215a7a;
+  border-radius: 4px;
+}
+
+/* Form Elements & Inputs */
+.settings-group {
+  border: 1px solid #215a7a;
+  background: #0b1e2e;
+  padding: 8px;
+  margin-bottom: 10px;
+  border-radius: 4px;
+}
+
+.movementDropdown,
+.terrainDropdowns,
+.desperateDropdown {
+  display: none;
+  margin-top: 10px;
+  /* Maintain flex layout when visible */
+  align-items: center;
+}
+
+.asteroidsDropdown {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.asteroidsSelect {
+  display: inline-block;
+  width: 200px !important;
+  margin: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.moonsDropdown {
+  margin-bottom: 5px;
+  display: flex;
+  align-items: center;
+}
+
+.moonsSelect {
+  width: 200px !important;
+  margin: 0;
+  display: inline-block;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.asteroidsCategories {
+  width: 120px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.moonsSmallSelect,
+.moonsMediumSelect,
+.moonsLargeSelect,
+.desparateSelect,
+.initiativeCategories {
+  width: 120px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Align labels for movement and desperate dropdowns */
+#movementDropdown label,
+#desperateDropdown label {
+  width: 195px !important;
+  display: inline-block;
+  margin: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.gameNameSelectContainer,
+.backgroundSelectContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 5px;
+}
+
+.gamename {
+  margin-left: 0px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.gameNameSelect,
+.background {
+  margin-left: 0px;
+  margin-top: 5px;
+  margin-bottom: 10px;
+  width: 145px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+
+
+.scenario-form {
+  margin-top: 5px;
+  margin-bottom: 0px;
+  padding: 5px;
+  background: rgba(23, 39, 54, 0.00);
+}
+
+.scenario-preview-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.scenario-preview-wrapper .scenario-form {
+  flex: 1;
+  min-width: 300px;
+}
+
+.scenario-preview-wrapper .map-preview-column {
+  flex: 0 0 450px;
+  max-width: 100%;
+}
+
+.scenario-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.scenario-row label {
+  flex: 0 0 220px;
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.scenario-row input,
+.scenario-row select,
+.scenario-row textarea {
+  flex: initial;
+  padding: 5px;
+  /* Indent text slightly */
+  font-size: 14px;
+  background-color: #0c1a28;
+  color: #DEEBFF;
+  border: 1px solid #215a7a;
+  border-radius: 4px;
+  width: 400px;
+  min-width: 300px;
+  box-sizing: border-box;
+  text-align: center;
+  /* Fix width calculation */
+}
+
+.scenario-row .forbiddenText {
+  padding-left: 0px;
+  padding-right: 10px;  
+}
+
+
+
+.scenario-row {
+  flex-wrap: wrap;
+  /* Allow wrapping for custom inputs */
+}
+
+.scenario-custom-input {
+  margin-top: 10px;
+  margin-left: 370px;
+  /* Indent below label */
+  min-width: 250px !important;
+  width: 250px !important;
+  flex-basis: auto;
+  /* Force new line and fill width minus indent */
+  box-sizing: border-box;
+  text-align: right !important;
+}
+
+/* Fix selector to target textarea in additional row */
+.scenario-row.additional textarea {
+  width: 400px;
+  /* Match others, or use 80% if intended */
+  resize: vertical;
+  text-align: left;
+}
+
+/* Global inputs for Create Game only */
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  background-color: #0c1a28;
+  color: #DEEBFF;
+  border: 1px solid #215a7a;
+  padding: 4px;
+  border-radius: 3px;
+  font-size: 15px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: #8bcaf2;
+  box-shadow: 0 0 3px #215a7a;
+}
+
+/* Hide numbers spinner */
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type=number] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.scenario-description {
+  white-space: normal;
+  background: rgba(23, 39, 54, 0.00);
+  color: #DEEBFF;
+  padding: 5px 10px 10px 0px;
+  border-radius: 6px;
+  line-height: 1.6;
+  font-family: sans-serif;
+}
+
+.scenario-description strong {
+  color: #DEEBFF;
+}
+
+
+
+.gamespacedefinition {
+  /* height: 24px; Removed fixed height */
+  position: relative;
+  margin-top: 5px;
+  margin-bottom: 0px;
+}
+
+
+.mapSelectContainer {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.mapSelect {
+  width: 300px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.backgroundSelect {
+  width: 200px !important;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  text-align: center;
+  vertical-align: middle;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.mapDimensionsSelect {
+  font-size: 14px;
+  width: 150px;
+  display: inline-block;
+  margin: 0;
+  box-sizing: border-box;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.mapDimensions {
+  font-size: 14px;
+  width: 190px;
+  display: inline-block;
+  box-sizing: border-box;
+  flex-shrink: 0;
+}
+
+.gamespacedefinition {
+  display: flex;
+  align-items: center;
+
+}
+
+.gamespacedefinition input.tinySize {
+  width: 40px !important;
+  text-align: center;
+  padding: 2px;
+}
+
+.unlimitedspace:not(.invisible),
+.limitedspace:not(.invisible) {
+  font-size: 14px;
+  width: 200px !important;
+  display: inline-flex;
+  justify-content: space-between;
+  align-items: center;
+  box-sizing: border-box;
+  gap: 15px;
+}
+
+
+
+/* Media Queries */
+@media screen and (max-width: 900px) {
+  .slots-map-wrapper {
+    flex-direction: column;
+  }
+
+  .slots-map-wrapper .map-preview-column {
+    flex: 1;
+    width: 100%;
+    order: -1;
+  }
+
+  .slots-map-wrapper .map-preview-column .split-header {
+    text-align: left;
+    margin-top: 0;
+  }
+}
+
+/* Hide 'Remove Slot' button for the first slot in each team */
+#team1 .slot-card:first-child .remove-btn,
+#team2 .slot-card:first-child .remove-btn {
+  display: none !important;
+}
+
+/* Restructured Layout for Game Options and Scenario Description */
+.game-options-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 55px;
+  align-items: flex-start;
+  padding: 10px;
+}
+
+.options-column {
+  flex: 0 0 450px;
+  /* Fixed wider width */
+  min-width: 300px;
+  /* Minimum width before wrapping */
+  display: flex;
+  flex-direction: column;
+  margin-left: 15px;
+}
+
+/* Ensure scenario form behaves as a column */
+.game-options-wrapper .scenario-form {
+  flex: 1;
+  min-width: 400px;
+  margin-top: 0 !important;
+  /* Override inline style or previous margin */
+  background: transparent;
+  /* Seamless look */
+  padding: 0;
+}
+
+/* Adjust split-header within columns to align top */
+.options-column .split-header,
+.game-options-wrapper .scenario-form .split-header {
+  margin-top: 10px;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 1100px) {
+  .game-options-wrapper {
+    flex-direction: column;
+  }
+
+  .options-column,
+  .game-options-wrapper .scenario-form {
+    width: 100%;
+    flex: none;
+  }
+}

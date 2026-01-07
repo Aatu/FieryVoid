@@ -231,7 +231,7 @@ const isLoadedAlternate = (system) => system.weapon && weaponManager.isLoadedAlt
 
 const isOffline = (ship, system) => shipManager.power.isOffline(ship, system);
 
-const isBoosted = (ship, system) => shipManager.power.isBoosted(ship, system);
+const isBoosted = (ship, system) => shipManager.power.isBoosted(ship, system) || system.active;
 
 const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
 

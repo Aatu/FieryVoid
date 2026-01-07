@@ -572,10 +572,8 @@ shipManager.power = {
 				turnToCheck = gamedata.turn - 1;
 				return (shipManager.power.getBoostOnTurn(system, turnToCheck) > 0);
 			}					
-		}
-
-		if(system.shaded && gamedata.gamephase === 1) return true; //Specific case so things like enemy Torvalus show as Shaded on Phase 1.		
-
+		}	
+		
 		return (shipManager.power.getBoost(system)!==0); //is boosted if boost > 0
 	},
 
@@ -678,7 +676,6 @@ shipManager.power = {
 
 	canBoost: function canBoost(ship, system) {
 
-		if(shipManager.getTurnDeployed(ship) !== gamedata.turn && gamedata.gamephase == -1) return false; //Prevent Torvalus toggle of Stealth when they are not ship deploying.
 		if(shipManager.power.isOffline(ship, system)) return false;
 		return true;
 		/* no longer needed, I'm leaving the code in case in the future ideas change again
@@ -699,8 +696,6 @@ shipManager.power = {
 	},
 
 	canDeboost: function canDeboost(ship, system) {
-
-		if(shipManager.getTurnDeployed(ship) !== gamedata.turn && gamedata.gamephase == -1) return false; //Prevent Torvalus toggle of Stealth when they are not ship deploying.
 		if(shipManager.power.isOffline(ship, system)) return false;
 		return true;
 	},

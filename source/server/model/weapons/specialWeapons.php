@@ -6973,6 +6973,7 @@ class PulsarMine extends Weapon{
     public $priorityAF = 1;
     public $loadingtime = 1;
 	public $autoFireOnly = true; //this weapon cannot be fired by player
+	public $preFires = true;
     public $useOEW = false;
 	public $noLockPenalty = false;
     public $calledShotMod = 0;
@@ -6998,7 +6999,7 @@ class PulsarMine extends Weapon{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	} 
 
-
+/*
     public function beforeFiringOrderResolution($gamedata){
     	
     	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
@@ -7028,7 +7029,37 @@ class PulsarMine extends Weapon{
 
     	
 	} //endof beforeFiringOrderResolution
+*/
 
+    public function beforePreFiringOrderResolution($gamedata){
+    	
+    	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
+		if($this->isOfflineOnTurn($gamedata->turn)) return; //Pulsar Mine is offline
+
+		$thisShip = $this->getUnit();
+		$deployTurn = $thisShip->getTurnDeployed($gamedata);
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
+
+    	$allShips = $gamedata->ships;  
+    	$relevantShips = array();
+
+		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
+		foreach($allShips as $ship){
+			if ($ship->isDestroyed()) continue;
+			if (!$ship instanceof FighterFlight && ($ship->id != $thisShip->id)) continue; //Ignore ships EXCEPT this one!			
+			if ($ship instanceof FighterFlight && $ship->team == $thisShip->team) continue;	//Ignore flights that are friendly.	
+			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore fighters that are not deployed yet!			
+			$relevantShips[] = $ship;			
+		}
+	
+		//Now check if any enemy fighters got in arc and range during their movement.
+		$targetFighters = $this->checkForValidTargets($relevantShips, $thisShip, $gamedata);
+
+    	//Now create up to 18 attacks using $targetFighters array.
+    	$this->createFireOrders($targetFighters, $thisShip, $gamedata);		
+
+    	
+	} //endof beforeFiringOrderResolution
 
 	private function getTempBearing($shipPosition, $targetPostion, $currFacing){
 		$relativeBearing = null;
@@ -7050,7 +7081,7 @@ class PulsarMine extends Weapon{
 	}
 	
 
-	private function checkTargetConditions($previousBearing, $shipPosition, $targetPostion, $shipfacing){
+	private function checkTargetConditions($previousBearing, $shipPosition, $targetPostion, $shipfacing, $gamedata){
 		$canTarget = false;
 		
 		$distance =	mathlib::getDistanceHex($shipPosition, $targetPostion);//Compare starting positions.						
@@ -7062,7 +7093,10 @@ class PulsarMine extends Weapon{
 			$targetBearing = $this->getTempBearing($shipPosition, $targetPostion, $shipfacing);					
 		} 
 		
-	    if ($distance <= 2 && mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) $canTarget = true;//Not in arc at turn start.
+	    if ($distance > 2 && !mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return $canTarget;//Not in arc and within 2 hexes, skip LoS check and return false.
+
+		$loSBlocked = $this->checkLineOfSight($shipPosition, $targetPostion, $gamedata); //Returns true is LoS blocked
+		if(!$loSBlocked) $canTarget = true;
 
 		return $canTarget;
 	}	
@@ -7098,7 +7132,7 @@ class PulsarMine extends Weapon{
 				$previousBearing = null;
 								
 			    //Check if Fighter can be attacked in its starting position	
-				if($this->checkTargetConditions($previousBearing, $shipPosition, $fighterStartLoc->position, $shipfacing)){
+				if($this->checkTargetConditions($previousBearing, $shipPosition, $fighterStartLoc->position, $shipfacing,$gamedata)){
 					$targetFighters[] = $unit;//Add to array.
 					continue;//Fire Orders will be created for this unit, move to next.
 				}		
@@ -7111,7 +7145,7 @@ class PulsarMine extends Weapon{
 						 $fighterMove->type == "turnleft" || 
 						 $fighterMove->type == "turnright") continue; //Not interested in start during Deployment, speed changes or turns.
 
-			    		if(!$this->checkTargetConditions($previousBearing, $shipPosition, $fighterMove->position, $shipfacing)) {
+			    		if(!$this->checkTargetConditions($previousBearing, $shipPosition, $fighterMove->position, $shipfacing, $gamedata)) {
 				    		$distance =	mathlib::getDistanceHex($shipPosition, $fighterMove->position);	//Compare positions at point of movement.	
 					    	$targetBearing = $this->getTempBearing($shipPosition, $fighterMove->position, $shipfacing);//Get bearing at this point in movement.
 							if($distance != 0) $previousBearing = $targetBearing;//Update previous bearing with latest unless distance still 0.			    			
@@ -7160,7 +7194,7 @@ class PulsarMine extends Weapon{
 
 		        // Create a new FireOrder
 		        $newFireOrder = new FireOrder(
-		            -1, "normal", $thisShip->id, $target->id,
+		            -1, "prefiring", $thisShip->id, $target->id,
 		            $this->id, $fighter->id, $gamedata->turn, 1, 
 		            0, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
 		            0, 0, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder

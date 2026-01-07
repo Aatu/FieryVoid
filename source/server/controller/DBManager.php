@@ -747,7 +747,7 @@ class DBManager
         ");
 
         if ($stmt) {
-            $gamename = $this->DBEscape($gamename);
+            //$gamename = $this->DBEscape($gamename);
             $background = $this->DBEscape($background);
             $slotnum = count($slots);
             $gamespace = $this->DBEscape($gamespace);
