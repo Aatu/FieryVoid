@@ -846,19 +846,8 @@ private function setWaiting() {
                     $move = $ship->getLastMovement();
                     $facing = $move->facing;
                     foreach ($ship->hexOffsets as $offset) {
-                        // OffsetCoordinate logic: q + offset.q, r + offset.r
-                        // Ensure offset is treated as array or object depending on structure
-                        $qOffset = is_array($offset) ? $offset['q'] : $offset->q;
-                        $rOffset = is_array($offset) ? $offset['r'] : $offset->r;
-                        
-                        // Apply rotation if needed
-                        if ($facing !== 0) {
-                            $rotated = Mathlib::rotateHex($qOffset, $rOffset, $facing);
-                            $qOffset = $rotated['q'];
-                            $rOffset = $rotated['r'];
-                        }
-
-                        $newHex = new OffsetCoordinate($position->q + $qOffset, $position->r + $rOffset);
+                        // Use accurate pixel-based rotation
+                        $newHex = Mathlib::getRotatedHex($position, $offset, $facing);
                         $blockedHexes[] = $newHex;
                     }
                 } elseif ($ship->Huge > 0) { // Standard circular Huge terrain

@@ -618,8 +618,8 @@ window.mathlib = {
 			var hexes = [];
 			hexes.push({ q: position.q, r: position.r });
 			hexOffsets.forEach(function (offset) {
-				var rotatedOffset = mathlib.rotateHex(offset.q, offset.r, facing);
-				hexes.push({ q: position.q + rotatedOffset.q, r: position.r + rotatedOffset.r });
+				var newHex = mathlib.getRotatedHex(position, offset, facing);
+				hexes.push(newHex);
 			});
 			return hexes;
 		}
@@ -676,6 +676,40 @@ window.mathlib = {
 		var newR = z;
 
 		return { q: Math.round(newQ), r: Math.round(newR) };
+	},
+
+	// New accurate function for getting a hex position based on a center, an offset (definition), and a facing.
+	// Uses pixel conversion to ensure grid consistency.
+	getRotatedHex: function (center, offset, facing) {
+		if (facing === 0) {
+			return { q: center.q + offset.q, r: center.r + offset.r };
+		}
+
+		// 1. Get pixel coordinates of the center
+		var centerPx = coordinateConverter.fromHexToGame(center);
+
+		// 2. Get pixel coordinates of the offset (relative to 0,0)
+		// We use hexCoToPixel on the offset directly, then rotate the resulting vector.
+		var zero = { q: 0, r: 0 };
+		var zeroPx = coordinateConverter.fromHexToGame(zero);
+		var offsetPx = coordinateConverter.fromHexToGame(offset);
+
+		var vecX = offsetPx.x - zeroPx.x;
+		var vecY = offsetPx.y - zeroPx.y;
+
+		// 3. Rotate Vector by facing * 60 degrees (Clockwise)
+		// Game Space is Y-Up (Cartesian). Standard Matrix is CCW.
+		// To rotate CW in Y-Up, we use a negative angle.
+		var angle = -facing * 60 * (Math.PI / 180);
+		var rotX = vecX * Math.cos(angle) - vecY * Math.sin(angle);
+		var rotY = vecX * Math.sin(angle) + vecY * Math.cos(angle);
+
+		// 4. Add rotated vector to center pixel
+		var targetPxX = centerPx.x + rotX;
+		var targetPxY = centerPx.y + rotY;
+
+		// 5. Convert back to Hex
+		return coordinateConverter.fromGameToHex({ x: targetPxX, y: targetPxY });
 	}
 
 

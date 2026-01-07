@@ -591,5 +591,53 @@ private static function bearingToDirectionIndex($bearing) {
 
         return ["q" => (int)$newQ, "r" => (int)$newR];
     }
+
+    public static function getRotatedHex($center, $offset, $facing) {
+        if ($facing == 0) {
+            // Check input types to ensure we can access q/r
+            $cq = ($center instanceof OffsetCoordinate) ? $center->q : (is_array($center) ? $center['q'] : $center->q);
+            $cr = ($center instanceof OffsetCoordinate) ? $center->r : (is_array($center) ? $center['r'] : $center->r);
+            $oq = is_array($offset) ? $offset['q'] : $offset->q;
+            $or = is_array($offset) ? $offset['r'] : $offset->r;
+            
+            return new OffsetCoordinate($cq + $oq, $cr + $or);
+        }
+
+        // Ensure center is OffsetCoordinate for conversion
+        if (!($center instanceof OffsetCoordinate)) {
+            $cq = is_array($center) ? $center['q'] : $center->q;
+            $cr = is_array($center) ? $center['r'] : $center->r;
+            $center = new OffsetCoordinate($cq, $cr);
+        }
+
+        // 1. Get pixel coordinates
+        $centerPx = self::hexCoToPixel($center);
+        
+        $oq = is_array($offset) ? $offset['q'] : $offset->q;
+        $or = is_array($offset) ? $offset['r'] : $offset->r;
+        $offsetObj = new OffsetCoordinate($oq, $or);
+        $offsetPx = self::hexCoToPixel($offsetObj);
+
+        $zero = new OffsetCoordinate(0, 0);
+        $zeroPx = self::hexCoToPixel($zero);
+
+        $vecX = $offsetPx['x'] - $zeroPx['x'];
+        $vecY = $offsetPx['y'] - $zeroPx['y'];
+
+        // 2. Rotate Vector
+        // Game Space is Y-Up. Standard trig is CCW. We need CW (Hex Facings).
+        // Use negative angle.
+        $angle = deg2rad(-$facing * 60);
+        $rotX = $vecX * cos($angle) - $vecY * sin($angle);
+        $rotY = $vecX * sin($angle) + $vecY * cos($angle);
+
+        // 3. Add to center
+        $targetPxX = $centerPx['x'] + $rotX;
+        $targetPxY = $centerPx['y'] + $rotY;
+
+        // 4. Convert back
+        $res = self::pixelCoToHex($targetPxX, $targetPxY);
+        return new OffsetCoordinate($res['x'], $res['y']);
+    }
 }
 ?>

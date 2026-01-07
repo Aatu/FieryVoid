@@ -2384,21 +2384,9 @@ window.weaponManager = {
 
                     for (var j in ship.hexOffsets) {
                         var offset = ship.hexOffsets[j];
-                        // Ensure compatibility whether offset is object or just has props
-                        var qOffset = offset.q;
-                        var rOffset = offset.r;
 
-                        // Apply rotation
-                        if (facing !== 0) {
-                            var rotated = mathlib.rotateHex(qOffset, rOffset, facing);
-                            qOffset = rotated.q;
-                            rOffset = rotated.r;
-                        }
-
-                        // Client-side hexlib usually generates {q,r} objects
-                        // We construct new coordinate based on position + offset
-                        var newHex = { q: position.q + qOffset, r: position.r + rOffset };
-
+                        // Use getRotatedHex for accurate positioning
+                        var newHex = mathlib.getRotatedHex(position, offset, facing);
                         blockedHexes.push(newHex);
                     }
                 } else if (ship.Huge > 0) { // Occupies more than 1 hex
