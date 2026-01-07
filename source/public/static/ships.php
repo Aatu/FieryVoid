@@ -1,1 +1,1 @@
-<script src="static/shipsCombined.js"></script>
+<script src="static/shipsCombined.js?v=1767796696"></script>
