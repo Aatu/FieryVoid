@@ -16,7 +16,7 @@ class Bintor extends BaseShip{
         $this->limited = 10;
         $this->fighters = array("normal"=>18);
 	    $this->isd = 2245;
- 		$this->unofficial = 'S'; //custom design, intended to provie Narn with EMine-free mainline options
+ 		$this->unofficial = true; //custom design, intended to provie Narn with EMine-free mainline options
 
 	    $this->notes = 'Custom no-EMine variant.';
 		
