@@ -605,12 +605,13 @@ window.ajaxInterface = {
         ajaxInterface.ajaxWithRetry({
             type: 'POST',
             url: 'slot.php',
-            dataType: 'json', // ✅ Expect JSON
-            data: {
+            dataType: 'json',
+            contentType: 'application/json',
+            data: JSON.stringify({
                 action: action,
                 gameid: gamedata.gameid,
                 slotid: slotid
-            },
+            }),
             timeout: 15000, // ✅ prevent hanging requests
         })
             .done(function (response, textStatus, xhr) {
