@@ -130,7 +130,7 @@ window.ajaxInterface = {
 
             error: (xhr, status, error) => {
                 // Silently ignore transient errors - user can try again
-                const ignoredStatuses = [503, 507]; // Fixed list
+                const ignoredStatuses = [400, 503, 507]; // 400=bad request (no popup), 503/507=server busy
                 if (xhr && ignoredStatuses.includes(xhr.status)) {
                     console.log('Faction load issue (status ' + xhr.status + '), try again');
                     // Don't call errorAjax for transient errors
