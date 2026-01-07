@@ -13,32 +13,34 @@ if (!function_exists('apcu_fetch')) {
 // Configuration
 // ----------------------
 $maxGlobal = 23;       // max active requests globally (Matched to user's thread limit)
-$maxIP = 8;            // max active requests per IP
+//$maxIP = 8;            // max active requests per IP - DISABLED to save APCu memory
 $maxWait = 5.0;        // max seconds to wait for a global slot
 $waitStep = 0.05 + (mt_rand(0, 50) / 1000.0); //Small stutter
 
-$ttlIP = 10;            // seconds for per-IP counter TTL
+//$ttlIP = 10;            // seconds for per-IP counter TTL
 $ttlGlobal = 30;        // fallback TTL for global counter (Increased for safety)
 
 $keyGlobal = 'server_active_requests';
-$keyIP = 'server_ip_' . md5($_SERVER['REMOTE_ADDR']);
+//$keyIP = 'server_ip_' . md5($_SERVER['REMOTE_ADDR']);
 
 $start = microtime(true);
 
 // ----------------------
 // State Tracking (Crucial for Shutdown)
 // ----------------------
-$ipAcquired = false;
+//$ipAcquired = false;
 $globalAcquired = false;
 
 // Register shutdown function IMMEDIATELY to handle exits/crashes
-register_shutdown_function(function() use (&$ipAcquired, &$globalAcquired, $keyGlobal, $keyIP) {
+register_shutdown_function(function() use (&$globalAcquired, $keyGlobal) {
     // Only decrement if WE actually incremented it
     if ($globalAcquired) {
         $val = apcu_fetch($keyGlobal);
         if ($val !== false && $val > 0) apcu_dec($keyGlobal);
     }
     
+    // IP Throttling Disabled
+    /*
     // Only decrement IP if WE incremented it
     if ($ipAcquired) {
         $i = apcu_fetch($keyIP);
@@ -48,11 +50,13 @@ register_shutdown_function(function() use (&$ipAcquired, &$globalAcquired, $keyG
             if ($new <= 0) apcu_delete($keyIP);
         }
     }
+    */
 });
 
 // ----------------------
-// Per-IP limiter
+// Per-IP limiter - DISABLED
 // ----------------------
+/*
 // Increment first
 $ipCount = apcu_inc($keyIP, 1, $exists);
 $ipAcquired = true; // Mark as acquired so shutdown will decrement it later
@@ -70,6 +74,7 @@ if ($ipCount > $maxIP) {
     echo json_encode(['error' => 'Too many requests from your IP']);
     exit;
 }
+*/
 
 // ----------------------
 // Global limiter (atomic CAS)
@@ -97,7 +102,6 @@ if (!$globalAcquired) {
     header("HTTP/1.1 503 Service Unavailable");
     header("Retry-After: " . ceil($maxWait));
     echo json_encode(['error' => 'Server busy, please retry']);
-    // $ipAcquired is true, so shutdown will release the IP slot.
     // $globalAcquired is false, so shutdown will NOT touch global count.
     exit;
 }
