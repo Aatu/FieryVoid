@@ -1747,15 +1747,19 @@ window.gamedata = {
 
 		const isCurrentlyHidden = factionElement.hasClass("shipshidden");
 
+		// Optimistic UI: Toggle immediately
+		factionElement.toggleClass("shipshidden");
+
 		if (isCurrentlyHidden && factionElement.hasClass("listempty")) {
 			window.ajaxInterface.getShipsForFaction(faction, function (factionShips) {
 				gamedata.parseShips(factionShips);
 				factionElement.removeClass("listempty"); // Only remove after successful load
 				gamedata.applyCustomShipFilter(); // run after ships load
+			}, function () {
+				// Error Callback: Revert optimistic toggle if load fails
+				factionElement.toggleClass("shipshidden");
 			});
 		}
-
-		factionElement.toggleClass("shipshidden");
 
 		// Apply ship filter AFTER visibility toggled
 		gamedata.applyCustomShipFilter();

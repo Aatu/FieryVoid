@@ -19,9 +19,17 @@ if (!$playerid) {
 
 $input = [];
 // Accept JSON POST body if present
-if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
-    strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
-    $input = json_decode(file_get_contents('php://input'), true) ?? [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Try reading JSON input if Content-Type matches OR if $_POST is empty (fallback)
+    if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false || empty($_POST)) {
+        $jsonInput = file_get_contents('php://input');
+        if ($jsonInput) {
+            $decoded = json_decode($jsonInput, true);
+            if (is_array($decoded)) {
+                $input = $decoded;
+            }
+        }
+    }
 }
 
 // Retrieve faction parameter from either GET or POST (POST preferred)
