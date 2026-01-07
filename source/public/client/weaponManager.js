@@ -634,7 +634,7 @@ window.weaponManager = {
     },
 
     isOnWeaponArc: function isOnWeaponArc(shooter, target, weapon) {
-        if(weapon.splitArcs) return weaponManager.isOnWeaponArcMultiple(shooter, target, weapon);
+        if (weapon.splitArcs) return weaponManager.isOnWeaponArcMultiple(shooter, target, weapon);
         //console.log("is on arc");
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
@@ -677,7 +677,7 @@ window.weaponManager = {
             const arc = arcs[i];
 
             const start = mathlib.addToDirection(arc.start, shooterFacing);
-            const end   = mathlib.addToDirection(arc.end, shooterFacing);
+            const end = mathlib.addToDirection(arc.end, shooterFacing);
 
             if (mathlib.isInArc(targetCompassHeading, start, end)) {
                 return true;
@@ -1845,7 +1845,7 @@ window.weaponManager = {
                         var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
                         if (fire.length === 0) continue;
-                        
+
                         weapon.fireOrders.push(...fire);
                         var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
                         if (finishedFiring) {
@@ -2376,7 +2376,32 @@ window.weaponManager = {
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
 
-                if (ship.Huge > 0) { // Occupies more than 1 hex
+                if (ship.hexOffsets && ship.hexOffsets.length > 0) {
+                    // Assuming ship.facing is available on client side ship object. 
+                    // shipManager stores it, usually ship.facing property exists.
+                    var lastMove = shipManager.movement.getLastCommitedMove(ship) || 0;
+                    var facing = lastMove.facing || 0;
+
+                    for (var j in ship.hexOffsets) {
+                        var offset = ship.hexOffsets[j];
+                        // Ensure compatibility whether offset is object or just has props
+                        var qOffset = offset.q;
+                        var rOffset = offset.r;
+
+                        // Apply rotation
+                        if (facing !== 0) {
+                            var rotated = mathlib.rotateHex(qOffset, rOffset, facing);
+                            qOffset = rotated.q;
+                            rOffset = rotated.r;
+                        }
+
+                        // Client-side hexlib usually generates {q,r} objects
+                        // We construct new coordinate based on position + offset
+                        var newHex = { q: position.q + qOffset, r: position.r + rOffset };
+
+                        blockedHexes.push(newHex);
+                    }
+                } else if (ship.Huge > 0) { // Occupies more than 1 hex
                     var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);

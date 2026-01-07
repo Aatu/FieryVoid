@@ -564,7 +564,32 @@ private static function bearingToDirectionIndex($bearing) {
     */        
 
 
+    public static function rotateHex($q, $r, $facing) {
+        if ($facing == 0) return ["q" => $q, "r" => $r];
+
+        // Convert Offset (Odd-R) to Cube
+        // Derived from OffsetCoordinate::toCube
+        $x = $q - ($r + ($r & 1)) / 2;
+        $z = $r;
+        $y = -$x - $z;
+
+        // Rotate Cube $facing times (Clockwise)
+        // (x, y, z) -> (-z, -x, -y)
+        for ($i = 0; $i < $facing; $i++) {
+            $newX = -$z;
+            $newY = -$x;
+            $newZ = -$y;
+            $x = $newX;
+            $y = $newY;
+            $z = $newZ;
+        }
+
+        // Convert Cube back to Offset (Odd-R)
+        // Derived from CubeCoordinate::toOffset
+        $newQ = $x + ($z + ($z & 1)) / 2;
+        $newR = $z;
+
+        return ["q" => (int)$newQ, "r" => (int)$newR];
+    }
 }
-
-
 ?>

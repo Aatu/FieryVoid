@@ -2609,8 +2609,15 @@ class LCV extends MediumShip{
 }
 
 class Terrain extends MediumShip{
-	public $shipSizeClass = 5; //5 is used to identify Terrain is certain Front End functions.
+    public $shipSizeClass = 5; //5 is used to identify Terrain is certain Front End functions.
     public $Enormous = true;
+    public $hexOffsets = []; //For irregular-shaped terrain, this lest's you specifiy specific hexes occupied in relation to terrain unit's hex.
+
+    public function stripForJson() {
+        $strippedShip = parent::stripForJson();
+        //$strippedShip->hexOffsets = $this->hexOffsets;
+        return $strippedShip;
+    }
 }
 
 

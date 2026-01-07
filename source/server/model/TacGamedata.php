@@ -832,25 +832,44 @@ private function setWaiting() {
 
     public function getBlockedHexes() {
         $blockedHexes = [];
-        
+
         foreach ($this->ships as $ship) {
             if($ship->isDestroyed()) continue;
 
             if ($ship->Enormous) { // Only enormous units block LoS
-                $position = $ship->getHexPos(); 
+                $position = $ship->getHexPos();
                 $blockedHexes[] = $position;
 
-                if($ship->Huge > 0){ //Larger terrain, need to add more than just centre hex.
+                // Check for custom hex offsets (non-circular terrain)
+                if (property_exists($ship, 'hexOffsets') && !empty($ship->hexOffsets)) {
+
+                    $move = $ship->getLastMovement();
+                    $facing = $move->facing;
+                    foreach ($ship->hexOffsets as $offset) {
+                        // OffsetCoordinate logic: q + offset.q, r + offset.r
+                        // Ensure offset is treated as array or object depending on structure
+                        $qOffset = is_array($offset) ? $offset['q'] : $offset->q;
+                        $rOffset = is_array($offset) ? $offset['r'] : $offset->r;
+                        
+                        // Apply rotation if needed
+                        if ($facing !== 0) {
+                            $rotated = Mathlib::rotateHex($qOffset, $rOffset, $facing);
+                            $qOffset = $rotated['q'];
+                            $rOffset = $rotated['r'];
+                        }
+
+                        $newHex = new OffsetCoordinate($position->q + $qOffset, $position->r + $rOffset);
+                        $blockedHexes[] = $newHex;
+                    }
+                } elseif ($ship->Huge > 0) { // Standard circular Huge terrain
                     $neighbourHexes = Mathlib::getNeighbouringHexes($position, $ship->Huge);
 
                     foreach ($neighbourHexes as $hex) {
                         $blockedHexes[] = new OffsetCoordinate($hex); // Ensure hexes are objects
                     }
                 }
-            }    
-
+            }
         }
-      
         return $blockedHexes;
     } //endof function getBlockedHexes
 
@@ -861,11 +880,12 @@ private function setWaiting() {
         foreach ($this->ships as $ship) {
             if($ship->isDestroyed()) continue;
 
-            if ($ship->Enormous) { // Only enormous units block LoS
-                $position = $ship->getHexPos(); 
-                $enormousHexes[] = $position;
+            if ($ship->Enormous && $ship->Huge == 0) { // Only enormous units, nothing larger.
+                if (property_exists($ship, 'hexOffsets') && !empty($ship->hexOffsets)) {  //Remove odd-shaped terrain as well.              
+                    $position = $ship->getHexPos(); 
+                    $enormousHexes[] = $position;
+                }    
             }    
-
         }
       
         return $enormousHexes;

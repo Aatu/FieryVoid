@@ -17,9 +17,9 @@ window.mathlib = {
 	},
 
 	getSeededRandomGenerator: function (seed) {
-		function lcg(a) {return a * 48271 % 2147483647}
+		function lcg(a) { return a * 48271 % 2147483647 }
 		seed = seed ? lcg(seed) : lcg(Math.random());
-		return function() {return (seed = lcg(seed)) / 2147483648}
+		return function () { return (seed = lcg(seed)) / 2147483648 }
 	},
 
 	arrayIsEmpty: function arrayIsEmpty(array) {
@@ -155,7 +155,7 @@ window.mathlib = {
 		if (oPos.equals(tPos)) {
 			//if Target has speed 0, consider Observer to have better Init! that would be better for firing arcs...
 			//if Observer has speed 0 consider Target to have better Ini!
-			if ( (shipManager.hasBetterInitive(observer, target) && (shipManager.movement.getSpeed(observer)!=0) ) || (shipManager.movement.getSpeed(target)==0) ) {
+			if ((shipManager.hasBetterInitive(observer, target) && (shipManager.movement.getSpeed(observer) != 0)) || (shipManager.movement.getSpeed(target) == 0)) {
 				oPos = shipManager.movement.getPreviousLocation(observer);
 			} else {
 				tPos = shipManager.movement.getPreviousLocation(target);
@@ -208,7 +208,7 @@ window.mathlib = {
 	},
 
 
-	doLinesIntersect: function(p1, p2, p3, p4) {
+	doLinesIntersect: function (p1, p2, p3, p4) {
 		const EPSILON = 1e-10;
 
 		function crossProduct(a, b) {
@@ -266,7 +266,7 @@ window.mathlib = {
 			y: cy + shrinkFactor * hexSize * Math.sin(angle)
 		}));
 	},
-		
+
 
 	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
 		const startPixel = coordinateConverter.fromHexToGame(start);
@@ -344,19 +344,19 @@ window.mathlib = {
 	},
 	*/
 
-//Called in Phase Strategy to show Ruler if LoS is toggled on.
-	showLoS: function showLoS(start, targetHex){
+	//Called in Phase Strategy to show Ruler if LoS is toggled on.
+	showLoS: function showLoS(start, targetHex) {
 
-		if(start == null){
+		if (start == null) {
 			//var firstShip = gamedata.getFirstFriendlyShip();
 			//start = shipManager.getShipPosition(firstShip);
 			return; //No start selectd yet, or tool just activated.			
 		}
 		var blockedHexes = weaponManager.getBlockedHexes();
-		
+
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
 	},
-	
+
 	clearLosSprite: function clearLosSprite() {
 		const LosSprite = window.LosSprite;
 		if (!LosSprite || !LosSprite.children || !Array.isArray(LosSprite.children)) {
@@ -553,92 +553,130 @@ window.mathlib = {
 	},
 
 
-// parity-aware 6 neighbours for your odd-row offset system
-offsetNeighbors: function offsetNeighbors(pos) {
-    const q = pos.q, r = pos.r;
-    const isOdd = (r % 2) !== 0;
-    if (isOdd) {
-        return [
-            { q: q + 1, r: r     }, // right
-            { q: q - 1, r: r     }, // left
-            { q: q - 1, r: r + 1 }, // upper-left (odd row)
-            { q: q - 1, r: r - 1 }, // lower-left (odd row)
-            { q: q    , r: r + 1 }, // upper-right (shifted)
-            { q: q    , r: r - 1 }  // lower-right (shifted)
-        ];
-    } else {
-        return [
-            { q: q + 1, r: r     }, // right
-            { q: q - 1, r: r     }, // left
-            { q: q + 1, r: r + 1 }, // upper-right (even row)
-            { q: q + 1, r: r - 1 }, // lower-right (even row)
-            { q: q    , r: r + 1 }, // upper-left (shifted)
-            { q: q    , r: r - 1 }  // lower-left (shifted)
-        ];
-    }
-},
+	// parity-aware 6 neighbours for your odd-row offset system
+	offsetNeighbors: function offsetNeighbors(pos) {
+		const q = pos.q, r = pos.r;
+		const isOdd = (r % 2) !== 0;
+		if (isOdd) {
+			return [
+				{ q: q + 1, r: r }, // right
+				{ q: q - 1, r: r }, // left
+				{ q: q - 1, r: r + 1 }, // upper-left (odd row)
+				{ q: q - 1, r: r - 1 }, // lower-left (odd row)
+				{ q: q, r: r + 1 }, // upper-right (shifted)
+				{ q: q, r: r - 1 }  // lower-right (shifted)
+			];
+		} else {
+			return [
+				{ q: q + 1, r: r }, // right
+				{ q: q - 1, r: r }, // left
+				{ q: q + 1, r: r + 1 }, // upper-right (even row)
+				{ q: q + 1, r: r - 1 }, // lower-right (even row)
+				{ q: q, r: r + 1 }, // upper-left (shifted)
+				{ q: q, r: r - 1 }  // lower-left (shifted)
+			];
+		}
+	},
 
-// Returns all hexes with distance <= radius (excluding center)
-getNeighbouringHexes: function getNeighbouringHexes(position, radius = 0) {
-    if (radius <= 0) return [];
+	// Returns all hexes with distance <= radius (excluding center)
+	getNeighbouringHexes: function getNeighbouringHexes(position, radius = 0) {
+		if (radius <= 0) return [];
 
-    const seen = new Set();
-    const key = p => `${p.q},${p.r}`;
+		const seen = new Set();
+		const key = p => `${p.q},${p.r}`;
 
-    // mark center visited
-    seen.add(key(position));
+		// mark center visited
+		seen.add(key(position));
 
-    // frontier starts at center
-    let frontier = [ { q: position.q, r: position.r } ];
-    const results = [];
+		// frontier starts at center
+		let frontier = [{ q: position.q, r: position.r }];
+		const results = [];
 
-    // expand ring by ring
-    for (let d = 1; d <= radius; d++) {
-        const next = [];
-        for (const node of frontier) {
-            const neighs = mathlib.offsetNeighbors(node);
-            for (const n of neighs) {
-                const k = key(n);
-                if (!seen.has(k)) {
-                    seen.add(k);
-                    next.push(n);
-                    results.push(n); // accumulate all nodes within <= radius
-                }
-            }
-        }
-        frontier = next;
-    }
+		// expand ring by ring
+		for (let d = 1; d <= radius; d++) {
+			const next = [];
+			for (const node of frontier) {
+				const neighs = mathlib.offsetNeighbors(node);
+				for (const n of neighs) {
+					const k = key(n);
+					if (!seen.has(k)) {
+						seen.add(k);
+						next.push(n);
+						results.push(n); // accumulate all nodes within <= radius
+					}
+				}
+			}
+			frontier = next;
+		}
 
-    return results; // array of {q,r} (same set your hardcoded radius=1/2 returned)
-},
+		return results; // array of {q,r} (same set your hardcoded radius=1/2 returned)
+	},
 
-// Returns only the perimeter hexes at exactly distance == radius
-getPerimeterHexes: function getPerimeterHexes(position, radius = 0) {
-    if (radius <= 0) return [];
+	// Returns only the perimeter hexes at exactly distance == radius
+	getPerimeterHexes: function getPerimeterHexes(position, radius = 0, hexOffsets = null, facing = 0) {
+		if (hexOffsets && Array.isArray(hexOffsets) && hexOffsets.length > 0) {
+			var hexes = [];
+			hexes.push({ q: position.q, r: position.r });
+			hexOffsets.forEach(function (offset) {
+				var rotatedOffset = mathlib.rotateHex(offset.q, offset.r, facing);
+				hexes.push({ q: position.q + rotatedOffset.q, r: position.r + rotatedOffset.r });
+			});
+			return hexes;
+		}
 
-    const seen = new Set();
-    const key = p => `${p.q},${p.r}`;
-    seen.add(key(position));
+		if (radius <= 0) return [];
 
-    let frontier = [ { q: position.q, r: position.r } ];
+		const seen = new Set();
+		const key = p => `${p.q},${p.r}`;
+		seen.add(key(position));
 
-    for (let d = 1; d <= radius; d++) {
-        const next = [];
-        for (const node of frontier) {
-            const neighs = mathlib.offsetNeighbors(node);
-            for (const n of neighs) {
-                const k = key(n);
-                if (!seen.has(k)) {
-                    seen.add(k);
-                    next.push(n);
-                }
-            }
-        }
-        frontier = next;
-    }
+		let frontier = [{ q: position.q, r: position.r }];
 
-    return frontier; // only the outer ring (distance == radius)
-}
+		for (let d = 1; d <= radius; d++) {
+			const next = [];
+			for (const node of frontier) {
+				const neighs = mathlib.offsetNeighbors(node);
+				for (const n of neighs) {
+					const k = key(n);
+					if (!seen.has(k)) {
+						seen.add(k);
+						next.push(n);
+					}
+				}
+			}
+			frontier = next;
+		}
+
+		return frontier; // only the outer ring (distance == radius)
+	},
+
+	rotateHex: function rotateHex(q, r, facing) {
+		if (facing === 0) return { q: q, r: r };
+
+		// Convert Offset (Odd-R) to Cube
+		// Derived from OffsetCoordinate::toCube
+		var x = q - (r + (r & 1)) / 2;
+		var z = r;
+		var y = -x - z;
+
+		// Rotate Cube 'facing' times (Clockwise)
+		// (x, y, z) -> (-z, -x, -y)
+		for (var i = 0; i < facing; i++) {
+			var newX = -z;
+			var newY = -x;
+			var newZ = -y;
+			x = newX;
+			y = newY;
+			z = newZ;
+		}
+
+		// Convert Cube back to Offset (Odd-R)
+		// Derived from CubeCoordinate::toOffset
+		var newQ = x + (z + (z & 1)) / 2;
+		var newR = z;
+
+		return { q: Math.round(newQ), r: Math.round(newR) };
+	}
 
 
 };
