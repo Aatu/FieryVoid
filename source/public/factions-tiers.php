@@ -209,8 +209,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>A weapon which deals damage based on how well it hits its target e.g. hit chance minus the dice result on its roll to hit.  
             Uses Flash mode, so 25% damage is caused to other units on the same hex as any target hit.</li>
        <h5>Gravitic Net</h5>
-            <li>In B5 Wars this weapon was used to move a target, and was fired before regular weapon declaration.	
-            This weapon is not implemented in Fiery Void yet, and any ships that were equipped with it use replacement weapons and are marked a ‘Semi-Custom’.</li>
+            <li>This weapon is used to move a target, and fires in the Pre-Firing phase, before regular weapon declaration.  
+            First target a ship (friend or foe) and a green hexagonal sprite will appear showing the available hexes that the target unit can be moved.
+            Next, target an available hex to confirm the shot.</li>
        <h5>Electro-Pulse Gun</h5>
             <li>Very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.</li>
        <h5>White Stars</h5>
@@ -882,7 +883,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Primordial Battle Cruiser</h5>
         <li>This ship differs from modern, quick-grown, Shadow vessels in a few ways:
             <ul class="circle-list">
-                <li>Most important is primary weapon firing arc: The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
+                <li>Most important is primary weapon firing arc: The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, and you can split your sweeping fire between both forward and rear arcs.</li>
                 <li>Six separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore in FV they've been moved to appropriate sides and hit charts adjusted.</li>                   
             </ul>            
         </li> 
