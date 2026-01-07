@@ -33,6 +33,7 @@ class Stiletto extends FighterFlight{
         $this->maxFlightSize = 6;
 		$this->specialDropout = true; //Has special rules for dropout.  		
 		$this->iniativebonus = 24*5;
+		$this->canPreOrder = true;
 		$this->populate();
     }
 

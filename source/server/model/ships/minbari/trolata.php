@@ -10,8 +10,7 @@ class Trolata extends BaseShip{
         $this->imagePath = "img/ships/troligan.png";
         $this->shipClass = "Trolata Armored Cruiser";
         $this->shipSizeClass = 3;
-        $this->gravitic = true;
-        $this->occurence = "uncommon";
+        $this->gravitic = true; 
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
         $this->turncost = 1.0;
@@ -21,6 +20,8 @@ class Trolata extends BaseShip{
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
         $this->isd = 2201;
+        $this->occurence = "uncommon";
+        $this->variantOf = "Troligan Armored Cruiser";
         $this->fighters = array("shuttles"=>2);
 
         // Ship system arguments: armor, health, power req, output

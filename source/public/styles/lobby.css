@@ -1,211 +1,245 @@
 @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap');
 
-.shipwindow{
-    position:fixed !important;
+.shipwindow {
+    position: fixed !important;
 }
 
-.creategame .subpanel.slotcontainer{
-    padding-bottom:0px;
+.unlimited-points-text {
+    font-size: 14px;
+    /* Adjustable size for lobby unlimited points text */
+    font-weight: bold;
+    vertical-align: middle;
 }
 
-.creategame .subpanel.gamespacecontainer{
-    padding-bottom:0px;
+.unlimited-points-text2 {
+    font-size: 18px;
+    /* Adjustable size for lobby unlimited points text */
+    font-weight: bold;
+    vertical-align: middle;
 }
 
-.invisible{
-    display:none;
+.creategame .subpanel.slotcontainer {
+    padding-bottom: 0px;
 }
 
-.slot{
+.creategame .subpanel.gamespacecontainer {
+    padding-bottom: 0px;
+}
+
+.invisible {
+    display: none;
+}
+
+.slot {
     border: 1px solid #215a7a;
-  	border-radius: 5px;    
-	color:#DEEBFF;
-	padding: 3px 5px;
-    position:relative;
-    margin-bottom:2px;
+    border-radius: 5px;
+    color: #DEEBFF;
+    padding: 3px 5px;
+    position: relative;
+    margin-bottom: 2px;
 }
 
-#movementDropdown, 
+#movementDropdown,
 #asteroidsDropdown,
 #desperateDropdown {
     margin-left: 15px;
 }
 
 #moonsDropdown {
-    margin-left: 15px; 
+    margin-left: 15px;
 }
 
 #moonsDropdown label {
     display: inline-block;
-    width: 140px;  /* Fixed width so dropdowns align */
+    width: 140px;
+    /* Fixed width so dropdowns align */
     margin-bottom: 5px;
-    margin-top: 5px;    
+    margin-top: 5px;
 }
 
 #moonsDropdown select {
-    width: 70px; /* Adjust dropdown width */
+    width: 70px;
+    /* Adjust dropdown width */
     margin-bottom: 6px;
 }
 
 
-.scenariolabel{
+.scenariolabel {
 
-    font-size:12px; 
-    margin:2px 0px; 
-    color: #DEEBFF; 
+    font-size: 12px;
+    margin: 2px 0px;
+    color: #DEEBFF;
 }
 
-.scenariovalue{
-    font-weight:bold;
-    font-size:12px; 
-    margin:2px 0px; 
-    color: #81a7ec; 
+.scenariovalue {
+    font-weight: bold;
+    font-size: 12px;
+    margin: 2px 0px;
+    color: #81a7ec;
 }
 
-.slot span{
-	padding-right:5px;
+.slot span {
+    padding-right: 5px;
 }
 
-.slot .status{
-	display:none;
+.slot .status {
+    display: none;
 }
 
-.slot.ready .status{
-	display:inline;
+.slot.ready .status {
+    display: inline;
 }
 
-.slot .status{
-    color: #00d100; /* Bright green */
-    font-weight: bold; /* Makes the text bold */
+.slot .status {
+    color: #00d100;
+    /* Bright green */
+    font-weight: bold;
+    /* Makes the text bold */
 }
 
-.slot .playername{
-	font-size:14px;
-	color:#DEEBFF; /* Original value  #496791 */
-    font-weight: bold; /* Makes the text bold */	
+.slot .playername {
+    font-size: 14px;
+    color: #DEEBFF;
+    /* Original value  #496791 */
+    font-weight: bold;
+    /* Makes the text bold */
 }
 
-.clickable{
-	cursor:pointer;
+.clickable {
+    cursor: pointer;
 }
 
-.clickable:hover{
-	text-decoration:underline;
+.clickable:hover {
+    text-decoration: underline;
 }
 
-.takeslot{
-    color:red;
-    font-weight: bold; /* Makes the text bold */    
+.takeslot {
+    color: red;
+    font-weight: bold;
+    margin-bottom: 5px;
+    margin-left: -5px;
+    vertical-align: auto;
+    font-size: 13px !important;
 }
 
-.taken .takeslot{
-	display:none;
+.taken .takeslot {
+    display: none;
 }
 
-.store span{
-	padding-left:5px;
+.store span {
+    padding-left: 5px;
 
 }
 
-.store .ship{
-	margin-left:20px;
+.store .ship {
+    margin-left: 20px;
 }
 
-.factiongroup-header{
-    font-weight:bold;
-    font-size:16px; 
-    margin:8px 5px; 
-    color: #6495ED;   
-    font-family: "Bruno Ace SC", sans-serif;    
-} 
-
-.store .faction
-{
-    cursor:pointer;
-}
-.store .factionname{
-	font-size:15px;
-	color:#f2f7ff;
-    font-weight: 525;   
+.factiongroup-header {
+    font-weight: bold;
+    font-size: 16px;
+    margin: 8px 5px;
+    color: #6495ED;
+    font-family: "Bruno Ace SC", sans-serif;
 }
 
-.store .ship{
-    color: #81a7ec; 
-	/*color:#8080FF;old purple*/    
-    margin-right: 5px;     
+.store .faction {
+    cursor: pointer;
 }
 
-.store .shipsizehdr{
-	color:#d0dbec;
-	margin-left:6px;
-	margin-top:2px;    
-	font-size:12px;
+.store .factionname {
+    font-size: 15px;
+    color: #f2f7ff;
+    font-weight: 525;
 }
 
-.store .storeship{
-	/*color:#a3c0f5;*/
-    color: #81a7ec;    
+.store .ship {
+    color: #81a7ec;
+    /*color:#8080FF;old purple*/
     margin-right: 5px;
-    margin-left: 20px;          
+    font-size: 13px;
 }
 
-.store .variant{
-	/*color:#8989fd; */
-    color: #578bec;       
+.store .shipsizehdr {
+    color: #d0dbec;
+    margin-left: 6px;
+    margin-top: 2px;
+    font-size: 13px;
+}
+
+.store .storeship {
+    /*color:#a3c0f5;*/
+    color: #81a7ec;
+    margin-right: 5px;
+    margin-left: 20px;
+    font-size: 13px;
+}
+
+.store .variant {
+    /*color:#8989fd; */
+    color: #578bec;
     margin-right: 15px;
-    margin-left: 20px;     
+    margin-left: 20px;
+    font-size: 13px;
 }
 
-.shipname{
-	color:#DEEBFF;       
+.shipname {
+    color: #DEEBFF;
 }
 
-.store .clickable{
-	cursor:pointer;
-	color:#DEEBFF;
+.store .clickable {
+    cursor: pointer;
+    color: #DEEBFF;
+    font-size: 13px;
 }
 
-.store .ship .clickable{
-	cursor:pointer;
-	color:#DEEBFF;
+.store .ship .clickable {
+    cursor: pointer;
+    color: #DEEBFF;
+    font-size: 13px;
 }
 
-.store .ship .clickable:hover{
-	cursor:pointer;
-	color:#DEEBFF;
-	text-decoration:underline;
+.store .ship .clickable:hover {
+    cursor: pointer;
+    color: #DEEBFF;
+    text-decoration: underline;
+    font-size: 13px;
 }
 
 .faction-display-name.custom-faction {
-    color: rgba(255, 255, 0, 0.774); /* Or any other color you want for custom factions */
-    /*color: #FFA080;*/  
-}
-
-.highlight-custom-ship {
-    color: rgba(255, 255, 0, 0.767); /* Or any other color you want for custom factions  #FFA080 */
+    color: rgba(255, 255, 0, 0.774);
+    /* Or any other color you want for custom factions */
     /*color: #FFA080;*/
 }
 
-.mediumSize{
-    width:200px;
-    text-align: center;
-    
+.highlight-custom-ship {
+    color: rgba(255, 255, 0, 0.767);
+    /* Or any other color you want for custom factions  #FFA080 */
+    /*color: #FFA080;*/
 }
 
-.smallSize{
-    width:100px;
+.mediumSize {
+    width: 200px;
     text-align: center;
-    
+
 }
 
-.tinySize{
-    width:30px;
+.smallSize {
+    width: 100px;
     text-align: center;
-    
+
 }
-.slot input{
-    margin-right:5px;
+
+.tinySize {
+    width: 30px;
+    text-align: center;
+
 }
+
+.slot input {
+    margin-right: 5px;
+}
+
 /*
 .leaveslot{
     position:absolute;
@@ -219,66 +253,71 @@
     cursor:pointer;
 }
 */
-.leaveslot{
-    position:absolute;
-    right:5px;          /* sits to the left of the 10px icon at right:5px */
-    top:1px;             /* align vertically with the icon */
-    font-size:11px;
-    color:#8bcaf2;
-    cursor:pointer;      /* so it feels clickable like the icon */
-	/*text-decoration:underline;  */  
-    /* optional: font-weight: bold; */
+.leaveslot {
+    position: absolute;
+    right: 3px;
+    /* sits to the left of the 10px icon at right:5px */
+    top: 1px;
+    /* align vertically with the icon */
+    cursor: pointer;
+    /* so it feels clickable like the icon */
+    color: #DEEBFF !important;
+    cursor: pointer;
+    font-size: 11px;
+    border: 1px solid #215a7a;
+    padding: 2px 4px;
+    border-radius: 3px;
+    transition: background 0.2s;
+    margin-top: 2px !important;
 }
 
-.value{
+.value {
     /*color:#6e9cdc; Original value  #496791 */
-    color: #81a7ec;      
+    color: #81a7ec;
 }
 
-.selectslot{
-    color:#FFA080;   
-    display:none;
+.selectslot {
+    color: #FFA080;
+    display: none;
 }
 
-.taken .selectslot{
-    
-    display:inline;
+.taken .selectslot {
+
+    display: inline;
 }
 
-.slot.selected .selectslot{
-    display:none;
+.slot.selected .selectslot {
+    display: none;
 }
 
-.slot.selected{
-    background-color:rgb(18, 61, 115, 0.7);
-	-moz-box-shadow: 0px 0px 1px #0099ff;
+.slot.selected {
+    background-color: rgb(18, 61, 115, 0.7);
+    -moz-box-shadow: 0px 0px 1px #0099ff;
     -webkit-box-shadow: 0px 0px 1px #0099ff;
     box-shadow: 0px 0px 1px #0099ff;
-    
+
 }
 
-.store .shipshidden .ship
-{
-    display:none;
+.store .shipshidden .ship {
+    display: none;
 }
 
-.store .shipshidden .shipsizehdr
-{
-    display:none;
+.store .shipshidden .shipsizehdr {
+    display: none;
 }
 
-.store .factionname .tooltip
-{
+.store .factionname .tooltip {
     font-size: 12px;
-    color:#496791;
-    display:none;
+    color: #496791;
+    display: none;
 }
 
 
-.store .factionname:hover .tooltip
-{
-    display:inline;
+.store .factionname:hover .tooltip {
+    display: inline;
 }
+
+
 
 .fleet-dropdown-container {
     position: relative;
@@ -291,17 +330,24 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 2px 6px;
+    padding: 5px 5px;
     border: 1px solid #7298a7;
     border-radius: 4px;
     background: #215a7a;
     cursor: pointer;
     min-width: 160px;
     color: #DEEBFF;
-    user-select: none; /* optional, prevents text selection */
-    position: relative; /* allow ::after to be absolutely positioned */
-    font-size: 1.1em;    
+    user-select: none;
+    /* optional, prevents text selection */
+    position: relative;
+    /* allow ::after to be absolutely positioned */
+    font-size: 13px;
     text-decoration: bold;
+    height: auto;
+    text-align: center;
+    box-sizing: border-box;
+    width: 150px;
+    line-height: normal;
 }
 
 /* Arrow for the dropdown button */
@@ -310,15 +356,18 @@
     font-size: 12px;
     color: #DEEBFF;
     position: absolute;
-    right: 6px;  /* distance from the right edge */
+    right: 6px;
+    /* distance from the right edge */
     top: 50%;
-    transform: translateY(-50%); /* vertical centering */
+    transform: translateY(-50%);
+    /* vertical centering */
     pointer-events: none;
 }
 
 /* Dropdown list */
 #fleetDropdownList {
-    display: none; /* hidden by default */
+    display: none;
+    /* hidden by default */
     position: absolute;
     right: 0;
     top: 100%;
@@ -329,16 +378,20 @@
     min-width: 300px;
     max-height: 200px;
     overflow-y: auto;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     font-size: 12px;
     color: #000000ff;
 }
 
-.fleetIdInput{
-    width: 40px; 
-    height: 16px; 
-    text-align: right; 
-    margin-right: 5px;
-    margin-left: 2px;    
+.Load-Fleet-by-ID {
+    margin-right: 2px;
+    font-size: 14px;
 }
 
+.fleetIdInput {
+    width: 40px;
+    height: 16px;
+    text-align: right;
+    margin-right: 5px;
+    margin-left: 2px;
+}

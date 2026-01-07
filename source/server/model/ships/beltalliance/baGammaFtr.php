@@ -8,7 +8,7 @@ class baGammaFtr extends FighterFlight{
 		$this->faction = "Belt Alliance";
         $this->phpclass = "baGammaFtr";
         $this->shipClass = "BA Gamma Light Fighters";
-		$this->imagePath = "img/ships/BAGamma.png";
+		$this->imagePath = "img/ships/BAGamma2.png";
 	    $this->isd = 2135;
  		$this->unofficial = true;
         
@@ -36,8 +36,8 @@ class baGammaFtr extends FighterFlight{
 		$armour = array(1, 1, 1, 1);
 		$fighter = new Fighter("baGammaFtr", $armour, 7, $this->id);
 		$fighter->displayName = "Gamma";
-		$fighter->imagePath = "img/ships/BAGamma.png";
-		$fighter->iconPath = "img/ships/BAGamma_large.png";
+		$fighter->imagePath = "img/ships/BAGamma2.png";
+		$fighter->iconPath = "img/ships/BAGamma_large2.png";
 			
         $frontGun = new GatlingGunFtr(330, 30, 0);
         $fighter->addFrontSystem($frontGun);

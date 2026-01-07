@@ -2,7 +2,8 @@
 
 window.ShipTooltipBallisticsMenu = function () {
 
-    var template = '<div>' + '<span class="weapon"></span>' + '<span class="hitchange"></span>' + '<span class="interception"> </span>' + '<button class="intercept"> </button>' + '</div>';
+    //var template = '<div>' + '<span class="weapon"></span>' + '<span class="hitchange"></span>' + '<span class="interception"> </span>' + '<button class="intercept"> </button>' + '</div>';
+    var template = '<div>' + '<span class="weapon"></span>' + '<span class="hitchange"></span>'  + '</div>'; //Removed interception and intercept button.
 
     function ShipTooltipBallisticsMenu(shipIconContainer, turn, allowIntercept, selectedShip) {
         this.shipIconContainer = shipIconContainer;
@@ -88,7 +89,7 @@ window.ShipTooltipBallisticsMenu = function () {
             }
             */
             let hitchanceLists = {};   // { firingMode: [hc, hc, ...] }
-
+            let shots = 0;
             for (let i = 0; i < ballistics.length; i++) {
                 const b = ballistics[i];
 
@@ -102,7 +103,7 @@ window.ShipTooltipBallisticsMenu = function () {
                     if (!hitchanceLists[mode]) {
                         hitchanceLists[mode] = [];
                     }
-
+                    shots += b.fireOrder.shots;
                     // Push the hit chance into the array for this firing mode
                     hitchanceLists[mode].push(hc);
                 }
@@ -117,8 +118,14 @@ window.ShipTooltipBallisticsMenu = function () {
             const maxHitchance = list.length > 0 ? Math.max(...list) : null;
             //const minHitchance = Math.min(...hitchanceList);
             //const maxHitchance = Math.max(...hitchanceList);
-        
-            if (ball.fireOrder.type == "normal" && amount > 1 && minHitchance !== maxHitchance) {
+            
+            if(ball.weapon.data["Offensive Dice"]){ //New block to show how many dice Shadow use for each split shot
+                if(amount == 1){
+                    jQuery(".hitchange", ballElement).html('- Between: ' + minHitchance + '% - ' + hitchanceNormalMode + '% (' + ball.fireOrder.shots + ' dice)');
+                } else{
+                    jQuery(".hitchange", ballElement).html('- Between: ' + minHitchance + '% - ' + hitchanceNormalMode + '% (' + shots + ' dice)');                    
+                }   
+            } else if (ball.fireOrder.type == "normal" && amount > 1 && minHitchance !== maxHitchance) {
                 jQuery(".hitchange", ballElement).html('- Between: ' + minHitchance + '% - ' + hitchanceNormalMode + '%');
             } else if (ball.fireOrder.type == "normal") {
                 jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%');

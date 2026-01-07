@@ -63,6 +63,7 @@ window.webglScene = function () {
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
         this.renderer.context.getExtension('OES_standard_derivatives');
+        this.renderer.localClippingEnabled = true;
 
         jQuery(this.renderer.domElement).addClass("webglCanvas").appendTo(canvasId);
 

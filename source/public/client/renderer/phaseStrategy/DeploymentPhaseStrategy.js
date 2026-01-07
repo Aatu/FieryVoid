@@ -28,8 +28,9 @@ window.DeploymentPhaseStrategy = function () {
         this.setPhaseHeader("DEPLOYMENT");
 
         //Show commit button Deployment Phase if player has no ships, should never actually happen as server will skip Deployment Phases for these slots.
-        if (!shipManager.playerHasDeployedShips(gamedata.thisplayer)) {
+        if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
             if(this.selectedShip) this.deselectShip(this.selectedShip);
+            this.setPhaseHeader("PRE-TURN ORDERS");            
             gamedata.showCommitButton();
             /*//Can auto-click it if we want.
 
