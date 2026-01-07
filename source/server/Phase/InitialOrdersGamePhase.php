@@ -73,24 +73,24 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
             if ($ship instanceof FighterFlight) {                
                 foreach ($ship->systems as $ftr) {
                     foreach ($ftr->systems as $ftrsys) {                   
-                    if (is_array($ftrsys->boostOtherPhases) && in_array($gameData->phase, $ftrsys->boostOtherPhases)) {  //Prevent duplication                    
-                            if (!empty($ftrsys->power)) {                            
-                                // Peel off the last entry so we can save it later
-                                $lastPower = array_pop($ftrsys->power);
+                        /*if (is_array($ftrsys->boostOtherPhases) && in_array($gameData->phase, $ftrsys->boostOtherPhases)) {  //Attempted segment when boosting in other phases was allowed                
+                                if (!empty($ftrsys->power)) {                            
+                                    // Peel off the last entry so we can save it later
+                                    $lastPower = array_pop($ftrsys->power);
 
-                                // Remove any power entries saved during Initial Orders
-                                $ftrsys->removePowerEntriesForTurn($gameData);
+                                    // Remove any power entries saved during Initial Orders
+                                    $ftrsys->removePowerEntriesForTurn($gameData);
 
-                                // Put the last entry back in $ftrsys->power                                
-                                $ftrsys->power[] = $lastPower;
-                            }                         
-                        }
+                                    // Put the last entry back in $ftrsys->power                                
+                                    $ftrsys->power[] = $lastPower;
+                                }                         
+                        }*/
                     $powers = array_merge($powers, $ftrsys->power);                        
                     }
                 }
             } else {
                 foreach ($ship->systems as $system){
-                    if (is_array($system->boostOtherPhases) && in_array($gameData->phase, $system->boostOtherPhases)) {  //Prevent duplication
+                    /*if (is_array($system->boostOtherPhases) && in_array($gameData->phase, $system->boostOtherPhases)) {  //Attempted segment when boosting in other phases was allowed
                         if (!empty($system->power)) {
                             // Peel off the last entry so we can save it later
                             $lastPower = array_pop($system->power);
@@ -101,7 +101,7 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
                             // Put the last entry back in $system->power
                             $system->power[] = $lastPower;
                         }
-                    }                    
+                    }*/                    
                 $powers = array_merge($powers, $system->power);
                 }
             }

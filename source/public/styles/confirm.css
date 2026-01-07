@@ -17,6 +17,7 @@
     text-align: center;
     transform: translate(-50%, -50%);
     overflow-y: auto;
+    font-size: 13px;
 }
 
 .confirm .missileselect {

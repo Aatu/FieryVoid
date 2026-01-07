@@ -12,6 +12,19 @@ var HeavyLaser = function HeavyLaser(json, ship) {
 HeavyLaser.prototype = Object.create(Laser.prototype);
 HeavyLaser.prototype.constructor = HeavyLaser;
 
+HeavyLaser.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];        
+    }
+
+	return this;
+};
+
 var MediumLaser = function MediumLaser(json, ship) {
     Laser.call(this, json, ship);
 };
@@ -54,11 +67,37 @@ var NeutronLaser = function NeutronLaser(json, ship) {
 NeutronLaser.prototype = Object.create(Laser.prototype);
 NeutronLaser.prototype.constructor = NeutronLaser;
 
+NeutronLaser.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];          
+    }
+
+	return this;
+};
+
 var ImprovedNeutronLaser = function ImprovedNeutronLaser(json, ship) {
     Laser.call(this, json, ship);
 };
 ImprovedNeutronLaser.prototype = Object.create(Laser.prototype);
 ImprovedNeutronLaser.prototype.constructor = ImprovedNeutronLaser;
+
+ImprovedNeutronLaser.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];        
+    }
+
+	return this;
+};
 
 var PowerLaser = function PowerLaser(json, ship) {
     Laser.call(this, json, ship);
@@ -66,11 +105,37 @@ var PowerLaser = function PowerLaser(json, ship) {
 PowerLaser.prototype = Object.create(Laser.prototype);
 PowerLaser.prototype.constructor = PowerLaser;
 
+PowerLaser.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];         
+    }
+
+	return this;
+};
+
 var MedPowerLaser = function MedPowerLaser(json, ship) {
     Laser.call(this, json, ship);
 };
 MedPowerLaser.prototype = Object.create(Laser.prototype);
 MedPowerLaser.prototype.constructor = MedPowerLaser;
+
+MedPowerLaser.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];         
+    }
+
+	return this;
+};
 
 var LaserLance = function LaserLance(json, ship) {
     Laser.call(this, json, ship);
@@ -144,6 +209,19 @@ var SpinalLaser = function SpinalLaser(json, ship) {
 };
 SpinalLaser.prototype = Object.create(Laser.prototype);
 SpinalLaser.prototype.constructor = SpinalLaser;
+
+SpinalLaser.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];         
+    }
+
+	return this;
+};
 
 var LtBlastLaser = function LtBlastLaser(json, ship) {
     Laser.call(this, json, ship);

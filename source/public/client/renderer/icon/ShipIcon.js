@@ -31,6 +31,7 @@ window.ShipIcon = function () {
         this.weaponArcs = [];
         this.hidden = false;
         this.BDEWSprite = null;
+        this.shipHexagonSpritesMap = new Map();
         this.NotMovedSprite = null;
 
         this.selected = false;
@@ -504,190 +505,27 @@ window.ShipIcon = function () {
         return null;
     };
 
+
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
         var hexDistance = window.coordinateConverter.getHexDistance();
 
         if (weapon instanceof Thruster) {
-            var graphicSize = 32;
-            var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
-            var material = new THREE.MeshBasicMaterial({
-                map: THRUSTER_TEXTURE, // Use the preloaded texture
-                transparent: true,
-                opacity: 0.7
-            });
 
-            var meshGraphic = new THREE.Mesh(geometry, material);
+            this.showThrusterIcon(ship, weapon); //Creates small thruster icon on relevant side of ship on hover over system.
 
-            var shipFacing = this.getFacing();
-            var offsetDistance = 80;
-            var offsetX = 0;
-            var offsetY = 0;
-            var rolled = shipManager.movement.isRolled(ship);
-            var rollAdd = rolled ? 180 : 0;
-
-            switch (weapon.direction) {
-                case 1:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
-                    break;
-                case 2:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
-                    break;
-                case 3:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
-                    break;
-                case 4:
-                    offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
-                    offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
-                    break;
-                default:
-                    offsetX = 0;
-                    offsetY = 0;
-            }
-
-            meshGraphic.position.set(offsetX, offsetY, 1);
-
-            var arcs = shipManager.systems.getArcs(ship, weapon);
-            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
-            meshGraphic.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
-
-            this.mesh.add(meshGraphic);
-            this.weaponArcs.push(meshGraphic);
-
-        } else { //Normal weapons, not thrusters
-
+        } else if (weapon.shootsStraight) { //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             var arcs = shipManager.systems.getArcs(ship, weapon);
-            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
-            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+            this.showStraightArcs(weapon, hexDistance, arcs);
 
-            //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
-            if (weapon.shootsStraight) {
-                const dis = weapon.rangePenalty === 0
-                    ? hexDistance * (weapon.range + 0.5)
-                    : 50 / weapon.rangePenalty * hexDistance;
+        } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
+            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
 
-                const shipFacing = this.getFacing(); // ship's facing in degrees
-
-                // Hex grid offsets for pointy-top hexes, clockwise
-                const hexDirOffsets = [
-                    { x: 1, y: 0 },                         // 0° forward
-                    { x: 0.5, y: -Math.sqrt(3) / 2 },         // 60° clockwise
-                    { x: -0.5, y: -Math.sqrt(3) / 2 },        // 120°
-                    { x: -1, y: 0 },                         // 180°
-                    { x: -0.5, y: Math.sqrt(3) / 2 },         // 240°
-                    { x: 0.5, y: Math.sqrt(3) / 2 },          // 300°
-                ];
-                // Arc start/end relative to ship's facing
-                let arcStart = arcs.start % 360;
-                let arcEnd   = arcs.end   % 360;
-                
-                if (arcStart === arcEnd) {
-                    arcStart = 0;
-                    arcEnd = 360;
-                } else if (arcEnd <= arcStart) {
-                    arcEnd += 360;
-                }
-
-                // Helper to create rounded rectangle
-                function createRoundedRectShape(width, height, radius) {
-                    const shape = new THREE.Shape();
-                    const w = width;
-                    const h = height;
-                    const r = Math.min(radius, w / 2, h / 2);
-
-                    shape.moveTo(-w / 2 + r, -h / 2);
-                    shape.lineTo(w / 2 - r, -h / 2);
-                    shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
-                    shape.lineTo(w / 2, h / 2 - r);
-                    shape.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
-                    shape.lineTo(-w / 2 + r, h / 2);
-                    shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
-                    shape.lineTo(-w / 2, -h / 2 + r);
-                    shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
-
-                    return shape;
-                }
-
-                for (let i = 0; i < 6; i++) {
-                    let dir = i * 60; // clockwise
-
-                    // Wrap around for arc selection
-                    let dirAdjusted = dir;
-                    if (dirAdjusted < arcStart) dirAdjusted += 360;
-
-                    if (dirAdjusted >= arcStart && dirAdjusted <= arcEnd) {
-                        const shape = createRoundedRectShape(dis, hexDistance * 0.85, hexDistance * 0.2);
-                        const geometry = new THREE.ShapeGeometry(shape);
-                        const material = new THREE.MeshBasicMaterial({
-                            color: 0x145080,
-                            opacity: 0.5,
-                            transparent: true
-                        });
-                        const lineArc = new THREE.Mesh(geometry, material);
-
-                        // Rotate relative to ship's facing
-                        lineArc.rotation.z = mathlib.degreeToRadian(-dir);
-
-                        // Position offset along the hex direction
-                        lineArc.position.x = hexDirOffsets[i].x * dis / 2;
-                        lineArc.position.y = hexDirOffsets[i].y * dis / 2;
-                        lineArc.position.z = -1;
-
-                        // Rotate into ship's local space
-                        lineArc.position.applyMatrix4(new THREE.Matrix4().makeRotationZ(mathlib.degreeToRadian(shipFacing)));
-                        lineArc.rotation.z += mathlib.degreeToRadian(shipFacing);
-
-                        this.mesh.add(lineArc);
-                        this.weaponArcs.push(lineArc);
-                    }
-                }
-
-                /* //I tried to get hex rows to work, but it has this weird offset for the their starting location for some reason.
-                const range = weapon.range;
-                const facing = arcs.start; // direction index or string
-                //let currentHex = window.coordinateConverter.fromGameToHex(this.getPosition()); // {q,r}
-                let shipPosition = this.getPosition();
-                shipPosition = {
-                x: shipPosition.x * (window.coordinateConverter.hexlenght / hexDistance),
-                y: shipPosition.y * (window.coordinateConverter.hexlenght / hexDistance)
-                };
-                let currentHex = window.coordinateConverter.fromGameToHex(shipPosition);
-                // Determine delta for each step based on facing
-                let dq = 0, dr = 0;
-                switch(facing) {
-                    case 0: dq=1; dr=0; break;   // East
-                    case 1: dq=1; dr=-1; break;  // NE
-                    case 2: dq=0; dr=-1; break;  // NW
-                    case 3: dq=-1; dr=0; break;  // West
-                    case 4: dq=-1; dr=1; break;  // SW
-                    case 5: dq=0; dr=1; break;   // SE
-                    default: dq=1; dr=0;          // default East
-                }
-
-                for (let i = 1; i <= range; i++) {
-                    currentHex.q += dq;
-                    currentHex.r += dr;
-
-                    const pos = window.coordinateConverter.fromHexToGame(currentHex);
-
-                    const geometry = new THREE.CircleGeometry(hexDistance * 0.45, 6);
-                    const material = new THREE.MeshBasicMaterial({ color: 0x145080, opacity: 0.5, transparent: true });
-                    const hexMesh = new THREE.Mesh(geometry, material);
-
-                    hexMesh.position.set(pos.x, pos.y, -1);
-                    hexMesh.rotation.z = Math.PI / 6;
-
-                    this.mesh.add(hexMesh);
-                    this.weaponArcs.push(hexMesh);
-                }
-                */
-
-            } else { //Normal circular weapon arcs
+            for (const arcs of allArcs) {
+                var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+                var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+                var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
                 var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
                 var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
                 var circle = new THREE.Mesh(geometry, material);
@@ -696,17 +534,167 @@ window.ShipIcon = function () {
                 this.mesh.add(circle);
                 this.weaponArcs.push(circle);
             }
+
+        } else { //Normal weapons with circular weapon arcs
+            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            var arcs = shipManager.systems.getArcs(ship, weapon);
+            var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+            var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
+            var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+
+            var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
+            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
+            var circle = new THREE.Mesh(geometry, material);
+            circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+            circle.position.z = -1;
+            this.mesh.add(circle);
+            this.weaponArcs.push(circle);
+
         }
 
         return null;
     };
+
+    ShipIcon.prototype.showThrusterIcon = function (ship, weapon) {
+        var graphicSize = 32;
+        var geometry = new THREE.PlaneGeometry(graphicSize, graphicSize);
+        var material = new THREE.MeshBasicMaterial({
+            map: THRUSTER_TEXTURE, // Use the preloaded texture
+            transparent: true,
+            opacity: 0.7
+        });
+
+        var meshGraphic = new THREE.Mesh(geometry, material);
+
+        var shipFacing = this.getFacing();
+        var offsetDistance = 80;
+        var offsetX = 0;
+        var offsetY = 0;
+        var rolled = shipManager.movement.isRolled(ship);
+        var rollAdd = rolled ? 180 : 0;
+
+        switch (weapon.direction) {
+            case 1:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing)) * offsetDistance;
+                break;
+            case 2:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 180)) * offsetDistance;
+                break;
+            case 3:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 90 + rollAdd)) * offsetDistance;
+                break;
+            case 4:
+                offsetX = Math.cos(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
+                offsetY = Math.sin(mathlib.degreeToRadian(shipFacing + 270 + rollAdd)) * offsetDistance;
+                break;
+            default:
+                offsetX = 0;
+                offsetY = 0;
+        }
+
+        meshGraphic.position.set(offsetX, offsetY, 1);
+
+        var arcs = shipManager.systems.getArcs(ship, weapon);
+        var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+        var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
+        meshGraphic.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
+
+        this.mesh.add(meshGraphic);
+        this.weaponArcs.push(meshGraphic);
+    };
+
+
+    ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
+        const dis = weapon.rangePenalty === 0
+            ? hexDistance * (weapon.range + 0.5)
+            : 50 / weapon.rangePenalty * hexDistance;
+
+        const shipFacing = this.getFacing(); // ship's facing in degrees
+
+        // Hex grid offsets for pointy-top hexes, clockwise
+        const hexDirOffsets = [
+            { x: 1, y: 0 },                         // 0° forward
+            { x: 0.5, y: -Math.sqrt(3) / 2 },         // 60° clockwise
+            { x: -0.5, y: -Math.sqrt(3) / 2 },        // 120°
+            { x: -1, y: 0 },                         // 180°
+            { x: -0.5, y: Math.sqrt(3) / 2 },         // 240°
+            { x: 0.5, y: Math.sqrt(3) / 2 },          // 300°
+        ];
+        // Arc start/end relative to ship's facing
+        let arcStart = arcs.start % 360;
+        let arcEnd = arcs.end % 360;
+
+        if (arcStart === arcEnd) {
+            arcStart = 0;
+            arcEnd = 360;
+        } else if (arcEnd <= arcStart) {
+            arcEnd += 360;
+        }
+
+        // Helper to create rounded rectangle
+        function createRoundedRectShape(width, height, radius) {
+            const shape = new THREE.Shape();
+            const w = width;
+            const h = height;
+            const r = Math.min(radius, w / 2, h / 2);
+
+            shape.moveTo(-w / 2 + r, -h / 2);
+            shape.lineTo(w / 2 - r, -h / 2);
+            shape.quadraticCurveTo(w / 2, -h / 2, w / 2, -h / 2 + r);
+            shape.lineTo(w / 2, h / 2 - r);
+            shape.quadraticCurveTo(w / 2, h / 2, w / 2 - r, h / 2);
+            shape.lineTo(-w / 2 + r, h / 2);
+            shape.quadraticCurveTo(-w / 2, h / 2, -w / 2, h / 2 - r);
+            shape.lineTo(-w / 2, -h / 2 + r);
+            shape.quadraticCurveTo(-w / 2, -h / 2, -w / 2 + r, -h / 2);
+
+            return shape;
+        }
+
+        for (let i = 0; i < 6; i++) {
+            let dir = i * 60; // clockwise
+
+            // Wrap around for arc selection
+            let dirAdjusted = dir;
+            if (dirAdjusted < arcStart) dirAdjusted += 360;
+
+            if (dirAdjusted >= arcStart && dirAdjusted <= arcEnd) {
+                const shape = createRoundedRectShape(dis, hexDistance * 0.85, hexDistance * 0.2);
+                const geometry = new THREE.ShapeGeometry(shape);
+                const material = new THREE.MeshBasicMaterial({
+                    color: 0x145080,
+                    opacity: 0.5,
+                    transparent: true
+                });
+                const lineArc = new THREE.Mesh(geometry, material);
+
+                // Rotate relative to ship's facing
+                lineArc.rotation.z = mathlib.degreeToRadian(-dir);
+
+                // Position offset along the hex direction
+                lineArc.position.x = hexDirOffsets[i].x * dis / 2;
+                lineArc.position.y = hexDirOffsets[i].y * dis / 2;
+                lineArc.position.z = -1;
+
+                // Rotate into ship's local space
+                lineArc.position.applyMatrix4(new THREE.Matrix4().makeRotationZ(mathlib.degreeToRadian(shipFacing)));
+                lineArc.rotation.z += mathlib.degreeToRadian(shipFacing);
+
+                this.mesh.add(lineArc);
+                this.weaponArcs.push(lineArc);
+            }
+        }
+    };
+
 
     ShipIcon.prototype.hideWeaponArcs = function () {
         this.weaponArcs.forEach(function (arc) {
             this.mesh.remove(arc);
         }, this);
     };
-
     /* //Old method for displaying BDEW as a circle - DK 12.2.25
         ShipIcon.prototype.showBDEW = function () {
     
@@ -771,6 +759,92 @@ window.ShipIcon = function () {
     ShipIcon.prototype.hideBDEW = function () {
         this.mesh.remove(this.BDEWSprite);
         this.BDEWSprite = null;
+    };
+
+    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size) {
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        var systemArcs = shipManager.systems.getArcs(shooter, system);
+
+        //Setup the Hexagon Geometry
+        var dis = (size + 0.6) * hexDistance;
+        var hexShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) hexShape.moveTo(x, y);
+            else hexShape.lineTo(x, y);
+        }
+        hexShape.closePath();
+
+        var plane1 = new THREE.Plane();
+        var plane2 = new THREE.Plane();
+        var shooterRotation = shooterIcon.mesh.rotation.z;
+
+        const TWO_PI = Math.PI * 2;
+        var offset = 0;
+        // Logic angles are CW (0=East, +CW). Visual are CCW. 
+        // We define CCW visual arc From -> To.
+        // VisStart = -LogicEnd. VisEnd = -LogicStart.
+        // Use the sprite's rotation, as the parent mesh doesn't rotate.
+        var shooterRotation = shooterIcon.shipSprite.mesh.rotation.z;
+
+        var angleStart = mathlib.degreeToRadian(-(systemArcs.end + offset)) + shooterRotation;
+        var angleEnd = mathlib.degreeToRadian(-(systemArcs.start + offset)) + shooterRotation;
+
+        var isSmallArc = false;
+
+        // If start != end, we clips. If start == end, it's a 360 circle (no clips).
+        if (systemArcs.start !== systemArcs.end) {
+            // Calculate the angular span
+            var span = angleEnd - angleStart;
+            while (span < 0) span += TWO_PI;
+            while (span > TWO_PI) span -= TWO_PI;
+            isSmallArc = span < Math.PI;
+        }
+
+        var shooterWorldPos = new THREE.Vector3();
+        shooterIcon.mesh.getWorldPosition(shooterWorldPos);
+
+        // Plane 1: Start Edge. Point IN (CCW +90).
+        var normal1 = new THREE.Vector3(Math.cos(angleStart + Math.PI / 2), Math.sin(angleStart + Math.PI / 2), 0);
+        plane1.setFromNormalAndCoplanarPoint(normal1, shooterWorldPos);
+
+        // Plane 2: End Edge. Point IN (CW -90).
+        var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
+        plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
+
+        var hexMaterial = new THREE.MeshBasicMaterial({
+            color: new THREE.Color(0.1, 0.5, 0.1),
+            opacity: 0.3,
+            transparent: true,
+            side: THREE.DoubleSide,
+            clippingPlanes: systemArcs.start !== systemArcs.end ? [plane1, plane2] : [],
+            clipIntersection: !isSmallArc
+        });
+
+        var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);
+        hexagon.position.set(0, 0, -1);
+        this.mesh.add(hexagon);
+        this.shipHexagonSpritesMap.set(system, hexagon);
+        /*
+        //plane/arc helpers to troubleshoot arc placement.
+        var helper1 = new THREE.PlaneHelper(plane1, 1000, 0xff0000); // Red
+        var helper2 = new THREE.PlaneHelper(plane2, 1000, 0x00ff00); // Green
+        shooterIcon.mesh.parent.add(helper1);
+        shooterIcon.mesh.parent.add(helper2);
+        */
+    };
+
+    ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {
+        this.mesh.remove(this.shipHexagonSpritesMap.get(system));
+        this.shipHexagonSpritesMap.delete(system);
+    }
+
+    ShipIcon.prototype.removeHexagonArcs = function () {
+        this.shipHexagonSpritesMap.forEach(function (system, arc, map) {
+            this.mesh.remove(system);
+        }, this);
     };
 
     ShipIcon.prototype.positionAndFaceIcon = function (offset) {

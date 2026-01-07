@@ -282,6 +282,8 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		var selectedSlot = playerManager.getSlotById(slotid);
 
+		if (selectedSlot.points == -1) return true; // Unlimited points
+
 		var points = 0;
 		for (var i in gamedata.ships) {
 			var lship = gamedata.ships[i];
@@ -299,6 +301,8 @@ window.gamedata = {
 
 		var slotid = gamedata.selectedSlot;
 		var selectedSlot = playerManager.getSlotById(slotid);
+
+		if (selectedSlot.points == -1) return true; // Unlimited points
 
 		var points = 0;
 		for (var i in gamedata.ships) {
@@ -747,7 +751,7 @@ window.gamedata = {
 
 
 
-		checkResult = "Total fleet limit: " + selectedSlot.points + "<br><br>";
+		checkResult = "Total fleet limit: " + (selectedSlot.points == -1 ? "Unlimited" : selectedSlot.points) + "<br><br>";
 
 		//check: overall fleet traits
 		checkResult += "Jump engine: "; //Jump Engine present?
@@ -1291,11 +1295,22 @@ window.gamedata = {
 		}
 
 		var maxPoints = selectedSlot.points;
-		var remainingPoints = maxPoints - points;
 
-		$('.max').html(selectedSlot.points);
+		if (maxPoints == -1) {
+			$('.max').html('<span class="unlimited-points-text2">Unlimited</span>');
+			$('.max-points-units').hide();
+			$('.remaining-points-container').hide();
+		} else {
+			var remainingPoints = maxPoints - points;
+			$('.max').html(selectedSlot.points);
+			$('.remaining').html(remainingPoints);
+			$('.max-points-units').show();
+			// Ensure container is shown, and units are visible inside it
+			$('.remaining-points-container').show();
+			$('.remaining-points-units').show();
+		}
+
 		$('.current').html(points);
-		$('.remaining').html(remainingPoints);
 		return points;
 	},
 
@@ -1732,15 +1747,19 @@ window.gamedata = {
 
 		const isCurrentlyHidden = factionElement.hasClass("shipshidden");
 
+		// Optimistic UI: Toggle immediately
+		factionElement.toggleClass("shipshidden");
+
 		if (isCurrentlyHidden && factionElement.hasClass("listempty")) {
 			window.ajaxInterface.getShipsForFaction(faction, function (factionShips) {
 				gamedata.parseShips(factionShips);
 				factionElement.removeClass("listempty"); // Only remove after successful load
 				gamedata.applyCustomShipFilter(); // run after ships load
+			}, function () {
+				// Error Callback: Revert optimistic toggle if load fails
+				factionElement.toggleClass("shipshidden");
 			});
 		}
-
-		factionElement.toggleClass("shipshidden");
 
 		// Apply ship filter AFTER visibility toggled
 		gamedata.applyCustomShipFilter();
@@ -1869,7 +1888,7 @@ window.gamedata = {
 	setSlotData: function setSlotData(data) {
 		var slot = $(".slot.slotid_" + data.slot);
 		$(".name", slot).html(data.name);
-		$(".points", slot).html(data.points);
+		$(".points", slot).html(data.points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : data.points);
 
 		$(".depx", slot).html(data.depx);
 		$(".depy", slot).html(data.depy);
@@ -2646,6 +2665,9 @@ window.gamedata = {
 
 		if (slot) { //sometimes slot hasn't been selected yet.
 			var slotPoints = slot.points ?? 0;
+
+			if (slotPoints === -1) return true; // Unlimited points
+
 			var spentPoints = 0;
 			for (var i in gamedata.ships) {
 				var lship = gamedata.ships[i];
@@ -2715,8 +2737,10 @@ window.gamedata = {
 			}
 			const pointsAvailable = slot.points - spentPoints;
 			if (response.list && pointsAvailable < response.list.points) {
-				confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
-				return;
+				if (gamedata.selectedSlot.points !== -1) { // Unlimited points				
+					confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
+					return;
+				}
 			}
 
 			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {

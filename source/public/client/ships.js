@@ -903,7 +903,9 @@ window.shipManager = {
 
         return false;
     },
-
+    
+    
+    /* Replcaedd with more efficient version, fully remove if no issues - DK - Dec 2025 
     checkConstantPivot: function checkConstantPivot() {
 		var pivotShips = [];
 		var counter = 0;
@@ -937,7 +939,7 @@ window.shipManager = {
 		
 		return pivotShips;
     },
-
+    */
 
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;
@@ -1019,18 +1021,18 @@ window.shipManager = {
         }     
     },    
 
-
     //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
-    playerHasDeployedShips: function playerHasDeployedShips(playerid) {
-       for (const ship of gamedata.ships) {
+    playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {
+        var hasDeployed = true;       
+       
+        for (const ship of gamedata.ships) {
             if(ship.userid !== playerid) continue;
     
             var deploys = shipManager.getTurnDeployed(ship);
-            if(deploys <= gamedata.turn) return true;
+            if(deploys >= gamedata.turn) hasDeployed = false;
         }
-        return false;         
+        return hasDeployed;         
     },
-
 
     //Called in various places to identify a ship as having ability to be invisible to enemy.
     isStealthShip: function(ship) {

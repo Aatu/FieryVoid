@@ -1,16 +1,16 @@
 <?php
-class Trolata extends BaseShip{
+class Troligan extends BaseShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 
-        $this->pointCost = 1100;
+        $this->pointCost = 950;
         $this->faction = "Minbari Federation";
-        $this->phpclass = "Trolata";
+        $this->phpclass = "Troligan";
         $this->imagePath = "img/ships/troligan.png";
-        $this->shipClass = "Trolata Armored Cruiser";
+        $this->shipClass = "Troligan Armored Cruiser";
         $this->shipSizeClass = 3;
-        $this->gravitic = true; 
+        $this->gravitic = true;
         $this->forwardDefense = 16;
         $this->sideDefense = 16;
         $this->turncost = 1.0;
@@ -19,9 +19,7 @@ class Trolata extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
-        $this->isd = 2201;
-        $this->occurence = "uncommon";
-        $this->variantOf = "Troligan Armored Cruiser";
+        $this->isd = 2166;
         $this->fighters = array("shuttles"=>2);
 
         // Ship system arguments: armor, health, power req, output
@@ -34,28 +32,25 @@ class Trolata extends BaseShip{
 
         // weapons arguments: armor, health, power, start arc, end arc
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
+        $this->addFrontSystem(new GravityNet(5, 8, 5, 300, 60));
         $this->addFrontSystem(new GraviticThruster(6, 20, 0, 5, 1));
-        $this->addFrontSystem(new NeutronLaser(4, 10, 6, 300, 60));
+        $this->addFrontSystem(new GravityNet(5, 8, 5, 300, 60));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));
-
         
-		$this->addAftSystem(new FusionCannon(3, 8, 1, 180, 300));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+		$this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
+        $this->addAftSystem(new GravityNet(6, 8, 5, 120, 240));
         $this->addAftSystem(new GraviticThruster(6, 30, 0, 9, 2));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));
-        $this->addAftSystem(new FusionCannon(3, 8, 1, 60, 180));
+        $this->addAftSystem(new GravityNet(6, 8, 5, 120, 240));
+        $this->addAftSystem(new FusionCannon(3, 8, 1, 120, 240));         
 
-        $this->addLeftSystem(new AntimatterConverter(5, 7, 5, 240, 0));
+        $this->addLeftSystem(new GravityNet(5, 8, 5, 240, 0));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 0));
+        $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addLeftSystem(new GraviticThruster(6, 14, 0, 4, 3));
-
-        $this->addRightSystem(new AntimatterConverter(5, 7, 5, 0, 120));
+        
+        $this->addRightSystem(new GravityNet(5, 8, 5, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addRightSystem(new GraviticThruster(6, 14, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -77,27 +72,28 @@ class Trolata extends BaseShip{
             ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Neutron Laser",
+                    6 => "Gravity Net",
                     8 => "Fusion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     6 => "Thruster",
-                    12 => "Fusion Cannon",
+                    8 => "Gravity Net",
+                    10 => "Fusion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     4 => "Thruster",
-					6 => "Antimatter Converter",
+					6 => "Gravity Net",
                     9 => "Fusion Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     4 => "Thruster",
-					6 => "Antimatter Converter",
+					6 => "Gravity Net",
                     9 => "Fusion Cannon",
                     18 => "Structure",
                     20 => "Primary",

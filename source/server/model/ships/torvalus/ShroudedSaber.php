@@ -29,7 +29,8 @@ class ShroudedSaber extends MediumShip{
         $this->pivotcost = 1;
 		$this->iniativebonus = 16 *5;
 
-		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.		
+		$this->trueStealth = true; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.
+		$this->canPreOrder = true;				
 		
 		//$this->fighters = array("normal"=>12); //Can optionally control 12
 		$this->notes = "Can control 12 fighters";
