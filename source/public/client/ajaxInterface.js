@@ -38,7 +38,7 @@ window.ajaxInterface = {
         }
     },
 
-    getShipsForFaction: function (factionRequest, callback) {
+    getShipsForFaction: function (factionRequest, callback, errorCallback) {
         const now = Date.now();
 
         if (this.lastClickTime[factionRequest] &&
@@ -48,7 +48,7 @@ window.ajaxInterface = {
         this.lastClickTime[factionRequest] = now;
 
         if (this.submiting) {
-            this.nextFaction = { factionRequest, callback };
+            this.nextFaction = { factionRequest, callback, errorCallback };
             return;
         }
 
@@ -73,10 +73,10 @@ window.ajaxInterface = {
         }
         */
 
-        this._sendRequest(factionRequest, callback);
+        this._sendRequest(factionRequest, callback, errorCallback);
     },
 
-    _sendRequest: function (factionRequest, callback) {
+    _sendRequest: function (factionRequest, callback, errorCallback) {
         // Validate faction before sending request
         if (!factionRequest) {
             console.warn('_sendRequest called with empty faction, ignoring');
@@ -96,7 +96,8 @@ window.ajaxInterface = {
             contentType: 'application/json',
             data: JSON.stringify({ faction: String(factionRequest) }),
             timeout: 15000,
-            retryCodes: [400, 503, 507], // Explicitly retry these codes for faction loading
+            retryCodes: [503, 507], // 400 is fatal, do not retry
+            maxAttempts: 3, // Limit retries to prevent piling on load
 
             success: (data) => {
                 if (data.error) {
@@ -129,12 +130,16 @@ window.ajaxInterface = {
 
             error: (xhr, status, error) => {
                 // Silently ignore transient errors - user can try again
-                const ignoredStatuses = [400, 503, 507];
+                const ignoredStatuses = [503, 507]; // Fixed list
                 if (xhr && ignoredStatuses.includes(xhr.status)) {
                     console.log('Faction load issue (status ' + xhr.status + '), try again');
                     // Don't call errorAjax for transient errors
                 } else {
                     this.errorAjax(xhr, status, error);
+                }
+
+                if (errorCallback) {
+                    errorCallback(xhr, status, error);
                 }
             },
 
@@ -143,9 +148,9 @@ window.ajaxInterface = {
                 this.submiting = false;
 
                 if (this.nextFaction) {
-                    const { factionRequest: nextF, callback: nextCb } = this.nextFaction;
+                    const { factionRequest: nextF, callback: nextCb, errorCallback: nextErr } = this.nextFaction;
                     this.nextFaction = null;
-                    this._sendRequest(nextF, nextCb);
+                    this._sendRequest(nextF, nextCb, nextErr);
                 }
             }
         });
