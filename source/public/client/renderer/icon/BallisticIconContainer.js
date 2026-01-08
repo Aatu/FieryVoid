@@ -83,7 +83,8 @@ window.BallisticIconContainer = function () {
 			const facing = shipManager.movement.getLastCommitedMove(ship).facing;
 			const perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge, ship.hexOffsets, facing); //Position + radius passed.
 
-			perimeterHexes.push(position); //Let's see what performance is like if we do add hexes for single hex Terrain
+			perimeterHexes.push(position); //Let's see what performance is like if we do add hexes for single hex Terrain. Remove if it causes rendering issues e.g. on Mobile - DK 8.1.26
+
 			perimeterHexes.forEach(neighbour => {
 				const pos = this.coordinateConverter.fromHexToGame(neighbour);
 				const sprite = new BallisticSprite(pos, "hexWhite");
