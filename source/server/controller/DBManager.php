@@ -1649,7 +1649,7 @@ class DBManager
                     $nm .= ', Terrain';
                 }             
 				if (strpos($rules, 'desperate')!==false){
-					$nm  .= ', Desparate';
+					$nm  .= ', Desperate';
 				}
 
                 $nm .= ')</span>';
