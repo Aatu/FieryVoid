@@ -198,10 +198,24 @@ class Mathlib{
     
     //New, working in testing at least, function for Pixel To Hex coordinate conversion.
     public static function pixelCoToHex($px, $py) {
-        $r = (2/3) * $py;
-        $q = ($px / sqrt(3)) + (0.5 * ($r & 1));
-    
-        return self::hexRound($q, $r);
+        // 1. Calculate Fractional Axial Coordinates
+        // q_axial = (sqrt(3)/3 * x - 1/3 * y)
+        // r_axial = (2/3 * y)
+        $q_axial = (sqrt(3)/3 * $px) - (1/3 * $py);
+        $r_axial = (2/3) * $py;
+
+        // 2. Round to nearest Hex (Axial)
+        $roundedAxial = self::hexRound($q_axial, $r_axial);
+        $x = $roundedAxial['x'];
+        $z = $roundedAxial['y']; // hexRound returns x/y as q/r(z)
+
+        // 3. Convert Axial to Offset (Odd-R)
+        // col = x + (z + (z&1)) / 2
+        // row = z
+        $q = $x + ($z + ($z & 1)) / 2;
+        $r = $z;
+
+        return array("x" => (int)$q, "y" => (int)$r);
     }
 
     
@@ -593,16 +607,6 @@ private static function bearingToDirectionIndex($bearing) {
     }
 
     public static function getRotatedHex($center, $offset, $facing) {
-        if ($facing == 0) {
-            // Check input types to ensure we can access q/r
-            $cq = ($center instanceof OffsetCoordinate) ? $center->q : (is_array($center) ? $center['q'] : $center->q);
-            $cr = ($center instanceof OffsetCoordinate) ? $center->r : (is_array($center) ? $center['r'] : $center->r);
-            $oq = is_array($offset) ? $offset['q'] : $offset->q;
-            $or = is_array($offset) ? $offset['r'] : $offset->r;
-            
-            return new OffsetCoordinate($cq + $oq, $cr + $or);
-        }
-
         // Ensure center is OffsetCoordinate for conversion
         if (!($center instanceof OffsetCoordinate)) {
             $cq = is_array($center) ? $center['q'] : $center->q;
@@ -625,8 +629,8 @@ private static function bearingToDirectionIndex($bearing) {
         $vecY = $offsetPx['y'] - $zeroPx['y'];
 
         // 2. Rotate Vector
-        // Game Space is Y-Up. Standard trig is CCW. We need CW (Hex Facings).
-        // Use negative angle.
+        // Standard Matrix with Negative Angle
+        // Matches Client Logic exactly.
         $angle = deg2rad(-$facing * 60);
         $rotX = $vecX * cos($angle) - $vecY * sin($angle);
         $rotY = $vecX * sin($angle) + $vecY * cos($angle);
@@ -637,7 +641,7 @@ private static function bearingToDirectionIndex($bearing) {
 
         // 4. Convert back
         $res = self::pixelCoToHex($targetPxX, $targetPxY);
-        return new OffsetCoordinate($res['x'], $res['y']);
+        return new OffsetCoordinate((int)round($res['x']), (int)round($res['y']));
     }
 }
 ?>

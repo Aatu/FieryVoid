@@ -814,19 +814,12 @@ window.shipManager = {
 
                 for (var j in ship2.hexOffsets) {
                     var offset = ship2.hexOffsets[j];
-                    // Ensure compatibility whether offset is object or just has props
-                    var qOffset = offset.q;
-                    var rOffset = offset.r;
 
-                    // Apply rotation
-                    if (facing !== 0) {
-                        var rotated = mathlib.rotateHex(qOffset, rOffset, facing);
-                        qOffset = rotated.q;
-                        rOffset = rotated.r;
-                    }
+                    // Use getRotatedHex for accurate positioning
+                    var newHex = mathlib.getRotatedHex(pos2, offset, facing);
 
                     // Check if pos1 matches the offset position
-                    if (pos1.q === (pos2.q + qOffset) && pos1.r === (pos2.r + rOffset)) {
+                    if (pos1.q === newHex.q && pos1.r === newHex.r) {
                         collides = true;
                         break;
                     }

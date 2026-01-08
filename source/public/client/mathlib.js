@@ -616,7 +616,7 @@ window.mathlib = {
 	getPerimeterHexes: function getPerimeterHexes(position, radius = 0, hexOffsets = null, facing = 0) {
 		if (hexOffsets && Array.isArray(hexOffsets) && hexOffsets.length > 0) {
 			var hexes = [];
-			hexes.push({ q: position.q, r: position.r });
+			//hexes.push({ q: position.q, r: position.r });
 			hexOffsets.forEach(function (offset) {
 				var newHex = mathlib.getRotatedHex(position, offset, facing);
 				hexes.push(newHex);
@@ -680,11 +680,8 @@ window.mathlib = {
 
 	// New accurate function for getting a hex position based on a center, an offset (definition), and a facing.
 	// Uses pixel conversion to ensure grid consistency.
+	// Uses pixel conversion to ensure grid consistency.
 	getRotatedHex: function (center, offset, facing) {
-		if (facing === 0) {
-			return { q: center.q + offset.q, r: center.r + offset.r };
-		}
-
 		// 1. Get pixel coordinates of the center
 		var centerPx = coordinateConverter.fromHexToGame(center);
 
