@@ -1477,15 +1477,15 @@ window.gamedata = {
 		const offsetY = (canvas.height - mapHeight * scale) / 2;
 
 		// Draw black background inside the blue outline
-		ctx.fillStyle = "black";
+      	ctx.fillStyle = "#000000";
 		ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 
 		// Draw dotted white center lines, avoiding cross-over at center
 		ctx.save();
-		ctx.globalAlpha = 0.6; // Semi-transparent
-		ctx.strokeStyle = "white";
+		ctx.globalAlpha = 0.4; // Semi-transparent
+        ctx.strokeStyle = "#496791";
 		ctx.lineWidth = 1;
-		ctx.setLineDash([6, 6]); // Dotted pattern: 6px line, 6px gap
+		ctx.setLineDash([4, 4]); // Dotted pattern: 6px line, 6px gap
 
 		const centerX = offsetX + (mapWidth / 2) * scale;
 		const centerY = offsetY + (mapHeight / 2) * scale;
@@ -1532,14 +1532,14 @@ window.gamedata = {
 			const h = parseInt(data.depheight) || 0;
 
 			if (data.playerid == player) {
-				ctx.fillStyle = "rgba(0,255,0,0.35)";
-				ctx.strokeStyle = "#006600";
+				ctx.fillStyle = "rgba(50, 200, 50, 0.4)"
+				ctx.strokeStyle = "#66ff66";
 			} else if (data.team == playerTeam) {
-				ctx.fillStyle = "rgba(100,170,250, 0.35)";
-				ctx.strokeStyle = "#033063";
+				ctx.fillStyle = "rgba(50, 50, 200, 0.4)";
+				ctx.strokeStyle = "#6666ff";
 			} else {
-				ctx.fillStyle = "rgba(250, 100, 100, 0.35)";
-				ctx.strokeStyle = "#630303";
+				ctx.fillStyle = "rgba(200, 50, 50, 0.4)";
+				ctx.strokeStyle = "#ff6666";
 			}
 			// Adjust position to treat (x, y) as center
 			const drawX = offsetX + (x - w / 2 + mapWidth / 2) * scale;
@@ -1551,19 +1551,18 @@ window.gamedata = {
 
 			// Draw slot number in the center
 			ctx.save(); // Save context state
-			ctx.globalAlpha = 0.8; // Semi-transparent
-			ctx.fillStyle = "white";
-			ctx.font = `${Math.max(4, Math.floor(4 * scale))}px Arial`; // smaller font with a minimum size
-			ctx.textAlign = "center";
-			ctx.textBaseline = "middle";
+            ctx.fillStyle = "white";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
 			ctx.fillText(team, (drawX + 6) + (w * scale) / 2, (drawY + 3) + (h * scale) / 2);
 			ctx.restore(); // Restore to default state
 		});
 
 		// Draw map border (blue rectangle)
         ctx.strokeStyle = "#deebffaf";
-        ctx.lineWidth = 1;
-		ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
+        ctx.lineWidth = 2;
+		ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 	},
 
 	getPlayerTeam: function getPlayerTeam(id) {
