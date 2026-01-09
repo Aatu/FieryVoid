@@ -347,12 +347,18 @@
         </div>-->
 <main class="container"></main>        
 		<div class="panel large lobby">
+            <?php 
+                $isFleetTest = false;
+                if ($gamelobbydata->rules && $gamelobbydata->rules->hasRuleName('fleetTest')) {
+                    $isFleetTest = true;
+                }
+            ?>
             <div class="">
                 <!--<span class="panelheader">GAME NAME: </span>-->
-                <span class="panelsubheader" style="font-size: 24px; color: #e0e7ef;"> <?php print($gamelobbydata->name); ?></span>
+                <span class="panelsubheader" style="font-size: 30px; color: #e0e7ef;"> <?php print($isFleetTest ? '<span style="color:yellow;">Fleet Test</span>' : $gamelobbydata->name); ?></span>
             </div>
 
-
+    <?php if (!$isFleetTest): ?>
     <div class="lobbyheader">SCENARIO DESCRIPTION</div>
 
     <div class="scenario-description">
@@ -389,118 +395,121 @@
     }
     ?>
     </div>
+    <?php endif; ?>
 
 <?php
 //define options list
 $optionsUsed = '';
 
-if ($gamelobbydata->gamespace == '-1x-1'){ //open map
-	$optionsUsed .= 'Open Map';
-}else{ //fixed map
-	$optionsUsed .= 'Map ' . $gamelobbydata->gamespace;
-}
-
-$simMv = false;
-$desperate = false;
-$asteroids = false;
-$moons = false;
-$initiativeCategories = null;
-$desperateTeams = null;
-$asteroidsNo = 0;
-$moonData = [];
-
-
-if ($gamelobbydata->rules) {
-//var_dump($gamelobbydata->rules);    
-    if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
-        $simMv = true;
-        $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
-        if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
-            $initiativeCategories = $initiativeRule->jsonSerialize();
-        }
+    if ($gamelobbydata->gamespace == '-1x-1'){ //open map
+        $optionsUsed .= 'Open Map';
+    }else{ //fixed map
+        $optionsUsed .= 'Map ' . $gamelobbydata->gamespace;
     }
 
-    if ($gamelobbydata->rules->hasRuleName('desperate')) {
-        $desperate = true;
-        $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
-        if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
-            $desperateTeams = $desperateRule->jsonSerialize();
-        }        
-    }
+    $simMv = false;
+    $desperate = false;
+    $asteroids = false;
+    $moons = false;
+    $initiativeCategories = null;
+    $desperateTeams = null;
+    $asteroidsNo = 0;
+    $moonData = [];
 
-    if ($gamelobbydata->rules->hasRuleName('asteroids')) {
-        $asteroids = true;
-        $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
-        if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
-            $asteroidsNo = $asteroidsRule->jsonSerialize();
-        }        
-    }  
 
-    if ($gamelobbydata->rules->hasRuleName('moons')) {
-        $moons = true;
-        $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
-        if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-            $moonData = $moonsRule->jsonSerialize();
-        }        
-    }       
-}
-
-if ($simMv == true) { // simultaneous movement
-    $optionsUsed .= ', Simultaneous Movement';
-    if ($initiativeCategories !== null) {
-        $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
-    }
-} else { // standard movement
-    $optionsUsed .= ', Standard Movement';
-}
-
-if ($desperate == true) { // Desperate rules in play
-    $teamDisplay = null;
-   
-    if($desperateTeams == 1) {
-            $teamDisplay = "Team 1";
-    }else if($desperateTeams == 2){    
-        $teamDisplay = "Team 2";
-    }else{    
-        $teamDisplay = "Both Teams";
-    }
-    $optionsUsed .= ', Desperate Rules ('. $teamDisplay . ')';
-} else { // standard rules
-    $optionsUsed .= '';
-}
-
-if ($asteroids == true) { // Asteroid terrain rules in play
-    $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
-}
-if ($moons == true) { // Moon terrain rules in play
-
-    $small  = $moonData['small']  ?? 0;
-    $medium = $moonData['medium'] ?? 0;
-    $large  = $moonData['large']  ?? 0;
-
-        function formatMoonCount($count, $type) {
-            if ($count <= 0) return null;
-            return $count . ' ' . $type;
+    if ($gamelobbydata->rules) {
+    //var_dump($gamelobbydata->rules);    
+        if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
+            $simMv = true;
+            $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
+            if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
+                $initiativeCategories = $initiativeRule->jsonSerialize();
+            }
         }
 
-        // Build each part with pluralization
-    $moonParts = array_filter([
-        formatMoonCount($small,  'Small'),
-        formatMoonCount($medium, 'Medium'),
-        formatMoonCount($large,  'Large'),
-    ]);
+        if ($gamelobbydata->rules->hasRuleName('desperate')) {
+            $desperate = true;
+            $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
+            if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
+                $desperateTeams = $desperateRule->jsonSerialize();
+            }        
+        }
 
-    $optionsUsed .= empty($moonParts)
-        ? ', Moons (None)'
-        : ', Moons (' . implode(', ', $moonParts) . ')';
-}
+        if ($gamelobbydata->rules->hasRuleName('asteroids')) {
+            $asteroids = true;
+            $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
+            if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
+                $asteroidsNo = $asteroidsRule->jsonSerialize();
+            }        
+        }  
 
-if ($asteroids == false && $moons == false) { 
-    $optionsUsed .= ', No terrain';
-}
+        if ($gamelobbydata->rules->hasRuleName('moons')) {
+            $moons = true;
+            $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
+            if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
+                $moonData = $moonsRule->jsonSerialize();
+            }        
+        }       
+    }
+
+    if ($simMv == true) { // simultaneous movement
+        $optionsUsed .= ', Simultaneous Movement';
+        if ($initiativeCategories !== null) {
+            $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
+        }
+    } else { // standard movement
+        $optionsUsed .= ', Standard Movement';
+    }
+
+    if ($desperate == true) { // Desperate rules in play
+        $teamDisplay = null;
+    
+        if($desperateTeams == 1) {
+                $teamDisplay = "Team 1";
+        }else if($desperateTeams == 2){    
+            $teamDisplay = "Team 2";
+        }else{    
+            $teamDisplay = "Both Teams";
+        }
+        $optionsUsed .= ', Desperate Rules ('. $teamDisplay . ')';
+    } else { // standard rules
+        $optionsUsed .= '';
+    }
+
+    if ($asteroids == true) { // Asteroid terrain rules in play
+        $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
+    }
+    if ($moons == true) { // Moon terrain rules in play
+
+        $small  = $moonData['small']  ?? 0;
+        $medium = $moonData['medium'] ?? 0;
+        $large  = $moonData['large']  ?? 0;
+
+            function formatMoonCount($count, $type) {
+                if ($count <= 0) return null;
+                return $count . ' ' . $type;
+            }
+
+            // Build each part with pluralization
+        $moonParts = array_filter([
+            formatMoonCount($small,  'Small'),
+            formatMoonCount($medium, 'Medium'),
+            formatMoonCount($large,  'Large'),
+        ]);
+
+        $optionsUsed .= empty($moonParts)
+            ? ', Moons (None)'
+            : ', Moons (' . implode(', ', $moonParts) . ')';
+    }
+
+    if ($asteroids == false && $moons == false) { 
+        $optionsUsed .= ', No terrain';
+    }
 
 ?>
+<?php if(!$isFleetTest): ?>
 <div><span class="scenariolabel">OPTIONS SELECTED: </span> <span><?php print($optionsUsed); ?> </span></div>
+<?php endif; ?>
 
 <div class="lobbyheader" style="margin-bottom: 10px; margin-top: 15px">RULES & INFO</div>
 
@@ -524,6 +533,7 @@ if ($asteroids == false && $moons == false) {
 
 
 	    
+            <?php if(!$isFleetTest): ?>
             <div class="createsubheader" style = "margin-top: 0px; margin-bottom: 5px; margin-left: 1px;">TEAM 1:</div>
 			<div id="team1" class="subpanel slotcontainer">
 			</div>
@@ -531,6 +541,7 @@ if ($asteroids == false && $moons == false) {
             <div class="createsubheader" style = "margin-top: 5px; margin-bottom: 5px; margin-left: 1px;">TEAM 2:</div>
 			<div id="team2" class="subpanel slotcontainer">
             </div>
+            <?php endif; ?>
             
             <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
 			-->
@@ -678,7 +689,9 @@ if ($asteroids == false && $moons == false) {
             &nbsp;&nbsp;
             <span class="btn btn-primary-lobby savebutton">SAVE FLEET</span>
             &nbsp;&nbsp;            
+            <?php if(!$isFleetTest): ?>
             <span class="btn btn-success-lobby readybutton">READY</span>
+            <?php endif; ?>
         </div>
 
     </div> <!-- Final closing of the .buy panel -->
@@ -688,12 +701,14 @@ if ($asteroids == false && $moons == false) {
 
 </div>
 
+    <?php if(!$isFleetTest): ?>
     <div id="deploymentPreview" class="panel large lobby" style="margin-top:10px;">
         <div class="createsubheader" style="margin-top:5px; text-align: center;"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
         <div id="mapPreviewContainer" style="margin: 0 auto 20px auto; text-align: center;">
             <canvas id="mapPreview" width="420" height="300"></canvas>
         </div>
     </div>
+    <?php endif; ?>
 
         <div id="globalchat" class="panel large lobby" style="height:200px;">
         <?php 

@@ -674,6 +674,12 @@ window.createGame = {
         return result;
     },
 
+    submitFleetTest: function () {
+        createGame.isFleetTest = true;
+        $("#createGameForm button[type='submit']").trigger("mousedown"); // Trigger validation/allowSubmit flag if needed
+        $("#createGameForm").submit();
+    },
+
     setData: function setData() {
         var gamename = $("#gamename").val();
         var background = $("#backgroundSelect").val();
@@ -687,6 +693,11 @@ window.createGame = {
 
         if ($("#flightSizeCheck:checked").val() == "on") {
             flight = 1;
+        }
+
+        // Add Fleet Test rule if flag is set
+        if (createGame.isFleetTest) {
+            createGame.rules.fleetTest = 1;
         }
 
         var data = { gamename: gamename, background: background, slots: createGame.slots, gamespace: gamespace, flight: flight, rules: createGame.rules, description: description };

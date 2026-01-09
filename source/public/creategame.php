@@ -321,6 +321,7 @@
                 <input id="createGameData" type="hidden" name="data" value="">
 
                 <div style="text-align: right; margin-top: 10px; padding-bottom: 1px;">
+                    <span class="btn btn-fleet-test" onclick="createGame.submitFleetTest()" style="margin-right: 15px;">Fleet Test</span>
                     <button type="submit" class="btn btn-create-submit create-game-btn" style="position: static; margin-top: 0; float: none;">
                         Create Game
                     </button>

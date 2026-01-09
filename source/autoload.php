@@ -342,6 +342,7 @@ spl_autoload_register(
                 'folshotb' => '/server/model/ships/brakiri/folshotB.php',
                 'forcedofflineforturns' => '/server/model/cricialClasses.php',
                 'forcedofflineoneturn' => '/server/model/cricialClasses.php',
+                'fleettestrule' => '/server/model/FleetTestRule.php',
                 'frazi' => '/server/model/ships/narn/frazi.php',
                 'freetrader' => '/server/model/ships/llort/freeTrader.php',
                 'freetraderpulsar' => '/server/model/ships/llort/freeTraderPulsar.php',

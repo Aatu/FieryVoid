@@ -80,7 +80,7 @@ class Manager{
         
             return array_merge(
                 self::$dbManager->getPlayerGames($userid),
-                self::$dbManager->getLobbyGames()
+                self::$dbManager->getLobbyGames($userid)
             );
       
         }

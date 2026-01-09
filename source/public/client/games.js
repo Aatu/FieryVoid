@@ -82,11 +82,22 @@ window.gamedata = {
 					html = html.replace("{players}", game.playerCount);
 					html = html.replace("{maxplayers}", game.slots);
 
+
 					gameDOM = $(html);
+
+					if (game.test) {
+						gameDOM.find('.players').remove();
+					}
+
 					gameDOM.appendTo($('.gamecontainer.lobby'));
 					$('.gamecontainer.lobby').addClass("found");
 				} else {
-					$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
+					if (!game.test) {
+						$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
+					} else {
+						//$('.players', gameDOM).remove();
+						$('.players', gameDOM).html("<br>");
+					}
 				}
 				lobbyfound = true;
 			}
@@ -146,5 +157,5 @@ window.gamedata = {
 };
 
 window.animation = {
-	animateWaiting: function animateWaiting() {}
+	animateWaiting: function animateWaiting() { }
 };

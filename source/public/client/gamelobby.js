@@ -1809,15 +1809,34 @@ window.gamedata = {
 		gamedata.maxpoints = serverdata.points;
 		gamedata.status = serverdata.status;
 		gamedata.gamespace = serverdata.gamespace;
+		gamedata.rules = serverdata.rules;
 
 		if (gamedata.status == "ACTIVE") {
 			window.location = "game.php?gameid=" + gamedata.gameid;
 		}
 
-		this.createSlots();
-		this.enableBuy();
-		this.constructFleetList();
-		this.drawMapPreview();
+		//Prune here
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) {		
+			var mySlot = null;
+			for (var slotKey in serverdata.slots) {
+				if (serverdata.slots[slotKey].playerid == gamedata.thisplayer) {
+					mySlot = {};
+					mySlot[slotKey] = serverdata.slots[slotKey];
+					break;
+				}
+			}
+			gamedata.slots = mySlot || serverdata.slots;
+			this.createSlots();
+			this.enableBuy();
+			this.constructFleetList();
+			//this.drawMapPreview();						
+		}else{	
+			this.createSlots();
+			this.enableBuy();
+			this.constructFleetList();
+			this.drawMapPreview();	
+		}			
+
 	},
 
 	createNewSlot: function createNewSlot(data) {
@@ -2447,6 +2466,13 @@ window.gamedata = {
 			window.confirm.error("You have to buy at least one ship!", function () { });
 			return;
 		}
+
+		// Fleet Test Check
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) {
+			window.confirm.error("You cannot Ready up in a Fleet test game!", function () { });
+			return;
+		}
+
 		// Pass the submission function as a callback, not invoke it immediately
 		confirm.confirm("Are you sure you wish to ready your fleet?", function () {
 			selectedSlot.lastphase = -2;
