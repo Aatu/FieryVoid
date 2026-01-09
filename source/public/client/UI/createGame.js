@@ -247,7 +247,7 @@ window.createGame = {
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
 
-        const centerX = offsetX+6 + (mapWidth / 2) * scale;
+        const centerX = offsetX + 6 + (mapWidth / 2) * scale;
         const centerY = offsetY + (mapHeight / 2) * scale;
 
         // Vertical Center Line
@@ -479,19 +479,19 @@ window.createGame = {
                     id: 1,
                     depx: 0, depy: 0, depwidth: 12, depheight: 6,
                     slots: [
-                        { depx: 0, depy: 0, depwidth: 12, depheight: 6 }
+                        { name: "Ambushed", points: 3500, depx: 0, depy: 0, depwidth: 12, depheight: 6 }
                     ]
                 },
                 {
                     id: 2,
                     depx: 0, depy: 0, depwidth: 30, depheight: 5,
                     slots: [
-                        { depx: 0, depy: -12, depwidth: 30, depheight: 5 },
-                        { depx: 0, depy: 12, depwidth: 30, depheight: 5 }
+                        { name: "Ambusher", points: 2000,depx: 0, depy: -12, depwidth: 30, depheight: 5 },
+                        { name: "Ambusher", points: 2000,depx: 0, depy: 12, depwidth: 30, depheight: 5 }
                     ]
                 }
             ]
-        },        
+        },
         "unlimited": {
             width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },
@@ -594,6 +594,13 @@ window.createGame = {
                     depwidth: config.depwidth,
                     depheight: config.depheight
                 });
+
+                if (config.points !== undefined) {
+                    slot.points = config.points;
+                }
+                if (config.name !== undefined) {
+                    slot.name = config.name;
+                }                
                 i++;
             }
         }
@@ -708,6 +715,12 @@ window.createGame = {
                 depwidth: explicitDefaults.depwidth,
                 depheight: explicitDefaults.depheight
             });
+            if (explicitDefaults.points !== undefined) {
+                newData.points = explicitDefaults.points;
+            }
+            if (explicitDefaults.name !== undefined) {
+                newData.name = explicitDefaults.name;
+            }            
         } else if (lastSlotOfTeam) {
             // Copy relevant deployment data
             newData.depx = lastSlotOfTeam.depx;
