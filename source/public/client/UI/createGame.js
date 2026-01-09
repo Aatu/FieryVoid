@@ -569,7 +569,7 @@ window.createGame = {
         let newData = {
             id: createGame.slotid,
             team: team,
-            name: "TEAM " + team,
+            name: "Team " + team,
             points: $("#unlimitedPointsCheck").is(":checked") ? -1 : 3500,
             depx: 0,
             depy: 0,
