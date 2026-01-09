@@ -35,8 +35,7 @@
 			$strippedSystem->fighter = true;
 			$strippedSystem->location = $this->location;
 			$strippedSystem->flightid = $this->flightid;
-			//$strippedSystem->systems = $this->systems; 			
-			$strippedSystem->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems); //Improved version that sends stripForJson for fighter systems, not whole systems
+			$strippedSystem->systems = $this->systems; 			
 
 			return $strippedSystem;
 		}
