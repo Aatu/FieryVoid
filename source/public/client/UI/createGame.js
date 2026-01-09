@@ -422,7 +422,7 @@ window.createGame = {
 
 
     mapData: {
-        "custom": { width: null, height: null },
+        "custom": { width: null, height: null, slotsRequired: { 1: 1, 2: 1 } },
         "small": {
             width: 30, height: 24,
             slotsRequired: { 1: 1, 2: 1 },
@@ -469,7 +469,15 @@ window.createGame = {
                     ]
                 }
             ]
-        }
+        },
+        "unlimited": {
+            width: null, height: null,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
+                { id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
+            ]
+        },
     },
 
     onMapDimensionsChange: function () {
@@ -482,10 +490,10 @@ window.createGame = {
         } else {
             $(".gamespacedefinition .unlimitedspace").addClass("invisible");
             $(".gamespacedefinition .limitedspace").removeClass("invisible");
+        }
 
-            if (mapConfig) {
-                createGame.applyMapConfig(mapConfig);
-            }
+        if (mapConfig) {
+            createGame.applyMapConfig(mapConfig);
         }
 
         createGame.drawMapPreview();
@@ -505,7 +513,7 @@ window.createGame = {
             for (let teamId = 1; teamId <= 2; teamId++) {
                 const required = config.slotsRequired[teamId] || 0;
                 if (required > 0) {
-                    const defaults = config.teams.find(t => t.id === teamId);
+                    const defaults = config.teams ? config.teams.find(t => t.id === teamId) : null;
                     createGame.ensureTeamSlots(teamId, required, defaults);
                 }
             }
