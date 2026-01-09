@@ -133,6 +133,9 @@ createFleetList: function createFleetList(slot, template) {
     var phaseLabel = "Initial Orders"
     switch(gamedata.gamephase){
 
+        case -1:
+            phaseLabel = "Pre-Turn";
+            break;            
         case 2:
             phaseLabel = "Movement";
             break;
@@ -178,7 +181,9 @@ createFleetList: function createFleetList(slot, template) {
 
         var phaseLabel = "Initial Orders"
         switch(gamedata.gamephase){
-
+            case -1:
+                phaseLabel = "Pre-Turn";
+                break;            
             case 2:
                 phaseLabel = "Movement";
                 break;
