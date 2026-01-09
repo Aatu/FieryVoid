@@ -247,7 +247,7 @@ window.createGame = {
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
 
-        const centerX = offsetX + (mapWidth / 2) * scale;
+        const centerX = offsetX+6 + (mapWidth / 2) * scale;
         const centerY = offsetY + (mapHeight / 2) * scale;
 
         // Vertical Center Line
@@ -470,6 +470,28 @@ window.createGame = {
                 }
             ]
         },
+        "ambush": {
+            width: 42, height: 30,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 1, 2: 2 },
+            teams: [
+                {
+                    id: 1,
+                    depx: 0, depy: 0, depwidth: 12, depheight: 6,
+                    slots: [
+                        { depx: 0, depy: 0, depwidth: 12, depheight: 6 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 0, depy: 0, depwidth: 30, depheight: 5,
+                    slots: [
+                        { depx: 0, depy: -12, depwidth: 30, depheight: 5 },
+                        { depx: 0, depy: 12, depwidth: 30, depheight: 5 }
+                    ]
+                }
+            ]
+        },        
         "unlimited": {
             width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },

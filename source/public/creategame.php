@@ -276,6 +276,7 @@
                     <option value="standard" selected>Standard (42x30)</option>
                     <option value="large">Large (60x40)</option>
                     <option value="2v2">2v2 (42x40)</option>
+                    <option value="ambush">Ambush (42x40)</option>                    
                     <option value="unlimited">No Boundaries</option>                    
                 </select>
             </div>
@@ -343,7 +344,6 @@
                 </div>
                 <div class="create-row">
                     
-                    <label>Points:</label>
                     <label>Points:</label>
                     <input class="points smallSize" type="text" data-validation="^[0-9]+$" name="points" value="0">
                     <span class="unlimited-label" style="display:none; font-weight:bold; color:#DEEBFF; margin-left:5px; padding: 5px;">Unlimited</span>
