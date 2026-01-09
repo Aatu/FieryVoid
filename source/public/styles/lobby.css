@@ -453,6 +453,7 @@
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
+    margin-top: 15px;
 }
 
 .buy-header-title-style {
@@ -461,13 +462,18 @@
 }
 
 .points-bracket-style {
-    margin-left: 5px;
+    margin-left: 2px;
 }
 
 .filter-container-style {
-    margin-top: 3px;
+    margin-top: 0px;
     margin-left: 5px;
     font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 0px;
+    /* Add some padding on the right for the points */
 }
 
 .all-filters-link {
@@ -614,4 +620,75 @@
 
 .health-bar-initial {
     width: 40px;
+}
+
+.lobby-split-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0px;
+}
+
+/* Container for Rules & Info to allow spacing control */
+.rules-info-container {
+    margin-bottom: 25px;
+}
+
+/* Specific spacing for Fleet Test mode to reduce gaps */
+.rules-info-container.fleet-test {
+    margin-bottom: 0px; /* Reduced margin for Fleet Test */
+}
+
+.lobby-description-column {
+    flex: 1;
+    min-width: 300px;
+}
+
+.lobby-map-column {
+    flex: 0 0 auto;
+    display: flex;
+    margin-top: 0px;
+    /* Adjust to vertically offset map from center */
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    top: 22px;
+    /* Adjust this value */
+}
+
+/* Container for Leave Game button to align bottom-right in split container */
+.lobby-leave-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+/* Unique style for Leave Game button */
+.lobby-leave-container .lobby-leave-button {
+    /* Add custom styles here */
+    margin-right: 0px;
+    margin-top: 3px;    
+}
+
+.mapPreviewContainer {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    text-align: center;
+
+}
+
+.mapPreviewContainerBox {
+    border: 2px solid #215a7a;
+    border-radius: 4px;
+    background-color: #000;
+    /* Ensure some background if empty */
+}
+
+/* Ensure canvas is responsive if needed, though fixed dimensions were requested to match createGame */
+#mapPreview {
+    display: block;
+    min-width: 480px;
 }

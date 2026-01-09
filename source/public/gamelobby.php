@@ -358,44 +358,10 @@
                 <span class="panelsubheader game-name"> <?php print($isFleetTest ? '<span class="fleet-test-text">Fleet Test</span>' : $gamelobbydata->name); ?></span>
             </div>
 
-    <?php if (!$isFleetTest): ?>
-    <div class="lobbyheader">SCENARIO DESCRIPTION</div>
+    <div class="lobby-split-container">
+        <!-- Left Column: Scenario Description -->
+        <div class="lobby-description-column">
 
-    <div class="scenario-description">
-    <?php
-    $desc = $gamelobbydata->description;
-
-    // Replace <br> tags with newlines to normalize input
-    $desc = str_replace(['<br>', '<br/>', '<br />'], "\n", $desc);
-
-    // Remove the header line if it exists
-    $desc = preg_replace('/^\*{3}.*\*{3}\s*/m', '', $desc);
-
-    // Split into lines
-    $lines = preg_split("/\r\n|\n|\r/", trim($desc));
-
-    foreach ($lines as $line) {
-        // Trim whitespace for safety
-        $line = trim($line);
-        if ($line === '') continue; // skip empty lines
-
-        // Try to split on the first colon
-        $pos = strpos($line, ':');
-        if ($pos !== false) {
-            $label = trim(substr($line, 0, $pos));
-            $value = trim(substr($line, $pos + 1));
-
-            // Bold the label regardless of case (you can add uppercase check if you want)
-        echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
-            '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
-        } else {
-            // Just print line if no colon found
-            echo htmlspecialchars($line) . '<br>';
-        }
-    }
-    ?>
-    </div>
-    <?php endif; ?>
 
 <?php
 //define options list
@@ -418,7 +384,6 @@ $optionsUsed = '';
 
 
     if ($gamelobbydata->rules) {
-    //var_dump($gamelobbydata->rules);    
         if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
             $simMv = true;
             $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
@@ -508,9 +473,10 @@ $optionsUsed = '';
 
 ?>
 <?php if(!$isFleetTest): ?>
-<div><span class="scenariolabel">OPTIONS SELECTED: </span> <span><?php print($optionsUsed); ?> </span></div>
+
 <?php endif; ?>
 
+<div class="rules-info-container <?php if($isFleetTest) echo 'fleet-test'; ?>">
 <div class="lobbyheader rules-info-header">RULES & INFO</div>
 
 <a href="./factions-tiers.php" target="_blank" class="lobby-link-blue">Fiery Void: Factions & Tiers</a> 
@@ -518,8 +484,6 @@ $optionsUsed = '';
 <br>
 <a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" class="lobby-link-blue">Ammo, Options & Enhancements</a> 
 <span class="lobby-desc-text"> - Details of all the extras available to Fiery Void units e.g. Missiles.</span>
-<!--<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
-<span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span> -->
 <br>
 
 <a href="https://old.wheelofnames.com/fx3-uje" target="_blank" class="lobby-link-blue">Tier 1</a> 
@@ -529,58 +493,129 @@ $optionsUsed = '';
 <a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" class="lobby-link-blue">Tier 3</a>
 <span class="lobby-dash-span">-</span>
 <span class="lobby-desc-text">Random Faction Wheels</span> 
-<br><br>
+</div> 
 
 
-	    
+
+
+        <?php if (!$isFleetTest): ?>
+
+            <div class="lobbyheader rules-info-header">SCENARIO DESCRIPTION</div>
+
+            <div class="scenario-description">
+            <?php
+            $desc = $gamelobbydata->description;
+
+            // Replace <br> tags with newlines to normalize input
+            $desc = str_replace(['<br>', '<br/>', '<br />'], "\n", $desc);
+
+            // Remove the header line if it exists
+            $desc = preg_replace('/^\*{3}.*\*{3}\s*/m', '', $desc);
+
+            // Split into lines
+            $lines = preg_split("/\r\n|\n|\r/", trim($desc));
+
+            foreach ($lines as $line) {
+                // Trim whitespace for safety
+                $line = trim($line);
+                if ($line === '') continue; // skip empty lines
+
+                // Try to split on the first colon
+                $pos = strpos($line, ':');
+                if ($pos !== false) {
+                    $label = trim(substr($line, 0, $pos));
+                    $value = trim(substr($line, $pos + 1));
+
+                    // Bold the label regardless of case (you can add uppercase check if you want)
+                echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
+                    '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
+                } else {
+                    // Just print line if no colon found
+                    echo htmlspecialchars($line) . '<br>';
+                }
+            }
+            ?>
+            </div>
+
             <?php if(!$isFleetTest): ?>
-            <div class="createsubheader team-header-one">TEAM 1:</div>
-			<div id="team1" class="subpanel slotcontainer">
-			</div>
-			
-            <div class="createsubheader team-header-two">TEAM 2:</div>
-			<div id="team2" class="subpanel slotcontainer">
-            </div>
+            <div><span class="scenariolabel">OPTIONS SELECTED: </span> <span class="scenariovalue"><?php print($optionsUsed); ?> </span></div>
             <?php endif; ?>
-            
-            <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
-			-->
-			
-            <div class="button-container">
-                <span class="btn btn-secondary-lobby leave">Leave Game</span>
+
+            <?php endif; ?>
+        </div>
+
+        <!-- Right Column: Map Preview -->
+        <?php if(!$isFleetTest): ?>
+        <div class="lobby-map-column">
+            <!--<div class="createsubheader deployment-header-style"><span>DEPLOYMENT ZONE PREVIEW:</span></div>-->
+            <div id="mapPreviewContainer" class="mapPreviewContainer">
+                <canvas id="mapPreview" width="400" height="300" class="mapPreviewContainerBox"></canvas>
             </div>
-			
-		</div>
+        </div>
+        <?php endif; ?>
+        <div class="lobby-leave-container">
+            <span class="btn btn-secondary-lobby leave lobby-leave-button">Leave Game</span>
+        </div>
+    </div>
+    
+
+</div>
+
+<?php if(!$isFleetTest): ?>
+<div class="panel large lobby lobby-teams-wrapper">
+    <div class="lobby-teams-container">
+        
+        <div class="createsubheader team-header-one">TEAM 1:</div>
+        <div id="team1" class="subpanel slotcontainer">
+        </div>
+        
+        <div class="createsubheader team-header-two">TEAM 2:</div>
+        <div id="team2" class="subpanel slotcontainer">
+        </div>
+        
+    </div>
+</div>
+<?php endif; ?>
+
 <div class="panel large lobby buy buy-panel-container">
 
-    <!-- Header row -->
+
     <div class="buy-header-flex">
         <div>
             <span class="panelheader buy-header-title-style">PURCHASE YOUR FLEET</span>
-        </div>  
-        <div>
-            <span class="panelsubheader current">0</span>
-            <span class="panelsubheader">/</span>
-            <span class="panelsubheader max">0</span><span class="panelsubheader max-points-units">pts</span>
-            <span class="remaining-points-container">
-                <span class="panelsmall points-bracket-style">(</span>
-                <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
-                <span class="panelsmall">)</span>
-            </span>
-        </div>
+        </div> 
+                <div>
+                    <span class="remaining-points-container">
+                        <span class="panelsmall points-bracket-style">(</span>
+                        <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
+                        <span class="panelsmall">)</span>
+                    </span>
+                </div>             
     </div>
 
             <div class="filter-container-style">
-                <span class="clickable tier-select-all all-filters-link">All Filters</span>
-                <span class="filter-pipe-separator">|</span>          
-                <span class="clickable tier-select-none no-filters-link">No Filters</span>
-                <span class="filter-pipe-separator">|</span>  
+                <div>
+                    <span class="clickable tier-select-all all-filters-link">All Filters</span>
+                    <span class="filter-pipe-separator">|</span>          
+                    <span class="clickable tier-select-none no-filters-link">No Filters</span>
+                    <span class="filter-pipe-separator">|</span>  
 
-                <label class="isd-filter-label-style">
-                    <span class="filter-by-isd-text">Filter by ISD:</span>
-                    <input type="text" id="isdFilter" value="" class="isd-input-style">
-                    <span class="clickable resetISDFilter reset-isd-link-style">Reset ISD</span>
-                </label>
+                    <label class="isd-filter-label-style">
+                        <span class="filter-by-isd-text">Filter by ISD:</span>
+                        <input type="text" id="isdFilter" value="" class="isd-input-style">
+                        <span class="clickable resetISDFilter reset-isd-link-style">Reset ISD</span>
+                    </label>
+                </div>
+                <div>
+                    <!--<span class="remaining-points-container">
+                        <span class="panelsmall points-bracket-style">(</span>
+                        <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
+                        <span class="panelsmall">) </span>
+                    </span>-->
+                    <span class="panelsubheader current">0</span>
+                    <span class="panelsubheader">/</span>
+                    <span class="panelsubheader max">0</span><span class="panelsubheader max-points-units">pts</span>
+                </div>
             </div>
 
 
@@ -699,19 +734,8 @@ $optionsUsed = '';
         <!-- ✅ Your inserted fleetcheck panel -->
         <div id="fleetcheck" class="panel large lobby fleet-check-panel-container"><p id="fleetchecktxt" class="fleet-check-text-style"><span></div>
 
-</div>
-
-    <?php if(!$isFleetTest): ?>
-    <div id="deploymentPreview" class="panel large lobby deployment-preview-wrapper">
-        <div class="createsubheader deployment-header-style"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
-        <div id="mapPreviewContainer" class="map-preview-wrapper">
-            <canvas id="mapPreview" width="420" height="300"></canvas>
-        </div>
-    </div>
-    <?php endif; ?>
-
         <div id="globalchat" class="panel large lobby global-chat-wrapper">
-        <?php 
+        <?php
             $chatgameid = 0;
             $chatelement = "#globalchat";
             include("chat.php")
