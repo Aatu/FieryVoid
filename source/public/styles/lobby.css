@@ -395,3 +395,223 @@
     margin-right: 5px;
     margin-left: 2px;
 }
+
+/* Post-Refactor Inline Style Replacements */
+
+.game-name {
+    font-size: 30px;
+    color: #e0e7ef;
+}
+
+.fleet-test-text {
+    color: yellow;
+}
+
+.rules-info-header {
+    margin-bottom: 10px;
+    margin-top: 15px;
+}
+
+.lobby-link-blue {
+    text-decoration: underline;
+    font-size: 15px;
+    color: #8bcaf2;
+}
+
+.lobby-desc-text {
+    font-size: 15px;
+}
+
+.lobby-separator-strong {
+    margin: 0 3px;
+    font-size: 16px;
+}
+
+.lobby-dash-span {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.team-header-one {
+    margin-top: 0px;
+    margin-bottom: 5px;
+    margin-left: 1px;
+}
+
+.team-header-two {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 1px;
+}
+
+.buy-panel-container {
+    display: none;
+}
+
+.buy-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.buy-header-title-style {
+    margin-left: 5px;
+    padding-right: 15px;
+}
+
+.points-bracket-style {
+    margin-left: 5px;
+}
+
+.filter-container-style {
+    margin-top: 3px;
+    margin-left: 5px;
+    font-size: 12px;
+}
+
+.all-filters-link {
+    margin-right: 5px;
+    text-decoration: underline;
+    color: #8bcaf2;
+}
+
+.filter-pipe-separator {
+    margin-right: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.no-filters-link {
+    text-decoration: underline;
+    margin-right: 5px;
+    color: #8bcaf2;
+}
+
+.isd-filter-label-style {
+    margin-left: 5px;
+    margin-top: 3px;
+}
+
+.filter-by-isd-text {
+    margin-right: 2px;
+}
+
+.isd-input-style {
+    width: 36px;
+    height: 14px;
+    text-align: right;
+}
+
+.reset-isd-link-style {
+    text-decoration: underline;
+    margin-left: 3px;
+    font-size: 11px;
+    color: #8bcaf2;
+}
+
+.tier-filters-row {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    margin-top: 3px;
+    flex-wrap: nowrap;
+}
+
+.tier-label-style {
+    margin-left: 5px;
+}
+
+.tier-pipe-separator {
+    margin-left: 6px;
+    margin-right: 6px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.custom-dropdown-style {
+    display: none;
+    margin-left: 10px;
+}
+
+.fleet-loading-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    font-size: 12px;
+    gap: 6px;
+}
+
+.fleet-id-label-container {
+    margin-left: 5px;
+    margin-top: 0px;
+    display: flex;
+    align-items: center;
+}
+
+.saved-fleet-wrapper {
+    position: relative;
+    margin-left: auto;
+    font-size: 12px;
+}
+
+.store-layout-table {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.store-left-col {
+    width: 45%;
+}
+
+.store-right-col {
+    width: 55%;
+    vertical-align: top;
+}
+
+.fleet-panel-style {
+    text-align: right;
+}
+
+.action-buttons-row {
+    text-align: right;
+    margin-top: 8px;
+}
+
+.fleet-checker-link-style {
+    font-size: 14px;
+}
+
+.fleet-check-panel-container {
+    display: none;
+}
+
+.fleet-check-text-style {
+    display: block;
+}
+
+.deployment-preview-wrapper {
+    margin-top: 10px;
+}
+
+.deployment-header-style {
+    margin-top: 5px;
+    text-align: center;
+}
+
+.map-preview-wrapper {
+    margin: 0 auto 20px auto;
+    text-align: center;
+}
+
+.global-chat-wrapper {
+    height: 200px;
+}
+
+.hidden-template-container {
+    display: none;
+}
+
+.health-bar-initial {
+    width: 40px;
+}
