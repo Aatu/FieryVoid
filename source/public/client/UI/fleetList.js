@@ -130,7 +130,22 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.appendTo(fleetlisttable);
     }
 
-    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for Orders]</span>";
+    var phaseLabel = "Initial Orders"
+    switch(gamedata.gamephase){
+
+        case 2:
+            phaseLabel = "Movement";
+            break;
+        case 5:
+            phaseLabel = "Pre-Firing";
+            break;  
+        case 3:
+            phaseLabel = "Firing";
+            break;                                                  
+    }
+
+    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for " + phaseLabel + " Orders]</span>";
+
     if(slot.surrendered !== null){
         if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
             turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
@@ -161,9 +176,23 @@ createFleetList: function createFleetList(slot, template) {
 
         if (!header.length) return; // Just in case something went wrong
 
+        var phaseLabel = "Initial Orders"
+        switch(gamedata.gamephase){
+
+            case 2:
+                phaseLabel = "Movement";
+                break;
+            case 5:
+                phaseLabel = "Pre-Firing";
+                break;  
+            case 3:
+                phaseLabel = "Firing";
+                break;                                                  
+        }
+
         const html = slot.waiting
             ? "<span style='color:green'>&nbsp;&nbsp;[Orders committed]</span>"
-            : "<span style='color:orange'>&nbsp;&nbsp;[Waiting for Orders]</span>";
+            : "<span style='color:orange'>&nbsp;&nbsp;[Waiting for " + phaseLabel + " Orders]</span>";
 
         header.html(html);
     },
