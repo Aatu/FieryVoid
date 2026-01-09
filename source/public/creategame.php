@@ -272,9 +272,10 @@
                 <label for="mapDimensionsSelect" class="mapDimensionsSelect">CHOOSE MAP:</label>
                 <select id="mapDimensionsSelect" name="mapdimensions" class="mapSelect">
                     <option value="custom">Custom</option>
-                    <option value="knifefight">Knife Fight (30x24)</option>
+                    <option value="small">Small (30x24)</option>
                     <option value="standard" selected>Standard (42x30)</option>
-                    <option value="baseassault">Base Assault (60x40)</option>
+                    <option value="large">Large (60x40)</option>
+                    <option value="2v2">2v2 (42x40)</option>
                     <option value="unlimited">Unlimited</option>                    
                 </select>
             </div>

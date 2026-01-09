@@ -421,8 +421,60 @@ window.createGame = {
     },
 
 
+    mapData: {
+        "custom": { width: null, height: null },
+        "small": {
+            width: 30, height: 24,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { id: 1, depx: -12, depy: 0, depwidth: 7, depheight: 24 },
+                { id: 2, depx: 11, depy: 0, depwidth: 7, depheight: 24 }
+            ]
+        },
+        "standard": {
+            width: 42, height: 30,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
+                { id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
+            ]
+        },
+        "large": {
+            width: 60, height: 40,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
+                { id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
+            ]
+        },
+        "2v2": {
+            width: 42, height: 40,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 2, 2: 2 },
+            teams: [
+                {
+                    id: 1,
+                    depx: -19, depy: 0, depwidth: 5, depheight: 40,
+                    slots: [
+                        { depx: -19, depy: -10, depwidth: 5, depheight: 20 },
+                        { depx: -19, depy: 10, depwidth: 5, depheight: 20 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 18, depy: 0, depwidth: 5, depheight: 40,
+                    slots: [
+                        { depx: 18, depy: -10, depwidth: 5, depheight: 20 },
+                        { depx: 18, depy: 10, depwidth: 5, depheight: 20 }
+                    ]
+                }
+            ]
+        }
+    },
+
     onMapDimensionsChange: function () {
         const val = $("#mapDimensionsSelect").val();
+        const mapConfig = createGame.mapData[val];
 
         if (val === "unlimited") {
             $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
@@ -431,73 +483,98 @@ window.createGame = {
             $(".gamespacedefinition .unlimitedspace").addClass("invisible");
             $(".gamespacedefinition .limitedspace").removeClass("invisible");
 
-            if (val === "standard") createGame.doSwitchSizeStandard();
-            else if (val === "knifefight") createGame.doSwitchSizeKnifeFight();
-            else if (val === "baseassault") createGame.doSwitchSizeBaseAssault();
-            // custom: do nothing, just show fields
+            if (mapConfig) {
+                createGame.applyMapConfig(mapConfig);
+            }
         }
 
         createGame.drawMapPreview();
+    },
+
+    applyMapConfig: function (config) {
+        if (config.width && config.height) {
+            createGame.gamespace_data.width = config.width;
+            createGame.gamespace_data.height = config.height;
+            $(".spacex").val(config.width);
+            $(".spacey").val(config.height);
+        }
+
+        // Handle slots
+        if (config.slotsRequired) {
+            // Enforce specific number of slots
+            for (let teamId = 1; teamId <= 2; teamId++) {
+                const required = config.slotsRequired[teamId] || 0;
+                if (required > 0) {
+                    const defaults = config.teams.find(t => t.id === teamId);
+                    createGame.ensureTeamSlots(teamId, required, defaults);
+                }
+            }
+        } else if (config.teams) {
+            // Just update existing slots with defaults (Legacy behavior)
+            for (let slot of createGame.slots) {
+                const defaults = config.teams.find(t => t.id === slot.team);
+                if (defaults) {
+                    // Only copy specific properties to avoid overwriting everything
+                    Object.assign(slot, {
+                        depx: defaults.depx,
+                        depy: defaults.depy,
+                        depwidth: defaults.depwidth,
+                        depheight: defaults.depheight
+                    });
+                }
+            }
+            createGame.refreshSlotsUI();
+        }
+    },
+
+    ensureTeamSlots: function (team, count, defaults) {
+        // Find current slots for this team
+        let teamSlots = createGame.slots.filter(s => s.team === team);
+
+        // Add slots if needed
+        while (teamSlots.length < count) {
+            createGame.createNewSlot.call({ className: "team" + team }, null, defaults);
+            // Refresh list
+            teamSlots = createGame.slots.filter(s => s.team === team);
+        }
+
+        // Remove slots if too many
+        while (teamSlots.length > count) {
+            const slotToRemove = teamSlots[teamSlots.length - 1];
+            createGame.removeSlotData(slotToRemove.id);
+            // Also remove from DOM immediately to keep UI in sync before full refresh
+            $(".slot.slotid_" + slotToRemove.id).remove();
+            teamSlots = createGame.slots.filter(s => s.team === team);
+        }
+
+        // Update all slots with defaults or specific slot overrides
+        if (defaults) {
+            let i = 0;
+            for (let slot of teamSlots) {
+                let config = defaults;
+                // Check for per-slot override
+                if (defaults.slots && defaults.slots[i]) {
+                    // Create a merged config where slot override takes precedence
+                    config = $.extend({}, defaults, defaults.slots[i]);
+                }
+
+                Object.assign(slot, {
+                    depx: config.depx,
+                    depy: config.depy,
+                    depwidth: config.depwidth,
+                    depheight: config.depheight
+                });
+                i++;
+            }
+        }
+
+        createGame.refreshSlotsUI();
     },
 
     refreshSlotsUI: function () {
         // Simple way: clear and redraw
         $(".slotcontainer").empty();
         createGame.createSlotsFromArray();
-    },
-
-
-    doSwitchSizeKnifeFight: function (data) {
-        createGame.gamespace_data.width = 30;
-        createGame.gamespace_data.height = 24;
-        $(".spacex").val(30);
-        $(".spacey").val(24);
-
-        const team1Defaults = { depx: -12, depy: 0, depwidth: 7, depheight: 24 };
-        const team2Defaults = { depx: 11, depy: 0, depwidth: 7, depheight: 24 };
-
-        for (let slot of createGame.slots) {
-            if (slot.team == 1) Object.assign(slot, team1Defaults);
-            else if (slot.team == 2) Object.assign(slot, team2Defaults);
-        }
-        createGame.refreshSlotsUI();
-        createGame.drawMapPreview();
-    },
-
-
-    doSwitchSizeBaseAssault: function (data) {
-        createGame.gamespace_data.width = 60;
-        createGame.gamespace_data.height = 40;
-        $(".spacex").val(60);
-        $(".spacey").val(40);
-
-        const team1Defaults = { depx: -28, depy: 0, depwidth: 5, depheight: 40 };
-        const team2Defaults = { depx: 27, depy: 0, depwidth: 5, depheight: 40 };
-
-        for (let slot of createGame.slots) {
-            if (slot.team == 1) Object.assign(slot, team1Defaults);
-            else if (slot.team == 2) Object.assign(slot, team2Defaults);
-        }
-        createGame.refreshSlotsUI();
-        createGame.drawMapPreview();
-    },
-
-
-    doSwitchSizeStandard: function (data) {
-        createGame.gamespace_data.width = 42;
-        createGame.gamespace_data.height = 30;
-        $(".spacex").val(42);
-        $(".spacey").val(30);
-
-        const team1Defaults = { depx: -19, depy: 0, depwidth: 5, depheight: 30 };
-        const team2Defaults = { depx: 18, depy: 0, depwidth: 5, depheight: 30 };
-
-        for (let slot of createGame.slots) {
-            if (slot.team == 1) Object.assign(slot, team1Defaults);
-            else if (slot.team == 2) Object.assign(slot, team2Defaults);
-        }
-        createGame.refreshSlotsUI();
-        createGame.drawMapPreview();
     },
 
 
@@ -553,8 +630,23 @@ window.createGame = {
         slot.find("[name='depavailable']").val(data.depavailable);
     },
 
-    createNewSlot: function createNewSlot(e) {
-        var team = $(this).hasClass("team1") ? 1 : 2;
+    createNewSlot: function createNewSlot(e, explicitDefaults) {
+        var team;
+        // Check if 'this' is a DOM-like object or jQuery object with class
+        if ($(this).hasClass("team1") || (this.className && this.className.indexOf("team1") !== -1)) {
+            team = 1;
+        } else if ($(this).hasClass("team2") || (this.className && this.className.indexOf("team2") !== -1)) {
+            team = 2;
+        } else {
+            // Fallback or passed directly?
+            // If we passed { className: "team1" } to call(), 'this' is that object.
+            // jQuery $(this) wraps it. $(obj).hasClass() might not work on plain objects depending on jQuery version.
+            // Let's check the property directly if we are mocking it.
+            if (this.className === "team1") team = 1;
+            else if (this.className === "team2") team = 2;
+            else team = 1; // Default fallback
+        }
+
         createGame.slotid++;
 
         // Default to copying the LAST slot of that team, or standard defaults if none
@@ -579,7 +671,14 @@ window.createGame = {
             depavailable: 1
         };
 
-        if (lastSlotOfTeam) {
+        if (explicitDefaults) {
+            Object.assign(newData, {
+                depx: explicitDefaults.depx,
+                depy: explicitDefaults.depy,
+                depwidth: explicitDefaults.depwidth,
+                depheight: explicitDefaults.depheight
+            });
+        } else if (lastSlotOfTeam) {
             // Copy relevant deployment data
             newData.depx = lastSlotOfTeam.depx;
             newData.depy = lastSlotOfTeam.depy;
