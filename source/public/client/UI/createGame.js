@@ -422,29 +422,36 @@ window.createGame = {
 
 
     mapData: {
-        "custom": { width: null, height: null, slotsRequired: { 1: 1, 2: 1 } },
+        "custom": { 
+            width: null, height: null, 
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                {  name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
+                {  name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
+            ]
+        },         
         "small": {
             width: 30, height: 24,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                { id: 1, depx: -12, depy: 0, depwidth: 7, depheight: 24 },
-                { id: 2, depx: 11, depy: 0, depwidth: 7, depheight: 24 }
+                {  name: "Team 1", id: 1, depx: -12, depy: 0, depwidth: 7, depheight: 24 },
+                {  name: "Team 2", id: 2, depx: 11, depy: 0, depwidth: 7, depheight: 24 }
             ]
         },
         "standard": {
             width: 42, height: 30,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                { id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
-                { id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
+                {  name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
+                { name: "Team 2",  id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
             ]
         },
         "large": {
             width: 60, height: 40,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                { id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
-                { id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
+                {  name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
+                {  name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
             ]
         },
         "2v2": {
@@ -456,16 +463,16 @@ window.createGame = {
                     id: 1,
                     depx: -19, depy: 0, depwidth: 5, depheight: 40,
                     slots: [
-                        { depx: -19, depy: -10, depwidth: 5, depheight: 20 },
-                        { depx: -19, depy: 10, depwidth: 5, depheight: 20 }
+                        { name: "Team 1", depx: -19, depy: -10, depwidth: 5, depheight: 20 },
+                        { name: "Team 1", depx: -19, depy: 10, depwidth: 5, depheight: 20 }
                     ]
                 },
                 {
                     id: 2,
                     depx: 18, depy: 0, depwidth: 5, depheight: 40,
                     slots: [
-                        { depx: 18, depy: -10, depwidth: 5, depheight: 20 },
-                        { depx: 18, depy: 10, depwidth: 5, depheight: 20 }
+                        {  name: "Team 2", depx: 18, depy: -10, depwidth: 5, depheight: 20 },
+                        {  name: "Team 2", depx: 18, depy: 10, depwidth: 5, depheight: 20 }
                     ]
                 }
             ]
@@ -492,12 +499,35 @@ window.createGame = {
                 }
             ]
         },
+        "convoyRaid": {
+            width: 42, height: 30,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 3, 2: 1 },
+            teams: [
+                {
+                    id: 1,
+                    depx: -19, depy: 5, depwidth: 5, depheight: 10,
+                    slots: [
+                        { name: "Defenders", depx: -19, depy: 5, depwidth: 5, depheight: 10, depavailable: 2 },
+                        { name: "Freighters", depx: -15, depy: -12, depwidth: 10, depheight: 3 },                        
+                        { name: "Jumpgate", points: 1000, depx: 15, depy: 12, depwidth: 2, depheight: 2 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 18, depy: 7, depwidth: 5, depheight: 16,
+                    slots: [
+                        { name: "Attackers", depx: 18, depy: 7, depwidth: 5, depheight: 16 }
+                    ]
+                }
+            ]
+        },        
         "unlimited": {
             width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                { id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
-                { id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
+                {  name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
+                {  name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
             ]
         },
     },
@@ -600,7 +630,10 @@ window.createGame = {
                 }
                 if (config.name !== undefined) {
                     slot.name = config.name;
-                }                
+                }
+                if (config.depavailable !== undefined) {
+                    slot.depavailable = config.depavailable;
+                }                                   
                 i++;
             }
         }
@@ -720,7 +753,10 @@ window.createGame = {
             }
             if (explicitDefaults.name !== undefined) {
                 newData.name = explicitDefaults.name;
-            }            
+            }
+            if (explicitDefaults.depavailable !== undefined) {
+                newData.depavailable = explicitDefaults.depavailable;
+            }                           
         } else if (lastSlotOfTeam) {
             // Copy relevant deployment data
             newData.depx = lastSlotOfTeam.depx;
