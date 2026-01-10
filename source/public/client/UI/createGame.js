@@ -502,6 +502,28 @@ window.createGame = {
                 }
             ]
         },
+        "baseAssault": {
+            width: 60, height: 40,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 2, 2: 1 },
+            teams: [
+                {
+                    id: 1,
+                    depx: -19, depy: 0, depwidth: 5, depheight: 40,
+                    slots: [
+                        { points: 5000, name: "Fixed Defences", depx: -19, depy: 0, depwidth: 5, depheight: 20 },
+                        { points: 5000, name: "Reinforcements", depx: -28, depy: 0, depwidth: 5, depheight: 40, depavailable: 3 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 26, depy: 0, depwidth: 6, depheight: 40,
+                    slots: [
+                        { points: 10000, name: "Attackers", depx: 26, depy: 0, depwidth: 6, depheight: 40 }
+                    ]
+                }
+            ]
+        },        
         "convoyRaid": {
             width: 42, height: 30,
             // Enforce strictly 2 slots per team

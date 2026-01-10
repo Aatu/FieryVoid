@@ -277,6 +277,7 @@
                     <option value="large">Large (60x40)</option>
                     <option value="2v2">2v2 (42x40)</option>
                     <option value="ambush">Ambush (42x40)</option>
+                    <option value="baseAssault">Base Assault (60x40)</option>                    
                     <option value="convoyRaid">Convoy Raid (42x30)</option>
                     <option value="northvsouth">North Vs South (60x40)</option>                                                           
                     <option value="unlimited">No Boundaries</option>                    
