@@ -522,6 +522,15 @@ window.createGame = {
                 }
             ]
         },        
+        "northvsouth": {
+            width: 60, height: 40,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                {  name: "Team 1", id: 1, depx: -1, depy: 17, depwidth: 59, depheight: 5 },
+                {  name: "Team 2", id: 2, depx: 0, depy: -17, depwidth: 59, depheight: 5 }
+            ]
+        },
         "unlimited": {
             width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },
