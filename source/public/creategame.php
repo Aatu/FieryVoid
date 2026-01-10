@@ -269,7 +269,7 @@
         <div class="split-header">MAP LAYOUT AND TEAMS:</div>
         <div id="gamespace" class="settings-group gamespacecontainer">
             <div class="mapSelectContainer">
-                <label for="mapDimensionsSelect" class="mapDimensionsSelect">CHOOSE MAP:</label>
+                <label for="mapDimensionsSelect" class="mapDimensionsSelect">MAP TEMPLATES:</label>
                 <select id="mapDimensionsSelect" name="mapdimensions" class="mapSelect">
                     <option value="custom">Custom</option>
                     <option value="small">Small (30x24)</option>
