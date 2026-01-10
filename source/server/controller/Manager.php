@@ -927,6 +927,8 @@ class Manager{
             }
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            
+            self::touchGame($gameid); // Ensure APCu knows about the advance
         }
         catch(Exception $e)
         {
