@@ -1343,7 +1343,7 @@ getActiveShipName: function getActiveShipName() {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
-        if (gamedata.gamephase == 1) {
+        /*if (gamedata.gamephase == 1) {
             //To recalculate fleet list values in Info Tab without refreshing page
             fleetListManager.reset();
             fleetListManager.displayFleetLists();
@@ -1351,12 +1351,11 @@ getActiveShipName: function getActiveShipName() {
             //To refresh whether player has committed their orders when a new phase begins.
             fleetListManager.refreshed = false;
             fleetListManager.displayFleetLists();
-        }
+        }*/
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
 
-        //fleetListManager.updateFleetList(); //No need to call again, called in fleetListManager.displayFleetLists()
     },
 
     drawIniGUI: function drawIniGUI() {
@@ -1573,6 +1572,12 @@ getActiveShipName: function getActiveShipName() {
         gamedata.initPhase();
         gamedata.drawIniGUI();
         window.webglScene.receiveGamedata(this);
+
+        // ✅ Update Info Tab (Waiting Status) with new data
+        if (window.fleetListManager) {
+            fleetListManager.refreshed = false;
+            fleetListManager.displayFleetLists();
+        }
 
         gamedata.checkGameStatus();
     },
