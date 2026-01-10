@@ -422,36 +422,36 @@ window.createGame = {
 
 
     mapData: {
-        "custom": { 
-            width: null, height: null, 
+        "custom": {
+            width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                {  name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
-                {  name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
+                { name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
+                { name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
             ]
-        },         
+        },
         "small": {
             width: 30, height: 24,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                {  name: "Team 1", id: 1, depx: -12, depy: 0, depwidth: 7, depheight: 24 },
-                {  name: "Team 2", id: 2, depx: 11, depy: 0, depwidth: 7, depheight: 24 }
+                { name: "Team 1", id: 1, depx: -12, depy: 0, depwidth: 7, depheight: 24 },
+                { name: "Team 2", id: 2, depx: 11, depy: 0, depwidth: 7, depheight: 24 }
             ]
         },
         "standard": {
             width: 42, height: 30,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                {  name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
-                { name: "Team 2",  id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
+                { name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30 },
+                { name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30 }
             ]
         },
         "large": {
             width: 60, height: 40,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                {  name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
-                {  name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
+                { name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
+                { name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
             ]
         },
         "2v2": {
@@ -471,8 +471,8 @@ window.createGame = {
                     id: 2,
                     depx: 18, depy: 0, depwidth: 5, depheight: 40,
                     slots: [
-                        {  name: "Team 2", depx: 18, depy: -10, depwidth: 5, depheight: 20 },
-                        {  name: "Team 2", depx: 18, depy: 10, depwidth: 5, depheight: 20 }
+                        { name: "Team 2", depx: 18, depy: -10, depwidth: 5, depheight: 20 },
+                        { name: "Team 2", depx: 18, depy: 10, depwidth: 5, depheight: 20 }
                     ]
                 }
             ]
@@ -481,20 +481,23 @@ window.createGame = {
             width: 42, height: 30,
             // Enforce strictly 2 slots per team
             slotsRequired: { 1: 1, 2: 2 },
+            scenario: {
+                //other: "The defender has been caught in an ambush! They must survive for 8 turns.",
+            },
             teams: [
                 {
                     id: 1,
                     depx: 0, depy: 0, depwidth: 12, depheight: 6,
                     slots: [
-                        { name: "Ambushed", points: 3500, depx: 0, depy: 0, depwidth: 12, depheight: 6 }
+                        { name: "Ambushed", points: 3000, depx: 0, depy: 0, depwidth: 12, depheight: 6 }
                     ]
                 },
                 {
                     id: 2,
                     depx: 0, depy: 0, depwidth: 30, depheight: 5,
                     slots: [
-                        { name: "Ambusher", points: 2000,depx: 0, depy: -12, depwidth: 30, depheight: 5 },
-                        { name: "Ambusher", points: 2000,depx: 0, depy: 12, depwidth: 30, depheight: 5 }
+                        { name: "Ambusher", points: 2000, depx: 0, depy: -12, depwidth: 30, depheight: 5 },
+                        { name: "Ambusher", points: 2000, depx: 0, depy: 12, depwidth: 30, depheight: 5 }
                     ]
                 }
             ]
@@ -509,7 +512,7 @@ window.createGame = {
                     depx: -19, depy: 5, depwidth: 5, depheight: 10,
                     slots: [
                         { name: "Defenders", depx: -19, depy: 5, depwidth: 5, depheight: 10, depavailable: 2 },
-                        { name: "Freighters", depx: -15, depy: -12, depwidth: 10, depheight: 3 },                        
+                        { name: "Freighters", depx: -15, depy: -12, depwidth: 10, depheight: 3 },
                         { name: "Jumpgate", points: 1000, depx: 15, depy: 12, depwidth: 2, depheight: 2 }
                     ]
                 },
@@ -521,22 +524,22 @@ window.createGame = {
                     ]
                 }
             ]
-        },        
+        },
         "northvsouth": {
             width: 60, height: 40,
             // Enforce strictly 2 slots per team
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                {  name: "Team 1", id: 1, depx: -1, depy: 17, depwidth: 59, depheight: 5 },
-                {  name: "Team 2", id: 2, depx: 0, depy: -17, depwidth: 59, depheight: 5 }
+                { name: "Team 1", id: 1, depx: -1, depy: 17, depwidth: 59, depheight: 5 },
+                { name: "Team 2", id: 2, depx: 0, depy: -17, depwidth: 59, depheight: 5 }
             ]
         },
         "unlimited": {
             width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                {  name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
-                {  name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
+                { name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40 },
+                { name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40 }
             ]
         },
     },
@@ -592,8 +595,41 @@ window.createGame = {
                     });
                 }
             }
-            createGame.refreshSlotsUI();
         }
+
+        // Populating Aditional Info when you select a map is supported, but it's quite tricky to know when to clear it.  So for the moment it's not used.
+        if (config.scenario) {
+            for (const [key, value] of Object.entries(config.scenario)) {
+                // If it's a dropdown that needs 'Other' to show custom input
+                if (["req", "tier", "victory", "enhancements"].includes(key)) {
+                    // Check if value is one of the options
+                    const select = $(`#${key}`);
+                    const optionExists = select.find(`option[value="${value}"]`).length > 0;
+
+                    if (optionExists) {
+                        select.val(value).trigger("change");
+                    } else {
+                        // Assume custom input
+                        const triggerVal = {
+                            "req": "Other",
+                            "tier": "Other",
+                            "victory": "Other",
+                            "enhancements": "Up to X points"
+                        }[key];
+
+                        if (triggerVal) {
+                            select.val(triggerVal).trigger("change");
+                            $(`#${key}_custom`).val(value);
+                        }
+                    }
+                } else {
+                    // Standard input/textarea
+                    $(`#${key}`).val(value);
+                }
+            }
+        }
+
+        createGame.refreshSlotsUI();
     },
 
     ensureTeamSlots: function (team, count, defaults) {
@@ -642,7 +678,7 @@ window.createGame = {
                 }
                 if (config.depavailable !== undefined) {
                     slot.depavailable = config.depavailable;
-                }                                   
+                }
                 i++;
             }
         }
@@ -765,7 +801,7 @@ window.createGame = {
             }
             if (explicitDefaults.depavailable !== undefined) {
                 newData.depavailable = explicitDefaults.depavailable;
-            }                           
+            }
         } else if (lastSlotOfTeam) {
             // Copy relevant deployment data
             newData.depx = lastSlotOfTeam.depx;
