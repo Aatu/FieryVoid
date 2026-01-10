@@ -469,7 +469,7 @@ input[type=number] {
 
 .mapDimensionsSelect {
   font-size: 14px;
-  width: 150px;
+  width: 180px;
   display: inline-block;
   margin: 0;
   box-sizing: border-box;
@@ -479,7 +479,7 @@ input[type=number] {
 
 .mapDimensions {
   font-size: 14px;
-  width: 190px;
+  width: 220px;
   display: inline-block;
   box-sizing: border-box;
   flex-shrink: 0;
