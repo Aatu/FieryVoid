@@ -545,6 +545,8 @@ window.gamedata = {
         }
 
         else if (gamedata.gamephase == 2) {
+            UI.shipMovement.hide();
+            
             var zeroSpeedShips = [];
             var activeShips = gamedata.getActiveShips();
             var html = '';
@@ -1098,14 +1100,7 @@ window.gamedata = {
                     foundNMShip = true;                   
                 }
 
-            }
-
-             if (foundNMShip) {
-                mustMoveError += "<br>You need to finish movement before you can commit the turn.";
-                window.confirm.error(mustMoveError, function () { });
-                return false;
-            }
-           
+            }                     
             if (foundPShip) {
                 mustPivotError += "<br>You need to order them to pivot.";
                 window.confirm.error(mustPivotError, function () { });
@@ -1115,6 +1110,12 @@ window.gamedata = {
             if (foundTShip) {
                 negThrustError += "<br>You need to lower channelled thrust before you can commit the turn.";
                 window.confirm.error(negThrustError, function () { });
+                return false;
+            }
+            
+            if (foundNMShip) {
+                mustMoveError += "<br>You need to finish movement before you can commit the turn.";
+                window.confirm.error(mustMoveError, function () { });
                 return false;
             }
            
