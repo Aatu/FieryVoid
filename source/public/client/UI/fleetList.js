@@ -130,7 +130,7 @@ createFleetList: function createFleetList(slot, template) {
         fleetlistline.appendTo(fleetlisttable);
     }
 
-    var phaseLabel = "Initial Orders"
+    var phaseLabel = "Initial"
     switch(gamedata.gamephase){
 
         case -1:
@@ -179,7 +179,7 @@ createFleetList: function createFleetList(slot, template) {
 
         if (!header.length) return; // Just in case something went wrong
 
-        var phaseLabel = "Initial Orders"
+        var phaseLabel = "Initial"
         switch(gamedata.gamephase){
             case -1:
                 phaseLabel = "Pre-Turn";
