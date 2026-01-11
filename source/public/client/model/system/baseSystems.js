@@ -1938,7 +1938,7 @@ ShadingField.prototype.doDeactivate = function () {
 					for (var j in system.systems) {
 						var fighterSystem = system.systems[j];	//The fighter's systems.
 						if (fighterSystem.name == "ShadingField") { //Is shading Field but not this one
-							if (fighterSystem.active) { //Is not boosted.
+							if (fighterSystem.active) { //Is boosted.
 								fighterSystem.active = false; //Set boost marker for notes.										
 							}
 						}
@@ -1982,6 +1982,112 @@ ShadingField.prototype.getOutput = function (ship, system) {
 	output = Math.max(0, output); //output cannot be negative!
 
 	return output;
+};
+
+
+var FtrPetals = function FtrPetals(json, ship) {
+	ShipSystem.call(this, json, ship);
+};
+FtrPetals.prototype = Object.create(ShipSystem.prototype);
+FtrPetals.prototype.constructor = FtrPetals;
+
+FtrPetals.prototype.initializationUpdate = function () {
+	if (this.active) {
+		this.outputDisplay = "OPEN";
+	} else {
+		this.outputDisplay = "-";
+	}
+	//var power = this.powerReq;
+	
+	//if(power == 0){
+	this.data["Power Used"] = 'None';
+
+	//}else{
+	//	this.data["Power Used"] = this.powerReq;		
+	//}	
+	return this;
+}
+
+
+FtrPetals.prototype.canActivate = function () {
+	if(gamedata.gamephase == 1 && !this.active) return true;
+	
+	return false;
+};
+
+FtrPetals.prototype.canDeactivate = function () {
+	if(gamedata.gamephase == 1 && this.active) return true;
+	
+	return false;
+};
+
+FtrPetals.prototype.doActivate = function () {
+	var ship = this.ship;
+	var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+	//If you boost one Petals in a flight, boost them all.
+	if (flight) {
+		for (var i in flight.systems) {
+			var system = flight.systems[i]; //The fighter	
+			if (!shipManager.systems.isDestroyed(ship, flight.systems[i])) {
+				for (var j in system.systems) {
+					var fighterSystem = system.systems[j];	//The fighter's systems.
+					if (fighterSystem.name == "FtrPetals") { //Is shading Field but not this one
+						if (!fighterSystem.active) { //Is not boosted.
+							fighterSystem.active = true; //Set boost marker for notes.										
+						}
+					}
+
+				}
+			}
+		}
+		//Increase profile and thrust of flight		
+		flight.forwardDefense += 1; 
+		flight.sideDefense += 1;
+		flight.freethrust += 2;
+		flight.systems[1].armour[2] -= 2; //Reduce side armour of fighters			
+
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+	}
+
+};
+
+FtrPetals.prototype.doDeactivate = function () {
+	var ship = this.ship;
+	var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+	//If you boost one Petals in a flight, boost them all.
+	if (flight) {
+		for (var i in flight.systems) {
+			var system = flight.systems[i]; //The fighter			
+			if (!shipManager.systems.isDestroyed(ship, flight.systems[i])) {
+				for (var j in system.systems) {
+					var fighterSystem = system.systems[j];	//The fighter's systems.
+					if (fighterSystem.name == "FtrPetals") { //Is shading Field but not this one
+						if (fighterSystem.active) { //Is  boosted.
+							fighterSystem.active = false; //Set boost marker for notes.										
+						}
+					}
+				}
+			}
+		}
+		//Reduce profile and thrust of flight		
+		flight.forwardDefense -= 1; 
+		flight.sideDefense -= 1;
+		flight.freethrust -= 2;
+		flight.systems[1].armour[2] += 2; //Reduce side armour of fighters		
+
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+	}
+};
+
+FtrPetals.prototype.doIndividualNotesTransfer = function () {
+
+	if (gamedata.gamephase == 1) {
+		var active = this.active; //Was shaded this turn.		
+		this.individualNotesTransfer = Array();
+		if (active) {
+			this.individualNotesTransfer.push(1);
+		}
+	}
 };
 
 

@@ -44,7 +44,8 @@
 				// List of properties to copy if present (required for Replay/UI/Custom Systems)
 				$properties = array(
 					'fireOrders', //For replay
-					'weapon' //For replay
+					'weapon', //For replay
+					'armour' //For Petals 
 				);
 
 				foreach($properties as $prop){

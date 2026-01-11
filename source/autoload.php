@@ -2492,6 +2492,7 @@ spl_autoload_register(
 				
 				//Vorlons
 				'powercapacitor' => '/server/model/systems/baseSystems.php',
+				'ftrpetals' => '/server/model/systems/baseSystems.php',                
                 'chargehalve' => '/server/model/cricialClasses.php',
                 'chargeempty' => '/server/model/cricialClasses.php',
 				'maggravreactortechnical' => '/server/model/systems/baseSystems.php',

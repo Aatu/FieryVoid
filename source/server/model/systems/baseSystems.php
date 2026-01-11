@@ -5172,6 +5172,120 @@ capacitor is completely emptied.
 							
 } //endof PowerCapacitor
 
+
+class FtrPetals extends ShipSystem implements SpecialAbility{    
+		public $name = "FtrPetals";
+		public $displayName = "Vorlon Petals";
+		public $iconPath = "PowerCapacitor.png";
+		public $specialAbilities = array("Petals");		
+		public $primary = true;
+		public $detected = true;
+		//defensive system
+		public $rangePenalty = 0;
+		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.			
+		
+		function __construct($armour, $maxhealth, $powerReq, $output){
+			parent::__construct($armour, $maxhealth, $powerReq, $output);
+			
+		}
+
+		protected $possibleCriticals = array(
+			26=>array("OutputReduced1")
+		);
+
+		public function isActive(){
+			return $this->active;
+		}
+
+		public function setSystemDataWindow($turn){
+			$this->data["Special"] = "Can be toggled open each turn during Initial Orders.";
+			$this->data["Special"] .= "<br>Whislt open Fighters gain +2 Thrust, however Defence Profiles are increase by 5% and their Side Armour is reduced by 2.";													
+		}	
+
+		public function getSpecialAbilityValue($args){
+			return true;
+		}
+
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer)){			
+			foreach($this->individualNotesTransfer as $shadingChange){			
+				if($petalChange == 1){
+					$this->active = true;
+				}else{
+					$this->active = false; //May start Deployment phase as true via notes
+				}									
+			}
+		} 
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}			
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
+		$ship = $this->getUnit();	
+		
+		switch($gameData->phase){
+			
+			case 1:
+				if ($this->active) {
+						$notekey = 'Open';
+						$noteHuman = 'Petals opened';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}
+			break;
+			
+		}	
+	}			
+
+		public function onIndividualNotesLoaded($gamedata){
+			//Sort notes by turn, and then phase so latest detection note is always last.
+			//$this->sortNotes();
+			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+				if($currNote->turn == $gamedata->turn){
+					$this->active = true;	
+
+					//Now amend ship stats
+					$flight = $this->getUnit();
+
+					//Increase profile and thrust of flight		
+					$flight->forwardDefense += 1; 
+					$flight->sideDefense += 1;
+					$flight->freethrust += 2;					
+								
+					foreach($flight->systems as $ftr){
+						$ftr->armour[2] = 1; //Decrease side armour of fighters
+						$ftr->armour[3] = 1; //Decrease side armour of fighters	
+					}
+				}
+			}
+
+			//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+			$this->individualNotes = array();		
+		} //endof function onIndividualNotesLoaded
+
+
+		private function sortNotes() {
+			usort($this->individualNotes, function($a, $b) {
+				// Compare by turn first
+				if ($a->turn == $b->turn) {
+					// If turns are equal, compare by phase
+					return ($a->phase < $b->phase) ? -1 : 1;
+				}
+				return ($a->turn < $b->turn) ? -1 : 1;
+			});
+		}
+
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->active = $this->active;				        
+			return $strippedSystem;
+		}
+
+	} //endof FtrPetals
+
+
 class StructureTechnical extends ShipSystem{
     public $name = "StructureTechnical";
     public $displayName = "Structure Technical";
