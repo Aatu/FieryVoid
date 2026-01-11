@@ -35,6 +35,7 @@
 			$strippedSystem->fighter = true;
 			$strippedSystem->location = $this->location;
 			$strippedSystem->flightid = $this->flightid;
+			$strippedSystem->armour = $this->armour;			
 			//$strippedSystem->systems = $this->systems; 	
 
 			//Improved version that sends stripForJson for fighter systems, not whole systems			
@@ -45,7 +46,6 @@
 				$properties = array(
 					'fireOrders', //For replay
 					'weapon', //For replay
-					'armour' //For Petals 
 				);
 
 				foreach($properties as $prop){
