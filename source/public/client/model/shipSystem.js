@@ -65,7 +65,7 @@ var Fighter = function Fighter(json, staticFighter, ship) {
 	Object.keys(staticFighter).forEach(function (key) {
 		//this[key] = staticFighter[key];	//Old method that didn't slice arrays - DK 11.1.26	
 		if (Array.isArray(staticFighter[key])) {
-			this[key] = staticFighter[key].slice();
+			this[key] = staticFighter[key].slice();  //Slices arrays like Armour etc so they can be modified for individual ships
 		} else {
 			this[key] = staticFighter[key];
 		}
@@ -87,7 +87,7 @@ var SuperHeavyFighter = function SuperHeavyFighter(json, ship) {
 	Object.keys(staticFighter).forEach(function (key) {
 		//this[key] = staticFighter[key];		//Old method that didn't slice arrays - DK 11.1.26	
 		if (Array.isArray(staticFighter[key])) {
-			this[key] = staticFighter[key].slice();
+			this[key] = staticFighter[key].slice(); //Slices arrays like Armour etc so they can be modified for individual ships
 		} else {
 			this[key] = staticFighter[key];
 		}
