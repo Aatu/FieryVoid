@@ -25,6 +25,8 @@ window.SystemFactory = (function () {
                 }
 
                 var system = SystemFactory.createSystemFromJson(jsonSystem, staticSystem, ship);
+
+                //if(system.initializeOnLoad) system.initializationUpdate(); //Not used by any systems yet, but available if you wanted to runs system.initialisationUpdate() immediately on page load.                 
                 systems[system.id] = system;
             }
 
@@ -63,7 +65,8 @@ window.SystemFactory = (function () {
                 }
 
                 var system = SystemFactory.createSystemFromJson(jsonSystem, staticSystem, fighter);
-                if(system.name == "FtrPetals") system.initializationUpdate(); //Honestly perhaps the stupidest thing I've ever done is add this here, works tho - DK 11.1.26                
+                if(system.initializeOnLoad) system.initializationUpdate(); //Runs system.initialisationUpdate() immediately on page loading. Useful for updating tooltip etc.  
+
                 systems[system.id] = system;
             })
 

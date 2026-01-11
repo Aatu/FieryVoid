@@ -5184,7 +5184,8 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 		//defensive system
 		public $rangePenalty = 0;
 		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.
-		public static $petalsDone = array();		
+		public static $petalsDone = array();	
+		protected $initializeOnLoad	= true; //Runs initialisationUpdate() immediately on page loading, useful for updating tooltips immediately.  Needs passed in strpForJson().
 		
 		function __construct($armour, $maxhealth, $powerReq, $output){
 			parent::__construct($armour, $maxhealth, $powerReq, $output);
@@ -5240,23 +5241,24 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 		}	
 	}			
 
-		public function onIndividualNotesLoaded($gamedata){
-			//Sort notes by turn, and then phase so latest detection note is always last.
-			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
-				if($currNote->turn == $gamedata->turn){
-					$this->active = true;
-				}
+	public function onIndividualNotesLoaded($gamedata){
+		//Sort notes by turn, and then phase so latest detection note is always last.
+		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+			if($currNote->turn == $gamedata->turn){
+				$this->active = true;
 			}
-
-			//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
-			$this->individualNotes = array();		
-		} //endof function onIndividualNotesLoaded
-
-		public function stripForJson(){
-			$strippedSystem = parent::stripForJson();
-			$strippedSystem->active = $this->active;				        
-			return $strippedSystem;
 		}
+
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();		
+	} //endof function onIndividualNotesLoaded
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->active = $this->active;
+		$strippedSystem->initializeOnLoad = $this->initializeOnLoad;							        
+		return $strippedSystem;
+	}
 
 	} //endof FtrPetals
 
