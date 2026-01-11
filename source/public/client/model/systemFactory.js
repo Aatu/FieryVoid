@@ -63,6 +63,7 @@ window.SystemFactory = (function () {
                 }
 
                 var system = SystemFactory.createSystemFromJson(jsonSystem, staticSystem, fighter);
+                if(system.name == "FtrPetals") system.initializationUpdate(); //Honestly perhaps the stupidest thing I've ever done is add this here, works tho - DK 11.1.26                
                 systems[system.id] = system;
             })
 

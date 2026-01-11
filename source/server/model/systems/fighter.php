@@ -202,6 +202,15 @@
 		}else{ //firing position indicated!
 			$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
 		}
+
+		if ($target->hasSpecialAbility("Petals")){ //Does ship have Specialists system?
+			$petals = $target->getSystemByName("FtrPetals");
+			if($petals->isActive()){
+				if($loc["min"] == 210  && $loc["max"] == 330 || $loc["min"] == 30 && $loc["max"] == 150) //Side profiles
+				$loc["armour"] -= 2;
+			} 
+		}
+
 		return $loc["armour"];
     }
 	

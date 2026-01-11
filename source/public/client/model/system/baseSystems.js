@@ -1991,20 +1991,33 @@ var FtrPetals = function FtrPetals(json, ship) {
 FtrPetals.prototype = Object.create(ShipSystem.prototype);
 FtrPetals.prototype.constructor = FtrPetals;
 
+//As well as usualy places this is also called from systemFactory.js so tooltip updates on hover without having to open shipwindow - DK
 FtrPetals.prototype.initializationUpdate = function () {
 	if (this.active) {
 		this.outputDisplay = "OPEN";
-	} else {
-		this.outputDisplay = "-";
+		var ship = this.ship;
+		var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.
+		
+		//Incredibly specific here, but it avoids alot of issues trying to pass effects from server
+		if(ship.name == "VorlonHeavyFighterFlight"){
+			flight.forwardDefense = 8; 
+			flight.sideDefense = 10;
+			flight.freethrust = 16;
+			ship.armour[2] = 1; //Reduce side armour of fighters
+			ship.armour[3] = 1; //Reduce side armour of fighters			
+		}else if(ship.name == "VorlonAssaultFighterFlight"){
+			ship.forwardDefense = 11; 
+			ship.sideDefense = 13;
+			flight.freethrust = 15;
+			ship.armour[2] = 3; //Reduce side armour of fighters
+			ship.armour[3] = 3; //Reduce side armour of fighters
+		}
+	} else{
+		this.outputDisplay = "-";		
 	}
-	//var power = this.powerReq;
-	
-	//if(power == 0){
+
 	this.data["Power Used"] = 'None';
 
-	//}else{
-	//	this.data["Power Used"] = this.powerReq;		
-	//}	
 	return this;
 }
 
@@ -2041,10 +2054,10 @@ FtrPetals.prototype.doActivate = function () {
 			}
 		}
 		//Increase profile and thrust of flight		
-		flight.forwardDefense += 1; 
-		flight.sideDefense += 1;
-		flight.freethrust += 2;
-		flight.systems[1].armour[2] -= 2; //Reduce side armour of fighters			
+		//flight.forwardDefense += 1; 
+		//flight.sideDefense += 1;
+		//flight.freethrust += 2;
+		//flight.systems[1].armour[2] -= 2; //Reduce side armour of fighters			
 
 		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 	}
@@ -2070,10 +2083,10 @@ FtrPetals.prototype.doDeactivate = function () {
 			}
 		}
 		//Reduce profile and thrust of flight		
-		flight.forwardDefense -= 1; 
-		flight.sideDefense -= 1;
-		flight.freethrust -= 2;
-		flight.systems[1].armour[2] += 2; //Reduce side armour of fighters		
+		//flight.forwardDefense -= 1; 
+		//flight.sideDefense -= 1;
+		//flight.freethrust -= 2;
+		//flight.systems[1].armour[2] += 2; //Reduce side armour of fighters		
 
 		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 	}

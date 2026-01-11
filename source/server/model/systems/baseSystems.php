@@ -5026,7 +5026,7 @@ capacitor is completely emptied.
 		}
 
 		//We can apply petal effects here so they are visible for player (note, criticals don't seem to get saved to database here, prolly because $dbManager->submitCriticals isn't called)			
-		if($gamedata->phase == 2 || $gamedata->phase == 3){
+		if($gamedata->phase == 2 || $gamedata->phase == 5 || $gamedata->phase == 3){
 	
 			$boostlevel = $this->getBoostLevel($gamedata->turn);
 			if ($boostlevel <1) return; //not boosted - no crit!
@@ -5182,7 +5182,8 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 		public $detected = true;
 		//defensive system
 		public $rangePenalty = 0;
-		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.			
+		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.
+		public static $petalsDone = array();		
 		
 		function __construct($armour, $maxhealth, $powerReq, $output){
 			parent::__construct($armour, $maxhealth, $powerReq, $output);
@@ -5203,13 +5204,13 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 		}	
 
 		public function getSpecialAbilityValue($args){
-			return true;
+			return 1;
 		}
 
 	public function doIndividualNotesTransfer(){
 		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
 		if(is_array($this->individualNotesTransfer)){			
-			foreach($this->individualNotesTransfer as $shadingChange){			
+			foreach($this->individualNotesTransfer as $petalChange){			
 				if($petalChange == 1){
 					$this->active = true;
 				}else{
@@ -5243,20 +5244,7 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 			//$this->sortNotes();
 			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
 				if($currNote->turn == $gamedata->turn){
-					$this->active = true;	
-
-					//Now amend ship stats
-					$flight = $this->getUnit();
-
-					//Increase profile and thrust of flight		
-					$flight->forwardDefense += 1; 
-					$flight->sideDefense += 1;
-					$flight->freethrust += 2;					
-								
-					foreach($flight->systems as $ftr){
-						$ftr->armour[2] = 1; //Decrease side armour of fighters
-						$ftr->armour[3] = 1; //Decrease side armour of fighters	
-					}
+					$this->active = true;
 				}
 			}
 

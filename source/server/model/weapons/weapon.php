@@ -1266,7 +1266,7 @@ public function getStartLoading()
                 $effectiveOB = $shooter->offensivebonus - $OBcrit;
                 $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
             }
-
+  
             if (!$this->ballistic) {
                 $dew = 0;
                 $bdew = 0;
@@ -1439,8 +1439,13 @@ public function getStartLoading()
 	        $targetCnC = $target->getSystemByName("CnC");        
 	        $defenceMod = $targetCnC->hasCritical("ProfileIncreased");
 	        $defence += $defenceMod;
-		}
-        
+		}else{             
+		    if ($target->hasSpecialAbility("Petals")){  
+                $petals = $target->getSystemByName("FtrPetals");   
+                $defence += $petals->getSpecialAbilityValue("FtrPetals");
+            } 
+        }    
+     
         $goal = $defence + $hitBonuses - $hitPenalties;
 
 		
