@@ -568,9 +568,14 @@ window.gamedata = {
                 }
             }
 
+            UI.shipMovement.hide();
+
             confirm.confirm(
                 html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
-                gamedata.doCommit
+                gamedata.doCommit,
+                function () {
+                    UI.shipMovement.show();
+                }
             );
 
             //CHECK for NO PRE FIRE            
@@ -745,6 +750,7 @@ window.gamedata = {
                     if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
                         hasNoFO.push(myShips[ship]);
                     }
+                UI.shipMovement.hide();  //To hide combat pivot UI again on commit clicked                  
                 }
             }
 
@@ -771,7 +777,14 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
-                confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                //confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                confirm.confirm(
+                    html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
+                    gamedata.doCommit,
+                    function () {
+                        UI.shipMovement.show(); //To show combat pivot UI again on Cancel
+                    }
+                );                
             }
         } else if (gamedata.gamephase != 4) {
             confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);

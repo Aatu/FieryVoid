@@ -7,7 +7,7 @@ window.PhaseStrategy = function () {
         this.gamedata = null;
         this.shipIconContainer = null;
         this.ewIconContainer = null;
-        this.ballisticIconContainer = null;       
+        this.ballisticIconContainer = null;
         this.shipWindowManager = null;
         this.coordinateConverter = coordinateConverter;
         this.currentlyMouseOveredIds = null;
@@ -35,20 +35,20 @@ window.PhaseStrategy = function () {
         this.uiManager = new window.UIManager($("body")[0]);
     }
 
-    PhaseStrategy.prototype.onOpenShipWindowFor = function(payload) {
+    PhaseStrategy.prototype.onOpenShipWindowFor = function (payload) {
         this.shipWindowManager.open(payload.ship);
     }
 
-    PhaseStrategy.prototype.onCloseShipWindow = function(payload) {
+    PhaseStrategy.prototype.onCloseShipWindow = function (payload) {
         this.shipWindowManager.close(payload.ship);
     }
 
-    PhaseStrategy.prototype.onCloseSystemInfo = function() {
+    PhaseStrategy.prototype.onCloseSystemInfo = function () {
         this.hideSystemInfo(true);
     }
 
-    PhaseStrategy.prototype.hideSystemInfo = function(force) {
-        if (! this.systemInfoState) {
+    PhaseStrategy.prototype.hideSystemInfo = function (force) {
+        if (!this.systemInfoState) {
             return true;
         }
 
@@ -64,10 +64,10 @@ window.PhaseStrategy = function () {
         return true;
     }
 
-    PhaseStrategy.prototype.showSystemInfo = function(ship, system, element, menu) {
+    PhaseStrategy.prototype.showSystemInfo = function (ship, system, element, menu) {
         if (this.systemInfoState && this.systemInfoState.menu && !menu) {
             return;
-        } 
+        }
 
         var boundingBox = element.getBoundingClientRect ? element.getBoundingClientRect() : element.get(0).getBoundingClientRect();
 
@@ -75,18 +75,18 @@ window.PhaseStrategy = function () {
             if (!this.uiManager.canShowSystemInfoMenu(ship, system)) {
                 return;
             }
-            this.uiManager.showSystemInfoMenu({ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox});
+            this.uiManager.showSystemInfoMenu({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
         } else {
-            this.uiManager.showSystemInfo({ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox});
+            this.uiManager.showSystemInfo({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
         }
-        this.systemInfoState = {menu: menu, element: element, system: system}
+        this.systemInfoState = { menu: menu, element: element, system: system }
     }
 
     PhaseStrategy.prototype.consumeGamedata = function () {
         this.shipIconContainer.consumeGamedata(this.gamedata);
         this.animationStrategy.update(this.gamedata);
         this.ewIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);       
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         this.redrawMovementUI();
     };
 
@@ -139,16 +139,16 @@ window.PhaseStrategy = function () {
             this.deselectShip(this.selectedShip);
         }
 
-        if (this.selectFromShips){ //To clear selectFromShips correctly if player clicks Commit before clicking anywhere else - DK 10/24
-			this.hideSelectFromShips(this.selectFromShips); 
-		}
-		
+        if (this.selectFromShips) { //To clear selectFromShips correctly if player clicks Commit before clicking anywhere else - DK 10/24
+            this.hideSelectFromShips(this.selectFromShips);
+        }
+
         this.currentlyMouseOveredIds = null;
 
         this.uiManager.hideWeaponList();
         this.hideSystemInfo(true);
         this.shipWindowManager.closeAll();
-        
+
         this.shipIconContainer.getArray(icon => {
             icon.showSideSprite(false);
             icon.setHighlighted(false);
@@ -164,13 +164,13 @@ window.PhaseStrategy = function () {
         }
     };
 
-    PhaseStrategy.prototype.onScrollToShip = function(payload) {
+    PhaseStrategy.prototype.onScrollToShip = function (payload) {
         var icon = this.shipIconContainer.getById(payload.shipId)
-        if(!shipManager.shouldBeHidden(icon.ship)){
+        if (!shipManager.shouldBeHidden(icon.ship)) {
             window.webglScene.moveCameraTo(icon.getPosition())
-        }else{
+        } else {
             return;
-        }    
+        }
     }
 
     PhaseStrategy.prototype.onScrollEvent = function (payload) {
@@ -208,70 +208,70 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onHexClicked = function (payload) {
-        if (gamedata.showLoS) { 
-            if(payload.button == 2){ //Right click, just clear and reset to this.selectedShip
+        if (gamedata.showLoS) {
+            if (payload.button == 2) { //Right click, just clear and reset to this.selectedShip
                 this._startHexRuler = null; //reset.
-                mathlib.clearLosSprite();                 
-            }else{
+                mathlib.clearLosSprite();
+            } else {
                 this._startHexRuler = null; //reset start point on any other type of click
-                mathlib.clearLosSprite();                   
+                mathlib.clearLosSprite();
                 this._startHexRuler = payload.hex;
-            }    
+            }
         }
     };
 
     PhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
-        
+
         // Filter out ships that are not yours or your team's + are stealth ships + not detected + not deployed yet.
-        const filteredShips = ships.filter(ship => 
+        const filteredShips = ships.filter(ship =>
             !(shipManager.shouldBeHidden(ship))
         );
 
-        if (gamedata.showLoS) { 
+        if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;
-            mathlib.clearLosSprite();                   
-        }  
+            mathlib.clearLosSprite();
+        }
 
-        if(filteredShips.length === 1){ //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
+        if (filteredShips.length === 1) { //only one ship, we have to pretend the stealth ship(s) aren't on same hex!
             var ship = filteredShips[0];
-            if(payload.button === 2){
+            if (payload.button === 2) {
                 this.onShipRightClicked(ship);
-            }else{    
+            } else {
                 this.onShipClicked(ship, payload);
-            }    
-        }else{
-            if(filteredShips.length > 0 && !gamedata.showLoS) this.showSelectFromShips(filteredShips, payload); //More than 1, but not 0.  Prevents graphic from appearing and indicating where hidden ships are.
+            }
+        } else {
+            if (filteredShips.length > 0 && !gamedata.showLoS) this.showSelectFromShips(filteredShips, payload); //More than 1, but not 0.  Prevents graphic from appearing and indicating where hidden ships are.
         }
     };
 
     PhaseStrategy.prototype.onShipRightClicked = function (ship) {
 
-        if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
-        
+        if (shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+
         if (this.gamedata.isMyShip(ship)) {
             this.setSelectedShip(ship);
         }
         //Needs to have a separate method here, since this count as a hex clicked apparently.
-        if (gamedata.showLoS) {         
+        if (gamedata.showLoS) {
             this._startHexRuler = null; //reset start point on right-clicking ship
-            mathlib.clearLosSprite();                   
-        }    
+            mathlib.clearLosSprite();
+        }
 
         this.shipWindowManager.open(ship);
     };
 
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
-        if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+        if (shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
 
-        if (gamedata.showLoS) { 
+        if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;
-            mathlib.clearLosSprite();                   
-        }     
-        
-		if(this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
-            this.selectShip(ship, payload);             
+            mathlib.clearLosSprite();
+        }
+
+        if (this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
+            this.selectShip(ship, payload);
         } else {
-            this.targetShip(ship, payload);        
+            this.targetShip(ship, payload);
         }
     };
 
@@ -279,13 +279,15 @@ window.PhaseStrategy = function () {
         this.setSelectedShip(ship);
         this.showAppropriateHighlight();
         this.showAppropriateEW();
-        if (!gamedata.showLoS){
+        if (!gamedata.showLoS) {
             var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn); //Don't show tooltip if ruler is on, as it blocks vision
             this.showShipTooltip(ship, payload, menu, false);
-        }    
+        }
     };
 
     PhaseStrategy.prototype.setSelectedShip = function (ship) {
+        if ($(".confirm").length > 0) return;
+
         if (this.selectedShip) {
             this.deselectShip(this.selectedShip);
         }
@@ -293,12 +295,12 @@ window.PhaseStrategy = function () {
         this.selectedShip = ship;
         this.shipIconContainer.getByShip(ship).setSelected(true);
         this.showAppropriateEW();
-        
+
         if (this.shipTooltip) {
             this.shipTooltip.update(ship, this.selectedShip);
         }
-        
-        this.uiManager.showWeaponList({ship: ship, gamePhase: gamedata.gamephase});
+
+        this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase });
     };
 
     PhaseStrategy.prototype.deselectShip = function (ship) {
@@ -310,7 +312,7 @@ window.PhaseStrategy = function () {
 
         this.selectedShip = null;
         this.uiManager.hideWeaponList();
-        if(gamedata.showLoS) mathlib.clearLosSprite();        
+        if (gamedata.showLoS) mathlib.clearLosSprite();
     };
 
     PhaseStrategy.prototype.targetShip = function (ship, payload) {
@@ -408,16 +410,16 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.onMouseOutShips = function (ships, payload) {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
-        
-        if(window.LosSprite) mathlib.clearLosSprite();
+
+        if (window.LosSprite) mathlib.clearLosSprite();
     };
 
     PhaseStrategy.prototype.onMouseOverShips = function (ships, payload) {
         // Filter out ships that are not visible or shouldn't show tooltips
-        if(gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex)
+        if (gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex)
 
         const visibleShips = ships.filter(ship => {
-            if(shipManager.shouldBeHidden(ship)) return false;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
+            if (shipManager.shouldBeHidden(ship)) return false;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
             return true;
         });
 
@@ -435,22 +437,22 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onMouseOverShip = function (ship, payload) {
-        
-        if(gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex);
 
-        if(shipManager.shouldBeHidden(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
+        if (gamedata.showLoS) mathlib.showLoS(this._startHexRuler, payload.hex);
+
+        if (shipManager.shouldBeHidden(ship)) return;  //Enemy, stealth equipped and undetected, or not deployed yet - DK May 2025
 
         this.showAppropriateHighlight();
         this.showAppropriateEW();
-        
-      //trying to allow hex targeting more easily where there are friendly units located.
+
+        //trying to allow hex targeting more easily where there are friendly units located.
         var menu = null;
         var hasHex = weaponManager.hasHexWeaponsSelected()
-        if(hasHex && this.gamedata.isMyorMyTeamShip(ship)) {
-            if(this.gamedata.gamephase == 3){
+        if (hasHex && this.gamedata.isMyorMyTeamShip(ship)) {
+            if (this.gamedata.gamephase == 3) {
                 menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
             }
-            if(this.gamedata.gamephase == 1){
+            if (this.gamedata.gamephase == 1) {
                 var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
                 menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
             }
@@ -459,13 +461,13 @@ window.PhaseStrategy = function () {
         var icon = this.shipIconContainer.getById(ship.id);
         if (!this.shipTooltip || !this.shipTooltip.menu) {
             //this.showShipTooltip(ship, payload, null, true);            
-            if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !gamedata.showLoS) this.showShipTooltip(ship, payload, menu, true);
+            if (!gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !gamedata.showLoS) this.showShipTooltip(ship, payload, menu, true);
         }
 
-        if (this.shipTooltip && this.shipTooltip.ships.includes(ship) &&  this.shipTooltip.ships.length === 1) {
+        if (this.shipTooltip && this.shipTooltip.ships.includes(ship) && this.shipTooltip.ships.length === 1) {
             this.shipTooltip.update(ship, this.selectedShip);
         }
-        
+
 
 
         this.showShipEW(ship);
@@ -578,7 +580,13 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.drawMovementUI = function (ship) {
-        UI.shipMovement.drawShipMovementUI(ship, new ShipMovementCallbacks(ship, this.onShipMovementChanged.bind(this)));
+        var drawn = UI.shipMovement.drawShipMovementUI(ship, new ShipMovementCallbacks(ship, this.onShipMovementChanged.bind(this)));
+
+        if (drawn === false) {
+            this.movementUI = null;
+            return;
+        }
+
         this.movementUI = {
             element: UI.shipMovement.uiElement,
             ship: ship,
@@ -620,11 +628,11 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
         });
-        
+
         if (system instanceof Ship) {
             return;
         }
-        
+
         var icon = this.shipIconContainer.getByShip(ship);
         icon.showWeaponArc(ship, system);
     };
@@ -690,7 +698,7 @@ window.PhaseStrategy = function () {
         if (this.animationStrategy) {
             this.animationStrategy.shipMovementChanged(ship);
         }
-        this.ballisticIconContainer.updateLinesForShip(ship, this.shipIconContainer);   
+        this.ballisticIconContainer.updateLinesForShip(ship, this.shipIconContainer);
         this.redrawMovementUI(ship);
     };
 
@@ -699,19 +707,19 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShowFriendlyEW = function (payload) {
-        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
+        showGlobalEW.call(this, gamedata.ships.filter(function (ship) { return gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
     PhaseStrategy.prototype.onShowEnemyEW = function (payload) {
-        showGlobalEW.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+        showGlobalEW.call(this, gamedata.ships.filter(function (ship) { return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
-    PhaseStrategy.prototype.showAppropriateEW = function() {
+    PhaseStrategy.prototype.showAppropriateEW = function () {
         this.shipIconContainer.getArray().forEach(icon => {
             icon.hideEW();
             icon.hideBDEW();
         });
-        
+
         this.ewIconContainer.hide();
         if (this.selectedShip) {
             this.showShipEW(this.selectedShip);
@@ -743,19 +751,19 @@ window.PhaseStrategy = function () {
         var system = payload.system;
 
         if (this.selectedShip === ship) {
-            this.uiManager.showWeaponList({ship: ship, gamePhase: gamedata.gamephase})
+            this.uiManager.showWeaponList({ ship: ship, gamePhase: gamedata.gamephase })
         }
-        
+
         if (this.systemInfoState) {
             this.showSystemInfo(ship, this.systemInfoState.system, this.systemInfoState.element, this.systemInfoState.menu);
         }
 
-        if ( system 
-		  && ( system.ballistic
-		    || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
-		    || system.canSplitShots //same for weapon that split shots, ballistic icons used to track these.
-		  )
-		) {
+        if (system
+            && (system.ballistic
+                || system.hextarget //same for direct fire hextarget weapons - they use ballistic highlight...
+                || system.canSplitShots //same for weapon that split shots, ballistic icons used to track these.
+            )
+        ) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
 
@@ -766,74 +774,74 @@ window.PhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
         var element = payload.element;
-        if(shipManager.getTurnDeployed(ship) > gamedata.turn) return;
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return;
 
         this.showSystemInfo(ship, system, element, true);
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship, system: system});
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship, system: system });
     };
 
-    PhaseStrategy.prototype.onHexTargeted = function(payload) {
+    PhaseStrategy.prototype.onHexTargeted = function (payload) {
         this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         this.shipWindowManager.update();
 
         if (this.selectedShip === payload.shooter) {
-            this.uiManager.showWeaponList({ship: payload.shooter, gamePhase: gamedata.gamephase})
+            this.uiManager.showWeaponList({ ship: payload.shooter, gamePhase: gamedata.gamephase })
         }
     };
 
-    PhaseStrategy.prototype.onShipTargeted = function(payload) {
-/*        if (payload.weapons.some(function(weapon) {return weapon.ballistic})) {
+    PhaseStrategy.prototype.onShipTargeted = function (payload) {
+        /*        if (payload.weapons.some(function(weapon) {return weapon.ballistic})) {
+                    this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+                }
+        */
+
+        if (payload.weapons.some(function (weapon) {
+            return weapon.ballistic || weapon.canSplitShots;
+        })) {
             this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
         }
-*/
-
-		if (payload.weapons.some(function (weapon) {
-		    return weapon.ballistic || weapon.canSplitShots;
-		})) {
-		    this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
-		}
 
         if (this.selectedShip === payload.shooter) {
-            this.uiManager.showWeaponList({ship: payload.shooter, gamePhase: gamedata.gamephase})
+            this.uiManager.showWeaponList({ ship: payload.shooter, gamePhase: gamedata.gamephase })
         }
 
-        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
+        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) && this.shipTooltip.ships.length === 1) {
             this.shipTooltip.update(payload.target, this.selectedShip);
         }
 
         this.shipWindowManager.update();
     };
 
-    PhaseStrategy.prototype.onSplitOrderRemoved = function(payload) {
+    PhaseStrategy.prototype.onSplitOrderRemoved = function (payload) {
 
-        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) &&  this.shipTooltip.ships.length === 1) {
+        if (this.shipTooltip && this.shipTooltip.ships.includes(payload.target) && this.shipTooltip.ships.length === 1) {
             this.shipTooltip.update(payload.target, this.selectedShip);
         }
-        
+
         this.shipWindowManager.update();
     };
 
     PhaseStrategy.prototype.onToggleFriendlyBallisticLines = function (payload) {
-        toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
+        toggleBallisticLines.call(this, gamedata.ships.filter(function (ship) { return gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
     PhaseStrategy.prototype.onToggleEnemyBallisticLines = function (payload) {
-        toggleBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+        toggleBallisticLines.call(this, gamedata.ships.filter(function (ship) { return !gamedata.isMyOrTeamOneShip(ship) }), payload);
     };
 
     PhaseStrategy.prototype.onShowAllBallistics = function (payload) {
         showAllBallisticLines.call(this, gamedata.ships, payload);
     };
-    
-    PhaseStrategy.prototype.onShowFriendlyBallistics = function (payload) {
-        showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return gamedata.isMyOrTeamOneShip(ship) }), payload);
-    };
-    
-    PhaseStrategy.prototype.onShowEnemyBallistics = function (payload) {
-        showAllBallisticLines.call(this, gamedata.ships.filter(function(ship){ return !gamedata.isMyOrTeamOneShip(ship) }), payload);
-    };        
 
-    PhaseStrategy.prototype.onToggleLoS = function(payload) {
+    PhaseStrategy.prototype.onShowFriendlyBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships.filter(function (ship) { return gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+
+    PhaseStrategy.prototype.onShowEnemyBallistics = function (payload) {
+        showAllBallisticLines.call(this, gamedata.ships.filter(function (ship) { return !gamedata.isMyOrTeamOneShip(ship) }), payload);
+    };
+
+    PhaseStrategy.prototype.onToggleLoS = function (payload) {
         if (payload.up) return;
 
         if (!gamedata.showLoS) {
@@ -853,24 +861,24 @@ window.PhaseStrategy = function () {
 
         if (payload.up) return; // Prevent repeating on key hold or keyup
 
-	    var scene = webglScene.scene;
-		this.ballisticIconContainer.createHexNumbers(scene);
+        var scene = webglScene.scene;
+        this.ballisticIconContainer.createHexNumbers(scene);
         window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
-    }; 
+    };
 
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
-		this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);        
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     };
 
     function showAllBallisticLines(ships, payload) {
-         if (payload.up) {
-     		this.ballisticIconContainer.hideLines(ships);
+        if (payload.up) {
+            this.ballisticIconContainer.hideLines(ships);
         } else {
-        	this.ballisticIconContainer.showLines(ships);
+            this.ballisticIconContainer.showLines(ships);
         }
-		this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);         
-    }   
+        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+    }
 
 
     return PhaseStrategy;
