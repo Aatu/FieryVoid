@@ -1048,10 +1048,13 @@ window.gamedata = {
             var negThrustError = "The following ships have insufficient engine thrust:<br>";
             var foundTShip = false; //Toggle to show error or not
 
+            var mustMoveError = "The following ships must move thier entire movement<br>";
+            var foundNMShip = false; //a ship must move its total movement
+
             var active = gamedata.getActiveShips();
 
             for (var i in active) {
-                var pShip = active[i];
+                var pShip = active[i];            
 
                 if (pShip.mustPivot) {
                     if (pShip.unavailable) continue;
@@ -1075,8 +1078,21 @@ window.gamedata = {
                     negThrustError += '<span class="ship-name">- ' + tShip.name + '</span><br>';
                 }
 
+                var nmShip = active[i];
+
+                if(!shipManager.movement.isMovementReady(nmShip)){
+                    mustMoveError += '<span class="ship-name">- ' + nmShip.name + '</span><br>';
+                    foundNMShip = true;                   
+                }
+
             }
 
+             if (foundNMShip) {
+                mustMoveError += "<br>You need to finish movement before you can commit the turn.";
+                window.confirm.error(mustMoveError, function () { });
+                return false;
+            }
+           
             if (foundPShip) {
                 mustPivotError += "<br>You need to order them to pivot.";
                 window.confirm.error(mustPivotError, function () { });
@@ -1088,7 +1104,7 @@ window.gamedata = {
                 window.confirm.error(negThrustError, function () { });
                 return false;
             }
-
+           
             ajaxInterface.submitGamedata();
 
             /* //Old version of mustPivot check.  Remove if no issues - DK - Dec 2025
