@@ -45,7 +45,6 @@
 				$properties = array(
 					'fireOrders', //For replay
 					'weapon', //For replay
-					'armour' //For Petals 
 				);
 
 				foreach($properties as $prop){

@@ -114,15 +114,6 @@ class FighterFlight extends BaseShip
         $strippedShip = parent::stripForJson();
 
         $strippedShip->flightSize = $this->flightSize;
-       
-		if ($this->hasSpecialAbility("Petals")){ //Does ship have Vorlon Petals system?
-            $petals = $this->getSystemByName("FtrPetals"); //Find a petal system.
-            if($petals->isActive()){
-                $strippedShip->forwardDefense = $this->forwardDefense; 
-                $strippedShip->sideDefense = $this->sideDefense;
-                $strippedShip->freethrust = $this->freethrust;                                
-            }       
-        }
 
         return $strippedShip;
     }
