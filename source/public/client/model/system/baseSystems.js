@@ -2052,12 +2052,7 @@ FtrPetals.prototype.doActivate = function () {
 
 				}
 			}
-		}
-		//Increase profile and thrust of flight		
-		//flight.forwardDefense += 1; 
-		//flight.sideDefense += 1;
-		//flight.freethrust += 2;
-		//flight.systems[1].armour[2] -= 2; //Reduce side armour of fighters			
+		}		
 
 		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 	}
@@ -2081,12 +2076,7 @@ FtrPetals.prototype.doDeactivate = function () {
 					}
 				}
 			}
-		}
-		//Reduce profile and thrust of flight		
-		//flight.forwardDefense -= 1; 
-		//flight.sideDefense -= 1;
-		//flight.freethrust -= 2;
-		//flight.systems[1].armour[2] += 2; //Reduce side armour of fighters		
+		}	
 
 		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 	}
