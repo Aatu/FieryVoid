@@ -1440,10 +1440,12 @@ public function getStartLoading()
 	        $defenceMod = $targetCnC->hasCritical("ProfileIncreased");
 	        $defence += $defenceMod;
 		}else{             
-		    if ($target->hasSpecialAbility("Petals")){  
-                $petals = $target->getSystemByName("FtrPetals");   
-                $defence += $petals->getSpecialAbilityValue("FtrPetals");
-            } 
+            if ($target->hasSpecialAbility("Petals")){ //Does ship have Specialists system?
+                $petals = $target->getSystemByName("FtrPetals");
+                if($petals->isActive()){
+	                $defence += 1;
+                } 
+            }           
         }    
      
         $goal = $defence + $hitBonuses - $hitPenalties;

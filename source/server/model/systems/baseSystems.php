@@ -5177,7 +5177,8 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 		public $name = "FtrPetals";
 		public $displayName = "Vorlon Petals";
 		public $iconPath = "PowerCapacitor.png";
-		public $specialAbilities = array("Petals");		
+		public $specialAbilities = array("Petals");
+		public $specialAbilityValue = 1;		
 		public $primary = true;
 		public $detected = true;
 		//defensive system
@@ -5204,7 +5205,7 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 		}	
 
 		public function getSpecialAbilityValue($args){
-			return 1;
+			return $this->specialAbilityValue;
 		}
 
 	public function doIndividualNotesTransfer(){
@@ -5241,7 +5242,6 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.
-			//$this->sortNotes();
 			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
 				if($currNote->turn == $gamedata->turn){
 					$this->active = true;
@@ -5251,19 +5251,6 @@ class FtrPetals extends ShipSystem implements SpecialAbility{
 			//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
 			$this->individualNotes = array();		
 		} //endof function onIndividualNotesLoaded
-
-
-		private function sortNotes() {
-			usort($this->individualNotes, function($a, $b) {
-				// Compare by turn first
-				if ($a->turn == $b->turn) {
-					// If turns are equal, compare by phase
-					return ($a->phase < $b->phase) ? -1 : 1;
-				}
-				return ($a->turn < $b->turn) ? -1 : 1;
-			});
-		}
-
 
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
