@@ -6480,7 +6480,8 @@ class ProximityLaserLauncher extends Weapon{
 		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximity Laser use a separate launcher system to determine point of shot.         
 		public $canSplitShots = true; //Added 
 		public $startArcArray = array(); 
-		public $endArcArray = array();		 
+		public $endArcArray = array();	
+		public $range = 30; 
 		
         //function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing){
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){		
