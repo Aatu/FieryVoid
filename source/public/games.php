@@ -87,14 +87,14 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->            
-        <li><strong>Create Game Screen</strong> - First part of the Create Game refresh is complete, let me know what you think of the new page on Discord!</li>
-        <li><strong>Gravity Nets</strong> - Minbari now have access to Gravity Nets and new ships equipped with this system have been added to their roster, thanks to Jonathan!</li>                 
-        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggled on and off during the Deployment phase and during a new Pre-Orders phase for turns after they've deployed.</li>       
-        <li><strong>Hyach Specialists</strong> - Specialists are selected during Deployment Phase, and some can now be used in Movement/Firing Phases.</li>                                  
-        <li><strong>Sustained Weapons</strong> - Sustained weapons now display their current target in weapon tooltip after firing their first shot.</li>                                            
-        <li><strong>Pulsar Mine</strong> - Pulsar Mine now checks Line of Sight and fires before the Firing phase starts.</li>  
-        <li><strong>Heavy Slicer</strong> - Shadow Battlecrusier now displays split Heavy Slicer arcs without the need to change Firing modes.</li>                
-        <li><strong>General Fixes</strong> - More server performance/stability updates, plus other small fixes. Thanks for all the reports!</li>                                                    
+        <li><strong>Create Game Screen</strong> - The Create Game refresh completed. New map templates added, and Fleet Test option added!</li>
+        <li><strong>Gravity Nets</strong> - Minbari now have access to Gravity Nets and new ships equipped with this system have been added to their roster, thanks to Jonathan!</li>   
+        <li><strong>Custom Centauri Units</strong> - House Valheru has received reinforcements! Thanks to Fred/Geoffrey!</li>                         
+        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggled on and off during the Deployment phase and during a Pre-Orders phase after they've deployed.</li>       
+        <li><strong>Hyach Specialists</strong> - Specialists are selected during Deployment Phase, and some can now be used in Movement/Firing Phases.</li>                                                                            
+        <li><strong>Vorlon Petals</strong> - Vorlon fighters can now toggled their petals open during Initial Orders.</li>      
+        <li><strong>Terrain</strong> - New Terrain units added.</li>                    
+        <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
