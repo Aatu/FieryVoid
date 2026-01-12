@@ -553,7 +553,7 @@ window.createGame = {
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
                 { name: "North", id: 1, depx: -1, depy: 17, depwidth: 59, depheight: 5 },
-                { name: "South", id: 2, depx: 0, depy: -17, depwidth: 59, depheight: 5 }
+                { name: "South", id: 2, depx: -1, depy: -17, depwidth: 59, depheight: 5 }
             ]
         },
         "unlimited": {
