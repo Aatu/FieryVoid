@@ -1906,6 +1906,7 @@ window.gamedata = {
 	setSlotData: function setSlotData(data) {
 		var slot = $(".slot.slotid_" + data.slot);
 		$(".name", slot).html(data.name);
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) data.points = -1;			
 		$(".points", slot).html(data.points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : data.points);
 
 		$(".depx", slot).html(data.depx);
