@@ -1849,6 +1849,46 @@ public function getAllEWExceptDEW($turn){
             }
         }
         $valid = $this->fillLocations($valid);
+
+        //New Ambiguous hit resolution - DK 12.1.26
+        //If we have multiple valid sections (ambiguous shot), randomize based on profile.
+        //Original logic sticked to the 'toughest' section deterministically.
+        if (count($valid) > 1) { //Only if multiple valid locations
+            $liveSections = array();
+            //Calculated REAL predicted health (fillLocations clamps it to 1, causing dead sections to look alive)
+            foreach ($valid as $loc){
+                
+                //We need to check if it's actually dead (Health - Expected <= 0). 
+                //fillLocations already subtracted expectedDamage but maxed it to 1.
+                //So we have to check the raw numbers.
+                $structure = $this->getStructureSystem($loc["loc"]);
+                if($structure){
+                    $trueRem = $structure->getRemainingHealth();
+                    $expected = 0;
+                    if(isset($this->expectedDamage[$loc["loc"]])) $expected = $this->expectedDamage[$loc["loc"]];
+                    
+                    if( ($trueRem - $expected) > 0 ){
+                         $liveSections[] = $loc;
+                    }
+                }
+            }
+
+            if(count($liveSections) > 1){
+                $totalProfile = 0;
+                foreach($liveSections as $loc) $totalProfile += $loc["profile"];
+
+                if($totalProfile > 0){
+                    $roll = Dice::d($totalProfile);
+                    $current = 0;
+                    foreach($liveSections as $loc){
+                        $current += $loc["profile"];
+                        if($roll <= $current) return $loc;
+                    }
+                }
+            }
+        }
+        //End of new block - DK 12.1.26
+
         $pick = $this->pickLocationForHit($valid);
         return $pick;
     }
