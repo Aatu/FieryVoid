@@ -463,16 +463,16 @@ window.createGame = {
                     id: 1,
                     depx: -19, depy: 0, depwidth: 5, depheight: 40,
                     slots: [
-                        { name: "Team 1", depx: -19, depy: -10, depwidth: 5, depheight: 20 },
-                        { name: "Team 1", depx: -19, depy: 10, depwidth: 5, depheight: 20 }
+                        { name: "Team 1 (North)", depx: -19, depy: 10, depwidth: 5, depheight: 20 },
+                        { name: "Team 1 (South)", depx: -19, depy: -10, depwidth: 5, depheight: 20 }
                     ]
                 },
                 {
                     id: 2,
                     depx: 18, depy: 0, depwidth: 5, depheight: 40,
                     slots: [
-                        { name: "Team 2", depx: 18, depy: -10, depwidth: 5, depheight: 20 },
-                        { name: "Team 2", depx: 18, depy: 10, depwidth: 5, depheight: 20 }
+                        { name: "Team 2 (North)", depx: 18, depy: 10, depwidth: 5, depheight: 20 },
+                        { name: "Team 2 (South)", depx: 18, depy: -10, depwidth: 5, depheight: 20 }
                     ]
                 }
             ]
@@ -496,8 +496,8 @@ window.createGame = {
                     id: 2,
                     depx: 0, depy: 0, depwidth: 30, depheight: 5,
                     slots: [
-                        { name: "Ambusher", points: 2000, depx: 0, depy: -12, depwidth: 30, depheight: 5 },
-                        { name: "Ambusher", points: 2000, depx: 0, depy: 12, depwidth: 30, depheight: 5 }
+                        { name: "Ambusher (North)", points: 2000, depx: 0, depy: 12, depwidth: 30, depheight: 5 },
+                        { name: "Ambusher (South)", points: 2000, depx: 0, depy: -12, depwidth: 30, depheight: 5 }
                     ]
                 }
             ]
@@ -552,8 +552,8 @@ window.createGame = {
             // Enforce strictly 2 slots per team
             slotsRequired: { 1: 1, 2: 1 },
             teams: [
-                { name: "Team 1", id: 1, depx: -1, depy: 17, depwidth: 59, depheight: 5 },
-                { name: "Team 2", id: 2, depx: 0, depy: -17, depwidth: 59, depheight: 5 }
+                { name: "North", id: 1, depx: -1, depy: 17, depwidth: 59, depheight: 5 },
+                { name: "South", id: 2, depx: 0, depy: -17, depwidth: 59, depheight: 5 }
             ]
         },
         "unlimited": {
