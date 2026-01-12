@@ -755,7 +755,7 @@ window.createGame = {
         // We can use [name='...']
         slot.find("[name='name']").val(data.name);
 
-        // Only update points if NOT unlimited (to avoid overwriting infinity symbol with -1)
+        // Only update points if NOT unlimited
         if (data.points != -1) {
             slot.find("[name='points']").val(data.points);
         }
