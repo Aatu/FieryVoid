@@ -2006,11 +2006,11 @@ FtrPetals.prototype.initializationUpdate = function () {
 			ship.armour[2] = 1; //Reduce side armour of fighters
 			ship.armour[3] = 1; //Reduce side armour of fighters			
 		}else if(ship.name == "VorlonAssaultFighterFlight"){
-			ship.forwardDefense = 11; 
-			ship.sideDefense = 13;
+			flight.forwardDefense = 11; 
+			flight.sideDefense = 13;
 			flight.freethrust = 15;
-			ship.armour[2] = 3; //Reduce side armour of fighters
-			ship.armour[3] = 3; //Reduce side armour of fighters
+			ship.armour[2] = 2; //Reduce side armour of fighters
+			ship.armour[3] = 2; //Reduce side armour of fighters
 		}
 	} else{
 		this.outputDisplay = "-";		
