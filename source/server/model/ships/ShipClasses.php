@@ -2202,7 +2202,8 @@ public function getAllEWExceptDEW($turn){
             }
             if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! assign to Structure...
         }
-        $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing'));       
+        // $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing')); //Original Logic - DK 13.01.26
+        $noPrimaryHits = ($weapon->damageType == 'Piercing'); //New logic: Only Piercing removes PRIMARY from table. $noPrimaryHits trait keeps it but redirects result.    
         if($noPrimaryHits){ //change hit chart! - no PRIMARY hits!
             $hitChart = array();
             //use only non-destroyed systems on section hit
@@ -2250,6 +2251,7 @@ public function getAllEWExceptDEW($turn){
         }
  
         if($name == 'Primary'){ //redirect to PRIMARY!
+            if($weapon->noPrimaryHits) return $this->getStructureSystem($location); //If weapon treats Primary as facing Structure - DK 13.01.26
             return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
         }
         $systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
@@ -2357,7 +2359,8 @@ public function getAllEWExceptDEW($turn){
 		}
 			
 		//for non-Flash/Piercing, add PRIMARY to hit table...
-		$noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash'));
+		// $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash')); //Original Logic - DK 13.01.26
+        $noPrimaryHits = (($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash')); //New Logic: Only Flash and Piercing remove functionality. $noPrimaryHits trait redirects logic later.
 		if(!$noPrimaryHits){ 
 			$multiplier = 0.1; //10% chance for PRIMARY penetration
 			if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
@@ -2390,6 +2393,7 @@ public function getAllEWExceptDEW($turn){
 		}
 		
 		if($name == 'Primary'){ //redirect to PRIMARY!
+            if($weapon->noPrimaryHits) return $this->getStructureSystem($location); //If weapon treats Primary as facing Structure - DK 13.01.26
 			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
