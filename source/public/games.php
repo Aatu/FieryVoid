@@ -17,6 +17,10 @@ if (empty($_SESSION["user"])) {
 // Fetch games for logged-in user
 $userid = (int)$_SESSION["user"];
 $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
+
+$defaultGameName = 'GAME NAME' . $_SESSION["user"];	
+$playerName = Manager::getPlayerName($_SESSION["user"]);
+$defaultGameName = ucfirst($playerName) . "'s Game";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,6 +45,8 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       gamedata.parseServerData(<?php echo $games; ?>);
       ajaxInterface.startPollingGames();
       gamedata.thisplayer = <?php echo $_SESSION["user"]; ?>;
+      gamedata.defaultGameName = "<?php echo $defaultGameName; ?>";
+      gamedata.defaultBackground = "21.PurpleNebula.jpg";
     });
     function loadFireList() {
       ajaxInterface.getFirePhaseGames();
@@ -124,6 +130,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       </div>
       <div class="create-col">
         <a class="btn btn-success create-game-btn" href="creategame.php">Create Game</a>
+        <button class="btn btn-secondary" onclick="gamedata.submitFleetTest()">Fleet Test</button>
         <button class="btn btn-secondary" onclick="loadFireList()">Recent Games</button>
       </div>
     </div>

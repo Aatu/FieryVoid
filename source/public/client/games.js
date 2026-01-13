@@ -152,6 +152,50 @@ window.gamedata = {
 	clickLobbyGame: function clickLobbyGame(e) {
 		var id = $(this).data().gameid;
 		window.location = "gamelobby.php?gameid=" + id;
+	},
+
+	submitFleetTest: function submitFleetTest() {
+		var gamename = gamedata.defaultGameName || "Test Game";
+		var background = gamedata.defaultBackground || "21.PurpleNebula.jpg";
+
+		var slots = [
+			{ id: 1, team: 1, name: "Team 1", points: 3500, depx: -19, depy: 0, deptype: "box", depwidth: 5, depheight: 30, depavailable: 1 },
+			{ id: 2, team: 2, name: "Team 2", points: 3500, depx: 18, depy: 0, deptype: "box", depwidth: 5, depheight: 30, depavailable: 1 }
+		];
+
+		var rules = {
+			fleetTest: 1
+		};
+
+		var gamespace = "42x30"; // Standard map dimensions
+		var flight = ""; // Default no variable flight size
+		var description = "";
+
+		var data = {
+			gamename: gamename,
+			background: background,
+			slots: slots,
+			gamespace: gamespace,
+			flight: flight,
+			rules: rules,
+			description: description
+		};
+
+		var form = $('<form>', {
+			'action': 'creategame.php',
+			'method': 'post'
+		}).append($('<input>', {
+			'type': 'hidden',
+			'name': 'docreate',
+			'value': 'true'
+		})).append($('<input>', {
+			'type': 'hidden',
+			'name': 'data',
+			'value': JSON.stringify(data)
+		}));
+
+		$('body').append(form);
+		form.submit();
 	}
 
 };
