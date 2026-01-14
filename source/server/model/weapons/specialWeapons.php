@@ -7105,7 +7105,6 @@ class PulsarMine extends Weapon{
 	
 
 	private function checkTargetConditions($previousBearing, $shipPosition, $targetPostion, $shipfacing, $gamedata){
-		$canTarget = false;
 		
 		$distance =	mathlib::getDistanceHex($shipPosition, $targetPostion);//Compare starting positions.						
 		$targetBearing = 0;
@@ -7116,12 +7115,13 @@ class PulsarMine extends Weapon{
 			$targetBearing = $this->getTempBearing($shipPosition, $targetPostion, $shipfacing);					
 		} 
 		
-	    if ($distance > 2 && !mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return $canTarget;//Not in arc and within 2 hexes, skip LoS check and return false.
+	    if ($distance > 2) return false; //Not within 2 hexes, skip LoS check and return false.
+		if(!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false; //Not in arc.
 
 		$loSBlocked = $this->checkLineOfSight($shipPosition, $targetPostion, $gamedata); //Returns true is LoS blocked
-		if(!$loSBlocked) $canTarget = true;
+		if($loSBlocked) return false; //LoS Blocked
 
-		return $canTarget;
+		return true;
 	}	
 
 
