@@ -1356,15 +1356,15 @@ getActiveShipName: function getActiveShipName() {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
-        /*if (gamedata.gamephase == 1) {
+        if (gamedata.gamephase == 1) {
             //To recalculate fleet list values in Info Tab without refreshing page
             fleetListManager.reset();
             fleetListManager.displayFleetLists();
-        } else {
+        } //else {
             //To refresh whether player has committed their orders when a new phase begins.
-            fleetListManager.refreshed = false;
-            fleetListManager.displayFleetLists();
-        }*/
+            //fleetListManager.refreshed = false;
+            //fleetListManager.displayFleetLists();
+        //}
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
