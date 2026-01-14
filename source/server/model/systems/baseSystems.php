@@ -274,7 +274,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			// Get distance to the stealth ship and check line of sight
 			$distance = mathlib::getDistanceHex($ship, $otherShip);
 			$otherPos = $otherShip->getHexPos();          
-			$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
+			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
 
 			// If within detection range, and LoS not blocked the ship is detected
 			if ($totalDetection >= $distance && !$noLoS) {  
@@ -302,7 +302,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 				$enemyPosition = $enemyShip->getHexPos();
 				$noLoS = false; //False means LoS not blocked
 			
-				$noLoS = Mathlib::checkLineOfSight($shipPosition, $enemyPosition, $blockedHexes);				
+				$noLoS = Mathlib::isLoSBlocked($shipPosition, $enemyPosition, $blockedHexes);				
 
 				if(!$noLoS){ //The enemy unit can see this ship LoS not blocked.
 					$canStealth = false;
@@ -6145,7 +6145,7 @@ class MindriderHangar extends ShipSystem{
 				// Get distance to the stealth ship and check line of sight
 				$distance = mathlib::getDistanceHex($ship, $otherShip);
 				$otherPos = $otherShip->getHexPos(); //Just deployed ships aren't counting for this.          
-				$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
+				$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
 
 				// If within detection range, and LoS not blocked the ship is detected
 				if($distance <= $range && !$noLoS){

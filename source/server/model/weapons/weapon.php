@@ -1275,7 +1275,7 @@ public function getStartLoading()
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
             } else { //ballistics use of OB is more complicated
                 $oew = 0;
-                $shooterlosBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $shooterlosBlocked  = $this->isLoSBlocked($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
                     if ($shooter->hasNavigator && !$shooterlosBlocked) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
@@ -1382,7 +1382,7 @@ public function getStartLoading()
         //Check Line of Sight has been maintained by ship for Ballistic weapons after launch (Fighters checked separately above).
         if($this->ballistic && (!$shooter instanceof FighterFlight) && !$this->hasSpecialLaunchHexCalculation){
             if(!$firecontrol <= 0){ //No point checking for LoS if FC is a 0 or lower anyway!
-                $losBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $losBlocked  = $this->isLoSBlocked($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                
                 if($losBlocked ){ //Line of Sight is blocked!
                     if($this instanceof AmmoMissileRackS) { //Only zero LAUNCHER FC on AmmoMissileLaunchers, missiles have own guidance e.g. bonus. 
@@ -2175,12 +2175,12 @@ full Advanced Armor effects (by rules) for reference:
         return null;    
     }     
 
-    public function checkLineOfSight($shooterPos, $targetPos, $gamedata) {
+    public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
         $blockedLosHex = $gamedata->getBlockedHexes();
 
         $noLoS = false;
         if (!empty($blockedLosHex)) {            
-            $noLoS = Mathlib::checkLineOfSight($shooterPos, $targetPos, $blockedLosHex);
+            $noLoS = Mathlib::isLoSBlocked($shooterPos, $targetPos, $blockedLosHex);
         }
         
         return $noLoS;

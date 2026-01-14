@@ -466,12 +466,12 @@ class BaseShip {
 	} //endOf function calculateCombatValueOld
 
 
-    public function checkLineOfSight($shooterPos, $targetPos, $gamedata) {
+    public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
         $blockedLosHex = $gamedata->getBlockedHexes();
 
         $noLoS = false;
         if (!empty($blockedLosHex)) {            
-            $noLoS = Mathlib::checkLineOfSight($shooterPos, $targetPos, $blockedLosHex);
+            $noLoS = Mathlib::isLoSBlocked($shooterPos, $targetPos, $blockedLosHex);
         }
         
         return $noLoS;

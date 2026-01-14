@@ -613,10 +613,10 @@ window.ew = {
                     var sPosShooter = shipManager.getShipPosition(ship);
                     var sPosTarget = shipManager.getShipPosition(target);                    
 
-                    loSBlockedtarget = mathlib.checkLineOfSight(sPosELINT, sPosTarget, blockedLosHex);
+                    loSBlockedtarget = mathlib.isLoSBlocked(sPosELINT, sPosTarget, blockedLosHex);
                     if(loSBlockedtarget) continue; //Line of sight blocked to one of the relevant units, skip.  
 
-                    loSBlockedshooter = mathlib.checkLineOfSight(sPosELINT, sPosShooter, blockedLosHex);
+                    loSBlockedshooter = mathlib.isLoSBlocked(sPosELINT, sPosShooter, blockedLosHex);
                     if(loSBlockedshooter) continue; //Line of sight blocked to one of the relevant units, skip.                                       
                 }
 

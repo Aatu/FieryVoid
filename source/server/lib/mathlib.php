@@ -318,7 +318,7 @@ class Mathlib{
         return $corners;
     }
     
-    public static function checkLineOfSight($start, $end, $blockedHexes) {
+    public static function isLoSBlocked($start, $end, $blockedHexes) {
         $startPixel = self::hexCoToPixelLoS($start);
         $endPixel = self::hexCoToPixelLoS($end);
         $hexSize = 50;
