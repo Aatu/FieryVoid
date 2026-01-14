@@ -688,11 +688,13 @@ ProximityLaserNew.prototype.initializationUpdate = function() {
         this.startArc = 0; //Hex target has arc, laser shot does not.
         this.endArc = 360;
         this.ignoresLoS = true;
+        this.range = 0;
     }else{
         this.hextarget = true;
         this.startArc = this.startArcArray[0]; //Use Arc arrays to reset to default
         this.endArc = this.endArcArray[0]; 
-        this.ignoresLoS = false;                       
+        this.ignoresLoS = false;
+        this.range = 30;                       
     } 
 
     return this;
@@ -700,7 +702,7 @@ ProximityLaserNew.prototype.initializationUpdate = function() {
 
 ProximityLaserNew.prototype.getFiringHex = function(shooter, weapon){ //Need to calculate hit chance from where Launcher targets.	
     var sPosLaunch;       
-        if (this.fireOrders.length > 1) {	//A hex has been targted, firing hex changes to those coordinates
+        if (this.fireOrders.length > 0) {	//A hex has been targeted, firing hex changes to those coordinates
             var sPosLaunch; 
             var launcherOrder = this.fireOrders[0];       
                 if (launcherOrder)	{	// check that launcher has firing orders.  
@@ -721,7 +723,7 @@ ProximityLaserNew.prototype.doMultipleHexFireOrders = function (shooter, hexpos)
     
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
-    if (this.fireOrders.length > 1) {
+    if (this.fireOrders.length > 0) {
         return;
     } 
 
@@ -767,7 +769,7 @@ ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, sy
         var calledid = -1; //No called shots.     
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        //if(chance < 1) continue;
 
         var fire = {
             id: fireid,

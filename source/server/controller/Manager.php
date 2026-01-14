@@ -80,7 +80,7 @@ class Manager{
         
             return array_merge(
                 self::$dbManager->getPlayerGames($userid),
-                self::$dbManager->getLobbyGames()
+                self::$dbManager->getLobbyGames($userid)
             );
       
         }
@@ -927,6 +927,8 @@ class Manager{
             }
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            
+            self::touchGame($gameid); // Ensure APCu knows about the advance
         }
         catch(Exception $e)
         {

@@ -195,9 +195,14 @@ window.ajaxInterface = {
                 // Retry if status matches allowed codes and attempts remain
                 const retryCodes = options.retryCodes || [503, 507];
 
-                if (xhr && retryCodes.includes(xhr.status) && attempt < maxAttempts) {
+                // Retry if status matches allowed codes, OR is timeout, OR is network error (0)
+                const isRetryableCode = xhr && retryCodes.includes(xhr.status);
+                const isTimeout = textStatus === 'timeout';
+                const isNetworkError = xhr && xhr.status === 0 && textStatus !== 'abort';
+
+                if ((isRetryableCode || isTimeout || isNetworkError) && attempt < maxAttempts) {
                     const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
-                    console.warn(`${xhr.status} error, retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
+                    console.warn(`AJAX issue (${textStatus || xhr.status}), retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
                     isRetrying = true;
 
                     setTimeout(() => {
