@@ -1022,7 +1022,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>New power is produced in the Initial Orders phase,</li>
                     <li>Opening petals by boosting Power Capacitor will reduce the armor of all the ship’s primary systems by 2 and increase Defence Profiles by 5%, but adds 50% to power generation the following turn,</li> 
                     <li>Capacitor destruction would leave the ship powerless, but doesn't cause a catastrophic explosion like Reactor destruction.  In FV it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), 
-                        add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li>                  
+                        add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li> 
+                    <li>Vorlon Fighters also have petals that they can toggle open in Initial Orders. Doing so provides 2 extra thrust that turn, but increases their Defence Profiles by 5% and reduces side armour by 2.</li>                                         
                 </ul>            
             </li>             
     <h5>Mag-Gravitic Reactor </h5>
@@ -1039,7 +1040,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             It does not affect the weapon in any other way e.g. leaving it to recharge for two turns will not increase power of shot.</li>
         <li>Can combine Lightning Cannons for higher power shots. To do so, the appropriate number of cannons must have the same firing mode and target assigned. 
             If player mis-declares and not enough weapons are assigned for declared mode, shot automatically misses and does not drain power.</li>
- <h5>Discharge Gun & Discharge Cannon</h5>
+    <h5>Discharge Gun & Discharge Cannon</h5>
         <li>LCan split shots amongst multiple targets up to four shots.  Can also split amongst offensive and defensive fire, with any manually selected intercept shots using minimal power if required 
             e.g. they actually try to intercept an incoming shot.</li>
         <li>Increased power levels are implemented as firing modes, so select this before targeting any enemy ships. Each offensive shot will be fired at the same power level.</li>                                                            

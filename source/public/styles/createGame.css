@@ -183,7 +183,7 @@
 }
 
 .mapPreviewContainer {
-  margin-top: 10px;
+  margin-top: 6px;
   margin-bottom: 5px;
   text-align: center;
 }
@@ -353,7 +353,7 @@
 
 .scenario-row .forbiddenText {
   padding-left: 0px;
-  padding-right: 10px;  
+  padding-right: 10px;
 }
 
 
@@ -469,7 +469,7 @@ input[type=number] {
 
 .mapDimensionsSelect {
   font-size: 14px;
-  width: 150px;
+  width: 180px;
   display: inline-block;
   margin: 0;
   box-sizing: border-box;
@@ -479,7 +479,7 @@ input[type=number] {
 
 .mapDimensions {
   font-size: 14px;
-  width: 190px;
+  width: 220px;
   display: inline-block;
   box-sizing: border-box;
   flex-shrink: 0;
@@ -581,4 +581,23 @@ input[type=number] {
     width: 100%;
     flex: none;
   }
+}
+
+.btn-fleet-test {
+  background: #215a7a;
+  color: white;
+  font-size: 1.2em;
+  border: 1px solid #7298a7;
+  width: 200px;
+  text-align: center;
+  box-sizing: border-box;
+  height: 30px;
+  line-height: normal;
+  padding: 5px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.btn-fleet-test:hover {
+  opacity: 0.9;
 }

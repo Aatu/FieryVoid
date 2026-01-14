@@ -1,565 +1,574 @@
-.shipwindow{
-    border:1px solid #496791;
-    background-color:#0a3340;
-    width:415px;
-    opacity:0.85;
-    color:white;
-    font-family:arial;
-    font-size:10px;
-    z-index:10001;
-    position:absolute;
-    top:50px;
-    display:none;
+.shipwindow {
+    border: 1px solid #496791;
+    background-color: #0a3340;
+    width: 415px;
+    opacity: 0.85;
+    color: white;
+    font-family: arial;
+    font-size: 10px;
+    z-index: 10001;
+    position: absolute;
+    top: 50px;
+    display: none;
     -moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
 }
 
 
-.shipwindow .value{
+.shipwindow .value {
     margin-top: 7px;
-    margin-left:3px;
-    margin-right:3px;
-    color:#C6E2FF;
+    margin-left: 3px;
+    margin-right: 3px;
+    color: #C6E2FF;
 }
 
-.shipwindow .shipclass{
+.shipwindow .shipclass {
     margin-left: 5px;
     font-size: 10px;
     color: white;
 }
 
-.shipwindow .iconduo .value{
-    margin-left:1px;
-    margin-right:3px;
+.shipwindow .iconduo .value {
+    margin-left: 1px;
+    margin-right: 3px;
     margin-top: 10px;
     display: inline-block;
-    color:#C6E2FF;
+    color: #C6E2FF;
 }
 
-.shipwindow .valueheader{
-    margin-left:3px;
-    color:white;
+.shipwindow .valueheader {
+    margin-left: 3px;
+    color: white;
 }
 
 
-.shipwindow .topbar{
-    height:24px;
-    background-color:#04161c;
-    border-bottom:1px solid #496791;
-    padding-top:5px;
-    font-size:13px;
-    position:relative;
+.shipwindow .topbar {
+    height: 24px;
+    background-color: #04161c;
+    border-bottom: 1px solid #496791;
+    padding-top: 5px;
+    font-size: 13px;
+    position: relative;
 }
 
 .shipwindow .topbar .value.name {
-    font-style: normal !important; /* Force normal font style */
-    font-size: 12px; /* Ensure font size is 12px */
-    font-weight: bold; /* Make it bold */
+    font-style: normal !important;
+    /* Force normal font style */
+    font-size: 12px;
+    /* Ensure font size is 12px */
+    font-weight: bold;
+    /* Make it bold */
 }
 
-.shipwindow .container{
-    position:relative;
-    margin-bottom:5px;
-}
-.visiblecontainer{
-    background-color:#072731;
-    border:1px solid #496791;
-    position:relative;
-    margin:3px;
+.shipwindow .container {
+    position: relative;
+    margin-bottom: 5px;
 }
 
-.shipwindow .icon{
-    border:1px solid #496791;
-    background-color:black;
-    width:122px;
-    height:122px;
-    margin:0px;
+.visiblecontainer {
+    background-color: #072731;
+    border: 1px solid #496791;
+    position: relative;
+    margin: 3px;
 }
 
-.shipwindow .basicinfo{
-    position:absolute;
-    right:0px;
-    top:0px;
-    width:357px;
-    height:120px;
-    margin:0px;
+.shipwindow .icon {
+    border: 1px solid #496791;
+    background-color: black;
+    width: 122px;
+    height: 122px;
+    margin: 0px;
 }
 
-.shipwindow .basicinfo table{
-    border-collapse:collapse;
-    margin:2px;
-}
-.shipwindow .basicinfo td{
-    border:1px solid #496791;
-    width:116px;
-}
-
-.shipwindow table.shipareas{
-    vertical-align:top;
+.shipwindow .basicinfo {
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 357px;
+    height: 120px;
+    margin: 0px;
 }
 
-.shipwindow .shipareas td{
-    width:102px;
-    border:1px solid #496791;
-    margin:0px;
-    padding:0px;
-    position:relative;
-    vertical-align:top;
+.shipwindow .basicinfo table {
+    border-collapse: collapse;
+    margin: 2px;
 }
 
-.shipwindow .shipareas td.noborder{
-    width:106px;
-    border:none;
+.shipwindow .basicinfo td {
+    border: 1px solid #496791;
+    width: 116px;
 }
 
-.shipwindow .shipareas td.four{
-    width:214px;
+.shipwindow table.shipareas {
+    vertical-align: top;
+}
+
+.shipwindow .shipareas td {
+    width: 102px;
+    border: 1px solid #496791;
+    margin: 0px;
+    padding: 0px;
+    position: relative;
+    vertical-align: top;
+}
+
+.shipwindow .shipareas td.noborder {
+    width: 106px;
+    border: none;
+}
+
+.shipwindow .shipareas td.four {
+    width: 214px;
 
 }
 
-.shipwindow .shipareas .visiblecontainer.structure{
-    width:100%;
-    height:30px;
-    text-align:center;
-    margin:0px;
-    border:none;
-    border-bottom:1px solid #496791;
+.shipwindow .shipareas .visiblecontainer.structure {
+    width: 100%;
+    height: 30px;
+    text-align: center;
+    margin: 0px;
+    border: none;
+    border-bottom: 1px solid #496791;
 }
 
-.shipwindow .shipareas .structure .value{
-    color:white;
+.shipwindow .shipareas .structure .value {
+    color: white;
 }
 
-.shipwindow .barcontainer{
-    margin-left:2px;
-    margin-right:2px;
-    border:1px solid #496791;
-    background-color:black;
-    position:relative;
+.shipwindow .barcontainer {
+    margin-left: 2px;
+    margin-right: 2px;
+    border: 1px solid #496791;
+    background-color: black;
+    position: relative;
 }
 
-.shipwindow .four .barcontainer{
-    width:227px;
-    
+.shipwindow .four .barcontainer {
+    width: 227px;
+
 }
 
-.shipwindow .two .barcontainer{
-    width:112px;
-    
+.shipwindow .two .barcontainer {
+    width: 112px;
+
 }
 
-.shipwindow .bar{
-    position:absolute;
-    top:0px;
-    left:0px;
-    background-color:#2f5123;
-    height:100%;
-    z-index:7001;
+.shipwindow .bar {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-color: #2f5123;
+    height: 100%;
+    z-index: 7001;
 }
 
-.shipwindow .close{
-    position:absolute;
-    border:1px solid #496791;
-    width:10px;
-    height:10px;
-    right:5px;
-    top:4px;
-    background-image:url(../img/close.png);
-    cursor:pointer;
+.shipwindow .close {
+    position: absolute;
+    border: 1px solid #496791;
+    width: 10px;
+    height: 10px;
+    right: 5px;
+    top: 4px;
+    background-image: url(../img/close.png);
+    cursor: pointer;
 }
 
 
-.shipwindow .EW{
-    width:125px;
-    background-color:#072731;
-    border:1px solid #496791;
-    vertical-align:top;
+.shipwindow .EW {
+    width: 125px;
+    background-color: #072731;
+    border: 1px solid #496791;
+    vertical-align: top;
 }
 
-.shipwindow .buttons{
-    height:80px;
-    overflow-y:auto;
+.shipwindow .buttons {
+    height: 80px;
+    overflow-y: auto;
 }
 
-.shipwindow .EW .EWcontainer{
-    height:100px;
-    overflow-y:auto;
+.shipwindow .EW .EWcontainer {
+    height: 100px;
+    overflow-y: auto;
 }
 
-.shipwindow .EW span{
+.shipwindow .EW span {
     margin: 0px 0px 0px 2px;
 }
 
-.shipwindow .EW .ewheader{
-    border:1px solid #496791;
+.shipwindow .EW .ewheader {
+    border: 1px solid #496791;
 }
 
-.shipwindow .ewentry{
-    margin-top:2px;
-    position:relative;
+.shipwindow .ewentry {
+    margin-top: 2px;
+    position: relative;
 }
 
-.ewentry .button1{
-    border:1px solid #496791;
-    width:12px;
-    height:12px;
-    position:absolute;
-    right:18px;
-    top:1px;
-    display:none;
-    background-image:url(../img/minussquare.png);
-    cursor:pointer;
+.ewentry .button1 {
+    border: 1px solid #496791;
+    width: 12px;
+    height: 12px;
+    position: absolute;
+    right: 18px;
+    top: 1px;
+    display: none;
+    background-image: url(../img/minussquare.png);
+    cursor: pointer;
 }
 
-.shipwindow .ewentry .shiplink{
-    color:#C6E2FF;
+.shipwindow .ewentry .shiplink {
+    color: #C6E2FF;
 }
 
-.ewentry .button2{
-    border:1px solid #496791;
-    width:12px;
-    height:12px;
-    position:absolute;
-    right:1px;
-    top:1px;
-    display:none;
-    background-image:url(../img/plussquare.png);
-    cursor:pointer;
+.ewentry .button2 {
+    border: 1px solid #496791;
+    width: 12px;
+    height: 12px;
+    position: absolute;
+    right: 1px;
+    top: 1px;
+    display: none;
+    background-image: url(../img/plussquare.png);
+    cursor: pointer;
 }
 
 
-.shipwindow .divider td{
-    vertical-align:top;
+.shipwindow .divider td {
+    vertical-align: top;
 }
 
 /*SYSTEM
 */
 
-.shipwindow .notes{
-    border:1px solid #496791;
-    margin-top:4px;
-    background-color:#072731;
-    overflow-y:auto;
+.shipwindow .notes {
+    border: 1px solid #496791;
+    margin-top: 4px;
+    background-color: #072731;
+    overflow-y: auto;
     text-align: center
 }
 
-.shipwindow .notes p{
-    margin:.5em 0 .5em 0;
+.shipwindow .notes p {
+    margin: .5em 0 .5em 0;
 }
 
-.shipwindow .shipSection{
-    margin-top:5px;    
+.shipwindow .shipSection {
+    margin-top: 5px;
 }
 
-.shipwindow .shipSection table{
-    width:100%;
+.shipwindow .shipSection table {
+    width: 100%;
 }
 
-.shipwindow .base #shipSection_4{
-    position:absolute;	
-    top:200px;
-    width:70px;
-    right:62px;
+.shipwindow .base #shipSection_4 {
+    position: absolute;
+    top: 200px;
+    width: 70px;
+    right: 62px;
 }
 
-.shipwindow .base #shipSection_3{
-    position:absolute;
-    top:200px;
-    width:70px;
-    left:55px; 
+.shipwindow .base #shipSection_3 {
+    position: absolute;
+    top: 200px;
+    width: 70px;
+    left: 55px;
 }
 
-.shipwindow #shipSection_4{
-    position:absolute;
-    top:225px;	
-    width:70px;
-    right:62px;
+.shipwindow #shipSection_4 {
+    position: absolute;
+    top: 225px;
+    width: 70px;
+    right: 62px;
 }
 
-.shipwindow #shipSection_3{
-    position:absolute;
-    top:225px;
-	/*leave room for 3rd column
+.shipwindow #shipSection_3 {
+    position: absolute;
+    top: 225px;
+    /*leave room for 3rd column
     width:70px;
     left:55px;
 	*/
-    width:105px;
-    left:20px;
+    width: 105px;
+    left: 20px;
 }
 
-.shipwindow.rolled #shipSection_3{
-    right:62px;
-    left:auto;
+.shipwindow.rolled #shipSection_3 {
+    right: 62px;
+    left: auto;
 }
 
-.shipwindow.rolled #shipSection_4{
-    left:55px;
-    right:auto;
+.shipwindow.rolled #shipSection_4 {
+    left: 55px;
+    right: auto;
 }
 
-.shipwindow .col2{
-    border-left:2px dotted #7e9dc7;
-    border-right:2px dotted #7e9dc7;
+.shipwindow .col2 {
+    border-left: 2px dotted #7e9dc7;
+    border-right: 2px dotted #7e9dc7;
 }
 
 
-.shipwindow .shipSection.primary{
-    border-top:2px dotted #7e9dc7;
-    border-bottom:2px dotted #7e9dc7;
+.shipwindow .shipSection.primary {
+    border-top: 2px dotted #7e9dc7;
+    border-bottom: 2px dotted #7e9dc7;
     padding: 5px 0px 5px 0px;
 }
 
 
 .shipwindow .structure {
-    text-align:center;
+    text-align: center;
 
 }
-.structure.system  .name{
-    width:60px;
+
+.structure.system .name {
+    width: 60px;
     margin: 0px auto 0px auto;
 }
 
 .shipwindow .structure.system {
 
-    width:110px;
-    height:48px;
+    width: 110px;
+    height: 48px;
 
 }
 
 
-.structure.system .systembarcontainer{
-    width:58px;
-    height:15px;
-    border:1px solid #496791;
-    margin:0px auto;
+.structure.system .systembarcontainer {
+    width: 58px;
+    height: 15px;
+    border: 1px solid #496791;
+    margin: 0px auto;
 }
 
-.structure.system .systembarcontainer .valuecontainer{
-    margin-top:3px;
+.structure.system .systembarcontainer .valuecontainer {
+    margin-top: 3px;
 }
 
-.shipwindow .structure.system .bar{
-    height:15px;
+.shipwindow .structure.system .bar {
+    height: 15px;
 }
 
 
-.shipwindow .system{
-    margin-left:auto;
-    margin-right:auto;
-    color:white;
-    font-family:arial;
-    font-size:9px;
-    width:32px;
-    height:37px;
+.shipwindow .system {
+    margin-left: auto;
+    margin-right: auto;
+    color: white;
+    font-family: arial;
+    font-size: 9px;
+    width: 32px;
+    height: 37px;
 }
 
-.shipwindow .system.structure{
-    width:64px;
-    height:37px;
-    border:1px solid #496791;
+.shipwindow .system.structure {
+    width: 64px;
+    height: 37px;
+    border: 1px solid #496791;
 }
 
-.shipwindow .system .value{
-    color:white;
+.shipwindow .system .value {
+    color: white;
 }
 
 .shipwindow.phase3.owned .system.weapon {
-    cursor:pointer;
+    cursor: pointer;
 }
 
 .shipwindow .system.selected {
-	background-color:#587aa5 !important;
-	-moz-box-shadow: 0px 0px 15px #0099ff;
+    background-color: #587aa5 !important;
+    -moz-box-shadow: 0px 0px 15px #0099ff;
     -webkit-box-shadow: 0px 0px 15px #0099ff;
     box-shadow: 0px 0px 15px #0099ff;
 
 }
 
-.system.selected .systembarcontainer{
-    border:1px solid #84a5ce !important;
+.system.selected .systembarcontainer {
+    border: 1px solid #84a5ce !important;
 }
 
-.system.selected .icon{
-    border:1px solid #84a5ce !important;
-    background-color:#254e82 !important;
+.system.selected .icon {
+    border: 1px solid #84a5ce !important;
+    background-color: #254e82 !important;
 }
 
-.iconduo.selected{
-    width:15px;
-    height:30px;
-    border:1px solid #84a5ce !important;
-    background-color:#254e82 !important;
+.iconduo.selected {
+    width: 15px;
+    height: 30px;
+    border: 1px solid #84a5ce !important;
+    background-color: #254e82 !important;
 }
 
 
-.fightersystem.selected .icon{
-	border:1px solid #84a5ce !important;
-	background-color:#254e82 !important;
-	-moz-box-shadow: 0px 0px 15px #0099ff;
+.fightersystem.selected .icon {
+    border: 1px solid #84a5ce !important;
+    background-color: #254e82 !important;
+    -moz-box-shadow: 0px 0px 15px #0099ff;
     -webkit-box-shadow: 0px 0px 15px #0099ff;
     box-shadow: 0px 0px 15px #0099ff;
 }
 
 .shipwindow .system.firing {
-   /*border:1px solid #b72929;*/
+    /*border:1px solid #b72929;*/
     /*background-color:#3f0d0d;*/
 }
 
-.shipwindow .system.firing .iconmask{
+.shipwindow .system.firing .iconmask {
     /*background-image:url(../img/firing.png);
 	opacity:0.6 !important;*/
-	
+
 }
 
-.shipwindow .system.firing .icon{
+.shipwindow .system.firing .icon {
     -moz-box-shadow: 0px 0px 15px #eb5c15;
     -webkit-box-shadow: 0px 0px 15px #eb5c15;
     box-shadow: 0px 0px 15px #eb5c15;
-    background-color:#e06f01;
-    border-color:#eb5c15;
+    background-color: #e06f01;
+    border-color: #eb5c15;
 }
 
-.shipwindow .system.selfIntercept .icon{
+.shipwindow .system.selfIntercept .icon {
     -moz-box-shadow: 0px 0px 15px #eb5c15;
     -webkit-box-shadow: 0px 0px 15px #eb5c15;
     box-shadow: 0px 0px 15px #eb5c15;
-    background-color:blue;
-    border-color:#eb5c15;
+    background-color: blue;
+    border-color: #eb5c15;
 }
 
-.shipwindow .duosystem .iconduo.firing{
-	-moz-box-shadow: 0px 0px 15px #eb5c15;
+.shipwindow .duosystem .iconduo.firing {
+    -moz-box-shadow: 0px 0px 15px #eb5c15;
     -webkit-box-shadow: 0px 0px 15px #eb5c15;
     box-shadow: 0px 0px 15px #eb5c15;
-    background-color:#e06f01;
+    background-color: #e06f01;
     border: 1px solid;
-    border-color:#eb5c15;
+    border-color: #eb5c15;
 }
 
-.shipwindow  .fightersystem.firing .icon{
+.shipwindow .fightersystem.firing .icon {
     -moz-box-shadow: 0px 0px 15px #eb5c15;
     -webkit-box-shadow: 0px 0px 15px #eb5c15;
     box-shadow: 0px 0px 15px #eb5c15;
-    background-color:#e06f01 !important;
-    border-color:#eb5c15 !important;
+    background-color: #e06f01 !important;
+    border-color: #eb5c15 !important;
 
 }
 
-.shipwindow .system .holdfire{
-    background-image:url(../img/holdfire.png);
+.shipwindow .system .holdfire {
+    background-image: url(../img/holdfire.png);
 }
 
-body.phase3 .shipwindow  .system.firing .holdfire{
-    display:block;
+body.phase3 .shipwindow .system.firing .holdfire {
+    display: block;
 }
 
-body.phase3 .shipwindow  .system.duofiring .holdfire{
-    display:block;
+body.phase3 .shipwindow .system.duofiring .holdfire {
+    display: block;
 }
 
-body.phase1 .shipwindow  .system.firing.ballistic.canAddShots .plus{
-    display:block;
-}
-body.phase3 .shipwindow  .system.firing.canAddShots .plus{
-    display:block;
+body.phase1 .shipwindow .system.firing.ballistic.canAddShots .plus {
+    display: block;
 }
 
-
-body.phase1 .shipwindow  .system.firing.ballistic.canReduceShots .minus{
-    display:block;
-}
-body.phase3 .shipwindow  .system.firing.canReduceShots .minus{
-    display:block;
+body.phase3 .shipwindow .system.firing.canAddShots .plus {
+    display: block;
 }
 
 
-
-body.phase1 .shipwindow  .system.firing.ballistic.canReduceShots .holdfire{
-    display:none;
-}
-body.phase3 .shipwindow  .system.firing.canReduceShots .holdfire{
-    display:none;
+body.phase1 .shipwindow .system.firing.ballistic.canReduceShots .minus {
+    display: block;
 }
 
-
-body.phase1 .shipwindow  .system.firing.ballistic .holdfire{
-    display:block;
+body.phase3 .shipwindow .system.firing.canReduceShots .minus {
+    display: block;
 }
 
 
 
-body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
-    display:none;
+body.phase1 .shipwindow .system.firing.ballistic.canReduceShots .holdfire {
+    display: none;
 }
 
-.system.firing .systembarcontainer{
+body.phase3 .shipwindow .system.firing.canReduceShots .holdfire {
+    display: none;
+}
+
+
+body.phase1 .shipwindow .system.firing.ballistic .holdfire {
+    display: block;
+}
+
+
+
+body.phase3 .shipwindow .system.firing.ballistic .holdfire {
+    display: none;
+}
+
+.system.firing .systembarcontainer {
     /*border:1px solid #b72929;*/
 }
 
-.system.firing .icon{
+.system.firing .icon {
     /*border:1px solid #b72929;*/
 }
 
 
 
 .shipwindow.phase3.owned.waiting .system.weapon {
-    cursor:auto;
+    cursor: auto;
 }
 
 
 
-.shipwindow .system .icon{
-    width:30px;
-    height:20px;
-    border:1px solid #496791;
-    margin:0px;
-    text-align:center;
-    padding-top:10px;
-    position:relative;
+.shipwindow .system .icon {
+    width: 30px;
+    height: 20px;
+    border: 1px solid #496791;
+    margin: 0px;
+    text-align: center;
+    padding-top: 10px;
+    position: relative;
 }
 
-.shipwindow .system .iconduo{
-    position:absolute;
-    left:0px;
-    top:0px;
-    width:13px;
-    height:30px;
-    margin:0px;
-    text-align:center;
+.shipwindow .system .iconduo {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 13px;
+    height: 30px;
+    margin: 0px;
+    text-align: center;
     display: inline-block;
 }
 
-.shipwindow .system .icon .iconmask{
-    position:absolute;
-    left:0px;
-    top:0px;
-    width:30px;
-    height:30px;
-    background-color:transparent;
-    opacity:0.5;
+.shipwindow .system .icon .iconmask {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    opacity: 0.5;
 }
 
-.shipwindow .system .iconduo .duoIconmask{
-    position:absolute;
-    left:0px;
-    top:0px;
-    width:15px;
-    height:30px;
-    background-color:transparent;
-    opacity:0.5;
+.shipwindow .system .iconduo .duoIconmask {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 15px;
+    height: 30px;
+    background-color: transparent;
+    opacity: 0.5;
 }
 
-.shipwindow .system.regular.weapon.loading .systemcontainer .icon .iconmask{
-    background-color:orange;
+.shipwindow .system.regular.weapon.loading .systemcontainer .icon .iconmask {
+    background-color: orange;
 }
 
-.shipwindow .system .systemcontainer.duosystem .iconduo.weapon.loading .duoIconmask{
-    background-color:orange;
+.shipwindow .system .systemcontainer.duosystem .iconduo.weapon.loading .duoIconmask {
+    background-color: orange;
 }
 
-.shipwindow .system.destroyed .iconmask{
-    background-color:black;
+.shipwindow .system.destroyed .iconmask {
+    background-color: black;
 }
 
 /*.shipwindow .system.offline .iconmask{
@@ -568,10 +577,10 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }*/
 
-.shipwindow .system.offline .systemcontainer .icon .iconmask{
-    background-color:black;
-    background-image:url(../img/offline.png);
-    opacity:0.5;
+.shipwindow .system.offline .systemcontainer .icon .iconmask {
+    background-color: black;
+    background-image: url(../img/offline.png);
+    opacity: 0.5;
 }
 
 /*.shipwindow .system.offline .systemcontainer.duosystem .iconduo .duoIconmask{
@@ -580,10 +589,10 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }*/
 
-.shipwindow .system.forcedoffline .systemcontainer .icon .iconmask{
-    background-color:black;
-    background-image:url(../img/offline.png);
-    opacity:0.5;
+.shipwindow .system.forcedoffline .systemcontainer .icon .iconmask {
+    background-color: black;
+    background-image: url(../img/offline.png);
+    opacity: 0.5;
 }
 
 /*.shipwindow .system.forcedoffline .systemcontainer.duosystem .iconduo .duoIconmask{
@@ -592,310 +601,309 @@ body.phase3 .shipwindow  .system.firing.ballistic .holdfire{
     opacity:0.5;
 }*/
 
-.shipwindow .system.destroyed .systembarcontainer{
-    border:1px solid #3d4755;
+.shipwindow .system.destroyed .systembarcontainer {
+    border: 1px solid #3d4755;
 }
 
-.shipwindow .system.destroyed .icon{
-    border:1px solid #3d4755;
+.shipwindow .system.destroyed .icon {
+    border: 1px solid #3d4755;
 }
 
-.shipwindow .system .name{
-    width:60px;
-    margin-top:3px;
-    margin-bottom:3px
+.shipwindow .system .name {
+    width: 60px;
+    margin-top: 3px;
+    margin-bottom: 3px
 }
 
-.shipwindow .system .health{
-    
+.shipwindow .system .health {}
+
+.shipwindow .system.offline .efficiency.value {
+    display: none;
+}
+
+.system .healthbar {
+
+    background-color: #2f5123;
+
 
 }
 
-.shipwindow .system.offline .efficiency.value{
-    display:none;
+.shipwindow .system .bar {
+    z-index: 7001;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 4px;
 }
 
-.system .healthbar{
-    
-    background-color:#2f5123;
-    
-    
+.shipwindow .system.critical .bar {
+    background-color: #b34119;
 }
 
-.shipwindow .system .bar{
-    z-index:7001;
-    position:absolute;
-    top:0px;
-    left:0px;
-    height:4px;
+.shipwindow .valuecontainer {
+    z-index: 7002;
+    position: relative;
 }
 
-.shipwindow .system.critical .bar{
-    background-color:#b34119;
-}
-
-.shipwindow .valuecontainer{
-    z-index:7002;
-    position:relative;
-}
-
-.shipwindow  .system .UI.active{
+.shipwindow .system .UI.active {
     -webkit-transition: all 0.1s linear;
-	-moz-transition: all 0.1s linear;
-	-o-transition: all 0.1s linear;
-	transition: all 0.1s linear;
-    display:block;
+    -moz-transition: all 0.1s linear;
+    -o-transition: all 0.1s linear;
+    transition: all 0.1s linear;
+    display: block;
 }
 
-.shipwindow  .system .UI{
-    z-index:10003;
-    position:absolute;
-    top:-1px;
-    left:30px;
-    background-color:black;
-    height:30px;
-    display:none;
-    border-right:1px solid #496791;
-    border-top:1px solid #496791;
-    border-bottom:1px solid #496791;
+.shipwindow .system .UI {
+    z-index: 10003;
+    position: absolute;
+    top: -1px;
+    left: 30px;
+    background-color: black;
+    height: 30px;
+    display: none;
+    border-right: 1px solid #496791;
+    border-top: 1px solid #496791;
+    border-bottom: 1px solid #496791;
 }
 
-.shipwindow  .system .iconduo .UI{
-    z-index:10003;
-    position:absolute;
-    top:-1px;
-    left:15px;
-    background-color:black;
-    height:30px;
-    display:none;
-    border-right:1px solid #496791;
-    border-top:1px solid #496791;
-    border-bottom:1px solid #496791;
+.shipwindow .system .iconduo .UI {
+    z-index: 10003;
+    position: absolute;
+    top: -1px;
+    left: 15px;
+    background-color: black;
+    height: 30px;
+    display: none;
+    border-right: 1px solid #496791;
+    border-top: 1px solid #496791;
+    border-bottom: 1px solid #496791;
 }
 
-.shipwindow .system .button{
-    width:12px;
-    height:12px;
-    cursor:pointer;
-    display:none;
-    margin:1px 1px 2px 2px;
+.shipwindow .system .button {
+    width: 12px;
+    height: 12px;
+    cursor: pointer;
+    display: none;
+    margin: 1px 1px 2px 2px;
 }
 
-.shipwindow .system .plus{
-    background-image:url(../img/plussquare.png);
+.shipwindow .system .plus {
+    background-image: url(../img/plussquare.png);
 }
 
-.shipwindow .system.enableAssignThrust .plus{
-    display:block;
+.shipwindow .system.enableAssignThrust .plus {
+    display: block;
 }
 
-.shipwindow .system .off{
-    background-image:url(../img/off.png);
+.shipwindow .system .off {
+    background-image: url(../img/off.png);
 }
 
-body.phase1 .shipwindow  .system.canoffline .off{
-    display:block;
+body.phase1 .shipwindow .system.canoffline .off {
+    display: block;
 }
 
-.shipwindow .system .on{
-    background-image:url(../img/on.png);
+.shipwindow .system .on {
+    background-image: url(../img/on.png);
 }
 
-body.phase1 .shipwindow  .system.offline .on{
-    display:block;
-}
-
-
-.shipwindow .system .overload{
-
-    background-image:url(../img/overload.png);
-
-}
-
-.shipwindow .system .stopoverload{
-
-    background-image:url(../img/overloading.png);
-
+body.phase1 .shipwindow .system.offline .on {
+    display: block;
 }
 
 
-body.phase1 .shipwindow  .system.canoverload .overload{
-    display:block;
-}
+.shipwindow .system .overload {
 
-.shipwindow  .system.overload .stopoverload{
-    display:block;
-}
-
-
-body.phase1 .shipwindow  .system.canboost .plus{
-    display:block;
-}
-
-body.phase1 .shipwindow  .system.boosted .plus{
-    display:block;
-}
-
-body.phase1 .shipwindow  .system.boosted .minus{
-    display:block;
-}
-
-.shipwindow .system .minus{
-
-    background-image:url(../img/minussquare.png);
+    background-image: url(../img/overload.png);
 
 }
 
-.shipwindow  .system.enableAssignThrust .minus{
-    display:block;
-}
+.shipwindow .system .stopoverload {
 
-.system .systemcontainer{
-    position:relative;
-}
-
-.system .systembarcontainer{
-    width:30px;
-    border-left:1px solid #496791;
-    border-right:1px solid #496791;
-    border-bottom:1px solid #496791;
-    height:4px;
-    background-color:black;
-    margin:0px;
-    padding:0px;
-    text-align:center;
-    position:relative;
+    background-image: url(../img/overloading.png);
 
 }
 
 
+body.phase1 .shipwindow .system.canoverload .overload {
+    display: block;
+}
+
+.shipwindow .system.overload .stopoverload {
+    display: block;
+}
 
 
-.system .efficiency.barcontainer{
-    width:38px;
+body.phase1 .shipwindow .system.canboost .plus {
+    display: block;
+}
+
+body.phase1 .shipwindow .system.boosted .plus {
+    display: block;
+}
+
+body.phase1 .shipwindow .system.boosted .minus {
+    display: block;
+}
+
+.shipwindow .system .minus {
+
+    background-image: url(../img/minussquare.png);
 
 }
 
-.system .efficiencybar{
-    background-color:#2f5123;
+.shipwindow .system.enableAssignThrust .minus {
+    display: block;
 }
 
-.system .critical{
-    background-color:#881c0d;
-    display:none;
+.system .systemcontainer {
+    position: relative;
+}
+
+.system .systembarcontainer {
+    width: 30px;
+    border-left: 1px solid #496791;
+    border-right: 1px solid #496791;
+    border-bottom: 1px solid #496791;
+    height: 4px;
+    background-color: black;
+    margin: 0px;
+    padding: 0px;
+    text-align: center;
+    position: relative;
+
+}
+
+
+
+
+.system .efficiency.barcontainer {
+    width: 38px;
+
+}
+
+.system .efficiencybar {
+    background-color: #2f5123;
+}
+
+.system .critical {
+    background-color: #881c0d;
+    display: none;
 }
 
 .shipwindow.flight {
-    width:320px;
-}
-.shipwindow.flight .fighter{
-	position:relative;
+    width: 320px;
 }
 
-.shipwindow.flight .fightercontainer{
+.shipwindow.flight .fighter {
+    position: relative;
+}
+
+.shipwindow.flight .fightercontainer {
     background-color: #072731;
     border: 0px;
-    width:100px;
-	position:relative;
-    overflow:hidden;
+    width: 100px;
+    position: relative;
+    overflow: hidden;
 }
 
-.shipwindow.flight .fighter .destroyedtext{
-	position:absolute;
-	width:96px;
-	text-align:center;
-	left:0px;
-	top:55px;
-	font-size:12px;
-	padding-top:5px;
-	display:none;
-	color:red;
-	background-color:black;
-	height:20px;
+.shipwindow.flight .fighter .destroyedtext {
+    position: absolute;
+    width: 96px;
+    text-align: center;
+    left: 0px;
+    top: 55px;
+    font-size: 12px;
+    padding-top: 5px;
+    display: none;
+    color: red;
+    background-color: black;
+    height: 20px;
 }
 
-.shipwindow.flight .fighter .disengagedtext{
-	position:absolute;
-	width:96px;
-	text-align:center;
-	left:0px;
-	top:55px;
-	font-size:12px;
-	padding-top:5px;
-	display:none;
-	color:#4bea1b;
-	background-color:black;
-	height:20px;
+.shipwindow.flight .fighter .disengagedtext {
+    position: absolute;
+    width: 96px;
+    text-align: center;
+    left: 0px;
+    top: 55px;
+    font-size: 12px;
+    padding-top: 5px;
+    display: none;
+    color: #4bea1b;
+    background-color: black;
+    height: 20px;
 }
 
-.shipwindow.flight .icon{
-	width:90px;
-	height:121px;
-	margin:auto;
-	background-repeat:no-repeat;
-	background-position:center;
-    background-size: contain; /* makes the image fit entirely */	
-	
+.shipwindow.flight .icon {
+    width: 90px;
+    height: 121px;
+    margin: auto;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    /* makes the image fit entirely */
+
 }
 
-.shipwindow.flight .divider{
-	border-spacing:5px;
-	width:320px;
+.shipwindow.flight .divider {
+    border-spacing: 5px;
+    width: 320px;
 }
-.shipwindow.flight .divider tr{
-	
-}
+
+.shipwindow.flight .divider tr {}
 
 .shipwindow.heavyfighter {
-    width:250px;
-}
-.shipwindow.heavyfighter .heavyfighter{
-	position:relative;
+    width: 250px;
 }
 
-.shipwindow.heavyfighter .fightercontainer{
+.shipwindow.heavyfighter .heavyfighter {
+    position: relative;
+}
+
+.shipwindow.heavyfighter .fightercontainer {
     background-color: #072731;
     border: 0px;
-    width:100px;
-	position:relative;
-    overflow:hidden;
+    width: 100px;
+    position: relative;
+    overflow: hidden;
 }
 
-.shipwindow.heavyfighter .icon{
-	width:120px;
-	height:151px;
-	margin:auto;
-	background-repeat:no-repeat;
-	background-position:center;
+.shipwindow.heavyfighter .icon {
+    width: 120px;
+    height: 151px;
+    margin: auto;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
-.shipwindow.heavyfighter .fightersystem{
-	width:30px;
-	height:30px;
-	margin:auto;
+.shipwindow.heavyfighter .fightersystem {
+    width: 30px;
+    height: 30px;
+    margin: auto;
 }
 
-.shipwindow.heavyfighter .fightersystem .icon{
-	width:26px;
-	height:20px;
-	padding-top:6px;
-	background-color:transparent;
-	border:1px solid #496791;
-	background-position:center; 
-	margin:1px;
-	text-align: center;
-	position:relative;
-	overflow:hidden;
+.shipwindow.heavyfighter .fightersystem .icon {
+    width: 26px;
+    height: 20px;
+    padding-top: 6px;
+    background-color: transparent;
+    border: 1px solid #496791;
+    background-position: center;
+    margin: 1px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
 }
 
-.shipwindow.heavyfighter .fightersystem .icon .iconmask{
-    position:absolute;
-    left:-2px;
-    top:-2px;
-    width:30px;
-    height:30px;
-    background-color:transparent;
-    opacity:0.5;
+.shipwindow.heavyfighter .fightersystem .icon .iconmask {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    opacity: 0.5;
 
 }
 
@@ -910,33 +918,34 @@ body.phase1 .shipwindow  .system.boosted .minus{
     width: 116px;
 }
 
-.fighter.destroyed, .fighter.destroyed .icon  {
-	background-color: #1F2836 !important;
+.fighter.destroyed,
+.fighter.destroyed .icon {
+    background-color: #1F2836 !important;
     border: 1px solid #3D4755 !important;
 }
 
-.fighter.destroyed .icon{
-	opacity:0.5;
+.fighter.destroyed .icon {
+    opacity: 0.5;
 }
 
-.fighter.destroyed .health{
-	border: 1px solid #3D4755 !important;
+.fighter.destroyed .health {
+    border: 1px solid #3D4755 !important;
 }
 
-.shipwindow.flight .fighter.destroyed .destroyedtext{
-	display:block;
+.shipwindow.flight .fighter.destroyed .destroyedtext {
+    display: block;
 }
 
-.shipwindow.flight .fighter.disengaged.destroyed .disengagedtext{
-	display:block;
+.shipwindow.flight .fighter.disengaged.destroyed .disengagedtext {
+    display: block;
 }
 
-.shipwindow.flight .fighter.disengaged.destroyed .destroyedtext{
-	display:none;
+.shipwindow.flight .fighter.disengaged.destroyed .destroyedtext {
+    display: none;
 }
 
-.fighter.destroyed .fightersystem{
-	display:none;
+.fighter.destroyed .fightersystem {
+    display: none;
 }
 
 .fighter .systembarcontainer {
@@ -950,188 +959,189 @@ body.phase1 .shipwindow  .system.boosted .minus{
     width: 86px;
 }
 
-.shipwindow .fighter .value{
+.shipwindow .fighter .value {
     color: white;
     font-family: arial;
     font-size: 9px;
 }
 
-.shipwindow .heavyfighter .value{
+.shipwindow .heavyfighter .value {
     color: white;
     font-family: arial;
     font-size: 9px;
 }
 
-.shipwindow.flight .fightersystem{
-	width:30px;
-	height:30px;
-	margin:auto;
+.shipwindow.flight .fightersystem {
+    width: 30px;
+    height: 30px;
+    margin: auto;
 }
 
-.shipwindow.flight .fightersystem .icon{
-	width:26px;
-	height:20px;
-	padding-top:6px;
-	background-color:transparent;
-	border:1px solid #496791;
-	background-position:center; 
-	margin:1px;
-	text-align: center;
-	position:relative;
-	overflow:hidden;
-}
-
-.shipwindow.flight .fightersystem .icon .iconmask{
-    position:absolute;
-    left:-2px;
-    top:-2px;
-    width:30px;
-    height:30px;
-    background-color:transparent;
-    opacity:0.5;
-
-}
-
-.shipwindow .fightersystem.loading .icon .iconmask{
-    background-color:orange;
-}
-
-
-.fightersystemcontainer td{
-	padding:0px;
-	margin:0px;
-}
-.flight .fightersystemcontainer tr{
-	width:90px;
-	padding:0px;
-	margin:0px;
-}
-
-.heavyfighter .fightersystemcontainer tr{
-	width:120px;
-	padding:0px;
-	margin:0px;
-}
-
-.flight .fightersystemcontainer{
-	width:90px;
-	padding:0px;
-	margin:0px;
-	border-spacing:0;
-}
-
-.heavyfighter .fightersystemcontainer{
-	width:120px;
-	padding:0px;
-	margin:0px;
-	border-spacing:0;
-}
-
-
-.shipwindow .system .mode{
-    border:1px solid #496791;
-    text-align:center;
-    padding-top:1px;
-    height:11px;
-}
-
-
-
-body.phase1 .shipwindow  .system.modes.ballistic .mode,
-body.phase3 .shipwindow  .system.modes .mode
-{
-    display:block;
-}
-
-body.phase3 .shipwindow .system.modes.ballistic .mode
-{
-    display:none !important;
-}
-
-body .shipwindow .system.modes.firing .mode
-{
-    display:none !important;
-}
-
-
-#systemInfo{
-	position:absolute;
-	display:none;
-	top:200px;
-	left:200px;
-	box-shadow: 5px 5px 5px black;
-	background-color: black; /*#04161C;*/
+.shipwindow.flight .fightersystem .icon {
+    width: 26px;
+    height: 20px;
+    padding-top: 6px;
+    background-color: transparent;
     border: 1px solid #496791;
-	z-index:20000;
-	padding:0px;
-	margin:0px;
-	color:white;
-	font-family: arial;
+    background-position: center;
+    margin: 1px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.shipwindow.flight .fightersystem .icon .iconmask {
+    position: absolute;
+    left: -2px;
+    top: -2px;
+    width: 30px;
+    height: 30px;
+    background-color: transparent;
+    opacity: 0.5;
+
+}
+
+.shipwindow .fightersystem.loading .icon .iconmask {
+    background-color: orange;
+}
+
+
+.fightersystemcontainer td {
+    padding: 0px;
+    margin: 0px;
+}
+
+.flight .fightersystemcontainer tr {
+    width: 90px;
+    padding: 0px;
+    margin: 0px;
+}
+
+.heavyfighter .fightersystemcontainer tr {
+    width: 120px;
+    padding: 0px;
+    margin: 0px;
+}
+
+.flight .fightersystemcontainer {
+    width: 90px;
+    padding: 0px;
+    margin: 0px;
+    border-spacing: 0;
+}
+
+.heavyfighter .fightersystemcontainer {
+    width: 120px;
+    padding: 0px;
+    margin: 0px;
+    border-spacing: 0;
+}
+
+
+.shipwindow .system .mode {
+    border: 1px solid #496791;
+    text-align: center;
+    padding-top: 1px;
+    height: 11px;
+}
+
+
+
+body.phase1 .shipwindow .system.modes.ballistic .mode,
+body.phase3 .shipwindow .system.modes .mode {
+    display: block;
+}
+
+body.phase3 .shipwindow .system.modes.ballistic .mode {
+    display: none !important;
+}
+
+body .shipwindow .system.modes.firing .mode {
+    display: none !important;
+}
+
+
+#systemInfo {
+    position: absolute;
+    display: none;
+    top: 200px;
+    left: 200px;
+    box-shadow: 5px 5px 5px black;
+    background-color: black;
+    /*#04161C;*/
+    border: 1px solid #496791;
+    z-index: 20000;
+    padding: 0px;
+    margin: 0px;
+    color: white;
+    font-family: arial;
     font-size: 9px;
-	line-height:12px;
-	opacity:0.85;
-	border-radius: 5px 5px 5px 5px;
+    line-height: 12px;
+    opacity: 0.85;
+    border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px;
 
 }
-#systemInfo div{
-	padding:2px 20px 0px 20px;
-	margin:0px;
-	
+
+#systemInfo div {
+    padding: 2px 20px 0px 20px;
+    margin: 0px;
+
 }
 
-#systemInfo div.targeting{
-	padding:0;
-	margin:0;
-	
+#systemInfo div.targeting {
+    padding: 0;
+    margin: 0;
+
 }
 
-#systemInfo div.datacontainer{
-	padding:0px;
-	margin:0px 0px 5px 0px;
+#systemInfo div.datacontainer {
+    padding: 0px;
+    margin: 0px 0px 5px 0px;
 }
 
 
-#systeminfo span{
-	padding:0px;
-	margin:0px;
+#systeminfo span {
+    padding: 0px;
+    margin: 0px;
 }
-#systemInfo .value{
-	padding-left:4px;
+
+#systemInfo .value {
+    padding-left: 4px;
     color: #C6E2FF;
 }
 
-#systemInfo div.name{
-	border-bottom: 1px solid #496791;
+#systemInfo div.name {
+    border-bottom: 1px solid #496791;
 }
 
-#systemInfo span.name{
+#systemInfo span.name {
     font-style: normal !important;
 }
 
-#systemInfo div.calledtargeting{
-	border-top: 1px solid #496791;
-	color:red;
-	margin-top:5px;
+#systemInfo div.calledtargeting {
+    border-top: 1px solid #496791;
+    color: red;
+    margin-top: 5px;
 }
 
-#systemInfo .weapon{
-	color:#b34119;
+#systemInfo .weapon {
+    color: #b34119;
 }
 
 
-#systemInfo ul{
-	padding:2px 20px 0px 34px;
-	margin:0px;
+#systemInfo ul {
+    padding: 2px 20px 0px 34px;
+    margin: 0px;
 }
 
-#systemInfo .crit{
-	color:red;
+#systemInfo .crit {
+    color: red;
 }
 
 .interceptButton {
-    font-size: 12px;    
+    font-size: 12px;
     margin-top: 8px;
     background-color: black;
     border: 1px solid red;
@@ -1156,6 +1166,7 @@ body .shipwindow .system.modes.firing .mode
     background-image: url(../img/plussquare.png);
     cursor: pointer;
 }
+
 .armourMinusButton {
     display: inline-block;
     border: 1px solid #496791;
@@ -1204,20 +1215,21 @@ body .shipwindow .system.modes.firing .mode
     border-collapse: collapse;
 }
 
-.shipwindow.left{
-    left: 50px;
+.shipwindow.left {
+    left: 30px;
 }
 
-.shipwindow.right{
-    right: 50px;
+.shipwindow.right {
+    right: 572px;
+    margin-top: 0px;
 }
 
 @media only screen and (max-width: 1024px) {
-    .shipwindow.left{
+    .shipwindow.left {
         left: 0;
     }
-    
-    .shipwindow.right{
+
+    .shipwindow.right {
         right: 0;
     }
 
@@ -1225,7 +1237,7 @@ body .shipwindow .system.modes.firing .mode
         max-width: 100vw;
         max-height: 100%;
         overflow-x: scroll;
-        top:0;
+        top: 0;
     }
 
     .shipwindow .close {

@@ -1938,7 +1938,7 @@ ShadingField.prototype.doDeactivate = function () {
 					for (var j in system.systems) {
 						var fighterSystem = system.systems[j];	//The fighter's systems.
 						if (fighterSystem.name == "ShadingField") { //Is shading Field but not this one
-							if (fighterSystem.active) { //Is not boosted.
+							if (fighterSystem.active) { //Is boosted.
 								fighterSystem.active = false; //Set boost marker for notes.										
 							}
 						}
@@ -1982,6 +1982,115 @@ ShadingField.prototype.getOutput = function (ship, system) {
 	output = Math.max(0, output); //output cannot be negative!
 
 	return output;
+};
+
+
+var FtrPetals = function FtrPetals(json, ship) {
+	ShipSystem.call(this, json, ship);
+};
+FtrPetals.prototype = Object.create(ShipSystem.prototype);
+FtrPetals.prototype.constructor = FtrPetals;
+
+//As well as usualy places this is also called from systemFactory.js so tooltip updates on hover without having to open shipwindow - DK
+FtrPetals.prototype.initializationUpdate = function () {
+	if (this.active) {
+		this.outputDisplay = "OPEN";
+		var ship = this.ship;
+		var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.
+		
+		//Incredibly specific here, but it avoids alot of issues trying to pass effects from server
+		if(ship.name == "VorlonHeavyFighterFlight"){
+			flight.forwardDefense = 8; 
+			flight.sideDefense = 10;
+			flight.freethrust = 16;
+			ship.armour[2] = 1; //Reduce side armour of fighters
+			ship.armour[3] = 1; //Reduce side armour of fighters			
+		}else if(ship.name == "VorlonAssaultFighterFlight"){
+			flight.forwardDefense = 11; 
+			flight.sideDefense = 13;
+			flight.freethrust = 15;
+			ship.armour[2] = 2; //Reduce side armour of fighters
+			ship.armour[3] = 2; //Reduce side armour of fighters
+		}
+	} else{
+		this.outputDisplay = "-";		
+	}
+
+	this.data["Power Used"] = 'None';
+
+	return this;
+}
+
+
+FtrPetals.prototype.canActivate = function () {
+	if(gamedata.gamephase == 1 && !this.active) return true;
+	
+	return false;
+};
+
+FtrPetals.prototype.canDeactivate = function () {
+	if(gamedata.gamephase == 1 && this.active) return true;
+	
+	return false;
+};
+
+FtrPetals.prototype.doActivate = function () {
+	var ship = this.ship;
+	var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+	//If you boost one Petals in a flight, boost them all.
+	if (flight) {
+		for (var i in flight.systems) {
+			var system = flight.systems[i]; //The fighter	
+			if (!shipManager.systems.isDestroyed(ship, flight.systems[i])) {
+				for (var j in system.systems) {
+					var fighterSystem = system.systems[j];	//The fighter's systems.
+					if (fighterSystem.name == "FtrPetals") { //Is shading Field but not this one
+						if (!fighterSystem.active) { //Is not boosted.
+							fighterSystem.active = true; //Set boost marker for notes.										
+						}
+					}
+
+				}
+			}
+		}		
+
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+	}
+
+};
+
+FtrPetals.prototype.doDeactivate = function () {
+	var ship = this.ship;
+	var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+	//If you boost one Petals in a flight, boost them all.
+	if (flight) {
+		for (var i in flight.systems) {
+			var system = flight.systems[i]; //The fighter			
+			if (!shipManager.systems.isDestroyed(ship, flight.systems[i])) {
+				for (var j in system.systems) {
+					var fighterSystem = system.systems[j];	//The fighter's systems.
+					if (fighterSystem.name == "FtrPetals") { //Is shading Field but not this one
+						if (fighterSystem.active) { //Is  boosted.
+							fighterSystem.active = false; //Set boost marker for notes.										
+						}
+					}
+				}
+			}
+		}	
+
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+	}
+};
+
+FtrPetals.prototype.doIndividualNotesTransfer = function () {
+
+	if (gamedata.gamephase == 1) {
+		var active = this.active; //Was shaded this turn.		
+		this.individualNotesTransfer = Array();
+		if (active) {
+			this.individualNotesTransfer.push(1);
+		}
+	}
 };
 
 

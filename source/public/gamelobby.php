@@ -347,243 +347,289 @@
         </div>-->
 <main class="container"></main>        
 		<div class="panel large lobby">
+            <?php 
+                $isFleetTest = false;
+                if ($gamelobbydata->rules && $gamelobbydata->rules->hasRuleName('fleetTest')) {
+                    $isFleetTest = true;
+                }
+            ?>
             <div class="">
                 <!--<span class="panelheader">GAME NAME: </span>-->
-                <span class="panelsubheader" style="font-size: 24px; color: #e0e7ef;"> <?php print($gamelobbydata->name); ?></span>
+                <span class="panelsubheader game-name"> <?php print($isFleetTest ? '<span class="fleet-test-text">Fleet Test</span>' : $gamelobbydata->name); ?></span>
             </div>
 
+    <div class="lobby-split-container">
+        <!-- Left Column: Scenario Description -->
+        <div class="lobby-description-column">
 
-    <div class="lobbyheader">SCENARIO DESCRIPTION</div>
-
-    <div class="scenario-description">
-    <?php
-    $desc = $gamelobbydata->description;
-
-    // Replace <br> tags with newlines to normalize input
-    $desc = str_replace(['<br>', '<br/>', '<br />'], "\n", $desc);
-
-    // Remove the header line if it exists
-    $desc = preg_replace('/^\*{3}.*\*{3}\s*/m', '', $desc);
-
-    // Split into lines
-    $lines = preg_split("/\r\n|\n|\r/", trim($desc));
-
-    foreach ($lines as $line) {
-        // Trim whitespace for safety
-        $line = trim($line);
-        if ($line === '') continue; // skip empty lines
-
-        // Try to split on the first colon
-        $pos = strpos($line, ':');
-        if ($pos !== false) {
-            $label = trim(substr($line, 0, $pos));
-            $value = trim(substr($line, $pos + 1));
-
-            // Bold the label regardless of case (you can add uppercase check if you want)
-        echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
-            '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
-        } else {
-            // Just print line if no colon found
-            echo htmlspecialchars($line) . '<br>';
-        }
-    }
-    ?>
-    </div>
 
 <?php
 //define options list
 $optionsUsed = '';
 
-if ($gamelobbydata->gamespace == '-1x-1'){ //open map
-	$optionsUsed .= 'Open Map';
-}else{ //fixed map
-	$optionsUsed .= 'Map ' . $gamelobbydata->gamespace;
-}
-
-$simMv = false;
-$desperate = false;
-$asteroids = false;
-$moons = false;
-$initiativeCategories = null;
-$desperateTeams = null;
-$asteroidsNo = 0;
-$moonData = [];
-
-
-if ($gamelobbydata->rules) {
-//var_dump($gamelobbydata->rules);    
-    if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
-        $simMv = true;
-        $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
-        if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
-            $initiativeCategories = $initiativeRule->jsonSerialize();
-        }
+    if ($gamelobbydata->gamespace == '-1x-1'){ //open map
+        $optionsUsed .= 'Open Map';
+    }else{ //fixed map
+        $optionsUsed .= 'Map ' . $gamelobbydata->gamespace;
     }
 
-    if ($gamelobbydata->rules->hasRuleName('desperate')) {
-        $desperate = true;
-        $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
-        if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
-            $desperateTeams = $desperateRule->jsonSerialize();
-        }        
-    }
+    $simMv = false;
+    $desperate = false;
+    $asteroids = false;
+    $moons = false;
+    $initiativeCategories = null;
+    $desperateTeams = null;
+    $asteroidsNo = 0;
+    $moonData = [];
 
-    if ($gamelobbydata->rules->hasRuleName('asteroids')) {
-        $asteroids = true;
-        $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
-        if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
-            $asteroidsNo = $asteroidsRule->jsonSerialize();
-        }        
-    }  
 
-    if ($gamelobbydata->rules->hasRuleName('moons')) {
-        $moons = true;
-        $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
-        if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-            $moonData = $moonsRule->jsonSerialize();
-        }        
-    }       
-}
-
-if ($simMv == true) { // simultaneous movement
-    $optionsUsed .= ', Simultaneous Movement';
-    if ($initiativeCategories !== null) {
-        $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
-    }
-} else { // standard movement
-    $optionsUsed .= ', Standard Movement';
-}
-
-if ($desperate == true) { // Desperate rules in play
-    $teamDisplay = null;
-   
-    if($desperateTeams == 1) {
-            $teamDisplay = "Team 1";
-    }else if($desperateTeams == 2){    
-        $teamDisplay = "Team 2";
-    }else{    
-        $teamDisplay = "Both Teams";
-    }
-    $optionsUsed .= ', Desperate Rules ('. $teamDisplay . ')';
-} else { // standard rules
-    $optionsUsed .= '';
-}
-
-if ($asteroids == true) { // Asteroid terrain rules in play
-    $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
-}
-if ($moons == true) { // Moon terrain rules in play
-
-    $small  = $moonData['small']  ?? 0;
-    $medium = $moonData['medium'] ?? 0;
-    $large  = $moonData['large']  ?? 0;
-
-        function formatMoonCount($count, $type) {
-            if ($count <= 0) return null;
-            return $count . ' ' . $type;
+    if ($gamelobbydata->rules) {
+        if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
+            $simMv = true;
+            $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
+            if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
+                $initiativeCategories = $initiativeRule->jsonSerialize();
+            }
         }
 
-        // Build each part with pluralization
-    $moonParts = array_filter([
-        formatMoonCount($small,  'Small'),
-        formatMoonCount($medium, 'Medium'),
-        formatMoonCount($large,  'Large'),
-    ]);
+        if ($gamelobbydata->rules->hasRuleName('desperate')) {
+            $desperate = true;
+            $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
+            if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
+                $desperateTeams = $desperateRule->jsonSerialize();
+            }        
+        }
 
-    $optionsUsed .= empty($moonParts)
-        ? ', Moons (None)'
-        : ', Moons (' . implode(', ', $moonParts) . ')';
-}
+        if ($gamelobbydata->rules->hasRuleName('asteroids')) {
+            $asteroids = true;
+            $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
+            if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
+                $asteroidsNo = $asteroidsRule->jsonSerialize();
+            }        
+        }  
 
-if ($asteroids == false && $moons == false) { 
-    $optionsUsed .= ', No terrain';
-}
+        if ($gamelobbydata->rules->hasRuleName('moons')) {
+            $moons = true;
+            $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
+            if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
+                $moonData = $moonsRule->jsonSerialize();
+            }        
+        }       
+    }
+
+    if ($simMv == true) { // simultaneous movement
+        $optionsUsed .= ', Simultaneous Movement';
+        if ($initiativeCategories !== null) {
+            $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
+        }
+    } else { // standard movement
+        $optionsUsed .= ', Standard Movement';
+    }
+
+    if ($desperate == true) { // Desperate rules in play
+        $teamDisplay = null;
+    
+        if($desperateTeams == 1) {
+                $teamDisplay = "Team 1";
+        }else if($desperateTeams == 2){    
+            $teamDisplay = "Team 2";
+        }else{    
+            $teamDisplay = "Both Teams";
+        }
+        $optionsUsed .= ', Desperate Rules ('. $teamDisplay . ')';
+    } else { // standard rules
+        $optionsUsed .= '';
+    }
+
+    if ($asteroids == true) { // Asteroid terrain rules in play
+        $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
+    }
+    if ($moons == true) { // Moon terrain rules in play
+
+        $small  = $moonData['small']  ?? 0;
+        $medium = $moonData['medium'] ?? 0;
+        $large  = $moonData['large']  ?? 0;
+
+            function formatMoonCount($count, $type) {
+                if ($count <= 0) return null;
+                return $count . ' ' . $type;
+            }
+
+            // Build each part with pluralization
+        $moonParts = array_filter([
+            formatMoonCount($small,  'Small'),
+            formatMoonCount($medium, 'Medium'),
+            formatMoonCount($large,  'Large'),
+        ]);
+
+        $optionsUsed .= empty($moonParts)
+            ? ', Moons (None)'
+            : ', Moons (' . implode(', ', $moonParts) . ')';
+    }
+
+    if ($asteroids == false && $moons == false) { 
+        $optionsUsed .= ', No terrain';
+    }
 
 ?>
-<div><span class="scenariolabel">OPTIONS SELECTED: </span> <span><?php print($optionsUsed); ?> </span></div>
+<?php if(!$isFleetTest): ?>
 
-<div class="lobbyheader" style="margin-bottom: 10px; margin-top: 15px">RULES & INFO</div>
+<?php endif; ?>
 
-<a href="./factions-tiers.php" target="_blank" style="text-decoration: underline; font-size: 15px; color: #8bcaf2;">Fiery Void: Factions & Tiers</a> 
-<span style="font-size: 15px;"> - Overview of Fiery Void factions and their approximate strengths.</span>
+<div class="rules-info-container <?php if($isFleetTest) echo 'fleet-test'; ?>">
+<div class="lobbyheader rules-info-header">RULES & INFO</div>
+
+<a href="./factions-tiers.php" target="_blank" class="lobby-link-blue">Fiery Void: Factions & Tiers</a> 
+<span class="lobby-desc-text"> - Overview of Fiery Void factions and their approximate strengths.</span>
 <br>
-<a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" style="text-decoration: underline; font-size: 15px; color: #8bcaf2;">Ammo, Options & Enhancements</a> 
-<span style="font-size: 15px;"> - Details of all the extras available to Fiery Void units e.g. Missiles.</span>
-<!--<a href="files/enhancements_list.txt" target="_blank" style="text-decoration: underline; font-size: 14px; color: #8bcaf2;">Systems & Enhancements</a> 
-<span style="font-size: 14px;"> - Details of common systems and unit enhancements e.g. Boarding Actions / Missiles.</span> -->
+<a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer" class="lobby-link-blue">Ammo, Options & Enhancements</a> 
+<span class="lobby-desc-text"> - Details of all the extras available to Fiery Void units e.g. Missiles.</span>
 <br>
 
-<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 15px;">Tier 1</a> 
-<strong style="margin: 0 3px; font-size: 16px;">|</strong> 
-<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" style="color: #8bcaf2; text-decoration: underline; font-size: 15px;">Tier 2</a>
-<strong style="margin: 0 3px; font-size: 16px;">|</strong> 
-<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" style="color: #8bcaf2;  text-decoration: underline; font-size: 15px;">Tier 3</a>
-<span style="margin-left: 3px; margin-right: 3px;">-</span>
-<span style="font-size: 15px;">Random Faction Wheels</span> 
-<br><br>
+<a href="https://old.wheelofnames.com/fx3-uje" target="_blank" class="lobby-link-blue">Tier 1</a> 
+<strong class="lobby-separator-strong">|</strong> 
+<a href="https://old.wheelofnames.com/rmq-7ds" target="_blank" class="lobby-link-blue">Tier 2</a>
+<strong class="lobby-separator-strong">|</strong> 
+<a href="https://old.wheelofnames.com/sgd-5zq" target="_blank" class="lobby-link-blue">Tier 3</a>
+<span class="lobby-dash-span">-</span>
+<span class="lobby-desc-text">Random Faction Wheels</span> 
+</div> 
 
 
-	    
-            <div class="createsubheader" style = "margin-top: 0px; margin-bottom: 5px; margin-left: 1px;">TEAM 1:</div>
-			<div id="team1" class="subpanel slotcontainer">
-			</div>
-			
-            <div class="createsubheader" style = "margin-top: 5px; margin-bottom: 5px; margin-left: 1px;">TEAM 2:</div>
-			<div id="team2" class="subpanel slotcontainer">
+
+
+        <?php if (!$isFleetTest): ?>
+
+            <div class="lobbyheader rules-info-header">SCENARIO DESCRIPTION</div>
+
+            <div class="scenario-description">
+            <?php
+            $desc = $gamelobbydata->description;
+
+            // Replace <br> tags with newlines to normalize input
+            $desc = str_replace(['<br>', '<br/>', '<br />'], "\n", $desc);
+
+            // Remove the header line if it exists
+            $desc = preg_replace('/^\*{3}.*\*{3}\s*/m', '', $desc);
+
+            // Split into lines
+            $lines = preg_split("/\r\n|\n|\r/", trim($desc));
+
+            foreach ($lines as $line) {
+                // Trim whitespace for safety
+                $line = trim($line);
+                if ($line === '') continue; // skip empty lines
+
+                // Try to split on the first colon
+                $pos = strpos($line, ':');
+                if ($pos !== false) {
+                    $label = trim(substr($line, 0, $pos));
+                    $value = trim(substr($line, $pos + 1));
+
+                    // Bold the label regardless of case (you can add uppercase check if you want)
+                echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
+                    '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
+                } else {
+                    // Just print line if no colon found
+                    echo htmlspecialchars($line) . '<br>';
+                }
+            }
+            ?>
             </div>
-            
-            <!--<div class="slot" data-slotid="2" data-playerid=""><span>SLOT 2:</span></div>
-			-->
-			
-            <div class="button-container">
-                <span class="btn btn-secondary-lobby leave">Leave Game</span>
-            </div>
-			
-		</div>
-<div class="panel large lobby buy" style="display:none;">
 
-    <!-- Header row -->
-    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-        <div>
-            <span class="panelheader" style="margin-left: 5px; padding-right: 15px;">PURCHASE YOUR FLEET</span>
-        </div>  
-        <div>
-            <span class="panelsubheader current">0</span>
-            <span class="panelsubheader">/</span>
-            <span class="panelsubheader max">0</span><span class="panelsubheader max-points-units">pts</span>
-            <span class="remaining-points-container">
-                <span class="panelsmall" style="margin-left: 5px;">(</span>
-                <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
-                <span class="panelsmall">)</span>
-            </span>
+            <?php if(!$isFleetTest): ?>
+            <div><span class="scenariolabel">OPTIONS SELECTED: </span> <span class="scenariovalue"><?php print($optionsUsed); ?> </span></div>
+            <?php endif; ?>
+
+            <?php endif; ?>
+        </div>
+
+        <!-- Right Column: Map Preview -->
+        <?php if(!$isFleetTest): ?>
+        <div class="lobby-map-column">
+            <!--<div class="createsubheader deployment-header-style"><span>DEPLOYMENT ZONE PREVIEW:</span></div>-->
+            <div id="mapPreviewContainer" class="mapPreviewContainer">
+                <canvas id="mapPreview" width="400" height="300" class="mapPreviewContainerBox"></canvas>
+            </div>
+        </div>
+        <?php endif; ?>
+        <div class="lobby-leave-container">
+            <span class="btn btn-secondary-lobby leave lobby-leave-button">Leave Game</span>
         </div>
     </div>
+    
 
-            <div style="margin-top: 3px; margin-left: 5px; font-size: 12px;">
-                <span class="clickable tier-select-all" style="margin-right: 5px; text-decoration: underline; color: #8bcaf2;">All Filters</span>
-                <span style="margin-right: 5px; font-size: 16px;  font-weight: bold">|</span>          
-                <span class="clickable tier-select-none" style="text-decoration: underline; margin-right: 5px; color: #8bcaf2;">No Filters</span>
-                <span style="font-size: 16px;  font-weight: bold">|</span>  
+</div>
 
-                <label style="margin-left: 5px; margin-top: 3px;">
-                    <span style="margin-right: 2px;">Filter by ISD:</span>
-                    <input type="text" id="isdFilter" value="" style="width: 36px; height: 14px; text-align: right;">
-                    <span class="clickable resetISDFilter" style="text-decoration: underline; margin-left: 3px; font-size: 11px; color: #8bcaf2;">Reset ISD</span>
-                </label>
+<?php if(!$isFleetTest): ?>
+<div class="panel large lobby lobby-teams-wrapper">
+    <div class="lobby-teams-container">
+        
+        <div class="createsubheader team-header-one">TEAM 1:</div>
+        <div id="team1" class="subpanel slotcontainer">
+        </div>
+        
+        <div class="createsubheader team-header-two">TEAM 2:</div>
+        <div id="team2" class="subpanel slotcontainer">
+        </div>
+        
+    </div>
+</div>
+<?php endif; ?>
+
+<div class="panel large lobby buy buy-panel-container">
+
+
+    <div class="buy-header-flex">
+        <div>
+            <span class="panelheader buy-header-title-style">PURCHASE YOUR FLEET</span>
+        </div> 
+                <div>
+                    <span class="remaining-points-container">
+                        <span class="panelsmall points-bracket-style">(</span>
+                        <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
+                        <span class="panelsmall">)</span>
+                    </span>
+                </div>             
+    </div>
+
+            <div class="filter-container-style">
+                <div>
+                    <span class="clickable tier-select-all all-filters-link">All Filters</span>
+                    <span class="filter-pipe-separator">|</span>          
+                    <span class="clickable tier-select-none no-filters-link">No Filters</span>
+                    <span class="filter-pipe-separator">|</span>  
+
+                    <label class="isd-filter-label-style">
+                        <span class="filter-by-isd-text">Filter by ISD:</span>
+                        <input type="text" id="isdFilter" value="" class="isd-input-style">
+                        <span class="clickable resetISDFilter reset-isd-link-style">Reset ISD</span>
+                    </label>
+                </div>
+                <div>
+                    <!--<span class="remaining-points-container">
+                        <span class="panelsmall points-bracket-style">(</span>
+                        <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
+                        <span class="panelsmall">) </span>
+                    </span>-->
+                    <span class="panelsubheader current">0</span>
+                    <span class="panelsubheader">/</span>
+                    <span class="panelsubheader max">0</span><span class="panelsubheader max-points-units">pts</span>
+                </div>
             </div>
 
 
-    <div style="display:flex; align-items:center; font-size:12px; margin-top:3px; flex-wrap:nowrap;">
-        <label style="margin-left:5px;">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
-        <label style="margin-left:5px;">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
-        <label style="margin-left:5px;">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
-        <label style="margin-left:5px;">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
-        <label style="margin-left:5px;">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other" checked></label>
+    <div class="tier-filters-row">
+        <label class="tier-label-style">Tier 1 <input type="checkbox" class="tier-filter" data-tier="Tier 1" checked></label>
+        <label class="tier-label-style">Tier 2 <input type="checkbox" class="tier-filter" data-tier="Tier 2" checked></label>
+        <label class="tier-label-style">Tier 3 <input type="checkbox" class="tier-filter" data-tier="Tier 3" checked></label>
+        <label class="tier-label-style">Ancients <input type="checkbox" class="tier-filter" data-tier="Tier Ancients" checked></label>
+        <label class="tier-label-style">Other <input type="checkbox" class="tier-filter" data-tier="Tier Other" checked></label>
 
-        <span style="margin-left:6px; margin-right:6px; font-size:16px; font-weight:bold;">|</span>
+        <span class="tier-pipe-separator">|</span>
 
-        <label style="margin-left:5px;">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
-        <span id="customDropdown" style="display:none; margin-left:10px;">
+        <label class="tier-label-style">Show Custom<input type="checkbox" id="toggleCustom" class="yellow-tick"></label>
+        <span id="customDropdown" class="custom-dropdown-style">
             <select id="customSelect" name="customFilterMode">
                 <option value="showCustom">Show Customs</option>
                 <option value="showOnlyCustom">Show Only Customs</option>
@@ -591,14 +637,14 @@ if ($asteroids == false && $moons == false) {
         </span>  
 
 
-        <div style="display:flex; align-items:center; margin-left:auto; font-size:12px; gap:6px;">
-            <label style="margin-left: 5px; margin-top: 0px; display:flex; align-items:center;">
+        <div class="fleet-loading-container">
+            <label class="fleet-id-label-container">
                 <span class="Load-Fleet-by-ID">Load Fleet by #ID:</span>
                 <input type="text" id="fleetIdInput" value="" class="fleetIdInput">
             </label>
 
             <!-- Custom Saved Fleet Dropdown -->
-            <div style="position:relative; margin-left:auto; font-size:12px;">
+            <div class="saved-fleet-wrapper">
                 <div id="fleetDropdownButton" class="fleet-dropdown-btn">
                     Load a Saved Fleet
                 </div>
@@ -659,44 +705,37 @@ if ($asteroids == false && $moons == false) {
     </script>
 
         <!-- Fleet selection area -->
-        <table class="store" style="width:100%; margin-top: 5px;">
+        <table class="store store-layout-table">
             <tr>
-                <td style="width:45%;">
+                <td class="store-left-col">
                     <div id="store" class="subpanel"></div>
                 </td>            
-                <td style="width:55%; vertical-align: top;">
-                    <div id="fleet" class="subpanel" style="text-align: right;"></div>
+                <td class="store-right-col">
+                    <div id="fleet" class="subpanel fleet-panel-style"></div>
                 </td>
             </tr>
         </table>
 
 			
-        <div style="text-align: right; margin-top: 8px;">
-            <a href="./fleetchecker.php" title="Details of fleet composition rules" target="_blank" style="font-size: 14px;">Fleet Checker rules</a>
+        <div class="action-buttons-row">
+            <a href="./fleetchecker.php" title="Details of fleet composition rules" target="_blank" class="fleet-checker-link-style">Fleet Checker rules</a>
             &nbsp;            
             <span class="btn btn-primary-lobby checkbutton">CHECK</span>
             &nbsp;&nbsp;
             <span class="btn btn-primary-lobby savebutton">SAVE FLEET</span>
             &nbsp;&nbsp;            
+            <?php if(!$isFleetTest): ?>
             <span class="btn btn-success-lobby readybutton">READY</span>
+            <?php endif; ?>
         </div>
 
     </div> <!-- Final closing of the .buy panel -->
 
         <!-- ✅ Your inserted fleetcheck panel -->
-        <div id="fleetcheck" class="panel large lobby" style="display:none;"><p id="fleetchecktxt" style="display:block;"><span></div>
+        <div id="fleetcheck" class="panel large lobby fleet-check-panel-container"><p id="fleetchecktxt" class="fleet-check-text-style"><span></div>
 
-</div>
-
-    <div id="deploymentPreview" class="panel large lobby" style="margin-top:10px;">
-        <div class="createsubheader" style="margin-top:5px; text-align: center;"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
-        <div id="mapPreviewContainer" style="margin: 0 auto 20px auto; text-align: center;">
-            <canvas id="mapPreview" width="420" height="300"></canvas>
-        </div>
-    </div>
-
-        <div id="globalchat" class="panel large lobby" style="height:200px;">
-        <?php 
+        <div id="globalchat" class="panel large lobby global-chat-wrapper">
+        <?php
             $chatgameid = 0;
             $chatelement = "#globalchat";
             include("chat.php")
@@ -716,7 +755,7 @@ if ($asteroids == false && $moons == false) {
 		<div class="datacontainer"></div>
 	</div>
                     
-    <div id="slottemplatecontainer" style="display:none;">
+    <div id="slottemplatecontainer" class="hidden-template-container">
         <div class="slot" >
             <div class="leaveslot">Leave Slot</div>
             <div>
@@ -748,14 +787,14 @@ if ($asteroids == false && $moons == false) {
     </div>
                     
                     
-    <div id="systemtemplatecontainer" style="display:none;">
+    <div id="systemtemplatecontainer" class="hidden-template-container">
 
         <div class="structure system">
             <div class="name"><span class="namevalue">STRUCTURE</span></div>
             <div class="systemcontainer">
 
                 <div class="health systembarcontainer">
-                    <div class="healthbar bar" style="width:40px;"></div>
+                    <div class="healthbar bar health-bar-initial"></div>
                     <div class="valuecontainer"><span class="healthvalue value"></span></div>
                 </div>
             </div>

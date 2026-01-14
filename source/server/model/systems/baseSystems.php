@@ -5026,7 +5026,7 @@ capacitor is completely emptied.
 		}
 
 		//We can apply petal effects here so they are visible for player (note, criticals don't seem to get saved to database here, prolly because $dbManager->submitCriticals isn't called)			
-		if($gamedata->phase == 2 || $gamedata->phase == 3){
+		if($gamedata->phase == 2 || $gamedata->phase == 5 || $gamedata->phase == 3){
 	
 			$boostlevel = $this->getBoostLevel($gamedata->turn);
 			if ($boostlevel <1) return; //not boosted - no crit!
@@ -5171,6 +5171,97 @@ capacitor is completely emptied.
     } //endof function criticalPhaseEffects	
 							
 } //endof PowerCapacitor
+
+
+class FtrPetals extends ShipSystem implements SpecialAbility{    
+		public $name = "FtrPetals";
+		public $displayName = "Vorlon Petals";
+		public $iconPath = "PowerCapacitor.png";
+		public $specialAbilities = array("Petals");
+		public $specialAbilityValue = 1;		
+		public $primary = true;
+		public $detected = true;
+		//defensive system
+		public $rangePenalty = 0;
+		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.
+		public static $petalsDone = array();	
+		protected $initializeOnLoad	= true; //Runs initialisationUpdate() immediately on page loading, useful for updating tooltips immediately.  Needs passed in strpForJson().
+		
+		function __construct($armour, $maxhealth, $powerReq, $output){
+			parent::__construct($armour, $maxhealth, $powerReq, $output);
+			
+		}
+
+		protected $possibleCriticals = array(
+			26=>array("OutputReduced1")
+		);
+
+		public function isActive(){
+			return $this->active;
+		}
+
+		public function setSystemDataWindow($turn){
+			$this->data["Special"] = "Can be toggled open each turn during Initial Orders.";
+			$this->data["Special"] .= "<br>Whislt open Fighters gain +2 Thrust, however Defence Profiles are increase by 5% and their Side Armour is reduced by 2.";													
+		}	
+
+		public function getSpecialAbilityValue($args){
+			return $this->specialAbilityValue;
+		}
+
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer)){			
+			foreach($this->individualNotesTransfer as $petalChange){			
+				if($petalChange == 1){
+					$this->active = true;
+				}else{
+					$this->active = false; //May start Deployment phase as true via notes
+				}									
+			}
+		} 
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}			
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
+		$ship = $this->getUnit();	
+		
+		switch($gameData->phase){
+			
+			case 1:
+				if ($this->active) {
+						$notekey = 'Open';
+						$noteHuman = 'Petals opened';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}
+			break;
+			
+		}	
+	}			
+
+	public function onIndividualNotesLoaded($gamedata){
+		//Sort notes by turn, and then phase so latest detection note is always last.
+		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+			if($currNote->turn == $gamedata->turn){
+				$this->active = true;
+			}
+		}
+
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();		
+	} //endof function onIndividualNotesLoaded
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->active = $this->active;
+		$strippedSystem->initializeOnLoad = $this->initializeOnLoad;							        
+		return $strippedSystem;
+	}
+
+	} //endof FtrPetals
+
 
 class StructureTechnical extends ShipSystem{
     public $name = "StructureTechnical";
