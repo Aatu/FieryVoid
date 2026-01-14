@@ -178,7 +178,7 @@ window.ajaxInterface = {
 
     // Internal method - handles the actual AJAX call and retries (bypasses queue)
     _doAjaxWithRetry: function (options, attempt) {
-        const maxAttempts = 5;
+        const maxAttempts = options.maxAttempts || 5;
         const baseDelay = 200;
         const deferred = $.Deferred();
         let isRetrying = false;
@@ -971,7 +971,7 @@ window.ajaxInterface = {
             return;
         }
 
-        if(phase === -2 && gamedata.rules && gamedata.rules.fleetTest === 1) return; //Don't poll for Fleet Test games.
+        if (phase === -2 && gamedata.rules && gamedata.rules.fleetTest === 1) return; //Don't poll for Fleet Test games.
 
         if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
         ajaxInterface.pollcount++;
@@ -1018,6 +1018,13 @@ window.ajaxInterface = {
     },
 
     requestGamedata: function requestGamedata() {
+        const now = Date.now();
+        const lastRequest = parseInt(localStorage.getItem('fv_lastTacGamedataRequest')) || 0;
+
+        // F5 Spam protection: 500ms debounce across reloads
+        if (now - lastRequest < 500) return;
+        localStorage.setItem('fv_lastTacGamedataRequest', now);
+
         // prevent overlap if already running
         if (ajaxInterface.submiting) return;
 
@@ -1027,6 +1034,7 @@ window.ajaxInterface = {
             type: 'GET',
             url: 'gamedata.php',
             dataType: 'json',
+            maxAttempts: 2, // Limit retries for in-game polling too
             data: {
                 turn: gamedata.turn,
                 phase: gamedata.gamephase,
@@ -1046,23 +1054,26 @@ window.ajaxInterface = {
     },
 
     startPollingGames: function () {
-        this.pollGames();
+        // Polling removed as per user request (games.php loads data via PHP)
     },
 
     // Polling entry point for home screen
     pollGames: function () {
         if (gamedata.waiting === false) return;
         if (!gamedata.animating) {
-            animation.animateWaiting();
+            //animation.animateWaiting();
             ajaxInterface.requestAllGames();
         }
     },
 
     requestAllGames: function () {
         const now = Date.now();
+        const lastRequest = parseInt(localStorage.getItem('fv_lastGamesRequest')) || 0;
 
-        // Debounce rapid triggers
-        if (now - ajaxInterface.lastRequestTimeGames < ajaxInterface.debounceDelayGames) return;
+        // Debounce rapid triggers (using persistent storage for F5 spam protection)
+        if (now - lastRequest < ajaxInterface.debounceDelayGames) return;
+        localStorage.setItem('fv_lastGamesRequest', now);
+
         ajaxInterface.lastRequestTimeGames = now;
 
         // Defensive check: prevent overlap if already running
@@ -1088,6 +1099,7 @@ window.ajaxInterface = {
             type: 'GET',
             url: 'allgames.php',
             dataType: 'json',
+            maxAttempts: 2, // Limit retries to prevent piling on load
             data: {},
             success: ajaxInterface.successRequest,
             error: ajaxInterface.errorAjax,
