@@ -48,12 +48,12 @@ const ShipLink = styled.span`
     margin-right: 5px;
 `;
 
-class ShipWindowEw extends React.Component{
+class ShipWindowEw extends React.Component {
 
-  
+
 
     render() {
-        const {ship} = this.props;
+        const { ship } = this.props;
 
         return (
             <EwContainer>
@@ -67,30 +67,30 @@ class ShipWindowEw extends React.Component{
 
 const getEW = ship => {
     let list = [];
-	let deployTurn = shipManager.getTurnDeployed(ship);
-    if(deployTurn > gamedata.turn){ //Selected ships is not deployed yet - DK May 2025
-        list.push(<Entry key={`dew-scs-${ship.id}`}><EntryHeader><br></br>DEPLOYS ON TURN</EntryHeader>{deployTurn}</Entry>);       
-        return list;  
-    }  
+    let deployTurn = shipManager.getTurnDeployed(ship);
+    if (deployTurn > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
+        list.push(<Entry key={`dew-scs-${ship.id}`}><EntryHeader><br></br>DEPLOYS ON TURN</EntryHeader>{deployTurn}</Entry>);
+        return list;
+    }
 
-    list.push(<Entry key={`dew-scs-${ship.id}`}><EntryHeader>DEW:</EntryHeader>{ew.getDefensiveEW(ship)}</Entry>);
-    var CCEWamount = Math.max(0,ew.getCCEW(ship) - ew.getDistruptionEW(ship));
-    list.push(<Entry key={`ccew-scs-${ship.id}`}><EntryHeader>CCEW:</EntryHeader>{CCEWamount}</Entry>);
+    list.push(<Entry key={`dew-scs-${ship.id}`}><EntryHeader>DEW:</EntryHeader>{formatEW(ew.getDefensiveEW(ship))}</Entry>);
+    var CCEWamount = Math.max(0, ew.getCCEW(ship) - ew.getDistruptionEW(ship));
+    list.push(<Entry key={`ccew-scs-${ship.id}`}><EntryHeader>CCEW:</EntryHeader>{formatEW(CCEWamount)}</Entry>);
 
-   	let bdew = ew.getBDEW(ship) * 0.25;
-   	let DetectSEW = ew.getDetectSEW(ship);
+    let bdew = ew.getBDEW(ship) * 0.25;
+    let DetectSEW = ew.getDetectSEW(ship);
 
-	if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
-	    
+    if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
+
     if (bdew) {
-        list.push(<Entry key={`bdew-scs-${ship.id}`}><EntryHeader>BDEW:</EntryHeader>{bdew.toFixed(2)}</Entry>);
+        list.push(<Entry key={`bdew-scs-${ship.id}`}><EntryHeader>BDEW:</EntryHeader>{formatEW(bdew)}</Entry>);
     }
     if (DetectSEW) {
-        list.push(<Entry key={`DetectSEW-scs-${ship.id}`}><EntryHeader>Detect Stealth:</EntryHeader>{DetectSEW}</Entry>);
+        list.push(<Entry key={`DetectSEW-scs-${ship.id}`}><EntryHeader>Detect Stealth:</EntryHeader>{formatEW(DetectSEW)}</Entry>);
     }
 
     list = list.concat(ship.EW
-        .filter(ewEntry =>  ewEntry.turn === gamedata.turn)
+        .filter(ewEntry => ewEntry.turn === gamedata.turn)
         .filter(ewEntry => ewEntry.type === "OEW" || ewEntry.type === "DIST" || ewEntry.type === "SOEW" || ewEntry.type === "SDEW")
         .map(ewEntry => (<Entry key={`${ewEntry.type}-scs-${ship.id}-${ewEntry.targetid}`}><EntryHeader>{ewEntry.type}:</EntryHeader><ShipLink>{gamedata.getShip(ewEntry.targetid).name}</ShipLink>{getAmount(ewEntry, ship)}</Entry>)))
 
@@ -101,24 +101,28 @@ const getEW = ship => {
 const getAmount = (ewEntry, ship) => {
     switch (ewEntry.type) {
         case 'SDEW':
-			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){
-			    let result = ewEntry.amount * 0.333;
-			    result = Math.round(result * 3) / 3;
-  				return result.toFixed(2);		
-			}else{        
-            	return ewEntry.amount * 0.5;
-			} 
+            if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) {
+                let result = ewEntry.amount * 0.333;
+                result = Math.round(result * 3) / 3;
+                return formatEW(result);
+            } else {
+                return formatEW(ewEntry.amount * 0.5);
+            }
         case 'DIST':
-			if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")){
-            	return ewEntry.amount / 4;				
-			}else{        
-            	return ewEntry.amount / 3;
-			}
+            if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) {
+                return formatEW(ewEntry.amount / 4);
+            } else {
+                return formatEW(ewEntry.amount / 3);
+            }
         case 'OEW':
-            return Math.max(0,ewEntry.amount - ew.getDistruptionEW(ship));
+            return formatEW(Math.max(0, ewEntry.amount - ew.getDistruptionEW(ship)));
         default:
-            return ewEntry.amount;
+            return formatEW(ewEntry.amount);
     }
+}
+
+const formatEW = val => {
+    return Math.round(val * 100) / 100;
 }
 
 export default ShipWindowEw;

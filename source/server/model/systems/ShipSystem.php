@@ -56,7 +56,7 @@ class ShipSystem {
 	
 	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.
 	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted	
-
+	protected $initializeOnLoad	= false; //Runs initialisationUpdate() immediately on page loading, useful for updating tooltips immediately.  Needs passed in strpForJson().
 
     function __construct($armour, $maxhealth, $powerReq, $output){
         $this->armour = $armour;

@@ -841,7 +841,7 @@ shipManager.power = {
 		//if (gamedata.gamephase !== 1) return;
 		
 		let isBoostPhase = false;
-
+		/*
 		// Check if boostOtherPhases is defined as an array
 		if (system.boostOtherPhases.length > 0) {
 			isBoostPhase = system.boostOtherPhases.includes(gamedata.gamephase);
@@ -849,8 +849,11 @@ shipManager.power = {
 		// Fallback: default boost phase (1)
 		} else if (gamedata.gamephase === 1) {
 			isBoostPhase = true;
-		}
+		}*/
 
+		if (gamedata.gamephase === 1) {
+			isBoostPhase = true;
+		}
 		// Stop here if not a boostable phase
 		if (!isBoostPhase) return;	
 
@@ -883,7 +886,7 @@ shipManager.power = {
 
 		//if (gamedata.gamephase !== 1) return;
 		let isBoostPhase = false;
-
+		/*
 		// Check if boostOtherPhases is defined as an array
 		if (system.boostOtherPhases.length > 0) {
 			isBoostPhase = system.boostOtherPhases.includes(gamedata.gamephase);
@@ -892,7 +895,11 @@ shipManager.power = {
 		} else if (gamedata.gamephase === 1) {
 			isBoostPhase = true;
 		}
+		*/
 
+		if (gamedata.gamephase === 1) {
+			isBoostPhase = true;
+		}		
 		// Stop here if not a boostable phase
 		if (!isBoostPhase) return;		
 		

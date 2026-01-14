@@ -269,13 +269,18 @@
         <div class="split-header">MAP LAYOUT AND TEAMS:</div>
         <div id="gamespace" class="settings-group gamespacecontainer">
             <div class="mapSelectContainer">
-                <label for="mapDimensionsSelect" class="mapDimensionsSelect">CHOOSE MAP:</label>
+                <label for="mapDimensionsSelect" class="mapDimensionsSelect">MAP TEMPLATES:</label>
                 <select id="mapDimensionsSelect" name="mapdimensions" class="mapSelect">
                     <option value="custom">Custom</option>
-                    <option value="knifefight">Knife Fight (30x24)</option>
+                    <option value="small">Small (30x24)</option>
                     <option value="standard" selected>Standard (42x30)</option>
-                    <option value="baseassault">Base Assault (60x40)</option>
-                    <option value="unlimited">Unlimited</option>                    
+                    <option value="large">Large (60x40)</option>
+                    <option value="2v2">2v2 (42x40)</option>
+                    <option value="ambush">Ambush (42x40)</option>
+                    <option value="baseAssault">Base Assault (60x40)</option>                    
+                    <option value="convoyRaid">Convoy Raid (42x30)</option>
+                    <option value="northvsouth">North Vs South (60x40)</option>                                                           
+                    <option value="unlimited">No Boundaries</option>                    
                 </select>
             </div>
             <div class="gamespacedefinition">
@@ -321,6 +326,7 @@
                 <input id="createGameData" type="hidden" name="data" value="">
 
                 <div style="text-align: right; margin-top: 10px; padding-bottom: 1px;">
+                    <span class="btn btn-fleet-test" onclick="createGame.submitFleetTest()" style="margin-right: 15px;">Fleet Test</span>
                     <button type="submit" class="btn btn-create-submit create-game-btn" style="position: static; margin-top: 0; float: none;">
                         Create Game
                     </button>
@@ -341,7 +347,6 @@
                 </div>
                 <div class="create-row">
                     
-                    <label>Points:</label>
                     <label>Points:</label>
                     <input class="points smallSize" type="text" data-validation="^[0-9]+$" name="points" value="0">
                     <span class="unlimited-label" style="display:none; font-weight:bold; color:#DEEBFF; margin-left:5px; padding: 5px;">Unlimited</span>

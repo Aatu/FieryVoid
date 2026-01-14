@@ -568,9 +568,14 @@ window.gamedata = {
                 }
             }
 
+            UI.shipMovement.hide();
+
             confirm.confirm(
                 html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
-                gamedata.doCommit
+                gamedata.doCommit,
+                function () {
+                    UI.shipMovement.show();
+                }
             );
 
             //CHECK for NO PRE FIRE            
@@ -745,6 +750,7 @@ window.gamedata = {
                     if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
                         hasNoFO.push(myShips[ship]);
                     }
+                UI.shipMovement.hide();  //To hide combat pivot UI again on commit clicked                  
                 }
             }
 
@@ -771,7 +777,14 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
-                confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                //confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                confirm.confirm(
+                    html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
+                    gamedata.doCommit,
+                    function () {
+                        UI.shipMovement.show(); //To show combat pivot UI again on Cancel
+                    }
+                );                
             }
         } else if (gamedata.gamephase != 4) {
             confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
@@ -1343,7 +1356,7 @@ getActiveShipName: function getActiveShipName() {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
-        if (gamedata.gamephase == 1) {
+        /*if (gamedata.gamephase == 1) {
             //To recalculate fleet list values in Info Tab without refreshing page
             fleetListManager.reset();
             fleetListManager.displayFleetLists();
@@ -1351,12 +1364,11 @@ getActiveShipName: function getActiveShipName() {
             //To refresh whether player has committed their orders when a new phase begins.
             fleetListManager.refreshed = false;
             fleetListManager.displayFleetLists();
-        }
+        }*/
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
 
-        //fleetListManager.updateFleetList(); //No need to call again, called in fleetListManager.displayFleetLists()
     },
 
     drawIniGUI: function drawIniGUI() {
@@ -1573,6 +1585,12 @@ getActiveShipName: function getActiveShipName() {
         gamedata.initPhase();
         gamedata.drawIniGUI();
         window.webglScene.receiveGamedata(this);
+
+        // ✅ Update Info Tab (Waiting Status) with new data
+        if (window.fleetListManager) {
+            fleetListManager.refreshed = false;
+            fleetListManager.displayFleetLists();
+        }
 
         gamedata.checkGameStatus();
     },

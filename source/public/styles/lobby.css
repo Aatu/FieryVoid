@@ -395,3 +395,300 @@
     margin-right: 5px;
     margin-left: 2px;
 }
+
+/* Post-Refactor Inline Style Replacements */
+
+.game-name {
+    font-size: 30px;
+    color: #e0e7ef;
+}
+
+.fleet-test-text {
+    color: yellow;
+}
+
+.rules-info-header {
+    margin-bottom: 10px;
+    margin-top: 15px;
+}
+
+.lobby-link-blue {
+    text-decoration: underline;
+    font-size: 15px;
+    color: #8bcaf2;
+}
+
+.lobby-desc-text {
+    font-size: 15px;
+}
+
+.lobby-separator-strong {
+    margin: 0 3px;
+    font-size: 16px;
+}
+
+.lobby-dash-span {
+    margin-left: 3px;
+    margin-right: 3px;
+}
+
+.team-header-one {
+    margin-top: 0px;
+    margin-bottom: 5px;
+    margin-left: 1px;
+}
+
+.team-header-two {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 1px;
+}
+
+.buy-panel-container {
+    display: none;
+}
+
+.buy-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 15px;
+}
+
+.buy-header-title-style {
+    margin-left: 5px;
+    padding-right: 15px;
+}
+
+.points-bracket-style {
+    margin-left: 2px;
+}
+
+.filter-container-style {
+    margin-top: 0px;
+    margin-left: 5px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 0px;
+    /* Add some padding on the right for the points */
+}
+
+.all-filters-link {
+    margin-right: 5px;
+    text-decoration: underline;
+    color: #8bcaf2;
+}
+
+.filter-pipe-separator {
+    margin-right: 5px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.no-filters-link {
+    text-decoration: underline;
+    margin-right: 5px;
+    color: #8bcaf2;
+}
+
+.isd-filter-label-style {
+    margin-left: 5px;
+    margin-top: 3px;
+}
+
+.filter-by-isd-text {
+    margin-right: 2px;
+}
+
+.isd-input-style {
+    width: 36px;
+    height: 14px;
+    text-align: right;
+}
+
+.reset-isd-link-style {
+    text-decoration: underline;
+    margin-left: 3px;
+    font-size: 11px;
+    color: #8bcaf2;
+}
+
+.tier-filters-row {
+    display: flex;
+    align-items: center;
+    font-size: 12px;
+    margin-top: 3px;
+    flex-wrap: nowrap;
+}
+
+.tier-label-style {
+    margin-left: 5px;
+}
+
+.tier-pipe-separator {
+    margin-left: 6px;
+    margin-right: 6px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.custom-dropdown-style {
+    display: none;
+    margin-left: 10px;
+}
+
+.fleet-loading-container {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+    font-size: 12px;
+    gap: 6px;
+}
+
+.fleet-id-label-container {
+    margin-left: 5px;
+    margin-top: 0px;
+    display: flex;
+    align-items: center;
+}
+
+.saved-fleet-wrapper {
+    position: relative;
+    margin-left: auto;
+    font-size: 12px;
+}
+
+.store-layout-table {
+    width: 100%;
+    margin-top: 5px;
+}
+
+.store-left-col {
+    width: 45%;
+}
+
+.store-right-col {
+    width: 55%;
+    vertical-align: top;
+}
+
+.fleet-panel-style {
+    text-align: right;
+}
+
+.action-buttons-row {
+    text-align: right;
+    margin-top: 8px;
+}
+
+.fleet-checker-link-style {
+    font-size: 14px;
+}
+
+.fleet-check-panel-container {
+    display: none;
+}
+
+.fleet-check-text-style {
+    display: block;
+}
+
+.deployment-preview-wrapper {
+    margin-top: 10px;
+}
+
+.deployment-header-style {
+    margin-top: 5px;
+    text-align: center;
+}
+
+.map-preview-wrapper {
+    margin: 0 auto 20px auto;
+    text-align: center;
+}
+
+.global-chat-wrapper {
+    height: 200px;
+}
+
+.hidden-template-container {
+    display: none;
+}
+
+.health-bar-initial {
+    width: 40px;
+}
+
+.lobby-split-container {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    align-items: center;
+    margin-bottom: 0px;
+}
+
+/* Container for Rules & Info to allow spacing control */
+.rules-info-container {
+    margin-bottom: 25px;
+}
+
+/* Specific spacing for Fleet Test mode to reduce gaps */
+.rules-info-container.fleet-test {
+    margin-bottom: 0px; /* Reduced margin for Fleet Test */
+}
+
+.lobby-description-column {
+    flex: 1;
+    min-width: 300px;
+}
+
+.lobby-map-column {
+    flex: 0 0 auto;
+    display: flex;
+    margin-top: 0px;
+    /* Adjust to vertically offset map from center */
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    position: relative;
+    top: 22px;
+    /* Adjust this value */
+}
+
+/* Container for Leave Game button to align bottom-right in split container */
+.lobby-leave-container {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+/* Unique style for Leave Game button */
+.lobby-leave-container .lobby-leave-button {
+    /* Add custom styles here */
+    margin-right: 0px;
+    margin-top: 3px;    
+}
+
+.mapPreviewContainer {
+    margin-top: 10px;
+    margin-bottom: 5px;
+    text-align: center;
+
+}
+
+.mapPreviewContainerBox {
+    border: 2px solid #215a7a;
+    border-radius: 4px;
+    background-color: #000;
+    /* Ensure some background if empty */
+}
+
+/* Ensure canvas is responsive if needed, though fixed dimensions were requested to match createGame */
+#mapPreview {
+    display: block;
+    min-width: 480px;
+}

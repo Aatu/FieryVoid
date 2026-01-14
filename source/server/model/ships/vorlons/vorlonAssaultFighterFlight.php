@@ -58,6 +58,7 @@ class VorlonAssaultFighterFlight extends FighterFlight{
 			$fighter->imagePath = "img/ships/VorlonAssaultFighter.png";
 			$fighter->iconPath = "img/ships/VorlonAssaultFighter_Large.png";
 						
+			$fighter->addFrontSystem(new FtrPetals(0,1,0,2));			
 			//main weapon
 			$fighter->addFrontSystem(new VorlonLtDischargeGun(330, 30, true));//arcfrom, arcto, dual mount true/false
 			

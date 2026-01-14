@@ -1346,14 +1346,14 @@ class SuperHeavyMolecularDisruptor extends Raking
         public $weaponClass = "Molecular"; 
         public $startArcArray = array(); 
         public $endArcArray = array();        
-
+        protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
+        
         //New variables to allow sweeping split shots.
         public $maxVariableShots = 24; //Default value, will be amended in front end anyway.
 		public $canSplitShots = true; //Allows weapon to split shots.
         //public $canSplitShotsArray = array(1=>true, 2=>true, 3=>true, 4=>true);
         public $canSplitShotsArray = array(1=>true, 2=>true);        
 	    protected $multiModeSplit = true; //Can split shots across different modes
-        protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
 		public $specialHitChanceCalculation	= true;	 //To update targeting tooltip in Front End
         private $damageDice = array();  
         private $maxDiceArray = array(1=> 8, 2=> 16, 3=> 24);         			
