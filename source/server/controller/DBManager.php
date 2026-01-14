@@ -2270,54 +2270,67 @@ class DBManager
 
     public function getSystemDataForShips(TacGamedata $gamedata, $fetchTurn)
     {
+        // Optmization: Fetch ALL system data up to current turn, ordered by turn ASC.
+        // We will then iterate and overwrite the data in a PHP array. 
+        // This avoids the expensive correlated subquery "SELECT ... ORDER BY turn DESC LIMIT 1" for every row.
         $stmt = $this->connection->prepare(
         "SELECT 
-                (SELECT data FROM tac_systemdata WHERE systemid = t.systemid AND shipid = t.shipid AND gameid = ? AND turn <= ? ORDER BY turn DESC limit 1) AS data, shipid, systemid, subsystem
+                shipid, systemid, subsystem, data
             FROM
-                tac_systemdata t
+                tac_systemdata
             WHERE 
-                gameid = ?  
-            GROUP BY 
-                systemid, subsystem, gameid, shipid
+                gameid = ? AND turn <= ? 
+            ORDER BY turn ASC
           "
         );
 
-        //select shipid, systemid, max(turn) as maxturn, (select data from tac_systemdata where systemid = t.systemid and shipid = t.shipid and turn <= 1 order by turn desc limit 1) as data from tac_systemdata t group by systemid, subsystem, gameid, shipid;
-
         if ($stmt) {
-            $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
+            $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
             $stmt->execute();
             $stmt->bind_result(
-                $data,
                 $shipid,
                 $systemid,
-                $subsystem
+                $subsystem,
+                $data
             );
+            
+            $systemDataMap = array(); // shipid -> systemid -> subsystem -> data
 
             while ($stmt->fetch()) {
-                //Debug::log("get ship by id '$shipId'\n");
-                $gamedata->getShipById($shipid)->getSystemById($systemid)->setSystemData($data, $subsystem);
+                 if (!isset($systemDataMap[$shipid])) $systemDataMap[$shipid] = array();
+                 if (!isset($systemDataMap[$shipid][$systemid])) $systemDataMap[$shipid][$systemid] = array();
+                 $systemDataMap[$shipid][$systemid][$subsystem] = $data;
             }
             $stmt->close();
+            
+            // Apply to ships
+            foreach ($systemDataMap as $sId => $systems) {
+                $ship = $gamedata->getShipById($sId);
+                if (!$ship) continue;
+                foreach ($systems as $sysId => $subsystems) {
+                    $system = $ship->getSystemById($sysId);
+                    if (!$system) continue;
+                    foreach ($subsystems as $subId => $dat) {
+                        $system->setSystemData($dat, $subId);
+                    }
+                }
+            }
         }
 
-        // Get ammo info
+        // Get ammo info - Same optimization
         $stmt = $this->connection->prepare(
             "SELECT 
-                shipid, systemid, firingmode, (select ammo from tac_ammo where shipid = t.shipid and systemid = t.systemid and firingmode = t.firingmode and gameid = ? and turn <= ? order by turn desc limit 1)
+                shipid, systemid, firingmode, ammo
             FROM 
-                tac_ammo t
+                tac_ammo
             WHERE 
-                gameid = ?
-            GROUP BY
-              shipid, systemid, firingmode
+                gameid = ? AND turn <= ?
+            ORDER BY turn ASC
             "
-
         );
 
-        //select shipid, systemid, firingmode, (select ammo from tac_ammo where shipid = t.shipid and systemid = t.systemid and firingmode = t.firingmode and turn <= 1 order by turn desc limit 1) as ammo from tac_ammo t group by shipid, systemid, firingmode;
         if ($stmt) {
-            $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
+            $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
             $stmt->execute();
             $stmt->bind_result(
                 $shipid,
@@ -2325,12 +2338,28 @@ class DBManager
                 $firingmode,
                 $ammo
             );
+            
+            $ammoMap = array();
 
             while ($stmt->fetch()) {
-                // This is a dual/duoweapon or a fightersystem
-                $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
+                 if (!isset($ammoMap[$shipid])) $ammoMap[$shipid] = array();
+                 if (!isset($ammoMap[$shipid][$systemid])) $ammoMap[$shipid][$systemid] = array();
+                 $ammoMap[$shipid][$systemid][$firingmode] = $ammo;
             }
             $stmt->close();
+            
+            // Apply ammo
+            foreach ($ammoMap as $sId => $systems) {
+                $ship = $gamedata->getShipById($sId);
+                if (!$ship) continue;
+                foreach ($systems as $sysId => $modes) {
+                     $system = $ship->getSystemById($sysId);
+                     if (!$system) continue;
+                     foreach ($modes as $mode => $amount) {
+                         $system->setAmmo($mode, $amount);
+                     }
+                }
+            }
         }	    
 
 
