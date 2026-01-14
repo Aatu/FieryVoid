@@ -36,7 +36,14 @@ class ChatManager{
             $message = htmlspecialchars($message);
             
             self::initDBManager();
-            self::$dbManager->submitChatMessage($userid, $message, $gameid);
+            $msgId = self::$dbManager->submitChatMessage($userid, $message, $gameid);
+            
+            // APCu: Update last message timestamp/ID to notify pollers
+            if (function_exists('apcu_store')) {
+                // We use microtime because we don't have the new ID easily without changing DBManager return
+                apcu_store('chat_last_update_' . $gameid, microtime(true)); 
+            }
+            
             return "{}";
         }    
         catch(Exception $e) 
@@ -51,7 +58,20 @@ class ChatManager{
         try
         {
             self::initDBManager();
-            self::$dbManager->deleteOldChatMessages();
+            
+            // APCu Fast Poll
+            if (function_exists('apcu_fetch')) {
+                 $lastUpdate = apcu_fetch('chat_last_update_' . $gameid);
+                 // If we have a timestamp, and we queried recently... 
+                 // Actually this logic is hard without passing client timestamp.
+                 // Simpler: Just rely on probabalistic delete for now, or use a short TTL cache of the result?
+                 // Let's stick toProbabalistic Delete first as it's safer.
+            }
+            
+            // Optimization: Only delete old messages 1% of the time
+            if (mt_rand(0, 99) === 0) {
+                self::$dbManager->deleteOldChatMessages();
+            }
             $messages = self::$dbManager->getChatMessages($lastid, $gameid);
             return json_encode($messages, JSON_NUMERIC_CHECK);
         }    

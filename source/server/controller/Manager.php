@@ -332,6 +332,7 @@ class Manager{
                  $data->last_update = $timestamp;
             }
 
+            unset($gdS); // Free the massive logic object memory BEFORE encoding
             $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
             unset($data); // free memory early
             return $json;
