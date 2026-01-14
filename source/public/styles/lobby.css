@@ -64,17 +64,20 @@
 }
 
 
-.scenariolabel {
+.scenario-description {
+    margin-top: 10px;    
+    font-size: 14px;
+}
 
-    font-size: 12px;
+.scenariolabel {
     margin: 2px 0px;
     color: #DEEBFF;
+    font-weight: 525;    
 }
 
 .scenariovalue {
-    font-weight: bold;
-    font-size: 12px;
-    margin: 2px 0px;
+
+    margin: 2px 2px;
     color: #81a7ec;
 }
 
