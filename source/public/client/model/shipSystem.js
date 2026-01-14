@@ -63,7 +63,12 @@ ShipSystem.prototype.doIndividualNotesTransfer = function () { //prepare individ
 var Fighter = function Fighter(json, staticFighter, ship) {
 
 	Object.keys(staticFighter).forEach(function (key) {
-		this[key] = staticFighter[key];
+		//this[key] = staticFighter[key];	//Old method that didn't slice arrays - DK 11.1.26	
+		if (Array.isArray(staticFighter[key])) {
+			this[key] = staticFighter[key].slice();  //Slices arrays like Armour etc so they can be modified for individual ships
+		} else {
+			this[key] = staticFighter[key];
+		}
 	}, this)
 
 	for (var i in json) {
@@ -80,7 +85,12 @@ Fighter.prototype.constructor = Fighter;
 
 var SuperHeavyFighter = function SuperHeavyFighter(json, ship) {
 	Object.keys(staticFighter).forEach(function (key) {
-		this[key] = staticFighter[key];
+		//this[key] = staticFighter[key];		//Old method that didn't slice arrays - DK 11.1.26	
+		if (Array.isArray(staticFighter[key])) {
+			this[key] = staticFighter[key].slice(); //Slices arrays like Armour etc so they can be modified for individual ships
+		} else {
+			this[key] = staticFighter[key];
+		}
 	}, this)
 
 	for (var i in json) {
@@ -379,8 +389,8 @@ ShipSystem.prototype.doIndividualNotesTransfer = function () { //prepare individ
 var Fighter = function Fighter(json, staticFighter, ship) {
 
 	Object.keys(staticFighter).forEach(function(key) {
-        this[key] = staticFighter[key];
-    }, this)
+		this[key] = staticFighter[key];
+	}, this)
 
 	for (var i in json) {
 		if (i == 'systems') {
@@ -396,8 +406,8 @@ Fighter.prototype.constructor = Fighter;
 
 var SuperHeavyFighter = function SuperHeavyFighter(json, ship) {
 	Object.keys(staticFighter).forEach(function(key) {
-        this[key] = staticFighter[key];
-    }, this)
+		this[key] = staticFighter[key];
+	}, this)
 
 	for (var i in json) {
 		if (i == 'systems') {
@@ -540,81 +550,81 @@ Weapon.prototype.changeFiringMode = function () {
 	if (!mathlib.arrayIsEmpty(this.trailColorArray)) this.trailColor = this.trailColorArray[this.firingMode];
 	if (!mathlib.arrayIsEmpty(this.projectilespeedArray)) this.projectilespeed = this.projectilespeedArray[this.firingMode];	
 		*//*
-	//firing animation related...
-	if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.animationColorArray)) this.animationColor = this.animationColorArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.animationExplosionScaleArray)) this.animationExplosionScale = this.animationExplosionScaleArray[this.firingMode];
+//firing animation related...
+if (!mathlib.arrayIsEmpty(this.animationArray)) this.animation = this.animationArray[this.firingMode];
+if (!mathlib.arrayIsEmpty(this.animationColorArray)) this.animationColor = this.animationColorArray[this.firingMode];
+if (!mathlib.arrayIsEmpty(this.animationExplosionScaleArray)) this.animationExplosionScale = this.animationExplosionScaleArray[this.firingMode];
 
-	if (!mathlib.arrayIsEmpty(this.startArcArray)) this.startArc = this.startArcArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.endArcArray)) this.endArc = this.endArcArray[this.firingMode];		
+if (!mathlib.arrayIsEmpty(this.startArcArray)) this.startArc = this.startArcArray[this.firingMode];
+if (!mathlib.arrayIsEmpty(this.endArcArray)) this.endArc = this.endArcArray[this.firingMode];		
 	
-	if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];		
-	if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];		
-	if (!mathlib.arrayIsEmpty(this.canSplitShotsArray)) this.canSplitShots = this.canSplitShotsArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.autoFireOnlyArray)) this.autoFireOnly = this.autoFireOnlyArray[this.firingMode];
-	if (!mathlib.arrayIsEmpty(this.canTargetAlliesArray)) this.canTargetAllies = this.canTargetAlliesArray[this.firingMode];			
-	if (!mathlib.arrayIsEmpty(this.noProjectileArray)) this.noProjectile = this.noProjectileArray[this.firingMode];
+if (!mathlib.arrayIsEmpty(this.ignoreJinkingArray)) this.ignoreJinking = this.ignoreJinkingArray[this.firingMode];		
+if (!mathlib.arrayIsEmpty(this.ignoreAllEWArray)) this.ignoreAllEW = this.ignoreAllEWArray[this.firingMode];		
+if (!mathlib.arrayIsEmpty(this.canSplitShotsArray)) this.canSplitShots = this.canSplitShotsArray[this.firingMode];
+if (!mathlib.arrayIsEmpty(this.autoFireOnlyArray)) this.autoFireOnly = this.autoFireOnlyArray[this.firingMode];
+if (!mathlib.arrayIsEmpty(this.canTargetAlliesArray)) this.canTargetAllies = this.canTargetAlliesArray[this.firingMode];			
+if (!mathlib.arrayIsEmpty(this.noProjectileArray)) this.noProjectile = this.noProjectileArray[this.firingMode];
 	
-	//Antimatter-specific
-	if (this instanceof AntimatterWeapon){
-		var updateDataPenalty = false; 
-		if (!mathlib.arrayIsEmpty(this.rngNoPenaltyArray)) {
-			this.rngNoPenalty = this.rngNoPenaltyArray[this.firingMode];
-			updateDataPenalty = true;
-		}
-		if (!mathlib.arrayIsEmpty(this.rngNormalPenaltyArray)) {
-			this.rngNormalPenalty = this.rngNormalPenaltyArray[this.firingMode];
-			updateDataPenalty = true;
-		}
-		if (updateDataPenalty == true){
-			this.data["Range brackets"] = 'no penalty up to ' + this.rngNoPenalty + ' / regular up to ' + this.rngNormalPenalty + ' / double' ;
-		}
-		
-		updateDataPenalty = false;
-		if (!mathlib.arrayIsEmpty(this.maxXArray)) {
-			this.maxX = this.maxXArray[this.firingMode];
-			updateDataPenalty = true;
-		}
-		if (!mathlib.arrayIsEmpty(this.dmgEquationArray)) {
-			this.dmgEquation = this.dmgEquationArray[this.firingMode];
-			updateDataPenalty = true;
-		}
-		if (updateDataPenalty == true){
-			this.data["X-dependent damage"] = this.dmgEquation + ' ( max X = ' + this.maxX + ')';
-		}
-	}//endof Antimatter specific
+//Antimatter-specific
+if (this instanceof AntimatterWeapon){
+var updateDataPenalty = false; 
+if (!mathlib.arrayIsEmpty(this.rngNoPenaltyArray)) {
+	this.rngNoPenalty = this.rngNoPenaltyArray[this.firingMode];
+	updateDataPenalty = true;
+}
+if (!mathlib.arrayIsEmpty(this.rngNormalPenaltyArray)) {
+	this.rngNormalPenalty = this.rngNormalPenaltyArray[this.firingMode];
+	updateDataPenalty = true;
+}
+if (updateDataPenalty == true){
+	this.data["Range brackets"] = 'no penalty up to ' + this.rngNoPenalty + ' / regular up to ' + this.rngNormalPenalty + ' / double' ;
+}
+	
+updateDataPenalty = false;
+if (!mathlib.arrayIsEmpty(this.maxXArray)) {
+	this.maxX = this.maxXArray[this.firingMode];
+	updateDataPenalty = true;
+}
+if (!mathlib.arrayIsEmpty(this.dmgEquationArray)) {
+	this.dmgEquation = this.dmgEquationArray[this.firingMode];
+	updateDataPenalty = true;
+}
+if (updateDataPenalty == true){
+	this.data["X-dependent damage"] = this.dmgEquation + ' ( max X = ' + this.maxX + ')';
+}
+}//endof Antimatter specific
 	
 }; //end of Weapon.prototype.changeFiringMode
 
 
 Weapon.prototype.getTurnsloaded = function () {
-				return this.turnsloaded;
+		return this.turnsloaded;
 };
 
 Weapon.prototype.getInterceptRating = function () {
-				return this.intercept;
+		return this.intercept;
 };
 
 Weapon.prototype.checkFinished = function () {
-	return false;
+return false;
 };
 
 //weapon that has special interaction with shield - eg. Phasing Pulse Cannon - redefines this
 Weapon.prototype.shieldInteractionDefense = function (target, shooter, shield, mod) {
-    return mod;
+return mod;
 };
 
-	Weapon.prototype.removeMultiModeSplit = function (ship, target) {
-		return;
-    };
+Weapon.prototype.removeMultiModeSplit = function (ship, target) {
+return;
+};
 
-	Weapon.prototype.removeAllMultiModeSplit = function (ship, target) {
-		return;
-    };	
+Weapon.prototype.removeAllMultiModeSplit = function (ship, target) {
+return;
+};	
 
 
 var Ballistic = function Ballistic(json, ship) {
-				Weapon.call(this, json, ship);
+		Weapon.call(this, json, ship);
 };
 
 Ballistic.prototype = Object.create(Weapon.prototype);

@@ -209,8 +209,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>A weapon which deals damage based on how well it hits its target e.g. hit chance minus the dice result on its roll to hit.  
             Uses Flash mode, so 25% damage is caused to other units on the same hex as any target hit.</li>
        <h5>Gravitic Net</h5>
-            <li>In B5 Wars this weapon was used to move a target, and was fired before regular weapon declaration.	
-            This weapon is not implemented in Fiery Void yet, and any ships that were equipped with it use replacement weapons and are marked a ‘Semi-Custom’.</li>
+            <li>This weapon is used to move a target, and fires in the Pre-Firing phase, before regular weapon declaration.  
+            First target a ship (friend or foe) and a green hexagonal sprite will appear showing the available hexes that the target unit can be moved.
+            Next, target an available hex to confirm the shot.</li>
        <h5>Electro-Pulse Gun</h5>
             <li>Very short range, slow firing weapon that only affects fighters. However, it can make called shots at no penalty.</li>
        <h5>White Stars</h5>
@@ -882,7 +883,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Primordial Battle Cruiser</h5>
         <li>This ship differs from modern, quick-grown, Shadow vessels in a few ways:
             <ul class="circle-list">
-                <li>Most important is primary weapon firing arc: The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, you can access these by using Firing Modes and can split your sweeping fire between both forward and rear arcs.</li>
+                <li>Most important is primary weapon firing arc: The Heavy Slicer on the Shadow Battlecruiser has both forward and rear arcs, and you can split your sweeping fire between both forward and rear arcs.</li>
                 <li>Six separate Energy Diffusers would have been difficult to set up on PRIMARY in a clear way - therefore in FV they've been moved to appropriate sides and hit charts adjusted.</li>                   
             </ul>            
         </li> 
@@ -1021,7 +1022,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>New power is produced in the Initial Orders phase,</li>
                     <li>Opening petals by boosting Power Capacitor will reduce the armor of all the ship’s primary systems by 2 and increase Defence Profiles by 5%, but adds 50% to power generation the following turn,</li> 
                     <li>Capacitor destruction would leave the ship powerless, but doesn't cause a catastrophic explosion like Reactor destruction.  In FV it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), 
-                        add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li>                  
+                        add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li> 
+                    <li>Vorlon Fighters also have petals that they can toggle open in Initial Orders. Doing so provides 2 extra thrust that turn, but increases their Defence Profiles by 5% and reduces side armour by 2.</li>                                         
                 </ul>            
             </li>             
     <h5>Mag-Gravitic Reactor </h5>
@@ -1038,7 +1040,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             It does not affect the weapon in any other way e.g. leaving it to recharge for two turns will not increase power of shot.</li>
         <li>Can combine Lightning Cannons for higher power shots. To do so, the appropriate number of cannons must have the same firing mode and target assigned. 
             If player mis-declares and not enough weapons are assigned for declared mode, shot automatically misses and does not drain power.</li>
- <h5>Discharge Gun & Discharge Cannon</h5>
+    <h5>Discharge Gun & Discharge Cannon</h5>
         <li>LCan split shots amongst multiple targets up to four shots.  Can also split amongst offensive and defensive fire, with any manually selected intercept shots using minimal power if required 
             e.g. they actually try to intercept an incoming shot.</li>
         <li>Increased power levels are implemented as firing modes, so select this before targeting any enemy ships. Each offensive shot will be fired at the same power level.</li>                                                            

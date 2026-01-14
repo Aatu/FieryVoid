@@ -43,7 +43,7 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new PacketTorpedo(4, 0, 0, 240, 60));         
         $this->addLeftSystem(new BattleLaser(4, 6, 6, 240, 360));       		
-        $this->addLeftSystem(new GaimPhotonBomb(4, 0, 0, 180, 360));  
+        //$this->addLeftSystem(new GaimPhotonBomb(4, 0, 0, 180, 360));  
         $this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
         $this->addLeftSystem(new Thruster(4, 15, 0, 4, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
@@ -52,7 +52,7 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
         $this->addRightSystem(new AssaultLaser(4, 6, 4, 300, 120));
         $this->addRightSystem(new AssaultLaser(4, 6, 4, 60, 240));		
         $this->addRightSystem(new PacketTorpedo(4, 0, 0, 300, 120));
-        $this->addRightSystem(new GaimPhotonBomb(4, 0, 0, 0, 180)); 
+        //$this->addRightSystem(new GaimPhotonBomb(4, 0, 0, 0, 180)); 
         $this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
         $this->addRightSystem(new Thruster(4, 15, 0, 4, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));

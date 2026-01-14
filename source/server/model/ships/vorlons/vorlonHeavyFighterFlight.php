@@ -50,6 +50,7 @@ class VorlonHeavyFighterFlight extends FighterFlight{
 			$fighter->iconPath = "img/ships/VorlonFighter_Large.png";
 						
 			//main weapon
+			$fighter->addFrontSystem(new FtrPetals(0,1,0,2));
 			$fighter->addFrontSystem(new VorlonLtDischargeGun(330, 30, false));//arcfrom, arcto, dual mount true/false
 			
 			//Adaptive Armor

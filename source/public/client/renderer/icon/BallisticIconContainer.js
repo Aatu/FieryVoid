@@ -73,13 +73,17 @@ window.BallisticIconContainer = function () {
 	function generateTerrainHexes(gamedata) {
 		if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
 
-		gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
+		gamedata.ships.filter(ship => ship.Enormous && ship.shipSizeClass == 5).forEach(ship => {
+		//gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
 			const position = shipManager.getShipPosition(ship);
 			/*const perimeterHexes = (ship.Huge === 2)
 				? mathlib.getPerimeterHexes(position, ship.Huge)
 				: mathlib.getNeighbouringHexes(position, ship.Huge);
 			*/
-			const perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge); //Position + radius passed.
+			const facing = shipManager.movement.getLastCommitedMove(ship).facing;
+			const perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge, ship.hexOffsets, facing); //Position + radius passed.
+
+			perimeterHexes.push(position); //Let's see what performance is like if we do add hexes for single hex Terrain. Remove if it causes rendering issues e.g. on Mobile - DK 8.1.26
 
 			perimeterHexes.forEach(neighbour => {
 				const pos = this.coordinateConverter.fromHexToGame(neighbour);
