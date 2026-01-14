@@ -2333,6 +2333,98 @@ class DBManager
             $stmt->close();
         }	    
 
+
+		//get enhancement info - optimization: single query for all ships
+		$allEnhancements = $this->getEnhancementsForGame($gamedata->id);
+		
+		foreach ($gamedata->ships as $ship){
+             $shipEnhancements = isset($allEnhancements[$ship->id]) ? $allEnhancements[$ship->id] : array();
+             
+			if( count($shipEnhancements) == 0 ){ //no enhancements! add empty one just to show it's been read
+				$ship->enhancementOptions[] = array('NONE','-', 0,0,0,0); //[ID,readableName,numberTaken,limit,price,priceStep]
+			}
+			foreach($shipEnhancements as $entry){
+				$ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
+			}
+		}
+		
+		//get individual notes for systems - optimization: single query
+        $allNotes = $this->getIndividualNotesForGame($gamedata, $fetchTurn);
+        
+		foreach ($gamedata->ships as $ship){
+            $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();
+            
+			foreach ($shipNotes as $currNote){
+				$system = $ship->getSystemById($currNote->systemid);
+                if ($system) // Robustness check
+				    $system->addIndividualNote($currNote);
+			}
+			$ship->onIndividualNotesLoaded($gamedata);
+		}
+		
+    } //endof function getSystemDataForShips
+
+/* // BACKUP of old getSystemDataForShips (N+1 query version) - retained for safety
+    public function getSystemDataForShips(TacGamedata $gamedata, $fetchTurn)
+    {
+        $stmt = $this->connection->prepare(
+        "SELECT 
+                (SELECT data FROM tac_systemdata WHERE systemid = t.systemid AND shipid = t.shipid AND gameid = ? AND turn <= ? ORDER BY turn DESC limit 1) AS data, shipid, systemid, subsystem
+            FROM
+                tac_systemdata t
+            WHERE 
+                gameid = ?  
+            GROUP BY 
+                systemid, subsystem, gameid, shipid
+          "
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
+            $stmt->execute();
+            $stmt->bind_result(
+                $data,
+                $shipid,
+                $systemid,
+                $subsystem
+            );
+
+            while ($stmt->fetch()) {
+                $gamedata->getShipById($shipid)->getSystemById($systemid)->setSystemData($data, $subsystem);
+            }
+            $stmt->close();
+        }
+
+        // Get ammo info
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, systemid, firingmode, (select ammo from tac_ammo where shipid = t.shipid and systemid = t.systemid and firingmode = t.firingmode and gameid = ? and turn <= ? order by turn desc limit 1)
+            FROM 
+                tac_ammo t
+            WHERE 
+                gameid = ?
+            GROUP BY
+              shipid, systemid, firingmode
+            "
+
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
+            $stmt->execute();
+            $stmt->bind_result(
+                $shipid,
+                $systemid,
+                $firingmode,
+                $ammo
+            );
+
+            while ($stmt->fetch()) {
+                $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
+            }
+            $stmt->close();
+        }	    
+
 		//get enhancement info   
 		foreach ($gamedata->ships as $ship){
 			$enhArray = $this->getEnhencementsForShip($ship->id);//result: array($enhID,$numbertaken,$readablename);
@@ -2354,7 +2446,87 @@ class DBManager
 			$ship->onIndividualNotesLoaded($gamedata);
 		}
 		
-    } //endof function getSystemDataForShips
+    }
+*/
+
+    // Optimized bulk fetcher
+    private function getEnhancementsForGame($gameID){
+        $toReturn = array(); // Map shipid -> array of entries
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, enhid, numbertaken, enhname
+            FROM 
+                tac_enhancements 
+            WHERE 
+                gameid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $gameID);
+            $stmt->bind_result($shipID, $enhID, $numbertaken, $description);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                if (!isset($toReturn[$shipID])) $toReturn[$shipID] = array();
+                $toReturn[$shipID][] = array($enhID,$numbertaken,$description);
+            }
+            $stmt->close();
+        }
+        return $toReturn;
+    }
+
+    // Optimized bulk fetcher
+	public function getIndividualNotesForGame($gamedata, $turn)
+	{
+		$toReturn = array(); // Map shipid -> array of Note objects
+		$stmt = $this->connection->prepare(
+            "SELECT *
+				FROM 
+					tac_individual_notes
+				WHERE 
+					gameid = ? AND turn <= ? 
+				ORDER BY turn ASC, phase ASC
+			"
+        );
+		
+		if ($stmt) {
+            $stmt->bind_param('ii', $gamedata->id, $turn);
+            $stmt->execute();
+            $stmt->bind_result(
+                $id,
+                $gameid,
+                $turn,
+                $phase,
+                $shipid_db,
+                $systemid_db,
+                $notekey,
+                $notekey_human,
+                $notevalue
+            );
+
+            while ($stmt->fetch()) {
+                $entry = new IndividualNote(
+					$id,
+					$gameid,
+					$turn,
+					$phase,
+					$shipid_db,
+					$systemid_db,
+					$notekey,
+					$notekey_human,
+					$notevalue
+                );
+                
+                if (!isset($toReturn[$shipid_db])) $toReturn[$shipid_db] = array();
+				$toReturn[$shipid_db][] = $entry;
+            }
+            $stmt->close();
+        }
+		
+		return $toReturn;
+		
+	}
 	
 	
 	
