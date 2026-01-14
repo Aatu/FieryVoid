@@ -1756,9 +1756,32 @@ public function getStartLoading()
             $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
             //find out opposite section...
             $relativeBearing = $target->getBearingOnUnit($shooter);
-            $oppositeBearing = Mathlib::addToDirection($relativeBearing, 180);
-            $outLocation = $target->doGetHitSectionBearing($oppositeBearing); //technically true, even if may lead to strange effects... (in some cases, one location may be chosen twice); in this case, assume narrow point was hit
-            $outLocation = $outLocation["loc"];//whole array was returned
+
+            //Rules update: piercing shots on HCVs coming from the side should split into 2 parts, not 3.
+            //Check for HCV / HCVLeftRight and modify outLocation to match facingLocation if angle is from the side.
+            $forceTwoWaySplit = false; 
+            if ($target instanceof HeavyCombatVesselLeftRight) {
+                //HCV Left/Right have 3-way split on 60-120 and 240-300 arcs. Everything else is 2-way.
+                if (!Mathlib::isInArc($relativeBearing, 60, 120) && !Mathlib::isInArc($relativeBearing, 240, 300)) {
+                    $forceTwoWaySplit = true;
+                }
+            } elseif ($target instanceof HeavyCombatVessel) { //Standard HCV
+                //Standard HCV have 3-way split on Forward (300-30) and Aft (150-210) arcs. Everything else is 2-way.
+                if (!Mathlib::isInArc($relativeBearing, 330, 30) && !Mathlib::isInArc($relativeBearing, 150, 210)) {
+                    $forceTwoWaySplit = true;
+                }
+            }
+
+            if ($forceTwoWaySplit){
+                $outLocation = $facingLocation;
+            }else{
+                //Standard logic: Find opposite section
+                $oppositeBearing = Mathlib::addToDirection($relativeBearing, 180);
+                $outLocation = $target->doGetHitSectionBearing($oppositeBearing); 
+                $outLocation = $outLocation["loc"];
+            }
+
+
             //find how big damage is done - split to 3 equal parts; if can't be equal, bigger portions will go to PRIMARY and facing parts
             if ($outLocation == $facingLocation) { //shot enters and exits through the same section - narrow point - split into 2 parts only!
                 $damageOut = 0;
