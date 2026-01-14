@@ -960,6 +960,8 @@ window.ajaxInterface = {
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+        var phase = gamedata.gamephase;
+
 
         // OPTIMIZATION: Throttling for background tabs
         if (document.hidden && !isLocal) {
@@ -969,7 +971,7 @@ window.ajaxInterface = {
             return;
         }
 
-        var phase = gamedata.gamephase;
+        if(phase === -2 && gamedata.rules && gamedata.rules.fleetTest === 1) return; //Don't poll for Fleet Test games.
 
         if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
         ajaxInterface.pollcount++;
@@ -989,19 +991,19 @@ window.ajaxInterface = {
             }
             // Phase -2 timings (customize as you like)
             if (notReadiedYet) {
-                time = 60000;
+                time = 30000;
             } else {
-                time = 6000;
-                if (ajaxInterface.pollcount > 1) time = 8000;
-                if (ajaxInterface.pollcount > 3) time = 15000;
+                time = 4000;
+                if (ajaxInterface.pollcount > 1) time = 6000;
+                if (ajaxInterface.pollcount > 3) time = 12000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
         } else {
             // In-Game timings
-            time = 6000;
-            if (ajaxInterface.pollcount > 1) time = 8000;
-            if (ajaxInterface.pollcount > 3) time = 10000;
+            time = 4000;
+            if (ajaxInterface.pollcount > 1) time = 6000;
+            if (ajaxInterface.pollcount > 3) time = 12000;
             if (ajaxInterface.pollcount > 10) time = 60000;
             if (ajaxInterface.pollcount > 40) time = 1800000;
         }
