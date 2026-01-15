@@ -305,12 +305,6 @@ class Manager{
 
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship, $force = false){
         
-        $cacheKey = "game_json_{$gameid}_{$userid}_{$turn}_{$phase}_{$activeship}";
-        if (!$force && function_exists('apcu_fetch')) {
-            $cached = apcu_fetch($cacheKey);
-            if ($cached) return $cached;
-        }
-
         try{
             $gdS = self::getTacGamedata($gameid, $userid, $turn, $phase, $activeship);
 
@@ -341,12 +335,6 @@ class Manager{
             unset($gdS); // Free the massive logic object memory BEFORE encoding
             $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
             unset($data); // free memory early
-
-            // 3. Short-term Cache Store (2 seconds)
-            if (function_exists('apcu_store')) {
-                apcu_store($cacheKey, $json, 2);
-            }
-
             return $json;
 
         }
