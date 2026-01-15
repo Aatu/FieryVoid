@@ -634,6 +634,7 @@ window.weaponManager = {
     },
 
     isOnWeaponArc: function isOnWeaponArc(shooter, target, weapon) {
+        if (weapon.splitArcs) return weaponManager.isOnWeaponArcMultiple(shooter, target, weapon);
         //console.log("is on arc");
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
@@ -653,6 +654,40 @@ window.weaponManager = {
 
         return mathlib.isInArc(targetCompassHeading, arcs.start, arcs.end);
     },
+
+    //Weapons like Shadow Heavy Slicer have two distinct arcs to check
+    isOnWeaponArcMultiple: function isOnWeaponArcMultiple(shooter, target, weapon) {
+        const shooterFacing = shipManager.getShipHeadingAngle(shooter);
+        const targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
+
+        const oPos = shipManager.getShipPosition(shooter);
+        const tPos = shipManager.getShipPosition(target);
+
+        /* Range-0 ballistic exception */
+        if (weapon.ballistic && oPos.equals(tPos)) return true;
+
+        // Get all weapon arcs (already roll-corrected)
+        const arcs = shipManager.systems.getMultipleArcs(shooter, weapon);
+
+        // No arcs = cannot fire
+        if (!arcs.length) return false;
+
+        // Check against ANY arc
+        for (let i = 0; i < arcs.length; i++) {
+            const arc = arcs[i];
+
+            const start = mathlib.addToDirection(arc.start, shooterFacing);
+            const end = mathlib.addToDirection(arc.end, shooterFacing);
+
+            if (mathlib.isInArc(targetCompassHeading, start, end)) {
+                return true;
+            }
+        }
+
+        return false;
+    },
+
+
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
@@ -1810,7 +1845,7 @@ window.weaponManager = {
                         var fire = weapon.doMultipleHexFireOrders(selectedShip, hexpos);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
                         if (fire.length === 0) continue;
-                        
+
                         weapon.fireOrders.push(...fire);
                         var finishedFiring = weapon.checkFinished(); //Split weapons should unselect after they've used all their shots.
                         if (finishedFiring) {
@@ -2341,7 +2376,20 @@ window.weaponManager = {
                 var position = shipManager.getShipPosition(ship);
                 blockedHexes.push(position);
 
-                if (ship.Huge > 0) { // Occupies more than 1 hex
+                if (ship.hexOffsets && ship.hexOffsets.length > 0) {
+                    // Assuming ship.facing is available on client side ship object. 
+                    // shipManager stores it, usually ship.facing property exists.
+                    var lastMove = shipManager.movement.getLastCommitedMove(ship) || 0;
+                    var facing = lastMove.facing || 0;
+
+                    for (var j in ship.hexOffsets) {
+                        var offset = ship.hexOffsets[j];
+
+                        // Use getRotatedHex for accurate positioning
+                        var newHex = mathlib.getRotatedHex(position, offset, facing);
+                        blockedHexes.push(newHex);
+                    }
+                } else if (ship.Huge > 0) { // Occupies more than 1 hex
                     var neighbourHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
                     // Add surrounding hexes directly
                     blockedHexes.push(...neighbourHexes);

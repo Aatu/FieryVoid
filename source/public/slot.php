@@ -89,6 +89,19 @@ exit;
     include_once 'global.php';
 
     $ret = '{"error":"AJAX request is omitting required data"}';    
+// Accept JSON POST body if present
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false || empty($_POST)) {
+        $jsonInput = file_get_contents('php://input');
+        if ($jsonInput) {
+            $decoded = json_decode($jsonInput, true);
+            if (is_array($decoded)) {
+                $_POST = array_merge($_POST, $decoded);
+            }
+        }
+    }
+}
+
     if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: games.php');
 //      print('{"error":"Not logged in."}');

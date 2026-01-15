@@ -114,7 +114,7 @@ class FighterFlight extends BaseShip
         $strippedShip = parent::stripForJson();
 
         $strippedShip->flightSize = $this->flightSize;
-       
+
         return $strippedShip;
     }
 

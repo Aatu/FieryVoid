@@ -9,8 +9,29 @@ class BuyingGamePhase implements Phase
 
         $t1 = 0;
         $t2 = 0;
-        $usedPositions = array(); // To store assigned (x, y) pairs 
+        //$usedPositions = array(); // To store assigned (x, y) pairs 
         $moonPositions = array(); // To store assigned (x, y) pairs 
+        $terrainOccupiedHexes = array(); // To store all hexes occupied by terrain units 
+
+
+        if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons"))){        
+            // Sort ships to prioritise placing larger terrain first 
+            usort($servergamedata->ships, function($a, $b) {
+                $getWeight = function($ship) {
+                    if ($ship instanceof moonLarge) return 90;
+                    if ($ship instanceof moonNew) return 80;
+                    if ($ship instanceof moonSmallNew) return 70;
+                    if ($ship instanceof asteroidThreeHex) return 60;
+                    if ($ship instanceof asteroidTwoHex) return 50;
+                    if ($ship instanceof asteroidLNew) return 40;
+                    if ($ship instanceof asteroidMNew) return 30;
+                    if ($ship instanceof asteroidSNew) return 20;
+                    return 0;
+                };
+                
+                return $getWeight($b) - $getWeight($a);
+            });
+        }
 
         foreach ($servergamedata->ships as $ship){
 
@@ -55,65 +76,101 @@ class BuyingGamePhase implements Phase
                 }    
 
                 // Generate a unique random position
+                $attempts = 0;
+                $maxAttempts = 500;
+                
                 while (true) {
+                    $attempts++;
+                    // Safety break to prevent infinite loops (ajax timeout)
+                    if ($attempts > $maxAttempts) {
+                        // If we can't place it safely after many tries, just place it at a random spot 
+                        // and ignore the "distance to other asteroids" rule, but still try to respect Moon distance if possible.
+                        // Or just allow overlap as a fallback.
+                        $usedPositions["$x,$y"] = true;
+                         // Register hexes anyway to prevent complete overlap if possible, but we stop checking collisions rigidly
+                        if ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) {
+                            $moonPositions[] = [$x, $y];
+                        }
+                        foreach ($currentUnitHexes as $hex) {
+                            $terrainOccupiedHexes[] = $hex->q . "," . $hex->r;
+                        }
+                        $move = new MovementOrder(-1, "start", $center, 0, 0, 0, $h, $h, true, 1, 0, 0);
+                        $ship->movement = array($move);
+                        break;
+                    }
+
                     $x = rand(-$maxX, $maxX);
                     $y = rand(-$maxY, $maxY);
-                    
-                    // Check for occupied hexes (applies to all)
-                    if (isset($usedPositions["$x,$y"])) {
-                        continue; // Position is already taken
-                    }
+                    $h = rand(0, 5); // Generate facing inside loop to validate specific footprint
 
-                    // If it's a moon, ensure it's not within 4 hexes of another moon
-                    if ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) {
-                        $tooClose = false;
-                        foreach ($moonPositions as [$mx, $my]) {
-                            $dx = $x - $mx;
-                            $dy = $y - $my;
-                            $distance = sqrt($dx * $dx + $dy * $dy); // Euclidean distance
-                            
-                            if ($distance < 7) { // Ensure moons are at least 6 hexes apart
-                                $tooClose = true;
-                                break;
-                            }
+                    $valid = true;
+                    $currentUnitHexes = []; // To store hexes occupied by this unit
+                    $center = new OffsetCoordinate($x, $y);
+                    $currentUnitHexes[] = $center;
+
+                    // 1. Calculate the hexes this unit would occupy
+                    if (property_exists($ship, 'hexOffsets') && is_array($ship->hexOffsets) && count($ship->hexOffsets) > 0) {
+                        foreach ($ship->hexOffsets as $offset) {
+                            $currentUnitHexes[] = Mathlib::getRotatedHex($center, $offset, $h);
                         }
-                        if ($tooClose) {
-                            continue; // Try another position
+                    } elseif ($ship->Huge > 0) {
+                        // Fallback for circular Huge terrain
+                        $neighbours = Mathlib::getNeighbouringHexes($center, $ship->Huge);
+                        foreach ($neighbours as $n) {
+                            $currentUnitHexes[] = new OffsetCoordinate($n['q'], $n['r']);
                         }
                     }
 
-                    // If it's an asteroid, ensure it's not within 2 hexes of any moon
-                    if ($ship instanceof asteroidSNew || $ship instanceof asteroidMNew || $ship instanceof asteroidLNew) {
-                        $tooCloseToMoon = false;
-                        foreach ($moonPositions as [$mx, $my]) {
-                            $dx = $x - $mx;
-                            $dy = $y - $my;
-                            $distance = sqrt($dx * $dx + $dy * $dy);
-
-                            if ($distance < 4) { // Asteroids must be at least 3 hexes away from any moon
-                                $tooCloseToMoon = true;
-                                break;
+                    // 2. Check collision with Moons
+                    foreach ($moonPositions as $mPos) {
+                        $moonCenter = new OffsetCoordinate($mPos[0], $mPos[1]);
+                        // Moons need 7 hex buffer from other moons, Asteroids need 4 from moons
+                        $limit = ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) ? 7 : 4;
+                        
+                        foreach ($currentUnitHexes as $myHex) {
+                            if (Mathlib::getDistanceHex($myHex, $moonCenter) < $limit) {
+                                $valid = false; 
+                                break 2; // Break both loops
                             }
                         }
-                        if ($tooCloseToMoon) {
-                            continue; // Try another position
-                        }
-                    }                
+                    }
+                    if (!$valid) continue; // Try next position
 
-                    // Valid position found
+                    // 3. Check collision with other Terrain (Asteroids/Irregular)
+                    // If we are over 50% of max attempts, relax the rule: allow 0 distance (adjacency), just no direct overlap
+                    $minDist = ($attempts > ($maxAttempts / 2)) ? 0 : 1; 
+
+                    if (!empty($terrainOccupiedHexes)) {
+                        foreach ($currentUnitHexes as $myHex) {
+                            foreach ($terrainOccupiedHexes as $occupiedHexStr) {
+                                list($oq, $or) = explode(',', $occupiedHexStr);
+                                $occupiedHex = new OffsetCoordinate((int)$oq, (int)$or);
+                                
+                                $dist = Mathlib::getDistanceHex($myHex, $occupiedHex);
+                                if ($dist <= $minDist) { 
+                                    $valid = false;
+                                    break 2;
+                                }
+                            }
+                        }
+                    }
+                    if (!$valid) continue;
+
+                    // 4. Success! Register position and hexes
                     $usedPositions["$x,$y"] = true;
-                    
-                    // If it's a moon, store its position
                     if ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) {
                         $moonPositions[] = [$x, $y];
                     }
+                    
+                    foreach ($currentUnitHexes as $hex) {
+                        $terrainOccupiedHexes[] = $hex->q . "," . $hex->r;
+                    }
 
-                    break;
+                    // Assign movement
+                    $move = new MovementOrder(-1, "start", $center, 0, 0, 0, $h, $h, true, 1, 0, 0);
+                    $ship->movement = array($move);
+                    break; // Break while(true)
                 }
-
-                $h = rand(0, 5); // Random heading/facing
-                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 0, $h, $h, true, 1, 0, 0);
-                $ship->movement = array($move);
             }
 
             foreach ($ship->systems as $system) {
@@ -130,6 +187,21 @@ class BuyingGamePhase implements Phase
     public function addAsteroids($gameData, $dbManager, $numberOfAsteroids, $slot)
     {
         $counter = $numberOfAsteroids;
+        $irregulars = floor($numberOfAsteroids/6); //one sixth of random asteroid are irregular 2 or 3 hex asteroids.
+
+        //Generate irregular Terrain first
+        while ($irregulars > 0) {
+            $size = Dice::d(2, 1);  //Use a dice to decide a random size of asteroid!                    
+            if($size == 1){
+                $currAsteroid = new asteroidTwoHex($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!               
+            }else{
+                $currAsteroid = new asteroidThreeHex($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                            
+            }
+            $counter--;
+            $irregulars--;               
+        }
 
         //Create asteroid as units in database.
         while ($counter > 0) {

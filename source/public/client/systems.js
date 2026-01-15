@@ -296,6 +296,38 @@ shipManager.systems = {
         }
     },
 
+
+    getMultipleArcs: function getMultipleArcs(ship, weapon) {    
+        const arcs = [];
+
+        const isRolled = shipManager.movement.isRolled(ship);
+
+        // Nothing to return if arrays are missing or empty
+        if (!weapon.startArcArray?.length || !weapon.endArcArray?.length) {
+            return arcs;
+        }
+
+        for (let i = 0; i < weapon.startArcArray.length; i++) {
+            const start = weapon.startArcArray[i];
+            const end   = weapon.endArcArray[i];
+
+            // Skip unmatched pairs
+            if (end === undefined) continue;
+
+            if (isRolled) {
+                arcs.push({
+                    start: mathlib.addToDirection(end, end * -2),
+                    end:   mathlib.addToDirection(start, start * -2)
+                });
+            } else {
+                arcs.push({ start, end });
+            }
+        }
+
+        return arcs;
+    },    
+
+
     getDisplayName: function getDisplayName(system) {
 
         if (system.name == "structure") {

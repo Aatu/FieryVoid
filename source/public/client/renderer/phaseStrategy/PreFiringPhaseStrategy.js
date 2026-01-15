@@ -30,6 +30,9 @@ window.PreFiringPhaseStrategy = function () {
 
     PreFiringPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this);
+        this.shipIconContainer.getArray().forEach(function (icon) {
+            icon.removeHexagonArcs();
+        });
     };
 
     PreFiringPhaseStrategy.prototype.onHexClicked = function (payload) {
@@ -102,6 +105,17 @@ window.PreFiringPhaseStrategy = function () {
         }
 
         PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+    };
+
+    PreFiringPhaseStrategy.prototype.onShowTargetedHexagonInArc = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship.              
+        var shooterIcon = this.shipIconContainer.getByShip(payload.shooter);
+        var targetIcon = this.shipIconContainer.getByShip(payload.target);
+        targetIcon.showTargetedHexagonInArc(payload.shooter, shooterIcon, payload.system, payload.system.moveDistance);
+    };  
+
+    PreFiringPhaseStrategy.prototype.onRemoveTargetedHexagonInArc = function(payload){ //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
+        var targetIcon = this.shipIconContainer.getByShip(payload.target);        
+        targetIcon.removeTargetedHexagonInArc(payload.system);
     };
 
     return PreFiringPhaseStrategy;

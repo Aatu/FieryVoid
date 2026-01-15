@@ -23,6 +23,8 @@ var Ship = function Ship(json) {
         }
     }
 
+    this.hexOffsets = json.hexOffsets || this.hexOffsets || null;
+
     // If we have any system data, proceed
     var systemsToLoad = inputSystems || staticSystems;
 
@@ -241,12 +243,12 @@ Ship.prototype = {
     constructor: Ship,
 
     getHitChangeMod: function getHitChangeMod(shooter, weapon) {
-		if (this.flight) return this.getHitChangeModFlight(shooter, weapon); //separate function for fighter flight - same approach, different loop
+        if (this.flight) return this.getHitChangeModFlight(shooter, weapon); //separate function for fighter flight - same approach, different loop
 
-		var firingPos = null;
-		if(weapon.ballistic) { //ballistic weapon uses position fron start of turn; direct fire weapons use ship itself rather than any position - important at range 0!
-			firingPos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
-		}
+        var firingPos = null;
+        if(weapon.ballistic) { //ballistic weapon uses position fron start of turn; direct fire weapons use ship itself rather than any position - important at range 0!
+            firingPos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
+        }
 
         var affectingSystems = Array();
         for (var i in this.systems) {
@@ -266,13 +268,13 @@ Ship.prototype = {
 
             var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
             mod = weapon.shieldInteractionDefense(this, shooter, system,mod);
-			
-			if (mod > 0){
-				//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
-				if ( (this.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
-					mod = 0;
-				}	
-			}
+        	
+            if (mod > 0){
+                //Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
+                if ( (this.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
+                    mod = 0;
+                }	
+            }
 
             if ( ! (affectingSystems[system.defensiveType])
                 || affectingSystems[system.defensiveType] < mod)
@@ -287,39 +289,39 @@ Ship.prototype = {
         return sum;
     }, //getHitChangeMod
 	
-	//loop through ALL fighters - sample fighter should be enough, but let's loop through all in case of eg. criticals
-	getHitChangeModFlight: function getHitChangeModFlight(shooter, weapon) {
-		var firingPos = null;
-		if(weapon.ballistic) { //ballistic weapon uses position fron start of turn; direct fire weapons use ship itself rather than any position - important at range 0!
-			firingPos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
-		}
-			
+    //loop through ALL fighters - sample fighter should be enough, but let's loop through all in case of eg. criticals
+    getHitChangeModFlight: function getHitChangeModFlight(shooter, weapon) {
+        var firingPos = null;
+        if(weapon.ballistic) { //ballistic weapon uses position fron start of turn; direct fire weapons use ship itself rather than any position - important at range 0!
+            firingPos = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); 		    
+        }
+        	
         var affectingSystems = Array();
         for (var i in this.systems) {
             var fighter = this.systems[i];
-			for (var j in fighter.systems) {
-				var system = fighter.systems[j];
+            for (var j in fighter.systems) {
+                var system = fighter.systems[j];
 
-				//if (!this.checkIsValidAffectingSystem(system, shipManager.getShipPosition(shooter)))
-				if (!this.checkIsValidAffectingSystem(system, shooter, firingPos)) //Marcin Sawicki: change to unit itself...
-					continue;
+                //if (!this.checkIsValidAffectingSystem(system, shipManager.getShipPosition(shooter)))
+                if (!this.checkIsValidAffectingSystem(system, shooter, firingPos)) //Marcin Sawicki: change to unit itself...
+                    continue;
 
-				var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
-				mod = weapon.shieldInteractionDefense(this, shooter, system,mod);
-				
-				if (mod > 0){
-					//Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
-					if ( (this.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
-						mod = 0;
-					}	
-				}
+                var mod = system.getDefensiveHitChangeMod(this, shooter, weapon);
+                mod = weapon.shieldInteractionDefense(this, shooter, system,mod);
+            	
+                if (mod > 0){
+                    //Advanced Sensors negate positive (eg. reducing profile) defensive systems' effects operated by less advanced races
+                    if ( (this.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors")) ){
+                        mod = 0;
+                    }	
+                }
 
-				if ( ! (affectingSystems[system.defensiveType])
-					|| affectingSystems[system.defensiveType] < mod)
-				{
-					affectingSystems[system.defensiveType] = mod;
-				}
-			}
+                if ( ! (affectingSystems[system.defensiveType])
+                    || affectingSystems[system.defensiveType] < mod)
+                {
+                    affectingSystems[system.defensiveType] = mod;
+                }
+            }
         }
         var sum = 0;
         for (var i in affectingSystems) {
@@ -350,11 +352,11 @@ Ship.prototype = {
             var heading = 0;
 
             //get the heading of position, not ship (in case ballistic)
-			if(pos!==null){
-				heading = mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(this), pos);
+            if(pos!==null){
+                heading = mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(this), pos);
             }else{
-				heading = mathlib.getCompassHeadingOfShip(this, shooter);
-			}
+                heading = mathlib.getCompassHeadingOfShip(this, shooter);
+            }
 
             //if not on arc, continue!
             if (!mathlib.isInArc(heading, mathlib.addToDirection(system.startArc, tf), mathlib.addToDirection(system.endArc, tf))) {

@@ -956,7 +956,7 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         $this->data["Special"] .= "<br>Select firing mode based on direction you wish to move ship and target a unit.";
         $this->data["Special"] .= "<br>Only ONE Gravitic Shifter can be used on a ship per turn, any other attempts will automatically miss.";           
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
-        $this->data["Special"] .= "<br>Can target allies.";
+        $this->data["Special"] .= "<br>Can target allies without suffering double range penalty for no EW Lock.";
         $this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
 		parent::setSystemDataWindow($turn);     
     }
@@ -976,10 +976,18 @@ class GraviticShifter extends Weapon implements SpecialAbility{
 
 		$target = $gamedata->getShipById($fireOrder->targetid);
         $shooter = $this->getUnit();
-        if($shooter->team !== $target->team){ //Let's make penalty only for enemy units
-            if($target->gravitic || $target->factionAge >= 3){//Gravitic or Ancient
-                $fireOrder->needed -= 15; //+15% chance to miss.
-            }
+
+        if($target->gravitic || $target->factionAge >= 3){ 
+            $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
+        }
+
+        if($shooter->team == $target->team){ //Let's make penalty only for enemy units
+		    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
+		    $targetPos = $target->getHexPos();                       
+            $distance = mathlib::getDistanceHex($launchPos, $targetPos);
+
+            $rangePen = $this->calculateRangePenalty($distance);
+            $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
         }    
 	}    
         
@@ -1033,6 +1041,270 @@ class GraviticShifter extends Weapon implements SpecialAbility{
 
     } //endof GraviticShifter    
 
+class GravityNet extends Weapon implements SpecialAbility{
+    public $name = "GravityNet";
+    public $displayName = "Gravity Net";
+    public $animation = "laser";
+    public $animationColor = array(102, 255, 00);	
+    public $animationExplosionScale = 1.0; //single hex explosion
+    public $priority = 1; 
+	public $hextarget = false; //Toggle to switch between hexTarget and normalTarget modes
+	public $hidetarget = true;   
+	public $specialAbilities = array("PreFiring");
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
+	public $damageType = "Standard"; //irrelevant, really
+	public $weaponClass = "Gravitic";
+	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
+	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
+	public $loadingtime = 2;
+    public $rangePenalty = 1;
+    protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()	
+    public $fireControl = array(1, 2, 3); // fighters, <mediums, <capitals 
+	public $preFires = true;
+    public $canSplitShots = true;
+    public $moveDistance = "";
+    public $showHexagonArc = true; 
+    public $specialHitChanceCalculation = true;			
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+    public $firingModes = array(
+		1 => "Standard - GN",
+        2 => "Priorty - GN"
+	);
+	    
+    protected $possibleCriticals = array(14 => "ReducedRange");
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 8;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 5;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        GravityNetHandler::addGravityNet($this);//so all Targeting Array are accessible together.
+    }
+
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
+
+     public function setSystemDataWindow($turn){
+        $this->data["Special"] = "<br>Each Gravity Net has a max movement range (Move Distance) determined by a D6 roll made for each weapon at start of pre-fire phase.";
+        $this->data["Special"] .= "<br>Move Distance is reported on mouse over and can be visualized when targeting with overlay.";
+        $this->data["Special"] .= "<br>Only ONE Gravity Net may affect a ship per turn, more may be fired at target.";           
+        $this->data["Special"] .= "<br>Standard (S) mode: Gravity Net hitting target with the largest Move Distance will take priority";
+        $this->data["Special"] .= "<br>Priorty (P) mode: Gravity Net hitting target will take priority over all other Gravity Nets.";
+        $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives (Does NOT include allies).";        
+        $this->data["Special"] .= "<br>Can target allies.";
+        $this->data["Special"] .= "<br>No effect on units bigger then firing ship.";	        	        		
+		parent::setSystemDataWindow($turn);  
+    }   
+
+	public function calculateHitBase($gamedata, $fireOrder){            
+        if($fireOrder->damageclass == 'gravNetMoveHex'){
+				$fireOrder->needed = 100; //always true
+				$fireOrder->updated = true;
+        }else{
+            parent::calculateHitBase($gamedata, $fireOrder);
+
+            if($fireOrder->targetid != -1){
+                $target = $gamedata->getShipById($fireOrder->targetid);
+                $shooter = $this->getUnit();
+
+                if($target->gravitic || $target->factionAge >= 3){ 
+                    $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
+                }
+
+                if($shooter->team == $target->team){ //Let's make penalty only for enemy units
+                    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
+                    $targetPos = $target->getHexPos();                       
+                    $distance = mathlib::getDistanceHex($launchPos, $targetPos);
+
+                    $rangePen = $this->calculateRangePenalty($distance);
+                    $fireOrder->needed += $rangePen * 5; //refund range penalty for friendly units since OEW lock on allies not possible.            
+                }   
+            }
+        }
+	}    
+
+    public function fire($gamedata, $fireOrder){   
+		if($fireOrder->damageclass == 'gravNetMoveHex'){		
+			return; //Don't roll targeting shots, to remove them from animations.
+		}else{	                        
+            parent::fire($gamedata, $fireOrder);  
+        }        
+    }
+    
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){   
+        if($fireOrder->damageclass == 'gravitic'){ //should only process the grav net's first fireOrder (pertains to actual shot) and then get gravNetPos from 2nd hexTarget order         
+            $targetSize = null;
+            $shooterSize = null;
+
+            if(!$target->Enormous){
+                $targetSize = $target->shipSizeClass; //only get ship size if not enormous, logic below accounts for enormous.
+            }
+            
+            if(!$shooter->Enormous){
+                $shooterSize = $shooter->shipSizeClass; //only get ship size if not enormous, logic below accounts for enormous.
+            }
+
+            if($shooter->Enormous || (!$target->Enormous && $shooterSize >= $targetSize)){ //Make sure target is equal to or smaller then shooter.      
+                $primaryGravityNet = GravityNetHandler::getPrimaryGravNetPerTarget($target);
+                //Debug::log(json_encode($primaryGravityNet, true));
+                if($this == $primaryGravityNet){//check if THIS gravity net is the primary gravity net(Primary is defined as gravity net that hits a given target with largest move distance)
+                    $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";
+                    $this->doGravityNetMove($target, $fireOrder->id, $gamedata);
+                }
+            }else{
+                $fireOrder->pubnotes = "<br>Target ship is larger then fireing ship and cannot be moved by Gravity Net.";
+            }              
+        }
+    }  
+
+    private function doGravityNetMove($target, $graviticOrderID, $gamedata){
+        $allFireOrders = $this->getFireOrders($gamedata->turn);
+        $gravNetMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
+        $gravNetMovePos = null; //var to hold grav net move target hex.
+
+        foreach($allFireOrders as $fireOrderCheck){ //find the gravNetMoveHex order and then process. If it does not exist do not process.
+            if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
+                $gravNetMovePosOrder = $fireOrderCheck;	
+                $xpos = $gravNetMovePosOrder->x; //get x coord for movement
+                $ypos = $gravNetMovePosOrder->y; //get y coord for movement
+                $orderID = $gravNetMovePosOrder->id;
+                //Debug::log(json_encode($xpos, true));
+
+                $lastMove = $target->getLastMovement(); //get target ship's last movement to ensure heading, speed and facing are conserved. 
+                //Create new movement order to target ship to grav net target hex.
+                //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
+                $gravNetMove = new MovementOrder(null, "prefire", new OffsetCoordinate($xpos, $ypos), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $graviticOrderID, 0);
+
+                //Add shifted movement order to database
+                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);				
+                break;
+            }
+        }         
+    }    
+    
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+
+        switch($gameData->phase){
+					
+				case 2: //Movement phase
+                    if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						//roll a D6 to determine how far THIS gravity net can move a ship	                    				
+                        $currentResult = Dice::d(6, 1); //dice size, number of rolls, determined max move for gravity net
+                        $notekey = 'gravityNetMove';
+                        $noteHuman = 'Gravity Net Max Move: '.strval($currentResult);
+                        $notevalue = $currentResult;
+                        $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+                    }  
+		break;	       
+        }
+    }
+
+    public function onIndividualNotesLoaded($gameData){     
+        switch($gameData->phase){
+            case 1:
+                $this->moveDistance = "TBD: PreFirePhase"; //set moveDistance back to TBD: PreFirePhase until next prefire phase, then display newly rolled value.
+
+            case 5: //get the current turns gravity net max movement value in PreFile phase   
+            foreach ($this->individualNotes as $currNote) {
+                    if ($currNote->turn == $gameData->turn) {               
+                        if ($currNote->notekey == 'gravityNetMove') {
+                            $this->moveDistance = $currNote->notevalue; 
+                        }
+                    }
+                }                
+        break;
+        }
+    }
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson(); 
+        $strippedSystem->showHexagonArc = $this->showHexagonArc;  
+        $strippedSystem->canTargetAll = $this->canTargetAll;
+        $strippedSystem->moveDistance = $this->moveDistance;                                        
+        return $strippedSystem;
+	}	
+     //endof GravityNet
+}
+
+class GravityNetHandler{ 
+	public $name = "GravityNetHandler";
+	private static $gravityNets = array();	
+	
+	//should be called by every Targeting Array on creation!
+	public static function addGravityNet($weapon){
+		self::$gravityNets[] = $weapon;		
+	}
+
+    public static function getPrimaryGravNetPerTarget($target){//returns the primary gravity net, highest priorty, highest movement and hitting grav net, per target
+        $hittingGravNetsOnTarget = self::getHittingGravNetsOnTarget($target); //get all hitting gravity nets on the same target.
+        $priortyGravNets = self::getPriortyGravNets($hittingGravNetsOnTarget); //see if any priority mode grav nets exist
+
+        if(count($priortyGravNets) > 0){
+            $primaryGravityNet = self::getLargestMovement($priortyGravNets); //find largestMove Priority grav net   
+        }else{
+            $primaryGravityNet = self::getLargestMovement($hittingGravNetsOnTarget); //find largestMove out of all hitting nets (no priority grav net/s designated)
+        }
+        return $primaryGravityNet;
+    }
+
+    private static function getHittingGravNetsOnTarget($target){//get all gravity nets that target same target and hit.
+        $hittingGravNetsOnTarget = array();
+        foreach(self::$gravityNets as $gravityNet){            
+            foreach($gravityNet->fireOrders as $fireOrder){                
+                $fireOrderTargetid = $fireOrder->targetid;//current fireorder targetid
+                $currTargetid = $target->id; //current gravity net's targetid
+                if($fireOrderTargetid == $currTargetid){//make sure target of processing gravity net matches current gravity net
+                    $shotsHit = $fireOrder->shotshit;
+                        if($shotsHit == 1){ //make sure the current grav net hit             
+                            $hittingGravNetsOnTarget[] = $gravityNet; //add hitting gravity net with same target to array (as processing gravity net).
+                        }
+                }
+            }          
+        }
+        return $hittingGravNetsOnTarget;
+    }
+
+    private static function getPriortyGravNets($gravityNets){//find all grav nets firing in Priority mode
+        $priortyGravNets = array();
+        foreach($gravityNets as $gravityNet){ 
+            foreach($gravityNet->fireOrders as $fireOrder){                
+                if($fireOrder->firingMode == 2){ //find priorty grav nets
+                    $priortyGravNets[] = $gravityNet;
+                }                
+            }
+        }   
+        return $priortyGravNets; 
+    }
+
+	private static function getLargestMovement($gravityNets){ //get Gravity Net with largest movement potential
+        $largestMovementValue = 0; //set inital movement range to 0;
+        $largestGravityNet = null;        
+        foreach($gravityNets as $gravityNet){ 
+            foreach($gravityNet->fireOrders as $fireOrder){                
+                if($gravityNet->moveDistance > $largestMovementValue){
+                    $largestMovementValue = $gravityNet->moveDistance;
+                    $largestGravityNet = $gravityNet;
+                }                
+            }
+        }
+        return $largestGravityNet;
+    }	  
+}
 
 class HypergravitonBlaster extends Weapon {
         public $name = "HypergravitonBlaster";

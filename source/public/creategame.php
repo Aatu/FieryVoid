@@ -12,7 +12,7 @@
 	$defaultGameName = 'GAME NAME' . $_SESSION["user"];	
 	$playerName = Manager::getPlayerName($_SESSION["user"]);
 	//if ($playerName != '')	
-		$defaultGameName = 'Game of ' . $playerName;
+		$defaultGameName = ucfirst($playerName) . "'s Game";
 
 	if (isset($_POST["docreate"]) && isset($_POST["data"])){
 		$id = Manager::createGame($_SESSION["user"], $_POST["data"]);
@@ -33,6 +33,7 @@
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
+        <link href="styles/createGame.css" rel="stylesheet" type="text/css">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/mathlib.js"></script>
@@ -48,302 +49,332 @@
       <a href="logout.php" class="btn btn-primary">Logout</a>
     </div>
   </header>
-<!--        <div class="helphide" style="float:right" onclick="window.helper.onClickHelpHide()">
-        <img id="helphideimg" src="img/greyvir.jpg" height="30" width="30">	
-        </div>-->
+
   <main class="container">
-    <section class="panel large create">
+      <form id="createGameForm" method="post">
+      <section class="panel large create">
       <div class="panelheader"><span>CREATE YOUR GAME</span></div>
-			<form id="createGameForm" method="post">
 			
-        <div class="createheader" style = "margin-top: 10px">GAME NAME:</div>
+        <div class="game-options-wrapper">
+            <div class="options-column">
+                <div class="split-header" style = "margin-top: 10px">GAME OPTIONS:</div>
+                <div class="gameNameSelectContainer">
+                    <label for="gamename" class="gameNameSelect">GAME NAME:</label>
+                    <input id="gamename" class="gamename" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
+                </div>    
+            
+                <!--<div class="split-header">BACKGROUND & GAME OPTIONS:</div>	-->					
+                <!--<div class="createheader">CHOOSE A BACKGROUND:</div>-->
+                <div class="backgroundSelectContainer">
+                    <label for="backgroundSelect" class="background">BACKGROUND:</label>        
+                    <select id="backgroundSelect" class="backgroundSelect" name="background">
+                        <!--<option id="default_option" value="default">select ...</option>-->
+                        <?php
+                            natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
+                            foreach ($maps as $name){
+                                $displayName = $name;
+                                $displayName = preg_replace('/^\d+\./', '', $displayName);
+                                $displayName = preg_replace('/\.[^.]+$/', '', $displayName);
+                                print("<option value=\"".$name."\">".$displayName."</option>");
+                            }
+                        
+                        ?>
+                    </select>
+                </div>    
 
-				<input id="gamename" style= "margin-left: 0px" type="text" name="gamename" value="<?php print($defaultGameName); ?>">
-						
-        <div class="createheader">CHOOSE A BACKGROUND:</div>
-				<select id="mapselect" name="background" style= "margin-left: 0px">
-					<!--<option id="default_option" value="default">select ...</option>-->
-					<?php
-						natsort($maps); // Natural sort: sorts "1", "2", ..., "10", "11"
-						foreach ($maps as $name){							
-							print("<option value=\"".$name."\">".$name."</option>");
-						}
-					
-					?>
-				</select>
 
-
-        <div class="createheader" style = "margin-bottom: 15px">SCENARIO DESCRIPTION:</div>
-
-        <div class="scenario-form">
-        <div class="scenario-row">
-            <label for="req">FLEET REQUIREMENTS:</label>
-            <input type="text" id="req" value="Pass the fleet checker / Other">
-        </div>
-        <div class="scenario-row">
-            <label for="tier">EXPECTED POWER LEVEL:</label>
-            <input type="text" id="tier" value="Tier 1 / Tier 2 / Tier 3 / Ancient / Other">
-        </div>
-        <div class="scenario-row">
-            <label for="forbidden">FORBIDDEN FACTIONS:</label>
-            <input type="text" id="forbidden" value="None">
-        </div>                
-        <div class="scenario-row">
-            <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
-            <input type="text" id="customfactions" value="Allowed / Not allowed">
-        </div>
-        <!--<div class="scenario-row">
-            <label for="customunits">CUSTOM UNITS IN OFFICIAL FACTIONS:</label>
-            <input type="text" id="customunits" value="Allowed / Not allowed">
-        </div>-->
-        <div class="scenario-row">
-            <label for="enhancements">ENHANCEMENTS:</label>
-            <input type="text" id="enhancements" value="Allowed / Up to 100 points / Not allowed">
-        </div>
-
-        <div class="scenario-row">
-            <label for="borders">MAP BORDERS:</label>
-            <input type="text" id="borders" value="Unit leaving map is destroyed / Unit ending movement out of map is destroyed">
-        </div>
-        <div class="scenario-row">
-            <label for="called">CALLED SHOTS:</label>
-            <select id="called">
-                <option value="Allowed" selected>Allowed</option>
-                <option value="Not allowed">Not allowed</option>
-            </select>
-        </div>
-        <div class="scenario-row">
-            <label for="victory">VICTORY CONDITIONS:</label>
-            <input type="text" id="victory" value="Last unit on map / Last ship on map / More forces remaining after Turn 12">
-        </div>
-        <div class="scenario-row">
-            <label for="other">ADDITIONAL INFO:</label>
-            <textarea id="other" rows="3" style="width: 100%; resize: vertical;"></textarea>
-        </div>     
-        </div>
-				
-				
-                <div class="createsubheader">GAME SPACE:</div>
-                <div id="gamespace" class="subpanel gamespacecontainer">
-                    <div class="slot" >
-                        <div>
-                            <input id="gamespacecheck" type="checkbox" name="fixedgamespace" checked>SET MAP BOUNDARIES
-                        </div>
-                        <div class="gamespacedefinition">
-                            <span class="smallSize headerSpan" style="margin-top: 5px; margin-left: 5px">MAP DIMENSIONS:</span>
-                            <span class="unlimitedspace">
-                                <span>NO BOUNDARIES</span>
-                            </span>
-                            <span class="limitedspace invisible">
-                                <span>WIDTH:</span>
-                                <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
-                                <span>HEIGHT:</span>
-                                <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">   
-				    &nbsp;&nbsp;
-				    <span style = "margin-left: 40px;">RESIZE MAP:</span><span class="clickable setsizeknifefight" style = "text-decoration: underline; color: #8bcaf2">KNIFE FIGHT (SMALL MAP)</span> <!-- button switching map dimensions -->
-				    &nbsp;&nbsp;				    
-                    <span class="clickable setsizestandard" style = "text-decoration: underline; color: #8bcaf2">STANDARD (NORMAL MAP)</span> <!-- button switching map dimensions -->
-                    &nbsp;&nbsp;
-                    <span class="clickable setswitchsizebaseassault" style = "text-decoration: underline; color: #8bcaf2">BASE ASSAULT (LARGE MAP)</span> <!-- button switching map dimensions -->
-                            </span>
-                        </div>
-                      <!---      <input id="flightSizeCheck" style="margin-top:20px;margin-bottom:10px;" type="checkbox" name="variableFlights">increased Flight size (up to 12 units per flight)
-                  -->
+            
+                <div id="simultaenousMovement" class="settings-group movementspacecontainer">
+                    <div>
+                        <input id="movementcheck" type="checkbox" name="movementcheck"> <label for="movementcheck" class="clickable">USE SIMULTANEOUS MOVEMENT</label>
+                    </div>
+                    <div id="movementDropdown" class="movementDropdown">
+                        <label for="initiativeSelect">Number of Initiative Groups:</label>
+                        <select id="initiativeSelect" name="initiativeCategories" class="initiativeCategories">
+                            <!-- Dropdown options from 1 to 12 -->
+                <?php 
+                for($i=1;$i<=12;$i++){ 
+                    $selected = '';
+                    
+                    if($i==SimultaneousMovementRule::$defaultNoOfCategories){ //is this value set as default?
+                        $selected = 'selected';
+                    }
+                    
+                print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
+                }          
+                    
+                ?>
+                        </select>
                     </div>
                 </div>
 
-<div class="createsubheader">GAME OPTIONS:</div>
+                <div id="terrain" class="settings-group movementspacecontainer">
+                    <div>
+                        <input id="terraincheck" type="checkbox" name="terraincheck"> <label for="terraincheck" class="clickable">ADD TERRAIN</label>
+                    </div>
 
-<div id="simultaenousMovement" class="subpanel movementspacecontainer">
-    <div class="slot">
-        <div>
-            <input id="movementcheck" type="checkbox" name="movementcheck">USE SIMULTANEOUS MOVEMENT
-        </div>
-    </div>
-    <div class="slot" id="movementDropdown" style="display:none;">
-        <label for="initiativeSelect">NUMBER OF INITIATIVE GROUPS:</label>
-        <select id="initiativeSelect" name="initiativeCategories">
-            <!-- Dropdown options from 1 to 12 -->
-<?php 
-for($i=1;$i<=12;$i++){ 
-    $selected = '';
-    
-    if($i==SimultaneousMovementRule::$defaultNoOfCategories){ //is this value set as default?
-        $selected = 'selected';
-    }
-    
-print("<option value=\"".$i."\" ".$selected." >".$i."</option>");
-}          
-      
-?>
-        </select>
-    </div>
-</div>
+                    <div id="asteroidsDropdown" class="terrainDropdowns">
+                        <div class="asteroidsDropdown">
+                            <label for="asteroidsSelect" class="asteroidsSelect">Number of Asteroids:</label>
+                            <select id="asteroidsSelect" name="asteroidsCategories" class="asteroidsCategories">
+                                <option value="0">None</option>              
+                                <option value="3">Few (3)</option>
+                                <option value="6">Several (6)</option>
+                                <option value="12">Pack (12)</option>
+                                <option value="18">Lots (18)</option>
+                                <option value="24">Horde (24)</option>
+                                <option value="36">Swarm (36)</option>
+                                <option value="48">Zounds (48)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="moonsDropdown" class="terrainDropdowns">
+                        <div class="moonsDropdown">
+                            <label for="moonsSmallSelect" class="moonsSelect">Small Moons:</label>
+                            <select id="moonsSmallSelect" name="moonsSmall" class="moonsSmallSelect">
+                                <option value="0">None</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                                <option value="5">5</option>        
+                            </select>
+                        </div>
+                        <div class="moonsDropdown">
+                            <label for="moonsMediumSelect" class="moonsSelect">Medium Moons:</label>
+                            <select id="moonsMediumSelect" name="moonsMedium" class="moonsMediumSelect">
+                                <option value="0">None</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>        
+                            </select>
+                        </div>
+                        <div class="moonsDropdown">
+                            <label for="moonsLargeSelect" class="moonsSelect">Large Moons:</label>
+                            <select id="moonsLargeSelect" name="moonsLarge" class="moonsLargeSelect">
+                                <option value="0">None</option>
+                                <option value="1">1</option>
+                                <option value="2">2</option>        
+                            </select>
+                        </div>
+                    </div>
+                </div>    
 
-<div id="terrain" class="subpanel movementspacecontainer">
-    <div class="slot">
-        <div>
-            <input id="terraincheck" type="checkbox" name="terraincheck">ADD TERRAIN
-        </div>
-    </div>
-
-    <div class="slot" id="asteroidsDropdown" style="display:none;">
-        <label for="asteroidsSelect">NUMBER OF ASTEROIDS:</label>
-        <select id="asteroidsSelect" name="asteroidsCategories">
-            <option value="0">None</option>              
-            <option value="3">Few (3)</option>
-            <option value="6">Several (6)</option>
-            <option value="12">Pack (12)</option>
-            <option value="18">Lots (18)</option>
-            <option value="24">Horde (24)</option>
-            <option value="36">Swarm (36)</option>
-            <option value="48">Zounds (48)</option>
-        </select>
-    </div>
-    <div class="slot" id="moonsDropdown" style="display:none;">
-        <label for="moonsSmallSelect">SMALL MOONS:</label>
-        <select id="moonsSmallSelect" name="moonsSmall">
-            <option value="0">None</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>
-            <option value="5">5</option>        
-        </select>
-        <br>
-        <label for="moonsMediumSelect">MEDIUM MOONS:</label>
-        <select id="moonsMediumSelect" name="moonsMedium">
-            <option value="0">None</option>
-            <option value="1">1</option>
-            <option value="2">2</option>
-            <option value="3">3</option>
-            <option value="4">4</option>        
-        </select>
-        <br>
-        <label for="moonsLargeSelect">LARGE MOONS:</label>
-        <select id="moonsLargeSelect" name="moonsLarge">
-            <option value="0">None</option>
-            <option value="1">1</option>
-            <option value="2">2</option>        
-        </select>
-    </div>
-</div>    
-
-
-    <div id="desperate" class="subpanel movementspacecontainer">
-        <div class="slot">
-            <div>
-                <input id="desperatecheck" type="checkbox" name="desperatecheck">USE 'DESPERATE' SCENARIO RULES
-            </div>    
-        </div>
-        
-        <div class="slot" id="desperateDropdown" style="display:none;">
-            <label for="desperateSelect">DESPERATE RULES APPLY TO:</label>
-            <select id="desperateSelect" name="desperateCategories">
-                <option value="-1">Both teams</option>
-                <option value="1">Team 1</option>
-                <option value="2">Team 2</option>
-            </select>
-        </div>
-    </div>
-                <div class="createsubheader">TEAM 1:</div>
-                <div id="team1" class="subpanel slotcontainer">
+                <div id="desperate" class="settings-group movementspacecontainer">
+                    <div>
+                        <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">USE 'DESPERATE' SCENARIO RULES</label>
+                    </div>    
                     
+                    <div id="desperateDropdown" class="desperateDropdown">
+                        <label for="desperateSelect">Apply to:</label>
+                        <select id="desperateSelect" name="desperateCategories"  class="desparateSelect">
+                            <option value="-1">Both teams</option>
+                            <option value="1">Team 1</option>
+                            <option value="2">Team 2</option>
+                        </select>
+                    </div>
                 </div>
-                <div><span class="clickable addslotbutton team1" style="margin-left: 5px; margin-top:5px; color: #8bcaf2">ADD SLOT</span></div>
+
+                <div class="settings-group movementspacecontainer">
+                     <input id="unlimitedPointsCheck" type="checkbox" name="unlimitedPointsCheck"> <label for="unlimitedPointsCheck" class="clickable">UNLIMITED POINTS</label>
+                </div>
+
+            </div>
+            
+            <!-- Scenario Description (Right Column) -->
+            <div class="scenario-form">
+                <div class="split-header">SCENARIO DESCRIPTION:</div>
+
+                <div class="scenario-row">
+                    <label for="tier">EXPECTED POWER LEVEL:</label>
+                    <select id="tier">
+                        <option value="Any">Any</option>                        
+                        <option value="Tier 1" selected>Tier 1</option>
+                        <option value="Tier 2">Tier 2</option>
+                        <option value="Tier 3">Tier 3</option>
+                        <option value="Ancient">Ancient</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="tier_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter power level...">
+                </div>      
+
+                <div class="scenario-row">
+                    <label for="req">FLEET REQUIREMENTS:</label>
+                    <select id="req">
+                        <option value="Pass the fleet checker">Pass the fleet checker</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <input type="text" id="req_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter requirements...">
+                </div>
+
+                <div class="scenario-row">
+                    <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
+                    <select id="customfactions">
+                        <option value="Allowed">Allowed</option>
+                        <option value="Semi-Custom Only">Semi-Custom Only</option>                        
+                        <option value="Not allowed" selected>Not allowed</option>
+                    </select>
+                </div>
+
+                <div class="scenario-row">
+                    <label for="forbidden">FORBIDDEN FACTIONS:</label>
+                    <input type="text" id="forbidden" value="None" class="forbiddenText">
+                </div> 
+
+                <div class="scenario-row">
+                    <label for="enhancements">ENHANCEMENTS:</label>
+                    <select id="enhancements">
+                        <option value="Allowed">Allowed</option>
+                        <option value="Up to X points">Up to X points</option>
+                        <option value="Not allowed">Not allowed</option>
+                    </select>
+                    <input type="number" min="0" step="1" data-validation="^[0-9]+$" id="enhancements_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter points...">
+                </div>
+        
+                <div class="scenario-row">
+                    <label for="borders">MAP BORDERS:</label>
+                    <select id="borders">
+                        <option value="Unit ending movement out of map is destroyed">Unit ending movement out of map is destroyed</option>
+                        <option value="Unit leaving map is destroyed">Unit leaving map is destroyed</option>
+                    </select>
+                </div>
+                <div class="scenario-row">
+                    <label for="called">CALLED SHOTS:</label>
+                    <select id="called">
+                        <option value="Allowed" selected>Allowed</option>
+                        <option value="Not allowed">Not allowed</option>
+                    </select>
+                </div>
+                <div class="scenario-row">
+                    <label for="victory">VICTORY CONDITIONS:</label>
+                    <select id="victory">
+                        <option value="Last unit on map">Last unit on map</option>
+                        <option value="Last ship on map">Last ship on map</option>
+                        <option value="More forces remaining after Turn 12">More forces remaining after Turn 12</option>
+                        <option value="Other">Other</option>                    
+                    </select>
+                    <input type="text" id="victory_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter victory conditions...">
+                </div>
+                <div class="scenario-row additional">
+                    <label for="other">ADDITIONAL INFO:</label>
+                    <textarea id="other" rows="3"></textarea>
+                </div>     
+            </div>
+        </div>
+    </section>
+
+    <section class="panel large create" style="margin-top: 15px;">
+        <!-- Moved Game Space Here (Below Scenario Description) -->
+        <div class="split-header">MAP LAYOUT AND TEAMS:</div>
+        <div id="gamespace" class="settings-group gamespacecontainer">
+            <div class="mapSelectContainer">
+                <label for="mapDimensionsSelect" class="mapDimensionsSelect">MAP TEMPLATES:</label>
+                <select id="mapDimensionsSelect" name="mapdimensions" class="mapSelect">
+                    <option value="custom">Custom</option>
+                    <option value="small">Small (30x24)</option>
+                    <option value="standard" selected>Standard (42x30)</option>
+                    <option value="large">Large (60x40)</option>
+                    <option value="2v2">2v2 (42x40)</option>
+                    <option value="ambush">Ambush (42x40)</option>
+                    <option value="baseAssault">Base Assault (60x40)</option>                    
+                    <option value="convoyRaid">Convoy Raid (42x30)</option>
+                    <option value="northvsouth">North Vs South (60x40)</option>                                                           
+                    <option value="unlimited">No Boundaries</option>                    
+                </select>
+            </div>
+            <div class="gamespacedefinition">
+                <span class="mapDimensions">MAP SIZE:</span>
+                <span class="unlimitedspace">
+                    <span>No Boundaries</span>
+                </span>
+                <span class="limitedspace invisible">
+                    <span>Width:</span>
+                    <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="number" name="spacex" value="0">
+                    <span>Height:</span>
+                    <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="number" name="spacey" value="0">   
+
+                </span>
+            </div>
+        </div>
+
+        <!-- Split Layout for Teams and Map -->
+        <div class="slots-map-wrapper">
+            <!-- Left Column: Teams -->
+            <div class="slots-column">
+                <div class="createsubheader" style="margin-top:0;">TEAM 1:</div>
+                <div id="team1" class="subpanel slotcontainer" style="border:none; background:transparent;"></div>
+                <div><span class="clickable addslotbutton team1" class="add-slot">ADD SLOT</span></div>
                 
                 <div class="createsubheader">TEAM 2:</div>
-                <div id="team2" class="subpanel slotcontainer">
-                    
+                <div id="team2" class="subpanel slotcontainer" style="border:none; background:transparent;"></div>
+                <div><span class="clickable addslotbutton team2" class="add-slot">ADD SLOT</span></div>
+            </div>
+
+            <!-- Right Column: Map Preview -->
+            <div class="map-preview-column">
+                <!--<div class="split-header"><span>DEPLOYMENT ZONE PREVIEW:</span></div>-->
+                <div id="mapPreviewContainer" class="mapPreviewContainer">
+                    <canvas id="mapPreview" width="545" height="390" class="mapPreviewContainerBox"></canvas>
                 </div>
-                <div><span class="clickable addslotbutton team2" style="margin-left: 5px; margin-top:5px; color: #8bcaf2">ADD SLOT</span></div>
+            </div>
+        </div>
                 
 				
 				<input type="hidden" name="docreate" value="true">
 
-                <div class="createsubheader" style="margin-top:5px; text-align: center;"><span>DEPLOYMENT ZONE PREVIEW:</span></div>
-                <!--<div id="mapPreviewContainer" style="margin-top: 0px;  text-align: center;"> -->                        
-                <div id="mapPreviewContainer" style="margin-top: 0px;  margin-bottom: 20px; text-align: center;">
-                    <canvas id="mapPreview" width="420" height="300"></canvas>
-                </div>
-
-
                 <input id="createGameData" type="hidden" name="data" value="">
 
-                <button type="submit" class="btn btn-success-create create-game-btn">
-                    Create Game
-                </button>                  
+                <div style="text-align: right; margin-top: 10px; padding-bottom: 1px;">
+                    <span class="btn btn-fleet-test" onclick="createGame.submitFleetTest()" style="margin-right: 15px;">Fleet Test</span>
+                    <button type="submit" class="btn btn-create-submit create-game-btn" style="position: static; margin-top: 0; float: none;">
+                        Create Game
+                    </button>
+                </div>                  
 				
-			</form>
-			
-		</div>
+
         
 
-
-
-
-        <!--        <div id="gamespacetemplatecontainer">
-                <div class="slot" >
-                    <div>
-                        <input id="gamespacecheck" type="checkbox" name="fixedgamespace">USE LIMITED GAME SPACE
-                    </div>
-                    <div class="gamespacedefinition" style="height:24px;vertical-align:middle;position:relative">
-                        <span class="smallSize headerSpan">GAME SPACE SIZE:</span>
-                        <span class="unlimitedspace">
-                            <span>Unlimited</span>
-                        </span>
-                        <span class="limitedspace invisible">
-                            <span>Width:</span>
-                            <input class ="spacex tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacex" value="0">
-                            <span>Height:</span>
-                            <input class ="spacey tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="spacey" value="0">     
-        
-
-                        </span>
-                    </div>
-                </div>
-            </div> -->
-        
+        <!-- Template for Slots (Hidden) -->
         <div id="slottemplatecontainer" style="display:none;">
-            <div class="slot" >
-                <div class="close"></div>
-                <div style="margin-top:5px; margin-bottom:5px;">
-                    <span class="smallSize headerSpan">NAME:</span>
-                    <input class ="name mediumSize" type="text" name="name" value="BLUE">
-                    <span class="smallSize headerSpan">POINTS:</span>
-                    <input class ="points smallSize" type="text" name="points" value="0">
+            <div class="slot-card slot">
+                <div class="header-row">
+                    <div style="display:flex; align-items:center;">
+                        <label class="slotName">SLOT NAME:</label>
+                        <input class="name mediumSize" type="text" name="name" value="BLUE" style="min-width: 150px;">
+                    </div>
+                    <span class="clickable close remove-btn">Remove Slot</span>
                 </div>
-                <div style="margin-top: 5px">
-                    <span class="smallSize headerSpan">DEPLOYMENT:</span>
-                    <span>X:</span>
-                    <input class ="depx tinySize" data-validation="^-{0,1}[0-9]+$" data-default ="0" type="text" name="depx" value="0">
-                    <span>Y:</span>
-                    <input class ="depy tinySize" type="text" name="depy" value="1">
-                <!--<span>Type</span> options other than 'box' do not work correctly, I'm disabling them
-				    <select class="deptype" name="deptype" style="margin-right: 5px">
-                        <option value="box">box</option>
-                        <option value="circle">circle</option>
-                        <option value="distance">distance</option>
-						
-                    </select>-->
-                    <span class="depwidthheader">WIDTH:</span>
-                    <input class ="depwidth tinySize" type="text" name="depwidth" value="0">
-                	<span class="depheightheader">HEIGHT:</span>
-                	<input class="depheight tinySize" type="text" name="depheight" value="0">
-                    <span>DEPLOYS ON TURN:</span>
-                    <input class="depavailable tinySize" type="number" name="depavailable" value="1" min="1">                   
-            		<!-- Add a Flexbox container here to align REMOVE SLOT to the right-->
-            		<div class="flex-container">
-                	<span class="clickable close" style="color: #8bcaf2">REMOVE SLOT</span>            
+                <div class="create-row">
                     
+                    <label>Points:</label>
+                    <input class="points smallSize" type="text" data-validation="^[0-9]+$" name="points" value="0">
+                    <span class="unlimited-label" style="display:none; font-weight:bold; color:#DEEBFF; margin-left:5px; padding: 5px;">Unlimited</span>
                     
-
+                    <label>Deploys on Turn:</label>
+                    <input class="depavailable tinySize" type="number" name="depavailable" value="1" min="1">
+                </div>
+                
+                <div class="create-row2">
+                    <label class="smallSize">Deployment:</label>
+                    <label>x:</label>
+                    <input class="depx tinySize" data-validation="^-{0,1}[0-9]+$" data-default="0" type="number" name="depx" value="0">
+                    
+                    <label>y:</label>
+                    <input class="depy tinySize" type="number" name="depy" value="1">
+                    
+                    <label class="depwidthheader">Width:</label>
+                    <input class="depwidth tinySize" type="number" name="depwidth" value="0">
+                    
+                    <label class="depheightheader">Height:</label>
+                    <input class="depheight tinySize" type="number" name="depheight" value="0">
                 </div>
             </div>
         </div>
         </section>
+      </form>
 
-        <div id="globalchat" class="panel large create" style="height:200px;">
+        <div id="globalchat" class="panel large create" style="height:200px; margin-top: 15px;">
         <?php 
             $chatgameid = 0;
             $chatelement = "#globalchat";

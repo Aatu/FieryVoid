@@ -2450,7 +2450,7 @@ class RammingAttack extends Weapon{
 				if($ship->isDestroyed()) continue; //Ignore destroyed ships
 				if($ship->isTerrain()) continue;	//Don't add other terrain.
 				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
-				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, assume they can fly around as per other auto-ram check for Enormous units.	
+				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, change if and when skindancing introduced.	
 				$relevantShips[] = $ship;			
 			}
 
@@ -2459,8 +2459,8 @@ class RammingAttack extends Weapon{
 
 			foreach($collisiontargets as $targetid=>$location){
 				$target = $gamedata->getShipById($targetid);
-				$type = "TerrainCollision";
-				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.
+				$type = "TerrainCollision"; //Moving through asteroids hex, d10 * speed damage.
+				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.  Full ramming damage.
 				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1);
 
 				if ($target instanceof FighterFlight && $type === "TerrainCrash") {
@@ -2502,6 +2502,9 @@ class RammingAttack extends Weapon{
 		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
 		
 		if($shooter instanceof FighterFlight) return; //fighters do not auto-ram; in tabletop they would make skin dance roll instead, but its success chance would be very high and it carries additional benefit if successful
+		//Change condition above to create opportunity for skindancing roll instead of just skipping.
+
+
 		if($shooter->isDestroyed()) return; //destroyed unit does not ram
 		$targetList = $gamedata->getShipsInDistance($shooter);
 		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
@@ -2532,11 +2535,31 @@ class RammingAttack extends Weapon{
 	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
 		//$thisShip = $this->getUnit();
 		
-		if ($thisShip->Huge > 0) { //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
-			// Add code that calls a new function, and replicates check below for all hexes within radius.
-			$radiusHexes = mathlib::getNeighbouringHexes($terrainPosition, $thisShip->Huge);
+		if ($thisShip->Huge > 0 || (property_exists($thisShip, 'hexOffsets') && !empty($thisShip->hexOffsets))) {  //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
+			// Terrain logic: Build list of ALL occupied hexes first.
+			$occupiedHexes = [];
+
+			if (property_exists($thisShip, 'hexOffsets') && !empty($thisShip->hexOffsets)) {
+				// 1. Irregular Shape defined by hexOffsets
+				$move = $thisShip->getLastMovement();
+				$facing = $move ? $move->facing : 0;
+				
+				foreach ($thisShip->hexOffsets as $offset) {
+					// Use accurate pixel-based rotation to get absolute hex position
+					$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $facing);
+				}
+			} else {
+				// 2. Standard Circular Shape defined by Huge radius
+				$occupiedHexes[] = $terrainPosition; // Center is always occupied for circular
+				if ($thisShip->Huge > 0) {
+					$neighbors = Mathlib::getNeighbouringHexes($terrainPosition, $thisShip->Huge);
+					foreach ($neighbors as $n) {
+						$occupiedHexes[] = new OffsetCoordinate($n['q'], $n['r']);
+					}
+				}
+			}
 	
-			foreach ($relevantShips as $ship) {  // Look through relevant ships' movements and take appropriate action.                 
+			foreach ($relevantShips as $ship) {  
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);
 				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
 				$previousFacing = $startMove->getFacingAngle();
@@ -2545,17 +2568,16 @@ class RammingAttack extends Weapon{
 					if ($shipMove->turn == $gamedata->turn) {
 						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
 							
-							// Check if shipMove position matches any position in $radiusHexes
-							$match = array_filter($radiusHexes, function($hex) use ($shipMove) {
-								return $hex['q'] == $shipMove->position->q && $hex['r'] == $shipMove->position->r;
-							});
+							// Check if shipMove position matches ANY occupied hex
+							$match = false;
+							foreach ($occupiedHexes as $hex) {
+								if ($hex->q == $shipMove->position->q && $hex->r == $shipMove->position->r) {
+									$match = true;
+									break;
+								}
+							}
 		
-							// Or if it matches the centre position directly
-							if (
-								!empty($match) || 
-								($shipMove->position->q == $terrainPosition->q && $shipMove->position->r == $terrainPosition->r)
-							) {
-								// Prevent duplicate ship IDs
+							if ($match) {
 								if (!isset($collisiontargets[$ship->id])) {
 									$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
 									$location = $this->getCollisionLocation($relativeBearing, $ship);
@@ -6458,7 +6480,8 @@ class ProximityLaserLauncher extends Weapon{
 		protected $hasSpecialLaunchHexCalculation = true; //Weapons like Proximity Laser use a separate launcher system to determine point of shot.         
 		public $canSplitShots = true; //Added 
 		public $startArcArray = array(); 
-		public $endArcArray = array();		 
+		public $endArcArray = array();	
+		public $range = 30; 
 		
         //function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing){
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){		
@@ -6973,6 +6996,7 @@ class PulsarMine extends Weapon{
     public $priorityAF = 1;
     public $loadingtime = 1;
 	public $autoFireOnly = true; //this weapon cannot be fired by player
+	public $preFires = true;
     public $useOEW = false;
 	public $noLockPenalty = false;
     public $calledShotMod = 0;
@@ -6998,7 +7022,7 @@ class PulsarMine extends Weapon{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	} 
 
-
+/*
     public function beforeFiringOrderResolution($gamedata){
     	
     	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
@@ -7028,7 +7052,37 @@ class PulsarMine extends Weapon{
 
     	
 	} //endof beforeFiringOrderResolution
+*/
 
+    public function beforePreFiringOrderResolution($gamedata){
+    	
+    	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
+		if($this->isOfflineOnTurn($gamedata->turn)) return; //Pulsar Mine is offline
+
+		$thisShip = $this->getUnit();
+		$deployTurn = $thisShip->getTurnDeployed($gamedata);
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
+
+    	$allShips = $gamedata->ships;  
+    	$relevantShips = array();
+
+		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
+		foreach($allShips as $ship){
+			if ($ship->isDestroyed()) continue;
+			if (!$ship instanceof FighterFlight && ($ship->id != $thisShip->id)) continue; //Ignore ships EXCEPT this one!			
+			if ($ship instanceof FighterFlight && $ship->team == $thisShip->team) continue;	//Ignore flights that are friendly.	
+			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore fighters that are not deployed yet!			
+			$relevantShips[] = $ship;			
+		}
+	
+		//Now check if any enemy fighters got in arc and range during their movement.
+		$targetFighters = $this->checkForValidTargets($relevantShips, $thisShip, $gamedata);
+
+    	//Now create up to 18 attacks using $targetFighters array.
+    	$this->createFireOrders($targetFighters, $thisShip, $gamedata);		
+
+    	
+	} //endof beforeFiringOrderResolution
 
 	private function getTempBearing($shipPosition, $targetPostion, $currFacing){
 		$relativeBearing = null;
@@ -7050,8 +7104,7 @@ class PulsarMine extends Weapon{
 	}
 	
 
-	private function checkTargetConditions($previousBearing, $shipPosition, $targetPostion, $shipfacing){
-		$canTarget = false;
+	private function checkTargetConditions($previousBearing, $shipPosition, $targetPostion, $shipfacing, $gamedata){
 		
 		$distance =	mathlib::getDistanceHex($shipPosition, $targetPostion);//Compare starting positions.						
 		$targetBearing = 0;
@@ -7062,9 +7115,13 @@ class PulsarMine extends Weapon{
 			$targetBearing = $this->getTempBearing($shipPosition, $targetPostion, $shipfacing);					
 		} 
 		
-	    if ($distance <= 2 && mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) $canTarget = true;//Not in arc at turn start.
+	    if ($distance > 2) return false; //Not within 2 hexes, skip LoS check and return false.
+		if(!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false; //Not in arc.
 
-		return $canTarget;
+		$loSBlocked = $this->checkLineOfSight($shipPosition, $targetPostion, $gamedata); //Returns true is LoS blocked
+		if($loSBlocked) return false; //LoS Blocked
+
+		return true;
 	}	
 
 
@@ -7098,7 +7155,7 @@ class PulsarMine extends Weapon{
 				$previousBearing = null;
 								
 			    //Check if Fighter can be attacked in its starting position	
-				if($this->checkTargetConditions($previousBearing, $shipPosition, $fighterStartLoc->position, $shipfacing)){
+				if($this->checkTargetConditions($previousBearing, $shipPosition, $fighterStartLoc->position, $shipfacing,$gamedata)){
 					$targetFighters[] = $unit;//Add to array.
 					continue;//Fire Orders will be created for this unit, move to next.
 				}		
@@ -7111,7 +7168,7 @@ class PulsarMine extends Weapon{
 						 $fighterMove->type == "turnleft" || 
 						 $fighterMove->type == "turnright") continue; //Not interested in start during Deployment, speed changes or turns.
 
-			    		if(!$this->checkTargetConditions($previousBearing, $shipPosition, $fighterMove->position, $shipfacing)) {
+			    		if(!$this->checkTargetConditions($previousBearing, $shipPosition, $fighterMove->position, $shipfacing, $gamedata)) {
 				    		$distance =	mathlib::getDistanceHex($shipPosition, $fighterMove->position);	//Compare positions at point of movement.	
 					    	$targetBearing = $this->getTempBearing($shipPosition, $fighterMove->position, $shipfacing);//Get bearing at this point in movement.
 							if($distance != 0) $previousBearing = $targetBearing;//Update previous bearing with latest unless distance still 0.			    			
@@ -7160,7 +7217,7 @@ class PulsarMine extends Weapon{
 
 		        // Create a new FireOrder
 		        $newFireOrder = new FireOrder(
-		            -1, "normal", $thisShip->id, $target->id,
+		            -1, "prefiring", $thisShip->id, $target->id,
 		            $this->id, $fighter->id, $gamedata->turn, 1, 
 		            0, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
 		            0, 0, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
