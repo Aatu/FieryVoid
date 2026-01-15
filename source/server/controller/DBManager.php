@@ -3465,19 +3465,24 @@ public function setLastTimeChatChecked($userid, $gameid)
     }
 */
 //New verion
-public function submitChatMessage($userid, $message, $gameid = 0)
-{
-    $stmt = $this->connection->prepare("
-        INSERT INTO chat (userid, username, gameid, time, message)
-        VALUES (?, (SELECT username FROM player WHERE id = ?), ?, NOW(), ?)
-    ");
+	public function submitChatMessage($userid, $message, $gameid = 0)
+	{
+		$stmt = $this->connection->prepare("
+			INSERT INTO chat (userid, username, gameid, time, message)
+			VALUES (?, (SELECT username FROM player WHERE id = ?), ?, NOW(), ?)
+		");
+		
+		$id = -1;
 
-    if ($stmt) {
-        $stmt->bind_param('iiis', $userid, $userid, $gameid, $message);
-        $stmt->execute();
-        $stmt->close();
-    }
-}
+		if ($stmt) {
+			$stmt->bind_param('iiis', $userid, $userid, $gameid, $message);
+			$stmt->execute();
+			$stmt->close();
+			$id = $this->getLastInstertID();
+		}
+		
+		return $id;
+	}
 
     public function getChatMessages($lastid, $gameid = 0)
     {

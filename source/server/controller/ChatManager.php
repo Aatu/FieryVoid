@@ -38,10 +38,9 @@ class ChatManager{
             self::initDBManager();
             $msgId = self::$dbManager->submitChatMessage($userid, $message, $gameid);
             
-            // APCu: Update last message timestamp/ID to notify pollers
-            if (function_exists('apcu_store')) {
-                // We use microtime because we don't have the new ID easily without changing DBManager return
-                apcu_store('chat_last_update_' . $gameid, microtime(true)); 
+            // APCu: Update last message ID!
+            if (function_exists('apcu_store') && $msgId > 0) {
+                apcu_store('chat_last_id_' . $gameid, $msgId, 3600); // 1 hour TTL
             }
             
             return "{}";
@@ -57,16 +56,15 @@ class ChatManager{
     {
         try
         {
-            self::initDBManager();
-            
-            // APCu Fast Poll
+            // APCu Fast Poll - Check BEFORE DB connection!
             if (function_exists('apcu_fetch')) {
-                 $lastUpdate = apcu_fetch('chat_last_update_' . $gameid);
-                 // If we have a timestamp, and we queried recently... 
-                 // Actually this logic is hard without passing client timestamp.
-                 // Simpler: Just rely on probabalistic delete for now, or use a short TTL cache of the result?
-                 // Let's stick toProbabalistic Delete first as it's safer.
+                 $lastMsgId = apcu_fetch('chat_last_id_' . $gameid);
+                 if ($lastMsgId !== false && $lastid >= $lastMsgId) {
+                     return "[]";
+                 }
             }
+
+            self::initDBManager();
             
             // Optimization: Only delete old messages 1% of the time
             if (mt_rand(0, 99) === 0) {
