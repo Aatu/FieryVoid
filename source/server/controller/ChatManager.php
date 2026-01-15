@@ -71,6 +71,30 @@ class ChatManager{
                 self::$dbManager->deleteOldChatMessages();
             }
             $messages = self::$dbManager->getChatMessages($lastid, $gameid);
+            
+            // APCu: If we just fetched messages from DB, update the cache to ensure Fast Poll works next time
+            if (function_exists('apcu_store')) {
+                // If we got messages, the last one is the latest ID.
+                $latestId = 0;
+                $msgs = $messages; // assuming array of objects keyed by ID per DBManager
+                 
+                if (!empty($msgs)) {
+                    // Get the last key (highest ID)
+                    end($msgs);
+                    $latestId = key($msgs);
+                } else {
+                    // If no new messages, it means the client's lastid IS the latest known state.
+                    // We should update APCu with this ID so the Fast Poll check (id >= apcu_id) passes next time.
+                    if ($lastid > 0) {
+                        $latestId = $lastid;
+                    }
+                }
+
+                if ($latestId > 0) {
+                     apcu_store('chat_last_id_' . $gameid, $latestId, 3600);
+                }
+            }
+
             return json_encode($messages, JSON_NUMERIC_CHECK);
         }    
         catch(Exception $e) 

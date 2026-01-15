@@ -3487,6 +3487,13 @@ public function setLastTimeChatChecked($userid, $gameid)
     public function getChatMessages($lastid, $gameid = 0)
     {
         $messages = array();
+        
+        // Critical Optimization:
+        // If lastid is 0 (initial load or reset), ONLY fetch the last 20 messages.
+        // This prevents the "memory limit" cracshes seen when a client reconnects and tries to fetch 'all' history.
+        // The default LIMIT 50 was causing issues on CloudLinux due to large JSON payloads.
+        $limit = ($lastid == 0) ? 20 : 50;
+
         $stmt = $this->connection->prepare("
             SELECT 
                 id, userid, username, gameid, message, time
@@ -3497,11 +3504,11 @@ public function setLastTimeChatChecked($userid, $gameid)
             AND 
                 id > ?
             ORDER BY id DESC
-            LIMIT 50;
+            LIMIT ?;
         ");
 
         if ($stmt) {
-            $stmt->bind_param('ii', $gameid, $lastid);
+            $stmt->bind_param('iii', $gameid, $lastid, $limit);
             $stmt->bind_result($id, $userid, $username, $gameid, $message, $time);
             $stmt->execute();
             while ($stmt->fetch()) {
