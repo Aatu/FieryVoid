@@ -25,10 +25,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
 if (function_exists('apcu_fetch') && isset($_GET['gameid']) && isset($_GET['last_time'])) {
     $gameid = $_GET['gameid'];
     $serverTime = apcu_fetch("game_{$gameid}_last_update");
-    
-    // Safety: If serverTime is missing (expired/evicted), we MUST load from DB to be safe.
-    // We only skip if we are certain the server has nothing new.
-    if ($serverTime && $serverTime <= $_GET['last_time']) {
+    if ($serverTime && $serverTime <= (float)$_GET['last_time']) {
+         error_log("Gamedata: Fast Poll EXEMPT - " . $_SERVER['REMOTE_ADDR']);
          echo "{}";
          exit;
     }

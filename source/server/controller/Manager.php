@@ -316,19 +316,29 @@ class Manager{
                 return $gdS;
             }
 
-            if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
-                return "{}";
-            
-            //NEW VERSION FOR PHP 8 - Aug 2025
-            $data = $gdS->stripForJson();
-
             // APCu Optimization: Inject Timestamp
+            $timestamp = 0;
             if (function_exists('apcu_fetch')) {
                  $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
                  if (!$timestamp) {
                      $timestamp = microtime(true);
                      self::touchGame($gameid);
                  }
+                 // Debug log to confirm injection
+                 // error_log("Manager: Injected last_update for Game $gameid: $timestamp");
+            }
+
+            if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY") {
+                if ($timestamp > 0) {
+                    return json_encode(["last_update" => $timestamp]);
+                }
+                return "{}";
+            }
+            
+            //NEW VERSION FOR PHP 8 - Aug 2025
+            $data = $gdS->stripForJson();
+
+            if ($timestamp > 0) {
                  $data->last_update = $timestamp;
             }
 
