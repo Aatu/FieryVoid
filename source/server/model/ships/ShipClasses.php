@@ -86,6 +86,7 @@ class BaseShip {
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
     
     public $slotid;
+    public $canPreOrder = false; //Marker for ships equipped with systems that are used every turn in Deployment/Pre-Orders Phase.
 
     public $movement = array();
     	    
@@ -522,7 +523,11 @@ class BaseShip {
         $strippedShip->phpclass = $this->phpclass;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
-		
+
+        //With changes to how we cache ships, we sadly have to re-do this each time. DK - Dec 2025
+        $this->notesFill();
+		$strippedShip->notes = $this->notes;                
+
 		$strippedShip->combatValue = $this->calculateCombatValue();
 		$strippedShip->pointCostEnh = $this->pointCostEnh;
 		
@@ -605,8 +610,8 @@ class BaseShip {
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
 		   if($this->faction == "Hyach Gerontocracy"){
-		                return $this->doHyachInitiativeBonus($gamedata);
-		        }            
+		        return $this->doHyachInitiativeBonus($gamedata);
+		    }            
 			if(($this->faction == "Gaim Intelligence") && ($this instanceOf gaimMoas)){  //GTS
                 return $this->doGaimInitiativeBonus($gamedata);
             }
@@ -805,7 +810,18 @@ class BaseShip {
             $system->generateIndividualNotes($gamedata, $dbManager);
         }
 	}
-	
+
+    //Used in FireGamePhase->process to generate extra notes for Hyach Specialists, but could have other applications - DK - 27.12.25
+	public function generateAdditionalNotes($gameData, $dbManager) {
+        
+        if($gameData->phase == 3){        
+            $specialists = $this->getSystemByName("HyachSpecialists");
+            if ($specialists){ //Does ship have Specialists system?            
+                $specialists->generateIndividualNotes($gameData, $dbManager); //Generate notes for Specialists system
+                $this->saveIndividualNotes($dbManager); //Save ship notes. 
+            }
+        }
+    }                
 	
 	/*calls systems to act on notes just loaded if necessary*/
 	public function onIndividualNotesLoaded($gamedata) {
@@ -903,7 +919,7 @@ class BaseShip {
         $readyToFire = false;
         foreach($this->systems as $system){
             if($system instanceof Weapon){
-                if($system->preFires && ($system->turnsloaded >= $system->loadingtime)){ //ready to fire!
+                if($system->preFires && ($system->turnsloaded >= $system->loadingtime) && !$system->autoFireOnly){ //ready to fire!
                     $readyToFire = true;
                     break; //At least one weapon can pre fire, exit loop.
                 }    
@@ -981,7 +997,7 @@ class BaseShip {
 			}
 		}
 
-			$this->notesFill(); //add miscellanous info to notes!
+			//$this->notesFill(); //add miscellanous info to notes! //Moved to strpForJson after cache changes - DK DEc 2025
 	   }//endof adding PRIMARY Structure (with specials attached)
 	   
             $this->addSystem($system, 0);
@@ -996,9 +1012,9 @@ class BaseShip {
 		
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
 		protected function notesFill($sampleFighter = null){
-			if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
-				return;
-			}
+			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
+			//	return;
+			//}
 			//add to Notes information about miscellanous attributes
 			if($this->notes!='')$this->notes .= '<br>';
 				//faction age - if older than Young
@@ -1833,6 +1849,46 @@ public function getAllEWExceptDEW($turn){
             }
         }
         $valid = $this->fillLocations($valid);
+
+        //New Ambiguous hit resolution - DK 12.1.26
+        //If we have multiple valid sections (ambiguous shot), randomize based on profile.
+        //Original logic sticked to the 'toughest' section deterministically.
+        if (count($valid) > 1) { //Only if multiple valid locations
+            $liveSections = array();
+            //Calculated REAL predicted health (fillLocations clamps it to 1, causing dead sections to look alive)
+            foreach ($valid as $loc){
+                
+                //We need to check if it's actually dead (Health - Expected <= 0). 
+                //fillLocations already subtracted expectedDamage but maxed it to 1.
+                //So we have to check the raw numbers.
+                $structure = $this->getStructureSystem($loc["loc"]);
+                if($structure){
+                    $trueRem = $structure->getRemainingHealth();
+                    $expected = 0;
+                    if(isset($this->expectedDamage[$loc["loc"]])) $expected = $this->expectedDamage[$loc["loc"]];
+                    
+                    if( ($trueRem - $expected) > 0 ){
+                         $liveSections[] = $loc;
+                    }
+                }
+            }
+
+            if(count($liveSections) > 1){
+                $totalProfile = 0;
+                foreach($liveSections as $loc) $totalProfile += $loc["profile"];
+
+                if($totalProfile > 0){
+                    $roll = Dice::d($totalProfile);
+                    $current = 0;
+                    foreach($liveSections as $loc){
+                        $current += $loc["profile"];
+                        if($roll <= $current) return $loc;
+                    }
+                }
+            }
+        }
+        //End of new block - DK 12.1.26
+
         $pick = $this->pickLocationForHit($valid);
         return $pick;
     }
@@ -2146,7 +2202,8 @@ public function getAllEWExceptDEW($turn){
             }
             if($rngTotal ==0) return $this->getStructureSystem(0);//there is nothing here! assign to Structure...
         }
-        $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing'));       
+        // $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing')); //Original Logic - DK 13.01.26
+        $noPrimaryHits = ($weapon->damageType == 'Piercing'); //New logic: Only Piercing removes PRIMARY from table. $noPrimaryHits trait keeps it but redirects result.    
         if($noPrimaryHits){ //change hit chart! - no PRIMARY hits!
             $hitChart = array();
             //use only non-destroyed systems on section hit
@@ -2194,6 +2251,7 @@ public function getAllEWExceptDEW($turn){
         }
  
         if($name == 'Primary'){ //redirect to PRIMARY!
+            if($weapon->noPrimaryHits) return $this->getStructureSystem($location); //If weapon treats Primary as facing Structure - DK 13.01.26
             return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
         }
         $systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
@@ -2301,7 +2359,8 @@ public function getAllEWExceptDEW($turn){
 		}
 			
 		//for non-Flash/Piercing, add PRIMARY to hit table...
-		$noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash'));
+		// $noPrimaryHits = ($weapon->noPrimaryHits || ($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash')); //Original Logic - DK 13.01.26
+        $noPrimaryHits = (($weapon->damageType == 'Piercing') || ($weapon->damageType == 'Flash')); //New Logic: Only Flash and Piercing remove functionality. $noPrimaryHits trait redirects logic later.
 		if(!$noPrimaryHits){ 
 			$multiplier = 0.1; //10% chance for PRIMARY penetration
 			if($this->shipSizeClass<=1) $multiplier = 0.15;//for MCVs - 15%...
@@ -2334,6 +2393,7 @@ public function getAllEWExceptDEW($turn){
 		}
 		
 		if($name == 'Primary'){ //redirect to PRIMARY!
+            if($weapon->noPrimaryHits) return $this->getStructureSystem($location); //If weapon treats Primary as facing Structure - DK 13.01.26
 			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
@@ -2593,8 +2653,15 @@ class LCV extends MediumShip{
 }
 
 class Terrain extends MediumShip{
-	public $shipSizeClass = 5; //5 is used to identify Terrain is certain Front End functions.
+    public $shipSizeClass = 5; //5 is used to identify Terrain is certain Front End functions.
     public $Enormous = true;
+    public $hexOffsets = []; //For irregular-shaped terrain, this lest's you specifiy specific hexes occupied in relation to terrain unit's hex.
+
+    public function stripForJson() {
+        $strippedShip = parent::stripForJson();
+        //$strippedShip->hexOffsets = $this->hexOffsets;
+        return $strippedShip;
+    }
 }
 
 

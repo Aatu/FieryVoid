@@ -35,7 +35,26 @@
 			$strippedSystem->fighter = true;
 			$strippedSystem->location = $this->location;
 			$strippedSystem->flightid = $this->flightid;
-			$strippedSystem->systems = $this->systems;
+			//$strippedSystem->systems = $this->systems; 	
+
+			//Improved version that sends stripForJson for fighter systems, not whole systems			
+			$strippedSystem->systems = array_map( function($system) {
+				$stripped = $system->stripForJson();
+
+				// List of properties to copy if present (required for Replay/UI/Custom Systems)
+				$properties = array(
+					'fireOrders', //For replay
+					'weapon', //For replay
+				);
+
+				foreach($properties as $prop){
+					if(isset($system->$prop)){
+						$stripped->$prop = $system->$prop;
+					}
+				}
+
+				return $stripped;
+			}, $this->systems); 					
 
 			return $strippedSystem;
 		}
@@ -183,6 +202,15 @@
 		}else{ //firing position indicated!
 			$loc = $target->doGetHitSectionPos($pos); //finds array with relevant data!
 		}
+
+		if ($target->hasSpecialAbility("Petals")){ //Does ship have Specialists system?
+			$petals = $target->getSystemByName("FtrPetals");
+			if($petals->isActive()){
+				if($loc["min"] == 210  && $loc["max"] == 330 || $loc["min"] == 30 && $loc["max"] == 150) //Side profiles
+				$loc["armour"] -= 2;
+			} 
+		}
+
 		return $loc["armour"];
     }
 	

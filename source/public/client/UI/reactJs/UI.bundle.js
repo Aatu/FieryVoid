@@ -38840,7 +38840,7 @@ var getEW = function getEW(ship) {
             null,
             "DEW:"
         ),
-        ew.getDefensiveEW(ship)
+        formatEW(ew.getDefensiveEW(ship))
     ));
     var CCEWamount = Math.max(0, ew.getCCEW(ship) - ew.getDistruptionEW(ship));
     list.push(React.createElement(
@@ -38851,7 +38851,7 @@ var getEW = function getEW(ship) {
             null,
             "CCEW:"
         ),
-        CCEWamount
+        formatEW(CCEWamount)
     ));
 
     var bdew = ew.getBDEW(ship) * 0.25;
@@ -38868,7 +38868,7 @@ var getEW = function getEW(ship) {
                 null,
                 "BDEW:"
             ),
-            bdew.toFixed(2)
+            formatEW(bdew)
         ));
     }
     if (DetectSEW) {
@@ -38880,7 +38880,7 @@ var getEW = function getEW(ship) {
                 null,
                 "Detect Stealth:"
             ),
-            DetectSEW
+            formatEW(DetectSEW)
         ));
     }
 
@@ -38916,21 +38916,25 @@ var getAmount = function getAmount(ewEntry, ship) {
             if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) {
                 var result = ewEntry.amount * 0.333;
                 result = Math.round(result * 3) / 3;
-                return result.toFixed(2);
+                return formatEW(result);
             } else {
-                return ewEntry.amount * 0.5;
+                return formatEW(ewEntry.amount * 0.5);
             }
         case 'DIST':
             if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) {
-                return ewEntry.amount / 4;
+                return formatEW(ewEntry.amount / 4);
             } else {
-                return ewEntry.amount / 3;
+                return formatEW(ewEntry.amount / 3);
             }
         case 'OEW':
-            return Math.max(0, ewEntry.amount - ew.getDistruptionEW(ship));
+            return formatEW(Math.max(0, ewEntry.amount - ew.getDistruptionEW(ship)));
         default:
-            return ewEntry.amount;
+            return formatEW(ewEntry.amount);
     }
+};
+
+var formatEW = function formatEW(val) {
+    return Math.round(val * 100) / 100;
 };
 
 exports.default = ShipWindowEw;
@@ -39665,7 +39669,7 @@ var isOffline = function isOffline(ship, system) {
 };
 
 var isBoosted = function isBoosted(ship, system) {
-    return shipManager.power.isBoosted(ship, system);
+    return shipManager.power.isBoosted(ship, system) || system.active;
 };
 
 var getStructureLeft = function getStructureLeft(ship, system) {
@@ -41218,8 +41222,9 @@ var canBFCPpropagate = function canBFCPpropagate(ship, system) {
 };
 
 //can do something with Hyach Specialists
+//const canSpec = (ship, system) => (gamedata.gamephase === 1) && system.name === 'hyachSpecialists';
 var canSpec = function canSpec(ship, system) {
-	return gamedata.gamephase === 1 && system.name === 'hyachSpecialists';
+	return system.name === 'hyachSpecialists';
 };
 var canSpecdisplayCurrClass = function canSpecdisplayCurrClass(ship, system) {
 	return canSpec(ship, system) && system.getCurrClass() != '';
@@ -41328,29 +41333,36 @@ var canOverload = function canOverload(ship, system) {
 var canStopOverload = function canStopOverload(ship, system) {
 	return gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system) && (system.overloadshots >= system.extraoverloadshots || system.overloadshots == 0);
 };
-/*
-const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
-
-const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
-*/
-var isBoostPhase = function isBoostPhase(system) {
-	// If boostOtherPhases is an array, check if the current gamephase is included
-	if (system.boostOtherPhases.length > 0) {
-		return system.boostOtherPhases.includes(gamedata.gamephase);
-	}
-
-	// Default: only in phase 1
-	return gamedata.gamephase === 1;
-};
 
 var canBoost = function canBoost(ship, system) {
-	return system.boostable && isBoostPhase(system) && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id === shipManager.power.getHighestSensorsId(ship));
+	return system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
 };
 
 var canDeBoost = function canDeBoost(ship, system) {
-	return isBoostPhase(system) && shipManager.power.canDeboost(ship, system) && Boolean(shipManager.power.getBoost(system));
+	return gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
+};
+/* Code for boosting systems in other phases.  Not longer need anymore since Shading Field got converted to notes
+const isBoostPhase = (system) => {
+    // If boostOtherPhases is an array, check if the current gamephase is included
+    if (system.boostOtherPhases.length > 0) {
+        return system.boostOtherPhases.includes(gamedata.gamephase);
+    }
+
+    // Default: only in phase 1
+    return gamedata.gamephase === 1;
 };
 
+const canBoost = (ship, system) =>
+    system.boostable &&
+    isBoostPhase(system) &&
+    shipManager.power.canBoost(ship, system) &&
+    (!system.isScanner() || system.id === shipManager.power.getHighestSensorsId(ship));
+
+const canDeBoost = (ship, system) =>
+    isBoostPhase(system) && 
+	shipManager.power.canDeboost(ship, system) && 
+	Boolean(shipManager.power.getBoost(system));
+*/
 var canAddShots = function canAddShots(ship, system) {
 	return system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots < system.maxVariableShots;
 };

@@ -17,6 +17,10 @@ if (empty($_SESSION["user"])) {
 // Fetch games for logged-in user
 $userid = (int)$_SESSION["user"];
 $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
+
+$defaultGameName = 'GAME NAME' . $_SESSION["user"];	
+$playerName = Manager::getPlayerName($_SESSION["user"]);
+$defaultGameName = ucfirst($playerName) . "'s Game";
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -41,6 +45,8 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       gamedata.parseServerData(<?php echo $games; ?>);
       ajaxInterface.startPollingGames();
       gamedata.thisplayer = <?php echo $_SESSION["user"]; ?>;
+      gamedata.defaultGameName = "<?php echo $defaultGameName; ?>";
+      gamedata.defaultBackground = "21.PurpleNebula.jpg";
     });
     function loadFireList() {
       ajaxInterface.getFirePhaseGames();
@@ -48,7 +54,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
   </script>
 </head>
 
-<body  style="background: url('./img/webBackgrounds/SantaBattle.png') no-repeat center center fixed; background-size: cover;">
+<body  style="background: url('./img/maps/21.PurpleNebula.jpg') no-repeat center center fixed; background-size: cover;">
 <header class="pageheader">
   <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
   <div class="top-right-row">
@@ -76,22 +82,25 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
 <div class="resources">
       <h3>Rules & Info</h3>
       <div class="links">     
+        <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of specific rules and differences from Babylon 5 Wars.</div>        
         <div><a href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers:</a> Overview of Fiery Void factions and their relative strengths.</div>
-        <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of specific rules and differences from Babylon 5 Wars.</div>
         <div><a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements:</a> Details of all the extras available to Fiery Void units e.g. Missiles.</div>
         <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge repository of Babylon 5 Wars rules and info!</div>
       </div> 
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — December 2025</h3>
+      <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
-      <li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>            
-        <li><strong>Torvalus Speculators</strong> - Transverse Drive added to complete the release of the new Torvalus Faction.</li>       
-        <li><strong>Shadow Slicers</strong> - Can now assign damage dice to shots/intercept.</li>                                  
-        <li><strong>Critical hits</strong> - Critical hits are now displayed in Combat Log and Replay animations.
-        <li><strong>Terrain Collisions</strong> - Terrain collisions will now occur, and cause damage, before the Firing Phase.</li>                                            
-        <li><strong>General Fixes</strong> - Server performance/stability updates, plus many other small fixes. Thanks for all the reports!</li>                                                    
+        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->            
+        <li><strong>Create Game Screen</strong> - The Create Game refresh completed. New map templates and Fleet Test option added!</li>
+        <li><strong>Gravity Nets</strong> - Minbari now have access to Gravity Nets and new ships equipped with this system have been added to their roster, thanks to Jonathan!</li>   
+        <li><strong>Custom Centauri Units</strong> - House Valheru has received reinforcements! Thanks to Fred/Geoffrey!</li>                         
+        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggled on and off during the Deployment phase and during a Pre-Orders phase after they've deployed.</li>       
+        <li><strong>Hyach Specialists</strong> - Specialists are selected during Deployment Phase, and some can now be used in Movement/Firing Phases.</li>                                                                            
+        <li><strong>Vorlon Petals</strong> - Vorlon fighters can now toggled their petals open during Initial Orders.</li>      
+        <li><strong>Terrain</strong> - New Terrain units added.</li>                    
+        <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
@@ -121,6 +130,7 @@ $games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
       </div>
       <div class="create-col">
         <a class="btn btn-success create-game-btn" href="creategame.php">Create Game</a>
+        <button class="btn btn-secondary" onclick="gamedata.submitFleetTest()">Fleet Test</button>
         <button class="btn btn-secondary" onclick="loadFireList()">Recent Games</button>
       </div>
     </div>

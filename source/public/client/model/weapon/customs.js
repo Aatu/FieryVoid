@@ -26,6 +26,18 @@ var CustomMatterStream = function CustomMatterStream(json, ship) {
 CustomMatterStream.prototype = Object.create(Weapon.prototype);
 CustomMatterStream.prototype.constructor = CustomMatterStream;
 
+CustomMatterStream.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];         
+    }
+
+	return this;
+};
 
 var CustomGatlingMattergunLight = function CustomGatlingMattergunLight(json, ship) {
     Weapon.call(this, json, ship);
@@ -216,6 +228,19 @@ var CustomLtParticleCutter = function CustomLtParticleCutter(json, ship) {
 };
 CustomLtParticleCutter.prototype = Object.create(Weapon.prototype);
 CustomLtParticleCutter.prototype.constructor = CustomLtParticleCutter;
+
+CustomLtParticleCutter.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+	if(gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+		this.data["Current Target"] = target.name;
+	}else{
+        delete this.data["Current Target"];         
+    }
+
+	return this;
+};
 
 var CustomEarlyLtParticleCutter = function CustomEarlyLtParticleCutter(json, ship) {
     Weapon.call(this, json, ship);

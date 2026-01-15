@@ -1,14 +1,109 @@
 "use strict";
 
 jQuery(function ($) {
-    $("#mapselect").on("change", createGame.mapSelect);
+    $("#backgroundSelect").on("change", createGame.mapSelect);
     createGame.mapSelect();
 
-    $("input").on("change", createGame.inputChange);
-    $("select").on("change", createGame.inputChange);
-    $("input").on("focus", createGame.inputFocus);
+    $("body").on("change", "input", createGame.inputChange);
+    $("body").on("change", "select", createGame.inputChange);
+    $("body").on("focus", "input", createGame.inputFocus);
+
+    // Mousewheel support for number inputs
+    // We use a non-passive listener on the document to ensure we can preventDefault() the scroll
+    document.addEventListener("wheel", function (e) {
+        // Support standard number inputs AND our special .points text input
+        const isNumberInput = (e.target.tagName === 'INPUT' && e.target.type === 'number');
+        const isPointsInput = (e.target.tagName === 'INPUT' && $(e.target).hasClass('points'));
+
+        if (!isNumberInput && !isPointsInput) return;
+        if (document.activeElement !== e.target) return; // Only if focused
+
+        e.preventDefault();
+
+        // Determine direction
+        const delta = e.deltaY;
+        const input = $(e.target);
+        const step = parseFloat(input.attr("step")) || 1;
+        let val = parseFloat(input.val()) || 0;
+
+        if (delta > 0) { // Scrolling down -> decrement
+            val -= step;
+        } else { // Scrolling up -> increment
+            val += step;
+        }
+
+        // Respect min/max if present
+        const min = input.attr("min");
+        const max = input.attr("max");
+
+        if (min !== undefined && val < parseFloat(min)) val = parseFloat(min);
+        if (max !== undefined && val > parseFloat(max)) val = parseFloat(max);
+
+        input.val(val);
+        input.trigger("change"); // Update model
+
+    }, { passive: false });
+
+    // Scenario Custom Input Logic
+    const scenarioCustoms = [
+        { id: 'req', trigger: 'Other' },
+        { id: 'tier', trigger: 'Other' },
+        { id: 'enhancements', trigger: 'Up to X points' },
+        { id: 'victory', trigger: 'Other' }
+    ];
+
+    scenarioCustoms.forEach(item => {
+        $(`#${item.id}`).on('change', function () {
+            const val = $(this).val();
+            if (val === item.trigger) {
+                $(`#${item.id}_custom`).show().focus();
+            } else {
+                $(`#${item.id}_custom`).hide();
+            }
+        });
+        // Init state
+        if ($(`#${item.id}`).val() === item.trigger) {
+            $(`#${item.id}_custom`).show();
+        }
+    });
+
+    // UNLIMITED POINTS LOGIC
+    $("#unlimitedPointsCheck").on("change", function () {
+        const isUnlimited = $(this).is(":checked");
+
+        if (isUnlimited) {
+            $(".points").hide();
+            $(".unlimited-label").show(); // Show our custom label
+
+            // Force update data model for all slots
+            createGame.slots.forEach(slot => {
+                slot.points = -1;
+            });
+
+        } else {
+            $(".points").show();
+            $(".unlimited-label").hide();
+
+            // Reset visual and model
+            $(".points").each(function () {
+                $(this).val("3000"); // Standard default visual
+                $(this).trigger("change"); // Trigger change to update model
+            });
+        }
+    });
+
+    // BLOCK INVALID CHARS FOR ENHANCEMENTS (INTEGERS ONLY)
+    $("#enhancements_custom").on("keydown", function (e) {
+        // Prevent characters that are invalid for a positive integer: 'e', 'E', '.', '+', '-'
+        if (["e", "E", "+", "-", "."].includes(e.key)) {
+            e.preventDefault();
+        }
+    });
+
+    // Use body delegation for dynamic elements if needed, though structure suggests static buttons for adding slots
     $(".addslotbutton").on("click", createGame.createNewSlot);
-    $(".close").on("click", createGame.removeSlot);
+    // Delegate close button click since slots are dynamic
+    $(".slotcontainer").on("click", ".close", createGame.removeSlot);
 
     let allowSubmit = false;
 
@@ -22,54 +117,55 @@ jQuery(function ($) {
             e.preventDefault(); // Block submission from pressing Enter
             return false;
         }
-    
+
         // Call your original setData function before submitting
         createGame.setData();
-    
+
         allowSubmit = false; // Reset flag after submission
     });
-    $("#gamespacecheck").on("click", createGame.doGameSpaceCheck);
-    $("#gamespacecheck").on("click", createGame.doFlightCheck);
+
+    // Bind checkbox events
+    $("#mapDimensionsSelect").on("change", createGame.onMapDimensionsChange);
+
     $("#movementcheck").on("click", createGame.doMovementCheck);
-    $("#desperatecheck").on("click", createGame.doDesperateCheck);             
+    $("#desperatecheck").on("click", createGame.doDesperateCheck);
     $("#terraincheck").on("click", createGame.doTerrainCheck);
-    
-    $(".setsizeknifefight").on("click", createGame.doSwitchSizeKnifeFight);
-    $(".setswitchsizebaseassault").on("click", createGame.doSwitchSizeBaseAssault);    
-    $(".setsizestandard").on("click", createGame.doSwitchSizeStandard);
 
     createGame.createSlotsFromArray();
-	createGame.doGameSpaceCheck(); //let's run proper map size setting right at the start - to match marking fixed map as defailt
+    createGame.onMapDimensionsChange(); // Run on load
     createGame.drawMapPreview();
 });
 
 window.createGame = {
     gamespace_data: { width: 42, height: 30 },
     rules: {},
-    slots: Array({ id: 1, team: 1, name: "TEAM 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }, { id: 2, team: 2, name: "TEAM 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }),
+    slots: [
+        { id: 1, team: 1, name: "Team 1", points: 3500, depx: -21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 },
+        { id: 2, team: 2, name: "Team 2", points: 3500, depx: 21, depy: 0, deptype: "box", depwidth: 10, depheight: 30, depavailable: 1 }
+    ],
     slotid: 2,
 
     mapSelect: function mapSelect() {
         $("#default_option").remove();
-        var val = $("#mapselect").val();
+        const val = $("#backgroundSelect").val();
         $("body").css("background-image", "url(img/maps/" + val + ")");
     },
 
     inputFocus: function inputFocus(e) {
-        var input = $(this);
-        var value = input.val();
+        const input = $(this);
+        const value = input.val();
         input.data("oldvalue", value);
     },
 
     inputChange: function inputChange(e) {
 
-        var input = $(this);
-        var value = input.val();
-        var inputname = input.attr("name");
+        const input = $(this);
+        const value = input.val();
+        const inputname = input.attr("name");
 
         if (input.data("validation")) {
-            var patt = new RegExp(input.data("validation"));
-            if (value.lenght == 0 || !patt.test(value)) {
+            const patt = new RegExp(input.data("validation"));
+            if (value.length == 0 || !patt.test(value)) {
                 input.val(input.data("oldvalue"));
                 return;
             }
@@ -77,114 +173,96 @@ window.createGame = {
 
         if (inputname == "spacex") {
             createGame.gamespace_data.width = parseInt(value);
+            $("#mapDimensionsSelect").val("custom");
             createGame.drawMapPreview();
             return;
         }
 
         if (inputname == "spacey") {
             createGame.gamespace_data.height = parseInt(value);
+            $("#mapDimensionsSelect").val("custom");
             createGame.drawMapPreview();
             return;
         }
 
-        var slot = $(".slot").has($(this));
-        var data = createGame.getSlotData(slot.data("slotid"));
-        if (!slot || !data) return;
+        // Find parent slot
+        const slot = input.closest(".slot");
+        if (slot.length === 0) return; // Not inside a slot
+
+        const slotId = slot.data("slotid");
+        const data = createGame.getSlotData(slotId);
+
+        if (!data) return;
 
         data[inputname] = value;
 
         if (inputname == "deptype") {
-            var width = $(".depwidthheader", slot);
-            var height = $(".depheightheader", slot);
-            var inputHeight = $(".depheight", slot);
-
-            if (value == "box") {
-                width.html("Width:");
-                height.html("Height:");
-                inputHeight.show();
-                height.show();
-            }
-
-            if (value == "circle") {
-                width.html("Radius:");
-                inputHeight.hide();
-                height.hide();
-            }
-
-            if (value == "distance") {
-                width.html("From:");
-                height.html("To:");
-                inputHeight.show();
-                height.show();
-            }
+            // Logic for deptype if we re-enable it later
         }
 
         createGame.drawMapPreview();
     },
 
-    drawMapPreview: function drawMapPreview () {
+    drawMapPreview: function drawMapPreview() {
         const canvas = document.getElementById("mapPreview");
+        if (!canvas) return;
         const ctx = canvas.getContext("2d");
         if (!ctx) return;
-    
-        const isLimited = $("#gamespacecheck").is(":checked");
-    
+
+        const isLimited = $("#mapDimensionsSelect").val() !== "unlimited";
+
         // Use fixed width/height if unlimited is selected
         const mapWidth = isLimited ? (createGame.gamespace_data.width || 1) : 84;
         const mapHeight = isLimited ? (createGame.gamespace_data.height || 1) : 60;
-    
+
         // Clear canvas
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
+
+        // Background
+        ctx.fillStyle = "#000000";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
         // Margins and scale
         const margin = 10;
         const scaleX = (canvas.width - margin * 2) / mapWidth;
         const scaleY = (canvas.height - margin * 2) / mapHeight;
         const scale = Math.min(scaleX, scaleY); // Uniform scale
-    
+
         // Calculate offset to center the map in the canvas
         const offsetX = (canvas.width - mapWidth * scale) / 2;
         const offsetY = (canvas.height - mapHeight * scale) / 2;
 
-        // Draw black background inside the blue outline
-        ctx.fillStyle = "black";
-        ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);        
+        // Draw Map Boundary
+        ctx.fillStyle = "#050a10";
+        ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 
-        // Draw dotted white center lines, avoiding cross-over at center
+        ctx.strokeStyle = "#deebffaf";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
+
+        // Grid lines / Center lines
         ctx.save();
-        ctx.globalAlpha = 0.6; // Semi-transparent
-        ctx.strokeStyle = "white";
+        ctx.globalAlpha = 0.4;
+        ctx.strokeStyle = "#496791";
         ctx.lineWidth = 1;
-        ctx.setLineDash([6, 6]); // Dotted pattern: 6px line, 6px gap
+        ctx.setLineDash([4, 4]);
 
-        const centerX = offsetX + (mapWidth / 2) * scale;
+        const centerX = offsetX + 6 + (mapWidth / 2) * scale;
         const centerY = offsetY + (mapHeight / 2) * scale;
 
-        // Vertical line: from center up
+        // Vertical Center Line
         ctx.beginPath();
-        ctx.moveTo(centerX+6, centerY);
-        ctx.lineTo(centerX+6, offsetY);
+        ctx.moveTo(centerX, offsetY);
+        ctx.lineTo(centerX, offsetY + mapHeight * scale);
         ctx.stroke();
 
-        // Vertical line: from center down
+        // Horizontal Center Line
         ctx.beginPath();
-        ctx.moveTo(centerX+6, centerY);
-        ctx.lineTo(centerX+6, offsetY + mapHeight * scale);
-        ctx.stroke();
-
-        // Horizontal line: from center left
-        ctx.beginPath();
-        ctx.moveTo(centerX+6, centerY);
-        ctx.lineTo(offsetX, centerY);
-        ctx.stroke();
-
-        // Horizontal line: from center right
-        ctx.beginPath();
-        ctx.moveTo(centerX+6, centerY);
+        ctx.moveTo(offsetX, centerY);
         ctx.lineTo(offsetX + mapWidth * scale, centerY);
         ctx.stroke();
 
-        ctx.restore(); // Restore default dash       
+        ctx.restore();
 
         // Draw deployment zones
         $(".slot").each(function () {
@@ -193,41 +271,59 @@ window.createGame = {
             const data = createGame.getSlotData(slotId);
             if (!data) return;
             const team = data.team;
-    
+
             const x = parseInt(data.depx) || 0;
             const y = parseInt(data.depy) || 0;
             const w = parseInt(data.depwidth) || 0;
             const h = parseInt(data.depheight) || 0;
-    
-            ctx.fillStyle = "rgba(0,255,0,0.35)";
-    
+
+            // Deployment color based on team
+            let color = team === 1 ? "rgba(50, 200, 50, 0.4)" : "rgba(200, 50, 50, 0.4)";
+            let borderColor = team === 1 ? "#66ff66" : "#ff6666";
+
+            if (team > 2) {
+                color = "rgba(50, 50, 200, 0.4)";
+                borderColor = "#6666ff";
+            }
+
+            ctx.fillStyle = color;
+            ctx.strokeStyle = borderColor;
+            ctx.lineWidth = 1;
+
             // Adjust position to treat (x, y) as center
+            // coordinate system: center of map is (0,0)
+            // canvas origin is topleft
+
+            // Map coord to Canvas coord:
+            // MapX [-width/2, width/2] -> CanvasX [offsetX, offsetX + width*scale]
+            // MapY [-height/2, height/2] -> CanvasY [offsetY + height*scale, offsetY] (flipped Y if we want standard cartesian, but usually screen coords are Y down)
+
+            // Existing logic assumed typical screen coords where Y increases downwards? 
+            // Let's verify standard B5W coord system... usually standard cartesian, but web canvas is Y-down.
+            // Looking at existing code: 
+            // const drawY = offsetY + (mapHeight / 2 - y - h / 2) * scale;
+            // This suggests Y grows UPWARDS in B5W coords (standard math), so we subtract Y from center.
+
             const drawX = offsetX + (x - w / 2 + mapWidth / 2) * scale;
-            const drawY = offsetY + (mapHeight / 2 - y - h / 2) * scale;
-    
-     //       console.log(`SlotID: ${slotId}, x: ${x}, y: ${y}, w: ${w}, h: ${h}, scale: ${scale}`);
-     //       console.log(`Drawing at: x=${drawX}, y=${drawY}`);
-    
-            ctx.fillRect(drawX+4, drawY, w * scale, h * scale);
-            ctx.strokeStyle = "#006600";
-            ctx.strokeRect(drawX+4, drawY, w * scale, h * scale);
-            
-            // Draw slot number in the center
-            ctx.save(); // Save context state
-            ctx.globalAlpha = 0.8; // Semi-transparent
+            // If y is positive (up), on canvas it should be higher (smaller Y value)
+            // CenterY on canvas is offsetY + (mapHeight/2)*scale
+            // So if y=0, drawY should be CenterY - h/2*scale
+            // If y=10, drawY should be CenterY - 10*scale - h/2*scale
+            const drawY = offsetY + ((mapHeight / 2) - y - (h / 2)) * scale;
+
+            ctx.fillRect(drawX + 6, drawY, w * scale, h * scale);
+            ctx.strokeRect(drawX + 6, drawY, w * scale, h * scale);
+
+            // Draw slot number/TeamID
+            ctx.save();
             ctx.fillStyle = "white";
-            ctx.font = `${Math.max(4, Math.floor(4 * scale))}px Arial`; // smaller font with a minimum size
+            ctx.font = "bold 14px Arial";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            ctx.fillText(team, (drawX+6) + (w * scale) / 2, (drawY+3) + (h * scale) / 2);
-            ctx.restore(); // Restore to default state
+            // Center of the box
+            ctx.fillText(team, drawX + 6 + (w * scale) / 2, drawY + (h * scale) / 2);
+            ctx.restore();
         });
-    
-        // Draw map border (rectangle)
-        ctx.strokeStyle = "#215a7a";
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.8; // Semi-transparent        
-        ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
     },
 
     doFlightCheck: function doFlightCheck(data) {
@@ -238,268 +334,388 @@ window.createGame = {
     },
 
 
-doDesperateCheck: function doDesperateCheck(data) {
-    var checkval = $("#desperatecheck:checked").val();
-
-    if (checkval == "on") {
-        // Show the dropdown for selecting initiative categories
-        $("#desperateDropdown").show();
-        // Set the selected value as initiativeCategories when checkbox is checked
-        var selectedValue = $("#desperateSelect").val();
-        createGame.rules.desperate = parseInt(selectedValue, 10);
-        
-        // Add an event listener to update the value if the user changes the dropdown
-        $("#desperateSelect").on('change', function() {
-            createGame.rules.desperate = parseInt($(this).val(), 10);
-        });
-    } else {
-        // Hide the dropdown when the checkbox is unchecked
-        $("#desperateDropdown").hide();
-        // Remove Desperate rule
-        delete createGame.rules.desperate;
-    }
-},
-
-
-doTerrainCheck: function doTerrainCheck(data) {    
-    // Simulate both checks by triggering them directly
-    createGame.doAsteroidsCheck(data);
-    createGame.doMoonsCheck(data);
-},
-
-doAsteroidsCheck: function () {
-    var checkval = $("#terraincheck:checked").val(); // use terraincheck instead
-
-    if (checkval == "on") {
-        $("#asteroidsDropdown").show();
-        var selectedValue = $("#asteroidsSelect").val();
-        createGame.rules.asteroids = parseInt(selectedValue, 10);
-
-        $("#asteroidsSelect").off('change').on('change', function () {
-            createGame.rules.asteroids = parseInt($(this).val(), 10);
-        });
-    } else {
-        $("#asteroidsDropdown").hide();
-        delete createGame.rules.asteroids;
-    }
-},
-
-
-doMoonsCheck: function () {
-    const enabled = $("#terraincheck").is(":checked");
-
-    if (enabled) {
-        $("#moonsDropdown").show();
-
-        const small  = parseInt($("#moonsSmallSelect").val(), 10)  || 0;
-        const medium = parseInt($("#moonsMediumSelect").val(), 10) || 0;
-        const large  = parseInt($("#moonsLargeSelect").val(), 10)  || 0;
-
-        // single array/object with the 3 values
-        createGame.rules.moons = { small, medium, large };
-
-        // namespaced handlers avoid duplicate bindings
-        $("#moonsSmallSelect").off('change.moons').on('change.moons', function () {
-            createGame.rules.moons.small = parseInt(this.value, 10) || 0;
-        });
-        $("#moonsMediumSelect").off('change.moons').on('change.moons', function () {
-            createGame.rules.moons.medium = parseInt(this.value, 10) || 0;
-        });
-        $("#moonsLargeSelect").off('change.moons').on('change.moons', function () {
-            createGame.rules.moons.large = parseInt(this.value, 10) || 0;
-        });
-
-    } else {
-        $("#moonsDropdown").hide();
-        delete createGame.rules.moons; // remove the whole rule when disabled
-    }
-},
-
-doMovementCheck: function doMovementCheck(data) {
-    var checkval = $("#movementcheck:checked").val();
-
-    if (checkval == "on") {
-        // Show the dropdown for selecting initiative categories
-        $("#movementDropdown").show();
-        // Set the selected value as initiativeCategories when checkbox is checked
-        var selectedValue = $("#initiativeSelect").val();
-        createGame.rules.initiativeCategories = parseInt(selectedValue, 10);
-        
-        // Add an event listener to update the value if the user changes the dropdown
-        $("#initiativeSelect").on('change', function() {
-            createGame.rules.initiativeCategories = parseInt($(this).val(), 10);
-        });
-    } else {
-        // Hide the dropdown when the checkbox is unchecked
-        $("#movementDropdown").hide();
-        // Remove initiativeCategories rule
-        delete createGame.rules.initiativeCategories;
-    }
-},
-
-
-    doGameSpaceCheck: function doGameSpaceCheck(data) {
-        var checkval = $("#gamespacecheck:checked").val();
+    doDesperateCheck: function doDesperateCheck(data) {
+        var checkval = $("#desperatecheck:checked").val();
 
         if (checkval == "on") {
-            $(".gamespacedefinition .unlimitedspace").addClass("invisible");
-            $(".gamespacedefinition .limitedspace").removeClass("invisible");
-            createGame.gamespace_data.width = 42; //Reset this
-            createGame.gamespace_data.height = 30;	//reset this
-            $(".spacex").val(createGame.gamespace_data.width);
-            $(".spacey").val(createGame.gamespace_data.height);
-            $(".deptype").val("box");
-            $("#team1 .depx").val(-19);
-            $("#team2 .depx").val(18);
-            $("#team1 .depy").val(0);
-            $("#team2 .depy").val(0);
-            $("#team1 .depwidth").val(5);
-            $("#team2 .depwidth").val(5);
-            $("#team1 .depheight").val(30);
-            $("#team2 .depheight").val(30);
-			//modify ALL SLOTS, rather than flat slots 0 and 1!
-			for (var slotID in createGame.slots) {
-				var slotData = createGame.slots[slotID];
-				if (slotData.team == 1){ //data for team 1
-					slotData.depx = $("#team1 .depx").val();
-					slotData.depy = $("#team1 .depy").val();
-					slotData.depwidth = $("#team1 .depwidth").val();
-					slotData.depheight = $("#team1 .depheight").val();
-					slotData.deptype = $(".deptype").val();
-					slotData.depavailable = 1;
-				} else { //data for team 2
-					slotData.depx = $("#team2 .depx").val();
-					slotData.depy = $("#team2 .depy").val();
-					slotData.depwidth = $("#team2 .depwidth").val();
-					slotData.depheight = $("#team2 .depheight").val();
-					slotData.deptype = $(".deptype").val();
-					slotData.depavailable = 1;
-				}
-			}
+            $("#desperateDropdown").show();
+            var selectedValue = $("#desperateSelect").val();
+            createGame.rules.desperate = parseInt(selectedValue, 10);
+
+            $("#desperateSelect").off('change').on('change', function () {
+                createGame.rules.desperate = parseInt($(this).val(), 10);
+            });
         } else {
+            $("#desperateDropdown").hide();
+            delete createGame.rules.desperate;
+        }
+    },
+
+
+    doTerrainCheck: function doTerrainCheck(data) {
+        createGame.doAsteroidsCheck(data);
+        createGame.doMoonsCheck(data);
+    },
+
+    doAsteroidsCheck: function () {
+        var checkval = $("#terraincheck:checked").val();
+
+        if (checkval == "on") {
+            $("#asteroidsDropdown").show();
+            var selectedValue = $("#asteroidsSelect").val();
+            createGame.rules.asteroids = parseInt(selectedValue, 10);
+
+            $("#asteroidsSelect").off('change').on('change', function () {
+                createGame.rules.asteroids = parseInt($(this).val(), 10);
+            });
+        } else {
+            $("#asteroidsDropdown").hide();
+            delete createGame.rules.asteroids;
+        }
+    },
+
+
+    doMoonsCheck: function () {
+        const enabled = $("#terraincheck").is(":checked");
+
+        if (enabled) {
+            $("#moonsDropdown").show();
+
+            const small = parseInt($("#moonsSmallSelect").val(), 10) || 0;
+            const medium = parseInt($("#moonsMediumSelect").val(), 10) || 0;
+            const large = parseInt($("#moonsLargeSelect").val(), 10) || 0;
+
+            createGame.rules.moons = { small, medium, large };
+
+            $("#moonsSmallSelect").off('change.moons').on('change.moons', function () {
+                createGame.rules.moons.small = parseInt(this.value, 10) || 0;
+            });
+            $("#moonsMediumSelect").off('change.moons').on('change.moons', function () {
+                createGame.rules.moons.medium = parseInt(this.value, 10) || 0;
+            });
+            $("#moonsLargeSelect").off('change.moons').on('change.moons', function () {
+                createGame.rules.moons.large = parseInt(this.value, 10) || 0;
+            });
+
+        } else {
+            $("#moonsDropdown").hide();
+            delete createGame.rules.moons;
+        }
+    },
+
+    doMovementCheck: function doMovementCheck(data) {
+        var checkval = $("#movementcheck:checked").val();
+
+        if (checkval == "on") {
+            $("#movementDropdown").show();
+            var selectedValue = $("#initiativeSelect").val();
+            createGame.rules.initiativeCategories = parseInt(selectedValue, 10);
+
+            $("#initiativeSelect").off('change').on('change', function () {
+                createGame.rules.initiativeCategories = parseInt($(this).val(), 10);
+            });
+        } else {
+            $("#movementDropdown").hide();
+            delete createGame.rules.initiativeCategories;
+        }
+    },
+
+
+    mapData: {
+        "custom": {
+            width: null, height: null,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30, depavailable: 1 }
+            ]
+        },
+        "small": {
+            width: 30, height: 24,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -12, depy: 0, depwidth: 7, depheight: 24, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 11, depy: 0, depwidth: 7, depheight: 24, depavailable: 1 }
+            ]
+        },
+        "standard": {
+            width: 42, height: 30,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 30, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 30, depavailable: 1 }
+            ]
+        },
+        "large": {
+            width: 60, height: 40,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40, depavailable: 1 }
+            ]
+        },
+        "2v2": {
+            width: 42, height: 40,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 2, 2: 2 },
+            teams: [
+                {
+                    id: 1,
+                    depx: -19, depy: 0, depwidth: 5, depheight: 40,
+                    slots: [
+                        { name: "Team 1 (North)", depx: -19, depy: 10, depwidth: 5, depheight: 20, depavailable: 1 },
+                        { name: "Team 1 (South)", depx: -19, depy: -10, depwidth: 5, depheight: 20, depavailable: 1 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 18, depy: 0, depwidth: 5, depheight: 40,
+                    slots: [
+                        { name: "Team 2 (North)", depx: 18, depy: 10, depwidth: 5, depheight: 20, depavailable: 1 },
+                        { name: "Team 2 (South)", depx: 18, depy: -10, depwidth: 5, depheight: 20, depavailable: 1 }
+                    ]
+                }
+            ]
+        },
+        "ambush": {
+            width: 42, height: 30,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 1, 2: 2 },
+            scenario: {
+                //other: "The defender has been caught in an ambush! They must survive for 8 turns.",
+            },
+            teams: [
+                {
+                    id: 1,
+                    depx: 0, depy: 0, depwidth: 12, depheight: 6,
+                    slots: [
+                        { name: "Ambushed", points: 3000, depx: 0, depy: 0, depwidth: 12, depheight: 6, depavailable: 1 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 0, depy: 0, depwidth: 30, depheight: 5,
+                    slots: [
+                        { name: "Ambusher (North)", points: 2000, depx: 0, depy: 12, depwidth: 30, depheight: 5, depavailable: 1 },
+                        { name: "Ambusher (South)", points: 2000, depx: 0, depy: -12, depwidth: 30, depheight: 5, depavailable: 1 }
+                    ]
+                }
+            ]
+        },
+        "baseAssault": {
+            width: 60, height: 40,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 2, 2: 1 },
+            teams: [
+                {
+                    id: 1,
+                    depx: -19, depy: 0, depwidth: 5, depheight: 40,
+                    slots: [
+                        { points: 5000, name: "Fixed Defences", depx: -19, depy: 0, depwidth: 5, depheight: 20, depavailable: 1 },
+                        { points: 5000, name: "Reinforcements", depx: -28, depy: 0, depwidth: 5, depheight: 40, depavailable: 3 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 26, depy: 0, depwidth: 6, depheight: 40,
+                    slots: [
+                        { points: 10000, name: "Attackers", depx: 26, depy: 0, depwidth: 6, depheight: 40, depavailable: 1 }
+                    ]
+                }
+            ]
+        },        
+        "convoyRaid": {
+            width: 42, height: 30,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 3, 2: 1 },
+            teams: [
+                {
+                    id: 1,
+                    depx: -19, depy: 5, depwidth: 5, depheight: 10,
+                    slots: [
+                        { name: "Defenders", depx: -19, depy: 5, depwidth: 5, depheight: 10, depavailable: 2 },
+                        { name: "Freighters", depx: -15, depy: -12, depwidth: 10, depheight: 3, depavailable: 1 },
+                        { name: "Jumpgate", points: 1000, depx: 15, depy: 12, depwidth: 2, depheight: 2, depavailable: 1 }
+                    ]
+                },
+                {
+                    id: 2,
+                    depx: 18, depy: 7, depwidth: 5, depheight: 16,
+                    slots: [
+                        { name: "Attackers", depx: 18, depy: 7, depwidth: 5, depheight: 16, depavailable: 1 }
+                    ]
+                }
+            ]
+        },
+        "northvsouth": {
+            width: 60, height: 40,
+            // Enforce strictly 2 slots per team
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { name: "North", id: 1, depx: -1, depy: 17, depwidth: 59, depheight: 5, depavailable: 1 },
+                { name: "South", id: 2, depx: -1, depy: -17, depwidth: 59, depheight: 5, depavailable: 1 }
+            ]
+        },
+        "unlimited": {
+            width: null, height: null,
+            slotsRequired: { 1: 1, 2: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -28, depy: 0, depwidth: 5, depheight: 40, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 27, depy: 0, depwidth: 5, depheight: 40, depavailable: 1 }
+            ]
+        },
+    },
+
+    onMapDimensionsChange: function () {
+        const val = $("#mapDimensionsSelect").val();
+        const mapConfig = createGame.mapData[val];
+
+        if (val === "unlimited") {
             $(".gamespacedefinition .unlimitedspace").removeClass("invisible");
             $(".gamespacedefinition .limitedspace").addClass("invisible");
+        } else {
+            $(".gamespacedefinition .unlimitedspace").addClass("invisible");
+            $(".gamespacedefinition .limitedspace").removeClass("invisible");
+        }
+
+        if (mapConfig) {
+            createGame.applyMapConfig(mapConfig);
         }
 
         createGame.drawMapPreview();
     },
 
-
-    doSwitchSizeKnifeFight: function doSwitchSizeKnifeFight(data) {
-		createGame.gamespace_data.width = 30;
-		createGame.gamespace_data.height = 24;		
-        $(".spacex").val(30);
-        $(".spacey").val(24);
-        $(".deptype").val("box");
-        $("#team1 .depx").val(-12);
-        $("#team2 .depx").val(11);
-        $("#team1 .depy").val(0);
-        $("#team2 .depy").val(0);
-        $("#team1 .depwidth").val(7);
-        $("#team2 .depwidth").val(7);
-        $("#team1 .depheight").val(24);
-        $("#team2 .depheight").val(24);
-		//modify ALL SLOTS, rather than flat slots 0 and 1!
-		for (var slotID in createGame.slots) {
-			var slotData = createGame.slots[slotID];
-			if (slotData.team == 1){ //data for team 1
-				slotData.depx = $("#team1 .depx").val();
-				slotData.depy = $("#team1 .depy").val();
-				slotData.depwidth = $("#team1 .depwidth").val();
-				slotData.depheight = $("#team1 .depheight").val();
-				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 1;
-			} else { //data for team 2
-				slotData.depx = $("#team2 .depx").val();
-				slotData.depy = $("#team2 .depy").val();
-				slotData.depwidth = $("#team2 .depwidth").val();
-				slotData.depheight = $("#team2 .depheight").val();
-				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 1;
-			}
+    applyMapConfig: function (config) {
+        if (config.width && config.height) {
+            createGame.gamespace_data.width = config.width;
+            createGame.gamespace_data.height = config.height;
+            $(".spacex").val(config.width);
+            $(".spacey").val(config.height);
         }
 
-        createGame.drawMapPreview();
+        // Handle slots
+        if (config.slotsRequired) {
+            // Enforce specific number of slots
+            for (let teamId = 1; teamId <= 2; teamId++) {
+                const required = config.slotsRequired[teamId] || 0;
+                if (required > 0) {
+                    const defaults = config.teams ? config.teams.find(t => t.id === teamId) : null;
+                    createGame.ensureTeamSlots(teamId, required, defaults);
+                }
+            }
+        } else if (config.teams) {
+            // Just update existing slots with defaults (Legacy behavior)
+            for (let slot of createGame.slots) {
+                const defaults = config.teams.find(t => t.id === slot.team);
+                if (defaults) {
+                    // Only copy specific properties to avoid overwriting everything
+                    Object.assign(slot, {
+                        depx: defaults.depx,
+                        depy: defaults.depy,
+                        depwidth: defaults.depwidth,
+                        depheight: defaults.depheight
+                    });
+                }
+            }
+        }
+
+        // Populating Aditional Info when you select a map is supported, but it's quite tricky to know when to clear it.  So for the moment it's not used.
+        if (config.scenario) {
+            for (const [key, value] of Object.entries(config.scenario)) {
+                // If it's a dropdown that needs 'Other' to show custom input
+                if (["req", "tier", "victory", "enhancements"].includes(key)) {
+                    // Check if value is one of the options
+                    const select = $(`#${key}`);
+                    const optionExists = select.find(`option[value="${value}"]`).length > 0;
+
+                    if (optionExists) {
+                        select.val(value).trigger("change");
+                    } else {
+                        // Assume custom input
+                        const triggerVal = {
+                            "req": "Other",
+                            "tier": "Other",
+                            "victory": "Other",
+                            "enhancements": "Up to X points"
+                        }[key];
+
+                        if (triggerVal) {
+                            select.val(triggerVal).trigger("change");
+                            $(`#${key}_custom`).val(value);
+                        }
+                    }
+                } else {
+                    // Standard input/textarea
+                    $(`#${key}`).val(value);
+                }
+            }
+        }
+
+        createGame.refreshSlotsUI();
+    },
+
+    ensureTeamSlots: function (team, count, defaults) {
+        // Find current slots for this team
+        let teamSlots = createGame.slots.filter(s => s.team === team);
+
+        // Add slots if needed
+        while (teamSlots.length < count) {
+            createGame.createNewSlot.call({ className: "team" + team }, null, defaults);
+            // Refresh list
+            teamSlots = createGame.slots.filter(s => s.team === team);
+        }
+
+        // Remove slots if too many
+        while (teamSlots.length > count) {
+            const slotToRemove = teamSlots[teamSlots.length - 1];
+            createGame.removeSlotData(slotToRemove.id);
+            // Also remove from DOM immediately to keep UI in sync before full refresh
+            $(".slot.slotid_" + slotToRemove.id).remove();
+            teamSlots = createGame.slots.filter(s => s.team === team);
+        }
+
+        // Update all slots with defaults or specific slot overrides
+        if (defaults) {
+            let i = 0;
+            for (let slot of teamSlots) {
+                let config = defaults;
+                // Check for per-slot override
+                if (defaults.slots && defaults.slots[i]) {
+                    // Create a merged config where slot override takes precedence
+                    config = $.extend({}, defaults, defaults.slots[i]);
+                }
+
+                Object.assign(slot, {
+                    depx: config.depx,
+                    depy: config.depy,
+                    depwidth: config.depwidth,
+                    depheight: config.depheight
+                });
+
+                if (config.points !== undefined) {
+                    slot.points = config.points;
+                }
+                if (config.name !== undefined) {
+                    slot.name = config.name;
+                }
+                if (config.depavailable !== undefined) {
+                    slot.depavailable = config.depavailable;
+                }
+                i++;
+            }
+        }
+
+        createGame.refreshSlotsUI();
+    },
+
+    refreshSlotsUI: function () {
+        // Simple way: clear and redraw
+        $(".slotcontainer").empty();
+        createGame.createSlotsFromArray();
     },
 
 
-    doSwitchSizeBaseAssault: function doSwitchSizeBaseAssault(data) {
-		createGame.gamespace_data.width = 60;
-		createGame.gamespace_data.height = 40;		
-        $(".spacex").val(60);
-        $(".spacey").val(40);
-        $(".deptype").val("box");
-        $("#team1 .depx").val(-28);
-        $("#team2 .depx").val(27);
-        $("#team1 .depy").val(0);
-        $("#team2 .depy").val(0);
-        $("#team1 .depwidth").val(5);
-        $("#team2 .depwidth").val(5);
-        $("#team1 .depheight").val(40);
-        $("#team2 .depheight").val(40);
-		//modify ALL SLOTS, rather than flat slots 0 and 1!
-		for (var slotID in createGame.slots) {
-			var slotData = createGame.slots[slotID];
-			if (slotData.team == 1){ //data for team 1
-				slotData.depx = $("#team1 .depx").val();
-				slotData.depy = $("#team1 .depy").val();
-				slotData.depwidth = $("#team1 .depwidth").val();
-				slotData.depheight = $("#team1 .depheight").val();
-				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 1;
-			} else { //data for team 2
-				slotData.depx = $("#team2 .depx").val();
-				slotData.depy = $("#team2 .depy").val();
-				slotData.depwidth = $("#team2 .depwidth").val();
-				slotData.depheight = $("#team2 .depheight").val();
-				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 1;
-			}
-        }
 
-        createGame.drawMapPreview();
-    },
-	
-	
-    doSwitchSizeStandard: function doSwitchSizeStandard(data) {
-		createGame.gamespace_data.width = 42;
-		createGame.gamespace_data.height = 30;		
-        $(".spacex").val(42);
-        $(".spacey").val(30);
-        $(".deptype").val("box");
-        $("#team1 .depx").val(-19);
-        $("#team2 .depx").val(18);
-        $("#team1 .depy").val(0);
-        $("#team2 .depy").val(0);
-        $("#team1 .depwidth").val(5);
-        $("#team2 .depwidth").val(5);
-        $("#team1 .depheight").val(30);
-        $("#team2 .depheight").val(30);
-		//modify ALL SLOTS, rather than flat slots 0 and 1!
-		for (var slotID in createGame.slots) {
-			var slotData = createGame.slots[slotID];
-			if (slotData.team == 1){ //data for team 1
-				slotData.depx = $("#team1 .depx").val();
-				slotData.depy = $("#team1 .depy").val();
-				slotData.depwidth = $("#team1 .depwidth").val();
-				slotData.depheight = $("#team1 .depheight").val();
-				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 1;
-			} else { //data for team 2
-				slotData.depx = $("#team2 .depx").val();
-				slotData.depy = $("#team2 .depy").val();
-				slotData.depwidth = $("#team2 .depwidth").val();
-				slotData.depheight = $("#team2 .depheight").val();
-				slotData.deptype = $(".deptype").val();
-				slotData.depavailable = 1;
-			}
-        }
-
-        createGame.drawMapPreview();
-    },
-    
-	
-	
     createSlotsFromArray: function createSlotsFromArray() {
         for (var i in createGame.slots) {
             createGame.createSlot(createGame.slots[i]);
@@ -513,45 +729,117 @@ doMovementCheck: function doMovementCheck(data) {
 
         actual.data("slotid", data.id);
         actual.addClass("slotid_" + data.id);
+
+        // Disable points input if unlimited
+        if (data.points == -1) {
+            actual.find("[name='points']").hide();
+            // Ensure label exists if not in template (it might be added to template later, but safe to add if missing)
+            if (actual.find(".unlimited-label").length === 0) {
+                actual.find("[name='points']").after('<span class="unlimited-label" style="display:inline-block; font-weight:bold; color:#DEEBFF; margin-left:5px;">Unlimited</span>');
+            } else {
+                actual.find(".unlimited-label").show();
+            }
+        } else {
+            // For standard slots, ensure label is hidden if it exists
+            if (actual.find(".unlimited-label").length === 0) {
+                actual.find("[name='points']").after('<span class="unlimited-label" style="display:none; font-weight:bold; color:#DEEBFF; margin-left:5px;">Unlimited</span>');
+            }
+        }
+
         createGame.setSlotData(data);
     },
 
     setSlotData: function setSlotData(data) {
         var slot = $(".slot.slotid_" + data.id);
-        $(".name", slot).val(data.name);
-        $(".points", slot).val(data.points);
+        // Note: We used to just use class selectors, but now we have Inputs with Names.
+        // We can use [name='...']
+        slot.find("[name='name']").val(data.name);
 
-        $(".depx", slot).val(data.depx);
-        $(".depy", slot).val(data.depy);
-        $(".deptype", slot).val("box"); //Option removed so just pass "box" as default - DK
-        $(".depwidth", slot).val(data.depwidth);
-        $(".depheight", slot).val(data.depheight);
-        $(".depavailable", slot).val(data.depavailable);
+        // Only update points if NOT unlimited
+        if (data.points != -1) {
+            slot.find("[name='points']").val(data.points);
+        }
+
+        slot.find("[name='depx']").val(data.depx);
+        slot.find("[name='depy']").val(data.depy);
+        slot.find("[name='depwidth']").val(data.depwidth);
+        slot.find("[name='depheight']").val(data.depheight);
+        slot.find("[name='depavailable']").val(data.depavailable);
     },
 
-    createNewSlot: function createNewSlot(e) {
-        var team = $(this).hasClass("team1") ? 1 : 2;
+    createNewSlot: function createNewSlot(e, explicitDefaults) {
+        var team;
+        // Check if 'this' is a DOM-like object or jQuery object with class
+        if ($(this).hasClass("team1") || (this.className && this.className.indexOf("team1") !== -1)) {
+            team = 1;
+        } else if ($(this).hasClass("team2") || (this.className && this.className.indexOf("team2") !== -1)) {
+            team = 2;
+        } else {
+            // Fallback or passed directly?
+            // If we passed { className: "team1" } to call(), 'this' is that object.
+            // jQuery $(this) wraps it. $(obj).hasClass() might not work on plain objects depending on jQuery version.
+            // Let's check the property directly if we are mocking it.
+            if (this.className === "team1") team = 1;
+            else if (this.className === "team2") team = 2;
+            else team = 1; // Default fallback
+        }
+
         createGame.slotid++;
-        var data = { id: createGame.slotid, team: team, name: "TEAM " + team, points: 3500, depx: 0, depy: 0, deptype: "box", depwidth: 0, depheight: 0, depavailable: 1 };
-			//copy data from team data!
-			if (data.team == 1){ //data for team 1
-				data.depx = $("#team1 .depx").val();
-				data.depy = $("#team1 .depy").val();
-				data.depwidth = $("#team1 .depwidth").val();
-				data.depheight = $("#team1 .depheight").val();
-				data.deptype = "box";
-				data.depavailable = 1;
-			} else { //data for team 2
-				data.depx = $("#team2 .depx").val();
-				data.depy = $("#team2 .depy").val();
-				data.depwidth = $("#team2 .depwidth").val();
-				data.depheight = $("#team2 .depheight").val();
-				data.deptype = "box";
-				data.depavailable = 1;
-			}
-		
-        createGame.slots.push(data);
-        createGame.createSlot(data);
+
+        // Default to copying the LAST slot of that team, or standard defaults if none
+        let lastSlotOfTeam = null;
+        for (let i = createGame.slots.length - 1; i >= 0; i--) {
+            if (createGame.slots[i].team === team) {
+                lastSlotOfTeam = createGame.slots[i];
+                break;
+            }
+        }
+
+        let newData = {
+            id: createGame.slotid,
+            team: team,
+            name: "Team " + team,
+            points: $("#unlimitedPointsCheck").is(":checked") ? -1 : 3500,
+            depx: 0,
+            depy: 0,
+            deptype: "box",
+            depwidth: 5,
+            depheight: 5,
+            depavailable: 1
+        };
+
+        if (explicitDefaults) {
+            Object.assign(newData, {
+                depx: explicitDefaults.depx,
+                depy: explicitDefaults.depy,
+                depwidth: explicitDefaults.depwidth,
+                depheight: explicitDefaults.depheight
+            });
+            if (explicitDefaults.points !== undefined) {
+                newData.points = explicitDefaults.points;
+            }
+            if (explicitDefaults.name !== undefined) {
+                newData.name = explicitDefaults.name;
+            }
+            if (explicitDefaults.depavailable !== undefined) {
+                newData.depavailable = explicitDefaults.depavailable;
+            }
+        } else if (lastSlotOfTeam) {
+            // Copy relevant deployment data
+            newData.depx = lastSlotOfTeam.depx;
+            newData.depy = lastSlotOfTeam.depy;
+            newData.depwidth = lastSlotOfTeam.depwidth;
+            newData.depheight = lastSlotOfTeam.depheight;
+            newData.depavailable = lastSlotOfTeam.depavailable;
+            newData.points = lastSlotOfTeam.points;
+        } else {
+            // Fallback if no slots exist for team (shouldn't happen often)
+            if (team === 1) { newData.depx = -19; newData.depheight = 30; }
+            if (team === 2) { newData.depx = 18; newData.depheight = 30; }
+        }
+
+        createGame.slots.push(newData);
+        createGame.createSlot(newData);
         createGame.drawMapPreview();
     },
 
@@ -571,53 +859,90 @@ doMovementCheck: function doMovementCheck(data) {
     },
 
     removeSlot: function removeSlot(e) {
-        var slot = $(".slot").has($(this));
-        var data = createGame.getSlotData(slot.data("slotid"));
+        const removeBtn = $(this);
+        const slot = removeBtn.closest(".slot");
+        const slotId = slot.data("slotid");
+        const data = createGame.getSlotData(slotId);
 
-        if (data.id < 3) {
-            window.confirm.error("You cant delete the first slot", function () {});
+        if (!data) return;
+
+        // Check if it's the last slot of a team
+        const slotsOfTeam = createGame.slots.filter(s => s.team === data.team);
+        if (slotsOfTeam.length <= 1) {
+            window.confirm.error("You cannot delete the last slot of a team!", function () { });
             return false;
         }
+
+        // Confirmation is generally annoying for simple removes, but if desired:
+        // window.confirm.show("Are you sure?", ...)
+        // For now, let's just do it to be zippy.
+
         createGame.removeSlotData(data.id);
         createGame.drawMapPreview();
         slot.remove();
     },
 
     getScenarioDescriptionFromFields: function getScenarioDescriptionFromFields() {
-    const fields = [
-        { label: 'REQUIREMENTS', id: 'req' },
-        { label: 'CUSTOM FACTIONS / UNITS', id: 'customfactions' },
-        //{ label: 'CUSTOM UNITS IN OFFICIAL FACTIONS', id: 'customunits' },
-        { label: 'ENHANCEMENTS', id: 'enhancements' },
-        { label: 'EXPECTED POWER LEVEL', id: 'tier' },
-        { label: 'FORBIDDEN FACTIONS', id: 'forbidden' },
-        { label: 'MAP BORDERS', id: 'borders' },
-        { label: 'CALLED SHOTS', id: 'called' },
-        { label: 'VICTORY CONDITIONS', id: 'victory' },
-        { label: 'ADDITIONAL INFO', id: 'other' }
-    ];
+        const fields = [
+            { label: 'REQUIREMENTS', id: 'req' },
+            { label: 'CUSTOM FACTIONS / UNITS', id: 'customfactions' },
+            //{ label: 'CUSTOM UNITS IN OFFICIAL FACTIONS', id: 'customunits' },
+            { label: 'ENHANCEMENTS', id: 'enhancements' },
+            { label: 'EXPECTED POWER LEVEL', id: 'tier' },
+            { label: 'FORBIDDEN FACTIONS', id: 'forbidden' },
+            { label: 'MAP BORDERS', id: 'borders' },
+            { label: 'CALLED SHOTS', id: 'called' },
+            { label: 'VICTORY CONDITIONS', id: 'victory' },
+            { label: 'ADDITIONAL INFO', id: 'other' }
+        ];
 
-    let result = '*** SCENARIO DESCRIPTION ***\n';
-    for (const field of fields) {
-        const value = document.getElementById(field.id).value.trim();
-        result += `${field.label}: ${value}\n`;
-    }
-    return result;
+        let result = '*** SCENARIO DESCRIPTION ***\n';
+        for (const field of fields) {
+            const el = document.getElementById(field.id);
+            if (el) {
+                let value = el.value.trim();
+
+                // Check for custom input override
+                const customEl = document.getElementById(field.id + '_custom');
+                if (customEl && customEl.style.display !== 'none') {
+                    const customVal = customEl.value.trim();
+                    if (field.id === 'enhancements') {
+                        value = `Up to ${customVal}pts allowed`;
+                    } else {
+                        value = customVal;
+                    }
+                }
+
+                result += `${field.label}: ${value}\n`;
+            }
+        }
+        return result;
+    },
+
+    submitFleetTest: function () {
+        createGame.isFleetTest = true;
+        $("#createGameForm button[type='submit']").trigger("mousedown"); // Trigger validation/allowSubmit flag if needed
+        $("#createGameForm").submit();
     },
 
     setData: function setData() {
         var gamename = $("#gamename").val();
-        var background = $("#mapselect").val();
+        var background = $("#backgroundSelect").val();
         var description = createGame.getScenarioDescriptionFromFields();
         var gamespace = "-1x-1";
         var flight = "";
 
-        if ($("#gamespacecheck:checked").val() == "on") {
+        if ($("#mapDimensionsSelect").val() !== "unlimited") {
             gamespace = "" + createGame.gamespace_data.width + "x" + createGame.gamespace_data.height;
         }
 
         if ($("#flightSizeCheck:checked").val() == "on") {
             flight = 1;
+        }
+
+        // Add Fleet Test rule if flag is set
+        if (createGame.isFleetTest) {
+            createGame.rules.fleetTest = 1;
         }
 
         var data = { gamename: gamename, background: background, slots: createGame.slots, gamespace: gamespace, flight: flight, rules: createGame.rules, description: description };

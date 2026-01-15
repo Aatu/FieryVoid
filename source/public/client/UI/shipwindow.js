@@ -19,10 +19,10 @@ window.shipWindowManager = {
 			/*            
 				if (shipManager.movement.isRolled(ship)){
 				   n.addClass("rolled");
-			       }else{
+				   }else{
 				   n.removeClass("rolled");
-			       }
-		       */
+				   }
+			   */
 		}
 	},
 
@@ -63,9 +63,13 @@ window.shipWindowManager = {
 				n.removeClass("left right"); // optionally clear positioning classes
 
 				if (ship.userid == 0) {
-					n.css("left", "30px");  // left side for store ship
+					n.addClass("right");
+					n.css("right", "");
+					n.css("left", "");
 				} else {
-					n.css("right", "30px"); // right side for fleet ship
+					n.addClass("left");
+					n.css("left", "");
+					n.css("right", "");
 				}
 			}
 		}
@@ -89,7 +93,7 @@ window.shipWindowManager = {
 	createShipWindow: function createShipWindow(ship) {
 		var template;
 
-		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip)){
+		if ((ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
 			template = $("#shipwindowtemplatecontainer .shipwindow.base");
 		} else {
 			template = $("#shipwindowtemplatecontainer .shipwindow.ship");
@@ -106,15 +110,15 @@ window.shipWindowManager = {
 		}
 
 		//In Buy Phase manually set where window opens.
-		if(gamedata.phase == 0){
-			if(ship.userid == 0){
-				shipwindow.addClass("left");
-			}else{
+		if (gamedata.phase == 0) {
+			if (ship.userid == 0) {
 				shipwindow.addClass("right");
+			} else {
+				shipwindow.addClass("left");
 			}
-		}else{	
+		} else {
 			if (gamedata.getPlayerTeam) {
-				if ( gamedata.getPlayerTeam() === 1) {
+				if (gamedata.getPlayerTeam() === 1) {
 					if (ship.userid == gamedata.thisplayer) {
 						shipwindow.addClass("left");
 					} else {
@@ -128,7 +132,7 @@ window.shipWindowManager = {
 					}
 				}
 			}
-		}	
+		}
 
 		shipwindow.data("ship", ship.id);
 		shipwindow.addClass("ship_" + ship.id);
@@ -179,19 +183,19 @@ window.shipWindowManager = {
 		shipWindowManager.addSystems(ship, shipwindow, 0);
 		shipWindowManager.addSystems(ship, shipwindow, 2);
 
-		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
-            shipWindowManager.addSystems(ship, shipwindow, 31);
-            shipWindowManager.addSystems(ship, shipwindow, 32);
-            shipWindowManager.addSystems(ship, shipwindow, 41);
-            shipWindowManager.addSystems(ship, shipwindow, 42);
-        } 
-        else {
-            shipWindowManager.addSystems(ship, shipwindow, 3);
-            shipWindowManager.addSystems(ship, shipwindow, 4);
-        }
+		if ((ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
+			shipWindowManager.addSystems(ship, shipwindow, 31);
+			shipWindowManager.addSystems(ship, shipwindow, 32);
+			shipWindowManager.addSystems(ship, shipwindow, 41);
+			shipWindowManager.addSystems(ship, shipwindow, 42);
+		}
+		else {
+			shipWindowManager.addSystems(ship, shipwindow, 3);
+			shipWindowManager.addSystems(ship, shipwindow, 4);
+		}
 	},
 
-/*old!*/
+	/*old!*/
 	hitChartSetup: function hitChartSetup(ship, shipwindow) {
 		var names = [];
 		var parentDiv = shipwindow.find(".buttons")[0];
@@ -204,11 +208,11 @@ window.shipWindowManager = {
 
 		var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
 
-		if ( (ship.base && !ship.smallBase) ) {
+		if ((ship.base && !ship.smallBase)) {
 			names[1] = "Sections";
 			toDo = 2;
-		} 
-		else if ( (ship.SixSidedShip)) {
+		}
+		else if ((ship.SixSidedShip)) {
 			names[0] = "Primary";
 			names[1] = "Front";
 			names[2] = "Aft";
@@ -320,9 +324,9 @@ window.shipWindowManager = {
 		var notes = Array();
 
 		/*unnecessary*/ /*
-                  if (ship.hitChart.length > 0 || typeof ship.hitChart[0] != "undefined"){
-                  notes.push("&nbsp;has B5W Hit Table.");
-                  }*/
+				  if (ship.hitChart.length > 0 || typeof ship.hitChart[0] != "undefined"){
+				  notes.push("&nbsp;has B5W Hit Table.");
+				  }*/
 
 		//BUTTONS like Defensive Fire
 		var belowIcon = shipWindow.find(".notes");
@@ -360,20 +364,20 @@ window.shipWindowManager = {
 
 		var tc = ship.turncost.toFixed(2);
 		var td = ship.turndelaycost.toFixed(2);
-	    
-        if(!ship.fighter){
-            abilities.push("&nbsp;TC: " + tc + " TD: " + td  );
-		var fDef = ship.forwardDefense*5;
-		var sDef = ship.sideDefense*5
-		abilities.push("&nbsp;Profile (F/S): " + fDef + "/" + sDef + "; Ini: " + ship.iniativebonus );
-		abilities.push("&nbsp;Acc: " + ship.accelcost + "  Pivot:  " + ship.pivotcost + "  Roll: " + ship.rollcost  );
-        }
 
-	if(ship.flight){
-		var flightArmour = shipManager.systems.getFlightArmour(ship);
-		abilities.push("&nbsp;" + flightArmour);
-		abilities.push("&nbsp;Thrust: " + ship.freethrust);
-	}
+		if (!ship.fighter) {
+			abilities.push("&nbsp;TC: " + tc + " TD: " + td);
+			var fDef = ship.forwardDefense * 5;
+			var sDef = ship.sideDefense * 5
+			abilities.push("&nbsp;Profile (F/S): " + fDef + "/" + sDef + "; Ini: " + ship.iniativebonus);
+			abilities.push("&nbsp;Acc: " + ship.accelcost + "  Pivot:  " + ship.pivotcost + "  Roll: " + ship.rollcost);
+		}
+
+		if (ship.flight) {
+			var flightArmour = shipManager.systems.getFlightArmour(ship);
+			abilities.push("&nbsp;" + flightArmour);
+			abilities.push("&nbsp;Thrust: " + ship.freethrust);
+		}
 
 		if (ship.agile) {
 			abilities.push("&nbsp;Agile ship");
@@ -458,7 +462,7 @@ window.shipWindowManager = {
 		var table = " table";
 		var dest = "";
 
-		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip))  {
+		if ((ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
 			type = ".shipwindow.base_";
 
 			if (location > 4) {
@@ -496,10 +500,10 @@ window.shipWindowManager = {
 		} else if (location < 3) {
 			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
 		}
-		else if (location > 30){
-			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);		
+		else if (location > 30) {
+			arrangement = shipWindowManager.getFinalArrangementFour(ship, systems, structure);
 		}
-		else{
+		else {
 			col2 = 1; //single column here
 			col3 = 2; //double column even here!
 			col4 = 3;
@@ -512,31 +516,31 @@ window.shipWindowManager = {
 		for (var i in arrangement) {
 			var group = arrangement[i];
 			var row;
-			if (group.length == 1){
-				row = $('<tr><td colspan="'+col4+'" class="systemcontainer_'+index+'"></td></tr>');
+			if (group.length == 1) {
+				row = $('<tr><td colspan="' + col4 + '" class="systemcontainer_' + index + '"></td></tr>');
 			}
-			else if (group.length == 2){
-				if (location == 4){//reverse order for Stbd!
-					row = $('<tr><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td><td colspan="'+col2+'" class="systemcontainer_'+(index)+'"></td></tr>');
+			else if (group.length == 2) {
+				if (location == 4) {//reverse order for Stbd!
+					row = $('<tr><td colspan="' + col3 + '" class="systemcontainer_' + (index + 1) + '"></td><td colspan="' + col2 + '" class="systemcontainer_' + (index) + '"></td></tr>');
 				}
 				else {
-					row = $('<tr><td colspan="'+col2+'" class="systemcontainer_'+index+'"></td><td colspan="'+col3+'" class="systemcontainer_'+(index+1)+'"></td></tr>');
+					row = $('<tr><td colspan="' + col2 + '" class="systemcontainer_' + index + '"></td><td colspan="' + col3 + '" class="systemcontainer_' + (index + 1) + '"></td></tr>');
 				}
 			}
 			else if (group.length == 3) {
-				if (location == 4){//reverse order for Stbd!
-					row = $('<tr><td class="systemcontainer_'+(index+2)+'"></td>'
-						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
-						+'<td class="systemcontainer_'+(index)+'"></td></tr>').appendTo(destination);
-				}else{
-					row = $('<tr><td class="systemcontainer_'+index+'"></td>'
-						+'<td colspan="'+col2+'" class="systemcontainer_'+(index+1)+'"></td>'
-						+'<td class="systemcontainer_'+(index+2)+'"></td></tr>').appendTo(destination);
+				if (location == 4) {//reverse order for Stbd!
+					row = $('<tr><td class="systemcontainer_' + (index + 2) + '"></td>'
+						+ '<td colspan="' + col2 + '" class="systemcontainer_' + (index + 1) + '"></td>'
+						+ '<td class="systemcontainer_' + (index) + '"></td></tr>').appendTo(destination);
+				} else {
+					row = $('<tr><td class="systemcontainer_' + index + '"></td>'
+						+ '<td colspan="' + col2 + '" class="systemcontainer_' + (index + 1) + '"></td>'
+						+ '<td class="systemcontainer_' + (index + 2) + '"></td></tr>').appendTo(destination);
 				}
-			}				
-			else if (group.length == 4){	
-				row = $('<tr><td class="systemcontainer_'+index+'"></td><td class="systemcontainer_'+(index+1)+'"></td>'
-				+'<td class="systemcontainer_'+(index+2)+'"></td><td class="systemcontainer_'+(index+3)+'"></td></tr>')
+			}
+			else if (group.length == 4) {
+				row = $('<tr><td class="systemcontainer_' + index + '"></td><td class="systemcontainer_' + (index + 1) + '"></td>'
+					+ '<td class="systemcontainer_' + (index + 2) + '"></td><td class="systemcontainer_' + (index + 3) + '"></td></tr>')
 			}
 
 			if (location == 2 || location == 32 || location == 42) {
@@ -559,10 +563,10 @@ window.shipWindowManager = {
 			$('<div style="height:' + arrangement.length * 30 + 'px"></div>').appendTo(".shipwindow.ship_" + ship.id + " .col3");
 		}
 	},
-	
 
-	getFinalArrangementTwo: function(ship, systems, structure, location){
-		
+
+	getFinalArrangementTwo: function (ship, systems, structure, location) {
+
 		var structDone = false;
 
 		var grouped = Array();
@@ -588,7 +592,7 @@ window.shipWindowManager = {
 			}
 		}
 
-		if (!structDone){
+		if (!structDone) {
 			grouped.push(Array(structure));
 		}
 
@@ -598,36 +602,36 @@ window.shipWindowManager = {
 
 
 	//Marcin Sawicki: i think there's enough room for 3 icons on the sides, and it will help when many systems are present
-	getFinalArrangementThree: function(ship, systems, structure, location){
+	getFinalArrangementThree: function (ship, systems, structure, location) {
 		var structDone = false;
 		var grouped = Array();
 		var list = Array();
 
-		if (structure){
-			if (location == 32 || location == 42){
+		if (structure) {
+			if (location == 32 || location == 42) {
 				grouped.push(Array(structure));
 				structDone = true;
 			}
 		}
 
-		for (var i= 0;i<systems.length;i++){
+		for (var i = 0; i < systems.length; i++) {
 			var system = systems[i];
 			/* let's try with top-heavy arrangement (orphan on the bottom instead of on top)
 			if (systems.length % 2 == 1 && i == 0){
 				grouped.push(Array(system));
 			}*/
 			//else {
-				list.push(system);
-				if (list.length == 3){
-					grouped.push(list);
-					list = Array();
-				}
+			list.push(system);
+			if (list.length == 3) {
+				grouped.push(list);
+				list = Array();
+			}
 			//}
 		}
 
-		if (list.length > 0){ //something was left over!
-					grouped.push(list);
-					list = Array();
+		if (list.length > 0) { //something was left over!
+			grouped.push(list);
+			list = Array();
 		}
 
 		if (!structDone) {
@@ -641,7 +645,7 @@ window.shipWindowManager = {
 
 		var grouped = shipManager.systems.groupSystems(systems);
 
-		if ( (ship.base && !ship.smallBase) || (ship.SixSidedShip))  {
+		if ((ship.base && !ship.smallBase) || (ship.SixSidedShip)) {
 			grouped = shipWindowManager.combineGroupsForBase(grouped);
 		} else {
 			grouped = shipWindowManager.combineGroups(grouped);
@@ -763,26 +767,9 @@ window.shipWindowManager = {
 				ulti.push(finals[i]);
 			}
 		}
-		
+
 		//New method to prevent Vree layout bug - 01/25 DK
 		if (remains.length <= 3 && remains.length > 0) {
-		    var group = [];
-		    for (var i in remains) {
-		        for (var j in remains[i]) {
-		            group.push(remains[i][j]);
-		        }
-		    }
-
-		    // Only push the group if it has elements
-		    if (group.length > 0) {
-		        ulti.push(group);
-		    }
-		} else if (remains.length > 3) {
-		    // Add remaining single-system groups without combining if too many remain
-		    ulti.push(...remains);
-		}		
-/* //Old code that caused Vree ships to bug if only two non-structure systems present in a block - 01/25 DK
-		if (remains.length <= 3) {
 			var group = [];
 			for (var i in remains) {
 				for (var j in remains[i]) {
@@ -790,10 +777,27 @@ window.shipWindowManager = {
 				}
 			}
 
-			ulti.push(group);
-			return ulti;
+			// Only push the group if it has elements
+			if (group.length > 0) {
+				ulti.push(group);
+			}
+		} else if (remains.length > 3) {
+			// Add remaining single-system groups without combining if too many remain
+			ulti.push(...remains);
 		}
-*/
+		/* //Old code that caused Vree ships to bug if only two non-structure systems present in a block - 01/25 DK
+				if (remains.length <= 3) {
+					var group = [];
+					for (var i in remains) {
+						for (var j in remains[i]) {
+							group.push(remains[i][j]);
+						}
+					}
+		
+					ulti.push(group);
+					return ulti;
+				}
+		*/
 		return finals;
 	},
 
@@ -833,7 +837,7 @@ window.shipWindowManager = {
 					}
 				} else {
 					shipWindowManager.setSystemData(ship, system, shipwindow);
-        			/* Cleaned 19.8.25 - DK	
+					/* Cleaned 19.8.25 - DK	
 					if (system.dualWeapon && system.weapons) {
 						var dualsystem = system.weapons[system.firingMode];
 						shipWindowManager.setSystemData(ship, dualsystem, shipwindow);
@@ -846,7 +850,7 @@ window.shipWindowManager = {
 						}
 							
 					} else {
-					*/	
+					*/
 					//shipWindowManager.setSystemData(ship, system, shipwindow); //Removed duplicate entry 17.10.25
 					//}
 
@@ -872,7 +876,7 @@ window.shipWindowManager = {
 
 				for (var i in ship.systems) {
 					var system = ship.systems[i];
-        			/* Cleaned 19.8.25 - DK		
+					/* Cleaned 19.8.25 - DK		
 					if (system.dualWeapon) {
 						for (var index in system.weapons) {
 							var weapon = system.weapons[index];
@@ -894,7 +898,7 @@ window.shipWindowManager = {
 							}
 						}
 					} else {
-					*/	
+					*/
 					shipWindowManager.setSystemData(ship, system, shipwindow);
 					//}
 				}
@@ -903,13 +907,13 @@ window.shipWindowManager = {
 	},
 
 	addEW: function addEW(ship, shipwindow) {
-		var dew =  ew.getDefensiveEW(ship);
+		var dew = ew.getDefensiveEW(ship);
 		var ccew = ew.getCCEW(ship);
 		var bdew = ew.getBDEW(ship) * 0.25;
 		var elint = shipManager.isElint(ship);
 
-		if(shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
-		
+		if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
+
 		if (!shipwindow) {
 			shipwindow = ship.shipStatusWindow;
 		}
@@ -956,15 +960,15 @@ window.shipWindowManager = {
 			if (entry.type == "SOEW") {
 				element.find(".button2").remove();
 				element.find(".value").html(entry.amount);
-			} else if((entry.type == "SDEW") && (shipManager.hasSpecialAbility(ship, "ConstrainedEW")))	{ 
-				element.find(".value").html(entry.amount * 0.33);		
+			} else if ((entry.type == "SDEW") && (shipManager.hasSpecialAbility(ship, "ConstrainedEW"))) {
+				element.find(".value").html(entry.amount * 0.33);
 			} else if (entry.type == "SDEW") {
 				element.find(".value").html(entry.amount * 0.5);
-			} else if((entry.type == "DIST") && (shipManager.hasSpecialAbility(ship, "ConstrainedEW")))	{ 
-				element.find(".value").html(entry.amount / 4);			
+			} else if ((entry.type == "DIST") && (shipManager.hasSpecialAbility(ship, "ConstrainedEW"))) {
+				element.find(".value").html(entry.amount / 4);
 			} else if (entry.type == "DIST") {
 				element.find(".value").html(entry.amount / 3);
-			}else if (entry.type == "OEW") {
+			} else if (entry.type == "OEW") {
 				element.find(".value").html(entry.amount - ew.getDistruptionEW(ship));
 			} else {
 				element.find(".value").html(entry.amount);
@@ -998,13 +1002,13 @@ window.shipWindowManager = {
 
 		var template = $("#systemtemplatecontainer .system.regular");
 		var systemwindow = template.clone(true).appendTo(destination);
-        /* Cleaned 19.8.25 - DK		
+		/* Cleaned 19.8.25 - DK		
 		if (system.duoWeapon) {
 			shipWindowManager.addDuoSystem(ship, system, systemwindow);
 		} else if (system.dualWeapon) {
 			shipWindowManager.addDualSystem(ship, system, systemwindow);
 		} else {
-		*/	
+		*/
 		shipWindowManager.addRegularSystem(ship, system, systemwindow);
 		//}
 	},
@@ -1059,7 +1063,7 @@ window.shipWindowManager = {
 		systemwindow.find(".mode").on("click", shipWindowManager.onModeClicked);
 	},
 
-    /* Cleaned 19.8.25 - DK		
+	/* Cleaned 19.8.25 - DK		
 	addDualSystem: function addDualSystem(ship, system, dualwindow) {
 		var dualsystem = system.weapons[system.firingMode];
 
@@ -1183,17 +1187,17 @@ window.shipWindowManager = {
 		}
 
 		shipManager.systems.initializeSystem(system);
-        /* Cleaned 19.8.25 - DK	
+		/* Cleaned 19.8.25 - DK	
 		if (system.dualWeapon && system.weapons != null) {
 			var weapon = system.weapons[system.firingMode];
 			shipManager.systems.initializeSystem(weapon);
 		}
-		*/	
+		*/
 
 		var systemwindow = shipwindow.find(".system_" + system.id);
 
 		systemwindow.data("shipid", ship.id); //Sometimes in fleet selection ship.id in systemwindow needs to be updated to show correct tooltip - DK 30.3.25
-			
+
 		if (systemwindow.length == 0 && system.parentId > -1) {
 			systemwindow = shipwindow.find(".parentsystem_" + system.parentId);
 		}
@@ -1231,7 +1235,7 @@ window.shipWindowManager = {
 
 				parentWindow.addClass("destroyed");
 			} else {
-			*/	
+			*/
 				systemwindow.addClass("destroyed");
 			}
 			return;
@@ -1252,7 +1256,7 @@ window.shipWindowManager = {
 
 			// To avoid double overlay of loading icon mask in case of a
 			// duoWeapon in a dualWeapon
-        	/* Cleaned 19.8.25 - DK					
+			/* Cleaned 19.8.25 - DK					
 			if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
 				systemwindow.addClass("loading");
 			} else {
@@ -1284,7 +1288,7 @@ window.shipWindowManager = {
 				systemwindow.removeClass("selfIntercept");
 			}
 			*/
-//
+			//
 			if (!weaponManager.isLoaded(system)) {
 				systemwindow.addClass("loading");
 			} else {
@@ -1317,7 +1321,7 @@ window.shipWindowManager = {
 			}
 
 			//if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) { //Cleaned 19.8.25 - DK	
-			if (!firing && (Object.keys(system.firingModes).length > 1)) {			
+			if (!firing && (Object.keys(system.firingModes).length > 1)) {
 				if (system.parentId >= 0) {
 					var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 
@@ -1356,7 +1360,7 @@ window.shipWindowManager = {
 
 				field.html(fire.shots + "/" + system.shots);
 			} else if (!firing) {
-        		/* Cleaned 19.8.25 - DK						
+				/* Cleaned 19.8.25 - DK						
 				if (system.duoWeapon) {
 					var UI_active = systemwindow.find(".UI").hasClass("active");
 
@@ -1370,29 +1374,29 @@ window.shipWindowManager = {
 					if (system.dualWeapon && system.weapons) {
 						system = system.weapons[system.firingMode];
 					}
-				*/	
-					var load = weaponManager.getWeaponCurrentLoading(system);
-					var loadingtime = system.loadingtime;
+				*/
+				var load = weaponManager.getWeaponCurrentLoading(system);
+				var loadingtime = system.loadingtime;
 
-					if (system.normalload > 0) {
-						loadingtime = system.normalload;
-					}
+				if (system.normalload > 0) {
+					loadingtime = system.normalload;
+				}
 
-					if (load > loadingtime) {
-						load = loadingtime;
-					}
+				if (load > loadingtime) {
+					load = loadingtime;
+				}
 
-					var overloadturns = "";
+				var overloadturns = "";
 
-					if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
-						overloadturns = "(" + system.overloadturns + ")";
-					}
+				if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
+					overloadturns = "(" + system.overloadturns + ")";
+				}
 
-					if (system.overloadshots > 0) {
-						field.html("S" + system.overloadshots);
-					} else {
-						field.html(load + overloadturns + "/" + loadingtime);
-					}
+				if (system.overloadshots > 0) {
+					field.html("S" + system.overloadshots);
+				} else {
+					field.html(load + overloadturns + "/" + loadingtime);
+				}
 				//}
 			}
 		} else if (system.name == "thruster") {
@@ -1429,9 +1433,9 @@ window.shipWindowManager = {
 
 		var requiredThrust = movement.requiredThrust;
 		var stillReq = shipManager.movement.calculateThrustStillReq(ship, movement);
-	
+
 		var shipwindow = ship.shipStatusWindow;
-	
+
 		$(".thruster", shipwindow).each(function () {
 			var direction = $(this).data("direction");
 
@@ -1444,7 +1448,7 @@ window.shipWindowManager = {
 		});
 
 		shipwindow.addClass("assignThrust");
-		window.webglScene.customEvent("AssignThrust", {ship: ship, totalRequired: requiredThrust, remainginRequired: stillReq, movement: movement})
+		window.webglScene.customEvent("AssignThrust", { ship: ship, totalRequired: requiredThrust, remainginRequired: stillReq, movement: movement })
 	},
 
 	selectAllGuns: function selectAllGuns(e) {
@@ -1540,13 +1544,13 @@ window.shipWindowManager = {
 	doneAssignThrust: function doneAssignThrust(ship) {
 
 		var shipwindow;
-		if (! ship){
+		if (!ship) {
 			shipwindow = $(".assignthrustcontainer").has($(this));
 			ship = gamedata.getShip(shipwindow.data("ship"));
 		} else {
 			shipwindow = ship.shipStatusWindow
 		}
-		
+
 		var movement = ship.movement[ship.movement.length - 1];;
 		var requiredThrust = movement.requiredThrust;
 		var stillReg = shipManager.movement.calculateThrustStillReq(ship, movement);
@@ -1565,18 +1569,18 @@ window.shipWindowManager = {
 			webglScene.customEvent("ShipMovementChanged", { ship: ship });
 			window.webglScene.customEvent("AssignThrust", false)
 		}
-        
-        //For Contraction, need to amend level for first order.
-		if(done){
-			if(movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);
+
+		//For Contraction, need to amend level for first order.
+		if (done) {
+			if (movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);
 		}
-			
+
 	},
 
 	cancelAssignThrustEvent: function cancelAssignThrustEvent(ship) {
 
 		var shipwindow;
-		if (! ship){
+		if (!ship) {
 			shipwindow = $(".assignthrustcontainer").has($(this));
 			ship = gamedata.getShip(shipwindow.data("ship"));
 		} else {
@@ -1599,7 +1603,7 @@ window.shipWindowManager = {
 		}
 
 		var element = ship.shipStatusWindow
-	
+
 		$(".assignThrust").removeClass("assignThrust");
 		$(".enableAssignThrust").removeClass("enableAssignThrust");
 
@@ -1631,5 +1635,5 @@ window.shipWindowManager = {
 		window.weaponManager.onModeClicked(shipwindow, systemwindow, ship, system);
 	}
 
-	
+
 };

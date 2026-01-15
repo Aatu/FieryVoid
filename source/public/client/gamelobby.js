@@ -282,6 +282,8 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		var selectedSlot = playerManager.getSlotById(slotid);
 
+		if (selectedSlot.points == -1) return true; // Unlimited points
+
 		var points = 0;
 		for (var i in gamedata.ships) {
 			var lship = gamedata.ships[i];
@@ -299,6 +301,8 @@ window.gamedata = {
 
 		var slotid = gamedata.selectedSlot;
 		var selectedSlot = playerManager.getSlotById(slotid);
+
+		if (selectedSlot.points == -1) return true; // Unlimited points
 
 		var points = 0;
 		for (var i in gamedata.ships) {
@@ -747,7 +751,7 @@ window.gamedata = {
 
 
 
-		checkResult = "Total fleet limit: " + selectedSlot.points + "<br><br>";
+		checkResult = "Total fleet limit: " + (selectedSlot.points == -1 ? "Unlimited" : selectedSlot.points) + "<br><br>";
 
 		//check: overall fleet traits
 		checkResult += "Jump engine: "; //Jump Engine present?
@@ -1291,11 +1295,22 @@ window.gamedata = {
 		}
 
 		var maxPoints = selectedSlot.points;
-		var remainingPoints = maxPoints - points;
 
-		$('.max').html(selectedSlot.points);
+		if (maxPoints == -1) {
+			$('.max').html('<span class="unlimited-points-text2">Unlimited</span>');
+			$('.max-points-units').hide();
+			$('.remaining-points-container').hide();
+		} else {
+			var remainingPoints = maxPoints - points;
+			$('.max').html(selectedSlot.points);
+			$('.remaining').html(remainingPoints);
+			$('.max-points-units').show();
+			// Ensure container is shown, and units are visible inside it
+			$('.remaining-points-container').show();
+			$('.remaining-points-units').show();
+		}
+
 		$('.current').html(points);
-		$('.remaining').html(remainingPoints);
 		return points;
 	},
 
@@ -1462,15 +1477,15 @@ window.gamedata = {
 		const offsetY = (canvas.height - mapHeight * scale) / 2;
 
 		// Draw black background inside the blue outline
-		ctx.fillStyle = "black";
+      	ctx.fillStyle = "#000000";
 		ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 
 		// Draw dotted white center lines, avoiding cross-over at center
 		ctx.save();
-		ctx.globalAlpha = 0.6; // Semi-transparent
-		ctx.strokeStyle = "white";
+		ctx.globalAlpha = 0.4; // Semi-transparent
+        ctx.strokeStyle = "#496791";
 		ctx.lineWidth = 1;
-		ctx.setLineDash([6, 6]); // Dotted pattern: 6px line, 6px gap
+		ctx.setLineDash([4, 4]); // Dotted pattern: 6px line, 6px gap
 
 		const centerX = offsetX + (mapWidth / 2) * scale;
 		const centerY = offsetY + (mapHeight / 2) * scale;
@@ -1517,14 +1532,14 @@ window.gamedata = {
 			const h = parseInt(data.depheight) || 0;
 
 			if (data.playerid == player) {
-				ctx.fillStyle = "rgba(0,255,0,0.35)";
-				ctx.strokeStyle = "#006600";
+				ctx.fillStyle = "rgba(50, 200, 50, 0.4)"
+				ctx.strokeStyle = "#66ff66";
 			} else if (data.team == playerTeam) {
-				ctx.fillStyle = "rgba(100,170,250, 0.35)";
-				ctx.strokeStyle = "#033063";
+				ctx.fillStyle = "rgba(50, 50, 200, 0.4)";
+				ctx.strokeStyle = "#6666ff";
 			} else {
-				ctx.fillStyle = "rgba(250, 100, 100, 0.35)";
-				ctx.strokeStyle = "#630303";
+				ctx.fillStyle = "rgba(200, 50, 50, 0.4)";
+				ctx.strokeStyle = "#ff6666";
 			}
 			// Adjust position to treat (x, y) as center
 			const drawX = offsetX + (x - w / 2 + mapWidth / 2) * scale;
@@ -1536,19 +1551,18 @@ window.gamedata = {
 
 			// Draw slot number in the center
 			ctx.save(); // Save context state
-			ctx.globalAlpha = 0.8; // Semi-transparent
-			ctx.fillStyle = "white";
-			ctx.font = `${Math.max(4, Math.floor(4 * scale))}px Arial`; // smaller font with a minimum size
-			ctx.textAlign = "center";
-			ctx.textBaseline = "middle";
+            ctx.fillStyle = "white";
+            ctx.font = "bold 14px Arial";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
 			ctx.fillText(team, (drawX + 6) + (w * scale) / 2, (drawY + 3) + (h * scale) / 2);
 			ctx.restore(); // Restore to default state
 		});
 
 		// Draw map border (blue rectangle)
-		ctx.strokeStyle = "#215a7a";
-		ctx.lineWidth = 1;
-		ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale); // Adjusted X offset
+        ctx.strokeStyle = "#deebffaf";
+        ctx.lineWidth = 2;
+		ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 	},
 
 	getPlayerTeam: function getPlayerTeam(id) {
@@ -1732,15 +1746,19 @@ window.gamedata = {
 
 		const isCurrentlyHidden = factionElement.hasClass("shipshidden");
 
+		// Optimistic UI: Toggle immediately
+		factionElement.toggleClass("shipshidden");
+
 		if (isCurrentlyHidden && factionElement.hasClass("listempty")) {
 			window.ajaxInterface.getShipsForFaction(faction, function (factionShips) {
 				gamedata.parseShips(factionShips);
 				factionElement.removeClass("listempty"); // Only remove after successful load
 				gamedata.applyCustomShipFilter(); // run after ships load
+			}, function () {
+				// Error Callback: Revert optimistic toggle if load fails
+				factionElement.toggleClass("shipshidden");
 			});
 		}
-
-		factionElement.toggleClass("shipshidden");
 
 		// Apply ship filter AFTER visibility toggled
 		gamedata.applyCustomShipFilter();
@@ -1790,15 +1808,34 @@ window.gamedata = {
 		gamedata.maxpoints = serverdata.points;
 		gamedata.status = serverdata.status;
 		gamedata.gamespace = serverdata.gamespace;
+		gamedata.rules = serverdata.rules;
 
 		if (gamedata.status == "ACTIVE") {
 			window.location = "game.php?gameid=" + gamedata.gameid;
 		}
 
-		this.createSlots();
-		this.enableBuy();
-		this.constructFleetList();
-		this.drawMapPreview();
+		//Prune here
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) {		
+			var mySlot = null;
+			for (var slotKey in serverdata.slots) {
+				if (serverdata.slots[slotKey].playerid == gamedata.thisplayer) {
+					mySlot = {};
+					mySlot[slotKey] = serverdata.slots[slotKey];
+					break;
+				}
+			}
+			gamedata.slots = mySlot || serverdata.slots;
+			this.createSlots();
+			this.enableBuy();
+			this.constructFleetList();
+			//this.drawMapPreview();						
+		}else{	
+			this.createSlots();
+			this.enableBuy();
+			this.constructFleetList();
+			this.drawMapPreview();	
+		}			
+
 	},
 
 	createNewSlot: function createNewSlot(data) {
@@ -1869,7 +1906,8 @@ window.gamedata = {
 	setSlotData: function setSlotData(data) {
 		var slot = $(".slot.slotid_" + data.slot);
 		$(".name", slot).html(data.name);
-		$(".points", slot).html(data.points);
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) data.points = -1;			
+		$(".points", slot).html(data.points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : data.points);
 
 		$(".depx", slot).html(data.depx);
 		$(".depy", slot).html(data.depy);
@@ -2428,6 +2466,13 @@ window.gamedata = {
 			window.confirm.error("You have to buy at least one ship!", function () { });
 			return;
 		}
+
+		// Fleet Test Check
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) {
+			window.confirm.error("You cannot Ready up in a Fleet test game!", function () { });
+			return;
+		}
+
 		// Pass the submission function as a callback, not invoke it immediately
 		confirm.confirm("Are you sure you wish to ready your fleet?", function () {
 			selectedSlot.lastphase = -2;
@@ -2646,6 +2691,9 @@ window.gamedata = {
 
 		if (slot) { //sometimes slot hasn't been selected yet.
 			var slotPoints = slot.points ?? 0;
+
+			if (slotPoints === -1) return true; // Unlimited points
+
 			var spentPoints = 0;
 			for (var i in gamedata.ships) {
 				var lship = gamedata.ships[i];
@@ -2715,8 +2763,10 @@ window.gamedata = {
 			}
 			const pointsAvailable = slot.points - spentPoints;
 			if (response.list && pointsAvailable < response.list.points) {
-				confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
-				return;
+				if (gamedata.selectedSlot.points !== -1) { // Unlimited points				
+					confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
+					return;
+				}
 			}
 
 			if (response.ships && Array.isArray(response.ships) && response.ships.length > 0) {

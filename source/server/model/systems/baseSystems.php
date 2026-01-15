@@ -2847,7 +2847,7 @@ public function onIndividualNotesLoaded($gamedata)
         $this->output = $this->output - $lostBFCP; //Adjust output based on damage taken, -1 point per 5 damage.
          
 		$this->data["Bonus Fire Control Points (BFCP)"] = $this->BFCPtotal_used . '/' . $this->output;
-		$this->data[" - per Fire Control category"] =  $this->BFCPpertype;
+		$this->data["Max Per Category"] =  $this->BFCPpertype;
 		foreach($this->allocatedBFCP as $FCType=>$BFCPallocated){
 			$this->data[' - '.$FCType] =  $BFCPallocated . '/' . $this->BFCPpertype;
 		}
@@ -2946,7 +2946,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	    // Example array from Front End:
 	    //     "Defence" => array(1, 2),
 	    //     "Engine" => array(1, 0)  );
-	    
+
 	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
 	    if (is_array($this->individualNotesTransfer)) {
 	        foreach ($this->individualNotesTransfer as $specType => $specValues) {
@@ -2968,44 +2968,63 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 //	 this method generates additional non-standard informaction in the form of individual system notes in this case: 
 //	 - Initial phase: check setting changes made by user, convert to notes	
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
 		$ship = $this->getUnit();	
 		
 		switch($gameData->phase){
-								
-				case 1: //Initial phase
+			
+			case -1:
+				if (!empty($this->currSelectedSpec)) {
+					foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
+						$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
+						$noteHuman = 'Specialist available';
+						$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+				}	
+			break;
 
-					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
-						//load existing data first - at this point ship is rudimentary, without data from database!
-						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
-						foreach ($listNotes as $currNote){
-							if($currNote->systemid==$this->id){//note is intended for this system!
-								$this->addIndividualNote($currNote);
-							}
+			case 1: //Initial phase
+
+				if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+					//load existing data first - at this point ship is rudimentary, without data from database!
+					$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+					foreach ($listNotes as $currNote){
+						if($currNote->systemid==$this->id){//note is intended for this system!
+							$this->addIndividualNote($currNote);
 						}
-						$this->onIndividualNotesLoaded($gameData);
-
+					}
+					$this->onIndividualNotesLoaded($gameData);
 					
-						foreach ($this->currSelectedSpec as $specialistType) {//Take Front end data on deployment turn and generate available Specs.
-
-							$notekey = 'available;' . $specialistType; //Make those Specialist Types available for rest of game.
-							$noteHuman = 'Specialist available';
-							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
-							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-						}
-						
-
-															
+					if (!empty($this->currchangedSpec)) {																				
 						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
-
 							$notekey = 'allocated;' . $specialistType;
 							$noteHuman = 'Specialist Used';
 							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
 							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 						}
 					}
-					
-				break;
+	
 				}
+			break;							
+						
+			//case 2: //Movement
+			//case 5: //Pre-Firing
+			//case 3: //Firing	
+			default:									 
+
+				if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+					if (!empty($this->currchangedSpec)) {																				
+						foreach($this->currchangedSpec as $specialistType){//Take Front end data and generate used Specs.
+							$notekey = 'allocated;' . $specialistType;
+							$noteHuman = 'Specialist Used';
+							$noteValue = 1; //Max Specialists is always 1, value not actually used for this type of note.
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+						}
+					}
+				}		
+			break;
+		}
 			
 	} //endof function generateIndividualNotes
 	
@@ -3072,7 +3091,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 						                $strongestSystem->output += $specialistBoost;
 						            }	
 								} 
-								
+								/*
 								$critList = array();							
 								foreach($system->criticals as $critDmg) {
 											if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
@@ -3096,7 +3115,8 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 												}
 											}
 										}
-									}																	
+									}
+									*/																		
 							}
 						}
 					$this->specAllocatedCount[$explodedKey[1]] = 1;//To show it has been used this turn in system info tooltip.
@@ -3166,7 +3186,7 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 										usort($critList, [self::class, 'sortCriticalsByRepairPriority']);			
 										foreach ($critList as $critDmg){ //repairable criticals of current system
 											if ($critRepairs > 0){//Can still repair!
-//												if ($critDmg->phpclass == )
+
 												$critDmg->turnend = $gamedata->turn-1;//actual repair. Use previous turn so it disappears after Intitial Orders (but would effect then, time to repair etc.
 												$critDmg->forceModify = true; //actually save the repair...
 												$critDmg->updated = true; //actually save the repair cd!...
@@ -3319,42 +3339,45 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
         parent::setSystemDataWindow($turn);            
 		$this->data["Specialists"] =  $this->specTotal - $this->specTotal_used; 		
 		foreach($this->availableSpec as $specialistType=>$specValue){
-			$specUsed = $this->allocatedSpec[$specialistType];
+			//$specUsed = $this->allocatedSpec[$specialistType];
 			$this->data[' - '.$specialistType] =  $specValue;
 		}
-		if (TacGamedata::$currentPhase != 1  && ($this->specAllocatedCount)){ 		
-			$this->data["Specialists used this turn"] = ''; // List which Specialists were actually used this turn.
-			foreach($this->specAllocatedCount as $specialistType => $specValue) {
-			    $this->data["Specialists used this turn"] .= $specialistType . ', ';
+		if (TacGamedata::$currentPhase != -1 && !empty($this->specAllocatedCount)) {
+			$used = [];
+
+			foreach ($this->specAllocatedCount as $specialistType => $specValue) {
+				$used[] = $specialistType;
 			}
+
+			$this->data["Specialists Used This Turn"] = implode(', ', $used);
 		}
-	if 	(TacGamedata::$currentTurn == 1 && TacGamedata::$currentPhase == 1){	//Show all Specialist info on Turn 1 Initial Orders.
+	if 	($turn == 1 && TacGamedata::$currentPhase == -1){	//Show all Specialist info on Turn 1 Initial Orders.
 	        $this->data["Special"] = "Technical system for Specialist management.";
 	        $this->data["Special"] .= "<br>On the Turn this ship deploys, select which Specialists this ship will have available.";        	   
 	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
 	        $this->data["Special"] .= "<br>Each Specialist can be used once, with these effects on the turn they are used:";
 			$this->data["Special"] .= "<br>  - Computer: +2 BFCP, +1 BFCP per type."; 
 			$this->data["Special"] .= "<br>  - Defence: Profiles lowered by 10%, all intercept ratings +10%."; 
-			$this->data["Special"] .= "<br>  - Engine: +25% Thrust, remove an Engine critical."; 
+			$this->data["Special"] .= "<br>  - Engine: +25% Thrust."; 
 			$this->data["Special"] .= "<br>  - Maneuvering: +10% thrust, Halves Turn Cost / Delay.";
 			$this->data["Special"] .= "<br>  - Sensor: +1 EW, remove a Scanner critical.";
-			$this->data["Special"] .= "<br>  - Power: +8-12 power, remove a Reactor critical.";
+			$this->data["Special"] .= "<br>  - Power: +8 to 12 power, remove a Reactor critical.";
 			$this->data["Special"] .= "<br>  - Repair: Remove two critical effects.";						 			
 			$this->data["Special"] .= "<br>  - Targeting: All weapons +3% to hit.";
 			$this->data["Special"] .= "<br>  - Thruster: No thruster limits and Engine Efficiency improved.";
 			$this->data["Special"] .= "<br>  - Weapon: All weapons +3 damage this turn.";								 
-	    }else{ //After Initials Orders on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
+	    }else{ //After Deployment on Turn 1, reduce data so that it just shows relevant info on Specialists selected.
 	        $this->data["Special"] = "Technical system used for Specialist management.";       	   
 	        $this->data["Special"] .= "<br>Activate Specialist(s) by clicking their '+' button during Initial Orders."; 
 	        $this->data["Special"] .= "<br>Each Specialists can be used once, with these effects on the turn they are used:";
 				foreach($this->allocatedSpec as $specialistType => $specValue) {
 					if ($specialistType == 'Computer') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +2 BFCP, +1 BFCP per type.';
 					if ($specialistType == 'Defence') $this->data["Special"] .= '<br>  -  '.$specialistType . ': Profiles lowered by 10%, intercept ratings +10%.';
-					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust, remove an Engine critical.';
+					if ($specialistType == 'Engine') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +25% Thrust.';
 					if ($specialistType == 'Maneuvering') $this->data["Special"] .= '<br>  -  '.$specialistType . ': +10% thrust, Halves Turn Cost / Delay.';
 					if ($specialistType == 'Repair') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :Remove two critical effects.';
-					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+1 EW, remove a Scanner critical.';
-					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+8-12 power, remove a Reactor critical.';
+					if ($specialistType == 'Sensor') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+1 EW, removes Scanner critical.';
+					if ($specialistType == 'Power') $this->data["Special"] .= '<br>  -  '.$specialistType . ' :+8 to 12 power, removes Reactor critical.';
 					if ($specialistType == 'Targeting') $this->data["Special"] .= '<br>  -  '.$specialistType . ': All weapons +3% to hit.';
 					if ($specialistType == 'Thruster') $this->data["Special"] .= '<br>  -  '.$specialistType . ': No thruster limits and engine efficiency improved.';
 					if ($specialistType == 'Weapon') $this->data["Special"] .= '<br>  -  '.$specialistType . ': All weapons +3 damage this turn.';						
@@ -5003,7 +5026,7 @@ capacitor is completely emptied.
 		}
 
 		//We can apply petal effects here so they are visible for player (note, criticals don't seem to get saved to database here, prolly because $dbManager->submitCriticals isn't called)			
-		if($gamedata->phase == 2 || $gamedata->phase == 3){
+		if($gamedata->phase == 2 || $gamedata->phase == 5 || $gamedata->phase == 3){
 	
 			$boostlevel = $this->getBoostLevel($gamedata->turn);
 			if ($boostlevel <1) return; //not boosted - no crit!
@@ -5148,6 +5171,97 @@ capacitor is completely emptied.
     } //endof function criticalPhaseEffects	
 							
 } //endof PowerCapacitor
+
+
+class FtrPetals extends ShipSystem implements SpecialAbility{    
+		public $name = "FtrPetals";
+		public $displayName = "Vorlon Petals";
+		public $iconPath = "PowerCapacitor.png";
+		public $specialAbilities = array("Petals");
+		public $specialAbilityValue = 1;		
+		public $primary = true;
+		public $detected = true;
+		//defensive system
+		public $rangePenalty = 0;
+		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.
+		public static $petalsDone = array();	
+		protected $initializeOnLoad	= true; //Runs initialisationUpdate() immediately on page loading, useful for updating tooltips immediately.  Needs passed in strpForJson().
+		
+		function __construct($armour, $maxhealth, $powerReq, $output){
+			parent::__construct($armour, $maxhealth, $powerReq, $output);
+			
+		}
+
+		protected $possibleCriticals = array(
+			26=>array("OutputReduced1")
+		);
+
+		public function isActive(){
+			return $this->active;
+		}
+
+		public function setSystemDataWindow($turn){
+			$this->data["Special"] = "Can be toggled open each turn during Initial Orders.";
+			$this->data["Special"] .= "<br>Whislt open Fighters gain +2 Thrust, however Defence Profiles are increase by 5% and their Side Armour is reduced by 2.";													
+		}	
+
+		public function getSpecialAbilityValue($args){
+			return $this->specialAbilityValue;
+		}
+
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer)){			
+			foreach($this->individualNotesTransfer as $petalChange){			
+				if($petalChange == 1){
+					$this->active = true;
+				}else{
+					$this->active = false; //May start Deployment phase as true via notes
+				}									
+			}
+		} 
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}			
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
+		$ship = $this->getUnit();	
+		
+		switch($gameData->phase){
+			
+			case 1:
+				if ($this->active) {
+						$notekey = 'Open';
+						$noteHuman = 'Petals opened';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}
+			break;
+			
+		}	
+	}			
+
+	public function onIndividualNotesLoaded($gamedata){
+		//Sort notes by turn, and then phase so latest detection note is always last.
+		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+			if($currNote->turn == $gamedata->turn){
+				$this->active = true;
+			}
+		}
+
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();		
+	} //endof function onIndividualNotesLoaded
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->active = $this->active;
+		$strippedSystem->initializeOnLoad = $this->initializeOnLoad;							        
+		return $strippedSystem;
+	}
+
+	} //endof FtrPetals
+
 
 class StructureTechnical extends ShipSystem{
     public $name = "StructureTechnical";
@@ -5787,11 +5901,11 @@ class MindriderHangar extends ShipSystem{
 		public $rangePenalty = 0;
 		public $range = 5;
 
-		public $boostable = true;
-		public $maxBoostLevel = 1;
-		public $boostEfficiency = 0;		
-		public $boostOtherPhases = array(-1, 3); //To allow boosting in Deployment and Firing Phases.
-		public $shaded	= false; //To track in Front End whether system was ever boost this turn, since boost can be toggled during Firing Phase.			
+		//public $boostable = true;
+		//public $maxBoostLevel = 1;
+		//public $boostEfficiency = 0;		
+		//public $boostOtherPhases = array(-1); //To allow boosting in Deployment and Firing Phases.
+		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.			
 		
 		function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
 			// shieldfactor is handled as output.
@@ -5811,20 +5925,6 @@ class MindriderHangar extends ShipSystem{
 		protected $possibleCriticals = array(
 			26=>array("OutputReduced1")
 		);
-		
-		private function getBoostLevel($turn){
-			$boostLevel = 0;
-		
-			foreach ($this->power as $i){
-					if ($i->turn != $turn) 
-							continue;							
-					if ($i->type == 2){
-							$boostLevel += $i->amount;
-					}				
-			}
-			
-			return $boostLevel;
-		}	
 
 		public function getDefensiveType()
 		{
@@ -5838,13 +5938,13 @@ class MindriderHangar extends ShipSystem{
 			$output += $this->outputMod; //outputMod itself is negative!
 
 			if($target instanceof FighterFlight){
-				if($this->shaded <= 0){
+				if(!$this->active){
 					return 0; //Fighters and not shaded, no defence mod.	
 				}else{					
 					return $output; //Shaded, hit mod applies!
 				} 			
 			}else{ //Is a ship!
-				if ($this->shaded > 0) $output = $output *2; //If in Shading Mode, double hit mod.			
+				if ($this->active) $output = $output *2; //If in Shading Mode, double hit mod.			
 				return $output;				
 			}       
 		}
@@ -5865,17 +5965,17 @@ class MindriderHangar extends ShipSystem{
 				$unit = $this->getUnit();
 				if($unit instanceof FighterFlight){
 					$this->data["Special"] = "Jammer ability, even against Ancients.";
-					$this->data["Special"] .= "<br>Can activate 'Shading Mode' for the NEXT turn, by boosting this system during Deployment or Firing Phase.";						
-					$this->data["Special"] .= "<br>When Shading is activated, this flight's defense ratings are reduced by 15, and it cannot be detected if it is over 15 hexes at the start or end of movement.";
-					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading was active.";
+					$this->data["Special"] .= "<br>Can use 'Shading Mode' by activating this system during Deployment/Pre-Turn Phase.";						
+					$this->data["Special"] .= "<br>When Shading is activated, defense ratings are reduced by 15, and cannot be detected if over 15 hexes at the start or end of movement.";
+					$this->data["Special"] .= "<br>HOWEVER, the flight cannot fire any weapons on a turn when Shading is active.";
 					$this->data["Special"] .= "<br>This system also incorporates a small Jump Drive, with a 20 turn recharge.";									
 				}else{
 					$this->data["Special"] = "Jammer ability, even against Ancients.";
 					$this->data["Special"] .= "<br>Provides EM Shield.";
-					$this->data["Special"] .= "<br>Toggle 'Shading Mode' for NEXT turn by boosting/unboosting this system during Deployment or CURRENT Firing Phase.";														
-					$this->data["Special"] .= "<br>When Shading is active, ship cannot be detected if it is over 15 hexes away from all enemy units at the start or end of movement.";
+					$this->data["Special"] .= "<br>Can use 'Shading Mode' by activating this system during Deployment/Pre-Turn Phase.";														
+					$this->data["Special"] .= "<br>When Shading is active, ship cannot be detected if over 15 hexes away from all enemy units at the start or end of movement.";
 					$this->data["Special"] .= "<br>EM Shield ratings are also doubled for hit chance modifier when Shaded.";									
-					$this->data["Special"] .= "<br>HOWEVER, ship cannot fire any weapons on a turn when Shading was active.";
+					$this->data["Special"] .= "<br>HOWEVER, ship cannot fire any weapons on a turn when Shading is active.";
 				}	
 		}	
 		
@@ -5906,6 +6006,43 @@ class MindriderHangar extends ShipSystem{
 		}
 
 
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer)){			
+			foreach($this->individualNotesTransfer as $shadingChange){			
+				if($shadingChange == 1){
+					$this->active = true;
+				}else{
+					$this->active = false; //May start Deployment phase as true via notes
+				}									
+			}
+		} 
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}			
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
+		$ship = $this->getUnit();	
+		
+		switch($gameData->phase){
+			
+			case -1:
+				if ($this->active) {
+						$notekey = 'Shaded';
+						$noteHuman = 'Shaded this turn';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}else{
+						$notekey = 'Unshaded';
+						$noteHuman = 'Not Shaded this turn';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}	
+			break;
+			
+		}	
+	}			
+
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.
 			$this->sortNotes();
@@ -5913,20 +6050,20 @@ class MindriderHangar extends ShipSystem{
 				switch($currNote->notekey){
 					case 'detected': 
 						$this->detected = true;
-						if($currNote->notevalue == 1){
-							$this->shaded = true;	
-						}else{
-							$this->shaded = false;								
-						} 
 					break;
 					case 'undetected': 
 						$this->detected = false;						
-						if($currNote->notevalue == 1){
-							$this->shaded = true;	
-						}else{
-							$this->shaded = false;								
-						} 
-					break;								
+					break;
+					case 'Shaded': 
+						if($currNote->turn == $gamedata->turn || $gamedata->phase == -1 && $currNote->turn == $gamedata->turn-1){					
+							$this->active = true;
+						}								
+					break;	
+					case 'Unshaded': 
+						if($currNote->turn == $gamedata->turn || $gamedata->phase == -1 && $currNote->turn == $gamedata->turn-1){					
+							$this->active = false;
+						}								
+					break;																				
 				}
 			}
 
@@ -5946,19 +6083,6 @@ class MindriderHangar extends ShipSystem{
 			});
 		}
 
-	public function doIndividualNotesTransferGD($gamedata){
-		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
-		if(is_array($this->individualNotesTransfer)){			
-			foreach($this->individualNotesTransfer as $shadingChange){			
-				if($shadingChange == 0){
-					$this->removePowerEntriesForTurn($gamedata);
-					break;
-				}									
-			}
-		} 
-		$this->individualNotesTransfer = array(); //empty, just in case
-	}	
-
 
 		public function checkStealthNextPhase($gamedata, $range = 15){				
 				$ship = $this->getUnit();
@@ -5973,7 +6097,7 @@ class MindriderHangar extends ShipSystem{
 					}
 
 				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point) we need to check last turn as well for boost, as this will not have been saved yet for current turn.					
-				if ($gamedata->phase ==1 && $this->getBoostLevel($gamedata->turn-1) > 0 || $this->getBoostLevel($gamedata->turn) > 0) {
+				if ($this->active) {
 					if ($this->isDetected($ship, $gamedata, $range)) {
 						$notekey   = 'detected';
 						$noteHuman = $noteHuman1;
@@ -6035,7 +6159,7 @@ class MindriderHangar extends ShipSystem{
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->detected = $this->detected;
-			$strippedSystem->shaded = $this->shaded;				        
+			$strippedSystem->active = $this->active;				        
 			return $strippedSystem;
 		}
 

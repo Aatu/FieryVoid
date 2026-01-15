@@ -14,15 +14,8 @@ class Shargoti extends BaseShip{
         $this->canvasSize = 310;
         $this->fighters = array("normal"=>24, "shuttles"=>6);
         $this->limited = 10;
-
-		$this->notes .= "<br>Official Shargoti Battlecruiser with Gravity Nets replaced by Fusion Cannons"; 
-		$this->unofficial = true;
- 		$this->unofficial = 'S'; //design released after AoG demise
-
-		
         $this->forwardDefense = 16;
         $this->sideDefense = 20;
-
         $this->turncost = 1.5;
         $this->turndelaycost = 1.33;
         $this->accelcost = 6;
@@ -71,7 +64,7 @@ class Shargoti extends BaseShip{
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 300));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
-        $this->addLeftSystem(new FusionCannon(3, 8, 1, 240, 360));
+        $this->addLeftSystem(new GravityNet(4, 8, 5, 240, 360));
         $this->addLeftSystem(new NeutronLaser(4, 10, 6, 300, 60));
         $this->addLeftSystem(new GraviticThruster(4, 20, 0, 7, 3));
 
@@ -80,7 +73,7 @@ class Shargoti extends BaseShip{
         $this->addRightSystem(new FusionCannon(3, 8, 1, 60, 180));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
-        $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 120));
+        $this->addRightSystem(new GravityNet(4, 8, 5, 0, 120));
         $this->addRightSystem(new NeutronLaser(4, 10, 6, 300, 60));
         $this->addRightSystem(new GraviticThruster(4, 20, 0, 7, 4));
         
@@ -120,15 +113,17 @@ class Shargoti extends BaseShip{
             ),
             3=> array(
                     3 => "Thruster",
-                    9 => "Fusion Cannon",
-                    12 => "Neutron Laser",
+                    8 => "Fusion Cannon",
+                    11 => "Neutron Laser",
+                    12 => "Gravity Net",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     3 => "Thruster",
-                    9 => "Fusion Cannon",
-                    12 => "Neutron Laser",
+                    8 => "Fusion Cannon",
+                    11 => "Neutron Laser",
+                    12 => "Gravity Net",
                     18 => "Structure",
                     20 => "Primary",
             ),

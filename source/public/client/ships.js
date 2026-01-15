@@ -1,252 +1,252 @@
 "use strict";
 
 window.shipManager = {
-/*
-    shipImages: Array(),
-    initiated: 0,
-    
-    initShips: function initShips() {
-        if (window.webglScene) {
-            return;
-        }
-
-        shipManager.initiated = 1;
-        for (var i in gamedata.ships) {
-            shipManager.createHexShipDiv(gamedata.ships[i]);
-        }
-        shipManager.initiated = 2;
-        shipManager.drawShips();
-    },
-
-    createHexShipDiv: function createHexShipDiv(ship) {
-
-        if (ship.htmlContainer) return;
-
-        var e = $("#pagecontainer #hexship_" + ship.id + ".hexship");
-
-        if (!e.length) {
-
-            e = $("#templatecontainer .hexship");
-            e.attr("id", "hexship_" + ship.id);
-            var s = shipManager.getShipCanvasSize(ship);
-            var w = s;
-            var h = s;
-            $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_" + ship.id).attr("width", w).attr("height", h);
-            var n = e.clone(true).appendTo("#pagecontainer");
-            n.data("ship", ship.id);
-            ship.htmlContainer = $("#pagecontainer #hexship_" + ship.id);
-            ship.shipclickableContainer = $('<div oncontextmenu="shipManager.onShipContextMenu(this);return false;" class="shipclickable ship_' + ship.id + '"></div>').appendTo("#pagecontainer");
-            ship.shipclickableContainer.data("id", ship.id);
-            ship.shipclickableContainer.on("dblclick", shipManager.onShipDblClick);
-            ship.shipclickableContainer.on("click", shipManager.onShipClick);
-            ship.shipclickableContainer.on("mouseover", shipClickable.shipclickableMouseOver);
-            ship.shipclickableContainer.on("mouseout", shipClickable.shipclickableMouseOut);
-            if (ship.flight) {
-                ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
-            } else {
-                ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
-            }
-
-            shipWindowManager.setData(ship);
-            $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_");
-            e.attr("id", "hexship_");
-            var img = new Image();
-            img.src = ship.imagePath;
-            shipManager.shipImages[ship.id] = {
-                orginal: img,
-                modified: null,
-                rolled: null,
-                drawData: Array()
-            };
-            $(shipManager.shipImages[ship.id].orginal).on("load", function () {
-                shipManager.shipImages[ship.id].orginal.loaded = true;
-            });
-        } else {
-            ship.htmlContainer = e;
-            ship.shipclickableContainer = $(".shipclickable.ship_" + ship.id);
-            ship.shipStatusWindow = $(".shipwindow.ship_" + ship.id);
-            shipWindowManager.setData(ship);
-        }
-
-        if (shipManager.isDestroyed(ship)) ship.dontDraw = true;
-    },
-
-    drawShips: function drawShips() {
-
-        if (shipManager.initiated == 0) {
-            shipManager.initShips();
-            return;
-        }
-
-        if (shipManager.initiated == 1) return;
-
-        for (var i in gamedata.ships) {
-            shipManager.drawShip(gamedata.ships[i]);
-        }
-    },
-
     /*
-    drawShip: function(ship){
-         if (shipManager.initiated == 0){
-            shipManager.initShips();
-            return;
-        }
-         if (shipManager.initiated == 1)
-            return;
-         if (gamedata.gamephase != -1){
-            if (ship.dontDraw || ship.unavailable){
-                ship.shipclickableContainer.css("z-index", "1");
-                ship.htmlContainer.hide();
+        shipImages: Array(),
+        initiated: 0,
+        
+        initShips: function initShips() {
+            if (window.webglScene) {
                 return;
-            }   
-        }
-        //graphics.clearCanvas("shipcanvas_" + ship.id);
-        var canvas = window.graphics.getCanvas("shipcanvas_" + ship.id);
-         canvas.fillStyle    = hexgrid.hexlinecolor;;
-        canvas.font         = 'italic 12px sans-serif';
-        canvas.textBaseline = 'top';
-         var pos = shipManager.getShipPositionForDrawing(ship);
-           var s = shipManager.getShipCanvasSize(ship);
-        var h = Math.round(s/2)
-        var hexShipZ = 1000; //+ship.id;
-        var scZ = 4500;//+ship.id;
-        if (gamedata.mouseOverShipId == ship.id){
-            hexShipZ+=500;
-            scZ+=500;
-        }
-         if (gamedata.activeship == ship.id || gamedata.isSelected(ship)){
-            hexShipZ+=250;
-            scZ+=250;
-        }
-        ship.htmlContainer.css("top", pos.y -h + "px").css("left", pos.x -h + "px").css("z-index", hexShipZ);
-        ship.htmlContainer.show();
-         var img = damageDrawer.getShipImage(ship);
-         var sc = ship.shipclickableContainer;
-        scSize = s*0.15*gamedata.zoom;
-        sc.css("width", scSize+"px");
-        sc.css("height", scSize+"px");
-        sc.css("left", ((pos.x) - (scSize*0.5))+"px");
-        sc.css("top", ((pos.y) - (scSize*0.5))+"px");
-        sc.css("z-index", scZ);
-           //console.log("gamedata.gamephase: " + gamedata.gamephase + " gamedata.activeship: " + gamedata.activeship + " ship.id: " + ship.id);
-        if (gamedata.gamephase == 2 && gamedata.activeship == ship.id && gamedata.animating == false && gamedata.waiting == false && gamedata.isMyShip(ship))
-            UI.shipMovement.drawShipMovementUI(ship);
-         if (gamedata.gamephase == -1 && gamedata.isMyShip(ship) && gamedata.isSelected(ship))
-            UI.shipMovement.drawShipMovementUI(ship);
-         if (gamedata.gamephase == 3 && ship.flight && gamedata.isSelected(ship))
-            UI.shipMovement.drawShipMovementUI(ship);
-         if (img.loaded){
-            shipManager.doDrawShip(canvas, s, ship, img);
-        }else{
-            $(img).on("load", function(){
-                img = damageDrawer.getShipImage(ship);
-                if (img.loaded){
-                    shipManager.doDrawShip(canvas, s, ship, img);
-                }else{
-                    $(img).on("load", function(){
-                        img = damageDrawer.getShipImage(ship);
-                        shipManager.doDrawShip(canvas, s, ship, img);
-                    });
-                }
-            });
-        }
-     },
-     doDrawShip: function(canvas, s, ship, img){
-        var dew = ew.getDefensiveEW(ship);
-        if (ship.flight)
-    dew = shipManager.movement.getJinking(ship);
-         var ccew = ew.getCCEW(ship);
-         var shipdrawangle = shipManager.getShipHeadingAngleForDrawing(ship);
-        var selected = gamedata.isSelected(ship);
-        var mouseover = (gamedata.mouseOverShipId == ship.id);
-         if (ship.drawn && shipdrawangle == ship.shipdrawangle && ship.drawnzoom == gamedata.zoom
-    && ship.drawmouseover == mouseover && ship.drawselected == selected && ship.drawDamage == false
-    && ship.drawDEW == dew && ship.drawCCEW == ccew)
-    {
-    return;
-        }
-          var myship = gamedata.isMyShip(ship);
-        //console.log("draw");
-        canvas.clearRect(0, 0, s, s);
-    if ((selected && myship && gamedata.gamephase == 1) || (mouseover && gamedata.gamephase > 1) || (mouseover && myship)){
-    if (gamedata.zoom > 0){
-    	if (dew > 0){
-    	dew = Math.ceil(( dew )*gamedata.zoom*0.5);
-    	canvas.strokeStyle = "rgba(144,185,208,0.40)";
-    	graphics.drawCircle(canvas, s/2, s/2, s*0.18*gamedata.zoom, dew);
-    }
-    	if (ccew > 0){
-    	ccew = Math.ceil(( ccew )*gamedata.zoom*0.5);
-                    if (myship)
-                    {
-                        canvas.strokeStyle = "rgba(20,80,128,0.50)";
-                    }
-                    else
-                    {
-                        canvas.strokeStyle = "rgba(179,65,25,0.50)";
-                    }
-    		graphics.drawCircle(canvas, s/2, s/2, ((s*0.18*gamedata.zoom)+(dew*0.5) + (ccew*0.5) + 2), ccew);
-    }
-    }
-    }
-    if (selected && !mouseover && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
-    canvas.strokeStyle = "rgba(144,185,208,0.40)";
-    canvas.fillStyle = "rgba(255,255,255,0.18)";
-    graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-    }else if ( mouseover ){
-    if (gamedata.isMyShip(ship)){
-    canvas.strokeStyle = "rgba(86,200,45,0.60)";
-    canvas.fillStyle = "rgba(50,122,24,0.50)";
-    }else{
-    canvas.strokeStyle = "rgba(229,87,38,0.60)";
-    canvas.fillStyle = "rgba(179,65,25,0.50)";
-    }
-    graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-    }
-    if (gamedata.isTargeted(ship)) {
-    canvas.strokeStyle = "rgba(144,185,208,0.40)";
-    canvas.fillStyle = "rgba(255,255,255,0.18)";
-    graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
-    }
-         var rolled = shipManager.movement.isRolled(ship);
-    graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img, rolled);
-         if (mouseover
-            && (!gamedata.isMyShip(ship) || gamedata.gamephase != 2 || gamedata.activeship != ship.id)){
-             canvas.strokeStyle = "rgba(86,200,45,0.90)";
-            canvas.fillStyle = "rgba(50,122,24,0.70)";
-             var c = Math.floor(s/2);
-            var a = shipManager.getShipDoMAngle(ship);
-            var r = s*0.18*gamedata.zoom;
-            var p = mathlib.getPointInDirection(r, a , c, c);
-            //graphics.drawCircleAndFill(canvas, p.x, p.y, 5*gamedata.zoom, 2);
-            graphics.drawArrow(canvas, p.x, p.y, a, 30, 1);
-        }
-    ship.shipdrawangle = shipdrawangle;
-    ship.drawn = true;
-    ship.drawnzoom = gamedata.zoom;
-    ship.drawselected = selected;
-    ship.drawmouseover = mouseover;
-    ship.drawDamage = false;
-    ship.drawDEW = dew;
-    ship.drawCCEW = ccew;
-      },
-    
-    getShipCanvasSize: function getShipCanvasSize(ship) {
-        return ship.canvasSize;
-    },
-
-    hasAnimationsDone: function hasAnimationsDone(ship) {
-
-        for (var i in ship.movement) {
-            movement = ship.movement[i];
-            if (movement.animated == false || movement.commit == false) {
-                return false;
             }
+    
+            shipManager.initiated = 1;
+            for (var i in gamedata.ships) {
+                shipManager.createHexShipDiv(gamedata.ships[i]);
+            }
+            shipManager.initiated = 2;
+            shipManager.drawShips();
+        },
+    
+        createHexShipDiv: function createHexShipDiv(ship) {
+    
+            if (ship.htmlContainer) return;
+    
+            var e = $("#pagecontainer #hexship_" + ship.id + ".hexship");
+    
+            if (!e.length) {
+    
+                e = $("#templatecontainer .hexship");
+                e.attr("id", "hexship_" + ship.id);
+                var s = shipManager.getShipCanvasSize(ship);
+                var w = s;
+                var h = s;
+                $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_" + ship.id).attr("width", w).attr("height", h);
+                var n = e.clone(true).appendTo("#pagecontainer");
+                n.data("ship", ship.id);
+                ship.htmlContainer = $("#pagecontainer #hexship_" + ship.id);
+                ship.shipclickableContainer = $('<div oncontextmenu="shipManager.onShipContextMenu(this);return false;" class="shipclickable ship_' + ship.id + '"></div>').appendTo("#pagecontainer");
+                ship.shipclickableContainer.data("id", ship.id);
+                ship.shipclickableContainer.on("dblclick", shipManager.onShipDblClick);
+                ship.shipclickableContainer.on("click", shipManager.onShipClick);
+                ship.shipclickableContainer.on("mouseover", shipClickable.shipclickableMouseOver);
+                ship.shipclickableContainer.on("mouseout", shipClickable.shipclickableMouseOut);
+                if (ship.flight) {
+                    ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
+                } else {
+                    ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
+                }
+    
+                shipWindowManager.setData(ship);
+                $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_");
+                e.attr("id", "hexship_");
+                var img = new Image();
+                img.src = ship.imagePath;
+                shipManager.shipImages[ship.id] = {
+                    orginal: img,
+                    modified: null,
+                    rolled: null,
+                    drawData: Array()
+                };
+                $(shipManager.shipImages[ship.id].orginal).on("load", function () {
+                    shipManager.shipImages[ship.id].orginal.loaded = true;
+                });
+            } else {
+                ship.htmlContainer = e;
+                ship.shipclickableContainer = $(".shipclickable.ship_" + ship.id);
+                ship.shipStatusWindow = $(".shipwindow.ship_" + ship.id);
+                shipWindowManager.setData(ship);
+            }
+    
+            if (shipManager.isDestroyed(ship)) ship.dontDraw = true;
+        },
+    
+        drawShips: function drawShips() {
+    
+            if (shipManager.initiated == 0) {
+                shipManager.initShips();
+                return;
+            }
+    
+            if (shipManager.initiated == 1) return;
+    
+            for (var i in gamedata.ships) {
+                shipManager.drawShip(gamedata.ships[i]);
+            }
+        },
+    
+        /*
+        drawShip: function(ship){
+             if (shipManager.initiated == 0){
+                shipManager.initShips();
+                return;
+            }
+             if (shipManager.initiated == 1)
+                return;
+             if (gamedata.gamephase != -1){
+                if (ship.dontDraw || ship.unavailable){
+                    ship.shipclickableContainer.css("z-index", "1");
+                    ship.htmlContainer.hide();
+                    return;
+                }   
+            }
+            //graphics.clearCanvas("shipcanvas_" + ship.id);
+            var canvas = window.graphics.getCanvas("shipcanvas_" + ship.id);
+             canvas.fillStyle    = hexgrid.hexlinecolor;;
+            canvas.font         = 'italic 12px sans-serif';
+            canvas.textBaseline = 'top';
+             var pos = shipManager.getShipPositionForDrawing(ship);
+               var s = shipManager.getShipCanvasSize(ship);
+            var h = Math.round(s/2)
+            var hexShipZ = 1000; //+ship.id;
+            var scZ = 4500;//+ship.id;
+            if (gamedata.mouseOverShipId == ship.id){
+                hexShipZ+=500;
+                scZ+=500;
+            }
+             if (gamedata.activeship == ship.id || gamedata.isSelected(ship)){
+                hexShipZ+=250;
+                scZ+=250;
+            }
+            ship.htmlContainer.css("top", pos.y -h + "px").css("left", pos.x -h + "px").css("z-index", hexShipZ);
+            ship.htmlContainer.show();
+             var img = damageDrawer.getShipImage(ship);
+             var sc = ship.shipclickableContainer;
+            scSize = s*0.15*gamedata.zoom;
+            sc.css("width", scSize+"px");
+            sc.css("height", scSize+"px");
+            sc.css("left", ((pos.x) - (scSize*0.5))+"px");
+            sc.css("top", ((pos.y) - (scSize*0.5))+"px");
+            sc.css("z-index", scZ);
+               //console.log("gamedata.gamephase: " + gamedata.gamephase + " gamedata.activeship: " + gamedata.activeship + " ship.id: " + ship.id);
+            if (gamedata.gamephase == 2 && gamedata.activeship == ship.id && gamedata.animating == false && gamedata.waiting == false && gamedata.isMyShip(ship))
+                UI.shipMovement.drawShipMovementUI(ship);
+             if (gamedata.gamephase == -1 && gamedata.isMyShip(ship) && gamedata.isSelected(ship))
+                UI.shipMovement.drawShipMovementUI(ship);
+             if (gamedata.gamephase == 3 && ship.flight && gamedata.isSelected(ship))
+                UI.shipMovement.drawShipMovementUI(ship);
+             if (img.loaded){
+                shipManager.doDrawShip(canvas, s, ship, img);
+            }else{
+                $(img).on("load", function(){
+                    img = damageDrawer.getShipImage(ship);
+                    if (img.loaded){
+                        shipManager.doDrawShip(canvas, s, ship, img);
+                    }else{
+                        $(img).on("load", function(){
+                            img = damageDrawer.getShipImage(ship);
+                            shipManager.doDrawShip(canvas, s, ship, img);
+                        });
+                    }
+                });
+            }
+         },
+         doDrawShip: function(canvas, s, ship, img){
+            var dew = ew.getDefensiveEW(ship);
+            if (ship.flight)
+        dew = shipManager.movement.getJinking(ship);
+             var ccew = ew.getCCEW(ship);
+             var shipdrawangle = shipManager.getShipHeadingAngleForDrawing(ship);
+            var selected = gamedata.isSelected(ship);
+            var mouseover = (gamedata.mouseOverShipId == ship.id);
+             if (ship.drawn && shipdrawangle == ship.shipdrawangle && ship.drawnzoom == gamedata.zoom
+        && ship.drawmouseover == mouseover && ship.drawselected == selected && ship.drawDamage == false
+        && ship.drawDEW == dew && ship.drawCCEW == ccew)
+        {
+        return;
+            }
+              var myship = gamedata.isMyShip(ship);
+            //console.log("draw");
+            canvas.clearRect(0, 0, s, s);
+        if ((selected && myship && gamedata.gamephase == 1) || (mouseover && gamedata.gamephase > 1) || (mouseover && myship)){
+        if (gamedata.zoom > 0){
+            if (dew > 0){
+            dew = Math.ceil(( dew )*gamedata.zoom*0.5);
+            canvas.strokeStyle = "rgba(144,185,208,0.40)";
+            graphics.drawCircle(canvas, s/2, s/2, s*0.18*gamedata.zoom, dew);
         }
-
-        return true;
-    },
-*/
+            if (ccew > 0){
+            ccew = Math.ceil(( ccew )*gamedata.zoom*0.5);
+                        if (myship)
+                        {
+                            canvas.strokeStyle = "rgba(20,80,128,0.50)";
+                        }
+                        else
+                        {
+                            canvas.strokeStyle = "rgba(179,65,25,0.50)";
+                        }
+                graphics.drawCircle(canvas, s/2, s/2, ((s*0.18*gamedata.zoom)+(dew*0.5) + (ccew*0.5) + 2), ccew);
+        }
+        }
+        }
+        if (selected && !mouseover && !(gamedata.gamephase == 2 && ship.id == gamedata.activeship)) {
+        canvas.strokeStyle = "rgba(144,185,208,0.40)";
+        canvas.fillStyle = "rgba(255,255,255,0.18)";
+        graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
+        }else if ( mouseover ){
+        if (gamedata.isMyShip(ship)){
+        canvas.strokeStyle = "rgba(86,200,45,0.60)";
+        canvas.fillStyle = "rgba(50,122,24,0.50)";
+        }else{
+        canvas.strokeStyle = "rgba(229,87,38,0.60)";
+        canvas.fillStyle = "rgba(179,65,25,0.50)";
+        }
+        graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
+        }
+        if (gamedata.isTargeted(ship)) {
+        canvas.strokeStyle = "rgba(144,185,208,0.40)";
+        canvas.fillStyle = "rgba(255,255,255,0.18)";
+        graphics.drawCircleAndFill(canvas, s/2, s/2, s*0.15*gamedata.zoom+1, 1);
+        }
+             var rolled = shipManager.movement.isRolled(ship);
+        graphics.drawAndRotate(canvas, s, s, s*gamedata.zoom, s*gamedata.zoom, shipdrawangle, img, rolled);
+             if (mouseover
+                && (!gamedata.isMyShip(ship) || gamedata.gamephase != 2 || gamedata.activeship != ship.id)){
+                 canvas.strokeStyle = "rgba(86,200,45,0.90)";
+                canvas.fillStyle = "rgba(50,122,24,0.70)";
+                 var c = Math.floor(s/2);
+                var a = shipManager.getShipDoMAngle(ship);
+                var r = s*0.18*gamedata.zoom;
+                var p = mathlib.getPointInDirection(r, a , c, c);
+                //graphics.drawCircleAndFill(canvas, p.x, p.y, 5*gamedata.zoom, 2);
+                graphics.drawArrow(canvas, p.x, p.y, a, 30, 1);
+            }
+        ship.shipdrawangle = shipdrawangle;
+        ship.drawn = true;
+        ship.drawnzoom = gamedata.zoom;
+        ship.drawselected = selected;
+        ship.drawmouseover = mouseover;
+        ship.drawDamage = false;
+        ship.drawDEW = dew;
+        ship.drawCCEW = ccew;
+          },
+        
+        getShipCanvasSize: function getShipCanvasSize(ship) {
+            return ship.canvasSize;
+        },
+    
+        hasAnimationsDone: function hasAnimationsDone(ship) {
+    
+            for (var i in ship.movement) {
+                movement = ship.movement[i];
+                if (movement.animated == false || movement.commit == false) {
+                    return false;
+                }
+            }
+    
+            return true;
+        },
+    */
     getShipDoMAngle: function getShipDoMAngle(ship) {
         var d = shipManager.movement.getLastCommitedMove(ship).heading;
         if (d == 0) {
@@ -421,7 +421,7 @@ window.shipManager = {
         return false;
     },
 
-    onShipDblClick: function onShipDblClick(e) {},
+    onShipDblClick: function onShipDblClick(e) { },
 
     onShipClick: function onShipClick(e) {
         //console.log("click on ship");
@@ -516,37 +516,37 @@ window.shipManager = {
         return false;
     },
 
-	//Used by RelayAnimationStrategy/fleetList to check if ship has jumped, if so different destroyed sprite/entry
-	hasJumpedNotDestroyed: function (ship) {
-		var hasJumped = false;
-	    // Check if the ship has a jump engine
-	    const jumpEngine = shipManager.systems.getSystemByName(ship, "jumpEngine");
-	    
-	    // If no jump engine, ship cannot jump
-	    if (!jumpEngine) {
-	        return false;
-	    }
-	    
-	   // Check if the jump engine is boosted
-	   //var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
-	   //if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
-	    	
-		//Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
-		var struct = shipManager.systems.getStructureSystem(ship, 0);
-            var maxHealth = struct.maxhealth;
-            var totalDamage = 0;
-            var thisDamage = null;
-            for (var i in struct.damage) {
-                thisDamage = struct.damage[i];
-                if (thisDamage.damageclass !== 'HyperspaceJump') totalDamage += Math.max(0, thisDamage.damage - thisDamage.armour); //Only count non-jump damage, as jumping destroys ship anyway.
-            }
-            
-        if(totalDamage < maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
-        
+    //Used by RelayAnimationStrategy/fleetList to check if ship has jumped, if so different destroyed sprite/entry
+    hasJumpedNotDestroyed: function (ship) {
+        var hasJumped = false;
+        // Check if the ship has a jump engine
+        const jumpEngine = shipManager.systems.getSystemByName(ship, "jumpEngine");
+
+        // If no jump engine, ship cannot jump
+        if (!jumpEngine) {
+            return false;
+        }
+
+        // Check if the jump engine is boosted
+        //var boostedJump = shipManager.power.isBoosted(ship, jumpEngine);
+        //if(!boostedJump) return false; //Hasn't boosted jump engine, it cannot have jumped.
+
+        //Check damage entries, and remove Hyperspace jump entry, to see if ship was 'destroyed' by jumping not actual damage.	    
+        var struct = shipManager.systems.getStructureSystem(ship, 0);
+        var maxHealth = struct.maxhealth;
+        var totalDamage = 0;
+        var thisDamage = null;
+        for (var i in struct.damage) {
+            thisDamage = struct.damage[i];
+            if (thisDamage.damageclass !== 'HyperspaceJump') totalDamage += Math.max(0, thisDamage.damage - thisDamage.armour); //Only count non-jump damage, as jumping destroys ship anyway.
+        }
+
+        if (totalDamage < maxHealth) return true; //The other damage sustained has not destroyed this ship, jumping has.
+
         return hasJumped;
-	},
-	
-		
+    },
+
+
     isDestroyed: function isDestroyed(ship) {
 
         if (ship == null) {
@@ -567,23 +567,23 @@ window.shipManager = {
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                if (!gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
                     var react = shipManager.systems.getSystemByName(ship, "reactor");
                     if (shipManager.systems.isDestroyed(ship, react)) {
                         return true;
                     }
-                }    
+                }
             } else {
                 var stru = shipManager.systems.getStructureSystem(ship, 0);
                 if (shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-                if(!gamedata.isTerrain(ship.shipSizeClass, ship.userid)){
+                if (!gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
                     var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
                     if (shipManager.systems.isDestroyed(ship, mainReactor)) {
                         return true;
                     }
-                }    
+                }
             }
         }
 
@@ -650,14 +650,14 @@ window.shipManager = {
         if (shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "cnC"))) {
             return true;
         }
-        
+
         /*ship without power (power deficit or Reactor shutdown critical) is adrift as well*/
-	/*...after consulting rulebook - it isn't!*/
-	/*
-        //isPowerless already checks for appropriate critical, actually
-        if (shipManager.power.isPowerless(ship)) return true;
-        */
-	    
+        /*...after consulting rulebook - it isn't!*/
+        /*
+            //isPowerless already checks for appropriate critical, actually
+            if (shipManager.power.isPowerless(ship)) return true;
+            */
+
         return false;
     },
 
@@ -680,7 +680,7 @@ window.shipManager = {
 
     getTurnDestroyed: function getTurnDestroyed(ship) {
         var turn = null;
-		if (!shipManager.isDestroyed(ship)) return null; //if ship is not destroyed then it's not destroyed :)
+        if (!shipManager.isDestroyed(ship)) return null; //if ship is not destroyed then it's not destroyed :)
         if (ship.flight) {
 
             var fightersSurviving = ship.systems.some(function (fighter) {
@@ -702,28 +702,28 @@ window.shipManager = {
             var stru = shipManager.systems.getStructureSystem(ship, 0);
             var sturn = damageManager.getTurnDestroyed(ship, stru);
 
-            if (rturn != null && (rturn < sturn || sturn == null)) turn = rturn;else turn = sturn;
+            if (rturn != null && (rturn < sturn || sturn == null)) turn = rturn; else turn = sturn;
         }
 
         return turn;
     },
-/*
-    getIniativeOrder: function getIniativeOrder(ship) {
-        var previousInitiative = -100000; //same Ini move together now!
-        var order = 0;  
-
-        for (var i in gamedata.ships) {
-            if (shipManager.isDestroyed(gamedata.ships[i])) continue;
-            if (gamedata.ships[i].iniative > previousInitiative){ //new Ini higher than previous!         
-                order++;
-                previousInitiative = gamedata.ships[i].iniative;
+    /*
+        getIniativeOrder: function getIniativeOrder(ship) {
+            var previousInitiative = -100000; //same Ini move together now!
+            var order = 0;  
+    
+            for (var i in gamedata.ships) {
+                if (shipManager.isDestroyed(gamedata.ships[i])) continue;
+                if (gamedata.ships[i].iniative > previousInitiative){ //new Ini higher than previous!         
+                    order++;
+                    previousInitiative = gamedata.ships[i].iniative;
+                }
+                if (gamedata.ships[i].id == ship.id) return order;
             }
-            if (gamedata.ships[i].id == ship.id) return order;
-        }
-
-        return 0; //should not happen
-    },
-*/
+    
+            return 0; //should not happen
+        },
+    */
 
     //New getInitiativeOrder function to accommodate terrain units like asteroids.
     getIniativeOrder: function getIniativeOrder(ship) {
@@ -731,7 +731,7 @@ window.shipManager = {
         var order = 0;
 
         // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
-        var validShips = gamedata.ships.filter(function(s) {
+        var validShips = gamedata.ships.filter(function (s) {
             return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s.shipSizeClass, s.userid) && !(shipManager.getTurnDeployed(s) > gamedata.turn);
         });
 
@@ -753,38 +753,38 @@ window.shipManager = {
 
         if (a.iniative < b.iniative) return false;
 
-/*
-        if (a.unmodifiedIniative != null && b.unmodifiedIniative != null) {
-            if (a.unmodifiedIniative > b.unmodifiedIniative)
-                return 1;
-        
-            if (a.unmodifiedIniative < b.unmodifiedIniative)
-                return -1;
-        }
-*/
+        /*
+                if (a.unmodifiedIniative != null && b.unmodifiedIniative != null) {
+                    if (a.unmodifiedIniative > b.unmodifiedIniative)
+                        return 1;
+                
+                    if (a.unmodifiedIniative < b.unmodifiedIniative)
+                        return -1;
+                }
+        */
         //if (a.iniative == b.iniative) {
-            if (a.iniativebonus > b.iniativebonus) return true;
+        if (a.iniativebonus > b.iniativebonus) return true;
 
-            if (b.iniativebonus > a.iniativebonus) return false;
+        if (b.iniativebonus > a.iniativebonus) return false;
 
-	    return (a.id>b.id); //lower ID wins, if all else fails
-	    
-	    /*
+        return (a.id > b.id); //lower ID wins, if all else fails
+
+        /*
             for (var i in gamedata.ships) {
                 if (gamedata.ships[i] == a) return false;
 
                 if (gamedata.ships[i] == b) return true;
             }
-	    */
+        */
         //}
 
         return 0; //shouldn't get here
     },
-	
-	hasWorseInitiveSort: function hasWorseInitiveSort(a, b) {
-		var hasBetterIni = shipManager.hasBetterInitive(a, b);
-		if(hasBetterIni) return -1; //reverse
-		return 1;
+
+    hasWorseInitiveSort: function hasWorseInitiveSort(a, b) {
+        var hasBetterIni = shipManager.hasBetterInitive(a, b);
+        if (hasBetterIni) return -1; //reverse
+        return 1;
     },
 
     //Only used for Deployment checks to prevent ships deploying on same hex (or now allow for later Deployments) - DK
@@ -799,31 +799,55 @@ window.shipManager = {
             if (shipManager.isDestroyed(ship2)) continue;
 
             //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
-            var depTurn = shipManager.getTurnDeployed(ship2);            
+            var depTurn = shipManager.getTurnDeployed(ship2);
             if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
 
             var pos2 = shipManager.getShipPosition(ship2);
 
             //But never let ships Deployment on unoccupied parts of Huge terrain.
-            if(ship2.Huge > 0 && ship2.Huge <= 3){ //Between 1 and 3, Moons basically - DK
+            var collides = false;
+
+            // Check for custom hex offsets (non-circular terrain)
+            if (ship2.hexOffsets && ship2.hexOffsets.length > 0) {
+                var lastMove = shipManager.movement.getLastCommitedMove(ship2);
+                var facing = lastMove ? lastMove.facing : 0;
+
+                for (var j in ship2.hexOffsets) {
+                    var offset = ship2.hexOffsets[j];
+
+                    // Use getRotatedHex for accurate positioning
+                    var newHex = mathlib.getRotatedHex(pos2, offset, facing);
+
+                    // Check if pos1 matches the offset position
+                    if (pos1.q === newHex.q && pos1.r === newHex.r) {
+                        collides = true;
+                        break;
+                    }
+                }
+            } else if (ship2.Huge > 0 && ship2.Huge <= 3) { //Between 1 and 3, Moons basically - DK
                 //var s2pos = shipManager.getShipPosition(ship2);
                 var distance = pos1.distanceTo(pos2);
-                if(distance > 0 && distance <= ship2.Huge){ 
-                    shipsInHex.push(ship2);
-                    confirm.error("You cannot deploy on terrain.");                                         
-                }    
+                if (distance > 0 && distance <= ship2.Huge) {
+                    collides = true;
+                }
+            }
+
+            if (collides) {
+                shipsInHex.push(ship2);
+                confirm.error("You cannot deploy on terrain.");
+                continue; // Collision found, skip center check for this ship
             }
 
             //if (ship.id = ship2.d)
             //  continue;
 
             if (pos1.equals(pos2)) {
-                if(gamedata.isTerrain(ship2.shipSizeClass, ship2.userid)){
+                if (gamedata.isTerrain(ship2.shipSizeClass, ship2.userid)) {
                     shipsInHex.push(ship2);
-                    confirm.error("You cannot deploy on terrain.");  
-                }else{
+                    confirm.error("You cannot deploy on terrain.");
+                } else {
                     shipsInHex.push(ship2);
-                }    
+                }
             }
         }
 
@@ -904,48 +928,50 @@ window.shipManager = {
         return false;
     },
 
+
+    /* Replcaedd with more efficient version, fully remove if no issues - DK - Dec 2025 
     checkConstantPivot: function checkConstantPivot() {
-		var pivotShips = [];
-		var counter = 0;
-		for (var i in gamedata.ships) {
-			var ship = gamedata.ships[i];
-			if (!ship.mustPivot) continue;//Ignore everything but ships that HAVE to pivot.
-			if (ship.unavailable) continue;
-			if (ship.userid != gamedata.thisplayer) continue;					
-			if (shipManager.isDestroyed(ship)) continue;
+        var pivotShips = [];
+        var counter = 0;
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (!ship.mustPivot) continue;//Ignore everything but ships that HAVE to pivot.
+            if (ship.unavailable) continue;
+            if (ship.userid != gamedata.thisplayer) continue;					
+            if (shipManager.isDestroyed(ship)) continue;
             var deployTurn = shipManager.getTurnDeployed(ship);
-			if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
-			var left = 0;
-			var right = 0;				
+            var left = 0;
+            var right = 0;				
 	
-	        const currentTurnMovements = ship.movement.filter(movement => movement.turn == gamedata.turn);
-	        currentTurnMovements.forEach(movement => {
-	            if (movement.type == "pivotleft" && !movement.preturn) {
-	                left++;
-	            }
-	            if (movement.type == "pivotright" && !movement.preturn) {
-	                right++;
-	            }
-	        });
+            const currentTurnMovements = ship.movement.filter(movement => movement.turn == gamedata.turn);
+            currentTurnMovements.forEach(movement => {
+                if (movement.type == "pivotleft" && !movement.preturn) {
+                    left++;
+                }
+                if (movement.type == "pivotright" && !movement.preturn) {
+                    right++;
+                }
+            });
 
-			if(left == right){				
-				pivotShips[counter] = ship;
-				counter++;		
-			}					
-		}
-		
-		return pivotShips;
+            if(left == right){				
+                pivotShips[counter] = ship;
+                counter++;		
+            }					
+        }
+    	
+        return pivotShips;
     },
-
+    */
 
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;
         //var ships = shipManager.getShipsInSameHex(ship);
         //for (var i in ships) {
-            //var othership = ships[i];
+        //var othership = ships[i];
         if (gamedata.turn == 1) return true; //on turn 1 all friendly ships can be protected!
-        
+
         for (var i in gamedata.ships) { //doesn't need to be on the same hex NOW... only at the start and end of move :)
             var othership = gamedata.ships[i];
             if (shipManager.isDestroyed(othership)) continue; //no need to list ships already destroyed
@@ -963,12 +989,12 @@ window.shipManager = {
         }
         return false;
     },
-    
+
     /*list of names of escorted ships*/
     listEscorting: function listEscorting(ship) {
         var resultTxt = '';
         if (!ship.flight) return resultTxt;
-    
+
         if (gamedata.turn == 1) return 'All'; //turn 1: all ships can be escorted
 
         for (var i in gamedata.ships) {
@@ -983,8 +1009,8 @@ window.shipManager = {
 
             if (oPos.equals(tPos)){
             */
-            if (shipManager.isEscorting(ship,othership)){
-                if(resultTxt != '') resultTxt += ', ';
+            if (shipManager.isEscorting(ship, othership)) {
+                if (resultTxt != '') resultTxt += ', ';
                 resultTxt += othership.name;
             }
         }
@@ -993,86 +1019,86 @@ window.shipManager = {
     },
 
     //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
-    shouldBeHidden: function(ship) {    
-        if(!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
-        if(shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
-        if(!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
+    shouldBeHidden: function (ship) {
+        if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
+        if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
+        if (!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         return false;
     },
-    
+
 
     getTurnDeployed: function getTurnDeployed(ship) {
-          
-        if(ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+
+        if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return 1; //Bases and OSATs never 'jump in', returns Turn 1.
-        }else{    
-           //return Math.max(ship.deploysOnTurn, slot.depavailable);
+        } else {
+            //return Math.max(ship.deploysOnTurn, slot.depavailable);
             var slot = playerManager.getSlotById(ship.slot);
             var depTurn = slot.depavailable;
 
-        if(slot.surrendered !== null){
-            if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
+            if (slot.surrendered !== null) {
+                if (slot.surrendered <= gamedata.turn) { //Surrendered on this turn or before.
                     depTurn = 999; //Artifically high number, so surrendered ships are no longer shown by game until one full team has surrendered! - DK
+                }
             }
-        }    
-            return depTurn;                       
-        }     
-    },    
-
-
-    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
-    playerHasDeployedShips: function playerHasDeployedShips(playerid) {
-       for (const ship of gamedata.ships) {
-            if(ship.userid !== playerid) continue;
-    
-            var deploys = shipManager.getTurnDeployed(ship);
-            if(deploys <= gamedata.turn) return true;
+            return depTurn;
         }
-        return false;         
     },
 
+    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
+    playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {
+        var hasDeployed = true;
+
+        for (const ship of gamedata.ships) {
+            if (ship.userid !== playerid) continue;
+
+            var deploys = shipManager.getTurnDeployed(ship);
+            if (deploys >= gamedata.turn) hasDeployed = false;
+        }
+        return hasDeployed;
+    },
 
     //Called in various places to identify a ship as having ability to be invisible to enemy.
-    isStealthShip: function(ship) {
+    isStealthShip: function (ship) {
         //if(shipManager.hasSpecialAbility(ship, "Stealth") && (!ship.flight)) return true;
         //return false;
         return ship.trueStealth;
     },
-  
 
-    markAsDetected: function(ship) {
+
+    markAsDetected: function (ship) {
         var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
-        if(stealthSystem) stealthSystem.detected = true;
-    }, 
+        if (stealthSystem) stealthSystem.detected = true;
+    },
 
 
     //Main Front End check on whether a stealth ship is detected or not, called in various places.
-    isDetected: function(ship) {         
-        if(ship.faction == "Torvalus Speculators"){
+    isDetected: function (ship) {
+        if (ship.faction == "Torvalus Speculators") {
             return shipManager.isDetectedTorvalus(ship, 15);
         }
-        if(gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
+        if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
         var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
-        if(stealthSystem && stealthSystem.detected) return true; //Already detected.
+        if (stealthSystem && stealthSystem.detected) return true; //Already detected.
 
         // If the ship used offensive or ELINT EW, it is revealed
         const usedEW = ew.getAllEWExceptDEW(ship); //Has used any EW abilities except DEW?
-        if (usedEW > 0){
+        if (usedEW > 0) {
             return true; //If so, revealed.
-        }            
-        if(shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
-        if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
+        }
+        if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
+        if (gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
 
         // Check all enemy ships to see if any can detect this ship
         for (const otherShip of gamedata.ships) {
             if (otherShip.team === ship.team) continue; // Skip friendly ships
             if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-            if(shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
+            if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
 
             let totalDetection = 0;
 
             if (!otherShip.flight) {
-                if(shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
+                if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
                 // Not a fighter — use scanner systems for detection
                 const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
                 const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
@@ -1097,15 +1123,15 @@ window.shipManager = {
                 }
             } else {
                 // Fighter unit — use offensive bonus
-                if(otherShip.offensivebonus) totalDetection = otherShip.offensivebonus;
+                if (otherShip.offensivebonus) totalDetection = otherShip.offensivebonus;
             }
 
             // Get distance to the stealth ship and check line of sight
             const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
             var loSBlocked = false;
             var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-            var shipPos= shipManager.getShipPosition(ship);
-            var otherShipPos= shipManager.getShipPosition(otherShip);                   
+            var shipPos = shipManager.getShipPosition(ship);
+            var otherShipPos = shipManager.getShipPosition(otherShip);
             loSBlocked = mathlib.checkLineOfSight(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
 
             // If within detection range, the ship is revealed
@@ -1119,19 +1145,19 @@ window.shipManager = {
         return false;
     },
 
-    isDetectedTorvalus: function(ship, detection = 15) {
-        if(gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
-        if(shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
+    isDetectedTorvalus: function (ship, detection = 15) {
+        if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
+        if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
         var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
-        if(shadingField && shadingField.detected) return true; //Already detected.     
+        if (shadingField && shadingField.detected) return true; //Already detected.     
 
-        if(gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
+        if (gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
 
         // Check all enemy ships to see if any can detect this ship
         for (const otherShip of gamedata.ships) {
             if (otherShip.team === ship.team) continue; // Skip friendly ships
             if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-            if(shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
+            if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
 
             let totalDetection = detection; //Shading Field detection range is always 15.
 
@@ -1139,8 +1165,8 @@ window.shipManager = {
             const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
             var loSBlocked = false;
             var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-            var shipPos= shipManager.getShipPosition(ship);
-            var otherShipPos= shipManager.getShipPosition(otherShip);                   
+            var shipPos = shipManager.getShipPosition(ship);
+            var otherShipPos = shipManager.getShipPosition(otherShip);
             loSBlocked = mathlib.checkLineOfSight(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
 
             // If within detection range, the ship is revealed

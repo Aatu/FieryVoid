@@ -80,7 +80,7 @@ class Manager{
         
             return array_merge(
                 self::$dbManager->getPlayerGames($userid),
-                self::$dbManager->getLobbyGames()
+                self::$dbManager->getLobbyGames($userid)
             );
       
         }
@@ -297,6 +297,12 @@ class Manager{
 		self::$dbManager->submitAmmo($shipid, $systemid, $gameid, 1, $ammoAmount, $turn);
     }
     
+    public static function touchGame($gameid) {
+        if (function_exists('apcu_store')) {
+            apcu_store('game_' . $gameid . '_last_update', microtime(true));
+        }
+    }
+
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship, $force = false){
         
         try{
@@ -312,13 +318,20 @@ class Manager{
 
             if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY")
                 return "{}";
-            /* //OLD VERION
-            $json = json_encode($gdS->stripForJson(), JSON_NUMERIC_CHECK);
-            //Debug("GAME: $gameid Player: $userid requesting gamedata. RETURNING NEW JSON");
-            return $json;
-            */
+            
             //NEW VERSION FOR PHP 8 - Aug 2025
             $data = $gdS->stripForJson();
+
+            // APCu Optimization: Inject Timestamp
+            if (function_exists('apcu_fetch')) {
+                 $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
+                 if (!$timestamp) {
+                     $timestamp = microtime(true);
+                     self::touchGame($gameid);
+                 }
+                 $data->last_update = $timestamp;
+            }
+
             $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
             unset($data); // free memory early
             return $json;
@@ -760,6 +773,8 @@ class Manager{
             
             //Debug("GAME: $gameid Player: $userid SUBMIT OK");
             
+            self::touchGame($gameid);
+
             $endtime = time();
             //Debug::log("SUBMITTING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
             return '{}';
@@ -912,6 +927,8 @@ class Manager{
             }
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            
+            self::touchGame($gameid); // Ensure APCu knows about the advance
         }
         catch(Exception $e)
         {

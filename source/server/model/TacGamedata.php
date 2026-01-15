@@ -406,6 +406,23 @@ class TacGamedata {
         return [];
     }
     
+    //New check at end fo firing phase to see f we run Deployment Phase next turn as a Pre-Turn ORders phase for systems like Shading Field
+    public function checkDeploymentPhaseForPlayer($playerId){
+        foreach($this->ships as $ship){
+            if ($ship->userid != $playerId) continue; //Not players ship
+            if(!$ship->canPreOrder) continue; //Can't pre-Order, filters out irreleveant ships and Terrain
+            
+            //Torvalus Block, other blocks could be added.
+            if($ship->faction == "Torvalus Speculators"){
+                $shadingField = $ship->getSystemByName("ShadingField");
+                if(!$shadingField->isDestroyed() && !$shadingField->isOfflineOnTurn()){
+                    return true; //At least one undestroyed, online Shading Field, do Pre-Orders
+                }
+            } 
+        }
+        return false;
+    }
+
     private $shipsById = array();
 
     /**
@@ -567,7 +584,7 @@ class TacGamedata {
                 for ($i=(sizeof($ship->movement)-1);$i>=0;$i--)
                 {
                     $move = $ship->movement[$i];
-                    if ($move->type == "deploy")
+                    if ($move->type == "deploy" && $move->turn == $this->turn)
                         unset($ship->movement[$i]);
                 }
             }
@@ -815,27 +832,53 @@ private function setWaiting() {
 
     public function getBlockedHexes() {
         $blockedHexes = [];
-        
+
         foreach ($this->ships as $ship) {
             if($ship->isDestroyed()) continue;
 
             if ($ship->Enormous) { // Only enormous units block LoS
-                $position = $ship->getHexPos(); 
+                $position = $ship->getHexPos();
                 $blockedHexes[] = $position;
 
-                if($ship->Huge > 0){ //Larger terrain, need to add more than just centre hex.
+                // Check for custom hex offsets (non-circular terrain)
+                if (property_exists($ship, 'hexOffsets') && !empty($ship->hexOffsets)) {
+
+                    $move = $ship->getLastMovement();
+                    $facing = $move->facing;
+                    foreach ($ship->hexOffsets as $offset) {
+                        // Use accurate pixel-based rotation
+                        $newHex = Mathlib::getRotatedHex($position, $offset, $facing);
+                        $blockedHexes[] = $newHex;
+                    }
+                } elseif ($ship->Huge > 0) { // Standard circular Huge terrain
                     $neighbourHexes = Mathlib::getNeighbouringHexes($position, $ship->Huge);
 
                     foreach ($neighbourHexes as $hex) {
                         $blockedHexes[] = new OffsetCoordinate($hex); // Ensure hexes are objects
                     }
                 }
-            }    
-
+            }
         }
-      
         return $blockedHexes;
     } //endof function getBlockedHexes
+
+    
+    public function getEnormousHexes() {
+        $enormousHexes = [];
+        
+        foreach ($this->ships as $ship) {
+            if($ship->isDestroyed()) continue;
+
+            if ($ship->Enormous && $ship->Huge == 0) { // Only enormous units, nothing larger.
+                if (property_exists($ship, 'hexOffsets') && !empty($ship->hexOffsets)) {  //Remove odd-shaped terrain as well.              
+                    $position = $ship->getHexPos(); 
+                    $enormousHexes[] = $position;
+                }    
+            }    
+        }
+      
+        return $enormousHexes;
+    } //endof function enormousHexes    
            
 
     public function getMinTurnDeployedSlot($slotid, $depavailable) {

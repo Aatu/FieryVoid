@@ -19,9 +19,17 @@ if (!$playerid) {
 
 $input = [];
 // Accept JSON POST body if present
-if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
-    strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false) {
-    $input = json_decode(file_get_contents('php://input'), true) ?? [];
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Try reading JSON input if Content-Type matches OR if $_POST is empty (fallback)
+    if (strpos($_SERVER['CONTENT_TYPE'] ?? '', 'application/json') !== false || empty($_POST)) {
+        $jsonInput = file_get_contents('php://input');
+        if ($jsonInput) {
+            $decoded = json_decode($jsonInput, true);
+            if (is_array($decoded)) {
+                $input = $decoded;
+            }
+        }
+    }
 }
 
 // Retrieve faction parameter from either GET or POST (POST preferred)
@@ -43,9 +51,22 @@ try {
         // Serve static file directly
         header('X-Source: Static');
         
-        // Enable Browser Caching (1 hour) to prevent constant redownloads
-        header('Cache-Control: public, max-age=3600');
-        header('Expires: ' . gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT');
+        // Enable Browser Caching with Validation
+        $lastModifiedTime = filemtime($jsonPath);
+        $etag = md5_file($jsonPath);
+        
+        header("Last-Modified: " . gmdate("D, d M Y H:i:s", $lastModifiedTime) . " GMT");
+        header("Etag: $etag");
+        header('Cache-Control: no-cache, must-revalidate'); // Require validation every time
+
+        // Check if browser has cached version
+        if (
+            (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= $lastModifiedTime) ||
+            (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag)
+        ) {
+            header("HTTP/1.1 304 Not Modified");
+            exit;
+        }
         header('Pragma: cache');
         
         if (!ob_start("ob_gzhandler")) ob_start(); //Try gzip, fall back to default

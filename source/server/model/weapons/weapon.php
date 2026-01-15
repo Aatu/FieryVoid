@@ -75,7 +75,7 @@ class Weapon extends ShipSystem
 	public $canSplitShots = false; //For Front end to allow weapons to target different enemies in same firing round. 
 	public $canSplitShotsArray = array(); 
     protected $multiModeSplit = false; //If you want the Front End to see this, pass it in strpForJson() in weapon :)
-
+    protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
     public $overloadable = false;
 
     public $normalload = 0;
@@ -1266,7 +1266,7 @@ public function getStartLoading()
                 $effectiveOB = $shooter->offensivebonus - $OBcrit;
                 $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
             }
-
+  
             if (!$this->ballistic) {
                 $dew = 0;
                 $bdew = 0;
@@ -1439,8 +1439,15 @@ public function getStartLoading()
 	        $targetCnC = $target->getSystemByName("CnC");        
 	        $defenceMod = $targetCnC->hasCritical("ProfileIncreased");
 	        $defence += $defenceMod;
-		}
-        
+		}else{             
+            if ($target->hasSpecialAbility("Petals")){ //Does ship have Specialists system?
+                $petals = $target->getSystemByName("FtrPetals");
+                if($petals->isActive()){
+	                $defence += 1;
+                } 
+            }           
+        }    
+     
         $goal = $defence + $hitBonuses - $hitPenalties;
 
 		
@@ -1621,7 +1628,8 @@ public function getStartLoading()
                 }
             }
         }
-	    
+	    /*
+        //MOVED TO CRITICALS.PHP to CAPTURE SUSTAINED WEAPONS THAT DIDN@T FIRE THEIR LAST SHOT - DK - Dec 2025
 		//for last segment of Sustained shot - force shutdown!
 		$newExtraShots = $this->overloadshots - 1; 	
 		if( $newExtraShots == 0 ) {
@@ -1630,7 +1638,7 @@ public function getStartLoading()
 			$crit->newCrit = true; //force save even if crit is not for current turn
 			$this->criticals[] =  $crit;
 		}
-
+        */
         $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!

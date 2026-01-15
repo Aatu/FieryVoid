@@ -600,7 +600,8 @@ MolecularSlicerBeamH.prototype.initializationUpdate = function () {
 	this.fireControl = this.fireControlArray[this.firingMode]; //reset 
 
 	//Piercing Mode at 1 or 2 turn charge doesn't get -20% hitchance
-	if(this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)){		
+	//if(this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)){
+	if(this.turnsloaded < 3 && this.firingMode == 1){					
 		this.data["Fire control (fighter/med/cap)"] = '20/30/40';         
 	}		
 
@@ -625,12 +626,17 @@ MolecularSlicerBeamH.prototype.initializationUpdate = function () {
 		this.data["Remaining Dice"] = shots - shotsUsed;
 	}
 
-	if(this.turnsloaded == 3 && (this.firingMode == 2 || this.firingMode == 4)){
+	//if(this.turnsloaded == 3 && (this.firingMode == 2 || this.firingMode == 4)){
+	if(this.turnsloaded == 3 && this.firingMode == 2){		
 		minDam = 40;
 		maxDam = 184;		
 	}
 
 	this.data["Damage"] = "" + minDam + "-" + maxDam;
+
+    if(this.startArcArray.length > 0){ //More than one arc e.g. Battlecruiser
+		this.data["Arc"] = this.startArcArray[0] + "..." + this.endArcArray[0] + ", " +  this.startArcArray[1] + "..." + this.endArcArray[1];		
+	}
 
 	return this;
 };
@@ -641,7 +647,8 @@ MolecularSlicerBeamH.prototype.calculateSpecialHitChanceMod = function (shooter,
 	var currentShots = this.fireOrders.length; //
 	mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current length as mod.
 
-	if (this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)) mod += 4;
+	//if (this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)) mod += 4;
+	if (this.turnsloaded < 3 && this.firingMode == 1) mod += 4;	
 
     if(target.flight &&  calledid && calledid !== -1){ //Has fireorder against fighter unit, and is a called shot
         mod += 8; //CalledShotmod is -8, so just compensate for that.            
@@ -659,8 +666,10 @@ MolecularSlicerBeamH.prototype.isLegalToFireMode = function (shooter) {
 		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
 			const existingMode = this.fireOrders[i].firingMode;
 
-			const existingPiercing = (existingMode === 1 || existingMode === 3);
-			const currentPiercing = (currentMode === 1 || currentMode === 3);
+			//const existingPiercing = (existingMode === 1 || existingMode === 3);
+			//const currentPiercing = (currentMode === 1 || currentMode === 3);
+			const existingPiercing = existingMode === 1;
+			const currentPiercing = currentMode === 1;			
 
 			if (existingPiercing !== currentPiercing) {
 				confirm.error("You cannot mix Piercing and Raking modes whilst at full charge.");
