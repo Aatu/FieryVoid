@@ -73,33 +73,63 @@ if ($ipCount > $maxIP) {
 }
 
 // ----------------------
+// Fast Poll Exemption
+// ----------------------
+// If this is a polling request that will be served from APCu, we skip the global limit.
+$isFastPoll = false;
+
+if (isset($_SERVER['PHP_SELF'])) {
+    if (strpos($_SERVER['PHP_SELF'], 'chatdata.php') !== false && isset($_GET['gameid'], $_GET['lastid'])) {
+        $key = 'chat_last_id_' . $_GET['gameid'];
+        $lastMsgId = apcu_fetch($key);
+        if ($lastMsgId !== false && $_GET['lastid'] >= $lastMsgId) {
+            $isFastPoll = true;
+             // DEBUG LOG
+             error_log("Load Guard: Fast Poll EXEMPT (Chat) - " . $_SERVER['REMOTE_ADDR']);
+        }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'gamedata.php') !== false && isset($_GET['gameid'], $_GET['last_time'])) {
+        $key = "game_" . $_GET['gameid'] . "_last_update";
+        $serverTime = apcu_fetch($key);
+        // Note: serverTime might be false if expired, in which case we don't fast poll
+        if ($serverTime && $serverTime <= $_GET['last_time']) {
+            $isFastPoll = true;
+             // DEBUG LOG
+             error_log("Load Guard: Fast Poll EXEMPT (Gamedata) - " . $_SERVER['REMOTE_ADDR']);
+        }
+    }
+}
+
+// ----------------------
 // Global limiter (atomic CAS)
 // ----------------------
 // Ensure key exists (safe to call repeatedly)
 apcu_add($keyGlobal, 0, $ttlGlobal);
 
-do {
-    $count = apcu_fetch($keyGlobal);
-    if ($count === false) $count = 0;
+// Only enforce global limit if NOT a fast poll
+if (!$isFastPoll) {
+    do {
+        $count = apcu_fetch($keyGlobal);
+        if ($count === false) $count = 0;
 
-    if ($count < $maxGlobal) {
-        // Atomic compare-and-swap
-        if (apcu_cas($keyGlobal, $count, $count + 1)) {
-            $globalAcquired = true; // SUCCESS! Shutdown will now handle this decrement.
-            break;
+        if ($count < $maxGlobal) {
+            // Atomic compare-and-swap
+            if (apcu_cas($keyGlobal, $count, $count + 1)) {
+                $globalAcquired = true; // SUCCESS! Shutdown will now handle this decrement.
+                break;
+            }
         }
+
+        usleep((int)($waitStep * 2000000));
+    } while ((microtime(true) - $start) < $maxWait);
+
+    // If no slot acquired, reject
+    if (!$globalAcquired) {
+        header("HTTP/1.1 503 Service Unavailable");
+        header("Retry-After: " . ceil($maxWait));
+        echo json_encode(['error' => 'Server busy, please retry']);
+        // $globalAcquired is false, so shutdown will NOT touch global count.
+        exit;
     }
-
-    usleep((int)($waitStep * 2000000));
-} while ((microtime(true) - $start) < $maxWait);
-
-// If no slot acquired, reject
-if (!$globalAcquired) {
-    header("HTTP/1.1 503 Service Unavailable");
-    header("Retry-After: " . ceil($maxWait));
-    echo json_encode(['error' => 'Server busy, please retry']);
-    // $globalAcquired is false, so shutdown will NOT touch global count.
-    exit;
 }
 
 // ----------------------
