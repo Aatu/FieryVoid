@@ -26,7 +26,7 @@ if (function_exists('apcu_fetch') && isset($_GET['gameid']) && isset($_GET['last
     $gameid = $_GET['gameid'];
     $serverTime = apcu_fetch("game_{$gameid}_last_update");
     if ($serverTime && $serverTime <= (float)$_GET['last_time']) {
-         error_log("Gamedata: Fast Poll EXEMPT - " . $_SERVER['REMOTE_ADDR']);
+         //error_log("Gamedata: Fast Poll EXEMPT - " . $_SERVER['REMOTE_ADDR']);
          echo "{}";
          exit;
     }
