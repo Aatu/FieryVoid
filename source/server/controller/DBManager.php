@@ -926,7 +926,7 @@ class DBManager
                     } else {
                         // Convert associative array to object
                         $obj = (object)$p;
-                        error_log("[submitPower] Warning: Power entry was array, normalized. Contents: " . json_encode($p));
+                        //error_log("[submitPower] Warning: Power entry was array, normalized. Contents: " . json_encode($p));
                         $normalized[] = $obj;
                     }
                 } else {
@@ -3492,7 +3492,7 @@ public function setLastTimeChatChecked($userid, $gameid)
         // If lastid is 0 (initial load or reset), ONLY fetch the last 20 messages.
         // This prevents the "memory limit" cracshes seen when a client reconnects and tries to fetch 'all' history.
         // The default LIMIT 50 was causing issues on CloudLinux due to large JSON payloads.
-        $limit = ($lastid == 0) ? 20 : 50;
+        $limit = ($lastid == 0) ? 15 : 25;
 
         $stmt = $this->connection->prepare("
             SELECT 
