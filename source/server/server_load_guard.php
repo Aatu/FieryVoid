@@ -87,6 +87,14 @@ if (isset($_SERVER['PHP_SELF'])) {
              // DEBUG LOG
              //error_log("Load Guard: Fast Poll EXEMPT (Chat) - " . $_SERVER['REMOTE_ADDR']);
         }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'gamedata.php') !== false && isset($_GET['gameid'], $_GET['last_time'])) {
+        $key = 'game_' . $_GET['gameid'] . '_last_update';
+        $serverTime = apcu_fetch($key);
+        if ($serverTime !== false && $serverTime <= (float)$_GET['last_time']) {
+            $isFastPoll = true;
+             // DEBUG LOG
+             //error_log("Load Guard: Fast Poll EXEMPT (Gamedata) - " . $_SERVER['REMOTE_ADDR']);
+        }
     }
 }
 
