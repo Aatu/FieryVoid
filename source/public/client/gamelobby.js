@@ -1477,13 +1477,13 @@ window.gamedata = {
 		const offsetY = (canvas.height - mapHeight * scale) / 2;
 
 		// Draw black background inside the blue outline
-      	ctx.fillStyle = "#000000";
+		ctx.fillStyle = "#000000";
 		ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 
 		// Draw dotted white center lines, avoiding cross-over at center
 		ctx.save();
 		ctx.globalAlpha = 0.4; // Semi-transparent
-        ctx.strokeStyle = "#496791";
+		ctx.strokeStyle = "#496791";
 		ctx.lineWidth = 1;
 		ctx.setLineDash([4, 4]); // Dotted pattern: 6px line, 6px gap
 
@@ -1551,17 +1551,17 @@ window.gamedata = {
 
 			// Draw slot number in the center
 			ctx.save(); // Save context state
-            ctx.fillStyle = "white";
-            ctx.font = "bold 14px Arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+			ctx.fillStyle = "white";
+			ctx.font = "bold 14px Arial";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
 			ctx.fillText(team, (drawX + 6) + (w * scale) / 2, (drawY + 3) + (h * scale) / 2);
 			ctx.restore(); // Restore to default state
 		});
 
 		// Draw map border (blue rectangle)
-        ctx.strokeStyle = "#deebffaf";
-        ctx.lineWidth = 2;
+		ctx.strokeStyle = "#deebffaf";
+		ctx.lineWidth = 2;
 		ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 	},
 
@@ -1815,7 +1815,7 @@ window.gamedata = {
 		}
 
 		//Prune here
-		if (gamedata.rules && gamedata.rules.fleetTest === 1) {		
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) {
 			var mySlot = null;
 			for (var slotKey in serverdata.slots) {
 				if (serverdata.slots[slotKey].playerid == gamedata.thisplayer) {
@@ -1829,12 +1829,12 @@ window.gamedata = {
 			this.enableBuy();
 			this.constructFleetList();
 			//this.drawMapPreview();						
-		}else{	
+		} else {
 			this.createSlots();
 			this.enableBuy();
 			this.constructFleetList();
-			this.drawMapPreview();	
-		}			
+			this.drawMapPreview();
+		}
 
 	},
 
@@ -1906,7 +1906,7 @@ window.gamedata = {
 	setSlotData: function setSlotData(data) {
 		var slot = $(".slot.slotid_" + data.slot);
 		$(".name", slot).html(data.name);
-		if (gamedata.rules && gamedata.rules.fleetTest === 1) data.points = -1;			
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) data.points = -1;
 		$(".points", slot).html(data.points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : data.points);
 
 		$(".depx", slot).html(data.depx);
@@ -1952,25 +1952,23 @@ window.gamedata = {
 			return;
 		}
 
-		//ajaxInterface.submitSlotAction("leaveslot", slotid);
 		ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
 			window.updateTierFilter();
-		});
 
-
-		var hasOtherSlots = 0;
-		for (var i in gamedata.slots) { //check all slots
-			var checkSlot = gamedata.slots[i];
-			if (checkSlot.playerid == gamedata.thisplayer) { //this slot has ready fleet
-				hasOtherSlots++;
+			var hasOtherSlots = 0;
+			for (var i in gamedata.slots) { //check all slots
+				var checkSlot = gamedata.slots[i];
+				if (checkSlot.playerid == gamedata.thisplayer) { //this slot has ready fleet
+					hasOtherSlots++;
+				}
 			}
-		}
-		//Will count current slot, so we're looking for two or more.
-		if (hasOtherSlots <= 1) {
-			window.location = "games.php"; //Leave to main lobby if layer has not other slots here.
-		} else {
-			ajaxInterface.startPollingGamedata();
-		}
+			//Will count current slot (because gamedata.slots is not yet updated via a poll), so we're looking for two or more.
+			if (hasOtherSlots <= 1) {
+				window.location = "games.php"; //Leave to main lobby if player has no other slots here.
+			} else {
+				ajaxInterface.startPollingGamedata();
+			}
+		});
 	},
 
 	enableBuy: function enableBuy() {
