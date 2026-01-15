@@ -85,16 +85,7 @@ if (isset($_SERVER['PHP_SELF'])) {
         if ($lastMsgId !== false && $_GET['lastid'] >= $lastMsgId) {
             $isFastPoll = true;
              // DEBUG LOG
-             error_log("Load Guard: Fast Poll EXEMPT (Chat) - " . $_SERVER['REMOTE_ADDR']);
-        }
-    } elseif (strpos($_SERVER['PHP_SELF'], 'gamedata.php') !== false && isset($_GET['gameid'], $_GET['last_time'])) {
-        $key = "game_" . $_GET['gameid'] . "_last_update";
-        $serverTime = apcu_fetch($key);
-        // Note: serverTime might be false if expired, in which case we don't fast poll
-        if ($serverTime && $serverTime <= $_GET['last_time']) {
-            $isFastPoll = true;
-             // DEBUG LOG
-             error_log("Load Guard: Fast Poll EXEMPT (Gamedata) - " . $_SERVER['REMOTE_ADDR']);
+             //error_log("Load Guard: Fast Poll EXEMPT (Chat) - " . $_SERVER['REMOTE_ADDR']);
         }
     }
 }
