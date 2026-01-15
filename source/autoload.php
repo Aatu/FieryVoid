@@ -772,6 +772,7 @@ spl_autoload_register(
                 'prefiringgamephase' => '/server/Phase/PreFiringGamePhase.php',                
                 'preyhawk' => '/server/model/ships/drazi/preyhawk.php',
                 'primus' => '/server/model/ships/centauri/primus.php',
+                'primusmd' => '/server/model/ships/centauri/primusMD.php',
                 'primusmaximus' => '/server/model/ships/centauri/primusMaximus.php',
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'prophet1780' => '/server/model/ships/orieni/prophet1780.php',
