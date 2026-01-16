@@ -49,6 +49,7 @@ class Manager{
             self::initDBManager();
             self::$dbManager->leaveSlot($user, $gameid, $slotid);
             self::$dbManager->deleteEmptyGames();
+            self::touchGame($gameid);
         }
         catch(exception $e) {
             throw $e;
@@ -227,7 +228,9 @@ class Manager{
         try {
             self::initDBManager();
             //self::$dbManager->startTransaction();
-            return self::$dbManager->takeSlot($userid, $gameid, $slot);
+            $ret = self::$dbManager->takeSlot($userid, $gameid, $slot);
+            self::touchGame($gameid);
+            return $ret;
             //self::$dbManager->endTransaction();
             
         }
