@@ -15,8 +15,20 @@ if (empty($_SESSION["user"])) {
 }
 
 // Fetch games for logged-in user
+// Fetch games for logged-in user
 $userid = (int)$_SESSION["user"];
-$games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
+$gamesData = Manager::getTacGames($userid);
+
+// STAMPEDE PROTECTION
+if (isset($gamesData[0]) && isset($gamesData[0]['status']) && $gamesData[0]['status'] == 'GENERATING') {
+    echo '<html><head><meta http-equiv="refresh" content="1"></head>
+    <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+    Refreshing game list...
+    </body></html>';
+    exit;
+}
+
+$games = json_encode($gamesData, JSON_NUMERIC_CHECK);
 
 $defaultGameName = 'GAME NAME' . $_SESSION["user"];	
 $playerName = Manager::getPlayerName($_SESSION["user"]);

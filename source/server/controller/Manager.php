@@ -141,12 +141,34 @@ class Manager{
 			return null;
         
         try {
+            // Caching for Games List (Short TTL to prevent stampede)
+            $cacheKey = "gameslist_" . $userid;
+            if (function_exists('apcu_fetch')) {
+                 $cached = apcu_fetch($cacheKey);
+                 if ($cached) return $cached;
+                 
+                 // Generation Lock
+                 $lockKey = "gameslist_lock_{$userid}";
+                 if (function_exists('apcu_add') && !apcu_add($lockKey, 1, 10)) {
+                     // Return array with status object, game.php will need to handle this structure
+                     return [['status' => "GENERATING"]]; 
+                 }
+            }
+
             self::initDBManager();
         
-            return array_merge(
+            $games = array_merge(
                 self::$dbManager->getPlayerGames($userid),
                 self::$dbManager->getLobbyGames($userid)
             );
+
+            // Cache result
+            if (function_exists('apcu_store')) {
+                apcu_store($cacheKey, $games, 2); // 2 seconds cache
+                apcu_delete("gameslist_lock_{$userid}");
+            }
+            
+            return $games;
       
         }
         catch(exception $e) {
@@ -394,44 +416,57 @@ class Manager{
                          return $cached['json'];
                      }
                  }
-            }
-
-            $gdS = self::getTacGamedata($gameid, $userid, $turn, $phase, $activeship);
-
-            if (!$gdS)
-                return "{}";
-
-            //getTacGameData trying to return error string
-            if (gettype($gdS) == "string") {
-                return $gdS;
-            }
-
-            if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY") {
-                if ($timestamp > 0) {
-                    return json_encode(["last_update" => $timestamp]);
+            
+                // Lock to prevent stampede (User F5 spam)
+                // Only lock if we are about to do the heavy lifting (Not hitting cache)
+                $lockKey = "game_lock_{$gameid}_{$userid}";
+                if (function_exists('apcu_add') && !apcu_add($lockKey, 1, 10)) {
+                     return '{"status": "GENERATING"}';
                 }
-                return "{}";
             }
-            
-            //NEW VERSION FOR PHP 8 - Aug 2025
-            $data = $gdS->stripForJson();
-
-            if ($timestamp > 0) {
-                 $data->last_update = $timestamp;
+    
+            try {
+                $gdS = self::getTacGamedata($gameid, $userid, $turn, $phase, $activeship);
+    
+                if (!$gdS)
+                    return "{}";
+    
+                //getTacGameData trying to return error string
+                if (gettype($gdS) == "string") {
+                    return $gdS;
+                }
+    
+                if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY") {
+                    if ($timestamp > 0) {
+                        return json_encode(["last_update" => $timestamp]);
+                    }
+                    return "{}";
+                }
+                
+                //NEW VERSION FOR PHP 8 - Aug 2025
+                $data = $gdS->stripForJson();
+    
+                if ($timestamp > 0) {
+                     $data->last_update = $timestamp;
+                }
+    
+                unset($gdS); // Free the massive logic object memory BEFORE encoding
+                
+                $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
+                
+                // Store in Cache
+                if ($timestamp > 0 && function_exists('apcu_store') && $json) {
+                    // error_log("Manager: JSON Cache STORE/MISS for Game $gameid User $userid");
+                    apcu_store($cacheKey, ['ts' => $timestamp, 'json' => $json], 3600);
+                }
+                
+                unset($data); // free memory early
+                return $json;
+            } finally {
+                if (function_exists('apcu_delete')) {
+                    apcu_delete($lockKey);
+                }
             }
-
-            unset($gdS); // Free the massive logic object memory BEFORE encoding
-            
-            $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
-            
-            // Store in Cache
-            if ($timestamp > 0 && function_exists('apcu_store') && $json) {
-                // error_log("Manager: JSON Cache STORE/MISS for Game $gameid User $userid");
-                apcu_store($cacheKey, ['ts' => $timestamp, 'json' => $json], 3600);
-            }
-            
-            unset($data); // free memory early
-            return $json;
 
         }
         catch(Exception $e) {

@@ -98,17 +98,38 @@ if (isset($_SERVER['PHP_SELF'])) {
          // This prevents the "Process Pile-up" on shared hosting by allowing cached page loads to bypass the concurrency queue
          $userid = $_SESSION['user'] ?? null;
          if ($userid) {
-             $cacheKey = "game_" . $_GET['gameid'] . "_user_" . $userid . "_json";
-             $cached = apcu_fetch($cacheKey);
-             // Verify timestamp
-             if ($cached && isset($cached['ts'])) {
-                 $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
-                 if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
-                     $isFastPoll = true;
-                     // error_log("Load Guard: Fast Poll EXEMPT (Game Page) - " . $_SERVER['REMOTE_ADDR']);
+             // 1. Check for Generation Lock
+             $lockKey = "game_lock_" . $_GET['gameid'] . "_" . $userid;
+             if (apcu_exists($lockKey)) {
+                 $isFastPoll = true;
+             } else {
+                 $cacheKey = "game_" . $_GET['gameid'] . "_user_" . $userid . "_json";
+                 $cached = apcu_fetch($cacheKey);
+                 // Verify timestamp
+                 if ($cached && isset($cached['ts'])) {
+                     $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
+                     if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
+                         $isFastPoll = true;
+                         // error_log("Load Guard: Fast Poll EXEMPT (Game Page) - " . $_SERVER['REMOTE_ADDR']);
+                     }
                  }
              }
          }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'games.php') !== false) {
+          // EXEMPTION for Games List
+          $userid = $_SESSION['user'] ?? null;
+          if ($userid) {
+             $lockKey = "gameslist_lock_" . $userid;
+             if (apcu_exists($lockKey)) {
+                 $isFastPoll = true;
+             } else {
+                 // Also fast poll if we have a valid short-term cache
+                 $cacheKey = "gameslist_" . $userid;
+                 if (apcu_exists($cacheKey)) {
+                     $isFastPoll = true;
+                 }
+             }
+          }
     } elseif (strpos($_SERVER['PHP_SELF'], 'gamelobby.php') !== false && isset($_GET['gameid'])) {
          // Exemption for game lobby optimization
          $userid = $_SESSION['user'] ?? null;

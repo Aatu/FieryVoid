@@ -25,6 +25,13 @@
     if (isset($decoded->error)) {
         $error = $serverdataJSON; // It's an error object in JSON format
         $serverdataJSON = '{}';
+    } elseif (isset($decoded->status) && $decoded->status == 'GENERATING') {
+        // STAMPEDE PROTECTION
+        echo '<html><head><meta http-equiv="refresh" content="1"></head>
+        <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+        Loading game data...
+        </body></html>';
+        exit;
     } else {
         $serverdata = $decoded; // Valid game data
     }
