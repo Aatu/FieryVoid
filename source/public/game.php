@@ -1,5 +1,6 @@
 <?php
     require_once 'global.php'; // ✅ Critical dependency
+    session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 
 	$gameid = 1;
 	$thisplayer = -1;
@@ -14,14 +15,18 @@
 		$thisplayer = $_SESSION["user"];
 	}
 	
-	$serverdata = Manager::getTacGamedata($gameid, $thisplayer, null, 0, -1);
-    $serverdataJSON = '{}';
+	$serverdataJSON = Manager::getTacGamedataJSON($gameid, $thisplayer, null, 0, -1);
     $error = 'null';
+    $serverdata = null;
 
-    if ($serverdata instanceof TacGameData) {
-        $serverdataJSON = json_encode($serverdata->stripForJson(), JSON_NUMERIC_CHECK);
+    // Check if result is valid JSON or Error
+    $decoded = json_decode($serverdataJSON);
+    
+    if (isset($decoded->error)) {
+        $error = $serverdataJSON; // It's an error object in JSON format
+        $serverdataJSON = '{}';
     } else {
-        $error = json_encode($serverdata, JSON_NUMERIC_CHECK);
+        $serverdata = $decoded; // Valid game data
     }
 ?>
 

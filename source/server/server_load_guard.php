@@ -84,8 +84,6 @@ if (isset($_SERVER['PHP_SELF'])) {
         $lastMsgId = apcu_fetch($key);
         if ($lastMsgId !== false && $_GET['lastid'] >= $lastMsgId) {
             $isFastPoll = true;
-             // DEBUG LOG
-             //error_log("Load Guard: Fast Poll EXEMPT (Chat) - " . $_SERVER['REMOTE_ADDR']);
         }
     } elseif (strpos($_SERVER['PHP_SELF'], 'gamedata.php') !== false && isset($_GET['gameid'], $_GET['last_time'])) {
         $key = 'game_' . $_GET['gameid'] . '_last_update';
@@ -95,6 +93,22 @@ if (isset($_SERVER['PHP_SELF'])) {
              // DEBUG LOG
              //error_log("Load Guard: Fast Poll EXEMPT (Gamedata) - " . $_SERVER['REMOTE_ADDR']);
         }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'game.php') !== false && isset($_GET['gameid'])) {
+         // Exemppt game.php ONLY if the JSON cache is hot
+         // This prevents the "Process Pile-up" on shared hosting by allowing cached page loads to bypass the concurrency queue
+         $userid = $_SESSION['user'] ?? null;
+         if ($userid) {
+             $cacheKey = "game_" . $_GET['gameid'] . "_user_" . $userid . "_json";
+             $cached = apcu_fetch($cacheKey);
+             // Verify timestamp
+             if ($cached && isset($cached['ts'])) {
+                 $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
+                 if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
+                     $isFastPoll = true;
+                     // error_log("Load Guard: Fast Poll EXEMPT (Game Page) - " . $_SERVER['REMOTE_ADDR']);
+                 }
+             }
+         }
     }
 }
 

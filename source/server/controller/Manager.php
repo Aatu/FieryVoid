@@ -306,6 +306,29 @@ class Manager{
     public static function getTacGamedataJSON($gameid, $userid, $turn, $phase, $activeship, $force = false){
         
         try{
+            // APCu Optimization: Inject Timestamp & Check JSON Cache
+            $timestamp = 0;
+            $cacheKey = "game_{$gameid}_user_{$userid}_json";
+            
+            if (function_exists('apcu_fetch')) {
+                 $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
+                 if (!$timestamp) {
+                     $timestamp = microtime(true);
+                     self::touchGame($gameid);
+                 }
+                 
+                 // Check if we have a valid cached JSON for this user
+                 // We only use cache if we are NOT forcing a refresh
+                 if (!$force) {
+                     $cached = apcu_fetch($cacheKey);
+                     if ($cached && isset($cached['ts']) && abs($cached['ts'] - $timestamp) < 0.001) {
+                         // Cache Hit!
+                         // error_log("Manager: JSON Cache HIT for Game $gameid User $userid");
+                         return $cached['json'];
+                     }
+                 }
+            }
+
             $gdS = self::getTacGamedata($gameid, $userid, $turn, $phase, $activeship);
 
             if (!$gdS)
@@ -314,18 +337,6 @@ class Manager{
             //getTacGameData trying to return error string
             if (gettype($gdS) == "string") {
                 return $gdS;
-            }
-
-            // APCu Optimization: Inject Timestamp
-            $timestamp = 0;
-            if (function_exists('apcu_fetch')) {
-                 $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
-                 if (!$timestamp) {
-                     $timestamp = microtime(true);
-                     self::touchGame($gameid);
-                 }
-                 // Debug log to confirm injection
-                 // error_log("Manager: Injected last_update for Game $gameid: $timestamp");
             }
 
             if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY") {
@@ -343,7 +354,15 @@ class Manager{
             }
 
             unset($gdS); // Free the massive logic object memory BEFORE encoding
+            
             $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
+            
+            // Store in Cache
+            if ($timestamp > 0 && function_exists('apcu_store') && $json) {
+                // error_log("Manager: JSON Cache STORE/MISS for Game $gameid User $userid");
+                apcu_store($cacheKey, ['ts' => $timestamp, 'json' => $json], 3600);
+            }
+            
             unset($data); // free memory early
             return $json;
 
