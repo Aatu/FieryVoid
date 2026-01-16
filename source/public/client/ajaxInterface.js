@@ -956,7 +956,7 @@ window.ajaxInterface = {
             return;
         }
 
-        var time = 8000;
+        var time = 4000;
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
@@ -991,19 +991,19 @@ window.ajaxInterface = {
             }
             // Phase -2 timings (customize as you like)
             if (notReadiedYet) {
-                time = 30000;
+                time = 20000;
             } else {
                 time = 4000;
-                if (ajaxInterface.pollcount > 1) time = 6000;
-                if (ajaxInterface.pollcount > 3) time = 12000;
+                if (ajaxInterface.pollcount > 1) time = 5000;
+                if (ajaxInterface.pollcount > 3) time = 10000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
         } else {
             // In-Game timings
             time = 4000;
-            if (ajaxInterface.pollcount > 1) time = 6000;
-            if (ajaxInterface.pollcount > 3) time = 12000;
+            if (ajaxInterface.pollcount > 1) time = 5000;
+            if (ajaxInterface.pollcount > 3) time = 10000;
             if (ajaxInterface.pollcount > 10) time = 60000;
             if (ajaxInterface.pollcount > 40) time = 1800000;
         }
