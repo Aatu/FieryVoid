@@ -373,6 +373,7 @@ window.ajaxInterface = {
         }
 
         if (!Array.isArray(shipsArray) || shipsArray.length === 0) {
+            ajaxInterface.submiting = false;
             window.confirm.error("You must have at least one ship before saving!", function () { });
             return; // stop execution
         }
@@ -1063,7 +1064,7 @@ window.ajaxInterface = {
             error: ajaxInterface.errorAjax,
             complete: function () {
                 // always clear flag, even on error/timeout
-                ajaxInterface.submiting = false;          
+                ajaxInterface.submiting = false;
             }
         });
     },
