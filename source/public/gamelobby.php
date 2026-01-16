@@ -4,11 +4,13 @@
 	
 	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
+        exit;
 	}
     
     	if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
 		header('Location: games.php');
+        exit;
 	}
 	
 	
@@ -24,6 +26,7 @@
 
     if (!is_object($gamelobbydata) || $gamelobbydata->status != "LOBBY") {
         header('Location: games.php');
+        exit;
     }
   
     // $gamelobbydataJSON is already set/cached, no need to encode again
@@ -657,19 +660,29 @@ $optionsUsed = '';
 
     <script>
         let cachedFleets = [];
+        let fleetsLoaded = false;
         // References
         const fleetDropdownButton = document.getElementById('fleetDropdownButton');
         const fleetDropdownList = document.getElementById('fleetDropdownList');
 
-        // Initialize cache once on page load
-        ajaxInterface.getSavedFleets(function(fleets) {
-            cachedFleets = fleets;
-            gamedata.populateFleetDropdown();
-        });        
-
         // Toggle dropdown visibility
         fleetDropdownButton.addEventListener('click', () => {
-            fleetDropdownList.style.display = fleetDropdownList.style.display === 'block' ? 'none' : 'block';
+            if (fleetDropdownList.style.display === 'block') {
+                fleetDropdownList.style.display = 'none';
+            } else {
+                fleetDropdownList.style.display = 'block';
+                
+                if (!fleetsLoaded) {
+                     // Show loading state
+                     fleetDropdownList.innerHTML = '<div style="text-align:center; padding:10px; color:#555;">Loading fleets...</div>';
+                     
+                     ajaxInterface.getSavedFleets(function(fleets) {
+                        cachedFleets = fleets;
+                        fleetsLoaded = true;
+                        gamedata.populateFleetDropdown();
+                    });
+                }
+            }
         });
 
         // Close dropdown if clicked outside

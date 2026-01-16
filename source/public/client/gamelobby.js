@@ -2898,11 +2898,12 @@ window.gamedata = {
 		gamedata.selectedSlot = slot.slot;
 		this.constructFleetList();
 
-		// Initialize saved fleet cache again in case PV is different in new slot
-		ajaxInterface.getSavedFleets(function (fleets) {
-			cachedFleets = fleets;
-			gamedata.populateFleetDropdown();
-		});
+		// Re-populate dropdown (filters by points) but do NOT re-fetch from server
+		if (window.cachedFleets && window.cachedFleets.length > 0) {
+			if (gamedata.populateFleetDropdown) {
+				gamedata.populateFleetDropdown();
+			}
+		}
 
 	},
 
