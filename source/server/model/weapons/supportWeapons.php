@@ -656,7 +656,7 @@ class ShadeModulator extends Weapon{
 						$alreadyBShade[] = $target->id;
 
 						$shadingField = $target->getSystemByName("ShadingField");
-						if (!$shadingField || !$shadingField->shaded) continue;
+						if (!$shadingField || !$shadingField->active) continue;
 
 						$target->forwardDefense -= 1;
 						$target->sideDefense -= 1;
@@ -670,7 +670,7 @@ class ShadeModulator extends Weapon{
 					if (Mathlib::getDistanceHex($target, $ship) > 20) continue 2;
 
 					$shadingField = $target->getSystemByName("ShadingField");
-					if (!$shadingField || !$shadingField->shaded) continue 2;
+					if (!$shadingField || !$shadingField->active) continue 2;
 
 					$target->forwardDefense -= 1;
 					$target->sideDefense -= 1;
@@ -1022,7 +1022,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		//Check for detection in 20 hexes.
 		$shadingField = $ship->getSystemByName("ShadingField");
 		if($shadingField){ //Shading Field exists.
-			if(!$shadingField->detected && $shadingField->shaded){ //Currently undetected and Shaded.
+			if(!$shadingField->detected && $shadingField->active){ //Currently undetected and Shaded.
 				$shadingField->checkStealthNextPhase($gamedata, 20);
 			} 
 		}	
