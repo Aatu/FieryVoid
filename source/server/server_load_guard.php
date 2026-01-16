@@ -102,6 +102,13 @@ if (isset($_SERVER['PHP_SELF'])) {
              $lockKey = "game_lock_" . $_GET['gameid'] . "_" . $userid;
              if (apcu_exists($lockKey)) {
                  $isFastPoll = true;
+                 // SHORT-CIRCUIT: Optimization to save memory. 
+                 // If locked, serve loading page immediately and exit.
+                 echo '<html><head><meta http-equiv="refresh" content="1"></head>
+                 <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+                 Loading game data... (Optimized Wait)
+                 </body></html>';
+                 exit;
              } else {
                  $cacheKey = "game_" . $_GET['gameid'] . "_user_" . $userid . "_json";
                  $cached = apcu_fetch($cacheKey);
@@ -122,6 +129,12 @@ if (isset($_SERVER['PHP_SELF'])) {
              $lockKey = "gameslist_lock_" . $userid;
              if (apcu_exists($lockKey)) {
                  $isFastPoll = true;
+                 // SHORT-CIRCUIT
+                 echo '<html><head><meta http-equiv="refresh" content="1"></head>
+                 <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+                 Refreshing game list... (Optimized Wait)
+                 </body></html>';
+                 exit;
              } else {
                  // Also fast poll if we have a valid short-term cache
                  $cacheKey = "gameslist_" . $userid;
@@ -140,7 +153,12 @@ if (isset($_SERVER['PHP_SELF'])) {
              $lockKey = "gamelobby_lock_" . $_GET['gameid'] . "_" . $userid;
              if (apcu_exists($lockKey)) {
                  $isFastPoll = true;
-                 //error_log("Load Guard: Fast Poll EXEMPT (Lobby Locked) - " . $_SERVER['REMOTE_ADDR']);
+                 // SHORT-CIRCUIT
+                 echo '<html><head><meta http-equiv="refresh" content="1"></head>
+                 <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+                 Loading... (Optimized Wait)
+                 </body></html>';
+                 exit;
              } else {
                  // 2. Check if we have valid CACHED data
                  $cacheKey = "gamelobby_" . $_GET['gameid'] . "_user_" . $userid . "_json";
