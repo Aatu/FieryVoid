@@ -1762,7 +1762,7 @@ public function getStartLoading()
             $forceTwoWaySplit = false; 
             if ($target instanceof HeavyCombatVesselLeftRight) {
                 //HCV Left/Right have 3-way split on 60-120 and 240-300 arcs. Everything else is 2-way.
-                if (!Mathlib::isInArc($relativeBearing, 60, 120) && !Mathlib::isInArc($relativeBearing, 240, 300)) {
+                if (!Mathlib::isInArc($relativeBearing, 30, 150) && !Mathlib::isInArc($relativeBearing, 210, 330)) {
                     $forceTwoWaySplit = true;
                 }
             } elseif ($target instanceof HeavyCombatVessel) { //Standard HCV
