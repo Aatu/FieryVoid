@@ -2366,6 +2366,7 @@ public function getAllEWExceptDEW($turn){
 			if (($system->location == $location) && (!($system instanceof Structure))){ 
 				//Flash - undestroyed only
 				if(($weapon->damageType != 'Flash') || (!$system->isDestroyed())) {
+                    if(!$system->isTargetable) continue; //cannot be targeted!
 					//Structure and C&C will get special treatment...
 					$multiplier = 1;
 					if($system->displayName == 'C&C' ) $multiplier = 0.5; //C&C should have relatively low chance to be hit!
