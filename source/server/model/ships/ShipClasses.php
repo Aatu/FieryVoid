@@ -2281,6 +2281,43 @@ public function getAllEWExceptDEW($turn){
 			}
 		}
 		if(sizeof($systemsInArc)>0) $systems = $systemsInArc; //some of indicated systems are in arc - they have to be targeted as priority!
+		
+		//Prefer Port/Stbd thrusters if on Primary and no thruster in arc
+		else if ( ($location == 0) && (sizeof($systems)>0) && ($systems[0] instanceof Thruster) ){
+			$preferredSystems = array();
+            
+            //Resolve bearing to 0-359 range just in case
+            $relBearing = $bearing;
+            while($relBearing < 0) $relBearing += 360;
+            while($relBearing >= 360) $relBearing -= 360;
+
+			foreach($systems as $currSys){
+				$center = ($currSys->startArc + $currSys->endArc) / 2;
+                if($currSys->startArc > $currSys->endArc){
+                     $center = ($currSys->startArc + $currSys->endArc + 360) / 2;
+                }
+                while($center >= 360) $center -= 360;
+                                
+                $isPortThruster = ($center > 180) && ($center < 360); //Strictly Port side
+                $isStbdThruster = ($center > 0) && ($center < 180); //Strictly Stbd side
+
+                //Shot from Port?
+                if( ($relBearing > 180) && ($relBearing < 360) ){ 
+                    if($isPortThruster) $preferredSystems[] = $currSys;
+                }
+                //Shot from Stbd?
+                else if( ($relBearing > 0) && ($relBearing < 180) ){
+                    if($isStbdThruster) $preferredSystems[] = $currSys;
+                }
+			}
+            
+            if(sizeof($preferredSystems)>0) $systems = $preferredSystems;
+            else if ( ($relBearing > 0) && ($relBearing < 360) && ($relBearing != 180) ) {
+                // Targeted specific side, but no matching thrusters found (e.g. destroyed).
+                // Do not fall back to wrong-side thrusters. Return Structure.
+                return $this->getStructureSystem($location);
+            }
+		}
 
         //now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
         $roll = Dice::d(sizeof($systems));
@@ -2401,10 +2438,56 @@ public function getAllEWExceptDEW($turn){
 			$struct = $this->getStructureSystem($location);
 			return $struct;
 		}
+
+        //prioritize in-arc systems - copied from byTable 16.01.2026
+        $systemsInArc = array();
+        foreach($systems as $systemInArc){
+            if(mathlib::isInArc($bearing, $systemInArc->startArc, $systemInArc->endArc)){ //actually this system is in relevant arc!
+                $systemsInArc[] = $systemInArc;
+            }
+        }
+        if(sizeof($systemsInArc)>0) $systems = $systemsInArc; //some of indicated systems are in arc - they have to be targeted as priority!
+
+		//Prefer Port/Stbd thrusters if on Primary and no thruster in arc
+		else if ( ($location == 0) && (sizeof($systems)>0) && ($systems[0] instanceof Thruster) ){
+			$preferredSystems = array();
+            
+            //Resolve bearing to 0-359 range just in case
+            $relBearing = $bearing;
+            while($relBearing < 0) $relBearing += 360;
+            while($relBearing >= 360) $relBearing -= 360;
+
+			foreach($systems as $currSys){
+				$center = ($currSys->startArc + $currSys->endArc) / 2;
+                if($currSys->startArc > $currSys->endArc){
+                     $center = ($currSys->startArc + $currSys->endArc + 360) / 2;
+                }
+                while($center >= 360) $center -= 360;
+                                
+                $isPortThruster = ($center > 180) && ($center < 360); //Strictly Port side
+                $isStbdThruster = ($center > 0) && ($center < 180); //Strictly Stbd side
+
+                //Shot from Port?
+                if( ($relBearing > 180) && ($relBearing < 360) ){ 
+                    if($isPortThruster) $preferredSystems[] = $currSys;
+                }
+                //Shot from Stbd?
+                else if( ($relBearing > 0) && ($relBearing < 180) ){
+                    if($isStbdThruster) $preferredSystems[] = $currSys;
+                }
+			}
+            
+            if(sizeof($preferredSystems)>0) $systems = $preferredSystems;
+            else if ( ($relBearing > 0) && ($relBearing < 360) && ($relBearing != 180) ) {
+                // Targeted specific side, but no matching thrusters found (e.g. destroyed).
+                // Do not fall back to wrong-side thrusters. Return Structure.
+                return $this->getStructureSystem($location);
+            }
+		}
 		
 		//now choose one of equal eligible systems (they're already known to be undestroyed)
-                $roll = Dice::d(sizeof($systems));
-                $system = $systems[$roll-1];
+        $roll = Dice::d(sizeof($systems));
+        $system = $systems[$roll-1];
 		return $system;
 		
 	} //end of function GetHitSystemByDice
