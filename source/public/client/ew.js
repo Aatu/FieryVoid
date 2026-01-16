@@ -528,7 +528,7 @@ window.ew = {
 		var jammerValue = 0;
         
         if(target.faction == "Torvalus Speculators"){
-            //if(target.flight) return 0; //Torvalus fighters do not get Jammer effect.
+            if(target.flight) return 0; //Torvalus fighters do not get Jammer effect.
 			var shadingField = shipManager.systems.getSystemByName(target, "ShadingField");
             if(!shipManager.systems.isDestroyed(target, shadingField) && !shipManager.power.isOffline(target, shadingField)){
                 return 1; //Not destroyed or offline

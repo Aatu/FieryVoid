@@ -5983,9 +5983,9 @@ class MindriderHangar extends ShipSystem{
 		public function getSpecialAbilityValue($args)
 		{
 			$ship = $this->getUnit();
-			//if($ship instanceof FighterFlight){
-			//	return 0; //Torvalus fighters don't get the Jammer effect.
-			//}
+			if($ship instanceof FighterFlight){
+				return 0; //Torvalus fighters don't get the Jammer effect.
+			}
 
 			if (!isset($args["shooter"]) || !isset($args["target"]))
 				throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");

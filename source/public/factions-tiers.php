@@ -949,7 +949,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Shrouded Saber - 12 drones (Optional)</li>                  
             </ul>
         </li>    
-        <h5>Shading Field</h5>
+    <h5>Shading Field</h5>
         <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
         <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
@@ -960,7 +960,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>
         </li>         
         <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
-            This can also be toggled on and off during Deployment and Pre-Turn Order phases but onl provides the Jammer effect in Normal Made.  In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
+            This can also be toggled on and off during Deployment and Pre-Turn Order phases like the ship version, but does not provide the Jammer effect in either mode.  
+            In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
