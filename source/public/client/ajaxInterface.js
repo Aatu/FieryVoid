@@ -37,7 +37,22 @@ window.ajaxInterface = {
             overlay.style.display = 'none';
         }
     },
+    /*
+    // Blocking overlay helpers to prevent navigation during critical submissions
+    showLoadingOverlay: function () {
+        var overlay = document.getElementById('global-loading-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+        }
+    },
 
+    hideLoadingOverlay: function () {
+        var overlay = document.getElementById('global-loading-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    },    
+    */
     getShipsForFaction: function (factionRequest, callback, errorCallback) {
         const now = Date.now();
 
@@ -1048,7 +1063,7 @@ window.ajaxInterface = {
             error: ajaxInterface.errorAjax,
             complete: function () {
                 // always clear flag, even on error/timeout
-                ajaxInterface.submiting = false;
+                ajaxInterface.submiting = false;          
             }
         });
     },

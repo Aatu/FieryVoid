@@ -809,6 +809,12 @@
         <span class="blocking-warning">Do not close window</span>
     </span>
 </div>
+<!--
+<div id="global-loading-overlay" class="blocking-overlay" style="display:none;">
+    <span>
+        LOADING...
+    </span>
+</div>-->
 
 </body>
 
