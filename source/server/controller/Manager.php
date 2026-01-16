@@ -79,7 +79,11 @@ class Manager{
             if (function_exists('apcu_fetch')) {
                 $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
                 if (!$timestamp) {
-                    $timestamp = 0; 
+                    // Heal cold cache: If no timestamp exists, create one so we can start caching this lobby
+                    $timestamp = microtime(true);
+                    if (function_exists('apcu_store')) {
+                        apcu_store('game_' . $gameid . '_last_update', $timestamp, 3600);
+                    }
                 }
 
                 $cached = apcu_fetch($cacheKey);
@@ -89,25 +93,38 @@ class Manager{
                 }
             }
 
-            $lobbymodel = self::getGameLobbyData($userid, $gameid);
-            
-            if (!$lobbymodel) {
-                return "{}";
+            // Lock to prevent stampede (User F5 spam)
+            $lockKey = "gamelobby_lock_{$gameid}_{$userid}";
+            if (function_exists('apcu_add') && !apcu_add($lockKey, 1, 10)) {
+                // Lock held by another request (same user/game)
+                 return '{"status": "GENERATING"}';
             }
 
-            $data = $lobbymodel->stripForJson();
-            unset($lobbymodel);
+            try {
+                $lobbymodel = self::getGameLobbyData($userid, $gameid);
+                
+                if (!$lobbymodel) {
+                    return "{}";
+                }
 
-            if ($timestamp > 0) {
-                $data->last_update = $timestamp;
-            }
+                $data = $lobbymodel->stripForJson();
+                unset($lobbymodel);
 
-            $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
-            unset($data);
+                if ($timestamp > 0) {
+                    $data->last_update = $timestamp;
+                }
 
-            if ($timestamp > 0 && function_exists('apcu_store') && $json) {
-                //error_log("Manager: LOBBY JSON Cache STORE/MISS for Game $gameid User $userid");
-                apcu_store($cacheKey, ['ts' => $timestamp, 'json' => $json], 3600);
+                $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
+                unset($data);
+
+                if ($timestamp > 0 && function_exists('apcu_store') && $json) {
+                    //error_log("Manager: LOBBY JSON Cache STORE/MISS for Game $gameid User $userid");
+                    apcu_store($cacheKey, ['ts' => $timestamp, 'json' => $json], 3600);
+                }
+            } finally {
+                if (function_exists('apcu_delete')) {
+                    apcu_delete($lockKey);
+                }
             }
 
             return $json;

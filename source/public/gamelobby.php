@@ -23,6 +23,15 @@
   // Use cached JSON to reduce server load
   $gamelobbydataJSON = Manager::getGameLobbyDataJSON( $_SESSION["user"], $gameid);
   $gamelobbydata = json_decode($gamelobbydataJSON);
+  
+    // STAMPEDE PROTECTION: If server is generating data, tell client to wait 1s
+    if (isset($gamelobbydata->status) && $gamelobbydata->status == "GENERATING") {
+        echo '<html><head><meta http-equiv="refresh" content="1"></head>
+        <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+        Loading...
+        </body></html>';
+        exit;
+    }
 
     if (!is_object($gamelobbydata) || $gamelobbydata->status != "LOBBY") {
         header('Location: games.php');
