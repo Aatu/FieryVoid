@@ -1,5 +1,6 @@
 <?php
     include_once 'global.php';
+    session_write_close(); // Prevent session locking for concurrent loads
 	
 	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
@@ -17,13 +18,15 @@
 		$gameid = $_GET["gameid"];
 	}
 	
-  $gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
+  // Use cached JSON to reduce server load
+  $gamelobbydataJSON = Manager::getGameLobbyDataJSON( $_SESSION["user"], $gameid);
+  $gamelobbydata = json_decode($gamelobbydataJSON);
 
     if (!is_object($gamelobbydata) || $gamelobbydata->status != "LOBBY") {
         header('Location: games.php');
     }
   
-	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
+    // $gamelobbydataJSON is already set/cached, no need to encode again
 	
 	// Getting all ships in one go causes memory overload on the server.
 	// Get the factions first. When a faction is opened to buy ships,
@@ -349,7 +352,8 @@
 		<div class="panel large lobby">
             <?php 
                 $isFleetTest = false;
-                if ($gamelobbydata->rules && $gamelobbydata->rules->hasRuleName('fleetTest')) {
+                // Using isset/property check instead of hasRuleName for JSON object
+                if (isset($gamelobbydata->rules->fleetTest)) {
                     $isFleetTest = true;
                 }
             ?>
@@ -383,37 +387,31 @@ $optionsUsed = '';
     $moonData = [];
 
 
-    if ($gamelobbydata->rules) {
-        if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
+    if (isset($gamelobbydata->rules)) {
+        if (isset($gamelobbydata->rules->initiativeCategories)) {
             $simMv = true;
-            $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
-            if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
-                $initiativeCategories = $initiativeRule->jsonSerialize();
-            }
+            $initiativeCategories = $gamelobbydata->rules->initiativeCategories;
         }
 
-        if ($gamelobbydata->rules->hasRuleName('desperate')) {
+        if (isset($gamelobbydata->rules->desperate)) {
             $desperate = true;
-            $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
-            if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
-                $desperateTeams = $desperateRule->jsonSerialize();
-            }        
+            $desperateTeams = $gamelobbydata->rules->desperate;     
         }
 
-        if ($gamelobbydata->rules->hasRuleName('asteroids')) {
+        if (isset($gamelobbydata->rules->asteroids)) {
             $asteroids = true;
-            $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
-            if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
-                $asteroidsNo = $asteroidsRule->jsonSerialize();
-            }        
+            $asteroidsNo = $gamelobbydata->rules->asteroids;     
         }  
 
-        if ($gamelobbydata->rules->hasRuleName('moons')) {
+        if (isset($gamelobbydata->rules->moons)) {
             $moons = true;
-            $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
-            if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-                $moonData = $moonsRule->jsonSerialize();
-            }        
+            $rulesMoons = $gamelobbydata->rules->moons;
+            // Convert to array if object
+            if (is_object($rulesMoons)) {
+                $moonData = (array)$rulesMoons;
+            } else if (is_array($rulesMoons)) {
+                $moonData = $rulesMoons;
+            }
         }       
     }
 

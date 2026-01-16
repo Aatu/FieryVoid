@@ -70,6 +70,53 @@ class Manager{
         return null; // Always return *something*
     }
     
+    public static function getGameLobbyDataJSON($userid, $gameid){
+        try {
+            $timestamp = 0;
+            $cacheKey = "gamelobby_{$gameid}_user_{$userid}_json";
+
+            if (function_exists('apcu_fetch')) {
+                $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
+                if (!$timestamp) {
+                    $timestamp = 0; 
+                }
+
+                $cached = apcu_fetch($cacheKey);
+                if ($timestamp > 0 && $cached && isset($cached['ts']) && abs($cached['ts'] - $timestamp) < 0.001) {
+                     //error_log("Manager: LOBBY JSON Cache HIT for Game $gameid User $userid");
+                     return $cached['json'];
+                }
+            }
+
+            $lobbymodel = self::getGameLobbyData($userid, $gameid);
+            
+            if (!$lobbymodel) {
+                return "{}";
+            }
+
+            $data = $lobbymodel->stripForJson();
+            unset($lobbymodel);
+
+            if ($timestamp > 0) {
+                $data->last_update = $timestamp;
+            }
+
+            $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
+            unset($data);
+
+            if ($timestamp > 0 && function_exists('apcu_store') && $json) {
+                //error_log("Manager: LOBBY JSON Cache STORE/MISS for Game $gameid User $userid");
+                apcu_store($cacheKey, ['ts' => $timestamp, 'json' => $json], 3600);
+            }
+
+            return $json;
+
+        } catch(Exception $e) {
+            $logid = Debug::error($e);
+            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+        }
+    }
+
     public static function getTacGames($userid){
         
         if (!is_numeric($userid))

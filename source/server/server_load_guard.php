@@ -109,6 +109,21 @@ if (isset($_SERVER['PHP_SELF'])) {
                  }
              }
          }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'gamelobby.php') !== false && isset($_GET['gameid'])) {
+         // Exemption for game lobby optimization
+         $userid = $_SESSION['user'] ?? null;
+         if ($userid) {
+             $cacheKey = "gamelobby_" . $_GET['gameid'] . "_user_" . $userid . "_json";
+             $cached = apcu_fetch($cacheKey);
+             // Verify timestamp
+             if ($cached && isset($cached['ts'])) {
+                 $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
+                 if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
+                     $isFastPoll = true;
+                     //error_log("Load Guard: Fast Poll EXEMPT (Game Lobby) - " . $_SERVER['REMOTE_ADDR']);
+                 }
+             }
+         }
     }
 }
 
