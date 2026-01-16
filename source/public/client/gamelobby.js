@@ -1952,18 +1952,22 @@ window.gamedata = {
 			return;
 		}
 
-		ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
+		ajaxInterface.submitSlotAction("leaveslot", slotid, function (serverdata) {
 			window.updateTierFilter();
 
 			var hasOtherSlots = 0;
-			for (var i in gamedata.slots) { //check all slots
-				var checkSlot = gamedata.slots[i];
+			// Use serverdata.slots explicitly. If missing (e.g. game deleted), assume empty list (0 slots).
+			var slotsToCheck = serverdata && serverdata.slots ? serverdata.slots : [];
+
+			for (var i in slotsToCheck) { //check all slots
+				var checkSlot = slotsToCheck[i];
 				if (checkSlot.playerid == gamedata.thisplayer) { //this slot has ready fleet
 					hasOtherSlots++;
 				}
 			}
-			//Will count current slot (because gamedata.slots is not yet updated via a poll), so we're looking for two or more.
-			if (hasOtherSlots <= 1) {
+
+			//UPDATE: gamedata slots IS updated now via the response from slot.php, so we check if we have ANY other slots.
+			if (hasOtherSlots === 0) {
 				window.location = "games.php"; //Leave to main lobby if player has no other slots here.
 			} else {
 				ajaxInterface.startPollingGamedata();
