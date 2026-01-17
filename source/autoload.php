@@ -3457,7 +3457,7 @@ spl_autoload_register(
 
 
 						//Campaign custom Centauri
-						'adira' => '/server/model/ships/centauri/Adira.php',
+						'adira' => '/server/model/ships/customs/Adira.php',
 
 						//Fred's custom Centauri
 						'ftrdefensegun' => '/server/model/weapons/customs.php',
