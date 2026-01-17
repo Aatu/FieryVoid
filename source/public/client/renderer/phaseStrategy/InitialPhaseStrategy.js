@@ -77,6 +77,40 @@ window.InitialPhaseStrategy = function () {
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
 
+    /* //Alterantive version that allows targeting of allies - DK
+    InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
+        
+        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+
+        if (this.selectedShip && shipManager.isElint(this.selectedShip) && ship !== this.selectedShip){
+            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
+            menu.addButton("selectShip",
+                function() {
+                    return this.selectedShip !== ship;
+                },
+                function () {
+                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                    this.showShipEW(this.selectedShip);
+                }.bind(this), "Select ship");
+        } else if (gamedata.isMyShip(ship)) {
+            //PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);             
+            menu.addButton("selectShip",
+                function() {
+                    return this.selectedShip !== ship;
+                },
+                function () {
+                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                    this.showShipEW(this.selectedShip);
+                }.bind(this), "Select ship");            
+            //var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
+            this.showShipEW(this.selectedShip);
+        }
+
+        if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
+    };
+    */
+
     InitialPhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         this.hideShipEW(ship);

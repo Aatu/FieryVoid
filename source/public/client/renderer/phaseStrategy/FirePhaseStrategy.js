@@ -56,6 +56,31 @@ window.FirePhaseStrategy = function () {
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
     };
 
+    /* //Alterantive version that allows targeting of allies - DK
+    FirePhaseStrategy.prototype.selectShip = function (ship, payload) {
+
+        if(gamedata.isMyorMyTeamShip(this.selectedShip) && weaponManager.hasShipWeaponsSelected()){
+        var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn); 
+        var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);                   
+            menu.addButton("selectShip",
+                function() {
+                    return this.selectedShip !== ship;
+                },
+                function () {
+                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                    this.showShipEW(this.selectedShip);
+                }.bind(this), "Select ship"); 
+        if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);                
+        }else{
+            this.setSelectedShip(ship);
+            var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+            var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
+            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+        }
+
+    };
+    */
+
     FirePhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
         this.hideMovementUI();

@@ -314,6 +314,14 @@ window.weaponManager = {
         return false;
     },
 
+    //For use if we allow targeting allies to toggle type of tooltips - DK
+    hasShipWeaponsSelected: function hasShipWeaponsSelected() {
+        return gamedata.selectedSystems.some(function (system) {
+            //return system instanceof Weapon && system.targetsShips === true;
+            return system instanceof Weapon && system.hextarget !== true;
+        });
+    },
+    
     selectAllWeapons: function selectAllWeapons(ship, system) {
         if (!gamedata.isMyShip(ship)) {
             return;
