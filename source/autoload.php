@@ -3456,6 +3456,9 @@ spl_autoload_register(
 						'gquell_noew' => '/server/model/ships/customs/gquell_noew.php',	
 
 
+						//Campaign custom Centauri
+						'adira' => '/server/model/ships/centauri/Adira.php',
+
 						//Fred's custom Centauri
 						'ftrdefensegun' => '/server/model/weapons/customs.php',
 						'snipercannon' => '/server/model/weapons/matter.php',

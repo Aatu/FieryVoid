@@ -1654,6 +1654,7 @@ class EWPulseTorpedo extends Pulse{
 
 
 class EWGraviticTractingRod extends SWDirectWeapon{
+
     /*StarWars Tractor Beam 
     */
     /*weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
@@ -1712,7 +1713,8 @@ class EWGraviticTractingRod extends SWDirectWeapon{
 	public function getDamage($fireOrder){ return  0;   }
 	public function setMinDamage(){   $this->minDamage =  0 ;      }
 	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
-} //end of class EWGraviticTractingRod
+
+}    //end of class EWGraviticTractingRod
 
 
 // END GRAVITIC WEAPONS
