@@ -21,7 +21,11 @@ class GameRules implements JsonSerializable{
         $moonsRules = $this->getMoonsRules($rules);
         if ($moonsRules !== null) {
             array_push($this->rules, $moonsRules);
-        }                  
+        }
+        $fleetTestRules = $this->getFleetTestRules($rules);
+        if ($fleetTestRules !== null) {
+            array_push($this->rules, $fleetTestRules);
+        }
     }
 
     private function getSimultaneousMovementRules($rules) {
@@ -46,7 +50,14 @@ class GameRules implements JsonSerializable{
         }
 
         return null;
-    }  
+    }
+
+    private function getFleetTestRules($rules) {
+        if (isset($rules['fleetTest'])) {
+            return new FleetTestRule((int)$rules['fleetTest']);
+        }
+        return null;
+    }
 /*
     private function getMoonsRules($rules) {
         if (isset($rules['moons'])) {

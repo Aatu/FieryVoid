@@ -1293,7 +1293,7 @@ window.confirm = {
         a.fadeIn(250);
     },
 
-    confirm: function confirm(msg, callback) {
+    confirm: function confirm(msg, callback, cancelCallback) {
         var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
         //var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
@@ -1308,6 +1308,7 @@ window.confirm = {
         $(".confirmok", e).on("click", callback);
         $(".confirmcancel", e).on("click", function () {
             $(".confirm").remove();
+            if (cancelCallback) cancelCallback();
         });
         $(".ok", e).css("left", "45%");
         var a = e.appendTo("body");

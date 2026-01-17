@@ -1617,21 +1617,28 @@ class DBManager
         return $playerName;
     }
 
-    public function getLobbyGames() {
+    public function getLobbyGames($userid) {
         //$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(gameid) from tac_playeringame where gameid = parentGameId ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");
 		//above always returns playerCount = number of slots, let's try different approach (Marcin Sawicki):
 		//$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
 		//enhance to include game rules
-		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers from tac_game g WHERE  g.status = 'LOBBY';");    
+		$stmt = $this->connection->prepare("select g.id as parentGameId, g.name, g.slots, g.gamespace, g.rules, (select count(distinct playerid) from tac_playeringame where gameid = parentGameId and playerid > 0 ) as numberOfPlayers, (SELECT count(*) FROM tac_playeringame WHERE gameid = g.id AND playerid = ?) as userInGame from tac_game g WHERE  g.status = 'LOBBY';");    
 		
         $games = [];
 		$nm = '';
 
         if ($stmt) {
-            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount );
+            $stmt->bind_param("i", $userid);
+            $stmt->bind_result($id, $gameName, $slots, $gamespace, $rules, $playerCount, $userInGame);
 			//$stmt->bind_result($id, $gameName, $slots, $playerCount );
             $stmt->execute();
             while ($stmt->fetch()) {
+                // FILTER: If it's a Fleet Test game, and user is not in it, SKIP.
+                $rulesObj = json_decode($rules, true);
+                if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1 && $userInGame == 0) {
+                    continue;
+                }
+
 				$nm = $gameName;
                 $nm .= ' <br><span class="gameRules">(';
 			//gamespace and rules: add to name!    
@@ -1649,11 +1656,21 @@ class DBManager
                     $nm .= ', Terrain';
                 }             
 				if (strpos($rules, 'desperate')!==false){
-					$nm  .= ', Desparate';
+					$nm  .= ', Desperate';
 				}
-
+                if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
+                    $nm = ', <span style="color:yellow; font-weight:bold;">Fleet Test</span>';
+                }
                 $nm .= ')</span>';
-                $games[] = ["id" => $id, "name" => $nm, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY"];
+
+                $fleetTest = false;
+                //To mark Fleet Test games as Fleet Test in lobby
+                if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
+                    $nm = '<span style="color:yellow; font-weight:bold;">Fleet Test</span>';
+                    $fleetTest = true;                    
+                }    
+
+                $games[] = ["id" => $id, "name" => $nm, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY", "test" => $fleetTest];
             }
             $stmt->close();
         }
