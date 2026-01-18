@@ -38604,6 +38604,20 @@ var ShipWindow = function (_React$Component) {
             });
         }
     }, {
+        key: "onShipTouchStart",
+        value: function onShipTouchStart(event) {
+            event.stopPropagation();
+            event.preventDefault(); /* Prevent mouse emulation */
+            var ship = this.props.ship;
+
+
+            webglScene.customEvent('SystemClicked', {
+                ship: ship,
+                system: ship,
+                element: event.target
+            });
+        }
+    }, {
         key: "onShipMouseOut",
         value: function onShipMouseOut() {
             webglScene.customEvent('SystemMouseOut');
@@ -38677,7 +38691,7 @@ var ShipWindow = function (_React$Component) {
                 React.createElement(
                     Column,
                     { top: true },
-                    React.createElement(ShipImage, { img: ship.imagePath, onMouseOver: this.onShipMouseOver.bind(this), onMouseOut: this.onShipMouseOut.bind(this) }),
+                    React.createElement(ShipImage, { img: ship.imagePath, onMouseOver: this.onShipMouseOver.bind(this), onMouseOut: this.onShipMouseOut.bind(this), onTouchStart: this.onShipTouchStart.bind(this) }),
                     systemsByLocation[1].length > 0 && React.createElement(_ShipSection2.default, { location: 1, ship: ship, systems: systemsByLocation[1] }),
                     React.createElement(_ShipWindowEw2.default, { ship: ship })
                 ),
