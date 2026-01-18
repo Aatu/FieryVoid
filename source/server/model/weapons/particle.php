@@ -1006,7 +1006,7 @@
               system hit will have its armor reduced by 2
               for non-fighter targets
         */
-		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+		protected function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
 		{
 			$target = $ship;
 			if(!$target instanceof FighterFlight){
@@ -1026,6 +1026,7 @@
 				$damageToRepeat = $damage-$armour;
 				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damageToRepeat);
 			}
+            return $damage;
 		}//endof onDamagedSystem
 		
 		//overkill should return damaged system itself, even if it is destroyed! - necessary for redefined doDamage to work properly
