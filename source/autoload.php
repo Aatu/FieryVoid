@@ -1291,6 +1291,7 @@ spl_autoload_register(
 				'ewnucleartorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
+                'tractingrodhandler' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
 				'ewduallaserbolt' => '/server/model/weapons/customEscalation.php',

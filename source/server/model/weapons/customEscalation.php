@@ -1653,68 +1653,266 @@ class EWPulseTorpedo extends Pulse{
 // GRAVITIC WEAPONS
 
 
-class EWGraviticTractingRod extends SWDirectWeapon{
+class EWGraviticTractingRod extends Weapon implements SpecialAbility {
 
-    /*StarWars Tractor Beam 
-    */
-    /*weapon that does no damage, but limits targets' maneuvrability next turn ('target held by tractor beam')
-    */
     public $name = "EWGraviticTractingRod";
     public $displayName = "Gravitic Tracting Rod";
-	
-    public $priority = 10; //let's fire last
-    public $loadingtime = 3;
+	public $iconPath = "EWGraviticTractingRod.png";
+    public $animation = "laser";
+    public $animationColor = array(102, 255, 00);	
+    public $animationExplosionScale = 1.0; //single hex explosion
+    public $priority = 1; 
+	public $hextarget = false; //Toggle to switch between hexTarget and normalTarget modes
+	public $hidetarget = true;   
+	public $specialAbilities = array("PreFiring");
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
+	public $damageType = "Standard"; //irrelevant, really
+	public $weaponClass = "Gravitic";
+	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
+	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
+	public $loadingtime = 3;
     public $rangePenalty = 2;
-    public $intercept = 0;
-    public $fireControl = array(null, 2, 4); // can't fire at fighters, incompatible with crit behavior!
-   
-	//let's animate this as a very wide beam...
-	public $animation = "laser";
-        public $animationColor = array(55, 55, 55);
-        public $animationColor2 = array(100, 100, 100);
-        public $animationExplosionScale = 0.45;
-        public $animationWidth = 15;
-        public $animationWidth2 = 0.5;
-	
- 	protected $possibleCriticals = array( //no point in damage reduced crit
-            14=>"ReducedRange"
+    protected $canTargetAll = true; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()	
+    public $fireControl = array(2, 2, 2); // fighters, <mediums, <capitals 
+	public $preFires = true;
+    public $canSplitShots = true;
+    public $moveDistance = "";
+    public $showHexagonArc = true; 
+    public $specialHitChanceCalculation = true;			
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+    public $firingModes = array(
+		1 => "Standard - GN",
+        2 => "Priorty - GN"
 	);
-	
-    public function setSystemDataWindow($turn){
-      parent::setSystemDataWindow($turn);
-		if (!isset($this->data["Special"])) {
-			$this->data["Special"] = '';
-		}else{
-			$this->data["Special"] .= '<br>';
-		}
-      $this->data["Special"] .= "Does no damage, but holds target next turn";      
-      $this->data["Special"] .= "<br>limiting its maneuvering options"; 
-      $this->data["Special"] .= "<br>(-1 thrust and -20 Initiative next turn).";  
-    }	
-    
-	function __construct($armor, $startArc, $endArc, $nrOfShots){ //armor, arc and number of weapon in common housing: structure and power data are calculated!
-		$this->intercept = 0;
-		$this->iconPath = "EWGraviticTractingRod.png";
-		
-		parent::__construct($armor, 10, 6, $startArc, $endArc, $nrOfShots); //maxhealth and powerReq for single gun mount!
-		$this->addSalvoMode();
-	}    
-	
-	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //target is held critical on PRIMARY Structure!
-		//marked to C&C
-		$CnC = $ship->getSystemByName("CnC");
-		if($CnC){
-			$crit = new swtargetheld(-1, $ship->id, $CnC->id, 'swtargetheld', $gamedata->turn); 
-			$crit->updated = true;
-		      $CnC->criticals[] =  $crit;
-		}
+
+    protected $possibleCriticals = array(14 => "ReducedRange");
+
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
 	}
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 10;
+		}
+		if ( $powerReq == 0 ){
+			$powerReq = 6;
+		}
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        TractingRodHandler::addTractingRod($this);//so all Targeting Array are accessible together.
+    }
+
+     public function setSystemDataWindow($turn){
+        $this->data["Special"] = "<br>Each Tracting Rod has a max movement range (Move Distance) determined by a D3 roll made for each weapon at start of pre-fire phase.";
+        $this->data["Special"] .= "<br>Move Distance is reported on mouse over and can be visualized when targeting with overlay.";
+        $this->data["Special"] .= "<br>Only ONE Tracting Rod may affect a ship per turn, more may be fired at target.";           
+        $this->data["Special"] .= "<br>Standard (S) mode: Tracting Rod hitting target with the largest Move Distance will take priority";
+        $this->data["Special"] .= "<br>Priorty (P) mode: Tracting Rod hitting target will take priority over all other Tracting Rods.";
+        $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives (Does NOT include allies).";        
+        $this->data["Special"] .= "<br>Can target allies.";
+		parent::setSystemDataWindow($turn);  
+    }   
+
+	public function calculateHitBase($gamedata, $fireOrder){            
+        if($fireOrder->damageclass == 'tractingRodMoveHex'){
+				$fireOrder->needed = 100; //always true
+				$fireOrder->updated = true;
+        }else{
+            parent::calculateHitBase($gamedata, $fireOrder);
+
+            if($fireOrder->targetid != -1){
+                $target = $gamedata->getShipById($fireOrder->targetid);
+                $shooter = $this->getUnit();
+
+                if($target->gravitic || $target->factionAge >= 3){ 
+                    $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
+                }
+
+                if($shooter->team == $target->team){ //Let's make penalty only for enemy units
+                    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
+                    $targetPos = $target->getHexPos();                       
+                    $distance = mathlib::getDistanceHex($launchPos, $targetPos);
+
+                    $rangePen = $this->calculateRangePenalty($distance);
+                    $fireOrder->needed += $rangePen * 5; //refund range penalty for friendly units since OEW lock on allies not possible.            
+                }   
+            }
+        }
+	}    
+
+    public function fire($gamedata, $fireOrder){   
+		if($fireOrder->damageclass == 'tractingRodMoveHex'){		
+			return; //Don't roll targeting shots, to remove them from animations.
+		}else{	                        
+            parent::fire($gamedata, $fireOrder);  
+        }        
+    }
 	
-	public function getDamage($fireOrder){ return  0;   }
-	public function setMinDamage(){   $this->minDamage =  0 ;      }
-	public function setMaxDamage(){   $this->maxDamage =  0 ;      }
+    protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){   
+        if($fireOrder->damageclass == 'gravitic'){ //should only process the grav net's first fireOrder (pertains to actual shot) and then get gravNetPos from 2nd hexTarget order         
+            $targetSize = null;
+            $shooterSize = null;
+
+                $primaryTractingRod = TractingRodHandler::getPrimaryTractingRodPerTarget($target);
+                if($this == $primaryTractingRod){//check if THIS gravity net is the primary gravity net(Primary is defined as gravity net that hits a given target with largest move distance)
+                    $fireOrder->pubnotes = "<br>Ship has been forced to move by a Tracting Rod.";
+                    $this->doTractingRodMove($target, $fireOrder->id, $gamedata);
+                }
+        }
+    }  
+
+    private function doTractingRodMove($target, $graviticOrderID, $gamedata){
+        $allFireOrders = $this->getFireOrders($gamedata->turn);
+        $tractingRodMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
+        $tractingRodMovePos = null; //var to hold grav net move target hex.
+
+        foreach($allFireOrders as $fireOrderCheck){ //find the gravNetMoveHex order and then process. If it does not exist do not process.
+            if ($fireOrderCheck->damageclass == 'tractingRodMoveHex'){
+                $tractingRodMovePosOrder = $fireOrderCheck;	
+                $xpos = $tractingRodMovePosOrder->x; //get x coord for movement
+                $ypos = $tractingRodMovePosOrder->y; //get y coord for movement
+                $orderID = $tractingRodMovePosOrder->id;
+
+                $lastMove = $target->getLastMovement(); //get target ship's last movement to ensure heading, speed and facing are conserved. 
+                //Create new movement order to target ship to grav net target hex.
+                //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
+                $gravNetMove = new MovementOrder(null, "prefire", new OffsetCoordinate($xpos, $ypos), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $graviticOrderID, 0);
+
+                //Add shifted movement order to database
+                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);				
+                break;
+            }
+        }         
+    }    
+	
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+
+        switch($gameData->phase){
+					
+				case 2: //Movement phase
+                    if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+						//load existing data first - at this point ship is rudimentary, without data from database!
+						$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn, $ship->id);	
+						//roll a D3 to determine how far THIS gravity net can move a ship	                    				
+                        $currentResult = Dice::d(3, 1); //dice size, number of rolls, determined max move for gravity net
+                        $notekey = 'tractingRodMove';
+                        $noteHuman = 'Tracting Rod Max Move: '.strval($currentResult);
+                        $notevalue = $currentResult;
+                        $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+                    }  
+		break;	       
+        }
+    }
+
+    public function onIndividualNotesLoaded($gameData){     
+        switch($gameData->phase){
+            case 1:
+                $this->moveDistance = "TBD: PreFirePhase"; //set moveDistance back to TBD: PreFirePhase until next prefire phase, then display newly rolled value.
+
+            case 5: //get the current turns gravity net max movement value in PreFile phase   
+            foreach ($this->individualNotes as $currNote) {
+                    if ($currNote->turn == $gameData->turn) {               
+                        if ($currNote->notekey == 'tractingRodMove') {
+                            $this->moveDistance = $currNote->notevalue; 
+                        }
+                    }
+                }                
+        break;
+        }
+    }
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson(); 
+        $strippedSystem->showHexagonArc = $this->showHexagonArc;  
+        $strippedSystem->canTargetAll = $this->canTargetAll;
+        $strippedSystem->moveDistance = $this->moveDistance;                                        
+        return $strippedSystem;
+	}	
 
 }    //end of class EWGraviticTractingRod
+
+
+
+
+class TractingRodHandler { 
+	public $name = "TractingRodHandler";
+	private static $tractingRods = array();	
+	
+	//should be called by every Targeting Array on creation!
+	public static function addTractingRod($weapon){
+		self::$tractingRods[] = $weapon;		
+	}
+
+    public static function getPrimaryTractingRodPerTarget($target){//returns the primary gravity net, highest priorty, highest movement and hitting grav net, per target
+        $hittingTractingRodsOnTarget = self::getHittingTractingRodsOnTarget($target); //get all hitting gravity nets on the same target.
+        $priorityTractingRods = self::getPriorityTractingRods($hittingTractingRodsOnTarget); //see if any priority mode grav nets exist
+
+        if(count($priorityTractingRods) > 0){
+            $primaryTractingRod = self::getLargestMovement($priorityTractingRods); //find largestMove Priority grav net   
+        }else{
+            $primaryTractingRod = self::getLargestMovement($hittingTractingRodsOnTarget); //find largestMove out of all hitting nets (no priority grav net/s designated)
+        }
+        return $primaryTractingRod;
+    }
+
+    private static function getHittingTractingRodsOnTarget($target){//get all gravity nets that target same target and hit.
+        $hittingTractingRodsOnTarget = array();
+        foreach(self::$tractingRods as $tractingRod){            
+            foreach($tractingRod->fireOrders as $fireOrder){                
+                $fireOrderTargetid = $fireOrder->targetid;//current fireorder targetid
+                $currTargetid = $target->id; //current gravity net's targetid
+                if($fireOrderTargetid == $currTargetid){//make sure target of processing gravity net matches current gravity net
+                    $shotsHit = $fireOrder->shotshit;
+                        if($shotsHit == 1){ //make sure the current grav net hit             
+                            $hittingTractingRodsOnTarget[] = $tractingRod; //add hitting gravity net with same target to array (as processing gravity net).
+                        }
+                }
+            }          
+        }
+        return $hittingTractingRodsOnTarget;
+    }
+
+    private static function getPriorityTractingRods($tractingRods){//find all grav nets firing in Priority mode
+        $priorityTractingRods = array();
+		Debug::log(json_encode("before loop", true));
+        foreach($tractingRods as $tractingRod){ 
+            foreach($tractingRod->fireOrders as $fireOrder){                
+                if($fireOrder->firingMode == 2){ //find priorty grav nets
+                    $priorityTractingRods[] = $tractingRod;
+                }                
+            }
+        }   
+		Debug::log(json_encode("after loop", true));
+        return $priorityTractingRods; 
+    }
+
+	private static function getLargestMovement($tractingRods){ //get Gravity Net with largest movement potential
+        $largestMovementValue = 0; //set inital movement range to 0;
+        $largestTractingRod = null;        
+        foreach($tractingRods as $tractingRod){ 
+            foreach($tractingRod->fireOrders as $fireOrder){                
+                if($tractingRod->moveDistance > $largestMovementValue){
+                    $largestMovementValue = $tractingRod->moveDistance;
+                    $largestTractingRod = $tractingRod;
+                }                
+            }
+        }
+        return $largestTractingRod;
+    }	  
+}
+
+
+
+
 
 
 // END GRAVITIC WEAPONS
