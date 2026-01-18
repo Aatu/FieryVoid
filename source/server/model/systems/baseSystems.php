@@ -4020,7 +4020,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -4035,7 +4035,33 @@ by 4.
 				$remainingCapacity += $tendrilCapacity;
 				$largestCapacity = max($tendrilCapacity,$largestCapacity);
 			}
-		}		
+		}
+
+		//If this is a multi-shot volley, we need to calculate the average protection.
+		if ($inflictingShots > 1) {
+			$simulatedTendrils = array();
+			foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+				$simulatedTendrils[$tendril->id] = max(0, $tendril->getRemainingCapacity()-$reduction);
+			}
+
+			$totalProtection = 0;
+			for($i=0; $i<$inflictingShots; $i++){
+				$bestCapacity = 0;
+				$bestTendrilId = -1;
+				foreach($simulatedTendrils as $id=>$cap){
+					if($cap > $bestCapacity){
+						$bestCapacity = $cap;
+						$bestTendrilId = $id;
+					}
+				}
+				if($bestCapacity > 0){
+					$absorbed = min($expectedDmg, $bestCapacity);
+					$totalProtection += $absorbed;
+					$simulatedTendrils[$bestTendrilId] -= $absorbed;
+				}
+			}
+			return $totalProtection / $inflictingShots;
+		}
 		
 		//tiebreaker: less filled (proportionally), to try and split load if possible
 		$protectionValue = $largestCapacity;
@@ -4794,7 +4820,7 @@ class Bulkhead extends ShipSystem{
 	
 	
 	//function estimating how good this Bulkhead is at stopping damage;
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1) {
 		//first do check whether this system can be protected! (same location or appropriate structure location)
 		if ($systemProtected) {
 			//is it on the same section?
@@ -4821,6 +4847,7 @@ class Bulkhead extends ShipSystem{
 		} else if ( ($systemProtected->repairPriority > 5) && ($targetHealth + $ownHealth > $expectedDmg)){ //for very important systems - protect even if result would be just damage reduction, as reduced crit on them is important
 			$protectionValue = $ownHealth;
 		}
+		
 		return $protectionValue;
 	}
 	//actual protection

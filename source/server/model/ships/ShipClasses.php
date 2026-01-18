@@ -1383,7 +1383,10 @@ class BaseShip {
 		}		
         //foreach($this->systems as $system){
 		foreach($listOfPotentialSystems as $system){
-			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt);
+			$shots = 1;
+			if($weapon && $weapon->isLinked) $shots = $weapon->shots;
+
+			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt, $shots);
             if ($value<1) continue;
 			if ($system->isDestroyed($turn-1)) continue;
 			if ($system->isOfflineOnTurn($turn)) continue;
