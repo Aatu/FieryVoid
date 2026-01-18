@@ -44,7 +44,7 @@ class ChoukaApostleCruiser extends BaseShip{
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWTwinLaserCannon(2, 8, 5, 300, 60));
-		$this->addFrontSystem(new EWGraviticTractingRod(4, 300, 60, 1));
+		$this->addFrontSystem(new EWGraviticTractingRod(4, 10, 6, 300, 60));
 		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
 		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
 		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 240, 60));

@@ -775,6 +775,7 @@ spl_autoload_register(
                 'prefiringgamephase' => '/server/Phase/PreFiringGamePhase.php',                
                 'preyhawk' => '/server/model/ships/drazi/preyhawk.php',
                 'primus' => '/server/model/ships/centauri/primus.php',
+                'primusmd' => '/server/model/ships/centauri/primusMD.php',
                 'primusmaximus' => '/server/model/ships/centauri/primusMaximus.php',
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'prophet1780' => '/server/model/ships/orieni/prophet1780.php',
@@ -1290,6 +1291,7 @@ spl_autoload_register(
 				'ewnucleartorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
+                'tractingrodhandler' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
 				'ewduallaserbolt' => '/server/model/weapons/customEscalation.php',
@@ -3454,6 +3456,9 @@ spl_autoload_register(
 						//Steve's no EW concept
 						'gquell_noew' => '/server/model/ships/customs/gquell_noew.php',	
 
+
+						//Campaign custom Centauri
+						'adira' => '/server/model/ships/customs/Adira.php',
 
 						//Fred's custom Centauri
 						'ftrdefensegun' => '/server/model/weapons/customs.php',
