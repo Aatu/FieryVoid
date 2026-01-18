@@ -1,6 +1,8 @@
 <?php
 class gaimTixTyk extends HeavyCombatVesselLeftRight{
     
+    public $imageFlipped = true; //Added to flipped asymetric image in shipIcon.js
+
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         

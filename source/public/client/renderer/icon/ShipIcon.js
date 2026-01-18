@@ -265,6 +265,10 @@ window.ShipIcon = function () {
                         : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
         );
 
+        if (ship.imageFlipped) {
+            this.shipSprite.mesh.scale.y = -1;
+        }
+
         /* //Old method with just this.mine
         this.shipSprite.setOverlayColor(
             this.ship.shipSizeClass === 5 
