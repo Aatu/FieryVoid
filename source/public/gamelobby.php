@@ -391,6 +391,7 @@ $optionsUsed = '';
 
     $simMv = false;
     $desperate = false;
+    $friendlyFire = false;    
     $asteroids = false;
     $moons = false;
     $initiativeCategories = null;
@@ -409,6 +410,10 @@ $optionsUsed = '';
             $desperate = true;
             $desperateTeams = $gamelobbydata->rules->desperate;     
         }
+
+        if (isset($gamelobbydata->rules->friendlyFire)) {
+            $friendlyFire = true;  
+        }        
 
         if (isset($gamelobbydata->rules->asteroids)) {
             $asteroids = true;
@@ -430,7 +435,7 @@ $optionsUsed = '';
     if ($simMv == true) { // simultaneous movement
         $optionsUsed .= ', Simultaneous Movement';
         if ($initiativeCategories !== null) {
-            $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
+            $optionsUsed .= ' (Brackets: ' . $initiativeCategories . ')';
         }
     } else { // standard movement
         $optionsUsed .= ', Standard Movement';
@@ -450,6 +455,13 @@ $optionsUsed = '';
     } else { // standard rules
         $optionsUsed .= '';
     }
+
+    if ($friendlyFire == true) { // Desperate rules in play
+        $optionsUsed .= ', Friendly Fire';
+    } else { // standard rules
+        $optionsUsed .= '';
+    }
+
 
     if ($asteroids == true) { // Asteroid terrain rules in play
         $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';

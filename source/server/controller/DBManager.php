@@ -1658,6 +1658,9 @@ class DBManager
 				if (strpos($rules, 'desperate')!==false){
 					$nm  .= ', Desperate';
 				}
+				if (strpos($rules, 'friendlyFire')!==false){
+					$nm  .= ', Friendly Fire';
+				}                
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
                     $nm = ', <span style="color:yellow; font-weight:bold;">Fleet Test</span>';
                 }

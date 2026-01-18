@@ -343,6 +343,7 @@ spl_autoload_register(
                 'forcedofflineforturns' => '/server/model/cricialClasses.php',
                 'forcedofflineoneturn' => '/server/model/cricialClasses.php',
                 'fleettestrule' => '/server/model/FleetTestRule.php',
+                'friendlyfirerule' => '/server/model/FriendlyFireRule.php',
                 'frazi' => '/server/model/ships/narn/frazi.php',
                 'freetrader' => '/server/model/ships/llort/freeTrader.php',
                 'freetraderpulsar' => '/server/model/ships/llort/freeTraderPulsar.php',

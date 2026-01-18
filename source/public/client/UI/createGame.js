@@ -130,6 +130,7 @@ jQuery(function ($) {
     $("#movementcheck").on("click", createGame.doMovementCheck);
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
     $("#terraincheck").on("click", createGame.doTerrainCheck);
+    $("#friendlyFireCheck").on("click", createGame.doFriendlyFireCheck);
 
     createGame.createSlotsFromArray();
     createGame.onMapDimensionsChange(); // Run on load
@@ -420,6 +421,16 @@ window.createGame = {
         }
     },
 
+    doFriendlyFireCheck: function doFriendlyFireCheck(data) {
+        var checkval = $("#friendlyFireCheck:checked").val();
+
+        if (checkval == "on") {
+            createGame.rules.friendlyFire = 1;
+        } else {
+            delete createGame.rules.friendlyFire;
+        }
+    },
+
 
     mapData: {
         "custom": {
@@ -523,7 +534,7 @@ window.createGame = {
                     ]
                 }
             ]
-        },        
+        },
         "convoyRaid": {
             width: 42, height: 30,
             // Enforce strictly 2 slots per team

@@ -12,14 +12,14 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.buttons = [
         { className: "addCCEW", condition: [isSelf, notFlight], action: addCCEW, info: "Add CCEW" }, 
         { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" }, 
-        { className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
-        { className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
-        { className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        { className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },         
-        //{ className: "addOEW", condition: [sourceNotFlight], action: addOEW, info: "Add OEW" }, 
-        //{ className: "removeOEW", condition: [sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
-        //{ className: "addDIST", condition: [isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        //{ className: "removeDIST", condition: [isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
+        //{ className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
+        //{ className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
+        //{ className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
+        //{ className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },         
+        { className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
+        { className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
+        { className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
+        { className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
         { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" }, 
         { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" }, 
         { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" }, 
@@ -31,8 +31,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" }, 
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
-		{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, hasSupportWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [isEnemy, hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firig Order" } 		
+		{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
+        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firig Order" } 		
         //{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
         //{ className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firig Order" } 				        
     ];
@@ -80,9 +80,9 @@ window.ShipTooltipInitialOrdersMenu = function () {
 	    }, this); // Make sure to bind `this` so that `this.selectedShip` is correct
 	}
 
-    function hasSupportWeaponSelected() {
+    function FFWeaponSelected() {
         return gamedata.selectedSystems.some(system => {
-            return system.canTargetAllies === true || system.canTargetAll === true;
+            return system.canTargetAllies === true || system.canTargetAll === true ||  (gamedata.rules && gamedata.rules.friendlyFire  === 1);
         });
     }
 

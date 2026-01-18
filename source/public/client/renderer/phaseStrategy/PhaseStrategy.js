@@ -268,11 +268,19 @@ window.PhaseStrategy = function () {
             mathlib.clearLosSprite();
         }
 
-        if (this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
-            this.selectShip(ship, payload);
-        } else {
-            this.targetShip(ship, payload);
-        }
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {          
+            if (this.gamedata.isMyShip(ship)) {        
+                this.selectShip(ship, payload);
+            } else {
+                this.targetShip(ship, payload);
+            }
+        }else{
+            if (this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) { 
+                this.selectShip(ship, payload);
+            } else {
+                this.targetShip(ship, payload);
+            }                       
+        }    
     };
 
     PhaseStrategy.prototype.selectShip = function (ship, payload) {
