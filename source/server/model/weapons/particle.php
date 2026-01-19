@@ -982,8 +982,9 @@
         }
 		
 		/*actually repeating damage scored on appropriate Structure*/
-		private function doRepeatDamageOnStructure($fireOrder,$target,$systemHit,$damageToRepeat, $gamedata){
+		private function doRepeatDamageOnStructure($fireOrder,$target,$systemHit, $damage, $gamedata){
             //Debug::log(json_encode($damageToRepeat));
+            $damageToRepeat = $this->damageToRepeat;
 
 			if(!$target instanceof FighterFlight){
 				$struct = null;
@@ -992,10 +993,15 @@
 				}else{
 					$struct = $target->getStructureSystem($systemHit->location);
 				}
-				if($struct && (!$struct->isDestroyed())){
+                if($struct && (!$struct->isDestroyed())){
                     $shooter = $this->getUnit();
+                    
+                    //Determine if the shot successfully penetrated (dealt damage) to trigger internal effects
+                    $isUnderShield = ($damage > 0);
+
                     //CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
-                    $systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $this, $struct, $damageToRepeat, false);
+                    //Pass true for isUnderShield to indicate this is internal/under-shield damage
+                    $systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $this, $struct, $damageToRepeat, false, $isUnderShield);
                     if($systemProtectingDmg){
                         $effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$this,$struct,$damageToRepeat, 0);
                         $damageToRepeat = $effectOfProtection['dmg'];
@@ -1040,7 +1046,7 @@
 					$crit->inEffect = false; //in effect only on next turn
 					$system->criticals[] = $crit;
 				}               
-				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$this->damageToRepeat, $gamedata);
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
 			}
 		}//endof onDamagedSystem
 		
