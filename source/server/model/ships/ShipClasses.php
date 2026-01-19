@@ -1384,6 +1384,7 @@ class BaseShip {
 
 		$shots = 1;
 		if($weapon && $weapon->isLinked) $shots = $weapon->shots;
+        if($weapon && $weapon->damagesUnderShield() && !$isUnderShield) $isUnderShield = true;  //Some weapon weapons might bypass shield-type protections, so only things like Diffsuers and Bulkheads would apply.
 
         //foreach($this->systems as $system){
 		foreach($listOfPotentialSystems as $system){

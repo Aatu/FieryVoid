@@ -1249,6 +1249,10 @@ class ShipSystem {
 		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
 		return $returnValues;
 	}
+
+	public function damagesUnderShield(){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
+		return false;
+	}	
 	
 	/*first attempt at StarTrek shield
 	public function doesReduceImpactDamage($expectedDmg){ //hook - systems that can affect damage dealing at the moment of impact will return positive value; strongest one will be chosen to interact
