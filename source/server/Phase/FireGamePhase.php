@@ -36,16 +36,30 @@ class FireGamePhase implements Phase
 		
         $dbManager->setPlayersWaitingStatusInGame($servergamedata->id, false);
 
+       $playersSkipped = [];
+
        //Checks for late-deploying slots to see if next phases skipped - DK 
        foreach($gameData->slots as $slot){   
+            if (!isset($playersSkipped[$slot->playerid])) {
+                $playersSkipped[$slot->playerid] = true; // Assume skipped initially
+            }
+
             $doDeployment = $gameData->checkDeploymentPhaseForPlayer($slot->playerid);                
             if ($slot->depavailable == $gameData->turn+1 || $doDeployment){
                 //Slot is deploying next turn, ensure that database know it completed this Firing Phase
-                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);               
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);   
+                $playersSkipped[$slot->playerid] = false; // Mark player as NOT skipped             
             } else {
                 //If not deploying next turn, set slot to skip that phase.  Manager::changeTurn always tries to create new Deplyment Phase.
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, -1, $gameData->turn+1);                
             }        
+        } 
+
+        // Update waiting status for fully skipped players
+        foreach ($playersSkipped as $playerid => $isSkipped) {
+            if ($isSkipped) {
+                 $dbManager->setPlayerWaitingStatus($playerid, $gameData->id, true);
+            }
         } 
     }
 
