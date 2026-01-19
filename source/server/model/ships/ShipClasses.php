@@ -1381,10 +1381,12 @@ class BaseShip {
 		}else{ //all systems of a ship
 			$listOfPotentialSystems = $this->systems;
 		}		
+
+		$shots = 1;
+		if($weapon && $weapon->isLinked) $shots = $weapon->shots;
+
         //foreach($this->systems as $system){
 		foreach($listOfPotentialSystems as $system){
-			$shots = 1;
-			if($weapon && $weapon->isLinked) $shots = $weapon->shots;
 
 			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt, $shots, $isUnderShield);
             if ($value<1) continue;
