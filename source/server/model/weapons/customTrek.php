@@ -1171,8 +1171,8 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	
 	
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1) {
-		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		
 		$remainingCapacity = $this->getRemainingCapacity();
 		$protectionValue = 0;
@@ -1395,8 +1395,8 @@ class TrekShieldFtr extends ShipSystem{
 
 
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1) {
-		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		
 		$remainingCapacity = $this->getRemainingCapacity();
 		$protectionValue = 0;

@@ -1373,7 +1373,7 @@ class BaseShip {
 
 	//defensive system that can affect damage dealing - only one (best) such system will be called
 	//call overridden by FighterFlight to get only systems on a fighter actually hit
-	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon, $systemhit, $expectedDmg, $damageWasDealt = false){ //$systemhit actually used by fighter flight
+	public function getSystemProtectingFromDamage($shooter, $pos, $turn, $weapon, $systemhit, $expectedDmg, $damageWasDealt = false, $isUnderShield = false){ //$systemhit actually used by fighter flight
 		$chosenSystem = null;
 		$chosenValue=0;
 		if($this instanceOf FighterFlight){ //only subsystems of a particular fighter
@@ -1386,7 +1386,7 @@ class BaseShip {
 			$shots = 1;
 			if($weapon && $weapon->isLinked) $shots = $weapon->shots;
 
-			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt, $shots);
+			$value=$system->doesProtectFromDamage($expectedDmg, $systemhit, $damageWasDealt, $shots, $isUnderShield);
             if ($value<1) continue;
 			if ($system->isDestroyed($turn-1)) continue;
 			if ($system->isOfflineOnTurn($turn)) continue;

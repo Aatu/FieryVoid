@@ -845,7 +845,10 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1) {		
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {	
+			
+			if($isUnderShield) return 0; //shield does not protect from internal damage
+
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
 			if($remainingCapacity>0){
@@ -1114,8 +1117,10 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		}//endof checkShieldDeduction		
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1) {
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
 			
+			if($isUnderShield) return 0; //shield does not protect from internal damage
+
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
 			if($remainingCapacity>0){
