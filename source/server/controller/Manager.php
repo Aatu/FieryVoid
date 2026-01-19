@@ -131,7 +131,13 @@ class Manager{
 
         } catch(Exception $e) {
             $logid = Debug::error($e);
-            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+            return json_encode([
+                "error" => $e->getMessage(),
+                "code" => $e->getCode(),
+                "logid" => $logid,
+                "file" => $e->getFile(),
+                "line" => $e->getLine()
+            ]);
         }
     }
 
@@ -376,7 +382,13 @@ class Manager{
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
             $logid = Debug::error($e);
-            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+            return json_encode([
+                "error" => $e->getMessage(),
+                "code" => $e->getCode(),
+                "logid" => $logid,
+                "file" => $e->getFile(),
+                "line" => $e->getLine()
+            ]);
         }
     }
     
@@ -471,7 +483,13 @@ class Manager{
         }
         catch(Exception $e) {
             $logid = Debug::error($e);
-            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+            return json_encode([
+                "error" => $e->getMessage(),
+                "code" => $e->getCode(),
+                "logid" => $logid,
+                "file" => $e->getFile(),
+                "line" => $e->getLine()
+            ]);
         }
     
     }
@@ -499,7 +517,13 @@ class Manager{
         }
         catch(Exception $e) {
             $logid = Debug::error($e);
-            return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+            return json_encode([
+                "error" => $e->getMessage(),
+                "code" => $e->getCode(),
+                "logid" => $logid,
+                "file" => $e->getFile(),
+                "line" => $e->getLine()
+            ]);
         }
     }
        
@@ -591,7 +615,13 @@ class Manager{
             } catch (Exception $e) {
                 self::$dbManager->endTransaction(true);
                 $logid = Debug::error($e);
-                return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
+                return json_encode([
+                    "error" => $e->getMessage(),
+                    "code" => $e->getCode(),
+                    "logid" => $logid,
+                    "file" => $e->getFile(),
+                    "line" => $e->getLine()
+                ]);
             }
     }
 
