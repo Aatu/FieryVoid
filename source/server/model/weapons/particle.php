@@ -1062,7 +1062,7 @@
 		protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
 		{
 			if($damageWasDealt){
-				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage);
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
 			}else{
 				parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 			}			
