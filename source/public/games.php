@@ -112,7 +112,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
         <li><strong>Escalation/Nexus Updates</strong> - Several Nexus fixes and a new Gravitic Tracting Rod weapon added for Chouka! Thanks to Geoffrey!</li>  
         <li><strong>Torvalus Stilettos</strong> - Jammer ability removed following rules clarification.</li> 
         <li><strong>Drazi Solar Cannon</strong> - Should now dealt correct damage to ships with damge mitigating systems e.g. Shadow Diffusers.</li> 
-        <li><strong>The Lllort</strong> - Third 'l' added to Lllort faction name..</li>                                                                               
+        <li><strong>The Lllort</strong> - Extra 'L' added to Lllort faction name.</li>                                                                               
         <li><strong>General Fixes</strong> - Further database optimisation and server stability fixes. Several bug fixes/improvements. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
