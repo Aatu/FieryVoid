@@ -1753,10 +1753,19 @@ public function getStartLoading()
         
         //if (($target->shipSizeClass > 1) && ($this->damageType == 'Piercing')) { //Piercing damage will be split into 3 parts vs units larger thgan MCVs
 		if (($noOfStructures > 1) && ($this->damageType == 'Piercing')) {//special handling of Piercing on ships with 2 or more Structures - otherwise it will degenerate to Standard (no overkill)
-            $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
+            if($this->ballistic){
+                $facingLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn, true);
+            }else{
+                $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
+            }
+            
             //find out opposite section...
-            $relativeBearing = $target->getBearingOnUnit($shooter);
-
+            if($this->ballistic){ //firing position is explicitly declared
+				$relativeBearing = $target->getBearingOnPos($launchPos);
+			}else{ //check from shooter...
+                $relativeBearing = $target->getBearingOnUnit($shooter);
+			}
+            
             //Rules update: piercing shots on HCVs coming from the side should split into 2 parts, not 3.
             //Check for HCV / HCVLeftRight and modify outLocation to match facingLocation if angle is from the side.
             $forceTwoWaySplit = false; 
