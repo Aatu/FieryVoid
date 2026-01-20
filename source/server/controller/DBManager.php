@@ -926,7 +926,7 @@ class DBManager
                     } else {
                         // Convert associative array to object
                         $obj = (object)$p;
-                        error_log("[submitPower] Warning: Power entry was array, normalized. Contents: " . json_encode($p));
+                        //error_log("[submitPower] Warning: Power entry was array, normalized. Contents: " . json_encode($p));
                         $normalized[] = $obj;
                     }
                 } else {
@@ -1658,6 +1658,9 @@ class DBManager
 				if (strpos($rules, 'desperate')!==false){
 					$nm  .= ', Desperate';
 				}
+				if (strpos($rules, 'friendlyFire')!==false){
+					$nm  .= ', Friendly Fire';
+				}                
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
                     $nm = ', <span style="color:yellow; font-weight:bold;">Fleet Test</span>';
                 }
@@ -2270,6 +2273,132 @@ class DBManager
 
     public function getSystemDataForShips(TacGamedata $gamedata, $fetchTurn)
     {
+        // Optmization: Fetch ALL system data up to current turn, ordered by turn ASC.
+        // We will then iterate and overwrite the data in a PHP array. 
+        // This avoids the expensive correlated subquery "SELECT ... ORDER BY turn DESC LIMIT 1" for every row.
+        $stmt = $this->connection->prepare(
+        "SELECT 
+                shipid, systemid, subsystem, data
+            FROM
+                tac_systemdata
+            WHERE 
+                gameid = ? AND turn <= ? 
+            ORDER BY turn ASC
+          "
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
+            $stmt->execute();
+            $stmt->bind_result(
+                $shipid,
+                $systemid,
+                $subsystem,
+                $data
+            );
+            
+            $systemDataMap = array(); // shipid -> systemid -> subsystem -> data
+
+            while ($stmt->fetch()) {
+                 if (!isset($systemDataMap[$shipid])) $systemDataMap[$shipid] = array();
+                 if (!isset($systemDataMap[$shipid][$systemid])) $systemDataMap[$shipid][$systemid] = array();
+                 $systemDataMap[$shipid][$systemid][$subsystem] = $data;
+            }
+            $stmt->close();
+            
+            // Apply to ships
+            foreach ($systemDataMap as $sId => $systems) {
+                $ship = $gamedata->getShipById($sId);
+                if (!$ship) continue;
+                foreach ($systems as $sysId => $subsystems) {
+                    $system = $ship->getSystemById($sysId);
+                    if (!$system) continue;
+                    foreach ($subsystems as $subId => $dat) {
+                        $system->setSystemData($dat, $subId);
+                    }
+                }
+            }
+        }
+
+        // Get ammo info - Same optimization
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, systemid, firingmode, ammo
+            FROM 
+                tac_ammo
+            WHERE 
+                gameid = ? AND turn <= ?
+            ORDER BY turn ASC
+            "
+        );
+
+        if ($stmt) {
+            $stmt->bind_param('ii', $gamedata->id, $fetchTurn);
+            $stmt->execute();
+            $stmt->bind_result(
+                $shipid,
+                $systemid,
+                $firingmode,
+                $ammo
+            );
+            
+            $ammoMap = array();
+
+            while ($stmt->fetch()) {
+                 if (!isset($ammoMap[$shipid])) $ammoMap[$shipid] = array();
+                 if (!isset($ammoMap[$shipid][$systemid])) $ammoMap[$shipid][$systemid] = array();
+                 $ammoMap[$shipid][$systemid][$firingmode] = $ammo;
+            }
+            $stmt->close();
+            
+            // Apply ammo
+            foreach ($ammoMap as $sId => $systems) {
+                $ship = $gamedata->getShipById($sId);
+                if (!$ship) continue;
+                foreach ($systems as $sysId => $modes) {
+                     $system = $ship->getSystemById($sysId);
+                     if (!$system) continue;
+                     foreach ($modes as $mode => $amount) {
+                         $system->setAmmo($mode, $amount);
+                     }
+                }
+            }
+        }	    
+
+
+		//get enhancement info - optimization: single query for all ships
+		$allEnhancements = $this->getEnhancementsForGame($gamedata->id);
+		
+		foreach ($gamedata->ships as $ship){
+             $shipEnhancements = isset($allEnhancements[$ship->id]) ? $allEnhancements[$ship->id] : array();
+             
+			if( count($shipEnhancements) == 0 ){ //no enhancements! add empty one just to show it's been read
+				$ship->enhancementOptions[] = array('NONE','-', 0,0,0,0); //[ID,readableName,numberTaken,limit,price,priceStep]
+			}
+			foreach($shipEnhancements as $entry){
+				$ship->enhancementOptions[] = array($entry[0],$entry[2], $entry[1],0,0,0);
+			}
+		}
+		
+		//get individual notes for systems - optimization: single query
+        $allNotes = $this->getIndividualNotesForGame($gamedata, $fetchTurn);
+        
+		foreach ($gamedata->ships as $ship){
+            $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();
+            
+			foreach ($shipNotes as $currNote){
+				$system = $ship->getSystemById($currNote->systemid);
+                if ($system) // Robustness check
+				    $system->addIndividualNote($currNote);
+			}
+			$ship->onIndividualNotesLoaded($gamedata);
+		}
+		
+    } //endof function getSystemDataForShips
+
+/* // BACKUP of old getSystemDataForShips (N+1 query version) - retained for safety
+    public function getSystemDataForShips(TacGamedata $gamedata, $fetchTurn)
+    {
         $stmt = $this->connection->prepare(
         "SELECT 
                 (SELECT data FROM tac_systemdata WHERE systemid = t.systemid AND shipid = t.shipid AND gameid = ? AND turn <= ? ORDER BY turn DESC limit 1) AS data, shipid, systemid, subsystem
@@ -2282,8 +2411,6 @@ class DBManager
           "
         );
 
-        //select shipid, systemid, max(turn) as maxturn, (select data from tac_systemdata where systemid = t.systemid and shipid = t.shipid and turn <= 1 order by turn desc limit 1) as data from tac_systemdata t group by systemid, subsystem, gameid, shipid;
-
         if ($stmt) {
             $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
             $stmt->execute();
@@ -2295,7 +2422,6 @@ class DBManager
             );
 
             while ($stmt->fetch()) {
-                //Debug::log("get ship by id '$shipId'\n");
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setSystemData($data, $subsystem);
             }
             $stmt->close();
@@ -2315,7 +2441,6 @@ class DBManager
 
         );
 
-        //select shipid, systemid, firingmode, (select ammo from tac_ammo where shipid = t.shipid and systemid = t.systemid and firingmode = t.firingmode and turn <= 1 order by turn desc limit 1) as ammo from tac_ammo t group by shipid, systemid, firingmode;
         if ($stmt) {
             $stmt->bind_param('iii', $gamedata->id, $fetchTurn, $gamedata->id);
             $stmt->execute();
@@ -2327,7 +2452,6 @@ class DBManager
             );
 
             while ($stmt->fetch()) {
-                // This is a dual/duoweapon or a fightersystem
                 $gamedata->getShipById($shipid)->getSystemById($systemid)->setAmmo($firingmode, $ammo);
             }
             $stmt->close();
@@ -2354,7 +2478,87 @@ class DBManager
 			$ship->onIndividualNotesLoaded($gamedata);
 		}
 		
-    } //endof function getSystemDataForShips
+    }
+*/
+
+    // Optimized bulk fetcher
+    private function getEnhancementsForGame($gameID){
+        $toReturn = array(); // Map shipid -> array of entries
+        $stmt = $this->connection->prepare(
+            "SELECT 
+                shipid, enhid, numbertaken, enhname
+            FROM 
+                tac_enhancements 
+            WHERE 
+                gameid = ?
+            "
+        );
+        if ($stmt)
+        {
+            $stmt->bind_param('i', $gameID);
+            $stmt->bind_result($shipID, $enhID, $numbertaken, $description);
+            $stmt->execute();
+            while ($stmt->fetch())
+            {
+                if (!isset($toReturn[$shipID])) $toReturn[$shipID] = array();
+                $toReturn[$shipID][] = array($enhID,$numbertaken,$description);
+            }
+            $stmt->close();
+        }
+        return $toReturn;
+    }
+
+    // Optimized bulk fetcher
+	public function getIndividualNotesForGame($gamedata, $turn)
+	{
+		$toReturn = array(); // Map shipid -> array of Note objects
+		$stmt = $this->connection->prepare(
+            "SELECT *
+				FROM 
+					tac_individual_notes
+				WHERE 
+					gameid = ? AND turn <= ? 
+				ORDER BY turn ASC, phase ASC
+			"
+        );
+		
+		if ($stmt) {
+            $stmt->bind_param('ii', $gamedata->id, $turn);
+            $stmt->execute();
+            $stmt->bind_result(
+                $id,
+                $gameid,
+                $turn,
+                $phase,
+                $shipid_db,
+                $systemid_db,
+                $notekey,
+                $notekey_human,
+                $notevalue
+            );
+
+            while ($stmt->fetch()) {
+                $entry = new IndividualNote(
+					$id,
+					$gameid,
+					$turn,
+					$phase,
+					$shipid_db,
+					$systemid_db,
+					$notekey,
+					$notekey_human,
+					$notevalue
+                );
+                
+                if (!isset($toReturn[$shipid_db])) $toReturn[$shipid_db] = array();
+				$toReturn[$shipid_db][] = $entry;
+            }
+            $stmt->close();
+        }
+		
+		return $toReturn;
+		
+	}
 	
 	
 	
@@ -3264,23 +3468,35 @@ public function setLastTimeChatChecked($userid, $gameid)
     }
 */
 //New verion
-public function submitChatMessage($userid, $message, $gameid = 0)
-{
-    $stmt = $this->connection->prepare("
-        INSERT INTO chat (userid, username, gameid, time, message)
-        VALUES (?, (SELECT username FROM player WHERE id = ?), ?, NOW(), ?)
-    ");
+	public function submitChatMessage($userid, $message, $gameid = 0)
+	{
+		$stmt = $this->connection->prepare("
+			INSERT INTO chat (userid, username, gameid, time, message)
+			VALUES (?, (SELECT username FROM player WHERE id = ?), ?, NOW(), ?)
+		");
+		
+		$id = -1;
 
-    if ($stmt) {
-        $stmt->bind_param('iiis', $userid, $userid, $gameid, $message);
-        $stmt->execute();
-        $stmt->close();
-    }
-}
+		if ($stmt) {
+			$stmt->bind_param('iiis', $userid, $userid, $gameid, $message);
+			$stmt->execute();
+			$stmt->close();
+			$id = $this->getLastInstertID();
+		}
+		
+		return $id;
+	}
 
     public function getChatMessages($lastid, $gameid = 0)
     {
         $messages = array();
+        
+        // Critical Optimization:
+        // If lastid is 0 (initial load or reset), ONLY fetch the last 20 messages.
+        // This prevents the "memory limit" cracshes seen when a client reconnects and tries to fetch 'all' history.
+        // The default LIMIT 50 was causing issues on CloudLinux due to large JSON payloads.
+        $limit = ($lastid == 0) ? 15 : 25;
+
         $stmt = $this->connection->prepare("
             SELECT 
                 id, userid, username, gameid, message, time
@@ -3291,11 +3507,11 @@ public function submitChatMessage($userid, $message, $gameid = 0)
             AND 
                 id > ?
             ORDER BY id DESC
-            LIMIT 50;
+            LIMIT ?;
         ");
 
         if ($stmt) {
-            $stmt->bind_param('ii', $gameid, $lastid);
+            $stmt->bind_param('iii', $gameid, $lastid, $limit);
             $stmt->bind_result($id, $userid, $username, $gameid, $message, $time);
             $stmt->execute();
             while ($stmt->fetch()) {

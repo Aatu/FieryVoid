@@ -36,7 +36,13 @@ class ChatManager{
             $message = htmlspecialchars($message);
             
             self::initDBManager();
-            self::$dbManager->submitChatMessage($userid, $message, $gameid);
+            $msgId = self::$dbManager->submitChatMessage($userid, $message, $gameid);
+            
+            // APCu: Update last message ID!
+            if (function_exists('apcu_store') && $msgId > 0) {
+                apcu_store('chat_last_id_' . $gameid, $msgId, 3600); // 1 hour TTL
+            }
+            
             return "{}";
         }    
         catch(Exception $e) 
@@ -50,9 +56,45 @@ class ChatManager{
     {
         try
         {
+            // APCu Fast Poll - Check BEFORE DB connection!
+            if (function_exists('apcu_fetch')) {
+                 $lastMsgId = apcu_fetch('chat_last_id_' . $gameid);
+                 if ($lastMsgId !== false && $lastid >= $lastMsgId) {
+                     return "[]";
+                 }
+            }
+
             self::initDBManager();
-            self::$dbManager->deleteOldChatMessages();
+            
+            // Optimization: Only delete old messages 1% of the time
+            if (mt_rand(0, 99) === 0) {
+                self::$dbManager->deleteOldChatMessages();
+            }
             $messages = self::$dbManager->getChatMessages($lastid, $gameid);
+            
+            // APCu: If we just fetched messages from DB, update the cache to ensure Fast Poll works next time
+            if (function_exists('apcu_store')) {
+                // If we got messages, the last one is the latest ID.
+                $latestId = 0;
+                $msgs = $messages; // assuming array of objects keyed by ID per DBManager
+                 
+                if (!empty($msgs)) {
+                    // Get the last key (highest ID)
+                    end($msgs);
+                    $latestId = key($msgs);
+                } else {
+                    // If no new messages, it means the client's lastid IS the latest known state.
+                    // We should update APCu with this ID so the Fast Poll check (id >= apcu_id) passes next time.
+                    if ($lastid > 0) {
+                        $latestId = $lastid;
+                    }
+                }
+
+                if ($latestId > 0) {
+                     apcu_store('chat_last_id_' . $gameid, $latestId, 3600);
+                }
+            }
+
             return json_encode($messages, JSON_NUMERIC_CHECK);
         }    
         catch(Exception $e) 

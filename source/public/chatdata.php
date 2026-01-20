@@ -2,6 +2,7 @@
 
 header('Content-Type: application/json; charset=utf-8');
 // --- Required classes ---
+require_once dirname(__DIR__) . '/server/server_load_guard.php';
 require_once dirname(__DIR__) . '/server/controller/ChatManager.php';
 require_once dirname(__DIR__) . '/server/controller/DBManager.php';
 require_once dirname(__DIR__) . '/server/model/ChatMessage.php';
@@ -62,7 +63,9 @@ try {
     echo json_encode([
         'error' => $e->getMessage(),
         'code'  => $e->getCode(),
-        'logid' => $logid
+        'logid' => $logid,
+        'file' => $e->getFile(),
+        'line' => $e->getLine()
     ]);
 }
 

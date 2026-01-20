@@ -265,15 +265,10 @@ window.ShipIcon = function () {
                         : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
         );
 
-        /* //Old method with just this.mine
-        this.shipSprite.setOverlayColor(
-            this.ship.shipSizeClass === 5 
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
-                : this.mine 
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
-                    : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
-        );
-        */
+        if (ship.imageFlipped) {
+            this.shipSprite.mesh.scale.y = -1;
+        }
+
         this.mesh.add(this.shipSprite.mesh);
 
         //29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously

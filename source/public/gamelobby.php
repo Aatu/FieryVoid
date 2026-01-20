@@ -1,13 +1,16 @@
 <?php
     include_once 'global.php';
+    session_write_close(); // Prevent session locking for concurrent loads
 	
 	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
+        exit;
 	}
     
     	if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
 		header('Location: games.php');
+        exit;
 	}
 	
 	
@@ -17,13 +20,25 @@
 		$gameid = $_GET["gameid"];
 	}
 	
-  $gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
+  // Use cached JSON to reduce server load
+  $gamelobbydataJSON = Manager::getGameLobbyDataJSON( $_SESSION["user"], $gameid);
+  $gamelobbydata = json_decode($gamelobbydataJSON);
+  
+    // STAMPEDE PROTECTION: If server is generating data, tell client to wait 1s
+    if (isset($gamelobbydata->status) && $gamelobbydata->status == "GENERATING") {
+        echo '<html><head><meta http-equiv="refresh" content="1"></head>
+        <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+        Loading...
+        </body></html>';
+        exit;
+    }
 
     if (!is_object($gamelobbydata) || $gamelobbydata->status != "LOBBY") {
         header('Location: games.php');
+        exit;
     }
   
-	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
+    // $gamelobbydataJSON is already set/cached, no need to encode again
 	
 	// Getting all ships in one go causes memory overload on the server.
 	// Get the factions first. When a faction is opened to buy ships,
@@ -349,7 +364,8 @@
 		<div class="panel large lobby">
             <?php 
                 $isFleetTest = false;
-                if ($gamelobbydata->rules && $gamelobbydata->rules->hasRuleName('fleetTest')) {
+                // Using isset/property check instead of hasRuleName for JSON object
+                if (isset($gamelobbydata->rules->fleetTest)) {
                     $isFleetTest = true;
                 }
             ?>
@@ -375,6 +391,7 @@ $optionsUsed = '';
 
     $simMv = false;
     $desperate = false;
+    $friendlyFire = false;    
     $asteroids = false;
     $moons = false;
     $initiativeCategories = null;
@@ -383,44 +400,42 @@ $optionsUsed = '';
     $moonData = [];
 
 
-    if ($gamelobbydata->rules) {
-        if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
+    if (isset($gamelobbydata->rules)) {
+        if (isset($gamelobbydata->rules->initiativeCategories)) {
             $simMv = true;
-            $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
-            if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
-                $initiativeCategories = $initiativeRule->jsonSerialize();
-            }
+            $initiativeCategories = $gamelobbydata->rules->initiativeCategories;
         }
 
-        if ($gamelobbydata->rules->hasRuleName('desperate')) {
+        if (isset($gamelobbydata->rules->desperate)) {
             $desperate = true;
-            $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
-            if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
-                $desperateTeams = $desperateRule->jsonSerialize();
-            }        
+            $desperateTeams = $gamelobbydata->rules->desperate;     
         }
 
-        if ($gamelobbydata->rules->hasRuleName('asteroids')) {
+        if (isset($gamelobbydata->rules->friendlyFire)) {
+            $friendlyFire = true;  
+        }        
+
+        if (isset($gamelobbydata->rules->asteroids)) {
             $asteroids = true;
-            $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
-            if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
-                $asteroidsNo = $asteroidsRule->jsonSerialize();
-            }        
+            $asteroidsNo = $gamelobbydata->rules->asteroids;     
         }  
 
-        if ($gamelobbydata->rules->hasRuleName('moons')) {
+        if (isset($gamelobbydata->rules->moons)) {
             $moons = true;
-            $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
-            if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-                $moonData = $moonsRule->jsonSerialize();
-            }        
+            $rulesMoons = $gamelobbydata->rules->moons;
+            // Convert to array if object
+            if (is_object($rulesMoons)) {
+                $moonData = (array)$rulesMoons;
+            } else if (is_array($rulesMoons)) {
+                $moonData = $rulesMoons;
+            }
         }       
     }
 
     if ($simMv == true) { // simultaneous movement
         $optionsUsed .= ', Simultaneous Movement';
         if ($initiativeCategories !== null) {
-            $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
+            $optionsUsed .= ' (Brackets: ' . $initiativeCategories . ')';
         }
     } else { // standard movement
         $optionsUsed .= ', Standard Movement';
@@ -440,6 +455,13 @@ $optionsUsed = '';
     } else { // standard rules
         $optionsUsed .= '';
     }
+
+    if ($friendlyFire == true) { // Desperate rules in play
+        $optionsUsed .= ', Friendly Fire';
+    } else { // standard rules
+        $optionsUsed .= '';
+    }
+
 
     if ($asteroids == true) { // Asteroid terrain rules in play
         $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
@@ -659,19 +681,29 @@ $optionsUsed = '';
 
     <script>
         let cachedFleets = [];
+        let fleetsLoaded = false;
         // References
         const fleetDropdownButton = document.getElementById('fleetDropdownButton');
         const fleetDropdownList = document.getElementById('fleetDropdownList');
 
-        // Initialize cache once on page load
-        ajaxInterface.getSavedFleets(function(fleets) {
-            cachedFleets = fleets;
-            gamedata.populateFleetDropdown();
-        });        
-
         // Toggle dropdown visibility
         fleetDropdownButton.addEventListener('click', () => {
-            fleetDropdownList.style.display = fleetDropdownList.style.display === 'block' ? 'none' : 'block';
+            if (fleetDropdownList.style.display === 'block') {
+                fleetDropdownList.style.display = 'none';
+            } else {
+                fleetDropdownList.style.display = 'block';
+                
+                if (!fleetsLoaded) {
+                     // Show loading state
+                     fleetDropdownList.innerHTML = '<div style="text-align:center; padding:10px; color:#555;">Loading fleets...</div>';
+                     
+                     ajaxInterface.getSavedFleets(function(fleets) {
+                        cachedFleets = fleets;
+                        fleetsLoaded = true;
+                        gamedata.populateFleetDropdown();
+                    });
+                }
+            }
         });
 
         // Close dropdown if clicked outside

@@ -1283,12 +1283,11 @@ window.confirm = {
         //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
 
 
-        $(".ok", e).on("click", callback);
+        $(".confirmok", e).on("click", callback);
         $(".confirmok", e).on("click", function () {
             $(".confirm").remove();
         });
         $(".confirmcancel", e).remove();
-        $(".ok", e).css("left", "45%");
         var a = e.appendTo("body");
         a.fadeIn(250);
     },
