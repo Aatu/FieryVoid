@@ -43,8 +43,9 @@ class TlacaEarly extends MediumShip{
         $this->addFrontSystem(new LightParticleBeamShip(2, 4, 1, 240, 360));
         $this->addFrontSystem(new LightParticleBeamShip(3, 6, 3, 0, 120));		
 
+        $this->addAftSystem(new Thruster(2, 9, 0, 2, 2));		
         $this->addAftSystem(new Hangar(1, 12));
-
+        $this->addAftSystem(new Thruster(2, 9, 0, 2, 2));
 	
         $this->addPrimarySystem(new Structure( 4, 46));
         
