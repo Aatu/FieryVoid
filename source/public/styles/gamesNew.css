@@ -718,10 +718,29 @@ kbd {
 
 .btn-view-ladder {
   /* Custom styles for View Ladder button */
+    background: #196666;
+    border: 1px solid #29a3a3;  
 }
 
 .btn-recent-games {
   /* Custom styles for Recent Games button */
+    background: #215a7a;
+    border: 1px solid #628c9d;
+}
+
+/* Distinct styles for Lobby Game Types */
+.game-type-fleettest {
+    border: 1px solid #e6ac00 !important;
+    background-color: rgba(40, 30, 0, 0.5);
+}
+
+.game-type-fleettest .lobbyname {
+    color: #ffbf00 !important; /* Gold for Fleet Test */
+}
+
+.game-type-normal {
+    /* Standard look, ensures consistency if defaults change */
+    border: 1px solid #66b266;
 }
 
 
