@@ -147,9 +147,9 @@ class Stealth extends ShipSystem implements SpecialAbility{
 				}	
 			break;
 
-			case 4: //Post-Firing phase
+			case 5: //Pre-Firing phase Advance(), always called even if phase not needed in game.
 				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
-					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?							//Prepare note for database!		
+					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
 						$notekey = 'detected';
 						$noteHuman = 'Ship detected';
 						$noteValue = 1;
