@@ -715,6 +715,7 @@ kbd {
   -moz-box-shadow: 0px 0px 1px #4a6a7a;
   -webkit-box-shadow: 0px 0px 1px #4a6a7a;
   box-shadow: 0px 0px 1px #4a6a7a;
+  color: #deebffe0;  
 }
 
 .game-type-fleettest {
@@ -737,7 +738,7 @@ kbd {
 
 .gameRules {
   /*color: #DEEBFF;*/
-  color: rgba(230, 255, 230, 0.616);
+  color: rgba(230, 255, 230, 0.705);
   font-size: 12px;
   font-weight: normal;
   margin-bottom: 0px;
