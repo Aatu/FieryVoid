@@ -71,7 +71,7 @@ jQuery(function ($) {
                 }
             });
 
-            console.log("Ladder JS Initialized");
+            //console.log("Ladder JS Initialized");
         },
 
         open: function (e) {
