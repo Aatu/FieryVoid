@@ -1641,14 +1641,19 @@ class DBManager
 
 				$nm = $gameName;
                 $nm .= ' <br><span class="gameRules">(';
-			//gamespace and rules: add to name!    
+			    //gamespace and rules: add to name!
 				if ($gamespace == '-1x-1'){ //open map
 					$nm .= 'Open';
 				}else{ //fixed map
 					$nm .= $gamespace;
 				}
+
+				if (strpos($rules, 'ladder')!==false){
+					$nm  .= ', Ladder';
+				}     
+
 				if (strpos($rules, 'initiativeCategories')!==false){//simultaneous movement
-					$nm  .= ', Sim Mov';
+					$nm  .= ', Sim. Mov';
 				}else{//standard movement
 					$nm  .= ', Std Mov';
 				}
