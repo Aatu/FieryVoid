@@ -1669,7 +1669,7 @@ class DBManager
                 $fleetTest = false;
                 //To mark Fleet Test games as Fleet Test in lobby
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
-                    $nm = '<span style="color:yellow; font-weight:bold;">Fleet Test</span>';
+                    $nm = '<span style="color:#ffbf00; font-weight:bold;">Fleet Test</span>';
                     $fleetTest = true;                    
                 }    
 
@@ -3596,6 +3596,62 @@ public function setLastTimeChatChecked($userid, $gameid)
         } catch (Exception $e) {
             throw $e;
         }
+    }
+    public function registerLadderPlayer($playerid)
+    {
+        // Check if already registered
+        $sql = "SELECT playerid FROM tac_ladder_rankings WHERE playerid = $playerid";
+        $result = $this->query($sql);
+        if ($result && sizeof($result) > 0) {
+           throw new Exception("You are already registered for the ladder.");
+        }
+
+        // Insert with default rating 100
+        $sql = "INSERT INTO tac_ladder_rankings (playerid, rating) VALUES ($playerid, 100)";
+        $this->insert($sql);
+    }
+
+    public function registerLadderResult($gameid, $playerid, $status)
+    {
+        $sql = "INSERT INTO tac_ladder_games (gameid, playerid, status) VALUES ($gameid, $playerid, '$status')";
+        $this->insert($sql);
+
+        // Update Rating: +1 for WIN, -1 for LOSS
+        $change = 0;
+        if ($status === "WIN") $change = 1;
+        else if ($status === "LOSS") $change = -1;
+
+        if ($change != 0) {
+            // Upsert: If player exists, add change. If not, start at 100 + change.
+            $sql = "INSERT INTO tac_ladder_rankings (playerid, rating) VALUES ($playerid, 100 + ($change)) 
+                    ON DUPLICATE KEY UPDATE rating = rating + ($change)";
+            $this->insert($sql); 
+        }
+    }
+
+    public function getLadderHistory($playerid)
+    {
+        $sql = "SELECT g.id, g.name, lg.status, p_opp.username as opponent_name, p_opp.id as opponent_id
+                FROM tac_ladder_games lg
+                JOIN tac_game g ON lg.gameid = g.id
+                LEFT JOIN tac_ladder_games lg_opp ON lg_opp.gameid = g.id AND lg_opp.playerid != lg.playerid
+                LEFT JOIN player p_opp ON lg_opp.playerid = p_opp.id
+                WHERE lg.playerid = $playerid
+                ORDER BY g.id DESC
+                LIMIT 20";
+        return $this->query($sql);
+    }
+
+    public function getLadderStandings()
+    {
+        $sql = "SELECT r.playerid, r.rating, p.username,
+                (SELECT COUNT(*) FROM tac_ladder_games g WHERE g.playerid = r.playerid AND g.status = 'WIN') as wins,
+                (SELECT COUNT(*) FROM tac_ladder_games g WHERE g.playerid = r.playerid AND g.status = 'LOSS') as losses
+                FROM tac_ladder_rankings r
+                LEFT JOIN player p ON r.playerid = p.id
+                ORDER BY r.rating DESC";
+                
+        return $this->query($sql);
     }
 }
 

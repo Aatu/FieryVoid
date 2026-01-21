@@ -517,6 +517,7 @@ spl_autoload_register(
                 'kromala' => '/server/model/ships/drazi_old/kromala.php',
                 'kutai' => '/server/model/ships/centauri/kutai.php',
                 'kutaiplasma' => '/server/model/ships/centauri/kutaiPlasma.php',
+                'ladderrule' => '/server/model/LadderRule.php',
                 'laertes' => '/server/model/ships/EA/laertes.php',
                 'laertesepsilon' => '/server/model/ships/EA/laertesEpsilon.php',
                 'laertes_early' => '/server/model/ships/EA_old/laertes_early.php',

@@ -164,6 +164,16 @@
     color: rgba(255, 255, 255, 0.692);
 }
 
+.confirm.warning {
+    background-color: #04161C;    
+    border: 1px solid #496791;  
+    color: #DEEBFF;
+    font-family: arial;
+    font-size: 16px;
+    width: 400px;    
+    display: inline-block;    
+}
+
 .confirm h2 {
     font-size: 22px;
     margin: 10px;

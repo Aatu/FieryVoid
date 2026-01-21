@@ -1,0 +1,244 @@
+/* Ladder Modal */
+#ladderModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.ladder-modal-content {
+    background-color: #04161C;
+    margin: 5% auto;
+    padding: 20px;
+    border: 1px solid #496791;
+    width: 80%;
+    max-width: 800px;
+    color: #DEEBFF;
+}
+
+.close-ladder {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-ladder:hover,
+.close-ladder:focus {
+    color: #fff;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* Layout */
+.ladder-flex-container {
+    display: flex;
+    gap: 20px;
+}
+
+.ladder-table-scroll {
+    max-height: 60vh;
+    overflow-y: auto;
+    border: 1px solid #334455;
+}
+
+/* Custom Scrollbar for Webkit */
+.ladder-table-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.ladder-table-scroll::-webkit-scrollbar-track {
+    background: #0c151a;
+}
+
+.ladder-table-scroll::-webkit-scrollbar-thumb {
+    background: #2a4a66;
+    border-radius: 4px;
+}
+
+.ladder-table-scroll::-webkit-scrollbar-thumb:hover {
+    background: #3a6a96;
+}
+
+
+.ladder-standings {
+    flex: 1;
+}
+
+.ladder-calculator {
+    flex: 0 0 300px;
+    padding-left: 20px;
+    border-left: 1px solid #496791;
+}
+
+/* Buttons */
+.btn-register-ladder {
+    float: right;
+    font-size: 14px;
+    background: #215a7a;
+    color: white;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #7298a7;
+}
+
+.btn-ladder-inline {
+    display: inline-block;
+    font-size: 13px;
+    background: #215a7a;
+    color: white;
+    padding: 2px 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #7298a7;
+    margin-left: 10px;
+    text-decoration: none;
+    width: 100px;
+    text-align: center;
+}
+
+.btn-register-ladder:hover,
+.btn-ladder-inline:hover {
+    background: #2c7da0;
+    color: white;
+}
+
+#btnCalculate {
+    width: 100%;
+    padding: 5px;
+    background: #215a7a;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #7298a7;
+}
+
+#btnCalculate:hover {
+    background: #5b80b0;
+}
+
+#btnPopulateSlots {
+    width: 100%;
+    padding: 5px;
+    background: #2a6633;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #66b266;
+}
+
+#btnPopulateSlots:hover {
+    background: #3a8a44;
+}
+
+/* Table */
+#ladderTable,
+#ladderHistoryTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+#ladderTable th,
+#ladderHistoryTable th {
+    border-bottom: 1px solid #496791;
+    padding: 8px;
+}
+
+#ladderTable th.text-left,
+#ladderHistoryTable th.text-left {
+    text-align: left;
+}
+
+#ladderTable th.text-center,
+#ladderHistoryTable th.text-center {
+    text-align: center;
+}
+
+.ladder-cell {
+    padding: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.ladder-cell-center {
+    text-align: center;
+    padding: 8px;
+    border-bottom: 1px solid #333;
+}
+
+.ladder-rating-cell {
+    text-align: center;
+    padding: 8px;
+    border-bottom: 1px solid #333;
+    font-weight: bold;
+    color: #8bcaf2;
+}
+
+.ladder-row-highlight {
+    background-color: rgba(33, 90, 122, 0.3);
+}
+
+/* Forms */
+.ladder-input-group {
+    margin-bottom: 10px;
+}
+
+.ladder-label {
+    display: block;
+}
+
+.ladder-input {
+    width: 100%;
+    padding: 5px;
+    background: #000;
+    color: #fff;
+    border: 1px solid #496791;
+}
+
+.ladder-static-value {
+    display: block;
+    padding: 0px;
+    color: #8bcaf2;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.ladder-calc-result {
+    margin-top: 20px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.ladder-disclaimer {
+    margin-top: 20px;
+    font-size: 12px;
+    color: #aaa;
+}
+
+.bonus-text-green {
+    color: #00ff00;
+}
+
+.bonus-text-yellow {
+    color: #ffcc00;
+}
+
+.bonus-subtext {
+    font-size: 12px;
+    color: #aaa;
+}
+
+/* Custom Hooks for Future Styling */
+.history-player-name {
+    /* Add custom styles for player name in history modal here */
+    font-weight: bold;
+    color: #8bcaf2;
+}

@@ -891,7 +891,41 @@ class Manager{
 
                 // Step 4: End game if one or zero teams remain
                 if ($aliveCount <= 1) {
-                    self::$dbManager->updateGameStatus($gameid, "SURRENDERED"); 
+                    self::$dbManager->updateGameStatus($gameid, "SURRENDERED");
+
+                    // --- LADDER LOGIC START ---
+                    $rules = $gdS->rules;
+                    if ($rules->hasRule('ladder') && $rules->callRule('ladder', array())) {
+                        // Game is a ladder game and has just finished via surrender.
+                        // Winners: Teams that are still "alive" (or if everyone surrendered, the last one standing implicitly).
+                        // Losers: Teams that have surrendered.
+                        
+                        // Re-evaluate slots to be sure we have latest state
+                        $finalSlots = self::$dbManager->getSlotsInGame($gameid);
+                        $winningTeam = null;
+
+                        // Identify the winning team (the one not surrendered)
+                        // If aliveCount is 1, find that team.
+                        // If aliveCount is 0, arguably everyone lost, or the last one to surrender "won"? 
+                        // Let's assume standard flow: one team remains.
+                        foreach ($finalSlots as $slot) {
+                             if ($slot->surrendered === null) {
+                                 $winningTeam = $slot->team;
+                                 break;
+                             }
+                        }
+                        
+                        if ($winningTeam !== null) {
+                            foreach ($finalSlots as $slot) {
+                                if ($slot->team == $winningTeam) {
+                                    self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'WIN');
+                                } else {
+                                    self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'LOSS');
+                                }
+                            }
+                        }
+                    }
+                    // --- LADDER LOGIC END ---
                 }
             } else {
                 return "{}";
@@ -1425,6 +1459,25 @@ class Manager{
     //Used by systems that boost outside of Initial Orders to prevent duplication of power entries.
     public static function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn){              
 		self::$dbManager->removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn);	
+    }
+
+    public static function getLadderStandings()
+    {
+        self::initDBManager();
+        return self::$dbManager->getLadderStandings();
+    }
+
+    public static function registerLadderPlayer($playerid)
+    {
+        self::initDBManager();
+        return self::$dbManager->registerLadderPlayer($playerid);
+    }
+
+
+    public static function getLadderHistory($playerid)
+    {
+        self::initDBManager();
+        return self::$dbManager->getLadderHistory($playerid);
     }
 
 }

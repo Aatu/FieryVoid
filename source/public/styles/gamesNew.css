@@ -525,20 +525,20 @@ a:hover {
   padding: 5px 10px;
 }
 
-.btn-secondary-lobby-leaveGame{
-    background: #215a7a;
-    color: white;
-    border: 1px solid #7298a7;
-    text-align: center;
-    box-sizing: border-box;
-    margin-top: 10px;
-    margin-right: 5px;
-    font-size: 13px;
-    width: 120px;
-    min-width: 90px;
-    height: auto;
-    line-height: normal;
-    padding: 5px 5px;    
+.btn-secondary-lobby-leaveGame {
+  background: #215a7a;
+  color: white;
+  border: 1px solid #7298a7;
+  text-align: center;
+  box-sizing: border-box;
+  margin-top: 10px;
+  margin-right: 5px;
+  font-size: 13px;
+  width: 120px;
+  min-width: 90px;
+  height: auto;
+  line-height: normal;
+  padding: 5px 5px;
 }
 
 .btn:hover {
@@ -710,7 +710,19 @@ kbd {
 }
 
 /* Slot Card Styling */
-/* Slot card and settings moved to createGame.css */
+/* Games List Buttons - Moved from ladder.css */
+.btn-fleet-test {
+    background: #997300;
+    border: 1px solid #e6ac00;
+}
+
+.btn-view-ladder {
+  /* Custom styles for View Ladder button */
+}
+
+.btn-recent-games {
+  /* Custom styles for Recent Games button */
+}
 
 
 

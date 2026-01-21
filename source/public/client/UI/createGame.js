@@ -131,6 +131,7 @@ jQuery(function ($) {
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
     $("#terraincheck").on("click", createGame.doTerrainCheck);
     $("#friendlyFireCheck").on("click", createGame.doFriendlyFireCheck);
+    $("#laddercheck").on("click", createGame.doLadderCheck);
 
     createGame.createSlotsFromArray();
     createGame.onMapDimensionsChange(); // Run on load
@@ -428,6 +429,16 @@ window.createGame = {
             createGame.rules.friendlyFire = 1;
         } else {
             delete createGame.rules.friendlyFire;
+        }
+    },
+
+    doLadderCheck: function doLadderCheck(data) {
+        var checkval = $("#laddercheck:checked").val();
+
+        if (checkval == "on") {
+            createGame.rules.ladder = 1;
+        } else {
+            delete createGame.rules.ladder;
         }
     },
 

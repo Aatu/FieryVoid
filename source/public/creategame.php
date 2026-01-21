@@ -31,6 +31,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
         <link href="styles/confirm.css" rel="stylesheet" type="text/css">
+        <link href="styles/ladder.css" rel="stylesheet" type="text/css">
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
         <link href="styles/createGame.css" rel="stylesheet" type="text/css">
@@ -39,7 +40,8 @@
         <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
         <script src="client/UI/createGame.js"></script>
-        <script src="client/ajaxInterface.js"></script>        
+        <script src="client/ajaxInterface.js"></script>
+        <script src="client/ladder.js"></script>        
 	</head>
 	<body class="creategame">
   <header class="pageheader">
@@ -83,10 +85,15 @@
                 </div>    
 
 
+
+                <div class="settings-group movementspacecontainer">
+                     <input id="laddercheck" type="checkbox" name="laddercheck"> <label for="laddercheck" class="clickable">Ladder Game</label>
+                     <span class="btn-ladder btn-ladder-inline btn-create-game-ladder">View Ladder</span>
+                </div>
             
                 <div id="simultaenousMovement" class="settings-group movementspacecontainer">
                     <div>
-                        <input id="movementcheck" type="checkbox" name="movementcheck"> <label for="movementcheck" class="clickable">USE SIMULTANEOUS MOVEMENT</label>
+                        <input id="movementcheck" type="checkbox" name="movementcheck"> <label for="movementcheck" class="clickable">Use Simultaneous Movement</label>
                     </div>
                     <div id="movementDropdown" class="movementDropdown">
                         <label for="initiativeSelect">Number of Brackets:</label>
@@ -110,7 +117,7 @@
 
                 <div id="terrain" class="settings-group movementspacecontainer">
                     <div>
-                        <input id="terraincheck" type="checkbox" name="terraincheck"> <label for="terraincheck" class="clickable">ADD TERRAIN</label>
+                        <input id="terraincheck" type="checkbox" name="terraincheck"> <label for="terraincheck" class="clickable">Add Terrain</label>
                     </div>
 
                     <div id="asteroidsDropdown" class="terrainDropdowns">
@@ -162,12 +169,12 @@
                 </div>    
 
                 <div class="settings-group movementspacecontainer">
-                     <input id="friendlyFireCheck" type="checkbox" name="friendlyFireCheck"> <label for="friendlyFireCheck" class="clickable">FRIENDLY FIRE</label>
+                     <input id="friendlyFireCheck" type="checkbox" name="friendlyFireCheck"> <label for="friendlyFireCheck" class="clickable">Friendly Fire</label>
                 </div>
 
                 <div id="desperate" class="settings-group movementspacecontainer">
                     <div>
-                        <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">DESPERATE SCENARIO</label>
+                        <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">Desperate Scenario</label>
                     </div>    
                     
                     <div id="desperateDropdown" class="desperateDropdown">
@@ -181,7 +188,7 @@
                 </div>
 
                 <div class="settings-group movementspacecontainer">
-                     <input id="unlimitedPointsCheck" type="checkbox" name="unlimitedPointsCheck"> <label for="unlimitedPointsCheck" class="clickable">UNLIMITED POINTS</label>
+                     <input id="unlimitedPointsCheck" type="checkbox" name="unlimitedPointsCheck"> <label for="unlimitedPointsCheck" class="clickable">Unlimited Points</label>
                 </div>
 
 
@@ -398,5 +405,6 @@ All trademarks and copyrights remain the property of their respective owners.
   </p>
 </footer>
 
+<?php include("ladder.php"); ?>
 </body>
 </html>

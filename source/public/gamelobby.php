@@ -389,6 +389,7 @@ $optionsUsed = '';
         $optionsUsed .= 'Map ' . $gamelobbydata->gamespace;
     }
 
+    $ladder = false;
     $simMv = false;
     $desperate = false;
     $friendlyFire = false;    
@@ -401,6 +402,11 @@ $optionsUsed = '';
 
 
     if (isset($gamelobbydata->rules)) {
+
+        if (isset($gamelobbydata->rules->ladder)) {
+            $ladder = true;  
+        }        
+
         if (isset($gamelobbydata->rules->initiativeCategories)) {
             $simMv = true;
             $initiativeCategories = $gamelobbydata->rules->initiativeCategories;
@@ -430,6 +436,12 @@ $optionsUsed = '';
                 $moonData = $rulesMoons;
             }
         }       
+    }
+
+    if ($ladder == true) { // Ladder game
+        $optionsUsed .= ', Ladder Game';
+    } else { 
+        $optionsUsed .= '';
     }
 
     if ($simMv == true) { // simultaneous movement
@@ -490,7 +502,7 @@ $optionsUsed = '';
     }
 
     if ($asteroids == false && $moons == false) { 
-        $optionsUsed .= ', No terrain';
+        $optionsUsed .= ', No Terrain';
     }
 
 ?>
