@@ -41,7 +41,7 @@ class BrixadiiDestroyerEscort extends HeavyCombatVessel{
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
         $this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 240, 60));
         $this->addFrontSystem(new NexusParticleBolter(3, 6, 2, 300, 120));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
+		$this->addFrontSystem(new NexusAntifighterLauncher(0, 6, 0, 270, 90));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -70,7 +70,7 @@ class BrixadiiDestroyerEscort extends HeavyCombatVessel{
                     5 => "Thruster",
                     7 => "Light Particle Beam",
                     10 => "Particle Bolter",
-					12 => "Kinetic Box Launcher",
+					12 => "Anti-fighter Launcher",
 					18 => "Structure",
                     20 => "Primary",
             ),
