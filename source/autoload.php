@@ -1726,6 +1726,7 @@ spl_autoload_register(
                 'brixadiiwarshipbase' => '/server/model/ships/NexusBrixadii_old/BrixadiiWarshipBase.php',		
                 'brixadiiwarshipprototype' => '/server/model/ships/NexusBrixadii_old/BrixadiiWarshipPrototype.php',		
                 'brixadiiwarship2108' => '/server/model/ships/NexusBrixadii/BrixadiiWarship2108.php',	
+                'brixadiiwarshipescort' => '/server/model/ships/NexusBrixadii/BrixadiiWarshipEscort.php',	
 
                 'brixadiijumpscout' => '/server/model/ships/NexusBrixadii_old/BrixadiiJumpScout.php',		
                 'brixadiijumpscout2108' => '/server/model/ships/NexusBrixadii/BrixadiiJumpScout2108.php',		
