@@ -1674,7 +1674,7 @@ class DBManager
                 $fleetTest = false;
                 //To mark Fleet Test games as Fleet Test in lobby
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
-                    $nm = '<span style="color:#ffbf00; font-weight:bold;">Fleet Test</span>';
+                    $nm = '<span style="color:#e6ac00; font-weight:bold;">Fleet Test</span>';
                     $fleetTest = true;                    
                 }    
 

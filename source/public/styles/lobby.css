@@ -407,7 +407,7 @@
 }
 
 .fleet-test-text {
-    color: yellow;
+    color: #ffbf00 !important; /* Gold for Fleet Test */
 }
 
 .rules-info-header {

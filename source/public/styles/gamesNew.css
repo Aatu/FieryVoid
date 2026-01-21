@@ -570,33 +570,6 @@ a:hover {
   margin-top: 0px
 }
 
-.gameRules {
-  /*color: #DEEBFF;*/
-  color: #84a5ce;
-  font-size: 12px;
-  font-weight: normal;
-  margin-bottom: 0px;
-  margin-top: 0px
-}
-
-.players {
-  /*color: #DEEBFF;*/
-  color: #DEEBFF;
-  font-size: 12px;
-  font-weight: normal;
-  margin-bottom: 0px;
-  margin-top: 0px
-}
-
-.waitingForTurn {
-  border: 1px solid #84a5ce !important;
-  background-color: #254e82 !important;
-  -moz-box-shadow: 0px 0px 1px #4a6a7a;
-  -webkit-box-shadow: 0px 0px 1px #4a6a7a;
-  box-shadow: 0px 0px 1px #4a6a7a;
-}
-
-
 
 .create-col .btn {
   display: block;
@@ -712,37 +685,73 @@ kbd {
 /* Slot Card Styling */
 /* Games List Buttons - Moved from ladder.css */
 .btn-fleet-test {
-    background: #997300;
-    border: 1px solid #e6ac00;
+  background: #997300b6;
+  border: 1px solid #e6ac00;
 }
 
 .btn-view-ladder {
   /* Custom styles for View Ladder button */
-    background: #196666;
-    border: 1px solid #29a3a3;  
+  background: #004d66;
+  border: 1px solid #0086b3;
 }
 
 .btn-recent-games {
   /* Custom styles for Recent Games button */
-    background: #215a7a;
-    border: 1px solid #628c9d;
+  background: #3d5c5cb6;
+  border: 1px solid #527a7a;
 }
 
 /* Distinct styles for Lobby Game Types */
+.create-game-btn {
+  /* Custom styles for Create Game button */
+  background: #3c7a3ce0 !important;
+  border: 1px solid #66b266 !important;
+}
+
+
+.waitingForTurn {
+  border: 1px solid #84a5ce !important;
+  background-color: #254d82d0 !important;
+  -moz-box-shadow: 0px 0px 1px #4a6a7a;
+  -webkit-box-shadow: 0px 0px 1px #4a6a7a;
+  box-shadow: 0px 0px 1px #4a6a7a;
+}
+
 .game-type-fleettest {
-    border: 1px solid #e6ac00 !important;
-    background-color: rgba(40, 30, 0, 0.5);
+  border: 1px solid #997300 !important;
+  background-color: rgba(40, 30, 0, 0.5);
 }
 
 .game-type-fleettest .lobbyname {
-    color: #ffbf00 !important; /* Gold for Fleet Test */
+  color: #e6ac00 !important;
+  /* Gold for Fleet Test */
 }
 
 .game-type-normal {
-    /* Standard look, ensures consistency if defaults change */
-    border: 1px solid #66b266;
+  /* Standard look, ensures consistency if defaults change */
+  color: #46a046 !important;
+  /* Gold for Fleet Test */
+  border: 1px solid #3c773c;
+  background-color: rgb(17, 34, 17, 0.5)
 }
 
+.gameRules {
+  /*color: #DEEBFF;*/
+  color: rgba(230, 255, 230, 0.616);
+  font-size: 12px;
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px
+}
+
+.players {
+  /*color: #DEEBFF;*/
+  color: rgb(222, 235, 255, 0.9);
+  font-size: 12px;
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px
+}
 
 
 @media screen and (max-width: 600px) {
