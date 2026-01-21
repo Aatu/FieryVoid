@@ -41,7 +41,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
 		$this->addFrontSystem(new ScatterPulsar(3, 4, 2, 300, 120));
         $this->addFrontSystem(new EnergyPulsar(3, 6, 3, 240, 60));
         $this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 120));
-		$this->addFrontSystem(new NexusAntifighterLauncher(0, 6, 0, 270, 90));
+		$this->addFrontSystem(new AegisSensorPod(0, 0, 0, 0, 360, 3));
                 
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -70,7 +70,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
                     5 => "Thruster",
                     7 => "Scatter Pulsar",
                     10 => "Energy Pulsar",
-					12 => "Anti-fighter Launcher",
+					12 => "Aegis Sensor Pod",
 					18 => "Structure",
                     20 => "Primary",
             ),
