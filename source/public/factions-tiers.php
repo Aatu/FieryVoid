@@ -73,7 +73,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#deneth">DENETH TRIBES</a></li>
                 <li><a href="#descari">DESCARI COMMITTEES</a></li>
                 <li><a href="#drakh">THE DRAKH (Unofficial)</a></li>                
-                <li><a href="#llort">THE LLLORT</a></li>
+                <li><a href="#llort">THE LLORT</a></li>
                 <li><a href="#markab">MARKAB THEOCRACY</a></li>
                 <li><a href="#minbariProt">MINBARI PROTECTORATE</a></li>                               
                 <li><a href="#rogolon">ROGOLON DYNASTY</a></li>    
@@ -704,7 +704,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>  
 
 
-    <h4 id="llort" style="">THE LLLORT</h4>
+    <h4 id="llort" style="">THE LLORT</h4>
     <p>No very specific rules/technologies but it's worth noting that their ships are often unusually asymmetric with atypical firing arcs and eclectic weapons sets.</p>                                 
     <a class="back-to-top" href="#top">↩ Back to Top</a>    
 
@@ -1410,7 +1410,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
        <li>Gaim Intelligence</li>
        <li>Hyach Gerontacracy</li>
        <li>Kor-Lyan Kingdoms</li>
-       <li>Lllort</li>
+       <li>Llort</li>
        <li>Minbari Federation</li>
        <li>Minbari Protectorate</li>
        <li>Narn Regime (with 6 or less Energy Mines)</li>
