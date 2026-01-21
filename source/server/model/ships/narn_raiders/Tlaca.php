@@ -28,14 +28,13 @@ class Tlaca extends MediumShip{
     	$this->fighters = array("medium"=>12);
          
         $this->addPrimarySystem(new Reactor(3, 8, 0, 0));
-        $this->addFrontSystem(new CnC(3, 4, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
         $this->addPrimarySystem(new Engine(3, 6, 0, 4, 3));        
-        $this->addFrontSystem(new Hangar(3, 1));
     	$this->addPrimarySystem(new Thruster(2, 9, 0, 2, 3));
     	$this->addPrimarySystem(new Thruster(2, 9, 0, 2, 4));
-    	
 		
+        $this->addFrontSystem(new CnC(3, 4, 0, 0));
+        $this->addFrontSystem(new Hangar(3, 1));
         $this->addFrontSystem(new Thruster(2, 9, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 9, 0, 2, 1));
         $this->addFrontSystem(new MediumPlasma(4, 5, 3, 240, 360));
@@ -44,7 +43,8 @@ class Tlaca extends MediumShip{
         $this->addFrontSystem(new LightPulse(3, 6, 3, 0, 120));		
 
         $this->addAftSystem(new Hangar(1, 12));
-
+        $this->addAftSystem(new Thruster(2, 9, 0, 2, 2));
+        $this->addAftSystem(new Thruster(2, 9, 0, 2, 2));
 	
         $this->addPrimarySystem(new Structure( 4, 46));
         
