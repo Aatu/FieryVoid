@@ -685,20 +685,20 @@ kbd {
 /* Slot Card Styling */
 /* Games List Buttons - Moved from ladder.css */
 .btn-fleet-test {
-  background: #997300b6;
-  border: 1px solid #e6ac00;
+  background: #99730091;
+  border: 1px solid #b38600;
 }
 
 .btn-view-ladder {
   /* Custom styles for View Ladder button */
-  background: #004d66;
-  border: 1px solid #0086b3;
+  background: #004d66d0;
+  border: 1px solid #007399;
 }
 
 .btn-recent-games {
   /* Custom styles for Recent Games button */
   background: #3d5c5cb6;
-  border: 1px solid #527a7a;
+  border: 1px solid #476b6b;
 }
 
 /* Distinct styles for Lobby Game Types */
@@ -720,7 +720,7 @@ kbd {
 
 .game-type-fleettest {
   border: 1px solid #997300 !important;
-  background-color: rgba(40, 30, 0, 0.5);
+  background-color: rgb(17, 34, 17, 0.4)
 }
 
 .game-type-fleettest .lobbyname {
@@ -733,7 +733,7 @@ kbd {
   color: #46a046 !important;
   /* Gold for Fleet Test */
   border: 1px solid #3c773c;
-  background-color: rgb(17, 34, 17, 0.5)
+  background-color: rgb(17, 34, 17, 0.4)
 }
 
 .gameRules {
