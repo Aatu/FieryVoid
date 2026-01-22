@@ -1861,6 +1861,8 @@ window.gamedata = {
 
 			if (!slotElement.length) {
 				gamedata.createNewSlot(slot);
+			} else {
+				gamedata.setSlotData(slot);
 			}
 
 			slotElement = $('.slot.slotid_' + slot.slot);
@@ -1936,7 +1938,7 @@ window.gamedata = {
 
 		ajaxInterface.submitSlotAction("takeslot", slotid, function () {
 			window.updateTierFilter();
-			//ajaxInterface.startPollingGamedata();							
+			//ajaxInterface.startPollingGamedata();
 		});
 	},
 

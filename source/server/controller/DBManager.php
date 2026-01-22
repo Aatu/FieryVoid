@@ -508,12 +508,22 @@ class DBManager
 
     public function leaveSlot($userid, $gameid, $slotid = null)
     {
-
         $userid = $this->DBEscape($userid);
         $gameid = $this->DBEscape($gameid);
         $slotid = $this->DBEscape($slotid);
 
         try {
+            // Identify slots to reset (for Ladder) BEFORE they are cleared
+            $slotsToReset = [];
+            if ($slotid) {
+                $slotsToReset[] = $slotid;
+            } else {
+                 $findSql = "SELECT slot FROM tac_playeringame WHERE gameid = $gameid AND playerid = $userid";
+                 $findRes = $this->query($findSql);
+                 foreach ($findRes as $row) {
+                     $slotsToReset[] = $row->slot;
+                 }
+            }
 
             $sql = "DELETE FROM `tac_ship` WHERE tacgameid = $gameid AND playerid = $userid";
             if ($slotid)
@@ -526,17 +536,54 @@ class DBManager
                 $sql .= " AND slot = $slotid";
 
             $this->update($sql);
-
+            
+            // Ladder Reset Logic
+            if (count($slotsToReset) > 0) {
+                $gSql = "SELECT rules, creator FROM tac_game WHERE id = $gameid";
+                $gRes = $this->query($gSql);
+                if ($gRes && count($gRes) > 0) {
+                    $rules = json_decode($gRes[0]->rules, true);
+                    if (isset($rules['ladder']) && $rules['ladder']) {
+                         $creatorId = $gRes[0]->creator;
+                         $basePoints = 0;
+                         
+                         // Try to get creator's points
+                         if ($creatorId) {
+                             $cSql = "SELECT points FROM tac_playeringame WHERE gameid = $gameid AND playerid = $creatorId";
+                             $cRes = $this->query($cSql);
+                             if ($cRes && count($cRes) > 0) {
+                                 $basePoints = $cRes[0]->points;
+                             }
+                         }
+                         
+                         // Fallback to min points in game
+                         if ($basePoints == 0) {
+                             $sSql = "SELECT points FROM tac_playeringame WHERE gameid = $gameid";
+                             $sRes = $this->query($sSql);
+                             $minPoints = 99999999;
+                             foreach($sRes as $row){
+                                 if ($row->points < $minPoints && $row->points > 0) $minPoints = $row->points;
+                             }
+                             if ($minPoints < 99999999) $basePoints = $minPoints;
+                         }
+                         
+                         if ($basePoints > 0) {
+                             foreach ($slotsToReset as $rSlot) {
+                                 $updSql = "UPDATE tac_playeringame SET points = $basePoints WHERE gameid = $gameid AND slot = $rSlot";
+                                 $this->update($updSql);
+                             }
+                         }
+                    }
+                }
+            }
 
         } catch (Exception $e) {
             throw $e;
         }
     }
 
-
     public function shouldBeInGameLobby($userid)
     {
-
         try {
             $sql = "SELECT * FROM `tac_game` g join `tac_playeringame` p on g.id = p.gameid where p.playerid = $userid and g.status = 'LOBBY';";
 
@@ -549,17 +596,14 @@ class DBManager
         } catch (Exception $e) {
             throw $e;
         }
-
     }
 
     public function takeSlot($userid, $gameid, $slotid)
     {
-
         $userid = $this->DBEscape($userid);
         $gameid = $this->DBEscape($gameid);
         $slotid = $this->DBEscape($slotid);
         try {
-
             $slot = $this->getSlotById($slotid, $gameid);
             if (!$slot)
                 return false;
@@ -571,9 +615,66 @@ class DBManager
             }
 
             $sql = "UPDATE tac_playeringame SET playerid = $userid WHERE gameid = $gameid and slot = $slotid";
-
             $this->update($sql);
+            
+            // Ladder Handicap Logic
+            $gSql = "SELECT rules FROM tac_game WHERE id = $gameid";
+            $gRes = $this->query($gSql);
+            
+            if ($gRes && count($gRes) > 0) {
+                $rules = json_decode($gRes[0]->rules, true);
+                if (isset($rules['ladder']) && $rules['ladder']) {
+                    //error_log("Ladder Logic Triggered for Game $gameid User $userid");
+                    
+                    $slots = $this->getSlotsInGame($gameid);
+                    $mySlot = null;
+                    $oppSlot = null;
+                    
+                    foreach ($slots as $s) {
+                        if ($s->slot == $slotid) $mySlot = $s;
+                        else if ($s->playerid != null) $oppSlot = $s; 
+                    }
+                    
+                    if ($mySlot && $oppSlot) {
+                        $myRating = 100;
+                        $oppRating = 100;
+                        
+                        $rSql = "SELECT rating FROM tac_ladder_rankings WHERE playerid = " . $userid;
+                        $rRes = $this->query($rSql);
+                        if ($rRes && count($rRes) > 0) $myRating = $rRes[0]->rating;
+                        
+                        $rSql2 = "SELECT rating FROM tac_ladder_rankings WHERE playerid = " . $oppSlot->playerid;
+                        $rRes2 = $this->query($rSql2);
+                        if ($rRes2 && count($rRes2) > 0) $oppRating = $rRes2[0]->rating;
+                        
+                        //error_log("Ratings - Me: $myRating (Slot $slotid), Opp: $oppRating (Player " . $oppSlot->playerid . ")");
+                        
+                        $diff = abs($myRating - $oppRating);
+                        
+                        // Use Opponent's points as Base (Do NOT modify opponent)
+                        $basePoints = $oppSlot->points;
+                        $bonusPoints = round($basePoints * ($diff / 100));
+                        
+                        //error_log("Base: $basePoints, Diff: $diff, Bonus: $bonusPoints");
 
+                        if ($myRating < $oppRating) {
+                            // Joiner is Weaker: Joiner gets BONUS (+)
+                             //error_log("Applying BONUS: " . ($basePoints + $bonusPoints));
+                             $this->update("UPDATE tac_playeringame SET points = " . ($basePoints + $bonusPoints) . " WHERE gameid = $gameid AND slot = $slotid");
+                        } else if ($myRating > $oppRating) {
+                             // Joiner is Stronger: Joiner gets PENALTY (-)
+                             //error_log("Applying PENALTY: " . ($basePoints - $bonusPoints));
+                             $this->update("UPDATE tac_playeringame SET points = " . ($basePoints - $bonusPoints) . " WHERE gameid = $gameid AND slot = $slotid");
+                        } else {
+                             // Equal ratings: Joiner gets Base
+                             //error_log("Applying BASE: " . $basePoints);
+                             $this->update("UPDATE tac_playeringame SET points = " . $basePoints . " WHERE gameid = $gameid AND slot = $slotid");
+                        }
+                    } else {
+                        //error_log("Ladder Logic: slots not found? MySlot: " . ($mySlot ? "Yes" : "No") . ", OppSlot: " . ($oppSlot ? "Yes" : "No"));
+                    }
+                }
+            }
 
         } catch (Exception $e) {
             throw $e;
@@ -1639,7 +1740,11 @@ class DBManager
                     continue;
                 }
 
-				$nm = $gameName;
+				if (strpos($rules, 'ladder')!==false){
+				    $nm = '<span style="font-weight:bold; color:#52b352; padding-right: 0px;">LADDER: </span>' . $gameName;
+                } else {                                    
+				    $nm = $gameName;
+                }
                 $nm .= ' <br><span class="gameRules">(';
 			    //gamespace and rules: add to name!
 				if ($gamespace == '-1x-1'){ //open map
@@ -1649,9 +1754,11 @@ class DBManager
 				}
 
 				if (strpos($rules, 'ladder')!==false){
-					$nm  .= ', Ladder';
+					$nm  .= ', Ranked';
 				}     
-
+				//if (strpos($rules, 'ladder')!==false){
+				//	$nm  .= ', <span style="font-weight:bold; color:gold; padding-right: 0px;">Ladder</span>';
+				//} 
 				if (strpos($rules, 'initiativeCategories')!==false){//simultaneous movement
 					$nm  .= ', Sim. Mov';
 				}else{//standard movement
@@ -1665,20 +1772,25 @@ class DBManager
 				}
 				if (strpos($rules, 'friendlyFire')!==false){
 					$nm  .= ', Friendly Fire';
-				}                
+				}                 
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
                     $nm = ', <span style="color:yellow; font-weight:bold;">Fleet Test</span>';
                 }
                 $nm .= ')</span>';
 
                 $fleetTest = false;
+                $ladder = false;
+                if (strpos($rules, 'ladder')!==false){
+                    $ladder = true;
+                }
+
                 //To mark Fleet Test games as Fleet Test in lobby
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
                     $nm = '<span style="color:#DEEBFF; font-weight:bold;">Fleet Test</span>'; 
                     $fleetTest = true;                    
                 }    
 
-                $games[] = ["id" => $id, "name" => $nm, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY", "test" => $fleetTest];
+                $games[] = ["id" => $id, "name" => $nm, "slots" => $slots, "playerCount" => $playerCount, "status" => "LOBBY", "test" => $fleetTest, "ladder" => $ladder];
             }
             $stmt->close();
         }
