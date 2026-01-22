@@ -7,13 +7,13 @@ window.SelectFromShips = function () {
     function ShipTooltip(selectedShip, ships, payload, phaseStrategy) {
         this.element = jQuery(HTML);
         this.ships = [].concat(ships);
-		    //this.ships.sort(shipManager.hasBetterInitive); //so they're displayed in Ini order
-			this.ships.sort(shipManager.hasWorseInitiveSort); //actualy make it so highest Ini is on top
+        //this.ships.sort(shipManager.hasBetterInitive); //so they're displayed in Ini order
+        this.ships.sort(shipManager.hasWorseInitiveSort); //actualy make it so highest Ini is on top
         this.position = payload.hex;
         this.payload = payload;
         this.selectedShip = selectedShip;
         this.phaseStrategy = phaseStrategy;
-        
+
         this.element.on('mousedown', function (e) {
             e.preventDefault();
         });
@@ -21,13 +21,13 @@ window.SelectFromShips = function () {
             e.preventDefault();
         });
         this.element.on('mouseover', function (e) {
-            e.preventDefault();e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
         });
         this.element.on('mousemove', function (e) {
             e.preventDefault();
         });
         this.element.on('mouseout', function (e) {
-            e.preventDefault();e.stopPropagation();
+            e.preventDefault(); e.stopPropagation();
         });
 
         create.call(this);
@@ -67,48 +67,58 @@ window.SelectFromShips = function () {
 
     function create() {
         console.log("CREATE select form ships", this.ships)
-        this.ships.forEach(function (ship){
+        this.ships.forEach(function (ship) {
             var deployedText = "";
             var deployTurn = shipManager.getTurnDeployed(ship);
             //if(shipManager.getTurnDeployed(ship) > gamedata.turn)  deployedText = '<span class="not-deployed">(Not Deployed)</span> ';
-            if(deployTurn > gamedata.turn)  deployedText = '<span class="not-deployed"> (Deploys Turn ' + deployTurn + ')</span> ';
+            if (deployTurn > gamedata.turn) deployedText = '<span class="not-deployed"> (Deploys Turn ' + deployTurn + ')</span> ';
 
-            if(ship.flight) {
+            if (ship.flight) {
                 var noOfFighters = 0;
                 ship.systems.forEach(ftr => {
-                        if (!shipManager.systems.isDestroyed(ship, ftr)){
-                            noOfFighters++;
-                        }
+                    if (!shipManager.systems.isDestroyed(ship, ftr)) {
+                        noOfFighters++;
+                    }
                 });
                 var name = jQuery(
                     '<div class="name value button ' + getAllyClass(ship) + '">' + '(' + noOfFighters + ') ' + ship.name + deployedText + ' </div>'
                 )
-                .on('click', function() {this.phaseStrategy.onShipClicked(ship, this.payload), this.destroy()}.bind(this))
-                .on('mouseover', function() {this.phaseStrategy.onMouseOverShip(ship, this.payload)}.bind(this))
-                .on('mouseout', function() {this.phaseStrategy.onMouseOutShips(ship, this.payload)}.bind(this))
-                name.contextmenu(function(e) {
+                    .on('click', function () {
+                        this.phaseStrategy.onShipClicked(ship, this.payload);
+                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                            this.destroy();
+                        }
+                    }.bind(this))
+                    .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))
+                    .on('mouseout', function () { this.phaseStrategy.onMouseOutShips(ship, this.payload) }.bind(this))
+                name.contextmenu(function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     this.phaseStrategy.onShipRightClicked(ship, this.payload)
                 }.bind(this))
                 this.element.append(name)
 
-            }else{
+            } else {
                 var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + ship.name + deployedText + ' </div>')
-                .on('click', function() {this.phaseStrategy.onShipClicked(ship, this.payload), this.destroy()}.bind(this))
-                .on('mouseover', function() {this.phaseStrategy.onMouseOverShip(ship, this.payload)}.bind(this))
-                .on('mouseout', function() {this.phaseStrategy.onMouseOutShips(ship, this.payload)}.bind(this))
-                name.contextmenu(function(e) {
+                    .on('click', function () {
+                        this.phaseStrategy.onShipClicked(ship, this.payload);
+                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                            this.destroy();
+                        }
+                    }.bind(this))
+                    .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))
+                    .on('mouseout', function () { this.phaseStrategy.onMouseOutShips(ship, this.payload) }.bind(this))
+                name.contextmenu(function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                     this.phaseStrategy.onShipRightClicked(ship, this.payload)
                 }.bind(this))
-            this.element.append(name)
+                this.element.append(name)
             }
         }, this)
     }
 
-    function showBallisticsTooltip(ballistics) {}
+    function showBallisticsTooltip(ballistics) { }
 
     function positionElement(element, position) {
         if (position instanceof hexagon.Offset) {
@@ -138,7 +148,7 @@ window.SelectFromShips = function () {
             return gamedata.isMyOrTeamOneShip(ship) ?  'ally' : 'enemy';
         }   
         */
-       return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'))    
+        return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'))
     }
 
     return ShipTooltip;

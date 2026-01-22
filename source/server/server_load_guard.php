@@ -13,34 +13,32 @@ if (!function_exists('apcu_fetch')) {
 // Configuration
 // ----------------------
 $maxGlobal = 23;       // max active requests globally (Matched to user's thread limit)
-//$maxIP = 8;            // max active requests per IP - DISABLED to save APCu memory
-$maxWait = 5.0;        // max seconds to wait for a global slot
+$maxIP = 6;            // max active requests per IP
+$maxWait = 1.0;        // max seconds to wait for a global slot
 $waitStep = 0.05 + (mt_rand(0, 50) / 1000.0); //Small stutter
 
 //$ttlIP = 10;            // seconds for per-IP counter TTL
 $ttlGlobal = 30;        // fallback TTL for global counter (Increased for safety)
 
 $keyGlobal = 'server_active_requests';
-//$keyIP = 'server_ip_' . md5($_SERVER['REMOTE_ADDR']);
+$keyIP = 'server_ip_' . md5($_SERVER['REMOTE_ADDR']);
 
 $start = microtime(true);
 
 // ----------------------
 // State Tracking (Crucial for Shutdown)
 // ----------------------
-//$ipAcquired = false;
+$ipAcquired = false;
 $globalAcquired = false;
 
 // Register shutdown function IMMEDIATELY to handle exits/crashes
-register_shutdown_function(function() use (&$globalAcquired, $keyGlobal) {
+register_shutdown_function(function() use (&$globalAcquired, $keyGlobal, &$ipAcquired, $keyIP) {
     // Only decrement if WE actually incremented it
     if ($globalAcquired) {
         $val = apcu_fetch($keyGlobal);
         if ($val !== false && $val > 0) apcu_dec($keyGlobal);
     }
     
-    // IP Throttling Disabled
-    /*
     // Only decrement IP if WE incremented it
     if ($ipAcquired) {
         $i = apcu_fetch($keyIP);
@@ -50,31 +48,133 @@ register_shutdown_function(function() use (&$globalAcquired, $keyGlobal) {
             if ($new <= 0) apcu_delete($keyIP);
         }
     }
-    */
 });
 
 // ----------------------
-// Per-IP limiter - DISABLED
+// Per-IP limiter
 // ----------------------
-/*
+
 // Increment first
 $ipCount = apcu_inc($keyIP, 1, $exists);
 $ipAcquired = true; // Mark as acquired so shutdown will decrement it later
 
 if (!$exists) {
     // Key did not exist yet, set TTL
-    apcu_store($keyIP, 1, $ttlIP);
+    apcu_store($keyIP, 1, 10);
 }
 
 // Check limit
 if ($ipCount > $maxIP) {
     // Rely on shutdown function to decrement (since $ipAcquired is true)
-    header("HTTP/1.1 429 Too Many Requests");
-    header("Retry-After: $ttlIP");
+    header("HTTP/1.1 503 Service Unavailable"); // Changed to 503 to signal retry
+    header("Retry-After: 10");
     echo json_encode(['error' => 'Too many requests from your IP']);
     exit;
 }
-*/
+
+// ----------------------
+// Fast Poll Exemption
+// ----------------------
+// If this is a polling request that will be served from APCu, we skip the global limit.
+$isFastPoll = false;
+
+if (isset($_SERVER['PHP_SELF'])) {
+    if (strpos($_SERVER['PHP_SELF'], 'chatdata.php') !== false && isset($_GET['gameid'], $_GET['lastid'])) {
+        $key = 'chat_last_id_' . $_GET['gameid'];
+        $lastMsgId = apcu_fetch($key);
+        if ($lastMsgId !== false && $_GET['lastid'] >= $lastMsgId) {
+            $isFastPoll = true;
+        }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'gamedata.php') !== false && isset($_GET['gameid'], $_GET['last_time'])) {
+        $key = 'game_' . $_GET['gameid'] . '_last_update';
+        $serverTime = apcu_fetch($key);
+        if ($serverTime !== false && $serverTime <= (float)$_GET['last_time']) {
+            $isFastPoll = true;
+             // DEBUG LOG
+             //error_log("Load Guard: Fast Poll EXEMPT (Gamedata) - " . $_SERVER['REMOTE_ADDR']);
+        }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'game.php') !== false && isset($_GET['gameid'])) {
+         // Exemppt game.php ONLY if the JSON cache is hot
+         // This prevents the "Process Pile-up" on shared hosting by allowing cached page loads to bypass the concurrency queue
+         $userid = $_SESSION['user'] ?? null;
+         if ($userid) {
+             // 1. Check for Generation Lock
+             $lockKey = "game_lock_" . $_GET['gameid'] . "_" . $userid;
+             if (apcu_exists($lockKey)) {
+                 $isFastPoll = true;
+                 // SHORT-CIRCUIT: Optimization to save memory. 
+                 // If locked, serve loading page immediately and exit.
+                 echo '<html><head><meta http-equiv="refresh" content="1"></head>
+                 <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+                 Loading game data... (Optimized Wait)
+                 </body></html>';
+                 exit;
+             } else {
+                 $cacheKey = "game_" . $_GET['gameid'] . "_user_" . $userid . "_json";
+                 $cached = apcu_fetch($cacheKey);
+                 // Verify timestamp
+                 if ($cached && isset($cached['ts'])) {
+                     $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
+                     if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
+                         $isFastPoll = true;
+                         // error_log("Load Guard: Fast Poll EXEMPT (Game Page) - " . $_SERVER['REMOTE_ADDR']);
+                     }
+                 }
+             }
+         }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'games.php') !== false) {
+          // EXEMPTION for Games List
+          $userid = $_SESSION['user'] ?? null;
+          if ($userid) {
+             $lockKey = "gameslist_lock_" . $userid;
+             if (apcu_exists($lockKey)) {
+                 $isFastPoll = true;
+                 // SHORT-CIRCUIT
+                 echo '<html><head><meta http-equiv="refresh" content="1"></head>
+                 <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+                 Refreshing game list... (Optimized Wait)
+                 </body></html>';
+                 exit;
+             } else {
+                 // Also fast poll if we have a valid short-term cache
+                 $cacheKey = "gameslist_" . $userid;
+                 if (apcu_exists($cacheKey)) {
+                     $isFastPoll = true;
+                 }
+             }
+          }
+    } elseif (strpos($_SERVER['PHP_SELF'], 'gamelobby.php') !== false && isset($_GET['gameid'])) {
+         // Exemption for game lobby optimization
+         $userid = $_SESSION['user'] ?? null;
+         if ($userid) {
+             // 1. Check if we are LOCKED (Generation in progress)
+             // If locked, we want to let this request through immediately so it can hit the 
+             // "Loading..." page in gamelobby.php and exit, rather than queuing up here.
+             $lockKey = "gamelobby_lock_" . $_GET['gameid'] . "_" . $userid;
+             if (apcu_exists($lockKey)) {
+                 $isFastPoll = true;
+                 // SHORT-CIRCUIT
+                 echo '<html><head><meta http-equiv="refresh" content="1"></head>
+                 <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+                 Loading... (Optimized Wait)
+                 </body></html>';
+                 exit;
+             } else {
+                 // 2. Check if we have valid CACHED data
+                 $cacheKey = "gamelobby_" . $_GET['gameid'] . "_user_" . $userid . "_json";
+                 $cached = apcu_fetch($cacheKey);
+                 // Verify timestamp
+                 if ($cached && isset($cached['ts'])) {
+                     $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
+                     if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
+                         $isFastPoll = true;
+                         //error_log("Load Guard: Fast Poll EXEMPT (Game Lobby) - " . $_SERVER['REMOTE_ADDR']);
+                     }
+                 }
+             }
+         }
+    }
+}
 
 // ----------------------
 // Global limiter (atomic CAS)
@@ -82,28 +182,31 @@ if ($ipCount > $maxIP) {
 // Ensure key exists (safe to call repeatedly)
 apcu_add($keyGlobal, 0, $ttlGlobal);
 
-do {
-    $count = apcu_fetch($keyGlobal);
-    if ($count === false) $count = 0;
+// Only enforce global limit if NOT a fast poll
+if (!$isFastPoll) {
+    do {
+        $count = apcu_fetch($keyGlobal);
+        if ($count === false) $count = 0;
 
-    if ($count < $maxGlobal) {
-        // Atomic compare-and-swap
-        if (apcu_cas($keyGlobal, $count, $count + 1)) {
-            $globalAcquired = true; // SUCCESS! Shutdown will now handle this decrement.
-            break;
+        if ($count < $maxGlobal) {
+            // Atomic compare-and-swap
+            if (apcu_cas($keyGlobal, $count, $count + 1)) {
+                $globalAcquired = true; // SUCCESS! Shutdown will now handle this decrement.
+                break;
+            }
         }
+
+        usleep((int)($waitStep * 2000000));
+    } while ((microtime(true) - $start) < $maxWait);
+
+    // If no slot acquired, reject
+    if (!$globalAcquired) {
+        header("HTTP/1.1 503 Service Unavailable");
+        header("Retry-After: " . ceil($maxWait));
+        echo json_encode(['error' => 'Server busy, please retry']);
+        // $globalAcquired is false, so shutdown will NOT touch global count.
+        exit;
     }
-
-    usleep((int)($waitStep * 2000000));
-} while ((microtime(true) - $start) < $maxWait);
-
-// If no slot acquired, reject
-if (!$globalAcquired) {
-    header("HTTP/1.1 503 Service Unavailable");
-    header("Retry-After: " . ceil($maxWait));
-    echo json_encode(['error' => 'Server busy, please retry']);
-    // $globalAcquired is false, so shutdown will NOT touch global count.
-    exit;
 }
 
 // ----------------------

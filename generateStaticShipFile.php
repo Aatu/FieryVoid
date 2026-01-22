@@ -5,11 +5,14 @@
 ob_start("ob_gzhandler"); 	
 include_once './source/public/global.php';
 
-$allFactions = ShipLoader::getAllFactionsStatic(); 
+// ----------------------
+// High Resource Limits
+// ----------------------
+ini_set('memory_limit', '-1'); 
+set_time_limit(300);
+
 $fileBase = './source/public/static/ships';
 $combinedFile = $fileBase . 'Combined.js';
-
-// Initialize combined file with empty object
 file_put_contents($combinedFile, 'window.staticShips = {};' . PHP_EOL);
 
 // Clear server-side cache (ShipLoader)
@@ -30,19 +33,23 @@ if (!is_dir($jsonDir)) {
     mkdir($jsonDir, 0777, true);
 }
 
+// ----------------------
+// OPTIMIZATION: Fetch ALL ships at once
+// ----------------------
+$shipsByFaction = ShipLoader::getAllShipsStatic(null);
 
-foreach($allFactions as $factionName){
+if (!$shipsByFaction) {
+    die("Error: No ships found.\n");
+}
+
+foreach($shipsByFaction as $factionName => $shipsOfFaction){
 	$data = [];
-	$shipsCurr = ShipLoader::getAllShipsStatic($factionName);
-
 	print($factionName . "\n");
 
-	foreach ($shipsCurr as $factionKey=>$shipsOfFaction) {
-        foreach ($shipsOfFaction as $ship) {
-            if ($ship && $ship instanceof BaseShip) {
-                print("generating: " . $ship->faction . " " . $ship->phpclass . "\n");
-                $data[$ship->phpclass] = $ship;
-            }
+    foreach ($shipsOfFaction as $ship) {
+        if ($ship && $ship instanceof BaseShip) {
+            print("generating: " . $ship->faction . " " . $ship->phpclass . "\n");
+            $data[$ship->phpclass] = $ship;
         }
     }
 	
@@ -55,8 +62,7 @@ foreach($allFactions as $factionName){
     $jsonPayload = [$factionName => $data];
     file_put_contents($jsonPath, json_encode($jsonPayload, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE));
 
-	$shipsCurr = null; // free memory
-    $data = null;
+    $data = null; // free memory
 }
 
 // Update ships.php to point to the combined file

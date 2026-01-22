@@ -42,15 +42,15 @@ const System = styled.div`
     height: 32px;
     margin: ${props => props.scs ? '3px 0' : '2px'};
    border: ${props => {
-		if (props.firing) {
+        if (props.firing) {
             return '1px solid #eb5c15';
-        }else if (props.highlight === 'Yellow') {
+        } else if (props.highlight === 'Yellow') {
             return '1px solid #e1b000'; // Some systems get a different border
-        }else if (props.highlight === 'Orange') {
+        } else if (props.highlight === 'Orange') {
             return '2px solid #ff6d3c'; // Some systems get a different border            
-        }else if (props.highlight === 'Red') {
+        } else if (props.highlight === 'Red') {
             return '2px solid #ff0000'; // Some systems get a different border            
-        }else {
+        } else {
             return '1px solid #496791';
         }
     }};
@@ -61,18 +61,18 @@ const System = styled.div`
             return '#e06f01'; //orange
         } else if (props.boosted) {
             return '#cca300'; //darkyellow
-		} else if (props.loading && props.loadedAlternate) { //weapon not ready in current mode, but  alternate mode is ready
-			return '#CD9E9E'; //pale red
+        } else if (props.loading && props.loadedAlternate) { //weapon not ready in current mode, but  alternate mode is ready
+            return '#CD9E9E'; //pale red
         } else {
             return 'black';
         }
     }};
-    box-shadow: ${props => { 
+    box-shadow: ${props => {
         if (props.selected) {
             return '0px 0px 15px #0099ff';
         } else if (props.firing) {
             return 'box-shadow: 0px 0px 15px #eb5c15';
-        }else {
+        } else {
             return 'none';
         }
     }};
@@ -92,34 +92,34 @@ const System = styled.div`
         width: 100%;
         height: 100%;
         opacity: ${props => {
-            if (props.destroyed || props.offline || props.loading) {
-                return '0.5';
-            }
+        if (props.destroyed || props.offline || props.loading) {
+            return '0.5';
+        }
 
-            return '0';
-        }};
+        return '0';
+    }};
 
         background-color: ${props => {
-            if (props.destroyed || props.offline) {
-                return 'black';
-            } else if (props.loading) {
-                return 'orange'
-            }
+        if (props.destroyed || props.offline) {
+            return 'black';
+        } else if (props.loading) {
+            return 'orange'
+        }
 
-            return 'transparent';
-        }};
+        return 'transparent';
+    }};
 
         background-image: ${props => {
-            if (props.offline) {
-                return 'url(./img/offline.png)';
-            }
+        if (props.offline) {
+            return 'url(./img/offline.png)';
+        }
 
-            return 'none';
-        }};
+        return 'none';
+    }};
     }
 `
 
-class SystemIcon extends React.Component{
+class SystemIcon extends React.Component {
 
     constructor(props) {
         super(props);
@@ -129,26 +129,37 @@ class SystemIcon extends React.Component{
         e.stopPropagation();
         e.preventDefault();
 
-        let {system, ship} = this.props;
-		system = shipManager.systems.initializeSystem(system);
+        let { system, ship } = this.props;
+        system = shipManager.systems.initializeSystem(system);
 
-		if (gamedata.waiting || gamedata.replay) return;
+        if (gamedata.waiting || gamedata.replay) return;
 
-		if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
-		
-		if (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires)) {
-			//cannoct SELECT weapon when unit is adrift though!
-			if(!shipManager.isAdrift(ship)){
-				if (gamedata.isMyShip(ship)) {
-					if (weaponManager.isSelectedWeapon(system)) {
-						weaponManager.unSelectWeapon(ship, system);
-					} else {
-						weaponManager.selectWeapon(ship, system);
-					}
-				}
-			}
+        if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return;//should work with disabled ship after all!
+
+        //New block to allow called shots on allied ships
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (gamedata.isMyShip(ship)) {
+                var selectedSystem = gamedata.selectedSystems.length > 0 ? gamedata.selectedSystems[0] : null;
+                if (selectedSystem && selectedSystem.ship.id != ship.id && !weaponManager.isSelectedWeapon(system)) {
+                    webglScene.customEvent('SystemTargeted', { ship: ship, system: system });
+                    return;
+                }
+            }
         }
-        
+
+        if (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires)) {
+            //cannoct SELECT weapon when unit is adrift though!
+            if (!shipManager.isAdrift(ship)) {
+                if (gamedata.isMyShip(ship)) {
+                    if (weaponManager.isSelectedWeapon(system)) {
+                        weaponManager.unSelectWeapon(ship, system);
+                    } else {
+                        weaponManager.selectWeapon(ship, system);
+                    }
+                }
+            }
+        }
+
         if (gamedata.isMyShip(ship)) {
             webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.target });
         } else {
@@ -160,15 +171,15 @@ class SystemIcon extends React.Component{
         event.stopPropagation();
         event.preventDefault();
 
-        let {system, ship} = this.props;
-		system = shipManager.systems.initializeSystem(system);
+        let { system, ship } = this.props;
+        system = shipManager.systems.initializeSystem(system);
 
         webglScene.customEvent('SystemMouseOver', {
             ship: ship,
             system: system,
             element: event.target
         });
-        
+
     }
 
     onSystemMouseOut(event) {
@@ -181,29 +192,29 @@ class SystemIcon extends React.Component{
         e.stopPropagation();
         e.preventDefault();
 
-        let {system, ship} = this.props;
+        let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
-        
+
         if (system.weapon) {
             weaponManager.selectAllWeapons(ship, system);
         }
     }
 
-    render(){
-        let {system, ship, scs, fighter, destroyed} = this.props;
+    render() {
+        let { system, ship, scs, fighter, destroyed } = this.props;
 
         system = shipManager.systems.initializeSystem(system);
 
-        if (getDestroyed(ship, system) || destroyed){
+        if (getDestroyed(ship, system) || destroyed) {
             return (
-                <System background={getBackgroundImage(system)} destroyed><HealthBar health="0"/></System>
+                <System background={getBackgroundImage(system)} destroyed><HealthBar health="0" /></System>
             )
         }
 
         return (
-            <System 
+            <System
                 scs={scs}
-    			highlight={hasBorderHighlight(ship, system)} // Pass criticals here to System                
+                highlight={hasBorderHighlight(ship, system)} // Pass criticals here to System                
                 onClick={this.clickSystem.bind(this)}
                 onMouseOver={this.onSystemMouseOver.bind(this)}
                 onMouseOut={this.onSystemMouseOut.bind(this)}
@@ -216,8 +227,8 @@ class SystemIcon extends React.Component{
                 firing={isFiring(ship, system)}
                 boosted={isBoosted(ship, system)}
             >
-            <SystemText>{getText(ship, system)}</SystemText>
-            {!fighter && <HealthBar scs={scs} health={getStructureLeft(ship, system)} criticals={hasCriticals(system)}/>}
+                <SystemText>{getText(ship, system)}</SystemText>
+                {!fighter && <HealthBar scs={scs} health={getStructureLeft(ship, system)} criticals={hasCriticals(system)} />}
             </System>
         )
     }
@@ -238,7 +249,7 @@ const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.get
 const getDestroyed = (ship, system) => shipManager.systems.isDestroyed(ship, system)
 
 const getBackgroundImage = (system) => {
-    if ( (system.name == "thruster") && (!system.iconPath)) { //technical thrusters have predefined image!
+    if ((system.name == "thruster") && (!system.iconPath)) { //technical thrusters have predefined image!
         return './img/systemicons/thruster' + system.direction + '.png';
     } else if (system.iconPath) {
         return `./img/systemicons/${system.iconPath}`;
@@ -254,18 +265,18 @@ const hasBorderHighlight = (ship, system) => shipManager.systems.hasBorderHighli
 const isSelected = (system) => weaponManager.isSelectedWeapon(system)
 
 const getText = (ship, system) => {
-	if (system.outputDisplay != '') { //some systems have very specific visual output, rather than generic
-		return system.outputDisplay;
-	} else if (system.weapon) {
-        
+    if (system.outputDisplay != '') { //some systems have very specific visual output, rather than generic
+        return system.outputDisplay;
+    } else if (system.weapon) {
+
         const firing = weaponManager.hasFiringOrder(ship, system);
 
         if (firing && system.canChangeShots) {
             const fire = weaponManager.getFiringOrder(ship, system);
             return fire.shots + "/" + system.shots;
         } else if (!firing) {
-           let load = weaponManager.getWeaponCurrentLoading(system);
-           let loadingtime = system.loadingtime;
+            let load = weaponManager.getWeaponCurrentLoading(system);
+            let loadingtime = system.loadingtime;
 
             if (system.normalload > 0) {
                 loadingtime = system.normalload;
@@ -286,7 +297,7 @@ const getText = (ship, system) => {
             } else {
                 return load + overloadturns + "/" + loadingtime;
             }
-            
+
         }
     } else if (system.outputType === "thrust") {
         return shipManager.movement.getRemainingEngineThrust(ship);
@@ -347,183 +358,183 @@ const setSystemData = (ship, system) => {
     }
     */
 
-    //shipWindowManager.removeSystemClasses(systemwindow);
+//shipWindowManager.removeSystemClasses(systemwindow);
 
-    /*
-    if (shipManager.systems.isDestroyed(ship, system)) {
-        if (system.parentId > 0) {
-            if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
-                // create an iconMask at the top of the DOM for the system.
-                var iconmask_element = document.createElement('div');
-                iconmask_element.className = "iconmask";
-                parentWindow.find(".iconmask").remove();
-                parentWindow.find(".icon").append(iconmask_element);
-            }
-
-            parentWindow.addClass("destroyed");
-        } else {
-            systemwindow.addClass("destroyed");
+/*
+if (shipManager.systems.isDestroyed(ship, system)) {
+    if (system.parentId > 0) {
+        if (shipManager.systems.getSystem(ship, system.parentId).duoWeapon) {
+            // create an iconMask at the top of the DOM for the system.
+            var iconmask_element = document.createElement('div');
+            iconmask_element.className = "iconmask";
+            parentWindow.find(".iconmask").remove();
+            parentWindow.find(".icon").append(iconmask_element);
         }
-        return;
+
+        parentWindow.addClass("destroyed");
+    } else {
+        systemwindow.addClass("destroyed");
     }
+    return;
+}
 
-    if (shipManager.criticals.hasCriticals(system)) {
-        if (system.parentId > 0) {
-            parentWindow.addClass("critical");
-        } else {
-            systemwindow.addClass("critical");
-        }
+if (shipManager.criticals.hasCriticals(system)) {
+    if (system.parentId > 0) {
+        parentWindow.addClass("critical");
+    } else {
+        systemwindow.addClass("critical");
     }
+}
 
-    */
- /*
-    if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
+*/
+/*
+   if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
 
-    if (system.weapon) {
-        var firing = weaponManager.hasFiringOrder(ship, system);
+   if (system.weapon) {
+       var firing = weaponManager.hasFiringOrder(ship, system);
 
-        // To avoid double overlay of loading icon mask in case of a
-        // duoWeapon in a dualWeapon
-        if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
-            systemwindow.addClass("loading");
-        } else {
-            systemwindow.removeClass("loading");
-        }
+       // To avoid double overlay of loading icon mask in case of a
+       // duoWeapon in a dualWeapon
+       if (!weaponManager.isLoaded(system) && !(system.duoWeapon && system.parentId > 0)) {
+           systemwindow.addClass("loading");
+       } else {
+           systemwindow.removeClass("loading");
+       }
 
-        if (weaponManager.isSelectedWeapon(system)) {
-            systemwindow.addClass("selected");
-        } else {
-            systemwindow.removeClass("selected");
-        }
+       if (weaponManager.isSelectedWeapon(system)) {
+           systemwindow.addClass("selected");
+       } else {
+           systemwindow.removeClass("selected");
+       }
 
-        if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
-            systemwindow.addClass("firing");
+       if (firing && firing != "self" && !system.duoWeapon && !systemwindow.hasClass("loading")) {
+           systemwindow.addClass("firing");
 
-            if (system.parentId > -1) {
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+           if (system.parentId > -1) {
+               var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 
-                if (parentSystem.duoWeapon) {
-                    $(".system_" + system.parentId).addClass("duofiring");
-                }
-            }
-        } else if (firing == "self") {
-            systemwindow.addClass("firing");
-            systemwindow.addClass("selfIntercept");
-        } else {
-            firing = false;
-            systemwindow.removeClass("firing");
-            systemwindow.removeClass("selfIntercept");
-        }
+               if (parentSystem.duoWeapon) {
+                   $(".system_" + system.parentId).addClass("duofiring");
+               }
+           }
+       } else if (firing == "self") {
+           systemwindow.addClass("firing");
+           systemwindow.addClass("selfIntercept");
+       } else {
+           firing = false;
+           systemwindow.removeClass("firing");
+           systemwindow.removeClass("selfIntercept");
+       }
 
-        if (system.ballistic) {
-            systemwindow.addClass("ballistic");
-        } else {
-            systemwindow.removeClass("ballistic");
-        }
+       if (system.ballistic) {
+           systemwindow.addClass("ballistic");
+       } else {
+           systemwindow.removeClass("ballistic");
+       }
 
-        if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
-            if (system.parentId >= 0) {
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
+       if (!firing && (Object.keys(system.firingModes).length > 1 || system.dualWeapon)) {
+           if (system.parentId >= 0) {
+               var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
 
-                if (parentSystem.parentId >= 0) {
-                    parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
-                    $(".parentsystem_" + parentSystem.id).addClass("modes");
-                    var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
-                } else {
-                    $(".parentsystem_" + parentSystem.id).addClass("modes");
-                    var modebutton = $(".mode", systemwindow);
-                }
+               if (parentSystem.parentId >= 0) {
+                   parentSystem = shipManager.systems.getSystem(ship, parentSystem.parentId);
+                   $(".parentsystem_" + parentSystem.id).addClass("modes");
+                   var modebutton = $(".mode", $(".parentsystem_" + parentSystem.id));
+               } else {
+                   $(".parentsystem_" + parentSystem.id).addClass("modes");
+                   var modebutton = $(".mode", systemwindow);
+               }
 
-                modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
-            } else {
-                systemwindow.addClass("modes");
+               modebutton.html("<span>" + parentSystem.firingModes[parentSystem.firingMode].substring(0, 1) + "</span>");
+           } else {
+               systemwindow.addClass("modes");
 
-                var modebutton = $(".mode", systemwindow);
-                modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
-            }
-        }
+               var modebutton = $(".mode", systemwindow);
+               modebutton.html("<span>" + system.firingModes[system.firingMode].substring(0, 1) + "</span>");
+           }
+       }
 
-        if (firing && system.canChangeShots) {
-            var fire = weaponManager.getFiringOrder(ship, system);
+       if (firing && system.canChangeShots) {
+           var fire = weaponManager.getFiringOrder(ship, system);
 
-            if (fire.shots < system.shots) {
-                systemwindow.addClass("canAddShots");
-            } else {
-                systemwindow.removeClass("canAddShots");
-            }
+           if (fire.shots < system.shots) {
+               systemwindow.addClass("canAddShots");
+           } else {
+               systemwindow.removeClass("canAddShots");
+           }
 
-            if (fire.shots > 1) {
-                systemwindow.addClass("canReduceShots");
-            } else {
-                systemwindow.removeClass("canReduceShots");
-            }
+           if (fire.shots > 1) {
+               systemwindow.addClass("canReduceShots");
+           } else {
+               systemwindow.removeClass("canReduceShots");
+           }
 
-            field.html(fire.shots + "/" + system.shots);
-        } else if (!firing) {
-            if (system.duoWeapon) {
-                var UI_active = systemwindow.find(".UI").hasClass("active");
+           field.html(fire.shots + "/" + system.shots);
+       } else if (!firing) {
+           if (system.duoWeapon) {
+               var UI_active = systemwindow.find(".UI").hasClass("active");
 
-                shipWindowManager.addDuoSystem(ship, system, systemwindow);
+               shipWindowManager.addDuoSystem(ship, system, systemwindow);
 
-                if (UI_active) {
-                    systemwindow.find(".UI").addClass("active");
-                }
-            } else {
-                if (system.dualWeapon && system.weapons) {
-                    system = system.weapons[system.firingMode];
-                }
+               if (UI_active) {
+                   systemwindow.find(".UI").addClass("active");
+               }
+           } else {
+               if (system.dualWeapon && system.weapons) {
+                   system = system.weapons[system.firingMode];
+               }
 
-                var load = weaponManager.getWeaponCurrentLoading(system);
-                var loadingtime = system.loadingtime;
+               var load = weaponManager.getWeaponCurrentLoading(system);
+               var loadingtime = system.loadingtime;
 
-                if (system.normalload > 0) {
-                    loadingtime = system.normalload;
-                }
+               if (system.normalload > 0) {
+                   loadingtime = system.normalload;
+               }
 
-                if (load > loadingtime) {
-                    load = loadingtime;
-                }
+               if (load > loadingtime) {
+                   load = loadingtime;
+               }
 
-                var overloadturns = "";
+               var overloadturns = "";
 
-                if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
-                    overloadturns = "(" + system.overloadturns + ")";
-                }
+               if (system.overloadturns > 0 && shipManager.power.isOverloading(ship, system)) {
+                   overloadturns = "(" + system.overloadturns + ")";
+               }
 
-                if (system.overloadshots > 0) {
-                    field.html("S" + system.overloadshots);
-                } else {
-                    field.html(load + overloadturns + "/" + loadingtime);
-                }
-            }
+               if (system.overloadshots > 0) {
+                   field.html("S" + system.overloadshots);
+               } else {
+                   field.html(load + overloadturns + "/" + loadingtime);
+               }
+           }
 
-            
-        }
-    } else if (system.name == "thruster") {
-        systemwindow.data("direction", system.direction);
-        systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
+           
+       }
+   } else if (system.name == "thruster") {
+       systemwindow.data("direction", system.direction);
+       systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
 
-        var channeled = shipManager.movement.getAmountChanneled(ship, system);
-        if (channeled > output) {
-            field.addClass("darkred");
-        } else {
-            field.removeClass("darkred");
-        }
+       var channeled = shipManager.movement.getAmountChanneled(ship, system);
+       if (channeled > output) {
+           field.addClass("darkred");
+       } else {
+           field.removeClass("darkred");
+       }
 
-        if (channeled < 0) {
-            channeled = 0;
-        }
+       if (channeled < 0) {
+           channeled = 0;
+       }
 
-        field.html(channeled + "/" + output);
-    } else if (system.name == "engine") {
-        var rem = shipManager.movement.getRemainingEngineThrust(ship);
+       field.html(channeled + "/" + output);
+   } else if (system.name == "engine") {
+       var rem = shipManager.movement.getRemainingEngineThrust(ship);
 
-        field.html(rem + "/" + output);
-    } else if (system.name == "reactor") {
-        field.html(shipManager.power.getReactorPower(ship, system));
-    } else if (system.output > 0) {
-        field.html(output);
-    }
+       field.html(rem + "/" + output);
+   } else if (system.name == "reactor") {
+       field.html(shipManager.power.getReactorPower(ship, system));
+   } else if (system.output > 0) {
+       field.html(output);
+   }
 }
 */
 export default SystemIcon;

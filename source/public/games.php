@@ -15,8 +15,20 @@ if (empty($_SESSION["user"])) {
 }
 
 // Fetch games for logged-in user
+// Fetch games for logged-in user
 $userid = (int)$_SESSION["user"];
-$games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
+$gamesData = Manager::getTacGames($userid);
+
+// STAMPEDE PROTECTION
+if (isset($gamesData[0]) && isset($gamesData[0]['status']) && $gamesData[0]['status'] == 'GENERATING') {
+    echo '<html><head><meta http-equiv="refresh" content="1"></head>
+    <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+    Refreshing game list...
+    </body></html>';
+    exit;
+}
+
+$games = json_encode($gamesData, JSON_NUMERIC_CHECK);
 
 $defaultGameName = 'GAME NAME' . $_SESSION["user"];	
 $playerName = Manager::getPlayerName($_SESSION["user"]);
@@ -92,15 +104,16 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     <div class="resources">
       <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
-        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->            
-        <li><strong>Create Game Screen</strong> - The Create Game refresh completed. New map templates and Fleet Test option added!</li>
-        <li><strong>Gravity Nets</strong> - Minbari now have access to Gravity Nets and new ships equipped with this system have been added to their roster, thanks to Jonathan!</li>   
-        <li><strong>Custom Centauri Units</strong> - House Valheru has received reinforcements! Thanks to Fred/Geoffrey!</li>                         
-        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggled on and off during the Deployment phase and during a Pre-Orders phase after they've deployed.</li>       
-        <li><strong>Hyach Specialists</strong> - Specialists are selected during Deployment Phase, and some can now be used in Movement/Firing Phases.</li>                                                                            
-        <li><strong>Vorlon Petals</strong> - Vorlon fighters can now toggled their petals open during Initial Orders.</li>      
-        <li><strong>Terrain</strong> - New Terrain units added.</li>                    
-        <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
+        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
+        <li><strong>Friendly Fire</strong> - New option added to Create Game screen allowing ships to fire on their own team!</li> 
+        <li><strong>Electronic Warfare</strong> - Now all EW options are available for any ship friend or foe!</li>    
+        <li><strong>Ship Selection</strong> - Due to above changes, in certain phases you will now need to double-click with left mouse button to select a ship.</li> 
+        <li><strong>Touchscreen Improvements</strong> - Line of Sight tool and Hit Chart displays should now work on mobile/tablet devices.</li>                                               
+        <li><strong>Escalation/Nexus Updates</strong> - Several Nexus fixes and a new Gravitic Tracting Rod weapon added for Chouka! Thanks to Geoffrey!</li>  
+        <li><strong>Torvalus Stilettos</strong> - Jammer ability removed following rules clarification.</li> 
+        <li><strong>Drazi Solar Cannon</strong> - Should now dealt correct damage to ships with damge mitigating systems e.g. Shadow Diffusers.</li> 
+        <li><strong>The Lllort</strong> - Extra 'L' added to Lllort faction name.</li>                                                                               
+        <li><strong>General Fixes</strong> - Further database optimisation and server stability fixes. Several bug fixes/improvements. Thanks for the reports!</li>                                                    
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>

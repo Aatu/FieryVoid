@@ -37,7 +37,22 @@ window.ajaxInterface = {
             overlay.style.display = 'none';
         }
     },
+    /*
+    // Blocking overlay helpers to prevent navigation during critical submissions
+    showLoadingOverlay: function () {
+        var overlay = document.getElementById('global-loading-overlay');
+        if (overlay) {
+            overlay.style.display = 'flex';
+        }
+    },
 
+    hideLoadingOverlay: function () {
+        var overlay = document.getElementById('global-loading-overlay');
+        if (overlay) {
+            overlay.style.display = 'none';
+        }
+    },    
+    */
     getShipsForFaction: function (factionRequest, callback, errorCallback) {
         const now = Date.now();
 
@@ -178,7 +193,7 @@ window.ajaxInterface = {
 
     // Internal method - handles the actual AJAX call and retries (bypasses queue)
     _doAjaxWithRetry: function (options, attempt) {
-        const maxAttempts = 5;
+        const maxAttempts = options.maxAttempts || 5;
         const baseDelay = 200;
         const deferred = $.Deferred();
         let isRetrying = false;
@@ -358,6 +373,7 @@ window.ajaxInterface = {
         }
 
         if (!Array.isArray(shipsArray) || shipsArray.length === 0) {
+            ajaxInterface.submiting = false;
             window.confirm.error("You must have at least one ship before saving!", function () { });
             return; // stop execution
         }
@@ -956,10 +972,12 @@ window.ajaxInterface = {
             return;
         }
 
-        var time = 8000;
+        var time = 4000;
 
         // detect environment
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
+        var phase = gamedata.gamephase;
+
 
         // OPTIMIZATION: Throttling for background tabs
         if (document.hidden && !isLocal) {
@@ -969,7 +987,7 @@ window.ajaxInterface = {
             return;
         }
 
-        var phase = gamedata.gamephase;
+        if (phase === -2 && gamedata.rules && gamedata.rules.fleetTest === 1) return; //Don't poll for Fleet Test games.
 
         if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
         ajaxInterface.pollcount++;
@@ -989,18 +1007,18 @@ window.ajaxInterface = {
             }
             // Phase -2 timings (customize as you like)
             if (notReadiedYet) {
-                time = 60000;
+                time = 20000;
             } else {
-                time = 6000;
-                if (ajaxInterface.pollcount > 1) time = 8000;
-                if (ajaxInterface.pollcount > 3) time = 15000;
+                time = 4000;
+                if (ajaxInterface.pollcount > 1) time = 5000;
+                if (ajaxInterface.pollcount > 3) time = 10000;
                 if (ajaxInterface.pollcount > 10) time = 60000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
         } else {
             // In-Game timings
-            time = 6000;
-            if (ajaxInterface.pollcount > 1) time = 8000;
+            time = 4000;
+            if (ajaxInterface.pollcount > 1) time = 5000;
             if (ajaxInterface.pollcount > 3) time = 10000;
             if (ajaxInterface.pollcount > 10) time = 60000;
             if (ajaxInterface.pollcount > 40) time = 1800000;
@@ -1016,6 +1034,13 @@ window.ajaxInterface = {
     },
 
     requestGamedata: function requestGamedata() {
+        const now = Date.now();
+        const lastRequest = parseInt(localStorage.getItem('fv_lastTacGamedataRequest')) || 0;
+
+        // F5 Spam protection: 500ms debounce across reloads
+        if (now - lastRequest < 500) return;
+        localStorage.setItem('fv_lastTacGamedataRequest', now);
+
         // prevent overlap if already running
         if (ajaxInterface.submiting) return;
 
@@ -1025,6 +1050,7 @@ window.ajaxInterface = {
             type: 'GET',
             url: 'gamedata.php',
             dataType: 'json',
+            maxAttempts: 2, // Limit retries for in-game polling too
             data: {
                 turn: gamedata.turn,
                 phase: gamedata.gamephase,
@@ -1044,23 +1070,26 @@ window.ajaxInterface = {
     },
 
     startPollingGames: function () {
-        this.pollGames();
+        // Polling removed as per user request (games.php loads data via PHP)
     },
 
     // Polling entry point for home screen
     pollGames: function () {
         if (gamedata.waiting === false) return;
         if (!gamedata.animating) {
-            animation.animateWaiting();
+            //animation.animateWaiting();
             ajaxInterface.requestAllGames();
         }
     },
 
     requestAllGames: function () {
         const now = Date.now();
+        const lastRequest = parseInt(localStorage.getItem('fv_lastGamesRequest')) || 0;
 
-        // Debounce rapid triggers
-        if (now - ajaxInterface.lastRequestTimeGames < ajaxInterface.debounceDelayGames) return;
+        // Debounce rapid triggers (using persistent storage for F5 spam protection)
+        if (now - lastRequest < ajaxInterface.debounceDelayGames) return;
+        localStorage.setItem('fv_lastGamesRequest', now);
+
         ajaxInterface.lastRequestTimeGames = now;
 
         // Defensive check: prevent overlap if already running
@@ -1086,6 +1115,7 @@ window.ajaxInterface = {
             type: 'GET',
             url: 'allgames.php',
             dataType: 'json',
+            maxAttempts: 2, // Limit retries to prevent piling on load
             data: {},
             success: ajaxInterface.successRequest,
             error: ajaxInterface.errorAjax,

@@ -89,7 +89,7 @@
                         <input id="movementcheck" type="checkbox" name="movementcheck"> <label for="movementcheck" class="clickable">USE SIMULTANEOUS MOVEMENT</label>
                     </div>
                     <div id="movementDropdown" class="movementDropdown">
-                        <label for="initiativeSelect">Number of Initiative Groups:</label>
+                        <label for="initiativeSelect">Number of Brackets:</label>
                         <select id="initiativeSelect" name="initiativeCategories" class="initiativeCategories">
                             <!-- Dropdown options from 1 to 12 -->
                 <?php 
@@ -161,13 +161,17 @@
                     </div>
                 </div>    
 
+                <div class="settings-group movementspacecontainer">
+                     <input id="friendlyFireCheck" type="checkbox" name="friendlyFireCheck"> <label for="friendlyFireCheck" class="clickable">FRIENDLY FIRE</label>
+                </div>
+
                 <div id="desperate" class="settings-group movementspacecontainer">
                     <div>
-                        <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">USE 'DESPERATE' SCENARIO RULES</label>
+                        <input id="desperatecheck" type="checkbox" name="desperatecheck"> <label for="desperatecheck" class="clickable">DESPERATE SCENARIO</label>
                     </div>    
                     
                     <div id="desperateDropdown" class="desperateDropdown">
-                        <label for="desperateSelect">Apply to:</label>
+                        <label for="desperateSelect">Apply Desparate rules to:</label>
                         <select id="desperateSelect" name="desperateCategories"  class="desparateSelect">
                             <option value="-1">Both teams</option>
                             <option value="1">Team 1</option>
@@ -179,6 +183,8 @@
                 <div class="settings-group movementspacecontainer">
                      <input id="unlimitedPointsCheck" type="checkbox" name="unlimitedPointsCheck"> <label for="unlimitedPointsCheck" class="clickable">UNLIMITED POINTS</label>
                 </div>
+
+
 
             </div>
             

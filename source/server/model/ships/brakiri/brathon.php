@@ -46,12 +46,12 @@ class Brathon extends BaseShip{
 	$t2r->displayName = "Main Thrust";
 	*/
 	    
-	$this->addLeftSystem($t1l);
+	$this->addFrontSystem($t1l);
    	$this->addLeftSystem($t3l);
-   	$this->addLeftSystem($t2l);
-   	$this->addRightSystem($t1r);
+   	$this->addAftSystem($t2l);
+   	$this->addFrontSystem($t1r);
    	$this->addRightSystem($t4r);
-    	$this->addRightSystem($t2r);
+    	$this->addAftSystem($t2r);
 
         $this->addPrimarySystem(new Reactor(3, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
@@ -96,13 +96,17 @@ class Brathon extends BaseShip{
                         20 => "Primary",
                 ),
                 3=> array(
-                        9 => "Thruster",
+                        3 => "1: Thruster",
+                        7 => "Thruster",                                                
+                        9 => "2: Thruster",
 			12 => "Gravitic Cutter",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
-                        9 => "Thruster",
+                        3 => "1: Thruster",
+                        7 => "Thruster",                                                
+                        9 => "2: Thruster",
 			12 => "Gravitic Cutter",
                         18 => "Structure",
                         20 => "Primary",

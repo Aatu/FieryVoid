@@ -36,6 +36,7 @@ window.PreFiringPhaseStrategy = function () {
     };
 
     PreFiringPhaseStrategy.prototype.onHexClicked = function (payload) {
+        this.lastClickedShipId = -1;           
         PhaseStrategy.prototype.onHexClicked.call(this, payload);           
         var hex = payload.hex;
 
@@ -52,11 +53,54 @@ window.PreFiringPhaseStrategy = function () {
         }
     };
 
+    /*//Old version before allied targeting
     PreFiringPhaseStrategy.prototype.selectShip = function (ship, payload) {
         this.setSelectedShip(ship);
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
         var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+    };
+    */
+
+    //New version that allows targeting of allies when Friendly Fire Active - DK
+    PreFiringPhaseStrategy.prototype.selectShip = function (ship, payload) {
+
+        if (this.lastClickedShipId === ship.id && gamedata.isMyShip(ship) && this.selectedShip !== ship) {
+            this.setSelectedShip(ship);
+            var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+            var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
+            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+        }
+
+        this.lastClickedShipId = ship.id;
+
+        if (gamedata.rules && gamedata.rules.friendlyFire  === 1) {              
+
+            if(gamedata.isMyorMyTeamShip(this.selectedShip) && weaponManager.hasShipWeaponsSelected()){
+                var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn); 
+                var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);                   
+                menu.addButton("selectShip",
+                    function() {
+                        return this.selectedShip !== ship;
+                    },
+                    function () {
+                        PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                        this.showShipEW(this.selectedShip);
+                    }.bind(this), "Select ship"); 
+                if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);                
+            }else{ //Remove this else block if we don't want to stadnardise double-click to select in Firing Phases
+                this.setSelectedShip(ship); 
+                var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+                var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
+                if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+            }
+        } else {
+            this.setSelectedShip(ship); 
+            var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+            var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
+            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);            
+        }    
+
     };
 
     PreFiringPhaseStrategy.prototype.deselectShip = function (ship) {
@@ -78,6 +122,7 @@ window.PreFiringPhaseStrategy = function () {
         var weapon = payload.weapon;
 
         if (this.selectedShip !== ship) {
+            this.lastClickedShipId = -1;               
             this.setSelectedShip(ship);
         }
 
@@ -100,9 +145,15 @@ window.PreFiringPhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
 
-        if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
-            weaponManager.targetShip(this.selectedShip, ship, system);
-        }
+        if (gamedata.rules && gamedata.rules.friendlyFire  === 1) {        
+            if (gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {        
+                weaponManager.targetShip(this.selectedShip, ship, system);
+            }
+        }else{
+            if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) { 
+                weaponManager.targetShip(this.selectedShip, ship, system);
+            }                               
+        }    
 
         PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
     };

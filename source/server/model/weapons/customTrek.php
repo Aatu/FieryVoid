@@ -1171,13 +1171,13 @@ class TrekShieldProjection extends Shield implements DefensiveSystem { //defensi
 	
 	
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
-		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		
 		$remainingCapacity = $this->getRemainingCapacity();
 		$protectionValue = 0;
 		if($remainingCapacity>0){
-			$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+			$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
 		}
 		return $protectionValue;
 	}
@@ -1395,14 +1395,15 @@ class TrekShieldFtr extends ShipSystem{
 
 
 	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
-		if($damageWasDealt) return 0; //does not protect from overkill damage, just first impact
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
 		
 		$remainingCapacity = $this->getRemainingCapacity();
 		$protectionValue = 0;
 		if($remainingCapacity>0){
-			$protectionValue = min($remainingCapacity,$this->output - $this->armour)+$this->armour ; //this is how much system can actually absorb
-			$protectionValue += $remainingCapacity/100;//this is a fraction of point to represent remaining shield capacity and help balance load
+			$absorbable = min($remainingCapacity, ($this->output - $this->armour) * $inflictingShots);
+			$protectionValue = ($absorbable / $inflictingShots) + $this->armour; //Average absorbable + constant armour
+			$protectionValue += $remainingCapacity/100;//tie breaker matching original logic
 		}
 		return $protectionValue;
 	}
