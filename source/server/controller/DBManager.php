@@ -1756,9 +1756,7 @@ class DBManager
 				if (strpos($rules, 'ladder')!==false){
 					$nm  .= ', Ranked';
 				}     
-				//if (strpos($rules, 'ladder')!==false){
-				//	$nm  .= ', <span style="font-weight:bold; color:gold; padding-right: 0px;">Ladder</span>';
-				//} 
+
 				if (strpos($rules, 'initiativeCategories')!==false){//simultaneous movement
 					$nm  .= ', Sim. Mov';
 				}else{//standard movement
@@ -1773,9 +1771,7 @@ class DBManager
 				if (strpos($rules, 'friendlyFire')!==false){
 					$nm  .= ', Friendly Fire';
 				}                 
-                if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
-                    $nm = ', <span style="color:yellow; font-weight:bold;">Fleet Test</span>';
-                }
+
                 $nm .= ')</span>';
 
                 $fleetTest = false;
@@ -1786,7 +1782,7 @@ class DBManager
 
                 //To mark Fleet Test games as Fleet Test in lobby
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
-                    $nm = '<span style="color:#DEEBFF; font-weight:bold;">Fleet Test</span>'; 
+                    $nm = '<span style="color:gold; font-weight:bold;">Fleet Test</span>'; 
                     $fleetTest = true;                    
                 }    
 
