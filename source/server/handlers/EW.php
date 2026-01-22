@@ -136,10 +136,10 @@
                 $shooterPos = $ship->getHexPos();
                 $targetPos = $target->getHexPos();                
 
-                $losBlockedTarget  = $elint->checkLineOfSight($elintPos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $losBlockedTarget  = $elint->isLoSBlocked($elintPos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 if($losBlockedTarget) continue; //Line of sight blocked to one of the relevant units, skip.         
 
-                $losBlockedShooter  = $elint->checkLineOfSight($elintPos, $shooterPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $losBlockedShooter  = $elint->isLoSBlocked($elintPos, $shooterPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 if($losBlockedShooter) continue; //Line of sight blocked to one of the relevant units, skip.                                       
 
 				if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.

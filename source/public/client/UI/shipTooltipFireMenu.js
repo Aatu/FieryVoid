@@ -13,8 +13,10 @@ window.ShipTooltipFireMenu = function () {
     ShipTooltipFireMenu.buttons = [
 		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" },	
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
-        { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, hasSupportWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.	
-        { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
+        { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.	
+        { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }        
+        //{ className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.	
+        //{ className: "removeMultiOrder", condition: [hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
 	];
 
     ShipTooltipFireMenu.prototype.getAllButtons = function () {
@@ -70,9 +72,9 @@ window.ShipTooltipFireMenu = function () {
         });
     }
 
-    function hasSupportWeaponSelected() {
+    function FFWeaponSelected() {
         return gamedata.selectedSystems.some(system => {
-            return system.canTargetAllies === true || system.canTargetAll === true;
+            return system.canTargetAllies === true || system.canTargetAll === true ||  (gamedata.rules && gamedata.rules.friendlyFire  === 1);
         });
     }
 

@@ -207,6 +207,13 @@ window.PhaseStrategy = function () {
         }
     };
 
+    PhaseStrategy.prototype.onMouseDownEvent = function (payload) {
+        if (gamedata.showLoS) {
+            this._startHexRuler = payload.hex;
+            mathlib.clearLosSprite();
+        }
+    };
+
     PhaseStrategy.prototype.onHexClicked = function (payload) {
         if (gamedata.showLoS) {
             if (payload.button == 2) { //Right click, just clear and reset to this.selectedShip
@@ -268,10 +275,18 @@ window.PhaseStrategy = function () {
             mathlib.clearLosSprite();
         }
 
-        if (this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
-            this.selectShip(ship, payload);
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (this.gamedata.isMyShip(ship)) {
+                this.selectShip(ship, payload);
+            } else {
+                this.targetShip(ship, payload);
+            }
         } else {
-            this.targetShip(ship, payload);
+            if (this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
+                this.selectShip(ship, payload);
+            } else {
+                this.targetShip(ship, payload);
+            }
         }
     };
 

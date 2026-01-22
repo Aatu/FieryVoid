@@ -1242,13 +1242,17 @@ class ShipSystem {
     }
 	
 	
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
 		return 0;
 	}
 	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
 		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
 		return $returnValues;
 	}
+
+	public function damagesUnderShield(){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
+		return false;
+	}	
 	
 	/*first attempt at StarTrek shield
 	public function doesReduceImpactDamage($expectedDmg){ //hook - systems that can affect damage dealing at the moment of impact will return positive value; strongest one will be chosen to interact

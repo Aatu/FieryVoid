@@ -966,7 +966,7 @@
         public $weaponClass = "Particle"; 
         public $noOverkill = true; // The damage of a solar cannon does not overkill.
 		public $firingModes = array( 1 => "Melt"); 
-        
+        private $damageToRepeat = 0;
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);   	    
@@ -982,7 +982,10 @@
         }
 		
 		/*actually repeating damage scored on appropriate Structure*/
-		private function doRepeatDamageOnStructure($fireOrder,$target,$systemHit,$damageToRepeat){
+		private function doRepeatDamageOnStructure($fireOrder,$target,$systemHit, $damage, $gamedata){
+            //Debug::log(json_encode($damageToRepeat));
+            $damageToRepeat = $this->damageToRepeat;
+
 			if(!$target instanceof FighterFlight){
 				$struct = null;
 				if($systemHit instanceof Structure){
@@ -990,7 +993,22 @@
 				}else{
 					$struct = $target->getStructureSystem($systemHit->location);
 				}
-				if($struct && (!$struct->isDestroyed())){
+                if($struct && (!$struct->isDestroyed())){
+                    $shooter = $this->getUnit();
+                    
+                    //Determine if the shot successfully penetrated (dealt damage) to trigger internal effects
+                    $isUnderShield = ($damage > 0);
+
+                    //CALL SYSTEMS PROTECTING FROM DAMAGE HERE! 
+                    //Pass true for isUnderShield to indicate this is internal/under-shield damage
+                    $systemProtectingDmg = $target->getSystemProtectingFromDamage($shooter, null, $gamedata->turn, $this, $struct, $damageToRepeat, false, $isUnderShield);
+                    if($systemProtectingDmg){
+                        $effectOfProtection = $systemProtectingDmg->doProtect($gamedata, $fireOrder, $target, $shooter,$this,$struct,$damageToRepeat, 0);
+                        $damageToRepeat = $effectOfProtection['dmg'];
+                        //$effectiveArmor = $effectOfProtection['armor'];
+                    }
+                    //Debug::log(json_encode($damageToRepeat));
+
 					$destroyed = false;
 					$remHealth = $struct->getRemainingHealth();	
 					if($damageToRepeat >= $remHealth) $destroyed = true;
@@ -1006,13 +1024,19 @@
               system hit will have its armor reduced by 2
               for non-fighter targets
         */
+
+        protected function beforeDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+            //Debug::log(json_encode($damage));
+            $this->damageToRepeat = $damage-$armour; //Saved damage amount before any protection from Diffusers/shields etc.
+            return $damage;
+        }
+
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
 		{
 			$target = $ship;
 			if(!$target instanceof FighterFlight){
 				//reduce armor of system hit
 				if (!$system->advancedArmor) { //Advanced Armor prevents armor reduction
-//				}elseif (!$system->hardAdvancedArmor){//hardened advanced armor prevents effect - GTS
 					$crit = new ArmorReduced(-1, $target->id, $system->id, "ArmorReduced", $gamedata->turn);
 					$crit->updated = true;
 					$crit->inEffect = false; //in effect only on next turn
@@ -1021,10 +1045,8 @@
 					$crit->updated = true;
 					$crit->inEffect = false; //in effect only on next turn
 					$system->criticals[] = $crit;
-				}
-				//repeat damage on structure this system is mounted to
-				$damageToRepeat = $damage-$armour;
-				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damageToRepeat);
+				}               
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
 			}
 		}//endof onDamagedSystem
 		
@@ -1046,7 +1068,7 @@
 		protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null)
 		{
 			if($damageWasDealt){
-				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage);
+				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
 			}else{
 				parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
 			}			

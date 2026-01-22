@@ -538,7 +538,7 @@ input[type=number] {
 .game-options-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 55px;
+  gap: 60px;
   align-items: flex-start;
   padding: 10px;
 }
@@ -550,7 +550,7 @@ input[type=number] {
   /* Minimum width before wrapping */
   display: flex;
   flex-direction: column;
-  margin-left: 15px;
+  margin-left: 10px;
 }
 
 /* Ensure scenario form behaves as a column */

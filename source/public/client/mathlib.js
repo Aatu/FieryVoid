@@ -268,7 +268,7 @@ window.mathlib = {
 	},
 
 
-	checkLineOfSight: function checkLineOfSight(start, end, blockedHexes) {
+	isLoSBlocked: function isLoSBlocked(start, end, blockedHexes) {
 		const startPixel = coordinateConverter.fromHexToGame(start);
 		const endPixel = coordinateConverter.fromHexToGame(end);
 

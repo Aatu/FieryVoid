@@ -17,6 +17,12 @@ if (!headers_sent() && !ini_get('zlib.output_compression')) {
     ob_start();
 }
 
+// ----------------------
+// High Resource Limits for Generator
+// ----------------------
+ini_set('memory_limit', '-1'); // Unlimited memory
+set_time_limit(300); // 5 minutes
+
 //// ─── Includes ──────────────────────────────────────────────────────
 require_once __DIR__ . '/source/public/global.php';
 
@@ -24,11 +30,13 @@ require_once __DIR__ . '/source/public/global.php';
 $fileBase = __DIR__ . '/source/public/static/ships';
 $combinedFile = $fileBase . 'Combined.js';
 
-//// ─── Fetch All Factions ─────────────────────────────────────────────
-//$allFactions = ShipLoader::getAllFactions();
-$allFactions = ShipLoader::getAllFactionsStatic(); //Changed to static method - 12.12.25
-if (!$allFactions) {
-    exit("<b>Error:</b> No factions found.");
+// ----------------------
+// OPTIMIZATION: Fetch ALL ships at once O(N) instead of O(N*M)
+// ----------------------
+$shipsByFaction = ShipLoader::getAllShipsStatic(null);
+
+if (!$shipsByFaction) {
+    exit("<b>Error:</b> No ships found.");
 }
 
 // Initialize combined file with empty object
@@ -41,27 +49,20 @@ if (!is_dir($jsonDir)) {
 }
 
 //// ─── Generate Per-Faction JS Files ──────────────────────────────────
-foreach ($allFactions as $factionName) {
+foreach ($shipsByFaction as $factionName => $shipsOfFaction) {
     $data = [];
-
-    //$shipsCurr = ShipLoader::getAllShips($factionName);
-    $shipsCurr = ShipLoader::getAllShipsStatic($factionName); //Changed to static method - 12.12.25   
+    
     echo "<br/><br/><strong>$factionName</strong>:<br/>\n";
 
-    foreach ($shipsCurr as $factionKey => $shipsOfFaction) {
-        foreach ($shipsOfFaction as $ship) {
-            if ($ship && $ship instanceof BaseShip) {
-                // Debug output
-                echo " &nbsp; - {$ship->phpclass}<br/>\n";
+    foreach ($shipsOfFaction as $ship) {
+        if ($ship && $ship instanceof BaseShip) {
+            // Debug output
+            echo " &nbsp; - {$ship->phpclass}<br/>\n";
 
-                // Store only what is needed for the static cache
-                $data[$ship->phpclass] = $ship;
-            }
+            // Store only what is needed for the static cache
+            $data[$ship->phpclass] = $ship;
         }
     }
-
-    // Free memory after each faction
-    unset($shipsCurr);
 
     // Append this faction to the combined file
     $chunk = 'window.staticShips["' . $factionName . '"]=' . json_encode($data, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE) . ';' . PHP_EOL;
@@ -71,7 +72,7 @@ foreach ($allFactions as $factionName) {
     $jsonPath = $jsonDir . '/' . $factionName . '.json';
     $jsonPayload = [$factionName => $data];
     file_put_contents($jsonPath, json_encode($jsonPayload, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE));
-
+    
     unset($data); // Free memory
 }
 

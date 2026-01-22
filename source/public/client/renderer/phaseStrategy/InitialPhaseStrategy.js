@@ -21,7 +21,7 @@ window.InitialPhaseStrategy = function () {
 
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
 
-        infowindow.informPhase(5000, function () {});
+        infowindow.informPhase(5000, function () { });
         this.selectFirstOwnShipOrActiveShip();
         gamedata.showCommitButton();
         gamedata.showSurrenderButton();
@@ -34,13 +34,14 @@ window.InitialPhaseStrategy = function () {
 
     InitialPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
-        
+
         gamedata.hideSurrenderButton();
         return this;
     };
 
     InitialPhaseStrategy.prototype.onHexClicked = function (payload) {
-        PhaseStrategy.prototype.onHexClicked.call(this, payload);        
+        this.lastClickedShipId = -1;
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);
         if (!this.selectedShip) {
             return;
         }
@@ -54,9 +55,12 @@ window.InitialPhaseStrategy = function () {
         }
     };
 
+    /* //Old version before allied targeting
     InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
         
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+
+
 
         if (this.selectedShip && shipManager.isElint(this.selectedShip) && ship !== this.selectedShip){
             var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position); 
@@ -76,6 +80,50 @@ window.InitialPhaseStrategy = function () {
 
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
+    */
+
+    //New version that allows targeting of allies when friendly fire option active - DK
+    InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
+        var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
+
+        //Method to double click to instand select, or single select and get EW/Firing Menus
+        if (this.lastClickedShipId === ship.id && gamedata.isMyShip(ship) && this.selectedShip !== ship) {
+            PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+            this.showShipEW(this.selectedShip);
+            //Re-create menu now that this.selectedShip has changed, so it shows the Own-Ship menu instead of Target-Ship menu
+            menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
+        }
+
+        this.lastClickedShipId = ship.id;
+
+        if (this.selectedShip && shipManager.isElint(this.selectedShip) && ship !== this.selectedShip) {
+            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);            
+            menu.addButton("selectShip",
+                function () {
+                    return this.selectedShip !== ship;
+                },
+                function () {
+                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                    this.showShipEW(this.selectedShip);
+                }.bind(this), "Select ship");
+            this.showShipEW(this.selectedShip);
+        } else if (gamedata.isMyShip(ship)) {
+            //PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
+            menu.addButton("selectShip",
+                function () {
+                    return this.selectedShip !== ship;
+                },
+                function () {
+                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+                    this.showShipEW(this.selectedShip);
+                }.bind(this), "Select ship");
+            this.showShipEW(this.selectedShip);
+        }
+
+        if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
+    };
+
 
     InitialPhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
@@ -92,10 +140,10 @@ window.InitialPhaseStrategy = function () {
     InitialPhaseStrategy.prototype.targetShip = function (ship, payload) {
         //TODO: Targeting ship with ballistic weapons
         //TODO: Targeting ship with support EW (defensive or offensive)
-        if(shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn){ //Selected ships is not deployed yet - DK May 2025
+        if (shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
             this.showShipTooltip(ship, payload, menu, false);
-            return;  
-        }    
+            return;
+        }
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
         var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
@@ -114,22 +162,29 @@ window.InitialPhaseStrategy = function () {
         var weapon = payload.weapon;
 
         if (this.selectedShip !== ship) {
+            this.lastClickedShipId = -1;
             this.setSelectedShip(ship);
         }
 
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
     };
 
     InitialPhaseStrategy.prototype.onSystemTargeted = function (payload) { //25.11.23 - Added onSystemTargeted here to allow Called Shots in Initial Orders phase e.g. Limpet Bore.
         var ship = payload.ship;
         var system = payload.system;
 
-        if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
-            weaponManager.targetShip(this.selectedShip, ship, system);
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
+                weaponManager.targetShip(this.selectedShip, ship, system);
+            }
+        } else {
+            if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
+                weaponManager.targetShip(this.selectedShip, ship, system);
+            }
         }
 
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
     };
-    
+
     return InitialPhaseStrategy;
 }();

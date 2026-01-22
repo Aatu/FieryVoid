@@ -714,7 +714,7 @@ The Chouka Theocracy was a minor regional power in the Escalation Wars universe,
 The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.
 As with the Circasians, the Chouka are best used against minor B5 powers (Alacans, Mitoc, Raiders), however some of their larger, more powerful units are roughly the equivalent of Dilgar-war era Earth Alliance. 
 Point Plasma Guns - These short range plasma weapons are the Chouka's primary anti-fighter weapons.
-Gravitic Tracting Rod - This rare device was only found on the Apostle Holy Cruiser. It was used to tractor on to smaller craft and draw them closer to dock with the ship for boarding. In Fiery Void, the Tracting Rod instead gives the target an initiative a thrust penalty.
+Gravitic Tracting Rod - This rare device was only found on the Apostle Holy Cruiser and Penitent Patrol Ship. The tracting rod acts as a weaker gravity net. However, there are no restrictions on the size of the firing unit versus target.
 Twin Laser Cannon - This Chouka weapon is an advancement over the basic Light Laser Cannon using early gravitic technology to improve its range. 
 Light Energy Mine - This is a smaller version of the Energy Mine used by the Narn. It has shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine. This weapon is being substituted for the Ballistic Mine Launchers these ships historically were deployed with.
 

@@ -9,7 +9,7 @@ class Lkarus extends BaseShip{
         $this->phpclass = "Lkarus";
         $this->imagePath = "img/ships/NarnPrivateerlkarusEarly.png";
         $this->shipClass = "Narn Privateer L'Karus Raider Cruiser";
-		$this->canvasSize = 125; //img has 125px per side
+		$this->canvasSize = 200; //img has 125px per side
         $this->fighters = array("normal"=>6);  
 	    $this->isd = 2231;
         $this->limited = 33;
