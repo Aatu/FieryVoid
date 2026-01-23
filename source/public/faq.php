@@ -245,7 +245,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 Alternatively you can set up an open Ladder game without using this feature and just set points values in team slots in the usual way.  
                 When a player takes the other slot in the game their points will be adjusted automatically.  Either way, decide on the specifics for the game (Points, Map; Standard vs Simultaneous Movement, etc.) and then click Create Game.  
                 Note, Ladder games are competitive matches so only two players can take part, and only one slot is allowed per team. </li>
-            <li>When the game ends and one side surrenders, the winner will have their ranking increased by 1 on the Ladder, and the loser has their ranking reduced by 1.</li>                                  
+            <li>When the game ends and one player surrendering (and at least one turn has been played), the winner will have their ranking increased by 1 on the Ladder, and the loser has their ranking reduced by 1.</li> 
+            <li>You can review your own and other players' match history by clicking 'View Ladder' on the FV home page and then clicking on thier name.</li>                                              
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

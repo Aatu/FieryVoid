@@ -894,33 +894,36 @@ class Manager{
                     self::$dbManager->updateGameStatus($gameid, "SURRENDERED");
 
                     // --- LADDER LOGIC START ---
-                    $rules = $gdS->rules;
-                    if ($rules->hasRule('ladder') && $rules->callRule('ladder', array())) {
-                        // Game is a ladder game and has just finished via surrender.
-                        // Winners: Teams that are still "alive" (or if everyone surrendered, the last one standing implicitly).
-                        // Losers: Teams that have surrendered.
-                        
-                        // Re-evaluate slots to be sure we have latest state
-                        $finalSlots = self::$dbManager->getSlotsInGame($gameid);
-                        $winningTeam = null;
+                    // Only process ladder results if it's NOT Turn 1 (prevents recording early surrenders/setup errors)
+                    if ($gdS->turn > 1) {
+                        $rules = $gdS->rules;
+                        if ($rules->hasRule('ladder') && $rules->callRule('ladder', array())) {
+                            // Game is a ladder game and has just finished via surrender.
+                            // Winners: Teams that are still "alive" (or if everyone surrendered, the last one standing implicitly).
+                            // Losers: Teams that have surrendered.
+                            
+                            // Re-evaluate slots to be sure we have latest state
+                            $finalSlots = self::$dbManager->getSlotsInGame($gameid);
+                            $winningTeam = null;
 
-                        // Identify the winning team (the one not surrendered)
-                        // If aliveCount is 1, find that team.
-                        // If aliveCount is 0, arguably everyone lost, or the last one to surrender "won"? 
-                        // Let's assume standard flow: one team remains.
-                        foreach ($finalSlots as $slot) {
-                             if ($slot->surrendered === null) {
-                                 $winningTeam = $slot->team;
-                                 break;
-                             }
-                        }
-                        
-                        if ($winningTeam !== null) {
+                            // Identify the winning team (the one not surrendered)
+                            // If aliveCount is 1, find that team.
+                            // If aliveCount is 0, arguably everyone lost, or the last one to surrender "won"? 
+                            // Let's assume standard flow: one team remains.
                             foreach ($finalSlots as $slot) {
-                                if ($slot->team == $winningTeam) {
-                                    self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'WIN');
-                                } else {
-                                    self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'LOSS');
+                                if ($slot->surrendered === null) {
+                                    $winningTeam = $slot->team;
+                                    break;
+                                }
+                            }
+                            
+                            if ($winningTeam !== null) {
+                                foreach ($finalSlots as $slot) {
+                                    if ($slot->team == $winningTeam) {
+                                        self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'WIN');
+                                    } else {
+                                        self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'LOSS');
+                                    }
                                 }
                             }
                         }
