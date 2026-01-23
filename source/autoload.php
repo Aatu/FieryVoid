@@ -2108,7 +2108,7 @@ spl_autoload_register(
                 'flyingfoxstarfury' => '/server/model/ships/EA_old/flyingfoxStarfury.php',
                 'laertesalpha' => '/server/model/ships/EA_old/laertesAlpha.php',
                 'laertesbeta' => '/server/model/ships/EA_old/laertesBeta.php',
-                'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
+                //'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
                 'laertesdelta_early' => '/server/model/ships/EA_old/laertesDelta_early.php',
                 'orestesalphaam' => '/server/model/ships/EA_old/orestesAlphaAM.php',
                 'orestesbetaam' => '/server/model/ships/EA_old/orestesBetaAM.php',
