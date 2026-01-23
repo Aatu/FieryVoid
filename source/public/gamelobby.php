@@ -214,8 +214,11 @@
 
         
         jQuery(function($){            
-            gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
+            var lobbyData = <?php print($gamelobbydataJSON); ?>;
+            gamedata.parseServerData(lobbyData);
             gamedata.parseFactions(<?php print($factions); ?>);
+            
+            var customWarningShown = false; // Track if warning has been shown
 
             $('.readybutton').on("click", gamedata.onReadyClicked);
             $('.savebutton').on("click", gamedata.onSaveClicked)            		
@@ -286,6 +289,11 @@
             $('#toggleCustom').on('change', function () {
                 if ($(this).is(':checked')) {
                     $('#customDropdown').show();
+                    
+                    if (!customWarningShown && lobbyData.description && lobbyData.description.match(/CUSTOM FACTIONS \/ UNITS:\s*Not Allowed/i)) {
+                        window.confirm.warning("Custom factions/units are not allowed in this scenario!");
+                        customWarningShown = true;
+                    }
                 } else {
                     $('#customDropdown').hide();
                 }
@@ -559,6 +567,11 @@ $optionsUsed = '';
                 if ($pos !== false) {
                     $label = trim(substr($line, 0, $pos));
                     $value = trim(substr($line, $pos + 1));
+
+                    // Check if ADDITIONAL INFORMATION is blank and set to 'None'
+                    if (strcasecmp($label, 'ADDITIONAL INFORMATION') === 0 && $value === '') {
+                        $value = 'None';
+                    }
 
                     // Bold the label regardless of case (you can add uppercase check if you want)
                 echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
