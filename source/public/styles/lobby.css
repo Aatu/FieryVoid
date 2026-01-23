@@ -78,7 +78,7 @@
 .scenariovalue {
 
     margin: 2px 2px;
-    color: #81a7ec;
+    color: #a6c1f2;
 }
 
 .slot span {
@@ -157,7 +157,7 @@
 }
 
 .store .ship {
-    color: #81a7ec;
+    color: #90b1ee; /* previous value #81a7ec */
     /*color:#8080FF;old purple*/
     margin-right: 5px;
     font-size: 13px;
@@ -172,7 +172,7 @@
 
 .store .storeship {
     /*color:#a3c0f5;*/
-    color: #81a7ec;
+    color: #90b1ee; /* previous value #81a7ec */
     margin-right: 5px;
     margin-left: 20px;
     font-size: 13px;
@@ -276,7 +276,7 @@
 
 .value {
     /*color:#6e9cdc; Original value  #496791 */
-    color: #81a7ec;
+    color: #90b1ee;  /* previous value #81a7ec */
 }
 
 .selectslot {
