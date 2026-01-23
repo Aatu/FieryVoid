@@ -3640,7 +3640,7 @@ class VorlonDischargeGun extends Weapon{
 	public $displayName = "Discharge Gun";
 	public $iconPath = "VorlonDischargeGun.png";
 	
-	public $animation = "laser";
+	public $animation = "bolt";
 	public $animationColor = array(175, 255, 225);
 	/*
 	public $trailColor = array(175, 225, 175);
@@ -5034,7 +5034,7 @@ class VorlonDischargeCannon extends Weapon{
 	public $displayName = "Discharge Cannon";
 	public $iconPath = "VorlonDischargeCannon.png";
 	
-	public $animation = "laser";
+	public $animation = "bolt";
 	public $animationColor = array(175, 255, 225);
 	/*
 	public $trailColor = array(175, 225, 175);
