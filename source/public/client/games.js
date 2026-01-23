@@ -209,10 +209,3 @@ window.gamedata = {
 window.animation = {
 	animateWaiting: function animateWaiting() { }
 };
-
-// Force reload on back/forward navigation (BF Cache fix)
-window.addEventListener('pageshow', function (event) {
-	if (event.persisted) {
-		window.location.reload();
-	}
-});
