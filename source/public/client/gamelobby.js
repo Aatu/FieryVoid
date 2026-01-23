@@ -83,9 +83,9 @@ window.gamedata = {
 			case 'Earth Alliance':
 				powerRating = 'Tier 1; Major Faction';
 				break;
-			case 'Earth Alliance (Custom)':
+			/*case 'Earth Alliance (Custom)':
 				powerRating = 'Tier 1; Major Custom Faction';
-				break;
+				break;*/
 			/*case 'Earth Alliance (defenses)':
 			  powerRating = 'Tier 1; Major Faction';
 			  break;*/
