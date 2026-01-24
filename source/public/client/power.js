@@ -502,6 +502,14 @@ shipManager.power = {
 	},
 
 	setOnline: function setOnline(ship, system, skipMessage = false) {
+		if (ship.faction === "Vorlon Empire" && !ship.flight && (system instanceof Weapon || system instanceof Shield)) {
+             var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
+             if (capacitor && capacitor.active) {
+                 if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");
+                 return;
+             }
+        }
+
 		if (system.name == "graviticShield") {
 			if (ship.checkShieldGenerator()) {
 				for (var i in ship.systems) {

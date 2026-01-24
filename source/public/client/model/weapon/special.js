@@ -187,6 +187,12 @@ VorlonDischargeGun.prototype.constructor = VorlonDischargeGun;
 
 VorlonDischargeGun.prototype.initializationUpdate = function() {
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
+    var ship = this.ship;
+    if(!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)){
+		shipManager.power.setOnline(ship, this);
+        this.reactivated = true;        
+    }
+
 	this.powerReq = 0;
     if(gamedata.gamephase == 3){     
         var isFiring = weaponManager.hasFiringOrder(this.ship, this);
@@ -290,6 +296,14 @@ VorlonDischargeCannon.prototype = Object.create(VorlonDischargeGun.prototype);
 VorlonDischargeCannon.prototype.constructor = VorlonDischargeCannon;
 
 VorlonDischargeCannon.prototype.initializationUpdate = function() {
+
+    var ship = this.ship;
+    // Turns systems back on after Capacitor was double charged the previous turn    
+	if(!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)){
+		shipManager.power.setOnline(ship, this);
+		this.reactivated = true;        
+	}
+
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
     if(gamedata.gamephase == 3){     
@@ -320,7 +334,15 @@ var VorlonLightningCannon = function VorlonLightningCannon(json, ship) {
 };
 VorlonLightningCannon.prototype = Object.create(Weapon.prototype);
 VorlonLightningCannon.prototype.constructor = VorlonLightningCannon;
+
 VorlonLightningCannon.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+    // Turns systems back on after Capacitor was double charged the previous turn    
+	if(!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)){
+		shipManager.power.setOnline(ship, this);
+		this.reactivated = true;        
+	}
+
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
 	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
@@ -345,6 +367,13 @@ var VorlonLightningGun = function VorlonLightningGun(json, ship) {
 VorlonLightningGun.prototype = Object.create(Weapon.prototype);
 VorlonLightningGun.prototype.constructor = VorlonLightningGun;
 VorlonLightningGun.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+    // Turns systems back on after Capacitor was double charged the previous turn    
+	if(!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)){
+		shipManager.power.setOnline(ship, this);
+		this.reactivated = true;        
+	}
+
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
 	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
@@ -362,6 +391,13 @@ var VorlonLightningGun2 = function VorlonLightningGun2(json, ship) {
 VorlonLightningGun2.prototype = Object.create(Weapon.prototype);
 VorlonLightningGun2.prototype.constructor = VorlonLightningGun2;
 VorlonLightningGun2.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+    // Turns systems back on after Capacitor was double charged the previous turn    
+	if(!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)){
+		shipManager.power.setOnline(ship, this);
+		this.reactivated = true;        
+	}
+
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
 	var isFiring = weaponManager.hasFiringOrder(this.ship, this);
@@ -379,6 +415,13 @@ VorlonDischargePulsar.prototype = Object.create(Weapon.prototype);
 VorlonDischargePulsar.prototype.constructor = VorlonDischargePulsar;
 
 VorlonDischargePulsar.prototype.initializationUpdate = function() {
+    var ship = this.ship;
+    // Turns systems back on after Capacitor was double charged the previous turn    
+	if(!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)){
+		shipManager.power.setOnline(ship, this);
+		this.reactivated = true;        
+	}
+
     // Needed because it can change power consumption during firing phase, depending on power and number of shots being changed
 	this.powerReq = 0;
 	var isFiring = weaponManager.hasFiringOrder(this.ship, this);

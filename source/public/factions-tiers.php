@@ -1020,7 +1020,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Power Capacitor</h5>
         <li>Produces power for Vorlon ships and can hold Power between turns up to its maximum capacity.  Some key points to note about it are:
                 <ul class="circle-list">
-                    <li>New power is produced in the Initial Orders phase,</li>
+                    <li>New power is produced in the Initial Orders phase.  The power produced can be doubled (along with Self Repair at end of turn) by clicking 'Select' in Initial Orders.  However this comes at the cost of deactivating all weapons and shields on that turn.</li>
                     <li>Opening petals by boosting Power Capacitor will reduce the armor of all the ship’s primary systems by 2 and increase Defence Profiles by 5%, but adds 50% to power generation the following turn,</li> 
                     <li>Capacitor destruction would leave the ship powerless, but doesn't cause a catastrophic explosion like Reactor destruction.  In FV it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), 
                         add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li> 
