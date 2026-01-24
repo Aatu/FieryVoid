@@ -3703,9 +3703,8 @@ class VorlonDischargeGun extends Weapon{
 		$this->data["Special"] .= "<br> - 2 power: 2d10+2"; 
 		$this->data["Special"] .= "<br> - 4 power: 3d10+3"; 
 		$this->data["Special"] .= "<br> - 6 power: 4d10+4"; 
-	//	$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
 		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
-		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";
 		$this->data["Special"] .= "<br>Interceping shots consume 2 power per shot (refunded if not used).";   	
 	}
 		
@@ -3890,11 +3889,11 @@ class VorlonDischargePulsar extends Weapon{
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
-		}	    		
-		$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
+		}	    		  
 		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used):";  
 		$this->data["Special"] .= "<br> - 4 power: 12 1d3 times, max 4"; 
 		$this->data["Special"] .= "<br> - 8 power: 18, 1d3 times, max 4"; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 		
 	public function getDamage($fireOrder){
@@ -4089,8 +4088,7 @@ class VorlonLightningCannon extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
-		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
+		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d10+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 4 Power, 2d10+16 Raking(10), -2.5/hex";
@@ -4099,6 +4097,7 @@ class VorlonLightningCannon extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 12 Power, 4d10+32 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1.25/hex"; 
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 		
 		
@@ -4367,7 +4366,6 @@ class VorlonLightningGun extends Weapon{
 			$this->data["Special"] .= '<br>';
 		}	    		
 		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
-		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d5+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 3 Power, 1d10+16 Raking(10), -2.5/hex";
@@ -4376,6 +4374,7 @@ class VorlonLightningGun extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 9 Power, 2d10+32 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 18 Power, 4d10+64 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 
 	public function getDamage($fireOrder){
@@ -4705,8 +4704,7 @@ class VorlonLightningGun2 extends Weapon{
 		}	    		
 		$this->data["Special"] .= "The mirror gun represents the Lightning Gun's ability to fire twice per turn.";
 		$this->data["Special"] .= "<br>May combine with other mirror guns or regular Lightning Guns for heavier shots.";
-		$this->data["Special"] .= "<br>Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
-		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
+		$this->data["Special"] .= "<br>Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d5+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 3 Power, 1d10+16 Raking(10), -2.5/hex";
@@ -4715,6 +4713,7 @@ class VorlonLightningGun2 extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 9 Power, 2d10+32 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 18 Power, 4d10+64 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 
 	public function getDamage($fireOrder){
@@ -5096,14 +5095,12 @@ class VorlonDischargeCannon extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-	//	$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
 		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used), and also fire control (e.g. higher modes are better against ships):";  
 		$this->data["Special"] .= "<br> - 5 power: 4d10+5, Raking(10)"; 
 		$this->data["Special"] .= "<br> - 10 power: 6d10+10, Raking(15)"; 
 		$this->data["Special"] .= "<br> - 15 power: 8d10+15, Raking(15)"; 
-		//$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
 		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
-		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";	
 		$this->data["Special"] .= "<br>Interceping shots consume 5 power per shot (refunded if not used).";   	
 	}
 		

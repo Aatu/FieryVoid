@@ -209,6 +209,8 @@ VorlonDischargeGun.prototype.initializationUpdate = function() {
         }
         this.data["Shots Remaining"] = 4 - this.fireOrders.length;
     }
+
+    this.outputDisplay = "1/1";
     return this;
 };
 
@@ -321,6 +323,8 @@ VorlonDischargeCannon.prototype.initializationUpdate = function() {
         }
         this.data["Shots Remaining"] = 4 - this.fireOrders.length;
     }
+    this.outputDisplay = "1/1";
+
     return this;
 };
 
@@ -350,6 +354,7 @@ VorlonLightningCannon.prototype.initializationUpdate = function() {
 		var firing = weaponManager.getFiringOrder(this.ship, this);
 		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
 	}
+    this.outputDisplay = "1/1";    
     return this;
 };
 
@@ -381,6 +386,7 @@ VorlonLightningGun.prototype.initializationUpdate = function() {
 		var firing = weaponManager.getFiringOrder(this.ship, this);
 		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
 	}
+    this.outputDisplay = "1/1";    
     return this;
 };
 
@@ -405,6 +411,7 @@ VorlonLightningGun2.prototype.initializationUpdate = function() {
 		var firing = weaponManager.getFiringOrder(this.ship, this);
 		this.powerReq = this.powerRequiredArray[firing.firingMode][1]; //element is array Number of prongs/Power)		
 	}
+    this.outputDisplay = "1/1";    
     return this;
 };
 
@@ -429,6 +436,7 @@ VorlonDischargePulsar.prototype.initializationUpdate = function() {
 		var firing = weaponManager.getFiringOrder(this.ship, this);
 		this.powerReq = 4*firing.firingMode;		
 	}
+    this.outputDisplay = "1/1";    
     return this;
 };
 
