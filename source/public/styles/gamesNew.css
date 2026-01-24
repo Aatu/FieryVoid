@@ -719,7 +719,7 @@ kbd {
 }
 
 .game-type-fleettest {
-  border: 1px solid #7298a7;
+  border: 1px solid #215a7a;
 }
 
 .game-type-fleettest .lobbyname {
@@ -729,9 +729,10 @@ kbd {
 
 .game-type-normal {
   /* Standard look, ensures consistency if defaults change */
-  color: #46a046 !important;
+  color: #3c7a3ce0 !important;
   /* Gold for Fleet Test */
-  border: 1px solid #3c773c;
+  /*border: 1px solid #3c773c;*/
+  border: 1px solid #215a7a;
 }
 
 .gameRules {
