@@ -38,14 +38,14 @@ class gaimTracha extends BaseShip{
 
 		$this->addAftSystem(new ScatterGun(3, 8, 3, 60, 300));
 
-		$this->addLeftSystem(new Thruster(4, 10, 0, 3, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addLeftSystem(new Thruster(4, 13, 0, 5, 3));
-		$this->addLeftSystem(new Thruster(4, 10, 0, 5, 2));
+		$this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
 		$this->addLeftSystem(new PacketTorpedo(3, 6, 5, 240, 360));
 
-		$this->addRightSystem(new Thruster(4, 10, 0, 3, 1));
+		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addRightSystem(new Thruster(4, 13, 0, 5, 4));
-		$this->addRightSystem(new Thruster(4, 10, 0, 5, 2));
+		$this->addAftSystem(new Thruster(4, 10, 0, 5, 2));
 		$this->addRightSystem(new PacketTorpedo(3, 6, 5, 0, 120));
         
         $this->addFrontSystem(new Structure( 4, 32));
@@ -75,13 +75,17 @@ class gaimTracha extends BaseShip{
                         20 => "Primary",
                 ),
                 3=> array(
-                        10 => "Thruster",
+                        3 => "1:Thruster",                        
+                        7 => "Thruster",
+                        10 => "2:Thruster",                
 						12 => "Packet Torpedo",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
-                        10 => "Thruster",
+                        3 => "1:Thruster",                        
+                        7 => "Thruster",
+                        10 => "2:Thruster",                
 						12 => "Packet Torpedo",
                         18 => "Structure",
                         20 => "Primary",
