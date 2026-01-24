@@ -107,15 +107,9 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Friendly Fire</strong> - New option added to Create Game screen allowing ships to fire on their own team!</li> 
-        <li><strong>Electronic Warfare</strong> - Now all EW options are available for any ship friend or foe!</li>    
-        <li><strong>Ship Selection</strong> - Due to above changes, in certain phases you will now need to double-click with left mouse button to select a ship.</li> 
-        <li><strong>Touchscreen Improvements</strong> - Line of Sight tool and Hit Chart displays should now work on mobile/tablet devices.</li>                                               
-        <li><strong>Escalation/Nexus Updates</strong> - Several Nexus fixes and a new Gravitic Tracting Rod weapon added for Chouka! Thanks to Geoffrey!</li>  
-        <li><strong>Torvalus Stilettos</strong> - Jammer ability removed following rules clarification.</li> 
-        <li><strong>Drazi Solar Cannon</strong> - Should now dealt correct damage to ships with damge mitigating systems e.g. Shadow Diffusers.</li> 
-        <li><strong>The Lllort</strong> - Extra 'L' added to Lllort faction name.</li>                                                                               
-        <li><strong>General Fixes</strong> - Further database optimisation and server stability fixes. Several bug fixes/improvements. Thanks for the reports!</li>                                                    
+        <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above for more details on how it works!</li>                                                                                                                             
+        <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>   
+        <li><strong>Power Capacitors</strong> - Added Vorlon ability to deactivate weapons and shields for double Power Generation/Self-Repair on that turn.</li>                                                  
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
