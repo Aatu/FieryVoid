@@ -685,20 +685,21 @@ kbd {
 /* Slot Card Styling */
 /* Games List Buttons - Moved from ladder.css */
 .btn-fleet-test {
-  border: 1px solid #7298a7;
-  background: #215a7a;
+  background: #004d66;
+  border: 1px solid #587e8d;
+
 }
 
 .btn-view-ladder {
   /* Custom styles for View Ladder button */
-  background: #004d66d0;
-  border: 1px solid #007399;
+  border: 1px solid #587e8d;
+  background: #215a7a;
 }
 
 .btn-recent-games {
   /* Custom styles for Recent Games button */
   background: #3d5c5cb6;
-  border: 1px solid #476b6bd8;
+  border: 1px solid #587e8d;
 }
 
 /* Distinct styles for Lobby Game Types */
