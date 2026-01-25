@@ -108,8 +108,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above for more details on how it works!</li>                                                                                                                             
-        <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>   
         <li><strong>Power Capacitors</strong> - Added Vorlon ability to deactivate weapons and shields for double Power Generation/Self-Repair on that turn.</li>                                                  
+        <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>

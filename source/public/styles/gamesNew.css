@@ -699,7 +699,7 @@ kbd {
 .btn-recent-games {
   /* Custom styles for Recent Games button */
   background: #3d5c5cb6;
-  border: 1px solid #587e8d;
+  border: 1px solid #587e8da4;
 }
 
 /* Distinct styles for Lobby Game Types */
