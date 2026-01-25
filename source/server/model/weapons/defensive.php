@@ -845,11 +845,14 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {		
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {	
+			
+			if($isUnderShield) return 0; //shield does not protect from internal damage
+
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
 			if($remainingCapacity>0){
-				$protectionValue = $remainingCapacity+$this->armour; //this is actually more than this system can protect from - but allows to balance load between systems in arc
+				$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
 			}
 			return $protectionValue;
 		}
@@ -1114,12 +1117,20 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		}//endof checkShieldDeduction		
 		
 		//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
-		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+		public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
 			
+			if($isUnderShield) return 0; //shield does not protect from internal damage
+
 			$remainingCapacity = $this->getRemainingCapacity();
 			$protectionValue = 0;
 			if($remainingCapacity>0){
 				$protectionValue = $remainingCapacity;
+				
+				//If there are multiple shots, we need to return the AVERAGE protection over the shots - accounting for the fact that the shield may be depleted by the first shot.
+				if($inflictingShots > 1){
+					$totalProtection = min($remainingCapacity, $expectedDmg * $inflictingShots);
+					$protectionValue = $totalProtection / $inflictingShots;
+				}
 			}
 			return $protectionValue;
 		}

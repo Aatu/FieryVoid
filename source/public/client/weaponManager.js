@@ -314,6 +314,14 @@ window.weaponManager = {
         return false;
     },
 
+    //For use if we allow targeting allies to toggle type of tooltips - DK
+    hasShipWeaponsSelected: function hasShipWeaponsSelected() {
+        return gamedata.selectedSystems.some(function (system) {
+            //return system instanceof Weapon && system.targetsShips === true;
+            return system instanceof Weapon && system.hextarget !== true;
+        });
+    },
+    
     selectAllWeapons: function selectAllWeapons(ship, system) {
         if (!gamedata.isMyShip(ship)) {
             return;
@@ -481,7 +489,7 @@ window.weaponManager = {
                         var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
                         var sPosTarget = shipManager.getShipPosition(ship);
                         //If one weapon has blocked LoS, they all do so change value outside loop
-                        loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+                        loSBlocked = mathlib.isLoSBlocked(sPosShooter, sPosTarget, blockedLosHex);
                     }
 
                     if (weapon.ignoresLoS) loSBlocked = false;
@@ -1009,7 +1017,7 @@ window.weaponManager = {
                 var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                
                 if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
                     var shooterPos = shipManager.getShipPosition(shooter);
-                    shooterLoSBlocked = mathlib.checkLineOfSight(shooterPos, sPosTarget, blockedLosHex);
+                    shooterLoSBlocked = mathlib.isLoSBlocked(shooterPos, sPosTarget, blockedLosHex);
                 }
                 // If no navigator and out of arc, or if LoS is blocked, set oew to 0
                 if ((!shooter.hasNavigator && !weaponManager.isOnWeaponArc(shooter, target, weapon)) || shooterLoSBlocked) {
@@ -1161,7 +1169,7 @@ window.weaponManager = {
             if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
                 var loSBlocked = false;
                 var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                   
-                loSBlocked = mathlib.checkLineOfSight(sPosLaunch, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
+                loSBlocked = mathlib.isLoSBlocked(sPosLaunch, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
 
                 if (loSBlocked) { // Line of Sight is blocked!
                     if (weapon instanceof AmmoMissileRackS) {
@@ -1548,7 +1556,7 @@ window.weaponManager = {
             var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
             var sPosTarget = shipManager.getShipPosition(ship);
             
-            loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+            loSBlocked = mathlib.isLoSBlocked(sPosShooter, sPosTarget, blockedLosHex);
         }
         */
         var toUnselect = [];
@@ -1561,7 +1569,7 @@ window.weaponManager = {
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
                 var sPosTarget = shipManager.getShipPosition(ship);
 
-                loSBlocked = mathlib.checkLineOfSight(sPosShooter, sPosTarget, blockedLosHex);
+                loSBlocked = mathlib.isLoSBlocked(sPosShooter, sPosTarget, blockedLosHex);
             }
 
             if (loSBlocked && !weapon.ignoresLoS) continue;
@@ -1831,7 +1839,7 @@ window.weaponManager = {
                 if (blockedLosHex && blockedLosHex.length > 0) {
                     var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
 
-                    loSBlocked = mathlib.checkLineOfSight(sPosShooter, hexpos, blockedLosHex);
+                    loSBlocked = mathlib.isLoSBlocked(sPosShooter, hexpos, blockedLosHex);
                 }
 
                 if (loSBlocked && !weapon.ignoresLoS) {

@@ -53,7 +53,7 @@ window.gamedata = {
 		var gamehtml = '<div class="game slot clickableGames" data-gameid="{gameid}"><span class="lobbyname">{gamename}</span><br><span class="value players">Players: {players}/{maxplayers}</span></div>';
 		var activefound = false;
 		var lobbyfound = false;
-		console.log("GAMES LOLS", this.games)
+		//console.log("GAMES LOLS", this.games)
 		for (var i in this.games) {
 			var game = this.games[i];
 			var gameDOM = $('.game[data-gameid="' + game.id + '"]');

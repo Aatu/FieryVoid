@@ -6390,7 +6390,7 @@ class ProximityLaserLauncher extends Weapon{
 			$target = $gamedata->getShipById($fireOrder->targetid);
 			$pos = $this->getFiringHex($gamedata, $fireOrder);		
 			$targetPos = $target->getHexPos();			
-			$losBlocked = $this->checkLineOfSight($pos, $targetPos, $gamedata);
+			$losBlocked = $this->isLoSBlocked($pos, $targetPos, $gamedata);
 
 			if($losBlocked){//Laser does not have Line of Sight from it's firing position
 				$fireOrder->needed = 0; //auto-miss.
@@ -6579,7 +6579,7 @@ class ProximityLaserLauncher extends Weapon{
 				$target = $gamedata->getShipById($fireOrder->targetid);
 				$pos = $this->getFiringHex($gamedata, $fireOrder);		
 				$targetPos = $target->getHexPos();			
-				$losBlocked = $this->checkLineOfSight($pos, $targetPos, $gamedata);
+				$losBlocked = $this->isLoSBlocked($pos, $targetPos, $gamedata);
 
 				if($losBlocked){//Laser does not have Line of Sight from it's firing position
 					$fireOrder->needed = 0; //auto-miss.
@@ -7118,7 +7118,7 @@ class PulsarMine extends Weapon{
 	    if ($distance > 2) return false; //Not within 2 hexes, skip LoS check and return false.
 		if(!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false; //Not in arc.
 
-		$loSBlocked = $this->checkLineOfSight($shipPosition, $targetPostion, $gamedata); //Returns true is LoS blocked
+		$loSBlocked = $this->isLoSBlocked($shipPosition, $targetPostion, $gamedata); //Returns true is LoS blocked
 		if($loSBlocked) return false; //LoS Blocked
 
 		return true;

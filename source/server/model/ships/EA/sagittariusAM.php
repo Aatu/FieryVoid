@@ -9,7 +9,7 @@ class SagittariusAM extends BaseShip{
         $this->faction = "Earth Alliance";
         $this->phpclass = "SagittariusAM";
         $this->imagePath = "img/ships/sagittarius.png";
-        $this->shipClass = "Sagittarius Missile Cruiser (Beta Model)";
+        $this->shipClass = "Sagittarius Missile Cruiser (Beta)";
         $this->shipSizeClass = 3;
         $this->limited = 33;
   	    $this->isd = 2230;        

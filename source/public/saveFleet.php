@@ -54,7 +54,9 @@ try {
     $ret = json_encode([
         "error" => $e->getMessage(),
         "code"  => $e->getCode(),
-        "logid" => $logid
+        "logid" => $logid,
+        "file" => $e->getFile(),
+        "line" => $e->getLine()
     ]);
 }
 
