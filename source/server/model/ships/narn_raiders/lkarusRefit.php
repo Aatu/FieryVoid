@@ -11,7 +11,7 @@ class LkarusRefit extends BaseShip{
         $this->shipClass = "Narn Privateer L'Karus Raider Cruiser (2244 refit)";
 			$this->occurence = "common";
 			$this->variantOf = "Narn Privateer L'Karus Raider Cruiser";        
-		$this->canvasSize = 125; //img has 125px per side
+		$this->canvasSize = 200; //img has 125px per side
         $this->fighters = array("normal"=>6);  
 	    $this->isd = 2244;
         $this->limited = 33;

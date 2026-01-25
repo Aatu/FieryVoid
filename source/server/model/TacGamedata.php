@@ -482,7 +482,8 @@ class TacGamedata {
 
 	    foreach ($this->ships as $ship){
 	        if ($ship->unavailable) continue;
-	        if ($ship->isTerrain()) continue;            
+	        if ($ship->isTerrain()) continue; 
+	        if ($ship->isDestroyed()) continue;                         
 
 	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
 
@@ -525,6 +526,7 @@ class TacGamedata {
 
 			if ($ship->team == $shooter->team)	        
 				continue;
+	        if ($ship->isDestroyed()) continue;              
 		        
 	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
 

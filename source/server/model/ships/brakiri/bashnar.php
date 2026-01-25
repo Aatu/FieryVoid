@@ -34,17 +34,17 @@ class Bashnar extends BaseShip{
 	$t3l = new GraviticThruster(3, 13, 0, 3, 3);
         $t2l = new GraviticThruster(3, 10, 0, 3, 2);
 	
-	$t1l->displayName = "Retro Thrust";
-	$t3l->displayName = "Port/Stb Thrust";
-	$t2l->displayName = "Main Thrust";
+	//$t1l->displayName = "Retro Thrust";
+	//$t3l->displayName = "Port/Stb Thrust";
+	//$t2l->displayName = "Main Thrust";
 	    
 	$t1r = new GraviticThruster(4, 10, 0, 3, 1);
 	$t4r = new GraviticThruster(3, 13, 0, 3, 4);
         $t2r = new GraviticThruster(3, 10, 0, 3, 2);
 	
-	$t1r->displayName = "Retro Thrust";
-	$t4r->displayName = "Port/Stb Thrust";
-	$t2r->displayName = "Main Thrust";
+	//$t1r->displayName = "Retro Thrust";
+	//$t4r->displayName = "Port/Stb Thrust";
+	//$t2r->displayName = "Main Thrust";
 
         $this->addPrimarySystem(new Reactor(3, 15, 0, 2));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
@@ -58,15 +58,15 @@ class Bashnar extends BaseShip{
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 120, 300));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 60, 240));
 
-        $this->addLeftSystem($t1l);
+        $this->addFrontSystem($t1l);
         $this->addLeftSystem(new Hangar(3, 6));
         $this->addLeftSystem($t3l);
-        $this->addLeftSystem($t2l);
+        $this->addAftSystem($t2l);
 
-        $this->addRightSystem($t1r);
+        $this->addFrontSystem($t1r);
         $this->addRightSystem(new Hangar(3, 6));
         $this->addRightSystem($t4r);
-        $this->addRightSystem($t2r);
+        $this->addAftSystem($t2r);
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 32));
@@ -95,17 +95,17 @@ class Bashnar extends BaseShip{
                         20 => "Primary",
                 ),
                 3=> array(
-                        3 => "Retro Thrust",
-			7 => "Port/Stb Thrust",
-                        9 => "Main Thrust",
+                        3 => "1: Thruster",
+                        7 => "Thruster",                                                
+                        9 => "2: Thruster",
 			13 => "Hangar",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
-                        3 => "Retro Thrust",
-			7 => "Port/Stb Thrust",
-                        9 => "Main Thrust",
+                        3 => "1: Thruster",
+                        7 => "Thruster",                                                
+                        9 => "2: Thruster",
 			13 => "Hangar",
                         18 => "Structure",
                         20 => "Primary",

@@ -141,11 +141,13 @@ GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, targ
 
     if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
     
+    /* //Removed since OEW lock on allies enabled - DK 17.1.26    
     if(shooter.team == target.team){
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
         var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
         mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
-    }    
+    }
+    */        
     
 	return mod; 
 };
@@ -161,11 +163,13 @@ GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
 
     if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
     
+    /* //Removed since OEW lock on allies enabled - DK 17.1.26
     if(shooter.team == target.team){
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
         var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
         mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
-    }    
+    } 
+    */       
     
 	return mod; 
 };
@@ -282,7 +286,7 @@ GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //f
         var dist = targetShipHex.distanceTo(targetMoveHex);
         if(dist <= maxmoverange){            
             var blockedHexes = weaponManager.getBlockedHexes();
-            var loSBlocked = mathlib.checkLineOfSight(targetShipHex, targetMoveHex, blockedHexes);
+            var loSBlocked = mathlib.isLoSBlocked(targetShipHex, targetMoveHex, blockedHexes);
             if(!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)){//make sure hexpos is a not a blocked hex and LOS is not blocked      
                 valid = true ;  
             }    

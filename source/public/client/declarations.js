@@ -440,26 +440,31 @@ window.declarations = {
     newText += 'GAME DESCRIPTION';
     newText += '</b></u></big><br><br>';
     // Rules in play
-
+	newText += 'RULES OF ENGAGEMENT:';
     // Check if 'Desperate' exists in gamedata.rules and evaluate its value
+    if (gamedata.rules && 'friendlyFire' in gamedata.rules) {
+        var desperateValue = gamedata.rules.desperate;
+		newText += '<br>Friendly Fire enabled.'; 
+    }
     if (gamedata.rules && 'desperate' in gamedata.rules) {
         var desperateValue = gamedata.rules.desperate;
-		newText += 'RULES OF ENGAGEMENT: '; 
         switch (desperateValue) {
             case 1:
-                newText += 'Desperate rules apply to Team 1.<br><br>';
+                newText += '<br>Desperate rules apply to Team 1.';
                 break;
             case 2:
-                newText += 'Desperate rules apply to Team 2.<br><br>';
+                newText += '<br>Desperate rules apply to Team 2.';
                 break;
             case -1:
-                newText += 'Desperate rules apply to both teams.<br><br>';
+                newText += '<br>Desperate rules apply to both teams.';
                 break;
             default:
-                newText += 'Normal engagement rules apply.<br><br>';
+                newText += '<br>Normal engagement rules apply.';
                 break;
         }
-    }
+    }	
+
+	newText += '<br><br>';
     //actual data
 	newText += gamedata.description.replace(/\n/g, "<br>");
     
