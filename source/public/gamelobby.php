@@ -317,6 +317,7 @@
                 $('#toggleCustom').prop('checked', true).trigger('change');
                 $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs                
                 $('#isdFilter').val('');
+                $('#nameFilter').val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -325,6 +326,7 @@
                 $('.tier-filter').prop('checked', false);
                 $('#toggleCustom').prop('checked', false).trigger('change');
                 $('#isdFilter').val('');
+                $('#nameFilter').val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -343,9 +345,17 @@
                 }
             });
 
-            // Reset ISD filter when clicking "Reset ISD"
-            $(".resetISDFilter").on("click", function () {
+            // Apply filter only when Enter key is pressed (for consistency)
+            $("#nameFilter").on("keypress", function (e) {
+                if (e.which === 13) {
+                    gamedata.applyCustomShipFilter();
+                }
+            });
+
+            // Reset filters when clicking "Reset Filters"
+            $(".resetFilters").on("click", function () {
                 $("#isdFilter").val('');
+                $("#nameFilter").val('');
                 gamedata.applyCustomShipFilter();
             });
 
@@ -647,10 +657,16 @@ $optionsUsed = '';
                     <span class="clickable tier-select-none no-filters-link">No Filters</span>
                     <span class="filter-pipe-separator">|</span>  
 
+                    <label class="name-filter-label-style">
+                        <span class="filter-by-name-text">Filter by Ship Name:</span>
+                        <input type="text" id="nameFilter" value="" class="name-input-style">
+                    </label>
+                    <!--<span class="filter-pipe-separator">|</span>-->
+
                     <label class="isd-filter-label-style">
                         <span class="filter-by-isd-text">Filter by ISD:</span>
                         <input type="text" id="isdFilter" value="" class="isd-input-style">
-                        <span class="clickable resetISDFilter reset-isd-link-style">Reset ISD</span>
+                        <span class="clickable resetFilters reset-filters-link-style">Reset Name/ISD</span>
                     </label>
                 </div>
                 <div>

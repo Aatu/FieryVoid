@@ -862,3 +862,16 @@ kbd {
 /* Split header and slots wrapper moved to createGame.css */
 
 /* Removed slots-map-wrapper media query */
+
+/* Reset Filters Link */
+.reset-filters-link-style {
+  margin-left: 5px;
+  color: #8bcaf2; /* Light red/pink to indicate reset/clear action */
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.reset-filters-link-style:hover {
+  color: #8bcaf2;
+}

@@ -1783,6 +1783,13 @@ window.gamedata = {
 				if (!showCustom && isCustom) visible = false;
 				if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
 
+				// Name filter logic
+				const nameFilter = $("#nameFilter").val().toLowerCase().trim();
+				if (nameFilter.length > 0) {
+					const shipName = $ship.find(".shiptype").text().toLowerCase();
+					if (shipName.indexOf(nameFilter) === -1) visible = false;
+				}
+
 				$ship.toggle(visible && !isHidden);
 			});
 		});
