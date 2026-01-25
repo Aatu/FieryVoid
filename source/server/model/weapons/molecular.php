@@ -1363,19 +1363,13 @@ class SuperHeavyMolecularDisruptor extends Raking
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){           			
             if ( $maxhealth == 0 ) $maxhealth = 18;
             if ( $powerReq == 0 ) $powerReq = 16;     
-            //$this->startArcArray[1] = $startArc; //Normal arcs
-            //$this->endArcArray[1] = $endArc;
-            //$this->startArcArray[2] = $startArc;
-            //$this->endArcArray[2] = $endArc; 
 
             if($startArc2 !== null || $endArc2 !== null){      
                 $this->startArcArray[0] = $startArc; //Set rear arcs manually
                 $this->endArcArray[0] = $endArc; 
                 $this->startArcArray[1] = $startArc2;
                 $this->endArcArray[1] = $endArc2; 
-                $this->splitArcs = true; 
-                //$this->firingModes = array(1=>'FP - Front Piercing', 2 =>'FR - Front Raking', 3=>'RP - Rear Piercing', 4=>'RR - Rear Raking');
-                //$this->modeLetters = 2;                           
+                $this->splitArcs = true;                          
             }                                   
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
