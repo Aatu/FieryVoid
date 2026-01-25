@@ -162,6 +162,7 @@ spl_autoload_register(
                 'talvan2006' => '/server/model/ships/centauri_old/talvan2006.php',
                 'talvanupgrade' => '/server/model/ships/centauri/talvanUpgrade.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
+                'centurionmd' => '/server/model/ships/centauri/centurionMD.php',                
                 'chatmanager' => '/server/controller/ChatManager.php',
                 'chatmessage' => '/server/model/ChatMessage.php',
                 'checkforselfinterceptfire' => '/server/model/weapons/weapon.php',
@@ -687,6 +688,7 @@ spl_autoload_register(
                 'ochlavitae' => '/server/model/ships/dilgar/ochlavitaE.php',
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
+                'octurionmd' => '/server/model/ships/centauri/octurionMD.php',                
                 'offsetcoordinate' => '/server/model/OffsetCoordinate.php',
                 'olgata' => '/server/model/ships/dilgar/olgata.php',
                 //'olympus' => '/server/model/ships/EA/olympus.php',
@@ -3296,7 +3298,8 @@ spl_autoload_register(
 						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',	
 						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',
 						'engineshorted' => '/server/model/cricialClasses.php',				 						 	 
-						'controlsstuck' => '/server/model/cricialClasses.php',	
+						'controlsstuck' => '/server/model/cricialClasses.php',
+
 
 					 							
 				//Thirdspace

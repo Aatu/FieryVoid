@@ -199,11 +199,21 @@
         public $firingModes = array( 1 => "Normal", 2=> "Split");
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
         public $canSplitShotsArray = array(1=>false, 2=>true );          
+        public $startArcArray = array(); 
+        public $endArcArray = array();        
+        protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
 
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 4;
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-		if ( $maxhealth == 0 ) $maxhealth = 6;
-		if ( $powerReq == 0 ) $powerReq = 4;
+            if($startArc2 !== null || $endArc2 !== null){      
+                $this->startArcArray[0] = $startArc; //Set rear arcs manually
+                $this->endArcArray[0] = $endArc; 
+                $this->startArcArray[1] = $startArc2;
+                $this->endArcArray[1] = $endArc2; 
+                $this->splitArcs = true;                          
+            }                                   
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
@@ -215,6 +225,12 @@
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->splitArcs = $this->splitArcs;        						                                        
+        return $strippedSystem;
+	}	            
 
     }
 
