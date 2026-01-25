@@ -7,11 +7,12 @@ class Looter extends BaseShip{
   		$this->pointCost = 340;
   		$this->faction = "Raiders";
         $this->phpclass = "Looter";
-        $this->imagePath = "img/ships/RaiderBattlewagon.png"; //needs to be changed
+        $this->imagePath = "img/ships/RaiderLooter.png"; //needs to be changed
         $this->shipClass = "Looter Support Cruiser";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>12);
         $this->limited = 33; //Limited Deployment
+		$this->canvasSize = 175;		
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
