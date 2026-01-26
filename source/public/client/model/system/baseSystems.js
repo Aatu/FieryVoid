@@ -1494,6 +1494,7 @@ PowerCapacitor.prototype.getRegeneration = function () {
 	if (boostCount > 0) {//boosted!
 		regeneration += Math.round(this.nominalOutput * 0.5);
 	}
+	if(this.active) regeneration += this.nominalOutput; //Double if weapons/shields have been shutdown.
 	return regeneration;
 };
 PowerCapacitor.prototype.hasMaxBoost = function () {
@@ -1508,8 +1509,60 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	var powerRemaining = shipManager.power.getReactorPower(this.ship, this);
 	powerRemaining = powerRemaining + this.getRegeneration();
 	powerRemaining = Math.min(powerRemaining, this.powerMax);
-	this.individualNotesTransfer.push(powerRemaining);
-	return true;
+	//this.individualNotesTransfer.push(powerRemaining);
+    this.individualNotesTransfer = {
+        powerRemaining: powerRemaining,
+        doubled: this.active === true
+    };
+
+    return true;
+};
+
+PowerCapacitor.prototype.canActivate = function () {
+	if(gamedata.gamephase == 1 && !this.active) return true;
+	
+	return false;
+};
+
+PowerCapacitor.prototype.canDeactivate = function () {
+	if(gamedata.gamephase == 1 && this.active) return true;
+	
+	return false;
+};
+
+PowerCapacitor.prototype.doActivate = function () {
+	var ship = this.ship;
+		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+		//If you boost one Shading field in a flight, boost them all.
+		if (ship) {
+			for (var i in ship.systems) {
+				var system = ship.systems[i]; //The fighter
+				if (shipManager.systems.isDestroyed(ship, system)) continue;
+					if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+						system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
+						system.reactivated = true; //To prevent it from immediately being powered back on.
+					}				
+			}
+		}
+		this.active = true;
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+};
+
+PowerCapacitor.prototype.doDeactivate = function () {
+	var ship = this.ship;
+		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+		//If you boost one Shading field in a flight, boost them all.
+		this.active = false;			
+		if (ship) {
+			for (var i in ship.systems) {
+				var system = ship.systems[i]; //The fighter
+				if (shipManager.systems.isDestroyed(ship, system)) continue;
+					if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+						shipManager.power.setOnline(ship, system);
+					}				
+			}
+		}	
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 };
 
 var BSGHybrid = function BSGHybrid(json, ship) {

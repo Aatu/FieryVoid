@@ -25,6 +25,12 @@ class Manager{
             self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
     }
 
+    private static function getCachePrefix() {
+        global $database_name;
+        // Use a safe fallback if for some reason db name is missing, though strictly it should be there.
+        return ($database_name ?? 'default') . '_';
+    }
+
     public static function setDBManager(DBManager $dbManager) {
         self::$dbManager = $dbManager;
     }
@@ -74,15 +80,16 @@ class Manager{
     public static function getGameLobbyDataJSON($userid, $gameid){
         try {
             $timestamp = 0;
-            $cacheKey = "gamelobby_{$gameid}_user_{$userid}_json";
+            $prefix = self::getCachePrefix();
+            $cacheKey = "{$prefix}gamelobby_{$gameid}_user_{$userid}_json";
 
             if (function_exists('apcu_fetch')) {
-                $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
+                $timestamp = apcu_fetch($prefix . 'game_' . $gameid . '_last_update');
                 if (!$timestamp) {
                     // Heal cold cache: If no timestamp exists, create one so we can start caching this lobby
                     $timestamp = microtime(true);
                     if (function_exists('apcu_store')) {
-                        apcu_store('game_' . $gameid . '_last_update', $timestamp, 3600);
+                        apcu_store($prefix . 'game_' . $gameid . '_last_update', $timestamp, 3600);
                     }
                 }
 
@@ -94,7 +101,7 @@ class Manager{
             }
 
             // Lock to prevent stampede (User F5 spam)
-            $lockKey = "gamelobby_lock_{$gameid}_{$userid}";
+            $lockKey = "{$prefix}gamelobby_lock_{$gameid}_{$userid}";
             if (function_exists('apcu_add') && !apcu_add($lockKey, 1, 10)) {
                 // Lock held by another request (same user/game)
                  return '{"status": "GENERATING"}';
@@ -148,13 +155,14 @@ class Manager{
         
         try {
             // Caching for Games List (Short TTL to prevent stampede)
-            $cacheKey = "gameslist_" . $userid;
+            $prefix = self::getCachePrefix();
+            $cacheKey = "{$prefix}gameslist_" . $userid;
             if (function_exists('apcu_fetch')) {
                  $cached = apcu_fetch($cacheKey);
                  if ($cached) return $cached;
                  
                  // Generation Lock
-                 $lockKey = "gameslist_lock_{$userid}";
+                 $lockKey = "{$prefix}gameslist_lock_{$userid}";
                  if (function_exists('apcu_add') && !apcu_add($lockKey, 1, 10)) {
                      // Return array with status object, game.php will need to handle this structure
                      return [['status' => "GENERATING"]]; 
@@ -171,7 +179,7 @@ class Manager{
             // Cache result
             if (function_exists('apcu_store')) {
                 apcu_store($cacheKey, $games, 2); // 2 seconds cache
-                apcu_delete("gameslist_lock_{$userid}");
+                apcu_delete("{$prefix}gameslist_lock_{$userid}");
             }
             
             return $games;
@@ -399,8 +407,9 @@ class Manager{
     }
     
     public static function touchGame($gameid) {
+        $prefix = self::getCachePrefix();
         if (function_exists('apcu_store')) {
-            apcu_store('game_' . $gameid . '_last_update', microtime(true));
+            apcu_store($prefix . 'game_' . $gameid . '_last_update', microtime(true));
         }
     }
 
@@ -408,11 +417,12 @@ class Manager{
         
         try{
             // APCu Optimization: Inject Timestamp & Check JSON Cache
+            $prefix = self::getCachePrefix();
             $timestamp = 0;
-            $cacheKey = "game_{$gameid}_user_{$userid}_json";
+            $cacheKey = "{$prefix}game_{$gameid}_user_{$userid}_json";
             
             if (function_exists('apcu_fetch')) {
-                 $timestamp = apcu_fetch('game_' . $gameid . '_last_update');
+                 $timestamp = apcu_fetch($prefix . 'game_' . $gameid . '_last_update');
                  if (!$timestamp) {
                      $timestamp = microtime(true);
                      self::touchGame($gameid);
@@ -431,7 +441,7 @@ class Manager{
             
                 // Lock to prevent stampede (User F5 spam)
                 // Only lock if we are about to do the heavy lifting (Not hitting cache)
-                $lockKey = "game_lock_{$gameid}_{$userid}";
+                $lockKey = "{$prefix}game_lock_{$gameid}_{$userid}";
                 if (function_exists('apcu_add') && !apcu_add($lockKey, 1, 10)) {
                      return '{"status": "GENERATING"}';
                 }
@@ -891,7 +901,44 @@ class Manager{
 
                 // Step 4: End game if one or zero teams remain
                 if ($aliveCount <= 1) {
-                    self::$dbManager->updateGameStatus($gameid, "SURRENDERED"); 
+                    self::$dbManager->updateGameStatus($gameid, "SURRENDERED");
+
+                    // --- LADDER LOGIC START ---
+                    // Only process ladder results if it's NOT Turn 1 (prevents recording early surrenders/setup errors)
+                    if ($gdS->turn > 1) {
+                        $rules = $gdS->rules;
+                        if ($rules->hasRule('ladder') && $rules->callRule('ladder', array())) {
+                            // Game is a ladder game and has just finished via surrender.
+                            // Winners: Teams that are still "alive" (or if everyone surrendered, the last one standing implicitly).
+                            // Losers: Teams that have surrendered.
+                            
+                            // Re-evaluate slots to be sure we have latest state
+                            $finalSlots = self::$dbManager->getSlotsInGame($gameid);
+                            $winningTeam = null;
+
+                            // Identify the winning team (the one not surrendered)
+                            // If aliveCount is 1, find that team.
+                            // If aliveCount is 0, arguably everyone lost, or the last one to surrender "won"? 
+                            // Let's assume standard flow: one team remains.
+                            foreach ($finalSlots as $slot) {
+                                if ($slot->surrendered === null) {
+                                    $winningTeam = $slot->team;
+                                    break;
+                                }
+                            }
+                            
+                            if ($winningTeam !== null) {
+                                foreach ($finalSlots as $slot) {
+                                    if ($slot->team == $winningTeam) {
+                                        self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'WIN');
+                                    } else {
+                                        self::$dbManager->registerLadderResult($gameid, $slot->playerid, 'LOSS');
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    // --- LADDER LOGIC END ---
                 }
             } else {
                 return "{}";
@@ -1425,6 +1472,25 @@ class Manager{
     //Used by systems that boost outside of Initial Orders to prevent duplication of power entries.
     public static function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn){              
 		self::$dbManager->removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn);	
+    }
+
+    public static function getLadderStandings()
+    {
+        self::initDBManager();
+        return self::$dbManager->getLadderStandings();
+    }
+
+    public static function registerLadderPlayer($playerid)
+    {
+        self::initDBManager();
+        return self::$dbManager->registerLadderPlayer($playerid);
+    }
+
+
+    public static function getLadderHistory($playerid)
+    {
+        self::initDBManager();
+        return self::$dbManager->getLadderHistory($playerid);
     }
 
 }

@@ -162,6 +162,7 @@ spl_autoload_register(
                 'talvan2006' => '/server/model/ships/centauri_old/talvan2006.php',
                 'talvanupgrade' => '/server/model/ships/centauri/talvanUpgrade.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
+                'centurionmd' => '/server/model/ships/centauri/centurionMD.php',                
                 'chatmanager' => '/server/controller/ChatManager.php',
                 'chatmessage' => '/server/model/ChatMessage.php',
                 'checkforselfinterceptfire' => '/server/model/weapons/weapon.php',
@@ -517,6 +518,7 @@ spl_autoload_register(
                 'kromala' => '/server/model/ships/drazi_old/kromala.php',
                 'kutai' => '/server/model/ships/centauri/kutai.php',
                 'kutaiplasma' => '/server/model/ships/centauri/kutaiPlasma.php',
+                'ladderrule' => '/server/model/LadderRule.php',
                 'laertes' => '/server/model/ships/EA/laertes.php',
                 'laertesepsilon' => '/server/model/ships/EA/laertesEpsilon.php',
                 'laertes_early' => '/server/model/ships/EA_old/laertes_early.php',
@@ -686,6 +688,7 @@ spl_autoload_register(
                 'ochlavitae' => '/server/model/ships/dilgar/ochlavitaE.php',
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
+                'octurionmd' => '/server/model/ships/centauri/octurionMD.php',                
                 'offsetcoordinate' => '/server/model/OffsetCoordinate.php',
                 'olgata' => '/server/model/ships/dilgar/olgata.php',
                 //'olympus' => '/server/model/ships/EA/olympus.php',
@@ -2107,7 +2110,7 @@ spl_autoload_register(
                 'flyingfoxstarfury' => '/server/model/ships/EA_old/flyingfoxStarfury.php',
                 'laertesalpha' => '/server/model/ships/EA_old/laertesAlpha.php',
                 'laertesbeta' => '/server/model/ships/EA_old/laertesBeta.php',
-                'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
+                //'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
                 'laertesdelta_early' => '/server/model/ships/EA_old/laertesDelta_early.php',
                 'orestesalphaam' => '/server/model/ships/EA_old/orestesAlphaAM.php',
                 'orestesbetaam' => '/server/model/ships/EA_old/orestesBetaAM.php',
@@ -3295,7 +3298,8 @@ spl_autoload_register(
 						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',	
 						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',
 						'engineshorted' => '/server/model/cricialClasses.php',				 						 	 
-						'controlsstuck' => '/server/model/cricialClasses.php',	
+						'controlsstuck' => '/server/model/cricialClasses.php',
+
 
 					 							
 				//Thirdspace
