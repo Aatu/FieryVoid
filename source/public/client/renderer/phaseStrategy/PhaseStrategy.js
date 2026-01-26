@@ -883,7 +883,7 @@ window.PhaseStrategy = function () {
 
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     };
 
     function showAllBallisticLines(ships, payload) {
@@ -892,7 +892,7 @@ window.PhaseStrategy = function () {
         } else {
             this.ballisticIconContainer.showLines(ships);
         }
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     }
 
 
