@@ -93,6 +93,16 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
 </div>
 
 
+<div class="resources">
+      <h3>Rules & Info</h3>
+      <div class="links">     
+        <div><a href="./faq.php" target="_blank" rel="noopener noreferrer">Fiery Void FAQ:</a> Aide Memoire of specific rules and differences from Babylon 5 Wars.</div>        
+        <div><a href="./factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers:</a> Overview of Fiery Void factions and their relative strengths.</div>
+        <div><a href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements:</a> Details of all the extras available to Fiery Void units e.g. Missiles.</div>
+        <div><a href="http://b5warsvault.wikidot.com/" target="_blank" rel="noopener noreferrer">Babylon 5 Wars Vault:</a> Huge repository of Babylon 5 Wars rules and info!</div>
+      </div> 
+    </div>
+
     <div class="resources">
       <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
@@ -100,18 +110,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
         <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above or watch the Video Tutorial for details on how it works!</li>  
         <li><strong>Friendly Fire</strong> - New option added to Create Game screen allowing ships to fire on their own team!</li> 
         <li><strong>Electronic Warfare</strong> - All EW options now available for any ship, friend or foe! Note - Ship Selection in Initial Orders requires Double-Left click, or a Right Click.</li>           
-        <li><strong>Power Capacitors</strong> - Added Vorlon ability to deactivate weapons and shields for double Power Generation/Self-Repair on that turn.</li>                                                  
-        <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           
-        <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
-      </ul>
-    </div>
-
-    <div class="resources">
-      <h3>Latest Updates — January 2026</h3>
-      <ul class="updates-list">
-        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above for more details on how it works!</li>                                                                                                                             
-        <li><strong>Power Capacitors</strong> - Added Vorlon ability to deactivate weapons and shields for double Power Generation/Self-Repair on that turn.</li>                                                  
+        <li><strong>Power Capacitors</strong> - Added Vorlon ability to deactivate weapons and shields for double Power Generation/Self-Repair on that turn.</li> 
+        <li><strong>Centauri War Crimes</strong> - Centurion, Octurion and Primus variants equipped with Mass Drivers added.</li>                                                 
         <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
