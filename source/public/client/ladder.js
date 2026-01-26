@@ -242,10 +242,12 @@ jQuery(function ($) {
                 if (slot.team == 1 && !foundMySlot) {
                     slot.name = ladder.myUsername;
                     slot.points = ladder.myPoints;
+                    slot.isLadderPopulated = true;
                     foundMySlot = true;
                 } else if (slot.team == 2 && !foundOppSlot) {
                     slot.name = ladder.oppUsername;
                     slot.points = ladder.oppPoints;
+                    slot.isLadderPopulated = true;
                     foundOppSlot = true;
                 }
             }

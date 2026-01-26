@@ -759,7 +759,9 @@ window.createGame = {
                     slot.points = config.points;
                 }
                 if (config.name !== undefined) {
-                    slot.name = config.name;
+                    if (!createGame.rules.ladder || !slot.isLadderPopulated) {
+                        slot.name = config.name;
+                    }
                 }
                 if (config.depavailable !== undefined) {
                     slot.depavailable = config.depavailable;
