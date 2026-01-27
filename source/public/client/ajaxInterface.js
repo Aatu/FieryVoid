@@ -1145,7 +1145,24 @@ window.ajaxInterface = {
             success: gamedata.createFireDiv,
             error: ajaxInterface.errorAjax
         });
-    }
+    },
+
+    // Add comma here if needed, or ensure previous block has it. 
+    // The previous active block ends at line 1315 '}'. 
+    // Wait, the file ends with `};`. I inserted `callServer` before the last `};`.
+    // The issue might be a missing comma on the property before `callServer`.
+    // Let's look at the context again.
+    // The last property before my insertion was `submitSlotAction` (or `construcGamedata`?).
+    // No, `construcGamedata` ends around 811. `construcGamedata2` around 912.
+    // `successSubmit` around 922. `successRequest` 933. `errorAjax` 939.
+    // `startPollingGamedata` 951. `stopPolling` 961. `pollGamedata` 1034.
+    // `requestGamedata` 1070. `startPollingGames` 1074. `pollGames` 1083. `requestAllGames` 1085.
+    // `_sendGameRequest` 1135. `getFirePhaseGames` 1148.
+    // The comments starting at 1151 are commented out.
+    // So `getFirePhaseGames` is the last active method. It ends at 1148.
+    // CHECK if it has a comma.
+
+    // I need to see lines around 1148.
 
 
     /* //OLD VERSION GETSHIPSFORFACTION()
@@ -1165,7 +1182,7 @@ window.ajaxInterface = {
     requestGamedata: function requestGamedata() {
         if (ajaxInterface.submiting) return; // 🚫 skip if still running
         ajaxInterface.submiting = true;
-
+ 
         $.ajax({
             type: 'GET',
             url: 'gamedata.php',
@@ -1187,13 +1204,13 @@ window.ajaxInterface = {
 
     /* //OLD VERSION SUBMITGAMEDATA()
         submitGamedata: function submitGamedata() {
-
+ 
             if (ajaxInterface.submiting) return;
-
+ 
             ajaxInterface.submiting = true;
-
+ 
             var gd = ajaxInterface.construcGamedata();
-
+ 
             $.ajax({
                 type: 'POST',
                 url: 'gamedata.php',
@@ -1202,7 +1219,7 @@ window.ajaxInterface = {
                 success: ajaxInterface.successSubmit,
                 error: ajaxInterface.errorAjax
             });
-
+ 
             gamedata.goToWaiting();
         },
     */
@@ -1210,7 +1227,7 @@ window.ajaxInterface = {
     /* //OLD VERSION OF SUBMITSLOTACTION()
     submitSlotAction: function submitSlotAction(action, slotid, callback) {
         ajaxInterface.submiting = true;
-
+ 
         $.ajax({
             type: 'POST',
             url: 'slot.php',
@@ -1227,59 +1244,59 @@ window.ajaxInterface = {
 
     /* //OLD VERSION OF POLLGAMEDATA()
     pollGamedata: function pollGamedata() {
-
+ 
         if (!ajaxInterface.pollActive) {
             ajaxInterface.stopPolling();
             return;
         }
-
+ 
         if (gamedata.waiting == false) {
             ajaxInterface.stopPolling();
             return;
         }
-
+ 
         if (!ajaxInterface.submiting) ajaxInterface.requestGamedata();
-
+ 
         ajaxInterface.pollcount++;
-
+ 
         // detect if running locally
         var isLocal = (location.hostname === "localhost" || location.hostname === "127.0.0.1");
-
+ 
         // base poll time
         var time = isLocal ? 3000 : 10000; // local = 2s, remote = 10s
-
-
+ 
+ 
         if (ajaxInterface.pollcount > 3) {
             time = isLocal ? 4000 : 20000; // local faster, remote 20s           
         }
-
+ 
         if (ajaxInterface.pollcount > 10) {
             time = isLocal ? 6000 : 60000; //Increased from 6 secs to 1 min
         }
-
+ 
         if (ajaxInterface.pollcount > 40) { //Decreased from 100 polls e.g. 
            time = isLocal ? 6000 : 1800000; //Increased from 50 secs to 30 mins
         }
-
+ 
         //if (ajaxInterface.pollcount > 80) {
         //    time = 500000;
         //}
-
+ 
         if (ajaxInterface.pollcount > 300) {
             return;
         }
-
+ 
         ajaxInterface.poll = setTimeout(ajaxInterface.pollGamedata, time);
     },
-
-
+ 
+ 
     //NEW-OLD VERSION FOR PHP 8   
     /* 
     getShipsForFaction: function getShipsForFaction(factionRequest, getFactionShipsCallback) {
         if (ajaxInterface.submiting) return;
-
+ 
         ajaxInterface.submiting = true;
-
+ 
         fetch('gamelobbyloader.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1304,12 +1321,70 @@ window.ajaxInterface = {
             ajaxInterface.errorAjax(null, null, error.message);
         });
     },
-
+ 
     react: function react() {
         alert("callback");
     },
     
-
+ 
     */
+
+    callServer: function (method, args, callback, errorCallback) {
+        // Simplified generic call, similar to older versions or expected by some simpler logic
+        // This is a wrapper to use standard ajax or the retry mechanism
+
+        // Construct standard payload if method is class::method
+        // But here we might just want a simple POST to a generic handler or specific scripts.
+        // Given existing code structure, we don't have a single entry point for "Manager::method".
+        // HOWEVER, `gamelobbyloader.php` seems to take various requests, or `gamedata.php`.
+
+        // Wait, looking at the plan: "Fetch ladder standings (via ajaxInterface -> Manager)".
+        // The codebase doesn't seem to have a generic RPC mechanism exposed to public JS this easily.
+        // We implemented `getLadderStandings` in `Manager.php`.
+        // BUT `Manager.php` is server-side. Accessing it requires a public PHP script.
+
+        // I need to implement a public entry point for this, OR reuse an existing one.
+        // `gamedata.php` calls `Manager::submitTacGamedata` or returns gamedata.
+        // `allgames.php` calls `Manager::getTacGames`.
+
+        // I need a new public script `ladderstandings.php` or similar to bridge the gap.
+        // So `callServer` here will specifically route to that.
+
+        if (method === "Manager::getLadderStandings") {
+            ajaxInterface.ajaxWithRetry({
+                type: 'GET',
+                url: 'ladderstandings.php',
+                dataType: 'json',
+                success: function (data) {
+                    if (callback) callback(data);
+                },
+                error: function (xhr, status, error) {
+                    if (errorCallback) errorCallback(xhr, status, error);
+                    else ajaxInterface.errorAjax(xhr, status, error);
+                }
+            });
+            return;
+        }
+
+        if (method === "Manager::getLadderHistory") {
+            var playerid = args[0];
+            ajaxInterface.ajaxWithRetry({
+                type: 'GET',
+                url: 'ladderstandings.php',
+                data: { action: 'history', playerid: playerid },
+                dataType: 'json',
+                success: function (data) {
+                    if (callback) callback(data);
+                },
+                error: function (xhr, status, error) {
+                    if (errorCallback) errorCallback(xhr, status, error);
+                    else ajaxInterface.errorAjax(xhr, status, error);
+                }
+            });
+            return;
+        }
+
+        console.error("Unknown method in callServer: " + method);
+    }
 
 };

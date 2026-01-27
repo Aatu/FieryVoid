@@ -5,12 +5,12 @@ class CottenBeta extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 400;
-        $this->faction = "Earth Alliance (Custom)";
+        $this->faction = "Civilians";
         $this->phpclass = "CottenBeta";
         $this->imagePath = "img/ships/cotton.png";
         $this->shipClass = "Cotten Long-Range Tender (Beta)";
-//			$this->variantOf = "Cotten Long-Range Tender (Alpha)";
-//			$this->occurence = "common";
+			$this->variantOf = "Cotten Long-Range Tender (Alpha)";
+			$this->occurence = "common";
         $this->shipSizeClass = 3;
 //			$this->canvasSize = 175; //img has 200px per side
  		$this->unofficial = true;

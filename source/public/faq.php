@@ -39,6 +39,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
+                <li><a href="#ladder">Online Ladder</a></li>                
                 <li><a href="#ruler">Ruler Tool</a></li>
                 <li><a href="#savedfleets">Saved Fleets</a></li>                                    
                 <li><a href="#stealth">Stealth Ships</a></li>
@@ -231,6 +232,24 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 The latter situation will be reflected in the Combat Log for that turn.</li>            
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+        <h3 id="ladder" >Online Ladder</h3>
+        <ul>
+            <li>The purpose of the Online Ladder in Fiery Void is primarily to help players create well-balanced, interesting games, as well as provide some bragging rights along the way.  
+                It works similar to a handicap in golf, whereby the difference in ratings between players is added as a % bonus to the lower rated player.  
+                So if there was a difference of 5 rating, then the lower-rated player gets 5% extra points!</li>
+            <li>To set-up a Ladder game, create a game as usual and tick the Ladder Game checkbox. You’ll see the ‘View Ladder’ button next to this option, 
+                and it allows you to see current ratings and even calculate the points difference that should apply against a particular player / populate the team slots with these values.</li>
+            <li>Alternatively you can set up an open Ladder game without using this feature and just set points values in team slots in the usual way.  
+                When a player takes the other slot in the game their points will be adjusted automatically. 
+                Alternatively you can set up an open Ladder game without using this feature and just set points values in team slots in the usual way.  
+                When a player takes the other slot in the game their points will be adjusted automatically.  Either way, decide on the specifics for the game (Points, Map; Standard vs Simultaneous Movement, etc.) and then click Create Game.  
+                Note, Ladder games are competitive matches so only two players can take part, and only one slot is allowed per team. </li>
+            <li>When the game ends and one player surrendering (and at least one turn has been played), the winner will have their ranking increased by 1 on the Ladder, and the loser has their ranking reduced by 1.  
+            You can review your own and other players' match history by clicking 'View Ladder' on the Fiery Void Home Page and then clicking on their name.</li>                                              
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
 
         <h3 id="ruler" >Ruler Tool</h3>
         <ul>

@@ -32,6 +32,11 @@ class GameRules implements JsonSerializable{
         if ($fleetTestRules !== null) {
             array_push($this->rules, $fleetTestRules);
         }
+
+        $ladderRules = $this->getLadderRules($rules);
+        if ($ladderRules !== null) {
+            array_push($this->rules, $ladderRules);
+        }
     }
 
     private function getSimultaneousMovementRules($rules) {
@@ -68,6 +73,13 @@ class GameRules implements JsonSerializable{
     private function getFleetTestRules($rules) {
         if (isset($rules['fleetTest'])) {
             return new FleetTestRule((int)$rules['fleetTest']);
+        }
+        return null;
+    }
+
+    private function getLadderRules($rules) {
+        if (isset($rules['ladder'])) {
+            return new LadderRule((bool)$rules['ladder']);
         }
         return null;
     }
