@@ -38604,6 +38604,20 @@ var ShipWindow = function (_React$Component) {
             });
         }
     }, {
+        key: "onShipTouchStart",
+        value: function onShipTouchStart(event) {
+            event.stopPropagation();
+            event.preventDefault(); /* Prevent mouse emulation */
+            var ship = this.props.ship;
+
+
+            webglScene.customEvent('SystemClicked', {
+                ship: ship,
+                system: ship,
+                element: event.target
+            });
+        }
+    }, {
         key: "onShipMouseOut",
         value: function onShipMouseOut() {
             webglScene.customEvent('SystemMouseOut');
@@ -38677,7 +38691,7 @@ var ShipWindow = function (_React$Component) {
                 React.createElement(
                     Column,
                     { top: true },
-                    React.createElement(ShipImage, { img: ship.imagePath, onMouseOver: this.onShipMouseOver.bind(this), onMouseOut: this.onShipMouseOut.bind(this) }),
+                    React.createElement(ShipImage, { img: ship.imagePath, onMouseOver: this.onShipMouseOver.bind(this), onMouseOut: this.onShipMouseOut.bind(this), onTouchStart: this.onShipTouchStart.bind(this) }),
                     systemsByLocation[1].length > 0 && React.createElement(_ShipSection2.default, { location: 1, ship: ship, systems: systemsByLocation[1] }),
                     React.createElement(_ShipWindowEw2.default, { ship: ship })
                 ),
@@ -39541,6 +39555,17 @@ var SystemIcon = function (_React$Component) {
 
             if (shipManager.isDestroyed(ship) || shipManager.isDestroyed(ship, system) /*|| shipManager.isAdrift(ship)*/) return; //should work with disabled ship after all!
 
+            //New block to allow called shots on allied ships
+            if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+                if (gamedata.isMyShip(ship)) {
+                    var selectedSystem = gamedata.selectedSystems.length > 0 ? gamedata.selectedSystems[0] : null;
+                    if (selectedSystem && selectedSystem.ship.id != ship.id && !weaponManager.isSelectedWeapon(system)) {
+                        webglScene.customEvent('SystemTargeted', { ship: ship, system: system });
+                        return;
+                    }
+                }
+            }
+
             if (system.weapon && gamedata.gamephase === 3 && !system.ballistic && !system.preFires || gamedata.gamephase === 1 && system.ballistic || gamedata.gamephase === 5 && system.preFires) {
                 //cannoct SELECT weapon when unit is adrift though!
                 if (!shipManager.isAdrift(ship)) {
@@ -39809,20 +39834,23 @@ if (shipManager.systems.isDestroyed(ship, system)) {
             parentWindow.find(".iconmask").remove();
             parentWindow.find(".icon").append(iconmask_element);
         }
-          parentWindow.addClass("destroyed");
+
+        parentWindow.addClass("destroyed");
     } else {
         systemwindow.addClass("destroyed");
     }
     return;
 }
-  if (shipManager.criticals.hasCriticals(system)) {
+
+if (shipManager.criticals.hasCriticals(system)) {
     if (system.parentId > 0) {
         parentWindow.addClass("critical");
     } else {
         systemwindow.addClass("critical");
     }
 }
-  */
+
+*/
 /*
    if (shipManager.power.setPowerClasses(ship, system, systemwindow)) return;
 
@@ -40123,7 +40151,8 @@ var SystemInfo = function (_React$Component) {
                     );
                 }),
                 Object.keys(system.critData).length > 0 && getCriticals(system),
-                !gamedata.isMyShip(ship) && (gamedata.gamephase == 3 || gamedata.gamephase == 1) && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
+                !gamedata.isMyShip(ship) && (gamedata.gamephase == 3 || gamedata.gamephase == 1) && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system),
+                gamedata.isMyShip(ship) && gamedata.rules && gamedata.rules.friendlyFire === 1 && (gamedata.gamephase == 3 || gamedata.gamephase == 5 || gamedata.gamephase == 1) && gamedata.waiting == false && gamedata.selectedSystems.length > 0 && selectedShip && getCalledShot(ship, selectedShip, system)
             );
         }
     }]);
@@ -40151,7 +40180,7 @@ var getCalledShot = function getCalledShot(ship, selectedShip, system) {
                                 null,
                                 weapon.displayName
                             ),
-                            "CANNOT CALL SHOT"
+                            ": Cannot Called Shot"
                         );
                     } else {
                         return React.createElement(
@@ -40176,7 +40205,7 @@ var getCalledShot = function getCalledShot(ship, selectedShip, system) {
                             null,
                             weapon.displayName
                         ),
-                        "NOT IN RANGE"
+                        ": Not in Range"
                     );
                 }
             } else {
@@ -40188,7 +40217,7 @@ var getCalledShot = function getCalledShot(ship, selectedShip, system) {
                         null,
                         weapon.displayName
                     ),
-                    "NOT IN ARC"
+                    ": Not in Arc"
                 );
             }
         }));
@@ -40199,8 +40228,8 @@ var getCalledShot = function getCalledShot(ship, selectedShip, system) {
             "Called shot"
         )].concat(React.createElement(
             Entry,
-            null,
-            "CANNOT TARGET"
+            { key: "cannotTarget" },
+            "Cannot Target"
         ));
     }
 };

@@ -15,8 +15,20 @@ if (empty($_SESSION["user"])) {
 }
 
 // Fetch games for logged-in user
+// Fetch games for logged-in user
 $userid = (int)$_SESSION["user"];
-$games = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
+$gamesData = Manager::getTacGames($userid);
+
+// STAMPEDE PROTECTION
+if (isset($gamesData[0]) && isset($gamesData[0]['status']) && $gamesData[0]['status'] == 'GENERATING') {
+    echo '<html><head><meta http-equiv="refresh" content="1"></head>
+    <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+    Refreshing game list...
+    </body></html>';
+    exit;
+}
+
+$games = json_encode($gamesData, JSON_NUMERIC_CHECK);
 
 $defaultGameName = 'GAME NAME' . $_SESSION["user"];	
 $playerName = Manager::getPlayerName($_SESSION["user"]);
@@ -33,12 +45,14 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <link href="styles/lobby.css" rel="stylesheet" type="text/css">
   <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
   <link href="styles/confirm.css" rel="stylesheet" type="text/css">
+  <link href="styles/ladder.css" rel="stylesheet" type="text/css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>
   <script src="client/player.js"></script>
   <script src="client/mathlib.js"></script>
   <script src="client/UI/confirm.js"></script>
+  <script src="client/ladder.js"></script>
   
   <script>
     jQuery($ => {
@@ -92,15 +106,14 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     <div class="resources">
       <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
-        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->            
-        <li><strong>Create Game Screen</strong> - The Create Game refresh completed. New map templates and Fleet Test option added!</li>
-        <li><strong>Gravity Nets</strong> - Minbari now have access to Gravity Nets and new ships equipped with this system have been added to their roster, thanks to Jonathan!</li>   
-        <li><strong>Custom Centauri Units</strong> - House Valheru has received reinforcements! Thanks to Fred/Geoffrey!</li>                         
-        <li><strong>Torvalus Shading Field</strong> - Shading Fields now toggled on and off during the Deployment phase and during a Pre-Orders phase after they've deployed.</li>       
-        <li><strong>Hyach Specialists</strong> - Specialists are selected during Deployment Phase, and some can now be used in Movement/Firing Phases.</li>                                                                            
-        <li><strong>Vorlon Petals</strong> - Vorlon fighters can now toggled their petals open during Initial Orders.</li>      
-        <li><strong>Terrain</strong> - New Terrain units added.</li>                    
-        <li><strong>General Fixes</strong> - Many other small fixes. Thanks for the reports!</li>                                                    
+        <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
+        <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above or watch the Video Tutorial for details on how it works!</li>  
+        <li><strong>Friendly Fire</strong> - New option added to Create Game screen allowing ships to fire on their own team!</li> 
+        <li><strong>Electronic Warfare</strong> - All EW options now available for any ship, friend or foe! Note - Ship Selection in Initial Orders requires Double-Left click, or a Right Click.</li>           
+        <li><strong>Power Capacitors</strong> - Added Vorlon ability to deactivate weapons and shields for double Power Generation/Self-Repair on that turn.</li> 
+        <li><strong>Custom Centauri</strong> - Further reinforcements for House Valeru added, thanks to Fred/Geoffrey.</li>           
+        <li><strong>Centauri War Crimes</strong> - Centurion, Octurion and Primus variants equipped with Mass Drivers added.</li>                                                 
+        <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
@@ -130,8 +143,9 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       </div>
       <div class="create-col">
         <a class="btn btn-success create-game-btn" href="creategame.php">Create Game</a>
-        <button class="btn btn-secondary" onclick="gamedata.submitFleetTest()">Fleet Test</button>
-        <button class="btn btn-secondary" onclick="loadFireList()">Recent Games</button>
+        <button class="btn btn-secondary btn-fleet-test" onclick="gamedata.submitFleetTest()">Fleet Test</button>
+        <button class="btn btn-secondary btn-ladder btn-view-ladder" data-show-calc="false">View Ladder</button>
+        <button class="btn btn-secondary btn-recent-games" onclick="loadFireList()">Recent Games</button>
       </div>
     </div>
   </section>
@@ -154,4 +168,5 @@ All trademarks and copyrights remain the property of their respective owners.
 </footer>
 
 </body>
+<?php include("ladder.php"); ?>
 </html>

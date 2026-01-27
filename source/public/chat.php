@@ -30,7 +30,7 @@ if (! isset($chatelement))
         // place to store current jqXhr so we can abort on unload
         _currentXhr: null,
 
-        initChat: function(){
+        initInterface: function(){
             $(chat.chatElement + " .chatinput").on("keydown", function(e){
                 chat.onKeyUp.call(this, e);
             });
@@ -47,10 +47,6 @@ if (! isset($chatelement))
             var c = $(chat.chatElement + " .chatMessages");
             c.scrollTop(c[0].scrollHeight);
 
-            // start polling only once
-            chat.startPolling();
-            chat.getLastTimeChecked();
-
             // abort outstanding requests on navigation away
             $(window).on('beforeunload.chat', function(){
                 if(chat._currentXhr && typeof chat._currentXhr.abort === "function"){
@@ -59,6 +55,12 @@ if (! isset($chatelement))
                 chat.polling = false;
                 chat.requesting = false;
             });
+        },
+
+        startNetworkOp: function(){
+            // start polling only once
+            chat.startPolling();
+            chat.getLastTimeChecked();
         },
 
         resizeChat: function(){
@@ -298,7 +300,10 @@ document.addEventListener("visibilitychange", function() {
 
     // register DOM ready AFTER chat is defined
     jQuery(function(){
-        chat.initChat();
+        chat.initInterface();
+        setTimeout(function(){
+            chat.startNetworkOp();
+        }, 2000);
     });
 
 })();

@@ -528,7 +528,7 @@ window.ew = {
 		var jammerValue = 0;
         
         if(target.faction == "Torvalus Speculators"){
-            //if(target.flight) return 0; //Torvalus fighters do not get Jammer effect.
+            if(target.flight) return 0; //Torvalus fighters do not get Jammer effect.
 			var shadingField = shipManager.systems.getSystemByName(target, "ShadingField");
             if(!shipManager.systems.isDestroyed(target, shadingField) && !shipManager.power.isOffline(target, shadingField)){
                 return 1; //Not destroyed or offline
@@ -613,10 +613,10 @@ window.ew = {
                     var sPosShooter = shipManager.getShipPosition(ship);
                     var sPosTarget = shipManager.getShipPosition(target);                    
 
-                    loSBlockedtarget = mathlib.checkLineOfSight(sPosELINT, sPosTarget, blockedLosHex);
+                    loSBlockedtarget = mathlib.isLoSBlocked(sPosELINT, sPosTarget, blockedLosHex);
                     if(loSBlockedtarget) continue; //Line of sight blocked to one of the relevant units, skip.  
 
-                    loSBlockedshooter = mathlib.checkLineOfSight(sPosELINT, sPosShooter, blockedLosHex);
+                    loSBlockedshooter = mathlib.isLoSBlocked(sPosELINT, sPosShooter, blockedLosHex);
                     if(loSBlockedshooter) continue; //Line of sight blocked to one of the relevant units, skip.                                       
                 }
 

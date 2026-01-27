@@ -1087,7 +1087,7 @@ window.shipManager = {
             return true; //If so, revealed.
         }
         if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
-        if (gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
+        if (gamedata.gamephase != 3 || gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
 
         // Check all enemy ships to see if any can detect this ship
         for (const otherShip of gamedata.ships) {
@@ -1132,7 +1132,7 @@ window.shipManager = {
             var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
             var shipPos = shipManager.getShipPosition(ship);
             var otherShipPos = shipManager.getShipPosition(otherShip);
-            loSBlocked = mathlib.checkLineOfSight(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
+            loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
 
             // If within detection range, the ship is revealed
             if (totalDetection >= distance && !loSBlocked) { //In range and LoS not blocked.
@@ -1167,7 +1167,7 @@ window.shipManager = {
             var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
             var shipPos = shipManager.getShipPosition(ship);
             var otherShipPos = shipManager.getShipPosition(otherShip);
-            loSBlocked = mathlib.checkLineOfSight(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
+            loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // True is LoSBlocked          
 
             // If within detection range, the ship is revealed
             if (distance <= totalDetection && !loSBlocked) { //In range and LoS not blocked.

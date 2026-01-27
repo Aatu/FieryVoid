@@ -175,7 +175,7 @@ window.webglScene = function () {
         return this;
     };
 
-    webglScene.prototype.touchstart = function(event) {
+    webglScene.prototype.touchstart = function (event) {
         this.lastTouchMove = event;
         if (event.originalEvent.touches.length === 1) {
             this.mouseDown(event);
@@ -185,25 +185,29 @@ window.webglScene = function () {
         }
     };
 
-    webglScene.prototype.touchmove = function(event) {
+    webglScene.prototype.touchmove = function (event) {
         event.stopPropagation();
         event.preventDefault();
 
         this.lastTouchMove = event;
 
         if (event.originalEvent.touches.length === 1 && !this.lastPinchDistance) {
-            this.drag(event);
+            if (window.gamedata.showLoS) {
+                this.doMouseMove(event);
+            } else {
+                this.drag(event);
+            }
         } else if (event.originalEvent.touches.length === 2) {
             var dist = Math.hypot(
                 event.originalEvent.touches[0].pageX - event.originalEvent.touches[1].pageX,
                 event.originalEvent.touches[0].pageY - event.originalEvent.touches[1].pageY
             );
-            if (! this.lastPinchDistance) {
+            if (!this.lastPinchDistance) {
                 this.lastPinchDistance = dist;
                 return;
             }
             var delta = dist - this.lastPinchDistance;
-            var zoom = this.zoom * (1  - (delta * 0.02));
+            var zoom = this.zoom * (1 - (delta * 0.02));
 
             if (zoom < ZOOM_MIN) zoom = ZOOM_MIN;
             if (zoom > ZOOM_MAX) zoom = ZOOM_MAX;
@@ -214,7 +218,7 @@ window.webglScene = function () {
         }
     };
 
-    webglScene.prototype.touchend = function(event) {
+    webglScene.prototype.touchend = function (event) {
         event.stopPropagation();
         event.preventDefault();
 
@@ -224,7 +228,7 @@ window.webglScene = function () {
             }
             this.lastTouchMove = null;
             this.lastPinchDistance = null;
-        } else if (event.originalEvent.touches.length === 1){
+        } else if (event.originalEvent.touches.length === 1) {
             this.phaseDirector.relayEvent('ZoomEvent', {
                 zoom: this.zoom,
                 animationReady: true
@@ -245,12 +249,12 @@ window.webglScene = function () {
 
     webglScene.prototype.keyDown = function (event) {
         var action = window.Settings.matchEvent(event);
-        this.customEvent(action, {up: false});
+        this.customEvent(action, { up: false });
     };
 
     webglScene.prototype.keyUp = function (event) {
         var action = window.Settings.matchEvent(event);
-        this.customEvent(action, {up: true});
+        this.customEvent(action, { up: true });
     };
 
     webglScene.prototype.mouseDown = function (event) {
@@ -258,6 +262,14 @@ window.webglScene = function () {
         event.preventDefault();
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
+
+        if (window.gamedata.showLoS && (event.button === 0 || event.type === 'touchstart')) {
+            var hexPos = this.coordinateConverter.fromGameToHex(gamePos, true);
+            var payload = getPositionObject.call(this, pos, gamePos, hexPos);
+            payload.button = event.button;
+            this.phaseDirector.relayEvent('MouseDownEvent', payload);
+            return;
+        }
 
         this.draggingStartPosition = getPositionObject(pos, gamePos);
         this.lastDraggingPosition = getPositionObject(pos, gamePos);
@@ -299,10 +311,10 @@ window.webglScene = function () {
         this.dragging = false;
     };
 
-    webglScene.prototype.mouseOver = function (e) {};
+    webglScene.prototype.mouseOver = function (e) { };
 
     webglScene.prototype.mouseMove = function (event) {
-        if (this.dragging) this.drag(event);else this.doMouseMove(event);
+        if (this.dragging) this.drag(event); else this.doMouseMove(event);
     };
 
     webglScene.prototype.doMouseMove = function (event) {
@@ -364,7 +376,7 @@ window.webglScene = function () {
         }
     };
 
-    webglScene.prototype.fireEvent = function (eventName, payload) {};
+    webglScene.prototype.fireEvent = function (eventName, payload) { };
 
     function scroll(payload) {
         if (payload.stopped) return;
@@ -400,7 +412,7 @@ window.webglScene = function () {
         var wheelData = e.detail ? e.detail * -1 : e.wheelDelta / 40;
 
         var step = 0;
-        if (wheelData < 0) step = 1;else step = -1;
+        if (wheelData < 0) step = 1; else step = -1;
 
         changeZoom.call(this, step);
     }

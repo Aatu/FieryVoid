@@ -752,7 +752,7 @@ window.gamedata = {
                     if ((fired == 0) && hasReadyGuns) { //no gun was fired, and there are ready guns
                         hasNoFO.push(myShips[ship]);
                     }
-                UI.shipMovement.hide();  //To hide combat pivot UI again on commit clicked                  
+                    UI.shipMovement.hide();  //To hide combat pivot UI again on commit clicked                  
                 }
             }
 
@@ -786,7 +786,7 @@ window.gamedata = {
                     function () {
                         UI.shipMovement.show(); //To show combat pivot UI again on Cancel
                     }
-                );                
+                );
             }
         } else if (gamedata.gamephase != 4) {
             confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
@@ -1373,15 +1373,15 @@ getActiveShipName: function getActiveShipName() {
         gamedata.subphase = 0;
         //shipManager.initShips();
         UI.shipMovement.hide();
-        /*if (gamedata.gamephase == 1) {
+        if (gamedata.gamephase == 1) {
             //To recalculate fleet list values in Info Tab without refreshing page
             fleetListManager.reset();
             fleetListManager.displayFleetLists();
-        } else {
-            //To refresh whether player has committed their orders when a new phase begins.
-            fleetListManager.refreshed = false;
-            fleetListManager.displayFleetLists();
-        }*/
+        } //else {
+        //To refresh whether player has committed their orders when a new phase begins.
+        //fleetListManager.refreshed = false;
+        //fleetListManager.displayFleetLists();
+        //}
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
@@ -1577,6 +1577,11 @@ getActiveShipName: function getActiveShipName() {
     parseServerData: function parseServerData(serverdata) {
         if (serverdata == null) return;
 
+        // APCu Optimization: Always update timestamp if present
+        if (serverdata.last_update) {
+            gamedata.lastUpdateTimestamp = serverdata.last_update;
+        }
+
         if (!serverdata.id) return;
 
         gamedata.turn = serverdata.turn;
@@ -1594,7 +1599,7 @@ getActiveShipName: function getActiveShipName() {
         gamedata.status = serverdata.status;
         gamedata.elintShips = Array();
         gamedata.gamespace = serverdata.gamespace;
-        gamedata.lastUpdateTimestamp = serverdata.last_update; // APCu Optimization
+
         shipManager.initiated = 0;
 
         gamedata.setShipsFromJson(serverdata.ships);

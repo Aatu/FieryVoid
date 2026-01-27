@@ -414,12 +414,13 @@ class Firing
             //Debug::log("Target weapon is uninterceptable\n");
             return false;
         }
-
+        
+        /* //Removed to allow shooting at own team.
         if ($shooter->team == $interceptingShip->team) {
             //Debug::log("Fire is friendly\n");
             return false;
         }
-
+        */
 
         if ((!($firingweapon->ballistic)) && $weapon->ballisticIntercept) {
             //Debug::log("Can only intercept ballistics, and this is not ballistic\n");
@@ -465,7 +466,8 @@ class Firing
             //Debug::log("Target is this another ship\n");
             if ($interceptingShip instanceof FighterFlight) { //can intercept ballistics IF together with target ship form start of turn
             	
-				if($weapon->freeinterceptspecial){ //weapon has own routine that handles whether it's capable of intercepting the shot
+				//if($weapon->freeinterceptspecial){ //weapon has own routine that handles whether it's capable of intercepting the shot
+				if($weapon->freeinterceptspecial && $target->team == $interceptingShip->team && $shooter->id != $interceptingShip->id){ //Special freeintercept and target from same team.                
 					return $weapon->canFreeInterceptShot($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon);					
 				}            	
             	
@@ -500,9 +502,10 @@ class Firing
                     return false;
                 }
 
-				if($weapon->freeinterceptspecial){ //weapon has own routine that handles whether it's capable of intercepting the shot
+				//if($weapon->freeinterceptspecial){ //weapon has own routine that handles whether it's capable of intercepting the shot
+				if($weapon->freeinterceptspecial && $target->team == $interceptingShip->team && $shooter->id != $interceptingShip->id){ //Special freeintercept and target from same team.
 					return $weapon->canFreeInterceptShot($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon);					
-				}else{ //standard $freeintercept - must be between firing unit and target
+				}else if ($target->team == $interceptingShip->team && $shooter->id != $interceptingShip->id){ //standard $freeintercept - must be between firing unit and target
 					//new approach: bearing to target is opposite to bearing shooter, +/- 60 degrees
 					//$oppositeBearing = mathlib::addToDirection($relativeBearing,180);//bearing exactly opposite to incoming shot
 					$oppositeBearingFrom = mathlib::addToDirection($relativeBearing, 120);//bearing exactly opposite to incoming shot, minus 60 degrees

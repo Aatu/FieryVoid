@@ -111,12 +111,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         if ( $action == 'takeslot' && isset($_POST["gameid"]) && isset($_POST["slotid"])){
             Manager::takeSlot($_SESSION["user"], $_POST["gameid"], $_POST["slotid"]);
-            $ret = Manager::getTacGamedataJSON($_POST["gameid"], $_SESSION["user"], -1, 0, -1);
+            $ret = Manager::getTacGamedataJSON($_POST["gameid"], $_SESSION["user"], -1, 0, -1, true);
         }
 		
 		if ($action == 'leaveslot' && isset($_POST["slotid"]) && isset($_POST["gameid"])){
             Manager::leaveLobbySlot($_SESSION["user"], $_POST["gameid"], $_POST["slotid"]);
-            $ret = Manager::getTacGamedataJSON($_POST["gameid"], $_SESSION["user"], -1, 0, -1);
+            $ret = Manager::getTacGamedataJSON($_POST["gameid"], $_SESSION["user"], -1, 0, -1, true);
         }
 		
 		

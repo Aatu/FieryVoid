@@ -1,13 +1,16 @@
 <?php
     include_once 'global.php';
+    session_write_close(); // Prevent session locking for concurrent loads
 	
 	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
 		header('Location: index.php');
+        exit;
 	}
     
     	if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
 		header('Location: games.php');
+        exit;
 	}
 	
 	
@@ -17,13 +20,25 @@
 		$gameid = $_GET["gameid"];
 	}
 	
-  $gamelobbydata = Manager::getGameLobbyData( $_SESSION["user"], $gameid);
+  // Use cached JSON to reduce server load
+  $gamelobbydataJSON = Manager::getGameLobbyDataJSON( $_SESSION["user"], $gameid);
+  $gamelobbydata = json_decode($gamelobbydataJSON);
+  
+    // STAMPEDE PROTECTION: If server is generating data, tell client to wait 1s
+    if (isset($gamelobbydata->status) && $gamelobbydata->status == "GENERATING") {
+        echo '<html><head><meta http-equiv="refresh" content="1"></head>
+        <body style="background:#000; color:red; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif; font-size:24px;">
+        Loading...
+        </body></html>';
+        exit;
+    }
 
     if (!is_object($gamelobbydata) || $gamelobbydata->status != "LOBBY") {
         header('Location: games.php');
+        exit;
     }
   
-	$gamelobbydataJSON = json_encode($gamelobbydata, JSON_NUMERIC_CHECK);
+    // $gamelobbydataJSON is already set/cached, no need to encode again
 	
 	// Getting all ships in one go causes memory overload on the server.
 	// Get the factions first. When a faction is opened to buy ships,
@@ -199,8 +214,11 @@
 
         
         jQuery(function($){            
-            gamedata.parseServerData(<?php print($gamelobbydataJSON); ?>);
+            var lobbyData = <?php print($gamelobbydataJSON); ?>;
+            gamedata.parseServerData(lobbyData);
             gamedata.parseFactions(<?php print($factions); ?>);
+            
+            var customWarningShown = false; // Track if warning has been shown
 
             $('.readybutton').on("click", gamedata.onReadyClicked);
             $('.savebutton').on("click", gamedata.onSaveClicked)            		
@@ -271,6 +289,11 @@
             $('#toggleCustom').on('change', function () {
                 if ($(this).is(':checked')) {
                     $('#customDropdown').show();
+                    
+                    if (!customWarningShown && lobbyData.description && lobbyData.description.match(/CUSTOM FACTIONS \/ UNITS:\s*Not Allowed/i)) {
+                        window.confirm.warning("Custom factions/units are not allowed in this scenario!");
+                        customWarningShown = true;
+                    }
                 } else {
                     $('#customDropdown').hide();
                 }
@@ -294,6 +317,7 @@
                 $('#toggleCustom').prop('checked', true).trigger('change');
                 $('#customSelect').val('showCustom'); // ✅ reset custom dropdown to Show Customs                
                 $('#isdFilter').val('');
+                $('#nameFilter').val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -302,6 +326,7 @@
                 $('.tier-filter').prop('checked', false);
                 $('#toggleCustom').prop('checked', false).trigger('change');
                 $('#isdFilter').val('');
+                $('#nameFilter').val('');
                 gamedata.applyCustomShipFilter();
                 updateTierFilter();
             });
@@ -320,9 +345,17 @@
                 }
             });
 
-            // Reset ISD filter when clicking "Reset ISD"
-            $(".resetISDFilter").on("click", function () {
+            // Apply filter only when Enter key is pressed (for consistency)
+            $("#nameFilter").on("keypress", function (e) {
+                if (e.which === 13) {
+                    gamedata.applyCustomShipFilter();
+                }
+            });
+
+            // Reset filters when clicking "Reset Filters"
+            $(".resetFilters").on("click", function () {
                 $("#isdFilter").val('');
+                $("#nameFilter").val('');
                 gamedata.applyCustomShipFilter();
             });
 
@@ -349,7 +382,8 @@
 		<div class="panel large lobby">
             <?php 
                 $isFleetTest = false;
-                if ($gamelobbydata->rules && $gamelobbydata->rules->hasRuleName('fleetTest')) {
+                // Using isset/property check instead of hasRuleName for JSON object
+                if (isset($gamelobbydata->rules->fleetTest)) {
                     $isFleetTest = true;
                 }
             ?>
@@ -373,8 +407,10 @@ $optionsUsed = '';
         $optionsUsed .= 'Map ' . $gamelobbydata->gamespace;
     }
 
+    $ladder = false;
     $simMv = false;
     $desperate = false;
+    $friendlyFire = false;    
     $asteroids = false;
     $moons = false;
     $initiativeCategories = null;
@@ -383,44 +419,53 @@ $optionsUsed = '';
     $moonData = [];
 
 
-    if ($gamelobbydata->rules) {
-        if ($gamelobbydata->rules->hasRuleName('initiativeCategories')) {
+    if (isset($gamelobbydata->rules)) {
+
+        if (isset($gamelobbydata->rules->ladder)) {
+            $ladder = true;  
+        }        
+
+        if (isset($gamelobbydata->rules->initiativeCategories)) {
             $simMv = true;
-            $initiativeRule = $gamelobbydata->rules->getRuleByName('initiativeCategories');
-            if ($initiativeRule && method_exists($initiativeRule, 'jsonSerialize')) {
-                $initiativeCategories = $initiativeRule->jsonSerialize();
-            }
+            $initiativeCategories = $gamelobbydata->rules->initiativeCategories;
         }
 
-        if ($gamelobbydata->rules->hasRuleName('desperate')) {
+        if (isset($gamelobbydata->rules->desperate)) {
             $desperate = true;
-            $desperateRule = $gamelobbydata->rules->getRuleByName('desperate');
-            if ($desperateRule && method_exists($desperateRule, 'jsonSerialize')) {
-                $desperateTeams = $desperateRule->jsonSerialize();
-            }        
+            $desperateTeams = $gamelobbydata->rules->desperate;     
         }
 
-        if ($gamelobbydata->rules->hasRuleName('asteroids')) {
+        if (isset($gamelobbydata->rules->friendlyFire)) {
+            $friendlyFire = true;  
+        }        
+
+        if (isset($gamelobbydata->rules->asteroids)) {
             $asteroids = true;
-            $asteroidsRule = $gamelobbydata->rules->getRuleByName('asteroids');
-            if ($asteroidsRule && method_exists($asteroidsRule, 'jsonSerialize')) {
-                $asteroidsNo = $asteroidsRule->jsonSerialize();
-            }        
+            $asteroidsNo = $gamelobbydata->rules->asteroids;     
         }  
 
-        if ($gamelobbydata->rules->hasRuleName('moons')) {
+        if (isset($gamelobbydata->rules->moons)) {
             $moons = true;
-            $moonsRule = $gamelobbydata->rules->getRuleByName('moons');
-            if ($moonsRule && method_exists($moonsRule, 'jsonSerialize')) {
-                $moonData = $moonsRule->jsonSerialize();
-            }        
+            $rulesMoons = $gamelobbydata->rules->moons;
+            // Convert to array if object
+            if (is_object($rulesMoons)) {
+                $moonData = (array)$rulesMoons;
+            } else if (is_array($rulesMoons)) {
+                $moonData = $rulesMoons;
+            }
         }       
+    }
+
+    if ($ladder == true) { // Ladder game
+        $optionsUsed .= ', Ladder Game';
+    } else { 
+        $optionsUsed .= '';
     }
 
     if ($simMv == true) { // simultaneous movement
         $optionsUsed .= ', Simultaneous Movement';
         if ($initiativeCategories !== null) {
-            $optionsUsed .= ' (Initiative Categories: ' . $initiativeCategories . ')';
+            $optionsUsed .= ' (Brackets: ' . $initiativeCategories . ')';
         }
     } else { // standard movement
         $optionsUsed .= ', Standard Movement';
@@ -440,6 +485,13 @@ $optionsUsed = '';
     } else { // standard rules
         $optionsUsed .= '';
     }
+
+    if ($friendlyFire == true) { // Desperate rules in play
+        $optionsUsed .= ', Friendly Fire';
+    } else { // standard rules
+        $optionsUsed .= '';
+    }
+
 
     if ($asteroids == true) { // Asteroid terrain rules in play
         $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
@@ -468,7 +520,7 @@ $optionsUsed = '';
     }
 
     if ($asteroids == false && $moons == false) { 
-        $optionsUsed .= ', No terrain';
+        $optionsUsed .= ', No Terrain';
     }
 
 ?>
@@ -525,6 +577,11 @@ $optionsUsed = '';
                 if ($pos !== false) {
                     $label = trim(substr($line, 0, $pos));
                     $value = trim(substr($line, $pos + 1));
+
+                    // Check if ADDITIONAL INFORMATION is blank and set to 'None'
+                    if (strcasecmp($label, 'ADDITIONAL INFORMATION') === 0 && $value === '') {
+                        $value = 'None';
+                    }
 
                     // Bold the label regardless of case (you can add uppercase check if you want)
                 echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
@@ -600,10 +657,16 @@ $optionsUsed = '';
                     <span class="clickable tier-select-none no-filters-link">No Filters</span>
                     <span class="filter-pipe-separator">|</span>  
 
+                    <label class="name-filter-label-style">
+                        <span class="filter-by-name-text">Filter by Ship Name:</span>
+                        <input type="text" id="nameFilter" value="" class="name-input-style">
+                    </label>
+                    <!--<span class="filter-pipe-separator">|</span>-->
+
                     <label class="isd-filter-label-style">
                         <span class="filter-by-isd-text">Filter by ISD:</span>
                         <input type="text" id="isdFilter" value="" class="isd-input-style">
-                        <span class="clickable resetISDFilter reset-isd-link-style">Reset ISD</span>
+                        <span class="clickable resetFilters reset-filters-link-style">Reset Name/ISD</span>
                     </label>
                 </div>
                 <div>
@@ -659,19 +722,29 @@ $optionsUsed = '';
 
     <script>
         let cachedFleets = [];
+        let fleetsLoaded = false;
         // References
         const fleetDropdownButton = document.getElementById('fleetDropdownButton');
         const fleetDropdownList = document.getElementById('fleetDropdownList');
 
-        // Initialize cache once on page load
-        ajaxInterface.getSavedFleets(function(fleets) {
-            cachedFleets = fleets;
-            gamedata.populateFleetDropdown();
-        });        
-
         // Toggle dropdown visibility
         fleetDropdownButton.addEventListener('click', () => {
-            fleetDropdownList.style.display = fleetDropdownList.style.display === 'block' ? 'none' : 'block';
+            if (fleetDropdownList.style.display === 'block') {
+                fleetDropdownList.style.display = 'none';
+            } else {
+                fleetDropdownList.style.display = 'block';
+                
+                if (!fleetsLoaded) {
+                     // Show loading state
+                     fleetDropdownList.innerHTML = '<div style="text-align:center; padding:10px; color:#555;">Loading fleets...</div>';
+                     
+                     ajaxInterface.getSavedFleets(function(fleets) {
+                        cachedFleets = fleets;
+                        fleetsLoaded = true;
+                        gamedata.populateFleetDropdown();
+                    });
+                }
+            }
         });
 
         // Close dropdown if clicked outside

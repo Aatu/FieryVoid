@@ -7,7 +7,7 @@
   max-width: 100%;
   margin: 0px auto 10px auto;
   background: rgba(23, 39, 54, 0.9);
-  border: 1px solid #215a7a;
+  border: 2px solid #215a7a;
   box-sizing: border-box;
   /* Ensure padding doesn't overflow */
 }
@@ -197,7 +197,7 @@
 .settings-group {
   border: 1px solid #215a7a;
   background: #0b1e2e;
-  padding: 8px;
+  padding: 7px;
   margin-bottom: 10px;
   border-radius: 4px;
 }
@@ -538,7 +538,7 @@ input[type=number] {
 .game-options-wrapper {
   display: flex;
   flex-wrap: wrap;
-  gap: 55px;
+  gap: 60px;
   align-items: flex-start;
   padding: 10px;
 }
@@ -550,7 +550,7 @@ input[type=number] {
   /* Minimum width before wrapping */
   display: flex;
   flex-direction: column;
-  margin-left: 15px;
+  margin-left: 10px;
 }
 
 /* Ensure scenario form behaves as a column */
@@ -600,4 +600,23 @@ input[type=number] {
 
 .btn-fleet-test:hover {
   opacity: 0.9;
+}
+
+/* Custom styles for Create Game Ladder button */
+.btn-create-game-ladder {
+  background: #215a7a;
+  color: white;
+  font-size: 12px;
+  border: 1px solid #7298a7;
+  padding: 4px 5px;
+  cursor: pointer;
+  border-radius: 4px;
+  display: block;
+  line-height: normal;
+  margin-left: 20px;
+  float: right;  
+}
+
+.btn-create-game-ladder:hover {
+  background: #2c7da0;
 }

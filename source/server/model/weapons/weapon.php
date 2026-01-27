@@ -1275,7 +1275,7 @@ public function getStartLoading()
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
             } else { //ballistics use of OB is more complicated
                 $oew = 0;
-                $shooterlosBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $shooterlosBlocked  = $this->isLoSBlocked($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
                     if ($shooter->hasNavigator && !$shooterlosBlocked) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
@@ -1382,7 +1382,7 @@ public function getStartLoading()
         //Check Line of Sight has been maintained by ship for Ballistic weapons after launch (Fighters checked separately above).
         if($this->ballistic && (!$shooter instanceof FighterFlight) && !$this->hasSpecialLaunchHexCalculation){
             if(!$firecontrol <= 0){ //No point checking for LoS if FC is a 0 or lower anyway!
-                $losBlocked  = $this->checkLineOfSight($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                $losBlocked  = $this->isLoSBlocked($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                
                 if($losBlocked ){ //Line of Sight is blocked!
                     if($this instanceof AmmoMissileRackS) { //Only zero LAUNCHER FC on AmmoMissileLaunchers, missiles have own guidance e.g. bonus. 
@@ -1753,12 +1753,44 @@ public function getStartLoading()
         
         //if (($target->shipSizeClass > 1) && ($this->damageType == 'Piercing')) { //Piercing damage will be split into 3 parts vs units larger thgan MCVs
 		if (($noOfStructures > 1) && ($this->damageType == 'Piercing')) {//special handling of Piercing on ships with 2 or more Structures - otherwise it will degenerate to Standard (no overkill)
-            $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
+            if($this->ballistic){
+                $facingLocation = $target->getHitSectionPos($launchPos, $fireOrder->turn, true);
+            }else{
+                $facingLocation = $target->getHitSection($shooter, $fireOrder->turn, true); //do accept destroyed section as location
+            }
+            
             //find out opposite section...
-            $relativeBearing = $target->getBearingOnUnit($shooter);
-            $oppositeBearing = Mathlib::addToDirection($relativeBearing, 180);
-            $outLocation = $target->doGetHitSectionBearing($oppositeBearing); //technically true, even if may lead to strange effects... (in some cases, one location may be chosen twice); in this case, assume narrow point was hit
-            $outLocation = $outLocation["loc"];//whole array was returned
+            if($this->ballistic){ //firing position is explicitly declared
+				$relativeBearing = $target->getBearingOnPos($launchPos);
+			}else{ //check from shooter...
+                $relativeBearing = $target->getBearingOnUnit($shooter);
+			}
+            
+            //Rules update: piercing shots on HCVs coming from the side should split into 2 parts, not 3.
+            //Check for HCV / HCVLeftRight and modify outLocation to match facingLocation if angle is from the side.
+            $forceTwoWaySplit = false; 
+            if ($target instanceof HeavyCombatVesselLeftRight) {
+                //HCV Left/Right have 3-way split on 60-120 and 240-300 arcs. Everything else is 2-way.
+                if (!Mathlib::isInArc($relativeBearing, 30, 150) && !Mathlib::isInArc($relativeBearing, 210, 330)) {
+                    $forceTwoWaySplit = true;
+                }
+            } elseif ($target instanceof HeavyCombatVessel) { //Standard HCV
+                //Standard HCV have 3-way split on Forward (300-30) and Aft (150-210) arcs. Everything else is 2-way.
+                if (!Mathlib::isInArc($relativeBearing, 330, 30) && !Mathlib::isInArc($relativeBearing, 150, 210)) {
+                    $forceTwoWaySplit = true;
+                }
+            }
+
+            if ($forceTwoWaySplit){
+                $outLocation = $facingLocation;
+            }else{
+                //Standard logic: Find opposite section
+                $oppositeBearing = Mathlib::addToDirection($relativeBearing, 180);
+                $outLocation = $target->doGetHitSectionBearing($oppositeBearing); 
+                $outLocation = $outLocation["loc"];
+            }
+
+
             //find how big damage is done - split to 3 equal parts; if can't be equal, bigger portions will go to PRIMARY and facing parts
             if ($outLocation == $facingLocation) { //shot enters and exits through the same section - narrow point - split into 2 parts only!
                 $damageOut = 0;
@@ -2152,12 +2184,12 @@ full Advanced Armor effects (by rules) for reference:
         return null;    
     }     
 
-    public function checkLineOfSight($shooterPos, $targetPos, $gamedata) {
+    public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
         $blockedLosHex = $gamedata->getBlockedHexes();
 
         $noLoS = false;
         if (!empty($blockedLosHex)) {            
-            $noLoS = Mathlib::checkLineOfSight($shooterPos, $targetPos, $blockedLosHex);
+            $noLoS = Mathlib::isLoSBlocked($shooterPos, $targetPos, $blockedLosHex);
         }
         
         return $noLoS;
