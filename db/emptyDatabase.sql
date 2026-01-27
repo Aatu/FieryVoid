@@ -537,7 +537,33 @@ CREATE TABLE `tac_saved_ammo` (
     ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+--
+-- Table structure for table `tac_ladder_games`
+--
 
+DROP TABLE IF EXISTS `tac_ladder_games`;
+
+CREATE TABLE `tac_ladder_games` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `gameid` INT NOT NULL,
+  `playerid` INT NOT NULL,
+  `status` VARCHAR(20) NOT NULL,
+  `recorded_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+--
+-- Table structure for table `tac_ladder_rankings`
+--
+
+DROP TABLE IF EXISTS `tac_ladder_rankings`;
+
+CREATE TABLE `tac_ladder_rankings` (
+  `playerid` INT NOT NULL,
+  `rating` INT NOT NULL DEFAULT 100,
+  PRIMARY KEY (`playerid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

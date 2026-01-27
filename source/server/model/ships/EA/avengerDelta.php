@@ -5,13 +5,13 @@ class AvengerDelta extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 650;
-        $this->faction = "Earth Alliance (Custom)";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "AvengerDelta";
         $this->imagePath = "img/ships/avenger.png";
         $this->shipClass = "Avenger Heavy Carrier (Delta)";
         $this->shipSizeClass = 3;
-//			$this->unofficial = true;
-//			$this->variantOf = "Avenger Heavy Carrier (Gamma)";
+			$this->unofficial = true;
+			$this->variantOf = "Avenger Heavy Carrier (Gamma)";
 		$this->fighters = array("normal"=>48);			
 			
 	    $this->isd = 2261;

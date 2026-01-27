@@ -502,6 +502,14 @@ shipManager.power = {
 	},
 
 	setOnline: function setOnline(ship, system, skipMessage = false) {
+		if (ship.faction === "Vorlon Empire" && !ship.flight && (system instanceof Weapon || system instanceof Shield)) {
+             var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
+             if (capacitor && capacitor.active) {
+                 if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");
+                 return;
+             }
+        }
+
 		if (system.name == "graviticShield") {
 			if (ship.checkShieldGenerator()) {
 				for (var i in ship.systems) {
@@ -867,7 +875,7 @@ shipManager.power = {
 
 		if (system.hasMaxBoost()) {
 			if (system.maxBoostLevel <= shipManager.power.getBoost(system)) {
-				confirm.error("You can not boost this weapon any further.");
+				confirm.error("You can not boost this system any further.");
 				return;
 			}
 		}
@@ -1069,25 +1077,7 @@ shipManager.power = {
 		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOn(ship);
 		}
-        /* Cleaned 19.8.25 - DK		
-		if (system.dualWeapon || system.duoWeapon) {
-			for (var i in system.weapons) {
-				var weapon = system.weapons[i];
 
-				if (weapon.duoWeapon) {
-					for (var index in weapon.weapons) {
-						var subweapon = weapon.weapons[index];
-
-						shipManager.power.setOnline(ship, subweapon);
-						shipWindowManager.setDataForSystem(ship, subweapon);
-					}
-				} else {
-					shipManager.power.setOnline(ship, weapon);
-					shipWindowManager.setDataForSystem(ship, weapon);
-				}
-			}
-		}
-		*/
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},

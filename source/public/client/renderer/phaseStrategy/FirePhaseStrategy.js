@@ -71,9 +71,14 @@ window.FirePhaseStrategy = function () {
 
         this.lastClickedShipId = ship.id;
 
-        if (gamedata.rules && gamedata.rules.friendlyFire  === 1) {              
+        var hexWeaponSelected = gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.hextarget === true;
+        });
 
-            if(gamedata.isMyorMyTeamShip(this.selectedShip) && weaponManager.hasShipWeaponsSelected()){
+        if (gamedata.rules && gamedata.rules.friendlyFire  === 1 || hexWeaponSelected) {              
+
+            //if(gamedata.isMyorMyTeamShip(this.selectedShip) && weaponManager.hasShipWeaponsSelected()){            
+            if(gamedata.isMyorMyTeamShip(this.selectedShip)){
                 var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn); 
                 var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);                   
                 menu.addButton("selectShip",

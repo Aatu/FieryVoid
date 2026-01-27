@@ -1087,7 +1087,7 @@ window.shipManager = {
             return true; //If so, revealed.
         }
         if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
-        if (gamedata.gamephase != 3) return false;  //Cannot only try to detect at start of Firing Phase
+        if (gamedata.gamephase != 3 || gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
 
         // Check all enemy ships to see if any can detect this ship
         for (const otherShip of gamedata.ships) {

@@ -14,7 +14,7 @@ class OmegaEpsilonDrakh  extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 1500;
-        $this->faction = "Earth Alliance (Custom)";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "OmegaEpsilonDrakh";
         $this->imagePath = "img/ships/omegaShadow.png";
         $this->shipClass = "Shadow Omega Destroyer (Drakh)";

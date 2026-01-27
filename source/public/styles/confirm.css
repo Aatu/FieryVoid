@@ -1,6 +1,7 @@
 .confirm {
     padding: 10px 10px 10px 10px;
-    border: 1px solid #defbff44;   
+    /*border: 1px solid #defbff44; */  
+    border: 1px solid #496791;      
     background-color: black;
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
@@ -21,7 +22,8 @@
 }
 
 .confirm .missileselect {
-    border: 1px solid #DEEBFF;
+    /*border: 1px solid #defbff44; */  
+    border: 1px solid #496791;   
     color: #DEEBFF;
     padding: 3px 5px;
     position: relative;
@@ -154,7 +156,8 @@
 }
 
 .confirm.error {
-    border: 1px solid #defbff44;    
+    /*border: 1px solid #defbff44; */  
+    border: 1px solid #496791;        
     color: #b34119;
     font-family: arial;
     font-size: 16px;
@@ -162,6 +165,16 @@
 
 .confirm.error .ship-name {
     color: rgba(255, 255, 255, 0.692);
+}
+
+.confirm.warning {
+    background-color: #04161C;    
+    border: 1px solid #496791;  
+    color: #deebffd2;
+    font-family: arial;
+    font-size: 16px;
+    width: 400px;    
+    display: inline-block;    
 }
 
 .confirm h2 {

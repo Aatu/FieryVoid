@@ -73,7 +73,7 @@ window.BallisticIconContainer = function () {
 	function generateTerrainHexes(gamedata) {
 		if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
 
-		gamedata.ships.filter(ship => ship.Enormous && ship.shipSizeClass == 5).forEach(ship => {
+		gamedata.ships.filter(ship => ship.Enormous && ship.shipSizeClass == 5 && !shipManager.isDestroyed(ship)).forEach(ship => {
 		//gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
 			const position = shipManager.getShipPosition(ship);
 			/*const perimeterHexes = (ship.Huge === 2)

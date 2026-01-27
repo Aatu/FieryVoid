@@ -580,6 +580,8 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.redrawMovementUI = function () {
 
+        if (gamedata.waiting) return;
+
         if (!this.selectedShip) {
             return;
         }
@@ -595,6 +597,8 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.drawMovementUI = function (ship) {
+        if (gamedata.waiting) return;
+
         var drawn = UI.shipMovement.drawShipMovementUI(ship, new ShipMovementCallbacks(ship, this.onShipMovementChanged.bind(this)));
 
         if (drawn === false) {
@@ -883,7 +887,7 @@ window.PhaseStrategy = function () {
 
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     };
 
     function showAllBallisticLines(ships, payload) {
@@ -892,7 +896,7 @@ window.PhaseStrategy = function () {
         } else {
             this.ballisticIconContainer.showLines(ships);
         }
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     }
 
 
