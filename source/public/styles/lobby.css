@@ -64,18 +64,21 @@
 }
 
 
-.scenariolabel {
+.scenario-description {
+    margin-top: 10px;    
+    font-size: 14px;
+}
 
-    font-size: 12px;
+.scenariolabel {
     margin: 2px 0px;
     color: #DEEBFF;
+    font-weight: 525;    
 }
 
 .scenariovalue {
-    font-weight: bold;
-    font-size: 12px;
-    margin: 2px 0px;
-    color: #81a7ec;
+
+    margin: 2px 2px;
+    color: #a6c1f2;
 }
 
 .slot span {
@@ -154,7 +157,7 @@
 }
 
 .store .ship {
-    color: #81a7ec;
+    color: #90b1ee; /* previous value #81a7ec */
     /*color:#8080FF;old purple*/
     margin-right: 5px;
     font-size: 13px;
@@ -169,7 +172,7 @@
 
 .store .storeship {
     /*color:#a3c0f5;*/
-    color: #81a7ec;
+    color: #90b1ee; /* previous value #81a7ec */
     margin-right: 5px;
     margin-left: 20px;
     font-size: 13px;
@@ -273,11 +276,11 @@
 
 .value {
     /*color:#6e9cdc; Original value  #496791 */
-    color: #81a7ec;
+    color: #90b1ee;  /* previous value #81a7ec */
 }
 
 .selectslot {
-    color: #FFA080;
+    color: orange;
     display: none;
 }
 
@@ -404,7 +407,7 @@
 }
 
 .fleet-test-text {
-    color: yellow;
+    color: #ffbf00d0 !important; /* Gold for Fleet Test */
 }
 
 .rules-info-header {

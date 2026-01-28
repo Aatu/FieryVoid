@@ -36,7 +36,7 @@ class ChoukaPenitentPatrolShip extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));        
         
-		$this->addFrontSystem(new EWGraviticTractingRod(3, 300, 60, 1));
+		$this->addFrontSystem(new EWGraviticTractingRod(3, 10, 6, 300, 60));
 		$this->addFrontSystem(new GrapplingClaw(2, 0, 0, 300, 60, 8, false));
 		$this->addFrontSystem(new GrapplingClaw(2, 0, 0, 300, 60, 8, false));
         $this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));	

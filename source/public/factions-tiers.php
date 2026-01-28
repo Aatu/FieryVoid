@@ -949,7 +949,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Shrouded Saber - 12 drones (Optional)</li>                  
             </ul>
         </li>    
-        <h5>Shading Field</h5>
+    <h5>Shading Field</h5>
         <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
         <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
@@ -960,7 +960,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>
         </li>         
         <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
-            This can also be toggled on and off during Deployment and Pre-Turn Order phases but onl provides the Jammer effect in Normal Made.  In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
+            This can also be toggled on and off during Deployment and Pre-Turn Order phases like the ship version, but does not provide the Jammer effect in either mode.  
+            In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
     <h5>Shade Modulator</h5>
         <li>The Shade Modulator is a versatile Support Weapons found on the Veiled Scimitar, it has four different firing modes which are described below. 
             <ul class="circle-list">
@@ -1019,7 +1020,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Power Capacitor</h5>
         <li>Produces power for Vorlon ships and can hold Power between turns up to its maximum capacity.  Some key points to note about it are:
                 <ul class="circle-list">
-                    <li>New power is produced in the Initial Orders phase,</li>
+                    <li>New power is produced in the Initial Orders phase.  The power produced can be doubled (along with Self Repair at end of turn) by clicking 'Select' in Initial Orders.  However this comes at the cost of deactivating all weapons and shields on that turn.</li>
                     <li>Opening petals by boosting Power Capacitor will reduce the armor of all the ship’s primary systems by 2 and increase Defence Profiles by 5%, but adds 50% to power generation the following turn,</li> 
                     <li>Capacitor destruction would leave the ship powerless, but doesn't cause a catastrophic explosion like Reactor destruction.  In FV it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), 
                         add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li> 

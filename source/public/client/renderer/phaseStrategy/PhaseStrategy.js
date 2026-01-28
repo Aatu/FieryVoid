@@ -207,6 +207,13 @@ window.PhaseStrategy = function () {
         }
     };
 
+    PhaseStrategy.prototype.onMouseDownEvent = function (payload) {
+        if (gamedata.showLoS) {
+            this._startHexRuler = payload.hex;
+            mathlib.clearLosSprite();
+        }
+    };
+
     PhaseStrategy.prototype.onHexClicked = function (payload) {
         if (gamedata.showLoS) {
             if (payload.button == 2) { //Right click, just clear and reset to this.selectedShip
@@ -268,10 +275,18 @@ window.PhaseStrategy = function () {
             mathlib.clearLosSprite();
         }
 
-        if (this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
-            this.selectShip(ship, payload);
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (this.gamedata.isMyShip(ship)) {
+                this.selectShip(ship, payload);
+            } else {
+                this.targetShip(ship, payload);
+            }
         } else {
-            this.targetShip(ship, payload);
+            if (this.gamedata.isMyShip(ship) && (!this.gamedata.canTargetAlly(ship))) {
+                this.selectShip(ship, payload);
+            } else {
+                this.targetShip(ship, payload);
+            }
         }
     };
 
@@ -565,6 +580,8 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.redrawMovementUI = function () {
 
+        if (gamedata.waiting) return;
+
         if (!this.selectedShip) {
             return;
         }
@@ -580,6 +597,8 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.drawMovementUI = function (ship) {
+        if (gamedata.waiting) return;
+
         var drawn = UI.shipMovement.drawShipMovementUI(ship, new ShipMovementCallbacks(ship, this.onShipMovementChanged.bind(this)));
 
         if (drawn === false) {
@@ -868,7 +887,7 @@ window.PhaseStrategy = function () {
 
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     };
 
     function showAllBallisticLines(ships, payload) {
@@ -877,7 +896,7 @@ window.PhaseStrategy = function () {
         } else {
             this.ballisticIconContainer.showLines(ships);
         }
-        this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
+        if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);
     }
 
 

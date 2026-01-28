@@ -3,7 +3,7 @@ class ArcticAlpha extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 875;
-        $this->faction = "Earth Alliance (Custom)";
+        $this->faction = "Earth Alliance";
 		$this->phpclass = "ArcticAlpha";
 		$this->imagePath = "img/ships/arctic.png";
 		$this->shipClass = "Arctic Heavy Cruiser (Alpha)";

@@ -18,6 +18,11 @@ TwinArray.prototype.initializationUpdate = function() {
 	} else {
 		delete this.data["Shots Remaining"];
 	}
+
+    if(this.startArcArray.length > 0){ //More than one arc e.g. Battlecruiser
+		this.data["Arc"] = this.startArcArray[0] + "..." + this.endArcArray[0] + ", " +  this.startArcArray[1] + "..." + this.endArcArray[1];		
+	}
+
 	return this;
 };
 

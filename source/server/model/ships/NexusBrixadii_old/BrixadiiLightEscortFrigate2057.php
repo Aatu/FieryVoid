@@ -43,7 +43,7 @@ class BrixadiiLightEscortFrigate2057 extends MediumShip{
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 60));
 		$this->addFrontSystem(new NexusParticleBolter(2, 6, 2, 300, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 300, 180));
-		$this->addFrontSystem(new NexusKineticBoxLauncher(0, 4, 0, 300, 60));
+		$this->addFrontSystem(new NexusAntifighterLauncher(0, 6, 0, 270, 90));
 		
 		$this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 14, 0, 4, 2));
@@ -67,7 +67,7 @@ class BrixadiiLightEscortFrigate2057 extends MediumShip{
             ),
             1=> array(
 				5 => "Thruster",
-				7 => "Kinetic Box Launcher",
+				7 => "Anti-fighter Launcher",
 				9 => "Particle Bolter",
 				11 => "Light Particle Beam",
 				17 => "Structure",

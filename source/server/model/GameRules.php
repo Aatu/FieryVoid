@@ -14,6 +14,12 @@ class GameRules implements JsonSerializable{
         if ($desperateRules !== null) {
             array_push($this->rules, $desperateRules);
         }
+
+        $friendlyFireRules = $this->getFriendlyFireRules($rules);
+        if ($friendlyFireRules !== null) {
+            array_push($this->rules, $friendlyFireRules);
+        }
+
         $asteroidsRules = $this->getAsteroidsRules($rules);
         if ($asteroidsRules !== null) {
             array_push($this->rules, $asteroidsRules);
@@ -25,6 +31,11 @@ class GameRules implements JsonSerializable{
         $fleetTestRules = $this->getFleetTestRules($rules);
         if ($fleetTestRules !== null) {
             array_push($this->rules, $fleetTestRules);
+        }
+
+        $ladderRules = $this->getLadderRules($rules);
+        if ($ladderRules !== null) {
+            array_push($this->rules, $ladderRules);
         }
     }
 
@@ -42,6 +53,13 @@ class GameRules implements JsonSerializable{
         }
 
         return null;
+    }
+
+    private function getFriendlyFireRules($rules) {
+        if (isset($rules['friendlyFire'])) {
+            return new FriendlyFireRule();
+        }
+        return null;
     }    
 
     private function getAsteroidsRules($rules) {
@@ -55,6 +73,13 @@ class GameRules implements JsonSerializable{
     private function getFleetTestRules($rules) {
         if (isset($rules['fleetTest'])) {
             return new FleetTestRule((int)$rules['fleetTest']);
+        }
+        return null;
+    }
+
+    private function getLadderRules($rules) {
+        if (isset($rules['ladder'])) {
+            return new LadderRule((bool)$rules['ladder']);
         }
         return null;
     }

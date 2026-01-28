@@ -975,12 +975,13 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         GraviticShifter::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
 
 		$target = $gamedata->getShipById($fireOrder->targetid);
-        $shooter = $this->getUnit();
+        //$shooter = $this->getUnit();
 
         if($target->gravitic || $target->factionAge >= 3){ 
             $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
         }
 
+        /* //Removed since OEW lock on allies enabled - DK 17.1.26  
         if($shooter->team == $target->team){ //Let's make penalty only for enemy units
 		    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
 		    $targetPos = $target->getHexPos();                       
@@ -988,7 +989,8 @@ class GraviticShifter extends Weapon implements SpecialAbility{
 
             $rangePen = $this->calculateRangePenalty($distance);
             $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
-        }    
+        } 
+        */       
 	}    
         
     public function fire($gamedata, $fireOrder){                   
@@ -1119,14 +1121,16 @@ class GravityNet extends Weapon implements SpecialAbility{
                     $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
                 }
 
+                /* //Removed since OEW lock on allies enabled - DK 17.1.26  
                 if($shooter->team == $target->team){ //Let's make penalty only for enemy units
                     $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
                     $targetPos = $target->getHexPos();                       
                     $distance = mathlib::getDistanceHex($launchPos, $targetPos);
 
                     $rangePen = $this->calculateRangePenalty($distance);
-                    $fireOrder->needed += $rangePen * 5; //refund range penalty for friendly units since OEW lock on allies not possible.            
-                }   
+                    $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
+                } 
+                */    
             }
         }
 	}    

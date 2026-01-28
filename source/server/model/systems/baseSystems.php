@@ -81,7 +81,6 @@ class Stealth extends ShipSystem implements SpecialAbility{
     //args for Jammer ability are array("shooter", "target")
     public function getSpecialAbilityValue($args)
     {
-        //Debug::log("calling stealth getSpecialAbilityValue");
         if (!isset($args["shooter"]) || !isset($args["target"]))
             throw new InvalidArgumentException("Missing arguments for Stealth getSpecialAbilityValue");
         
@@ -147,9 +146,9 @@ class Stealth extends ShipSystem implements SpecialAbility{
 				}	
 			break;
 
-			case 4: //Post-Firing phase
+			case 5: //Pre-Firing phase Advance(), always called even if phase not needed in game.
 				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
-					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?							//Prepare note for database!		
+					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
 						$notekey = 'detected';
 						$noteHuman = 'Ship detected';
 						$noteValue = 1;
@@ -274,7 +273,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			// Get distance to the stealth ship and check line of sight
 			$distance = mathlib::getDistanceHex($ship, $otherShip);
 			$otherPos = $otherShip->getHexPos();          
-			$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
+			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
 
 			// If within detection range, and LoS not blocked the ship is detected
 			if ($totalDetection >= $distance && !$noLoS) {  
@@ -302,7 +301,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 				$enemyPosition = $enemyShip->getHexPos();
 				$noLoS = false; //False means LoS not blocked
 			
-				$noLoS = Mathlib::checkLineOfSight($shipPosition, $enemyPosition, $blockedHexes);				
+				$noLoS = Mathlib::isLoSBlocked($shipPosition, $enemyPosition, $blockedHexes);				
 
 				if(!$noLoS){ //The enemy unit can see this ship LoS not blocked.
 					$canStealth = false;
@@ -849,8 +848,10 @@ class MagGravReactorTechnical extends MagGravReactor{
 		$this->data["Special"] = "This system is here for technical purposes only. Cannot be damaged in any way.";
 		$ship = $this->getUnit();
 		//I'm reusing this system in Asteroid unit, but don't want this text here - DK
-		if($ship->factionAge > 2) $this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
-		
+		if($ship->factionAge > 2){
+			$this->data["Special"] .= "<br>Mag-Gravitic Reactor: provides fixed total power, regardless of destroyed systems.";
+			$this->data["Special"] .= "<br>System icon displays CURRENT power available to this vessel.";			
+		}
 	}		
 }//endof MagGravReactor		
 
@@ -4020,7 +4021,7 @@ by 4.
 	//function estimating how good this Diffuser is at stopping damage;
 	//in case of diffuser, its effectiveness equals largest shot it can stop, with tiebreaker equal to remaining total capacity
 	//this is for recognizing it as system capable of affecting damage resolution and choosing best one if multiple Diffusers can protect
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
 		$remainingCapacity = 0;
 		$totalCapacity = 0;
 		$largestCapacity = 0;
@@ -4035,7 +4036,33 @@ by 4.
 				$remainingCapacity += $tendrilCapacity;
 				$largestCapacity = max($tendrilCapacity,$largestCapacity);
 			}
-		}		
+		}
+
+		//If this is a multi-shot volley, we need to calculate the average protection.
+		if ($inflictingShots > 1) {
+			$simulatedTendrils = array();
+			foreach($this->tendrils as $tendril) if(!$tendril->isDestroyed()){
+				$simulatedTendrils[$tendril->id] = max(0, $tendril->getRemainingCapacity()-$reduction);
+			}
+
+			$totalProtection = 0;
+			for($i=0; $i<$inflictingShots; $i++){
+				$bestCapacity = 0;
+				$bestTendrilId = -1;
+				foreach($simulatedTendrils as $id=>$cap){
+					if($cap > $bestCapacity){
+						$bestCapacity = $cap;
+						$bestTendrilId = $id;
+					}
+				}
+				if($bestCapacity > 0){
+					$absorbed = min($expectedDmg, $bestCapacity);
+					$totalProtection += $absorbed;
+					$simulatedTendrils[$bestTendrilId] -= $absorbed;
+				}
+			}
+			return $totalProtection / $inflictingShots;
+		}
 		
 		//tiebreaker: less filled (proportionally), to try and split load if possible
 		$protectionValue = $largestCapacity;
@@ -4189,12 +4216,18 @@ class SelfRepair extends ShipSystem{
             return $boostLevel;
         }	
         
-	public function getEffectiveOutput(){
+	public function getEffectiveOutput($ship){
 		$turn = TacGamedata::$currentTurn;
       	$boost = $this->getBoostLevel($turn);
  	    $output = $this->getOutput();
-      	
-      	$effectiveoutput = $output + $boost;
+		$bonus = 0;
+		if($ship->faction == "Vorlon Empire"){
+			$capacitor = $ship->getSystemByName("PowerCapacitor");			
+			$doubled = $capacitor->isDoubled();			
+			if($capacitor && $doubled == true) $bonus = $output; //Double output
+
+		}				
+      	$effectiveoutput = $output + $boost + $bonus;
       	
       	return $effectiveoutput; 
 		}		
@@ -4208,13 +4241,13 @@ class SelfRepair extends ShipSystem{
 		
 		//how many points are available?
 		$availableRepairPoints = $this->maxRepairPoints - $this->usedRepairPoints;
-		$availableRepairPoints = min($availableRepairPoints,$this->getEffectiveOutput()); //no more than remaining points, no more than actual system repair capability	
+		$availableRepairPoints = min($availableRepairPoints,$this->getEffectiveOutput($ship)); //no more than remaining points, no more than actual system repair capability	
 		
 		//sort all systems by priority
 		$ship=$this->getUnit();
 		$systemList = array();
 		foreach($ship->systems as $system){			
-			if ( $system->maxhealth <= $system->getRemainingHealth( ) ) continue; //skip undamaged systems...
+			if ( $system->maxhealth <= $system->getRemainingHealth() ) continue; //skip undamaged systems...
 			//priority overrides...
 			if(array_key_exists($system->id, $this->priorityChanges) && ($this->priorityChanges[$system->id]>=0)){
 				$system->repairPriority = $this->priorityChanges[$system->id];
@@ -4794,7 +4827,7 @@ class Bulkhead extends ShipSystem{
 	
 	
 	//function estimating how good this Bulkhead is at stopping damage;
-	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false) {
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
 		//first do check whether this system can be protected! (same location or appropriate structure location)
 		if ($systemProtected) {
 			//is it on the same section?
@@ -4821,6 +4854,7 @@ class Bulkhead extends ShipSystem{
 		} else if ( ($systemProtected->repairPriority > 5) && ($targetHealth + $ownHealth > $expectedDmg)){ //for very important systems - protect even if result would be just damage reduction, as reduced crit on them is important
 			$protectionValue = $ownHealth;
 		}
+		
 		return $protectionValue;
 	}
 	//actual protection
@@ -4895,6 +4929,8 @@ class PowerCapacitor extends ShipSystem{
     public $boostable = false; //changed to True if a given ship has Petals! 
     public $maxBoostLevel = 1;
     public $boostEfficiency = 0;
+	protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.
+	private $doubled = false; //Passed from Front End, to generate note to double Self Repair output at end of turn.		
 	
 /*
 	1-17: No effect.
@@ -4929,7 +4965,9 @@ capacitor is completely emptied.
 		$this->powerCurr = $newValue;
 	}
 	
-	
+	public function isDoubled(){
+		return $this->doubled;
+	}
 
 
 	/* this method generates additional non-standard informaction in the form of individual system notes
@@ -4977,6 +5015,13 @@ capacitor is completely emptied.
 						$noteHuman = 'Power Capacitor - stored power';
 						$noteValue = $this->powerCurr;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				
+						if($this->doubled == true){ //To generate note to double Self Repair output at end of turn.
+							$notekey = 'doubled';
+							$noteHuman = 'Power Capacitor - Doubled';
+							$noteValue = 1;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);
+						}
 					}
 					break;
 				
@@ -5018,10 +5063,11 @@ capacitor is completely emptied.
 	*/
 	public function onIndividualNotesLoaded($gamedata){
 		foreach ($this->individualNotes as $currNote){ //assume ASCENDING sorting - so enact all changes as is
+			if($currNote->turn == $gamedata->turn && $currNote->notekey == 'doubled') $this->doubled = true;	//Value check to see if Self Repair doubled.		
 			switch($currNote->notekey){
 				case 'powerStored': //power that should be stored at this moment
 					$this->setPowerHeld($currNote->notevalue);
-					break;			
+					break;								
 			}
 		}
 
@@ -5059,12 +5105,14 @@ capacitor is completely emptied.
         parent::setSystemDataWindow($turn); 
 		$this->powerMax = $this->getMaxCapacity(); //do cut off overflow here as well!
 		$this->powerCurr =min($this->powerCurr, $this->powerMax);
-		$this->data["Power stored/max"] =  $this->powerCurr . '/' . $this->powerMax;
+		$this->data["Power Stored / Max"] =  $this->powerCurr . '/' . $this->powerMax;
 		$this->data["Power regeneration"] =  'Initial phase only';
-        $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";	   
+        $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";
+        $this->data["Special"] = "You can double power generation (and self-repair) by clicking 'Select', at the cost of deactivating all weapons and shields this turn.";	  			   
 		if ($this->boostable){
-			$this->data["Special"] .= "<br>You may open ship petals by boosting this system, increasing generation by 50% on the following turn - however all primary systems lose 2 Armour and Defence Profiles increase 5% for the current turn.";
+			$this->data["Special"] .= "<br>In addition, you may open ship petals by boosting this system with '+', increasing generation by 50% on the following turn - however all primary systems lose 2 Armour and Defence Profiles increase 5% for the current turn.";
 		}
+		$this->data["Special"] .= "<br>You cannot generate more power than the Capacitor Max value, any excess is lost.";		
 		$this->data["Special"] .= "<br>Destroying Capacitor disables (but does not destroy) the ship.";
     }
 	
@@ -5132,17 +5180,31 @@ capacitor is completely emptied.
 		$strippedSystem->nominalOutput = $this->output;
 		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
+		$strippedSystem->active = $this->active;
+		$strippedSystem->doubled = $this->doubled;					
         return $strippedSystem;
     }
-	
+
+	/*
 	public function doIndividualNotesTransfer(){
 		//data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
 		//in this case it should be just one entry, power remaining
-		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $powerLeft)  $this->powerReceivedFromFrontEnd = $powerLeft;
+		if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $powerLeft => $doubled){
+			$this->powerReceivedFromFrontEnd = $powerLeft;
+		}  
 		$this->individualNotesTransfer = array(); //empty, just in case
 	}		
+	*/
 	
-	
+	public function doIndividualNotesTransfer() {
+		//data received in variable individualNotesTransfer, further functions will look for it in powerReceivedFromFrontEnd
+        $notes = (array)$this->individualNotesTransfer;
+        if (isset($notes['powerRemaining'])) $this->powerReceivedFromFrontEnd = $notes['powerRemaining'];
+        if (isset($notes['doubled'])) $this->doubled = $notes['doubled'];
+        
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}
+
 	//upon destruction (ship should be completely disabled) go for:
 	// - add Power reduction critical to Reactor (so ship goes out of control) 
 	// - add SelfRepair output reduction critical (so the damage isn't just repaired in a few turns ;) ).
@@ -5983,9 +6045,9 @@ class MindriderHangar extends ShipSystem{
 		public function getSpecialAbilityValue($args)
 		{
 			$ship = $this->getUnit();
-			//if($ship instanceof FighterFlight){
-			//	return 0; //Torvalus fighters don't get the Jammer effect.
-			//}
+			if($ship instanceof FighterFlight){
+				return 0; //Torvalus fighters don't get the Jammer effect.
+			}
 
 			if (!isset($args["shooter"]) || !isset($args["target"]))
 				throw new InvalidArgumentException("Missing arguments for Jammer getSpecialAbilityValue");
@@ -6145,7 +6207,7 @@ class MindriderHangar extends ShipSystem{
 				// Get distance to the stealth ship and check line of sight
 				$distance = mathlib::getDistanceHex($ship, $otherShip);
 				$otherPos = $otherShip->getHexPos(); //Just deployed ships aren't counting for this.          
-				$noLoS = !empty($blockedHexes) && Mathlib::checkLineOfSight($pos, $otherPos, $blockedHexes);
+				$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
 
 				// If within detection range, and LoS not blocked the ship is detected
 				if($distance <= $range && !$noLoS){

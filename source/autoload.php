@@ -162,6 +162,7 @@ spl_autoload_register(
                 'talvan2006' => '/server/model/ships/centauri_old/talvan2006.php',
                 'talvanupgrade' => '/server/model/ships/centauri/talvanUpgrade.php',
                 'centurion' => '/server/model/ships/centauri/centurion.php',
+                'centurionmd' => '/server/model/ships/centauri/centurionMD.php',                
                 'chatmanager' => '/server/controller/ChatManager.php',
                 'chatmessage' => '/server/model/ChatMessage.php',
                 'checkforselfinterceptfire' => '/server/model/weapons/weapon.php',
@@ -343,6 +344,7 @@ spl_autoload_register(
                 'forcedofflineforturns' => '/server/model/cricialClasses.php',
                 'forcedofflineoneturn' => '/server/model/cricialClasses.php',
                 'fleettestrule' => '/server/model/FleetTestRule.php',
+                'friendlyfirerule' => '/server/model/FriendlyFireRule.php',
                 'frazi' => '/server/model/ships/narn/frazi.php',
                 'freetrader' => '/server/model/ships/llort/freeTrader.php',
                 'freetraderpulsar' => '/server/model/ships/llort/freeTraderPulsar.php',
@@ -516,6 +518,7 @@ spl_autoload_register(
                 'kromala' => '/server/model/ships/drazi_old/kromala.php',
                 'kutai' => '/server/model/ships/centauri/kutai.php',
                 'kutaiplasma' => '/server/model/ships/centauri/kutaiPlasma.php',
+                'ladderrule' => '/server/model/LadderRule.php',
                 'laertes' => '/server/model/ships/EA/laertes.php',
                 'laertesepsilon' => '/server/model/ships/EA/laertesEpsilon.php',
                 'laertes_early' => '/server/model/ships/EA_old/laertes_early.php',
@@ -685,6 +688,7 @@ spl_autoload_register(
                 'ochlavitae' => '/server/model/ships/dilgar/ochlavitaE.php',
                 'ochlavitam' => '/server/model/ships/dilgar/ochlavitaM.php',
                 'octurion' => '/server/model/ships/centauri/octurion.php',
+                'octurionmd' => '/server/model/ships/centauri/octurionMD.php',                
                 'offsetcoordinate' => '/server/model/OffsetCoordinate.php',
                 'olgata' => '/server/model/ships/dilgar/olgata.php',
                 //'olympus' => '/server/model/ships/EA/olympus.php',
@@ -775,6 +779,7 @@ spl_autoload_register(
                 'prefiringgamephase' => '/server/Phase/PreFiringGamePhase.php',                
                 'preyhawk' => '/server/model/ships/drazi/preyhawk.php',
                 'primus' => '/server/model/ships/centauri/primus.php',
+                'primusmd' => '/server/model/ships/centauri/primusMD.php',
                 'primusmaximus' => '/server/model/ships/centauri/primusMaximus.php',
                 'prophet' => '/server/model/ships/orieni/prophet.php',
                 'prophet1780' => '/server/model/ships/orieni/prophet1780.php',
@@ -1290,6 +1295,7 @@ spl_autoload_register(
 				'ewnucleartorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
+                'tractingrodhandler' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
 				'ewduallaserbolt' => '/server/model/weapons/customEscalation.php',
@@ -1723,6 +1729,7 @@ spl_autoload_register(
                 'brixadiiwarshipbase' => '/server/model/ships/NexusBrixadii_old/BrixadiiWarshipBase.php',		
                 'brixadiiwarshipprototype' => '/server/model/ships/NexusBrixadii_old/BrixadiiWarshipPrototype.php',		
                 'brixadiiwarship2108' => '/server/model/ships/NexusBrixadii/BrixadiiWarship2108.php',	
+                'brixadiiwarshipescort' => '/server/model/ships/NexusBrixadii/BrixadiiWarshipEscort.php',	
 
                 'brixadiijumpscout' => '/server/model/ships/NexusBrixadii_old/BrixadiiJumpScout.php',		
                 'brixadiijumpscout2108' => '/server/model/ships/NexusBrixadii/BrixadiiJumpScout2108.php',		
@@ -2103,7 +2110,7 @@ spl_autoload_register(
                 'flyingfoxstarfury' => '/server/model/ships/EA_old/flyingfoxStarfury.php',
                 'laertesalpha' => '/server/model/ships/EA_old/laertesAlpha.php',
                 'laertesbeta' => '/server/model/ships/EA_old/laertesBeta.php',
-                'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
+                //'laertesdelta' => '/server/model/ships/EA/laertesDelta.php',
                 'laertesdelta_early' => '/server/model/ships/EA_old/laertesDelta_early.php',
                 'orestesalphaam' => '/server/model/ships/EA_old/orestesAlphaAM.php',
                 'orestesbetaam' => '/server/model/ships/EA_old/orestesBetaAM.php',
@@ -3291,7 +3298,8 @@ spl_autoload_register(
 						'hyperionaegis' => '/server/model/ships/EA/HyperionAegis.php',	
 						'abbaishieldprojector' => '/server/model/weapons/supportWeapons.php',
 						'engineshorted' => '/server/model/cricialClasses.php',				 						 	 
-						'controlsstuck' => '/server/model/cricialClasses.php',	
+						'controlsstuck' => '/server/model/cricialClasses.php',
+
 
 					 							
 				//Thirdspace
@@ -3455,6 +3463,9 @@ spl_autoload_register(
 						'gquell_noew' => '/server/model/ships/customs/gquell_noew.php',	
 
 
+						//Campaign custom Centauri
+						'adira' => '/server/model/ships/customs/Adira.php',
+
 						//Fred's custom Centauri
 						'ftrdefensegun' => '/server/model/weapons/customs.php',
 						'snipercannon' => '/server/model/weapons/matter.php',
@@ -3465,10 +3476,12 @@ spl_autoload_register(
 						'dargarian' => '/server/model/ships/centauri/Dargarian.php',
 						'darius' => '/server/model/ships/centauri/Darius.php',
 						'elutai' => '/server/model/ships/centauri/Elutai.php',
+						'gladiator' => '/server/model/ships/centauri/Gladiator.php',
 						'jara' => '/server/model/ships/centauri/Jara.php',
                         'maximillian' => '/server/model/ships/centauri/Maximillian.php',
                         'mograte' => '/server/model/ships/centauri/Mograte.php',
                         'octuran' => '/server/model/ships/centauri/Octuran.php',
+                        'phobos' => '/server/model/ships/centauri/Phobos.php',
                         'primo' => '/server/model/ships/centauri/Primo.php',
                         'rizek' => '/server/model/ships/centauri/Rizek.php',
                         'rotas' => '/server/model/ships/centauri/Rotas.php',

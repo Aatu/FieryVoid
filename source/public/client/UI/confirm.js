@@ -1283,12 +1283,11 @@ window.confirm = {
         //$('<div class="message"><span>Name your new '+ship.shipClass+'</span></div>').prependTo(e);
 
 
-        $(".ok", e).on("click", callback);
+        $(".confirmok", e).on("click", callback);
         $(".confirmok", e).on("click", function () {
             $(".confirm").remove();
         });
         $(".confirmcancel", e).remove();
-        $(".ok", e).css("left", "45%");
         var a = e.appendTo("body");
         a.fadeIn(250);
     },
@@ -1317,7 +1316,7 @@ window.confirm = {
 
     //New window type, simplies provide a wanring to players about a specific action they are taking, does not prevent any.
     warning: function warning(msg) {
-        var e = $('<div class="confirm error"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
+        var e = $('<div class="confirm warning"><div class="ui"><div class="confirmok" style="margin:auto;"></div></div></div>');
         $('<span>' + msg + '</span>').prependTo(e);
 
         $(".confirmok", e).on("click", function () {

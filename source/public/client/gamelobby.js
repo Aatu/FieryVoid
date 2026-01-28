@@ -83,9 +83,9 @@ window.gamedata = {
 			case 'Earth Alliance':
 				powerRating = 'Tier 1; Major Faction';
 				break;
-			case 'Earth Alliance (Custom)':
+			/*case 'Earth Alliance (Custom)':
 				powerRating = 'Tier 1; Major Custom Faction';
-				break;
+				break;*/
 			/*case 'Earth Alliance (defenses)':
 			  powerRating = 'Tier 1; Major Faction';
 			  break;*/
@@ -1477,13 +1477,13 @@ window.gamedata = {
 		const offsetY = (canvas.height - mapHeight * scale) / 2;
 
 		// Draw black background inside the blue outline
-      	ctx.fillStyle = "#000000";
+		ctx.fillStyle = "#000000";
 		ctx.fillRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 
 		// Draw dotted white center lines, avoiding cross-over at center
 		ctx.save();
 		ctx.globalAlpha = 0.4; // Semi-transparent
-        ctx.strokeStyle = "#496791";
+		ctx.strokeStyle = "#496791";
 		ctx.lineWidth = 1;
 		ctx.setLineDash([4, 4]); // Dotted pattern: 6px line, 6px gap
 
@@ -1551,17 +1551,17 @@ window.gamedata = {
 
 			// Draw slot number in the center
 			ctx.save(); // Save context state
-            ctx.fillStyle = "white";
-            ctx.font = "bold 14px Arial";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
+			ctx.fillStyle = "white";
+			ctx.font = "bold 14px Arial";
+			ctx.textAlign = "center";
+			ctx.textBaseline = "middle";
 			ctx.fillText(team, (drawX + 6) + (w * scale) / 2, (drawY + 3) + (h * scale) / 2);
 			ctx.restore(); // Restore to default state
 		});
 
 		// Draw map border (blue rectangle)
-        ctx.strokeStyle = "#deebffaf";
-        ctx.lineWidth = 2;
+		ctx.strokeStyle = "#deebffaf";
+		ctx.lineWidth = 2;
 		ctx.strokeRect(offsetX, offsetY, mapWidth * scale, mapHeight * scale);
 	},
 
@@ -1783,6 +1783,13 @@ window.gamedata = {
 				if (!showCustom && isCustom) visible = false;
 				if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
 
+				// Name filter logic
+				const nameFilter = $("#nameFilter").val().toLowerCase().trim();
+				if (nameFilter.length > 0) {
+					const shipName = $ship.find(".shiptype").text().toLowerCase();
+					if (shipName.indexOf(nameFilter) === -1) visible = false;
+				}
+
 				$ship.toggle(visible && !isHidden);
 			});
 		});
@@ -1815,7 +1822,7 @@ window.gamedata = {
 		}
 
 		//Prune here
-		if (gamedata.rules && gamedata.rules.fleetTest === 1) {		
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) {
 			var mySlot = null;
 			for (var slotKey in serverdata.slots) {
 				if (serverdata.slots[slotKey].playerid == gamedata.thisplayer) {
@@ -1829,12 +1836,12 @@ window.gamedata = {
 			this.enableBuy();
 			this.constructFleetList();
 			//this.drawMapPreview();						
-		}else{	
+		} else {
 			this.createSlots();
 			this.enableBuy();
 			this.constructFleetList();
-			this.drawMapPreview();	
-		}			
+			this.drawMapPreview();
+		}
 
 	},
 
@@ -1861,6 +1868,8 @@ window.gamedata = {
 
 			if (!slotElement.length) {
 				gamedata.createNewSlot(slot);
+			} else {
+				gamedata.setSlotData(slot);
 			}
 
 			slotElement = $('.slot.slotid_' + slot.slot);
@@ -1906,7 +1915,7 @@ window.gamedata = {
 	setSlotData: function setSlotData(data) {
 		var slot = $(".slot.slotid_" + data.slot);
 		$(".name", slot).html(data.name);
-		if (gamedata.rules && gamedata.rules.fleetTest === 1) data.points = -1;			
+		if (gamedata.rules && gamedata.rules.fleetTest === 1) data.points = -1;
 		$(".points", slot).html(data.points == -1 ? '<span class="unlimited-points-text">UNLIMITED</span>' : data.points);
 
 		$(".depx", slot).html(data.depx);
@@ -1936,7 +1945,7 @@ window.gamedata = {
 
 		ajaxInterface.submitSlotAction("takeslot", slotid, function () {
 			window.updateTierFilter();
-			//ajaxInterface.startPollingGamedata();							
+			//ajaxInterface.startPollingGamedata();
 		});
 	},
 
@@ -1952,25 +1961,27 @@ window.gamedata = {
 			return;
 		}
 
-		//ajaxInterface.submitSlotAction("leaveslot", slotid);
-		ajaxInterface.submitSlotAction("leaveslot", slotid, function () {
+		ajaxInterface.submitSlotAction("leaveslot", slotid, function (serverdata) {
 			window.updateTierFilter();
-		});
 
+			var hasOtherSlots = 0;
+			// Use serverdata.slots explicitly. If missing (e.g. game deleted), assume empty list (0 slots).
+			var slotsToCheck = serverdata && serverdata.slots ? serverdata.slots : [];
 
-		var hasOtherSlots = 0;
-		for (var i in gamedata.slots) { //check all slots
-			var checkSlot = gamedata.slots[i];
-			if (checkSlot.playerid == gamedata.thisplayer) { //this slot has ready fleet
-				hasOtherSlots++;
+			for (var i in slotsToCheck) { //check all slots
+				var checkSlot = slotsToCheck[i];
+				if (checkSlot.playerid == gamedata.thisplayer) { //this slot has ready fleet
+					hasOtherSlots++;
+				}
 			}
-		}
-		//Will count current slot, so we're looking for two or more.
-		if (hasOtherSlots <= 1) {
-			window.location = "games.php"; //Leave to main lobby if layer has not other slots here.
-		} else {
-			ajaxInterface.startPollingGamedata();
-		}
+
+			//UPDATE: gamedata slots IS updated now via the response from slot.php, so we check if we have ANY other slots.
+			if (hasOtherSlots === 0) {
+				window.location = "games.php"; //Leave to main lobby if player has no other slots here.
+			} else {
+				ajaxInterface.startPollingGamedata();
+			}
+		});
 	},
 
 	enableBuy: function enableBuy() {
@@ -2896,11 +2907,12 @@ window.gamedata = {
 		gamedata.selectedSlot = slot.slot;
 		this.constructFleetList();
 
-		// Initialize saved fleet cache again in case PV is different in new slot
-		ajaxInterface.getSavedFleets(function (fleets) {
-			cachedFleets = fleets;
-			gamedata.populateFleetDropdown();
-		});
+		// Re-populate dropdown (filters by points) but do NOT re-fetch from server
+		if (window.cachedFleets && window.cachedFleets.length > 0) {
+			if (gamedata.populateFleetDropdown) {
+				gamedata.populateFleetDropdown();
+			}
+		}
 
 	},
 

@@ -508,7 +508,8 @@ body {
         font-size: 12px;   
         font-style:normal;
         font-weight:bold;  
-        color: #597eb1; /* #deebff; */                         
+        /*color: #597eb1; /* #deebff; */ 
+        color: #7ba2ea;                                
         top: 0;             /* Align to the top */
         right: 0;           /* Align to the right */
         padding-top: 3px;

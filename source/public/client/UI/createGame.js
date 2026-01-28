@@ -130,6 +130,8 @@ jQuery(function ($) {
     $("#movementcheck").on("click", createGame.doMovementCheck);
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
     $("#terraincheck").on("click", createGame.doTerrainCheck);
+    $("#friendlyFireCheck").on("click", createGame.doFriendlyFireCheck);
+    $("#laddercheck").on("click", createGame.doLadderCheck);
 
     createGame.createSlotsFromArray();
     createGame.onMapDimensionsChange(); // Run on load
@@ -420,6 +422,67 @@ window.createGame = {
         }
     },
 
+    doFriendlyFireCheck: function doFriendlyFireCheck(data) {
+        var checkval = $("#friendlyFireCheck:checked").val();
+
+        if (checkval == "on") {
+            createGame.rules.friendlyFire = 1;
+        } else {
+            delete createGame.rules.friendlyFire;
+        }
+    },
+
+    doLadderCheck: function doLadderCheck(data) {
+        var checkval = $("#laddercheck:checked").val();
+        var mapSelect = $("#mapDimensionsSelect");
+
+        if (checkval == "on") {
+            createGame.rules.ladder = 1;
+
+            // Ladder requires strictly 1 slot per team.
+            // Prune any extras.
+            var team1 = createGame.slots.find(function (s) { return s.team === 1; });
+            var team2 = createGame.slots.find(function (s) { return s.team === 2; });
+
+            var newSlots = [];
+            if (team1) newSlots.push(team1);
+            if (team2) newSlots.push(team2);
+
+            createGame.slots = newSlots;
+            createGame.refreshSlotsUI();
+
+            // Grey out forbidden maps
+            var currentMap = mapSelect.val();
+            createGame.forbiddenLadderMaps.forEach(function (mapVal) {
+                var option = mapSelect.find('option[value="' + mapVal + '"]');
+                option.prop('disabled', true);
+                // Visual feedback (optional, but good for clarity)
+                option.css('color', '#999');
+            });
+
+            // If current map is forbidden, switch to standard
+            if (createGame.forbiddenLadderMaps.includes(currentMap)) {
+                mapSelect.val("standard").trigger("change");
+            }
+
+            createGame.drawMapPreview();
+
+        } else {
+            delete createGame.rules.ladder;
+
+            // Re-enable all maps
+            createGame.forbiddenLadderMaps.forEach(function (mapVal) {
+                var option = mapSelect.find('option[value="' + mapVal + '"]');
+                option.prop('disabled', false);
+                option.css('color', '');
+            });
+
+            createGame.refreshSlotsUI();
+        }
+    },
+
+    forbiddenLadderMaps: ["2v2", "ambush", "baseAssault", "convoyRaid"],
+
 
     mapData: {
         "custom": {
@@ -523,7 +586,7 @@ window.createGame = {
                     ]
                 }
             ]
-        },        
+        },
         "convoyRaid": {
             width: 42, height: 30,
             // Enforce strictly 2 slots per team
@@ -696,7 +759,9 @@ window.createGame = {
                     slot.points = config.points;
                 }
                 if (config.name !== undefined) {
-                    slot.name = config.name;
+                    if (!createGame.rules.ladder || !slot.isLadderPopulated) {
+                        slot.name = config.name;
+                    }
                 }
                 if (config.depavailable !== undefined) {
                     slot.depavailable = config.depavailable;
@@ -712,6 +777,14 @@ window.createGame = {
         // Simple way: clear and redraw
         $(".slotcontainer").empty();
         createGame.createSlotsFromArray();
+
+        if (createGame.rules.ladder) {
+            $(".addslotbutton").hide();
+            $(".slot .remove-btn").hide();
+        } else {
+            $(".addslotbutton").show();
+            $(".slot .remove-btn").css("display", ""); // Restore default visibility
+        }
     },
 
 
