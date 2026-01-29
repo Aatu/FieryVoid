@@ -2487,6 +2487,26 @@ class Structure extends ShipSystem{
 	
 } //endof Structure	
 
+class KirishiacOrbital extends ShipSystem{
+	public $name = "kirishiacOrbital";
+    public $displayName = "Orbital";	
+	public $primary = false;
+	private $pairing = null;
+
+	function __construct($armour, $maxhealth, $orientation, $pairing){ //$orientation is L or R - regarding graphics
+		$this->pairing = $pairing;
+		$this->displayName = 'Orbital ' . $pairing . '';
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ){
+			$maxhealth = 11;
+		}
+
+		$this->iconPath = "KirishiacOrbital".$orientation.".png";
+		parent::__construct($armour, $maxhealth, 0, 0);
+		$this->addTag('Kirishiac Orbital'); //needed to properly allocate hits on Vorlon ships, where most of these weapons are used
+	}
+} 
+
 /*custon system for Nexus LCVs*/
 class NexusLCVController extends ShipSystem {
 

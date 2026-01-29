@@ -265,6 +265,14 @@ var StructureTechnical = function StructureTechnical(json, ship) {
 StructureTechnical.prototype = Object.create(ShipSystem.prototype);
 StructureTechnical.prototype.constructor = StructureTechnical;
 
+var KirishiacOrbital = function KirishiacOrbital(json, ship){
+	ShipSystem.call(this, json, ship);
+};
+
+KirishiacOrbital.prototype = Object.create(ShipSystem.prototype);
+KirishiacOrbital.prototype.constructor = KirishiacOrbital;
+
+
 var Jammer = function Jammer(json, ship) {
 	ShipSystem.call(this, json, ship);
 };
