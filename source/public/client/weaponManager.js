@@ -547,7 +547,7 @@ window.weaponManager = {
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hexTargeted"> Hex Targeted</span></div>').appendTo(f);
                     } else {
                         // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
-                        if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
+                        if (calledid != null && !weaponManager.canWeaponCall(weapon) && !targetSystem.isAlwaysCalledShot) {
                             $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotCalled"> Cannot Called Shot</span></div>').appendTo(f);
                         } else {
                             var hitChance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
@@ -595,7 +595,7 @@ window.weaponManager = {
         var sectionEligible = false; //section that system is mounted on is eligible for caled shots
         if (!shooter) return false;
         if (system.isTargetable != true) return false; //cannot be targeted by called shots under any conditions
-
+        //if (system.isAlwaysCalledShot) return true; //always allow called shots in these special systems(like Kirishias Orbital)
         if (target.flight) return true; //allow called shots at fighters (in effect it will affect particular fighter, not fighter system)
 
         //Added fragment below to allow Limpet Bore Torpedo to target any exterior system, no other weapon should meet criteria at this time - DK - 16 Apr 2024
@@ -621,7 +621,7 @@ window.weaponManager = {
                     arcTo = currSectionData.max;
                 }
                 if (mathlib.isInArc(shooterCompassHeading, mathlib.addToDirection(arcFrom, targetFacing), mathlib.addToDirection(arcTo, targetFacing))) {
-                    if (currSectionData.call == true) return true;
+                    if (currSectionData.call == true || system.isAlwaysCalledShot) return true;
                 }
 
                 /*old version - not taking Rolled state into account
@@ -630,6 +630,7 @@ window.weaponManager = {
                 }
                 */
                 sectionEligible = currSectionData.call;
+                if (system.isAlwaysCalledShot) sectionEligible = true;
             }
             //"loc" => $curr['loc'], "min" => $curr['min'], "max" => $curr['max'], "call" => $call
         }
@@ -637,6 +638,9 @@ window.weaponManager = {
         if (system.location > 0 && sectionEligible == true) {
             return false; //non-PRIMARY and eligible for called shots, but still here => must be out of arc!
         }
+        
+        if (system.isAlwaysCalledShot) return true;
+        
         //option here: section not normally eligible for target shots (PRIMARY or outer section on MCV)
         //check whether system is PRIMARY-targetable!
         if (system.isPrimaryTargetable != true) return false; //cannot be targeted under these conditions
@@ -1715,7 +1719,7 @@ window.weaponManager = {
 
                             if (system) {
                                 //check if weapon is eligible for called shot!
-                                if (!weaponManager.canWeaponCall(weapon)) continue;
+                                 if (!weaponManager.canWeaponCall(weapon) && !system.isAlwaysCalledShot) continue;
 
                                 // When the system is a subsystem, make all damage go through
                                 // the parent.
