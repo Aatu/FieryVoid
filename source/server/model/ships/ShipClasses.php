@@ -2499,6 +2499,34 @@ public function getAllEWExceptDEW($turn){
 		
 	} //end of function GetHitSystemByDice
 		
+    public function getHitSystemForKirishiacOrbital($orbital, $shooter, $fire, $weapon, $location){
+        $pairing = $orbital->getPairing();
+        $candidates = array();
+        
+        foreach($this->systems as $system){
+            if($system->isDestroyed()) continue;
+            if(method_exists($system, 'getPairing') && $system->getPairing() == $pairing){
+                $candidates[] = $system;
+            }
+        }
+        
+        if(empty($candidates)) return $orbital; 
+        
+        $hitChart = array();
+        $totalWeight = 0;
+        foreach($candidates as $system){
+            $weight = ceil($system->maxhealth) + 1;
+            $totalWeight += $weight;
+            $hitChart[$totalWeight] = $system;
+        }
+        
+        $roll = Dice::d($totalWeight);
+        foreach($hitChart as $limit => $sys){
+            if($roll <= $limit) return $sys;
+        }
+        
+        return $orbital;
+    }
         
         public static function hasBetterIniative($a, $b){
 			if ($a->iniative > $b->iniative) return true;

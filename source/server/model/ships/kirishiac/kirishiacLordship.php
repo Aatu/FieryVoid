@@ -37,33 +37,34 @@ class kirishiacLordship extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(8, 25, 6, 8));
         $this->addPrimarySystem(new SelfRepair(7, 12, 6)); //armor, structure, output
 
-        $this->addFrontSystem(new AntigravityBeam(6, 6, 3, 270, 90, 'A'));
+        $this->addFrontSystem(new KirishiacOrbital(6, 18, 'R', 'B'));
         $this->addFrontSystem(new GraviticThruster(7, 15, 0, 4, 1));		
-        $this->addFrontSystem(new AntigravityBeam(6, 6, 3, 270, 90, 'B'));
+        $this->addFrontSystem(new KirishiacOrbital(6, 18, 'L', 'A'));
         $this->addFrontSystem(new GraviticThruster(7, 15, 0, 4, 1));       
 		$this->addFrontSystem(new HypergravitonBlaster(7, 30, 15, 300, 60));
-	    $this->addFrontSystem(new KirishiacOrbital(6, 18, 'L', 'A'));
-        $this->addFrontSystem(new KirishiacOrbital(6, 18, 'R', 'B'));
+        $this->addFrontSystem(new AntigravityBeam(6, 6, 3, 270, 90, 'B'));	    
+        $this->addFrontSystem(new AntigravityBeam(6, 6, 3, 270, 90, 'A'));	
 		
-		
+        
+        $this->addAftSystem(new AntigravityBeam(6, 6, 3, 90, 270,'F'));
+        $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));	
+        $this->addAftSystem(new AntigravityBeam(6, 6, 3, 90, 270, 'E'));          
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
-        $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));	        
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new KirishiacOrbital(6, 18, 'R','F'));
-        $this->addAftSystem(new KirishiacOrbital(6, 18, 'L', 'E'));        
-        $this->addAftSystem(new AntigravityBeam(6, 6, 3, 90, 270,'F'));
-        $this->addAftSystem(new AntigravityBeam(6, 6, 3, 90, 270, 'E'));
+        $this->addAftSystem(new KirishiacOrbital(6, 18, 'L', 'E'));  
+       
 
-		$this->addLeftSystem(new AntigravityBeam(6, 6, 3, 120, 300, 'G'));
-		$this->addLeftSystem(new AntigravityBeam(6, 6, 3, 240, 60, 'H'));
-        $this->addLeftSystem(new KirishiacOrbital(6, 18, 'L', 'H'));
-        $this->addLeftSystem(new KirishiacOrbital(6, 18,'R', 'G'));
+        $this->addLeftSystem(new AntigravityBeam(6, 6, 3, 120, 300, 'G'));
+        $this->addLeftSystem(new KirishiacOrbital(6, 18,'R', 'G'));              
+        $this->addLeftSystem(new AntigravityBeam(6, 6, 3, 240, 60, 'H'));
+         $this->addLeftSystem(new KirishiacOrbital(6, 18, 'L', 'H')); 
         $this->addLeftSystem(new GraviticThruster(7, 25, 0, 7, 3));
 
-		$this->addRightSystem(new AntigravityBeam(6, 6, 3, 300, 120, 'D'));
 		$this->addRightSystem(new AntigravityBeam(6, 6, 3, 60, 240, 'C'));
-        $this->addRightSystem(new KirishiacOrbital(6, 18, 'R','C'));
-        $this->addRightSystem(new KirishiacOrbital(6, 18, 'L', 'D'));
+        $this->addRightSystem(new KirishiacOrbital(6, 18, 'R','C'));   
+        $this->addRightSystem(new KirishiacOrbital(6, 18, 'L', 'D'));              
+        $this->addRightSystem(new AntigravityBeam(6, 6, 3, 300, 120, 'D'));	        
         $this->addRightSystem(new GraviticThruster(7, 25, 0, 7, 4));
 
 
@@ -87,25 +88,25 @@ class kirishiacLordship extends BaseShip{
             1=> array(
                     4 => "Thruster",
                     8 => "Hypergraviton Blaster",
-                    9 => "Antigravity Beam",
+                    10 => "TAG:Kirishiac Orbital",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     8 => "Thruster",
-                    9 => "Antigravity Beam",
+                    10 => "TAG:Kirishiac Orbital",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     6 => "Thruster",
-                    7 => "Antigravity Beam",
+                    8 => "TAG:Kirishiac Orbital",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array(
                     6 => "Thruster",
-                    7 => "Antigravity Beam",
+                    8 => "TAG:Kirishiac Orbital",
                     18 => "Structure",
                     20 => "Primary",
             ),

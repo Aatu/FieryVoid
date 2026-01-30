@@ -40171,7 +40171,7 @@ var getCalledShot = function getCalledShot(ship, selectedShip, system) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     var value = weapon.firingMode;
                     value = weapon.firingModes[value];
-                    if (system.id != null && !weaponManager.canWeaponCall(weapon)) {
+                    if (system.id != null && !weaponManager.canWeaponCall(weapon) && !system.isAlwaysCalledShot) {
                         return React.createElement(
                             Entry,
                             { key: "called-" + i },

@@ -33,6 +33,7 @@ class ShipSystem {
     public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)
+    public $isAlwaysCalledShot = false; //can this system be targeted by called shot even if weapon cannot normally do so?
     
     public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
 	
@@ -69,6 +70,7 @@ class ShipSystem {
         $strippedSystem = new stdClass();
         $strippedSystem->id = $this->id;
         $strippedSystem->name = $this->name;
+        $strippedSystem->isAlwaysCalledShot = $this->isAlwaysCalledShot;
         $strippedSystem->damage = $this->damage;
         $strippedSystem->criticals = $this->criticals;
         $strippedSystem->critData = $this->critData;

@@ -2491,6 +2491,7 @@ class KirishiacOrbital extends ShipSystem{
 	public $name = "kirishiacOrbital";
     public $displayName = "Orbital";	
 	public $primary = false;
+	public $isAlwaysCalledShot = true; //ensure that Orbitals can be specifically targeted by all weapons. 
 	private $pairing = null;
 
 	function __construct($armour, $maxhealth, $orientation, $pairing){ //$orientation is L or R - regarding graphics
