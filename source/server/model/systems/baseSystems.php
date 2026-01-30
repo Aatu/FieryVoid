@@ -2492,10 +2492,13 @@ class KirishiacOrbital extends ShipSystem{
     public $displayName = "Orbital";	
 	public $primary = false;
 	public $isAlwaysCalledShot = true; //ensure that Orbitals can be specifically targeted by all weapons. 
+	public $hasSystemHitChart = true; //use this var to track of a given system has a system specific hitchart so when hit it also needs to roll on this table.
+	public $systemHitChart = array(); //holds the hitchart for this specific system. 
 	private $pairing = null;
 
-	function __construct($armour, $maxhealth, $orientation, $pairing){ //$orientation is L or R - regarding graphics
+	function __construct($armour, $maxhealth, $orientation, $pairing, $systemHitChart){ //$orientation is L or R - regarding graphics
 		$this->pairing = $pairing;
+		$this->systemHitChart = $systemHitChart;
 		$this->displayName = 'Orbital ' . $pairing . '';
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
@@ -2504,7 +2507,10 @@ class KirishiacOrbital extends ShipSystem{
 
 		$this->iconPath = "KirishiacOrbital".$orientation.".png";
 		parent::__construct($armour, $maxhealth, 0, 0);
-		$this->addTag('Kirishiac Orbital'); //needed to properly allocate hits on Vorlon ships, where most of these weapons are used
+
+		public function getPairing(){ //getter for pairing, allows to get attached/paired systems/weps
+				return $this->pairing;
+		}
 	}
 } 
 
