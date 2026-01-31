@@ -1662,7 +1662,11 @@ class AntigravityBeam extends Gravitic{
 			$this->data["Special"] .= "<br> - A single antigravity beam (3d10+6)."; 
 			$this->data["Special"] .= "<br> - Split into three beams (1d10+2, each)."; 
 		}
-	
+
+        public function getPairing(){ //getter for pairing, allows to get attached/paired systems/weps
+				return $this->pairing;
+		}
+        
 		public function getDamage($fireOrder){
 			switch($this->firingMode){
 				case 1:

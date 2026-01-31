@@ -2167,7 +2167,10 @@ public function getAllEWExceptDEW($turn){
         $systems = array();
  
         if ($fire->calledid != -1){
-            $system = $this->getSystemById($fire->calledid);
+            $system = $this->getSystemById($fire->calledid);    
+            if($system->hasSystemHitChart){//check if system has it's own hit table, this is for things like Kirishiac Orbital
+                $system = $this->getHitSubSystemByTable($system); //this will roll hit location on target system with subsystems
+            }
         }
 
         if ($system != null && !$system->isDestroyed()) return $system; //if destroted, allocate s if it wasn't called
@@ -2258,9 +2261,10 @@ public function getAllEWExceptDEW($turn){
  
         if($name == 'Primary'){ //redirect to PRIMARY!
             if($weapon->noPrimaryHits) return $this->getStructureSystem($location); //If weapon treats Primary as facing Structure - DK 13.01.26
-            return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
-        }
+                return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
+            }
         $systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
+
         if(sizeof($systems)==0){ //if empty, damage is done to Structure
             $struct = $this->getStructureSystem($location);
             return $struct;
@@ -2328,7 +2332,11 @@ public function getAllEWExceptDEW($turn){
         //now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
-	        
+        
+        if($system->hasSystemHitChart){//check if system has it's own hit table, this is for things like Kirishiac Orbital
+            $system = $this->getHitSubSystemByTable($system); 
+        } 
+	   
         return $system;
 
     } //end of function getHitSystemByTable
@@ -2344,6 +2352,9 @@ public function getAllEWExceptDEW($turn){
 
         if ($fire->calledid != -1){
             $system = $this->getSystemById($fire->calledid);
+            if($system->hasSystemHitChart){//check if system has it's own hit table, this is for things like Kirishiac Orbital
+                $system = $this->getHitSubSystemByTable($system); 
+            } 
         }
 
         if ($system != null && !$system->isDestroyed()) return $system; //if destroted, allocate s if it wasn't called
@@ -2495,103 +2506,113 @@ public function getAllEWExceptDEW($turn){
 		//now choose one of equal eligible systems (they're already known to be undestroyed)
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
+
+        if($system->hasSystemHitChart){//check if system has it's own hit table, this is for things like Kirishiac Orbital
+            $system = $this->getHitSubSystemByTable($system); 
+        } 
+
 		return $system;
 		
 	} //end of function GetHitSystemByDice
-		
-    public function getHitSystemForKirishiacOrbital($orbital, $shooter, $fire, $weapon, $location){
-        $pairing = $orbital->getPairing();
-        $candidates = array();
-        
-        foreach($this->systems as $system){
-            if($system->isDestroyed()) continue;
-            if(method_exists($system, 'getPairing') && $system->getPairing() == $pairing){
-                $candidates[] = $system;
-            }
-        }
-        
-        if(empty($candidates)) return $orbital; 
-        
-        $hitChart = array();
-        $totalWeight = 0;
-        foreach($candidates as $system){
-            $weight = ceil($system->maxhealth) + 1;
-            $totalWeight += $weight;
-            $hitChart[$totalWeight] = $system;
-        }
-        
-        $roll = Dice::d($totalWeight);
-        foreach($hitChart as $limit => $sys){
-            if($roll <= $limit) return $sys;
-        }
-        
-        return $orbital;
-    }
-        
-        public static function hasBetterIniative($a, $b){
-			if ($a->iniative > $b->iniative) return true;
-			if ($a->iniative < $b->iniative) return false;
-
-				if ($a->iniativebonus > $b->iniativebonus) return true;
-				if ($b->iniativebonus > $a->iniativebonus) return false;
-
-			if ($a->id > $b->id) {
-				return true;
-			} else{
-				return false;    
-			}
-		
-			/* replaced by changed logic above, to unify among various places in game
-            if ($a->iniative > $b->iniative)
-                return true;
-            
-            if ($a->iniative < $b->iniative)
-                return false;
-
-            if ($a->unmodifiedIniative != null && $b->unmodifiedIniative != null) {
-                if ($a->unmodifiedIniative > $b->unmodifiedIniative)
-                    return true;
-            
-                if ($a->unmodifiedIniative < $b->unmodifiedIniative)
-                    return false;
-            }
-                
-            if ($a->iniative == $b->iniative){
-                if ($a->iniativebonus > $b->iniativebonus)
-                    return true;
-                
-                if ($b->iniativebonus > $a->iniativebonus)
-                    return false;
-                
-                if ($a->id > $b->id)
-                    return true;
-            }
-            */
-            return true; //should never reach here
-        }
-        
-        public function getAllFireOrders($turn = -1)
-        {	
-            $orders = array();
-            
-            foreach ($this->systems as $system){
-                $orders = array_merge($orders, $system->getFireOrders($turn));
-            }
-            
-            return $orders;
-        }
-        
-        protected function getUndamagedSameSystem($system, $location){
-            foreach ($this->systems as $sys){
-                // check if there is another system of the same class on this location.
-                if($sys->location == $location && get_class($system) == get_class($sys) && !$sys->isDestroyed()){
-                    return $sys;
+	
+    private function getHitSubSystemByTable($system){
+    $roll = Dice::d(20);
+        $name = '';            
+        while ($name == ''){
+            if (isset($system->systemHitChart[$roll])){
+                $name = $system->systemHitChart[$roll];
+            }else{
+                $roll++;
+                if($roll>20)//out of range already! return facing Structure... Should not happen.
+                {
+                    return $this->getStructureSystem($location);
                 }
             }
-            return null;
-        } 
+        }
+        Debug::log(json_encode("NAME!", true));
+        Debug::log(json_encode($name, true));
+        if(!$name == 'Structure'){//if the hit is Structure, the target remains the origonal system itself
+            $subSystems; //array to hold all subsystem of matched name on a given system.
+            $systemPairing = $system->getPairing(); //get current system's pairing ID to find all systems attached to current system (same ID). 
+            foreach ($this->systems as $subSystem){
+                if($subSystem.getPairing() == $systemPairing){ 
+                    $subSystems[] = $subSystem;
+                }
+            }
+            //now choose one of equal eligible subSystems
+            $roll = Dice::d(sizeof($subSystems));
+            $subSystem = $systems[$roll-1];
+
+            return $subSystem;
+        }
+
+        return $system;         
+    }
+
+    public static function hasBetterIniative($a, $b){
+        if ($a->iniative > $b->iniative) return true;
+        if ($a->iniative < $b->iniative) return false;
+
+            if ($a->iniativebonus > $b->iniativebonus) return true;
+            if ($b->iniativebonus > $a->iniativebonus) return false;
+
+        if ($a->id > $b->id) {
+            return true;
+        } else{
+            return false;    
+        }
+    
+        /* replaced by changed logic above, to unify among various places in game
+        if ($a->iniative > $b->iniative)
+            return true;
         
-	/*note expected damage - important for deciding ambiguous shots!*/
+        if ($a->iniative < $b->iniative)
+            return false;
+
+        if ($a->unmodifiedIniative != null && $b->unmodifiedIniative != null) {
+            if ($a->unmodifiedIniative > $b->unmodifiedIniative)
+                return true;
+        
+            if ($a->unmodifiedIniative < $b->unmodifiedIniative)
+                return false;
+        }
+            
+        if ($a->iniative == $b->iniative){
+            if ($a->iniativebonus > $b->iniativebonus)
+                return true;
+            
+            if ($b->iniativebonus > $a->iniativebonus)
+                return false;
+            
+            if ($a->id > $b->id)
+                return true;
+        }
+        */
+        return true; //should never reach here
+    }
+    
+    public function getAllFireOrders($turn = -1)
+    {	
+        $orders = array();
+        
+        foreach ($this->systems as $system){
+            $orders = array_merge($orders, $system->getFireOrders($turn));
+        }
+        
+        return $orders;
+    }
+    
+    protected function getUndamagedSameSystem($system, $location){
+        foreach ($this->systems as $sys){
+            // check if there is another system of the same class on this location.
+            if($sys->location == $location && get_class($system) == get_class($sys) && !$sys->isDestroyed()){
+                return $sys;
+            }
+        }
+        return null;
+    } 
+    
+/*note expected damage - important for deciding ambiguous shots!*/
 	public function setExpectedDamage($hitLoc, $hitChance, $weapon, $shooter){
 		//add to table private $expectedDamage = array(); //loc => dam; damage the unit is expected to take this turn
 		if(($hitLoc==0) || ($hitChance<=0)) return; //no point checking, PRIMARY damage not relevant for this decision; same when hit chance is less than 0

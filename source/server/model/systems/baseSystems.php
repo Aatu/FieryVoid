@@ -2506,12 +2506,12 @@ class KirishiacOrbital extends ShipSystem{
 		}
 
 		$this->iconPath = "KirishiacOrbital".$orientation.".png";
-		parent::__construct($armour, $maxhealth, 0, 0);
-
-		public function getPairing(){ //getter for pairing, allows to get attached/paired systems/weps
+		parent::__construct($armour, $maxhealth, 0, 0);	
+	}
+	
+	public function getPairing(){ //getter for pairing, allows to get attached/paired systems/weps
 				return $this->pairing;
 		}
-	}
 } 
 
 /*custon system for Nexus LCVs*/
