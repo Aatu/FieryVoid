@@ -1380,7 +1380,21 @@ public function getStartLoading()
             $mod -= ($CnC->hasCritical("tmphitreduction", $gamedata->turn, $gamedata->turn));
             $mod -= ($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
         }
-        $firecontrol = $this->fireControl[$target->getFireControlIndex()];
+
+        $targetIndex = $target->getFireControlIndex();
+        
+        // If this is a called shot, check if the system overrides the target index
+        if ($fireOrder->calledid != -1) {
+            $system = $target->getSystemById($fireOrder->calledid);
+            if ($system) {
+                $override = $system->getFireControlIndexOverride();
+                if ($override !== null) {
+                    $targetIndex = $override;
+                }
+            }
+        }
+        
+        $firecontrol = $this->fireControl[$targetIndex];
         
 		if ($shooter->hasSpecialAbility("HyachComputer")) { //Does ship have a Hyach Computer that might add bonus FC?
 			$bonusFireControl = 0; //initialise
