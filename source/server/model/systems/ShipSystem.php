@@ -81,6 +81,7 @@ class ShipSystem {
         $strippedSystem->outputMod = $this->outputMod;
         $strippedSystem->destroyed = $this->destroyed;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer; //necessary		 
+        $strippedSystem->fireControlIndexOverride = $this->getFireControlIndexOverride();
 
 		//ship enhancements - check if this system is affected...
 		$strippedSystem = Enhancements::addSystemEnhancementsForJSON($this->unit, $this, $strippedSystem);//modifies $strippedSystem object
@@ -118,6 +119,10 @@ class ShipSystem {
 		$tag = strtoupper($tag);
 		if(in_array($tag,$this->tagList)) $toReturn = true;		
 		return $toReturn;
+	}
+
+	public function getFireControlIndexOverride(){
+		return null;
 	}
 
 	public function checkforCalledShotBonus(){
@@ -1243,8 +1248,7 @@ class ShipSystem {
     public function setInitialSystemData($ship)
     {
     }
-	
-	
+
 	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
 		return 0;
 	}

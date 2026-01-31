@@ -1159,6 +1159,13 @@ window.weaponManager = {
 
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
+        
+        if (calledid > 0) {
+            var targetSystem = shipManager.systems.getSystem(target, calledid);
+            if (targetSystem && targetSystem.fireControlIndexOverride !== null && targetSystem.fireControlIndexOverride !== undefined) {
+                firecontrol = weapon.fireControl[targetSystem.fireControlIndexOverride];
+            }
+        }
 
         if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
             var bonusfirecontrol = 0;

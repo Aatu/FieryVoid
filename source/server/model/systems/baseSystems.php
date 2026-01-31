@@ -2496,8 +2496,12 @@ class KirishiacOrbital extends ShipSystem{
 	public $systemHitChart = array(); //holds the hitchart for this specific system. 
 	private $pairing = null;
 
-	function __construct($armour, $maxhealth, $orientation, $pairing, $systemHitChart){ //$orientation is L or R - regarding graphics
+	protected $calledShotBonus = 8; //8 to remove called shot std malus, will be adjusted in constructure based on ship profile 
+
+	function __construct($armour, $maxhealth, $orientation, $pairing, $profileAdjust, $systemHitChart){ //$orientation is L or R - regarding graphics, 
+	// profile adjust is a value to add/subtract to calledShotBonus to ensure Orbital has effective profile of 8 (for Kirishiac lord this would be -7(15-7 = 8)). 
 		$this->pairing = $pairing;
+		$this->calledShotBonus += $profileAdjust;
 		$this->systemHitChart = $systemHitChart;
 		$this->displayName = 'Orbital ' . $pairing . '';
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -2508,10 +2512,25 @@ class KirishiacOrbital extends ShipSystem{
 		$this->iconPath = "KirishiacOrbital".$orientation.".png";
 		parent::__construct($armour, $maxhealth, 0, 0);	
 	}
+
+	public function checkforCalledShotBonus(){
+			return $this->calledShotBonus;
+		}
 	
 	public function getPairing(){ //getter for pairing, allows to get attached/paired systems/weps
 				return $this->pairing;
 		}
+		
+	public function getFireControlIndexOverride(){
+		return 0; // Use Fighter Fire Control index
+	}
+
+	public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->calledShotBonus = $this->calledShotBonus;                         
+            return $strippedSystem;
+	}
+	
 } 
 
 /*custon system for Nexus LCVs*/

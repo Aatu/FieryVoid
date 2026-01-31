@@ -1332,7 +1332,7 @@ class HypergravitonBlaster extends Weapon {
 		public $raking = 20;
 		public $damageType = 'Raking'; 
     	public $weaponClass = "Gravitic";
-		public $fireingModes = array(1=>"Raking");
+		public $firingModes = array(1=>"Raking");
     	
 		protected $thrustBoosted = true;//Variable FRont End looks for to use thrust as boost. 
 	    protected $thrustPerBoost = 6; //Variable showing how much thrust is used per boost.

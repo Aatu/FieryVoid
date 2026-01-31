@@ -42,9 +42,9 @@ class kirishiacLordship extends BaseShip{
         $this->addPrimarySystem(new JumpEngine(8, 25, 6, 8));
         $this->addPrimarySystem(new SelfRepair(7, 12, 6)); //armor, structure, output
 
-        $this->addFrontSystem(new KirishiacOrbital(6, 18, 'R', 'B', $orbitalHitChart)); //Armor, stucture, orientation, pairing, hitchart
+        $this->addFrontSystem(new KirishiacOrbital(6, 18, 'R', 'B', -7, $orbitalHitChart)); //Armor, stucture, orientation, pairing, profileAdjust, hitchart
         $this->addFrontSystem(new GraviticThruster(7, 15, 0, 4, 1));		
-        $this->addFrontSystem(new KirishiacOrbital(6, 18, 'L', 'A', $orbitalHitChart));
+        $this->addFrontSystem(new KirishiacOrbital(6, 18, 'L', 'A', -7, $orbitalHitChart));
         $this->addFrontSystem(new GraviticThruster(7, 15, 0, 4, 1));       
 		$this->addFrontSystem(new HypergravitonBlaster(7, 30, 15, 300, 60));
         $this->addFrontSystem(new AntigravityBeam(6, 6, 3, 270, 90, false, 'B'));	    
@@ -56,19 +56,19 @@ class kirishiacLordship extends BaseShip{
         $this->addAftSystem(new AntigravityBeam(6, 6, 3, 90, 270, false, 'E'));          
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
-        $this->addAftSystem(new KirishiacOrbital(6, 18, 'R','F', $orbitalHitChart));
-        $this->addAftSystem(new KirishiacOrbital(6, 18, 'L', 'E', $orbitalHitChart));  
+        $this->addAftSystem(new KirishiacOrbital(6, 18, 'R','F', -7, $orbitalHitChart));
+        $this->addAftSystem(new KirishiacOrbital(6, 18, 'L', 'E', -7, $orbitalHitChart));  
        
 
         $this->addLeftSystem(new AntigravityBeam(6, 6, 3, 120, 300, false, 'G'));
-        $this->addLeftSystem(new KirishiacOrbital(6, 18,'R', 'G', $orbitalHitChart));              
+        $this->addLeftSystem(new KirishiacOrbital(6, 18,'R', 'G', -7, $orbitalHitChart));              
         $this->addLeftSystem(new AntigravityBeam(6, 6, 3, 240, 60, false, 'H'));
-         $this->addLeftSystem(new KirishiacOrbital(6, 18, 'L', 'H', $orbitalHitChart)); 
+         $this->addLeftSystem(new KirishiacOrbital(6, 18, 'L', 'H', -7, $orbitalHitChart)); 
         $this->addLeftSystem(new GraviticThruster(7, 25, 0, 7, 3));
 
 		$this->addRightSystem(new AntigravityBeam(6, 6, 3, 60, 240, false, 'C'));
-        $this->addRightSystem(new KirishiacOrbital(6, 18, 'R','C', $orbitalHitChart));   
-        $this->addRightSystem(new KirishiacOrbital(6, 18, 'L', 'D', $orbitalHitChart));              
+        $this->addRightSystem(new KirishiacOrbital(6, 18, 'R','C', -7, $orbitalHitChart));   
+        $this->addRightSystem(new KirishiacOrbital(6, 18, 'L', 'D', -7, $orbitalHitChart));              
         $this->addRightSystem(new AntigravityBeam(6, 6, 3, 300, 120, false, 'D'));	        
         $this->addRightSystem(new GraviticThruster(7, 25, 0, 7, 4));
 
