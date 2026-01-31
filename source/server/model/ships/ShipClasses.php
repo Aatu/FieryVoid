@@ -2520,7 +2520,7 @@ public function getAllEWExceptDEW($turn){
 	} //end of function GetHitSystemByDice
 	
     private function getHitSubSystemByTable($system, $location){
-    $roll = Dice::d(20);
+        $roll = Dice::d(20);
         $name = '';            
         while ($name == ''){
             if (isset($system->systemHitChart[$roll])){
@@ -2533,13 +2533,15 @@ public function getAllEWExceptDEW($turn){
                 }
             }
         }
-        Debug::log(json_encode("NAME!", true));
-        Debug::log(json_encode($name, true));
         if($name != "Structure"){//if the hit is Structure, the target remains the origonal system itself
             $subSystems = array(); //array to hold all subsystem of matched name on a given system.
-            $systemPairing = $system->getPairing(); //get current system's pairing ID to find all systems attached to current system (same ID). 
+            if(method_exists($system, 'getPairing')){
+                $systemPairing = $system->getPairing(); //get current system's pairing ID to find all systems attached to current system (same ID). 
+            }else{
+                return $system; //incase System does not have pairing, should be impossible as pairing is how subsystems are defined for given system.
+            }            
             foreach ($this->systems as $subSystem){
-                if(method_exists($subSystem, 'getPairing') && $subSystem->getPairing() == $systemPairing && $subSystem->displayName == $name){ 
+                if($subSystem->displayName == $name." ". $systemPairing){ 
                     Debug::log(json_encode("Made it!", true));    
                     $subSystems[] = $subSystem;
                 }

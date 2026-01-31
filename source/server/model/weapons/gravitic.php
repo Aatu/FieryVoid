@@ -1623,6 +1623,7 @@ class AntigravityBeam extends Gravitic{
         public $animationColor = array(250, 251, 196);
         public $factionAge = 3;//Primordial weapon, which sometimes has consequences!
         private $pairing = null; //allows attaching to orbital
+        public $isTargetable = null;
         
         
         public $intercept = 3;
@@ -1640,8 +1641,9 @@ class AntigravityBeam extends Gravitic{
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
         public $canSplitShotsArray = array(1=>false, 2=>true );          
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing ){ //$orientation is 0,60,120,180,240,300 - regarding graphics
-		    $this->pairing = $pairing;
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $isTargetable, $pairing){ //$orientation is 0,60,120,180,240,300 - regarding graphics
+		    $this->isTargetable = $isTargetable;
+            $this->pairing = $pairing;
 		    $this->displayName = 'Antigravity Beam ' . $pairing . ''; 				
 		    //maxhealth and power reqirement are fixed; left option to override with hand-written values       
             if ( $maxhealth == 0 ) $maxhealth = 6;
