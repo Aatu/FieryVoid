@@ -30,7 +30,7 @@ class kirishiacLordship extends BaseShip{
 
         $orbitalHitChart = array( 
             6 => "Antigravity Beam",
-            20 => "Sturcture"
+            20 => "Structure"
             );
 	
         $this->addPrimarySystem(new Reactor(7, 35, 0, 0));
@@ -116,6 +116,7 @@ class kirishiacLordship extends BaseShip{
                     18 => "Structure",
                     20 => "Primary",
             ),
+            
         );
     }
 }

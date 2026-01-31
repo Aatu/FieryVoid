@@ -54,7 +54,7 @@ class ShipSystem {
 	protected $doCountForCombatValue = true; //false means this system is skipped when evaluating ships' combat value!
 	
 	protected $tagList = array(); //tags for TAG hit chart entry; REMEMBER TAGS SHOULD BE MADE USING CAPITAL LETTERS!
-	public $hasSystemHitChart = true; //Has a hitChart that is rolled everytime this system is hit. 
+	public $hasSystemHitChart = false; //Has a hitChart that is rolled everytime this system is hit. 
 	
 	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.
 	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted	
