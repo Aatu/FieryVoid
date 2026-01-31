@@ -2169,7 +2169,7 @@ public function getAllEWExceptDEW($turn){
         if ($fire->calledid != -1){
             $system = $this->getSystemById($fire->calledid);    
             if($system->hasSystemHitChart){//check if system has it's own hit table, this is for things like Kirishiac Orbital
-                $system = $this->getHitSubSystemByTable($system); //this will roll hit location on target system with subsystems
+                $system = $this->getHitSubSystemByTable($system, $location); //this will roll hit location on target system with subsystems
             }
         }
 
@@ -2334,7 +2334,9 @@ public function getAllEWExceptDEW($turn){
         $system = $systems[$roll-1];
         
         if($system->hasSystemHitChart){//check if system has it's own hit table, this is for things like Kirishiac Orbital
-            $system = $this->getHitSubSystemByTable($system); 
+            Debug::log(json_encode("Has SystemHitChart!", true));
+            Debug::log(json_encode($name, true));
+            $system = $this->getHitSubSystemByTable($system, $location); 
         } 
 	   
         return $system;
@@ -2342,7 +2344,7 @@ public function getAllEWExceptDEW($turn){
     } //end of function getHitSystemByTable
 
 
-    public function getHitSystemByDice( $shooter, $fire, $weapon, $location){
+    public function getHitSystemByDice($shooter, $fire, $weapon, $location){
         /*same as by table, but prepare table out of available systems...*/
         $system = null;
         $name = false;
@@ -2507,15 +2509,17 @@ public function getAllEWExceptDEW($turn){
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
 
+        /*
         if($system->hasSystemHitChart){//check if system has it's own hit table, this is for things like Kirishiac Orbital
             $system = $this->getHitSubSystemByTable($system); 
         } 
+        */
 
 		return $system;
 		
 	} //end of function GetHitSystemByDice
 	
-    private function getHitSubSystemByTable($system){
+    private function getHitSubSystemByTable($system, $location){
     $roll = Dice::d(20);
         $name = '';            
         while ($name == ''){
@@ -2525,23 +2529,25 @@ public function getAllEWExceptDEW($turn){
                 $roll++;
                 if($roll>20)//out of range already! return facing Structure... Should not happen.
                 {
-                    return $this->getStructureSystem($location);
+                    return $this->getStructureSystem($location);                    
                 }
             }
         }
         Debug::log(json_encode("NAME!", true));
         Debug::log(json_encode($name, true));
-        if(!$name == 'Structure'){//if the hit is Structure, the target remains the origonal system itself
-            $subSystems; //array to hold all subsystem of matched name on a given system.
+        if($name != "Structure"){//if the hit is Structure, the target remains the origonal system itself
+            $subSystems = array(); //array to hold all subsystem of matched name on a given system.
             $systemPairing = $system->getPairing(); //get current system's pairing ID to find all systems attached to current system (same ID). 
             foreach ($this->systems as $subSystem){
-                if($subSystem.getPairing() == $systemPairing){ 
+                if(method_exists($subSystem, 'getPairing') && $subSystem->getPairing() == $systemPairing && $subSystem->displayName == $name){ 
+                    Debug::log(json_encode("Made it!", true));    
                     $subSystems[] = $subSystem;
                 }
             }
             //now choose one of equal eligible subSystems
+            if (count($subSystems) == 0) return $system;
             $roll = Dice::d(sizeof($subSystems));
-            $subSystem = $systems[$roll-1];
+            $subSystem = $subSystems[$roll-1];
 
             return $subSystem;
         }
