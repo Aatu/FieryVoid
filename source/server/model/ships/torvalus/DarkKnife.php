@@ -17,7 +17,9 @@ class DarkKnife extends BaseShip{
         $this->agile = true;
 				
         $this->gravitic = true;
-		$this->advancedArmor = true;   
+		$this->advancedArmor = true;  
+		$this->skinDancer = true; 
+		$this->notes .= "Can skin dance"; 		
         
         $this->forwardDefense = 11;
         $this->sideDefense = 14;

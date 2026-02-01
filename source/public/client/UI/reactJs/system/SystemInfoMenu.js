@@ -1,18 +1,18 @@
 import * as React from "react";
 import styled from "styled-components"
 import SystemInfoButtons from "./SystemInfoButtons";
-import {Tooltip, TooltipHeader, TooltipEntry} from '../common'
+import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
 
-const InfoHeader = TooltipHeader.extend`
+const InfoHeader = styled(TooltipHeader)`
     font-size: 12px;
 `;
 
-const SystemInfoTooltip = Tooltip.extend`
+const SystemInfoTooltip = styled(Tooltip)`
     position: absolute;
     z-index: 20000;
     ${props => Object.keys(props.position).reduce((style, key) => {
-        return style + "\n" + key + ':' + props.position[key] + 'px;';
-    }, '')}
+    return style + "\n" + key + ':' + props.position[key] + 'px;';
+}, '')}
     max-width: 250px;
     text-align: left;
     opacity:0.8;
@@ -20,7 +20,7 @@ const SystemInfoTooltip = Tooltip.extend`
     padding-bottom: 3px;
 `;
 
-const Entry = TooltipEntry.extend`
+const Entry = styled(TooltipEntry)`
     text-align: left;
     color: #5e85bc;
     font-family: arial;
@@ -34,12 +34,12 @@ const Header = styled.span`
 class SystemInfoMenu extends React.Component {
 
     render() {
-        
-        const {boundingBox} = this.props;
+
+        const { boundingBox } = this.props;
 
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>
-                <SystemInfoButtons {...this.props}/>
+                <SystemInfoButtons {...this.props} />
             </SystemInfoTooltip>
         )
     }
@@ -47,7 +47,7 @@ class SystemInfoMenu extends React.Component {
 
 const getPosition = boundingBox => {
     const position = {};
-    
+
     if (boundingBox.top > window.innerHeight / 2) {
         position.bottom = window.innerHeight - boundingBox.top;
     } else {

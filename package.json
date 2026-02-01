@@ -1,21 +1,18 @@
 {
-  "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-core": "^6.26.0",
-    "babel-plugin-styled-components": "^1.5.0",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "babel-preset-env": "^1.6.1",
-    "babel-preset-react": "^6.24.1",
-    "babelify": "^8.0.0",
-    "browserify": "^16.1.0",
-    "watchify": "^3.10.0"
-  },
+  "name": "fieryvoid-client",
+  "version": "1.0.0",
+  "private": true,
   "scripts": {
-    "build": "watchify source/public/client/UI/reactJs/UI.js -o source/public/client/UI/reactJs/UI.bundle.js -t [ babelify --presets [ env react ] ]"
+    "build": "vite build",
+    "watch": "vite build --watch"
   },
   "dependencies": {
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
-    "styled-components": "^3.1.6"
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "styled-components": "^6.1.8"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.2.1",
+    "vite": "^5.1.4"
   }
 }

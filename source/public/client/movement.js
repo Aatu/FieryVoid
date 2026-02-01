@@ -1037,6 +1037,7 @@ shipManager.movement = {
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
+        if(ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
 
         /*cannot turn into pivot if unit is aligned...*/
         if (!shipManager.movement.isOutOfAlignment(ship)) return false;
@@ -1837,12 +1838,13 @@ shipManager.movement = {
             return false;
         }
 
-        if (!ship.gravitic && shipManager.movement.isOutOfAlignment(ship)) {
+        if (!ship.gravitic && !ship.flight && shipManager.movement.isOutOfAlignment(ship)) {
             return false;
         }
 
         return true;
     },
+
 
     doTurn: function doTurn(ship, right) {
         if ((!ship.osat) || (ship.flight)) {
@@ -1854,10 +1856,11 @@ shipManager.movement = {
             shipManager.movement.doDeploymentTurn(ship, right);
             return;
         }
+        
         shipManager.movement.doNormalTurn(ship, right);
-    },
+    },   
 
-    doNormalTurn: function doNormalTurn(ship, right) {
+    doNormalTurn: function doNormalTurn(ship, right, gravitic = false) {
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
         if (ship.osat && (!ship.flight)) {
             requiredThrust = 0;
@@ -1882,6 +1885,8 @@ shipManager.movement = {
 
         newfacing = mathlib.addToHexFacing(lastMovement.facing, step);
         newheading = mathlib.addToHexFacing(lastMovement.heading, step);
+
+        if(ship.flight && !gravitic) newfacing = newheading; //fighter automatically change facing to heading unless Gravitic and choosing not to do so.    
 
         if (ship.flight || ship.osat) {
             commit = true;
@@ -1915,6 +1920,63 @@ shipManager.movement = {
             shipWindowManager.assignThrust(ship);
         }
     },
+
+
+    canGraviticTurn: function canGraviticTurn(ship, right) {
+        //if (gamedata.gamephase == -1 && ship.deploymove) return true;
+        if (gamedata.gamephase != 2) return false;
+        if(!ship.flight) return false; //Fighters only for now.
+
+        if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
+        //if (shipManager.systems.isEngineDestroyed(ship)) return false;
+
+        //if (shipManager.movement.isRolling(ship) && !ship.gravitic) return false;
+        if (shipManager.movement.checkHasUncommitted(ship)) return false;
+        var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+        var previous = shipManager.movement.getLastCommitedMove(ship);
+        if (turndelay > 0) {
+            if (!(ship.agile && previous && previous.turn == gamedata.turn && shipManager.movement.isTurn(previous))) {
+                return false;
+            }
+        }
+
+        var speed = shipManager.movement.getSpeed(ship);
+        var baseTurnCost = ship.turncost;
+        //if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
+        var turncost = Math.ceil(speed * baseTurnCost);
+        turncost = Math.max(1, turncost);//turn cost may never be less than 1!
+
+        if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
+            return false;
+        }
+        //var pivoting = shipManager.movement.isPivoting(ship);
+        //if (pivoting != "no" && !ship.gravitic) {
+        //    return false;
+        //}
+        //var rolling = shipManager.movement.isRolling(ship);
+        //if (rolling && !ship.gravitic) {
+        //    return false;
+        //}
+
+        if (ship.gravitic && ship.flight && shipManager.movement.isOutOfAlignment(ship)) {
+            return true;
+        }
+
+        return false;
+    },    
+
+
+    doGraviticTurn: function doGraviticTurn(ship, right) {
+        if (!shipManager.movement.canGraviticTurn(ship, right)) {
+            return false;
+        }
+
+        if(ship.flight){
+            shipManager.movement.doNormalTurn(ship, right, true);
+        }else{}  
+
+    }, 
+
 
     autoAssignThrust: function autoAssignThrust(ship) {
         var move = ship.movement[ship.movement.length - 1];

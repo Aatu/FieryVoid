@@ -218,7 +218,9 @@
             gamedata.parseServerData(lobbyData);
             gamedata.parseFactions(<?php print($factions); ?>);
             
-            var customWarningShown = false; // Track if warning has been shown
+            var customWarningShown = false; 
+            var customFactionWarningShown = false;
+            var customShipWarningShown = false;
 
             $('.readybutton').on("click", gamedata.onReadyClicked);
             $('.savebutton').on("click", gamedata.onSaveClicked)            		
@@ -280,19 +282,21 @@
             // ✅ Listen to Tier and Custom Faction checkboxes
             $('.tier-filter').on('change', updateTierFilter);
 
-            /*
-            $('#toggleCustom').on('change', function () {
-                updateTierFilter();
-                gamedata.applyCustomShipFilter();
-            });
-            */
-            $('#toggleCustom').on('change', function () {
-                if ($(this).is(':checked')) {
+            // Combined listener for toggle and dropdown
+            $('#toggleCustom, #customSelect').on('change', function () {
+                var showCustom = $('#toggleCustom').is(':checked');
+                // var mode = $('#customSelect').val(); // Mode no longer needed for specific warnings
+
+                if (showCustom) {
                     $('#customDropdown').show();
                     
-                    if (!customWarningShown && lobbyData.description && lobbyData.description.match(/CUSTOM FACTIONS \/ UNITS:\s*Not Allowed/i)) {
-                        window.confirm.warning("Custom factions/units are not allowed in this scenario!");
-                        customWarningShown = true;
+                    var description = lobbyData.description || "";
+                    // Check if explicit permission is missing (i.e. it does NOT say "Allowed")
+                    var allowed = description.match(/CUSTOM FACTIONS \/ UNITS:\s*Allowed/i);
+
+                    if (!allowed && !customWarningShown) {
+                         window.confirm.warning("Custom Factions and/or Units not allowed in this match. <br>Please check Scenario Description");
+                         customWarningShown = true;
                     }
                 } else {
                     $('#customDropdown').hide();
@@ -567,6 +571,8 @@ $optionsUsed = '';
             // Split into lines
             $lines = preg_split("/\r\n|\n|\r/", trim($desc));
 
+            $inAdditionalInfo = false;
+
             foreach ($lines as $line) {
                 // Trim whitespace for safety
                 $line = trim($line);
@@ -578,17 +584,29 @@ $optionsUsed = '';
                     $label = trim(substr($line, 0, $pos));
                     $value = trim(substr($line, $pos + 1));
 
-                    // Check if ADDITIONAL INFORMATION is blank and set to 'None'
-                    if (strcasecmp($label, 'ADDITIONAL INFORMATION') === 0 && $value === '') {
-                        $value = 'None';
-                    }
+                    $isAdditionalInfo = (strcasecmp($label, 'ADDITIONAL INFORMATION') === 0 || strcasecmp($label, 'ADDITIONAL INFO') === 0);
 
-                    // Bold the label regardless of case (you can add uppercase check if you want)
-                echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
-                    '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
+                    if ($isAdditionalInfo) {
+                        $inAdditionalInfo = true;
+                        if ($value === '') {
+                            $value = 'None';
+                        }
+                        
+                        echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span><br>' .
+                             '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
+                    } else {
+                        $inAdditionalInfo = false;
+                        // Bold the label regardless of case (you can add uppercase check if you want)
+                        echo '<span class="scenariolabel">' . htmlspecialchars($label) . ':</span>&nbsp; ' .
+                             '<span class="scenariovalue">' . htmlspecialchars($value) . '</span><br>';
+                    }
                 } else {
                     // Just print line if no colon found
-                    echo htmlspecialchars($line) . '<br>';
+                    if ($inAdditionalInfo) {
+                         echo '<span class="scenariovalue">' . htmlspecialchars($line) . '</span><br>';
+                    } else {
+                         echo htmlspecialchars($line) . '<br>';
+                    }
                 }
             }
             ?>

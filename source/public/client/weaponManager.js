@@ -321,7 +321,7 @@ window.weaponManager = {
             return system instanceof Weapon && system.hextarget !== true;
         });
     },
-    
+
     selectAllWeapons: function selectAllWeapons(ship, system) {
         if (!gamedata.isMyShip(ship)) {
             return;
@@ -418,65 +418,10 @@ window.weaponManager = {
             }
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
-        /* //Oldest method before I added check for Sweeping Mode to not retarget ships.  Just in case ;)
-                for (var i in gamedata.selectedSystems) {
-                    var weapon = gamedata.selectedSystems[i];
-                    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
-                        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
-                            var value = weapon.firingMode;
-                            value = weapon.firingModes[value];
-                            var keys = Object.keys(weapon.firingModes);                    
-                            if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
-                                //called shot, weapon not eligible!
-                                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-                            } else if (keys.length > 1){//DK - Added to better display Firing Mode info on targeting enemy ship.
-                                $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);                      
-                            } else {
-                                $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
-                            }
-                        } else {
-                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
-                        }
-                    } else {
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
-                    }
-                }
-            },
-        */
 
-        /*
-                //Not quite as old version, before I added the Line of Sight check.
-                for (var i in gamedata.selectedSystems) {
-                    var weapon = gamedata.selectedSystems[i];
-                    if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
-                        if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
-                            var value = weapon.firingMode;
-                            value = weapon.firingModes[value];
-                            var keys = Object.keys(weapon.firingModes);
-        
-                            // Priority check for "Sweeping" firing mode
-                            if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
-                                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
-                            } else if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
-                                // Called shot, weapon not eligible!
-                                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-                            } else if (keys.length > 1) {
-                                // Display Firing Mode info when there are multiple firing modes
-                                $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
-                            } else {
-                                // Default case to display the weapon info without firing mode
-                                $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
-                            }
-                        } else {
-                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
-                        }
-                    } else {
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
-                    }
-                }
-        */
         var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
         var loSBlocked = false; //Default to LoS not blocked.
+        var skinDanceBlocked = null;
 
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
@@ -484,6 +429,34 @@ window.weaponManager = {
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
 
+                    //Check for skin-dancing ships, these can't be targeted unless the shooter is also skin-dancing on same target.
+                    if (gamedata.gamephase == 3) {
+                        let sharedSkinDancing = false;
+                        //Check if TARGET is skindancing
+                        if (ship.skinDancing && Object.values(ship.skinDancing).includes(true)) {
+                            for (const [targetID, value] of Object.entries(ship.skinDancing)) {
+                                if (value === true && selectedShip.skinDancing && selectedShip.skinDancing[targetID] === true) {
+                                    sharedSkinDancing = true;
+                                    break;
+                                }
+                            }
+
+                            if (!sharedSkinDancing) {
+                                skinDanceBlocked = 'Target'; //Can't target a skin-dancing ship if shooter is not skindancing same Enormous unit
+                            }
+                        }
+
+                        //Check if SHOOTER is skindancing
+                        if (selectedShip.skinDancing && Object.values(selectedShip.skinDancing).includes(true)) {
+                            var targetCompassHeading = mathlib.getCompassHeadingOfShip(selectedShip, ship);
+                            var shooterFacing = shipManager.getShipHeadingAngle(selectedShip);
+                            var targetBearing = mathlib.getAngleBetween(shooterFacing, targetCompassHeading, true);
+
+                            //Restriction: If not shooting Host, AND in valid arc, AND not shared -> Block.
+                            //Inverse (Allow): Shooting Host OR Side/Rear OR Shared.
+                            if (!selectedShip.skinDancing[ship.id] && (targetBearing < 60 || targetBearing > 300) && !sharedSkinDancing) skinDanceBlocked = 'Shooter';
+                        }
+                    }
 
                     if (blockedLosHex.length > 0 && !loSBlocked) {
                         var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -499,32 +472,42 @@ window.weaponManager = {
                     var keys = Object.keys(weapon.firingModes);
 
                     if (ship.Huge > 0) { //Cannot Target larger terrain.
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> CANNOT TARGET</span></div>').appendTo(f);
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> LINE OF SIGHT BLOCKED</span></div>').appendTo(f);
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> Line of Sight Blocked</span></div>').appendTo(f);
+                    } else if (skinDanceBlocked !== null) {
+                        // Can't target outside forward 120 degrees if skin-dancing
+                        $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="skinDanceBlocked">' + skinDanceBlocked + ' is Skin Dancing</span></div>').appendTo(f);
                     } else if (weapon.hextarget) {
                         // Don't show hit chance if targeting the hex.
-                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="losBlocked"> HEX TARGETED</span></div>').appendTo(f);
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hexTargeted"> Hex Targeted</span></div>').appendTo(f);
                     } else {
                         // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
-                        /* //Old blocker for slicer code when it tried to target same ship multiple times.  Fine to do now - DK - Dec 2025
-                        if (value === "Sweeping" && ship.shipSizeClass >= 0 && weaponManager.hasTargetedThisShip(ship, weapon)) {
-                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT TARGET AGAIN</span></div>').appendTo(f);
-                        } else if */
                         if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
-                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> CANNOT CALL SHOT</span></div>').appendTo(f);
-                        } else if (keys.length > 1) {
-                            $('<div><span class="weapon">' + weapon.displayName + '<span class="firingMode"> (' + value + ')</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                            $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotCalled"> Cannot Called Shot</span></div>').appendTo(f);
                         } else {
-                            $('<div><span class="weapon">' + weapon.displayName + '</span><span class="hitchange"> - Approx: ' + weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid) + '%</span></div>').appendTo(f);
+                            var hitChance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
+                            if (hitChance <= 0) {
+                                if (keys.length > 1) {
+                                    $('<div><span class="weapon">' + weapon.displayName + ': <span class="firingMode"> (' + value + ')</span> - <span class="negHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
+                                } else {
+                                    $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="negHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
+                                }
+                            } else {
+                                if (keys.length > 1) {
+                                    $('<div><span class="weapon">' + weapon.displayName + ': <span class="firingMode"> (' + value + ')</span> - <span class="posHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
+                                } else {
+                                    $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="posHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
+                                }
+                            }
                         }
                     }
                 } else {
-                    $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hitchange"> NOT IN RANGE</span></div>').appendTo(f);
+                    $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInRange"> Not In Range</span></div>').appendTo(f);
                 }
             } else {
-                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> NOT IN ARC </span></div>').appendTo(f);
+                $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="notInArc"> Not In Arc </span></div>').appendTo(f);
             }
         }
 
@@ -921,6 +904,12 @@ window.weaponManager = {
 
         if (weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
 
+        /*//If skin-dancing shots which have a front arc automatically hit.
+        if (gamedata.gamephase == 3 && !weapon.ballistic && shooter.skinDancing[target.id] === true) {
+            var inFrontArc = mathlib.isInArc(0, weapon.startArc, weapon.endArc);
+            if (inFrontArc) return 100; //Skindancing ships auto-hit targets directly in front of them.           
+        }*/
+
         if (weapon.isRammingAttack) {
             return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
         }
@@ -943,7 +932,7 @@ window.weaponManager = {
         }
 
         //Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
-        if (weapon.targetsImmobile) { //Target must be en
+        if (weapon.targetsImmobile) { //Target must be enormous unit and shooter at Speed 0.
             var ownSpeed = shipManager.movement.getSpeed(shooter);
             var targetSpeed = shipManager.movement.getSpeed(target);
             if (!target.Enormous || ownSpeed > 0 || targetSpeed > 0) return 0;
@@ -1020,7 +1009,11 @@ window.weaponManager = {
                     shooterLoSBlocked = mathlib.isLoSBlocked(shooterPos, sPosTarget, blockedLosHex);
                 }
                 // If no navigator and out of arc, or if LoS is blocked, set oew to 0
-                if ((!shooter.hasNavigator && !weaponManager.isOnWeaponArc(shooter, target, weapon)) || shooterLoSBlocked) {
+                if ((!shooter.hasNavigator && 
+                !weaponManager.isOnWeaponArc(shooter, target, weapon)) || 
+                shooterLoSBlocked || 
+                Object.values(shooter.skinDancing).includes(true) || 
+                Object.values(shooter.skinDancing).includes("Failed")) {
                     oew = 0;
                 }
             }
@@ -1168,8 +1161,9 @@ window.weaponManager = {
         if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
             if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
                 var loSBlocked = false;
-                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                   
-                loSBlocked = mathlib.isLoSBlocked(sPosLaunch, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
+                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 
+                var shooterPos2 = shipManager.getShipPosition(shooter);
+                loSBlocked = mathlib.isLoSBlocked(shooterPos2, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
 
                 if (loSBlocked) { // Line of Sight is blocked!
                     if (weapon instanceof AmmoMissileRackS) {
@@ -1537,28 +1531,16 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
+        if(!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
 
-
-        if (selectedShip.faction == "Torvalus Speculators") {
-            var shadingField = shipManager.systems.getSystemByName(selectedShip, "ShadingField");
-            if (shadingField.shaded) {
-                var html = "You cannot fire weapons on a turn when your Shading Field was active.";
-                confirm.warning(html);
-                return; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
-            }
+        //Check for skin-dancing ships, these can't be targeted unless the shooter is also skin-dancing on same target, they also have their own rules about firing.
+        if (gamedata.gamephase == 3) {
+            if(!weaponManager.checkSkindancing(selectedShip, ship)) return; //Returns false if skin dancing conditions prevent firing at or from a skin dancing unit.
         }
 
         var blockedLosHex = weaponManager.getBlockedHexes();
         var loSBlocked = false;
-        /*
-        if (blockedLosHex && blockedLosHex.length > 0) {
-            var weapon = gamedata.selectedSystems[0]; // Use the first weapon to get the shooter's position
-            var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
-            var sPosTarget = shipManager.getShipPosition(ship);
-            
-            loSBlocked = mathlib.isLoSBlocked(sPosShooter, sPosTarget, blockedLosHex);
-        }
-        */
+
         var toUnselect = [];
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
@@ -1792,6 +1774,7 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
+        if(!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.        
 
         var toUnselect = Array();
         var splitTargeted = [];
@@ -2058,6 +2041,7 @@ window.weaponManager = {
 
     canCombatTurn: function canCombatTurn(ship) {
         var fires = weaponManager.getAllFireOrders(ship);
+        if (Object.values(ship.skinDancing).includes(true) || Object.values(ship.skinDancing).includes("Failed")) return false; //Cannot combat pivot while skindancing or after failure      
         for (var i in fires) {
             var fire = fires[i];
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
@@ -2348,11 +2332,11 @@ window.weaponManager = {
     canRam: function canRam(ship) {
         if (ship.hasOwnProperty("hunterkiller")) {}
     },
-
+    
     askForRam: function askForRam(target) {
-
+    
         var selectedShip = gamedata.getSelectedShip();
-
+    
         confirm.confirmWithOptions("CONFIRM movement ?", "Yup", "Nah, too risky yo", function (respons) {
             if (respons) {
                 console.log("ye");
@@ -2407,6 +2391,70 @@ window.weaponManager = {
 
         return blockedHexes;
     },
+
+
+    isHidden: function isHidden(ship) {
+        if (ship.faction == "Torvalus Speculators") {
+            var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
+            if (shadingField.active) {
+                var html = "You cannot fire weapons on a turn when your Shading Field was active.";
+                confirm.warning(html);
+                return false; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
+            }
+        }    
+
+        if(shipManager.hasSpecialAbility(ship, "Cloaking")){
+            var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");            
+            if (cloakingDevice.active) {
+                var html = "You cannot fire weapons on a turn when your Cloaking Device was active.";
+                confirm.warning(html);
+                return false; //Cloaking Device active this turn, ship cannot fire.
+            }
+        }
+
+        return true;
+    },   
+    
+    checkSkindancing: function checkSkindancing(selectedShip, ship) {
+            // 0. Pre-calculate Shared Skindancing State
+            let sharedSkinDancing = false;
+            if (ship.skinDancing && Object.values(ship.skinDancing).includes(true)) {
+                for (const [targetID, value] of Object.entries(ship.skinDancing)) {
+                    if (value === true && selectedShip.skinDancing && selectedShip.skinDancing[targetID] === true) {
+                        sharedSkinDancing = true;
+                        break;
+                    }
+                }
+            }
+            // 1. Check if SHOOTER has skindanced (Failed OR Success)
+            if (selectedShip.skinDancing) {
+                const statusValues = Object.values(selectedShip.skinDancing);
+                // Case A: Shooter FAILED -> Cannot fire at all.
+                if (statusValues.includes("Failed")) {
+                    confirm.warning("You cannot fire weapons after an unsuccessful attempt to Skin Dance.");
+                    return false;
+                }
+                // Case B: Shooter SUCCEEDED -> Restrict targeting
+                if (statusValues.includes(true)) {
+                    var targetCompassHeading = mathlib.getCompassHeadingOfShip(selectedShip, ship);
+                    var shooterFacing = shipManager.getShipHeadingAngle(selectedShip);
+                    var targetBearing = mathlib.getAngleBetween(shooterFacing, targetCompassHeading, true);            
+                    // Allow firing if: Target is Host OR Target is in Side/Rear Arc OR Shared Target
+                    if (selectedShip.skinDancing[ship.id] !== true && (targetBearing < 60 || targetBearing > 300) && !sharedSkinDancing) {
+                        return false;
+                    }
+                }
+            }
+            // 2. Check if TARGET is skindancing (Protection from others)
+            // If target is skindancing (and we haven't already confirmed we share it), we can't shoot.
+            if (ship.skinDancing && Object.values(ship.skinDancing).includes(true)) {
+                 if (!sharedSkinDancing) {
+                    return false; //Can't target a skin-dancing ship if shooter is not skindancing same Enormous unit
+                 }
+            }
+
+        return true;    
+    },        
 
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
@@ -2488,7 +2536,7 @@ window.weaponManager = {
         if (system.dualWeapon || system.duoWeapon) {
             for (var i in system.weapons) {
                 var weapon = system.weapons[i];
-
+    
                 if (weapon.duoWeapon) {
                     for (var index in weapon.weapons) {
                         var subweapon = weapon.weapons[index];

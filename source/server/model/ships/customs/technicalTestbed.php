@@ -22,6 +22,8 @@ class TechnicalTestbed extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
+        $this->trueStealth = true;
+        $this->canPreOrder = true;
 
 		$this->advancedArmor = true;   
 		$this->hardAdvancedArmor = true;   
@@ -34,6 +36,7 @@ class TechnicalTestbed extends MediumShip{
         $this->addPrimarySystem(new Hangar(6, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4)); 
+        $this->addPrimarySystem(new CloakingDevice(4, 13, 10, 5));         
 	    
 	//ammo magazine itself
 	$ammoMagazine = new AmmoMagazine(6); //pass magazine capacity 

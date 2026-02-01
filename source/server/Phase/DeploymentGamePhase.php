@@ -15,7 +15,7 @@ class DeploymentGamePhase implements Phase
             if ($ship->isDestroyed() || $ship->base || $ship->smallBase || $ship->isTerrain() || ($ship->getTurnDeployed($gameData) > $gameData->turn))  {
                 continue;
             }
-            if($ship->hasSpecialAbility("Stealth")) $ship->checkStealth($gameData); //Extra check needed at end of movement for Stealth ships like Torvalus.
+            if($ship->trueStealth) $ship->checkStealth($gameData); //Extra check needed at end of movement for Stealth ships like Torvalus.
         }
 
         //Checks for late-deploying slots to see if next phases skipped - DK 

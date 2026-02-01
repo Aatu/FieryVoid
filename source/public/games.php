@@ -108,11 +108,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above or watch the Video Tutorial for details on how it works!</li>  
-        <li><strong>Friendly Fire</strong> - New option added to Create Game screen allowing ships to fire on their own team!</li> 
-        <li><strong>Electronic Warfare</strong> - All EW options now available for any ship, friend or foe! Note - Ship Selection in Initial Orders requires Double-Left click, or a Right Click.</li>           
-        <li><strong>Power Capacitors</strong> - Added Vorlon ability to deactivate weapons and shields for double Power Generation/Self-Repair on that turn.</li> 
-        <li><strong>Custom Centauri</strong> - Further reinforcements for House Valeru added, thanks to Fred/Geoffrey.</li>           
-        <li><strong>Centauri War Crimes</strong> - Centurion, Octurion and Primus variants equipped with Mass Drivers added.</li>                                                 
+        <li><strong>Skin Dancing</strong> - Fighters and Agile ships will now automatically try to Skin Dance when they end their movement on same hex as an Enormous unit.  See FAQ for more details!</li>          
+        <li><strong>Fighter Movement</strong> - Fighter/Shuttles will now automcatially change their facing to match their heading when they turn.  Added new icon for Gravitic fighters to turn without changing facing.</li> 
+        <li><strong>Terrain collisions</strong> - With Skin Dancing now added, asteroid collisions have been standardised across all types of unit as per Tabletop rules.</li>         
+        <li><strong>Custom Centauri</strong> - Further reinforcements for House Valeru added, thanks to Fred/Geoffrey.</li>                                                           
         <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

@@ -3,12 +3,12 @@ import styled from "styled-components"
 import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
 import ShipInfo from "./ShipInfo";
 
-const InfoHeader = TooltipHeader.extend`
+const InfoHeader = styled(TooltipHeader)`
     /*font-size: 12px;*/
 	font-size: 13px;
 `;
 
-const SystemInfoTooltip = Tooltip.extend`
+const SystemInfoTooltip = styled(Tooltip)`
     position: absolute;
     z-index: 20000;
     ${props => Object.keys(props.position).reduce((style, key) => {
@@ -19,7 +19,7 @@ const SystemInfoTooltip = Tooltip.extend`
     opacity:0.8;
 `;
 
-export const Entry = TooltipEntry.extend`
+export const Entry = styled(TooltipEntry)`
     text-align: left;
     /*color: #5e85bc;*/
 	color: #BDEAFA; /*replace dark blue above with bluish white, more eyes friendly*/
@@ -85,15 +85,15 @@ class SystemInfo extends React.Component {
                 {Object.keys(system.critData).length > 0 && getCriticals(system)}
 
                 {(!gamedata.isMyShip(ship) &&
-                  (gamedata.gamephase == 3 ||  gamedata.gamephase == 1) &&
-                   gamedata.waiting == false &&
-                   gamedata.selectedSystems.length > 0 && selectedShip) &&
-                   getCalledShot(ship, selectedShip, system)}
+                    (gamedata.gamephase == 3 || gamedata.gamephase == 1) &&
+                    gamedata.waiting == false &&
+                    gamedata.selectedSystems.length > 0 && selectedShip) &&
+                    getCalledShot(ship, selectedShip, system)}
 
 
-                {(  gamedata.isMyShip(ship) &&
-                    gamedata.rules && 
-                    gamedata.rules.friendlyFire  === 1 &&  
+                {(gamedata.isMyShip(ship) &&
+                    gamedata.rules &&
+                    gamedata.rules.friendlyFire === 1 &&
                     (gamedata.gamephase == 3 || gamedata.gamephase == 5 || gamedata.gamephase == 1) &&
                     gamedata.waiting == false &&
                     gamedata.selectedSystems.length > 0 && selectedShip) &&

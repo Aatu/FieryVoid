@@ -534,8 +534,8 @@ class SystemInfoButtons extends React.Component {
 				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
 				{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}				
 
-				{canActivate(ship, system) && <Button onClick={this.activate.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
-				{canDeactivate(ship, system) && <Button onClick={this.deactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}		
+				{canActivate(ship, system) && <Button title="Activate" onClick={this.activate.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
+				{canDeactivate(ship, system) && <Button title="Deactivate" onClick={this.deactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}		
 
 				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship,system)} img={getAAcurrClassImg(ship,system)}></Button>}
 				{canAAdisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
