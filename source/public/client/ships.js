@@ -929,42 +929,6 @@ window.shipManager = {
     },
 
 
-    /* Replcaedd with more efficient version, fully remove if no issues - DK - Dec 2025 
-    checkConstantPivot: function checkConstantPivot() {
-        var pivotShips = [];
-        var counter = 0;
-        for (var i in gamedata.ships) {
-            var ship = gamedata.ships[i];
-            if (!ship.mustPivot) continue;//Ignore everything but ships that HAVE to pivot.
-            if (ship.unavailable) continue;
-            if (ship.userid != gamedata.thisplayer) continue;					
-            if (shipManager.isDestroyed(ship)) continue;
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
-
-            var left = 0;
-            var right = 0;				
-	
-            const currentTurnMovements = ship.movement.filter(movement => movement.turn == gamedata.turn);
-            currentTurnMovements.forEach(movement => {
-                if (movement.type == "pivotleft" && !movement.preturn) {
-                    left++;
-                }
-                if (movement.type == "pivotright" && !movement.preturn) {
-                    right++;
-                }
-            });
-
-            if(left == right){				
-                pivotShips[counter] = ship;
-                counter++;		
-            }					
-        }
-    	
-        return pivotShips;
-    },
-    */
-
     isEscorting: function isEscorting(ship, target) {
         if (!ship.flight) return false;
         //var ships = shipManager.getShipsInSameHex(ship);
@@ -1102,7 +1066,7 @@ window.shipManager = {
         }
 
         if(shipManager.getSpecialAbilityStealth(ship, "Stealth")){
-            var stealthSystem = shipManager.systems.getSystemByName(ship, "Stealth");             
+            var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");             
             if(stealthSystem){
                 return stealthSystem.isDetectedStealth(ship);
             }else{

@@ -4112,16 +4112,24 @@ class VorlonLightningCannon extends Weapon{
 	
 	public $uninterceptable = true; //Lightning Cannon is uninterceptable
 	public $intercept = 4; //intercept rating -4
-	
+	public $modeLetters = 1;
+	public $modeLettersArray = array(
+		1 => 1,
+		2 => 1,
+		3 => 1,
+		4 => 1,
+		5 => 2,
+		6 => 2
+	);
 	
 	public $firingMode = 1;	
 	public $firingModes = array(
-		1 => "1Prong",
-		2 => "2Prongs",
-		3 => "3Prongs",
-		4 => "4Prongs",
-		5 => "P3Piercing",
-		6 => "Q4Piercing"
+		1 => "1-Prong",
+		2 => "2-Prongs",
+		3 => "3-Prongs",
+		4 => "4-Prongs",
+		5 => "3Piercing",
+		6 => "4Piercing"
 	);
 	
 	public $priority = 5; //medium Standard weapon - for single fire...

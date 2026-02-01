@@ -13,7 +13,7 @@ const SystemInfoTooltip = styled(Tooltip)`
     ${props => Object.keys(props.position).reduce((style, key) => {
     return style + "\n" + key + ':' + props.position[key] + 'px;';
 }, '')}
-    max-width: 250px;
+    max-width: 600px;
     text-align: left;
     opacity:0.8;
     border: 1px solid #496791;

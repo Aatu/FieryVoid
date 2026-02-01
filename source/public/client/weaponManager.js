@@ -48,6 +48,69 @@ window.weaponManager = {
         }
     },
 
+    onSetModeClicked: function onSetModeClicked(ship, system, mode) {
+        if (!system) return;
+
+        if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) return;
+
+        if (gamedata.gamephase != 1 && system.ballistic) return;
+
+        if (gamedata.gamephase != 5 && system.preFires) return;
+
+        if (weaponManager.hasFiringOrder(ship, system) && !system.multiModeSplit) return;
+
+        if (gamedata.isMyShip(ship)) {
+            system.setFiringMode(mode);
+            shipWindowManager.setDataForSystem(ship, system);
+            webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+        }
+    },
+
+    onSetModeAllClicked: function onSetModeAllClicked(ship, system, mode) {
+        if (!system) return;
+
+        if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) return;
+        if (gamedata.gamephase != 1 && system.ballistic) return;
+        if (gamedata.gamephase != 5 && system.preFires) return;
+
+        var modeSet = mode;
+        //set this mode on ALL similar weapons that aren't declared and can change firing mode
+        var allWeapons = [];
+        if (ship.flight) {
+            allWeapons = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, weapons) => all.concat(weapons), [])
+                .filter(system => system.weapon);
+        } else {
+            allWeapons = ship.systems.filter(system => system.weapon);
+        }
+        var similarWeapons = new Array();
+        for (var i = 0; i < allWeapons.length; i++) {
+            if (system.displayName === allWeapons[i].displayName) {
+                if (system.weapon) {
+                    similarWeapons.push(allWeapons[i]);
+                }
+            }
+        }
+
+        for (var i = 0; i < similarWeapons.length; i++) {
+            var weapon = similarWeapons[i];
+
+            if (weaponManager.hasFiringOrder(ship, weapon) && !weapon.multiModeSplit) continue;
+
+            if (weapon.firingMode == modeSet) continue;
+            //Replicate canChangeFiringMode logic
+            if (!((gamedata.gamephase === 1 && weapon.ballistic) || (gamedata.gamephase === 5 && weapon.preFires) || (gamedata.gamephase === 3 && !weapon.ballistic && !weapon.preFires))) continue;
+
+            //Check if mode exists for this weapon
+            if (weapon.firingModes[modeSet]) {
+                weapon.setFiringMode(modeSet);
+            }
+        }
+
+        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+    },
+
     onHoldfireClicked: function onHoldfireClicked(e) {
         e.stopPropagation();
         var shipwindow = $(".shipwindow").has($(this));
@@ -1009,11 +1072,11 @@ window.weaponManager = {
                     shooterLoSBlocked = mathlib.isLoSBlocked(shooterPos, sPosTarget, blockedLosHex);
                 }
                 // If no navigator and out of arc, or if LoS is blocked, set oew to 0
-                if ((!shooter.hasNavigator && 
-                !weaponManager.isOnWeaponArc(shooter, target, weapon)) || 
-                shooterLoSBlocked || 
-                Object.values(shooter.skinDancing).includes(true) || 
-                Object.values(shooter.skinDancing).includes("Failed")) {
+                if ((!shooter.hasNavigator &&
+                    !weaponManager.isOnWeaponArc(shooter, target, weapon)) ||
+                    shooterLoSBlocked ||
+                    Object.values(shooter.skinDancing).includes(true) ||
+                    Object.values(shooter.skinDancing).includes("Failed")) {
                     oew = 0;
                 }
             }
@@ -1531,11 +1594,11 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        if(!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
+        if (!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
 
         //Check for skin-dancing ships, these can't be targeted unless the shooter is also skin-dancing on same target, they also have their own rules about firing.
         if (gamedata.gamephase == 3) {
-            if(!weaponManager.checkSkindancing(selectedShip, ship)) return; //Returns false if skin dancing conditions prevent firing at or from a skin dancing unit.
+            if (!weaponManager.checkSkindancing(selectedShip, ship)) return; //Returns false if skin dancing conditions prevent firing at or from a skin dancing unit.
         }
 
         var blockedLosHex = weaponManager.getBlockedHexes();
@@ -1774,7 +1837,7 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        if(!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.        
+        if (!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.        
 
         var toUnselect = Array();
         var splitTargeted = [];
@@ -2401,10 +2464,10 @@ window.weaponManager = {
                 confirm.warning(html);
                 return false; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
             }
-        }    
+        }
 
-        if(shipManager.hasSpecialAbility(ship, "Cloaking")){
-            var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");            
+        if (shipManager.hasSpecialAbility(ship, "Cloaking")) {
+            var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");
             if (cloakingDevice.active) {
                 var html = "You cannot fire weapons on a turn when your Cloaking Device was active.";
                 confirm.warning(html);
@@ -2413,48 +2476,48 @@ window.weaponManager = {
         }
 
         return true;
-    },   
-    
+    },
+
     checkSkindancing: function checkSkindancing(selectedShip, ship) {
-            // 0. Pre-calculate Shared Skindancing State
-            let sharedSkinDancing = false;
-            if (ship.skinDancing && Object.values(ship.skinDancing).includes(true)) {
-                for (const [targetID, value] of Object.entries(ship.skinDancing)) {
-                    if (value === true && selectedShip.skinDancing && selectedShip.skinDancing[targetID] === true) {
-                        sharedSkinDancing = true;
-                        break;
-                    }
+        // 0. Pre-calculate Shared Skindancing State
+        let sharedSkinDancing = false;
+        if (ship.skinDancing && Object.values(ship.skinDancing).includes(true)) {
+            for (const [targetID, value] of Object.entries(ship.skinDancing)) {
+                if (value === true && selectedShip.skinDancing && selectedShip.skinDancing[targetID] === true) {
+                    sharedSkinDancing = true;
+                    break;
                 }
             }
-            // 1. Check if SHOOTER has skindanced (Failed OR Success)
-            if (selectedShip.skinDancing) {
-                const statusValues = Object.values(selectedShip.skinDancing);
-                // Case A: Shooter FAILED -> Cannot fire at all.
-                if (statusValues.includes("Failed")) {
-                    confirm.warning("You cannot fire weapons after an unsuccessful attempt to Skin Dance.");
+        }
+        // 1. Check if SHOOTER has skindanced (Failed OR Success)
+        if (selectedShip.skinDancing) {
+            const statusValues = Object.values(selectedShip.skinDancing);
+            // Case A: Shooter FAILED -> Cannot fire at all.
+            if (statusValues.includes("Failed")) {
+                confirm.warning("You cannot fire weapons after an unsuccessful attempt to Skin Dance.");
+                return false;
+            }
+            // Case B: Shooter SUCCEEDED -> Restrict targeting
+            if (statusValues.includes(true)) {
+                var targetCompassHeading = mathlib.getCompassHeadingOfShip(selectedShip, ship);
+                var shooterFacing = shipManager.getShipHeadingAngle(selectedShip);
+                var targetBearing = mathlib.getAngleBetween(shooterFacing, targetCompassHeading, true);
+                // Allow firing if: Target is Host OR Target is in Side/Rear Arc OR Shared Target
+                if (selectedShip.skinDancing[ship.id] !== true && (targetBearing < 60 || targetBearing > 300) && !sharedSkinDancing) {
                     return false;
                 }
-                // Case B: Shooter SUCCEEDED -> Restrict targeting
-                if (statusValues.includes(true)) {
-                    var targetCompassHeading = mathlib.getCompassHeadingOfShip(selectedShip, ship);
-                    var shooterFacing = shipManager.getShipHeadingAngle(selectedShip);
-                    var targetBearing = mathlib.getAngleBetween(shooterFacing, targetCompassHeading, true);            
-                    // Allow firing if: Target is Host OR Target is in Side/Rear Arc OR Shared Target
-                    if (selectedShip.skinDancing[ship.id] !== true && (targetBearing < 60 || targetBearing > 300) && !sharedSkinDancing) {
-                        return false;
-                    }
-                }
             }
-            // 2. Check if TARGET is skindancing (Protection from others)
-            // If target is skindancing (and we haven't already confirmed we share it), we can't shoot.
-            if (ship.skinDancing && Object.values(ship.skinDancing).includes(true)) {
-                 if (!sharedSkinDancing) {
-                    return false; //Can't target a skin-dancing ship if shooter is not skindancing same Enormous unit
-                 }
+        }
+        // 2. Check if TARGET is skindancing (Protection from others)
+        // If target is skindancing (and we haven't already confirmed we share it), we can't shoot.
+        if (ship.skinDancing && Object.values(ship.skinDancing).includes(true)) {
+            if (!sharedSkinDancing) {
+                return false; //Can't target a skin-dancing ship if shooter is not skindancing same Enormous unit
             }
+        }
 
-        return true;    
-    },        
+        return true;
+    },
 
 
     getAllFireOrdersForAllShipsForTurn: function getAllFireOrdersForAllShipsForTurn(turn, type) {
