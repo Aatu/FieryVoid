@@ -29,6 +29,8 @@ async function optimize() {
         let processedCount = 0;
         let errorCount = 0;
 
+        const MIN_SAVINGS_PERCENT = 10; // Only save if we reduce size by at least 10%
+
         for (const file of images) {
             try {
                 const originalBuffer = await fs.readFile(file);
@@ -41,12 +43,15 @@ async function optimize() {
                     ]
                 });
 
-                if (optimizedBuffer.length < originalBuffer.length) {
+                const savings = originalBuffer.length - optimizedBuffer.length;
+                const savingsPercent = (savings / originalBuffer.length) * 100;
+
+                if (savingsPercent >= MIN_SAVINGS_PERCENT) {
                     await fs.writeFile(file, optimizedBuffer);
-                    savedBytes += (originalBuffer.length - optimizedBuffer.length);
-                    // console.log(`Optimized: ${path.relative(ROOT_DIR, file)} (-${((originalBuffer.length - optimizedBuffer.length) / 1024).toFixed(2)} KB)`);
+                    savedBytes += savings;
+                    process.stdout.write(`\nOptimized: ${path.relative(ROOT_DIR, file)} (-${savingsPercent.toFixed(1)}% / -${(savings / 1024).toFixed(2)} KB)`);
                 } else {
-                    // console.log(`Skipped (no improvement): ${path.relative(ROOT_DIR, file)}`);
+                    // console.log(`Skipped (already optimized): ${path.relative(ROOT_DIR, file)}`);
                 }
             } catch (err) {
                 console.error(`Error processing ${file}:`, err);
