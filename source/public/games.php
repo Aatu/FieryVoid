@@ -109,7 +109,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above or watch the Video Tutorial for details on how it works!</li>  
         <li><strong>Skin Dancing</strong> - Fighters and Agile ships will now automatically try to Skin Dance when they end their movement on same hex as an Enormous unit.  See FAQ for more details!</li>          
-        <li><strong>Fighter Movement</strong> - Fighter/Shuttles will now automcatially change their facing to match their heading when they turn.  Added new icon for Gravitic fighters to turn without changing facing.</li> 
+        <li><strong>Fighter Movement</strong> - Fighter/Shuttles automatically change facing to match their heading when they turn.  New icon added for Gravitic fighters to turn without changing facing.</li> 
         <li><strong>Terrain collisions</strong> - With Skin Dancing now added, asteroid collisions have been standardised across all types of unit as per Tabletop rules.</li>         
         <li><strong>Custom Centauri</strong> - Further reinforcements for House Valeru added, thanks to Fred/Geoffrey.</li>                                                           
         <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           

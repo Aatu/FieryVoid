@@ -294,7 +294,7 @@
                     // Check if explicit permission is missing (i.e. it does NOT say "Allowed")
                     var allowed = description.match(/CUSTOM FACTIONS \/ UNITS:\s*Allowed/i);
 
-                    if (!allowed && !customWarningShown) {
+                    if (!allowed && !customWarningShown && gamedata.rules && gamedata.rules.fleetTest !== 1) {
                          window.confirm.warning("Custom Factions and/or Units not allowed in this match. <br>Please check Scenario Description");
                          customWarningShown = true;
                     }
