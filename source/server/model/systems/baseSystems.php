@@ -2495,7 +2495,7 @@ class KirishiacOrbital extends ShipSystem{
 	public $hasSystemHitChart = true; //use this var to track of a given system has a system specific hitchart so when hit it also needs to roll on this table.
 	public $systemHitChart = array(); //holds the hitchart for this specific system. 
 	private $pairing = null;
-	protected $isDocked = false; //track each orbitals docking status
+	protected $active = false; //track each orbitals docking status
 	public $turnsDocked = 1; //track how long orbital has been docked
 
 	protected $calledShotBonus = 8; //8 to remove called shot std malus, will be adjusted in constructure based on ship profile 
@@ -2520,9 +2520,9 @@ class KirishiacOrbital extends ShipSystem{
 			if(is_array($this->individualNotesTransfer)){			
 				foreach($this->individualNotesTransfer as $docking){			
 					if($docking == 1){
-						$this->isDocked = true;
+						$this->active = true;
 					}else{
-						$this->isDocked = false; //May start Deployment phase as true via notes
+						$this->active = false; //May start Deployment phase as true via notes
 					}									
 				}
 			} 
@@ -2546,7 +2546,7 @@ class KirishiacOrbital extends ShipSystem{
 		
 		switch($gameData->phase){			
 			case -1: //pre-phase
-				if ($this->isDocked) {
+				if ($this->active) {
 						$this->turnsDocked++;
 						$notekey = 'Docked';
 						$noteHuman = 'Docked this turn';
@@ -2565,7 +2565,7 @@ class KirishiacOrbital extends ShipSystem{
 				$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey2,$noteHuman2,$noteValue2);
 			break;	
 			case 1: //inital phase
-				if(!$this->isDocked){ //if not docked in inital phase reset the turnsDocked to 1
+				if(!$this->active){ //if not docked in inital phase reset the turnsDocked to 1
 					$this->turnsDocked = 1;
 				}
 			break;
@@ -2595,7 +2595,7 @@ class KirishiacOrbital extends ShipSystem{
 
 	public function stripForJson() {
             $strippedSystem = parent::stripForJson();   
-			$strippedSystem->isDocked = $this->isDocked; 
+			$strippedSystem->active = $this->active; 
             $strippedSystem->calledShotBonus = $this->calledShotBonus; 
 			$strippedSystem->turnsDocked = $this->turnsDocked;    
 			$strippedSystem->outputDisplay = $this->outputDisplay;
