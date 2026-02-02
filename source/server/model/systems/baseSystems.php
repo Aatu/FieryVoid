@@ -2495,6 +2495,8 @@ class KirishiacOrbital extends ShipSystem{
 	public $hasSystemHitChart = true; //use this var to track of a given system has a system specific hitchart so when hit it also needs to roll on this table.
 	public $systemHitChart = array(); //holds the hitchart for this specific system. 
 	private $pairing = null;
+	protected $isDocked = false; //track each orbitals docking status
+	public $turnsDocked = 1; //track how long orbital has been docked
 
 	protected $calledShotBonus = 8; //8 to remove called shot std malus, will be adjusted in constructure based on ship profile 
 
@@ -2513,6 +2515,72 @@ class KirishiacOrbital extends ShipSystem{
 		parent::__construct($armour, $maxhealth, 0, 0);	
 	}
 
+	public function doIndividualNotesTransfer(){
+			//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+			if(is_array($this->individualNotesTransfer)){			
+				foreach($this->individualNotesTransfer as $docking){			
+					if($docking == 1){
+						$this->isDocked = true;
+					}else{
+						$this->isDocked = false; //May start Deployment phase as true via notes
+					}									
+				}
+			} 
+			$this->individualNotesTransfer = array(); //empty, just in case
+		}			
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
+		$ship = $this->getUnit();	
+
+		//Load previous turn's notes to get turnsDocked count
+		if ($gameData->phase == 1) {
+			$listNotes = $dbManager->getIndividualNotesForShip($gameData, $gameData->turn - 1, $ship->id);
+			foreach ($listNotes as $currNote){
+				if($currNote->systemid==$this->id){
+					$this->addIndividualNote($currNote);
+				}
+			}
+			$this->onIndividualNotesLoaded($gameData);
+		}
+		
+		switch($gameData->phase){			
+			case -1: //pre-phase
+				if ($this->isDocked) {
+						$this->turnsDocked++;
+						$notekey = 'Docked';
+						$noteHuman = 'Docked this turn';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}else{
+						$notekey = 'Undocked';
+						$noteHuman = 'Not docked this turn';
+						$noteValue = 1;
+						$this->turnsDocked = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}	
+				$notekey2 = 'turnsDocked';
+				$noteHuman2 = 'Turns Docked';
+				$noteValue2 = $this->turnsDocked;
+				$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey2,$noteHuman2,$noteValue2);
+			break;	
+			case 1: //inital phase
+				if(!$this->isDocked){ //if not docked in inital phase reset the turnsDocked to 1
+					$this->turnsDocked = 1;
+				}
+			break;
+		}
+	}			
+
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){
+			if($currNote->notekey == 'turnsDocked'){
+				$this->turnsDocked = $currNote->notevalue;
+			}
+		}
+		$this->individualNotes = array();
+	}
+
 	public function checkforCalledShotBonus(){
 			return $this->calledShotBonus;
 		}
@@ -2526,11 +2594,13 @@ class KirishiacOrbital extends ShipSystem{
 	}
 
 	public function stripForJson() {
-            $strippedSystem = parent::stripForJson();    
-            $strippedSystem->calledShotBonus = $this->calledShotBonus;                         
+            $strippedSystem = parent::stripForJson();   
+			$strippedSystem->isDocked = $this->isDocked; 
+            $strippedSystem->calledShotBonus = $this->calledShotBonus; 
+			$strippedSystem->turnsDocked = $this->turnsDocked;    
+			$strippedSystem->outputDisplay = $this->outputDisplay;
             return $strippedSystem;
 	}
-	
 } 
 
 /*custon system for Nexus LCVs*/

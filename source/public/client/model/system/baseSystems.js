@@ -272,6 +272,46 @@ var KirishiacOrbital = function KirishiacOrbital(json, ship){
 KirishiacOrbital.prototype = Object.create(ShipSystem.prototype);
 KirishiacOrbital.prototype.constructor = KirishiacOrbital;
 
+KirishiacOrbital.prototype.initializationUpdate = function () {
+	if (this.isDocked) {
+		this.outputDisplay = this.turnsDocked + "/5\n"+ "Docked";
+	} else {
+		this.outputDisplay = "Active";
+	}
+	
+	return this;
+}
+
+KirishiacOrbital.prototype.canActivate = function () {
+	if(gamedata.gamephase == -1 && !this.isDockled) return true;
+	
+	return false;
+};
+
+KirishiacOrbital.prototype.canDeactivate = function () {
+	if(gamedata.gamephase == -1 && this.isDocked) return true;
+	
+	return false;
+};
+
+KirishiacOrbital.prototype.doActivate = function () {
+	this.isDocked = true;	
+};
+
+KirishiacOrbital.prototype.doDeactivate = function () {
+	this.isDocked = false;
+};
+
+KirishiacOrbital.prototype.doIndividualNotesTransfer = function () {
+
+	if (gamedata.gamephase == -1) {
+		var isDocked = this.isDocked; //Was docked this turn.		
+		this.individualNotesTransfer = Array();
+		if (isDocked) {
+			this.individualNotesTransfer.push(1);
+		}
+	}
+};
 
 var Jammer = function Jammer(json, ship) {
 	ShipSystem.call(this, json, ship);
