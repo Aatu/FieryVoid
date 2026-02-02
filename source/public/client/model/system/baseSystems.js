@@ -273,41 +273,41 @@ KirishiacOrbital.prototype = Object.create(ShipSystem.prototype);
 KirishiacOrbital.prototype.constructor = KirishiacOrbital;
 
 KirishiacOrbital.prototype.initializationUpdate = function () {
-	if (this.isDocked) {
-		this.outputDisplay = this.turnsDocked + "/5\n"+ "Docked";
+	if (this.active) {
+		this.outputDisplay = "[" + this.turnsDocked + "/5" + "]\n" + "Docked";
 	} else {
-		this.outputDisplay = "Active";
+		this.outputDisplay = "ORB";
 	}
 	
 	return this;
 }
 
 KirishiacOrbital.prototype.canActivate = function () {
-	if(gamedata.gamephase == -1 && !this.isDockled) return true;
+	if(gamedata.gamephase == -1 && !this.active) return true;
 	
 	return false;
 };
 
 KirishiacOrbital.prototype.canDeactivate = function () {
-	if(gamedata.gamephase == -1 && this.isDocked) return true;
+	if(gamedata.gamephase == -1 && this.active) return true;
 	
 	return false;
 };
 
 KirishiacOrbital.prototype.doActivate = function () {
-	this.isDocked = true;	
+	this.active = true;	
 };
 
 KirishiacOrbital.prototype.doDeactivate = function () {
-	this.isDocked = false;
+	this.active = false;
 };
 
 KirishiacOrbital.prototype.doIndividualNotesTransfer = function () {
 
 	if (gamedata.gamephase == -1) {
-		var isDocked = this.isDocked; //Was docked this turn.		
+		var active = this.active; //Was docked this turn.		
 		this.individualNotesTransfer = Array();
-		if (isDocked) {
+		if (active) {
 			this.individualNotesTransfer.push(1);
 		}
 	}
