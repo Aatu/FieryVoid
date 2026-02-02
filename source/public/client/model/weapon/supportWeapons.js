@@ -248,7 +248,7 @@ ShadeModulator.prototype.doMultipleFireOrders = function (shooter, target, syste
 
 	if(this.firingMode == 4){
         var shadingField = shipManager.systems.getSystemByName(target, "ShadingField");
-        if(!shadingField.shaded){			
+        if(!shadingField.active){			
 			confirm.error("Shade Modulator can only target Shaded units for Shade Enhancement!");		
 			return; //No more shots to allocated!
 		}	

@@ -1,32 +1,33 @@
 import * as React from "react";
 import PlayerSettingsForm from "./PlayerSettingsForm";
-import {ContainerRoundedRightBottom, Clickable} from "../styled";
+import styled from 'styled-components';
+import { ContainerRoundedRightBottom, Clickable } from "../styled";
 
-class PlayerSettings extends React.Component{
+class PlayerSettings extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {open: false};
+        this.state = { open: false };
     }
 
     open() {
-        this.setState({open: true});
+        this.setState({ open: true });
     };
 
     close() {
-        this.setState({open: false});
+        this.setState({ open: false });
     };
 
-    render(){
-        if (! this.state.open) {
+    render() {
+        if (!this.state.open) {
             return (<MainButton onClick={this.open.bind(this)}>⚙</MainButton>);
         }
 
-        return (<PlayerSettingsForm close={this.close.bind(this)} {...this.props}/>)
+        return (<PlayerSettingsForm close={this.close.bind(this)} {...this.props} />)
     }
 }
 
-const MainButton = ContainerRoundedRightBottom.extend`
+const MainButton = styled(ContainerRoundedRightBottom)`
     width: 50px;
     height: 50px;
     position: fixed;

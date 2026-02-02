@@ -14,10 +14,12 @@ class BlackRapier extends BaseShip{
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->agile = true;
+		$this->notes .= "Can skin dance"; 
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;   
-        
+		$this->skinDancer = true;         
+
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
         

@@ -61,13 +61,13 @@ class PlayerSettingsForm extends React.Component {
                 <InputAndLabel label={"Key to display ALL Ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowAllBallistics")} value={this.getKey.call(this, "ShowAllBallistics")} />
                 <InputAndLabel label={"Key to display FRIENDLY Ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowFriendlyBallistics")} value={this.getKey.call(this, "ShowFriendlyBallistics")} />
                 <InputAndLabel label={"Key to display ENEMY Ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowEnemyBallistics")} value={this.getKey.call(this, "ShowEnemyBallistics")} />
-                <InputAndLabel label={"Key to toggle RULER tool"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleLoS")} value={this.getKey.call(this, "ToggleLoS")} />                                                                                                
-                <InputAndLabel label={"Key to toggle HEX numbers"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleHexNumbers")} value={this.getKey.call(this, "ToggleHexNumbers")} />                                                
+                <InputAndLabel label={"Key to toggle RULER tool"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleLoS")} value={this.getKey.call(this, "ToggleLoS")} />
+                <InputAndLabel label={"Key to toggle HEX numbers"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleHexNumbers")} value={this.getKey.call(this, "ToggleHexNumbers")} />
                 <SubTitle>Sound</SubTitle>
-                <InputAndLabel label={"Toggle sound in Replay"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleSound")} value={this.getKey.call(this, "ToggleSound")} />     
-                <SubTitle>Visual</SubTitle>                           
+                <InputAndLabel label={"Toggle sound in Replay"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleSound")} value={this.getKey.call(this, "ToggleSound")} />
+                <SubTitle>Visual</SubTitle>
                 <InputAndLabel placeholder="0" type="number" label={"Zoom level to change to strategic view"} onChange={this.getOnChange.call(this, "ZoomLevelToStrategic")} value={this.get.call(this, "ZoomLevelToStrategic")} />
-                <Disclaimer>Fiery Void is an unofficial fan-made game inspired by Babylon 5 Wars. It is not endorsed by or affiliated with any official rights holders. All trademarks remain the property of their respective owners.</Disclaimer>                 
+                <Disclaimer>Fiery Void is an unofficial fan-made game inspired by Babylon 5 Wars. It is not endorsed by or affiliated with any official rights holders. All trademarks remain the property of their respective owners.</Disclaimer>
             </SubContainer>
         </Backdrop>)
     }
@@ -112,7 +112,7 @@ const CloseButton = styled.div`
     ${Clickable}
 `;
 
-const SubContainer = Container.extend`
+const SubContainer = styled(Container)`
     position: relative;
     max-width: 100%;
     width: 800px;

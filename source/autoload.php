@@ -2766,6 +2766,7 @@ spl_autoload_register(
                 'trekshieldprojection' => '/server/model/weapons/customTrek.php',
                 'trekshieldprojector' => '/server/model/weapons/customTrek.php',
                 'trekshieldftr' => '/server/model/weapons/customTrek.php',
+                'cloakingdevice' => '/server/model/weapons/customTrek.php',
 				
 				//ships
 				

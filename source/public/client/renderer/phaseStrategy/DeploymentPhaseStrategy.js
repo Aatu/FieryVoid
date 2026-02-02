@@ -29,8 +29,8 @@ window.DeploymentPhaseStrategy = function () {
 
         //Show commit button Deployment Phase if player has no ships, should never actually happen as server will skip Deployment Phases for these slots.
         if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
-            if(this.selectedShip) this.deselectShip(this.selectedShip);
-            this.setPhaseHeader("PRE-TURN ORDERS");            
+            if (this.selectedShip) this.deselectShip(this.selectedShip);
+            this.setPhaseHeader("PRE-TURN ORDERS");
             gamedata.showCommitButton();
             /*//Can auto-click it if we want.
 
@@ -38,7 +38,7 @@ window.DeploymentPhaseStrategy = function () {
             setTimeout(() => {
                 $(".confirmok").trigger("click");
             }, 50); // Adjust delay if needed */
-            
+
         }
 
         return this;
@@ -57,7 +57,7 @@ window.DeploymentPhaseStrategy = function () {
 
     DeploymentPhaseStrategy.prototype.selectFirstOwnShipOrActiveShip = function () {
         var ship = gamedata.getFirstFriendlyShipDeployment();
-        
+
         //TODO: what about active ship?
         if (ship) {
             this.setSelectedShip(ship);
@@ -65,7 +65,7 @@ window.DeploymentPhaseStrategy = function () {
     };
 
     DeploymentPhaseStrategy.prototype.onHexClicked = function (payload) {
-        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);
         var hex = payload.hex;
 
         if (!this.selectedShip || (shipManager.getTurnDeployed(this.selectedShip) < gamedata.turn)) {
@@ -76,7 +76,7 @@ window.DeploymentPhaseStrategy = function () {
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
             if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
                 shipManager.movement.deploy(this.selectedShip, hex);
-                this.onShipMovementChanged({ship: this.selectedShip});
+                this.onShipMovementChanged({ ship: this.selectedShip });
                 this.drawMovementUI(this.selectedShip);
 
                 if (validateAllDeployment(this.gamedata, this.deploymentSprites)) {
@@ -87,24 +87,25 @@ window.DeploymentPhaseStrategy = function () {
     };
 
     DeploymentPhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
-        if(shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+        if (shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
 
-        if (gamedata.showLoS) { 
+        if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;
-            mathlib.clearLosSprite();                   
-        }  
+            mathlib.clearLosSprite();
+        }
 
-		if(this.gamedata.isMyShip(ship) && (shipManager.getTurnDeployed(ship) == gamedata.turn)) { //Own ship and deploys this turn, just select it.
-            this.selectShip(ship, payload);    
+        if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn) 
+            || (shipManager.getTurnDeployed(ship) < gamedata.turn) && ship.canPreOrder)) { //Own ship and deploys this turn, just select it. Means that late-deployers can't deploy on ships with canPreOrder (unless they click very edge of hex), but that's rare.
+            this.selectShip(ship, payload);
         } else { //Neither of the above is true, allow to deploy.  Even on hexes occupied by ships that deployed earlier in game.
             this.onHexClicked(payload);
         }
-    };    
+    };
 
     DeploymentPhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
         var depTurn = shipManager.getTurnDeployed(ship);
-        if(depTurn < gamedata.turn) return;       
+        if (depTurn < gamedata.turn) return;
 
         showDeploymentArea(ship, this.deploymentSprites, this.gamedata);
 
@@ -120,7 +121,7 @@ window.DeploymentPhaseStrategy = function () {
         this.hideMovementUI();
     };
 
-    DeploymentPhaseStrategy.prototype.createReplayUI = function (gamedata) {};
+    DeploymentPhaseStrategy.prototype.createReplayUI = function (gamedata) { };
 
     function showEnemyDeploymentAreas(deploymentSprites, gamedata) {
         var team = gamedata.getPlayerTeam();
@@ -136,12 +137,12 @@ window.DeploymentPhaseStrategy = function () {
         var team = gamedata.getPlayerTeam();
         var slot = gamedata.getPlayerSlot();
         deploymentSprites.forEach(function (icon) {
-            if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid != gamedata.thisplayer  && icon.available >= gamedata.turn) {
+            if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid != gamedata.thisplayer && icon.available >= gamedata.turn) {
                 // Let's try and also show the blue ally box.
-                icon.allySprite.show();                 
+                icon.allySprite.show();
             } //else if (icon.team == team && icon.slotId != "" + slot + "" && icon.playerid == gamedata.thisplayer) {
-                //icon.ownSprite.show();   
-           // }    
+            //icon.ownSprite.show();   
+            // }    
         });
     }
 
@@ -179,7 +180,7 @@ window.DeploymentPhaseStrategy = function () {
             var ownSprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'own', scene, deploymentData.avail);
             var allySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'ally', scene, deploymentData.avail);
             var enemySprite = new DeploymentIcon(deploymentData.position, deploymentData.size, 'enemy', scene, deploymentData.avail);
-            
+
             var mapData = getMapData();
 
             var terrainSprite = new DeploymentIcon(mapData.position, mapData.size, 'terrain', scene, 1);
@@ -217,16 +218,16 @@ window.DeploymentPhaseStrategy = function () {
     }
 
     function validateTerrainDeployment(hex) {
-            var mapData = getMapData();
-            var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
+        var mapData = getMapData();
+        var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
 
-            var offsetPosition = {
-                x: mapData.position.x - hexPositionInGame.x,
-                y: mapData.position.y - hexPositionInGame.y
-            };
+        var offsetPosition = {
+            x: mapData.position.x - hexPositionInGame.x,
+            y: mapData.position.y - hexPositionInGame.y
+        };
 
-            return Math.abs(offsetPosition.x) < Math.floor(mapData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(mapData.size.height / 2);
-    }    
+        return Math.abs(offsetPosition.x) < Math.floor(mapData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(mapData.size.height / 2);
+    }
 
     function getMapData() {
 
@@ -239,14 +240,14 @@ window.DeploymentPhaseStrategy = function () {
             mapWidth = (parseInt(match[1])) * window.Config.HEX_SIZE * 1.73;
         }
 
-		if(mapHeight <= 0) mapHeight = 48 * window.Config.HEX_SIZE * 1.5;		
-		if(mapWidth <= 0) mapWidth = 72 * window.Config.HEX_SIZE * 1.73;
+        if (mapHeight <= 0) mapHeight = 48 * window.Config.HEX_SIZE * 1.5;
+        if (mapWidth <= 0) mapWidth = 72 * window.Config.HEX_SIZE * 1.73;
 
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;
         return {
-            position: {x: -40, y: 0},
-            size: {height: mapHeight,width: mapWidth},
+            position: { x: -40, y: 0 },
+            size: { height: mapHeight, width: mapWidth },
         };
     }
 
@@ -284,7 +285,7 @@ window.DeploymentPhaseStrategy = function () {
                 continue;
             }
 
-            if(shipManager.getTurnDeployed(ship) != gamedata.turn) continue; //We're only validating ships that deploy this turn!
+            if (shipManager.getTurnDeployed(ship) != gamedata.turn) continue; //We're only validating ships that deploy this turn!
 
             if (!validateDeploymentPosition(ship, null, deploymentSprites)) {
                 return false;
@@ -298,9 +299,9 @@ window.DeploymentPhaseStrategy = function () {
         if (!hex) {
             hex = new hexagon.Offset(shipManager.getShipPosition(ship));
         }
-        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {//return true;
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {//return true;
             return validateTerrainDeployment(hex);
-        }else{    
+        } else {
             var icon = getSlotById(ship.slot, deploymentSprites);
             return icon.isValidDeploymentPosition(hex);
         }

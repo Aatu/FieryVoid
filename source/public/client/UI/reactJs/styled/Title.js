@@ -9,8 +9,8 @@ const Title = styled.span`
     font-weight: bold;
 `;
 
-const SubTitle = Title.extend`
+const SubTitle = styled(Title)`
     font-weight: normal;
 `;
 
-export {Title, SubTitle};
+export { Title, SubTitle };
