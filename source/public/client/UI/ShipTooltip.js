@@ -2,7 +2,10 @@
 
 window.ShipTooltip = function () {
 
-    var HTML = '<div class="shipNameContainer">' + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>' + '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>TARGETING</span></div>' + '<div class="fire targeting"></div>' + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:#b34119;"><span>INCOMING:</span></div>' + '<div class="ballistics incoming"></div>' + '<div class="buttons"></div>' + '</div>';
+    var HTML = '<div class="shipNameContainer">' + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>' + 
+    '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red; text-decoration: bold;"><span>TARGETING</span></div>' + 
+    '<div class="fire targeting"></div>' + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red;"><span>INCOMING:</span></div>' + 
+    '<div class="ballistics incoming"></div>' + '<div class="buttons"></div>' + '</div>';
 
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu) {
         this.element = jQuery(HTML);
@@ -165,14 +168,24 @@ window.ShipTooltip = function () {
         }
         if(shipManager.isStealthShip(ship)){
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn){
-                toDisplay += '<span style="color:green;">Undetected</span>; '; //Always say undetected on Deployment phase.  
+                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Always say undetected on Deployment phase.  
             } else if (shipManager.isDetected(ship)) {
                 toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
             } else {
-                toDisplay += '<span style="color:green;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
+                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
             }
         }
-                    
+ 
+        if (gamedata.gamephase == 3){
+            if(Object.values(ship.skinDancing).includes(true)){ 
+                toDisplay += '<span style="color:limegreen;">Skin Dancing</span>; '; //Notify player that unit is skin dancing this turn.                  
+            }else if(Object.values(ship.skinDancing).includes("Aborted")){
+                toDisplay += '<span style="color:orange;">Skin Dance Aborted</span>; '; //Notify player that unit is skin dancing this turn.  
+            }  else if(Object.values(ship.skinDancing).includes("Failed")){
+                toDisplay += '<span style="color:red;">Failed Skin Dancing</span>; '; //Notify player that unit is skin dancing this turn.  
+            }        
+        }        
+
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
         } else if (ship.osat) {

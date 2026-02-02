@@ -6,7 +6,7 @@ const ShipSectionContainer = styled.div`
     display: flex;
     flex-wrap: wrap-reverse;
     width: ${props => {
-        switch(props.location) {
+        switch (props.location) {
             case 1:
             case 0:
             case 2:
@@ -22,7 +22,7 @@ const ShipSectionContainer = styled.div`
     margin: 2px;
 
     border: ${props => {
-        switch(props.location) {
+        switch (props.location) {
             case 0:
                 return '2px solid #6089c1';
             default:
@@ -45,24 +45,24 @@ const StructureContainer = styled.div`
     height: 16px;
     box-sizing: border-box;
     background-color: black;
-    color: ${props => props.health === 0 ? 'transparent' : 'white'};
+    color: ${props => props.$health === 0 ? 'transparent' : 'white'};
     font-family: arial;
     font-size: 11px;
     text-shadow: black 0 0 6px, black 0 0 6px;
     border: 1px solid #496791;
     margin: 2px;
-    filter: ${props => props.health === 0 ? 'blur(1px)' : 'none'};
+    filter: ${props => props.$health === 0 ? 'blur(1px)' : 'none'};
 
-    :before {
+    &::before {
         box-sizing: border-box;
         content: "";
         position:absolute;
-        width:  ${props => `${props.health}%`};
+        width:  ${props => props.$health}%;
         height: 100%;
         left: 0;
         bottom: 0;
         z-index: 0;
-        background-color: ${props => props.criticals ? '#ed6738' : '#427231'};
+        background-color: ${props => props.$criticals ? '#ed6738' : '#427231'};
         border: 1px solid black;
     }
 
@@ -70,16 +70,16 @@ const StructureContainer = styled.div`
 
 class ShipSection extends React.Component {
     render() {
-        const {ship, systems, location} = this.props;
+        const { ship, systems, location } = this.props;
 
         const structure = getStructure(systems);
 
         return (
             <ShipSectionContainer location={location}>
-                {orderSystems(systems, location).map(system => (<SystemIcon scs key={`system-scs-${location}-${ship.id}-${system.id}`} system={system} ship={ship}/>))}
+                {orderSystems(systems, location).map(system => (<SystemIcon scs key={`system-scs-${location}-${ship.id}-${system.id}`} system={system} ship={ship} />))}
 
-                {structure && <StructureContainer health={getStructureLeft(ship, structure)} criticals={hasCriticals(structure)}>
-                    <StructureText>{ structure.maxhealth - damageManager.getDamage(ship, structure)} / {structure.maxhealth} A {shipManager.systems.getArmour(ship, structure)}</StructureText>
+                {structure && <StructureContainer $health={getStructureLeft(ship, structure)} $criticals={hasCriticals(structure)}>
+                    <StructureText>{structure.maxhealth - damageManager.getDamage(ship, structure)} / {structure.maxhealth} A {shipManager.systems.getArmour(ship, structure)}</StructureText>
                 </StructureContainer>}
             </ShipSectionContainer>
         )
@@ -114,11 +114,11 @@ const reverseRowsOfThree = (systems) => {
     systems.forEach((system, i) => {
         const j = i % 3;
         if (j === 0) {
-            list[i+2] = system;
+            list[i + 2] = system;
         } else if (j === 1) {
             list[i] = system;
         } else {
-            list[i-2] = system;
+            list[i - 2] = system;
         }
     })
 
@@ -144,12 +144,12 @@ const orderSystemsFourWide = (systems) => {
 
     let list = [];
 
-	//4 equal systems
-    while(true) {
+    //4 equal systems
+    while (true) {
 
-        const {picked, remaining} = pickOuter(systems, 4);
+        const { picked, remaining } = pickOuter(systems, 4);
 
-        if(picked.length === 0) {
+        if (picked.length === 0) {
             break;
         }
 
@@ -157,18 +157,18 @@ const orderSystemsFourWide = (systems) => {
 
         list = list.concat(picked);
     }
-	
 
-	//2 systems, plus optionally 2 other systems in the middle
-    while(true) {
 
-        const {picked, remaining} = pickOuter(systems, 2);
+    //2 systems, plus optionally 2 other systems in the middle
+    while (true) {
 
-        if(picked.length === 0) {
+        const { picked, remaining } = pickOuter(systems, 2);
+
+        if (picked.length === 0) {
             break;
         }
 
-        
+
         systems = remaining;
 
         const secondPick = pickOuter(systems, 2);
@@ -178,7 +178,7 @@ const orderSystemsFourWide = (systems) => {
             list = list.concat([picked[0], secondPick.picked[0], secondPick.picked[1], picked[1]]);
         } else {
             //list = list.concat([picked[0], systems.pop(), systems.pop(), picked[1]]) //use shift so system order is not reversed
-			list = list.concat([picked[0], systems.shift(), systems.shift(), picked[1]]);
+            list = list.concat([picked[0], systems.shift(), systems.shift(), picked[1]]);
             list = list.filter(system => system);
         }
     }
@@ -193,11 +193,11 @@ const orderSystemsThreeWide = (systems) => {
 
     let list = [];
 
-    while(true) {
+    while (true) {
 
-        const {picked, remaining} = pick(systems, 3);
+        const { picked, remaining } = pick(systems, 3);
 
-        if(picked.length === 0) {
+        if (picked.length === 0) {
             break;
         }
 
@@ -206,15 +206,15 @@ const orderSystemsThreeWide = (systems) => {
         list = list.concat(picked);
     }
 
-    while(true) {
+    while (true) {
 
-        const {picked, remaining} = pick(systems, 2);
+        const { picked, remaining } = pick(systems, 2);
 
-        if(picked.length === 0) {
+        if (picked.length === 0) {
             break;
         }
 
-        const {three, remainingSystems} = findFriendForTwo(picked, remaining);
+        const { three, remainingSystems } = findFriendForTwo(picked, remaining);
 
         systems = remainingSystems;
 
@@ -229,8 +229,8 @@ const orderSystemsThreeWide = (systems) => {
 const findFriendForTwo = (two, systems) => {
 
     const onePick = pick(systems, 1);
-    
-	/* singleton in the middle - does not look that good on the sides! changing to singleton on the inside
+
+    /* singleton in the middle - does not look that good on the sides! changing to singleton on the inside
     if (onePick.picked.length === 1) {
         return {three: [two[0], onePick.picked[0], two[1]], remainingSystems: onePick.remaining}
     }
@@ -238,24 +238,24 @@ const findFriendForTwo = (two, systems) => {
     if (systems.length > 0) {
         return {three: [two[0], systems.pop(), two[1]], remainingSystems: systems}
     }
-	*/
-	if (onePick.picked.length === 1) {
-        return {three: [onePick.picked[0], two[0], two[1] ], remainingSystems: onePick.remaining}
+    */
+    if (onePick.picked.length === 1) {
+        return { three: [onePick.picked[0], two[0], two[1]], remainingSystems: onePick.remaining }
     }
 
     if (systems.length > 0) {
         /*return {three: [systems.pop(), two[0], two[1] ], remainingSystems: systems}*/ //use shift so system order is not reversed
-		return {three: [systems.shift(), two[0], two[1] ], remainingSystems: systems}
+        return { three: [systems.shift(), two[0], two[1]], remainingSystems: systems }
     }
 
-    return {three: [two[0], two[1]], remainingSystems: systems}
+    return { three: [two[0], two[1]], remainingSystems: systems }
 }
 
 const pick = (systems, amount = 3) => {
     const one = systems.find(system => {
         const count = systems.reduce((all, otherSystem) => {
             if (otherSystem.name === system.name) {
-                return all+1;
+                return all + 1;
             }
 
             return all;
@@ -269,11 +269,11 @@ const pick = (systems, amount = 3) => {
     });
 
     if (!one) {
-        return {picked: [], remaining: systems};
+        return { picked: [], remaining: systems };
     }
 
     let picked = [];
-	// this gets first X...
+    // this gets first X...
     const remaining = systems.filter(otherSystem => {
         if (otherSystem.name === one.name && amount > 0) {
             amount--;
@@ -284,7 +284,7 @@ const pick = (systems, amount = 3) => {
         return true;
     })
 
-    return {picked, remaining};
+    return { picked, remaining };
 }
 
 
@@ -293,7 +293,7 @@ const pickOuter = (systems, amount = 3) => {
     const one = systems.find(system => {
         const count = systems.reduce((all, otherSystem) => {
             if (otherSystem.name === system.name) {
-                return all+1;
+                return all + 1;
             }
 
             return all;
@@ -307,12 +307,12 @@ const pickOuter = (systems, amount = 3) => {
     });
 
     if (!one) {
-        return {picked: [], remaining: systems};
+        return { picked: [], remaining: systems };
     }
-	
+
     let picked = [];
     let picked2 = [];
-	// this gets outer X...
+    // this gets outer X...
     const remaining = systems.filter(otherSystem => {
         if (otherSystem.name === one.name /*&& amount > 0*/) {
             //amount--;
@@ -322,18 +322,18 @@ const pickOuter = (systems, amount = 3) => {
 
         return true;
     })
-	
-	var fromBeginning = Math.ceil(amount/2);
-	var fromEnding = Math.floor(amount/2);
-	for(var i = 0;i<picked2.length;i++){
-		if ((i<fromBeginning) || (i>=(picked2.length-fromEnding))){ //elements from beginning and end get picked
-			picked.push(picked2[i]);
-		}else{//remaining elements (from the middle) get returned to the pool
-			remaining.unshift(picked2[i]); //return to the beginning - so they're picked first in next row!
-		}
-	}
 
-    return {picked, remaining};
+    var fromBeginning = Math.ceil(amount / 2);
+    var fromEnding = Math.floor(amount / 2);
+    for (var i = 0; i < picked2.length; i++) {
+        if ((i < fromBeginning) || (i >= (picked2.length - fromEnding))) { //elements from beginning and end get picked
+            picked.push(picked2[i]);
+        } else {//remaining elements (from the middle) get returned to the pool
+            remaining.unshift(picked2[i]); //return to the beginning - so they're picked first in next row!
+        }
+    }
+
+    return { picked, remaining };
 }
 
 

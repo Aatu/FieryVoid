@@ -41,7 +41,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li>                
                 <li><a href="#ruler">Ruler Tool</a></li>
-                <li><a href="#savedfleets">Saved Fleets</a></li>                                    
+                <li><a href="#savedfleets">Saved Fleets</a></li>
+                <li><a href="#skindancing">Skin Dancing</a></li>                                                       
                 <li><a href="#stealth">Stealth Ships</a></li>
                 <li><a href="#terrain">Terrain</a></li>  
                 <li><a href="#useful">Useful Controls</a></li>
@@ -270,6 +271,43 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
+        <h3 id="skindancing" >Skin Dancing</h3>
+        <ul>
+            <li>Skin dancing refers to a maneuver wherein a unit flies only meters above the surface of a large unit or base. It is a very dangerous maneuver only performed by the most agile
+                of ships.</li>
+            <li>Any unit that is able to Skin Dance will automatically attempt to do so when it ends its movement on the same hex as an Enormous Unit 
+                (not a Terrain unit though, where it will suffer the normal collision rules covered in the 'Terrain' section).  In order to be eligible to Skin Dance a unit must meet the following critieria:</li>
+                <ul class="circle-list">
+                    <li>Must be a Medium Ship or smaller, and must be classified as agile (fighters and shuttles are considered agile for this purpose).  There are some rare execptions to this rule e.g. Torvalus capital ships.</li>
+                    <li>Skin Dancing unit cannot be stationary, and the Enormous Unit cannot be moving at more than Speed 5.  
+                    If the Enormous unit is moving the dancing ship must be moving in the same direction or the exact opposite direction.</li>
+                </ul>
+            </li>
+            <li>Eligible ships will then make a Skin Dancing roll on d20 just before the Firing Phase begins, and must roll 15 or less to succeed. The following modifiers are applied to this roll:
+                <ul class="circle-list">
+                    <li>If the skin dancer’s speed is greater than 5, +1 to the roll for each 2 points of speed (or any fraction) above this limit.</li>
+                    <li>If either unit is rolling or pivoting, +5 is added to the roll. These are cumulative, so if the skin dancer is rolling while the target is pivoting, add +10. A rotating base is not considered to be pivoting. </li>
+                    <li>If a skin dancing ship has lost any of its thrusters (regardless of their location), +1 is added for each point of thrust rating no longer available. 
+                        For example, a ship that has lost two of its aft 4-rating thrusters would have +8 to the roll.</li>
+                    <li>If a skin dancing fighter is jinking, +3 is added for each level.</li>
+                    <li>If a flight of fighters are equipped with a navigator, -1 is subtracted from the roll.</li>
+                </ul>
+            </li>
+            <li>If the roll fails by 5 or less (i.e., the modified roll is a 16, 17, 18, 19, or 20), the dance is aborted with no ill effects, and there is no chance of a ram.  
+                If the roll result is 21 or higher, skin-dancing ships smashes into the hull of the Enormous unit. 
+                For fighters, one fighter at random crashes into the hull as above while the others break away. 
+                The survivors cannot fire (even defensively) or guide weapons on that turn as they are too busy pulling out of the maneuver.</li>
+            <li>If skin dancing is successful, the unit cannot be fired upon by enemy units unless they also skin dance over the same target, 
+                the exception being ballistic weapons that were launched at the skin dancing ship earlier in the turn.  
+                The vessel you are skimming over also cannot fire at you, and cannot fire defensively against your weapons, because you’re inside its weapon’s tracking zones.</li>
+            <li>Finally, any of your forward firing weapons (those that can legally fire into the row of hexes directly ahead of your ship) automatically roll the best result on their hit dice e.g. they will roll a 1 on a d100 meaning they automatically hit in almsot all cases.  
+                In fact, your weapons may not fire at any other target (except other skin dancers, against whom they use the normal firing procedures) unless they can fire outside the 120° forward area ahead of the ship. 
+                If this is the case, they can choose another eligible target if desired. That unit may use intercept fire or other defensive devices normally.</li>
+            <li>Fighters cannot guide missiles or other ballistic weapons towards a target (even the unit being skin danced over) even if they have a navigator. 
+                The pilot and any other crewmen are too busy controlling the fighter and its onboard weapons to perform another mission.</li>    
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>        
+
         <h3 id="stealth" >Hyach Stealth Ships</h3>
         <ul>
             <li>Stealth ships are invisible at long ranges until they reveal themselves or are detected.</li>
@@ -294,7 +332,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Stealth fighters: Double range penalty beyond 5 hexes, and ballistic launches restricted beyond 5 hexes.</li>
                 </ul>
             </li>
-            <li>Stealth fighters cannot become fully invisible, only benefit from jammer/no-lock effects.</li>
+            <li>Stealth fighters cannot become fully invisible, they only benefit from jammer/no-lock effects.</li>
             <li>Note - These rules only cover the Stealth function for younger Bablyon 5 races, such as the Hyach.  
                 For details of other factions' stealth mechanics, such as the Torvalus, see individual faction notes in <a href="https://fieryvoid.eu/factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers</a></li>            
         </ul>
@@ -302,13 +340,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="terrain" >Terrain</h3>
         <ul>
-            <li><b>Asteroids (Single Hex):</b> Added in Create Game or manually from Terrain faction list. 
-            They block line of sight and cause 1d10 * Speed raking damage to non-fighters moving through them (applied at same time as other Ramming Attacks).  
-            If a ship ENDS its movement on an asteroid it will automatically ram it fully, as the Asteroid is an Enormous unit (see above).</li>
+            <li><b>Asteroids (Single Hex Only):</b> Added in Create Game or manually from Terrain faction list. 
+            They block line of sight and cause 1d10 * Speed raking damage to any unit that moves through them or ends on their movement on the same hex.  
+            This damage is dealt immediately before Firing Phase.</li>           
+            <li><b>Moons / Large Asteroids:</b> Describes anything larger than Asteroids above (e.g. occupy multiple hexes). 
+            Units moving into their area automatically crash into it during the Pre-Firing Phase.</li>
             <li><b>Manual Placement:</b> If you want to have full control over where Terrain is placed, you can create a new player slot for yourself at game creation and 
             pick the terrain you want from the Terrain faction in Other.  
-            Then, providing you have set an appropriately wide deployment zone, you can just place these like any other ship on Turn 1.</li>            
-            <li><b>Moons / Large Asteroids:</b> Larger than asteroids (multiple hexes). Units moving into their area automatically crash into it during the Pre-Firing Phase.</li>
+            Then, providing you have set an appropriately wide deployment zone, you can just place these like any other ship on Turn 1.</li>             
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

@@ -1,5 +1,5 @@
 import * as React from "react";
-import ReactDom from "react-dom";
+import { createRoot } from "react-dom/client";
 import PlayerSettings from "./playerSettings/PlayerSettings";
 import ShipThrust from "./shipThrust/ShipThrust";
 import FullScreen from "./fullScreen/FullScreen";
@@ -7,57 +7,84 @@ import EwButtons from "./ewButtons/EwButtons";
 import WeaponList from "./system/WeaponList";
 import SystemInfo from "./system/SystemInfo";
 import SystemInfoMenu from "./system/SystemInfoMenu";
-import {canDoAnything} from "./system/SystemInfoButtons";
+import { canDoAnything } from "./system/SystemInfoButtons";
 import ShipWindowsContainer from "./shipWindow/ShipWindowsContainer";
 
-class UIManager{
+class UIManager {
 
     constructor(parentElement) {
         this.parentElement = parentElement;
+        this.roots = new Map();
+    }
+
+    getRoot(selector) {
+        const element = jQuery(selector, this.parentElement)[0];
+        if (!element) return null;
+
+        if (!this.roots.has(element)) {
+            this.roots.set(element, createRoot(element));
+        }
+        return this.roots.get(element);
+    }
+
+    unmountRoot(selector) {
+        const element = jQuery(selector, this.parentElement)[0];
+        if (element && this.roots.has(element)) {
+            const root = this.roots.get(element);
+            root.unmount();
+            this.roots.delete(element);
+        }
     }
 
     EwButtons(args) {
-        ReactDom.render(<EwButtons {...args}/>, jQuery("#showEwButtons", this.parentElement)[0] );
+        const root = this.getRoot("#showEwButtons");
+        if (root) root.render(<EwButtons {...args} />);
     }
 
     FullScreen(args) {
-        ReactDom.render(<FullScreen {...args}/>, jQuery("#fullScreen", this.parentElement)[0] );
+        const root = this.getRoot("#fullScreen");
+        if (root) root.render(<FullScreen {...args} />);
     }
 
     PlayerSettings(args) {
-        ReactDom.render(<PlayerSettings {...args}/>, jQuery("#playerSettings", this.parentElement)[0] );
+        const root = this.getRoot("#playerSettings");
+        if (root) root.render(<PlayerSettings {...args} />);
     }
 
     showShipThrustUI(args) {
-        ReactDom.render(<ShipThrust {...args}/>, jQuery("#shipThrust", this.parentElement)[0] );
+        const root = this.getRoot("#shipThrust");
+        if (root) root.render(<ShipThrust {...args} />);
     }
 
     hideShipThrustUI() {
-        ReactDom.unmountComponentAtNode(jQuery("#shipThrust", this.parentElement)[0]);
+        this.unmountRoot("#shipThrust");
     }
 
     showWeaponList(args) {
-        ReactDom.render(<WeaponList {...args}/>, jQuery("#weaponList", this.parentElement)[0] );
+        const root = this.getRoot("#weaponList");
+        if (root) root.render(<WeaponList {...args} />);
     }
 
     hideWeaponList() {
-        ReactDom.unmountComponentAtNode(jQuery("#weaponList", this.parentElement)[0]);
+        this.unmountRoot("#weaponList");
     }
 
     showSystemInfo(args) {
-        ReactDom.render(<SystemInfo {...args}/>, jQuery("#systemInfoReact", this.parentElement)[0] );
+        const root = this.getRoot("#systemInfoReact");
+        if (root) root.render(<SystemInfo {...args} />);
     }
 
     hideSystemInfo() {
-        ReactDom.unmountComponentAtNode(jQuery("#systemInfoReact", this.parentElement)[0]);
+        this.unmountRoot("#systemInfoReact");
     }
 
     showSystemInfoMenu(args) {
-        ReactDom.render(<SystemInfoMenu {...args}/>, jQuery("#systemInfoReact", this.parentElement)[0] );
+        const root = this.getRoot("#systemInfoReact");
+        if (root) root.render(<SystemInfoMenu {...args} />);
     }
 
     hideSystemInfoMenu() {
-        ReactDom.unmountComponentAtNode(jQuery("#systemInfoReact", this.parentElement)[0]);
+        this.unmountRoot("#systemInfoReact");
     }
 
     canShowSystemInfoMenu(ship, system) {
@@ -65,7 +92,8 @@ class UIManager{
     }
 
     renderShipWindows(args) {
-        ReactDom.render(<ShipWindowsContainer {...args}/>, jQuery("#shipWindowsReact", this.parentElement)[0] );
+        const root = this.getRoot("#shipWindowsReact");
+        if (root) root.render(<ShipWindowsContainer {...args} />);
     }
 }
 
