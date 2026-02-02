@@ -34,6 +34,9 @@ window.UI = {
             UI.shipMovement.turnleftElement = $("#turnleft", ui);
             UI.shipMovement.turnrightElement = $("#turnright", ui);
 
+            UI.shipMovement.graviticTurnLeftElement = $("#graviticTurnLeft", ui);
+            UI.shipMovement.graviticTurnRightElement = $("#graviticTurnRight", ui);            
+
             UI.shipMovement.turnIntoPivotLeftElement = $("#turnIntoPivotLeft", ui);
             UI.shipMovement.turnIntoPivotRightElement = $("#turnIntoPivotRight", ui);
 
@@ -102,6 +105,9 @@ window.UI = {
 
             UI.shipMovement.turnIntoPivotLeftElement.on("click touchstart", UI.shipMovement.turnIntoPivotLeftCallback);
             UI.shipMovement.turnIntoPivotRightElement.on("click touchstart", UI.shipMovement.turnIntoPivotRightCallback);
+
+            UI.shipMovement.graviticTurnLeftElement.on("click touchstart", UI.shipMovement.graviticTurnLeftCallback);
+            UI.shipMovement.graviticTurnRightElement.on("click touchstart", UI.shipMovement.graviticTurnRightCallback);            
 
             jQuery('#shipMovementUI div').on('mousedown touchend touchmove', cancelEvent);
             jQuery('#shipMovementUI div').on('mouseup touchend touchmove', cancelEvent);
@@ -240,6 +246,20 @@ window.UI = {
             UI.shipMovement.callbackHandler.turnIntoPivotCallback(e, true);
         },
 
+        graviticTurnRightCallback: function graviticTurnRightCallback(e) {
+            e.stopPropagation();
+            UI.shipMovement.graviticTurnCallback(e, true);
+        },
+
+        graviticTurnLeftCallback: function graviticTurnLeftCallback(e) {
+            e.stopPropagation();
+            UI.shipMovement.graviticTurnCallback(e, false);
+        },
+
+         graviticTurnCallback: function graviticTurnCallback(e, right) {
+            UI.shipMovement.callbackHandler. graviticTurnCallback(e, right);
+        },        
+
         drawShipMovementUI: function drawShipMovementUI(ship, callbackHandler) {
 
             UI.shipMovement.callbackHandler = callbackHandler;
@@ -284,6 +304,7 @@ window.UI = {
                 acc.hide();
             }
 
+            //CHANGE SPEED
             dis = 40;
             var deacc = UI.shipMovement.deaccElement;
             if (shipManager.movement.canChangeSpeed(ship)) {
@@ -291,9 +312,11 @@ window.UI = {
             } else {
                 deacc.hide();
             }
+
             angle = mathlib.addToDirection(shipHeading, -60);
             dis = 60;
 
+            //TURN LEFT
             var turnleft = UI.shipMovement.turnleftElement;
             if (shipManager.movement.canTurn(ship, false)) {
                 UI.shipMovement.drawUIElement(turnleft, pos.x, pos.y, s, dis * 1.4, angle, "img/turnleft.png", "turnleftcanvas", shipHeading);
@@ -302,13 +325,14 @@ window.UI = {
             }
 
             dis = 85;
+
+            //SLIP LEFT
             var slipleft = UI.shipMovement.slipleftElement;
             if (shipManager.movement.canSlip(ship, false)) {
                 UI.shipMovement.drawUIElement(slipleft, pos.x, pos.y, s * 0.7, dis * 1.4, angle, "img/move.png", "slipleftcanvas", mathlib.addToDirection(shipHeading, -60));
             } else {
                 slipleft.hide();
             }
-
 
             // TURN INTO PIVOT LEFT
             dis = 70;
@@ -318,17 +342,28 @@ window.UI = {
                 UI.shipMovement.drawUIElement(turnPivotLeft, pos.x, pos.y, s, dis * 1.4, angle, "img/turnIntoPivotLeft.png", "turnIntoPivotLeftCanvas", shipHeading);
             } else {
                 turnPivotLeft.hide();
-            }
+            }       
+
+            //GRAVITIC TURN LEFT
+            var graviticTurnLeft = UI.shipMovement.graviticTurnLeftElement;
+            if (shipManager.movement.canGraviticTurn(ship, false)) {
+                UI.shipMovement.drawUIElement(graviticTurnLeft, pos.x, pos.y, s, dis * 1.4, angle, "img/graviticTurnLeft.png", "graviticTurnLeftCanvas", shipHeading);
+            } else {
+                graviticTurnLeft.hide();
+            }     
 
             dis = 60;
             angle = mathlib.addToDirection(shipHeading, 60);
-            var turnright = UI.shipMovement.turnrightElement;
 
+            //TURN RIGHT
+            var turnright = UI.shipMovement.turnrightElement;
             if (shipManager.movement.canTurn(ship, true)) {
                 UI.shipMovement.drawUIElement(turnright, pos.x, pos.y, s, dis * 1.4, angle, "img/turnright.png", "turnrightcanvas", shipHeading);
             } else {
                 turnright.hide();
             }
+
+
 
             dis = 85;
             var slipright = UI.shipMovement.sliprightElement;
@@ -348,9 +383,17 @@ window.UI = {
                 turnPivotRight.hide();
             }
 
+            //GRAVTIC TURN RIGHT
+            var graviticTurnRight = UI.shipMovement.graviticTurnRightElement;
+            if (shipManager.movement.canGraviticTurn(ship, false)) {
+                UI.shipMovement.drawUIElement(graviticTurnRight, pos.x, pos.y, s, dis * 1.4, angle, "img/graviticTurnRight.png", "graviticTurnRightCanvas", shipHeading);
+            } else {
+                graviticTurnRight.hide();
+            }   
+
             dis = 60;
 
-            //Pivot Right
+            //PIVOT LEFT
             angle = mathlib.addToDirection(shipHeading, -90);
             var pivotleft = UI.shipMovement.pivotleftElement;
             var pivotLeftActive = UI.shipMovement.pivotLeftActiveElement;
@@ -395,7 +438,7 @@ window.UI = {
                 pivotLeftActive.hide();
             }
 
-            //Pivot Right
+            //PIVOT RIGHT
             angle = mathlib.addToDirection(shipHeading, 90);
             var pivotright = UI.shipMovement.pivotrightElement;
             var pivotRightActive = UI.shipMovement.pivotRightActiveElement;
@@ -440,7 +483,7 @@ window.UI = {
                 pivotRightActive.hide();
             }
 
-            // Base Rotation
+            //BASE ROTATION
             var rotateleft = UI.shipMovement.rotateleftElement;
             var rotateright = UI.shipMovement.rotaterightElement;
             if (shipManager.movement.canRotate(ship)) {
@@ -460,38 +503,12 @@ window.UI = {
 
             dis = 30;
             angle = mathlib.addToDirection(shipHeading, 180);
-            var checkHeading = shipManager.getShipDoMAngle(ship);
-            /*			            
-                        var roll = UI.shipMovement.rollElement;
-                        var emergencyroll = UI.shipMovement.emergencyrollElement;            
-                        if (shipManager.movement.canRoll(ship)) {
-                            var icon = "img/rotate.png";
-                            if (shipManager.movement.isRolling(ship)) icon = "img/rotate_active.png";
-            
-                            dis += 30;
-                            UI.shipMovement.drawUIElement(roll, pos.x, pos.y, s, dis * 1.4, angle, icon, "rollcanvas", shipHeading);
-                            emergencyroll.hide()
-                        } else if (shipManager.movement.canEmergencyRoll(ship)){
-                            var icon = "img/emergencyRoll.png";
-                            // Check if the ship is facing left (adjust condition as needed)
-                            var rollIconAngle = mathlib.addToDirection(shipHeading, 180);;
-                            if (checkHeading >= 90 && checkHeading <= 270) {	
-                                // Swap angles for the morecontraction and lesscontraction buttons
-                                icon = "img/emergencyRollFlipped.png";
-                            } 
-                            dis += 30;
-                            UI.shipMovement.drawUIElement(emergencyroll, pos.x, pos.y, s, dis * 1.4, angle, icon, "emergencyrollcanvas", shipHeading);
-                            roll.hide();                            
-                        }else {
-                            roll.hide();
-                            emergencyroll.hide()                
-                        }
-            */
 
+            //ROLLING 
             var roll = UI.shipMovement.rollElement;
             var emergencyroll = UI.shipMovement.emergencyrollElement;
             var icon = "";
-            //		var checkHeading = shipHeading; // checkHeading is defined before now.
+            var checkHeading = shipManager.getShipDoMAngle(ship);
             dis += 30; // Increment distance only once.
 
             if (shipManager.movement.canRoll(ship)) {
@@ -522,6 +539,7 @@ window.UI = {
                 UI.shipMovement.rollActiveElement.hide();
             }
 
+            //JINKING
             var morejink = UI.shipMovement.morejinkElement;
             if (shipManager.movement.canJink(ship, 1)) {
                 if (!ship.flight) {
@@ -553,7 +571,7 @@ window.UI = {
                 lessjink.hide();
             }
 
-            //Shadows half phasing
+            //HALF PHASING
             var halfphase = UI.shipMovement.halfphaseElement;
             if (shipManager.movement.canHalfPhase(ship)) {
                 UI.shipMovement.drawUIElement(halfphase, pos.x, pos.y, 50, 35 * 1.4, angle, "img/HalfPhase.png", "halfphasecanvas", 0);
@@ -561,6 +579,7 @@ window.UI = {
                 halfphase.hide();
             }
 
+            //CANCEL MOVEMENT
             var cancel = UI.shipMovement.cancelElement;
             if (shipManager.movement.hasDeletableMovements(ship) && weaponManager.canCombatTurn(ship)) {
                 dis += 26;
@@ -569,6 +588,7 @@ window.UI = {
                 cancel.hide();
             }
 
+            //CONTRACTION
             var contraction = UI.shipMovement.contractionElement;
             if (shipManager.movement.canContract(ship, 0)) {
                 var icon = "img/contraction.png";

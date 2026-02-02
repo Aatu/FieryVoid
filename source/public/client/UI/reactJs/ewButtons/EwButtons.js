@@ -11,7 +11,7 @@ class EwButtons extends React.Component {
             losToggled: false,
             hexToggled: false,
             soundToggled: true,
-            replayMode: this.getReplayMode() 
+            replayMode: this.getReplayMode()
         };
 
         this.showFriendlyEW = this.showFriendlyEW.bind(this);
@@ -23,7 +23,7 @@ class EwButtons extends React.Component {
         this.toggleHexNumbers = this.toggleHexNumbers.bind(this);
         this.externalToggleHexNumbers = this.externalToggleHexNumbers.bind(this);
         this.toggleSound = this.toggleSound.bind(this);
-        this.externalToggleSound = this.externalToggleSound.bind(this);        
+        this.externalToggleSound = this.externalToggleSound.bind(this);
     }
 
     getReplayMode() {
@@ -40,14 +40,14 @@ class EwButtons extends React.Component {
             if (this.state.replayMode !== replayValue) {
                 this.setState({ replayMode: replayValue });
             }
-        }, 500);                      
+        }, 500);
     }
 
     componentWillUnmount() {
         window.removeEventListener("LoSToggled", this.externalToggleLoS);
         window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
         window.removeEventListener("soundToggled", this.externalToggleSound);
-        clearInterval(this.replayCheck);                       
+        clearInterval(this.replayCheck);
     }
 
     externalToggleLoS() {
@@ -60,8 +60,8 @@ class EwButtons extends React.Component {
         }));
     }
 
-    externalToggleSound(){
-        this.setState({ soundToggled: gamedata.playAudio  });
+    externalToggleSound() {
+        this.setState({ soundToggled: gamedata.playAudio });
     }
 
     showFriendlyEW(up) {
@@ -123,17 +123,17 @@ class EwButtons extends React.Component {
                 <FBButton onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)} />
                 <EBButton onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)} />
                 <LoSButton
-                    toggled={this.state.losToggled}
+                    $toggled={this.state.losToggled}
                     onMouseDown={this.toggleLoS.bind(this, false)}
                 />
                 <HexButton
-                    toggled={this.state.hexToggled}
+                    $toggled={this.state.hexToggled}
                     onMouseDown={this.toggleHexNumbers.bind(this, false)}
                 />
 
                 {this.state.replayMode && (
                     <SoundButton
-                        toggled={this.state.soundToggled}
+                        $toggled={this.state.soundToggled}
                         onMouseDown={this.toggleSound}
                         title={this.state.soundToggled ? "Sound On" : "Sound Off"}
                     />
@@ -151,7 +151,7 @@ const Container = styled.div`
     z-index: 4;
 `;
 
-const MainButton = ContainerRoundedRightSide.extend`
+const MainButton = styled(ContainerRoundedRightSide)`
     display: flex;
     width: 45px;
     height: 45px;
@@ -165,42 +165,42 @@ const MainButton = ContainerRoundedRightSide.extend`
     ${Clickable}
 `;
 
-const EEWButton = MainButton.extend`
+const EEWButton = styled(MainButton)`
     background-image: url("./img/EEW.png");
 `;
-const FEWButton = MainButton.extend`
+const FEWButton = styled(MainButton)`
     background-image: url("./img/FEW.png");
 `;
-const EBButton = MainButton.extend`
+const EBButton = styled(MainButton)`
     background-image: url("./img/ballisticTarget2.png");
 `;
-const FBButton = MainButton.extend`
+const FBButton = styled(MainButton)`
     background-image: url("./img/ballisticLaunch2.png");
 `;
-const LoSButton = MainButton.extend`
+const LoSButton = styled(MainButton)`
     background-image: url("./img/los1.png");
     filter: ${props =>
-        props.toggled
+        props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.toggled ? "limegreen" : "#496791")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#496791")};
     border-right: none;
     box-shadow: 0px 0px 0px black;
 `;
-const HexButton = MainButton.extend`
+const HexButton = styled(MainButton)`
     background-image: url("./img/hexNumber.png");
     filter: ${props =>
-        props.toggled
+        props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.toggled ? "limegreen" : "#496791")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#496791")};
     border-right: none;
 `;
 
 // 🎧 New Sound Button Style
-const SoundButton = MainButton.extend`
+const SoundButton = styled(MainButton)`
     background-image: ${props =>
-        props.toggled
+        props.$toggled
             ? 'url("./img/soundOn.png")'
             : 'url("./img/soundOff.png")'};
     border-right: none;
@@ -299,32 +299,32 @@ class EwButtons extends React.Component {
     render() {
         return (
             <Container>
-				<FEWButton 
-				    onMouseDown={this.showFriendlyEW.bind(this, false)}
-				    onMouseUp={this.showFriendlyEW.bind(this, true)}
+                <FEWButton 
+                    onMouseDown={this.showFriendlyEW.bind(this, false)}
+                    onMouseUp={this.showFriendlyEW.bind(this, true)}
                     onTouchStart={this.showFriendlyEW.bind(this, false)}
                     onTouchEnd={this.showFriendlyEW.bind(this, true)}                    
-				></FEWButton>
-				<EEWButton  
-				    onMouseDown={this.showEnemyEW.bind(this, false)}
-				    onMouseUp={this.showEnemyEW.bind(this, true)}
+                ></FEWButton>
+                <EEWButton  
+                    onMouseDown={this.showEnemyEW.bind(this, false)}
+                    onMouseUp={this.showEnemyEW.bind(this, true)}
                     onTouchStart={this.showEnemyEW.bind(this, false)}
                     onTouchEnd={this.showEnemyEW.bind(this, true)}                     
-				></EEWButton>
-				<FBButton 
-				    onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)}
-				></FBButton>
-				<EBButton  
-				    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
-				></EBButton>
-				<LoSButton
+                ></EEWButton>
+                <FBButton 
+                    onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)}
+                ></FBButton>
+                <EBButton  
+                    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
+                ></EBButton>
+                <LoSButton
                     toggled={this.state.losToggled}  
-				    onMouseDown={this.toggleLoS.bind(this, false)}
-				></LoSButton>	                
-				<HexButton
+                    onMouseDown={this.toggleLoS.bind(this, false)}
+                ></LoSButton>	                
+                <HexButton
                     toggled={this.state.hexToggled}   
-				    onMouseDown={this.toggleHexNumbers.bind(this, false)}
-				></HexButton>				
+                    onMouseDown={this.toggleHexNumbers.bind(this, false)}
+                ></HexButton>				
             </Container>
         );
     }

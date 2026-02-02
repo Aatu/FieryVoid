@@ -133,6 +133,7 @@ class Weapon extends ShipSystem
     public $firingMode = 1;
     public $firingModes = array(1 => "Standard"); //just a convenient name for firing mode
     public $modeLetters = 1;//Default to show only first letter of alt firing modes.  Up to 3 letter looks ok.
+	public $modeLettersArray = array();    
     public $damageType = ""; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
     public $damageTypeArray = array();
     public $weaponClass = "Particle"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! Make Particle default to prevent AA bugs when "" passed.
@@ -1278,12 +1279,22 @@ public function getStartLoading()
                 $shooterlosBlocked  = $this->isLoSBlocked($pos, $targetPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
                 //$soew = 0; //fighters CAN receive SOEW (fractional, SOEW calculation takes this into account)
                 if (!($shooter->isDestroyed() || $shooter->getFighterBySystem($fireOrder->weaponid)->isDestroyed())) {
-                    if ($shooter->hasNavigator && !$shooterlosBlocked) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
+
+                    // Check if skindancing is Active (True) or Failed. (Aborted counts as inactive).
+                    $isSkindancing = false;
+                    foreach ($shooter->skinDancing as $status) {
+                        if ($status === true || $status === 'Failed') {
+                            $isSkindancing = true;
+                            break;
+                        }
+                    }
+
+                    if ($shooter->hasNavigator && !$shooterlosBlocked && !$isSkindancing) {// Fighter has navigator and Line of Sight. Flight always benefits from offensive bonus.
                         $oew = $effectiveOB;
                     } else { // Check if target is in current weapon arc
                         $relativeBearing = $shooter->getBearingOnUnit($target);
-                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$shooterlosBlocked ) {
-                            // Target is in current launcher arc and has Line of Sight. Flight benefits from offensive bonus.
+                        if (mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc) && !$shooterlosBlocked && !$isSkindancing) {
+                            // Target is in current launcher arc and has Line of Sight and is NOT skindancing. Flight benefits from offensive bonus.
                             // Now check if the fighter is not firing any non-ballistic weapons
                             if (!$this->isFtrFiringNonBallisticWeapons($shooter, $fireOrder)) {
 								$oew = $effectiveOB;
@@ -1462,7 +1473,7 @@ public function getStartLoading()
 		//update by arc - this caused some trouble and I want it logged...		
         $relativeBearing = $target->getBearingOnUnit($shooter);
 		$notes .= 'bearing from target ' . $relativeBearing . ', ';
-				
+
         $fireOrder->chosenLocation = $hitLoc;
         $fireOrder->needed = $change;
         $fireOrder->notes = $notes;
@@ -1565,6 +1576,7 @@ public function getStartLoading()
             return; //Somehow a hex targeted weapon made it to the normal fire function, don't proceed.
         }    
 
+
         $fireOrder->needed -= $fireOrder->totalIntercept;
         $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;
         $fireOrder->notes .= $notes;
@@ -1606,9 +1618,19 @@ public function getStartLoading()
                 }
             }
 
+            //If skin-dancing shots which have a front arc automatically hit.
+            if (!$this->ballistic && isset($shooter->skinDancing[$target->id]) && $shooter->skinDancing[$target->id] === true) {
+                $inFrontArc = mathlib::isInArc(0, $this->startArc, $this->endArc);
+
+                if ($inFrontArc) {
+                    $rolled = 1;//Automatically roll best result when skindancing
+                }
+            }            
 
             $fireOrder->notes .= " FIRING SHOT " . ($i + 1) . ": rolled: $rolled, needed: $needed\n";
             $fireOrder->rolled = $rolled; //might be useful for weapon itself, too - like counting damage for Anti-Matter
+
+
 
             //hit?
             if ($rolled <= $needed) {

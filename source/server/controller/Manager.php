@@ -1462,6 +1462,11 @@ class Manager{
 		
     }
     
+    public static function insertSingleShip($gamedata, $ship, $userid){          
+		self::$dbManager->submitShip($gamedata->id, $ship, $userid);;
+    }    
+                 
+
     //Used by Pakmara Plasma Web to retrieve fire orders in workflow and get most recent id etc
     public static function retrieveFiringOrdersForWeapon($gamedata, $shooterid, $weaponid)
     {	
@@ -1469,7 +1474,7 @@ class Manager{
 		return $fireOrders;
     }    
 
-    //Used by systems that boost outside of Initial Orders to prevent duplication of power entries.
+    //Used by systems that boost outside of Initial Orders to prevent duplication of power entries. Not used by anything at the moment since Torvalus Shading Field got changed to Notes
     public static function removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn){              
 		self::$dbManager->removePowerEntriesForTurn($gameid, $shipid, $systemid, $turn);	
     }

@@ -2020,4 +2020,222 @@ class TrekMediumDisabler extends TrekShipDisablerBase{
 } //end of class TrekMediumDisabler
 
 
+//Trek Cloaking Device
+class CloakingDevice extends ShipSystem implements SpecialAbility{    
+	public $name = "CloakingDevice";
+	public $displayName = "Cloaking Device";
+	public $iconPath = "CloakingDevice.png";
+	public $specialAbilities = array("Cloaking");
+	public $primary = true;
+	public $detected = true;
+	protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment/PreOrders.			
+		
+	function __construct($armour, $maxhealth, $powerReq, $output){
+		parent::__construct($armour, $maxhealth, $powerReq, $output);
+	}	
+
+	public function onConstructed($ship, $turn, $phase){
+		parent::onConstructed($ship, $turn, $phase);
+	}
+
+	protected $possibleCriticals = array(
+		16=>array("ForcedOfflineOneTurn")
+	);
+
+	public function setSystemDataWindow($turn){							
+		$this->data["Special"] = ".";
+		$this->data["Special"] .= "<br>.";
+
+	}	
+			
+	public function getSpecialAbilityValue($args){
+		return $this->specialAbilityValue;
+	}
+
+	public function doIndividualNotesTransfer(){
+		//data received in variable individualNotesTransfer, further functions will look for it in currchangedAA
+		if(is_array($this->individualNotesTransfer)){			
+			foreach($this->individualNotesTransfer as $cloakingChange){			
+				if($cloakingChange == 1){
+					$this->active = true;
+				}else{
+					$this->active = false; //May start Deployment phase as true via notes
+				}									
+			}
+		} 
+		$this->individualNotesTransfer = array(); //empty, just in case
+	}			
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$this->doIndividualNotesTransfer();
+		$ship = $this->getUnit();	
+		
+		switch($gameData->phase){
+			
+			case -1:
+				if ($this->active) {
+					$notekey = 'Cloaked';
+					$noteHuman = 'Cloaked this turn';
+					$noteValue = 1;
+					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}else{
+					$notekey = 'Decloaked';
+					$noteHuman = 'Not cloaked this turn';
+					$noteValue = 1;
+					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				}	
+			break;
+		}	
+	}			
+
+		public function onIndividualNotesLoaded($gamedata){
+			//Sort notes by turn, and then phase so latest detection note is always last.
+			$this->sortNotes();
+			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+				switch($currNote->notekey){
+					case 'detected': 
+						$this->detected = true;
+					break;
+					case 'undetected': 
+						$this->detected = false;						
+					break;
+					case 'Cloaked': 
+						if($currNote->turn == $gamedata->turn || $gamedata->phase == -1 && $currNote->turn == $gamedata->turn-1){					
+							$this->active = true;
+						}								
+					break;	
+					case 'Decloaked': 
+						if($currNote->turn == $gamedata->turn || $gamedata->phase == -1 && $currNote->turn == $gamedata->turn-1){					
+							$this->active = false;
+						}								
+					break;																				
+				}
+			}
+
+			//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+			$this->individualNotes = array();		
+		} //endof function onIndividualNotesLoaded
+
+
+		private function sortNotes() {
+			usort($this->individualNotes, function($a, $b) {
+				// Compare by turn first
+				if ($a->turn == $b->turn) {
+					// If turns are equal, compare by phase
+					return ($a->phase < $b->phase) ? -1 : 1;
+				}
+				return ($a->turn < $b->turn) ? -1 : 1;
+			});
+		}
+
+
+		public function checkStealthNextPhase($gamedata){
+					
+				$ship = $this->getUnit();
+					if($gamedata->phase == 1){ 
+						$noteHuman1 = 'D-detectedActive';
+						$noteHuman2 = 'D-undetectedActive';						
+						$noteHuman3 = 'D-NotActive';						
+					}else{
+						$noteHuman1 = '2-detectedActive';
+						$noteHuman2 = '2-undetectedActive';						
+						$noteHuman3 = '2-NotActive';						
+					}
+
+				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point).					
+				if ($this->active) {
+					if ($this->isDetected($ship, $gamedata)) {
+						$notekey   = 'detected';
+						$noteHuman = $noteHuman1;
+						$noteValue = 1;							
+					} else {
+						$notekey   = 'undetected';
+						$noteHuman = $noteHuman2;
+						$noteValue = 1;							
+					}
+				} else {
+					$notekey   = 'detected';
+					$noteHuman = $noteHuman3; //Not shaded yet or was shaded and then turned off.
+					$noteValue = 0;						
+				}
+
+				$note = new IndividualNote(
+						-1,
+						$gamedata->id,
+						$gamedata->turn,
+						$gamedata->phase,
+						$ship->id,
+						$this->id,
+						$notekey,
+						$noteHuman,
+						$noteValue
+				);
+
+				Manager::insertIndividualNote($note);	
+					
+		}
+
+
+		private function isDetected($ship, $gameData) {
+
+			// Check all enemy ships to see if any can detect this ship at end of turn
+			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			$pos = $ship->getHexPos(); //Just do this once outside loop		
+
+			foreach ($gameData->ships as $otherShip) {
+				// Skip friendly ships
+				if($otherShip->team === $ship->team) continue;
+				if($otherShip->isTerrain()) continue; //Ignore Terrain
+				if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+		
+				$totalDetection = 0;
+		
+				if (!$otherShip instanceof FighterFlight) {
+					if($otherShip->isDisabled()) continue;
+					// Not a fighter — use scanner systems
+					foreach($otherShip->systems as $system){
+						if($system instanceof Scanner){
+							if(!$system->isDestroyed() && !$system->isOfflineOnTurn()) $totalDetection += $system->output;
+						}
+					}	
+					// Apply detection multiplier based on ship type
+					if ($otherShip->base) {
+						$totalDetection = floor($totalDetection * 1.5);
+					} elseif ($otherShip->hasSpecialAbility("ELINT")) {
+						//$totalDetection *= 1;				
+						$bonusDSEW = $otherShip->getEWByType("Detect Stealth", $gameData->turn);	
+						$totalDetection += $bonusDSEW;
+		
+					} else {
+						$totalDetection = floor($totalDetection/2); //Half sensor rating
+					}
+				} else {
+					// Fighter unit — use offensive bonus
+					$totalDetection = ceil($otherShip->offensivebonus/3);// Half of OB.
+				}
+		
+				// Get distance to the stealth ship and check line of sight
+				$distance = mathlib::getDistanceHex($ship, $otherShip);
+				$otherPos = $otherShip->getHexPos();          
+				$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
+
+				// If within detection range, and LoS not blocked the ship is detected
+				if ($totalDetection >= $distance && !$noLoS) {  
+					return true; //Just return, if one ship can see the stealthed ship then all can.
+				}
+			}
+
+			return false; //No other conditions were true, not detected.		
+		}	
+
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->detected = $this->detected;
+			$strippedSystem->active = $this->active;				        
+			return $strippedSystem;
+		}
+
+	} //endof CloakingDevice
+
 ?>

@@ -5962,12 +5962,7 @@ class MindriderHangar extends ShipSystem{
 		public $damagePenalty = 0;
 		public $rangePenalty = 0;
 		public $range = 5;
-
-		//public $boostable = true;
-		//public $maxBoostLevel = 1;
-		//public $boostEfficiency = 0;		
-		//public $boostOtherPhases = array(-1); //To allow boosting in Deployment and Firing Phases.
-		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment, since boost can be toggled during Firing Phase.			
+		protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment/PreOrders.				
 		
 		function __construct($armour, $maxhealth, $powerReq, $shieldFactor, $startArc, $endArc){
 			// shieldfactor is handled as output.
@@ -6014,9 +6009,6 @@ class MindriderHangar extends ShipSystem{
 		public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 			if($this->isDestroyed($turn-1) || $this->isOfflineOnTurn() || $target instanceof FighterFlight)
 				return 0;		
-			
-			//if ($this->hasCritical('DamageReductionRemoved'))
-			//	return 0;
 			
 			$output = $this->output;
 			$output += $this->outputMod; //outputMod itself is negative!
@@ -6158,7 +6150,7 @@ class MindriderHangar extends ShipSystem{
 						$noteHuman3 = '2-NotActive';						
 					}
 
-				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point) we need to check last turn as well for boost, as this will not have been saved yet for current turn.					
+				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point).					
 				if ($this->active) {
 					if ($this->isDetected($ship, $gamedata, $range)) {
 						$notekey   = 'detected';

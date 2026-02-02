@@ -975,6 +975,8 @@ shipManager.power = {
 			system = shipManager.systems.getSystem(ship, system.parentId);
 		}
 
+		if(system.active) return; //Prevent powering off systems that were activated in Pre-Turn orders e.g. Shading Field
+
 		if (gamedata.gamephase != 1) return;
 
 		if (shipManager.isDestroyed(ship) || shipManager.systems.isDestroyed(ship, system)) return;
