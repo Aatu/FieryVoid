@@ -1,11 +1,11 @@
 import * as React from "react";
 import styled from 'styled-components';
-import { Transform } from "stream";
 
 
-class Component extends React.Component{
-    render(){
-        const {children, className} = this.props
+
+class Component extends React.Component {
+    render() {
+        const { children, className } = this.props
         return (
             <div className={className}>
                 {children}
@@ -42,17 +42,17 @@ const TooltipHeader = styled.div`
 
 const TooltipEntry = styled.div`
     color: ${props => {
-        if (props.type == 'good') {
+        if (props.$type == 'good') {
             return '#6fc126;';
-        } else if (props.type == 'bad') {
+        } else if (props.$type == 'bad') {
             return '#ff7b3f;';
         } else {
             return 'white;'
         }
     }}
-    font-weight: ${props => props.important ? 'bold' : 'inherit'};
-    font-size: ${props => props.important ? '14px' : '12px'};
-    margin-top: ${props => props.space ? '14px' : '0'};
+    font-weight: ${props => props.$important ? 'bold' : 'inherit'};
+    font-size: ${props => props.$important ? '14px' : '12px'};
+    margin-top: ${props => props.$space ? '14px' : '0'};
 `
 
-export {Tooltip, TooltipHeader, TooltipEntry}
+export { Tooltip, TooltipHeader, TooltipEntry }

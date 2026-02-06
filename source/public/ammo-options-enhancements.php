@@ -86,8 +86,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Class I - Interceptor Missile (2250/2263)</strong> - Range 0 - Damage 0 - Fire Control: -/-/-,  Fires defensively for -30 intercept rating against ballistic weapons,</li>      
       <li><strong>Class L - Long Range Missile (2225)</strong> - Range 30 - Damage 15 - Fire Control: +3/+3/+3,</li>  
       <li><strong> Class K - Starburst Missile (2260/2264)</strong> - Range 15 - Damage 10*[D3+3] - Fire Control: +3/+3/+3 - Deals damage in pulse mode,</li>   
-      <li><strong>Class KK - Kinetic Missile (1976)</strong> - Range 60 [but -5% per hex range penalty after 15 hexes] - Damage 18 - Fire Control: +3/+3/+3 - Deal matter damage,</li>  
-      <li><strong>Class J - Jammer Missile (2239)</strong> - Range 15 - Damage 0 - Fire Control: -/-/-, Kor-Lyan only - All ships within 5 hexes receive two points of Blanket DEW,</li>  
+      <li><strong>Class KK - Kinetic Missile (1976)</strong> - Range 60 [but -5% per hex range penalty after 15 hexes] - Damage 18 - Fire Control: +3/+3/+3 - Orieni only.  Deals matter damage,</li>  
+      <li><strong>Class J - Jammer Missile (2239)</strong> - Range 15 - Damage 0 - Fire Control: -/-/-, Kor-Lyan only. All ships within 5 hexes receive two points of Blanket DEW (BDEW),</li>  
       <li><strong>Class M - Multiwarhead Missile (2256)</strong> - Range 20 - Damage 10*6 - Fire Control: +3/-/-, Can only target fighters, splits into 6 submunitions,</li>      
       <li><strong>Class P - Piercing Missile (2244)</strong> - Range 20 - Damage 30 - Fire Control: -/+3/+3 - Deals piercing damage,</li>  
       <li><strong>Class S - Stealth Missile (2252)</strong> - Range 20 - Damage 20- Fire Control: +3/+3/+3 - Kor-Lyan only, missile target not revealed to enemy player.</li>   

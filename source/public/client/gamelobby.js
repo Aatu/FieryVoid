@@ -83,9 +83,9 @@ window.gamedata = {
 			case 'Earth Alliance':
 				powerRating = 'Tier 1; Major Faction';
 				break;
-			case 'Earth Alliance (Custom)':
+			/*case 'Earth Alliance (Custom)':
 				powerRating = 'Tier 1; Major Custom Faction';
-				break;
+				break;*/
 			/*case 'Earth Alliance (defenses)':
 			  powerRating = 'Tier 1; Major Faction';
 			  break;*/
@@ -1783,6 +1783,13 @@ window.gamedata = {
 				if (!showCustom && isCustom) visible = false;
 				if (!isNaN(isdValue) && shipISD > isdValue) visible = false;
 
+				// Name filter logic
+				const nameFilter = $("#nameFilter").val().toLowerCase().trim();
+				if (nameFilter.length > 0) {
+					const shipName = $ship.find(".shiptype").text().toLowerCase();
+					if (shipName.indexOf(nameFilter) === -1) visible = false;
+				}
+
 				$ship.toggle(visible && !isHidden);
 			});
 		});
@@ -1861,6 +1868,8 @@ window.gamedata = {
 
 			if (!slotElement.length) {
 				gamedata.createNewSlot(slot);
+			} else {
+				gamedata.setSlotData(slot);
 			}
 
 			slotElement = $('.slot.slotid_' + slot.slot);
@@ -1936,7 +1945,7 @@ window.gamedata = {
 
 		ajaxInterface.submitSlotAction("takeslot", slotid, function () {
 			window.updateTierFilter();
-			//ajaxInterface.startPollingGamedata();							
+			//ajaxInterface.startPollingGamedata();
 		});
 	},
 

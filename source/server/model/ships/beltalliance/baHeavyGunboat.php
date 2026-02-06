@@ -62,11 +62,11 @@ class BAHeavyGunboat extends HeavyCombatVessel{
         		15 => "Scanner",
         		16 => "Hangar",
         		19 => "Reactor",
-        		20 => "C&C",	
+        		20 => "C&C",
         	),
         	1=> array(
         		6 => "Thruster",
-        		8 => "Heavy Blast Cannon",
+        		7 => "Heavy Blast Cannon",
         		8 => "Medium Blast Cannon",
         		10 => "Standard Particle Beam",
         		11 => "BA Interceptor I",

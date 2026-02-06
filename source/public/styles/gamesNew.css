@@ -525,20 +525,20 @@ a:hover {
   padding: 5px 10px;
 }
 
-.btn-secondary-lobby-leaveGame{
-    background: #215a7a;
-    color: white;
-    border: 1px solid #7298a7;
-    text-align: center;
-    box-sizing: border-box;
-    margin-top: 10px;
-    margin-right: 5px;
-    font-size: 13px;
-    width: 120px;
-    min-width: 90px;
-    height: auto;
-    line-height: normal;
-    padding: 5px 5px;    
+.btn-secondary-lobby-leaveGame {
+  background: #215a7a;
+  color: white;
+  border: 1px solid #7298a7;
+  text-align: center;
+  box-sizing: border-box;
+  margin-top: 10px;
+  margin-right: 5px;
+  font-size: 13px;
+  width: 120px;
+  min-width: 90px;
+  height: auto;
+  line-height: normal;
+  padding: 5px 5px;
 }
 
 .btn:hover {
@@ -569,33 +569,6 @@ a:hover {
   margin-bottom: 0px;
   margin-top: 0px
 }
-
-.gameRules {
-  /*color: #DEEBFF;*/
-  color: #84a5ce;
-  font-size: 12px;
-  font-weight: normal;
-  margin-bottom: 0px;
-  margin-top: 0px
-}
-
-.players {
-  /*color: #DEEBFF;*/
-  color: #DEEBFF;
-  font-size: 12px;
-  font-weight: normal;
-  margin-bottom: 0px;
-  margin-top: 0px
-}
-
-.waitingForTurn {
-  border: 1px solid #84a5ce !important;
-  background-color: #254e82 !important;
-  -moz-box-shadow: 0px 0px 1px #4a6a7a;
-  -webkit-box-shadow: 0px 0px 1px #4a6a7a;
-  box-shadow: 0px 0px 1px #4a6a7a;
-}
-
 
 
 .create-col .btn {
@@ -710,8 +683,76 @@ kbd {
 }
 
 /* Slot Card Styling */
-/* Slot card and settings moved to createGame.css */
+/* Games List Buttons - Moved from ladder.css */
+.btn-fleet-test {
+  background: #004d66;
+  border: 1px solid #587e8d;
 
+}
+
+.btn-view-ladder {
+  /* Custom styles for View Ladder button */
+  border: 1px solid #587e8d;
+  background: #215a7a;
+}
+
+.btn-recent-games {
+  /* Custom styles for Recent Games button */
+  background: #3d5c5cb6;
+  border: 1px solid #587e8da4;
+}
+
+/* Distinct styles for Lobby Game Types */
+.create-game-btn {
+  /* Custom styles for Create Game button */
+  background: #3c7a3ce0 !important;
+  border: 1px solid #66b266 !important;
+}
+
+
+.waitingForTurn {
+  border: 1px solid #84a5ce !important;
+  background-color: #254d82d0 !important;
+  -moz-box-shadow: 0px 0px 1px #4a6a7a;
+  -webkit-box-shadow: 0px 0px 1px #4a6a7a;
+  box-shadow: 0px 0px 1px #4a6a7a;
+  color: #deebffe0;  
+}
+
+.game-type-fleettest {
+  border: 1px solid #215a7a;
+}
+
+.game-type-fleettest .lobbyname {
+  color: #e6ac00 !important;
+  /* Gold for Fleet Test */
+}
+
+.game-type-normal {
+  /* Standard look, ensures consistency if defaults change */
+  color: #3c7a3ce0 !important;
+  /* Gold for Fleet Test */
+  /*border: 1px solid #3c773c;*/
+  border: 1px solid #215a7a;
+}
+
+.gameRules {
+  /*color: #DEEBFF;*/
+  color: rgba(230, 255, 230, 0.705);
+  font-size: 12px;
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px
+}
+
+.players {
+  /*color: #DEEBFF;*/
+  color: rgb(222, 235, 255, 0.9);
+  font-size: 12px;
+  font-weight: normal;
+  margin-bottom: 0px;
+  margin-top: 0px
+}
 
 
 @media screen and (max-width: 600px) {
@@ -821,3 +862,16 @@ kbd {
 /* Split header and slots wrapper moved to createGame.css */
 
 /* Removed slots-map-wrapper media query */
+
+/* Reset Filters Link */
+.reset-filters-link-style {
+  margin-left: 5px;
+  color: #8bcaf2; /* Light red/pink to indicate reset/clear action */
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 1em;
+}
+
+.reset-filters-link-style:hover {
+  color: #8bcaf2;
+}

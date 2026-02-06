@@ -80,7 +80,8 @@ class BaseShip {
 	
 	public $ignoreManoeuvreMods = false;//New marker for factions like Mindriders that don't take penalties for pivoting etc
     public $trueStealth = false; //For ships that can actually be hidden, not just jammer from range.  Important for Front End.	
-		
+    public $skinDancing = array();	//Holds target ids when there's a successful skin dance.
+    protected $skinDancer = false; //Let';s ships of unusual size skin dance e.g. Toravlus capitals ships.   	
 
     public $team;
     private $expectedDamage = array(); //loc=>dam; damage the unit is expected to take this turn (at outer locations), to decide where to take ambiguous shots
@@ -521,6 +522,7 @@ class BaseShip {
         $strippedShip->movement = $this->movement; 
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
+        $strippedShip->skinDancing = $this->skinDancing;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
@@ -910,6 +912,12 @@ class BaseShip {
             $shadingField = $this->getSystemByName("ShadingField");
             if($shadingField) $shadingField->checkStealthNextPhase($gamedata);
         }
+
+        //Trek block.
+        if($this->hasSpecialAbility("Cloaking")){           
+            $cloakingDevice = $this->getSystemByName("CloakingDevice");
+            if($cloakingDevice) $cloakingDevice->checkStealthNextPhase($gamedata);
+        } 
 
         return;
     }   
@@ -2613,9 +2621,14 @@ public function getAllEWExceptDEW($turn){
 		if ($this->shipSizeClass == 1) $multiplier = 1.2; //MCVs seem to use a bit larger multiplier...
 		$dmg = ceil($structuretotal * $multiplier);
 		return $dmg;
-	} //endof function getRammingFactor
+	} //endof function getRammingFactor      
 
-    } //endof class BaseShip
+    public function isSkinDancer(){
+        return $this->skinDancer;
+    }    
+
+
+} //endof class BaseShip
     
 class BaseShipNoAft extends BaseShip{
     //public $draziCap = true;//no longer used

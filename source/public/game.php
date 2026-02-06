@@ -610,6 +610,14 @@
             <canvas id="turnIntoPivotRightCanvas" width="40" height="40"></canvas>
         </div>
 
+        <div id="graviticTurnRight" class="movement-icon" data-movement-type="Gravitic Turn Right">
+            <canvas id="graviticTurnRightCanvas" width="40" height="40"></canvas>
+        </div>
+        
+        <div id="graviticTurnLeft" class="movement-icon" data-movement-type="Gravitic Turn Left">
+            <canvas id="graviticTurnLeftCanvas" width="40" height="40"></canvas>
+        </div>        
+
         <div id="slipright" class="movement-icon" data-movement-type="Slip Right">
             <canvas id="sliprightcanvas" width="30" height="30"></canvas>
         </div>

@@ -86,17 +86,23 @@ window.gamedata = {
 					gameDOM = $(html);
 
 					if (game.test) {
+						gameDOM.addClass("game-type-fleettest");
 						gameDOM.find('.players').remove();
+					} else {
+						gameDOM.addClass("game-type-normal");
+						$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
 					}
 
 					gameDOM.appendTo($('.gamecontainer.lobby'));
 					$('.gamecontainer.lobby').addClass("found");
 				} else {
-					if (!game.test) {
-						$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
-					} else {
+					if (game.test) {
+						gameDOM.addClass("game-type-fleettest");
 						//$('.players', gameDOM).remove();
 						$('.players', gameDOM).html("<br>");
+					} else {
+						gameDOM.addClass("game-type-normal");
+						$('.players', gameDOM).html("Players: " + game.playerCount + "/" + game.slots);
 					}
 				}
 				lobbyfound = true;

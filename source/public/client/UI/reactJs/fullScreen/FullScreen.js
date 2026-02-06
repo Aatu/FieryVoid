@@ -1,7 +1,8 @@
 import * as React from "react";
-import {ContainerRounded, Clickable} from "../styled";
+import styled from 'styled-components';
+import { ContainerRounded, Clickable } from "../styled";
 
-class FullScreen extends React.Component{
+class FullScreen extends React.Component {
 
     fullScreen() {
         /*
@@ -14,26 +15,26 @@ class FullScreen extends React.Component{
         }
         */
 
-       var doc = window.document;
-       var docEl = doc.documentElement;
-     
-       var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
-       var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
-     
-       if(!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
-         requestFullScreen.call(docEl);
-       }
-       else {
-         cancelFullScreen.call(doc);
-       }
-        
+        var doc = window.document;
+        var docEl = doc.documentElement;
+
+        var requestFullScreen = docEl.requestFullscreen || docEl.mozRequestFullScreen || docEl.webkitRequestFullScreen || docEl.msRequestFullscreen;
+        var cancelFullScreen = doc.exitFullscreen || doc.mozCancelFullScreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+
+        if (!doc.fullscreenElement && !doc.mozFullScreenElement && !doc.webkitFullscreenElement && !doc.msFullscreenElement) {
+            requestFullScreen.call(docEl);
+        }
+        else {
+            cancelFullScreen.call(doc);
+        }
+
     }
-    render(){
+    render() {
         return (<MainButton onClick={this.fullScreen.bind(this)}>FS</MainButton>);
     }
 }
 
-const MainButton = ContainerRounded.extend`
+const MainButton = styled(ContainerRounded)`
     width: 50px;
     height: 50px;
     position: fixed;

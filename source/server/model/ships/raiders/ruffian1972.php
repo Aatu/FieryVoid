@@ -7,12 +7,13 @@ class Ruffian1972 extends BaseShip{
   		$this->pointCost = 320;
   		$this->faction = "Raiders";
         $this->phpclass = "Ruffian1972";
-        $this->imagePath = "img/ships/RaiderBattlewagon.png"; //needs to be changed
+        $this->imagePath = "img/ships/RaiderRuffian.png"; //needs to be changed
         $this->shipClass = "Ruffian Cruiser (1972)";
 			$this->variantOf = "Ruffian Cruiser";	    
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
         $this->fighters = array("normal"=>18);
+		$this->canvasSize = 175;		
         
 		$this->notes = "Generic raider unit.";
 

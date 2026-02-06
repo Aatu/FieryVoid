@@ -17,19 +17,19 @@ const Backdrop = styled.div`
     background-color: rgba(0,0,0,0.5);
 `;
 
-const ContainerRoundedRightBottom = Container.extend`
+const ContainerRoundedRightBottom = styled(Container)`
     border-radius: 0px 0px 0px 30px;
     box-shadow: 5px 5px 10px black;
 `;
 
-const ContainerRounded = Container.extend`
+const ContainerRounded = styled(Container)`
     border-radius: 0px 0px 30px 30px;
     box-shadow: 5px 5px 10px black;
 `;
 
-const ContainerRoundedRightSide = Container.extend`
+const ContainerRoundedRightSide = styled(Container)`
     border-radius: 30px 0px 0px 30px;
     box-shadow: 5px 5px 10px black;
 `;
 
-export {Container, ContainerRoundedRightBottom, Backdrop, ContainerRounded, ContainerRoundedRightSide};
+export { Container, ContainerRoundedRightBottom, Backdrop, ContainerRounded, ContainerRoundedRightSide };

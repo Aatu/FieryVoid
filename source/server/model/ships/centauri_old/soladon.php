@@ -7,7 +7,7 @@ class Soladon extends BaseShip{
 	$this->pointCost = 475;
         $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Soladon";
-        $this->imagePath = "img/ships/celerian.png";
+        $this->imagePath = "img/ships/nalor.png";
         $this->shipClass = "Soladon Escort Cruiser";
         $this->shipSizeClass = 3;
         $this->occurence = "uncommon";
