@@ -354,12 +354,13 @@ body {
 
 
 .enemy.name{
-    color:#b34119;
+    /*color:#b34119;*/
+    color: red;
 }
 
 .mine.name{
     /*color:#2f5123; I'm making this color much lighter! this dark it's poorly readable*/
-	color:#55a837;;
+	color:limegreen;
 }
 
 .terrain.name{
@@ -508,7 +509,8 @@ body {
         font-size: 12px;   
         font-style:normal;
         font-weight:bold;  
-        color: #597eb1; /* #deebff; */                         
+        /*color: #597eb1; /* #deebff; */ 
+        color: #7ba2ea;                                
         top: 0;             /* Align to the top */
         right: 0;           /* Align to the right */
         padding-top: 3px;
@@ -951,6 +953,22 @@ body {
 
 }
 
+.skinDanceBlocked,
+.hexTargeted,
+.cannotCalled{
+    color: red;
+}
+
+.losBlocked,
+.notInRange,
+.notInArc,
+.negHitchange{
+    color: rgb(255, 70, 70);
+}
+
+.posHitchange{
+    color: lime;
+}
 
 @media only screen and (max-width: 1024px) {
     #phaseheader {

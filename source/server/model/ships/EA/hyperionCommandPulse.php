@@ -5,7 +5,7 @@ class HyperionCommandPulse extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 760;
-        $this->faction = "Earth Alliance (Custom)";
+        $this->faction = "Earth Alliance";
         $this->phpclass = "HyperionCommandPulse";
         $this->imagePath = "img/ships/hyperion.png";
         $this->shipClass = "Hyperion Pulse Command Cruiser (Iota)";
@@ -13,8 +13,8 @@ class HyperionCommandPulse extends BaseShip{
         $this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>6);
 	    
-//        $this->occurence = "uncommon";
-//        $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
+        $this->occurence = "uncommon";
+        $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
         $this->isd = 2246;
 	    
         $this->fighters = array("normal"=>6);

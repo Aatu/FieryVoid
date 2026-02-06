@@ -390,20 +390,16 @@ class Firing
             //Debug::log("Fire is intercept\n");
             return false;
         }
-        //if ($weapon instanceof DualWeapon) $weapon->getFiringWeapon($fire); //Cleaned 19.8.25 - DK	
 
         if ($weapon->intercept == 0) {
             //Debug::log("Weapon has intercept of zero\n");
             return false;
         }
 
-
         $shooter = $gd->getShipById($fire->shooterid);
         $target = $gd->getShipById($fire->targetid);
         $interceptingShip = $weapon->getUnit();
-        $firingweapon = $shooter->getSystemById($fire->weaponid);
-        
-        //if($interceptingShip->getTurnDeployed($gd) > $gd->turn)	return; //Ship not deployed yet.		
+        $firingweapon = $shooter->getSystemById($fire->weaponid);		
 
         if ($firingweapon->doNotIntercept){ //some attacks simply aren't subject to interception - like being in a field, or ramming attacks
             //Debug::log("Target weapon cannot be intercepted\n");
@@ -430,8 +426,6 @@ class Firing
 
 
         if ($firingweapon->ballistic) {
- //           $movement = $shooter->getLastTurnMovement($fire->turn); //Removed Mar '24 - To enable intercept for BallisticMineLauncher
- //           $pos = mathlib::hexCoToPixel($movement->position); //Removed Mar '24 - To enable intercept for BallisticMineLauncher
  			$pos = $firingweapon->getFiringHex($gd, $fire); //Added Mar '24 - To enable intercept for BallisticMineLauncher
             $relativeBearing = $interceptingShip->getBearingOnPos($pos);
         } else {
@@ -456,6 +450,19 @@ class Firing
             return false;
         }
         */
+	
+        if (!$firingweapon->ballistic && isset($shooter->skinDancing[$target->id]) && $shooter->skinDancing[$target->id] === true) {          
+            return false; // Can't intercept for ships skindancing on you.
+        }
+
+        // Check if the Intercepting Ship is a failed Skindancer
+        if (!empty($interceptingShip->skinDancing)) {
+            foreach ($interceptingShip->skinDancing as $status) {
+                if ($status === 'Failed') {
+                    return false; // Failed skindancers cannot intercept
+                }
+            }
+        }
 
 		//added for Vorlon weapons, also used for Interceptor missile.
 		if(!$weapon->canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)) return false; //some weapons do have exotic rules whether they can intercept at all
@@ -519,7 +526,7 @@ class Firing
             }
         }
 
-        //Debug::log("INVALID INTERCEPT\n"); //should not rech here!
+        //Debug::log("INVALID INTERCEPT\n"); //should not reach here!
         return false;
     } //endof function isLegalIntercept
 
@@ -527,8 +534,16 @@ class Firing
     public static function preparePreFiring($gamedata){
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
-            foreach ($ship->systems as $system){
-                $system->beforePreFiringOrderResolution($gamedata);
+            if($ship instanceof FighterFlight){
+                foreach ($ship->systems as $ftr){
+                    foreach ($ftr->systems as $system){                    
+                        $system->beforePreFiringOrderResolution($gamedata);
+                    }    
+                }
+            }else{
+                foreach ($ship->systems as $system){
+                    $system->beforePreFiringOrderResolution($gamedata);
+                }
             }
         }
 
@@ -732,7 +747,7 @@ public static function firePreFiringWeapons($gamedata){
         foreach ($gamedata->ships as $ship){
             foreach ($ship->systems as $system){
                 $system->beforeFiringOrderResolution($gamedata);
-            }
+            }   
         }
 
         $ambiguousFireOrders  = array();

@@ -2428,18 +2428,12 @@ class RammingAttack extends Weapon{
 		  $this->data["Special"] .= "<br>Immobile objects do have ramming attack for technical purposes, but won't use it offensively.";
 	}	
 	
-	/*
-	//fill gamedata variable, which might otherwise be left out!
-	public function beforeFiringOrderResolution($gamedata){
-		$this->gamedata = $gamedata;
-	}
-	*/
 
 	//Here we will check for collisions with Terrain in PRE-FIRING phase
 	public function beforePreFiringOrderResolution($gamedata){
 		$shooter = $this->getUnit();
 		$deployTurn = $shooter->getTurnDeployed($gamedata);
-		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!	
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
 	
 		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
 		if($shooter->isTerrain() && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
@@ -2450,7 +2444,7 @@ class RammingAttack extends Weapon{
 				if($ship->isDestroyed()) continue; //Ignore destroyed ships
 				if($ship->isTerrain()) continue;	//Don't add other terrain.
 				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
-				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, change if and when skindancing introduced.	
+				//if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, change if and when skindancing introduced.	
 				$relevantShips[] = $ship;			
 			}
 
@@ -2501,35 +2495,208 @@ class RammingAttack extends Weapon{
 		if($this->autoFireOnly) return;//ramming attack on some units (eg. immobile ones) is for technical purposes only!	
 		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
 		
-		if($shooter instanceof FighterFlight) return; //fighters do not auto-ram; in tabletop they would make skin dance roll instead, but its success chance would be very high and it carries additional benefit if successful
+		//if($shooter instanceof FighterFlight) return; //skindancing added, so this line is removed.
 		//Change condition above to create opportunity for skindancing roll instead of just skipping.
 
-
 		if($shooter->isDestroyed()) return; //destroyed unit does not ram
-		$targetList = $gamedata->getShipsInDistance($shooter);
+		$targetList = $gamedata->getShipsInDistance($shooter, 0); //distance 0!
+
+
+
 		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
 		foreach($targetList as $targetID=>$target){
-			if(!$target->Enormous) continue; //auto-ram Enormous units
-			if($targetID == $shooter->id) continue; //do not ram self
-			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
-			//$deployTurn = $target->getTurnDeployed($gamedata);
+			if(!$target->Enormous) continue; //only auto-ram Enormous units
+			if($target instanceof Terrain) continue; //Terrain Enormous units are handled as collisions now.		
+			if($targetID == $shooter->id) continue; //do not ram self			
+			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed			
 			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
-			//don’t repeat manual ramming order
-			$alreadyDeclared = false;
-			foreach ($alreadyFiringAt as $existingFiringOrder){
-				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
-			}
-			If($alreadyDeclared) continue;
-			//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already – auto-ram it!
-			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
-			$fire = new FireOrder(-1, 'prefiring', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
-				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, 'TerrainCrash'
-			);
-			$fire->addToDB = true;		
-			$this->fireOrders[] = $fire;
+			if (isset($shooter->skinDancing[$targetID])) continue; //Already skin-dancing, or additional fighter after the first has succeeded/rammed.		
+
+			$skinDancing = $this->getSkinDancingResult($shooter, $target, $gamedata); //Targeting FIXED call internal method
+				
+			if($skinDancing == 'Success'){
+				$shooter->skinDancing[$targetID] = true;			
+				continue; //Do not proceed with auto-ram when a successful skindance has occurred. Note target id in ship variable for notes later.
+			}else if($skinDancing == 'Aborted') {
+				$shooter->skinDancing[$targetID] = 'Aborted';				
+				continue; //Not skin-dancing, but not ramming either.
+			} else if ($skinDancing == 'Failed'){
+				$shooter->skinDancing[$targetID] = 'Failed'; //Add false here, so we only hit one fighter.			
+				$calledid = -1;
+				if($shooter instanceof FighterFlight){
+					//Find last undestroyed fighter
+					foreach($shooter->systems as $fighter){
+						if(!$fighter->isDestroyed()){
+							$calledid = $fighter->id;
+						}
+					}			
+				}
+		
+				//don’t repeat manual ramming order
+				$alreadyDeclared = false;
+				foreach ($alreadyFiringAt as $existingFiringOrder){
+					if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
+				}
+				if($alreadyDeclared) continue;
+				//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already, either can't skin-dance or failed to – auto-ram it!
+				$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+				$fire = new FireOrder(-1, 'prefiring', $shooter->id, $targetID, $this->id, $calledid, $gamedata->turn,
+					1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, 'TerrainCrash'
+				);
+				$fire->addToDB = true;		
+				$this->fireOrders[] = $fire;
+			}else{ //'Invalid' returns effectively.  Caused all fighters to crash etc.
+				//don’t repeat manual ramming order
+				$alreadyDeclared = false;
+				foreach ($alreadyFiringAt as $existingFiringOrder){
+					if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
+				}
+				if($alreadyDeclared) continue;
+				//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already, either can't skin-dance or failed to – auto-ram it!
+				$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+				$fire = new FireOrder(-1, 'prefiring', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
+					1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, 'TerrainCrash'
+				);
+				$fire->addToDB = true;		
+				$this->fireOrders[] = $fire;				
+			}	
 			
 		}
 	}	
+
+    public function getSkinDancingResult($shooter, $target, $gamedata) {
+		if($this->designedToRam) return 'Invalid'; //Do full automatic ramming for these units e.g. HKs		
+		if(!empty($shooter->skinDancing)) return 'Success'; //Already skindancing.
+		//Debug::log("Ship name " . $shooter->name);			
+		//Debug::log("before size check " . $shooter->shipSizeClass);	
+        //Ship type checks        
+        if($shooter->shipSizeClass > 1 && !$shooter->isSkinDancer()) return 'Invalid'; //LCV or smaller (or special rules like Torvalus)
+		//Debug::log("before agile check " . $shooter->agile);			
+        if(!$shooter->agile) return 'Invalid'; //Must be agile
+	
+        $shipSpeed = $shooter->getSpeed();
+		//Debug::log("before shooter speed check. Shooter Speed: " . $shipSpeed);			
+        if($shipSpeed == 0) return 'Invalid'; //Speed 0 ships can't skindance.
+		//Debug::log("before target speed check " . $shooter->id);	
+        //Speed checks
+        $targetSpeed = $target->getSpeed(); 
+		//Debug::log("before target speed check. Target Speed: " . $targetSpeed);			       
+        if($targetSpeed > 5) return 'Invalid';
+        if($targetSpeed > 0){
+			$shooterLastMove = $shooter->getLastMovement();
+			$shooterHeading = $shooterLastMove->heading;
+			//Debug::log("shooterHeading " . $shooterHeading);			
+			$targetLastMove = $target->getLastMovement();
+			$targetHeading = $targetLastMove->heading;	
+			//Debug::log("targetHeading " . $targetHeading);			
+			$oppositeHeading = ($targetHeading + 3) % 6;
+			//Debug::log("oppositeHeading " . $oppositeHeading);			
+			//Cannot skin-dance if target moving and ship not moving in same or opposite direction.	
+			if($shooterHeading !== $targetHeading && $shooterHeading !== $oppositeHeading) return 'Invalid';	
+        }        
+
+		$roll = Dice::d(20); // Roll the dice
+		
+		//Debug::log("roll " . $roll);			
+		$mod = 0;
+		if($shipSpeed > 5) $mod += ceil(($shipSpeed - 5)/2);
+		//Debug::log("speed mod " . $mod);			
+		if(Movement::isPivoting($shooter, $gamedata->turn) || Movement::isPivoting($target, $gamedata->turn)) $mod += 5; //Shooter or target is pivoting
+		//Debug::log("pivoting mod " . $mod);			
+		if(Movement::isRolling($shooter, $gamedata->turn) || Movement::isRolling($target, $gamedata->turn)) $mod += 5; //Shooter or target is rolling
+		//Debug::log("rolling mod " . $mod);
+		$thrusterMod = 0;
+		foreach($shooter->systems as $system){
+			if($system->name == 'thruster' && $system->isDestroyed()) $thrusterMod += $system->output; 	
+		}
+		$mod += $thrusterMod;
+		//Debug::log("thruster mod " . $thrusterMod);		
+		$jinking = Movement::getJinking($shooter, $gamedata->turn);
+		if($jinking > 0) $mod += $jinking * 3;
+		//Debug::log("jinking mod " . $jinking * 3);	
+		if($shooter instanceof FighterFlight && $shooter->hasNavigator) $mod -= 1;
+		//Debug::log("Navigator mod " . $mod);	
+		$modifiedRoll = $roll + $mod;
+		//Debug::log("modifiedRoll " . $modifiedRoll);	
+		if($modifiedRoll <= 15){
+			return 'Success';
+		} else if($modifiedRoll > 15 && $modifiedRoll < 21){
+			return 'Aborted';
+		} else{
+			return 'Failed'; 	
+		}
+
+    }     
+
+	public function generateIndividualNotes($gamedata, $dbManager){	
+		//Create notes for successful Skindancers in Pre-Firing Phase advance()		
+		//Check removed to ensure notes are generated whenever data is present - relies on getSkinDancingResult population.
+		$ship = $this->getUnit();
+		
+		if(!empty($ship->skinDancing)){
+			//Ensuring only one note is generated per flight (as each fighter has its own RammingAttack system)
+            if($ship instanceof FighterFlight){
+                $firstRamming = $ship->getSystemByName("RammingAttack");
+                if($firstRamming && $firstRamming->id !== $this->id) return;
+            }
+
+			$noteValue = null;
+			foreach ($ship->skinDancing as $targetID => $value) {
+				if ($value === true) {
+					$notekey   = 'skindancing';					
+					$noteValue = $targetID;
+					break;
+				}else if($value == 'Aborted'){
+					$notekey   = 'abortedSkindance';					
+					$noteValue = $targetID;
+					break;
+				}else if($value == 'Failed'){
+					$notekey   = 'failedSkindance';					
+					$noteValue = $targetID;
+					break;
+				}
+			}
+
+			if ($noteValue !== null) {
+				//$notekey   = 'skindancing';
+				$noteHuman = 'Ship is skindancing';
+
+				$this->individualNotes[] = new IndividualNote(
+					-1,
+					$gamedata->id,
+					$gamedata->turn,
+					$gamedata->phase,
+					$ship->id,
+					$this->id,
+					$notekey,
+					$noteHuman,
+					$noteValue
+				);
+			}
+		}
+
+	}	
+
+
+	public function onIndividualNotesLoaded($gamedata){
+    	foreach ($this->individualNotes as $currNote) { // Assume ASCENDING sorting - so enact all changes as is
+			if($currNote->turn == $gamedata->turn){
+
+				if($currNote->notekey === 'skindancing'){
+					$ship = $this->getUnit();
+					$ship->skinDancing[$currNote->notevalue] = true;
+				}else if($currNote->notekey === 'abortedSkindance'){
+					$ship = $this->getUnit();
+					$ship->skinDancing[$currNote->notevalue] = 'Aborted';					
+				}else if($currNote->notekey === 'failedSkindance'){
+					$ship = $this->getUnit();
+					$ship->skinDancing[$currNote->notevalue] = 'Failed';					
+				}
+			}	
+		}		
+		$this->individualNotes = array();//delete notes, after reaction on their load they serve no further purpose
+	}
+
 
 	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition, $thisShip){
 	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
@@ -2612,12 +2779,12 @@ class RammingAttack extends Weapon{
 						}
 			
 						// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
-						if ($shipMove->type == "end" && 
+						/*if ($shipMove->type == "end" && 
 							isset($collisiontargets[$ship->id]) &&
 							$terrainPosition->q == $shipMove->position->q &&
 							$terrainPosition->r == $shipMove->position->r) {
 							unset($collisiontargets[$ship->id]); // Remove from collision targets.
-						}
+						}*/
 
 						$previousPosition = $shipMove->position;
 						$previousFacing = $shipMove->getFacingAngle();
@@ -2669,102 +2836,6 @@ class RammingAttack extends Weapon{
 		return 0; // Should not happen but return default if so.
 	} //endof getCollisionLocation()
 
-	//Create firing orders for collisions, then find Enormous units on the same hex (other than self), create automatic attacks vs them
-	//Moved to beforePreFiringOrderResolution() above	 
-	public function beforeFiringOrderResolution($gamedata){
-		/*
-		$shooter = $this->getUnit();
-		$deployTurn = $shooter->getTurnDeployed($gamedata);
-		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
-		//Moved to beforePreFiringOrderResolution() above
-		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
-		if(($shooter->isTerrain()) && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
-			$relevantShips = array();
-
-			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
-			foreach($gamedata->ships as $ship){
-				if($ship->isDestroyed()) continue; //Ignore destroyed ships
-				if($ship->isTerrain()) continue;	//Don't add other terrain.
-				if($ship->getTurnDeployed($gamedata) > $gamedata->turn)	continue; //Ship not deployed yet.		
-				if ($ship instanceof FighterFlight && $shooter->Huge == 0) continue; //Not doing fighters except for very large terrain, assume they can fly around as per other auto-ram check for Enormous units.	
-				$relevantShips[] = $ship;			
-			}
-
-			$terrrainPosition = $shooter->getHexPos();
-			$collisiontargets = $this->checkForCollisions($relevantShips,  $gamedata, $terrrainPosition);
-
-			foreach($collisiontargets as $targetid=>$location){
-				$target = $gamedata->getShipById($targetid);
-				$type = "TerrainCollision";
-				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.
-				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1);
-
-				if ($target instanceof FighterFlight && $type === "TerrainCrash") {
-					$first = true; // Flag to track the first entry
-				
-					foreach ($target->systems as $fighter) {                          
-						$newFireOrder = new FireOrder(
-							-1, "normal", $shooter->id, $target->id,
-							$this->id, $fighter->id, $gamedata->turn, 1,
-							0, 0, 1, 0, 0,
-							$targetMovement->position->q, $targetMovement->position->r, $type, 10001
-						);
-						$newFireOrder->chosenLocation = $location;                
-				
-						if ($first) {
-							$newFireOrder->pubnotes = "<br>COLLISION! A fighter unit collided with terrain during its movement!";
-							$first = false; // Set flag to false after first iteration
-						}
-				
-						$newFireOrder->addToDB = true;
-						$this->fireOrders[] = $newFireOrder;
-					}       
-				}else{						
-					$newFireOrder = new FireOrder(
-						-1, "normal", $shooter->id, $target->id,
-						$this->id, -1, $gamedata->turn, 1,
-						0, 0, 1, 0, 0,
-						$targetMovement->position->q, $targetMovement->position->r, $type, 10001
-					);
-					$newFireOrder->chosenLocation = $location;				
-					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
-					$newFireOrder->addToDB = true;
-					$this->fireOrders[] = $newFireOrder;
-				}	
-			}	
-		}
-		
-		if($this->autoFireOnly) return;//ramming attack on some units (eg. immobile ones) is for technical purposes only!	
-		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
-		
-		if($shooter instanceof FighterFlight) return; //fighters do not auto-ram; in tabletop they would make skin dance roll instead, but its success chance would be very high and it carries additional benefit if successful
-		if($shooter->isDestroyed()) return; //destroyed unit does not ram
-		$targetList = $gamedata->getShipsInDistance($shooter);
-		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
-		foreach($targetList as $targetID=>$target){
-			if(!$target->Enormous) continue; //auto-ram Enormous units
-			if($targetID == $shooter->id) continue; //do not ram self
-			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
-			//$deployTurn = $target->getTurnDeployed($gamedata);
-			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
-			//don’t repeat manual ramming order
-			$alreadyDeclared = false;
-			foreach ($alreadyFiringAt as $existingFiringOrder){
-				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
-			}
-			If($alreadyDeclared) continue;
-			//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already – auto-ram it!
-			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
-			$fire = new FireOrder(-1, 'normal', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
-				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $this->weaponClass
-			);
-			$fire->addToDB = true;		
-			$this->fireOrders[] = $fire;
-			
-		}
-		*/
-	} //endof public function beforeFiringOrderResolution
-
 
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
@@ -2804,6 +2875,7 @@ class RammingAttack extends Weapon{
 				return $location;
 	}//endof getRamHitLocation()
 
+
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
 		$this->gamedata = $gamedata;
@@ -2833,10 +2905,15 @@ class RammingAttack extends Weapon{
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
-			if($target instanceof FighterFlight){ //allocate exactly to firing fighter!
-				$ftr = $target->getFighterBySystem($this->id);
-				if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
-				$fireOrder->calledid = $ftr->id;
+			if($target instanceof FighterFlight){ //allocate exactly to firing fighter if no calledid!
+				if ($fireOrder->calledid != -1) {
+					// Called ID already set (e.g. by beforePreFiringOrderResolution for skindancing), use it.
+					// We might want to verify it's not destroyed, but the generator should have handled that.
+				} else {
+					$ftr = $target->getFighterBySystem($this->id);
+					if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
+					$fireOrder->calledid = $ftr->id;
+				}
 			}
 
 			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
@@ -2852,7 +2929,7 @@ class RammingAttack extends Weapon{
 					0,0,'AutoRam',10000
 				);				
 				$newFireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);								
-				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
+				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->notes = " Automatic ramming - Enormous unit returns damage.";
 				$newFireOrder->addToDB = true;
 				$this->fireOrders[] = $newFireOrder;				
 			}
@@ -3640,7 +3717,7 @@ class VorlonDischargeGun extends Weapon{
 	public $displayName = "Discharge Gun";
 	public $iconPath = "VorlonDischargeGun.png";
 	
-	public $animation = "laser";
+	public $animation = "bolt";
 	public $animationColor = array(175, 255, 225);
 	/*
 	public $trailColor = array(175, 225, 175);
@@ -3703,9 +3780,8 @@ class VorlonDischargeGun extends Weapon{
 		$this->data["Special"] .= "<br> - 2 power: 2d10+2"; 
 		$this->data["Special"] .= "<br> - 4 power: 3d10+3"; 
 		$this->data["Special"] .= "<br> - 6 power: 4d10+4"; 
-	//	$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
 		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
-		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";
 		$this->data["Special"] .= "<br>Interceping shots consume 2 power per shot (refunded if not used).";   	
 	}
 		
@@ -3890,11 +3966,11 @@ class VorlonDischargePulsar extends Weapon{
 			$this->data["Special"] = '';
 		}else{
 			$this->data["Special"] .= '<br>';
-		}	    		
-		$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
+		}	    		  
 		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used):";  
 		$this->data["Special"] .= "<br> - 4 power: 12 1d3 times, max 4"; 
 		$this->data["Special"] .= "<br> - 8 power: 18, 1d3 times, max 4"; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 		
 	public function getDamage($fireOrder){
@@ -4036,16 +4112,24 @@ class VorlonLightningCannon extends Weapon{
 	
 	public $uninterceptable = true; //Lightning Cannon is uninterceptable
 	public $intercept = 4; //intercept rating -4
-	
+	public $modeLetters = 1;
+	public $modeLettersArray = array(
+		1 => 1,
+		2 => 1,
+		3 => 1,
+		4 => 1,
+		5 => 2,
+		6 => 2
+	);
 	
 	public $firingMode = 1;	
 	public $firingModes = array(
-		1 => "1Prong",
-		2 => "2Prongs",
-		3 => "3Prongs",
-		4 => "4Prongs",
-		5 => "P3Piercing",
-		6 => "Q4Piercing"
+		1 => "1-Prong",
+		2 => "2-Prongs",
+		3 => "3-Prongs",
+		4 => "4-Prongs",
+		5 => "3Piercing",
+		6 => "4Piercing"
 	);
 	
 	public $priority = 5; //medium Standard weapon - for single fire...
@@ -4089,8 +4173,7 @@ class VorlonLightningCannon extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
-		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
+		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d10+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 4 Power, 2d10+16 Raking(10), -2.5/hex";
@@ -4099,6 +4182,7 @@ class VorlonLightningCannon extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 12 Power, 4d10+32 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 24 Power, 8d10+64 Piercing, -1.25/hex"; 
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 		
 		
@@ -4367,7 +4451,6 @@ class VorlonLightningGun extends Weapon{
 			$this->data["Special"] .= '<br>';
 		}	    		
 		$this->data["Special"] .= "Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
-		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d5+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 3 Power, 1d10+16 Raking(10), -2.5/hex";
@@ -4376,6 +4459,7 @@ class VorlonLightningGun extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 9 Power, 2d10+32 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 18 Power, 4d10+64 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 
 	public function getDamage($fireOrder){
@@ -4705,8 +4789,7 @@ class VorlonLightningGun2 extends Weapon{
 		}	    		
 		$this->data["Special"] .= "The mirror gun represents the Lightning Gun's ability to fire twice per turn.";
 		$this->data["Special"] .= "<br>May combine with other mirror guns or regular Lightning Guns for heavier shots.";
-		$this->data["Special"] .= "<br>Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target."; 
-		$this->data["Special"] .= "<br>Accelerator option added only to force explicit player consent for interception. It does not change damage output.";   
+		$this->data["Special"] .= "<br>Uninterceptable. Capable of multiple modes of fire. Higher modes require combining multiple prongs on the same target.";   
 		$this->data["Special"] .= "<br>Firing modes available (Number of prongs/power used per SHOT/damage output (and mode)/range penalty):";  
 		$this->data["Special"] .= "<br> - 1 Prong: 1 Power, 1d5+8 Standard, -5/hex"; 
 		$this->data["Special"] .= "<br> - 2 Prongs: 3 Power, 1d10+16 Raking(10), -2.5/hex";
@@ -4715,6 +4798,7 @@ class VorlonLightningGun2 extends Weapon{
 		$this->data["Special"] .= "<br> - 3 Prongs Piercing: 9 Power, 2d10+32 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br> - 4 Prongs Piercing: 18 Power, 4d10+64 Piercing, -1.65/hex"; 
 		$this->data["Special"] .= "<br>If weapon is mis-declared (shot is declared but not enough prongs are allocated in appropriate mode) shot will automatically miss and Power will NOT be drained."; 
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";		
 	}
 
 	public function getDamage($fireOrder){
@@ -5034,7 +5118,7 @@ class VorlonDischargeCannon extends Weapon{
 	public $displayName = "Discharge Cannon";
 	public $iconPath = "VorlonDischargeCannon.png";
 	
-	public $animation = "laser";
+	public $animation = "bolt";
 	public $animationColor = array(175, 255, 225);
 	/*
 	public $trailColor = array(175, 225, 175);
@@ -5096,14 +5180,12 @@ class VorlonDischargeCannon extends Weapon{
 		}else{
 			$this->data["Special"] .= '<br>';
 		}	    		
-	//	$this->data["Special"] .= "Accelerator option is here only to force explicit player consent for interception. It does not change damage output.";  
 		$this->data["Special"] .= "<br>Firing mode affects damage output (and power used), and also fire control (e.g. higher modes are better against ships):";  
 		$this->data["Special"] .= "<br> - 5 power: 4d10+5, Raking(10)"; 
 		$this->data["Special"] .= "<br> - 10 power: 6d10+10, Raking(15)"; 
 		$this->data["Special"] .= "<br> - 15 power: 8d10+15, Raking(15)"; 
-		//$this->data["Special"] .= "<br>Weapon can fire up to 4 times (charging power above for each shot) - NEEDS TO BE DECLARED MANUALLY (by default 4 shots are declared but You may decrease this number)."; 
 		$this->data["Special"] .= "<br>Fires up to 4 times (costing power per shot), at same or different targets.";
-		$this->data["Special"] .= "<br>Player must explicitly order weapon to intercept.";
+		$this->data["Special"] .= "<br>You must explicitly order this weapon to intercept.";	
 		$this->data["Special"] .= "<br>Interceping shots consume 5 power per shot (refunded if not used).";   	
 	}
 		

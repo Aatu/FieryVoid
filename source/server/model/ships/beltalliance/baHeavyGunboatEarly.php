@@ -67,7 +67,7 @@ class BAHeavyGunboatEarly extends HeavyCombatVessel{
         	),
         	1=> array(
         		6 => "Thruster",
-        		8 => "Heavy Blast Cannon",
+        		7 => "Heavy Blast Cannon",
         		8 => "Medium Blast Cannon",
         		10 => "Standard Particle Beam",
         		11 => "BA Interceptor Prototype",

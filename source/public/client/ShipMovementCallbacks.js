@@ -137,6 +137,21 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    ShipMovementCallbacks.prototype.graviticTurnRightCallback = function (e) {
+        e.stopPropagation();
+        this.graviticTurnCallback(e, true);
+    };
+
+    ShipMovementCallbacks.prototype.graviticTurnLeftCallback = function (e) {
+        e.stopPropagation();
+        this.graviticTurnCallback(e, false);
+    };    
+
+    ShipMovementCallbacks.prototype.graviticTurnCallback = function (e, right) {
+        shipManager.movement.doGraviticTurn(this.ship, right);
+        this.updateCallback({ ship: this.ship });
+    };    
+
     ShipMovementCallbacks.prototype.moveCallback = function (e) {
         e.stopPropagation();
 

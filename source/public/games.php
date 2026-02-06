@@ -45,12 +45,14 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <link href="styles/lobby.css" rel="stylesheet" type="text/css">
   <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
   <link href="styles/confirm.css" rel="stylesheet" type="text/css">
+  <link href="styles/ladder.css" rel="stylesheet" type="text/css">
   <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>
   <script src="client/player.js"></script>
   <script src="client/mathlib.js"></script>
   <script src="client/UI/confirm.js"></script>
+  <script src="client/ladder.js"></script>
   
   <script>
     jQuery($ => {
@@ -105,15 +107,12 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — January 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Friendly Fire</strong> - New option added to Create Game screen allowing ships to fire on their own team!</li> 
-        <li><strong>Electronic Warfare</strong> - Now all EW options are available for any ship friend or foe!</li>    
-        <li><strong>Ship Selection</strong> - Due to above changes, in certain phases you will now need to double-click with left mouse button to select a ship.</li> 
-        <li><strong>Touchscreen Improvements</strong> - Line of Sight tool and Hit Chart displays should now work on mobile/tablet devices.</li>                                               
-        <li><strong>Escalation/Nexus Updates</strong> - Several Nexus fixes and a new Gravitic Tracting Rod weapon added for Chouka! Thanks to Geoffrey!</li>  
-        <li><strong>Torvalus Stilettos</strong> - Jammer ability removed following rules clarification.</li> 
-        <li><strong>Drazi Solar Cannon</strong> - Should now dealt correct damage to ships with damge mitigating systems e.g. Shadow Diffusers.</li> 
-        <li><strong>The Lllort</strong> - Extra 'L' added to Lllort faction name.</li>                                                                               
-        <li><strong>General Fixes</strong> - Further database optimisation and server stability fixes. Several bug fixes/improvements. Thanks for the reports!</li>                                                    
+        <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above or watch the Video Tutorial for details on how it works!</li>  
+        <li><strong>Skin Dancing</strong> - Fighters and Agile ships will now automatically try to Skin Dance when they end their movement on same hex as an Enormous unit.  See FAQ for more details!</li>          
+        <li><strong>Fighter Movement</strong> - Fighter/Shuttles automatically change facing to match their heading when they turn.  New icon added for Gravitic fighters to turn without changing facing.</li> 
+        <li><strong>Terrain collisions</strong> - With Skin Dancing now added, asteroid collisions have been standardised across all types of unit as per Tabletop rules.</li>         
+        <li><strong>Custom Centauri</strong> - Further reinforcements for House Valeru added, thanks to Fred/Geoffrey.</li>                                                           
+        <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
@@ -143,8 +142,9 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       </div>
       <div class="create-col">
         <a class="btn btn-success create-game-btn" href="creategame.php">Create Game</a>
-        <button class="btn btn-secondary" onclick="gamedata.submitFleetTest()">Fleet Test</button>
-        <button class="btn btn-secondary" onclick="loadFireList()">Recent Games</button>
+        <button class="btn btn-secondary btn-fleet-test" onclick="gamedata.submitFleetTest()">Fleet Test</button>
+        <button class="btn btn-secondary btn-ladder btn-view-ladder" data-show-calc="false">View Ladder</button>
+        <button class="btn btn-secondary btn-recent-games" onclick="loadFireList()">Recent Games</button>
       </div>
     </div>
   </section>
@@ -167,4 +167,5 @@ All trademarks and copyrights remain the property of their respective owners.
 </footer>
 
 </body>
+<?php include("ladder.php"); ?>
 </html>

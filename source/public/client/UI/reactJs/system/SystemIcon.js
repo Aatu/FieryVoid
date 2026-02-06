@@ -12,14 +12,14 @@ const HealthBar = styled.div`
     
     background-color: black;
 
-    :before {
+    &::before {
         content: "";
         position:absolute;
-        width:  ${props => `${props.health}%`};
+        width:  ${props => props.$health}%;
         height: 100%;
         left: 0;
         bottom: 0;
-        background-color: ${props => props.criticals ? '#ed6738' : '#427231'};
+        background-color: ${props => props.$criticals ? '#ed6738' : '#427231'};
     }
 `;
 
@@ -40,59 +40,59 @@ const System = styled.div`
     box-sizing: border-box;
     width: 32px;
     height: 32px;
-    margin: ${props => props.scs ? '3px 0' : '2px'};
+    margin: ${props => props.$scs ? '3px 0' : '2px'};
    border: ${props => {
-        if (props.firing) {
+        if (props.$firing) {
             return '1px solid #eb5c15';
-        } else if (props.highlight === 'Yellow') {
+        } else if (props.$highlight === 'Yellow') {
             return '1px solid #e1b000'; // Some systems get a different border
-        } else if (props.highlight === 'Orange') {
+        } else if (props.$highlight === 'Orange') {
             return '2px solid #ff6d3c'; // Some systems get a different border            
-        } else if (props.highlight === 'Red') {
+        } else if (props.$highlight === 'Red') {
             return '2px solid #ff0000'; // Some systems get a different border            
         } else {
             return '1px solid #496791';
         }
     }};
     background-color:  ${props => {
-        if (props.selected) {
+        if (props.$selected) {
             return '#4e6c91';
-        } else if (props.firing) {
+        } else if (props.$firing) {
             return '#e06f01'; //orange
-        } else if (props.boosted) {
+        } else if (props.$boosted) {
             return '#cca300'; //darkyellow
-        } else if (props.loading && props.loadedAlternate) { //weapon not ready in current mode, but  alternate mode is ready
+        } else if (props.$loading && props.$loadedAlternate) { //weapon not ready in current mode, but  alternate mode is ready
             return '#CD9E9E'; //pale red
         } else {
             return 'black';
         }
     }};
     box-shadow: ${props => {
-        if (props.selected) {
+        if (props.$selected) {
             return '0px 0px 15px #0099ff';
-        } else if (props.firing) {
+        } else if (props.$firing) {
             return 'box-shadow: 0px 0px 15px #eb5c15';
         } else {
             return 'none';
         }
     }};
-    background-image: ${props => `url(${props.background})`};
+    background-image: ${props => `url(${props.$background})`};
     background-size: cover;
-    filter: ${props => props.destroyed ? 'blur(1px)' : 'none'};
+    filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
     cursor: pointer;
     
     ${SystemText} {
-        display: ${props => props.offline ? 'none' : 'flex'};
+        display: ${props => props.$offline ? 'none' : 'flex'};
     }
 
 
-    :before {
+    &::before {
         content: "";
         position:absolute;
         width: 100%;
         height: 100%;
         opacity: ${props => {
-        if (props.destroyed || props.offline || props.loading) {
+        if (props.$destroyed || props.$offline || props.$loading) {
             return '0.5';
         }
 
@@ -100,9 +100,9 @@ const System = styled.div`
     }};
 
         background-color: ${props => {
-        if (props.destroyed || props.offline) {
+        if (props.$destroyed || props.$offline) {
             return 'black';
-        } else if (props.loading) {
+        } else if (props.$loading) {
             return 'orange'
         }
 
@@ -110,7 +110,7 @@ const System = styled.div`
     }};
 
         background-image: ${props => {
-        if (props.offline) {
+        if (props.$offline) {
             return 'url(./img/offline.png)';
         }
 
@@ -205,30 +205,41 @@ class SystemIcon extends React.Component {
 
         system = shipManager.systems.initializeSystem(system);
 
+        system = shipManager.systems.initializeSystem(system);
+
+        /*
+        console.log('SystemIcon render:', {
+            name: system.name,
+            $health: getStructureLeft(ship, system),
+            $offline: isOffline(ship, system),
+            $destroyed: getDestroyed(ship, system)
+        });
+        */
+
         if (getDestroyed(ship, system) || destroyed) {
             return (
-                <System background={getBackgroundImage(system)} destroyed><HealthBar health="0" /></System>
+                <System $background={getBackgroundImage(system)} $destroyed><HealthBar $health="0" /></System>
             )
         }
 
         return (
             <System
-                scs={scs}
-                highlight={hasBorderHighlight(ship, system)} // Pass criticals here to System                
+                $scs={scs}
+                $highlight={hasBorderHighlight(ship, system)} // Pass criticals here to System                
                 onClick={this.clickSystem.bind(this)}
                 onMouseOver={this.onSystemMouseOver.bind(this)}
                 onMouseOut={this.onSystemMouseOut.bind(this)}
                 onContextMenu={this.onContextMenu.bind(this)}
-                background={getBackgroundImage(system)}
-                offline={isOffline(ship, system)}
-                loading={isLoading(system)}
-                loadedAlternate={isLoadedAlternate(system)} //alternate mode ready while primary is not
-                selected={isSelected(system)}
-                firing={isFiring(ship, system)}
-                boosted={isBoosted(ship, system)}
+                $background={getBackgroundImage(system)}
+                $offline={isOffline(ship, system)}
+                $loading={isLoading(system)}
+                $loadedAlternate={isLoadedAlternate(system)} //alternate mode ready while primary is not
+                $selected={isSelected(system)}
+                $firing={isFiring(ship, system)}
+                $boosted={isBoosted(ship, system)}
             >
                 <SystemText>{getText(ship, system)}</SystemText>
-                {!fighter && <HealthBar scs={scs} health={getStructureLeft(ship, system)} criticals={hasCriticals(system)} />}
+                {!fighter && <HealthBar $scs={scs} $health={getStructureLeft(ship, system)} $criticals={hasCriticals(system)} />}
             </System>
         )
     }

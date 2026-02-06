@@ -7,7 +7,7 @@ class PreFiringGamePhase implements Phase
         $dbManager->updateGamedata($gameData);
 
         $servergamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
-        Firing::preparePreFiring($servergamedata); //Calculate base hit first
+        Firing::preparePreFiring($servergamedata); //Calculate base hit first / Ramming Attack systems checks for collisions and skindancing
         Firing::firePreFiringWeapons($servergamedata);
 
 

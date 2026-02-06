@@ -5,12 +5,12 @@ class PorcupineBeta extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 275;
-        $this->faction = "Earth Alliance (Custom)";
+        $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "PorcupineBeta";
         $this->imagePath = "img/ships/porcupine.png";
         $this->shipClass = "Porcupine Light Carrier (Beta)";
-//			$this->variantOf = "Porcupine Light Carrier (Alpha)";
-//			$this->occurence = "common";
+			$this->variantOf = "Porcupine Light Carrier (Alpha)";
+            $this->occurence = "common";
         $this->canvasSize = 80;
  		$this->unofficial = true;
 

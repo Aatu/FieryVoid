@@ -41,7 +41,7 @@ class MovementGamePhase implements Phase
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
 
             // Perform post-move stealth check for ships with that ability (e.g. Torvalus)
-            if ($ship->hasSpecialAbility("Stealth")) {
+            if ($ship->trueStealth) {
                 $ship->checkStealth($gameData);
             }
 
@@ -85,36 +85,6 @@ class MovementGamePhase implements Phase
             }
         }
     }
-
-    /* //old version of Advance
-    public function advance(TacGamedata $gameData, DBManager $dbManager)
-    {
-        //Have to load new gamedata, because the old object does not have moves for ships that were just submitted
-        foreach ($dbManager->getTacGamedata($gameData->forPlayer, $gameData->id)->ships as $ship) {
-            if ($ship->isDestroyed() || $ship->base || $ship->smallBase || $ship->isTerrain() || ($ship->getTurnDeployed($gameData) > $gameData->turn))  {
-                continue;
-            }
-
-            $lastmove = $ship->getLastMovement();
-            $newMove = new MovementOrder(null, 'end', $lastmove->position, 0, 0, $lastmove->speed, $lastmove->heading, $lastmove->facing, false, $gameData->turn, 0, 0);
-            $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
-            if($ship->hasSpecialAbility("Stealth")) $ship->checkStealth($gameData); //Extra check needed at end of movement for Stealth ships like Torvalus.
-        }
-
-        $gameData->setPhase(3);
-        $gameData->setActiveship(-1);
-        $dbManager->updateGamedata($gameData);
-        $dbManager->setPlayersWaitingStatusInGame($gameData->id, false);
-
-        foreach($gameData->slots as $slot){
-            $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
-            if($minTurnDeploy > $gameData->turn || ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)){ //Slot has no units deployed or has surrendered.
-                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);
-            }
-        }   
-                  
-    }
-    */
 
 	/*old version - before changes - in case of need of rollback*/
     public function process_bak(TacGamedata $gameData, DBManager $dbManager, Array $ships)
