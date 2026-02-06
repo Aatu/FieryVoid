@@ -29,7 +29,7 @@ class TrekFederationConstitutionCmdCL extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-	$this->iniativebonus = 8 *5; 
+	$this->iniativebonus = 9 *5;  //command variant AND small HCV bonus
 		
 	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
