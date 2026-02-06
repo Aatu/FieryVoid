@@ -2756,6 +2756,13 @@ spl_autoload_register(
 				'trekshipdisablerbase' => '/server/model/weapons/customTrek.php',
 				'treklightdisabler' => '/server/model/weapons/customTrek.php',
 				'trekmediumdisabler' => '/server/model/weapons/customTrek.php',
+
+				'trekdisruptorcannon' => '/server/model/weapons/customTrek.php',
+				'trekearlydisruptor' => '/server/model/weapons/customTrek.php',
+				'treklightdisruptorarray' => '/server/model/weapons/customTrek.php',
+				'treklightdisruptor' => '/server/model/weapons/customTrek.php',
+
+//				'combattransporter' => '/server/model/weapons/customTrek.php',
 				
 				//systems
                 'trekwarpdrive' => '/server/model/weapons/customTrek.php', //nacelle

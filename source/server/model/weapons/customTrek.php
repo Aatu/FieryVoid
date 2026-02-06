@@ -2020,4 +2020,515 @@ class TrekMediumDisabler extends TrekShipDisablerBase{
 } //end of class TrekMediumDisabler
 
 
+
+
+
+class TrekEarlyDisruptor extends Pulse{
+        public $name = "TrekEarlyDisruptor";
+        public $displayName = "Early Disruptor";
+	    public $iconPath = 'LightBlastCannon.png';
+
+        public $animation = "bolt";
+        public $animationColor = array(142, 252, 13);
+
+		public $rof = 2;
+        public $grouping = 20;
+        public $maxpulses = 3;
+ 		protected $useDie = 2; //die used for base number of hits
+       
+        public $loadingtime = 2;
+        public $intercept = 2;
+        public $ballisticIntercept = true;
+        public $priority = 5;
+
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Molecular"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 4;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 1) + 6;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
+		
+    }  //end of class TrekEarlyDisruptor
+
+
+
+class TrekLightDisruptorArray extends Weapon{
+		public $name = "TrekLightDisruptorArray";
+        public $displayName = "Light Disruptor Array";
+        public $iconPath = "TrekPhaserLanceM.png"; 
+        public $animation = "laser";
+        public $animationColor = array(142, 252, 13);
+
+        public $raking = 8;
+        
+        public $intercept = 2;
+		public $priority = 6; //technically light Raking, but borderline - and they're by far heaviest weapons that Federation has - hence 'heavy Raking' status
+		public $priorityArray = array(1=>6, 2=>6);		
+		public $priorityAF = 4; //both Lance and full Phaser are treated as heavy vs fighters
+		
+        public $loadingtime = 1;
+    	public $gunsArray = array(1=>3, 2=>1); //three individual shots, can combine into one
+		
+        public $rangePenaltyArray = array(1=>0.66, 2=>0.66);
+        public $fireControlArray = array( 1=>array(3, 2, 2), 2=>array(3, 2, 2) ); 
+
+        public $damageType = "Raking";
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
+		public $weaponClass = "Molecular";
+		public $weaponClassArray = array(1=>'Molecular', 2=>'Molecular');
+		public $firingModes = array( 1 => "Multiple", 2=> "Combined");
+		public $firingMode = 1;
+
+	 	public function getInterceptRating($turn){
+			return 2;
+		}
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Can fire as either:";  
+			$this->data["Special"] .= "<br> - Multiple: 3 shots, 1d10+3 damage"; 
+			$this->data["Special"] .= "<br> - Combined: 1 shot, 3d10+6 damage"; 
+		}
+	
+		public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(10, 1)+3; //Multiple
+					break;
+				case 2:
+					return Dice::d(10, 3)+6; //Combined
+					break;	
+			}
+		}
+
+ 		public function setMinDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 4; //Multiple
+					break;
+				case 2:
+					$this->minDamage = 9; //Combined
+					break;	
+			}
+		}
+             
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 13; //Multiple
+					break;
+				case 2:
+					$this->maxDamage = 36; //Combined
+					break;	
+			}
+		}
+		
+}//end of class TrekLightDisruptorArray
+
+
+class TrekLightDisruptor extends Pulse{
+        public $name = "TrekLightDisruptor";
+        public $displayName = "Light Disruptor";
+	    public $iconPath = 'LightBlastCannon.png';
+
+        public $animation = "bolt";
+        public $animationColor = array(142, 252, 13);
+
+		public $rof = 3;
+        public $grouping = 20;
+        public $maxpulses = 5;
+ 		protected $useDie = 3; //die used for base number of hits
+       
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $priority = 4; //light Raking	
+		public $priorityAF = 5; //...Standard vs fighters
+
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Molecular"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+        
+        public $rangePenalty = 0.66;
+        public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+			if (!$system->advancedArmor){//advanced armor prevents effect
+				$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+				$system->setCritical($crit); //$system->criticals[] =  $crit;			
+				//and previous turn crit - to be NOT saved, but so crit is recognized as
+			}
+		}
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 3;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6, 2) + 2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+		
+    }  //end of class TrekLightDisruptor
+
+
+class TrekDisruptorCannon extends Weapon{
+		public $name = "TrekDisruptorCannon";
+        public $displayName = "Disruptor Cannon";
+        public $iconPath = "TrekLightPhaseCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(142, 252, 13);
+
+        public $raking = 10;
+        
+		public $priority = 7; //light Raking		
+		public $priorityAF = 3; //Standard
+		
+        public $loadingtime = 1;
+		
+        public $rangePenalty = 0.66;
+        public $fireControl = array(1, 2, 3);
+
+        public $damageType = "Raking";
+		public $weaponClass = "Molecular";
+		public $firingModes = array( 1 => "Raking");
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 8;
+			if ( $powerReq == 0 ) $powerReq = 6;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+        protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){
+            parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
+			if ($system->advancedArmor) return; //advanced armor prevents effect 
+					$fireOrder->pubnotes .= "<br>Dmg value: $damage ";
+//					$fireOrder->pubnotes .= "Dmg value: "+$damage+"; ";
+//					$fireOrder->pubnotes .= " DROPOUT! ";
+			if ($damage < 12) return; //not enough damage to trigger effect
+            if(!$this->alreadyReduced){ 
+                //$struct = $target->getStructureSystem($location); //this caused problems if first rake penetrated!
+				$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+				$struct = $target->getStructureSystem($sectionFacing); 
+                if ($struct->advancedArmor) return; //advanced armor prevents effect 
+                if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
+                    $this->alreadyReduced = true; //do this only for first part of shot that actually connects
+                    $crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+                    $crit->updated = true;
+                    $crit->inEffect = false;
+                    $struct->criticals[] = $crit;
+                }
+            }
+        }       
+	
+        public function getDamage($fireOrder){        return 20;   }
+        public function setMinDamage(){     $this->minDamage = 20 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+
+}//end of class TrekDisruptorCannon
+
+
+
+
+class CombatTransporter extends Weapon{
+	public $name = "CombatTransporter";
+	public $displayName = "Combat Transporter";
+	public $iconPath = "grapplingClaw.png";
+	public $animation = "trail";
+	public $animationColor = array(50, 50, 50);
+	public $animationWidth = 0.2;
+  
+	public $calledShotMod = 0; //instead of usual -8
+	
+	public $loadingtime = 1;
+	public $rangePenalty = 1;
+    public $fireControl = array(null, 2, 2);
+	
+	public $noOverkill = true;
+	public $priority = 9;
+	
+	public $uninterceptable = true; 
+	public $doNotIntercept = true;			
+
+	public $damageType = "Special";
+	public $damageTypeArray = array(1=> "Special", 2=> "Standard", 3=> "Special");	
+	public $weaponClass = "Matter";
+	public $firingModes = array(
+		1 => "Capture Ship",
+		2 => "Sabotage",
+		3 => "Rescue"
+	);		
+
+	public $eliteMarines = false;
+//	public $isBoardingAction = true;//For front end to recalculate hit chance.	
+		
+	public $ammunition = 0; //limited number of Marine contingents.
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition, $elite)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 2;
+        if ( $powerReq == 0 ) $powerReq = 2;      						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition, $elite); //Parent routines take care of the rest
+		$this->ammunition = $ammunition;			
+		$this->eliteMarines = $elite;	       
+	}
+
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);      
+		$this->data["Special"] = "<br>If on same hex as an enemy ship, and in arc, this weapon attempt to deliver Marines to that vessel.";	
+		$this->data["Special"] .= "<br>Marines may attempt three 'Missions' by selecting the appropriate Firing Mode.";  		
+		$this->data["Special"] .= "<br> - Capture Ship: Marines can attempt to overcome defenders on enemy ship and disable it."; 
+		$this->data["Special"] .= "<br> - Sabotage: Can be directed at a specific system (i.e. called shot) or for general sabotage operations on enemy ship."; 
+		$this->data["Special"] .= "<br> - Rescue: Scenarios only, Marines will board enemy ship and attempt to rescue target."; 
+		$this->data["Special"] .= "<br>See 'Common Systems & Enhancements' file for full information on Boarding Actions.";  		                     
+		if($this->eliteMarines){
+			$this->data["Elite"] = "Yes";
+		}else{
+			$this->data["Elite"] = "No";			
+		}
+	    $this->data["Ammunition"] = $this->ammunition;					
+	}
+
+
+
+
+   public function fire($gamedata, $fireOrder){ //note ammo usage
+		parent::fire($gamedata, $fireOrder);
+
+		if($fireOrder->rolled <= $fireOrder->needed){//Only reduce ammo if Marines successfully boarded enemy ship.
+
+			$this->ammunition--;//Deduct Marine unit just used.			
+
+			//Need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+			$ship = $gamedata->getShipById($fireOrder->shooterid);
+	
+			foreach ($ship->enhancementOptions as $enhancement) {
+			    $enhID = $enhancement[0];
+				$enhCount = $enhancement[2];		        
+				if($enhCount > 0) {		            
+			        if ($enhID == 'EXT_MRN') $this->ammunition -= $enhCount;       	
+				}
+			}	
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+		}
+			
+	}
+
+	private function checkMissionAmount($target, $gamedata, $fireOrder){	
+		$tooMany = false;//Initialise
+		$noOfPods = 0;//Initialise	
+
+	    foreach (Marines::$boardedThisTurn as $boardedId) {//Check static variable for how many marines missions have boarded THIS turn.
+	        if ($boardedId == $target->id) {
+	            $noOfPods++;
+	        }
+	    }	
+		
+		//Different amount of marine missions possible depending on size of ships.
+		if(	($target->shipSizeClass > 3 && $noOfPods >= 12) ||
+			($target->shipSizeClass == 3 && $noOfPods >= 8) ||
+		   	($target->shipSizeClass == 2 && $noOfPods >= 4) || 
+		   	($target->shipSizeClass == 1 && $noOfPods >= 2) ||
+		   	($target->shipSizeClass < 1 && $noOfPods > 1)) {
+		 									
+			$tooMany = true; //There are too many, change to false.
+		}	
+
+		return $tooMany;	
+		
+	}//endof checkMissionAmount()
+
+
+
+	private function getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder){
+		$rollMod = 0;
+		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
+						
+		$location = $fireOrder->chosenLocation ;
+		if($location == 0 && (!$target instanceof OSAT)) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       
+
+		foreach ($target->enhancementOptions as $enhancement) {//Defender quality can influence roll too.
+		    $enhID = $enhancement[0];
+			$enhCount = $enhancement[2];		        
+			if($enhCount > 0) {		            
+		        if ($enhID == 'ELITE_CREW') $rollMod += $enhCount;	//Elite Crews are better at defending.
+		        if ($enhID == 'POOR_CREW') $rollMod -= $enhCount; //Poor Crews are worse.
+		        if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.		        	
+			}
+		}
+
+        return $rollMod;
+        		
+	}//endof getDeliveryRollMod	
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+			
+		if ($system->advancedArmor) {//no effect on Advanced Armor for Younger Races equipped with this e.g. Shadow Omega.	
+			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with advanced armor.";				
+			return; 	
+		}
+		
+		//check if there are too many marines already on target ship.
+		if($this->checkMissionAmount($target, $gamedata, $fireOrder)){//If it returns true, there are too many attaching pods.							
+			$this->ammunition++;//Marines weren't eliminated.  Give ammunition back to weapon.
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);	
+			$fireOrder->pubnotes .= "<br>Too many Breaching Pods/Grappling Claws attached on target, boarding attempt cancelled.";		
+			return;
+		}	
+			
+		//Can proceed with boarding actions, roll to see if Marines are delivered.		
+		$rollMod = $this->getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder);		
+		$deliveryRoll = max(0, Dice::d(10) + $rollMod);		
+
+		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.		
+		foreach($cnc->criticals as $critDisabled){
+			if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) $deliveryRoll = 1;//Ship captured, auto success.		
+		}		
+		
+		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
+				
+			switch($this->firingMode){
+								
+				case 1://Capture
+
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to capture enemy ship next turn.";			
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}else{//Not Elite Marines					
+									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}							    		
+			            }				
+				
+					break;
+
+				case 2://Sabotage
+
+					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot and not structure, place crit on system.
+							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
+						if($this->eliteMarines){//Are Marines Elite?
+							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+						}else{//Not Elite Marines			
+							$crit = new Sabotage(-1, $ship->id, $system->id, 'Sabotage', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+						}	
+					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
+						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
+							if($cnc){
+									if($this->eliteMarines){//Are Marines Elite?
+										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
+									}else{//Not Elite Marines					
+										$crit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+									}							    		
+				            }				
+					}	
+					
+					break;				
+				
+				case 3://Rescue
+
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt their rescue mission next turn.";			
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note marines have boarded this turn
+								}else{//Not Elite Marines					
+									$crit = new RescueMission(-1, $ship->id, $cnc->id, 'RescueMission', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}							    		
+			            }	
+				
+					break;			
+				
+			}
+		}elseif($deliveryRoll >= 6 && $deliveryRoll <=8){//Unsuccessful delivery
+			$this->ammunition++;//Marines weren't eliminated, they just weren't delivered.  Give ammunition back to weapon.
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was beaten back by defenders but managed to return safely to their pod.";
+			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
+			return;	
+		}else{//Roll result is 9 or over
+			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was eliminated by defenders whilst trying to board the enemy ship.";
+			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.								
+			return;
+		}			
+	}//endof onDamagedSystem() 		
+	
+	
+	public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects()
+		return 0;
+	}
+
+	public function setMinDamage(){     $this->minDamage = 0;      }
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
+
+	public function stripForJson() {
+			$strippedSystem = parent::stripForJson();    
+			$strippedSystem->ammunition = $this->ammunition;			
+			$strippedSystem->isBoardingAction = $this->isBoardingAction;                          
+			return $strippedSystem;
+	}	
+	
+} //endof class GrapplingClaw
+
+
+
+
 ?>
