@@ -25,7 +25,7 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 4;
-	$this->iniativebonus = 2 *5; 
+	$this->iniativebonus = 1 *5; //a bonus as Excelsior is smaller than a regular Capital
 		
 	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 30, 0, 0));
