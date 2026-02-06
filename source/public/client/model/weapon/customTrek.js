@@ -352,3 +352,34 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
     // No one detected the ship
     return false;
 };
+
+
+var TrekEarlyDisruptor = function TrekEarlyDisruptor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekEarlyDisruptor.prototype = Object.create(Weapon.prototype);
+TrekEarlyDisruptor.prototype.constructor = TrekEarlyDisruptor;
+
+var TrekLightDisruptorArray = function TrekLightDisruptorArray(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekLightDisruptorArray.prototype = Object.create(Weapon.prototype);
+TrekLightDisruptorArray.prototype.constructor = TrekLightDisruptorArray;
+
+var TrekLightDisruptor = function TrekLightDisruptor(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekLightDisruptor.prototype = Object.create(Weapon.prototype);
+TrekLightDisruptor.prototype.constructor = TrekLightDisruptor;
+
+var TrekDisruptorCannon = function TrekDisruptorCannon(json, ship) {
+    Weapon.call(this, json, ship);
+};
+TrekDisruptorCannon.prototype = Object.create(Weapon.prototype);
+TrekDisruptorCannon.prototype.constructor = TrekDisruptorCannon;
+
+var CombatTransporter = function CombatTransporter(json, ship) {
+    Weapon.call(this, json, ship);
+};
+CombatTransporter.prototype = Object.create(Weapon.prototype);
+CombatTransporter.prototype.constructor = CombatTransporter;
