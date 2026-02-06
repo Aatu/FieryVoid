@@ -70,7 +70,7 @@ class Fessa extends MediumShip{
                 20 => "Primary",
             ),
             2 => array(
-                3 => "Thruster",
+                4 => "Thruster",
 				9 => "Standard Particle Beam",
                 15 => "Structure",
                 20 => "Primary",
