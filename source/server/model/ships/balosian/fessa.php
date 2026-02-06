@@ -25,15 +25,19 @@ class Fessa extends MediumShip{
         $this->pivotcost = 0;
         
 		$this->iniativebonus = -2 *5;
-         
+
+	//official SCS says that Ion Cannons and a pair of SPBs are on PRIMARY... but with hit chart saying they're hittable from the Front and Aft only, respectively.
+	//I will change them to be shown on appropriate locations - this would be much more practical and intuitive
+	///(SCS locations make sense due to where the weapons physically fit into the converted freighter, but do not make sense for hit chart)
+		
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
  	    $this->addPrimarySystem(new Engine(3, 6, 0, 6, 4));
         $this->addPrimarySystem(new Hangar(3, 4));
-        $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
-        $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));  
-        $this->addPrimarySystem(new IonCannon(3, 6, 4, 240, 0));
-        $this->addPrimarySystem(new IonCannon(3, 6, 4, 0, 120));
+        $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));
+        $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));  
+        $this->addFrontSystem(new IonCannon(3, 6, 4, 240, 0));
+        $this->addFrontSystem(new IonCannon(3, 6, 4, 0, 120));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 4));
 
@@ -61,13 +65,13 @@ class Fessa extends MediumShip{
                 4 => "Thruster",
                 7 => "Standard Particle Beam", //only front ones, correct - as I think by comparing with Hassa!
                 9 => "C&C",                
-                11 => "0:Ion Cannon",
+                11 => "Ion Cannon",
                 17 => "Structure",
                 20 => "Primary",
             ),
             2 => array(
                 3 => "Thruster",
-				9 => "0:Standard Particle Beam",
+				9 => "Standard Particle Beam",
                 15 => "Structure",
                 20 => "Primary",
             ),
