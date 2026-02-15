@@ -9,7 +9,7 @@ class BlackRapier extends BaseShip{
         $this->phpclass = "BlackRapier";
         $this->shipClass = "Black Rapier";
         $this->imagePath = "img/ships/TorvalusBlackRapier.png";
-        $this->canvasSize = 256;
+        $this->canvasSize = 280;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial

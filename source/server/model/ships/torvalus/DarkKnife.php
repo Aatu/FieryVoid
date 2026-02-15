@@ -10,7 +10,7 @@ class DarkKnife extends BaseShip{
         $this->shipClass = "Dark Knife";
         //$this->variantOf = "Dark Knife";
         $this->imagePath = "img/ships/TorvalusDarkKnife.png";
-        $this->canvasSize = 256;
+        $this->canvasSize = 280;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
