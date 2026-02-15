@@ -21,6 +21,22 @@
     font-size: 13px;
 }
 
+.confirm::-webkit-scrollbar {
+    width: 8px;
+}
+
+.confirm::-webkit-scrollbar-track {
+    background: #0d1620;
+}
+
+.confirm::-webkit-scrollbar-thumb {
+    background: #466486;
+}
+
+.confirm::-webkit-scrollbar-thumb:hover {
+    background: #5a7ea8;
+}
+
 .confirm .missileselect {
     /*border: 1px solid #defbff44; */  
     border: 1px solid #496791;   
@@ -157,8 +173,8 @@
 
 .confirm.error {
     /*border: 1px solid #defbff44; */  
-    border: 1px solid #496791;        
-    color: #b34119;
+    border: 2px solid #641b1b;        
+    color: #c94b1d;
     font-family: arial;
     font-size: 16px;
 }
