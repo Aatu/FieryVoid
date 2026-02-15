@@ -1906,8 +1906,20 @@ window.gamedata = {
 	},
 
 	createNewSlot: function createNewSlot(data) {
+		var teamId = data.team;
+		var teamSection = $("#lobbyTeamsContainer .team-section[data-team-id='" + teamId + "']");
+
+		if (teamSection.length === 0) {
+			var teamTemplate = $("#lobbyTeamTemplate").children().clone();
+			teamTemplate.attr("data-team-id", teamId);
+			teamTemplate.find(".team-number").text(teamId);
+			// Optional: color coding could be added here similar to createGame.js if desired
+			$("#lobbyTeamsContainer").append(teamTemplate);
+			teamSection = teamTemplate;
+		}
+
+		var target = teamSection.find(".slotcontainer");
 		var template = $("#slottemplatecontainer .slot");
-		var target = $("#team" + data.team + ".slotcontainer");
 		var actual = template.clone(true).appendTo(target);
 
 		actual.data("slotid", data.slot);

@@ -4,6 +4,13 @@
     position: fixed !important;
 }
 
+.team-header{
+    font-size: 16px;
+    margin-top: 5px;
+    margin-left: 5px;
+    font-weight: bold;
+}
+
 .unlimited-points-text {
     font-size: 14px;
     /* Adjustable size for lobby unlimited points text */
@@ -312,19 +319,7 @@
     margin-right: 5px;
 }
 
-/*
-.leaveslot{
-    position:absolute;
-    border:1px solid #DEEBFF;
 
-    width:10px;
-    height:10px;
-    right:5px;
-    top:4px;
-    background-image:url(../img/close1.png);
-    cursor:pointer;
-}
-*/
 .leaveslot {
     position: absolute;
     right: 3px;
@@ -335,12 +330,21 @@
     /* so it feels clickable like the icon */
     color: #DEEBFF !important;
     cursor: pointer;
-    font-size: 11px;
-    border: 1px solid #215a7a;
-    padding: 2px 4px;
     border-radius: 3px;
     transition: background 0.2s;
     margin-top: 2px !important;
+  background: #7a2121;
+  font-size: 0.85em;
+  /* Smaller than Add Team */
+  border: 1px solid #a77272;
+  width: auto;
+  text-align: center;
+  box-sizing: border-box;
+  height: auto;
+  line-height: normal;
+  padding: 2px 8px;
+  display: inline-block;
+  vertical-align: middle;    
 }
 
 .value {
@@ -744,6 +748,8 @@
 /* Unique style for Leave Game button */
 .lobby-leave-container .lobby-leave-button {
     /* Add custom styles here */
+    background: #7a2121;
+    border: 1px solid #a77272;        
     margin-right: 0px;
     margin-top: 3px;
 }

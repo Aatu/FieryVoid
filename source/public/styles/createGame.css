@@ -45,7 +45,7 @@
 
 .split-header {
   margin-top: 5px;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
   color: #deebffc5;
   display: block;
   font-size: 1.17em;
@@ -161,6 +161,7 @@
   color: #a0b8c8;
 }
 
+/*
 .slot-card .remove-btn {
   color: #DEEBFF !important;
   cursor: pointer;
@@ -175,7 +176,7 @@
 .slot-card .remove-btn:hover {
   background: rgba(229, 115, 115, 0.2);
 }
-
+*/
 .add-slot {
   margin-left: 5px;
   margin-top: 5px;
@@ -197,7 +198,7 @@
 .settings-group {
   border: 1px solid #215a7a;
   background: #0b1e2e;
-  padding: 7px;
+  padding: 9px 7px;
   margin-bottom: 10px;
   border-radius: 4px;
 }
@@ -528,11 +529,6 @@ input[type=number] {
   }
 }
 
-/* Hide 'Remove Slot' button for the first slot in each team */
-#team1 .slot-card:first-child .remove-btn,
-#team2 .slot-card:first-child .remove-btn {
-  display: none !important;
-}
 
 /* Restructured Layout for Game Options and Scenario Description */
 .game-options-wrapper {
@@ -585,7 +581,7 @@ input[type=number] {
 
 .btn-fleet-test {
   background: #215a7a;
-  color: white;
+  color: #DEEBFF;
   font-size: 1.2em;
   border: 1px solid #7298a7;
   width: 200px;
@@ -602,6 +598,106 @@ input[type=number] {
   opacity: 0.9;
 }
 
+/* NEW: Add Team Button */
+.btn-add-team {
+  background: #215a7a;
+  color: #DEEBFF;
+  font-size: 1em;
+  border: 1px solid #7298a7;
+  width: 120px;
+  text-align: center;
+  box-sizing: border-box;
+  height: 26px;
+  line-height: 24px;
+  padding: 0 5px;
+  cursor: pointer;
+  display: inline-block;
+  margin-top: 0px;
+  float: left;
+  margin-bottom: 15px;  
+}
+
+.btn-add-team:hover {
+  background: #2c7da0;
+  opacity: 0.9;
+  text-decoration: none;
+}
+
+/* NEW: Add Slot Button */
+.btn-add-slot {
+  background: #1b6449;
+  /* Teal/Greenish */
+  color: #DEEBFF;
+  font-size: 0.9em;
+  border: 1px solid #629d85;
+  width: 100px;
+  text-align: center;
+  box-sizing: border-box;
+  display: inline-block;
+  margin-top: 0px;
+  font-size: 0.85em;
+  height: auto;
+  line-height: normal;
+  padding: 2px 8px;
+  cursor: pointer;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-left: 5px;
+  margin-right: 14px;
+}
+
+.btn-add-slot:hover {
+  background: #2c906a;
+  opacity: 0.9;
+  text-decoration: none;
+}
+
+.add-slot-wrapper {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 5px;
+  padding-right: 5px;
+  width: 100%;
+}
+
+#teamsContainer {
+  clear: both;
+}
+
+/* NEW: Remove Team Button */
+.btn-remove-team,
+.slot-card .remove-btn {
+  background: #7a2121;
+  color: #DEEBFF;
+  font-size: 0.85em;
+  /* Smaller than Add Team */
+  border: 1px solid #a77272;
+  width: 100px;
+  text-align: center;
+  box-sizing: border-box;
+  height: auto;
+  line-height: normal;
+  padding: 2px 8px;
+  cursor: pointer;
+  display: inline-block;
+  border-radius: 3px;
+  vertical-align: middle;
+  margin-left: 20px;
+}
+
+.btn-remove-team:hover,
+.slot-card .remove-btn:hover {
+  background: #a02c2c;
+  opacity: 0.9;
+  text-decoration: none;
+}
+
+/* HIDE 'Remove Team' button for Team 1 and Team 2 */
+div[data-team-id="1"] .remove-team-btn,
+div[data-team-id="2"] .remove-team-btn {
+  display: none !important;
+}
+
 /* Custom styles for Create Game Ladder button */
 .btn-create-game-ladder {
   background: #215a7a;
@@ -614,9 +710,10 @@ input[type=number] {
   display: block;
   line-height: normal;
   margin-left: 20px;
-  float: right;  
+  float: right;
 }
 
 .btn-create-game-ladder:hover {
   background: #2c7da0;
 }
+

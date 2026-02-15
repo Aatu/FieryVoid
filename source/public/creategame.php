@@ -225,8 +225,8 @@
                     <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
                     <select id="customfactions">
                         <option value="Allowed">Allowed</option>
-                        <option value="Custom factions only">Custom Factions only</option>                        
-                        <option value="Custom ships in official factions only">Custom Ships in official factions only</option>                         
+                        <option value="Custom factions only">Custom factions only</option>                        
+                        <option value="Custom ships in official factions only">Custom ships in official factions only</option>                         
                         <option value="Not allowed" selected>Not allowed</option>
                     </select>
                 </div>
@@ -316,13 +316,10 @@
         <div class="slots-map-wrapper">
             <!-- Left Column: Teams -->
             <div class="slots-column">
-                <div class="createsubheader" style="margin-top:0;">TEAM 1:</div>
-                <div id="team1" class="subpanel slotcontainer" style="border:none; background:transparent;"></div>
-                <div><span class="clickable addslotbutton team1" class="add-slot">ADD SLOT</span></div>
-                
-                <div class="createsubheader">TEAM 2:</div>
-                <div id="team2" class="subpanel slotcontainer" style="border:none; background:transparent;"></div>
-                <div><span class="clickable addslotbutton team2" class="add-slot">ADD SLOT</span></div>
+                <div id="addTeamBtn" class="clickable btn btn-add-team">Add Team</div>
+                <div id="teamsContainer">
+                    <!-- Teams will be injected here -->
+                </div>
             </div>
 
             <!-- Right Column: Map Preview -->
@@ -348,6 +345,18 @@
 				
 
         
+
+        <!-- Template for Team (Hidden) -->
+        <div id="teamtemplatecontainer" style="display:none;">
+            <div class="team-section" data-team-id="">
+                <div class="team-header-row" style="display:flex; justify-content:flex-start; align-items:center; margin-top: 10px; border-bottom: 1px solid #496791; padding-bottom: 5px; margin-bottom: 10px;">
+                    <div class="createsubheader" style="margin:0;">TEAM <span class="team-number"></span>:</div>
+                    <span class="clickable btn-remove-team remove-team-btn">Remove Team</span>
+                </div>
+                <div class="subpanel slotcontainer" style="border:none; background:transparent;"></div>
+                <div class="add-slot-wrapper"><span class="clickable addslotbutton btn-add-slot">Add Slot</span></div>
+            </div>
+        </div>
 
         <!-- Template for Slots (Hidden) -->
         <div id="slottemplatecontainer" style="display:none;">
