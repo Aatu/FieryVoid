@@ -28,7 +28,7 @@ class TrekFederationConstitutionAltCL extends HeavyCombatVessel{
         $this->accelcost = 2;
         $this->rollcost = 2;
         $this->pivotcost = 2;
-	$this->iniativebonus = 6 *5; 
+	$this->iniativebonus = 7 *5; //deliberate +1 as Constitution is smaller than a typical HCV
 		
 	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
