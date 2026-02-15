@@ -2180,7 +2180,23 @@ FtrPetals.prototype.initializationUpdate = function () {
 			ship.armour[3] = 2; //Reduce side armour of fighters
 		}
 	} else{
-		this.outputDisplay = "-";		
+		this.outputDisplay = "-";
+		var ship = this.ship;
+		var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.			
+		//Incredibly specific here, but it avoids alot of issues trying to pass effects from server
+		if(ship.name == "VorlonHeavyFighterFlight"){
+			flight.forwardDefense = 7; 
+			flight.sideDefense = 9;
+			flight.freethrust = 14;
+			ship.armour[2] = 3; //Reduce side armour of fighters
+			ship.armour[3] = 3; //Reduce side armour of fighters			
+		}else if(ship.name == "VorlonAssaultFighterFlight"){
+			flight.forwardDefense = 10; 
+			flight.sideDefense = 12;
+			flight.freethrust = 13;
+			ship.armour[2] = 4; //Reduce side armour of fighters
+			ship.armour[3] = 4; //Reduce side armour of fighters
+		}			
 	}
 
 	this.data["Power Used"] = 'None';
@@ -2238,7 +2254,8 @@ FtrPetals.prototype.doDeactivate = function () {
 					var fighterSystem = system.systems[j];	//The fighter's systems.
 					if (fighterSystem.name == "FtrPetals") { //Is shading Field but not this one
 						if (fighterSystem.active) { //Is  boosted.
-							fighterSystem.active = false; //Set boost marker for notes.										
+							fighterSystem.active = false; //Set boost marker for notes.	
+																
 						}
 					}
 				}
