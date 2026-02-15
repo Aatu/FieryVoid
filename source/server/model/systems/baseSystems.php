@@ -235,7 +235,8 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		}
 
 		// Check all enemy ships to see if any can detect this ship at end of turn
-		$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+		//$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+		$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
 		$pos = $ship->getHexPos(); //Just do this once outside loop		
 
 		foreach ($gameData->ships as $otherShip) {
@@ -287,7 +288,8 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 
 	private function isUndetected($ship, $gameData) {		
-		$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.
+		//$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.
+		$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
 		$shipPosition = $ship->getHexPos(); //Save outside loop as this won't change.
 		$canStealth = true; //Default to being able to stealth again, then prove if it can't below.
 
@@ -4166,43 +4168,36 @@ class SelfRepair extends ShipSystem{
 		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
 		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
 		$this->data["Repair points (used/max)"] = $this->usedRepairPoints . "/" . $this->maxRepairPoints;
-		$this->data["Special"] = "At end of turn phase automatically repairs damage to vessel. Cannot repair destroyed structure blocks.";      
-		//$this->data["Special"] .= "<br>Priority: first fix criticals, then damaged systems, finally restore destroyed systems.";  
-		$this->data["Special"] .= "<br>Priority: first fix criticals, then revive destroyed systems, finally restore boxes to damaged systems.";  
+		$this->data["Special"] = "At end of turn phase automatically repairs damage to vessel. Cannot repair destroyed structure blocks.";       
+		$this->data["Special"] .= "<br>Default Priority: Fix criticals, revive destroyed systems, finally heal damaged systems.";  
 		$this->data["Special"] .= "<br>Core (and other particularly important) systems are repaired first, then weapons, then other systems.";
 		$this->data["Special"] .= "<br>Will not fix criticals and damage caused in current turn.";
-		$this->data["Special"] .= "<br>Player may modify repair priorities - click self repair system in Initial phase and cycle through damaged systems.";
+		$this->data["Special"] .= "<br>Player may modify repair priorities using the Manage Repair Queue menu.";
 	}
 
 	
-	/* sorts system for repair priority*/
-    public static function sortSystemsByRepairPriority($a, $b){
-		/* being destroyed modifies priority instead
-		$aDestroyed = $a->isDestroyed();
-		$bDestroyed = $b->isDestroyed();
-		//destroyed systems are fixed first!
-		if(($aDestroyed == true) && ($bDestroyed == false)){
-			return -1;
-		}else if(($aDestroyed == false) && ($bDestroyed == true)){
-			return 1;
-		}
-		*/
-		//priority, then size (smaller first, as easier to repair), then ID!
-		if($a->repairPriority!==$b->repairPriority){ 
-            return $b->repairPriority - $a->repairPriority; //higher priority first!
-        }else if($a->maxhealth!==$b->maxhealth){ 
-            return $a->maxhealth - $b->maxhealth; //smaller first!
-        }else return $a->id - $b->id;
-    } //endof function sortSystemsByRepairPriority
-	/* sorts critical hits for repair priority*/
-    public static function sortCriticalsByRepairPriority($a, $b){
-		//priority, then size (smaller first, as easier to repair), then ID!
-		if($a->repairPriority!==$b->repairPriority){ 
-            return $b->repairPriority - $a->repairPriority; //higher priority first!
-        }else if($a->repairCost!==$b->repairCost){ ///costlier first!
-            return $b->repairCost - $a->repairCost; //costlier first!
-        }else return $a->id - $b->id;
-    } //endof function sortSystemsByRepairPriority
+	/* sorts generated repair queue */
+    public static function sortUnifiedRepairQueue($a, $b){
+		if($a['priority'] !== $b['priority']){ 
+            return $b['priority'] - $a['priority']; //higher priority first!
+        }
+        
+        //Secondary: Criticals before Systems (if priority equal)
+        if($a['type'] !== $b['type']){
+            return ($a['type'] === 'critical') ? -1 : 1; 
+        }
+
+        //Tertiary and Quaternary
+        if($a['type'] === 'critical'){
+             //Costlier first
+             if($a['cost'] !== $b['cost']) return $b['cost'] - $a['cost'];
+        }else{
+             //Smaller first (Health)
+             if($a['maxhealth'] !== $b['maxhealth']) return $a['maxhealth'] - $b['maxhealth'];
+        }
+        
+        return $a['id'] - $b['id'];
+    }
 	
 	private function getBoostLevel($turn){
             $boostLevel = 0;
@@ -4243,17 +4238,20 @@ class SelfRepair extends ShipSystem{
 		$availableRepairPoints = $this->maxRepairPoints - $this->usedRepairPoints;
 		$availableRepairPoints = min($availableRepairPoints,$this->getEffectiveOutput($ship)); //no more than remaining points, no more than actual system repair capability	
 		
-		//sort all systems by priority
-		$ship=$this->getUnit();
-		$systemList = array();
+        $repairQueue = array();
+        $ship=$this->getUnit();
+
+        // 1. Gather Systems
 		foreach($ship->systems as $system){			
 			if ( $system->maxhealth <= $system->getRemainingHealth() ) continue; //skip undamaged systems...
 			//priority overrides...
+            $prio = $system->repairPriority;
 			if(array_key_exists($system->id, $this->priorityChanges) && ($this->priorityChanges[$system->id]>=0)){
-				$system->repairPriority = $this->priorityChanges[$system->id];
+				$prio = $this->priorityChanges[$system->id];
 			}			
-			//skip systems attached to destroyed structure blocks...
-			if($system->repairPriority<1) continue;//skip systems that cannot be repaired
+			
+            //skip systems attached to destroyed structure blocks...
+			if($prio<1) continue;//skip systems that cannot be repaired
 			if(!($system instanceOf Structure)){ //non-Structure system - cannot repair if attached to destroyed Structure block
 				$strBlock = $ship->getStructureSystem($system->location);
 				if($strBlock->isDestroyed($gamedata->turn)) continue;
@@ -4262,166 +4260,124 @@ class SelfRepair extends ShipSystem{
 			}
 			
 			//destroyed systems get first priority
-			if( ($system->repairPriority <=10) //only systems whose priority wasn't modified yet
+			if( ($prio <=10) //only systems whose priority wasn't modified yet
 				&& ($system->isDestroyed($gamedata->turn))
+				&& (!array_key_exists($system->id, $this->priorityChanges)) //AND was NOT manually modified by player!
 			){
-				$system->repairPriority += 10;
+				$prio += 10;
 			}
 			
-			$systemList[] = $system;			
+            $currentDamage = $system->maxhealth - $system->getRemainingHealth();
+            $causedThisTurn = $system->damageReceivedOnTurn($gamedata->turn);
+            $toBeRepaired = $currentDamage - $causedThisTurn;
+            
+            if ($toBeRepaired > 0) {
+			    $repairQueue[] = array(
+                    'type' => 'system',
+                    'obj' => $system,
+                    'priority' => $prio,
+                    'cost' => $toBeRepaired, // Needed for unified repair logic
+                    'maxhealth' => $system->maxhealth, // For sorting
+                    'id' => $system->id // For sorting
+                );
+            }		
 		}
-		usort($systemList, [self::class, 'sortSystemsByRepairPriority']);
-		
 
-// Add GTS		
-		//repair criticals (on non-destroyed systems only; also, skip criticals generated this turn!)
-        $critList = array();
-        foreach ($ship->systems as $systemToRepair){//crit fixing may be necessary even on technically undamaged systems
-            if ($availableRepairPoints<1) break;//cannot repair anything
+        // 2. Gather Criticals
+        foreach ($ship->systems as $systemToRepair){
+            // Filtering similar to systems logic but applicable to parent system of critical
+            //$availableRepairPoints check moved to execution loop
+
             if ($systemToRepair->repairPriority<1) continue;//skip systems that cannot be repaired
             if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair criticals on destroyed system...
+
+             // CALCULATE BASE PRIORITY FOR SYSTEM (Needed for Crit Default)
+            $sysPrio = $systemToRepair->repairPriority;
+            // Override removed to decouple system/critical priorities
+			// if(array_key_exists($systemToRepair->id, $this->priorityChanges) && ($this->priorityChanges[$systemToRepair->id]>=0)){
+			// 	$sysPrio = $this->priorityChanges[$systemToRepair->id];
+			// }	
 
             foreach($systemToRepair->criticals as $critDmg) {
                 if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
                 if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn
                 if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
-                if($critDmg->repairPriority<10) $critDmg->repairPriority += $systemToRepair->repairPriority; //modify priority by priority of system critical is on! 
-                $critList[] = $critDmg;
-            }
-        }
-		$noOfCrits = count($critList);
-        if($noOfCrits>0){
-			usort($critList, [self::class, 'sortCriticalsByRepairPriority']);
-			
-            foreach ($critList as $critDmg){ //repairable criticals of current system, already sorted
-                if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
-                    $system = $ship->getSystemById($critDmg->systemid); //We already have the ship object passed to criticalPhaseEffects(), use it to get the system the foreach loop is considering at this point'
-                    $system->repairCritical($critDmg, $gamedata->turn); // Call our new function in shipSystem class, passing details of the particular critical we're considering, plus $gamedata->turn as it's also needed.
-                    $availableRepairPoints -= $critDmg->repairCost; //Keep these two lines  here, as they amend variable in THIS function (see above)!
-                    $this->usedThisTurn += $critDmg->repairCost; 
-                    //End of work, move onto next critical if there is one.
-                } 
-            }
-        }
-// End add GTS
-		
-		
-		//repair damaged/destroyed systems, possibly undestroying them in the process (cannot repair destroyed Structure and systems attached to it - but this is taken care at the stage of preparing list of repairable systems)
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
-			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
-			$causedThisTurn = $systemToRepair->damageReceivedOnTurn($gamedata->turn);
-			$toBeRepaired = $currentDamage-$causedThisTurn;
-			if($toBeRepaired > 0){ //do repair!
-				$toBeFixed = min($toBeRepaired, $availableRepairPoints);
-				$undestroy = false;
-				if ($toBeFixed>=$currentDamage){ //full health restored!
-					$undestroy=true;
-				}
-				//actual healing entry
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
-				$damageEntry->updated = true;
-				$systemToRepair->damage[] = $damageEntry;
-				//mark repair points used
-				$availableRepairPoints -= $toBeFixed;
-				$this->usedThisTurn += $toBeFixed;
-			}
-		}	
-			
-			
-		/*rehearsed above
-		//repair criticals (on non-destroyed systems only; also, skip criticals generated this turn!)
-		//foreach ($systemList as $systemToRepair){
-		foreach ($ship->systems as $systemToRepair){//crit fixing may be necessary even on technically undamaged systems	
-			if ($availableRepairPoints<1) break;//cannot repair anything
-			if ($systemToRepair->repairPriority<1) continue;//skip systems that cannot be repaired
-			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair criticals on destroyed system...
-			$critList = array();
-			foreach($systemToRepair->criticals as $critDmg) {
-				if($critDmg->repairPriority<1) continue;//if critical cannot be repaired
-				if($critDmg->turn >= $gamedata->turn) continue;//don't repair criticals caused in current (or future!) turn
-				if ($critDmg->oneturn || ($critDmg->turnend > 0)) continue;//temporary criticals (or those already repaired) also cannot be repaired
-				$critList[] = $critDmg;				
-			}			
-			$noOfCrits = count($critList);
-			if($noOfCrits>0){
-				usort($critList, "self::sortCriticalsByRepairPriority");
-				foreach ($critList as $critDmg){ //repairable criticals of current system
-					if ($critDmg->repairCost <= $availableRepairPoints){//execute repair!
-						$critDmg->turnend = $gamedata->turn;//actual repair ;)
-						$critDmg->forceModify = true; //actually save the repair...
-						$critDmg->updated = true; //actually save the repair cd!...
-						$availableRepairPoints -= $critDmg->repairCost;
-						$this->usedThisTurn += $critDmg->repairCost;
-					}
-				}
-			}
-		}	
-		*/	
-			
-		/*old version - separate loops for destroyed and damaged systems
-		//repair destroyed systems, possibly undestroying them in the process (cannot repair destroyed Structure)
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
-			if ($systemToRepair instanceOf Structure) continue; //cannot repair destroyed Structure
-			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
-			if($currentDamage > 0){ //do repair!
-				$toBeFixed = min($currentDamage, $availableRepairPoints);
-				$undestroy = false;
-				if ($toBeFixed==$currentDamage){ //full health restored!
-					$undestroy=true;
-				}
-				//actual healing entry
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
-				$damageEntry->updated = true;
-				$systemToRepair->damage[] = $damageEntry;
-				//meark repair points used
-				$availableRepairPoints -= $toBeFixed;
-				$this->usedThisTurn += $toBeFixed;
-			}
-		}	
-		
-		
-		//repair damaged systems
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
-			//structure is okay - at apprpriate priority - as revivable systems were revived already
-			//if ($systemToRepair instanceOf Structure) continue; //let's repair destroyed systems first, then go for damaged Structure
-			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//don't repair damage on destroyed system... yet!
-			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
-			if($currentDamage > 0){ //do repair!
-				$toBeFixed = min($currentDamage, $availableRepairPoints);
-				//actual healing entry
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, false, 'SelfRepair', 'SelfRepair');
-				$damageEntry->updated = true;
-				$systemToRepair->damage[] = $damageEntry;
-				//meark repair points used
-				$availableRepairPoints -= $toBeFixed;
-				$this->usedThisTurn += $toBeFixed;
-			}
-		}	
-		*/
+                
+                $critPrio = $critDmg->repairPriority;
 
-		/* separate block not necessary when repair happens AFTER reviving
-		//repair damaged Structure
-		foreach ($systemList as $systemToRepair){
-			if ($availableRepairPoints<1) continue;//cannot repair anything any longer
-			if (!($systemToRepair instanceOf Structure)) continue; //now it's Structure exclusively
-			if ($systemToRepair->isDestroyed($gamedata->turn)) continue;//cannot repair destroyed Structure
-			$currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
-			if($currentDamage > 0){ //do repair!
-				$toBeFixed = min($currentDamage, $availableRepairPoints);
-				//actual healing entry
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, false, 'SelfRepair', 'SelfRepair');
-				$damageEntry->updated = true;
-				$systemToRepair->damage[] = $damageEntry;
-				//meark repair points used
-				$availableRepairPoints -= $toBeFixed;
-				$this->usedThisTurn += $toBeFixed;
-			}
-		}	
-		*/
+                //priority override?
+                $compKey = $systemToRepair->id . '-' . $critDmg->id;
+                if(array_key_exists($compKey, $this->priorityChanges) && ($this->priorityChanges[$compKey]>=0)){
+                     $critPrio = $this->priorityChanges[$compKey];
+                }else{
+                    if($critPrio<10) $critPrio += $sysPrio; //modify priority by priority of system critical is on! 
+                }
+                
+                $repairQueue[] = array(
+                    'type' => 'critical',
+                    'obj' => $critDmg,
+                    'sys' => $systemToRepair, // We need the system object to execute repair
+                    'priority' => $critPrio,
+                    'cost' => $critDmg->repairCost,
+                    'id' => $systemToRepair->id // Fallback ID for sorting
+                );
+            }
+        }
 		
+        // 3. Sort
+		usort($repairQueue, [self::class, 'sortUnifiedRepairQueue']);
+		
+        // 4. Execute Repairs
+        foreach($repairQueue as $job) {
+             if ($availableRepairPoints < 1) break;//cannot repair anything any longer
+             
+             if ($job['type'] === 'critical') {
+                 $critDmg = $job['obj'];
+                 // Additional check just in case costs changed logic? No, static data mostly.
+                 if ($critDmg->repairCost <= $availableRepairPoints){
+                    $system = $job['sys'];
+                    $system->repairCritical($critDmg, $gamedata->turn); // Call our new function in shipSystem class
+                    $availableRepairPoints -= $critDmg->repairCost; 
+                    $this->usedThisTurn += $critDmg->repairCost; 
+                 }
+             } else {
+                 // System Repair
+                 $systemToRepair = $job['obj'];
+                 
+			    $currentDamage = $systemToRepair->maxhealth - $systemToRepair->getRemainingHealth( );
+			    $causedThisTurn = $systemToRepair->damageReceivedOnTurn($gamedata->turn);
+			    $toBeRepaired = $currentDamage-$causedThisTurn;
+                
+                // Re-validate toBeRepaired just in case
+			    if($toBeRepaired > 0){ //do repair!
+				    $toBeFixed = min($toBeRepaired, $availableRepairPoints);
+				    $undestroy = false;
+				    if ($toBeFixed>=$currentDamage){ //full health restored!
+					    $undestroy=true;
+				    }
+				    //actual healing entry
+				    $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $systemToRepair->id, -$toBeFixed, 0, 0, -1, false, $undestroy, 'SelfRepair', 'SelfRepair');
+				    $damageEntry->updated = true;
+				    $systemToRepair->damage[] = $damageEntry;
+				    //mark repair points used
+				    $availableRepairPoints -= $toBeFixed;
+				    $this->usedThisTurn += $toBeFixed;
+
+				    //Check if fully repaired, and if so remove from priority list!
+				    if ($systemToRepair->getRemainingHealth() >= $systemToRepair->maxhealth){
+					    if(array_key_exists($systemToRepair->id, $this->priorityChanges)){
+						    unset($this->priorityChanges[$systemToRepair->id]);
+						    //and create note to remove it from DB/Client
+						    $notekey = 'override';
+						    $noteHuman = 'Repair priority override removed';
+						    $noteValue = $systemToRepair->id . ';-1';
+						    $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					    }
+				    }
+			    }
+             }
+        }
+			
     } //endof function criticalPhaseEffects
 	
 	
@@ -4501,6 +4457,7 @@ class SelfRepair extends ShipSystem{
 	}		
 
 }//endof class SelfRepair
+
 
 class ThirdspaceSelfRepair extends SelfRepair{
 
@@ -5108,9 +5065,9 @@ capacitor is completely emptied.
 		$this->data["Power Stored / Max"] =  $this->powerCurr . '/' . $this->powerMax;
 		$this->data["Power regeneration"] =  'Initial phase only';
         $this->data["Special"] = "This system is responsible for generating and storing power (Reactor is nearby for technical purposes).";
-        $this->data["Special"] = "You can double power generation (and self-repair) by clicking 'Select', at the cost of deactivating all weapons and shields this turn.";	  			   
+        $this->data["Special"] = "You can double power recharge (and Self-Repair), at the cost of deactivating all weapons and shields this turn.";	  			   
 		if ($this->boostable){
-			$this->data["Special"] .= "<br>In addition, you may open ship petals by boosting this system with '+', increasing generation by 50% on the following turn - however all primary systems lose 2 Armour and Defence Profiles increase 5% for the current turn.";
+			$this->data["Special"] .= "<br>In addition, you may open ship petals increasing generation by 50% on the following turn - however all primary systems lose 2 Armour and Defence Profiles increase 5% for the current turn.";
 		}
 		$this->data["Special"] .= "<br>You cannot generate more power than the Capacitor Max value, any excess is lost.";		
 		$this->data["Special"] .= "<br>Destroying Capacitor disables (but does not destroy) the ship.";
@@ -5570,7 +5527,7 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 		
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Regenerates " . $this->getRegenforNotes($turn) . " health split eqaully amongst all Thirdspace Shields at the end of each turn.";
+		$this->data["Special"] = "Regenerates " . $this->getRegenforNotes($turn) . " health split equally amongst all Thirdspace Shields at the end of each turn.";
 		$this->data["Special"] .= "<br>Shields will not regenerate above their Base Rating, instead any excess will be allocate to another shield where possible.";
 		$this->data["Special"] .= "<br>Current Shield Power CANNOT be regenerated above Maximum Shield Power.";		       
         $this->data["Special"] .= "<br>Regeneration can be boosted " . $this->maxBoostLevel  . " times at " . $this->boostEfficiency ." power for " . $this->boostEfficiency ." extra output.";  
@@ -6186,7 +6143,8 @@ class MindriderHangar extends ShipSystem{
 
 		private function isDetected($ship, $gameData, $range) {
 	
-			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			//$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop				
 			$pos = $ship->getHexPos(); //Just do this once outside loop	
 
 			foreach ($gameData->ships as $otherShip) {

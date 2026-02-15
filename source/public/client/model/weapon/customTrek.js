@@ -337,7 +337,8 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
         // Get distance to the stealth ship and check line of sight
         const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
         var loSBlocked = false;
-        var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+        //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+	    var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.        
         var shipPos = shipManager.getShipPosition(ship);
         var otherShipPos = shipManager.getShipPosition(otherShip);
         loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            

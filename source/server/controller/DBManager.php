@@ -663,8 +663,14 @@ class DBManager
                              $this->update("UPDATE tac_playeringame SET points = " . ($basePoints + $bonusPoints) . " WHERE gameid = $gameid AND slot = $slotid");
                         } else if ($myRating > $oppRating) {
                              // Joiner is Stronger: Joiner gets PENALTY (-)
-                             //error_log("Applying PENALTY: " . ($basePoints - $bonusPoints));
-                             $this->update("UPDATE tac_playeringame SET points = " . ($basePoints - $bonusPoints) . " WHERE gameid = $gameid AND slot = $slotid");
+                             // OLD WAY: $points = $basePoints - $bonusPoints; // effective: Base * (1 - diff/100)
+                             // NEW WAY: Base / (1 + diff/100)
+                             
+                             $factor = 1 + ($diff / 100);
+                             $newPoints = round($basePoints / $factor);
+                             
+                             //error_log("Applying PENALTY: " . $newPoints);
+                             $this->update("UPDATE tac_playeringame SET points = " . $newPoints . " WHERE gameid = $gameid AND slot = $slotid");
                         } else {
                              // Equal ratings: Joiner gets Base
                              //error_log("Applying BASE: " . $basePoints);
@@ -1615,6 +1621,12 @@ class DBManager
             $stmt->execute();
 			while ($stmt->fetch()) {
 				$nm = $gameName;
+
+				if (strpos($rules, 'ladder')!==false){
+				    $nm = '<span style="font-weight:bold; color:gold; padding-right: 0px;">LADDER: </span>' . $gameName;
+                } else {                                    
+				    $nm = $gameName;
+                }                
                 /*$nm .= ' <br><span class="gameRules">(';
 			    //gamespace and rules: add to name!    
 				if ($gamespace == '-1x-1'){ //open map
@@ -3202,7 +3214,7 @@ class DBManager
             ON
                 p.gameid = g.id
             WHERE
-                DATE_ADD(p.lastactivity, INTERVAL 2 MONTH) < NOW()
+                DATE_ADD(p.lastactivity, INTERVAL 3 MONTH) < NOW()
             OR
                 (DATE_ADD(p.lastactivity, INTERVAL 5 DAY) < NOW() 
                 AND
@@ -3724,6 +3736,26 @@ public function setLastTimeChatChecked($userid, $gameid)
         $this->insert($sql);
     }
 
+    public function removeLadderPlayer($playerid)
+    {
+        $playerid = (int)$playerid;
+        // Delete from rankings
+        $sql = "DELETE FROM tac_ladder_rankings WHERE playerid = $playerid";
+        $this->update($sql);
+
+        // Delete from games history
+        $sql = "DELETE FROM tac_ladder_games WHERE playerid = $playerid";
+        $this->update($sql);
+    }
+
+    public function isLadderPlayer($playerid)
+    {
+        $playerid = (int)$playerid;
+        $sql = "SELECT playerid FROM tac_ladder_rankings WHERE playerid = $playerid";
+        $result = $this->query($sql);
+        return ($result && sizeof($result) > 0);
+    }
+
     public function registerLadderResult($gameid, $playerid, $status)
     {
         $sql = "INSERT INTO tac_ladder_games (gameid, playerid, status) VALUES ($gameid, $playerid, '$status')";
@@ -3762,6 +3794,14 @@ public function setLastTimeChatChecked($userid, $gameid)
                 (SELECT COUNT(*) FROM tac_ladder_games g WHERE g.playerid = r.playerid AND g.status = 'LOSS') as losses
                 FROM tac_ladder_rankings r
                 LEFT JOIN player p ON r.playerid = p.id
+                WHERE 
+                    (SELECT COUNT(*) FROM tac_ladder_games lg WHERE lg.playerid = r.playerid) = 0
+                    OR
+                    EXISTS (
+                        SELECT 1 FROM tac_ladder_games lg 
+                        JOIN tac_game g ON lg.gameid = g.id 
+                        WHERE lg.playerid = r.playerid
+                    )
                 ORDER BY r.rating DESC";
                 
         return $this->query($sql);

@@ -2179,7 +2179,8 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 		private function isDetected($ship, $gameData) {
 
 			// Check all enemy ships to see if any can detect this ship at end of turn
-			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			//$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
 			$pos = $ship->getHexPos(); //Just do this once outside loop		
 
 			foreach ($gameData->ships as $otherShip) {

@@ -756,7 +756,13 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
     };
 
-    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size) {
+    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null) {
+
+        //Check if we already have a sprite for this system, if so, remove it.
+        if (this.shipHexagonSpritesMap.has(system)) {
+            this.removeTargetedHexagonInArc(system);
+        }
+
         var hexDistance = window.coordinateConverter.getHexDistance();
         var systemArcs = shipManager.systems.getArcs(shooter, system);
 
@@ -808,10 +814,17 @@ window.ShipIcon = function () {
         // Plane 2: End Edge. Point IN (CW -90).
         var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
         plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
+        if (color == null) {
+            color = new THREE.Color(0.1, 0.5, 0.1)
+        }
+
+        if (opacity == null) {
+            opacity = 0.3
+        }
 
         var hexMaterial = new THREE.MeshBasicMaterial({
-            color: new THREE.Color(0.1, 0.5, 0.1),
-            opacity: 0.3,
+            color: color,
+            opacity: opacity,
             transparent: true,
             side: THREE.DoubleSide,
             clippingPlanes: systemArcs.start !== systemArcs.end ? [plane1, plane2] : [],
@@ -832,8 +845,10 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {
-        this.mesh.remove(this.shipHexagonSpritesMap.get(system));
-        this.shipHexagonSpritesMap.delete(system);
+        if (this.shipHexagonSpritesMap.has(system)) {
+            this.mesh.remove(this.shipHexagonSpritesMap.get(system));
+            this.shipHexagonSpritesMap.delete(system);
+        }
     }
 
     ShipIcon.prototype.removeHexagonArcs = function () {

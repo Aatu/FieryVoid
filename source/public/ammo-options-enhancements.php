@@ -46,12 +46,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#factionenhancements">Faction Enhancements</a>
            <ul class="sub-list">
                 <li><a href="#ancients">Ancients</a></li>
-                <li><a href="#ipsha">Ipsha</a></li>
-                <li><a href="#markab">Markab</a></li>
+                <li><a href="#drazi">Drazi Freehold</a></li>                
+                <li><a href="#ipsha">Ipsha Baronies</a></li>
+                <li><a href="#markab">Markab Theocracy</a></li>
                 <li><a href="#mindriders">The Mindriders</a></li>                  
-                <li><a href="#shadows">Shadows</a></li>
+                <li><a href="#shadows">Shadow Association</a></li>
                 <li><a href="#thirdspace">Thirdspace</a></li>                    
-                <li><a href="#vorlons">Vorlons</a></li>                  
+                <li><a href="#vorlons">Vorlon Empire</a></li>                  
             </ul>     
       </li>                                                                 
         <!-- Add more sections here -->
@@ -259,7 +260,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
           
-    <h4 id="ipsha" style="margin-top: 15px;">Ipsha:</h4>
+   <h4 id="drazi" style="margin-top: 15px;">Drazi Freehold:</h4>
+      <ul>
+        <li><strong>Repeater Gunsights</strong>
+            <ul class="circle-list">
+                <li>Effect: Allows Particle Repeaters to split their shots within a 1 hex radius, and target different fighters in a flight.</li>
+                <li>Points Cost: 12pts per Particle Repeater</li>
+                <li>Limit: N/A</li>
+            </ul>      
+        </li> 
+      </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>              
+
+    <h4 id="ipsha" style="margin-top: 15px;">Ipsha Baronies:</h4>
       <ul>
         <li><strong>Spark Curtain</strong>
             <ul class="circle-list">
@@ -290,7 +303,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>      
 
-    <h4 id="markab" style="margin-top: 15px;">Markab:</h4>
+    <h4 id="markab" style="margin-top: 15px;">Markab Theocracy:</h4>
       <ul>
         <li><strong>Religious Fervor</strong>
             <ul class="circle-list">
@@ -315,7 +328,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       </ul>    
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-    <h4 id="shadows" style="margin-top: 15px;">Shadows:</h4>
+    <h4 id="shadows" style="margin-top: 15px;">Shadow Association:</h4>
       <ul>
         <li><strong>Increased Diffuser Capability</strong>
             <ul class="circle-list">
@@ -357,7 +370,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       </ul>   
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-    <h4 id="vorlons" style="margin-top: 15px;">Vorlons:</h4>
+    <h4 id="vorlons" style="margin-top: 15px;">Vorlon Empire:</h4>
       <ul>
         <li><strong>Amethyst Skin Coloring</strong>
             <ul class="circle-list">

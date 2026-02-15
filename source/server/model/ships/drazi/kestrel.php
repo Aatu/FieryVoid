@@ -26,6 +26,8 @@ class Kestrel extends MediumShip{
 	    $this->isd = 2229;
 	    $this->occurence = "rare";
 	    $this->variantOf = "Kestrel Corvette";
+
+		$this->enhancementOptionsEnabled[] = 'GUNSIGHT'; //can equip particle repeaters with Gunsights        
 	
          
         $this->addPrimarySystem(new Reactor(4, 10, 0, 4));

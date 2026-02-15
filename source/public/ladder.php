@@ -5,7 +5,7 @@
     
     <div class="ladder-flex-container">
         <div id="ladderStandingsPane" class="ladder-standings">
-            <h3>Standings <button id="btnRegisterLadder" class="btn-register-ladder">Register for Ladder</button></h3>
+            <h3>Standings <div style="float:right;"><button id="btnRegisterLadder" class="btn-register-ladder" style="float:none;">Register for Ladder</button> <button id="btnRemoveAccount" class="btn-remove-account" style="float:none; margin-left: 10px; display: none;">Remove Account</button></div></h3>
             <div class="ladder-table-scroll">
                 <table id="ladderTable">
                     <thead>
