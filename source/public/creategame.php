@@ -293,7 +293,9 @@
                     <option value="ambush">Ambush (42x40)</option>
                     <option value="baseAssault">Base Assault (60x40)</option>                    
                     <option value="convoyRaid">Convoy Raid (42x30)</option>
-                    <option value="northvsouth">North Vs South (60x40)</option>                                                           
+                    <option value="northvsouth">North Vs South (60x40)</option> 
+                    <option value="3teams">Three Teams (42x30)</option>
+                    <option value="4teams">Four Teams (42x30)</option>                                                                              
                     <option value="unlimited">No Boundaries</option>                    
                 </select>
             </div>

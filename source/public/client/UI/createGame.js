@@ -483,7 +483,7 @@ window.createGame = {
         }
     },
 
-    forbiddenLadderMaps: ["2v2", "ambush", "baseAssault", "convoyRaid"],
+    forbiddenLadderMaps: ["2v2", "ambush", "baseAssault", "convoyRaid", "3teams", "4teams"],
 
 
     mapData: {
@@ -621,6 +621,25 @@ window.createGame = {
                 { name: "South", id: 2, depx: -1, depy: -17, depwidth: 59, depheight: 5, depavailable: 1 }
             ]
         },
+        "3teams": {
+            width: 42, height: 30,
+            slotsRequired: { 1: 1, 2: 1, 3: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -19, depy: -7, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 18, depy: -7, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 3", id: 3, depx: 0, depy: 12, depwidth: 15, depheight: 5, depavailable: 1 }
+            ]
+        },
+        "4teams": {
+            width: 42, height: 30,
+            slotsRequired: { 1: 1, 2: 1, 3: 1, 4: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 3", id: 3, depx: 0, depy: 12, depwidth: 15, depheight: 5, depavailable: 1 },
+                { name: "Team 4", id: 4, depx: 0, depy: -12, depwidth: 15, depheight: 5, depavailable: 1 }
+            ]
+        },
         "unlimited": {
             width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },
@@ -667,6 +686,28 @@ window.createGame = {
             // First, remove teams that are not in the requirements (if we are being strict, but maybe better to just ensure the ones we need exist)
             // For now, let's just ensure the required ones exist.
 
+            // NEW: Remove teams that are NOT in the required list
+            // This allows switching from "4 Teams" back to "Standard" to cleanup
+            const currentTeams = [...new Set(createGame.slots.map(s => s.team))];
+            currentTeams.forEach(teamId => {
+                if (!teamIds.includes(teamId)) {
+                    // Remove all slots for this team
+                    // createGame.removeTeam(teamId); // Suppressed to avoid confirmation
+
+                    // Note: createGame.removeTeam usually asks for confirmation...
+                    // But here we might want to force it?
+                    // The removeTeam function:
+                    // window.confirm.confirm("Are you sure you want to remove Team " + teamId + "?", function () { ... });
+
+                    // We can't easily bypass the confirm in the current `removeTeam` implementation without modifying it.
+                    // Instead, let's manually remove the slots for this team.
+
+                    createGame.slots = createGame.slots.filter(s => s.team !== teamId);
+                }
+            });
+
+            // Re-fetch slots after removal
+            // Then ensure required teams exist
             teamIds.forEach(teamId => {
                 const required = config.slotsRequired[teamId] || 0;
                 if (required > 0) {
@@ -674,11 +715,6 @@ window.createGame = {
                     createGame.ensureTeamSlots(teamId, required, defaults);
                 }
             });
-
-            // Create slots for teams that might not be in slotsRequired but exist in current slots?
-            // No, applyMapConfig implies setting the state to match the map.
-            // But we should probably remove extra teams if the map is strict.
-            // However, for "custom" or "unlimited", slotsRequired might be just {1:1, 2:1} as minimum.
 
         } else if (config.teams) {
             // Just update existing slots with defaults (Legacy behavior)
