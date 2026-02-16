@@ -194,12 +194,60 @@ class AdaptiveArmorList extends Component {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     }
 
+    getRelevantArmorTypes() {
+        const { ship, system } = this.props;
+        const gamedata = window.gamedata;
+        const shipManager = window.shipManager;
+
+        const friendlyFire = gamedata.rules && gamedata.rules.friendlyFire === 1;
+        const relevantTypes = new Set();
+        const allocatedTypes = Object.keys(system.allocatedAA).filter(type => system.allocatedAA[type] > 0);
+
+        // Always include types that have current allocation or we have increased/changed this turn
+        allocatedTypes.forEach(type => relevantTypes.add(type));
+        Object.keys(system.currchangedAA).forEach(type => {
+            if (system.currchangedAA[type] !== 0) relevantTypes.add(type);
+        });
+
+
+        for (const i in gamedata.ships) {
+            const otherShip = gamedata.ships[i];
+            if (shipManager.isDestroyed(otherShip)) continue;
+
+            // If FF is off, skip friendly ships
+            if (!friendlyFire && !gamedata.isEnemy(ship, otherShip)) continue;
+
+            if (otherShip.flight) {
+                for (let iFtr = 0; iFtr < otherShip.systems.length; iFtr++) {
+                    const ftr = otherShip.systems[iFtr];
+                    if (ftr) {
+                        for (let iSys = 0; iSys < ftr.systems.length; iSys++) {
+                            const sys = ftr.systems[iSys];
+                            if (sys && sys.weaponClass) {
+                                relevantTypes.add(sys.weaponClass);
+                            }
+                        }
+                    }
+                }
+            } else {
+                for (let iSys = 0; iSys < otherShip.systems.length; iSys++) {
+                    const sys = otherShip.systems[iSys];
+                    if (sys && sys.weaponClass) {
+                        relevantTypes.add(sys.weaponClass);
+                    }
+                }
+            }
+        }
+
+        return Object.keys(system.availableAA).filter(type => relevantTypes.has(type)).sort();
+    }
+
     render() {
         const { ship, system } = this.props;
 
         if (!system || !system.availableAA) return null;
 
-        const armorTypes = Object.keys(system.availableAA).sort();
+        const armorTypes = this.getRelevantArmorTypes();
         const allocatedAA = system.allocatedAA;
 
         const canIncrease = (type) => {
