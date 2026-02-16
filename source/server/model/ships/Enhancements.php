@@ -191,7 +191,7 @@ class Enhancements{
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 	  }  
 	  
-	  //Extra Marines for Grappling Claws, cost: 10 per unit, limit: 3	  	
+	  //Extra Marines for Grappling Claws / Combat Transporters, cost: 10 per unit, limit: 3	  	
 	  $enhID = 'EXT_MRN';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Extra Marine Units';
@@ -199,6 +199,11 @@ class Enhancements{
 		  $enhPrice = 0; //fixed.		  
 		  foreach ($ship->systems as $system){
 			if ($system instanceof GrapplingClaw){
+		  	$enhPrice += 10;
+		    }
+		  } 	  
+		  foreach ($ship->systems as $system){
+			if ($system instanceof CombatTransporter){
 		  	$enhPrice += 10;
 		    }
 		  } 	  
@@ -1654,6 +1659,11 @@ class Enhancements{
 								$system->eliteMarines = true;
 							}
 						}
+						foreach ($ship->systems as $system){
+							if ($system instanceof CombatTransporter){							
+								$system->eliteMarines = true;
+							}
+						}
 						break;	
 
 					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
@@ -1665,6 +1675,11 @@ class Enhancements{
 					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.
 						foreach ($ship->systems as $system){
 							if ($system instanceof GrapplingClaw){							
+								$system->ammunition += $enhCount;
+							}
+						}
+						foreach ($ship->systems as $system){
+							if ($system instanceof CombatTransporter){							
 								$system->ammunition += $enhCount;
 							}
 						}

@@ -23,10 +23,15 @@ class technicalTargetDrone extends VreeCapital
 		$this->accelcost = 1;
 		$this->rollcost = 1;
 		$this->pivotcost = 1;
+
+    	$this->iniativebonus = 50 * 5;
 		
         $this->gravitic = true;  
 
 		$this->notes = "DO NOT USE, prone to change!";
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
 
 		$this->VreeHitLocations = false;
 
@@ -59,12 +64,19 @@ class technicalTargetDrone extends VreeCapital
         $this->addFrontSystem(new PlasmaWaveTorpedo(4, 7, 4, 300, 60));
         $this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 300, 60));	
 */
-
+/*
+        $this->addFrontSystem(new TrekEarlyDisruptor(3, 6, 4, 270, 90));	
         $this->addFrontSystem(new TrekEarlyDisruptor(3, 6, 4, 270, 90));	
         $this->addFrontSystem(new TrekLightDisruptorArray(3, 6, 3, 270, 90));	
         $this->addFrontSystem(new TrekLightDisruptor(3, 6, 3, 270, 90));	
+        $this->addFrontSystem(new TrekMedDisruptor(3, 6, 3, 270, 90));	
+        $this->addFrontSystem(new TrekMedDisruptor(3, 6, 3, 270, 90));	
         $this->addFrontSystem(new TrekDisruptorCannon(3, 8, 6, 270, 90));	
-//        $this->addFrontSystem(new CombatTransporter(3, 2, 2, 270, 90, 8, false));	
+        $this->addFrontSystem(new TrekDisruptorCannon(3, 8, 6, 270, 90));	
+        $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
+        $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
+*/
+//        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 8, false));	
 
 
 		$structArmor = 0;

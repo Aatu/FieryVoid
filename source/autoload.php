@@ -2493,7 +2493,8 @@ spl_autoload_register(
 				'shadowdreadnoughtprimordial' => '/server/model/ships/shadows/shadowDreadnoughtPrimordial.php',
 				'shadowpatrolcruiser' => '/server/model/ships/shadows/shadowPatrolCruiser.php',
 				'shadowpatrolcruiserprimordial' => '/server/model/ships/shadows/shadowPatrolCruiserPrimordial.php',
-								
+				'shadowregenbase' => '/server/model/ships/shadows/shadowRegenBase.php',
+
                 'omegaepsilon' => '/server/model/ships/EA/omegaEpsilon.php',
                 'omegaepsilondrakh' => '/server/model/ships/EA/omegaEpsilonDrakh.php',
 				
@@ -2764,6 +2765,8 @@ spl_autoload_register(
 				'trekearlydisruptor' => '/server/model/weapons/customTrek.php',
 				'treklightdisruptorarray' => '/server/model/weapons/customTrek.php',
 				'treklightdisruptor' => '/server/model/weapons/customTrek.php',
+				'trekmeddisruptor' => '/server/model/weapons/customTrek.php',
+				'trekklingonlauncher' => '/server/model/weapons/customTrek.php',
 
 //				'combattransporter' => '/server/model/weapons/customTrek.php',
 				
