@@ -8,7 +8,7 @@ class breachingPodEA extends FighterFlight{
         $this->faction = "Earth Alliance";
         $this->phpclass = "breachingPodEA";
         $this->shipClass = "Lamprey Breaching Pods";
-        $this->imagePath = "img/ships/Hades.png";
+        $this->imagePath = "img/ships/Lamprey.png";
         $this->isd = 2238;
         
 //	    $this->notes = 'Non-atmospheric.';
@@ -44,8 +44,8 @@ class breachingPodEA extends FighterFlight{
             $armour = array(3, 3, 3, 3);
             $fighter = new Fighter("breachingPodEA", $armour, 18, $this->id);
             $fighter->displayName = "Lamprey";
-            $fighter->imagePath = "img/ships/Hades.png";
-            $fighter->iconPath = "img/ships/Hades_Large.png";
+            $fighter->imagePath = "img/ships/Lamprey.png";
+            $fighter->iconPath = "img/ships/Lamprey_large.png";
 
 			$fighter->addFrontSystem(new Marines(0, 360, 0, false)); //startarc, endarc, damagebonus, elite.
 
