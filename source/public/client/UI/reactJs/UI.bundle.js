@@ -707,17 +707,26 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     &:last-child {
         border-bottom: none;
     }
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+    }
 `,CD=Q.div`
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+
+    @media (max-width: 768px) {
+        margin-bottom: 4px;
+    }
 `,Py=Q.span`
     font-weight: bold;
 `,Lb=Q.span`
-    font-size: 10px;
+    font-size: 9px;
     color: #c8d5ea;
     margin-top: 2px;
-    margin-right: 8px;    
+    margin-right: 10px;    
     margin-left: 1px;
 `,bD=Q(Py)`
     color: #ffb833;
@@ -728,6 +737,10 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
 `,ED=Q.div`
     display: flex;
     gap: 2px;
+
+    @media (max-width: 768px) {
+        justify-content: flex-end; 
+    }
 `,vv=Q.div`
     width: 18px;
     height: 18px;

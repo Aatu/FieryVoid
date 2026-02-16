@@ -56,12 +56,21 @@ const ListItem = styled.div`
     &:last-child {
         border-bottom: none;
     }
+
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: stretch;
+    }
 `;
 
 const ItemInfo = styled.div`
     flex-grow: 1;
     display: flex;
     flex-direction: column;
+
+    @media (max-width: 768px) {
+        margin-bottom: 4px;
+    }
 `;
 
 const ItemName = styled.span`
@@ -69,10 +78,10 @@ const ItemName = styled.span`
 `;
 
 const ItemStatus = styled.span`
-    font-size: 10px;
+    font-size: 9px;
     color: #c8d5ea;
     margin-top: 2px;
-    margin-right: 8px;    
+    margin-right: 10px;    
     margin-left: 1px;
 `;
 
@@ -89,6 +98,10 @@ const DestroyedItemName = styled(ItemName)`
 const ActionButtons = styled.div`
     display: flex;
     gap: 2px;
+
+    @media (max-width: 768px) {
+        justify-content: flex-end; 
+    }
 `;
 
 const ActionButton = styled.div`
