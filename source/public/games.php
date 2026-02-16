@@ -108,11 +108,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>MultiPlayer (Beta)</strong> - Fiery Void now supports more than two teams, look in Create Game screen for the new options!</li>  
-        <li><strong>UI Menus</strong> - Several complex systems received updates to their UI menus, including Self Repair, AA Controller, Thoughts Shields and Hyach Computer/Specialists.</li>          
-        <li><strong>Particle Repeater</strong> - Drazi ships equiped with the Paritcle Repeater can now purchase Repeater Gunsights, see 'Ammo, Options and Enhancements' for more details.</li>         
-        <li><strong>Fleet Selection</strong> - Any enhancements bought will now be listed underneath purchased ships.</li> 
-        <li><strong>DIST EW</strong> - DIST Electronic Warfare ability now correctly requires line of sight.</li>                                                           
-        <li><strong>General Fixes</strong> - Several bug fixes/appearance updates. Thanks for the reports!</li>           
+        <li><strong>New System Menus</strong> - Several complex systems have received updates to their UI menus, including Self Repair, AA Controller, Thoughts Shields and Hyach Computer/Specialists.</li>          
+        <li><strong>Repeater Gunsights</strong> - Drazi ships equiped with the Particle Repeater(s) can now purchase Repeater Gunsights, see 'Ammo, Options and Enhancements' for more details.</li>         
+        <li><strong>Fleet Selection</strong> - Ships purchased with any Ammo, Options or Enhancements will now have these listed underneath them in the purchased ship list.</li> 
+        <li><strong>Disruption EW</strong> - The Disruption (DIST) Electronic Warfare ability now correctly requires line of sight.</li>                                                           
+        <li><strong>General Fixes</strong> - Many smaller bug fixes/appearance updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
