@@ -4176,27 +4176,18 @@ class SelfRepair extends ShipSystem{
 	}
 
 	
-	/* sorts generated repair queue */
+	    /* sorts generated repair queue */
     public static function sortUnifiedRepairQueue($a, $b){
 		if($a['priority'] !== $b['priority']){ 
             return $b['priority'] - $a['priority']; //higher priority first!
         }
         
-        //Secondary: Criticals before Systems (if priority equal)
-        if($a['type'] !== $b['type']){
-            return ($a['type'] === 'critical') ? -1 : 1; 
+        //Deterministic Sort: System ID then SubID
+        if($a['id'] !== $b['id']){
+            return $a['id'] - $b['id']; 
         }
 
-        //Tertiary and Quaternary
-        if($a['type'] === 'critical'){
-             //Costlier first
-             if($a['cost'] !== $b['cost']) return $b['cost'] - $a['cost'];
-        }else{
-             //Smaller first (Health)
-             if($a['maxhealth'] !== $b['maxhealth']) return $a['maxhealth'] - $b['maxhealth'];
-        }
-        
-        return $a['id'] - $b['id'];
+        return $a['subId'] - $b['subId'];
     }
 	
 	private function getBoostLevel($turn){
@@ -4278,7 +4269,8 @@ class SelfRepair extends ShipSystem{
                     'priority' => $prio,
                     'cost' => $toBeRepaired, // Needed for unified repair logic
                     'maxhealth' => $system->maxhealth, // For sorting
-                    'id' => $system->id // For sorting
+                    'id' => $system->id, // For sorting
+                    'subId' => 0 // SubID for sorting
                 );
             }		
 		}
@@ -4319,7 +4311,8 @@ class SelfRepair extends ShipSystem{
                     'sys' => $systemToRepair, // We need the system object to execute repair
                     'priority' => $critPrio,
                     'cost' => $critDmg->repairCost,
-                    'id' => $systemToRepair->id // Fallback ID for sorting
+                    'id' => $systemToRepair->id, // Fallback ID for sorting
+                    'subId' => $critDmg->id // SubID for sorting
                 );
             }
         }

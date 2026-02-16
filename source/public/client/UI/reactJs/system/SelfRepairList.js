@@ -185,6 +185,7 @@ class SelfRepairList extends React.Component {
         this.state = {
             priorityInputs: {}
         };
+        this.lastOrder = [];
     }
 
     getRepairableSystems() {
@@ -265,6 +266,7 @@ class SelfRepairList extends React.Component {
                         priority: critPriority,
                         cost: crit.repairCost,
                         id: sys.id, // For stable sort,
+                        subId: crit.id, // For deterministic tie-breaking
                         keyId: compositeKey // For action handlers
                     });
                 }
@@ -281,6 +283,8 @@ class SelfRepairList extends React.Component {
                     priority: basePriority,
                     damage: damage,
                     maxHealth: sys.maxhealth,
+                    id: sys.id,
+                    subId: 0, // Ensure System comes before Criticals (if same priority)
                     keyId: sys.id // For action handlers
                 });
             }
@@ -289,24 +293,28 @@ class SelfRepairList extends React.Component {
         // Concatenate first
         const allItems = [...criticals, ...systems];
 
-        // Sort Unified List: Priority DESC, then Criticals over Systems, then ID ASC
+        // Sort Unified List: Priority (Desc) -> Visual Stability (Previous Order) -> ID/SubID (Asc)
         allItems.sort((a, b) => {
             if (a.priority !== b.priority) return b.priority - a.priority; // Higher priority first
 
-            // If priorities equal, Criticals come first (legacy behavior/tie-breaker)
-            if (a.type !== b.type) {
-                return a.type === 'critical' ? -1 : 1;
+            // Visual Stability: Maintain relative order of items with equal priority
+            if (this.lastOrder && this.lastOrder.length > 0) {
+                const indexA = this.lastOrder.indexOf(a.keyId);
+                const indexB = this.lastOrder.indexOf(b.keyId);
+
+                // Only use previous order if BOTH items were previously rendered
+                if (indexA !== -1 && indexB !== -1) {
+                    return indexA - indexB;
+                }
             }
 
-            // Secondary sorts from previous logic
-            if (a.type === 'critical') {
-                if (a.cost !== b.cost) return b.cost - a.cost; // Costlier crits first
-            } else {
-                if (a.maxHealth !== b.maxHealth) return a.maxHealth - b.maxHealth; // Smaller systems first
-            }
-
-            return a.id - b.id;
+            // Fallback / Deterministic Sort
+            if (a.id !== b.id) return a.id - b.id;
+            return a.subId - b.subId;
         });
+
+        // Update lastOrder for next comparison
+        this.lastOrder = allItems.map(item => item.keyId);
 
         return allItems;
     }
