@@ -204,8 +204,10 @@ class Weapon extends ShipSystem
 
 			//set AF priority, too!
 			$this->setPriorityAF(); 
-			$this->priorityAFArray[$i] = $this->priorityAF;
-		
+			if(!isset($this->priorityAFArray[$i])) {
+			  $this->priorityAFArray[$i] = $this->priorityAF;
+			}
+			
 			//...and scale!
 			if (!isset($this->animationExplosionScaleArray[$i]) || ($this->animationExplosionScaleArray[$i]<=0)){
 				if($this->animationExplosionScale>0){ //default exists - use it!
@@ -625,7 +627,9 @@ class Weapon extends ShipSystem
 			$this->maxDamageArray[$i] = $this->maxDamage;
 			//set AF priority, too!
 			$this->setPriorityAF(); 
-			$this->priorityAFArray[$i] = $this->priorityAF;
+			if(!isset($this->priorityAFArray[$i])) {
+				$this->priorityAFArray[$i] = $this->priorityAF;
+			}
 		} 
 
         //re-apply damage penalties, if any!
@@ -2117,7 +2121,7 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->priorityAFArray[$i])){
 			$this->priorityAF = $this->priorityAFArray[$i];
 		}else{ //this means appropriate AF priority is not set yet - it is generated ans so must always be set! 
-			$this->priorityAF = 0;
+			$this->priorityAFArray[$i] = $this->priorityAF;
 		}
 
 		/*not used any more!
@@ -2247,6 +2251,7 @@ class checkForSelfInterceptFire
         return false;
     }
 } //endof class checkForSelfInterceptFire
+
 
 
  
