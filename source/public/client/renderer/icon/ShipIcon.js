@@ -705,29 +705,6 @@ window.ShipIcon = function () {
             this.mesh.remove(arc);
         }, this);
     };
-    /* //Old method for displaying BDEW as a circle - DK 12.2.25
-        ShipIcon.prototype.showBDEW = function () {
-    
-            var BDEW = ew.getBDEW(this.ship);
-            if (!BDEW || this.BDEWSprite){
-                return;
-            }
-    
-            var hexDistance = window.coordinateConverter.getHexDistance();
-            var dis = 20 * hexDistance;
-    
-            var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255,  157 / 255, 0 / 255);
-    
-            var geometry = new THREE.CircleGeometry(dis, 64, 0);
-            var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
-            var circle = new THREE.Mesh(geometry, material);
-            circle.position.z = -1;
-            this.mesh.add(circle);
-            this.BDEWSprite = circle;
-    
-            return null;
-        };
-    */
 
     ShipIcon.prototype.showBDEW = function () {
         var BDEW = ew.getBDEW(this.ship);
