@@ -239,12 +239,13 @@ window.BallisticIconContainer = function () {
 				'1-Blanket Shield': { type: 'hexGreen', text: 'Shade Modulator', color: '#008000' },
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
 				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
+				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },	
 				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },
 				'Priorty - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
 			};
 
 			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)){
-        		var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
+        		var shadingField = shipManager.systems.getSystemByName(shooter, "ShadingField");
 				if(!shadingField.isDetectedTorvalus(shooter, 20)) return; 
 			}
 
