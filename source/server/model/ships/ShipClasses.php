@@ -3326,5 +3326,11 @@ class MindriderMCV extends MediumShip{
 
 }//endof MindriderMCV
 
+
+
+
+
+
+
     
 ?>
