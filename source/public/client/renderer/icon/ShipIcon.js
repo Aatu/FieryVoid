@@ -196,16 +196,19 @@ window.ShipIcon = function () {
             } else {
                 this.mesh.position.z = 0;
             }
-            if (!this.terrain) { //No sprite for Terrain  
+
+            // On mobile, if selected, don't hide sprites
+            if (window.matchMedia("(pointer: coarse)").matches && this.selected && !this.terrain) {
+                this.shipDirectionOfProwSprite.show();
+                this.shipDirectionOfMovementSprite.show();
+            } else if (!this.terrain) { //No sprite for Terrain  
                 this.shipDirectionOfProwSprite.hide();
                 this.shipDirectionOfMovementSprite.hide();
             }
         }
-
-        this.selected = value;
     };
 
-    ShipIcon.prototype.setSelected = function (value) {
+    ShipIcon.prototype.setSelected = function (value, showMobileSprites) {
         if (!this.terrain) { // Don't show selection circle for terrain.
             if (value) {
                 this.ShipSelectedSprite.show();
@@ -217,6 +220,17 @@ window.ShipIcon = function () {
                     this.mesh.position.z = 0;
                 }
                 this.ShipSelectedSprite.hide();
+            }
+
+            // Mobile/Tablet specific logic: Show direction sprites on selection since there is no hover
+            if (window.matchMedia("(pointer: coarse)").matches) {
+                if (value && showMobileSprites === true) {
+                    this.shipDirectionOfProwSprite.show();
+                    this.shipDirectionOfMovementSprite.show();
+                } else {
+                    this.shipDirectionOfProwSprite.hide();
+                    this.shipDirectionOfMovementSprite.hide();
+                }
             }
         }
         this.selected = value;
