@@ -243,7 +243,10 @@ window.BallisticIconContainer = function () {
 				'Priorty - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
 			};
 
-			if (modeName == 'Transverse Jump' && !shipManager.isDetectedTorvalus(shooter, 20) && !gamedata.isMyorMyTeamShip(shooter)) return;
+			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)){
+        		var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
+				if(!shadingField.isDetectedTorvalus(shooter, 20)) return; 
+			}
 
 			const match = modeMap[modeName];
 			if (match) {
