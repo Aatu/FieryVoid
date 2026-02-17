@@ -41,6 +41,11 @@ const ListContainer = styled.div`
     &::-webkit-scrollbar-thumb:hover {
         background: #5a7ea8; 
     }
+
+    @media (max-width: 768px) {
+        text-align: center;         
+    }    
+
 `;
 
 const ListItem = styled.div`
@@ -60,6 +65,7 @@ const ListItem = styled.div`
     @media (max-width: 768px) {
         flex-direction: column;
         align-items: stretch;
+        margin-right: 0px;                 
     }
 `;
 
@@ -70,6 +76,7 @@ const ItemInfo = styled.div`
 
     @media (max-width: 768px) {
         margin-bottom: 4px;
+        text-align: center;          
     }
 `;
 
@@ -83,6 +90,13 @@ const ItemStatus = styled.span`
     margin-top: 2px;
     margin-right: 10px;    
     margin-left: 1px;
+
+    @media (max-width: 768px) {
+        text-align: center;
+        margin-right: 0px;    
+        margin-left: 0px;                  
+    }
+
 `;
 
 const CriticalItemName = styled(ItemName)`
@@ -100,7 +114,7 @@ const ActionButtons = styled.div`
     gap: 2px;
 
     @media (max-width: 768px) {
-        justify-content: flex-end; 
+        justify-content: center;       
     }
 `;
 
