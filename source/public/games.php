@@ -104,15 +104,15 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — January 2026</h3>
+      <h3>Latest Updates — February 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Online Ladder</strong> - Online Competitive Ladder added, read the FAQ above or watch the Video Tutorial for details on how it works!</li>  
-        <li><strong>Skin Dancing</strong> - Fighters and Agile ships will now automatically try to Skin Dance when they end their movement on same hex as an Enormous unit.  See FAQ for more details!</li>          
-        <li><strong>Fighter Movement</strong> - Fighter/Shuttles automatically change facing to match their heading when they turn.  New icon added for Gravitic fighters to turn without changing facing.</li> 
-        <li><strong>Terrain collisions</strong> - With Skin Dancing now added, asteroid collisions have been standardised across all types of unit as per Tabletop rules.</li>         
-        <li><strong>Custom Centauri</strong> - Further reinforcements for House Valeru added, thanks to Fred/Geoffrey.</li>                                                           
-        <li><strong>General Fixes</strong> - Several bug fixes/improvements. Thanks for the reports!</li>           
+        <li><strong>MultiPlayer (Beta)</strong> - Fiery Void now supports more than two teams, look in Create Game screen for the new options!</li>  
+        <li><strong>New System Menus</strong> - Several complex systems have received updates to their UI menus, including Self Repair, AA Controller, Thoughts Shields and Hyach Computer/Specialists.</li>          
+        <li><strong>Repeater Gunsights</strong> - Drazi ships equiped with the Particle Repeater(s) can now purchase Repeater Gunsights, see 'Ammo, Options and Enhancements' for more details.</li>         
+        <li><strong>Fleet Selection</strong> - Ships purchased with any Ammo, Options or Enhancements will now have these listed underneath them in the purchased ship list.</li> 
+        <li><strong>Disruption EW</strong> - The Disruption (DIST) Electronic Warfare ability now correctly requires line of sight.</li>                                                           
+        <li><strong>General Fixes</strong> - Many smaller bug fixes/appearance updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>

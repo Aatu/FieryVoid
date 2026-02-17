@@ -108,6 +108,23 @@ class TrekPhaserBase extends Raking { //common Phaser things like color
 }
 
 
+
+
+class TrekDisruptorBase extends Weapon { //centralize armor interactions and color
+
+		public $animationColor = array(142, 252, 13);
+	
+		public $reduceFacing = 0; //reduce armor of facing structure (compard with total damage done - Armor reduced if damage exceeds this variable)
+		public $reduceSystem = 0; //reduce armor of system hit, except Structure (compared with immediate damage done)
+		public $reduceStructure = 0; //reduce armor of Structure hit  (compared with immediate damage done)
+		
+		
+}
+
+
+
+
+
 class TrekLtPhaseCannon extends TrekPhaserBase{
 		public $name = "TrekLtPhaseCannon";
         public $displayName = "Light Phase Cannon";
@@ -2179,7 +2196,8 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 		private function isDetected($ship, $gameData) {
 
 			// Check all enemy ships to see if any can detect this ship at end of turn
-			$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			//$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
+			$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
 			$pos = $ship->getHexPos(); //Just do this once outside loop		
 
 			foreach ($gameData->ships as $otherShip) {
@@ -2237,5 +2255,765 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 		}
 
 	} //endof CloakingDevice
+
+
+
+class TrekEarlyDisruptor extends Pulse{
+        public $name = "TrekEarlyDisruptor";
+        public $displayName = "Early Disruptor";
+	    public $iconPath = 'TrekEarlyDisruptor.png';
+
+        public $animation = "bolt";
+        public $animationColor = array(142, 252, 13);
+
+		public $rof = 2;
+        public $grouping = 20;
+        public $maxpulses = 3;
+ 		protected $useDie = 2; //die used for base number of hits
+       
+        public $loadingtime = 2;
+        public $intercept = 2;
+        public $ballisticIntercept = true;
+        public $priority = 5;
+
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Molecular"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 4;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 1) + 6;   }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
+		
+    }  //end of class TrekEarlyDisruptor
+
+
+
+class TrekLightDisruptorArray extends Weapon{
+		public $name = "TrekLightDisruptorArray";
+        public $displayName = "Light Disruptor Array";
+        public $iconPath = "TrekDisruptorArray.png"; 
+        public $animation = "laser";
+        public $animationColor = array(142, 252, 13);
+
+        public $raking = 8;
+        
+        public $intercept = 2;
+		public $priority = 6; //technically light Raking, but borderline - and they're by far heaviest weapons that Federation has - hence 'heavy Raking' status
+		public $priorityArray = array(1=>6, 2=>6);		
+		public $priorityAF = 4; //both Lance and full Phaser are treated as heavy vs fighters
+		
+        public $loadingtime = 1;
+    	public $gunsArray = array(1=>3, 2=>1); //three individual shots, can combine into one
+		
+        public $rangePenaltyArray = array(1=>1.33, 2=>1.33);
+        public $fireControlArray = array( 1=>array(3, 2, 2), 2=>array(3, 2, 2) ); 
+
+        public $damageType = "Raking";
+		public $damageTypeArray = array(1=>'Raking', 2=>'Raking'); 
+		public $weaponClass = "Molecular";
+		public $weaponClassArray = array(1=>'Molecular', 2=>'Molecular');
+		public $firingModes = array( 1 => "Multiple", 2=> "Combined");
+		public $firingMode = 1;
+
+	 	public function getInterceptRating($turn){
+			return 2;
+		}
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 3;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Can fire as either:";  
+			$this->data["Special"] .= "<br> - Multiple: 3 shots, 1d10+3 damage"; 
+			$this->data["Special"] .= "<br> - Combined: 1 shot, 3d10+6 damage"; 
+		}
+	
+		public function getDamage($fireOrder){
+			switch($this->firingMode){
+				case 1:
+					return Dice::d(10, 1)+3; //Multiple
+					break;
+				case 2:
+					return Dice::d(10, 3)+6; //Combined
+					break;	
+			}
+		}
+
+ 		public function setMinDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->minDamage = 4; //Multiple
+					break;
+				case 2:
+					$this->minDamage = 9; //Combined
+					break;	
+			}
+		}
+             
+        public function setMaxDamage(){
+			switch($this->firingMode){
+				case 1:
+					$this->maxDamage = 13; //Multiple
+					break;
+				case 2:
+					$this->maxDamage = 36; //Combined
+					break;	
+			}
+		}
+		
+}//end of class TrekLightDisruptorArray
+
+
+class TrekLightDisruptor extends Pulse{
+        public $name = "TrekLightDisruptor";
+        public $displayName = "Light Disruptor";
+	    public $iconPath = 'TrekLtDisruptor.png';
+
+        public $animation = "bolt";
+        public $animationColor = array(142, 252, 13);
+
+		public $rof = 3;
+        public $grouping = 20;
+        public $maxpulses = 5;
+ 		protected $useDie = 3; //die used for base number of hits
+       
+        public $loadingtime = 1;
+        public $intercept = 2;
+		public $priority = 4; //light Raking	
+		public $priorityAF = 5; //...Standard vs fighters
+
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Molecular"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+        
+        public $rangePenalty = 1.32;
+        public $fireControl = array(4, 3, 3); // fighters, <mediums, <capitals
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+			if (!$system->advancedArmor){//advanced armor prevents effect
+				if ($system instanceof Structure) return;        // don't apply to structure
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+					$system->setCritical($crit); //$system->criticals[] =  $crit;			
+			}
+		}
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+			$this->data["Special"] .= "<br>-1 armor to every system hit.";
+            $this->data["Special"] .= '<br>Structure armor unaffected.';
+        }
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 6;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 3;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6, 2) + 2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+		
+    }  //end of class TrekLightDisruptor
+
+class TrekMedDisruptor extends Pulse{
+        public $name = "TrekMedDisruptor";
+        public $displayName = "Medium Disruptor";
+	    public $iconPath = 'TrekMedDisruptor.png';
+
+        public $animation = "bolt";
+        public $animationColor = array(142, 252, 13);
+
+		public $postArmorTotal = 0;
+
+		public $rof = 3;
+        public $grouping = 20;
+        public $maxpulses = 4;
+ 		protected $useDie = 3; //die used for base number of hits
+       
+        public $loadingtime = 2;
+
+		public $reduceFacing = 12; //reduce armor of facing structure (compard with total damage done - Armor reduced if damage exceeds this variable)
+		private $alreadyReduced = false;  //we only want the disruptor to reduce the structure armor once per shot
+
+        public $ballisticIntercept = true;
+        public $intercept = 2;
+		public $priority = 5; //light Raking	
+		public $priorityAF = 5; //...Standard vs fighters
+
+    	public $damageType = "Pulse"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Molecular"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
+        
+        public $rangePenalty = 0.66;
+        public $fireControl = array(2, 3, 3); // fighters, <mediums, <capitals
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+			if ($system instanceof Structure) {  //Only checking for structure damage
+				$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
+				$fireOrder->pubnotes .= "<br>Total Damage is: $this->postArmorTotal";
+				$fireOrder->pubnotes .= "<br>reduceFacing is: $this->reduceFacing";
+			}
+			if (!$system->advancedArmor){//advanced armor prevents effect
+				if ($system instanceof Structure) {
+					//no need to do anything here
+				}else{
+					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+					$crit->updated = true;
+					$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+					$system->setCritical($crit); //$system->criticals[] =  $crit;	
+				}
+				if(!$this->alreadyReduced){ //if enough damage gets through shields and armor, structure armor is reduced
+					if ($this->postArmorTotal >= $this->reduceFacing) {
+						$target = $ship;
+						$shooter = $this->getUnit();
+						$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+						$struct = $target->getStructureSystem($sectionFacing);
+						if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
+							$this->alreadyReduced = true; //do this only for first part of shot that actually connects
+							$crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+							$crit->updated = true;
+							$crit->inEffect = false;
+							$struct->criticals[] = $crit;
+						}					
+					}
+				}
+			}
+		}
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+			$this->data["Special"] .= "<br>-1 armor to every system hit.";
+            $this->data["Special"] .= '<br>If 12 or more damage strike the facing structure, the facing structure armor loses 1 point.';
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			//maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ){
+				$maxhealth = 8;
+			}
+			if ( $powerReq == 0 ){
+				$powerReq = 6;
+			}		
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+        public function getDamage($fireOrder){        return Dice::d(6, 2) + 4;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 18 ;      }
+		
+    }  //end of class TrekMedDisruptor
+
+class TrekDisruptorCannon extends TrekDisruptorBase {
+		public $name = "TrekDisruptorCannon";
+        public $displayName = "Disruptor Cannon";
+        public $iconPath = "TrekDisruptorCannon.png";
+        public $animation = "laser";
+        public $animationColor = array(142, 252, 13);
+
+        public $raking = 10;
+
+		public $postArmorTotal = 0;
+        
+		public $priority = 7; //light Raking		
+		public $priorityAF = 3; //Standard
+		
+        public $loadingtime = 2;
+
+		public $reduceFacing = 12; //reduce armor of facing structure (compard with total damage done - Armor reduced if damage exceeds this variable)
+		private $alreadyReduced = false;  //we only want the disruptor to reduce the structure armor once per shot
+		
+        public $rangePenalty = 0.66;
+        public $fireControl = array(1, 2, 3);
+
+        public $damageType = "Raking";
+		public $weaponClass = "Molecular";
+		public $firingModes = array( 1 => "Raking");
+
+       public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            if (!isset($this->data["Special"])) {
+                $this->data["Special"] = '';
+            }else{
+                $this->data["Special"] .= '<br>';
+            } 
+			$this->data["Special"] .= "<br>If 12 or more damage breach shields and armor, the facing structure block loses 1 point of armor.";
+        }
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
+			if ( $maxhealth == 0 ) $maxhealth = 8;
+			if ( $powerReq == 0 ) $powerReq = 6;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+			$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
+
+			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
+			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
+//			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
+
+			if($system->advancedArmor) return; //advanced armor prevents this
+			if(!$this->alreadyReduced){
+				if ($this->postArmorTotal >= $this->reduceFacing) {
+
+					$target = $ship;
+					$shooter = $this->getUnit();
+					$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+					$struct = $target->getStructureSystem($sectionFacing);
+					if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
+						$this->alreadyReduced = true; //do this only for first part of shot that actually connects
+						$crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = false;
+						$struct->criticals[] = $crit;
+					}					
+				}
+			}
+		}
+
+        public function getDamage($fireOrder){        return Dice::d(10, 3) + 10;   }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }
+
+}//end of class TrekDisruptorCannon
+
+    class TrekKlingonLauncher extends Torpedo{
+        public $name = "TrekKlingonLauncher";
+        public $displayName = "Klingon Launcher";
+        public $iconPath = "TrekKlingonLauncher.png";
+        public $range = 25;  
+		public $distanceRange = 40;
+        public $loadingtime = 2;
+		public $specialRangeCalculation = true; //to inform front end that it should use weapon-specific range penalty calculation - such a method should be present in .js!
+        
+        public $weaponClass = "Molecular"; 
+        public $damageType = "Standard"; 
+        
+        public $fireControl = array(0, 2, 3); // fighters, <mediums, <capitals 
+		public $rangePenalty = 0.5; //-1/2 hexes - BUT ONLY AFTER 10 HEXES
+        
+        public $animation = "torpedo";
+        public $animationColor = array(142, 252, 13);
+
+        public $priority = 5; //heavy Standard
+
+		public $postArmorTotal = 0;
+
+		public $reduceFacing = 12; //reduce armor of facing structure (compard with total damage done - Armor reduced if damage exceeds this variable)
+
+		private $alreadyReduced = false;  //we only want the disruptor to reduce the structure armor once per shot
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 10;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+            	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] .= "This weapon suffers range penalty (like direct fire weapons do), but only after first 10 hexes of distance.";
+		$this->data["Special"] .= "<br>If 12 or more damage breach shields and armor, the facing structure block loses 1 point of armor.";
+	}
+        
+		public function calculateRangePenalty($distance){
+			$rangePenalty = 0;//base penalty
+			$rangePenalty += $this->rangePenalty * max(0,$distance-10); //everything above 10 hexes receives range penalty
+			return $rangePenalty;
+		}
+
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+			$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
+
+			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
+			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
+//			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
+
+			if($system->advancedArmor) return; //advanced armor prevents this
+			if(!$this->alreadyReduced){
+				if ($this->postArmorTotal >= $this->reduceFacing) {
+
+					$target = $ship;
+					$shooter = $this->getUnit();
+					$sectionFacing = $target->getHitSection($shooter, $fireOrder->turn);
+					$struct = $target->getStructureSystem($sectionFacing);
+					if(!$struct->isDestroyed($fireOrder->turn-1)){ //last turn Structure was still there...
+						$this->alreadyReduced = true; //do this only for first part of shot that actually connects
+						$crit = new ArmorReduced(-1, $target->id, $struct->id, "ArmorReduced", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = false;
+						$struct->criticals[] = $crit;
+					}					
+				}
+			}
+		}
+
+
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2)+10;    }
+        public function setMinDamage(){     $this->minDamage = 12;      }
+        public function setMaxDamage(){     $this->maxDamage = 30;      }
+    
+    }//endof class TrekKlingonLauncher
+
+
+
+
+
+
+class CombatTransporter extends Weapon{
+	public $name = "CombatTransporter";
+	public $displayName = "Combat Transporter";
+	public $iconPath = "TrekCombatTransporter.png";
+	public $animation = "trail";
+	public $animationColor = array(50, 50, 50);
+	public $animationWidth = 0.2;
+
+	public $useOEW = false; 
+	public $range = 10;
+  
+	public $noPrimaryHits = true; //cannot hit PRIMARY from outer table, should never happen.
+
+	public $calledShotMod = 0; //instead of usual -8
+	
+	public $loadingtime = 1;
+	public $rangePenalty = 1;
+
+	public $noOverkill = true;
+	public $priority = 9;
+	
+	public $uninterceptable = true; 
+	public $doNotIntercept = true;			
+
+	public $damageType = "Special";
+	public $damageTypeArray = array(1=> "Special", 2=> "Standard", 3=> "Special");	
+	public $weaponClass = "Matter";
+	public $firingModes = array(
+		1 => "Capture Ship",
+		2 => "Sabotage",
+		3 => "Rescue"
+	);		
+
+	public $eliteMarines = false;
+	public $isBoardingAction = true;//For front end to recalculate hit chance.	
+		
+	public $ammunition = 0; //limited number of Marine contingents.
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition, $elite) 
+		{
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+			parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition, $elite); //Parent routines take care of the rest
+			$this->ammunition = $ammunition;			
+			$this->eliteMarines = $elite;
+        }
+        
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);      
+		$this->data["Special"] = "<br>If on same hex as an enemy ship, and in arc, this weapon attempt to deliver Marines to that vessel.";	
+		$this->data["Special"] .= "<br>Marines may attempt three 'Missions' by selecting the appropriate Firing Mode.";  		
+		$this->data["Special"] .= "<br> - Capture Ship: Marines can attempt to overcome defenders on enemy ship and disable it."; 
+		$this->data["Special"] .= "<br> - Sabotage: Can be directed at a specific system (i.e. called shot) or for general sabotage operations on enemy ship."; 
+		$this->data["Special"] .= "<br> - Rescue: Scenarios only, Marines will board enemy ship and attempt to rescue target."; 
+		$this->data["Special"] .= "<br>See 'Common Systems & Enhancements' file for full information on Boarding Actions.";  		                     
+		if($this->eliteMarines){
+			$this->data["Elite"] = "Yes";
+		}else{
+			$this->data["Elite"] = "No";			
+		}
+	    $this->data["Ammunition"] = $this->ammunition;					
+	}
+
+
+
+
+       public function setAmmo($firingMode, $amount){
+            $this->ammunition = $amount;
+        }
+
+
+
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		//Needs it's own custom routine for hit chance.
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);	
+		$target = $gamedata->getShipById($fireOrder->targetid);			
+
+		if($target->factionAge > 2) {//Cannot attach to Ancients.  Might be impossible if Front End chance is also made 0%
+			$fireOrder->pubnotes .= "<br> Cannot transport to Ancient ships.";
+			$fireOrder->needed = 0;
+			$fireOrder->updated = true;						
+			return; 
+		}
+		
+		//Now roll to see if the Breaching Pod attaches on this turn.
+//		$shooterMove = $shooter->getLastMovement();
+//		$shooterSpeed = $shooterMove->speed;		
+		
+//		$targetMove = $target->getLastMovement();
+//		$targetSpeed = $targetMove->speed;
+//		$speedDifference = abs($targetSpeed - $shooterSpeed);//Calculate absolute difference in speed.
+//		if($shooter->faction == "Llort" || $shooter->faction == "ZNexus Sal-bez Coalition") $speedDifference -= 1;//Llort reduce speed difference by 1.
+			
+//		$finalSpeedDifference = 0;
+		
+//		if($finalSpeedDifference > $shooter->freethrust){//Pod cannot compensate enough for speed difference with available thrust.
+//			$fireOrder->needed = 0;
+//			$fireOrder->updated = true;
+//			$fireOrder->pubnotes .= "<br> The speed difference to target is too great and pod is unable to attach.";					
+//			return; 
+//		}
+
+        $hitLoc = null;
+        $hitLoc = $target->getHitSection($shooter, $fireOrder->turn);
+		
+//		if($targetSpeed > $shooterSpeed){//Target is moving faster, roll to attach.
+			$baseHitChance = 100;//Start with automatic hit.
+//			$speedChance = 	$finalSpeedDifference *10;//Each point of speed difference is 10% chance to miss.
+//			$finalHitChance = $baseHitChance - $speedChance;//Adjust hitchance.
+			$finalHitChance = $baseHitChance;
+			$fireOrder->needed = $finalHitChance;//Update fireOrder.		
+			$fireOrder->updated = true;	
+			$fireOrder->chosenLocation = $hitLoc;//Need to mark this for successful shots to check if hitting Primary.									
+//			return;
+//		}else{
+//			$fireOrder->needed = 100;
+//			$fireOrder->updated = true;
+//			$fireOrder->chosenLocation = $hitLoc;			
+//			return;
+//		}	
+		
+	}//endof calculateHitBase
+
+
+
+
+
+       public function fire($gamedata, $fireOrder){ //note ammo usage
+            parent::fire($gamedata, $fireOrder);
+
+			if($fireOrder->rolled <= $fireOrder->needed){//Only reduce ammo if Marines successfully boarded enemy ship.
+
+				$this->ammunition--;//Deduct Marine unit just used.			
+
+				//Need to remove Enhancement bonuses from saved ammo count, as these will be re-added in onConstructed()
+				$ship = $gamedata->getShipById($fireOrder->shooterid);
+	
+				foreach ($ship->enhancementOptions as $enhancement) {
+					$enhID = $enhancement[0];
+					$enhCount = $enhancement[2];		        
+					if($enhCount > 0) {		            
+						if ($enhID == 'EXT_MAR') $this->ammunition -= $enhCount;       	
+					}
+				}	
+				Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+			}
+
+        }
+
+	public static function recordBoarding($targetId) {
+	    Marines::$boardedThisTurn[] = $targetId;
+	}	
+
+	private function getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder){
+		$rollMod = 0;
+		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
+
+		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" )	$rollMod += 1; //Certain factions defend harder! 
+
+		$location = $fireOrder->chosenLocation ;
+		if($location == 0 && (!$target instanceof OSAT)) $rollMod -= 1; //Easier to deliver marines to destroyed sections i.e direct to Primary section.	       
+
+		foreach ($target->enhancementOptions as $enhancement) {//Defender quality can influence roll too.
+		    $enhID = $enhancement[0];
+			$enhCount = $enhancement[2];		        
+			if($enhCount > 0) {		            
+		        if ($enhID == 'ELITE_CREW') $rollMod += $enhCount;	//Elite Crews are better at defending.
+		        if ($enhID == 'POOR_CREW') $rollMod -= $enhCount; //Poor Crews are worse.
+		        if ($enhID == 'MARK_FERV') $rollMod += $enhCount; //Markab Fervor causes defenders to fight harder.		        	
+			}
+		}
+
+        return $rollMod;
+        		
+	}//endof getDeliveryRollMod
+	
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+			
+		if ($system->advancedArmor) {//no effect on Advanced Armor for Younger Races equipped with this e.g. Shadow Omega.	
+			$fireOrder->pubnotes .= "<br> Marines cannot attack systems with advanced armor.";				
+			return; 	
+		}
+
+		//Can proceed with boarding actions, roll to see if Marines are delivered.		
+		$rollMod = $this->getDeliveryRollMod($shooter, $target, $gamedata, $fireOrder);		
+		$deliveryRoll = max(0, Dice::d(10) + $rollMod);		
+
+		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.		
+		foreach($cnc->criticals as $critDisabled){
+			if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) $deliveryRoll = 1;//Ship captured, auto success.		
+		}		
+		
+		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
+				
+			switch($this->firingMode){
+								
+				case 1://Capture
+
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to capture enemy ship next turn.";			
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}else{//Not Elite Marines					
+									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}							    		
+			            }				
+				
+					break;
+
+				case 2://Sabotage
+
+					if($fireOrder->calledid != -1 && !($system instanceof Structure) && $system->location != 0){//Is a called shot and not structure, place crit on system.
+							$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
+						if($this->eliteMarines){//Are Marines Elite?
+							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+						}else{//Not Elite Marines			
+							$crit = new Sabotage(-1, $ship->id, $system->id, 'Sabotage', $gamedata->turn+1); //Takes effect next turn.
+							$crit->updated = true;
+							$system->criticals[] =  $crit;
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+						}	
+					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
+						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
+							if($cnc){
+									if($this->eliteMarines){//Are Marines Elite?
+										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
+									}else{//Not Elite Marines					
+										$crit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
+										$crit->updated = true;
+										$cnc->criticals[] =  $crit;
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+									}							    		
+				            }				
+					}	
+					
+					break;				
+				
+				case 3://Rescue
+
+					$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt their rescue mission next turn.";			
+						if($cnc){
+								if($this->eliteMarines){//Are Marines Elite?
+									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note marines have boarded this turn
+								}else{//Not Elite Marines					
+									$crit = new RescueMission(-1, $ship->id, $cnc->id, 'RescueMission', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->updated = true;
+									$cnc->criticals[] =  $crit;
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
+								}							    		
+			            }	
+				
+					break;			
+				
+			}
+		}elseif($deliveryRoll >= 6 && $deliveryRoll <=8){//Unsuccessful delivery
+			$this->ammunition++;//Marines weren't eliminated, they just weren't delivered.  Give ammunition back to weapon.
+			Manager::updateAmmoInfo($fireOrder->shooterid, $this->id, $gamedata->id, $this->firingMode, $this->ammunition, $gamedata->turn);
+			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was beaten back by defenders but managed to return safely to their pod.";
+			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
+			return;	
+		}else{//Roll result is 9 or over
+			$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit was eliminated by defenders whilst trying to board the enemy ship.";
+			Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.								
+			return;
+		}			
+	}//endof onDamagedSystem() 		
+	
+	
+	public function getDamage($fireOrder){ //Damage is handled in criticalPhaseEffects()
+		return 0;
+	}
+
+	public function setMinDamage(){     $this->minDamage = 0;      }
+	public function setMaxDamage(){     $this->maxDamage = 0;      }
+
+	public function stripForJson() {
+			$strippedSystem = parent::stripForJson();    
+			$strippedSystem->ammunition = $this->ammunition;			
+			$strippedSystem->isBoardingAction = $this->isBoardingAction;                          
+			return $strippedSystem;
+	}	
+	
+} //endof class CombatTransporter
 
 ?>

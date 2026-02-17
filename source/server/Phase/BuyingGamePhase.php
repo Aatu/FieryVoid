@@ -7,13 +7,6 @@ class BuyingGamePhase implements Phase
     {
         $servergamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
 
-        $t1 = 0;
-        $t2 = 0;
-        //$usedPositions = array(); // To store assigned (x, y) pairs 
-        $moonPositions = array(); // To store assigned (x, y) pairs 
-        $terrainOccupiedHexes = array(); // To store all hexes occupied by terrain units 
-
-
         if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons"))){        
             // Sort ships to prioritise placing larger terrain first 
             usort($servergamedata->ships, function($a, $b) {
@@ -33,36 +26,94 @@ class BuyingGamePhase implements Phase
             });
         }
 
-        foreach ($servergamedata->ships as $ship){
+        // Identify participating teams and count ships per team
+        $teamShips = [];
+        foreach ($servergamedata->ships as $ship) {
+            if ($ship->userid != -5) {
+                $teamShips[$ship->team][] = $ship;
+            }
+        }
+        
+        $teams = array_keys($teamShips);
+        sort($teams);
+        $totalTeams = count($teams);
+        
+        $gamespace = $this->getGamespace($gameData);
+        $width = $gamespace['width'];
+        $height = $gamespace['height'];
+        
+        // Organize teams by Odd (Left) and Even (Right)
+        $leftTeams = [];
+        $rightTeams = [];
 
-            if($ship->userid != -5){ //No point doing any of this for generated, they will place separately in next part.
-                $h = 3;
-                if ($ship->team == 1){
-                    $t1++;
-                    $t = $t1;
-                    $h = 0;
-                }else{
-                    $t2++;
-                    $t = $t2;
-                }
+        foreach ($teams as $teamId) {
+            if ($teamId % 2 != 0) {
+                $leftTeams[] = $teamId;
+            } else {
+                $rightTeams[] = $teamId;
+            }
+        }
 
-                if ($t % 2 == 0){
-                    $y = $t/2;
-                }else{
-                    $y = (($t-1)/2)*-1;
-                }
+        // Calculate Team Centers
+        $teamCenters = [];
+        $teamHeadings = [];
+        // Spacing between teams on the same side
+        $teamVerticalSpacing = 20; 
 
-                $x = -30;
+        // LEFT TEAMS (Odd)
+        $numLeft = count($leftTeams);
+        foreach ($leftTeams as $i => $teamId) {
+             // Center them vertically
+             if ($numLeft > 1) {
+                 $y = (($i) - ($numLeft - 1) / 2) * $teamVerticalSpacing;
+             } else {
+                 $y = 0;
+             }
+             $teamCenters[$teamId] = new OffsetCoordinate(-($width/2) - 5, $y);
+             $teamHeadings[$teamId] = 0; // Face Right
+        }
 
-                if ($ship->team == 2){
-                    $x=30;
+        // RIGHT TEAMS (Even)
+        $numRight = count($rightTeams);
+        foreach ($rightTeams as $i => $teamId) {
+             if ($numRight > 1) {
+                 $y = (($i) - ($numRight - 1) / 2) * $teamVerticalSpacing;
+             } else {
+                 $y = 0;
+             }
+             $teamCenters[$teamId] = new OffsetCoordinate(($width/2) + 5, $y);
+             $teamHeadings[$teamId] = 3; // Face Left
+        }
+
+        foreach ($teams as $teamId) {
+            $ships = $teamShips[$teamId];
+            $center = $teamCenters[$teamId] ?? new OffsetCoordinate(0,0);
+            $facing = $teamHeadings[$teamId] ?? 0;
+            
+            $count = 0;
+            foreach ($ships as $ship) {
+                $count++;
+                
+                // Formations: Vertical Line relative to team center
+                // Simple pattern: 0, 1, -1, 2, -2... along the vertical axis
+                if ($count % 2 == 0) {
+                    $offsetStep = $count / 2;
+                } else {
+                    $offsetStep = (($count - 1) / 2) * -1;
                 }
                 
-                $move = new MovementOrder(-1, "start", new OffsetCoordinate($x, $y), 0, 0, 5, $h, $h, true, 1, 0, 0);
-                $ship->movement = array($move);
-            } 
+                // Apply offset to Y axis (q, r+offset) for standard vertical stack
+                $deployPos = new OffsetCoordinate($center->q, $center->r + $offsetStep);
 
-            // Now let's see if we have to add any terrain.
+                $move = new MovementOrder(-1, "start", $deployPos, 0, 0, 5, $facing, $facing, true, 1, 0, 0);
+                $ship->movement = array($move);
+            }
+        } 
+
+        // Now let's see if we have to add any terrain.
+        $moonPositions = [];
+        $terrainOccupiedHexes = [];
+        foreach ($servergamedata->ships as $ship) {
             if (($gameData->rules->hasRuleName("asteroids") || $gameData->rules->hasRuleName("moons")) && $ship->userid == -5) {
                 // It's an asteroid or moon, so assign a unique random position.
                 $deploymentZone = $this->getGamespace($gameData);
@@ -86,7 +137,7 @@ class BuyingGamePhase implements Phase
                         // If we can't place it safely after many tries, just place it at a random spot 
                         // and ignore the "distance to other asteroids" rule, but still try to respect Moon distance if possible.
                         // Or just allow overlap as a fallback.
-                        $usedPositions["$x,$y"] = true;
+                        //$usedPositions["$x,$y"] = true; // Variable not previously used? kept commented out if wasn't there or local
                          // Register hexes anyway to prevent complete overlap if possible, but we stop checking collisions rigidly
                         if ($ship instanceof moonSmallNew || $ship instanceof moonNew || $ship instanceof moonLarge) {
                             $moonPositions[] = [$x, $y];

@@ -63,13 +63,13 @@ window.shipWindowManager = {
 				n.removeClass("left right"); // optionally clear positioning classes
 
 				if (ship.userid == 0) {
-					n.addClass("right");
-					n.css("right", "");
-					n.css("left", "");
-				} else {
 					n.addClass("left");
 					n.css("left", "");
 					n.css("right", "");
+				} else {
+					n.addClass("right");
+					n.css("right", "");
+					n.css("left", "");
 				}
 			}
 		}
@@ -112,9 +112,9 @@ window.shipWindowManager = {
 		//In Buy Phase manually set where window opens.
 		if (gamedata.phase == 0) {
 			if (ship.userid == 0) {
-				shipwindow.addClass("right");
-			} else {
 				shipwindow.addClass("left");
+			} else {
+				shipwindow.addClass("right");
 			}
 		} else {
 			if (gamedata.getPlayerTeam) {

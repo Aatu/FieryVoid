@@ -209,7 +209,13 @@
                 
                 if (!$elint->isElint()) continue;
                 
-                if (Mathlib::getDistanceHex( $ship, $elint ) > 30) continue;
+                if (Mathlib::getDistanceHex( $ship, $elint ) > 30) continue;               
+
+                $elintPos = $elint->getHexPos();
+                $shipPos = $ship->getHexPos();
+
+                $losBlocked  = $elint->isLoSBlocked($elintPos, $shipPos, $gamedata); //Defaults false e.g. line of sight NOT blocked.
+                if($losBlocked) continue; //Line of sight blocked to one of the relevant units, skip.                  
 
                 if($elint->hasSpecialAbility("ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
         	        $fdew = $elint->getEWByType("DIST", $gamedata->turn, $ship) / 4 ;	

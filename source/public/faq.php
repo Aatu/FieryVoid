@@ -281,6 +281,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Must be a Medium Ship or smaller, and must be classified as agile (fighters and shuttles are considered agile for this purpose).  There are some rare execptions to this rule e.g. Torvalus capital ships.</li>
                     <li>Skin Dancing unit cannot be stationary, and the Enormous Unit cannot be moving at more than Speed 5.  
                     If the Enormous unit is moving the dancing ship must be moving in the same direction or the exact opposite direction.</li>
+                    <li>Must not be a unit designed to ram e.g. Orieni Hunter-Killer drones.</li>
                 </ul>
             </li>
             <li>Eligible ships will then make a Skin Dancing roll on d20 just before the Firing Phase begins, and must roll 15 or less to succeed. The following modifiers are applied to this roll:

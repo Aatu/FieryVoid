@@ -352,7 +352,8 @@ window.mathlib = {
 			//start = shipManager.getShipPosition(firstShip);
 			return; //No start selectd yet, or tool just activated.			
 		}
-		var blockedHexes = weaponManager.getBlockedHexes();
+		//var blockedHexes = weaponManager.getBlockedHexes();
+	    var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.   	
 
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
 	},

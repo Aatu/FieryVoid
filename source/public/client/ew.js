@@ -604,7 +604,8 @@ window.ew = {
 			if (jammerValue>0) continue; //no lock-on negates SOEW, if any
 
                 //Check for Line of sight - DK Nov 2025
-                var blockedLosHex = weaponManager.getBlockedHexes();
+                //var blockedLosHex = weaponManager.getBlockedHexes();
+                var blockedLosHex = gamedata.blockedHexes;                 
                 var loSBlockedshooter = false;
                 var loSBlockedtarget = false;
 
@@ -690,9 +691,17 @@ window.ew = {
     getDistruptionEW: function getDistruptionEW(ship) {
 
         var amount = 0;
+        //var blockedLosHex = weaponManager.getBlockedHexes();        
+	    var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.	  
+
         for (var i in gamedata.ships) {
             var elint = gamedata.ships[i];
             if (elint == ship || !shipManager.isElint(elint)) continue;
+            
+            if (blockedLosHex && blockedLosHex.length > 0) {
+                var loSBlocked = mathlib.isLoSBlocked(shipManager.getShipPosition(elint), shipManager.getShipPosition(ship), blockedLosHex);
+                if(loSBlocked) continue; //Line of sight blocked to one of the relevant units, skip.
+            }     
 
 			if(shipManager.hasSpecialAbility(elint, "ConstrainedEW")){//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.
             	var fdew = ew.getEWByType("DIST", elint, ship) / 4;	

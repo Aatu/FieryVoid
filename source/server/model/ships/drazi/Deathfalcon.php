@@ -29,6 +29,8 @@ class Deathfalcon extends BaseShipNoAft{
         
         $this->iniativebonus = 10;
 
+		$this->enhancementOptionsEnabled[] = 'GUNSIGHT'; //can equip particle repeaters with Gunsights        
+
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 5, 7));

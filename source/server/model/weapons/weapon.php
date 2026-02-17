@@ -2207,7 +2207,8 @@ full Advanced Armor effects (by rules) for reference:
     }     
 
     public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
-        $blockedLosHex = $gamedata->getBlockedHexes();
+        //$blockedLosHex = $gamedata->getBlockedHexes();
+		$blockedHexes = $gamedata->blockedHexes; //Just do this once outside loop	        
 
         $noLoS = false;
         if (!empty($blockedLosHex)) {            
