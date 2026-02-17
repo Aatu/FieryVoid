@@ -23,10 +23,15 @@ class technicalTargetDrone extends VreeCapital
 		$this->accelcost = 1;
 		$this->rollcost = 1;
 		$this->pivotcost = 1;
+
+    	$this->iniativebonus = 50 * 5;
 		
         $this->gravitic = true;  
 
 		$this->notes = "DO NOT USE, prone to change!";
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
 
 		$this->VreeHitLocations = false;
 
@@ -41,7 +46,7 @@ class technicalTargetDrone extends VreeCapital
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 1)); 
         $this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 2));  
 		$this->addPrimarySystem(new GraviticThruster(5, 16, 0, 9, 4));	
-
+/*
         $this->addFrontSystem(new SniperCannon(5, 10, 12, 300, 60));	
         $this->addFrontSystem(new AncientMatterGun(5, 10, 5, 300, 60));	
         $this->addFrontSystem(new AncientPlasmaGun(5, 10, 5, 300, 60));	
@@ -58,6 +63,21 @@ class technicalTargetDrone extends VreeCapital
         $this->addFrontSystem(new RailGun(4, 9, 6, 0, 360));
         $this->addFrontSystem(new PlasmaWaveTorpedo(4, 7, 4, 300, 60));
         $this->addFrontSystem(new MolecularSlicerBeamL(5, 0, 0, 300, 60));	
+*/
+/*
+        $this->addFrontSystem(new TrekEarlyDisruptor(3, 6, 4, 270, 90));	
+        $this->addFrontSystem(new TrekEarlyDisruptor(3, 6, 4, 270, 90));	
+        $this->addFrontSystem(new TrekLightDisruptorArray(3, 6, 3, 270, 90));	
+        $this->addFrontSystem(new TrekLightDisruptor(3, 6, 3, 270, 90));	
+        $this->addFrontSystem(new TrekMedDisruptor(3, 6, 3, 270, 90));	
+        $this->addFrontSystem(new TrekMedDisruptor(3, 6, 3, 270, 90));	
+        $this->addFrontSystem(new TrekDisruptorCannon(3, 8, 6, 270, 90));	
+        $this->addFrontSystem(new TrekDisruptorCannon(3, 8, 6, 270, 90));	
+        $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
+        $this->addFrontSystem(new TrekKlingonLauncher(3, 10, 5, 270, 90));	
+*/
+//        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 8, false));	
+
 
 		$structArmor = 0;
 		$structHP = 50;
