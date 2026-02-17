@@ -73,6 +73,7 @@ window.PhaseStrategy = function () {
 
         if (menu) {
             if (!this.uiManager.canShowSystemInfoMenu(ship, system)) {
+                this.hideSystemInfo(true);
                 return;
             }
             this.uiManager.showSystemInfoMenu({ ship: ship, selectedShip: this.selectedShip, system: system, boundingBox: boundingBox });
@@ -793,6 +794,12 @@ window.PhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
         var element = payload.element;
+
+        if (this.systemInfoState && this.systemInfoState.system === system && this.systemInfoState.menu) {
+            this.hideSystemInfo(true);
+            return;
+        }
+
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) return;
 
         this.showSystemInfo(ship, system, element, true);

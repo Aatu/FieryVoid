@@ -1,50 +1,69 @@
-.chatcontainer{
-    width:100%;
-    height:100%;
-    overflow:hidden;
-    position:relative;
-	font-style:normal;
+.chatcontainer {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    position: relative;
+    font-style: normal;
 }
 
-.chatMessages{
-    height:100%;
-	overflow-x:hidden;
-    overflow-y:scroll;
+.chatMessages {
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
-.chatinput{
-    border:0;
-    padding:0;
-    height:20px;
-    width:100%;
+.chatMessages::-webkit-scrollbar {
+    width: 10px;
 }
 
-.chatmessage{
+.chatMessages::-webkit-scrollbar-track {
+    background: #0d1620;
+}
+
+.chatMessages::-webkit-scrollbar-thumb {
+    background: #466486;
+}
+
+.chatMessages::-webkit-scrollbar-thumb:hover {
+    background: #5a7ea8;
+}
+
+.chatinput {
+    border: 0;
+    padding: 0;
+    height: 20px;
+    width: 100%;
+}
+
+.chatmessage {
     margin: 2px 5px 2px 5px;
     /*font-size:11px;*/
-	font-size:12px;/*actual text will have larger, separate size*/
+    font-size: 12px;
+    /*actual text will have larger, separate size*/
 }
 
-.chattime{
-    color:#DEEBFF;
+.chattime {
+    color: #DEEBFF;
 }
 
-.chatuser{
-    color:#DEEBFF;
+.chatuser {
+    color: #DEEBFF;
 }
 
-.chatingame{
-    color:#b34119;
+.chatingame {
+    color: #b34119;
 }
 
-.chatuser.mine{
+.chatuser.mine {
     /*color:#2f5123;*/
-	color:#00D800; /*green*/
+    color: #00D800;
+    /*green*/
 }
 
-.chattext{
+.chattext {
     /*color:#496791;*/
-	color:#BDEAFA; /*white-ish*/	
-	font-style:normal;
-	font-size:15px;
+    color: #BDEAFA;
+    /*white-ish*/
+    font-style: normal;
+    font-size: 15px;
 }

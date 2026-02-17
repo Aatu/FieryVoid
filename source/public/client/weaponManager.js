@@ -482,7 +482,8 @@ window.weaponManager = {
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
 
-        var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
+        //var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
+        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.        
         var loSBlocked = false; //Default to LoS not blocked.
         var skinDanceBlocked = null;
 
@@ -1066,7 +1067,8 @@ window.weaponManager = {
             oew = shooter.offensivebonus - OBcrit;
             if (weapon.ballistic) { //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
                 var shooterLoSBlocked = false;
-                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                
+                //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 
+                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                                    
                 if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
                     var shooterPos = shipManager.getShipPosition(shooter);
                     shooterLoSBlocked = mathlib.isLoSBlocked(shooterPos, sPosTarget, blockedLosHex);
@@ -1224,7 +1226,8 @@ window.weaponManager = {
         if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
             if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
                 var loSBlocked = false;
-                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 
+                //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                    
                 var shooterPos2 = shipManager.getShipPosition(shooter);
                 loSBlocked = mathlib.isLoSBlocked(shooterPos2, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
 
@@ -1601,7 +1604,8 @@ window.weaponManager = {
             if (!weaponManager.checkSkindancing(selectedShip, ship)) return; //Returns false if skin dancing conditions prevent firing at or from a skin dancing unit.
         }
 
-        var blockedLosHex = weaponManager.getBlockedHexes();
+        //var blockedLosHex = weaponManager.getBlockedHexes();
+        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.         
         var loSBlocked = false;
 
         var toUnselect = [];
@@ -1880,7 +1884,8 @@ window.weaponManager = {
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)) {
 
                 //Check for Line of sight
-                var blockedLosHex = weaponManager.getBlockedHexes();
+                //var blockedLosHex = weaponManager.getBlockedHexes();
+                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                 
                 var loSBlocked = false;
                 if (blockedLosHex && blockedLosHex.length > 0) {
                     var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -2421,6 +2426,7 @@ window.weaponManager = {
         return shortLogTypes.includes(fire.damageclass);
     },
 
+    //Should have been replaced by gamedata.blockedHexes, but leaving just in case I've missed a call somewhere - DK 10.2.26
     getBlockedHexes: function getBlockedHexes() {
         var blockedHexes = [];
 

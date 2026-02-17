@@ -11,6 +11,7 @@ jQuery(function ($) {
             $(document).on("click", ".close-ladder", ladder.close);
             $(document).on("click", "#btnCalculate", ladder.calculate);
             $(document).on("click", "#btnRegisterLadder", ladder.register);
+            $(document).on("click", "#btnRemoveAccount", ladder.removeAccount);
             $(document).on("click", "#btnPopulateSlots", ladder.populateSlots);
             $(document).on("click", "#btnHistoryBack", ladder.hideHistory);
 
@@ -126,6 +127,45 @@ jQuery(function ($) {
             });
         },
 
+        removeAccount: function () {
+            var msg = "Are you sure you wish to remove you account from the Online Ladder, this will reset your ranking to 100 if you re-register";
+
+            var doRemove = function () {
+                ajaxInterface.ajaxWithRetry({
+                    type: 'POST',
+                    url: 'ladderstandings.php',
+                    dataType: 'json',
+                    data: JSON.stringify({
+                        action: "remove"
+                    }),
+                    contentType: 'application/json',
+                    success: function (data) {
+                        if (data.success) {
+                            if (typeof confirm !== 'undefined' && confirm.warning) {
+                                confirm.warning("Account removed from ladder.");
+                            } else {
+                                alert("Account removed from ladder.");
+                            }
+                            ladder.fetchStandings();
+                        } else {
+                            alert("Removal failed: " + (data.error || "Unknown error"));
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        alert("Error: " + error);
+                    }
+                });
+            };
+
+            if (typeof confirm !== 'undefined' && confirm.confirm) {
+                confirm.confirm(msg, doRemove);
+            } else {
+                if (window.confirm(msg)) {
+                    doRemove();
+                }
+            }
+        },
+
         fetchStandings: function () {
             $("#ladderTable tbody").html('<tr><td colspan="5" style="text-align:center;">Loading...</td></tr>');
 
@@ -141,6 +181,15 @@ jQuery(function ($) {
                 if (currentUser) {
                     $("#calcMyRating").text(currentUser.rating);
                     if (currentUser.username) ladder.myUsername = currentUser.username;
+
+                    // Toggle buttons based on registration
+                    if (currentUser.isRegistered) {
+                        $("#btnRegisterLadder").prop("disabled", true).css("opacity", 0.5).css("cursor", "default");
+                        $("#btnRemoveAccount").show();
+                    } else {
+                        $("#btnRegisterLadder").prop("disabled", false).css("opacity", 1).css("cursor", "pointer");
+                        $("#btnRemoveAccount").hide();
+                    }
                 }
 
                 var html = "";

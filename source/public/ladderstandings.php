@@ -16,6 +16,12 @@ try {
             echo json_encode(["success" => true]);
             exit;
         }
+        
+        if (isset($input['action']) && $input['action'] === 'remove') {
+            Manager::removeLadderPlayer($_SESSION["user"]);
+            echo json_encode(["success" => true]);
+            exit;
+        }
     }
 
     if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'history') {
@@ -46,7 +52,8 @@ try {
         "standings" => $standings,
         "currentUser" => [
             "id" => $myId,
-            "rating" => $myRating
+            "rating" => $myRating,
+            "isRegistered" => ($myRating != 100 || $myId != 0 && $myRating == 100 && Manager::isLadderPlayer($myId))
         ]
     ]);
 } catch (Exception $e) {

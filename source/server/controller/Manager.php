@@ -1491,6 +1491,18 @@ class Manager{
         return self::$dbManager->registerLadderPlayer($playerid);
     }
 
+    public static function removeLadderPlayer($playerid)
+    {
+        self::initDBManager();
+        return self::$dbManager->removeLadderPlayer($playerid);
+    }
+
+    public static function isLadderPlayer($playerid)
+    {
+        self::initDBManager();
+        return self::$dbManager->isLadderPlayer($playerid);
+    }
+
 
     public static function getLadderHistory($playerid)
     {

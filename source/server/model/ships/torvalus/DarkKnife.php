@@ -10,7 +10,7 @@ class DarkKnife extends BaseShip{
         $this->shipClass = "Dark Knife";
         //$this->variantOf = "Dark Knife";
         $this->imagePath = "img/ships/TorvalusDarkKnife.png";
-        $this->canvasSize = 256;
+        $this->canvasSize = 280;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -18,8 +18,7 @@ class DarkKnife extends BaseShip{
 				
         $this->gravitic = true;
 		$this->advancedArmor = true;  
-		$this->skinDancer = true; 
-		$this->notes .= "Can skin dance"; 		
+		$this->skinDancer = true; 	
         
         $this->forwardDefense = 11;
         $this->sideDefense = 14;
@@ -35,7 +34,8 @@ class DarkKnife extends BaseShip{
 		$this->canPreOrder = true;		
 		//$this->fighters = array("normal"=>24);
 		$this->notes = "Can control 24 fighters";		
-        
+		$this->notes .= '<br>Can skin dance'; 
+
 		/*Torvalus use their own enhancement set */		
 		Enhancements::nonstandardEnhancementSet($this, 'TorvalusShip');
 		

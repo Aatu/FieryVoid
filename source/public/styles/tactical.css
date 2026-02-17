@@ -934,7 +934,9 @@ body {
     display: flex; /* Flex to center content, hidden by JS via inline style */
     align-items: center;
     justify-content: center;
-    color: #b34119; /* Standard alert color */
+    /*color: #b34119; /* Standard alert color */
+    border: 2px solid #7a2121;        
+    color: #c94b1d;    
     font-size: 18px;
     font-weight: bold;
     text-align: center;

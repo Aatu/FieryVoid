@@ -16,13 +16,7 @@
         public $displayName = "Fusion Cannon";
         public $animation = "bolt";
         public $animationColor =  array(175, 225, 175);
-	    /*
-        public $trailColor = array(110, 225, 110);
-        public $animationExplosionScale = 0.20;
-        public $projectilespeed = 12;
-        public $animationWidth = 6;
-        public $trailLength = 16;
-*/
+
         public $intercept = 2;
         public $priority = 6; //that's heavy hitting power
 

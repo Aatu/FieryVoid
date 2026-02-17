@@ -25,7 +25,7 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 4;
-	$this->iniativebonus = 2 *5; 
+	$this->iniativebonus = 1 *5; //a bonus as Excelsior is smaller than a regular Capital
 		
 	$this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Reactor(5, 30, 0, 0));
@@ -63,6 +63,8 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
 	$this->addLeftSystem(new TrekPhaser(3, 0, 0, 240, 360));
 	$this->addLeftSystem(new TrekPhaser(3, 0, 0, 210, 330));
 	$warpNacelle = new TrekWarpDrive(4, 25, 0, 4); //armor, structure, power usage, impulse output
+		$warpNacelle->startArc = 0;
+		$warpNacelle->endArc = 180;
 	$impulseDrive->addThruster($warpNacelle);
 	$this->addLeftSystem($warpNacelle);
 
@@ -78,6 +80,8 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
 	$this->addRightSystem(new TrekPhaser(3, 0, 0, 0, 120));
 	$this->addRightSystem(new TrekPhaser(3, 0, 0, 30, 150));
 	$warpNacelle = new TrekWarpDrive(4, 25, 0, 4); //armor, structure, power usage, impulse output
+		$warpNacelle->startArc = 180;
+		$warpNacelle->endArc = 360;
 	$impulseDrive->addThruster($warpNacelle);
 	$this->addRightSystem($warpNacelle);
 
@@ -100,7 +104,7 @@ class TrekFederationExcelsiorEarly extends BaseShipNoAft{
 	    
         $this->hitChart = array(
             0=> array(
-				2 => "2:Nacelle",
+				2 => "TAG:Nacelle",
 				4 => "2:Phaser Lance",
 				6 => "2:Photon Torpedo",
 				11 => "Structure",

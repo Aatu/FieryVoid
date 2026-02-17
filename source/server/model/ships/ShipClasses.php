@@ -468,11 +468,12 @@ class BaseShip {
 
 
     public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
-        $blockedLosHex = $gamedata->getBlockedHexes();
+        //$blockedHexes = $gamedata->getBlockedHexes();
+		$blockedHexes = $gamedata->blockedHexes; //Just do this once outside loop	        
 
         $noLoS = false;
-        if (!empty($blockedLosHex)) {            
-            $noLoS = Mathlib::isLoSBlocked($shooterPos, $targetPos, $blockedLosHex);
+        if (!empty($blockedHexes)) {            
+            $noLoS = Mathlib::isLoSBlocked($shooterPos, $targetPos, $blockedHexes);
         }
         
         return $noLoS;

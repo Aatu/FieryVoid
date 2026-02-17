@@ -26,10 +26,9 @@ class Brostilli extends SmallStarBaseFourSections
 		$this->forwardDefense = 21;
 		$this->sideDefense = 21;
 
-
+		$this->enhancementOptionsEnabled[] = 'GUNSIGHT'; //can equip particle repeaters with Gunsights
 
 		$this->addPrimarySystem(new Reactor(6, 26, 0, 4));
-//		$this->addPrimarySystem(new ProtectedCnC(7, 40, 0, 0)); //originally 2 systems with structure 20, armor 6 each
 		$cnc = new CnC(6, 20, 0, 0);
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;

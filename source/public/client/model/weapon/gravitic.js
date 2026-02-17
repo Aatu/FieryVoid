@@ -181,8 +181,14 @@ GravityNet.prototype.initializationUpdate = function() {
     if (this.fireOrders.length > 0) {
         this.hextarget = true;
         this.ignoresLoS = false;
-
-        
+        if (this.fireOrders.length == 1) {
+            if (!weaponManager.isSelectedWeapon(this)) {
+                webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });
+            } else if (weaponManager.isSelectedWeapon(this) && this.target) {
+                webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });//Remove any old sprites to prevent duplication.
+                webglScene.customEvent("ShowTargetedHexagonInArc", { shooter: this.ship, target: this.target, system: this});
+            }
+        }
     }else{
         this.hextarget = false;
         this.ignoresLoS = false; 
@@ -229,10 +235,10 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         }; 
         this.target = target; //store current target to this gravity net object.       
         fireOrdersArray.push(fire); // Store each fire order
+        
+        webglScene.customEvent("ShowTargetedHexagonInArc", {shooter: shooter, target: target, system: this});
+        this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.        
     }
-
-    webglScene.customEvent("ShowTargetedHexagonInArc", {shooter: shooter, target: target, system: this});
-    this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.
     
     return fireOrdersArray; // Return all fire orders
 };    
@@ -285,7 +291,8 @@ GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //f
         var targetMoveHex = hexpos;
         var dist = targetShipHex.distanceTo(targetMoveHex);
         if(dist <= maxmoverange){            
-            var blockedHexes = weaponManager.getBlockedHexes();
+            //var blockedHexes = weaponManager.getBlockedHexes();
+	        var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.             
             var loSBlocked = mathlib.isLoSBlocked(targetShipHex, targetMoveHex, blockedHexes);
             if(!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)){//make sure hexpos is a not a blocked hex and LOS is not blocked      
                 valid = true ;  

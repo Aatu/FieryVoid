@@ -12,7 +12,7 @@ const ShipWindowContainer = styled.div`
     flex-wrap: wrap;
     position: absolute;
     ${props => {
-        if (props.team === 1) {
+        if (props.$isMyTeam) {
             return "left: 50px; \n top: 50px;"
         } else {
             return "right: 50px; \n top: 50px;"
@@ -32,7 +32,7 @@ const ShipWindowContainer = styled.div`
 
     @media (max-width: 1024px) {
         ${props => {
-        if (props.team === 1) {
+        if (props.$isMyTeam) {
             return "left: 0; \n top: 0; \n right: unset;"
         } else {
             return "right: 0; \n top: 0; \n left: unset;"
@@ -145,10 +145,11 @@ class ShipWindow extends React.Component {
 
     render() {
         const { ship } = this.props;
+        const isMyTeam = ship.team === window.gamedata.getPlayerTeam();
 
         if (ship.flight) {
             return (
-                <ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} team={ship.team}>
+                <ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} team={ship.team}>
                     <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
                     <FighterList ship={ship} />
                 </ShipWindowContainer>
@@ -157,7 +158,7 @@ class ShipWindow extends React.Component {
 
         const systemsByLocation = sortIntoLocations(ship);
 
-        return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} team={ship.team}>
+        return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} team={ship.team}>
             <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
             <Column $top>
                 <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onTouchStart={this.onShipTouchStart.bind(this)} />

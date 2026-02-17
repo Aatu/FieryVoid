@@ -2,6 +2,12 @@
 
 jQuery(function ($) {
     $("#backgroundSelect").on("change", createGame.mapSelect);
+
+    // Bind global Add Team button
+    $("#addTeamBtn").on("click", function () {
+        createGame.addTeam();
+    });
+
     createGame.mapSelect();
 
     $("body").on("change", "input", createGame.inputChange);
@@ -103,7 +109,16 @@ jQuery(function ($) {
     // Use body delegation for dynamic elements if needed, though structure suggests static buttons for adding slots
     $(".addslotbutton").on("click", createGame.createNewSlot);
     // Delegate close button click since slots are dynamic
-    $(".slotcontainer").on("click", ".close", createGame.removeSlot);
+    // Delegate close button click to a static parent since slots and their containers are dynamic
+    $("#teamsContainer").on("click", ".close", createGame.removeSlot);
+    // Delegate remove team button
+    $("#teamsContainer").on("click", ".remove-team-btn", function () {
+        console.log("Remove Team Clicked");
+        const rawId = $(this).closest(".team-section").data("team-id");
+        const teamId = parseInt(rawId);
+        console.log("Target Team ID:", teamId);
+        createGame.removeTeam(teamId);
+    });
 
     let allowSubmit = false;
 
@@ -133,7 +148,7 @@ jQuery(function ($) {
     $("#friendlyFireCheck").on("click", createGame.doFriendlyFireCheck);
     $("#laddercheck").on("click", createGame.doLadderCheck);
 
-    createGame.createSlotsFromArray();
+    createGame.refreshSlotsUI();
     createGame.onMapDimensionsChange(); // Run on load
     createGame.drawMapPreview();
 });
@@ -267,11 +282,9 @@ window.createGame = {
         ctx.restore();
 
         // Draw deployment zones
-        $(".slot").each(function () {
-            const slot = $(this);
-            const slotId = slot.data("slotid");
-            const data = createGame.getSlotData(slotId);
-            if (!data) return;
+        // Iterate data model directly to ensure we catch all teams even if DOM is lagging
+        createGame.slots.forEach(function (slot) {
+            const data = slot;
             const team = data.team;
 
             const x = parseInt(data.depx) || 0;
@@ -279,38 +292,27 @@ window.createGame = {
             const w = parseInt(data.depwidth) || 0;
             const h = parseInt(data.depheight) || 0;
 
-            // Deployment color based on team
-            let color = team === 1 ? "rgba(50, 200, 50, 0.4)" : "rgba(200, 50, 50, 0.4)";
-            let borderColor = team === 1 ? "#66ff66" : "#ff6666";
+            const colors = [
+                { fill: "rgba(50, 200, 50, 0.4)", stroke: "#66ff66" }, // Green
+                { fill: "rgba(200, 50, 50, 0.4)", stroke: "#ff6666" }, // Red
+                { fill: "rgba(50, 50, 200, 0.4)", stroke: "#6666ff" }, // Blue
+                { fill: "rgba(200, 200, 50, 0.4)", stroke: "#ffff66" }, // Yellow
+                { fill: "rgba(50, 200, 200, 0.4)", stroke: "#66ffff" }, // Cyan
+                { fill: "rgba(200, 50, 200, 0.4)", stroke: "#ff66ff" }  // Magenta
+            ];
 
-            if (team > 2) {
-                color = "rgba(50, 50, 200, 0.4)";
-                borderColor = "#6666ff";
-            }
+            const colorIdx = (team - 1) % colors.length;
+            const style = colors[colorIdx];
 
-            ctx.fillStyle = color;
-            ctx.strokeStyle = borderColor;
+            ctx.fillStyle = style.fill;
+            ctx.strokeStyle = style.stroke;
             ctx.lineWidth = 1;
 
             // Adjust position to treat (x, y) as center
             // coordinate system: center of map is (0,0)
             // canvas origin is topleft
 
-            // Map coord to Canvas coord:
-            // MapX [-width/2, width/2] -> CanvasX [offsetX, offsetX + width*scale]
-            // MapY [-height/2, height/2] -> CanvasY [offsetY + height*scale, offsetY] (flipped Y if we want standard cartesian, but usually screen coords are Y down)
-
-            // Existing logic assumed typical screen coords where Y increases downwards? 
-            // Let's verify standard B5W coord system... usually standard cartesian, but web canvas is Y-down.
-            // Looking at existing code: 
-            // const drawY = offsetY + (mapHeight / 2 - y - h / 2) * scale;
-            // This suggests Y grows UPWARDS in B5W coords (standard math), so we subtract Y from center.
-
             const drawX = offsetX + (x - w / 2 + mapWidth / 2) * scale;
-            // If y is positive (up), on canvas it should be higher (smaller Y value)
-            // CenterY on canvas is offsetY + (mapHeight/2)*scale
-            // So if y=0, drawY should be CenterY - h/2*scale
-            // If y=10, drawY should be CenterY - 10*scale - h/2*scale
             const drawY = offsetY + ((mapHeight / 2) - y - (h / 2)) * scale;
 
             ctx.fillRect(drawX + 6, drawY, w * scale, h * scale);
@@ -481,7 +483,7 @@ window.createGame = {
         }
     },
 
-    forbiddenLadderMaps: ["2v2", "ambush", "baseAssault", "convoyRaid"],
+    forbiddenLadderMaps: ["2v2", "ambush", "baseAssault", "convoyRaid", "3teams", "4teams"],
 
 
     mapData: {
@@ -619,6 +621,25 @@ window.createGame = {
                 { name: "South", id: 2, depx: -1, depy: -17, depwidth: 59, depheight: 5, depavailable: 1 }
             ]
         },
+        "3teams": {
+            width: 42, height: 30,
+            slotsRequired: { 1: 1, 2: 1, 3: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -19, depy: -7, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 18, depy: -7, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 3", id: 3, depx: 0, depy: 12, depwidth: 15, depheight: 5, depavailable: 1 }
+            ]
+        },
+        "4teams": {
+            width: 42, height: 30,
+            slotsRequired: { 1: 1, 2: 1, 3: 1, 4: 1 },
+            teams: [
+                { name: "Team 1", id: 1, depx: -19, depy: 0, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 2", id: 2, depx: 18, depy: 0, depwidth: 5, depheight: 15, depavailable: 1 },
+                { name: "Team 3", id: 3, depx: 0, depy: 12, depwidth: 15, depheight: 5, depavailable: 1 },
+                { name: "Team 4", id: 4, depx: 0, depy: -12, depwidth: 15, depheight: 5, depavailable: 1 }
+            ]
+        },
         "unlimited": {
             width: null, height: null,
             slotsRequired: { 1: 1, 2: 1 },
@@ -657,15 +678,44 @@ window.createGame = {
         }
 
         // Handle slots
+        // Handle slots
         if (config.slotsRequired) {
             // Enforce specific number of slots
-            for (let teamId = 1; teamId <= 2; teamId++) {
+            const teamIds = Object.keys(config.slotsRequired).map(Number);
+
+            // First, remove teams that are not in the requirements (if we are being strict, but maybe better to just ensure the ones we need exist)
+            // For now, let's just ensure the required ones exist.
+
+            // NEW: Remove teams that are NOT in the required list
+            // This allows switching from "4 Teams" back to "Standard" to cleanup
+            const currentTeams = [...new Set(createGame.slots.map(s => s.team))];
+            currentTeams.forEach(teamId => {
+                if (!teamIds.includes(teamId)) {
+                    // Remove all slots for this team
+                    // createGame.removeTeam(teamId); // Suppressed to avoid confirmation
+
+                    // Note: createGame.removeTeam usually asks for confirmation...
+                    // But here we might want to force it?
+                    // The removeTeam function:
+                    // window.confirm.confirm("Are you sure you want to remove Team " + teamId + "?", function () { ... });
+
+                    // We can't easily bypass the confirm in the current `removeTeam` implementation without modifying it.
+                    // Instead, let's manually remove the slots for this team.
+
+                    createGame.slots = createGame.slots.filter(s => s.team !== teamId);
+                }
+            });
+
+            // Re-fetch slots after removal
+            // Then ensure required teams exist
+            teamIds.forEach(teamId => {
                 const required = config.slotsRequired[teamId] || 0;
                 if (required > 0) {
                     const defaults = config.teams ? config.teams.find(t => t.id === teamId) : null;
                     createGame.ensureTeamSlots(teamId, required, defaults);
                 }
-            }
+            });
+
         } else if (config.teams) {
             // Just update existing slots with defaults (Legacy behavior)
             for (let slot of createGame.slots) {
@@ -774,17 +824,143 @@ window.createGame = {
     },
 
     refreshSlotsUI: function () {
-        // Simple way: clear and redraw
+        createGame.renderTeams();
         $(".slotcontainer").empty();
         createGame.createSlotsFromArray();
+        createGame.drawMapPreview(); // Ensure map updates
 
         if (createGame.rules.ladder) {
             $(".addslotbutton").hide();
             $(".slot .remove-btn").hide();
+            $("#addTeamBtn").hide();
+            $(".remove-team-btn").hide();
         } else {
+            // Only show Add Team if map supports it (or is custom/unlimited)
+            const mapType = $("#mapDimensionsSelect").val();
+            // Allow adding teams on all maps for now as per user request/workflow
+            const allowAddTeam = true; // ["custom", "unlimited"].includes(mapType);
+
+            if (allowAddTeam) {
+                $("#addTeamBtn").show();
+                $(".remove-team-btn").show();
+            } else {
+                $("#addTeamBtn").hide();
+                $(".remove-team-btn").hide();
+            }
+
             $(".addslotbutton").show();
-            $(".slot .remove-btn").css("display", ""); // Restore default visibility
+            createGame.updateSlotButtons();
         }
+    },
+
+    updateSlotButtons: function () {
+        // Reset display first (or ensure we show/hide correctly)
+        // $(".slot .remove-btn").css("display", ""); // Optional if we explicitly show/hide below
+
+        const teams = [...new Set(createGame.slots.map(s => s.team))];
+        teams.forEach(teamId => {
+            const teamSlots = createGame.slots.filter(s => s.team === teamId);
+            if (teamSlots.length <= 1) {
+                $(`#team${teamId} .slot .remove-btn`).hide();
+            } else {
+                $(`#team${teamId} .slot .remove-btn`).show();
+            }
+        });
+    },
+
+
+    renderTeams: function () {
+        // Identify all unique teams
+        const teams = [...new Set(createGame.slots.map(s => s.team))].sort((a, b) => a - b);
+        const container = $("#teamsContainer");
+
+        // Remove teams that no longer exist
+        container.find(".team-section").each(function () {
+            const id = parseInt($(this).data("team-id"));
+            if (!teams.includes(id)) {
+                $(this).remove();
+            }
+        });
+
+        // Add missing teams
+        teams.forEach(teamId => {
+            if (container.find(`.team-section[data-team-id="${teamId}"]`).length === 0) {
+                const template = $("#teamtemplatecontainer .team-section").clone();
+                template.attr("data-team-id", teamId);
+                template.find(".team-number").text(teamId);
+
+                // Add specific ID for slot container targeting
+                template.find(".slotcontainer").attr("id", "team" + teamId);
+
+                // Update Add Slot button
+                template.find(".addslotbutton").addClass("team" + teamId).data("team", teamId);
+
+                // Bind remove team
+                // Show/Hide remove team button based on team ID
+                if (teamId > 2) {
+                    template.find(".remove-team-btn").show();
+                } else {
+                    template.find(".remove-team-btn").hide();
+                }
+
+                // Bind add slot
+                template.find(".addslotbutton").on("click", createGame.createNewSlot);
+
+                container.append(template);
+            }
+        });
+    },
+
+    addTeam: function () {
+        const teams = [...new Set(createGame.slots.map(s => s.team))];
+        const nextTeamId = (teams.length > 0 ? Math.max(...teams) : 0) + 1;
+
+        // Determine default deployment based on Odd/Even
+        let defaults = {};
+        if (nextTeamId % 2 !== 0) {
+            // Odd -> Mimic Team 1
+            const t1 = createGame.slots.find(s => s.team === 1);
+            if (t1) {
+                defaults = { depx: t1.depx, depy: t1.depy, depwidth: t1.depwidth, depheight: t1.depheight };
+            } else {
+                defaults = { depx: -19, depy: 0, depwidth: 5, depheight: 30 };
+            }
+        } else {
+            // Even -> Mimic Team 2
+            const t2 = createGame.slots.find(s => s.team === 2);
+            if (t2) {
+                defaults = { depx: t2.depx, depy: t2.depy, depwidth: t2.depwidth, depheight: t2.depheight };
+            } else {
+                defaults = { depx: 18, depy: 0, depwidth: 5, depheight: 30 };
+            }
+        }
+
+        // Find a new slot ID
+        let maxSlot = 0;
+        createGame.slots.forEach(s => maxSlot = Math.max(maxSlot, s.id));
+        createGame.slotid = maxSlot + 1;
+
+        createGame.slots.push({
+            id: createGame.slotid,
+            team: nextTeamId,
+            name: "Team " + nextTeamId,
+            points: 3500,
+            depx: parseInt(defaults.depx) || 0,
+            depy: parseInt(defaults.depy) || 0,
+            depwidth: parseInt(defaults.depwidth) || 5,
+            depheight: parseInt(defaults.depheight) || 5,
+            depavailable: 1
+        });
+
+        createGame.refreshSlotsUI();
+    },
+
+    removeTeam: function (teamId) {
+        console.log("Executing removeTeam for:", teamId);
+        window.confirm.confirm("Are you sure you want to remove Team " + teamId + "?", function () {
+            createGame.slots = createGame.slots.filter(s => s.team !== teamId);
+            createGame.refreshSlotsUI();
+        });
     },
 
 
@@ -796,8 +972,19 @@ window.createGame = {
     },
 
     createSlot: function createSlot(data) {
-        var template = $("#slottemplatecontainer .slot");
+        var template = $("#slottemplatecontainer .slot").clone();
         var target = $("#team" + data.team + ".slotcontainer");
+
+        if (target.length === 0) {
+            console.error("Target container for team " + data.team + " not found!");
+            return;
+        }
+
+        template.addClass("slotid_" + data.id);
+        template.data("slotid", data.id);
+        template.data("team", data.team);
+
+        // ... (rest of slot population)
         var actual = template.clone(true).appendTo(target);
 
         actual.data("slotid", data.id);
@@ -841,20 +1028,21 @@ window.createGame = {
     },
 
     createNewSlot: function createNewSlot(e, explicitDefaults) {
+        if (this.id === "addTeamBtn") return; // Prevent accidental trigger if class matches
         var team;
-        // Check if 'this' is a DOM-like object or jQuery object with class
-        if ($(this).hasClass("team1") || (this.className && this.className.indexOf("team1") !== -1)) {
-            team = 1;
-        } else if ($(this).hasClass("team2") || (this.className && this.className.indexOf("team2") !== -1)) {
-            team = 2;
+        // Check if 'this' is a DOM-like object or jQuery object
+        // Use data-team attribute if available (Best practice)
+        if ($(this).data("team")) {
+            team = parseInt($(this).data("team"));
         } else {
-            // Fallback or passed directly?
-            // If we passed { className: "team1" } to call(), 'this' is that object.
-            // jQuery $(this) wraps it. $(obj).hasClass() might not work on plain objects depending on jQuery version.
-            // Let's check the property directly if we are mocking it.
-            if (this.className === "team1") team = 1;
-            else if (this.className === "team2") team = 2;
-            else team = 1; // Default fallback
+            // Fallback for ensureTeamSlots which uses .call({className...}) or legacy class names
+            const className = this.className || "";
+            const match = className.match(/team(\d+)/);
+            if (match) {
+                team = parseInt(match[1]);
+            } else {
+                team = 1; // Default fallback
+            }
         }
 
         createGame.slotid++;
@@ -914,6 +1102,7 @@ window.createGame = {
         createGame.slots.push(newData);
         createGame.createSlot(newData);
         createGame.drawMapPreview();
+        createGame.updateSlotButtons();
     },
 
     getSlotData: function getSlotData(id) {
@@ -953,6 +1142,7 @@ window.createGame = {
         createGame.removeSlotData(data.id);
         createGame.drawMapPreview();
         slot.remove();
+        createGame.updateSlotButtons();
     },
 
     getScenarioDescriptionFromFields: function getScenarioDescriptionFromFields() {
