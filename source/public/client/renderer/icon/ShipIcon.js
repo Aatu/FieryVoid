@@ -206,6 +206,7 @@ window.ShipIcon = function () {
                 this.shipDirectionOfMovementSprite.hide();
             }
         }
+        //this.selected = value; //Removed when I added code for mobile browsers to show direction sprites.        
     };
 
     ShipIcon.prototype.setSelected = function (value, showMobileSprites) {
