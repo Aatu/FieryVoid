@@ -3,7 +3,7 @@
 ?>
 
 <link href="styles/chat.css" rel="stylesheet" type="text/css">
-<script src="client/combatLog.js"></script>
+
 
 <div id="combatLogContainer" class="chatcontainer">
     <div id="combatLogButtons" class = ""> <!-- buttons directing what's to be displayed -->

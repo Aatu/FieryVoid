@@ -125,7 +125,7 @@
         <script src="client/model/weapon/customTrek.js"></script>		
         <script src="client/model/weapon/customCW.js"></script>
     <?php else: ?>
-    <script src="client/gamelobby.legacy.bundle.js"></script>
+    <script defer src="client/gamelobby.legacy.bundle.js"></script>
     <?php endif; ?>		
 		<script>
 			

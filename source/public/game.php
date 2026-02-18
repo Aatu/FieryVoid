@@ -54,9 +54,9 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
-    <script src="client/lib/three.min.js"></script>
-    <script src="client/lib/THREE.MeshLine.js"></script>
-    <script src="client/UI/reactJs/UI.bundle.js"></script>
+    <script defer src="client/lib/three.min.js"></script>
+    <script defer src="client/lib/THREE.MeshLine.js"></script>
+    <script defer src="client/UI/reactJs/UI.bundle.js"></script>
 	<!-- replaced by php include below
     <script src="static/ships.js"></script>
 	-->
@@ -219,7 +219,8 @@
     <script src="client/ew.js"></script>
     <script src="client/weaponManager.js"></script>
     <script src="client/damage.js"></script>
-	<script src="client/combatLog.js"></script>
+    <script src="client/combatLog.js"></script>
+    <script src="client/declarations.js"></script>
 	<script src="client/player.js"></script>
     <script src="client/ships.js"></script>
     <script src="client/movement.js"></script>
@@ -267,7 +268,7 @@
 	<script src="client/model/weapon/customTrek.js"></script>
     <script src="client/model/weapon/customCW.js"></script>
     <?php else: ?>
-    <script src="client/game.legacy.bundle.js"></script>
+    <script defer src="client/game.legacy.bundle.js"></script>
     <?php endif; ?>
 </head>
 
