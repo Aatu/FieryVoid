@@ -231,70 +231,70 @@ TrekMediumDisabler.prototype.constructor = TrekMediumDisabler;
 
 
 var CloakingDevice = function CloakingDevice(json, ship) {
-	ShipSystem.call(this, json, ship);
+    ShipSystem.call(this, json, ship);
 };
 CloakingDevice.prototype = Object.create(ShipSystem.prototype);
 CloakingDevice.prototype.constructor = CloakingDevice;
 
 CloakingDevice.prototype.initializationUpdate = function () {
-	if (this.active) {
-		this.outputDisplay = "CLOAK";
-	} else {
-		this.outputDisplay = '-';
-	}
-	var power = this.powerReq;
+    if (this.active) {
+        this.outputDisplay = "CLOAK";
+    } else {
+        this.outputDisplay = '-';
+    }
+    var power = this.powerReq;
 
-    if(gamedata.gamephase == -1){
+    if (gamedata.gamephase == -1) {
         var ship = this.ship;
-        if(shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) this.active = false;    
+        if (shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) this.active = false;
     }
 
-	if(power == 0){
-		this.data["Power Used"] = 'None';
-	}else{
-		this.data["Power Used"] = this.powerReq;		
-	}	
-	return this;
+    if (power == 0) {
+        this.data["Power Used"] = 'None';
+    } else {
+        this.data["Power Used"] = this.powerReq;
+    }
+    return this;
 }
 
 CloakingDevice.prototype.canActivate = function () {
     var ship = this.ship;
-	if(gamedata.gamephase == -1 && !this.active && !shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) return true;
-	
-	return false;
+    if (gamedata.gamephase == -1 && !this.active && !shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) return true;
+
+    return false;
 };
 
 CloakingDevice.prototype.canDeactivate = function () {
-	if(gamedata.gamephase == -1 && this.active) return true;
-	
-	return false;
+    if (gamedata.gamephase == -1 && this.active) return true;
+
+    return false;
 };
 
 CloakingDevice.prototype.doActivate = function () {
-	this.active = true;
+    this.active = true;
 };
 
 CloakingDevice.prototype.doDeactivate = function () {
-	this.active = false;
+    this.active = false;
 };
 
 CloakingDevice.prototype.doIndividualNotesTransfer = function () {
 
-	if (gamedata.gamephase == -1) {
-		var active = this.active; //Was shaded this turn.		
-		this.individualNotesTransfer = Array();
-		if (active) {
-			this.individualNotesTransfer.push(1);
-		}
-	}
+    if (gamedata.gamephase == -1) {
+        var active = this.active; //Was shaded this turn.		
+        this.individualNotesTransfer = Array();
+        if (active) {
+            this.individualNotesTransfer.push(1);
+        }
+    }
 };
 
 CloakingDevice.prototype.isDetectedTrek = function (ship) {
     if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
     if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.       
     if (this.detected) return true; //Already detected. 
-    if (shipManager.systems.isDestroyed(ship, this)) return true; 
-    if (shipManager.power.isOffline(ship, this)) return true;              
+    if (shipManager.systems.isDestroyed(ship, this)) return true;
+    if (shipManager.power.isOffline(ship, this)) return true;
 
     if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
 
@@ -338,7 +338,7 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
         const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
         var loSBlocked = false;
         //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-	    var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.        
+        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.        
         var shipPos = shipManager.getShipPosition(ship);
         var otherShipPos = shipManager.getShipPosition(otherShip);
         loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
@@ -391,7 +391,7 @@ var TrekKlingonLauncher = function TrekKlingonLauncher(json, ship) {
 TrekKlingonLauncher.prototype = Object.create(Torpedo.prototype);
 TrekKlingonLauncher.prototype.constructor = TrekKlingonLauncher;
 TrekKlingonLauncher.prototype.calculateSpecialRangePenalty = function (distance) {
-    var distancePenalized = Math.max(0,distance - 10); //ignore first 10 hexes
+    var distancePenalized = Math.max(0, distance - 10); //ignore first 10 hexes
     var rangePenalty = this.rangePenalty * distancePenalized;
     return rangePenalty;
 };
@@ -404,32 +404,32 @@ CombatTransporter.prototype.constructor = CombatTransporter;
 
 var MicroJumpSystem = function MicroJumpSystem(json, ship) {
     Weapon.call(this, json, ship);
-    this.defensiveType = "Blink"; 	 
+    this.defensiveType = "Blink";
 };
 MicroJumpSystem.prototype = Object.create(Weapon.prototype);
 MicroJumpSystem.prototype.constructor = MicroJumpSystem;
 
 MicroJumpSystem.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
-	if(weapon.ballistic && this.fireOrders.length > 0 && gamedata.gamephase == 3){
-		var fireOrder = this.fireOrders[0];
+    if (weapon.ballistic && this.fireOrders.length > 0 && gamedata.gamephase == 3) {
+        var fireOrder = this.fireOrders[0];
 
-		const notes = fireOrder.notes; // e.g. "shooter: 2,-2 target: 2,0 dis: 2"
+        const notes = fireOrder.notes; // e.g. "shooter: 2,-2 target: 2,0 dis: 2"
 
-		// Default distance
-		let dis = 0;
+        // Default distance
+        let dis = 0;
 
-		// Try to extract the number after "dis:"
-		const match = notes.match(/dis:\s*(\d+)/);
+        // Try to extract the number after "dis:"
+        const match = notes.match(/dis:\s*(\d+)/);
 
-		if (match) {
-			dis = parseInt(match[1], 10);
-		}
+        if (match) {
+            dis = parseInt(match[1], 10);
+        }
 
-		const mod = dis * 2;
-		return mod;		
-	}else{
-		return 0;
-	}
+        const mod = dis * 2;
+        return mod;
+    } else {
+        return 0;
+    }
 
 };
 
@@ -437,7 +437,12 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
     var shooterPos = shipManager.getShipPosition(shooter);
     var heading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
 
-    if (Object.values(gamedata.blockedHexes).includes(target)) return false;
+    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)){
+        var html = "You cannot Warp Jump onto Terrain!";
+        confirm.warning(html);
+        return false;
+        
+    }    
 
     const hexDirections = [0, 60, 120, 180, 240, 300];
 
