@@ -112,6 +112,8 @@
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
+    <?php $debug = isset($_GET['debug']); ?>
+    <?php if ($debug): ?>
     <script src="client/lib/graphics.js"></script>
     <script src="client/lib/HexagonMath.js"></script>
     <script src="client/lib/AbstractCanvas.js"></script>
@@ -264,6 +266,9 @@
 	<script src="client/model/weapon/customBSG.js"></script>
 	<script src="client/model/weapon/customTrek.js"></script>
     <script src="client/model/weapon/customCW.js"></script>
+    <?php else: ?>
+    <script src="client/game.legacy.bundle.js"></script>
+    <?php endif; ?>
 </head>
 
 

@@ -74,7 +74,10 @@
 ?>
 		
 <!--		<script src="client/helper.js"></script>-->
-        <script src="client/gamelobby.js"></script>
+    <!--		<script src="client/helper.js"></script>-->
+    <?php $debug = isset($_GET['debug']); ?>
+    <?php if ($debug): ?>
+    <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/lobbyEnhancements.js"></script>        
 		<script src="client/player.js"></script>
@@ -120,7 +123,10 @@
         <script src="client/model/weapon/customEscalation.js"></script>		
         <script src="client/model/weapon/customBSG.js"></script>		
         <script src="client/model/weapon/customTrek.js"></script>		
-        <script src="client/model/weapon/customCW.js"></script>		
+        <script src="client/model/weapon/customCW.js"></script>
+    <?php else: ?>
+    <script src="client/gamelobby.legacy.bundle.js"></script>
+    <?php endif; ?>		
 		<script>
 			
             window.weaponManager = 
