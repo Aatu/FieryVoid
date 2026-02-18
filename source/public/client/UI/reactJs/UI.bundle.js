@@ -694,6 +694,11 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     &::-webkit-scrollbar-thumb:hover {
         background: #5a7ea8; 
     }
+
+    @media (max-width: 768px) {
+        text-align: center;         
+    }    
+
 `,Ab=Q.div`
     display: flex;
     justify-content: space-between;
@@ -711,6 +716,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     @media (max-width: 768px) {
         flex-direction: column;
         align-items: stretch;
+        margin-right: 0px;                 
     }
 `,CD=Q.div`
     flex-grow: 1;
@@ -719,6 +725,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
 
     @media (max-width: 768px) {
         margin-bottom: 4px;
+        text-align: center;          
     }
 `,Py=Q.span`
     font-weight: bold;
@@ -728,6 +735,13 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     margin-top: 2px;
     margin-right: 10px;    
     margin-left: 1px;
+
+    @media (max-width: 768px) {
+        text-align: center;
+        margin-right: 0px;    
+        margin-left: 0px;                  
+    }
+
 `,bD=Q(Py)`
     color: #ffb833;
     font-weight: normal;    
@@ -739,7 +753,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     gap: 2px;
 
     @media (max-width: 768px) {
-        justify-content: flex-end; 
+        justify-content: center;       
     }
 `,vv=Q.div`
     width: 18px;

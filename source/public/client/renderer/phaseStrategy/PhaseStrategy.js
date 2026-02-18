@@ -309,7 +309,7 @@ window.PhaseStrategy = function () {
         }
 
         this.selectedShip = ship;
-        this.shipIconContainer.getByShip(ship).setSelected(true);
+        this.shipIconContainer.getByShip(ship).setSelected(true, true);
         this.showAppropriateEW();
 
         if (this.shipTooltip) {
@@ -527,6 +527,14 @@ window.PhaseStrategy = function () {
         if (hide) {
             this.onMouseOutCallbacks.push(this.hideShipTooltip.bind(this, shipTooltip));
         }
+
+        // Mobile/Tablet specific logic: Highlight ships (shows direction sprites) when tooltip is shown
+        // Only if not 'hide' (i.e. persistent tooltip from click/tap), to avoid highlighting on spurious touches/scrolling
+        if (!hide && window.matchMedia("(pointer: coarse)").matches) {
+            ships.forEach(ship => {
+                this.shipIconContainer.getByShip(ship).setHighlighted(true);
+            });
+        }
     };
 
     PhaseStrategy.prototype.showSelectFromShips = function (ships, payload) {
@@ -539,6 +547,11 @@ window.PhaseStrategy = function () {
         if (this.shipTooltip && this.shipTooltip === shipTooltip) {
             this.shipTooltip.destroy();
             this.shipTooltip = null;
+
+            // Mobile/Tablet specific logic: Remove highlights when tooltip is hidden
+            if (window.matchMedia("(pointer: coarse)").matches) {
+                this.showAppropriateHighlight();
+            }
         }
     };
 
@@ -751,6 +764,10 @@ window.PhaseStrategy = function () {
             icon.showSideSprite(false);
             icon.setHighlighted(false);
         })
+
+        if (this.selectedShip) {
+            this.shipIconContainer.getByShip(this.selectedShip).setSelected(true, true);
+        }
     }
 
     function showGlobalEW(ships, payload) {
