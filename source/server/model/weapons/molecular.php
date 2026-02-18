@@ -882,8 +882,8 @@ class SuperHeavyMolecularDisruptor extends Raking
 			$this->data["Special"] .= "<br> - 1 turn: 4d10+4"; 
 			$this->data["Special"] .= "<br> - 2 turns: 6d10+6"; 
 			$this->data["Special"] .= "<br> - 3 turns: 8d10+8"; 
-			$this->data["Special"] .= "<br>May spend 1d10 dice to gain -10 intercept, this is cumulative and suffers no degradation.";
-			$this->data["Special"] .= "<br>Each self-intercept dice committed increases the number of shots Slicer may intercept, as well as the total interception amount.";                            
+			//$this->data["Special"] .= "<br>May spend 1d10 dice to gain -10 intercept, this is cumulative and suffers no degradation.";
+			//$this->data["Special"] .= "<br>Each self-intercept dice committed increases the number of shots Slicer may intercept, as well as the total interception amount.";                            
         }        
 
 		/*Slicers ignore armor, except against hardened advanced armor*/
