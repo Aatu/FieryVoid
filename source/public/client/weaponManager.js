@@ -9,11 +9,6 @@ window.weaponManager = {
     ramWarning: false,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
-        /*obsolete
-        if (weapon.duoWeapon) {
-            var returnArray = new Array(weapon.weapons[1].getTurnsloaded(), weapon.weapons[2].getTurnsloaded());
-            return returnArray;
-        }*/
         return weapon.turnsloaded;
     },
 
@@ -30,18 +25,9 @@ window.weaponManager = {
         if (weaponManager.hasFiringOrder(ship, system) && !system.multiModeSplit) return;
 
         if (gamedata.isMyShip(ship)) {
-            //weaponManager.unSelectWeapon(ship, system); //do NOT do so - that would be much better for next mode change!
 
-			/* no dual weapons around any more!
-            if (system.dualWeapon) {
-                console.log("changing dual weapon?")
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-                parentSystem.changeFiringMode();
-                shipWindowManager.setDataForSystem(ship, parentSystem);
-            } else */{
-                system.changeFiringMode();
-                shipWindowManager.setDataForSystem(ship, system);
-            }
+            system.changeFiringMode();
+            shipWindowManager.setDataForSystem(ship, system);
 
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
@@ -2396,24 +2382,6 @@ window.weaponManager = {
         return weapon;
     },
 
-    /*no longer used!
-    canRam: function canRam(ship) {
-        if (ship.hasOwnProperty("hunterkiller")) {}
-    },
-    
-    askForRam: function askForRam(target) {
-    
-        var selectedShip = gamedata.getSelectedShip();
-    
-        confirm.confirmWithOptions("CONFIRM movement ?", "Yup", "Nah, too risky yo", function (respons) {
-            if (respons) {
-                console.log("ye");
-            } else {
-                console.log("na");
-            }
-        });
-    },
-    */
 
     //Function called in Combat Log animation to check if a particular fireORder needs to use the full log message e.g. Reactor overlaods, Hyperspace jumps
     doShortLogText: function doShortLogText(fire) {
@@ -2601,22 +2569,7 @@ window.weaponManager = {
         if (!system.fireOrders) return;
 
         var fires = system.fireOrders;
-        /* Cleaned 19.8.25 - DK
-        if (system.dualWeapon || system.duoWeapon) {
-            for (var i in system.weapons) {
-                var weapon = system.weapons[i];
-    
-                if (weapon.duoWeapon) {
-                    for (var index in weapon.weapons) {
-                        var subweapon = weapon.weapons[index];
-                        fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(subweapon));
-                    }
-                } else {
-                    fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(weapon));
-                }
-            }
-        }
-        */
+
         return fires;
     },
 
