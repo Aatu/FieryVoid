@@ -3208,8 +3208,8 @@ class MicroJumpSystem extends Weapon implements SpecialAbility, DefensiveSystem{
         $ship = $gamedata->getShipById($fireOrder->shooterid); 
 		$shipPos = $ship->getHexPos(); 		
 		
-        //$rolled = Dice::d(20); //Roll d20 to decide what happens during jump
-        $rolled = 1; //For debugging
+        $rolled = Dice::d(20); //Roll d20 to decide what happens during jump
+        //$rolled = 1; //For debugging
 
 		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
         $dis = mathlib::getDistanceHex($shipPos, $targetPos); //How many hexes did player choose to jump. 
@@ -3223,7 +3223,7 @@ class MicroJumpSystem extends Weapon implements SpecialAbility, DefensiveSystem{
 			$this->doWarpJump($gamedata,$targetPos, $ship, $dis);
 			$fireOrder->pubnotes .= " Warp Drive activates succesfully and moves ship to new hex.";
 
-//I've removed the deviation logic for Mirco Jump atm, not sure if this is required.  This means there's just a 20% chance of failure. 			
+		//I've removed the deviation logic for Mirco Jump atm, not sure if this is required.  This means there's just a 20% chance of failure. 			
 		/*} else if($rolled >= 17 && $rolled <= 18){  //17 - Success but towards a different counterclockwise/clockwise hex facings.
 			$newPos = null;
 
