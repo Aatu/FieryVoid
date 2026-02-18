@@ -849,7 +849,7 @@ class SuperHeavyMolecularDisruptor extends Raking
         public $fireControl = array(2, 4, 6); // fighters, <=mediums, <=capitals 
 		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
 		public $uninterceptable = true;
-        public $intercept = 2;
+        public $intercept = 0; //Light Slicer can't actually intercept.
 		public $raking = 10;
         public $damageType = "Raking"; 
         public $weaponClass = "Molecular"; 	
@@ -925,19 +925,7 @@ class SuperHeavyMolecularDisruptor extends Raking
                 while ($spareDice > 0){
                     $this->guns++; //Add a new gun to increase intercept shots by 1                                
                     $spareDice -= 1;                 
-                } 
-             
-                /* //Removed because it was giving slicers a free intercept (e.g. without -5% hit chance), or it was adding -5% hitchance after firing orders committed.
-                if($interceptsAllowed == 0){
-                    //Offensive shot fired, but no selfINtercept declared.  Let's make one for the spare dice.
-                    $ship = $this->getUnit();                      
-                    $interceptFireOrder = new FireOrder( -1, "selfIntercept", $ship->id, $ship->id,
-                        $this->id, -1, $gamedata->turn, 1,
-                        0, 0, 1, 0, 0, null, null
-                    );
-                    $interceptFireOrder->addToDB = true;
-                    $this->fireOrders[] = $interceptFireOrder;                                    
-                } */                                      
+                }                                    
             }   
 
         }
@@ -1149,6 +1137,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public $priority = 7;//heavy Raking weapon - with armor-ignoring 
 
 		public $raking = 15;
+        public $intercept = 2;        
         public $damageType = "Raking"; 
         public $weaponClass = "Molecular"; 
 
@@ -1333,6 +1322,7 @@ class SuperHeavyMolecularDisruptor extends Raking
 		public $priorityArray = array(1=>2, 2=>3);        
 
 		public $raking = 15;
+        public $intercept = 2;
         public $damageType = "Piercing"; 
         public $weaponClass = "Molecular"; 
         public $startArcArray = array(); 
