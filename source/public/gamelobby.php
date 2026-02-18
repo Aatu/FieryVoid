@@ -208,13 +208,17 @@
                 },
             }
             
-            window.shipManager.movement.isRolled = function(ship)
-            {
-                return false;
-            }
+            $(function(){
+                window.shipManager.movement.isRolled = function(ship)
+                {
+                    return false;
+                }
+            });
             
             
-            window.shipWindowManager.addEW = function(){};            
+            $(function(){
+                window.shipWindowManager.addEW = function(){}; 
+            });            
 
         
         jQuery(function($){            
