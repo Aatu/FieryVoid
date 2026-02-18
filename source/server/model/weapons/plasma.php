@@ -1598,7 +1598,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 		
 	public function fire($gamedata, $fireOrder){
-
+		if($fireOrder->firingMode == 1) return; //Don't animate Defensive fire, it clogs up Replay
 		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') {
             Manager::insertSingleFiringOrder($gamedata, $fireOrder); //But do insert to db for replay
 			return; //Don't resolve ballistic 'cloud' fireOrders.

@@ -3016,4 +3016,418 @@ class CombatTransporter extends Weapon{
 	
 } //endof class CombatTransporter
 
+
+class MicroJumpSystem extends Weapon implements SpecialAbility, DefensiveSystem{
+    public $name = "MicroJumpSystem";
+    public $displayName = "Warp Drive";
+	public $noProjectile = true;	
+	public $specialAbilities = array("PreFiring");
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
+	
+	public $damageType = "Standard"; //irrelevant, really
+	public $weaponClass = "Particle";
+	public $hextarget = true;
+	public $hidetarget = false;
+	public $uninterceptable = true; //although I don't think a weapon exists that could intercept it...
+	public $doNotIntercept = true; //although I don't think a weapon exists that could intercept it...
+	public $priority = 1;
+	
+	public $range = 0;
+	public $loadingtime = 4;
+    public $rangePenalty = 0;
+	
+	public $animation = "blink";
+	public $animationColor = array(255, 255, 0);
+	public $animationExplosionScale = 0.3; //single hex explosion
+	public $animationExplosionType = "AoE";
+	
+	public $firingModes = array(
+		1 => "Warp Jump"
+	);
+	public $preFires = true;
+	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles.
+	protected $specialArcs = true;	//Denotes for Front End to redirect to weapon specific function to get arcs.			
+	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+	private $baseLoadingTime = 4; //Can be altered by a IncreasedRecharge1 critical, so we need to remember it's base value.
+    public $ignoresLoS = false; //I assume we're not warping thru Terrain.
+
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $loading){
+		if ( $maxhealth == 0 ) $maxhealth = 9; //Set these as you like.
+        if ( $powerReq == 0 ) $powerReq = 0;                           
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $this->startArc = $startArc;       	
+        $this->endArc = $endArc;
+        $this->range = $range; //Set range value passed from SCS
+ 		$this->outputDisplay = $this->range;
+		$this->loadingtime = $loading; //Set loading values in SCS too so we can alter for more modern Trek ships		  
+		$this->baseLoadingTime = $loading;       
+    }
+
+	public function onConstructed($ship, $turn, $phase){
+		parent::onConstructed($ship, $turn, $phase);
+
+		foreach($ship->systems as $system){
+			if($system->displayName == "Nacelle"){
+				if ( $system->maxhealth <= $system->getRemainingHealth() ) continue; //skip undamaged systems...
+            	$currentDamage = $system->maxhealth - $system->getRemainingHealth();				
+				if($currentDamage >= (ceil($system->maxhealth/2))){
+					$this->range = max(0, $this->range - 2); //Reduce by 1 for each Nacelle that has taken more than 50% damage.
+					$this->outputDisplay = max(0, $this->outputDisplay - 2);		
+				} 
+			}
+		}			
+
+	}
+
+    protected $possibleCriticals = array(
+            20 =>array("IncreasedRecharge1")
+	);
+
+	//Required to be overwritten in weapon for IncreasedRecharge1 crit to function. 
+    public function getLoadingTime()
+    {
+		$loadingTime = $this->baseLoadingTime;
+		$critPenalty = $this->hasCritical("IncreasedRecharge1");
+
+		$combinedLoadingTime = $loadingTime + $critPenalty;
+        return $combinedLoadingTime;
+    }
+
+	//Required to be overwritten in weapon for IncreasedRecharge1 crit to function. 
+    public function setLoading($loading){
+		if (!$loading)
+			return;
+
+		$this->overloadturns = $loading->overloading;
+		$this->overloadshots = $loading->extrashots;
+
+		$critsLastTurn = 0;
+
+		$critPenalty = $this->hasCritical("IncreasedRecharge1");
+		if($critPenalty > 0){		
+			foreach($this->criticals as $crit){
+				if ($crit->phpclass === "IncreasedRecharge1" && $crit->turn == TacGamedata::$currentTurn-1) {
+					$critsLastTurn++;	
+				}
+			}
+		}
+
+		if(TacGamedata::$currentPhase == -1){ //Only adjust oading during Deployment loading of new turn.
+
+			if($loading->loadingtime == $loading->loading){ //If Transverse Drive was fully charged, keep it fully charged.
+				$this->turnsloaded = $loading->loading + $critsLastTurn;
+			}else{
+				$this->turnsloaded = $loading->loading;	//Else, it wasn't fully charged so keep number of turns loaded the same, just loadingtime ceiling increases.
+			} 
+		}else{
+			$this->turnsloaded = $loading->loading;			
+		}	
+
+        $this->loadingtime = $loading->loadingtime;
+        $this->firingMode = $loading->firingmode;
+    }
+
+	public function getSpecialAbilityValue($args)
+    {
+		return $this->specialAbilityValue;
+	}
+
+	public function getDefensiveType()	{
+		return "Blink"; //Different category so it works in parallel with EM Shield effect of Shading Field
+	}
+
+	//I kept the ballistic hit change mod after a jump, seem appropriate but can be removed if Wolfgang doesn't want it
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon) {
+		// Only applies to ballistic weapons
+		if (!$weapon->ballistic) {
+			return 0;
+		}
+
+		// Retrieve fire orders for this turn
+		$firingOrders = $this->getFireOrders($turn);
+
+		// Find the first normal fire order
+		$hasFireOrder = null;
+		foreach ($firingOrders as $fireOrder) {
+			if ($fireOrder->type === 'prefiring') {
+				$hasFireOrder = $fireOrder;
+				break;
+			}
+		}
+
+		// No transverse jump, return 0
+		if ($hasFireOrder === null) {
+			return 0;
+		}
+
+		if($hasFireOrder->shotshit == 1){ //Transverse jump was successful!
+			// Extract the 'dis' value from fire order notes (example: "shooter: 2,-2 target: 2,0 dis: 2")
+			$notes = $hasFireOrder->notes;
+			$dis = 0; // default value
+
+			if (preg_match('/dis:\s*(\d+)/', $notes, $matches)) {
+				$dis = (int)$matches[1];
+			}
+
+			// Multiply distance by 2 to get the modifier, adjust as needed.
+			$mod = $dis * 2;
+
+			return $mod;
+		}else{
+			return 0;
+		}	
+	}
+
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+		return 0;
+	}
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		//reduce by distance...
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$firingPos = $shooter->getHexPos();
+		if ($fireOrder->targetid != -1) { //for some reason ship was targeted!
+			$targetship = $gamedata->getShipById($fireOrder->targetid);
+			//insert correct target coordinates: target ships' position!
+			$targetPos = $targetship->getHexPos();
+			$fireOrder->x = $targetPos->q;
+			$fireOrder->y = $targetPos->r;
+			$fireOrder->targetid = -1; //correct the error
+		}
+		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+		$dis = mathlib::getDistanceHex($firingPos, $targetPos);
+		$fireOrder->needed = 100;
+		$fireOrder->notes .=  "shooter: " . $firingPos->q . "," . $firingPos->r . " target: " . $targetPos->q . "," . $targetPos->r . " dis: $dis ";
+		$fireOrder->updated = true;
+	}
+	
+    public function fire($gamedata, $fireOrder){ 
+
+        $ship = $gamedata->getShipById($fireOrder->shooterid); 
+		$shipPos = $ship->getHexPos(); 		
+		
+        $rolled = Dice::d(20); //Roll d20 to decide what happens during jump
+        //$rolled = 1; //For debugging
+
+		$targetPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $dis = mathlib::getDistanceHex($shipPos, $targetPos); //How many hexes did player choose to jump. 
+
+		//Then see what was rolled and create movement orders/crits accordingly.
+		if($rolled <= 16){	//E.g. 1-16 successful
+
+        	$fireOrder->rolled = $rolled; 
+			$fireOrder->shotshit++; //Mark hit.
+
+			$this->doWarpJump($gamedata,$targetPos, $ship, $dis);
+			$fireOrder->pubnotes .= " Warp Drive activates succesfully and moves ship to new hex.";
+
+		//I've removed the deviation logic for Mirco Jump atm, not sure if this is required.  This means there's just a 20% chance of failure. 			
+		/*} else if($rolled >= 17 && $rolled <= 18){  //17 - Success but towards a different counterclockwise/clockwise hex facings.
+			$newPos = null;
+
+        	$fireOrder->rolled = $rolled; 
+
+			$originalBearing = $ship->getBearingOnPos($targetPos); //0, 60, 120. 180, 240 or 300
+
+			if($rolled == 17){
+				$shipFacing = $ship->getFacingAngle();
+				$relative = Mathlib::addToDirection($originalBearing, -60);
+				$absoluteBearing = Mathlib::addToDirection($shipFacing, $relative);
+
+				// Get actual position in new direction
+				$newPos = Mathlib::moveInDirection($shipPos, $absoluteBearing, $dis);
+
+			    $fireOrder->pubnotes .= " Transverse Drive activates succesfully, but the direction travelled is changed by 60 degrees counter-clockwise.";											
+			}else{
+				$shipFacing = $ship->getFacingAngle();
+				$relative = Mathlib::addToDirection($originalBearing, 60); //Bearing from ship heading.
+				$absoluteBearing = Mathlib::addToDirection($shipFacing, $relative); //Objective Bearing on map
+				// Get actual position in new direction
+				$newPos = Mathlib::moveInDirection($shipPos, $absoluteBearing, $dis);
+
+			    $fireOrder->pubnotes .= " Transverse Drive activates succesfully, but the direction travelled is changed by 60 degrees clockwise.";												
+			}
+		
+			$this->doWarpJump($gamedata,$newPos, $ship, $dis);
+			
+			//Update fireOrder details with new targetPos		
+			$fireOrder->x = $newPos->q;
+			$fireOrder->y = $newPos->r;
+        	$fireOrder->updated = true;
+			$fireOrder->shotshit++; //Mark hit.	
+
+		*/} else if($rolled == 19){ //19 - Fail, test jump engine for explosion then return.
+        	$fireOrder->rolled = $rolled; 
+
+			$fireOrder->pubnotes .= " Warp jump attempt was unsuccesful!";						
+			return;
+
+		} else if($rolled >= 20){ //20- Fail with ForcedOfflineOneTurn Crit
+        	$fireOrder->rolled = $rolled; 
+
+			//Force cooldown as crit failue, if ship didn't blow up :)
+			$crits = array(); 
+			$crits = $this->testCritical($ship, $gamedata, $crits); //Need to force critical test outside normal routine
+
+			$fireOrder->pubnotes .= " Warp Drive failed to jump and has rolled for potential critical effect.";					
+			return;
+		}	
+
+	} //endof function fire	
+
+	private function doWarpJump($gamedata, $targetPos, $ship, $distance){
+	
+		$lastMove = $ship->getLastMovement();
+		
+		//Create new movement orders to $targetPos.
+        $transverseJump = new MovementOrder(null, "prefire", new OffsetCoordinate($targetPos->q, $targetPos->r), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $distance, 0);
+
+		//Add Tranverse movement order to database
+		Manager::insertSingleMovement($gamedata->id, $ship->id, $transverseJump);		
+
+		/*
+		//No need to check for collision now, as there's no deviation and Warp Jump obeys Line of Sight at Targeting
+		$crashableShips = array();
+		$shipPoS = $targetPos;
+
+		foreach($gamedata->ships as $otherShip){
+			if($otherShip->isDestroyed()) continue; //Ignore destroyed ships
+			if(!$otherShip->isTerrain() && !$otherShip->Enormous) continue;	//Don't add non-Terrain or non-Enormous units
+			if($otherShip->getTurnDeployed($gamedata) > $gamedata->turn) continue; //Ship not deployed yet.	Shouldn't happen for Enormous units...
+			$dist = mathlib::getDistance($transverseJump->getCoPos(), $otherShip->getCoPos());									
+			if($dist <= 8) $crashableShips[] = $otherShip;	//You can only jump 3 hexes, and max terrain radiius is 3, but let's add a 2 hex buffer to future proof.		
+		}
+
+		foreach($crashableShips as $crashShip){		
+			$crashShipPoS = $crashShip->getHexPos();			
+			//$collision = $this->checkForCollisions($ship, $transverseJump,  $gamedata, $crashShipPoS, $crashShip);
+
+			if(!empty($collision)){
+				foreach($collision as $crashShipId=>$location){ //Should only be one					
+					$crashShip = $gamedata->getShipById($crashShipId);
+					$rammingAttack = $crashShip->getSystemByName("RammingAttack");										
+					$fire = new FireOrder(-1, 'prefiring', $crashShip->id, $ship->id, $rammingAttack->id, -1, $gamedata->turn,
+						1, 100, 100, 1, 0, 0, $shipPoS->q,  $shipPoS->r, 'TerrainCrash', -1
+					);
+					$fire->chosenLocation = $location;							
+					$fire->addToDB = true;		
+					$this->fireOrders[] = $fire;
+					$rammingAttack->fire($gamedata, $fire);					
+				}		
+			}			
+
+		}		
+		*/		
+	}
+
+	/* //Not needed, no check for collision necessary
+	private function checkForCollisions($ship, $transverseJump, $gamedata, $terrainPosition, $crashShip){
+	    $collisiontargets = array(); // Initialize array
+		
+		if ($crashShip->Huge > 0) { //Terrain occupies more than just 1 hex!  Need to check all of its hexes.
+			// Add code that calls a new function, and replicates check below for all hexes within radius.
+			$radiusHexes = mathlib::getNeighbouringHexes($terrainPosition, $crashShip->Huge);
+                
+			$startMove = $ship->getLastTurnMovement($gamedata->turn);
+			$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
+			$previousFacing = $startMove->getFacingAngle();
+							
+			// Check if shipMove position matches any position in $radiusHexes
+			$match = array_filter($radiusHexes, function($hex) use ($transverseJump) {
+				return $hex['q'] == $transverseJump->position->q && $hex['r'] == $transverseJump->position->r;
+			});
+		
+			// Or if it matches the centre position directly
+			if (
+				!empty($match) || 
+				($transverseJump->position->q == $terrainPosition->q && $transverseJump->position->r == $terrainPosition->r)
+				) {
+							// Prevent duplicate ship IDs
+				if (!isset($collisiontargets[$crashShip->id])) {
+					$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+					$location = $this->getCollisionLocation($relativeBearing, $ship);
+					$collisiontargets[$crashShip->id] = $location; // Add to array to be targeted.
+				}
+			}
+		}else{					
+			// Now check other movements in the turn.
+			$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+			$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+			$previousFacing = $startMove->getFacingAngle();			
+				
+					// Check if the position matches the asteroids, e.g. zero distance.
+					if ($terrainPosition->q == $transverseJump->position->q && $terrainPosition->r == $transverseJump->position->r) {
+						$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+						$location = $this->getCollisionLocation($relativeBearing, $ship);
+						$collisiontargets[$crashShip->id] = $location; // Add to array to be targeted.
+					}
+		}
+
+	    return $collisiontargets;		
+		
+	}//end of checkForCollisions()		
+
+
+	private function getTempBearing($shipPosition, $asteroidPosition, $ship, $facing){
+		$relativeBearing = 0;	
+		$oPos = mathlib::hexCoToPixel($shipPosition);//Convert to pixel format		
+		$tPos = mathlib::hexCoToPixel($asteroidPosition); //Convert to pixel format
+				
+		$compassHeading = mathlib::getCompassHeadingOfPoint($oPos, $tPos);//Get heading using pixel formats.
+        $relativeBearing =  Mathlib::addToDirection($compassHeading, -$facing);//relative bearing, compass - current facing.
+       
+        if( Movement::isRolled($ship) ){ //if ship is rolled, mirror relative bearing.  Not really needed, since arcs don't actually change.  
+            if( $relativeBearing !== 0 ) { //mirror of 0 is 0
+                $relativeBearing = 360-$relativeBearing;
+            }
+        }        
+
+		return round($relativeBearing);//Round and return!
+	}
+
+
+	private function getCollisionLocation($relativeBearing, $target) {
+		foreach ($target->getLocations() as $location) {
+			$min = $location["min"];
+			$max = $location["max"];
+			
+			// Normal range check
+			if ($min < $max && $relativeBearing >= $min && $relativeBearing < $max) {
+				return $location["loc"];
+			}
+			
+			// Wrap-around range check (e.g., 330-30)
+			if ($min > $max && ($relativeBearing >= $min || $relativeBearing < $max)) {
+				return $location["loc"];
+			}
+		}
+		
+		return 0; // Should not happen but return default if so.
+	} //endof getCollisionLocation()
+	*/
+
+     public function setSystemDataWindow($turn){
+        $this->data["Special"] = "."; 
+        $this->data["Special"] .= "<br>.";	
+		parent::setSystemDataWindow($turn);     
+    }
+
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->shootsStraight = $this->shootsStraight;
+        $strippedSystem->specialArcs = $this->specialArcs;
+        $strippedSystem->loadingtime = $this->loadingtime;	//With certain crits this can change for this weapon!													                                        
+        return $strippedSystem;
+	}	
+
+
+}	
+
 ?>
