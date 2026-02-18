@@ -2120,8 +2120,7 @@ full Advanced Armor effects (by rules) for reference:
         if (isset($this->priorityArray[$i])) $this->priority = $this->priorityArray[$i];
         if (isset($this->priorityAFArray[$i])){
 			$this->priorityAF = $this->priorityAFArray[$i];
-		}else{ //this means appropriate AF priority is not set yet - it is generated ans so must always be set! 
-			$this->priorityAFArray[$i] = $this->priorityAF;
+		}else{ //this means appropriate AF priority array entry is not set yet - THI IS ALL RIGHT and should not be addressed here, it will be filled in time!
 		}
 
 		/*not used any more!
@@ -2255,3 +2254,4 @@ class checkForSelfInterceptFire
 
 
  
+
