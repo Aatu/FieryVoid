@@ -417,7 +417,7 @@ class Weapon extends ShipSystem
 			break;
 			
 		case 8: //light Raking
-			$this->priorityAF = 4;
+			$this->priorityAF = 4; 
 			break;
 			
 		case 6: //heavy Standard 
@@ -428,15 +428,15 @@ class Weapon extends ShipSystem
 			$this->priorityAF = 6;
 			break;			
 			
-		case 5: 
+		case 5: //medium Standard
 			$this->priorityAF = 7;
 			break;
 			
-		case 4: 
+		case 4: //light Standard
 			$this->priorityAF = 8;
 			break;
 			
-		case 3: 
+		case 3: //very light Standard
 			$this->priorityAF = 9;
 			break;
 			
@@ -2255,4 +2255,5 @@ class checkForSelfInterceptFire
 
 
  
+
 
