@@ -39,6 +39,10 @@ How to rebuild:
 Since I added the legacy build to your main build script in package.json, just running yarn build (or npm run build) will handle everything for you. It builds your vite app AND rebuilds this legacy bundle in one go.
 I've updated the walkthrough with these instructions for future reference.
 
+How to edit client side now:
+
+You'll need to run yarn watch:legacy in FV folder when editing client files now, similar to how we run yarn watch when editing React files.
+
 # Image Optimiser:
 Open your terminal in the project root (c:\FV_env\FieryVoid).
 Run the command:
