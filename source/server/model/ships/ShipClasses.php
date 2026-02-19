@@ -1024,6 +1024,9 @@ class BaseShip {
 			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
 			//	return;
 			//}
+            if ($sampleFighter === null && $this instanceof FighterFlight) {
+                $sampleFighter = $this->getSampleFighter();
+            }
 			//add to Notes information about miscellanous attributes
 			if($this->notes!='')$this->notes .= '<br>';
 				//faction age - if older than Young
