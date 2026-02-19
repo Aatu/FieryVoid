@@ -94,7 +94,7 @@ window.webglSprite = function () {
                     // Simple global queue system
                     window.textureQueue = window.textureQueue || [];
                     window.activeTextureLoads = window.activeTextureLoads || 0;
-                    const MAX_CONCURRENT = 10;
+                    const MAX_CONCURRENT = (window.Config && window.Config.MAX_CONCURRENT_IMAGES) ? window.Config.MAX_CONCURRENT_IMAGES : 10;
 
                     const processQueue = () => {
                         while (window.activeTextureLoads < MAX_CONCURRENT && window.textureQueue.length > 0) {
