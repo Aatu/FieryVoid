@@ -15170,28 +15170,33 @@ window.SimultaneousMovementRule = (function(){
 jQuery(function () {
 	jQuery("#logUI div").on("click", window.botPanel.onLogUIClicked)
 
-	
+
 	$("#expandBotPanel").click(function () {
 		var logContainer = $("#logcontainer");
-	
+
 		logContainer.toggleClass('large');
-	
+
 		// Hide iniGui if logcontainer is large
 		if (logContainer.hasClass('large')) {
-            $("#iniGui").hide();
-            $(backDiv).data("on", 0);
-            backDiv.style.marginLeft = "0px";
-            document.getElementById("iniSlider").src = "img/pullOut.png";
+			$(iniGui).addClass("closed");
+			$(backDiv).addClass("closed");
+			$(backDiv).data("on", 0);
+			document.getElementById("iniSlider").src = "img/pullOut.png";
 		} else {
 			// If not large, ensure it behaves normally
-            $("#iniGui").show();
-            $(backDiv).data("on", 1);
-            backDiv.style.marginLeft = "250px";
-            document.getElementById("iniSlider").src = "img/pullIn.png";
+			$(iniGui).removeClass("closed");
+			$(backDiv).removeClass("closed");
+			$(backDiv).data("on", 1);
+
+			// Clean up any potential lingering inline styles
+			$("#iniGui").css("display", "");
+			$("#backDiv").css("margin-left", "");
+
+			document.getElementById("iniSlider").src = "img/pullIn.png";
 		}
 
 		// Manually create a fake element with the right data-select
-		var fakeElement = $("<div>").data("select", "#log");		
+		var fakeElement = $("<div>").data("select", "#log");
 		// Call onLogUIClicked with that fake element as "this"
 		window.botPanel.onLogUIClicked.call(fakeElement);
 	});
@@ -16750,51 +16755,42 @@ getActiveShipName: function getActiveShipName() {
             //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
             var td = document.createElement("td");
-            td.position = "relative";
-            td.style.width = "10%";
+            td.className = "iniOrder";
             td.id = "iniTd";
-            td.style.textAlign = "center";
-            td.style.fontSize = "18px";
-            //td.innerHTML = categoryIndex !== null ? categoryIndex : i + 1;
-            //Marcin Sawicki, display actual movement order instead:
             td.innerHTML = shipManager.getIniativeOrder(ships[i]);
 
             if (gamedata.isMyShip(ships[i])) {
-                td.style.color = "green";
+                td.classList.add("iniMyShip");
             } else if (gamedata.isMyorMyTeamShip(ships[i])) {
-                td.style.color = "#6091d2"; // Lighter blue
+                td.classList.add("iniAllyShip");
             } else {
-                td.style.color = "red";
+                td.classList.add("iniEnemyShip");
             }
 
             tr.appendChild(td);
 
             var td = document.createElement("td");
-            td.position = "relative";
-            td.style.width = "60%";
+            td.className = "iniInfo";
             td.id = "iniTd";
 
             var span = document.createElement("span");
-            span.style.textAlign = "center";
-            span.style.fontSize = "12px";
-            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-size: 12px'>" + ships[i].name;
-            span.innerHTML += "<p style='margin-top: 6px; margin-bottom: 6px; font-weight: bold; font-size: 11px'>" + ships[i].shipClass;
+            span.innerHTML += "<p class='iniName'>" + ships[i].name + "</p>";
+            span.innerHTML += "<p class='iniClass'>" + ships[i].shipClass + "</p>";
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
                 if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
-                    //hasDeletableMovements means player actually did _something_ with this ship! otherwise speed 0 units are immediately shown as moved and are easily skipped
-                    td.className = "iniActiveMoved";
+                    td.classList.add("iniActiveMoved");
                 } else if (active === true && gamedata.isMyShip(ships[i])) {
-                    td.className = "iniActive";
+                    td.classList.add("iniActive");
                 } else if (active === true && gamedata.isMyorMyTeamShip(ships[i])) {
-                    td.className = "iniActiveAlly";
+                    td.classList.add("iniActiveAlly");
                 } else if (active === true && !gamedata.isMyShip(ships[i])) {
-                    td.className = "iniActiveEnemy";
+                    td.classList.add("iniActiveEnemy");
                 }
             } else {
                 if (gamedata.getActiveShips().includes(ships[i])) {
-                    td.className = gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy";
+                    td.classList.add(gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy");
                 }
             }
 
@@ -16804,20 +16800,14 @@ getActiveShipName: function getActiveShipName() {
             tr.appendChild(td);
 
             var td = document.createElement("td");
-            td.position = "relative";
-            td.style.width = "20%";
+            td.className = "iniImage";
             td.id = "iniTd";
 
             var img = document.createElement("img");
             img.src = ships[i].imagePath;
 
-            if (!ships[i].flight) {
-                img.style.width = "40px";
-                img.style.height = "40px";
-            } else {
-                img.style.width = "20px";
-                img.style.height = "20px";
-                td.style.paddingLeft = "12px";
+            if (ships[i].flight) {
+                td.classList.add("flight");
             }
 
             td.appendChild(img);
@@ -16829,35 +16819,52 @@ getActiveShipName: function getActiveShipName() {
         ini_gui.appendChild(table);
 
         var backDiv = document.getElementById("backDiv");
+
+        // Preserve state
+        var isOpen = $(backDiv).data("on");
+        if (isOpen === undefined) isOpen = 1; // Default to open
+
         backDiv.innerHTML = "";
         backDiv.style.paddingBottom = "10px";
-        $(backDiv).removeData();
+
+        // $(backDiv).removeData(); // Don't remove!
 
         var img = new Image();
         img.id = "iniSlider";
-        img.src = "img/pullIn.png";
         img.style.width = "30px";
         img.style.height = "30px";
         img.style.marginLeft = "12px";
 
+        if (isOpen == 0) {
+            img.src = "img/pullOut.png";
+            $(ini_gui).addClass("closed");
+            $(backDiv).addClass("closed");
+        } else {
+            img.src = "img/pullIn.png";
+            $(ini_gui).removeClass("closed");
+            $(backDiv).removeClass("closed");
+        }
+
         backDiv.appendChild(img);
+        $(backDiv).data("on", isOpen);
 
         backDiv.addEventListener("click", gamedata.sliderToggle);
     },
 
     sliderToggle: function sliderToggle() {
         var backDiv = document.getElementById("backDiv");
+        var iniGui = document.getElementById("iniGui");
 
-        if ($(backDiv).data("on") == 0) {
-            $("#iniGui").show();
-            $(backDiv).data("on", 1);
-            backDiv.style.marginLeft = "250px";
-            document.getElementById("iniSlider").src = "img/pullIn.png";
-        } else {
-            $("#iniGui").hide();
+        if ($(backDiv).data("on") == 1) { // If open, close it
+            $(iniGui).addClass("closed");
+            $(backDiv).addClass("closed");
             $(backDiv).data("on", 0);
-            backDiv.style.marginLeft = "0px";
             document.getElementById("iniSlider").src = "img/pullOut.png";
+        } else { // If closed, open it
+            $(iniGui).removeClass("closed");
+            $(backDiv).removeClass("closed");
+            $(backDiv).data("on", 1);
+            document.getElementById("iniSlider").src = "img/pullIn.png";
         }
     },
 
