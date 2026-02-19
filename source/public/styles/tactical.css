@@ -906,7 +906,8 @@ body {
 
 .iniTr {}
 
-#iniTd {}
+
+.iniTr {}
 
 .iniOrder {
     width: 10%;
@@ -1026,8 +1027,16 @@ body {
     -moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
+    box-shadow: 5px 5px 10px black;
     padding-top: 10px;
+    padding-bottom: 10px;
     border-radius: 0px 10px 10px 0px;
+}
+
+#iniSlider {
+    width: 30px;
+    height: 30px;
+    margin-left: 12px;
 }
 
 #backDiv.closed {

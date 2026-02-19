@@ -1414,7 +1414,6 @@ getActiveShipName: function getActiveShipName() {
 
             var td = document.createElement("td");
             td.className = "iniOrder";
-            td.id = "iniTd";
             td.innerHTML = shipManager.getIniativeOrder(ships[i]);
 
             if (gamedata.isMyShip(ships[i])) {
@@ -1429,7 +1428,6 @@ getActiveShipName: function getActiveShipName() {
 
             var td = document.createElement("td");
             td.className = "iniInfo";
-            td.id = "iniTd";
 
             var span = document.createElement("span");
             span.innerHTML += "<p class='iniName'>" + ships[i].name + "</p>";
@@ -1459,7 +1457,6 @@ getActiveShipName: function getActiveShipName() {
 
             var td = document.createElement("td");
             td.className = "iniImage";
-            td.id = "iniTd";
 
             var img = document.createElement("img");
             img.src = ships[i].imagePath;
@@ -1483,15 +1480,12 @@ getActiveShipName: function getActiveShipName() {
         if (isOpen === undefined) isOpen = 1; // Default to open
 
         backDiv.innerHTML = "";
-        backDiv.style.paddingBottom = "10px";
+
 
         // $(backDiv).removeData(); // Don't remove!
 
         var img = new Image();
         img.id = "iniSlider";
-        img.style.width = "30px";
-        img.style.height = "30px";
-        img.style.marginLeft = "12px";
 
         if (isOpen == 0) {
             img.src = "img/pullOut.png";
