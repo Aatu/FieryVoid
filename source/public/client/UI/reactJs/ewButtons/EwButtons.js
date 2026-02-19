@@ -163,6 +163,12 @@ const MainButton = styled(ContainerRoundedRightSide)`
     background-repeat: no-repeat;
     background-size: cover;
     ${Clickable}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 30px;
+        font-size: 20px;
+    }
 `;
 
 const EEWButton = styled(MainButton)`

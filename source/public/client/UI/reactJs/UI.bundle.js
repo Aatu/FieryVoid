@@ -523,6 +523,12 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     background-repeat: no-repeat;
     background-size: cover;
     ${bi}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 30px;
+        font-size: 20px;
+    }
 `,Vk=Q(ys)`
     background-image: url("./img/EEW.png");
 `,Wk=Q(ys)`
