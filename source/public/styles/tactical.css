@@ -884,7 +884,7 @@ body {
     color: #deebffdc;
     background-color: #0a3340;
     margin-top: 50px;
-    width: 320px;
+    width: 300px;
     height: auto;
     position: absolute;
     display: inline-block;
@@ -1024,7 +1024,7 @@ body {
     z-index: 10000;
     margin-top: 65px;
     margin-top: 65px;
-    left: 320px !important;
+    left: 300px !important;
     margin-left: 0px !important;
     /* Override legacy JS */
     /* Default open */
