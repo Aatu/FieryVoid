@@ -518,21 +518,31 @@ body {
     width: 10px;
 }
 
-#iniGui::-webkit-scrollbar-track,
+#iniGui::-webkit-scrollbar-track {
+    background: transparent;
+}
+
 #gameinfo::-webkit-scrollbar-track,
 #declarationsContainer::-webkit-scrollbar-track,
 #combatLogContainer::-webkit-scrollbar-track {
     background: #0d1620;
 }
 
-#iniGui::-webkit-scrollbar-thumb,
+#iniGui::-webkit-scrollbar-thumb {
+    background: #3c5574;
+    border-radius: 6px;
+}
+
 #gameinfo::-webkit-scrollbar-thumb,
 #declarationsContainer::-webkit-scrollbar-thumb,
 #combatLogContainer::-webkit-scrollbar-thumb {
     background: #3c5574;
 }
 
-#iniGui::-webkit-scrollbar-thumb:hover,
+#iniGui::-webkit-scrollbar-thumb:hover {
+    background: #5a7ea8;
+}
+
 #gameinfo::-webkit-scrollbar-thumb:hover,
 #declarationsContainer::-webkit-scrollbar-thumb:hover,
 #combatLogContainer::-webkit-scrollbar-thumb:hover {
