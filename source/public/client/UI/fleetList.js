@@ -164,7 +164,7 @@ createFleetList: function createFleetList(slot, template) {
     fleetlistentry.find(".fleetheader").html(
         deploys + "<span class='headername'>FLEET LIST - </span>" +
         "<span class='playername'>" + slot.playername + 
-        " - Fleet Value: " + totalCurrValue + " / " + totalBaseValue + " CP" +
+        ": " + totalCurrValue + " / " + totalBaseValue + " CP" +
          "<span class='turnTaken'>" + turnTaken + "</span>"
     );
 

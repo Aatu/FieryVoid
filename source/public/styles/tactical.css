@@ -413,6 +413,7 @@ body {
     height: 150px;
     opacity: 0.85;
     color: #7ba2ea;
+    /*color: #e0e7ef;*/       
     /* #deebff; */
     background-color: #04161C;
     border-top: 1px solid #496791;
@@ -457,6 +458,7 @@ body {
     z-index: 9999;
     background-color: #020E12;
     cursor: pointer;
+    color: #deebffb6;  
 }
 
 .logUiEntry span {}
@@ -465,11 +467,11 @@ body {
     color: #DEEBFF;
 }
 
-
 .logUiEntry.selected {
     top: -25px;
     background-color: #04161C;
     color: #DEEBFF;
+    font-weight: bold;
 }
 
 #logTab.logUiEntry {
@@ -552,11 +554,11 @@ body {
 #combatLogButtons {
     position: absolute;
     /* Absolute positioning */
-    font-size: 12px;
+    font-size: 14px;
     font-style: normal;
-    font-weight: bold;
-    /*color: #597eb1; /* #deebff; */
-    color: #7ba2ea;
+    /*font-weight: bold;*/
+    /*color: #7ba2ea; /* #deebff; */
+    color: #e0e7ef;     
     top: 0;
     /* Align to the top */
     right: 0;
@@ -569,29 +571,50 @@ body {
 }
 
 #combatLogButtons input[type="button"] {
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
     margin-top: 1px;
-    margin-right: 3px;
+    margin-right: 1px;
+    margin-left: 3px;    
     /* Add space between buttons */
-    border: none;
-    /* Remove default border */
+    border: 1px solid #587e8d;
+    background: #215a7a;
+    border-radius: 4px;
+    color: #e0e7ef;    
 }
 
 
-#combatLogActual {
+#LogActual {
     padding-top: 3px;
     font-size: 12px;
     font-style: normal;
 }
 
 #declarationsButtons {
+    margin-top: 4px;
+    margin-bottom: 4px;
     padding-top: 5px;
-    font-size: 12px;
+    font-size: 13px;
+    color: #e0e7ef;       
+}
+
+#declarationsButtons input[type="button"] {
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    margin-right: 1px;
+    margin-left: 2px;    
+    /* Add space between buttons */
+    border: 1px solid #587e8d;
+    background: #215a7a;
+    border-radius: 4px;
+    color: #e0e7ef;    
 }
 
 #declarationsActual {
     padding-bottom: 10px;
+    color: #e0e7ef;       
 }
 
 #expandBotPanel {
@@ -620,6 +643,19 @@ body {
 #gameinfo.logPanelEntry {
     overflow-x: hidden;
     overflow-y: scroll;
+}
+
+.combatTurn{
+    font-size:12px; 
+    font-weight:bold; 
+    text-decoration:underline; 
+    top: 15px;
+    color: #e0e7ef;       
+}
+
+.noCombatLog{
+    font-size:14px; 
+    color: #e0e7ef;    
 }
 
 .fleetlistentry {
@@ -659,6 +695,11 @@ body {
     text-decoration: underline;
     text-transform: uppercase;
     color: #a7c1f1;
+}
+
+.fleetheader{
+    margin-bottom: 3px;
+    margin-left: 5px
 }
 
 .fleetlist .shipname {

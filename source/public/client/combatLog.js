@@ -509,11 +509,11 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
         var currentTurn = window.combatLog.getDisplayTurn();
     
         // Start building the log HTML
-        var html = '<br><span style="font-size:12px; font-weight:bold; text-decoration:underline;">Turn ' + currentTurn + ':</span><br>';
+        var html = '<br><span class = "combatTurn";>Turn ' + currentTurn + ':</span><br>';
     
         // Check if the allFireOrders array is empty
         if (allFireOrders.length === 0) {
-            html += '<span style="font-size:12px;"><br>No fire orders were made this turn!</span>';
+            html += '<span class = "noCombatLog";><br>No fire orders were made this turn!</span>';
         }
     
         // Update the content of LogActual with the current turn and optional message

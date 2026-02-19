@@ -13,7 +13,7 @@
       <input type="button" id="currentTurnButton" value="Back to Current Turn" onclick="window.combatLog.showCurrent();" style="display:none;"> <!-- Hidden initially -->
     </div>
   
-    <div id="LogActual" class="" style="display:none;"> <!-- actual Combat Log, filled on button press -->
+    <div id="LogActual" class="LogActual" style="display:none;"> <!-- actual Combat Log, filled on button press -->
         <!-- the printed combat log will go here -->
     </div>
 </div>
