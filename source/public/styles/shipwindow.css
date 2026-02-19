@@ -1216,11 +1216,11 @@ body .shipwindow .system.modes.firing .mode {
 }
 
 .shipwindow.left {
-    left: 30px;
+    left: 20px;
 }
 
 .shipwindow.right {
-    right: 572px;
+    right: 610px;
     margin-top: 0px;
 }
 

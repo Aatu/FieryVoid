@@ -19,7 +19,7 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
 		
     $user = trim($_POST["user"]);
     $pass = trim($_POST["pass"]);
-    $pass2 = $_POST["pass2"];
+    $pass2 = trim($_POST["pass2"]);
     // $secret = $_POST["secret"];
     // global $secret_phrase;
     
@@ -55,11 +55,12 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
 		<title>FieryVoid</title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
-        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
+        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
+        <link href="styles/reg.css" rel="stylesheet" type="text/css">
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
 	</head>
-    <body  style="background: url('./img/maps/20.Pillars.jpg') no-repeat center center fixed; background-size: cover;">
+    <body class="reg-background">
 <!--        <div class="helphide" style="float:right"> <div id="helphideimg"></div>
         </div>-->
 
@@ -70,9 +71,9 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
   </div>
 </header>    
 		<div class="reg-panel">
-            <div class="resources" style="font-weight: bold;  font-size: 1.1em;">Register your account below:</div>
+            <div class="resources reg-resources">Register your account below:</div>
 
-			<form style="margin-right: 0px;" method="post">
+			<form class="reg-form" method="post">
                 <div class="error"><span><?php print($error); ?></span></div>
 				<table>
 				
@@ -89,15 +90,60 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
                 </tr>
                 -->
 
-				<tr><td><label style="font-weight: normal;">Username:</label></td><td><input style="text-align: left; margin-bottom: 0px; margin-left: 60px;" type="text" name="user"></input></td></tr>
-				<tr><td><label style="font-weight: normal;">Password:</label></td><td><input style="text-align: left; margin-bottom: 0px; margin-left: 60px;" type="password" name="pass"></input></td></tr>
-                <tr><td><label style="font-weight: normal;">Re-type password:</label></td><td><input style="text-align: left; margin-bottom: 0px; margin-left: 60px;" type="password" name="pass2"></input></td></tr>
+				<tr class="reg-input-row">
+                    <td><label for="user">Username:</label></td>
+                    <td><input class="reg-input-field" type="text" name="user" id="user"></input></td>
+                </tr>
+				<tr class="reg-input-row">
+                    <td><label for="pass">Password:</label></td>
+                    <td>
+                        <div class="password-wrapper">
+                            <input class="password-input-field" type="password" name="pass" id="pass"></input>
+                            <span class="password-toggle-icon" onclick="togglePassword('pass', this)">
+                                <!-- Eye Icon (SVG) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                  <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                  <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="reg-input-row">
+                    <td><label for="pass2">Re-type password:</label></td>
+                    <td>
+                        <div class="password-wrapper">
+                            <input class="password-input-field" type="password" name="pass2" id="pass2"></input>
+                            <span class="password-toggle-icon" onclick="togglePassword('pass2', this)">
+                                <!-- Eye Icon (SVG) -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                                  <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
+                                  <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
+                                </svg>
+                            </span>
+                        </div>
+                    </td>
+                </tr>
 				</table>
-                <div style="text-align: right;">
-                    <input type="submit" class="btn btn-primary" style="margin-top: 10px; margin-bottom: 0px; margin-right: 5px;" value="Register">
+                <div class="submit-container">
+                    <input type="submit" class="btn btn-primary reg-submit-btn" value="Register">
                 </div>                		
 			</form>
 
+            <script>
+            function togglePassword(inputId, icon) {
+                var input = document.getElementById(inputId);
+                var path = icon.querySelector('svg path'); // Naive selection for icon swap if we wanted it
+                
+                if (input.type === "password") {
+                    input.type = "text";
+                    icon.style.color = "#8bcaf2"; // Highlight when visible
+                } else {
+                    input.type = "password";
+                    icon.style.color = "#888"; // Dim when hidden
+                }
+            }
+            </script>
 		</div>
 
 <!--        <div id="globalhelp" class="helppanel">

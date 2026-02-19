@@ -18,7 +18,7 @@ class TacGamedata {
     public $ballistics = array();
     public $waitingForThisPlayer = false;
     public $rules;
-    
+    public $blockedHexes;
     
     
     function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $description='', $gamespace = null, $rules = null){
@@ -27,6 +27,8 @@ class TacGamedata {
         $this->setPhase($phase);
         $this->setActiveship($activeship);
         $this->setForPlayer($forPlayer);
+        $this->setForPlayer($forPlayer);
+        //$this->setBlockedHexes();
         $this->name = $name;
         $this->status = $status;
         $this->points = (int)$points;
@@ -92,11 +94,13 @@ class TacGamedata {
         $strippedGamedata->changed = $this->changed;
         $strippedGamedata->rules = $this->rules;
         $strippedGamedata->forPlayer = $this->forPlayer;
+        $strippedGamedata->blockedHexes = $this->blockedHexes;
 
         return $strippedGamedata;
     }
 
     public function onConstructed(){
+        $this->setBlockedHexes();
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
 
@@ -842,6 +846,8 @@ private function setWaiting() {
 		return false; //this ship was not found
 	}//endof function shipBelongs
 
+    
+    //Replaced by setBlockedHexes() below, but I've left in in case there's any calls I miss - DK 10.2.26
     public function getBlockedHexes() {
         $blockedHexes = [];
 
@@ -873,6 +879,48 @@ private function setWaiting() {
         }
         return $blockedHexes;
     } //endof function getBlockedHexes
+
+
+    public function setBlockedHexes() {
+        $blockedHexes = [];
+
+        try {
+            foreach ($this->ships as $ship) {
+                if($ship->isDestroyed()) continue;
+
+                if ($ship->Enormous) { // Only enormous units block LoS
+                    $position = $ship->getHexPos();
+                    if (!$position) continue; // Skip if no position (e.g. in lobby/initialization)
+
+                    $blockedHexes[] = $position;
+
+                    // Check for custom hex offsets (non-circular terrain)
+                    if (property_exists($ship, 'hexOffsets') && !empty($ship->hexOffsets)) {
+
+                        $move = $ship->getLastMovement();
+                        if (!$move) continue; // Skip if no movement data
+
+                        $facing = $move->facing;
+                        foreach ($ship->hexOffsets as $offset) {
+                            // Use accurate pixel-based rotation
+                            $newHex = Mathlib::getRotatedHex($position, $offset, $facing);
+                            $blockedHexes[] = $newHex;
+                        }
+                    } elseif ($ship->Huge > 0) { // Standard circular Huge terrain
+                        $neighbourHexes = Mathlib::getNeighbouringHexes($position, $ship->Huge);
+
+                        foreach ($neighbourHexes as $hex) {
+                            $blockedHexes[] = new OffsetCoordinate($hex); // Ensure hexes are objects
+                        }
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            // Ignore exceptions during blocked hex calculation (e.g. in Lobby)
+        }
+
+        $this->blockedHexes = $blockedHexes;
+    } //endof function setBlockedHexes    
 
     
     public function getEnormousHexes() {

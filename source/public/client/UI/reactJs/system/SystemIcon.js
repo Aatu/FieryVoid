@@ -255,7 +255,14 @@ const isOffline = (ship, system) => shipManager.power.isOffline(ship, system);
 
 const isBoosted = (ship, system) => shipManager.power.isBoosted(ship, system) || system.active;
 
-const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
+const getStructureLeft = (ship, system) => {
+    if (system.name === 'ThirdspaceShield' || system.name === 'ThoughtShield') {
+        if (system.baseRating) {
+            return Math.min(100, (system.currentHealth / system.baseRating) * 100);
+        }
+    }
+    return (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
+}
 
 const getDestroyed = (ship, system) => shipManager.systems.isDestroyed(ship, system)
 

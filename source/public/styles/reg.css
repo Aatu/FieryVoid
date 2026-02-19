@@ -1,0 +1,119 @@
+/* Registration Page Styles */
+
+body.reg-background {
+    background: url('../img/maps/20.Pillars.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+.reg-resources {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.reg-form {
+    margin-right: 0px;
+}
+
+.reg-input-row label {
+    font-weight: normal;
+    white-space: nowrap;
+}
+
+.reg-input-field {
+    text-align: left;
+    margin-bottom: 0px;
+    margin-left: 40px;
+    width: 100%;
+    max-width: 185px;
+    box-sizing: border-box;
+}
+
+.password-wrapper {
+    position: relative;
+    margin-left: 40px;
+    display: inline-block;
+    width: 100%;
+    max-width: 185px;
+}
+
+.password-input-field {
+    text-align: left;
+    margin-bottom: 0px;
+    padding-right: 30px;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.password-toggle-icon {
+    position: absolute;
+    right: 8px;
+    top: 62%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #888;
+}
+
+.submit-container {
+    text-align: right;
+    width: 500px;
+    border-radius: 4px;
+}
+
+.reg-submit-btn {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    margin-right: 5px;
+}
+
+/* Login Page Styles (Index.php) */
+body.login-background {
+    background: url('../img/maps/14.PlanetsNear.jpg') no-repeat center center fixed;
+    background-size: cover;
+}
+
+.login-link {
+    color: #8bcaf2;
+    font-size: 1.1em;
+}
+
+.login-or-text {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+.login-table {
+    text-align: center;
+    margin-left: 30px;
+    margin-top: 5px;
+}
+
+.login-label {
+    margin-left: 30px;
+    margin-right: 20px;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.login-input {
+    text-align: left;
+    width: 100%;
+    max-width: 250px;
+    box-sizing: border-box;
+}
+
+.login-submit-container {
+    text-align: right;
+}
+
+.login-submit-btn {
+    margin-top: 10px;
+    margin-bottom: 0px;
+    margin-right: 25px;
+}
+
+.login-password-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    max-width: 250px;
+}

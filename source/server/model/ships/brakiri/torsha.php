@@ -33,7 +33,7 @@ class Torsha extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 20, 9, 9));
         $this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
-	$this->addPrimarySystem(new Hangar(4, 20));
+	    $this->addPrimarySystem(new Hangar(4, 20));
         $this->addPrimarySystem(new ShieldGenerator(4, 12, 4, 2));
    
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 240, 60));
@@ -43,8 +43,8 @@ class Torsha extends BaseShip{
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
         $this->addFrontSystem(new GravitonPulsar(3, 5, 2, 300, 120));
 
-        $this->addAftSystem(new GravitonPulsar(3, 5, 2, 60, 240));
-        $this->addAftSystem(new GravitonPulsar(3, 5, 2, 120, 300));
+        $this->addAftSystem(new GraviticBolt(3, 5, 2, 120, 300));
+        $this->addAftSystem(new GraviticBolt(3, 5, 2, 60, 240));  
         $this->addAftSystem(new GraviticThruster(3, 16, 0, 5, 2));
         $this->addAftSystem(new GraviticThruster(3, 16, 0, 5, 2));
 

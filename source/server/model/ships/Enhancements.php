@@ -154,32 +154,6 @@ class Enhancements{
 		  //technical ID, human readable name, number taken, maximum number to take, price for one, price increase for each further, is an option (rather than enhancement)
 	  }	 
 
-	  //To convert Assault Shuttles hangar slots to Fighter Slots
-	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Only add if ship has Assault Shuttle hangar space! 	  
-	    $enhID = 'HANG_F';
-		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Convert Assault Shuttle slot to Fighter slot';
-				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
-				$enhPrice = 5; //Flat 5 pts per slot converted	  
-				$enhPriceStep = 0; //flat rate
-				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
-		}
-	  }
-
-	  //To convert Fighter hangar slots to Assault Shuttle Slots
-	  $keysToCheck = ["normal", "heavy", "medium"]; //Light and Ultralight cannot be converted.
-	  $matchingKeys = array_intersect_key($ship->fighters, array_flip($keysToCheck)); // Find matching keys
-	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys 
-	  if ($totalCount > 0) { 	  
-	    $enhID = 'HANG_AS';
-		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Convert Fighter slot to Assault Shuttle slot';
-				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
-				$enhPrice = 5; //Flat 5 pts per slot converted	  
-				$enhPriceStep = 0; //flat rate
-				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
-		}
-	  }
 
 	  //Elite Marines for Grappling Claws, cost: 40% craft price (round up), limit: 1	  	
 	  $enhID = 'ELT_MRN';	  
@@ -210,7 +184,53 @@ class Enhancements{
 		  $enhPriceStep = 0;
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 	  } 
-	  	   
+
+	  
+	  $enhID = 'GUNSIGHT';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Repeater Gunsights';
+		  $count = 0;	 
+		  foreach ($ship->systems as $system){
+			if ($system instanceof ParticleRepeater){
+				$count++;
+			}
+		  }  
+		  if($count > 0){ //ship is actually equipped with a Particle Repeater(s)	  
+			  $enhPrice = 12 * $count;	
+			  $enhPriceStep = 0; 
+			  $enhLimit = 1;	  
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+	  }	 
+
+
+	  //To convert Assault Shuttles hangar slots to Fighter Slots
+	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Only add if ship has Assault Shuttle hangar space! 	  
+	    $enhID = 'HANG_F';
+		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Assault Shuttle to Fighter slot';
+				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
+				$enhPrice = 5; //Flat 5 pts per slot converted	  
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
+		}
+	  }
+
+	  //To convert Fighter hangar slots to Assault Shuttle Slots
+	  $keysToCheck = ["normal", "heavy", "medium"]; //Light and Ultralight cannot be converted.
+	  $matchingKeys = array_intersect_key($ship->fighters, array_flip($keysToCheck)); // Find matching keys
+	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys 
+	  if ($totalCount > 0) { 	  
+	    $enhID = 'HANG_AS';
+		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Fighter to Assault Shuttle slot';
+				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
+				$enhPrice = 5; //Flat 5 pts per slot converted	  
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
+		}
+	  }
+
 	  $enhID = 'IFF_SYS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Identify Friend or Foe (IFF) System';
@@ -1666,6 +1686,17 @@ class Enhancements{
 						}
 						break;	
 
+					case 'GUNSIGHT'://Split fire: allows Particle Repeaters to split their shots.
+						foreach ($ship->systems as $system){
+							if ($system instanceof ParticleRepeater){
+								$damageTaken = $system->maxhealth - ($system->getRemainingHealth()); //Check for damge taken.    
+								if($damageTaken > 0) break; //Lose gunsights if even 1 point of damage taken.								
+								$system->specialHitChanceCalculation = true;
+								$system->canSplitShots = true;
+							}
+						}
+						break;	
+
 					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
 						break;	
 
@@ -2215,6 +2246,12 @@ class Enhancements{
 								$strippedSystem->output = $system->output;
 							}
 							break;
+						case 'GUNSIGHT': //improved Thought Shield
+							if ($system instanceof ParticleRepeater){
+								$strippedSystem->canSplitShots = $system->canSplitShots ;
+								$strippedSystem->specialHitChanceCalculation = $system->specialHitChanceCalculation ;						
+							}													
+							break;								
 						case 'IMPR_PSY': //Spark Curtain - affects output of Spark Field
 							if($system instanceof PsychicField){
 								$strippedSystem->range = $system->range;

@@ -385,8 +385,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
 
     <h4 id="drazi" style="">DRAZI FREEHOLD</h4>
-    <p>Drazi are a very solid, beginner-friendly faction which uses an assortment of fast recharging particle weapons to pummel their enemies.  
-        Their distinctive HCV layout with outer hulls on port and starboard instead of the traditional front and aft layout, is very notable for producing surprisingly resilient ships.</p>            
+        <p>Drazi are a very solid, beginner-friendly faction which uses an assortment of fast recharging particle weapons to pummel their enemies.  
+        Their distinctive HCV layout with outer hulls on port and starboard instead of the traditional front and aft layout, is very notable for producing surprisingly resilient ships.</p>
+       <h5>Repeater Gunsights</h5>
+            <li>Ships equipped with Particle Repeaters can purchased this option in Fleet Selection.  Repeaters armed with gunsights are able to split their shots between different enemy units within a 1 hex radius of their original target,
+                and different fighters within the same flights.  If the Particle Repeater takes any damage at all, it loses its gunsight ability.  All other rules relating to the Particle Repeater remain the same.</li>
+                           
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
@@ -1020,8 +1024,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Power Capacitor</h5>
         <li>Produces power for Vorlon ships and can hold Power between turns up to its maximum capacity.  Some key points to note about it are:
                 <ul class="circle-list">
-                    <li>New power is produced in the Initial Orders phase.  The power produced can be doubled (along with Self Repair at end of turn) by clicking 'Select' in Initial Orders.  However this comes at the cost of deactivating all weapons and shields on that turn.</li>
-                    <li>Opening petals by boosting Power Capacitor will reduce the armor of all the ship’s primary systems by 2 and increase Defence Profiles by 5%, but adds 50% to power generation the following turn,</li> 
+                    <li>New power is produced in the Initial Orders phase.  The power produced can be doubled (along with Self Repair at end of turn) at the cost of deactivating all weapons and shields on that turn.</li>
+                    <li>Separately, you can also open petals on some Vorlon ships but this will reduce the armor on all of the ship’s primary systems by 2 and increase Defence Profiles by 5% for that turn, but adds 50% to power generation.</li> 
                     <li>Capacitor destruction would leave the ship powerless, but doesn't cause a catastrophic explosion like Reactor destruction.  In FV it will leave ship powerless (as the Capacitor is the main power source on Vorlon ships), 
                         add Power reduction critical to Reactor (so ship goes out of control) and Self Repair system so that the damage isn't just repaired in a few turns.</li> 
                     <li>Vorlon Fighters also have petals that they can toggle open in Initial Orders. Doing so provides 2 extra thrust that turn, but increases their Defence Profiles by 5% and reduces side armour by 2.</li>                                         

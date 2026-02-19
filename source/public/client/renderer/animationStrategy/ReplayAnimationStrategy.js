@@ -311,24 +311,10 @@ window.ReplayAnimationStrategy = function () {
             return 0;
         });
 
+        // Pass 1: Hex Targeted Fire (excluding pre-firing which is handled elsewhere)
+        var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
+
         shipList.forEach(function (ship) {
-            var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
-                ship,
-                this.shipIconContainer,
-                this.emitterContainer,
-                this.gamedata,
-                time,
-                this.scene,
-                this.movementAnimations,
-                logAnimation
-            );
-
-            this.animations.push(perShipAnimation);
-            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                time += perShipAnimation.getDuration();
-            }
-
-            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
             var firesForThisShip = allHexBallistics.filter(function (f) {
                 return f && (f.shooter === ship || f.shooter === ship.id);
             });
@@ -351,6 +337,26 @@ window.ReplayAnimationStrategy = function () {
                 if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
                     time += hexAnim.getDuration();
                 }
+            }
+        }, this);
+
+
+        // Pass 2: Incoming Direct Fire (Standard Exchanges)
+        shipList.forEach(function (ship) {
+            var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
+                ship,
+                this.shipIconContainer,
+                this.emitterContainer,
+                this.gamedata,
+                time,
+                this.scene,
+                this.movementAnimations,
+                logAnimation
+            );
+
+            this.animations.push(perShipAnimation);
+            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                time += perShipAnimation.getDuration();
             }
 
         }, this);

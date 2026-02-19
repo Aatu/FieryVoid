@@ -61,11 +61,12 @@ class PlasmaStream extends Plasma{
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 		if (!$system->advancedArmor){//advanced armor prevents effect
-			$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
-			$crit->updated = true;
-			$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
-			$system->setCritical($crit); //$system->criticals[] =  $crit;			
-			//and previous turn crit - to be NOT saved, but so crit is recognized as
+			if (($damage+$armour)>0){//ensure that some damage was actually dealt - if entire rake is blocked by defensive system, then it has no effect						 
+				$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+				$crit->updated = true;
+				$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+				$system->setCritical($crit); //$system->criticals[] =  $crit;			
+			}
 		}
 	}
 	

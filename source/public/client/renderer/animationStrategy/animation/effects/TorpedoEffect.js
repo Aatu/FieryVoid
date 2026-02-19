@@ -72,7 +72,7 @@ window.TorpedoEffect = function () {
 
         if (args.systemDestroyedEffect) {
             args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + this.duration)
-            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + this.duration, 'crit');             
+            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + this.duration, 'crit');
         }
     }
 
@@ -83,44 +83,47 @@ window.TorpedoEffect = function () {
     };
 
     // --- 🔊 Add render() just for sound timing ---
-TorpedoEffect.prototype.render = function (now, total, last, delta, zoom) {
-    if (this.emitterContainer && this.emitterContainer.render) {
-        this.emitterContainer.render(now, total, last, delta, zoom);
-    }
-
-    // --- Only play sounds once the animation has actually started running ---
-    // Prevent sounds from triggering during replay preload or setup.
-    if (total < this.time) {
-        return;
-    }
-
-    // --- Play launch sound (only once) ---
-    if (gamedata.playAudio && !this.playedLaunchSound) {
-        try {
-            const launchSound = TorpedoEffect.cachedLaunchAudio.cloneNode(true);
-            launchSound.volume = this.soundVolume;
-            launchSound.currentTime = 0;
-            launchSound.play().catch(() => {});
-            this.playedLaunchSound = true;
-        } catch (e) {
-            console.warn("Torpedo launch sound failed:", e);
+    TorpedoEffect.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        if (this.emitterContainer && this.emitterContainer.render) {
+            this.emitterContainer.render(now, total, last, delta, zoom);
         }
-    }
 
-    // --- Play explosion sound ---
-    const explosionTime = this.time + this.duration - 50; // slightly before impact
-    if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= explosionTime) {
-        try {
-            const explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
-            explosionSound.volume = this.soundVolume;
-            explosionSound.currentTime = 0;
-            explosionSound.play().catch(() => {});
-            this.playedImpactSound = true;
-        } catch (e) {
-            console.warn("Torpedo explosion sound failed:", e);
+        // --- Only play sounds once the animation has actually started running ---
+        // Prevent sounds from triggering during replay preload or setup.
+        if (total < this.time) {
+            return;
         }
-    }
-};
+
+        // 🛑 Do not play sounds if we are paused or scrubbing backwards
+        if (paused || back) return;
+
+        // --- Play launch sound (only once) ---
+        if (gamedata.playAudio && !this.playedLaunchSound) {
+            try {
+                const launchSound = TorpedoEffect.cachedLaunchAudio.cloneNode(true);
+                launchSound.volume = this.soundVolume;
+                launchSound.currentTime = 0;
+                launchSound.play().catch(() => { });
+                this.playedLaunchSound = true;
+            } catch (e) {
+                console.warn("Torpedo launch sound failed:", e);
+            }
+        }
+
+        // --- Play explosion sound ---
+        const explosionTime = this.time + this.duration - 50; // slightly before impact
+        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= explosionTime) {
+            try {
+                const explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
+                explosionSound.volume = this.soundVolume;
+                explosionSound.currentTime = 0;
+                explosionSound.play().catch(() => { });
+                this.playedImpactSound = true;
+            } catch (e) {
+                console.warn("Torpedo explosion sound failed:", e);
+            }
+        }
+    };
     function createTorpedoParticles(size, color, position) {
         var particle;
         var amount = Math.ceil(Math.random() * 3) + 4;

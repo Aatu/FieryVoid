@@ -651,23 +651,19 @@
 	    
         public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
-	    /*
-        public $trailColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.40;
-        public $projectilespeed = 40;
-        public $animationWidth = 4;
-        public $trailLength = 30;
-        */
+
         public $loadingtime = 1;
         public $boostable = true;
         public $boostEfficiency = 1;
         public $priority = 5;
-	public $intercept = 1;
+	    public $intercept = 1;
         public $rangePenalty = 1;
         public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals
-        
+        public $canSplitShots = false; //Defaults false without Gunsights
+        public $specialHitChanceCalculation = false;        
         private $hitChanceMod = 0;
-        private $previousHit = true;       
+        private $shotsFiredSoFar = 0;
+        //private $previousHit = true;       
        
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -676,15 +672,14 @@
         
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-	    $this->data["Special"] = "Standard power: 1 shot, intercept -5.";
-	    $this->data["Special"] .= "<br>Each additional +1 Power adds -5 intercept or 1 shot in offensive mode.";
-	    $this->data["Special"] .= "<br>Each pair of shots above 2 forces a turn of cooldown (round up).";
-	    $this->data["Special"] .= "<br>All shots hit the same target. If a shot misses, further ones miss automatically. Otherwise they have cumulative to hit penalty.";
-            //$this->defaultShots = 1+$this->getBoostLevel(TacGamedata::$currentTurn); //default shots is 1, so interception is correct!
-            
+            $this->data["Special"] = "Standard power: 1 shot, intercept -5.";
+            $this->data["Special"] .= "<br>Each additional +1 Power adds -5 intercept or 1 shot in offensive mode providing you have a OEW lock.";
+            $this->data["Special"] .= "<br>Each pair of shots above 2 forces a turn of cooldown (rounded up).";
+            $this->data["Special"] .= "<br>Shots can target different units with a cumulative to hit penalty. However, once a shot misses, all further ones miss automatically.";
+            $this->data["Special"] .= "<br>If equipped with gunsights, this weapon may split it's shots to different tagets in a 1 hex radius.";
             parent::setSystemDataWindow($turn);
         } 
-	    
+                   
 	protected function applyCooldown($gamedata){
 		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
 		//if boosted, cooldown (1 per 2 extra shots above first 2)
@@ -700,16 +695,118 @@
 		 }
 	}
         
+        public function beforeFiringOrderResolution($gamedata){
+            if(!$this->canSplitShots) return; //Only relevant for split shots.
+        
+            //Gather all valid fire orders for this turn
+            $validOrders = array();
+            foreach($this->fireOrders as $fireOrder){
+                if($fireOrder->turn != $gamedata->turn) continue;
+                if($fireOrder->type == 'intercept' || $fireOrder->type == 'selfIntercept') continue;
+                $validOrders[] = $fireOrder;
+            }
+            
+            $count = count($validOrders);
+            if($count == 0) return;
+            
+            $maxShots = $this->getMaxShots($gamedata->turn);
+            
+            //Distribute shots: 1 per valid order, remainder to last order.
+            //We reset shots here, so fire() doesn't need to guess.
+            $shotsUsed = 0;
+            for($i=0; $i<$count; $i++){
+                $order = $validOrders[$i];
+                $order->shots = 1; //Base 1 shot per target
+                $shotsUsed++;
+                
+                if($i == ($count-1)){ //Last order gets the rest
+                    $remaining = $maxShots - $shotsUsed;
+                    if($remaining > 0){
+                        $order->shots += $remaining;
+                    }
+                }
+            }
+        }
+
         public function fire($gamedata, $fireOrder){ 
-			$currBoostlevel = $this->getBoostLevel($gamedata->turn);
-				$this->hitChanceMod = 0;
-				$fireOrder->shots = 1 + $currBoostlevel;
-				parent::fire($gamedata, $fireOrder);
-			$this->applyCooldown($gamedata);			
+            // If this order was already handled (e.g. by a previous call in the same turn resolving the whole volley), skip it.
+            if ($fireOrder->rolled > 0) return;
+
+            $currBoostlevel = $this->getBoostLevel($gamedata->turn);
+
+
+            // If we can't split shots, then this is a fresh volley every time we enter fire (standard behavior).
+            if (!$this->canSplitShots) {
+                $this->shotsFiredSoFar = 0;
+                $this->hitChanceMod = 0;
+				$fireOrder->shots = 1 + $currBoostlevel; 
+                
+                $shooter = $this->getUnit();
+                $target = $gamedata->getShipById($fireOrder->targetid);
+                $oew = $shooter->getOEW($target, $gamedata->turn);                                 
+                if ($oew < 1) $fireOrder->shots = 1; //Only 1 shot if no OEW lock.
+                
+                parent::fire($gamedata, $fireOrder);
+                
+                $this->shotsFiredSoFar += $fireOrder->shots;
+                $this->applyCooldown($gamedata);
+            } else {
+                // Split shots / Gunsight logic
+                // We resolve ALL shots for this weapon/turn NOW, to ensure correct sequence.
+
+                // 1. Gather all valid fire orders for this weapon, this turn.
+                $allOrders = array();
+                foreach($this->fireOrders as $fo){
+                    if($fo->turn == $gamedata->turn && $fo->type != 'intercept' && $fo->type != 'selfIntercept'){
+                         $allOrders[] = $fo;
+                    }
+                }
+                
+                // 2. Sort by ID to ensure creation order (user click order).
+                usort($allOrders, function($a, $b){
+                    return $a->id - $b->id;
+                });
+
+                // 3. Reset state
+                $this->shotsFiredSoFar = 0;
+                $this->hitChanceMod = 0;
+
+                // 4. Iterate and fire
+                foreach($allOrders as $currOrder){
+                     // Skip if somehow already rolled
+                     if($currOrder->rolled > 0) continue;
+
+                     // Calculate mod logic same as before but inside loop
+                     // If splitting shots, calculate modifier for this specific shot and apply it to fire order
+				     $mod = $this->getPrevShotHitChanceMod($this->shotsFiredSoFar);
+				     $currOrder->needed -= $mod;
+
+                     // Check broken chain
+                     if($this->hitChanceMod >= 10000){
+                         $currOrder->needed = 0;
+                         $currOrder->totalIntercept = 0; //Prevent weird log entries
+                         $currOrder->numInterceptors = 0;
+                         $currOrder->pubnotes .= "<br>Automatic miss due to previous miss in chain.";
+                     }
+
+                     // Execute
+                     parent::fire($gamedata, $currOrder);
+
+                     // Check if miss occurred to break chain
+                     if ($currOrder->shotshit < $currOrder->shots){
+                        $this->hitChanceMod = 10000;
+                     }
+
+                     // Update accumulator
+                     $this->shotsFiredSoFar += $currOrder->shots;
+                }
+                
+                // 5. Apply cooldown once for the volley
+                $this->applyCooldown($gamedata);
+            }
         }
 	    
-    /* applying cooldown when firing defensively, too
-    */
+    //applying cooldown when firing defensively, too
     public function fireDefensively($gamedata, $interceptedWeapon)
     {
 		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
@@ -718,22 +815,37 @@
 		parent::fireDefensively($gamedata, $interceptedWeapon);
     }
         
-        /*if previous shot missed, next one misses automatically*/
+        //if previous shot missed, next one misses automatically
         /*so if current mod is not equal to one of previous shot, then it's clearly a miss - return suitably high mod*/
         public function getShotHitChanceMod($shotInSequence){ 
-            $prevExpectedChance = $this->getPrevShotHitChanceMod($shotInSequence-1);
+            $effectiveShotIndex = $this->shotsFiredSoFar + $shotInSequence;
+            $prevExpectedChance = $this->getPrevShotHitChanceMod($effectiveShotIndex-1);
+            
             if($prevExpectedChance != $this->hitChanceMod){ //something missed in between
                 $this->hitChanceMod = 10000; //clear miss!!!
             }else{
-                $this->hitChanceMod = $this->getPrevShotHitChanceMod($shotInSequence);
+                $this->hitChanceMod = $this->getPrevShotHitChanceMod($effectiveShotIndex);
             }
-            return $this->hitChanceMod;
+            
+            //Subtract the modifier that was already applied to the FireOrder in fire()
+            //This avoids double-counting the penalty for the first shot(s) in the sequence
+            $baseMod = 0;
+            if($this->canSplitShots){
+                 $baseMod = $this->getPrevShotHitChanceMod($this->shotsFiredSoFar);
+            }
+            
+            return $this->hitChanceMod - $baseMod;
         }
         
         public function getPrevShotHitChanceMod($shotInSequence){ //just finds hit chance for a given shot - what it should be
             if($shotInSequence <=0) return 0;
-            if($shotInSequence ==1) return 5;
-            $mod= 5+10*($shotInSequence-2);
+            // Formula: No mod (0) on 1st shot (index 0). -1 (5) on 2nd (index 1). -2 (10) more on each subsequent.
+            // Index 0: 0
+            // Index 1: 5
+            // Index 2: 5 + 10 = 15
+            // Index 3: 5 + 20 = 25
+            
+            $mod = 5 + 10 * ($shotInSequence - 1);
             return $mod;
         }                
         
@@ -742,8 +854,8 @@
         }
         
         protected function doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location = null){ 
-            //if target is fighter flight, ensure that the same fighter is hit every time!
-            if($target instanceof FighterFlight){
+            //if target is fighter flight, ensure that the same fighter is hit every time if no Gunsights!
+            if($target instanceof FighterFlight && !$this->canSplitShots){
                 $fireOrder->linkedHit = $system;
             }            
             parent::doDamage($target, $shooter, $system, $damage, $fireOrder, $pos, $gamedata, $damageWasDealt, $location);
@@ -778,13 +890,6 @@
 	    
         public $animation = "bolt";
         public $animationColor = array(255, 163, 26);
-	    /*
-        public $trailColor = array(255, 163, 26);
-        public $animationExplosionScale = 0.30;
-        public $projectilespeed = 20;
-        public $animationWidth = 4;
-        public $trailLength = 30;
-        */
 	    
         public $loadingtime = 1;
         public $boostable = true;

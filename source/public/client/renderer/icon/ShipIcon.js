@@ -196,16 +196,20 @@ window.ShipIcon = function () {
             } else {
                 this.mesh.position.z = 0;
             }
-            if (!this.terrain) { //No sprite for Terrain  
+
+            // On mobile, if selected, don't hide sprites
+            if (window.matchMedia("(pointer: coarse)").matches && this.selected && !this.terrain) {
+                this.shipDirectionOfProwSprite.show();
+                this.shipDirectionOfMovementSprite.show();
+            } else if (!this.terrain) { //No sprite for Terrain  
                 this.shipDirectionOfProwSprite.hide();
                 this.shipDirectionOfMovementSprite.hide();
             }
         }
-
-        this.selected = value;
+        //this.selected = value; //Removed when I added code for mobile browsers to show direction sprites.        
     };
 
-    ShipIcon.prototype.setSelected = function (value) {
+    ShipIcon.prototype.setSelected = function (value, showMobileSprites) {
         if (!this.terrain) { // Don't show selection circle for terrain.
             if (value) {
                 this.ShipSelectedSprite.show();
@@ -217,6 +221,17 @@ window.ShipIcon = function () {
                     this.mesh.position.z = 0;
                 }
                 this.ShipSelectedSprite.hide();
+            }
+
+            // Mobile/Tablet specific logic: Show direction sprites on selection since there is no hover
+            if (window.matchMedia("(pointer: coarse)").matches) {
+                if (value && showMobileSprites === true) {
+                    this.shipDirectionOfProwSprite.show();
+                    this.shipDirectionOfMovementSprite.show();
+                } else {
+                    this.shipDirectionOfProwSprite.hide();
+                    this.shipDirectionOfMovementSprite.hide();
+                }
             }
         }
         this.selected = value;
@@ -690,29 +705,6 @@ window.ShipIcon = function () {
             this.mesh.remove(arc);
         }, this);
     };
-    /* //Old method for displaying BDEW as a circle - DK 12.2.25
-        ShipIcon.prototype.showBDEW = function () {
-    
-            var BDEW = ew.getBDEW(this.ship);
-            if (!BDEW || this.BDEWSprite){
-                return;
-            }
-    
-            var hexDistance = window.coordinateConverter.getHexDistance();
-            var dis = 20 * hexDistance;
-    
-            var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255,  157 / 255, 0 / 255);
-    
-            var geometry = new THREE.CircleGeometry(dis, 64, 0);
-            var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
-            var circle = new THREE.Mesh(geometry, material);
-            circle.position.z = -1;
-            this.mesh.add(circle);
-            this.BDEWSprite = circle;
-    
-            return null;
-        };
-    */
 
     ShipIcon.prototype.showBDEW = function () {
         var BDEW = ew.getBDEW(this.ship);
@@ -756,7 +748,13 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
     };
 
-    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size) {
+    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null) {
+
+        //Check if we already have a sprite for this system, if so, remove it.
+        if (this.shipHexagonSpritesMap.has(system)) {
+            this.removeTargetedHexagonInArc(system);
+        }
+
         var hexDistance = window.coordinateConverter.getHexDistance();
         var systemArcs = shipManager.systems.getArcs(shooter, system);
 
@@ -808,10 +806,17 @@ window.ShipIcon = function () {
         // Plane 2: End Edge. Point IN (CW -90).
         var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
         plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
+        if (color == null) {
+            color = new THREE.Color(0.1, 0.5, 0.1)
+        }
+
+        if (opacity == null) {
+            opacity = 0.3
+        }
 
         var hexMaterial = new THREE.MeshBasicMaterial({
-            color: new THREE.Color(0.1, 0.5, 0.1),
-            opacity: 0.3,
+            color: color,
+            opacity: opacity,
             transparent: true,
             side: THREE.DoubleSide,
             clippingPlanes: systemArcs.start !== systemArcs.end ? [plane1, plane2] : [],
@@ -832,8 +837,10 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.removeTargetedHexagonInArc = function (system) {
-        this.mesh.remove(this.shipHexagonSpritesMap.get(system));
-        this.shipHexagonSpritesMap.delete(system);
+        if (this.shipHexagonSpritesMap.has(system)) {
+            this.mesh.remove(this.shipHexagonSpritesMap.get(system));
+            this.shipHexagonSpritesMap.delete(system);
+        }
     }
 
     ShipIcon.prototype.removeHexagonArcs = function () {

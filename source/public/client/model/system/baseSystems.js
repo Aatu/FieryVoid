@@ -329,7 +329,8 @@ Stealth.prototype.isDetectedStealth = function (ship) {
         // Get distance to the stealth ship and check line of sight
         const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
         var loSBlocked = false;
-        var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+        //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+	    var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.		
         var shipPos = shipManager.getShipPosition(ship);
         var otherShipPos = shipManager.getShipPosition(otherShip);
         loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
@@ -1693,7 +1694,7 @@ ThirdspaceShieldGenerator.prototype.initializationUpdate = function () {
 
 	var boostCount = shipManager.power.getBoost(this); //Find any boost.
 	if (shieldCount > 0) boostCount = boostCount * shieldCount; //Multiply boost count by number of shields.
-	var totalOutput = this.output + boostCount; // Get total output. 		
+	this.totalOutput = this.output + boostCount; // Get total output. 		
 
 	if (gamedata.gamephase == 1) {
 		this.outputDisplay = this.storedCapacity;
@@ -1701,12 +1702,12 @@ ThirdspaceShieldGenerator.prototype.initializationUpdate = function () {
 		if (this.storedCapacity == 0) {
 			this.outputDisplay = '-'; //'0' is not shown!
 		}
-		this.data["Current Output "] = totalOutput;	//Update this to help show player how much they've boosted, since outputDisplay used for transferring.
+		this.data["Current Output "] = this.totalOutput;	//Update this to help show player how much they've boosted, since outputDisplay used for transferring.
 		this.data["Current Shield Power "] = currentShieldHealth;
 		this.data["Boosted by "] = boostCount;
 	} else {
-		this.outputDisplay = totalOutput;
-		this.data["Current Output"] = totalOutput;
+		this.outputDisplay = this.totalOutput;
+		this.data["Current Output"] = this.totalOutput;
 		this.data["Current Shield Power "] = currentShieldHealth;
 	}
 
@@ -2133,7 +2134,8 @@ ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
         // Get distance to the stealth ship and check line of sight
         const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
         var loSBlocked = false;
-        var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+        //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+	    var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.			
         var shipPos = shipManager.getShipPosition(ship);
         var otherShipPos = shipManager.getShipPosition(otherShip);
         loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // True is LoSBlocked          
@@ -2178,7 +2180,23 @@ FtrPetals.prototype.initializationUpdate = function () {
 			ship.armour[3] = 2; //Reduce side armour of fighters
 		}
 	} else{
-		this.outputDisplay = "-";		
+		this.outputDisplay = "-";
+		var ship = this.ship;
+		var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.			
+		//Incredibly specific here, but it avoids alot of issues trying to pass effects from server
+		if(ship.name == "VorlonHeavyFighterFlight"){
+			flight.forwardDefense = 7; 
+			flight.sideDefense = 9;
+			flight.freethrust = 14;
+			ship.armour[2] = 3; //Reduce side armour of fighters
+			ship.armour[3] = 3; //Reduce side armour of fighters			
+		}else if(ship.name == "VorlonAssaultFighterFlight"){
+			flight.forwardDefense = 10; 
+			flight.sideDefense = 12;
+			flight.freethrust = 13;
+			ship.armour[2] = 4; //Reduce side armour of fighters
+			ship.armour[3] = 4; //Reduce side armour of fighters
+		}			
 	}
 
 	this.data["Power Used"] = 'None';
@@ -2236,7 +2254,8 @@ FtrPetals.prototype.doDeactivate = function () {
 					var fighterSystem = system.systems[j];	//The fighter's systems.
 					if (fighterSystem.name == "FtrPetals") { //Is shading Field but not this one
 						if (fighterSystem.active) { //Is  boosted.
-							fighterSystem.active = false; //Set boost marker for notes.										
+							fighterSystem.active = false; //Set boost marker for notes.	
+																
 						}
 					}
 				}

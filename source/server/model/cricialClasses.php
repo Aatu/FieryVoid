@@ -50,7 +50,7 @@ class DisengagedFighter extends Critical{
 	
 
 class OutputHalved extends Critical{
-    public $description = "Output halved.";
+    public $description = "Output halved";
     public $outputModPercentage = -50; //output modified by -50%
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
@@ -67,7 +67,7 @@ class OutputHalvedOneTurn extends Critical{
 }
 	
 class OutputReduced extends Critical{
-    public $description = "Output reduced.";
+    public $description = "Output reduced";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
@@ -140,7 +140,7 @@ class OutputReduced10 extends OutputReduced1{
 }
 
 class PartialBurnout extends Critical{
-    public $description = "Efficiency halved.";
+    public $description = "Efficiency halved";
     public $outputMod = -0.5;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -148,7 +148,7 @@ class PartialBurnout extends Critical{
 }
 
 class SevereBurnout extends Critical{
-    public $description = "System non functional.";
+    public $description = "System non-functional";
     public $outputMod = -1;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -156,7 +156,7 @@ class SevereBurnout extends Critical{
 }
 
 class DamageReductionRemoved extends Critical{
-    public $description = "Damage reduction disabled.";
+    public $description = "Damage reduction disabled";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -179,7 +179,7 @@ class ForcedOfflineForTurns extends Critical{
 }
 
 class FirstThrustIgnored extends Critical{
-    public $description = "First point of channeled thrust is ignored.";
+    public $description = "First point of channeled thrust lost";
     public $outputMod = -1;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
@@ -187,7 +187,7 @@ class FirstThrustIgnored extends Critical{
 }
 
 class FirstThrustIgnoredOneTurn extends Critical{
-    public $description = "First point of channeled thrust is ignored.";
+    public $description = "First point of channeled thrust lost";
     public $outputMod = -1;    
     public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
@@ -196,7 +196,7 @@ class FirstThrustIgnoredOneTurn extends Critical{
 }
 
 class HalfEfficiency extends Critical{
-    public $description = "Two points of thrust required to channel one through.";
+    public $description = "Double thrust required";
     public $outputMod = 0;
     public $priority = 3; //nastiest of Thruster crits, so should be removed first!
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
@@ -205,21 +205,21 @@ class HalfEfficiency extends Critical{
 }
 
 class OSATThrusterCrit extends Critical{
-    public $description = "Can only turn once per turn.";
+    public $description = "Can only turn once per turn";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
 
 class AmmoExplosion extends Critical{
-    public $description = "Stored ammunition did explode.";
+    public $description = "Stored ammunition exploded";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
 
 class CommunicationsDisruptedOneTurn extends Critical{
-    public $description = "Communications disrupted. -5 Initiative";
+    public $description = "Comms disrupted. -5 Initiative";
     public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -227,7 +227,7 @@ class CommunicationsDisruptedOneTurn extends Critical{
 }
 
 class CommunicationsDisrupted extends Critical{
-    public $description = "Communications disrupted. -5 Initiative.";
+    public $description = "Comms disrupted. -5 Initiative";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -242,14 +242,14 @@ class PenaltyToHitOneTurn extends Critical{
 }
 
 class PenaltyToHit extends Critical{
-    public $description = "-1 penalty to hit for all weapons.";
+    public $description = "-1 penalty to hit for all weapons";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
 
 class RestrictedEWOneTurn extends Critical{
-    public $description = "-2 EW. May use no more than half of its EW offensively";
+    public $description = "-2 EW. Only up to half EW offensively";
     public $oneturn = true;
 //	public $priority = 1; //probably the nastiest C&C crit, to be fixed at first priority
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
@@ -258,7 +258,7 @@ class RestrictedEWOneTurn extends Critical{
 }
 
 class RestrictedEW extends Critical{
-    public $description = "-2 EW. May use no more than half of its EW offensively.";
+    public $description = "-2 EW. Only up to half EW offensively";
 	public $priority = 1; //probably the nastiest C&C crit, to be fixed at first priority
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -274,7 +274,7 @@ class ReducedIniativeOneTurn extends Critical{
 }
 
 class ReducedIniative extends Critical{
-    public $description = "-10 Initiative.";
+    public $description = "-10 Initiative";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -289,21 +289,21 @@ class ShipDisabledOneTurn extends Critical{
 }
 
 class ShipDisabled extends Critical{
-    public $description = "Ship disabled.";
+    public $description = "Ship disabled";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
 //Reduces $rangePenalty
 class ReducedRange extends Critical{
-    public $description = "Range penalty increased.";
+    public $description = "Range penalty increased";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
 
 class ReducedDamage extends Critical{
-    public $description = "Damage reduced.";
+    public $description = "Damage reduced";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -311,7 +311,7 @@ class ReducedDamage extends Critical{
 
 //Antimatter has special ReducedRange critical
 class ReducedRangeAntimatter extends Critical{
-    public $description = "Range penalty increased.";//increase range by 3
+    public $description = "Range penalty increased";//increase range by 3
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -319,7 +319,7 @@ class ReducedRangeAntimatter extends Critical{
 
 //Reduces $range
 class ReducedRangeValue extends Critical{
-    public $description = "Offensive mode range reduced.";//decrease range by 2
+    public $description = "Offensive mode range reduced";//decrease range by 2
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -327,14 +327,14 @@ class ReducedRangeValue extends Critical{
 
 //Antimatter has special ReducedDamage critical
 class ReducedDamageAntimatter extends Critical{
-    public $description = "Damage reduced."; //reduce X by 2 (not below 0)
+    public $description = "Damage reduced"; //reduce X by 2 (not below 0)
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
 
 class ArmorReduced extends Critical{
-    public $description = "Armor reduced.";
+    public $description = "Armor reduced";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -342,7 +342,7 @@ class ArmorReduced extends Critical{
 
 
 class FieldFluctuations extends Critical{ /*reduced power output for MagGrav Reactor*/
-    public $description = "Field Fluctuations (-10% Power).";
+    public $description = "Field Fluctuations (-10% Power)";
     public $outputModPercentage = -10; //output modified by -10%
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -351,7 +351,7 @@ class FieldFluctuations extends Critical{ /*reduced power output for MagGrav Rea
 
 
 class GravThrusterCritIgnored extends Critical{ /*Gravitic Thruster - first critical is ignored*/
-    public $description = "Critical damage negated.";
+    public $description = "Critical damage negated";
 	public $priority = 6; //in itself does nothing, last priority to fix
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -360,7 +360,7 @@ class GravThrusterCritIgnored extends Critical{ /*Gravitic Thruster - first crit
 
 
 class swtargetheld extends Critical{ /*next turn target is being held by tractor beam!*/
-    public $description = "Held by tractor beam! Reduced Initiative (-20/hit) and remaining thrust (-1/hit).";
+    public $description = "Held by tractor beam! Reduced Initiative (-20/hit) and remaining thrust (-1/hit)";
     public $oneturn = true;		
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -370,7 +370,7 @@ class swtargetheld extends Critical{ /*next turn target is being held by tractor
 
 
 class tmpsensordown extends Critical{ /*next turn target Sensors/OB are down by 1, to a minimum of 0 - place on C&C or FIRST FIGHTER! (may be destroyed)!*/
-    public $description = "-1 Sensors/OB.";
+    public $description = "-1 Sensors/OB";
     public $oneturn = true;		
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -378,7 +378,7 @@ class tmpsensordown extends Critical{ /*next turn target Sensors/OB are down by 
 }
 
 class tmpinidown extends Critical{ /*next turn target Initiative is down by 1, to a minimum of 0 - place on C&C or FIRST FIGHTER! (may be destroyed)!*/
-    public $description = "-5 Initiative."; //-1 in d20 system
+    public $description = "-5 Initiative"; //-1 in d20 system
     public $oneturn = true;		
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend =0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -387,7 +387,7 @@ class tmpinidown extends Critical{ /*next turn target Initiative is down by 1, t
 
 
 class tmppowerdown extends Critical{ /*next turn target Power is down by 1 - place on C&C (may be destroyed)!*/
-    public $description = "-1 Power."; 
+    public $description = "-1 Power"; 
     public $oneturn = true;		
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -396,7 +396,7 @@ class tmppowerdown extends Critical{ /*next turn target Power is down by 1 - pla
 
 
 class tmphitreduction extends Critical{ /*immediate reduction in target's chance to hit for all fire*/
-    public $description = "Chaff Missile Hit! -15% chance to hit to all fire, except ballistics.";
+    public $description = "Chaff Missile Hit! -15% chance to hit to all fire, except ballistics";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -405,7 +405,7 @@ class tmphitreduction extends Critical{ /*immediate reduction in target's chance
 
 
 class TendrilDestroyed extends Critical{
-    public $description = "Tendril destroyed.";
+    public $description = "Tendril destroyed";
 	public $repairPriority = 0; //cannot be fixed
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -413,14 +413,14 @@ class TendrilDestroyed extends Critical{
 }
 
 class TendrilCapacityReduced extends Critical{
-    public $description = "Capacity of all tendrils reduced by 2.";
+    public $description = "Capacity of all tendrils reduced by 2";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
 }
 
 class ShadowPilotPain extends Critical{
-    public $description = "Pilot feels pain."; //-1 penalty on weapons fire, has a -1 penalty to initiative and loses 1 point of free thrust
+    public $description = "Pilot feels pain"; //-1 penalty on weapons fire, has a -1 penalty to initiative and loses 1 point of free thrust
 	public $repairPriority = 0; //cannot be fixed
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -429,7 +429,7 @@ class ShadowPilotPain extends Critical{
 
 
 class ChargeHalve extends Critical{ //charge halved - instant effect, to be received in appropriate crit-phase method; no lasting effect
-    public $description = "Stored power is halved.";
+    public $description = "Stored power is halved";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
 		$turnend=$turn;//ALWAYS - immediate end of effect! 
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -437,7 +437,7 @@ class ChargeHalve extends Critical{ //charge halved - instant effect, to be rece
 }
 
 class ChargeEmpty extends Critical{ //charge emptied - instant effect, to be received in appropriate crit-phase method; no lasting effect
-    public $description = "Stored power is lost.";
+    public $description = "Stored power is lost";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
 		$turnend=$turn;//ALWAYS - immediate end of effect! 
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -447,7 +447,7 @@ class ChargeEmpty extends Critical{ //charge emptied - instant effect, to be rec
 //for Reactor - it will check for explosion every turn (including turn the critical was added, as officially this is done at start of turn; in FV there is no option to voluntarily shut down the Reactor to prevent that)
 //-10 Power that comes with the crit officially will be applied as a separate critical
 class ContainmentBreach extends Critical{
-     public $description = "Containment Breach!";
+     public $description = "Containment Breach";
 	public $repairCost = 2;
 	public $repairPriority = 9; //it's REALLY important to prevent reactor explosion :)
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
@@ -457,7 +457,7 @@ class ContainmentBreach extends Critical{
 
 class SensorLoss extends Critical{
 	//Used by the Cylon Hybrid
-    public $description = "Sensor loss: -3 EW.";
+    public $description = "Sensor loss: -3 EW";
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -465,7 +465,7 @@ class SensorLoss extends Critical{
 
 class LimpetBore extends Critical{
 	//Used by the Limpet Bore Torpedo
-    public $description = "Limpet Bore attached to system."; 
+    public $description = "Limpet Bore attached to system"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
 		if($turnend == 0) $turnend = $turn + 4;    	
@@ -493,7 +493,7 @@ class MayOverheat extends Critical {
 
 class Sabotage extends Critical{
 	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
-    public $description = "Enemy marine unit is undertaking sabotage operations."; 
+    public $description = "Enemy marine unit is undertaking sabotage operations"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
@@ -502,7 +502,7 @@ class Sabotage extends Critical{
 
 class SabotageElite extends Critical{
 	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
-    public $description = "Elite marine unit is undertaking sabotage operations."; 
+    public $description = "Elite marine unit is undertaking sabotage operations"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
@@ -511,7 +511,7 @@ class SabotageElite extends Critical{
 
 class ProfileIncreased extends Critical{
 	//Used to increase ship profiles during firing, and make them easier to hit.
-    public $description = "Ship defence profile increased.";      
+    public $description = "Ship defence profile increased";      
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }
@@ -519,7 +519,7 @@ class ProfileIncreased extends Critical{
 
 class CaptureShip extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "Enemy marines are attempting to capture this ship."; 
+    public $description = "Enemy marines are attempting to capture this ship"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
@@ -528,7 +528,7 @@ class CaptureShip extends Critical{
 
 class CaptureShipElite extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "Elite marines are attempting to capture this ship."; 
+    public $description = "Elite marines are attempting to capture this ship"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
@@ -537,7 +537,7 @@ class CaptureShipElite extends Critical{
 
 class RescueMission extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "An Marine unit is conducting a rescue mission."; 
+    public $description = "An Marine unit is conducting a rescue mission"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
@@ -546,7 +546,7 @@ class RescueMission extends Critical{
 
 class RescueMissionElite extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "An elite Marine unit is conducting a rescue mission."; 
+    public $description = "An elite Marine unit is conducting a rescue mission"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
@@ -555,7 +555,7 @@ class RescueMissionElite extends Critical{
 
 class DefenderLost extends Critical{
 	//To record when defending marines are killed.
-    public $description = "Defender lost."; 
+    public $description = "Defender lost"; 
 	public $repairPriority = 0;//Can't repair.'       
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );

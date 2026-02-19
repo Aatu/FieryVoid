@@ -55,7 +55,7 @@ class ThirdspaceAttackCraft extends LCV{ //Actually an LCV.
 //	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 //	$this->addFrontSystem(new PsionicConcentrator(5, 0, 0, 300, 150));
 			
-	$this->addPrimarySystem(new ThirdspaceShield(2, 60, 60, 0, 360, 'C'));
+	$this->addPrimarySystem(new ThirdspaceShield(0, 60, 60, 0, 360, 'C'));
 				
 	$this->addPrimarySystem(new Structure( 5, 36));
 	    

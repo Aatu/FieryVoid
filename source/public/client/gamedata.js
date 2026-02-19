@@ -25,7 +25,7 @@ window.gamedata = {
     replay: false,
     playAudio: true, //To allow toggling of audio during Replay.    
     showLoS: false,
-
+    blockedHexes: Array(),
 
     mouseOverShipId: -1,
 
@@ -1582,6 +1582,7 @@ getActiveShipName: function getActiveShipName() {
         gamedata.status = serverdata.status;
         gamedata.elintShips = Array();
         gamedata.gamespace = serverdata.gamespace;
+        gamedata.blockedHexes = serverdata.blockedHexes;
 
         shipManager.initiated = 0;
 

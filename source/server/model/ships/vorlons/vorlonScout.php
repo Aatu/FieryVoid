@@ -12,7 +12,7 @@ class VorlonScout extends HeavyCombatVessel{
         $this->occurence = "uncommon";
 		
         $this->imagePath = "img/ships/VorlonBattleDestroyer.png";
-        $this->canvasSize = 200;
+        $this->canvasSize = 190;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 2; 
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
