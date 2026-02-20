@@ -12036,7 +12036,7 @@ window.InitialPhaseStrategy = function () {
     InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
 
-        //Method to double click to instand select, or single select and get EW/Firing Menus
+        //Method to double click to instant own ships always, or single select and get EW/Firing Menus for ELINTs, Hex Weapons and alliedEW weapons 
         if (this.lastClickedShipId === ship.id && gamedata.isMyShip(ship) && this.selectedShip !== ship) {
             PhaseStrategy.prototype.setSelectedShip.call(this, ship);
             this.showShipEW(this.selectedShip);
@@ -12046,19 +12046,20 @@ window.InitialPhaseStrategy = function () {
 
         this.lastClickedShipId = ship.id;
 
-        if (this.selectedShip && shipManager.isElint(this.selectedShip) && ship !== this.selectedShip) {
-            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);            
-            menu.addButton("selectShip",
-                function () {
-                    return this.selectedShip !== ship;
-                },
-                function () {
-                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-                    this.showShipEW(this.selectedShip);
-                }.bind(this), "Select ship");
-            this.showShipEW(this.selectedShip);
-        } else if (gamedata.isMyShip(ship)) {
-            //PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+        var hexWeaponSelected = gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.hextarget === true;
+        });
+
+        var isElintOrAlliedEW = this.selectedShip && (shipManager.isElint(this.selectedShip) || shipManager.hasSpecialAbility(this.selectedShip, "alliedEW"));
+        var friendlyFireActive = gamedata.rules && gamedata.rules.friendlyFire === 1;
+        var clickedFriendly = gamedata.isMyorMyTeamShip(ship);
+
+        // Add selectShip and don't instant target for:
+        // - ELINT or alliedEW weapons
+        // - Friendly ships when you have a hex weapon selected, or Friendly Fire rules are in effect
+        if (this.selectedShip && ship !== this.selectedShip &&
+            (isElintOrAlliedEW || (clickedFriendly && (hexWeaponSelected || friendlyFireActive)))) {
+
             var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
             menu.addButton("selectShip",
                 function () {
@@ -12068,6 +12069,13 @@ window.InitialPhaseStrategy = function () {
                     PhaseStrategy.prototype.setSelectedShip.call(this, ship);
                     this.showShipEW(this.selectedShip);
                 }.bind(this), "Select ship");
+
+            this.showShipEW(this.selectedShip);
+
+            // Default select ship if it's one of your own.        
+        } else if (gamedata.isMyShip(ship)) {
+            PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
             this.showShipEW(this.selectedShip);
         }
 
@@ -14134,33 +14142,33 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipInitialOrdersMenu.buttons = [
-        { className: "addCCEW", condition: [isSelf, notFlight], action: addCCEW, info: "Add CCEW" }, 
-        { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" }, 
-        //{ className: "addOEW", condition: [isEnemy, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
-        //{ className: "removeOEW", condition: [isEnemy, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
-        //{ className: "addDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        //{ className: "removeDIST", condition: [isEnemy, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },         
-        { className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
-        { className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
-        { className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        { className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
-        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" }, 
-        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" }, 
-        { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" }, 
-        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" }, 
-        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW" }, 
+        { className: "addCCEW", condition: [isSelf, notFlight], action: addCCEW, info: "Add CCEW" },
+        { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" },
+        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: addOEW, info: "Add OEW" },
+        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
+        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
+        { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
+        //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
+        //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
+        //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
+        //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
+        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" },
+        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" },
+        { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" },
+        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" },
+        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW" },
         { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, hasBDEW], action: removeBDEW, info: "Remove BDEW" },
-        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW], action: addDetectSEW, info: "Add Detect Stealth" }, 
-        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, hasDSEW], action: removeDetectSEW, info: "Remove Detect Stealth" },    
-        { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" }, 
-        { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" }, 
+        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW], action: addDetectSEW, info: "Add Detect Stealth" },
+        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, hasDSEW], action: removeDetectSEW, info: "Remove Detect Stealth" },
+        { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" },
+        { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
-		{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firig Order" } 		
+        { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
+        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
         //{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        //{ className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firig Order" } 				        
+        //{ className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" } 				        
     ];
-    
+
 
     ShipTooltipInitialOrdersMenu.prototype.getAllButtons = function () {
         return ShipTooltipInitialOrdersMenu.buttons.concat(ShipTooltipMenu.prototype.getAllButtons.call(this));
@@ -14173,11 +14181,11 @@ window.ShipTooltipInitialOrdersMenu = function () {
         });
     }
 
-	function hasSplitWeaponFiringOrder() {
-	    return gamedata.selectedSystems.some(function (system) {
-	        return system instanceof Weapon && system.canSplitShots && weaponManager.hasTargetedThisShip(this.targetedShip, system);
-	    }.bind(this)); // Bind `this` to the callback
-	}
+    function hasSplitWeaponFiringOrder() {
+        return gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.canSplitShots && weaponManager.hasTargetedThisShip(this.targetedShip, system);
+        }.bind(this)); // Bind `this` to the callback
+    }
 
     function hasHexWeaponsSelected() {
         return gamedata.selectedSystems.some(function (system) {
@@ -14194,19 +14202,21 @@ window.ShipTooltipInitialOrdersMenu = function () {
         weaponManager.targetHex(this.selectedShip, this.hexagon);
     }
 
-	function removeFiringOrderMulti(){
-	    // Loop through selected systems and check for systems that have canSplitShots set to true
-	    gamedata.selectedSystems.forEach(function(system) {
-	        if (system.canSplitShots) {
-	            // Call weaponManager.removeFiringOrderMulti for each system that meets the condition
-	            weaponManager.removeFiringOrderMulti(this.selectedShip, system, this.targetedShip, true);
-	        }
-	    }, this); // Make sure to bind `this` so that `this.selectedShip` is correct
-	}
+    function removeFiringOrderMulti() {
+        // Loop through selected systems and check for systems that have canSplitShots set to true
+        gamedata.selectedSystems.forEach(function (system) {
+            if (system.canSplitShots) {
+                // Call weaponManager.removeFiringOrderMulti for each system that meets the condition
+                weaponManager.removeFiringOrderMulti(this.selectedShip, system, this.targetedShip, true);
+            }
+        }, this); // Make sure to bind `this` so that `this.selectedShip` is correct
+    }
 
     function FFWeaponSelected() {
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) return true; //To let ballistics target
+
         return gamedata.selectedSystems.some(system => {
-            return system.canTargetAllies === true || system.canTargetAll === true ||  (gamedata.rules && gamedata.rules.friendlyFire  === 1);
+            return system.canTargetAllies === true || system.canTargetAll === true;
         });
     }
 
@@ -14256,8 +14266,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
         var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Stealth", this.turn);
         if (!entry) return;
         ew.deassignEW(this.selectedShip, entry);
-    }    
-    
+    }
+
     function removeAllEW() {
         ew.removeEW(this.selectedShip);
     }
@@ -14312,6 +14322,19 @@ window.ShipTooltipInitialOrdersMenu = function () {
         return this.selectedShip && !gamedata.isMyorMyTeamShip(this.targetedShip);
     }
 
+    function isEnemyEW() {
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) return true;
+        if (shipManager.hasSpecialAbility(this.selectedShip, "alliedEW")) return true;
+
+        var hexWeaponSelected = gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.hextarget === true;
+        });
+
+        if (hexWeaponSelected) return true;
+
+        return this.selectedShip && !gamedata.isMyorMyTeamShip(this.targetedShip);
+    }
+
     function isFriendly() {
         return gamedata.isMyorMyTeamShip(this.targetedShip);
     }
@@ -14323,11 +14346,11 @@ window.ShipTooltipInitialOrdersMenu = function () {
     function notFlight() {
         return (!this.selectedShip || !this.selectedShip.flight) && (!this.targetedShip || !this.targetedShip.flight);
     }
-	
+
     function sourceNotFlight() {
         return (!this.selectedShip || !this.selectedShip.flight);
     }
-	
+
     function targetNotFlight() {
         return (!this.targetedShip || !this.targetedShip.flight);
     }
@@ -14348,14 +14371,14 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     function hasOEW() { return ew.getEWByType("OEW", this.selectedShip, this.targetedShip) > 0; }
     function hasCCEW() { return ew.getEWByType("CCEW", this.selectedShip) > 0; }
-    function hasSDEW() { return ew.getEWByType("SDEW", this.selectedShip, this.targetedShip) > 0; }    
+    function hasSDEW() { return ew.getEWByType("SDEW", this.selectedShip, this.targetedShip) > 0; }
     function hasSOEW() { return ew.getEWByType("SOEW", this.selectedShip, this.targetedShip) > 0; }
     function hasBDEW() { return ew.getEWByType("BDEW", this.selectedShip) > 0; }
     function hasDIST() { return ew.getEWByType("DIST", this.selectedShip, this.targetedShip) > 0; }
     function hasDSEW() { return ew.getEWByType("Detect Stealth", this.selectedShip) > 0; }
-		
+
     function advSensorsCheck() { /*check whether source ship has Advanced Sensors OR target ship does NOT have Advanced Sensors*/
-	return ( shipManager.hasSpecialAbility(this.selectedShip, "AdvancedSensors") || (!(shipManager.hasSpecialAbility(this.targetedShip, "AdvancedSensors"))) ) 
+        return (shipManager.hasSpecialAbility(this.selectedShip, "AdvancedSensors") || (!(shipManager.hasSpecialAbility(this.targetedShip, "AdvancedSensors"))))
     }
 
     return ShipTooltipInitialOrdersMenu;

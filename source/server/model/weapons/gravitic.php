@@ -912,7 +912,7 @@ class GraviticShifter extends Weapon implements SpecialAbility{
     public $animationColor = array(99, 255, 00);	
     public $animationExplosionScale = 0.3; //single hex explosion
     public $priority = 1;    
-	public $specialAbilities = array("PreFiring");
+	public $specialAbilities = array("PreFiring", "alliedEW");
 	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
 	public $damageType = "Standard"; //irrelevant, really
 	public $weaponClass = "Gravitic";
@@ -1052,7 +1052,7 @@ class GravityNet extends Weapon implements SpecialAbility{
     public $priority = 1; 
 	public $hextarget = false; //Toggle to switch between hexTarget and normalTarget modes
 	public $hidetarget = true;   
-	public $specialAbilities = array("PreFiring");
+	public $specialAbilities = array("PreFiring", "alliedEW");
 	public $specialAbilityValue = true; //so it is actually recognized as special ability!  		
 	public $damageType = "Standard"; //irrelevant, really
 	public $weaponClass = "Gravitic";
