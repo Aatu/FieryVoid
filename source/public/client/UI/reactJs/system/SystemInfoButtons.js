@@ -23,6 +23,7 @@ const Button = styled.div`
 	background-size: cover;
 	align-items: center;
     justify-content: center;
+    mix-blend-mode: ${props => props.$blend || 'normal'};
     ${Clickable}
 `;
 
@@ -203,6 +204,21 @@ class SystemInfoButtons extends React.Component {
 	}
 
 
+
+	selectAllWeapons(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		weaponManager.selectAllWeapons(ship, system, "forceSelect");
+		webglScene.customEvent('CloseSystemInfo');
+	}
+
+	deselectAllWeapons(e) {
+		e.stopPropagation(); e.preventDefault();
+		const { ship, system } = this.props;
+		weaponManager.selectAllWeapons(ship, system, "forceDeselect");
+		webglScene.customEvent('CloseSystemInfo');
+	}
+
 	/*declare this weapon to be eligible for defensive fire this turn*/
 	declareSelfIntercept(e) {
 		e.stopPropagation(); e.preventDefault();
@@ -306,7 +322,7 @@ class SystemInfoButtons extends React.Component {
 						}
 					}
 				}
-
+	
 			} else {
 				for (var iSys = 0; iSys < otherUnit.systems.length; iSys++) {
 					var ctrl = otherUnit.systems[iSys];
@@ -317,7 +333,7 @@ class SystemInfoButtons extends React.Component {
 				}
 			}
 		}
-
+	
 		//for each Controller: set allocated level to desired if possible
 		for (var c = 0; c < allOwnAA.length; c++) {
 			var ctrl = allOwnAA[c];
@@ -329,7 +345,7 @@ class SystemInfoButtons extends React.Component {
 				ctrl.doIncrease();
 			}
 		}
-
+	
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 	*/
@@ -342,14 +358,14 @@ class SystemInfoButtons extends React.Component {
 		system.doIncrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
+	
 	BFCPdecrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doDecrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
+	
 	BFCPpropagate(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -373,7 +389,7 @@ class SystemInfoButtons extends React.Component {
 						}
 					}
 				}
-
+	
 			} else {
 				for (var iSys = 0; iSys < otherUnit.systems.length; iSys++) {
 					var ctrl = otherUnit.systems[iSys];
@@ -384,7 +400,7 @@ class SystemInfoButtons extends React.Component {
 				}
 			}
 		}
-
+	
 		//for each Computer: set allocated level to desired if possible
 		for (var c = 0; c < allOwnBFCP.length; c++) {
 			var ctrl = allOwnBFCP[c];
@@ -396,7 +412,7 @@ class SystemInfoButtons extends React.Component {
 				ctrl.doIncrease();
 			}
 		}
-
+	
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 	*/
@@ -414,14 +430,14 @@ class SystemInfoButtons extends React.Component {
 		system.doUnselect();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
+	
 	Specincrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doUse();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
+	
 	Specdecrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -455,7 +471,7 @@ class SystemInfoButtons extends React.Component {
 		system.doIncrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
+	
 	TSShieldDecrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -480,15 +496,15 @@ class SystemInfoButtons extends React.Component {
 		system.doDecrease25();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
+	
 	TSShieldGenSelect(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doSelect();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
-
+	
+	
 	ThoughtShieldGenSelect(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -521,6 +537,9 @@ class SystemInfoButtons extends React.Component {
 				{canChangeFiringMode(ship, system) && <FiringModeSelector ship={ship} system={system} />}
 				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
 				{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
+
+				{canSelectAllWeapons(ship, system) && <Button title="Select all weapons of this type" onClick={this.selectAllWeapons.bind(this)} img="./img/selectAllWeapons.png" $blend="screen"></Button>}
+				{canSelectAllWeapons(ship, system) && <Button title="Deselect all weapons of this type" onClick={this.deselectAllWeapons.bind(this)} img="./img/deselectAllWeapons.png" $blend="screen"></Button>}
 
 				{canActivate(ship, system) && <Button title="Activate" onClick={this.activate.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
 				{canDeactivate(ship, system) && <Button title="Deactivate" onClick={this.deactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}
@@ -600,6 +619,18 @@ class SystemInfoButtons extends React.Component {
 	}
 }
 
+// Check if this is a touch device, the system is a weapon, and it can be fired this phase
+const canSelectAllWeapons = (ship, system) => {
+	if (!window.matchMedia("(pointer: coarse)").matches) return false;
+	if (!system.weapon) return false;
+
+	if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) return false;
+	if (gamedata.gamephase != 1 && system.ballistic) return false;
+	if (gamedata.gamephase != 5 && system.preFires) return false;
+
+	return true;
+};
+
 //can do something with Adaptive Armor Controller
 const canAA = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'adaptiveArmorController');
 const canAAdisplayCurrClass = (ship, system) => canAA(ship, system) && system.getCurrClass() != '';
@@ -664,7 +695,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 	|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
-	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system);
+	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSelectAllWeapons(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
@@ -684,17 +715,17 @@ const isBoostPhase = (system) => {
 	if (system.boostOtherPhases.length > 0) {
 		return system.boostOtherPhases.includes(gamedata.gamephase);
 	}
-
+	
 	// Default: only in phase 1
 	return gamedata.gamephase === 1;
 };
-
+	
 const canBoost = (ship, system) =>
 	system.boostable &&
 	isBoostPhase(system) &&
 	shipManager.power.canBoost(ship, system) &&
 	(!system.isScanner() || system.id === shipManager.power.getHighestSensorsId(ship));
-
+	
 const canDeBoost = (ship, system) =>
 	isBoostPhase(system) && 
 	shipManager.power.canDeboost(ship, system) && 
@@ -713,8 +744,8 @@ const canChangeFiringMode = (ship, system) => system.weapon && ((gamedata.gameph
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
 const canRemIntercept = (ship, system) => system.weapon && weaponManager.canRemInterceptSingle(ship, system);
 
-const canActivate = (ship, system) => system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
-const canDeactivate = (ship, system) => system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
+const canActivate = (ship, system) => system.canActivate && typeof system.canActivate === 'function' && system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
+const canDeactivate = (ship, system) => system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
 
 const canPowerCapacitor = (ship, system) => {
 	if (system.name === 'powerCapacitor' || system.name === 'PowerCapacitor') {

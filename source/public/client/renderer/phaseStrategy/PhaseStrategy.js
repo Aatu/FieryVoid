@@ -654,9 +654,13 @@ window.PhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
         var element = payload.element;
-        //systemInfo.showSystemInfo(element, weapon, ship, this.selectedShip);
+        var showInfo = payload.showInfo !== false;
 
-        this.showSystemInfo(ship, system, element, false);
+        if (showInfo) {
+            this.showSystemInfo(ship, system, element, false);
+        } else {
+            this.hideSystemInfo();
+        }
 
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
