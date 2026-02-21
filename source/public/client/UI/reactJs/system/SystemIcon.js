@@ -203,6 +203,7 @@ class SystemIcon extends React.Component {
     }
 
     onTouchStart(event) {
+        event.stopPropagation();
         this.touchActive = true;
         this.ignoreNextClick = false;
 
@@ -233,6 +234,7 @@ class SystemIcon extends React.Component {
     }
 
     onTouchMove(event) {
+        event.stopPropagation();
         if (!this.longPressTimer) return;
 
         const touch = event.touches[0];
@@ -247,6 +249,7 @@ class SystemIcon extends React.Component {
     }
 
     onTouchEnd(event) {
+        event.stopPropagation();
         if (this.longPressTimer) {
             // Timer didn't pop, meaning this was a short tap
             clearTimeout(this.longPressTimer);
