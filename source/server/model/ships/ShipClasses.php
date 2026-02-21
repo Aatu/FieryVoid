@@ -37,6 +37,7 @@ class BaseShip {
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
+    public $messageOP = array(); //Used by fleet checker to give specific warnings about some fleet choices e.g. Warlock, e-mines.
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;

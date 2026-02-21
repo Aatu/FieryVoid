@@ -24,6 +24,8 @@ class Gtal extends BaseShip{
         $this->pivotcost = 2;
         $this->iniativebonus = 5;
 	    $this->notes = "Provides +5 Initiative for all friendly Narn units";
+
+		$this->messageOP = array(2 => 'Taking more than 6 Energy Mines moves a fleet into Superior Tier.');  		
         
         $this->addPrimarySystem(new Reactor(6, 25, 0, 2));
         $this->addPrimarySystem(new CnC(7, 24, 0, 0));
