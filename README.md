@@ -49,3 +49,5 @@ Run the command:
 yarn run optimize-images
 
 Use ‘?v=2’ after png to force image refresh.
+
+As images are now saved in Index mode, if you want to edit them you'll need to change to RGB mode (otherwise you lose alot of functionality).  In GIMP this is easily via by Image->Mode->RGB.
