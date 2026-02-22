@@ -2102,8 +2102,12 @@ class FlagBridge extends CnC implements SpecialAbility {
             }
 
             // Check specific Faction matching
-            if (!$flagBridge->worksOnAllFactions) {
+            if ($flagBridge->worksOnAllFactions === false) {
                 if ($thisShip->faction !== $ship->faction) continue;
+            } elseif (is_array($flagBridge->worksOnAllFactions)) {
+                if (!in_array($thisShip->faction, $flagBridge->worksOnAllFactions)) continue;
+            } elseif (is_string($flagBridge->worksOnAllFactions)) {
+                if ($thisShip->faction !== $flagBridge->worksOnAllFactions) continue;
             }
 
             // Check Fighter vs Ship restriction
@@ -2158,8 +2162,12 @@ class FlagBridge extends CnC implements SpecialAbility {
         if (!$this->worksOnAllies) {
             $this->data["Special"] .= "<br>Only affects units from your own fleet.";
         }
-        if (!$this->worksOnAllFactions) {
+        if ($this->worksOnAllFactions === false) {
             $this->data["Special"] .= "<br>Only affects units matching this ship's faction.";
+        } elseif (is_array($this->worksOnAllFactions)) {
+            $this->data["Special"] .= "<br>Only affects units from these factions: " . implode(", ", $this->worksOnAllFactions) . ".";
+        } elseif (is_string($this->worksOnAllFactions)) {
+            $this->data["Special"] .= "<br>Only affects units from faction: " . $this->worksOnAllFactions . ".";
         }
         $this->data["Special"] .= "<br>Bonus type: " . $this->bonusType . " (Bonuses of the same type do not stack).";
     }

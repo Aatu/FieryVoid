@@ -31,7 +31,7 @@ class Poseidon extends BaseShip{
 
 		$this->addPrimarySystem(new Reactor(5, 28, 0, 0));
 		//$this->addPrimarySystem(new CnC(6, 24, 0, 0));
-		$this->addPrimarySystem(new FlagBridge(6, 24, 0, 1, 'EA Command Bonus', 60,  true, true, true, false));				
+		$this->addPrimarySystem(new FlagBridge(6, 24, 0, 1, 'EA Command Bonus', 60,  true, true, true, false, array("Earth Alliance", "Earth Alliance (early)")));				
 		$this->addPrimarySystem(new Scanner(5, 20, 3, 8));
 		$this->addPrimarySystem(new Engine(6, 25, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(5, 2));
