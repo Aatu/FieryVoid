@@ -29,7 +29,8 @@ class Udran extends BaseShip{
 
 
         $this->addPrimarySystem(new Reactor(7, 25, 0, 4));
-        $this->addPrimarySystem(new CnC(7, 24, 0, 1));
+        //$this->addPrimarySystem(new CnC(7, 24, 0, 1));
+		$this->addPrimarySystem(new FlagBridge(7, 24, 0, 1, 'Yolu Command Bonus', 60,  true, true, true, false));        
         $this->addPrimarySystem(new Scanner(6, 28, 5, 13));
         $this->addPrimarySystem(new Engine(7, 25, 0, 12, 6));
         $this->addPrimarySystem(new Hangar(5, 2, 6));

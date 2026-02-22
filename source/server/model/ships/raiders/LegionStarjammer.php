@@ -15,7 +15,7 @@ class LegionStarjammer extends BaseShip{
         $this->fighters = array("heavy"=>12);
 
 		$this->notes = "Used only by the Imperial Star Legion";
-		$this->notes .= "<br>Provides +5 initiative to all friendly Raider units within 5 hexes.";
+		$this->notes .= "<br>Provides +5 initiative to friendly Raider units within 5 hexes.";
         
 		$this->isd = 2267;
 
@@ -31,7 +31,8 @@ class LegionStarjammer extends BaseShip{
 		$this->iniativebonus = 5;
    
         $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 16, 0, 1));
+        //$this->addPrimarySystem(new CnC(5, 16, 0, 1));
+		$this->addPrimarySystem(new FlagBridge(5, 16, 0, 1, 'ISL Command Bonus', 5,  true, true, true, false));				
         $this->addPrimarySystem(new Scanner(5, 17, 5, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
         $this->addPrimarySystem(new Hangar(5, 14));

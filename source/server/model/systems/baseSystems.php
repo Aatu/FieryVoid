@@ -2013,6 +2013,159 @@ class SecondaryCnC extends ShipSystem{
 	
 }//endof class SecondaryCnC
 
+class FlagBridge extends CnC implements SpecialAbility {
+    public $name = "cnC";
+    public $displayName = "CnC";
+    
+    public $initiativeBonus = 1;
+    public $bonusType = 'Generic';
+	public $specialAbilities = array("FlagBridge");	
+	public $specialAbilityValue = 0;
+	
+    public $range = 60;
+    public $worksOnFighters = false;
+    public $worksOnShips = true;
+    public $worksOnAllies = true;
+    public $worksOnlyOnBaseHull = false;
+    public $worksOnAllFactions = false;
+
+    private static $cachedFlagBridges = null;
+    private static $cacheKey = "";
+
+    function __construct($armour, $maxhealth, $powerReq, $initiativeBonus = 1, $bonusType = 'Generic', $range = 60,  $worksOnFighters = false, $worksOnShips = true, $worksOnAllies = true, $worksOnlyOnBaseHull = false, $worksOnAllFactions = false) {
+        parent::__construct($armour, $maxhealth, $powerReq, 0);
+        
+        $this->initiativeBonus = $initiativeBonus;
+        $this->bonusType = $bonusType;
+        $this->range = $range;
+        $this->worksOnFighters = $worksOnFighters;
+        $this->worksOnShips = $worksOnShips;
+        $this->worksOnAllies = $worksOnAllies;
+        $this->worksOnlyOnBaseHull = $worksOnlyOnBaseHull;
+        $this->worksOnAllFactions = $worksOnAllFactions;
+    }
+
+    public function getSpecialAbilityValue($args)
+    {
+        return $this->specialAbilityValue;
+    }	
+
+
+    public static function getIniBonus($gamedata, $thisShip){
+        $totalBonus = 0;
+        $bonusesByType = array(); // Store highest bonus per type
+
+        $currentCacheKey = $gamedata->id . "_" . $gamedata->turn . "_" . $gamedata->phase;
+
+        // Cache FlagBridge locations once per phase to prevent O(N^2) systems iteration
+        if (self::$cachedFlagBridges === null || self::$cacheKey !== $currentCacheKey) {
+            self::$cachedFlagBridges = array();
+            self::$cacheKey = $currentCacheKey;
+
+            if($gamedata->turn > 0 && $gamedata->phase >= 0){
+                foreach ($gamedata->ships as $ship) {
+                    if ($ship->isDestroyed()) continue;
+
+                    foreach ($ship->systems as $sys) {
+                        if ($sys instanceof FlagBridge && !$sys->isDestroyed()) {
+                            self::$cachedFlagBridges[] = array(
+                                'system' => $sys,
+                                'ship' => $ship
+                            );
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty(self::$cachedFlagBridges)) {
+            return 0; // Quick exit if no FlagBridges exist this turn
+        }
+
+        // Only calculate distance and restrictions against known FlagBridges
+        foreach (self::$cachedFlagBridges as $fbData) {
+            $flagBridge = $fbData['system'];
+            $ship = $fbData['ship'];
+                    
+            // Get distance to this ship
+            $distance = mathlib::getDistanceHex($thisShip, $ship);
+
+            // Check distance
+            if ($distance > $flagBridge->range) continue;
+
+            // Check Faction / Ally restriction
+            if (!$flagBridge->worksOnAllies) {
+                if ($thisShip->userid != $ship->userid) continue;
+            } else {
+                // Assuming allied ships are owned by the same user based on standard FieryVoid logic
+                if ($thisShip->userid != $ship->userid) continue;
+            }
+
+            // Check specific Faction matching
+            if (!$flagBridge->worksOnAllFactions) {
+                if ($thisShip->faction !== $ship->faction) continue;
+            }
+
+            // Check Fighter vs Ship restriction
+            $isFighter = ($thisShip instanceof FighterFlight);
+            if ($isFighter && !$flagBridge->worksOnFighters) continue;
+            if (!$isFighter && !$flagBridge->worksOnShips) continue;
+
+            // Check Base Hull/Variant restriction
+            if ($flagBridge->worksOnlyOnBaseHull) {
+                $baseHull = $flagBridge->worksOnlyOnBaseHull;
+                if (!$thisShip->isHull($baseHull)) continue;
+            }
+
+            // It applies! Add to our type array
+            $type = $flagBridge->bonusType;
+            $bonus = $flagBridge->initiativeBonus * 5; // The raw bonus is multiplied by 5
+
+            if (!isset($bonusesByType[$type]) || $bonus > $bonusesByType[$type]) {
+                $bonusesByType[$type] = $bonus;
+            }
+        }
+
+        foreach ($bonusesByType as $bonus) {
+            $totalBonus += $bonus;
+        }
+
+        return $totalBonus;
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+
+        $targets = array();
+        if ($this->worksOnShips) {
+            $targets[] = "ships";
+        }
+        if ($this->worksOnFighters) {
+            $targets[] = "fighters";
+        }
+        $targetStr = implode(" and ", $targets);
+        
+        $this->data["Special"] .= "Provides +" . ($this->initiativeBonus * 5) . " Initiative to friendly $targetStr within " . $this->range . " hexes.";
+        
+        if ($this->worksOnlyOnBaseHull) {
+            $this->data["Special"] .= "<br>Only affects units based on the " . $this->worksOnlyOnBaseHull . " hull.";
+        }
+        if (!$this->worksOnAllies) {
+            $this->data["Special"] .= "<br>Only affects units from your own fleet.";
+        }
+        if (!$this->worksOnAllFactions) {
+            $this->data["Special"] .= "<br>Only affects units matching this ship's faction.";
+        }
+        $this->data["Special"] .= "<br>Bonus type: " . $this->bonusType . " (Bonuses of the same type do not stack).";
+    }
+}
+
+
 
 class CargoBay extends ShipSystem{
     public $name = "cargoBay";

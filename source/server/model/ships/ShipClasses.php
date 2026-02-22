@@ -152,7 +152,22 @@ class BaseShip {
 			$this->HyachSpecialists = new HyachSpecialists($specTotal); 
 			return $this->getHyachSpecialists();
 		}		
+
         
+        /**
+         * Checks if this ship is, or is a variant of, the specified hull.
+         * Matches against phpclass (e.g., 'gaimMoas'), shipClass (e.g., 'Moas Gunship'),
+         * and variantOf (e.g., 'Moas Gunship').
+         * @param string $hullName The name of the hull or class to check against.
+         * @return bool
+         */
+        public function isHull($hullName) {
+            if ($this->phpclass === $hullName) return true;
+            if ($this->shipClass === $hullName) return true;
+            if ($this->variantOf === $hullName) return true;
+            return false;
+        }
+
         public function getCommonIniModifiers( $gamedata ){ //common Initiative modifiers: speed, criticals
             $mod = 0;
             $speed = $this->getSpeed();
@@ -584,45 +599,54 @@ class BaseShip {
 		$strippedShip->enhancementOptions = array(); //no point in sending options information...
         return $strippedShip;
     }
-	    
+	 
+                    
+
         public function getInitiativebonus($gamedata){
+            $flagBridgeBonus = FlagBridge::getIniBonus($gamedata, $this);
+
+            /*
             if($this->faction == "Abbai Matriarchate"){
-                return $this->doAbbaiInitiativeBonus($gamedata);
+                return $this->doAbbaiInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
             if($this->faction == "Centauri Republic"){
-                return $this->doCentauriInitiativeBonus($gamedata);
+                return $this->doCentauriInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
             if($this->faction == "Dilgar Imperium"){
-                return $this->doDilgarInitiativeBonus($gamedata);
+                return $this->doDilgarInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
             if($this->faction == "Narn Regime"){
-                return $this->doNarnInitiativeBonus($gamedata);
+                return $this->doNarnInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
             if($this->faction == "Yolu Confederation"){
-                return $this->doYoluInitiativeBonus($gamedata);
+                return $this->doYoluInitiativeBonus($gamedata) + $flagBridgeBonus;
 			}
 			if ($this->faction == "Earth Alliance" || 
 				$this->faction == "Earth Alliance (defenses)" || 
 				$this->faction == "Earth Alliance (early)" ||
 				$this->faction == "Earth Alliance (custom)"){
-                return $this->doEAInitiativeBonus($gamedata);
+                return $this->doEAInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
 			if($this->faction == "Raiders"){
-                return $this->doRaidersInitiativeBonus($gamedata);
+                return $this->doRaidersInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
+            */   
+            //Pakmara have special Ini penalty 
             if(($this->faction == "Pak'ma'ra Confederacy") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
+           /* 
 		   if($this->faction == "Hyach Gerontocracy"){
-		        return $this->doHyachInitiativeBonus($gamedata);
+		        return $this->doHyachInitiativeBonus($gamedata) + $flagBridgeBonus;
 		    }            
 			if(($this->faction == "Gaim Intelligence") && ($this instanceOf gaimMoas)){  //GTS
-                return $this->doGaimInitiativeBonus($gamedata);
+                return $this->doGaimInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
-            return $this->iniativebonus;
+            */
+            return $this->iniativebonus + $flagBridgeBonus;
         }
         
-		
+		/*
         private function doAbbaiInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
@@ -735,7 +759,7 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     	} //end of doDilgarInitiativeBonus  
-    
+    */        
     
         private function doPakmaraInitiativeBonus($gamedata){
         	
@@ -747,19 +771,18 @@ class BaseShip {
 	                     ($ship->faction == "Pak'ma'ra Confederacy") //Correct faction
 	                    && ($this->userid == $ship->userid) //of same player
 	                    && (!($ship instanceOf FighterFlight)) //actually a ship
-	                    && (!$ship->isDestroyed()) //alive
-	                   ){
-	                            $alivePakShips++;
-	                    }
-						$mod = floor(($alivePakShips)/3); //Divide by three and round down
-	                    }
+	                    && (!$ship->isDestroyed())){
+	                        $alivePakShips++;
+	                }
+					$mod = floor(($alivePakShips)/3); //Divide by three and round down
+	            }
 	                
 	        //    debug::log($this->phpclass."- bonus: ".$mod);
 	        return $this->iniativebonus - $mod*5;
     	} //end of doPakmaraInitiativeBonus    
 
-
-         private function doHyachInitiativeBonus($gamedata){
+        /*    
+        private function doHyachInitiativeBonus($gamedata){
             foreach($gamedata->ships as $ship){
                 if(!$ship->isDestroyed()
                         && ($ship->faction == "Hyach Gerontocracy")
@@ -799,7 +822,24 @@ class BaseShip {
         //    debug::log($this->phpclass."- bonus: ".$mod);
         return $this->iniativebonus + $mod*5;
     }//end of doGaimInitiativeBonus
-
+    */  
+    
+    /*
+    private function doYoluInitiativeBonus($gamedata){
+        foreach($gamedata->ships as $ship){
+            if(!$ship->isDestroyed()
+                && ($ship->faction == "Yolu Confederation")
+                && ($this->userid == $ship->userid)
+                && ($ship instanceof Udran)
+                && ($this->id != $ship->id)){
+                $cnc = $ship->getSystemByName("CnC");
+                $bonus = $cnc->output;
+                return ($this->iniativebonus+$bonus*5);
+            }
+        }
+        return $this->iniativebonus;
+    }
+    */       
 	
 	/*saves individual notes systems might have generated*/
 	public function saveIndividualNotes(DBManager $dbManager) {
@@ -833,22 +873,7 @@ class BaseShip {
             $system->onIndividualNotesLoaded($gamedata);
         }
 	}
-
-    private function doYoluInitiativeBonus($gamedata){
-        foreach($gamedata->ships as $ship){
-            if(!$ship->isDestroyed()
-                && ($ship->faction == "Yolu Confederation")
-                && ($this->userid == $ship->userid)
-                && ($ship instanceof Udran)
-                && ($this->id != $ship->id)){
-                $cnc = $ship->getSystemByName("CnC");
-                $bonus = $cnc->output;
-                return ($this->iniativebonus+$bonus*5);
-            }
-        }
-        return $this->iniativebonus;
-    }
-
+     
     public function setEW($ew)
     {
         $this->EW[] = $ew;
