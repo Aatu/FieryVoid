@@ -274,9 +274,10 @@ body {
 
 #infowindow {
     width: 400px;
-    margin-left: -150px;
+    max-width: 90%;
+    transform: translateX(-50%);
+    text-align: center;
     display: none;
-    /* border:1px solid #496791; */
     background-color: black;
     /* #0A3340; */
     opacity: 0.65;
@@ -597,7 +598,7 @@ body {
     border: 1px solid #587e8d;
     background: #215a7a;
     border-radius: 4px;
-    color: #e0e7ef; 
+    color: #e0e7ef;
 }
 
 
@@ -1273,7 +1274,7 @@ body {
     #backDiv {
         left: 200px !important;
         margin-left: 0px !important;
-        margin-top: 50px;        
+        margin-top: 50px;
     }
 
     #backDiv.closed {

@@ -1,7 +1,7 @@
 .confirm {
     padding: 10px 10px 10px 10px;
-    /*border: 1px solid #defbff44; */  
-    border: 1px solid #496791;      
+    /*border: 1px solid #defbff44; */
+    border: 1px solid #496791;
     background-color: black;
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
@@ -38,8 +38,8 @@
 }
 
 .confirm .missileselect {
-    /*border: 1px solid #defbff44; */  
-    border: 1px solid #496791;   
+    /*border: 1px solid #defbff44; */
+    border: 1px solid #496791;
     color: #DEEBFF;
     padding: 3px 5px;
     position: relative;
@@ -172,8 +172,8 @@
 }
 
 .confirm.error {
-    /*border: 1px solid #defbff44; */  
-    border: 2px solid #641b1b;        
+    /*border: 1px solid #defbff44; */
+    border: 2px solid #641b1b;
     color: #c94b1d;
     font-family: arial;
     font-size: 16px;
@@ -184,13 +184,13 @@
 }
 
 .confirm.warning {
-    background-color: #04161C;    
-    border: 1px solid #496791;  
+    background-color: #04161C;
+    border: 1px solid #496791;
     color: #deebffd2;
     font-family: arial;
     font-size: 16px;
-    width: 400px;    
-    display: inline-block;    
+    width: 400px;
+    display: inline-block;
 }
 
 .confirm h2 {
@@ -287,6 +287,13 @@
 
 @media only screen and (max-width: 1024px) {}
 
+@media only screen and (max-width: 765px) {
+    .confirm {
+        width: 80% !important;
+        min-width: unset;
+    }
+}
+
 /* Multi-value input dialog styles */
 .confirm.multi-value-confirm {
     background: rgb(12, 0, 13);
@@ -360,7 +367,7 @@
 
 .confirm.multi-value-confirm .multi-value-input:focus {
     border-color: #6a0080;
-    border: 1px solid #6a0080;    
+    border: 1px solid #6a0080;
     box-shadow: 0 0 10px rgba(191, 0, 230, 0.75);
     color: #ffffff;
     background: #000;
