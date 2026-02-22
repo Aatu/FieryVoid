@@ -74,7 +74,7 @@
     <script>
         window.Config = {
             HEX_SIZE: 50,
-            MAX_CONCURRENT_IMAGES: 20 // Limit concurrent image loads to prevent HTTP/2 errors
+            MAX_CONCURRENT_IMAGES: 40 // Limit concurrent image loads to prevent HTTP/2 errors
         };
     </script>
 
