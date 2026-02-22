@@ -1169,7 +1169,7 @@ body {
 @media only screen and (max-width: 765px) {
     #phaseheader {
         width: auto;
-        min-width: 250px;
+        min-width: 220px;
         max-width: 55vw;
         height: 22px;
         padding-top: 2px;
@@ -1273,6 +1273,7 @@ body {
     #backDiv {
         left: 200px !important;
         margin-left: 0px !important;
+        margin-top: 50px;        
     }
 
     #backDiv.closed {
