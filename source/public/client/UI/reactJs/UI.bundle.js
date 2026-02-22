@@ -326,6 +326,11 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     color: #deebff;
     padding: 10px;
     font-weight: bold;
+
+    @media (max-width: 765px) {
+        padding: 5px 10px;
+        font-size: 14px;
+    }
 `,jy=Q(yb)`
     font-weight: normal;
 `,bi=mb`
@@ -339,10 +344,23 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     width: 100%;
     display: flex;
     padding: 10px;
+
+    @media (max-width: 765px) {
+        padding: 4px 10px;
+    }
 `,Sk=Q.span`
     width: calc(50% - 10px);
+
+    @media (max-width: 765px) {
+        font-size: 12px;
+    }
 `,xk=Q.input`
     width: calc(50% - 10px);
+
+    @media (max-width: 765px) {
+        font-size: 12px;
+        padding: 2px;
+    }
 `;class Ck extends Yt.Component{render(){const{children:u,className:d}=this.props;return E.jsx("div",{className:d,children:u})}}const zy=Q(Ck)`
     z-index:7001;
     opacity:0.65;
@@ -382,6 +400,12 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     font-size: 46px;
     padding-left: 5px;
     ${bi}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 30px;
+        font-size: 28px;
+    }
 `,Tk=Q(pv)`
     position: relative;
     max-width: 100%;
@@ -389,10 +413,20 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     margin: 30px auto;
     display: flex;
     flex-direction: column;
+
+    @media (max-width: 765px) {
+        width: 98%;
+        margin: 5px auto;
+    }
 `,Rk=Q.p`
     padding: 0 10px 0 10px;
     margin: 5px 0 5px 0;
     color: #6689ba;
+
+    @media (max-width: 765px) {
+        font-size: 12px;
+        margin: 2px 0 2px 0;
+    }
 `,kk=Q.p`
     font-size: 0.9rem;
     opacity: 0.7;

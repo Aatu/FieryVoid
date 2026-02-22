@@ -110,6 +110,12 @@ const CloseButton = styled.div`
     font-size: 46px;
     padding-left: 5px;
     ${Clickable}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 30px;
+        font-size: 28px;
+    }
 `;
 
 const SubContainer = styled(Container)`
@@ -119,12 +125,22 @@ const SubContainer = styled(Container)`
     margin: 30px auto;
     display: flex;
     flex-direction: column;
+
+    @media (max-width: 765px) {
+        width: 98%;
+        margin: 5px auto;
+    }
 `;
 
 const Paragraph = styled.p`
     padding: 0 10px 0 10px;
     margin: 5px 0 5px 0;
     color: #6689ba;
+
+    @media (max-width: 765px) {
+        font-size: 12px;
+        margin: 2px 0 2px 0;
+    }
 `;
 
 const Disclaimer = styled.p`
