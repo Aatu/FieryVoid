@@ -118,7 +118,7 @@
 @media only screen and (max-width: 765px) {
     #replayUI {
         font-size: 12px;
-        min-height: 22px;
+        min-height: 21px;
         height: auto;
         padding-top: 3px;
         margin-left: 5px;
