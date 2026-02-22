@@ -58,12 +58,14 @@
 .missileSelectItem {
     text-align: left;
     vertical-align: middle;
+    margin-bottom: 8px;
 }
 
 .missileSelectItem .selectText {
     padding-left: 10px;
     display: inline-block;
     width: 75.5%;
+    vertical-align: middle;
 }
 
 .missileSelectItem .selectButtons {
@@ -78,6 +80,7 @@
     background-color: #072731;
     padding: 3px 5px;
     text-align: right;
+    vertical-align: middle;
 }
 
 .fighterAmount {
@@ -87,6 +90,7 @@
     background-color: #072731;
     padding: 3px 5px;
     text-align: right;
+    vertical-align: middle;
 }
 
 .totalUnitCost .totalUnitCostText {
@@ -96,6 +100,7 @@
     text-align: right;
     margin-right: 15px;
     width: 62%;
+    vertical-align: middle;
 }
 
 .totalUnitCost .totalUnitCostAmount {
@@ -105,17 +110,24 @@
     background-color: #072731;
     padding: 3px 5px;
     text-align: right;
+    vertical-align: middle;
 }
 
 .missileSelectItem table {
     border-spacing: 0px;
     empty-cells: show;
     display: inline-block;
+    vertical-align: middle;
+}
+
+.missileSelectItem table td {
+    padding: 0;
+    line-height: 0;
 }
 
 
 .missileSelectItem .minusButton {
-    display: inline-block;
+    display: block;
     border: 1px solid #496791;
     width: 12px;
     height: 12px;
@@ -125,13 +137,14 @@
 }
 
 .missileSelectItem .plusButton {
-    display: inline-block;
+    display: block;
     border: 1px solid #496791;
     width: 12px;
     height: 12px;
     position: relative;
     background-image: url(../img/plussquare.png);
     cursor: pointer;
+    margin-bottom: 3px;
 }
 
 .confirm .missileSelectItem .combo input {
