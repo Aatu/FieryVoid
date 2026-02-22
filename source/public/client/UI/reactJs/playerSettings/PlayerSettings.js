@@ -42,6 +42,13 @@ const MainButton = styled(ContainerRoundedRightBottom)`
     border-right: none;
     border-top: none;
     ${Clickable}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 30px;
+        font-size: 28px;
+        padding-left: 2px;
+    }
 `;
 
 export default PlayerSettings;

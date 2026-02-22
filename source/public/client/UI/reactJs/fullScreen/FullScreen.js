@@ -47,6 +47,13 @@ const MainButton = styled(ContainerRounded)`
     font-size: 32px;
     border-top: none;
     ${Clickable}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 30px;
+        right: 40px;
+        font-size: 20px;
+    }
 `;
 
 export default FullScreen;
