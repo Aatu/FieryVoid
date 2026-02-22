@@ -29,7 +29,7 @@ class PlayerSettings extends React.Component {
 
 const MainButton = styled(ContainerRoundedRightBottom)`
     width: 50px;
-    height: 50px;
+    height: 45px;
     position: fixed;
     right: 0;
     top: 0;
@@ -37,7 +37,7 @@ const MainButton = styled(ContainerRoundedRightBottom)`
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 46px;
+    font-size: 40px;
     padding-left: 5px;
     border-right: none;
     border-top: none;
@@ -45,7 +45,7 @@ const MainButton = styled(ContainerRoundedRightBottom)`
 
     @media (max-width: 765px) {
         width: 30px;
-        height: 30px;
+        height: 36px;
         font-size: 28px;
         padding-left: 2px;
     }

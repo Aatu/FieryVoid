@@ -1,30 +1,35 @@
 #replayUI {
-    z-index:9999;
-    border:1px solid #496791;
+    pointer-events: auto;
+    border: 1px solid #496791;
     border-radius: 8px;
-    color:#deebff;
-    background-color:#0a3340;
-    position:absolute;
-    top:-3px;
-    left:710px;
-    min-height:35px;
-    width:auto;
-    opacity:0.85;
+    color: #deebff;
+    background-color: #0a3340;
+    position: relative;
+    margin-left: 10px;
+    min-height: 25px;
+    height: auto;
+    padding-top: 8px;
+    width: auto;
+    opacity: 0.85;
     box-shadow: 5px 5px 10px black;
     display: none;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     font-family: arial;
     font-size: 16px;
+    flex-shrink: 0;
 }
 
-#replayUI.active, #replayUI.inactive {
+#replayUI.active,
+#replayUI.inactive {
     display: flex;
 }
 
-#replayUI.active{
+#replayUI.active {
+    background-color: transparent;
     border: none;
+    box-shadow: none;
 }
 
 #replayUI button {
@@ -44,6 +49,11 @@
 
 #replayUI .selected-replay {
     text-transform: uppercase;
+        margin-top: 0px;
+        margin-right: 3px;
+        margin-bottom: 0px;
+        margin-left: 12px;
+        padding-top: 3px;    
 }
 
 #replayUI .replay-buttons button {
@@ -70,13 +80,23 @@
 }
 
 #replayUI.active .replay-active {
-    display: block;
-    padding: 10px;    
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
     position: fixed;
-    top: 0px;
+    left: 50vw;
+    transform: translateX(-50%);
+    top: 5px;
+    /*background-color: #0a3340;
+    border: 1px solid #496791;
+    border-radius: 8px;
+    box-shadow: 5px 5px 10px black;*/
+    z-index: 10000;
 }
 
-#replayUI button:focus { outline: none; }
+#replayUI button:focus {
+    outline: none;
+}
 
 #replayUI button.active {
     text-shadow: white 0 0 10px, white 0 0 3px;
@@ -95,8 +115,35 @@
     display: flex;
 }
 
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 765px) {
     #replayUI {
-        left: calc(50% + 5px);
+        font-size: 12px;
+        min-height: 22px;
+        height: auto;
+        padding-top: 3px;
+        margin-left: 5px;
     }
+
+    #replayUI button {
+        font-size: 12px;
+        margin: 0 3px;
+        padding-top: 3px;
+    }
+
+    #replayUI .replay-buttons button {
+        font-size: 24px;
+    }
+
+    #replayUI.active .replay-active {
+        padding: 5px;
+    }
+    #replayUI .selected-replay {
+        text-transform: uppercase;
+        font-size: 12px;
+        margin-top: 0px;
+        margin-right: 3px;
+        margin-bottom: 0px;
+        margin-left: 8px;
+        padding-top: 3px;
+}    
 }

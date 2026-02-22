@@ -36,7 +36,7 @@ class FullScreen extends React.Component {
 
 const MainButton = styled(ContainerRounded)`
     width: 50px;
-    height: 50px;
+    height: 45px;
     position: fixed;
     right: 60px;
     top: 0;
@@ -44,7 +44,7 @@ const MainButton = styled(ContainerRounded)`
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 28px;
     border-top: none;
     ${Clickable}
 

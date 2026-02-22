@@ -167,22 +167,35 @@ body {
     -webkit-border-radius: 5px;
 }
 
-#phaseheader {
+#topcontainer {
+    position: absolute;
+    top: -3px;
+    left: -4px;
     z-index: 10000;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    max-width: calc(100% - 120px);
+    pointer-events: none;
+}
+
+#phaseheader {
     border: 1px solid #496791;
     border-radius: 8px;
     color: #deebff;
     background-color: #0a3340;
-    position: absolute;
-    top: -3px;
-    left: -4px;
+    position: relative;
     height: 25px;
-    width: 700px;
+    width: auto;
+    min-width: 500px;
     opacity: 0.85;
     -moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
-    padding-top: 10px;
+    padding-top: 8px;
+    padding-right: 45px;
+    flex-shrink: 0;
+    pointer-events: auto;
 }
 
 .phasecontainer {
@@ -193,6 +206,8 @@ body {
     font-family: arial;
     font-size: 16px;
     margin-left: 10px;
+    text-transform: uppercase;
+    text-shadow: black 0 0 10px, black 0 0 3px;
 }
 
 #phaseheader .value.activeship {
@@ -243,10 +258,11 @@ body {
 }
 
 .ok {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     background-image: url(../img/ok.png);
     cursor: pointer;
+    background-size: cover;
 }
 
 .cancel {
@@ -413,7 +429,7 @@ body {
     height: 150px;
     opacity: 0.85;
     color: #7ba2ea;
-    /*color: #e0e7ef;*/       
+    /*color: #e0e7ef;*/
     /* #deebff; */
     background-color: #04161C;
     border-top: 1px solid #496791;
@@ -458,7 +474,7 @@ body {
     z-index: 9999;
     background-color: #020E12;
     cursor: pointer;
-    color: #deebffb6;  
+    color: #deebffb6;
 }
 
 .logUiEntry span {}
@@ -558,7 +574,7 @@ body {
     font-style: normal;
     /*font-weight: bold;*/
     /*color: #7ba2ea; /* #deebff; */
-    color: #e0e7ef;     
+    color: #e0e7ef;
     top: 0;
     /* Align to the top */
     right: 0;
@@ -575,12 +591,12 @@ body {
     cursor: pointer;
     margin-top: 1px;
     margin-right: 1px;
-    margin-left: 3px;    
+    margin-left: 3px;
     /* Add space between buttons */
     border: 1px solid #587e8d;
     background: #215a7a;
     border-radius: 4px;
-    color: #e0e7ef;    
+    color: #e0e7ef;
 }
 
 
@@ -595,7 +611,7 @@ body {
     margin-bottom: 4px;
     padding-top: 5px;
     font-size: 13px;
-    color: #e0e7ef;       
+    color: #e0e7ef;
 }
 
 #declarationsButtons input[type="button"] {
@@ -604,17 +620,17 @@ body {
     margin-top: 3px;
     margin-bottom: 3px;
     margin-right: 1px;
-    margin-left: 2px;    
+    margin-left: 2px;
     /* Add space between buttons */
     border: 1px solid #587e8d;
     background: #215a7a;
     border-radius: 4px;
-    color: #e0e7ef;    
+    color: #e0e7ef;
 }
 
 #declarationsActual {
     padding-bottom: 10px;
-    color: #e0e7ef;       
+    color: #e0e7ef;
 }
 
 #expandBotPanel {
@@ -645,17 +661,17 @@ body {
     overflow-y: scroll;
 }
 
-.combatTurn{
-    font-size:12px; 
-    font-weight:bold; 
-    text-decoration:underline; 
+.combatTurn {
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: underline;
     top: 15px;
-    color: #e0e7ef;       
+    color: #e0e7ef;
 }
 
-.noCombatLog{
-    font-size:14px; 
-    color: #e0e7ef;    
+.noCombatLog {
+    font-size: 14px;
+    color: #e0e7ef;
 }
 
 .fleetlistentry {
@@ -697,7 +713,7 @@ body {
     color: #a7c1f1;
 }
 
-.fleetheader{
+.fleetheader {
     margin-bottom: 3px;
     margin-left: 5px
 }
@@ -925,7 +941,7 @@ body {
     color: #deebffdc;
     background-color: #0a3340;
     margin-top: 50px;
-    width: 300px;
+    width: 260px;
     height: auto;
     position: absolute;
     display: inline-block;
@@ -1022,7 +1038,8 @@ body {
     font-size: 16px;
     color: white;
     width: 100%;
-    margin-left: 63px;
+    margin-left: 75px;
+    opacity: 0.8;
 }
 
 .iniActiveMoved {
@@ -1065,7 +1082,7 @@ body {
     z-index: 10000;
     margin-top: 65px;
     margin-top: 65px;
-    left: 300px !important;
+    left: 260px !important;
     margin-left: 0px !important;
     /* Override legacy JS */
     /* Default open */
@@ -1150,7 +1167,47 @@ body {
 
 @media only screen and (max-width: 765px) {
     #phaseheader {
+        width: auto;
+        min-width: 250px;
+        max-width: 55vw;
+        height: 22px;
+        padding-top: 2px;
+        padding-right: 45px;
+    }
+
+    #phaseheader .value {
+        font-size: 12px;
+        margin-left: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        /*max-width: calc(100% - 10px);*/
         max-width: 50%;
+        vertical-align: bottom;
+    }
+
+    #phaseheader .value.activeship {
+        margin-left: 5px;
+    }
+
+    #phaseheader .finished,
+    #phaseheader .notlogged {
+        display: none;
+    }
+
+    #phaseheader .uitable {
+        top: 2px;
+        right: 5px;
+    }
+
+    /* Scale down OK/Cancel/Surrender buttons if they appear in the phase header */
+    #phaseheader .ok,
+    #phaseheader .cancel,
+    #phaseheader .surrender {
+        width: 18px;
+        height: 18px;
+        background-size: cover;
     }
 
     #logUI {
@@ -1205,6 +1262,7 @@ body {
     #iniGui {
         max-height: calc(100vh - 250px);
         width: 200px;
+        margin-top: 35px;
     }
 
     #iniGui.closed {
@@ -1246,6 +1304,7 @@ body {
 
     #iniTopic {
         font-size: 13px;
-        margin-left: 30px;
+        margin-left: 55px;
+        opacity: 0.8;
     }
 }

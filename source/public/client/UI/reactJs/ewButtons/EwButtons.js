@@ -149,6 +149,11 @@ const Container = styled.div`
     right: 0;
     top: 60px;
     z-index: 4;
+
+    @media (max-width: 765px) {
+        top: 40px;
+    }
+
 `;
 
 const MainButton = styled(ContainerRoundedRightSide)`

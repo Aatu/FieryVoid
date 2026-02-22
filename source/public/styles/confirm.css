@@ -269,8 +269,8 @@
     background-image: url("../img/surrender_icon.png");
     background-size: cover;
     cursor: pointer;
-    height: 30px;
-    width: 30px;
+    height: 25px;
+    width: 25px;
 }
 
 .ui span {

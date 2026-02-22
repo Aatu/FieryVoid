@@ -401,7 +401,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     line-height: 1.3;
 `,Sb={48:"0",49:"1",50:"2",51:"3",52:"4",53:"5",54:"6",55:"7",56:"8",57:"9",58:":",65:"a",66:"b",67:"c",68:"d",69:"e",70:"f",71:"g",72:"h",73:"i",74:"j",75:"k",76:"l",77:"m",78:"n",79:"o",80:"p",81:"q",82:"r",83:"s",84:"t",85:"u",86:"v",87:"w",88:"x",89:"y",90:"z"};class Dk extends Yt.Component{constructor(u){super(u),this.state={open:!1}}open(){this.setState({open:!0})}close(){this.setState({open:!1})}render(){return this.state.open?E.jsx(bk,{close:this.close.bind(this),...this.props}):E.jsx(_k,{onClick:this.open.bind(this),children:"⚙"})}}const _k=Q(vk)`
     width: 50px;
-    height: 50px;
+    height: 45px;
     position: fixed;
     right: 0;
     top: 0;
@@ -409,11 +409,18 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 46px;
+    font-size: 40px;
     padding-left: 5px;
     border-right: none;
     border-top: none;
     ${bi}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 36px;
+        font-size: 28px;
+        padding-left: 2px;
+    }
 `,xb=Q.span`
     color: white;
     font-family:arial;
@@ -495,7 +502,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     ${bi}
 `;class Uk extends Yt.Component{constructor(u){super(u)}ready(){window.shipWindowManager.doneAssignThrust(this.props.ship)}cancel(){window.shipWindowManager.cancelAssignThrustEvent(this.props.ship)}resetThrust(){const u=this.props.ship;window.shipManager.movement.revertAutoThrust(u),window.shipWindowManager.setData(u),window.shipWindowManager.assignThrust(u)}autoAssign(){const u=this.props.ship;window.shipManager.movement.revertAutoThrust(u),window.shipManager.movement.autoAssignThrust(u),window.shipWindowManager.setData(u),window.shipWindowManager.assignThrust(u)}render(){const{ship:u,position:d,rotation:m,totalRequired:C,remainginRequired:T,movement:D}=this.props;return E.jsxs(Lk,{onMouseOver:x=>x.preventDefault(),id:"thrustUIContainer",$left:`${d.x}px`,$top:`${d.y}px`,children:[E.jsxs(Nk,{style:{transform:`rotate(${Math.round(Math.abs(m))}deg)`},$rotation:Math.round(Math.abs(m)),children:[E.jsx(bb,{children:hv(u,1,C,T)}),E.jsx(wb,{children:hv(u,3,C,T)}),E.jsx(Ak,{children:hv(u,4,C,T)}),E.jsx(Mk,{children:hv(u,2,C,T)})]}),E.jsxs(jk,{children:[E.jsx(Uy,{children:"Assign thrust"}),Hk(C,T,D),Fk(u),Pk(u,D),E.jsx(Tb,{$space:!0,$important:!0,onClick:this.resetThrust.bind(this),children:"RESET THRUST"}),E.jsx(Tb,{$important:!0,onClick:this.autoAssign.bind(this),children:"AUTO ASSIGN"}),E.jsxs(zk,{children:[E.jsx(Eb,{onClick:this.ready.bind(this),children:"✔"}),E.jsx(Eb,{onClick:this.cancel.bind(this),children:"🛇"})]})]})]})}}const Fk=c=>{const u=shipManager.movement.getRemainingEngineThrust(c);return E.jsxs(gs,{$space:!0,$important:!0,children:["Thrust available: ",u]})},Pk=(c,u)=>{if(!shipManager.movement.isTurn(u))return null;const d=shipManager.movement.calculateTurndelay(c,u,u.speed);return E.jsxs(gs,{$important:!0,children:["Current turn delay: ",d]})},Hk=(c,u,d)=>{const m=Array("either","front","aft","port","starboard");d.type=="roll"&&(m[0]="any");const C=u.map((T,D)=>T<=0||T===null?null:E.jsxs(gs,{$type:T===0?"good":"bad",children:[T," thrust to ",m[D]," thrusters"]},`assign-thrust-text-${D}`)).filter(T=>T!==null);return C.length===0?E.jsx(gs,{$type:"good",children:"All done!"}):C},hv=(c,u,d,m)=>{const C=shipManager.systems.getThrusters(c,u);return m.type!=="roll"&&d[u]===null?null:C.map((T,D)=>{const x=()=>{shipManager.movement.assignThrust(c,T),shipWindowManager.assignThrust(c)},M=K=>{K.preventDefault(),shipManager.movement.unAssignThrust(c,T),shipWindowManager.assignThrust(c)};let G=shipManager.criticals.hasCritical(T,"HalfEfficiency")?10:0;shipManager.criticals.hasCritical(T,"FirstThrustIgnored")&&(G+=1);const H=shipManager.movement.getAmountChanneled(c,T),X=shipManager.systems.getOutput(c,T);return E.jsx(Ok,{$crits:G,onClick:x,onContextMenu:M,$direction:u,children:E.jsxs(xb,{children:[H,"/",X]})},`thruster-${u}-${D}`)})};class $k extends Yt.Component{fullScreen(){var u=window.document,d=u.documentElement,m=d.requestFullscreen||d.mozRequestFullScreen||d.webkitRequestFullScreen||d.msRequestFullscreen,C=u.exitFullscreen||u.mozCancelFullScreen||u.webkitExitFullscreen||u.msExitFullscreen;!u.fullscreenElement&&!u.mozFullScreenElement&&!u.webkitFullscreenElement&&!u.msFullscreenElement?m.call(d):C.call(u)}render(){return E.jsx(Ik,{onClick:this.fullScreen.bind(this),children:"FS"})}}const Ik=Q(mk)`
     width: 50px;
-    height: 50px;
+    height: 45px;
     position: fixed;
     right: 60px;
     top: 0;
@@ -503,14 +510,26 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 32px;
+    font-size: 28px;
     border-top: none;
     ${bi}
+
+    @media (max-width: 765px) {
+        width: 30px;
+        height: 30px;
+        right: 40px;
+        font-size: 20px;
+    }
 `;class Bk extends ar.Component{constructor(u){super(u),this.state={losToggled:!1,hexToggled:!1,soundToggled:!0,replayMode:this.getReplayMode()},this.showFriendlyEW=this.showFriendlyEW.bind(this),this.showEnemyEW=this.showEnemyEW.bind(this),this.toggleFriendlyBallisticLines=this.toggleFriendlyBallisticLines.bind(this),this.toggleEnemyBallisticLines=this.toggleEnemyBallisticLines.bind(this),this.toggleLoS=this.toggleLoS.bind(this),this.externalToggleLoS=this.externalToggleLoS.bind(this),this.toggleHexNumbers=this.toggleHexNumbers.bind(this),this.externalToggleHexNumbers=this.externalToggleHexNumbers.bind(this),this.toggleSound=this.toggleSound.bind(this),this.externalToggleSound=this.externalToggleSound.bind(this)}getReplayMode(){return gamedata.replay||!gamedata.isPlayerInGame()}componentDidMount(){window.addEventListener("LoSToggled",this.externalToggleLoS),window.addEventListener("HexNumbersToggled",this.externalToggleHexNumbers),window.addEventListener("soundToggled",this.externalToggleSound),this.replayCheck=setInterval(()=>{const u=this.getReplayMode();this.state.replayMode!==u&&this.setState({replayMode:u})},500)}componentWillUnmount(){window.removeEventListener("LoSToggled",this.externalToggleLoS),window.removeEventListener("HexNumbersToggled",this.externalToggleHexNumbers),window.removeEventListener("soundToggled",this.externalToggleSound),clearInterval(this.replayCheck)}externalToggleLoS(){this.setState({losToggled:gamedata.showLoS})}externalToggleHexNumbers(){this.setState(u=>({hexToggled:!u.hexToggled}))}externalToggleSound(){this.setState({soundToggled:gamedata.playAudio})}showFriendlyEW(u){webglScene.customEvent("ShowFriendlyEW",{up:u})}showEnemyEW(u){webglScene.customEvent("ShowEnemyEW",{up:u})}toggleFriendlyBallisticLines(u){webglScene.customEvent("ToggleFriendlyBallisticLines",{up:u})}toggleEnemyBallisticLines(u){webglScene.customEvent("ToggleEnemyBallisticLines",{up:u})}toggleLoS(u){if(u)return;const d=!this.state.losToggled;this.setState({losToggled:d}),webglScene.customEvent("ToggleLoS",{up:u}),window.dispatchEvent(new CustomEvent("LoSToggled"))}toggleHexNumbers(u){if(u)return;const d=!this.state.hexToggled;this.setState({hexToggled:d}),webglScene.customEvent("ToggleHexNumbers",{up:u}),window.dispatchEvent(new CustomEvent("HexNumbersToggled"))}toggleSound(){const u=!this.state.soundToggled;this.setState({soundToggled:u}),webglScene.customEvent("ToggleSound",{enabled:u})}render(){return E.jsxs(Vk,{children:[E.jsx(Yk,{onMouseDown:this.showFriendlyEW.bind(this,!1),onMouseUp:this.showFriendlyEW.bind(this,!0),onTouchStart:this.showFriendlyEW.bind(this,!1),onTouchEnd:this.showFriendlyEW.bind(this,!0)}),E.jsx(Wk,{onMouseDown:this.showEnemyEW.bind(this,!1),onMouseUp:this.showEnemyEW.bind(this,!0),onTouchStart:this.showEnemyEW.bind(this,!1),onTouchEnd:this.showEnemyEW.bind(this,!0)}),E.jsx(Qk,{onMouseDown:this.toggleFriendlyBallisticLines.bind(this,!1)}),E.jsx(Gk,{onMouseDown:this.toggleEnemyBallisticLines.bind(this,!1)}),E.jsx(Kk,{$toggled:this.state.losToggled,onMouseDown:this.toggleLoS.bind(this,!1)}),E.jsx(qk,{$toggled:this.state.hexToggled,onMouseDown:this.toggleHexNumbers.bind(this,!1)}),this.state.replayMode&&E.jsx(Xk,{$toggled:this.state.soundToggled,onMouseDown:this.toggleSound,title:this.state.soundToggled?"Sound On":"Sound Off"})]})}}const Vk=Q.div`
     position: fixed;
     right: 0;
     top: 60px;
     z-index: 4;
+
+    @media (max-width: 765px) {
+        top: 40px;
+    }
+
 `,ys=Q(gk)`
     display: flex;
     width: 45px;
