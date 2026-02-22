@@ -119,6 +119,8 @@ class ShipWindow extends React.Component {
 
     onShipMouseOver(event) {
         if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
         let { ship } = this.props;
 
         webglScene.customEvent('SystemMouseOver', {
@@ -148,6 +150,7 @@ class ShipWindow extends React.Component {
     onShipTouchStart(event) {
         this.touchActive = true;
         this.ignoreNextClick = false;
+        window.lastTouchActiveTime = Date.now();
 
         if (this.longPressTimer) {
             clearTimeout(this.longPressTimer);
@@ -214,6 +217,8 @@ class ShipWindow extends React.Component {
 
     onShipMouseOut() {
         if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
         webglScene.customEvent('SystemMouseOut');
     }
 

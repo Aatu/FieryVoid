@@ -182,6 +182,8 @@ class SystemIcon extends React.Component {
 
     onSystemMouseOver(event) {
         if (this.touchActive) return; // Ignore native mouseover if touch is active
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return; // Ignore ghost mouseover after touch
+
         event.stopPropagation();
         event.preventDefault();
 
@@ -199,6 +201,8 @@ class SystemIcon extends React.Component {
 
     onSystemMouseOut(event) {
         if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return; // Ignore ghost mouseout after touch
+
         event.stopPropagation();
         event.preventDefault();
         webglScene.customEvent('SystemMouseOut');
@@ -208,6 +212,7 @@ class SystemIcon extends React.Component {
         event.stopPropagation();
         this.touchActive = true;
         this.ignoreNextClick = false;
+        window.lastTouchActiveTime = Date.now();
 
         if (this.longPressTimer) {
             clearTimeout(this.longPressTimer);

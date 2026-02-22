@@ -85,6 +85,7 @@ class FighterIcon extends React.Component {
 
     onSystemMouseOver(event) {
         if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
 
         // Mobile browsers fire a synthetic 'mouseover' event immediately after 'touchend'.
         // Because child SystemIcons call stopPropagation() on their touch events,
@@ -105,12 +106,15 @@ class FighterIcon extends React.Component {
 
     onSystemMouseOut() {
         if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
         webglScene.customEvent('SystemMouseOut');
     }
 
     onFighterTouchStart(event) {
         this.touchActive = true;
         this.ignoreNextClick = false;
+        window.lastTouchActiveTime = Date.now();
 
         if (this.longPressTimer) {
             clearTimeout(this.longPressTimer);
