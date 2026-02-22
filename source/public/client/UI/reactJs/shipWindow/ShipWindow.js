@@ -28,7 +28,15 @@ const ShipWindowContainer = styled.div`
     box-shadow: 5px 5px 10px black;
     font-size: 10px;
     color: white;
+    color: white;
     font-family: arial;
+    
+    /* Prevent text selection and callouts on mobile */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     @media (max-width: 1024px) {
         ${props => {
@@ -180,6 +188,15 @@ class ShipWindow extends React.Component {
         }
     }
 
+    onShipTouchCancel(event) {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.touchActive = false;
+        webglScene.customEvent('SystemMouseOut');
+    }
+
     onShipTouchEnd(event) {
         if (this.longPressTimer) {
             // Timer didn't pop, meaning this was a short tap
@@ -228,7 +245,7 @@ class ShipWindow extends React.Component {
         return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} team={ship.team}>
             <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
             <Column $top>
-                <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onClick={this.onShipClick.bind(this)} onTouchStart={this.onShipTouchStart.bind(this)} onTouchMove={this.onShipTouchMove.bind(this)} onTouchEnd={this.onShipTouchEnd.bind(this)} />
+                <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onClick={this.onShipClick.bind(this)} onTouchStart={this.onShipTouchStart.bind(this)} onTouchMove={this.onShipTouchMove.bind(this)} onTouchEnd={this.onShipTouchEnd.bind(this)} onTouchCancel={this.onShipTouchCancel.bind(this)} />
                 {systemsByLocation[1].length > 0 && <ShipSection location={1} ship={ship} systems={systemsByLocation[1]} />}
                 <ShipWindowEw ship={ship} />
             </Column>

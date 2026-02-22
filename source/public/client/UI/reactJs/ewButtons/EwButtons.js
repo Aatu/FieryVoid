@@ -11,6 +11,10 @@ class EwButtons extends React.Component {
             losToggled: false,
             hexToggled: false,
             soundToggled: true,
+            bgToggled: false,
+            ebToggled: false,
+            fbToggled: false,
+            originalBgImage: null,
             replayMode: this.getReplayMode()
         };
 
@@ -24,6 +28,8 @@ class EwButtons extends React.Component {
         this.externalToggleHexNumbers = this.externalToggleHexNumbers.bind(this);
         this.toggleSound = this.toggleSound.bind(this);
         this.externalToggleSound = this.externalToggleSound.bind(this);
+        this.toggleBackground = this.toggleBackground.bind(this);
+        this.externalToggleBackground = this.externalToggleBackground.bind(this);
     }
 
     getReplayMode() {
@@ -33,6 +39,7 @@ class EwButtons extends React.Component {
     componentDidMount() {
         window.addEventListener("LoSToggled", this.externalToggleLoS);
         window.addEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+        window.addEventListener("BackgroundToggled", this.externalToggleBackground);
         window.addEventListener("soundToggled", this.externalToggleSound);
         // 👇 periodically check for replay mode change
         this.replayCheck = setInterval(() => {
@@ -46,6 +53,7 @@ class EwButtons extends React.Component {
     componentWillUnmount() {
         window.removeEventListener("LoSToggled", this.externalToggleLoS);
         window.removeEventListener("HexNumbersToggled", this.externalToggleHexNumbers);
+        window.removeEventListener("BackgroundToggled", this.externalToggleBackground);
         window.removeEventListener("soundToggled", this.externalToggleSound);
         clearInterval(this.replayCheck);
     }
@@ -64,6 +72,10 @@ class EwButtons extends React.Component {
         this.setState({ soundToggled: gamedata.playAudio });
     }
 
+    externalToggleBackground() {
+        this.toggleBackground();
+    }
+
     showFriendlyEW(up) {
         webglScene.customEvent("ShowFriendlyEW", { up });
     }
@@ -73,10 +85,16 @@ class EwButtons extends React.Component {
     }
 
     toggleFriendlyBallisticLines(up) {
+        if (up) return;
+        const newValue = !this.state.fbToggled;
+        this.setState({ fbToggled: newValue });
         webglScene.customEvent("ToggleFriendlyBallisticLines", { up });
     }
 
     toggleEnemyBallisticLines(up) {
+        if (up) return;
+        const newValue = !this.state.ebToggled;
+        this.setState({ ebToggled: newValue });
         webglScene.customEvent("ToggleEnemyBallisticLines", { up });
     }
 
@@ -105,6 +123,29 @@ class EwButtons extends React.Component {
         webglScene.customEvent("ToggleSound", { enabled: newValue });
     }
 
+    toggleBackground() {
+        const bodyBg = document.getElementById("background");
+        if (!bodyBg) return;
+
+        const newValue = !this.state.bgToggled;
+        let originalImage = this.state.originalBgImage;
+
+        if (newValue) {
+            // Turning ON the feature (background off - plain black)
+            if (!originalImage) {
+                originalImage = bodyBg.style.backgroundImage;
+            }
+            bodyBg.style.backgroundImage = 'none';
+            bodyBg.style.backgroundColor = 'black';
+        } else {
+            // Turning OFF the feature (background on - original image)
+            bodyBg.style.backgroundImage = originalImage || '';
+            bodyBg.style.backgroundColor = '';
+        }
+
+        this.setState({ bgToggled: newValue, originalBgImage: originalImage });
+    }
+
     render() {
         return (
             <Container>
@@ -120,8 +161,14 @@ class EwButtons extends React.Component {
                     onTouchStart={this.showEnemyEW.bind(this, false)}
                     onTouchEnd={this.showEnemyEW.bind(this, true)}
                 />
-                <FBButton onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)} />
-                <EBButton onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)} />
+                <FBButton
+                    $toggled={this.state.fbToggled}
+                    onMouseDown={this.toggleFriendlyBallisticLines.bind(this, false)}
+                />
+                <EBButton
+                    $toggled={this.state.ebToggled}
+                    onMouseDown={this.toggleEnemyBallisticLines.bind(this, false)}
+                />
                 <LoSButton
                     $toggled={this.state.losToggled}
                     onMouseDown={this.toggleLoS.bind(this, false)}
@@ -129,6 +176,11 @@ class EwButtons extends React.Component {
                 <HexButton
                     $toggled={this.state.hexToggled}
                     onMouseDown={this.toggleHexNumbers.bind(this, false)}
+                />
+                <BgButton
+                    $toggled={this.state.bgToggled}
+                    onMouseDown={this.toggleBackground}
+                    title={this.state.bgToggled ? "Enable Background" : "Disable Background"}
                 />
 
                 {this.state.replayMode && (
@@ -184,9 +236,15 @@ const FEWButton = styled(MainButton)`
 `;
 const EBButton = styled(MainButton)`
     background-image: url("./img/ballisticTarget2.png");
+    box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
+    background-color: ${props => (props.$toggled ? "#1b533d" : "#0a3340")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#496791")};
 `;
 const FBButton = styled(MainButton)`
     background-image: url("./img/ballisticLaunch2.png");
+    box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
+    background-color: ${props => (props.$toggled ? "#1b533d" : "#0a3340")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#496791")};
 `;
 const LoSButton = styled(MainButton)`
     background-image: url("./img/los1.png");
@@ -196,7 +254,6 @@ const LoSButton = styled(MainButton)`
             : "none"};
     border: 1px solid ${props => (props.$toggled ? "limegreen" : "#496791")};
     border-right: none;
-    box-shadow: 0px 0px 0px black;
 `;
 const HexButton = styled(MainButton)`
     background-image: url("./img/hexNumber.png");
@@ -206,6 +263,29 @@ const HexButton = styled(MainButton)`
             : "none"};
     border: 1px solid ${props => (props.$toggled ? "limegreen" : "#496791")};
     border-right: none;
+`;
+
+const BgButton = styled(MainButton)`
+    filter: ${props =>
+        props.$toggled
+            ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
+            : "none"};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#496791")};
+    border-right: none;
+    position: relative;
+
+
+    &::after {
+        content: '';
+        position: absolute;
+        width: 50%;
+        height: 50%;
+        background: linear-gradient(135deg, black 40%, #49915fff 60%);
+        border: 2px solid #fdfdfdb4;
+        border-radius: 4px;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+    margin-left: 4px;           
+    }
 `;
 
 // 🎧 New Sound Button Style

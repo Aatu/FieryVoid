@@ -63,6 +63,7 @@ class PlayerSettingsForm extends React.Component {
                 <InputAndLabel label={"Key to display ENEMY Ballistics"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ShowEnemyBallistics")} value={this.getKey.call(this, "ShowEnemyBallistics")} />
                 <InputAndLabel label={"Key to toggle RULER tool"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleLoS")} value={this.getKey.call(this, "ToggleLoS")} />
                 <InputAndLabel label={"Key to toggle HEX numbers"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleHexNumbers")} value={this.getKey.call(this, "ToggleHexNumbers")} />
+                <InputAndLabel label={"Key to toggle MAP background"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleBackground")} value={this.getKey.call(this, "ToggleBackground")} />
                 <SubTitle>Sound</SubTitle>
                 <InputAndLabel label={"Toggle sound in Replay"} onChange={() => { }} onKeydown={this.getOnKeyDown.call(this, "ToggleSound")} value={this.getKey.call(this, "ToggleSound")} />
                 <SubTitle>Visual</SubTitle>

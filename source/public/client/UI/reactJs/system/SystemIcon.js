@@ -82,6 +82,8 @@ const System = styled.div`
     cursor: pointer;
     -webkit-user-select: none;
     -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
     user-select: none;
     
     ${SystemText} {
@@ -248,6 +250,16 @@ class SystemIcon extends React.Component {
         }
     }
 
+    onTouchCancel(event) {
+        event.stopPropagation();
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.touchActive = false;
+        webglScene.customEvent('SystemMouseOut');
+    }
+
     onTouchEnd(event) {
         event.stopPropagation();
         if (this.longPressTimer) {
@@ -315,6 +327,7 @@ class SystemIcon extends React.Component {
                 onTouchStart={this.onTouchStart.bind(this)}
                 onTouchMove={this.onTouchMove.bind(this)}
                 onTouchEnd={this.onTouchEnd.bind(this)}
+                onTouchCancel={this.onTouchCancel.bind(this)}
                 onContextMenu={this.onContextMenu.bind(this)}
                 $background={getBackgroundImage(system)}
                 $offline={isOffline(ship, system)}

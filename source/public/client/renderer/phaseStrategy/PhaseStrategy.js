@@ -913,6 +913,11 @@ window.PhaseStrategy = function () {
         window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
     };
 
+    PhaseStrategy.prototype.onToggleBackground = function (payload) {
+        if (payload.up) return;
+        window.dispatchEvent(new CustomEvent("BackgroundToggled"));
+    };
+
     function toggleBallisticLines(ships, payload) {
         this.ballisticIconContainer.toggleBallisticLines(ships);
         if (!this.gamedata.replay) this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer);

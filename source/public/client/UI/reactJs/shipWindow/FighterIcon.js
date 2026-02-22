@@ -19,6 +19,10 @@ const FighterIconContainer = styled.div`
     margin: 5px;
     filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
     opacity: ${props => props.$destroyed ? '0.5' : '1'};
+
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
 `;
 
 const Container = styled.div`
@@ -52,6 +56,10 @@ const HealthBar = styled.div`
     text-shadow: black 0 0 6px, black 0 0 6px;
     border: 1px solid #496791;
     margin: 2px;
+
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
 
     &::before {
         box-sizing: border-box;
@@ -143,6 +151,15 @@ class FighterIcon extends React.Component {
         }
     }
 
+    onFighterTouchCancel(event) {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.touchActive = false;
+        webglScene.customEvent('SystemMouseOut');
+    }
+
     onFighterTouchEnd(event) {
         if (this.longPressTimer) {
             // Timer didn't pop, meaning this was a short tap
@@ -174,7 +191,7 @@ class FighterIcon extends React.Component {
         */
         //new version - fwd and aft systems (unit creator decides the layout)
         return (
-            <FighterIconContainer $destroyed={destroyed} $img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)}>
+            <FighterIconContainer $destroyed={destroyed} $img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
                 <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
                 <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
                 <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
