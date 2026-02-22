@@ -33,6 +33,7 @@
     padding: 0;
     height: 20px;
     width: 100%;
+    border-radius: 5px;
 }
 
 .chatmessage {
