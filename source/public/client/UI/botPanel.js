@@ -3,28 +3,33 @@
 jQuery(function () {
 	jQuery("#logUI div").on("click", window.botPanel.onLogUIClicked)
 
-	
+
 	$("#expandBotPanel").click(function () {
 		var logContainer = $("#logcontainer");
-	
+
 		logContainer.toggleClass('large');
-	
+
 		// Hide iniGui if logcontainer is large
 		if (logContainer.hasClass('large')) {
-            $("#iniGui").hide();
-            $(backDiv).data("on", 0);
-            backDiv.style.marginLeft = "0px";
-            document.getElementById("iniSlider").src = "img/pullOut.png";
+			$(iniGui).addClass("closed");
+			$(backDiv).addClass("closed");
+			$(backDiv).data("on", 0);
+			document.getElementById("iniSlider").src = "img/pullOut.png";
 		} else {
 			// If not large, ensure it behaves normally
-            $("#iniGui").show();
-            $(backDiv).data("on", 1);
-            backDiv.style.marginLeft = "250px";
-            document.getElementById("iniSlider").src = "img/pullIn.png";
+			$(iniGui).removeClass("closed");
+			$(backDiv).removeClass("closed");
+			$(backDiv).data("on", 1);
+
+			// Clean up any potential lingering inline styles
+			$("#iniGui").css("display", "");
+			$("#backDiv").css("margin-left", "");
+
+			document.getElementById("iniSlider").src = "img/pullIn.png";
 		}
 
 		// Manually create a fake element with the right data-select
-		var fakeElement = $("<div>").data("select", "#log");		
+		var fakeElement = $("<div>").data("select", "#log");
 		// Call onLogUIClicked with that fake element as "this"
 		window.botPanel.onLogUIClicked.call(fakeElement);
 	});

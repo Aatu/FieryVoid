@@ -1,7 +1,7 @@
 .confirm {
     padding: 10px 10px 10px 10px;
-    /*border: 1px solid #defbff44; */  
-    border: 1px solid #496791;      
+    /*border: 1px solid #defbff44; */
+    border: 1px solid #496791;
     background-color: black;
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
@@ -30,7 +30,7 @@
 }
 
 .confirm::-webkit-scrollbar-thumb {
-    background: #466486;
+    background: #3c5574;
 }
 
 .confirm::-webkit-scrollbar-thumb:hover {
@@ -38,8 +38,8 @@
 }
 
 .confirm .missileselect {
-    /*border: 1px solid #defbff44; */  
-    border: 1px solid #496791;   
+    /*border: 1px solid #defbff44; */
+    border: 1px solid #496791;
     color: #DEEBFF;
     padding: 3px 5px;
     position: relative;
@@ -58,12 +58,14 @@
 .missileSelectItem {
     text-align: left;
     vertical-align: middle;
+    margin-bottom: 8px;
 }
 
 .missileSelectItem .selectText {
     padding-left: 10px;
     display: inline-block;
     width: 75.5%;
+    vertical-align: middle;
 }
 
 .missileSelectItem .selectButtons {
@@ -78,6 +80,7 @@
     background-color: #072731;
     padding: 3px 5px;
     text-align: right;
+    vertical-align: middle;
 }
 
 .fighterAmount {
@@ -87,6 +90,7 @@
     background-color: #072731;
     padding: 3px 5px;
     text-align: right;
+    vertical-align: middle;
 }
 
 .totalUnitCost .totalUnitCostText {
@@ -96,6 +100,7 @@
     text-align: right;
     margin-right: 15px;
     width: 62%;
+    vertical-align: middle;
 }
 
 .totalUnitCost .totalUnitCostAmount {
@@ -105,17 +110,24 @@
     background-color: #072731;
     padding: 3px 5px;
     text-align: right;
+    vertical-align: middle;
 }
 
 .missileSelectItem table {
     border-spacing: 0px;
     empty-cells: show;
     display: inline-block;
+    vertical-align: middle;
+}
+
+.missileSelectItem table td {
+    padding: 0;
+    line-height: 0;
 }
 
 
 .missileSelectItem .minusButton {
-    display: inline-block;
+    display: block;
     border: 1px solid #496791;
     width: 12px;
     height: 12px;
@@ -125,13 +137,14 @@
 }
 
 .missileSelectItem .plusButton {
-    display: inline-block;
+    display: block;
     border: 1px solid #496791;
     width: 12px;
     height: 12px;
     position: relative;
     background-image: url(../img/plussquare.png);
     cursor: pointer;
+    margin-bottom: 3px;
 }
 
 .confirm .missileSelectItem .combo input {
@@ -172,8 +185,8 @@
 }
 
 .confirm.error {
-    /*border: 1px solid #defbff44; */  
-    border: 2px solid #641b1b;        
+    /*border: 1px solid #defbff44; */
+    border: 2px solid #641b1b;
     color: #c94b1d;
     font-family: arial;
     font-size: 16px;
@@ -184,13 +197,13 @@
 }
 
 .confirm.warning {
-    background-color: #04161C;    
-    border: 1px solid #496791;  
+    background-color: #04161C;
+    border: 1px solid #496791;
     color: #deebffd2;
     font-family: arial;
     font-size: 16px;
-    width: 400px;    
-    display: inline-block;    
+    width: 400px;
+    display: inline-block;
 }
 
 .confirm h2 {
@@ -269,8 +282,8 @@
     background-image: url("../img/surrender_icon.png");
     background-size: cover;
     cursor: pointer;
-    height: 30px;
-    width: 30px;
+    height: 25px;
+    width: 25px;
 }
 
 .ui span {
@@ -286,6 +299,13 @@
 }
 
 @media only screen and (max-width: 1024px) {}
+
+@media only screen and (max-width: 765px) {
+    .confirm {
+        width: 80% !important;
+        min-width: unset;
+    }
+}
 
 /* Multi-value input dialog styles */
 .confirm.multi-value-confirm {
@@ -360,7 +380,7 @@
 
 .confirm.multi-value-confirm .multi-value-input:focus {
     border-color: #6a0080;
-    border: 1px solid #6a0080;    
+    border: 1px solid #6a0080;
     box-shadow: 0 0 10px rgba(191, 0, 230, 0.75);
     color: #ffffff;
     background: #000;

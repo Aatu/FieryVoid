@@ -86,7 +86,7 @@ window.InitialPhaseStrategy = function () {
     InitialPhaseStrategy.prototype.selectShip = function (ship, payload) {
         var position = this.coordinateConverter.fromGameToHex(this.shipIconContainer.getByShip(ship).getPosition());
 
-        //Method to double click to instand select, or single select and get EW/Firing Menus
+        //Method to double click to instant own ships always, or single select and get EW/Firing Menus for ELINTs, Hex Weapons and alliedEW weapons 
         if (this.lastClickedShipId === ship.id && gamedata.isMyShip(ship) && this.selectedShip !== ship) {
             PhaseStrategy.prototype.setSelectedShip.call(this, ship);
             this.showShipEW(this.selectedShip);
@@ -96,19 +96,20 @@ window.InitialPhaseStrategy = function () {
 
         this.lastClickedShipId = ship.id;
 
-        if (this.selectedShip && shipManager.isElint(this.selectedShip) && ship !== this.selectedShip) {
-            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);            
-            menu.addButton("selectShip",
-                function () {
-                    return this.selectedShip !== ship;
-                },
-                function () {
-                    PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-                    this.showShipEW(this.selectedShip);
-                }.bind(this), "Select ship");
-            this.showShipEW(this.selectedShip);
-        } else if (gamedata.isMyShip(ship)) {
-            //PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+        var hexWeaponSelected = gamedata.selectedSystems.some(function (system) {
+            return system instanceof Weapon && system.hextarget === true;
+        });
+
+        var isElintOrAlliedEW = this.selectedShip && (shipManager.isElint(this.selectedShip) || shipManager.hasSpecialAbility(this.selectedShip, "alliedEW"));
+        var friendlyFireActive = gamedata.rules && gamedata.rules.friendlyFire === 1;
+        var clickedFriendly = gamedata.isMyorMyTeamShip(ship);
+
+        // Add selectShip and don't instant target for:
+        // - ELINT or alliedEW weapons
+        // - Friendly ships when you have a hex weapon selected, or Friendly Fire rules are in effect
+        if (this.selectedShip && ship !== this.selectedShip &&
+            (isElintOrAlliedEW || (clickedFriendly && (hexWeaponSelected || friendlyFireActive)))) {
+
             var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
             menu.addButton("selectShip",
                 function () {
@@ -118,6 +119,13 @@ window.InitialPhaseStrategy = function () {
                     PhaseStrategy.prototype.setSelectedShip.call(this, ship);
                     this.showShipEW(this.selectedShip);
                 }.bind(this), "Select ship");
+
+            this.showShipEW(this.selectedShip);
+
+            // Default select ship if it's one of your own.        
+        } else if (gamedata.isMyShip(ship)) {
+            PhaseStrategy.prototype.setSelectedShip.call(this, ship);
+            var menu = new ShipTooltipInitialOrdersMenu(this.selectedShip, ship, this.gamedata.turn, position);
             this.showShipEW(this.selectedShip);
         }
 

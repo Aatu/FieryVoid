@@ -310,9 +310,9 @@ class FighterFlight extends BaseShip
 		
 		
 		//add to Notes information about miscellanous attributes - with first fighter being added
-		if($fighter->id == 1){
-			$this->notesFill($fighter);
-		}
+		//if($fighter->id == 1){
+		//	$this->notesFill($fighter);
+		//}
 		//add ramming attack if not equipped already$rammingExists = false;
 		$rammingExists = false;
 		foreach($fighter->systems as $sys)  if ($sys instanceof RammingAttack){

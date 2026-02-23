@@ -14,7 +14,7 @@ class HyachIrokaiKal extends BaseShip{
 			$this->occurence = "rare";
         $this->shipSizeClass = 3;
 
-		$this->notes = "Provides +5 initiative to all friendly Hyach units.";
+		$this->notes = "Provides +5 initiative to friendly Hyach units.";
 
         $this->isd = 2165;
         
@@ -32,7 +32,8 @@ class HyachIrokaiKal extends BaseShip{
        
 
         $this->addPrimarySystem(new Reactor(5, 28, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 26, 0, 1));
+        //$this->addPrimarySystem(new CnC(5, 26, 0, 1));
+$this->addPrimarySystem(new FlagBridge(5, 26, 0, 1, 'Hyach Command Bonus', 60,  true, true, true, false));				
 		$sensors = new Scanner(5, 30, 8, 12);
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 

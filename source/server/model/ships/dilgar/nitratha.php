@@ -23,7 +23,8 @@ class Nitratha extends BaseShip{
         $this->pivotcost = 3;
 
         $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
-        $this->addPrimarySystem(new CnC(4, 21, 0, 1));
+        //$this->addPrimarySystem(new CnC(4, 21, 0, 1));
+        $this->addPrimarySystem(new FlagBridge(4, 21, 0, 1, 'Pentacan Formation', 9,  false, true, false, false));		                
         $this->addPrimarySystem(new Scanner(4, 12, 3, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 5, 3));
         $this->addPrimarySystem(new Hangar(3, 2));

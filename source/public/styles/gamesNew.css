@@ -725,6 +725,7 @@ kbd {
 
 .game-type-fleettest .lobbyname {
   color: #e6ac00 !important;
+  padding-right: 0px;
   /* Gold for Fleet Test */
 }
 

@@ -364,14 +364,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Set a ship’s reactor to overload in Initial Orders to self-destruct at the end of the turn.</li>
             <li><b>Right-click actions:</b>
                 <ul class="circle-list">
-                    <li>Right-click Unit - select it (if yours) and open controls.</li>
-                    <li>Right-click Weapon - select all similar weapons (e.g., all fighter guns).</li>
-                    <li>Right-click Power Button - toggle all similar systems.</li>
-                    <li>Right-click Firing Mode - change fire mode on all similar undeclared weapons.</li>
-                    <li>Right-click Defensive Fire - enable defensive fire on all similar undeclared weapons.</li>
-                    <li>Right-click Cancel Move - cancel all current moves for the unit.</li>
-                    <li>Right-click Cancel Firing Order - cancel firing orders for all similar weapons.</li>
-                    <li>Right-click Move Forward - move forward using all remaining movement.</li>
+                    <li>Right-click Unit - Select it (if yours) and open controls.</li>
+                    <li>Right-click Weapon - Select all similar weapons (e.g., all fighter guns).</li>
+                    <li>Right-click Power Button - Toggle all similar systems.</li>
+                    <li>Right-click Firing Mode - Change fire mode on all similar undeclared weapons.</li>
+                    <li>Right-click Defensive Fire - Enable defensive fire on all similar undeclared weapons.</li>
+                    <li>Right-click Cancel Move - Cancel all current moves for the unit.</li>
+                    <li>Right-click Cancel Firing Order - Cancel firing orders for all similar weapons.</li>
+                    <li>Right-click Move Forward - Move forward using all remaining movement.</li>
                 </ul>
             </li>
         </ul>
