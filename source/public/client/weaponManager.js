@@ -871,7 +871,11 @@ window.weaponManager = {
 
         if (target.Enormous) hitChance += 6;//+6 vs Enormous units
         if (shooter.Enormous) hitChance += 6;//+6 if ramming unit is Enormous
-        if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) hitChance += 2;//+2 if target is Capital and ramming unit is not
+
+		if (!shooter.flight){ //upon re-reading - this bonus does not apply to fighters
+       	 if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) hitChance += 2;//+2 if target is Capital and ramming unit is not
+		}
+		
         if ((shooter.shipSizeClass >= 3) && (target.shipSizeClass < 3)) hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
         if ((shooter.flight) && (!target.flight)) hitChance += 4;//+4 for fighter trying to ram a ship
         var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)
