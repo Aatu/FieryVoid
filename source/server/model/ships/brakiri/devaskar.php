@@ -42,8 +42,8 @@ class Devaskar extends BaseShip{
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
 
-        $this->addAftSystem(new GraviticBolt(3, 5, 2, 60, 240));
         $this->addAftSystem(new GraviticBolt(3, 5, 2, 120, 300));
+        $this->addAftSystem(new GraviticBolt(3, 5, 2, 60, 240));        
         $this->addAftSystem(new GraviticThruster(3, 16, 0, 5, 2));
         $this->addAftSystem(new GraviticThruster(3, 16, 0, 5, 2));
 

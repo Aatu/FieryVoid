@@ -3,6 +3,12 @@ import styled from "styled-components"
 import { Clickable } from "../styled";
 
 import FiringModeSelector from "./FiringModeSelector";
+import SelfRepairList from "./SelfRepairList";
+import AdaptiveArmorList from "./AdaptiveArmorList";
+import HyachComputerList from "./HyachComputerList";
+import HyachSpecialistsList from "./HyachSpecialistsList";
+import ShieldGeneratorList from "./ShieldGeneratorList";
+import PowerCapacitor from "./PowerCapacitor";
 
 const Container = styled.div`
     display:flex;
@@ -21,6 +27,9 @@ const Button = styled.div`
 `;
 
 class SystemInfoButtons extends React.Component {
+	constructor(props) {
+		super(props);
+	}
 
 	online(e) {
 		e.stopPropagation(); e.preventDefault();
@@ -239,7 +248,8 @@ class SystemInfoButtons extends React.Component {
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 
-	/*switch Adaptive Armor, Hyach Computer or Specialists display to next damage/FC class*/
+
+	//switch Adaptive Armor, Hyach Computer or Specialists display to next damage/FC class
 	nextCurrClass(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -254,21 +264,25 @@ class SystemInfoButtons extends React.Component {
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 
-	/*Adaptive Armor increase rating for current class*/
+
+	/*
+	//Adaptive Armor increase rating for current class
 	AAincrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doIncrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-	/*Adaptive Armor decrease rating for current class*/
+	//Adaptive Armor decrease rating for current class
 	AAdecrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doDecrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	*/
 	/*Adaptive Armor propagate setting for current damage type*/
+	/*
 	AApropagate(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -292,13 +306,7 @@ class SystemInfoButtons extends React.Component {
 						}
 					}
 				}
-				/*
-				
-				
-				allOwnAA = ship.systems
-					.map(fighter => fighter.systems)
-					.filter(system => system.displayName = "Adaptive Armor Controller");
-					*/
+
 			} else {
 				for (var iSys = 0; iSys < otherUnit.systems.length; iSys++) {
 					var ctrl = otherUnit.systems[iSys];
@@ -324,23 +332,24 @@ class SystemInfoButtons extends React.Component {
 
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-
+	*/
 
 	/*Hyach Computer increase rating for current class*/
+	/*
 	BFCPincrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doIncrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-	/*Hyach Computer decrease rating for current class*/
+
 	BFCPdecrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doDecrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-	/*Hyach Computer propagate setting for current damage type*/
+
 	BFCPpropagate(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -390,8 +399,9 @@ class SystemInfoButtons extends React.Component {
 
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	*/
 
-	/*Hyach Specialists increase rating for current class*/
+	/*
 	Specselect(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -411,15 +421,16 @@ class SystemInfoButtons extends React.Component {
 		system.doUse();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-	/*Hyach Specialists decrease rating for current class*/
+
 	Specdecrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doDecrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	*/
 
-	/*Thirdspace Shield increase health*/
+	/*Thirdspace Shield increase health
 	TSShieldIncrease25(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -444,7 +455,7 @@ class SystemInfoButtons extends React.Component {
 		system.doIncrease();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-	/*Thirdspace Shield decrease health*/
+
 	TSShieldDecrease(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -469,7 +480,7 @@ class SystemInfoButtons extends React.Component {
 		system.doDecrease25();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
-	/*Thirdspace Shield Generator Presets*/
+
 	TSShieldGenSelect(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
@@ -477,45 +488,20 @@ class SystemInfoButtons extends React.Component {
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 
-	/*Thought Shield Generator Presets*/
+
 	ThoughtShieldGenSelect(e) {
 		e.stopPropagation(); e.preventDefault();
 		const { ship, system } = this.props;
 		system.doSelect();
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
+	*/
 
-	/*Self Repair - display next system in need of repairs*/
-	nextSRsystem(e) {
-		e.stopPropagation(); e.preventDefault();
-		const { ship, system } = this.props;
-		system.getNextSystem();
-		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	}
-	/*Self Repair - change system priority*/
-	SRPriorityUp(e) {
-		e.stopPropagation(); e.preventDefault();
-		const { ship, system } = this.props;
-		system.setRepairPriority(20);
-		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	}
-	SRPriorityDown(e) {
-		e.stopPropagation(); e.preventDefault();
-		const { ship, system } = this.props;
-		system.setRepairPriority(0);
-		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	}
-	SRPriorityCancel(e) {
-		e.stopPropagation(); e.preventDefault();
-		const { ship, system } = this.props;
-		system.setRepairPriority(-1);
-		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
-	}
 
 	render() {
 		const { ship, selectedShip, system } = this.props;
 
-		if (!canDoAnything) {
+		if (!canDoAnything(ship, system)) {
 			return null;
 		}
 
@@ -539,19 +525,30 @@ class SystemInfoButtons extends React.Component {
 				{canActivate(ship, system) && <Button title="Activate" onClick={this.activate.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
 				{canDeactivate(ship, system) && <Button title="Deactivate" onClick={this.deactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}
 
+				{/* Adaptive Armor List Integration */}
+				{/* Adaptive Armor List Integration */}
+				{canAA(ship, system) && <AdaptiveArmorList ship={ship} system={system} />}
+
+				{/* Legacy AA Controls - Commented out for revamp
 				{canAAdisplayCurrClass(ship, system) && <Button title={getAAcurrClassName(ship, system)} img={getAAcurrClassImg(ship, system)}></Button>}
 				{canAAdisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canAAdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
 				{canAAincrease(ship, system) && <Button onClick={this.AAincrease.bind(this)} img="./img/systemicons/AAclasses/iconPlus.png"></Button>}
 				{canAAdecrease(ship, system) && <Button onClick={this.AAdecrease.bind(this)} img="./img/systemicons/AAclasses/iconMinus.png"></Button>}
 				{canAApropagate(ship, system) && <Button title="Propagate setting" onClick={this.AApropagate.bind(this)} img="./img/systemicons/AAclasses/iconPropagate.png"></Button>}
+                */}
 
+				{canBFCP(ship, system) && <HyachComputerList system={system} ship={ship} />}
+				{/*
 				{canBFCPdisplayCurrClass(ship, system) && <Button title={getBFCPcurrClassName(ship, system)} img={getBFCPcurrClassImg(ship, system)}></Button>}
 				{canBFCPdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/BFCPclasses/iconNext.png"></Button>}
 				{canBFCPincrease(ship, system) && <Button onClick={this.BFCPincrease.bind(this)} img="./img/systemicons/BFCPclasses/iconPlus.png"></Button>}
 				{canBFCPdecrease(ship, system) && <Button onClick={this.BFCPdecrease.bind(this)} img="./img/systemicons/BFCPclasses/iconMinus.png"></Button>}
 				{canBFCPpropagate(ship, system) && <Button title="Propagate setting" onClick={this.BFCPpropagate.bind(this)} img="./img/systemicons/BFCPclasses/iconPropagate.png"></Button>}
+				*/}
 
+				{canSpec(ship, system) && <HyachSpecialistsList system={system} ship={ship} />}
+				{/*
 				{canSpecdisplayCurrClass(ship, system) && <Button title={getSpeccurrClassName(ship, system)} img={getSpeccurrClassImg(ship, system)}></Button>}
 				{canSpecdisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canSpecdisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}
@@ -559,7 +556,10 @@ class SystemInfoButtons extends React.Component {
 				{canSpecunselect(ship, system) && <Button onClick={this.Specunselect.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}
 				{canSpecincrease(ship, system) && <Button onClick={this.Specincrease.bind(this)} img="./img/systemicons/Specialistclasses/iconPlus.png"></Button>}
 				{canSpecdecrease(ship, system) && <Button onClick={this.Specdecrease.bind(this)} img="./img/systemicons/Specialistclasses/iconMinus.png"></Button>}
+				*/}
 
+				{(canTSShield(ship, system) || canTSShieldGen(ship, system)) && <ShieldGeneratorList system={system} ship={ship} />}
+				{/*
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus25.png"></Button>}
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}
@@ -572,7 +572,10 @@ class SystemInfoButtons extends React.Component {
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canTSShieldGendisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}
 				{canTSShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
+				*/}
 
+				{(canThoughtShield(ship, system) || canThoughtShieldGen(ship, system)) && <ShieldGeneratorList system={system} ship={ship} />}
+				{/*
 				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus25.png"></Button>}
 				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease10.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus10.png"></Button>}
 				{canThoughtShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease5.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus5.png"></Button>}
@@ -585,13 +588,12 @@ class SystemInfoButtons extends React.Component {
 				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="Previous" onClick={this.prevCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconPrev.png"></Button>}
 				{canThoughtShieldGendisplayCurrClass(ship, system) && <Button title="Next" onClick={this.nextCurrClass.bind(this)} img="./img/systemicons/Specialistclasses/iconNext.png"></Button>}
 				{canThoughtShieldGenSelect(ship, system) && <Button onClick={this.TSShieldGenSelect.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
+				*/}
 
 
-				{canSRdisplayCurrSystem(ship, system) && <Button title="Next" onClick={this.nextSRsystem.bind(this)} img="./img/systemicons/AAclasses/iconNext.png"></Button>}
-				{canSRdisplayCurrSystem(ship, system) && <Button title={getSRdescription(ship, system)} img={getSRicon(ship, system)}></Button>}
-				{canSRdisplayCurrSystem(ship, system) && <Button title="Highest priority" onClick={this.SRPriorityUp.bind(this)} img="./img/iconSRHigh.png"></Button>}
-				{canSRdisplayCurrSystem(ship, system) && <Button title="Disable repair" onClick={this.SRPriorityDown.bind(this)} img="./img/iconSRLow.png"></Button>}
-				{canSRdisplayCurrSystem(ship, system) && <Button title="Default priority" onClick={this.SRPriorityCancel.bind(this)} img="./img/iconSRCancel.png"></Button>}
+				{canSelfRepairList(ship, system) && <SelfRepairList ship={ship} system={system} />}
+
+				{canPowerCapacitor(ship, system) && <PowerCapacitor ship={ship} system={system} />}
 
 			</Container>
 		)
@@ -601,58 +603,60 @@ class SystemInfoButtons extends React.Component {
 //can do something with Adaptive Armor Controller
 const canAA = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'adaptiveArmorController');
 const canAAdisplayCurrClass = (ship, system) => canAA(ship, system) && system.getCurrClass() != '';
+/*
 const getAAcurrClassImg = (ship, system) => './img/systemicons/AAclasses/' + system.getCurrClass() + '.png';
 const getAAcurrClassName = (ship, system) => system.getCurrClass();
 const canAAincrease = (ship, system) => canAA(ship, system) && system.canIncrease() != '';
 const canAAdecrease = (ship, system) => canAA(ship, system) && system.canDecrease() != '';
 const canAApropagate = (ship, system) => canAA(ship, system) && system.canPropagate() != '';
+*/
 
 //can do something with Hyach Computer
 const canBFCP = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'hyachComputer');
 const canBFCPdisplayCurrClass = (ship, system) => canBFCP(ship, system) && system.getCurrClass() != '';
+/*
 const getBFCPcurrClassImg = (ship, system) => './img/systemicons/BFCPclasses/' + system.getCurrClass() + '.png';
 const getBFCPcurrClassName = (ship, system) => system.getCurrClass();
 const canBFCPincrease = (ship, system) => canBFCP(ship, system) && system.canIncrease() != '';
 const canBFCPdecrease = (ship, system) => canBFCP(ship, system) && system.canDecrease() != '';
 const canBFCPpropagate = (ship, system) => canBFCP(ship, system) && system.canPropagate() != '';
+*/
 
 //can do something with Hyach Specialists
 //const canSpec = (ship, system) => (gamedata.gamephase === 1) && system.name === 'hyachSpecialists';
 const canSpec = (ship, system) => system.name === 'hyachSpecialists';
-const canSpecdisplayCurrClass = (ship, system) => canSpec(ship, system) && system.getCurrClass() != '';
+/*const canSpecdisplayCurrClass = (ship, system) => canSpec(ship, system) && system.getCurrClass() != '';
 const getSpeccurrClassImg = (ship, system) => './img/systemicons/Specialistclasses/' + system.getCurrClass() + '.png';
 const getSpeccurrClassName = (ship, system) => system.getCurrClass();
 const canSpecselect = (ship, system) => canSpec(ship, system) && system.canSelect() != '';
 const canSpecunselect = (ship, system) => canSpec(ship, system) && system.canUnselect() != '';
 const canSpecincrease = (ship, system) => canSpec(ship, system) && system.canUse() != '';
-const canSpecdecrease = (ship, system) => canSpec(ship, system) && system.canDecrease() != '';
+const canSpecdecrease = (ship, system) => canSpec(ship, system) && system.canDecrease() != '';*/
 
 //can do something with Thirdspace Shields
 const canTSShield = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThirdspaceShield';
-const canTSShieldIncrease = (ship, system) => canTSShield(ship, system) && system.canIncrease() != '';
-const canTSShieldDecrease = (ship, system) => canTSShield(ship, system) && system.canDecrease() != '';
+/*const canTSShieldIncrease = (ship, system) => canTSShield(ship, system) && system.canIncrease() != '';
+const canTSShieldDecrease = (ship, system) => canTSShield(ship, system) && system.canDecrease() != '';*/
 //can do something with Thirdspace Shield Generator
 const canTSShieldGen = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThirdspaceShieldGenerator';
-const canTSShieldGendisplayCurrClass = (ship, system) => canTSShieldGen(ship, system) && system.getCurrClass() != '';
+/*const canTSShieldGendisplayCurrClass = (ship, system) => canTSShieldGen(ship, system) && system.getCurrClass() != '';
 const getTSShieldGencurrClassImg = (ship, system) => './img/systemicons/ShieldGenclasses/' + system.getCurrClass() + '.png';
 const getTSShieldGencurrClassName = (ship, system) => system.getCurrClass();
-const canTSShieldGenSelect = (ship, system) => canTSShieldGen(ship, system) && system.canSelect() != '';
+const canTSShieldGenSelect = (ship, system) => canTSShieldGen(ship, system) && system.canSelect() != '';*/
 
 //can do something with Thought Shields
 const canThoughtShield = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThoughtShield';
-const canThoughtShieldIncrease = (ship, system) => canThoughtShield(ship, system) && system.canIncrease() != '';
-const canThoughtShieldDecrease = (ship, system) => canThoughtShield(ship, system) && system.canDecrease() != '';
+/*const canThoughtShieldIncrease = (ship, system) => canThoughtShield(ship, system) && system.canIncrease() != '';
+const canThoughtShieldDecrease = (ship, system) => canThoughtShield(ship, system) && system.canDecrease() != '';*/
 //can do something with Thirdspace Shield Generator
 const canThoughtShieldGen = (ship, system) => (gamedata.gamephase === 1) && system.name === 'ThoughtShieldGenerator';
-const canThoughtShieldGendisplayCurrClass = (ship, system) => canThoughtShieldGen(ship, system) && system.getCurrClass() != '';
+/*const canThoughtShieldGendisplayCurrClass = (ship, system) => canThoughtShieldGen(ship, system) && system.getCurrClass() != '';
 const getThoughtShieldGencurrClassImg = (ship, system) => './img/systemicons/ShieldGenclasses/' + system.getCurrClass() + '.png';
 const getThoughtShieldGencurrClassName = (ship, system) => system.getCurrClass();
-const canThoughtShieldGenSelect = (ship, system) => canThoughtShieldGen(ship, system) && system.canSelect() != '';
+const canThoughtShieldGenSelect = (ship, system) => canThoughtShieldGen(ship, system) && system.canSelect() != '';*/
 
 //can do something with Self Repair...
-const canSRdisplayCurrSystem = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'SelfRepair') && (system.getCurrSystem() >= 0);
-const getSRdescription = (ship, system) => system.getCurrSystemDescription();
-const getSRicon = (ship, system) => system.getCurrSystemIcon();
+const canSelfRepairList = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'SelfRepair');
 
 export const canDoAnything = (ship, system) => canOffline(ship, system) || canOnline(ship, system)
 	|| canOverload(ship, system) || canStopOverload(ship, system) || canBoost(ship, system)
@@ -660,7 +664,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 	|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
-	|| canSRdisplayCurrSystem(ship, system) || canActivate(ship, system) || canDeactivate(ship, system);
+	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
@@ -671,9 +675,9 @@ const canOverload = (ship, system) => gamedata.gamephase === 1 && !shipManager.p
 
 const canStopOverload = (ship, system) => gamedata.gamephase === 1 && system.weapon && system.overloadable && shipManager.power.isOverloading(ship, system) && (system.overloadshots >= system.extraoverloadshots || system.overloadshots == 0);
 
-const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship));
+const canBoost = (ship, system) => system.boostable && gamedata.gamephase === 1 && shipManager.power.canBoost(ship, system) && (!system.isScanner() || system.id == shipManager.power.getHighestSensorsId(ship)) && system.name !== 'ThirdspaceShieldGenerator' && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
 
-const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system));
+const canDeBoost = (ship, system) => gamedata.gamephase === 1 && Boolean(shipManager.power.getBoost(system)) && system.name !== 'ThirdspaceShieldGenerator' && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
 /* Code for boosting systems in other phases.  Not longer need anymore since Shading Field got converted to notes
 const isBoostPhase = (system) => {
 	// If boostOtherPhases is an array, check if the current gamephase is included
@@ -707,15 +711,24 @@ const canChangeFiringMode = (ship, system) => system.weapon && ((gamedata.gameph
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
-const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && weaponManager.canRemInterceptSingle(ship, system);
+const canRemIntercept = (ship, system) => system.weapon && weaponManager.canRemInterceptSingle(ship, system);
 
-const canActivate = (ship, system) => system.canActivate(); //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
-const canDeactivate = (ship, system) => system.canDeactivate();
+const canActivate = (ship, system) => system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
+const canDeactivate = (ship, system) => system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
+
+const canPowerCapacitor = (ship, system) => {
+	if (system.name === 'powerCapacitor' || system.name === 'PowerCapacitor') {
+		//console.log("canPowerCapacitor TRUE");
+		return true;
+	}
+	//console.log("canPowerCapacitor FALSE: ", system.name);
+	return false;
+}
 
 
 export default SystemInfoButtons;
 
-/*
+/* //Replaced with FiringModeSelecter component - DK 1.2.26
 const getFiringModes = (ship, system, changeFiringMode, allChangeFiringMode) => {
 	if (system.parentId >= 0) {
 		let parentSystem = shipManager.systems.getSystem(ship, system.parentId);

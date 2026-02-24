@@ -24,6 +24,8 @@ class Guardhawk extends HeavyCombatVesselLeftRight{
         $this->pivotcost = 2;
         $this->iniativebonus = 40;
 
+		$this->enhancementOptionsEnabled[] = 'GUNSIGHT'; //can equip particle repeaters with Gunsights        
+
         $this->addPrimarySystem(new Reactor(5, 14, 0, 4));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));

@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
-import SystemInfoButtons from "./SystemInfoButtons";
+import SystemInfoButtons, { canDoAnything } from "./SystemInfoButtons";
 import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
 
 const InfoHeader = styled(TooltipHeader)`
@@ -15,7 +15,7 @@ const SystemInfoTooltip = styled(Tooltip)`
 }, '')}
     max-width: 600px;
     text-align: left;
-    opacity:0.8;
+    opacity: ${props => props.opacity || 0.8};
     border: 1px solid #496791;
     padding-bottom: 3px;
 `;
@@ -35,10 +35,23 @@ class SystemInfoMenu extends React.Component {
 
     render() {
 
-        const { boundingBox } = this.props;
+        const { ship, system, boundingBox } = this.props;
+
+        if (!canDoAnything(ship, system)) {
+            return null;
+        }
 
         return (
-            <SystemInfoTooltip position={getPosition(boundingBox)}>
+            <SystemInfoTooltip position={getPosition(boundingBox)} opacity={(
+                system.name === 'SelfRepair' ||
+                system.name === 'adaptiveArmorController' ||
+                system.name === 'hyachComputer' ||
+                system.name === 'hyachSpecialists' ||
+                system.name === 'ThoughtShield' ||
+                system.name === 'ThirdspaceShield'||
+                system.name === 'ThoughtShieldGenerator' ||
+                system.name === 'ThirdspaceShieldGenerator'||
+                system.name === 'powerCapacitor') ? 0.9 : 0.8}>
                 <SystemInfoButtons {...this.props} />
             </SystemInfoTooltip>
         )

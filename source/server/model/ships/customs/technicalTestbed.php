@@ -36,7 +36,8 @@ class TechnicalTestbed extends MediumShip{
         $this->addPrimarySystem(new Hangar(6, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4)); 
-        $this->addPrimarySystem(new CloakingDevice(4, 13, 10, 5));         
+        $this->addPrimarySystem(new CloakingDevice(4, 13, 10, 5));
+        //$this->addPrimarySystem(new MicroJumpSystem(4, 0, 0, 330, 30, 8, 4));                 
 	    
 	//ammo magazine itself
 	$ammoMagazine = new AmmoMagazine(6); //pass magazine capacity 

@@ -385,7 +385,8 @@ EWGraviticTractingRod.prototype.validateTargetMoveHex = function(hexpos, maxmove
         var targetMoveHex = hexpos;
         var dist = targetShipHex.distanceTo(targetMoveHex);
         if(dist <= maxmoverange){            
-            var blockedHexes = weaponManager.getBlockedHexes();
+            //var blockedHexes = weaponManager.getBlockedHexes();
+	        var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.             
             var loSBlocked = mathlib.checkLineOfSight(targetShipHex, targetMoveHex, blockedHexes);
             if(!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)){//make sure hexpos is a not a blocked hex and LOS is not blocked      
                 valid = true ;  

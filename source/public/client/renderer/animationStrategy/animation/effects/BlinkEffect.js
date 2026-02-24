@@ -83,45 +83,49 @@ window.BlinkEffect = function () {
     };
 
     // --- 🔊 Add render() just for sound timing ---
-BlinkEffect.prototype.render = function (now, total, last, delta, zoom) {
-    if (this.emitterContainer && this.emitterContainer.render) {
-        this.emitterContainer.render(now, total, last, delta, zoom);
-    }
+    BlinkEffect.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        if (this.emitterContainer && this.emitterContainer.render) {
+            this.emitterContainer.render(now, total, last, delta, zoom);
+        }
 
-    // --- Only play sounds once the animation has actually started running ---
-    // Prevent sounds from triggering during replay preload or setup.
-    if (total < this.time) {
-        return;
-    }
-    if (this.hit) {
-        // --- Play launch sound (only once) ---
-        if (gamedata.playAudio && !this.playedLaunchSound) {
-            try {
-                const launchSound = BlinkEffect.cachedLaunchAudio.cloneNode(true);
-                launchSound.volume = this.soundVolume;
-                launchSound.currentTime = 0;
-                launchSound.play().catch(() => {});
-                this.playedLaunchSound = true;
-            } catch (e) {
-                console.warn("Blink launch sound failed:", e);
+        // --- Only play sounds once the animation has actually started running ---
+        // Prevent sounds from triggering during replay preload or setup.
+        if (total < this.time) {
+            return;
+        }
+
+        // 🛑 Do not play sounds if we are paused or scrubbing backwards
+        if (paused || back) return;
+
+        if (this.hit) {
+            // --- Play launch sound (only once) ---
+            if (gamedata.playAudio && !this.playedLaunchSound) {
+                try {
+                    const launchSound = BlinkEffect.cachedLaunchAudio.cloneNode(true);
+                    launchSound.volume = this.soundVolume;
+                    launchSound.currentTime = 0;
+                    launchSound.play().catch(() => { });
+                    this.playedLaunchSound = true;
+                } catch (e) {
+                    console.warn("Blink launch sound failed:", e);
+                }
             }
         }
-    }    
 
-    // --- Play explosion sound ---
-    const explosionTime = this.time + this.duration - 50; // slightly before impact
-    /*if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= explosionTime) {
-        try {
-            const explosionSound = BlinkEffect.cachedExplosionAudio.cloneNode(true);
-            explosionSound.volume = this.soundVolume;
-            explosionSound.currentTime = 0;
-            explosionSound.play().catch(() => {});
-            this.playedImpactSound = true;
-        } catch (e) {
-            console.warn("Blink explosion sound failed:", e);
-        }
-    }*/
-};
+        // --- Play explosion sound ---
+        const explosionTime = this.time + this.duration - 50; // slightly before impact
+        /*if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= explosionTime) {
+            try {
+                const explosionSound = BlinkEffect.cachedExplosionAudio.cloneNode(true);
+                explosionSound.volume = this.soundVolume;
+                explosionSound.currentTime = 0;
+                explosionSound.play().catch(() => {});
+                this.playedImpactSound = true;
+            } catch (e) {
+                console.warn("Blink explosion sound failed:", e);
+            }
+        }*/
+    };
     function createBlinkParticles(size, color, position) {
         var particle;
         var amount = Math.ceil(Math.random() * 3) + 4;

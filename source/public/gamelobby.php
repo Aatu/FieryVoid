@@ -638,16 +638,8 @@ $optionsUsed = '';
 
 <?php if(!$isFleetTest): ?>
 <div class="panel large lobby lobby-teams-wrapper">
-    <div class="lobby-teams-container">
-        
-        <div class="createsubheader team-header-one">TEAM 1:</div>
-        <div id="team1" class="subpanel slotcontainer">
-        </div>
-        
-        <div class="createsubheader team-header-two">TEAM 2:</div>
-        <div id="team2" class="subpanel slotcontainer">
-        </div>
-        
+    <div class="lobby-teams-container" id="lobbyTeamsContainer">
+        <!-- Teams injected by JS -->
     </div>
 </div>
 <?php endif; ?>
@@ -661,9 +653,9 @@ $optionsUsed = '';
         </div> 
                 <div>
                     <span class="remaining-points-container">
-                        <span class="panelsmall points-bracket-style">(</span>
+                        <!--<span class="panelsmall points-bracket-style">(</span>-->
                         <span class="panelsmall remaining">0</span><span class="panelsmall remaining-points-units">pts left</span>
-                        <span class="panelsmall">)</span>
+                        <!--<span class="panelsmall points-bracket-style">)</span>-->
                     </span>
                 </div>             
     </div>
@@ -846,21 +838,28 @@ $optionsUsed = '';
 		<div class="datacontainer"></div>
 	</div>
                     
+    <div id="lobbyTeamTemplate" style="display:none;">
+        <div class="team-section" data-team-id="">
+             <div class="createsubheader team-header">Team <span class="team-number"></span>:</div>
+             <div class="subpanel slotcontainer"></div>
+        </div>
+    </div>
+
     <div id="slottemplatecontainer" class="hidden-template-container">
         <div class="slot" >
             <div class="leaveslot">Leave Slot</div>
             <div>
-                <span class="smallSize headerSpan">NAME:</span>
+                <span class="smallSize headerSpan">Name:</span>
                 <span class ="value name"></span>
-                <span class="smallSize headerSpan">POINTS:</span>
+                <span class="smallSize headerSpan">Points:</span>
                 <span class ="value points"></span>
-                <span class="smallSize headerSpan">PLAYER:</span>
+                <span class="smallSize headerSpan">Player:</span>
                 <span class="playername"></span><span class="status">READY</span>
                 <span class="takeslot clickable">TAKE SLOT</span>
                 <span class="selectslot clickable">SELECT</span>
             </div>
             <div>
-                <span class="smallSize headerSpan">DEPLOYMENT:</span>
+                <span class="smallSize headerSpan">Deployment Zone:</span>
                 <span>X:</span>
                 <span class ="value depx"></span>
                 <span>Y:</span>

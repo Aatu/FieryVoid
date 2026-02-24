@@ -2777,6 +2777,7 @@ spl_autoload_register(
                 'trekshieldprojector' => '/server/model/weapons/customTrek.php',
                 'trekshieldftr' => '/server/model/weapons/customTrek.php',
                 'cloakingdevice' => '/server/model/weapons/customTrek.php',
+                'microjumpsystem' => '/server/model/weapons/customTrek.php',                
 				
 				//ships
 				
@@ -3373,7 +3374,7 @@ spl_autoload_register(
 				'volleylaser' => '/server/model/weapons/pulse.php',
 				'shademodulator' => '/server/model/weapons/supportWeapons.php',                 
                 'shadingfield' => '/server/model/systems/baseSystems.php',
-                'transversedrive' => '/server/model/weapons/supportWeapons.php',
+                'transversedrive' => '/server/model/weapons/supportWeapons.php',                
                 
                 'increasedrecharge1' => '/server/model/cricialClasses.php',
                 'damagesystem' => '/server/model/cricialClasses.php',

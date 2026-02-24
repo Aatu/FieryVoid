@@ -9,11 +9,6 @@ window.weaponManager = {
     ramWarning: false,
 
     getWeaponCurrentLoading: function getWeaponCurrentLoading(weapon) {
-        /*obsolete
-        if (weapon.duoWeapon) {
-            var returnArray = new Array(weapon.weapons[1].getTurnsloaded(), weapon.weapons[2].getTurnsloaded());
-            return returnArray;
-        }*/
         return weapon.turnsloaded;
     },
 
@@ -30,18 +25,9 @@ window.weaponManager = {
         if (weaponManager.hasFiringOrder(ship, system) && !system.multiModeSplit) return;
 
         if (gamedata.isMyShip(ship)) {
-            //weaponManager.unSelectWeapon(ship, system); //do NOT do so - that would be much better for next mode change!
 
-			/* no dual weapons around any more!
-            if (system.dualWeapon) {
-                console.log("changing dual weapon?")
-                var parentSystem = shipManager.systems.getSystem(ship, system.parentId);
-                parentSystem.changeFiringMode();
-                shipWindowManager.setDataForSystem(ship, parentSystem);
-            } else */{
-                system.changeFiringMode();
-                shipWindowManager.setDataForSystem(ship, system);
-            }
+            system.changeFiringMode();
+            shipWindowManager.setDataForSystem(ship, system);
 
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
@@ -482,7 +468,8 @@ window.weaponManager = {
             $('<div><span class="weapon">' + html + '</span></div>').appendTo(f);
         }
 
-        var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
+        //var blockedLosHex = weaponManager.getBlockedHexes(); //Are there any blocked hexes, no point checking if no.
+        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.        
         var loSBlocked = false; //Default to LoS not blocked.
         var skinDanceBlocked = null;
 
@@ -1066,7 +1053,8 @@ window.weaponManager = {
             oew = shooter.offensivebonus - OBcrit;
             if (weapon.ballistic) { //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
                 var shooterLoSBlocked = false;
-                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS                
+                //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 
+                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                                    
                 if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
                     var shooterPos = shipManager.getShipPosition(shooter);
                     shooterLoSBlocked = mathlib.isLoSBlocked(shooterPos, sPosTarget, blockedLosHex);
@@ -1224,7 +1212,8 @@ window.weaponManager = {
         if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
             if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
                 var loSBlocked = false;
-                var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 
+                //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                    
                 var shooterPos2 = shipManager.getShipPosition(shooter);
                 loSBlocked = mathlib.isLoSBlocked(shooterPos2, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
 
@@ -1601,7 +1590,8 @@ window.weaponManager = {
             if (!weaponManager.checkSkindancing(selectedShip, ship)) return; //Returns false if skin dancing conditions prevent firing at or from a skin dancing unit.
         }
 
-        var blockedLosHex = weaponManager.getBlockedHexes();
+        //var blockedLosHex = weaponManager.getBlockedHexes();
+        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.         
         var loSBlocked = false;
 
         var toUnselect = [];
@@ -1880,7 +1870,8 @@ window.weaponManager = {
             if (weaponManager.isPosOnWeaponArc(selectedShip, hexpos, weapon)) {
 
                 //Check for Line of sight
-                var blockedLosHex = weaponManager.getBlockedHexes();
+                //var blockedLosHex = weaponManager.getBlockedHexes();
+                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                 
                 var loSBlocked = false;
                 if (blockedLosHex && blockedLosHex.length > 0) {
                     var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -2391,24 +2382,6 @@ window.weaponManager = {
         return weapon;
     },
 
-    /*no longer used!
-    canRam: function canRam(ship) {
-        if (ship.hasOwnProperty("hunterkiller")) {}
-    },
-    
-    askForRam: function askForRam(target) {
-    
-        var selectedShip = gamedata.getSelectedShip();
-    
-        confirm.confirmWithOptions("CONFIRM movement ?", "Yup", "Nah, too risky yo", function (respons) {
-            if (respons) {
-                console.log("ye");
-            } else {
-                console.log("na");
-            }
-        });
-    },
-    */
 
     //Function called in Combat Log animation to check if a particular fireORder needs to use the full log message e.g. Reactor overlaods, Hyperspace jumps
     doShortLogText: function doShortLogText(fire) {
@@ -2421,6 +2394,7 @@ window.weaponManager = {
         return shortLogTypes.includes(fire.damageclass);
     },
 
+    //Should have been replaced by gamedata.blockedHexes, but leaving just in case I've missed a call somewhere - DK 10.2.26
     getBlockedHexes: function getBlockedHexes() {
         var blockedHexes = [];
 
@@ -2595,22 +2569,7 @@ window.weaponManager = {
         if (!system.fireOrders) return;
 
         var fires = system.fireOrders;
-        /* Cleaned 19.8.25 - DK
-        if (system.dualWeapon || system.duoWeapon) {
-            for (var i in system.weapons) {
-                var weapon = system.weapons[i];
-    
-                if (weapon.duoWeapon) {
-                    for (var index in weapon.weapons) {
-                        var subweapon = weapon.weapons[index];
-                        fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(subweapon));
-                    }
-                } else {
-                    fires = fires.concat(weaponManager.getAllFireOrdersFromSystem(weapon));
-                }
-            }
-        }
-        */
+
         return fires;
     },
 

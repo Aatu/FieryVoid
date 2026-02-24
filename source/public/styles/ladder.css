@@ -82,11 +82,26 @@
     float: right;
     font-size: 14px;
     background: #215a7a;
-    color: white;
+    color: #DEEBFF;
     padding: 5px 10px;
     cursor: pointer;
     border-radius: 4px;
     border: 1px solid #7298a7;
+}
+
+.btn-remove-account {
+    float: right;
+    font-size: 14px;
+    background: #660000;
+    color: #DEEBFF;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #990000;
+}
+
+.btn-remove-account:hover {
+    background: #c00;
 }
 
 .btn-ladder-inline {
