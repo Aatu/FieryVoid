@@ -8,8 +8,8 @@ window.ReplayPhaseStrategy = function () {
         this.currentTurn = null;
         this.currentPhase = null;
         this.replayTurn = null;
-        this.replayPhase = null;    
-		this.allBallistics = null;  //New variable added so that ballisticLineIcons can be rendered during Replay - DK 12/24 
+        this.replayPhase = null;
+        this.allBallistics = null;  //New variable added so that ballisticLineIcons can be rendered during Replay - DK 12/24 
 
         this.loading = false;
     }
@@ -35,7 +35,7 @@ window.ReplayPhaseStrategy = function () {
         this.shipWindowManager = shipWindowManager;
         gamedata.replay = true;
         this.createReplayUI();
-        
+
         startReplayOrRequestGamedata.call(this);
 
         activatePause.call(this);
@@ -44,15 +44,17 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
-        infowindow.informPhase(5000, function () {});
-        document.getElementById('combatLogContainer').style.display = 'none'; //Hide print Log buttons
+        infowindow.informPhase(5000, function () { });
+        var combatLogContainer = document.getElementById('combatLogContainer');
+        if (combatLogContainer) combatLogContainer.style.display = 'none'; //Hide print Log buttons
         return this;
     };
 
     ReplayPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
-        gamedata.replay = false;        
-        document.getElementById('combatLogContainer').style.display = 'block'; //Show print Log buttons
+        gamedata.replay = false;
+        var combatLogContainer = document.getElementById('combatLogContainer');
+        if (combatLogContainer) combatLogContainer.style.display = 'block'; //Show print Log buttons
         return this;
     };
 
@@ -64,10 +66,10 @@ window.ReplayPhaseStrategy = function () {
         startReplayOrRequestGamedata.call(this);
     };
 
-    ReplayPhaseStrategy.prototype.done = function () {};
+    ReplayPhaseStrategy.prototype.done = function () { };
 
     ReplayPhaseStrategy.prototype.onHexClicked = function (payload) {
-        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);
     };
 
     ReplayPhaseStrategy.prototype.selectShip = function (ship, payload) {
@@ -110,12 +112,12 @@ window.ReplayPhaseStrategy = function () {
         }
     };
 
-    ReplayPhaseStrategy.prototype.showAppropriateEW = function() {
+    ReplayPhaseStrategy.prototype.showAppropriateEW = function () {
         this.shipIconContainer.getArray().forEach(icon => {
             icon.hideEW();
             icon.hideBDEW();
         });
-        
+
         this.ewIconContainer.hide();
         if (this.selectedShip) {
             this.showShipEW(this.selectedShip);
@@ -225,7 +227,7 @@ window.ReplayPhaseStrategy = function () {
         } else {
             // 🔊 Turn sound ON            
             gamedata.playAudio = true;
-              
+
         }
 
         window.dispatchEvent(new CustomEvent("soundToggled"));
@@ -310,8 +312,8 @@ window.ReplayPhaseStrategy = function () {
             success: function (data) {
                 gamedata.parseServerData(data); 
                 //New section called at this point so that ballisticIcons can be rendered during Replay - DK 10/24  
-				this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');		
-        		this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);         		
+                this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');		
+                this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);         		
                 stopLoading.call(this);
             }.bind(this),
             error: ajaxInterface.errorAjax
@@ -344,67 +346,67 @@ window.ReplayPhaseStrategy = function () {
     }    
     
 */
-//New versions to use ajaxWithRetry()
-function requestReplayGamedata() {
-    startLoading.call(this);
+    //New versions to use ajaxWithRetry()
+    function requestReplayGamedata() {
+        startLoading.call(this);
 
-    ajaxInterface.ajaxWithRetry({
-        type: 'GET',
-        url: 'replay.php',
-        dataType: 'json',
-        data: {
-            turn: this.replayTurn,
-            gameid: this.gamedata.gameid,
-            time: new Date().getTime()
-        },
-        success: function (data) {
-            gamedata.parseServerData(data);
-            gamedata.replay = true;
-            // New section so ballisticIcons render during Replay
-            this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(
-                gamedata.turn,
-                'ballistic'
-            );
+        ajaxInterface.ajaxWithRetry({
+            type: 'GET',
+            url: 'replay.php',
+            dataType: 'json',
+            data: {
+                turn: this.replayTurn,
+                gameid: this.gamedata.gameid,
+                time: new Date().getTime()
+            },
+            success: function (data) {
+                gamedata.parseServerData(data);
+                gamedata.replay = true;
+                // New section so ballisticIcons render during Replay
+                this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(
+                    gamedata.turn,
+                    'ballistic'
+                );
 
-            this.ballisticIconContainer.consumeGamedata(
-                this.gamedata,
-                this.shipIconContainer,
-                this.allBallistics
-            );
-        }.bind(this),
-        error: ajaxInterface.errorAjax,
-        complete: function () {
-            stopLoading.call(this);
-        }.bind(this)
-    });
-}
+                this.ballisticIconContainer.consumeGamedata(
+                    this.gamedata,
+                    this.shipIconContainer,
+                    this.allBallistics
+                );
+            }.bind(this),
+            error: ajaxInterface.errorAjax,
+            complete: function () {
+                stopLoading.call(this);
+            }.bind(this)
+        });
+    }
 
-function requestPlayableGamedata() {
-    startLoading.call(this);
+    function requestPlayableGamedata() {
+        startLoading.call(this);
 
-    ajaxInterface.ajaxWithRetry({
-        type: 'GET',
-        url: 'gamedata.php',
-        dataType: 'json',
-        data: {
-            turn: -1,
-            phase: 0,
-            activeship: -1,
-            gameid: gamedata.gameid,
-            playerid: gamedata.thisplayer || -1,
-            time: new Date().getTime(),
-            force: true
-        },
-        success: function (data) {
-            gamedata.replay = false;
-            gamedata.parseServerData(data);
-        }.bind(this),
-        error: ajaxInterface.errorAjax,
-        complete: function () {
-            stopLoading.call(this);
-        }.bind(this)
-    });
-}
+        ajaxInterface.ajaxWithRetry({
+            type: 'GET',
+            url: 'gamedata.php',
+            dataType: 'json',
+            data: {
+                turn: -1,
+                phase: 0,
+                activeship: -1,
+                gameid: gamedata.gameid,
+                playerid: gamedata.thisplayer || -1,
+                time: new Date().getTime(),
+                force: true
+            },
+            success: function (data) {
+                gamedata.replay = false;
+                gamedata.parseServerData(data);
+            }.bind(this),
+            error: ajaxInterface.errorAjax,
+            complete: function () {
+                stopLoading.call(this);
+            }.bind(this)
+        });
+    }
 
 
     function startLoading() {

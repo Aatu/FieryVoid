@@ -237,6 +237,7 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.onWindowResize = function () {
+        if (!this.initialized) return; // Guard: may fire before init() completes
         this.width = jQuery('#pagecontainer').width();
         this.height = jQuery('#pagecontainer').height();
 
@@ -244,7 +245,7 @@ window.webglScene = function () {
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.coordinateConverter.onResize(window.innerWidth, window.innerHeight);
-        this.starField.cleanUp();
+        if (this.starField) this.starField.cleanUp();
     };
 
     webglScene.prototype.keyDown = function (event) {
