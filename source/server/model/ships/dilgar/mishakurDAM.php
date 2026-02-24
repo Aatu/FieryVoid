@@ -40,7 +40,8 @@ class MishakurDAM extends BaseShip{
         //$this->enhancementOptionsEnabled[] = 'AMMO_P';//Dilgar were wiped out before Piercing missile was devised     
 		
         $this->addPrimarySystem(new Reactor(5, 28, 0, -18));
-        $this->addPrimarySystem(new CnC(6, 30, 0, 3));
+        //$this->addPrimarySystem(new CnC(6, 30, 0, 3));
+        $this->addPrimarySystem(new FlagBridge(6, 30, 0, 3, 'Pentacan Formation', 9,  false, true, false, false));		        
         $this->addPrimarySystem(new Scanner(5, 20, 4, 10));
         $this->addPrimarySystem(new Engine(5, 18, 0, 9, 3));
         $this->addPrimarySystem(new Hangar(4, 4));

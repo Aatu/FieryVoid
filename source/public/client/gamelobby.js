@@ -532,6 +532,7 @@ window.gamedata = {
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
 
 		var totalEnhancementsValue = 0;
+		var messageOP = '';
 
 		for (var i in gamedata.ships) {
 			var lship = gamedata.ships[i];
@@ -781,6 +782,16 @@ window.gamedata = {
 					}
 				}
 			}
+
+			if (lship.messageOP) {
+				for (var m in lship.messageOP) {
+					if (!messageOP.includes(lship.messageOP[m])) {
+						messageOP += "<br> - " + lship.messageOP[m];
+						warningFound = true;
+					}
+				}
+			}
+
 		} //end of loop at ships preparing data
 
 
@@ -845,6 +856,10 @@ window.gamedata = {
 		if (specialVariantPresent) {
 			warningText += "<br> - Special deployment unit(s) present! See particular unit description.";
 			warningFound = true;
+		}
+
+		if (messageOP !== '') {
+			warningText += messageOP;
 		}
 
 		//Static structures present?
@@ -1218,7 +1233,7 @@ window.gamedata = {
 		}
 
 		if (warningFound) {
-			checkResult = "<u>Unchecked or non-canon elements found - check text for details.</u>" + warningText + "<br><br>" + checkResult;
+			checkResult = "<u>CAUTION: Unchecked or non-canon elements found - check text below details.</u>" + warningText + "<br><br>" + checkResult;
 		}
 
 		if (problemFound) {

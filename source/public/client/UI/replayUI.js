@@ -2,32 +2,32 @@
 
 window.ReplayUI = function () {
 
-    var template = 
-    '<div id="replayUI">\n' 
-    + '    <div class="replay-inactive">\n' 
-    + '        <button id="activateReplay">Replay</button>\n' 
-    + '    </div>\n' 
-    + '    <div class="replay-active">\n'
-    + '        <div class="replay-container">\n' 
-    + '            <button id="deactivateReplay">Resume game</button>\n' 
-    + '        </div>\n' 
-    + '        <div class="replay-container">\n' 
-    + '            <div class="selected-replay"></div>\n' 
-    + '            <button id="toMovement">Movement</button>\n'  
-    + '            <button id="toFiring">Firing</button>\n'
-    + '        </div>\n' 
-    + '        <div class="replay-container replay-buttons">\n' 
-    + '            <button id="turnBack">❚◀</button>\n' 
-    + '            <button id="back">◀</button>\n' 
-    + '            <button id="pause">❚❚</button>\n' 
-    + '            <button id="play">▶</button>\n' 
-    + '            <button id="turnForward">▶❚</button>\n' 
-    + '        </div>\n'
-    + '        <div class="replay-container loading-indicator">\n' 
-    + '            Loading replay...\n' 
-    + '        </div>\n' 
-    + '    </div>\n' 
-    + '</div>';
+    var template =
+        '<div id="replayUI">\n'
+        + '    <div class="replay-inactive">\n'
+        + '        <button id="activateReplay">Replay</button>\n'
+        + '    </div>\n'
+        + '    <div class="replay-active">\n'
+        + '        <div class="replay-container">\n'
+        + '            <button id="deactivateReplay">Resume game</button>\n'
+        + '        </div>\n'
+        + '        <div class="replay-container">\n'
+        + '            <div class="selected-replay"></div>\n'
+        + '            <button id="toMovement">Movement</button>\n'
+        + '            <button id="toFiring">Firing</button>\n'
+        + '        </div>\n'
+        + '        <div class="replay-container replay-buttons">\n'
+        + '            <button id="turnBack">❚◀</button>\n'
+        + '            <button id="back">◀</button>\n'
+        + '            <button id="pause">❚❚</button>\n'
+        + '            <button id="play">▶</button>\n'
+        + '            <button id="turnForward">▶❚</button>\n'
+        + '        </div>\n'
+        + '        <div class="replay-container loading-indicator">\n'
+        + '            Loading replay...\n'
+        + '        </div>\n'
+        + '    </div>\n'
+        + '</div>';
 
     function ReplayUI(replayActive, callbacks) {
         this.replayActive = replayActive || false;
@@ -35,19 +35,19 @@ window.ReplayUI = function () {
         if (!callbacks) {
             callbacks = {};
         }
-        this.play = callbacks.play || function () {};
-        this.back = callbacks.back || function () {};
-        this.pause = callbacks.pause || function () {};
-        this.turnForward = callbacks.turnForward || function () {};
-        this.turnBack = callbacks.turnBack || function () {};
-        this.endReplay = callbacks.endReplay || function () {};
-        this.toFiringPhase = callbacks.toFiringPhase || function () {};
-        this.toMovementPhase = callbacks.toMovementPhase ||function () {};
+        this.play = callbacks.play || function () { };
+        this.back = callbacks.back || function () { };
+        this.pause = callbacks.pause || function () { };
+        this.turnForward = callbacks.turnForward || function () { };
+        this.turnBack = callbacks.turnBack || function () { };
+        this.endReplay = callbacks.endReplay || function () { };
+        this.toFiringPhase = callbacks.toFiringPhase || function () { };
+        this.toMovementPhase = callbacks.toMovementPhase || function () { };
     }
 
     ReplayUI.prototype.activate = function () {
 
-        this.element = jQuery('body').prepend(template);
+        this.element = jQuery('#topcontainer').append(template);
 
         if (this.replayActive) {
             $("#replayUI").addClass('active').removeClass('inactive');

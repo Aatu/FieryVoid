@@ -24,6 +24,7 @@ class Bintak extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 4;
 
+		$this->messageOP = array(2 => 'Taking more than 6 Energy Mines moves a fleet into Superior Tier.'); 		
         
         $this->addPrimarySystem(new Reactor(7, 30, 0, 0));
         $this->addPrimarySystem(new CnC(7, 28, 0, 0));

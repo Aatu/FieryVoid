@@ -22,6 +22,7 @@ class Gquan extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 2;
 
+		$this->messageOP = array(2 => 'Taking more than 6 Energy Mines moves a fleet into Superior Tier.');         
         
         $this->addPrimarySystem(new Reactor(6, 22, 0, 0));
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));

@@ -80,6 +80,11 @@ const System = styled.div`
     background-size: cover;
     filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
     cursor: pointer;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
     
     ${SystemText} {
         display: ${props => props.$offline ? 'none' : 'flex'};
@@ -123,11 +128,19 @@ class SystemIcon extends React.Component {
 
     constructor(props) {
         super(props);
+        this.longPressTimer = null;
+        this.ignoreNextClick = false;
+        this.touchActive = false;
     }
 
     clickSystem(e) {
         e.stopPropagation();
         e.preventDefault();
+
+        if (this.ignoreNextClick) {
+            this.ignoreNextClick = false;
+            return;
+        }
 
         let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
@@ -161,13 +174,16 @@ class SystemIcon extends React.Component {
         }
 
         if (gamedata.isMyShip(ship)) {
-            webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.target });
+            webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.currentTarget, showMenu: true });
         } else {
             webglScene.customEvent('SystemTargeted', { ship: ship, system: system });
         }
     }
 
     onSystemMouseOver(event) {
+        if (this.touchActive) return; // Ignore native mouseover if touch is active
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return; // Ignore ghost mouseover after touch
+
         event.stopPropagation();
         event.preventDefault();
 
@@ -177,20 +193,104 @@ class SystemIcon extends React.Component {
         webglScene.customEvent('SystemMouseOver', {
             ship: ship,
             system: system,
-            element: event.target
+            element: event.currentTarget,
+            showInfo: true
         });
 
     }
 
     onSystemMouseOut(event) {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return; // Ignore ghost mouseout after touch
+
         event.stopPropagation();
         event.preventDefault();
         webglScene.customEvent('SystemMouseOut');
     }
 
+    onTouchStart(event) {
+        event.stopPropagation();
+        this.touchActive = true;
+        this.ignoreNextClick = false;
+        window.lastTouchActiveTime = Date.now();
+
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+        }
+
+        const target = event.currentTarget;
+        const touch = event.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+
+        this.longPressTimer = setTimeout(() => {
+            this.ignoreNextClick = true; // Prevent click from firing after long press
+            let { system, ship } = this.props;
+            system = shipManager.systems.initializeSystem(system);
+
+            // Long Press -> generic tooltip
+            webglScene.customEvent('SystemMouseOver', {
+                ship: ship,
+                system: system,
+                element: target,
+                showInfo: true
+            });
+
+            this.longPressTimer = null;
+        }, 400); // 400ms hold required for info window
+    }
+
+    onTouchMove(event) {
+        event.stopPropagation();
+        if (!this.longPressTimer) return;
+
+        const touch = event.touches[0];
+        const dx = touch.clientX - this.touchStartX;
+        const dy = touch.clientY - this.touchStartY;
+
+        // Cancel if they move more than 10 pixels
+        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+    }
+
+    onTouchCancel(event) {
+        event.stopPropagation();
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.touchActive = false;
+        webglScene.customEvent('SystemMouseOut');
+    }
+
+    onTouchEnd(event) {
+        event.stopPropagation();
+        if (this.longPressTimer) {
+            // Timer didn't pop, meaning this was a short tap
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+            // Short tap should not show arcs, clickSystem will handle selection and showing Action Menu.
+        } else {
+            // Timer already fired (long press). Hide info on release.
+            webglScene.customEvent('SystemMouseOut');
+        }
+
+        setTimeout(() => {
+            this.touchActive = false;
+        }, 300); // Clear touch active after giving click events time to fire/be ignored
+    }
+
+
+
     onContextMenu(e) {
         e.stopPropagation();
         e.preventDefault();
+
+        if (window.matchMedia("(pointer: coarse)").matches) {
+            return; // Disable Right-click select all on touch devices, as they have a dedicated Action Menu button instead!
+        }
 
         let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
@@ -229,6 +329,10 @@ class SystemIcon extends React.Component {
                 onClick={this.clickSystem.bind(this)}
                 onMouseOver={this.onSystemMouseOver.bind(this)}
                 onMouseOut={this.onSystemMouseOut.bind(this)}
+                onTouchStart={this.onTouchStart.bind(this)}
+                onTouchMove={this.onTouchMove.bind(this)}
+                onTouchEnd={this.onTouchEnd.bind(this)}
+                onTouchCancel={this.onTouchCancel.bind(this)}
                 onContextMenu={this.onContextMenu.bind(this)}
                 $background={getBackgroundImage(system)}
                 $offline={isOffline(ship, system)}

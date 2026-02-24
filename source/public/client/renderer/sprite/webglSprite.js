@@ -20,7 +20,8 @@ window.webglSprite = function () {
             texture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
             overlayAlpha: { type: 'f', value: 0.0 },
             overlayColor: { type: 'v3', value: new THREE.Color(0, 0, 0) },
-            opacity: { type: 'f', value: 1.0
+            opacity: {
+                type: 'f', value: 1.0
                 //opacity:		{ type: 'f',	value: 1.0},
                 //tileDimensions: { type: 'v2',	value: new THREE.Vector2(1, 1)},
                 //damageLookup:	{ type: 't',	value: new THREE.DataTexture(null, 0, 0)},
@@ -31,7 +32,8 @@ window.webglSprite = function () {
                 //worldPosition:	{ type: 'v3',	value: new THREE.Vector3(0, 0, 0)},
                 //scale:			{ type: 'v2',	value: new THREE.Vector2(1, 1)},
                 //flatLight:		{ type: 'f',	value: 1.0}
-            } };
+            }
+        };
 
         this.mesh = create.call(this, size, image);
     }
@@ -88,23 +90,47 @@ window.webglSprite = function () {
         if (typeof image == "string") {
             if (!loadedTextures[image]) {
                 loadedTextures[image] = new Promise((resolve, reject) => {
-                    imageBitmapLoader.load(
-                        image,
-                        imageBitmap => {
-                            setTimeout(() => {
-                                const texture = new THREE.CanvasTexture(imageBitmap);
-                                texture.minFilter = THREE.LinearMipMapNearestFilter; //THREE.NearestFilter;
-                                //tex.magFilter = THREE.NearestFilter;
-                                //THREE.NearestFilter, THREE.NearestMipMapNearestFilter, THREE.NearestMipMapLinearFilter, THREE.LinearFilter, and THREE.LinearMipMapNearestFilter
 
-                                resolve(texture);
-                            }, 0);
-                        },
-                        undefined,
-                        reject
-                    );
-                })
+                    // Simple global queue system
+                    window.textureQueue = window.textureQueue || [];
+                    window.activeTextureLoads = window.activeTextureLoads || 0;
+                    const MAX_CONCURRENT = (window.Config && window.Config.MAX_CONCURRENT_IMAGES) ? window.Config.MAX_CONCURRENT_IMAGES : 10;
+
+                    const processQueue = () => {
+                        while (window.activeTextureLoads < MAX_CONCURRENT && window.textureQueue.length > 0) {
+                            window.activeTextureLoads++;
+                            const task = window.textureQueue.shift();
+                            task();
+                        }
+                    };
+
+                    const loadTask = () => {
+                        imageBitmapLoader.load(
+                            image,
+                            imageBitmap => {
+                                setTimeout(() => {
+                                    const texture = new THREE.CanvasTexture(imageBitmap);
+                                    texture.minFilter = THREE.LinearMipMapNearestFilter;
+                                    resolve(texture);
+                                    window.activeTextureLoads--;
+                                    processQueue();
+                                }, 0);
+                            },
+                            undefined,
+                            (err) => {
+                                console.error("Error loading texture:", image, err);
+                                reject(err);
+                                window.activeTextureLoads--;
+                                processQueue();
+                            }
+                        );
+                    };
+
+                    window.textureQueue.push(loadTask);
+                    processQueue();
+                });
             }
+
             loadedTextures[image].then(texture => {
                 setTimeout(() => {
                     this.uniforms.texture.value = texture;

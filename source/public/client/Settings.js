@@ -1,28 +1,29 @@
 "use strict";
 
-window.Settings = (function(){
+window.Settings = (function () {
 
     function Settings(settings) {
-this.settings = {
-    ShowAllEW: settings.ShowAllEW || {keyCode: 87, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
-    ShowFriendlyEW: settings.ShowFriendlyEW || {keyCode: 88, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
-    ShowEnemyEW: settings.ShowEnemyEW || {keyCode: 89, shiftKey: false, altKey: false, ctrlKey: false, metaKey:false },
-    ShowAllBallistics: settings.ShowAllBallistics || {keyCode: 66, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
-    ShowFriendlyBallistics: settings.ShowFriendlyBallistics || {keyCode: 70, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
-    ShowEnemyBallistics: settings.ShowEnemyBallistics || {keyCode: 69, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
-    ToggleLoS: settings.ToggleLoS || {keyCode: 82, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},     
-    ToggleHexNumbers: settings.ToggleHexNumbers || {keyCode: 72, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},
-    ToggleSound: settings.ToggleSound || {keyCode: 83, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false},                  
-    ZoomLevelToStrategic: 0.2
-};
+        this.settings = {
+            ShowAllEW: settings.ShowAllEW || { keyCode: 87, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ShowFriendlyEW: settings.ShowFriendlyEW || { keyCode: 88, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ShowEnemyEW: settings.ShowEnemyEW || { keyCode: 89, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ShowAllBallistics: settings.ShowAllBallistics || { keyCode: 66, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ShowFriendlyBallistics: settings.ShowFriendlyBallistics || { keyCode: 70, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ShowEnemyBallistics: settings.ShowEnemyBallistics || { keyCode: 69, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ToggleLoS: settings.ToggleLoS || { keyCode: 82, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ToggleHexNumbers: settings.ToggleHexNumbers || { keyCode: 72, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ToggleBackground: settings.ToggleBackground || { keyCode: 77, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ToggleSound: settings.ToggleSound || { keyCode: 83, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            ZoomLevelToStrategic: 0.2
+        };
 
         this.set = function (key, value) {
-          if (this.settings[key] === undefined)  {
-              throw new Error("Unrecognized settings key '" + key + "'");
-          }
+            if (this.settings[key] === undefined) {
+                throw new Error("Unrecognized settings key '" + key + "'");
+            }
 
-          console.log("setting key", key, "to", value, typeof value);
-          this.settings[key] = value;
+            console.log("setting key", key, "to", value, typeof value);
+            this.settings[key] = value;
         };
 
         this.save = function () {
@@ -46,7 +47,7 @@ this.settings = {
         }, this)
     };
 
-    function load(){
+    function load() {
         var settings = localStorage.getItem("settings") || "{}";
         return JSON.parse(settings);
     }

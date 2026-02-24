@@ -21,6 +21,10 @@ const ShipSectionContainer = styled.div`
     box-sizing: border-box;
     margin: 2px;
 
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+
     border: ${props => {
         switch (props.location) {
             case 0:
@@ -52,6 +56,10 @@ const StructureContainer = styled.div`
     border: 1px solid #496791;
     margin: 2px;
     filter: ${props => props.$health === 0 ? 'blur(1px)' : 'none'};
+
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
 
     &::before {
         box-sizing: border-box;
