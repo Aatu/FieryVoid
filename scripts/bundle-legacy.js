@@ -70,7 +70,7 @@ function createBundle(config) {
 // Modify extractScriptSources to accept excluded list
 function extractScriptSources(content, excluded) {
     const sources = [];
-    const scriptRegex = /<script src="([^"]+)"><\/script>/;
+    const scriptRegex = /<script(?: defer)? src="([^"]+)"><\/script>/;
 
     const lines = content.split('\n');
     lines.forEach(line => {

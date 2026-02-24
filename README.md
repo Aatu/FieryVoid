@@ -24,7 +24,7 @@ You can access the virtual box by:
 
 # New Game.php and gamelobby.php bundling:
 
-I created a scripts/bundle-legacy.js script that bundles the ~130 legacy JavaScript files into a single file (game.legacy.bundle.js). I also updated game.php to load this bundle by default, which should drastically reduce HTTP requests and eliminate the HTTP/2 errors. You can still load individual scripts for debugging by adding ?debug=1 to the URL. I updated package.json to include this in your build process (using yarn).
+I created a scripts/bundle-legacy.js script that bundles the ~130 legacy JavaScript files into a single file (game.legacy.bundle.js). I also updated game.php to load this bundle by default, which should drastically reduce HTTP requests and eliminate the HTTP/2 errors. You can still load individual scripts for debugging by adding &debug=1 to the URL. I updated package.json to include this in your build process (using yarn).
 
 Because I've set up the build script to read game.php directly, you don't need to do anything special to maintain the bundle list!
 
