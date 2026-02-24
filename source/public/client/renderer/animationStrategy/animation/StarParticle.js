@@ -40,33 +40,33 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setTexture = function (tex) {
-        changeAttribute(this.geometry, this.index, 'textureNumber', tex);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 1, tex);
 
         return this;
     };
-    
+
     StarParticle.prototype.setParallaxFactor = function (parallaxFactor) {
-        changeAttribute(this.geometry, this.index, 'parallaxFactor', -1.0 + parallaxFactor);
+        changePackedAttribute(this.geometry, this.index, 'starData', 3, 0, -1.0 + parallaxFactor);
         return this;
     };
 
     StarParticle.prototype.setSineFrequency = function (sineFrequency) {
-        changeAttribute(this.geometry, this.index, 'sineFrequency', sineFrequency);
+        changePackedAttribute(this.geometry, this.index, 'starData', 3, 1, sineFrequency);
         return this;
     };
 
     StarParticle.prototype.setSineAmplitude = function (sineAmplitude) {
-        changeAttribute(this.geometry, this.index, 'sineAmplitude', sineAmplitude);
+        changePackedAttribute(this.geometry, this.index, 'starData', 3, 2, sineAmplitude);
         return this;
     };
 
     StarParticle.prototype.setSize = function (size) {
-        changeAttribute(this.geometry, this.index, 'size', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 0, size);
         return this;
     };
 
     StarParticle.prototype.setSizeChange = function (size) {
-        changeAttribute(this.geometry, this.index, 'sizeChange', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 1, size);
         return this;
     };
 
@@ -76,7 +76,7 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setOpacity = function (opacity) {
-        changeAttribute(this.geometry, this.index, 'opacity', opacity);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 2, opacity);
         return this;
     };
 
@@ -86,12 +86,12 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setAngle = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angle', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 2, mathlib.degreeToRadian(angle));
         return this;
     };
 
     StarParticle.prototype.setAngleChange = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angleChange', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 3, mathlib.degreeToRadian(angle));
         return this;
     };
 
@@ -101,7 +101,7 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setActivationTime = function (gameTime) {
-        changeAttribute(this.geometry, this.index, 'activationGameTime', gameTime);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 0, gameTime);
         return this;
     };
 
@@ -114,6 +114,12 @@ window.StarParticle = function () {
             target[index * values.length + i] = value;
         });
 
+        geometry.attributes[key].needsUpdate = true;
+    }
+
+    function changePackedAttribute(geometry, index, key, componentCount, offset, value) {
+        var target = geometry.attributes[key].array;
+        target[index * componentCount + offset] = value;
         geometry.attributes[key].needsUpdate = true;
     }
 

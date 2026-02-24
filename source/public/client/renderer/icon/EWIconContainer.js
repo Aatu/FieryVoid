@@ -4,8 +4,8 @@ window.EWIconContainer = function () {
 
     var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
     var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
-    var COLOR_OEW_DIST = new THREE.Color(255 / 255,  157 / 255, 0 / 255);
-    var COLOR_SDEW = new THREE.Color(109/255, 189/255, 255/255);
+    var COLOR_OEW_DIST = new THREE.Color(255 / 255, 157 / 255, 0 / 255);
+    var COLOR_SDEW = new THREE.Color(109 / 255, 189 / 255, 255 / 255);
     var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1);
 
     function EWIconContainer(coordinateConverter, scene, iconContainer) {
@@ -122,7 +122,7 @@ window.EWIconContainer = function () {
             return;
         }
 
-        if((shipManager.shouldBeHidden(ship)) || (shipManager.shouldBeHidden(target))) return;
+        if ((shipManager.shouldBeHidden(ship)) || (shipManager.shouldBeHidden(target))) return;
 
         var icon = getOEWIcon.call(this, ship, target, type);
         if (icon) {
@@ -159,7 +159,7 @@ window.EWIconContainer = function () {
             amount: amount,
             shipIcon: shipIcon,
             targetIcon: targetIcon,
-            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, getColor(ship, type), 0.5),
+            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -5, getColor(ship, type), 0.5),
             used: true
         };
 
@@ -169,8 +169,8 @@ window.EWIconContainer = function () {
         return OEWIcon;
     }
 
-    function getColor(ship, type)  {
-        switch(type) {
+    function getColor(ship, type) {
+        switch (type) {
             case "OEW":
                 return gamedata.isMyOrTeamOneShip(ship) ? COLOR_OEW_FRIENDLY : COLOR_OEW_ENEMY;
             case "DIST":

@@ -35,6 +35,7 @@ window.ShipIcon = function () {
         this.NotMovedSprite = null;
 
         this.selected = false;
+        this.baseZ = this.terrain ? -50 : 0;
 
         this.create(ship, scene);
         this.consumeShipdata(ship);
@@ -185,16 +186,16 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
-            this.mesh.position.z = 499;
+            this.mesh.position.z = this.baseZ + (this.terrain ? 10 : 499);
             if (!this.terrain) { //No sprite for Terrain  
                 this.shipDirectionOfProwSprite.show();
                 this.shipDirectionOfMovementSprite.show();
             }
         } else {
             if (this.selected) {
-                this.mesh.position.z = 100;
+                this.mesh.position.z = this.baseZ + (this.terrain ? 5 : 100);
             } else {
-                this.mesh.position.z = 0;
+                this.mesh.position.z = this.baseZ;
             }
 
             // On mobile, if selected, don't hide sprites
@@ -214,11 +215,11 @@ window.ShipIcon = function () {
             if (value) {
                 this.ShipSelectedSprite.show();
                 if (!this.selected) {
-                    this.mesh.position.z = 100;
+                    this.mesh.position.z = this.baseZ + (this.terrain ? 5 : 100);
                 }
             } else {
                 if (this.selected) {
-                    this.mesh.position.z = 0;
+                    this.mesh.position.z = this.baseZ;
                 }
                 this.ShipSelectedSprite.hide();
             }
@@ -250,7 +251,7 @@ window.ShipIcon = function () {
     ShipIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
-        this.mesh.position.set(500, 0, 0);
+        this.mesh.position.set(500, 0, this.baseZ);
         this.mesh.renderDepth = 10;
 
         // Defined a maximum width and height, some new ships like Thirdspace are MUCH larger and benefit from this - DK 25.3.24
@@ -517,6 +518,8 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+        if (!(weapon instanceof Weapon)) return null; // Only show arcs for weapons
+
         var hexDistance = window.coordinateConverter.getHexDistance();
 
         if (weapon instanceof Thruster) {
@@ -530,6 +533,7 @@ window.ShipIcon = function () {
 
         } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
 
             for (const arcs of allArcs) {
@@ -547,6 +551,7 @@ window.ShipIcon = function () {
 
         } else { //Normal weapons with circular weapon arcs
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             var arcs = shipManager.systems.getArcs(ship, weapon);
             var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
             var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
@@ -786,9 +791,10 @@ window.ShipIcon = function () {
         var angleEnd = mathlib.degreeToRadian(-(systemArcs.start + offset)) + shooterRotation;
 
         var isSmallArc = false;
+        var is360Arc = Math.abs(systemArcs.start - systemArcs.end) === 360 || systemArcs.start === systemArcs.end;
 
         // If start != end, we clips. If start == end, it's a 360 circle (no clips).
-        if (systemArcs.start !== systemArcs.end) {
+        if (!is360Arc) {
             // Calculate the angular span
             var span = angleEnd - angleStart;
             while (span < 0) span += TWO_PI;
@@ -819,7 +825,7 @@ window.ShipIcon = function () {
             opacity: opacity,
             transparent: true,
             side: THREE.DoubleSide,
-            clippingPlanes: systemArcs.start !== systemArcs.end ? [plane1, plane2] : [],
+            clippingPlanes: !is360Arc ? [plane1, plane2] : [],
             clipIntersection: !isSmallArc
         });
 

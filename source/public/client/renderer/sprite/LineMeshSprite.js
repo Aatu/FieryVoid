@@ -32,9 +32,13 @@ window.LineMeshSprite = function () {
 
     function create(start, end, lineWidth) {
         console.log("lineWidth", lineWidth);
-        var geometry = new THREE.Geometry();
-        geometry.vertices.push(new THREE.Vector3(start.x, start.y, 0));
-        geometry.vertices.push(new THREE.Vector3(end.x, end.y, 0));
+
+        var points = [
+            new THREE.Vector3(start.x, start.y, 0),
+            new THREE.Vector3(end.x, end.y, 0)
+        ];
+        var geometry = new THREE.BufferGeometry().setFromPoints(points);
+
         var line = new MeshLine();
         line.setGeometry(geometry);
 

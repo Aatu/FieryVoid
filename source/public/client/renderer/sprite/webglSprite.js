@@ -17,7 +17,7 @@ window.webglSprite = function () {
         this.mesh = null;
         this.size = size;
         this.uniforms = {
-            texture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
+            spriteTexture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
             overlayAlpha: { type: 'f', value: 0.0 },
             overlayColor: { type: 'v3', value: new THREE.Color(0, 0, 0) },
             opacity: {
@@ -133,7 +133,7 @@ window.webglSprite = function () {
 
             loadedTextures[image].then(texture => {
                 setTimeout(() => {
-                    this.uniforms.texture.value = texture;
+                    this.uniforms.spriteTexture.value = texture;
                 }, 0);
             });
         }

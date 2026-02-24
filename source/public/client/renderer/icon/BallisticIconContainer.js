@@ -74,7 +74,7 @@ window.BallisticIconContainer = function () {
 		if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
 
 		gamedata.ships.filter(ship => ship.Enormous && ship.shipSizeClass == 5 && !shipManager.isDestroyed(ship)).forEach(ship => {
-		//gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
+			//gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
 			const position = shipManager.getShipPosition(ship);
 			/*const perimeterHexes = (ship.Huge === 2)
 				? mathlib.getPerimeterHexes(position, ship.Huge)
@@ -239,14 +239,14 @@ window.BallisticIconContainer = function () {
 				'1-Blanket Shield': { type: 'hexGreen', text: 'Shade Modulator', color: '#008000' },
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
 				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
-				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },	
+				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },
 				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },
 				'Priorty - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
 			};
 
-			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)){
-        		var shadingField = shipManager.systems.getSystemByName(shooter, "ShadingField");
-				if(!shadingField.isDetectedTorvalus(shooter, 20)) return; 
+			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)) {
+				var shadingField = shipManager.systems.getSystemByName(shooter, "ShadingField");
+				if (!shadingField.isDetectedTorvalus(shooter, 20)) return;
 			}
 
 			const match = modeMap[modeName];
@@ -503,7 +503,7 @@ window.BallisticIconContainer = function () {
 			launchPosition,
 			targetPosition,
 			3 * this.zoomScale,
-			-3,
+			-5, // Render above terrain but below ships
 			getLineColorByType(type),
 			0.5
 		);
@@ -722,7 +722,7 @@ window.BallisticIconContainer = function () {
 		}
 
 		// Convert canvas to a texture
-		const texture = new THREE.Texture(canvas);
+		const texture = new THREE.CanvasTexture(canvas);
 		texture.needsUpdate = true;
 		return texture;
 	}
@@ -1392,7 +1392,7 @@ window.BallisticIconContainer = function () {
 				id: ballistic.id,
 				shooterId: ballistic.shooterid,
 				targetId: ballistic.targetid,
-				lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.5),
+				lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -5, getLineColorByType(type), 0.5),
 				used: true,
 				isFriendly: isFriendly
 			});

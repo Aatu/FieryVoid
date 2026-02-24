@@ -32,26 +32,19 @@ window.ParticleEmitter = function () {
         var uniforms = {
             gameTime: { type: 'f', value: 0.0 },
             zoomLevel: { type: 'f', value: 1.0 },
-            texture: { type: 't', value: texture }
+            spriteTexture: { type: 't', value: texture }
         };
 
         this.particleGeometry = new THREE.BufferGeometry();
 
-        this.particleGeometry.addAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('size', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sizeChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('opacity', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('activationGameTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('textureNumber', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+        this.particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+
+        this.particleGeometry.setAttribute('sizeAngleData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('fadeData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('timeTextureData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
 
 
         this.particleGeometry.dynamic = true;
@@ -100,14 +93,14 @@ window.ParticleEmitter = function () {
         this.active = false;
     };
 
-    ParticleEmitter.prototype.reset = function () {};
+    ParticleEmitter.prototype.reset = function () { };
 
     ParticleEmitter.prototype.cleanUp = function () {
         this.mesh.material.dispose();
         this.scene.remove(this.mesh);
     };
 
-    ParticleEmitter.prototype.update = function (gameData) {};
+    ParticleEmitter.prototype.update = function (gameData) { };
 
     ParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
         this.particleMaterial.uniforms.gameTime.value = total;

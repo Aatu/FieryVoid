@@ -23,7 +23,7 @@ window.ShipSelectedSprite = function () {
             createTextures();
         }
 
-        this.uniforms.texture.value = chooseTexture(type, selected);
+        this.uniforms.spriteTexture.value = chooseTexture(type, selected);
     }
 
     function chooseTexture(type, selected) {
@@ -55,20 +55,20 @@ window.ShipSelectedSprite = function () {
         var context = canvas.getContext("2d");
         getColorByType(context, type, selected);
 
-		//Separate these so we can give different type of dotted circles different number of segments - DK 10/24
+        //Separate these so we can give different type of dotted circles different number of segments - DK 10/24
         if (selected && type == 'mine') {
             window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 12, 0.25);
         } else if (selected && type == 'ally') {
             window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 16, 0.3);
         } else if (selected && type == 'enemy') {
-            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 10, 0.20);      
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 10, 0.20);
         } else if (selected && type == 'neutral') {
-            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.22, TEXTURE_SIZE * 0.26, 4, 0.15);      
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.22, TEXTURE_SIZE * 0.26, 4, 0.15);
         } else {
             window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
         }
 
-        var tex = new THREE.Texture(canvas);
+        var tex = new THREE.CanvasTexture(canvas);
         tex.needsUpdate = true;
 
         return tex;
@@ -76,7 +76,7 @@ window.ShipSelectedSprite = function () {
 
     function getColorByType(context, type, selected) {
         var a = -0.1;
-    
+
         if (type == "mine" && selected) {
             context.strokeStyle = "rgba(78,220,25," + (0.60 + a) + ")";
             context.fillStyle = "rgba(78,220,25," + (0.40 + a) + ")";

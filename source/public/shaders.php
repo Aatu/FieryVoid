@@ -11,7 +11,7 @@
 </script>
 
 <script id="spriteFragmentShader" type="x-shader/x-fragment">
-    uniform sampler2D texture;
+    uniform sampler2D spriteTexture;
     uniform float overlayAlpha;
     uniform vec3 overlayColor;
     uniform float opacity;
@@ -19,7 +19,7 @@
     varying vec2 vUv;
 
     void main() {
-        vec4 textureColor = texture2D(texture, vUv);
+        vec4 textureColor = texture2D(spriteTexture, vUv);
         vec4 finalColor = textureColor;
 
         if (overlayAlpha > 0.0 && textureColor.a > 0.0){
@@ -52,7 +52,7 @@
 </script>
 
 <script id="boxSpriteFragmentShader" type="x-shader/x-fragment">
-    uniform sampler2D texture;
+    uniform sampler2D spriteTexture;
     uniform vec4 color;
 
     varying vec2 vUv;
@@ -64,19 +64,13 @@
 
 <script id="effectVertexShader" type="x-shader/x-fragment">
     attribute vec3 color;
-    attribute float opacity;
-    attribute float fadeInTime;
-    attribute float fadeInSpeed;
-    attribute float fadeOutTime;
-    attribute float fadeOutSpeed;
-    attribute float size;
-    attribute float sizeChange;
-    attribute float angle;
-    attribute float angleChange;
     attribute vec3 velocity;
     attribute vec3 acceleration;
-    attribute float activationGameTime;
-    attribute float textureNumber;
+
+    attribute vec4 sizeAngleData; // x: size, y: sizeChange, z: angle, w: angleChange
+    attribute vec4 fadeData;      // x: fadeInTime, y: fadeInSpeed, z: fadeOutTime, w: fadeOutSpeed
+    attribute vec3 timeTextureData; // x: activationGameTime, y: textureNumber, z: opacity
+    
     uniform float zoomLevel;
     uniform float gameTime;
     varying vec4  vColor;
@@ -84,6 +78,20 @@
     varying float textureN;
     void main()
     {
+        float size = sizeAngleData.x;
+        float sizeChange = sizeAngleData.y;
+        float angle = sizeAngleData.z;
+        float angleChange = sizeAngleData.w;
+
+        float fadeInTime = fadeData.x;
+        float fadeInSpeed = fadeData.y;
+        float fadeOutTime = fadeData.z;
+        float fadeOutSpeed = fadeData.w;
+
+        float activationGameTime = timeTextureData.x;
+        float textureNumber = timeTextureData.y;
+        float opacity = timeTextureData.z;
+
         float elapsedTime = gameTime - activationGameTime;
 
         if (elapsedTime < 0.0 || (fadeOutTime > 0.0 && gameTime - (fadeOutTime + fadeOutSpeed) > 0.0)) {
@@ -139,7 +147,7 @@
 </script>
 
 <script id="effectFragmentShader" type="x-shader/x-fragment">
-    uniform sampler2D texture;
+    uniform sampler2D spriteTexture;
     varying vec4 vColor;
     varying float vAngle;
     varying float textureN;
@@ -170,7 +178,7 @@
             1.0 - (rPos.y / textureAmount + tPos.y)
         );
 
-        vec4 rotatedTexture = texture2D(texture, finalPos);
+        vec4 rotatedTexture = texture2D(spriteTexture, finalPos);
         gl_FragColor = gl_FragColor * rotatedTexture;
     }
 </script>
@@ -178,16 +186,11 @@
 
 <script id="starVertexShader" type="x-shader/x-fragment">
     attribute vec3 color;
-    attribute float opacity;
-    attribute float size;
-    attribute float sizeChange;
-    attribute float angle;
-    attribute float angleChange;
-    attribute float activationGameTime;
-    attribute float textureNumber;
-    attribute float parallaxFactor;
-    attribute float sineFrequency;
-    attribute float sineAmplitude;
+
+    attribute vec4 sizeAngleData; // x: size, y: sizeChange, z: angle, w: angleChange
+    attribute vec3 timeTextureData; // x: activationGameTime, y: textureNumber, z: opacity
+    attribute vec3 starData; // x: parallaxFactor, y: sineFrequency, z: sineAmplitude
+
     uniform float gameTime;
     uniform mat4 customMatrix;
     varying vec4  vColor;
@@ -195,6 +198,19 @@
     varying float textureN;
     void main()
     {
+        float size = sizeAngleData.x;
+        float sizeChange = sizeAngleData.y;
+        float angle = sizeAngleData.z;
+        float angleChange = sizeAngleData.w;
+
+        float activationGameTime = timeTextureData.x;
+        float textureNumber = timeTextureData.y;
+        float opacity = timeTextureData.z;
+
+        float parallaxFactor = starData.x;
+        float sineFrequency = starData.y;
+        float sineAmplitude = starData.z;
+        
         float elapsedTime = gameTime - activationGameTime;
 
         if (elapsedTime < 0.0) {
@@ -229,7 +245,7 @@
     }
 </script>
 <script id="starFragmentShader" type="x-shader/x-fragment">
-    uniform sampler2D texture;
+    uniform sampler2D spriteTexture;
     varying vec4 vColor;
     varying float vAngle;
     varying float textureN;
@@ -260,7 +276,7 @@
             1.0 - (rPos.y / textureAmount + tPos.y)
         );
 
-        vec4 rotatedTexture = texture2D(texture, finalPos);
+        vec4 rotatedTexture = texture2D(spriteTexture, finalPos);
         gl_FragColor = gl_FragColor * rotatedTexture;
     }
 </script>
