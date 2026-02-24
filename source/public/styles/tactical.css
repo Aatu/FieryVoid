@@ -213,6 +213,7 @@ body {
 #phaseheader .value.activeship {
     color: #aabcd4;
     margin-left: 15px;
+    text-transform: none;
 }
 
 .finished {
