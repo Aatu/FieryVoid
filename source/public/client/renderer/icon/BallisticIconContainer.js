@@ -455,10 +455,13 @@ window.BallisticIconContainer = function () {
 
 		// Override for special launcher hex logic
 		if (weapon?.hasSpecialLaunchHexCalculation) {
-			const launcherHex = weaponManager.getFiringHex(shooter, weapon);
-			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
-			type = 'red';
-			if (ballistic.damageclass == 'Targeter') type = 'yellow';
+			if (ballistic.damageclass === 'Targeter') {
+				type = 'yellow';
+			} else {
+				const launcherHex = weaponManager.getFiringHex(shooter, weapon);
+				launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
+				type = 'red';
+			}
 		}
 
 		// Handle specific modeName cases
