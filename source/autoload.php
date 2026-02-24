@@ -2873,6 +2873,15 @@ spl_autoload_register(
 				'treksulibancarrier' => '/server/model/ships/ZTrekSuliban/TrekSulibanCarrier.php',
 				'treksulibancruiser' => '/server/model/ships/ZTrekSuliban/TrekSulibanCruiser.php',
 				'treksulibanhelix' => '/server/model/ships/ZTrekSuliban/TrekSulibanHelix.php',
+
+				//Klingon Empire
+				'klingond5' => '/server/model/ships/ZTrekKlingon/KlingonD5.php',
+				'klingond5tanker' => '/server/model/ships/ZTrekKlingon/KlingonD5Tanker.php',
+				'klingond7' => '/server/model/ships/ZTrekKlingon/KlingonD7.php',
+				'klingond7early' => '/server/model/ships/ZTrekKlingon/KlingonD7Early.php',
+				'klingonktochshuttle' => '/server/model/ships/ZTrekKlingon/KlingonKTochShuttle.php',
+				'klingontransport' => '/server/model/ships/ZTrekKlingon/KlingonTransport.php',
+
 				
 				
 				

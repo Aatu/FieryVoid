@@ -135,7 +135,7 @@ class TrekLtPhaseCannon extends TrekPhaserBase{
         
         public $intercept = 2;
 		public $priority = 8; //light Raking		
-		public $priorityAF = 7; //Standard
+		public $priorityAF = 8; //light Standard
 		
         public $loadingtime = 1;
 		
@@ -177,8 +177,8 @@ class TrekPhaseCannon extends TrekPhaserBase{
         public $raking = 8;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking	
-		public $priorityAF = 3; //as heavy Raking vs fighters!		
+		public $priority = 7; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
+		public $priorityAF = 6; //count as moderately strong vs fighters
 		
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -268,8 +268,8 @@ class TrekHvyPhaseCannon extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 1;
-		public $priority = 7; //technically light Raking, but they're heaviest Raking guns that early Federation has - and stand out in the context of Federation fleet  	
-		public $priorityAF = 3; //as heavy Raking vs fighters!		
+		public $priority = 6; //technically light Raking, but they're heaviest Raking guns that early Federation has - and stand out in the context of Federation fleet  		
+		public $priorityAF = 5; //count as strong vs fighters
 		
         public $loadingtime = 2;
 		public $normalload = 3;
@@ -445,8 +445,8 @@ class TrekPhaser extends TrekPhaserBase{
         public $raking = 10;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking	
-		public $priorityAF = 3; //as heavy Raking vs fighters!		
+	    public $priority = 7; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
+		public $priorityAF = 6; //count as moderately strong vs fighters
 		
         public $loadingtime = 1;
 		public $normalload = 2;
@@ -541,8 +541,9 @@ class TrekPhaserLance extends TrekPhaserBase{
         
         public $intercept = 2;
 		public $priority = 7; //technically light Raking, but borderline - and they're by far heaviest weapons that Federation has - hence 'heavy Raking' status
-		public $priorityArray = array(1=>7, 2=>8);		
-		public $priorityAF = 3; //both Lance and full Phaser are treated as heavy vs fighters
+		public $priorityArray = array(1=>6, 2=>7);		
+		public $priorityAF = 3; //Lances are very heavy vs fighers, Phasers high end mediums
+		public $priorityAFArray = array(1=>3, 2=>6);		
 		
         public $loadingtime = 2;
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
@@ -628,7 +629,7 @@ class TrekLightPhaser extends TrekPhaserBase{
         
         public $intercept = 2;
 		public $priority = 8; //light Raking	
-		public $priorityAF = 7; //...Standard vs fighters
+		public $priorityAF = 8; //...light Standard vs fighters
 		
         public $loadingtime = 1;
 		
@@ -663,10 +664,11 @@ class TrekLightPhaserLance extends TrekPhaserBase{
         public $raking = 8;
         
         public $intercept = 2;
-		public $priority = 8; //light Raking		
+		public $priority = 7; //light Raking... but they still stand out among Federation weapons, at least in Lance mode	
+		public $priorityArray = array(1=>7, 2=>8); 
     	public $gunsArray = array(1=>1, 2=>2); //one Lance, but two Beam shots!
-		public $priorityAF = 3; //heavy Raking vs fighters!	
-		public $priorityAFArray = array(1=>3, 2=>7); ///...but regular Light Phasers are effectively medium Standard vs fighters
+		public $priorityAF = 7;
+		public $priorityAFArray = array(1=>7, 2=>8); 
 		
         public $loadingtime = 1;
 		
@@ -2484,8 +2486,8 @@ class TrekMedDisruptor extends Pulse{
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 			if ($system instanceof Structure) {  //Only checking for structure damage
 				$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
-				$fireOrder->pubnotes .= "<br>Total Damage is: $this->postArmorTotal";
-				$fireOrder->pubnotes .= "<br>reduceFacing is: $this->reduceFacing";
+//				$fireOrder->pubnotes .= "<br>Total Damage is: $this->postArmorTotal";
+//				$fireOrder->pubnotes .= "<br>reduceFacing is: $this->reduceFacing";
 			}
 			if (!$system->advancedArmor){//advanced armor prevents effect
 				if ($system instanceof Structure) {
@@ -2588,8 +2590,8 @@ class TrekDisruptorCannon extends TrekDisruptorBase {
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 			$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
 
-			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
-			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
+//			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
+//			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
 //			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
 
 			if($system->advancedArmor) return; //advanced armor prevents this
@@ -2675,8 +2677,8 @@ class TrekDisruptorCannon extends TrekDisruptorBase {
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 			$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
 
-			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
-			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
+//			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
+//			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
 //			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
 
 			if($system->advancedArmor) return; //advanced armor prevents this
