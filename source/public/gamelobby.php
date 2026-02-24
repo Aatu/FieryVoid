@@ -74,7 +74,10 @@
 ?>
 		
 <!--		<script src="client/helper.js"></script>-->
-        <script src="client/gamelobby.js"></script>
+    <!--		<script src="client/helper.js"></script>-->
+    <?php $debug = isset($_GET['debug']); ?>
+    <?php if ($debug): ?>
+    <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
 		<script src="client/lobbyEnhancements.js"></script>        
 		<script src="client/player.js"></script>
@@ -110,8 +113,6 @@
         <script src="client/model/weapon/aoe.js"></script>
         <script src="client/model/weapon/molecular.js"></script>
         <script src="client/model/weapon/antimatter.js"></script>
-        <!--<script src="client/model/weapon/dualWeapon.js"></script>-->
-        <!--<script src="client/model/weapon/duoWeapon.js"></script>-->
         <script src="client/model/weapon/gravitic.js"></script>
         <script src="client/model/weapon/missile.js"></script>
         <script src="client/model/weapon/ion.js"></script>
@@ -122,7 +123,10 @@
         <script src="client/model/weapon/customEscalation.js"></script>		
         <script src="client/model/weapon/customBSG.js"></script>		
         <script src="client/model/weapon/customTrek.js"></script>		
-        <script src="client/model/weapon/customCW.js"></script>		
+        <script src="client/model/weapon/customCW.js"></script>
+    <?php else: ?>
+    <script defer src="client/gamelobby.legacy.bundle.js"></script>
+    <?php endif; ?>		
 		<script>
 			
             window.weaponManager = 
@@ -204,13 +208,17 @@
                 },
             }
             
-            window.shipManager.movement.isRolled = function(ship)
-            {
-                return false;
-            }
+            $(function(){
+                window.shipManager.movement.isRolled = function(ship)
+                {
+                    return false;
+                }
+            });
             
             
-            window.shipWindowManager.addEW = function(){};            
+            $(function(){
+                window.shipWindowManager.addEW = function(){}; 
+            });            
 
         
         jQuery(function($){            

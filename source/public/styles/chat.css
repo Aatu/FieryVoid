@@ -21,7 +21,7 @@
 }
 
 .chatMessages::-webkit-scrollbar-thumb {
-    background: #466486;
+    background: #3c5574;
 }
 
 .chatMessages::-webkit-scrollbar-thumb:hover {
@@ -33,6 +33,7 @@
     padding: 0;
     height: 20px;
     width: 100%;
+    border-radius: 5px;
 }
 
 .chatmessage {

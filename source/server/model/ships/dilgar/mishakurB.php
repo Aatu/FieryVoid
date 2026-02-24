@@ -29,7 +29,8 @@ class MishakurB extends BaseShip{
         $this->occurence = "rare";
         
         $this->addPrimarySystem(new Reactor(5, 25, 0, 4));
-        $this->addPrimarySystem(new CnC(6, 25, 0, 2));
+        //$this->addPrimarySystem(new CnC(6, 25, 0, 2));
+        $this->addPrimarySystem(new FlagBridge(6, 25, 0, 2, 'Pentacan Formation', 9,  false, true, false, false));		        
         $this->addPrimarySystem(new Scanner(5, 16, 4, 9));
         $this->addPrimarySystem(new Engine(5, 13, 0, 7, 3));
         $this->addPrimarySystem(new Hangar(4, 14));

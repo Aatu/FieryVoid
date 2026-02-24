@@ -16,7 +16,7 @@ class PrimusMaximus extends BaseShip{
         $this->isd = 2260;
         $this->variantOf = "Primus Battlecruiser";
 	    
-	    $this->notes = "Provides +5 Initiative for all friendly Centauri units";
+	    $this->notes = "Provides +5 Initiative to friendly Centauri units";
         
         $this->forwardDefense = 16;
         $this->sideDefense = 17;
@@ -29,10 +29,8 @@ class PrimusMaximus extends BaseShip{
 		
 		$this->iniativebonus = 5;
          
-		/* let's replace this with appropriate two C&Cs!
-        $this->addPrimarySystem(new ProtectedCnC(8, 28, 0, 0)); //nominally one 7/20 and one 8/8
-		*/
-		$cnc = new CnC(7, 20, 0, 0);
+		//$cnc = new CnC(7, 20, 0, 0);        
+		$cnc = new FlagBridge(7, 20, 0, 1, 'Centauri Command Bonus', 60,  true, true, true, false);		        
 		$cnc->startArc = 0;
 		$cnc->endArc = 360;
         $this->addPrimarySystem($cnc);

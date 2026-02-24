@@ -654,9 +654,13 @@ window.PhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
         var element = payload.element;
-        //systemInfo.showSystemInfo(element, weapon, ship, this.selectedShip);
+        var showInfo = payload.showInfo !== false;
 
-        this.showSystemInfo(ship, system, element, false);
+        if (showInfo) {
+            this.showSystemInfo(ship, system, element, false);
+        } else {
+            this.hideSystemInfo();
+        }
 
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.hideWeaponArcs();
@@ -907,6 +911,11 @@ window.PhaseStrategy = function () {
         var scene = webglScene.scene;
         this.ballisticIconContainer.createHexNumbers(scene);
         window.dispatchEvent(new CustomEvent("HexNumbersToggled"));
+    };
+
+    PhaseStrategy.prototype.onToggleBackground = function (payload) {
+        if (payload.up) return;
+        window.dispatchEvent(new CustomEvent("BackgroundToggled"));
     };
 
     function toggleBallisticLines(ships, payload) {

@@ -95,7 +95,7 @@ class Pshultau extends BaseShip{
                         10 => "Jump Engine",
                         12 => "Scanner",
                         15 => "Engine",
-                        16 => "Hangar",
+                        17 => "Hangar",
                         19 => "Reactor",
                         20 => "TAG:C&C",
                 ),

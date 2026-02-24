@@ -7,7 +7,7 @@ class centaurumUpgraded extends BaseShip{
 		$this->pointCost = 1000;
         $this->faction = "Centauri Republic";
         $this->phpclass = "centaurumUpgraded";
-        $this->imagePath = "img/ships/octurion.png";
+        $this->imagePath = "img/ships/Centaurum.png";
         $this->shipClass = "Centaurum Battleship (Upgraded)";
         $this->shipSizeClass = 3;
         $this->limited = 33; //limited deployment

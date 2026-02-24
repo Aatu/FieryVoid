@@ -28,7 +28,15 @@ const ShipWindowContainer = styled.div`
     box-shadow: 5px 5px 10px black;
     font-size: 10px;
     color: white;
+    color: white;
     font-family: arial;
+    
+    /* Prevent text selection and callouts on mobile */
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 
     @media (max-width: 1024px) {
         ${props => {
@@ -97,6 +105,9 @@ const ShipImage = styled.div`
     box-sizing: border-box;
     margin: 2px;
     transform: rotate(-90deg);
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
 `;
 
 
@@ -107,6 +118,9 @@ class ShipWindow extends React.Component {
     }
 
     onShipMouseOver(event) {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
         let { ship } = this.props;
 
         webglScene.customEvent('SystemMouseOver', {
@@ -117,10 +131,14 @@ class ShipWindow extends React.Component {
 
     }
 
-    onShipTouchStart(event) {
+    onShipClick(event) {
         event.stopPropagation();
-        event.preventDefault(); /* Prevent mouse emulation */
         let { ship } = this.props;
+
+        if (this.ignoreNextClick) {
+            this.ignoreNextClick = false;
+            return;
+        }
 
         webglScene.customEvent('SystemClicked', {
             ship: ship,
@@ -129,7 +147,78 @@ class ShipWindow extends React.Component {
         });
     }
 
+    onShipTouchStart(event) {
+        this.touchActive = true;
+        this.ignoreNextClick = false;
+        window.lastTouchActiveTime = Date.now();
+
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+        }
+
+        const target = event.currentTarget;
+        const touch = event.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+
+        this.longPressTimer = setTimeout(() => {
+            this.ignoreNextClick = true; // Prevent click from firing after long press
+            let { ship } = this.props;
+
+            // Long Press -> generic tooltip
+            webglScene.customEvent('SystemMouseOver', {
+                ship: ship,
+                system: ship,
+                element: target,
+                showInfo: true
+            });
+
+            this.longPressTimer = null;
+        }, 400); // 400ms hold required for info window
+    }
+
+    onShipTouchMove(event) {
+        if (!this.longPressTimer) return;
+
+        const touch = event.touches[0];
+        const dx = touch.clientX - this.touchStartX;
+        const dy = touch.clientY - this.touchStartY;
+
+        // Cancel if they move more than 10 pixels
+        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+    }
+
+    onShipTouchCancel(event) {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.touchActive = false;
+        webglScene.customEvent('SystemMouseOut');
+    }
+
+    onShipTouchEnd(event) {
+        if (this.longPressTimer) {
+            // Timer didn't pop, meaning this was a short tap
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        } else {
+            // Timer already fired (long press). Hide info on release.
+            webglScene.customEvent('SystemMouseOut');
+        }
+
+        setTimeout(() => {
+            this.touchActive = false;
+        }, 300); // Clear touch active after giving click events time to fire/be ignored
+    }
+
     onShipMouseOut() {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
         webglScene.customEvent('SystemMouseOut');
     }
 
@@ -161,7 +250,7 @@ class ShipWindow extends React.Component {
         return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} team={ship.team}>
             <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
             <Column $top>
-                <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onTouchStart={this.onShipTouchStart.bind(this)} />
+                <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onClick={this.onShipClick.bind(this)} onTouchStart={this.onShipTouchStart.bind(this)} onTouchMove={this.onShipTouchMove.bind(this)} onTouchEnd={this.onShipTouchEnd.bind(this)} onTouchCancel={this.onShipTouchCancel.bind(this)} />
                 {systemsByLocation[1].length > 0 && <ShipSection location={1} ship={ship} systems={systemsByLocation[1]} />}
                 <ShipWindowEw ship={ship} />
             </Column>

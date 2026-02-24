@@ -1,75 +1,75 @@
-
 body {
     height: 100%;
     width: 100%;
-    overflow:hidden;
-    -webkit-overflow-scrolling: touch; /* iOS velocity scrolling */
+    overflow: hidden;
+    -webkit-overflow-scrolling: touch;
+    /* iOS velocity scrolling */
 }
 
 body *::-moz-selection {
-background: transparent;
-} 
+    background: transparent;
+}
 
 body *::selection {
-background: transparent;
+    background: transparent;
 }
 
 #background {
-    position:absolute;
-    width:100%;
-    height:100%;
+    position: absolute;
+    width: 100%;
+    height: 100%;
     top: 0;
     left: 0;
     background-size: cover;
 }
 
-#hexgrid{
+#hexgrid {
 
-    margin:0;
-    padding:0;
-    z-index:1;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
 }
 
-#EWindicators{
-    margin:0;
-    padding:0;
-    z-index:2999;
+#EWindicators {
+    margin: 0;
+    padding: 0;
+    z-index: 2999;
 }
 
-#effects{
-    margin:0;
-    padding:0;
-    z-index:4000;
+#effects {
+    margin: 0;
+    padding: 0;
+    z-index: 4000;
 }
 
-#ships{
-    z-index:200;
-    position:absolute;
-    top:0px;
-    left:0px;
+#ships {
+    z-index: 200;
+    position: absolute;
+    top: 0px;
+    left: 0px;
 }
 
-#topUIbar{
-    z-index:500;
-    width:100px;
-    height:25px;
-    padding:5px 5px;
-    background-color:#081d3d;
-    position:absolute;
-    top:0px;
-    right:10px;
+#topUIbar {
+    z-index: 500;
+    width: 100px;
+    height: 25px;
+    padding: 5px 5px;
+    background-color: #081d3d;
+    position: absolute;
+    top: 0px;
+    right: 10px;
     border-left: 1px solid #486288;
     border-right: 1px solid #486288;
     border-bottom: 1px solid #486288;
-    
+
 }
 
-#pagecontainer{
-    position:fixed;
-    z-index:1;
-	overflow:hidden;
-    width:100vw;
-    height:100%;
+#pagecontainer {
+    position: fixed;
+    z-index: 1;
+    overflow: hidden;
+    width: 100vw;
+    height: 100%;
     top: 0px;
     bottom: 0px;
     left: 0px;
@@ -78,196 +78,216 @@ background: transparent;
 }
 
 
-#reactUI{
-    position:absolute;
-    z-index:999999;
-    overflow:hidden;
+#reactUI {
+    position: absolute;
+    z-index: 999999;
+    overflow: hidden;
     top: 0;
     left: 0;
 }
 
-body{
-	overflow:hidden;
+body {
+    overflow: hidden;
 }
 
-#templatecontainer{
-    display:none;
+#templatecontainer {
+    display: none;
 }
 
-#pagecontainer .hexship{
-    position:absolute;
-    z-index:200;
+#pagecontainer .hexship {
+    position: absolute;
+    z-index: 200;
 }
 
-.button{
-    cursor:pointer;
+.button {
+    cursor: pointer;
 }
 
 body {
-    padding:0;
-    margin:0;
-    background-color:black;
-    overflow:hidden;
+    padding: 0;
+    margin: 0;
+    background-color: black;
+    overflow: hidden;
 }
 
-.tacticalcanvas{
-    position:absolute;
-    top:0;
-    bottom:0;
-    width:100%;
-    height:100%;
+.tacticalcanvas {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
 }
 
-#shipMovementUI{
-    display:none;
-    position:absolute;
-    z-index:7000;   
+#shipMovementUI {
+    display: none;
+    position: absolute;
+    z-index: 7000;
 }
 
-#shipMovementUI div{
-    position:absolute;
-    overflow:hidden;
-    cursor:pointer;
+#shipMovementUI div {
+    position: absolute;
+    overflow: hidden;
+    cursor: pointer;
 }
 
-#shipMovementUI div canvas{
-    position:relative;
-}
-.centercontainer{
-    position:absolute !important;
-    left:50% !important;
-    top:50% !important;
-    overflow:visible !important;
+#shipMovementUI div canvas {
+    position: relative;
 }
 
-.centercontent{
-    left:-50%;
-    overflow:visible !important;
-    position:relative !important;
+.centercontainer {
+    position: absolute !important;
+    left: 50% !important;
+    top: 50% !important;
+    overflow: visible !important;
 }
 
-#shipMovementUI .centercontainer .value{
-    z-index:100;
-    display:inline;
-    color:white;
-    opacity:0.7;
-    top:-10px;
+.centercontent {
+    left: -50%;
+    overflow: visible !important;
+    position: relative !important;
 }
 
-.roundedright{
+#shipMovementUI .centercontainer .value {
+    z-index: 100;
+    display: inline;
+    color: white;
+    opacity: 0.7;
+    top: -10px;
+}
+
+.roundedright {
     border-radius: 0px 0px 30px 0px;
     -moz-border-radius: 0px 0px 30px 0px;
     -webkit-border-bottom-right-radius: 30px;
 }
 
-.rounded{
+.rounded {
     border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px;
 }
 
-#phaseheader{
-    z-index:10000;
-    border:1px solid #496791;
-    border-radius: 8px;    
-    color:#deebff;
-    background-color:#0a3340;
-    position:absolute;
-    top:-3px;
-    left:-4px;
-    height:25px;
-    width:700px;
-    opacity:0.85;
+#topcontainer {
+    position: absolute;
+    top: -3px;
+    left: -4px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    max-width: calc(100% - 120px);
+    pointer-events: none;
+}
+
+#phaseheader {
+    border: 1px solid #496791;
+    border-radius: 8px;
+    color: #deebff;
+    background-color: #0a3340;
+    position: relative;
+    height: 25px;
+    width: auto;
+    min-width: 500px;
+    opacity: 0.85;
     -moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
-    padding-top:10px;
+    padding-top: 8px;
+    padding-right: 45px;
+    flex-shrink: 0;
+    pointer-events: auto;
 }
 
-.phasecontainer{
-    margin:10px 5px;
+.phasecontainer {
+    margin: 10px 5px;
 }
 
-#phaseheader .value{
-    font-family:arial;
-    font-size:16px;
-    margin-left:10px;
+#phaseheader .value {
+    font-family: arial;
+    font-size: 16px;
+    margin-left: 10px;
+    text-transform: uppercase;
+    text-shadow: black 0 0 10px, black 0 0 3px;
 }
 
-#phaseheader .value.activeship{
-    color:#aabcd4;
-    margin-left: 15px;     
+#phaseheader .value.activeship {
+    color: #aabcd4;
+    margin-left: 15px;
 }
 
-.finished{
-	display:none;
-	color:#b34119;
+.finished {
+    display: none;
+    color: #b34119;
 }
 
-.notlogged{
-	display:none;
-	color:#b34119;
+.notlogged {
+    display: none;
+    color: #b34119;
 
 }
 
-.uitable{
-    position:absolute;
-    top:2px;
-    right:10px;
-}
-.uitable td{
-    padding-right:10px;
+.uitable {
+    position: absolute;
+    top: 2px;
+    right: 10px;
 }
 
-.centeredvaluecontainer{
-    position:relative;
-    text-align:center;
+.uitable td {
+    padding-right: 10px;
 }
 
-.red{
-    color:#b34119 !important;
+.centeredvaluecontainer {
+    position: relative;
+    text-align: center;
 }
 
-.lightred{
-    color:#e3511d !important;
+.red {
+    color: #b34119 !important;
 }
 
-.darkred{
-    color:#491604 !important;
+.lightred {
+    color: #e3511d !important;
 }
 
-.green{
-    color:#2f5123; 	
+.darkred {
+    color: #491604 !important;
 }
 
-.ok{
-    width:30px;
-    height:30px;
-    background-image:url(../img/ok.png);
-    cursor:pointer;
+.green {
+    color: #2f5123;
 }
 
-.cancel{
-    width:30px;
-    height:30px;
-    background-image:url(../img/cancel.png);
-    cursor:pointer;
+.ok {
+    width: 25px;
+    height: 25px;
+    background-image: url(../img/ok.png);
+    cursor: pointer;
+    background-size: cover;
+}
+
+.cancel {
+    width: 30px;
+    height: 30px;
+    background-image: url(../img/cancel.png);
+    cursor: pointer;
 }
 
 #infowindow {
-    width:400px;
-    margin-left:-150px;
-    display:none;
-     /* border:1px solid #496791; */
-    background-color: black; /* #0A3340; */
-    opacity:0.65;
-    color:white;
-    font-family:arial;
-    font-size:10px;
-    z-index:10000;
-    position:absolute;
-    left:50%;
-    top:100px;
+    width: 400px;
+    max-width: 90%;
+    transform: translateX(-50%);
+    text-align: center;
+    display: none;
+    background-color: black;
+    /* #0A3340; */
+    opacity: 0.65;
+    color: white;
+    font-family: arial;
+    font-size: 10px;
+    z-index: 10000;
+    position: absolute;
+    left: 50%;
+    top: 100px;
 
     border-radius: 7px;
     -moz-border-radius: 7px;
@@ -275,114 +295,117 @@ body {
 
 }
 
-#infowindow h2{
-    color:#deebff;
-    font-family:arial;
-    font-size:20px;
-    margin:3px 0px 3px 0px;
-    font-weight:400;
+#infowindow h2 {
+    color: #deebff;
+    font-family: arial;
+    font-size: 20px;
+    margin: 3px 0px 3px 0px;
+    font-weight: 400;
 
-    text-align:center;
-}   
-
-.shipclickable{
-    position:absolute;
-    width:50px;
-    height:50px;
-    background-color:transparent;
-    opacity:0.5;
-    z-index:2000;
-    top:50%;
-    left:50%;
-    cursor:pointer;
-	/*border:1px solid red;*/
+    text-align: center;
 }
 
-.ballclickable{
-    position:absolute;
-    width:0px;
-    height:0px;
-    background-color:transparent;
-    cursor:pointer;
-	/*border:1px solid red;*/
+.shipclickable {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: transparent;
+    opacity: 0.5;
+    z-index: 2000;
+    top: 50%;
+    left: 50%;
+    cursor: pointer;
+    /*border:1px solid red;*/
 }
 
-.ballisticcanvas{
-	position:absolute;
-	
+.ballclickable {
+    position: absolute;
+    width: 0px;
+    height: 0px;
+    background-color: transparent;
+    cursor: pointer;
+    /*border:1px solid red;*/
 }
 
-.hexshipcanvas{
-    z-index:201;
+.ballisticcanvas {
+    position: absolute;
+
 }
 
-#shipNameContainer, .shipNameContainer{
-  
-    z-index:7001;
-    opacity:0.65;
-    position:absolute;
-    display:none;
-    text-align:center;
-    font-family:arial;
-    font-size:12px;
-    color:white;
-	background-color:black;
-	border-radius: 7px;
+.hexshipcanvas {
+    z-index: 201;
+}
+
+#shipNameContainer,
+.shipNameContainer {
+
+    z-index: 7001;
+    opacity: 0.65;
+    position: absolute;
+    display: none;
+    text-align: center;
+    font-family: arial;
+    font-size: 12px;
+    color: white;
+    background-color: black;
+    border-radius: 7px;
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
-	padding:3px 15px 3px 15px;
+    padding: 3px 15px 3px 15px;
 }
 
 .shipNameContainer .fire {
-    display:none;
+    display: none;
 }
 
-#shipNameContainer span, .shipNameContainer span{
-	padding-top:2px;
+#shipNameContainer span,
+.shipNameContainer span {
+    padding-top: 2px;
 }
 
-#shipNameContainer .name, .shipNameContainer .name{
-   font-size:16px;
-   font-style:normal;
+#shipNameContainer .name,
+.shipNameContainer .name {
+    font-size: 16px;
+    font-style: normal;
 
 }
 
 .not-deployed {
     color: #b34119;
     font-size: 16px;
-} 
+}
 
 
-.enemy.name{
+.enemy.name {
     /*color:#b34119;*/
     color: red;
 }
 
-.mine.name{
+.mine.name {
     /*color:#2f5123; I'm making this color much lighter! this dark it's poorly readable*/
-	color:limegreen;
+    color: limegreen;
 }
 
-.terrain.name{
-	color:#dedede;
+.terrain.name {
+    color: #dedede;
 }
 
-.ally.name{
-	color:#33adff;
+.ally.name {
+    color: #33adff;
 }
 
 
-#weaponTargetingContainer{
-	display:none;
-	width:200px;
-	z-index:7001;
-    opacity:0.65;
-    position:absolute;
-	font-family:arial;
-    font-size:12px;
-     color:#deebff;
-	background-color:black;
-    padding:4px 10px;
+#weaponTargetingContainer {
+    display: none;
+    width: 200px;
+    z-index: 7001;
+    opacity: 0.65;
+    position: absolute;
+    font-family: arial;
+    font-size: 12px;
+    color: #deebff;
+    background-color: black;
+    padding: 4px 10px;
     border-radius: 7px;
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
@@ -390,243 +413,331 @@ body {
 
 }
 
-#weaponTargetingContainer .hitinfo{
-	display:none;
+#weaponTargetingContainer .hitinfo {
+    display: none;
 }
 
-.BPcontainer{
-	width:190px;
-	height:170px;
-	margin: 2px 5px 5px 5px; 
-	display:none;
+.BPcontainer {
+    width: 190px;
+    height: 170px;
+    margin: 2px 5px 5px 5px;
+    display: none;
 }
 
-#logcontainer{
-    width:100%;
+#logcontainer {
+    width: 100%;
     max-width: 800px;
-	height:150px;
-	opacity:0.85;
-    color: #7ba2ea; /* #deebff; */
+    height: 150px;
+    opacity: 0.85;
+    color: #7ba2ea;
+    /*color: #e0e7ef;*/
+    /* #deebff; */
     background-color: #04161C;
     border-top: 1px solid #496791;
-	border-right: 1px solid #496791;
-	border-left: 1px solid #496791;
-	position:fixed;
-	bottom:0px;
-	z-index:10;
-	-moz-box-shadow: 5px 5px 10px black;
+    border-right: 1px solid #496791;
+    border-left: 1px solid #496791;
+    position: fixed;
+    bottom: 0px;
+    z-index: 10;
+    -moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
-	font-family:arial;
-	font-size:12px;
+    font-family: arial;
+    font-size: 12px;
     -webkit-transition: all 0.1s linear;
-	-moz-transition: all 0.1s linear;
-	-o-transition: all 0.1s linear;
-	transition: all 0.1s linear;
+    -moz-transition: all 0.1s linear;
+    -o-transition: all 0.1s linear;
+    transition: all 0.1s linear;
 }
 
-#logcontainer.large{
+#logcontainer.large {
     height: 500px;
 }
 
-#logcontainer.mouseover
-{
-    bottom:0px;
+#logcontainer.mouseover {
+    bottom: 0px;
 }
 
-.logUiEntry{
-    position:absolute;
-    top:-26px;
-    border-top: 1px solid #496791;
-	border-right: 1px solid #496791;
-	border-left: 1px solid #496791;
-    border-radius: 5px 5px 0px 0px;
-    -moz-border-radius: 5px 5px 0px 0px;
-    -webkit-border-radius: 5px 5px 0px 0px;
-    width:100px;
-    height:18px;
-    text-align: center;
-    font-size: 10px;
-    padding-top:6px;
-    z-index: 9999;
-    background-color:#020E12;
-    cursor:pointer;
-}
-
-.logUiEntry span{
-}
-
-.logUiEntry.newMessage{
-    color:#DEEBFF;
-}
-
-
-.logUiEntry.selected{
-    top:-25px;
-    background-color: #04161C;
-    color:#DEEBFF;
-}
-
-#logTab.logUiEntry{
-    left:-1px;
-}
-
-#infoTab.logUiEntry{
-    left:104px;
-}
-
-#chatTab.logUiEntry{
-    left:208px;
-}
-
-#globalChatTab.logUiEntry{
-    left:312px;
-}
-
-#settingsTab.logUiEntry{
-    left:417px;
-}
-
-
-#declarationsTab.logUiEntry{
-    left:416px;
-}
-
-#declarationsContainer{	
-    overflow-y: scroll;
+.logUiEntry {
     position: absolute;
-    padding: 0 0px;
-}
-
-#combatLogContainer{
-    overflow-y: scroll;
-    position: absolute;
-    padding: 0 0px 0 0px; /* Extra right padding for scrollbar visibility */  
-}
-
-#combatLogButtons{	
-        position: absolute; /* Absolute positioning */
-        font-size: 12px;   
-        font-style:normal;
-        font-weight:bold;  
-        /*color: #597eb1; /* #deebff; */ 
-        color: #7ba2ea;                                
-        top: 0;             /* Align to the top */
-        right: 0;           /* Align to the right */
-        padding-top: 3px;
-        padding-right: 3px; /* Adjust for padding from the right side */
-        z-index: 11;        /* Make sure it's on top */
-}
-
-#combatLogButtons input[type="button"] {
-    font-size: 12px;
-    cursor: pointer;
-    margin-top: 1px;
-    margin-right: 3px; /* Add space between buttons */
-    border: none; /* Remove default border */
-}
-
-
-#combatLogActual{	
-    padding-top: 3px;
-    font-size: 12px;   
-    font-style:normal; 
-}
-
-#declarationsButtons{	
-    padding-top: 5px;
-    font-size: 12px;      
-}
-
-#declarationsActual{	
-    padding-bottom: 10px;
-}
-
-#expandBotPanel{
-    position:absolute;
-    top:-26px;
+    top: -26px;
     border-top: 1px solid #496791;
     border-right: 1px solid #496791;
     border-left: 1px solid #496791;
     border-radius: 5px 5px 0px 0px;
     -moz-border-radius: 5px 5px 0px 0px;
     -webkit-border-radius: 5px 5px 0px 0px;
-    width:100px;
-    height:18px;
+    width: 100px;
+    height: 18px;
     text-align: center;
     font-size: 10px;
-    padding-top:6px;
+    padding-top: 6px;
     z-index: 9999;
-    background-color:#020E12;
-    cursor:pointer;
-    right:5px;
+    background-color: #020E12;
+    cursor: pointer;
+    color: #deebffb6;
+}
+
+.logUiEntry span {}
+
+.logUiEntry.newMessage {
+    color: #DEEBFF;
+}
+
+.logUiEntry.selected {
+    top: -25px;
+    background-color: #04161C;
+    color: #DEEBFF;
+    font-weight: bold;
+}
+
+#logTab.logUiEntry {
+    left: -1px;
+}
+
+#infoTab.logUiEntry {
+    left: 104px;
+}
+
+#chatTab.logUiEntry {
+    left: 208px;
+}
+
+#globalChatTab.logUiEntry {
+    left: 312px;
+}
+
+#settingsTab.logUiEntry {
+    left: 417px;
+}
+
+
+#declarationsTab.logUiEntry {
+    left: 416px;
+}
+
+#declarationsContainer {
+    overflow-y: scroll;
+    position: absolute;
+    padding: 0 0px;
+}
+
+#combatLogContainer {
+    overflow-y: scroll;
+    position: absolute;
+    padding: 0px 0px 0px 0px;
+    /* Extra right padding for scrollbar visibility */
+}
+
+
+#iniGui::-webkit-scrollbar,
+#gameinfo::-webkit-scrollbar,
+#declarationsContainer::-webkit-scrollbar,
+#combatLogContainer::-webkit-scrollbar {
+    width: 10px;
+}
+
+#iniGui::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#gameinfo::-webkit-scrollbar-track,
+#declarationsContainer::-webkit-scrollbar-track,
+#combatLogContainer::-webkit-scrollbar-track {
+    background: #0d1620;
+}
+
+#iniGui::-webkit-scrollbar-thumb {
+    background: #3c5574;
+    border-radius: 6px;
+}
+
+#gameinfo::-webkit-scrollbar-thumb,
+#declarationsContainer::-webkit-scrollbar-thumb,
+#combatLogContainer::-webkit-scrollbar-thumb {
+    background: #3c5574;
+}
+
+#iniGui::-webkit-scrollbar-thumb:hover {
+    background: #5a7ea8;
+}
+
+#gameinfo::-webkit-scrollbar-thumb:hover,
+#declarationsContainer::-webkit-scrollbar-thumb:hover,
+#combatLogContainer::-webkit-scrollbar-thumb:hover {
+    background: #5a7ea8;
+}
+
+#combatLogButtons {
+    position: absolute;
+    /* Absolute positioning */
+    font-size: 14px;
+    font-style: normal;
+    /*font-weight: bold;*/
+    /*color: #7ba2ea; /* #deebff; */
+    color: #e0e7ef;
+    top: 0;
+    /* Align to the top */
+    right: 0;
+    /* Align to the right */
+    padding-top: 3px;
+    padding-right: 3px;
+    /* Adjust for padding from the right side */
+    z-index: 11;
+    /* Make sure it's on top */
+    opacity: 0.95;
+}
+
+#combatLogButtons input[type="button"] {
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 3px;
+    margin-right: 0px;
+    margin-left: 3px;
+    /* Add space between buttons */
+    border: 1px solid #587e8d;
+    background: #215a7a;
+    border-radius: 4px;
+    color: #e0e7ef;
+}
+
+
+#LogActual {
+    padding-top: 3px;
+    font-size: 12px;
+    font-style: normal;
+}
+
+#declarationsButtons {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding-top: 5px;
+    font-size: 13px;
+    color: #e0e7ef;
+}
+
+#declarationsButtons input[type="button"] {
+    font-size: 13px;
+    cursor: pointer;
+    margin-top: 3px;
+    margin-bottom: 3px;
+    margin-right: 1px;
+    margin-left: 2px;
+    /* Add space between buttons */
+    border: 1px solid #587e8d;
+    background: #215a7a;
+    border-radius: 4px;
+    color: #e0e7ef;
+}
+
+#declarationsActual {
+    padding-bottom: 10px;
+    color: #e0e7ef;
+}
+
+#expandBotPanel {
+    position: absolute;
+    top: -26px;
+    border-top: 1px solid #496791;
+    border-right: 1px solid #496791;
+    border-left: 1px solid #496791;
+    border-radius: 5px 5px 0px 0px;
+    -moz-border-radius: 5px 5px 0px 0px;
+    -webkit-border-radius: 5px 5px 0px 0px;
+    width: 100px;
+    height: 18px;
+    text-align: center;
+    font-size: 10px;
+    padding-top: 6px;
+    z-index: 9999;
+    background-color: #020E12;
+    cursor: pointer;
+    right: 5px;
     width: 40px;
     color: white;
 
 }
 
-#gameinfo.logPanelEntry{
-    overflow-x:hidden;
-    overflow-y:scroll;
+#gameinfo.logPanelEntry {
+    overflow-x: hidden;
+    overflow-y: scroll;
 }
 
-.fleetlistentry{
+.combatTurn {
+    font-size: 12px;
+    font-weight: bold;
+    text-decoration: underline;
+    top: 15px;
+    color: #e0e7ef;
+}
+
+.noCombatLog {
+    font-size: 14px;
+    color: #e0e7ef;
+}
+
+.fleetlistentry {
     padding-top: 10px;
     padding-left: 5px;
-    padding-bottom: 5px;    
+    padding-bottom: 5px;
     float: left;
     width: 98%;
 }
 
-.fleetlistentry .destroyed{
+.fleetlistentry .destroyed {
     font-style: normal;
-    color:#c54120;
+    color: #c54120;
 }
 
-.fleetlistentry .jumped{
+.fleetlistentry .jumped {
     font-style: normal;
     /*color:#00d100;*/
-    color: #cc8500;    
+    color: #cc8500;
 }
 
-.fleetheader .headername{
-	font-weight:bold;
-	color:#deebff;
+.fleetheader .headername {
+    font-weight: bold;
+    color: #deebff;
 }
 
-.fleetheader .playername{
-	color:#deebff;
+.fleetheader .playername {
+    color: #deebff;
 }
 
-.fleetlist{
+.fleetlist {
     display: block;
 }
 
-.fleetlist .header{
+.fleetlist .header {
     font-weight: bold;
     text-decoration: underline;
     text-transform: uppercase;
-    color: #a7c1f1;    
+    color: #a7c1f1;
 }
 
-.fleetlist .shipname{
+.fleetheader {
+    margin-bottom: 3px;
+    margin-left: 5px
+}
+
+.fleetlist .shipname {
     margin-top: 3px;
     float: left;
     padding-left: 5px;
-    width:30%;
+    width: 30%;
 }
 
-.fleetlist .shipclass{
+.fleetlist .shipclass {
     margin-top: 3px;
     float: left;
-    width:30%;
+    width: 30%;
 }
 
-.fleetlist .shiptype{
+.fleetlist .shiptype {
     margin-top: 3px;
     float: left;
     width: 10%;
-    text-align: center;    
+    text-align: center;
 }
 
 /* //Apparently not used anymore, and old element is pushing value out of alignment in Info Tab - DK
@@ -641,205 +752,212 @@ body {
     display: none;
 }
 
-.fleetlist .initiative{
-	margin-top: 3px;
-	float: left;
+.fleetlist .initiative {
+    margin-top: 3px;
+    float: left;
     text-align: center;
-	width: 10%;
+    width: 10%;
 }
 
 .fleetlist .value {
     margin-top: 3px;
     float: left;
     width: 15%;
-    text-align: center;        
+    text-align: center;
 }
 
-#logcontainer #gameinfo{
-    height:100%;
-    width:100%;
+#logcontainer #gameinfo {
+    height: 100%;
+    width: 100%;
     z-index: 10001;
-    
+
 }
 
-#logcontainer #chat{
-    height:100%;
-    width:100%;
+#logcontainer #chat {
+    height: 100%;
+    width: 100%;
     z-index: 10001;
-    
+
 }
 
-#logcontainer #globalchat{
-    height:100%;
-    width:100%;
+#logcontainer #globalchat {
+    height: 100%;
+    width: 100%;
     z-index: 10001;
-    
-}
-
-#log{
-	width:100%;
-	height:100%;
-	border-right: 1px solid #496791;
-	position:absolute;
-	left:0px;
-	top:0px;
-	z-index:10000;
-	overflow-y:visible;
-	overflow-x:hidden;
 
 }
 
+#log {
+    width: 100%;
+    height: 100%;
+    border-right: 1px solid #496791;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 10000;
+    overflow-y: visible;
+    overflow-x: hidden;
 
-#logContainer.assignThrust #log{
-	display:none;
-}
-
-#log .logentry{
-	margin:3px 5px 3px 5px;
-    cursor:pointer;
-}
-#log .logheader{
-	font-weight:bold;
-	color:#c54120;
-}
-
-#log .damage{
-	color:#c54120;
-}
-
-#log .critical{
-	color:rgba(255, 166, 0, 0.781);
-}
-
-#log .shiplink{
-	color:#deebff;
-}
-
-#log .notes{
-	display:none;
-}
-
-#log .destroyed{
-	font-weight:bold;
-	color:#b34119;
-}
-
-#log ul{
-	margin: 5px 0px;
 }
 
 
-#logcontainer .assignthrustcontainer{
-	display:none;
-	padding-bottom:10px;
-	z-index:10001;
-	height:132px;
+#logContainer.assignThrust #log {
+    display: none;
 }
 
-#logcontainer .assignthrustcontainer h2{
-	margin:5px 0px 5px 0px;
-}
-#logcontainer .assignthrustcontainer p{
-	font-size:10px;
-	padding: 0px 5px;
-	margin:0px;
+#log .logentry {
+    margin: 3px 5px 3px 5px;
+    cursor: pointer;
 }
 
-#logcontainer .assignThrust.assignthrustcontainer{
-	display:block;
+#log .logheader {
+    font-weight: bold;
+    color: #c54120;
 }
 
-#logcontainer .assignthrustcontainer .ok{
-	position:absolute;
-	bottom:15px;
-	left:150px;
+#log .damage {
+    color: #c54120;
 }
 
-#logcontainer .assignthrustcontainer .cancel{
-	position:absolute;
-	bottom:15px;
-	right:150px;
+#log .critical {
+    color: rgba(255, 166, 0, 0.781);
+}
+
+#log .shiplink {
+    color: #deebff;
+}
+
+#log .notes {
+    display: none;
+}
+
+#log .destroyed {
+    font-weight: bold;
+    color: #b34119;
+}
+
+#log ul {
+    margin: 5px 0px;
 }
 
 
-.shipSelectList{
-	position:absolute;
-	display:none;
-	top:200px;
-	left:200px;
-	/*border: 1px solid #496791;*/
-	background-color:black;
-	z-index:20000;
-	padding:5px 0px;
-	margin:0px;
-	color:white;
-	font-family: arial;
+#logcontainer .assignthrustcontainer {
+    display: none;
+    padding-bottom: 10px;
+    z-index: 10001;
+    height: 132px;
+}
+
+#logcontainer .assignthrustcontainer h2 {
+    margin: 5px 0px 5px 0px;
+}
+
+#logcontainer .assignthrustcontainer p {
+    font-size: 10px;
+    padding: 0px 5px;
+    margin: 0px;
+}
+
+#logcontainer .assignThrust.assignthrustcontainer {
+    display: block;
+}
+
+#logcontainer .assignthrustcontainer .ok {
+    position: absolute;
+    bottom: 15px;
+    left: 150px;
+}
+
+#logcontainer .assignthrustcontainer .cancel {
+    position: absolute;
+    bottom: 15px;
+    right: 150px;
+}
+
+
+.shipSelectList {
+    position: absolute;
+    display: none;
+    top: 200px;
+    left: 200px;
+    /*border: 1px solid #496791;*/
+    background-color: black;
+    z-index: 20000;
+    padding: 5px 0px;
+    margin: 0px;
+    color: white;
+    font-family: arial;
     font-size: 9px;
-	line-height:12px;
-	opacity:0.65;
-	border-radius: 5px 5px 5px 5px;
+    line-height: 12px;
+    opacity: 0.65;
+    border-radius: 5px 5px 5px 5px;
     -moz-border-radius: 5px 5px 5px 5px;
     -webkit-border-radius: 5px;
 
 }
 
-.shipSelectList .shiplistentry{
-	margin:3px 20px;
-	cursor:pointer;
+.shipSelectList .shiplistentry {
+    margin: 3px 20px;
+    cursor: pointer;
 }
 
-.shipSelectList .shiplistentry.action{
-	margin:3px 40px;
-	cursor:pointer;
+.shipSelectList .shiplistentry.action {
+    margin: 3px 40px;
+    cursor: pointer;
 }
 
-.shipSelectList .shiplistentry.remark{
-	margin:3px 45px;
-        color:#496791;
+.shipSelectList .shiplistentry.remark {
+    margin: 3px 45px;
+    color: #496791;
 }
 
-.shipSelectList .shiplistentry span{
-	 font-size:14px;
-	 padding-right:5px;
-}
-.shipSelectList .shiplistentry.action span{
-	 font-size:12px;
+.shipSelectList .shiplistentry span {
+    font-size: 14px;
+    padding-right: 5px;
 }
 
-.shipSelectList .shiplistentry.remark span{
-	 font-size:11px;
+.shipSelectList .shiplistentry.action span {
+    font-size: 12px;
 }
 
-.shipSelectList .shiplistentry .name{
-   font-style:italic;
+.shipSelectList .shiplistentry.remark span {
+    font-size: 11px;
+}
+
+.shipSelectList .shiplistentry .name {
+    font-style: italic;
 }
 
 
-.shipSelectList .shiplistentry .enemy.name{
-    color:#b34119;
+.shipSelectList .shiplistentry .enemy.name {
+    color: #b34119;
 }
 
-.shipSelectList .shiplistentry .ally.name{
-    color:#2f5123;
+.shipSelectList .shiplistentry .ally.name {
+    color: #2f5123;
 }
 
 #iniGui {
-    z-index:10000;
-    border:1px solid #496791;
-    color:#deebffdc;
-    background-color:#0a3340;
+    z-index: 10000;
+    border: 1px solid #496791;
+    color: #deebffdc;
+    background-color: #0a3340;
     margin-top: 50px;
-    width: 250px;
+    width: 260px;
     height: auto;
     position: absolute;
     display: inline-block;
     opacity: 0.9;
     box-shadow: 5px 5px 10px black;
-    padding-top:10px;
+    padding-top: 10px;
     padding-bottom: 10px;
     border-radius: 0px 10px 10px 0px;
     max-height: 550px;
     overflow-y: auto;
+}
+
+#iniGui.closed {
+    display: none;
 }
 
 #iniTable {
@@ -855,10 +973,66 @@ body {
     padding-left: 5px;
 }
 
-.iniTr {
+.iniTr {}
+
+
+.iniTr {}
+
+.iniOrder {
+    width: 10%;
+    text-align: center;
+    font-size: 18px;
+    position: relative;
+    padding-right: 5px;
 }
 
-#iniTd {
+.iniInfo {
+    width: 60%;
+    position: relative;
+    text-align: center;
+    font-size: 12px;
+}
+
+.iniName {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.iniClass {
+    margin-top: 6px;
+    margin-bottom: 6px;
+    font-weight: bold;
+    font-size: 11px;
+}
+
+.iniImage {
+    width: 20%;
+    position: relative;
+    text-align: center;
+}
+
+.iniImage img {
+    width: 40px;
+    height: 40px;
+}
+
+.iniImage.flight img {
+    width: 20px;
+    height: 20px;
+    padding-left: 12px;
+}
+
+.iniMyShip {
+    color: green;
+}
+
+.iniAllyShip {
+    color: #6091d2;
+}
+
+.iniEnemyShip {
+    color: red;
 }
 
 #iniTopic {
@@ -866,7 +1040,8 @@ body {
     font-size: 16px;
     color: white;
     width: 100%;
-    margin-left: 63px;
+    margin-left: 75px;
+    opacity: 0.8;
 }
 
 .iniActiveMoved {
@@ -878,21 +1053,21 @@ body {
     border: 1px solid #2ea86b !important;
     background-color: rgb(22, 63, 53, 0.9) !important;
     box-shadow: 0px 0px 3px #3fd58f;
-    color: #e6e6e6;    
+    color: #e6e6e6;
 }
 
 .iniActiveAlly {
     border: 1px solid #6d95c5 !important;
     background-color: rgb(22, 47, 80, 0.9) !important;
     box-shadow: 0px 0px 3px #09F;
-    color: #d9d9d9;    
+    color: #d9d9d9;
 }
 
 .iniActiveEnemy {
     border: 1px solid #c65d4a !important;
     background-color: rgb(61, 30, 27, 0.9) !important;
     box-shadow: 0px 0px 3px #f07662;
-    color: #d9d9d9;    
+    color: #d9d9d9;
 }
 
 .redIni {
@@ -908,18 +1083,34 @@ body {
     position: absolute;
     z-index: 10000;
     margin-top: 65px;
-    margin-left: 250px;
+    margin-top: 65px;
+    left: 260px !important;
+    margin-left: 0px !important;
+    /* Override legacy JS */
+    /* Default open */
     width: 55px;
-    height: 25px;    
-    border:1px solid #496791;
-    color:#deebff;
-    background-color:#0a3340;
+    height: 25px;
+    border: 1px solid #496791;
+    color: #deebff;
+    background-color: #0a3340;
     opacity: 0.8;
     -moz-box-shadow: 5px 5px 10px black;
     -webkit-box-shadow: 5px 5px 10px black;
     box-shadow: 5px 5px 10px black;
-    padding-top:10px;
+    box-shadow: 5px 5px 10px black;
+    padding-top: 10px;
+    padding-bottom: 10px;
     border-radius: 0px 10px 10px 0px;
+}
+
+#iniSlider {
+    width: 30px;
+    height: 30px;
+    margin-left: 12px;
+}
+
+#backDiv.closed {
+    left: 0px !important;
 }
 
 /* Blocking UI Overlay */
@@ -930,53 +1121,97 @@ body {
     width: 100%;
     height: 100%;
     background: rgba(0, 0, 0, 0.85);
-    z-index: 100000; /* Above everything */
-    display: flex; /* Flex to center content, hidden by JS via inline style */
+    z-index: 100000;
+    /* Above everything */
+    display: flex;
+    /* Flex to center content, hidden by JS via inline style */
     align-items: center;
     justify-content: center;
     /*color: #b34119; /* Standard alert color */
-    border: 2px solid #7a2121;        
-    color: #c94b1d;    
+    border: 2px solid #7a2121;
+    color: #c94b1d;
     font-size: 18px;
     font-weight: bold;
     text-align: center;
-    pointer-events: auto; /* Catch all clicks */
+    pointer-events: auto;
+    /* Catch all clicks */
     cursor: wait;
 }
 
 .blocking-warning {
-    color:#deebff;       /* example */
-    font-weight: bold; /* example */
-    font-size: 16px;     /* example */
+    color: #deebff;
+    /* example */
+    font-weight: bold;
+    /* example */
+    font-size: 16px;
+    /* example */
     opacity: 0.8;
 }
 
-#fullScreen {
-
-}
+#fullScreen {}
 
 .skinDanceBlocked,
 .hexTargeted,
-.cannotCalled{
+.cannotCalled {
     color: red;
 }
 
 .losBlocked,
 .notInRange,
 .notInArc,
-.negHitchange{
+.negHitchange {
     color: rgb(255, 70, 70);
 }
 
-.posHitchange{
+.posHitchange {
     color: lime;
 }
 
-@media only screen and (max-width: 1024px) {
+@media only screen and (max-width: 765px) {
     #phaseheader {
-        max-width: 50%;
+        width: auto;
+        min-width: 220px;
+        max-width: 55vw;
+        height: 22px;
+        padding-top: 2px;
+        padding-right: 45px;
     }
-    
+
+    #phaseheader .value {
+        font-size: 12px;
+        margin-left: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        /*max-width: calc(100% - 10px);*/
+        max-width: 50%;
+        vertical-align: bottom;
+    }
+
+    #phaseheader .value.activeship {
+        margin-left: 5px;
+    }
+
+    #phaseheader .finished,
+    #phaseheader .notlogged {
+        display: none;
+    }
+
+    #phaseheader .uitable {
+        top: 2px;
+        right: 5px;
+    }
+
+    /* Scale down OK/Cancel/Surrender buttons if they appear in the phase header */
+    #phaseheader .ok,
+    #phaseheader .cancel,
+    #phaseheader .surrender {
+        width: 18px;
+        height: 18px;
+        background-size: cover;
+    }
+
     #logUI {
         display: flex;
         flex-direction: row;
@@ -995,20 +1230,20 @@ body {
     #logUI #infoTab {
         left: 15%;
     }
-	
+
     #logUI #chatTab {
         left: 30%;
-	    width: 15%;
+        width: 15%;
     }
 
     #logUI #globalChatTab {
         left: 45%;
-	    width: 15%;    
+        width: 15%;
     }
 
     #logUI #declarationsTab {
         left: 60%;
-	    width: 15%;    
+        width: 15%;
     }
 
     #logUI #expandBotPanel {
@@ -1022,11 +1257,57 @@ body {
         max-width: none;
     }
 
-    #logcontainer.large{
+    #logcontainer.large {
         height: 50vh;
     }
 
     #iniGui {
-        max-height: calc(100vh - 130px);
+        max-height: calc(100vh - 250px);
+        width: 200px;
+        margin-top: 35px;
+    }
+
+    #iniGui.closed {
+        display: none;
+    }
+
+    #backDiv {
+        left: 200px !important;
+        margin-left: 0px !important;
+        margin-top: 50px;
+    }
+
+    #backDiv.closed {
+        left: 0px !important;
+    }
+
+
+    .iniOrder {
+        font-size: 12px;
+    }
+
+    .iniName {
+        font-size: 10px !important;
+    }
+
+    .iniClass {
+        font-size: 9px !important;
+    }
+
+    .iniImage img {
+        width: 25px;
+        height: 25px;
+    }
+
+    .iniImage.flight img {
+        width: 15px;
+        height: 15px;
+        padding-left: 5px;
+    }
+
+    #iniTopic {
+        font-size: 13px;
+        margin-left: 55px;
+        opacity: 0.8;
     }
 }

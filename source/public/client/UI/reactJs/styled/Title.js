@@ -7,6 +7,11 @@ const Title = styled.span`
     color: #deebff;
     padding: 10px;
     font-weight: bold;
+
+    @media (max-width: 765px) {
+        padding: 5px 10px;
+        font-size: 14px;
+    }
 `;
 
 const SubTitle = styled(Title)`
