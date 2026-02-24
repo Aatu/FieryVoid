@@ -62,6 +62,7 @@ window.webglScene = function () {
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.context.getExtension('OES_standard_derivatives');
         this.renderer.localClippingEnabled = true;
 

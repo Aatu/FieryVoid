@@ -110,6 +110,7 @@ window.webglSprite = function () {
                             imageBitmap => {
                                 setTimeout(() => {
                                     const texture = new THREE.CanvasTexture(imageBitmap);
+                                    texture.colorSpace = THREE.SRGBColorSpace;
                                     texture.minFilter = THREE.LinearMipMapNearestFilter;
                                     resolve(texture);
                                     window.activeTextureLoads--;

@@ -76,7 +76,7 @@ window.LaserEffect = function () {
 
         if (args.systemDestroyedEffect) {
             args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + Math.random() * this.duration);
-            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + Math.random() * this.duration, 'crit');            
+            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + Math.random() * this.duration, 'crit');
         }
 
         // --- Cached laser sound setup ---
@@ -107,7 +107,7 @@ window.LaserEffect = function () {
                 this.laserSound = LaserEffect.cachedAudio.cloneNode(true);
                 this.laserSound.volume = this.soundVolume;
                 this.laserSound.currentTime = 0;
-                this.laserSound.play().catch(() => {});
+                this.laserSound.play().catch(() => { });
                 this.playedSound = true;
             } catch (e) {
                 console.warn("Laser sound playback failed:", e);
@@ -174,9 +174,13 @@ window.LaserEffect = function () {
 
     function createLaser(color, opacity, width) {
         const startAndEnd = getStartAndEnd.call(this);
+
+        const tex = new THREE.TextureLoader().load("img/effect/laser19.png");
+        tex.colorSpace = THREE.SRGBColorSpace;
+
         return new LineSprite(startAndEnd.start, startAndEnd.end, width, 201, color, opacity, {
             blending: THREE.AdditiveBlending,
-            texture: new THREE.TextureLoader().load("img/effect/laser19.png")
+            texture: tex
         });
     }
 
@@ -187,9 +191,9 @@ window.LaserEffect = function () {
         const start = this.weapon.hasSpecialLaunchHexCalculation
             ? this.weaponOrigin
             : {
-                  x: this.shooter.getPosition().x + this.startOffset.x,
-                  y: this.shooter.getPosition().y + this.startOffset.y
-              };
+                x: this.shooter.getPosition().x + this.startOffset.x,
+                y: this.shooter.getPosition().y + this.startOffset.y
+            };
 
         const end = { x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y };
 
@@ -362,7 +366,7 @@ window.LaserEffect = function () {
         var start = this.shooter.getPosition();
         start.x += this.startOffset.x;
         start.y += this.startOffset.y;
-		}
+        }
         var end = { x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y };
         return { start: start, end: end };
     }

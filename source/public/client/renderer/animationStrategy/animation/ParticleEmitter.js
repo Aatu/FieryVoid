@@ -6,6 +6,7 @@ window.ParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+    texture.colorSpace = THREE.SRGBColorSpace;
 
     function ParticleEmitter(scene, particleCount, args) {
         Animation.call(this);
