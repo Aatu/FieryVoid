@@ -48,6 +48,6 @@ Open your terminal in the project root (c:\FV_env\FieryVoid).
 Run the command:
 yarn run optimize-images
 
-Use ‘?v=2’ after png to force image refresh.
+As images are now saved in Index mode, if you want to edit them you'll need to change to RGB mode (otherwise you lose alot of functionality).  In GIMP this is easily done via by Image->Mode->RGB.
 
-As images are now saved in Index mode, if you want to edit them you'll need to change to RGB mode (otherwise you lose alot of functionality).  In GIMP this is easily via by Image->Mode->RGB.
+If you're finding image are not updating, sometimes using ‘?v=2’ after .png can force image refresh.
