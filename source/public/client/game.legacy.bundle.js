@@ -4166,6 +4166,10 @@ window.BallisticIconContainer = function () {
 		this.ballisticLineIcons = [];
 		this.hexNumberIcons = [];
 		this.hexNumbersGenerated = false;
+
+		// Track lines visibility state explicitly rather than inferring from existing sprites
+		this.friendlyLinesVisible = false;
+		this.enemyLinesVisible = false;
 	}
 
 	BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
@@ -4207,8 +4211,9 @@ window.BallisticIconContainer = function () {
 
 	function generateBallisticLines() {
 		const oldIcons = this.ballisticLineIcons;
-		const isFriendlyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && icon.isFriendly);
-		const isEnemyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && !icon.isFriendly);
+		// Removed reliance on checking existing icons' visibility:
+		// const isFriendlyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && icon.isFriendly);
+		// const isEnemyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && !icon.isFriendly);
 
 		this.ballisticLineIcons = oldIcons.filter(icon => {
 			if (!icon.used) {
@@ -4217,7 +4222,7 @@ window.BallisticIconContainer = function () {
 			}
 
 			if (icon.lineSprite) {
-				const shouldBeVisible = icon.isFriendly ? isFriendlyLinesVisible : isEnemyLinesVisible;
+				const shouldBeVisible = icon.isFriendly ? this.friendlyLinesVisible : this.enemyLinesVisible;
 				icon.lineSprite[shouldBeVisible ? 'show' : 'hide']();
 				icon.lineSprite.isVisible = shouldBeVisible;
 			}
@@ -4680,19 +4685,16 @@ window.BallisticIconContainer = function () {
 
 		scene.add(lineSprite.mesh);
 
-		// Control line visibility based on team and current toggle state
-		const isFriendlyLinesVisible = this.ballisticLineIcons.some(
-			icon => icon.lineSprite?.isVisible && icon.isFriendly
-		);
-		const isEnemyLinesVisible = this.ballisticLineIcons.some(
-			icon => icon.lineSprite?.isVisible && !icon.isFriendly
-		);
-
+		// Control line visibility based on explicit toggle state
 		const currentIcon = this.ballisticLineIcons.find(icon => icon.id === ballistic.id);
 		if (currentIcon) {
-			currentIcon.lineSprite.isVisible =
-				(isFriendly && isFriendlyLinesVisible) ||
-				(!isFriendly && isEnemyLinesVisible);
+			const shouldBeVisible = isFriendly ? this.friendlyLinesVisible : this.enemyLinesVisible;
+			if (shouldBeVisible) {
+				currentIcon.lineSprite.show();
+			} else {
+				currentIcon.lineSprite.hide();
+			}
+			currentIcon.lineSprite.isVisible = shouldBeVisible;
 		}
 	}
 
@@ -4714,11 +4716,20 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
 		const shipIds = ships.map(s => s.id);
+
+		if (ships.length > 0) {
+			if (gamedata.isMyOrTeamOneShip(ships[0])) {
+				this.friendlyLinesVisible = !this.friendlyLinesVisible;
+			} else {
+				this.enemyLinesVisible = !this.enemyLinesVisible;
+			}
+		}
+
 		this.ballisticLineIcons.forEach(icon => {
 			if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
-				const visible = icon.lineSprite.isVisible;
-				icon.lineSprite[visible ? 'hide' : 'show']();
-				icon.lineSprite.isVisible = !visible;
+				const visible = icon.isFriendly ? this.friendlyLinesVisible : this.enemyLinesVisible;
+				icon.lineSprite[visible ? 'show' : 'hide']();
+				icon.lineSprite.isVisible = visible;
 			}
 		});
 		return this;
@@ -4726,6 +4737,15 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.hideLines = function (ships) {
 		const shipIds = ships.map(s => s.id);
+
+		if (ships.length > 0) {
+			if (gamedata.isMyOrTeamOneShip(ships[0])) {
+				this.friendlyLinesVisible = false;
+			} else {
+				this.enemyLinesVisible = false;
+			}
+		}
+
 		this.ballisticLineIcons.forEach(icon => {
 			if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
 				icon.lineSprite.hide();
@@ -4737,6 +4757,15 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.showLines = function (ships) {
 		const shipIds = ships.map(s => s.id);
+
+		if (ships.length > 0) {
+			if (gamedata.isMyOrTeamOneShip(ships[0])) {
+				this.friendlyLinesVisible = true;
+			} else {
+				this.enemyLinesVisible = true;
+			}
+		}
+
 		this.ballisticLineIcons.forEach(icon => {
 			if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
 				icon.lineSprite.show();
