@@ -73,6 +73,7 @@ window.BallisticSprite = function () {
     function createTexture(type) {
         var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
         var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
         return tex;
     }
@@ -84,6 +85,7 @@ window.BallisticSprite = function () {
 
         // Create a temporary texture to return immediately
         var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
 
         // Load the image asynchronously
@@ -154,6 +156,7 @@ window.BallisticSprite = function () {
         });
 
         const tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
         return tex;
     }

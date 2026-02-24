@@ -177,6 +177,7 @@ window.LaserEffect = function () {
 
         const tex = new THREE.TextureLoader().load("img/effect/laser19.png");
         tex.colorSpace = THREE.SRGBColorSpace;
+        tex.colorSpace = THREE.SRGBColorSpace;
 
         return new LineSprite(startAndEnd.start, startAndEnd.end, width, 201, color, opacity, {
             blending: THREE.AdditiveBlending,

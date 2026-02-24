@@ -509,6 +509,7 @@ window.mathlib = {
 		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
 
 		const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
 		texture.needsUpdate = true;
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
@@ -536,6 +537,7 @@ window.mathlib = {
 			markerCtx.fill();
 
 			const markerTexture = new THREE.CanvasTexture(markerCanvas);
+        markerTexture.colorSpace = THREE.SRGBColorSpace;
 			markerTexture.needsUpdate = true;
 
 			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });

@@ -2,11 +2,11 @@
 
 window.EWIconContainer = function () {
 
-    var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
-    var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
-    var COLOR_OEW_DIST = new THREE.Color(255 / 255, 157 / 255, 0 / 255);
-    var COLOR_SDEW = new THREE.Color(109 / 255, 189 / 255, 255 / 255);
-    var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1);
+    var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear();
+    var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear();
+    var COLOR_OEW_DIST = new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
+    var COLOR_SDEW = new THREE.Color(109 / 255, 189 / 255, 255 / 255).convertSRGBToLinear();
+    var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1).convertSRGBToLinear();
 
     function EWIconContainer(coordinateConverter, scene, iconContainer) {
         this.ewIcons = [];

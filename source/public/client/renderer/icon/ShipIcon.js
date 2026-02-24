@@ -4,9 +4,12 @@ window.ShipIcon = function () {
 
     var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
     directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
     var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
     directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
     const THRUSTER_TEXTURE = new THREE.TextureLoader().load("./img/systemicons/thrusterICON1.png");
+    THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 
     function ShipIcon(ship, scene) {
@@ -276,12 +279,12 @@ window.ShipIcon = function () {
 
         this.shipSprite.setOverlayColor(
             this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
                 : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
                     : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
         );
 
         if (ship.imageFlipped) {
@@ -723,7 +726,7 @@ window.ShipIcon = function () {
         var hexDistance = window.coordinateConverter.getHexDistance();
         var dis = 20.6 * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
 
-        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 157 / 255, 0 / 255);
+        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() : new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
 
         // Create a hexagon shape
         var hexShape = new THREE.Shape();
@@ -816,7 +819,7 @@ window.ShipIcon = function () {
         var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
         plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
         if (color == null) {
-            color = new THREE.Color(0.1, 0.5, 0.1)
+            color = new THREE.Color(0.1, 0.5, 0.1).convertSRGBToLinear()
         }
 
         if (opacity == null) {

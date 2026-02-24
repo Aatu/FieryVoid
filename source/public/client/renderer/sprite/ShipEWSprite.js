@@ -28,6 +28,7 @@ window.ShipEWSprite = function () {
         drawCCEW(context, DEW, CCEW);
 
         var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
         this.uniforms.spriteTexture.value = texture;
     };

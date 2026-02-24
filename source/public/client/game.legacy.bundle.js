@@ -738,7 +738,6 @@ window.webglScene = function () {
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
-        this.renderer.context.getExtension('OES_standard_derivatives');
         this.renderer.localClippingEnabled = true;
 
         jQuery(this.renderer.domElement).addClass("webglCanvas").appendTo(canvasId);
@@ -1562,6 +1561,7 @@ window.webglSprite = function () {
                             imageBitmap => {
                                 setTimeout(() => {
                                     const texture = new THREE.CanvasTexture(imageBitmap);
+        texture.colorSpace = THREE.SRGBColorSpace;
                                     texture.colorSpace = THREE.SRGBColorSpace;
                                     texture.minFilter = THREE.LinearMipMapNearestFilter;
                                     resolve(texture);
@@ -1662,6 +1662,7 @@ window.ShipEWSprite = function () {
         drawCCEW(context, DEW, CCEW);
 
         var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
         this.uniforms.spriteTexture.value = texture;
     };
@@ -1790,6 +1791,7 @@ window.ShipSelectedSprite = function () {
         }
 
         var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
 
         return tex;
@@ -1940,6 +1942,7 @@ PlainSprite.prototype.addTextSprite = function(avail) {
     ctx.fillText("Turn " + avail, canvas.width / 2, canvas.height / 2);
 
     var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.needsUpdate = true;
@@ -2135,6 +2138,7 @@ window.BallisticSprite = function () {
     function createTexture(type) {
         var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
         var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
         return tex;
     }
@@ -2146,6 +2150,7 @@ window.BallisticSprite = function () {
 
         // Create a temporary texture to return immediately
         var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
 
         // Load the image asynchronously
@@ -2216,6 +2221,7 @@ window.BallisticSprite = function () {
         });
 
         const tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
         return tex;
     }
@@ -2444,6 +2450,7 @@ window.TextSprite = function () {
         var geometry = new THREE.PlaneGeometry(size, size, 1, 1);
 
         var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
 
         this.material = new THREE.MeshBasicMaterial({
@@ -2537,6 +2544,7 @@ window.HexNumberSprite = function () {
     
         // Create and return a texture from the canvas
         var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
     
         return tex;
@@ -2552,9 +2560,12 @@ window.ShipIcon = function () {
 
     var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
     directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
     var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
     directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
     const THRUSTER_TEXTURE = new THREE.TextureLoader().load("./img/systemicons/thrusterICON1.png");
+    THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 
     function ShipIcon(ship, scene) {
@@ -2824,12 +2835,12 @@ window.ShipIcon = function () {
 
         this.shipSprite.setOverlayColor(
             this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
                 : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
                     : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
         );
 
         if (ship.imageFlipped) {
@@ -3271,7 +3282,7 @@ window.ShipIcon = function () {
         var hexDistance = window.coordinateConverter.getHexDistance();
         var dis = 20.6 * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
 
-        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 157 / 255, 0 / 255);
+        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() : new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
 
         // Create a hexagon shape
         var hexShape = new THREE.Shape();
@@ -3364,7 +3375,7 @@ window.ShipIcon = function () {
         var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
         plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
         if (color == null) {
-            color = new THREE.Color(0.1, 0.5, 0.1)
+            color = new THREE.Color(0.1, 0.5, 0.1).convertSRGBToLinear()
         }
 
         if (opacity == null) {
@@ -3502,14 +3513,14 @@ window.FlightIcon = function () {
     };
 
     FlightIcon.prototype.getFacing = function (facing) {
-		var facingActual = this.fighterObject.rotation.z;
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        var facingActual = this.fighterObject.rotation.z;
+        this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         return mathlib.radianToDegree(facingActual);
     };
 
     FlightIcon.prototype.setFacing = function (facing) {
-		var facingActual = mathlib.degreeToRadian(facing);
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        var facingActual = mathlib.degreeToRadian(facing);
+        this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         this.fighterObject.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
     };
 
@@ -3518,16 +3529,16 @@ window.FlightIcon = function () {
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
-        var overlayColour = 
-                this.terrain 
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
-                : this.mine 
-                ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
-                : this.ally 
-                ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
-                : new THREE.Color(255 / 255, 40 / 255, 40 / 255); // Red
+        var overlayColour =
+            this.terrain
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
+                : this.mine
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
+                    : this.ally
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
 
-		this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
+        this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
         this.mesh.add(this.shipDirectionOfProwSprite.mesh);
         this.shipDirectionOfProwSprite.hide();
 
@@ -3546,18 +3557,18 @@ window.FlightIcon = function () {
 
         this.mesh.add(this.fighterObject);
 
-		//29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
-        
-        this.shipEWSprite = new window.ShipEWSprite({ width: this.size*0.75, height: this.size*0.75 }, -1);
+        //29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
+
+        this.shipEWSprite = new window.ShipEWSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
-        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
-        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, 'neutral', false).hide();
+        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, 'neutral', false).hide();
         this.mesh.add(this.NotMovedSprite.mesh);
 
         scene.add(this.mesh);
@@ -3946,11 +3957,11 @@ window.ShipIconContainer = function () {
 
 window.EWIconContainer = function () {
 
-    var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
-    var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
-    var COLOR_OEW_DIST = new THREE.Color(255 / 255, 157 / 255, 0 / 255);
-    var COLOR_SDEW = new THREE.Color(109 / 255, 189 / 255, 255 / 255);
-    var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1);
+    var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear();
+    var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear();
+    var COLOR_OEW_DIST = new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
+    var COLOR_SDEW = new THREE.Color(109 / 255, 189 / 255, 255 / 255).convertSRGBToLinear();
+    var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1).convertSRGBToLinear();
 
     function EWIconContainer(coordinateConverter, scene, iconContainer) {
         this.ewIcons = [];
@@ -4796,77 +4807,84 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.createHexNumbers = function (scene) {
 		if (this.hexNumberMesh) {
-			// Toggle visibility
 			this.hexNumberMesh.visible = !this.hexNumberMesh.visible;
 			return;
 		}
 
-		// Define grid dimensions based on hex count
-		const gridWidth = 72; // Adjust based on your hex layout
+		const gridWidth = 72;
 		const gridHeight = 48;
 		const hexSize = 50;
 
-		// Create single large texture with all hex numbers
 		const largeTexture = createLargeHexNumberTexture(gridWidth, gridHeight, hexSize);
 
-		// Hexagon grid dimensions (corrected aspect ratio)
 		const totalWidth = gridWidth * hexSize * 2;
-		const totalHeight = gridHeight * hexSize * Math.sqrt(4);
+		const totalHeight = gridHeight * hexSize * 2;
 
-		// Create a plane to apply the texture (or adjust for hexagonal shape)
 		const geometry = new THREE.PlaneGeometry(totalWidth, totalHeight);
 		const material = new THREE.MeshBasicMaterial({
 			map: largeTexture,
-			transparent: true
+			transparent: true,
+			depthWrite: false
 		});
 
 		this.hexNumberMesh = new THREE.Mesh(geometry, material);
-		this.hexNumberMesh.position.set(502.5, -651, -1); // Adjust as needed	
+		this.hexNumberMesh.position.set(502.5, -651, -1);
 		scene.add(this.hexNumberMesh);
 	};
 
-	function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour = "#ffffff") {
-		const HEX_WIDTH = Math.sqrt(3) * hexSize;  // Corrected for side-standing hexagons
-		const HEX_HEIGHT = 2 * hexSize; // Corrected for vertical stacking
-		const SCALE_FACTOR = 2;  // Increase resolution for sharp text
-		const TEXTURE_WIDTH = gridWidth * HEX_WIDTH * SCALE_FACTOR;
-		const TEXTURE_HEIGHT = gridHeight * HEX_HEIGHT * SCALE_FACTOR;
+	function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour) {
+		textColour = textColour || "#ffffff";
+		const HEX_WIDTH = Math.sqrt(3) * hexSize;
+		const HEX_HEIGHT = 2 * hexSize;
 
-		// Create canvas with refined dimensions
+		// Use half-size canvas (30MP vs original 120MP = 4x less RAM / generation time).
+		// ctx.scale(0.5, 0.5) maps all drawing coordinates to this smaller canvas
+		// while keeping the same relative positions in the texture UV space.
+		const DRAW_SCALE = 2;  // Drawing coordinate scale (original positions)
+		const CANVAS_SCALE = 0.5; // Canvas is half the original size
+		const TEXTURE_WIDTH = Math.ceil(gridWidth * HEX_WIDTH * DRAW_SCALE * CANVAS_SCALE);
+		const TEXTURE_HEIGHT = Math.ceil(gridHeight * HEX_HEIGHT * DRAW_SCALE * CANVAS_SCALE);
+
 		const canvas = document.createElement("canvas");
 		canvas.width = TEXTURE_WIDTH;
 		canvas.height = TEXTURE_HEIGHT;
 		const ctx = canvas.getContext("2d");
 
-		// Clear the canvas
-		ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+		// Scale the context down so that original DRAW_SCALE=2 positions fit in half the canvas
+		ctx.scale(CANVAS_SCALE, CANVAS_SCALE);
 
-		// Set text properties
-		const fontSize = Math.floor(hexSize * 0.2 * SCALE_FACTOR);  // Smaller text but sharp
-		ctx.globalAlpha = 0.85;
-		ctx.font = `bold ${fontSize}px Arial`;
+		ctx.clearRect(0, 0, TEXTURE_WIDTH / CANVAS_SCALE, TEXTURE_HEIGHT / CANVAS_SCALE);
+
+		const fontSize = Math.floor(hexSize * 0.2 * DRAW_SCALE);
+		ctx.font = "bold " + fontSize + "px Arial";
 		ctx.fillStyle = textColour;
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		ctx.globalAlpha = 0.6; // 50% transparency
+		ctx.globalAlpha = 0.6;
 
 		let number = 1;
 
 		for (let r = 0; r < gridHeight; r++) {
 			for (let q = 0; q < gridWidth; q++) {
-				let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2; // REDUCED COLUMN SPACING			
-				let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2; // INCREASED ROW SPACING
+				// Exact original spacing constants from SCALE_FACTOR=2 version
+				let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2;
+				let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2;
 
-				// Offset odd rows for staggered hex layout
 				if (r % 2 !== 0) x += HEX_WIDTH * 0.855;
 
-				ctx.fillText(String(number).padStart(4, '0'), x, y);
+				// Snap to even pixels so ctx.scale(0.5) always hits a whole canvas pixel
+				const px = Math.round(x / 2) * 2;
+				const py = Math.round(y / 2) * 2;
+				ctx.fillText(String(number).padStart(4, '0'), px, py);
 				number++;
 			}
 		}
 
-		// Convert canvas to a texture
 		const texture = new THREE.CanvasTexture(canvas);
+		texture.colorSpace = THREE.SRGBColorSpace;
+		texture.generateMipmaps = false;
+		texture.minFilter = THREE.LinearFilter;
+		texture.magFilter = THREE.LinearFilter;
 		texture.needsUpdate = true;
 		return texture;
 	}
@@ -8361,6 +8379,7 @@ window.ParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
     texture.colorSpace = THREE.SRGBColorSpace;
 
     function ParticleEmitter(scene, particleCount, args) {
@@ -8507,6 +8526,7 @@ window.StarParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
     texture.colorSpace = THREE.SRGBColorSpace;
 
     function StarParticleEmitter(scene, particleCount, args) {
@@ -8715,6 +8735,7 @@ window.ParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
     texture.colorSpace = THREE.SRGBColorSpace;
 
     function ParticleEmitter(scene, particleCount, args) {
@@ -9273,6 +9294,7 @@ window.LaserEffect = function () {
         const startAndEnd = getStartAndEnd.call(this);
 
         const tex = new THREE.TextureLoader().load("img/effect/laser19.png");
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.colorSpace = THREE.SRGBColorSpace;
 
         return new LineSprite(startAndEnd.start, startAndEnd.end, width, 201, color, opacity, {
@@ -13528,6 +13550,7 @@ window.HexagonTexture = function () {
         }
 
         var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -17543,6 +17566,7 @@ window.mathlib = {
 		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
 
 		const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
 		texture.needsUpdate = true;
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
@@ -17570,6 +17594,7 @@ window.mathlib = {
 			markerCtx.fill();
 
 			const markerTexture = new THREE.CanvasTexture(markerCanvas);
+        markerTexture.colorSpace = THREE.SRGBColorSpace;
 			markerTexture.needsUpdate = true;
 
 			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });

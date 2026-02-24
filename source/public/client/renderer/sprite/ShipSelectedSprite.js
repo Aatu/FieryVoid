@@ -69,6 +69,7 @@ window.ShipSelectedSprite = function () {
         }
 
         var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
 
         return tex;

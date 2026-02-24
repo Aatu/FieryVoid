@@ -37,6 +37,7 @@ window.TextSprite = function () {
         var geometry = new THREE.PlaneGeometry(size, size, 1, 1);
 
         var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
 
         this.material = new THREE.MeshBasicMaterial({

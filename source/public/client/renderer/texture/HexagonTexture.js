@@ -96,6 +96,7 @@ window.HexagonTexture = function () {
         }
 
         var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;

@@ -652,77 +652,84 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.createHexNumbers = function (scene) {
 		if (this.hexNumberMesh) {
-			// Toggle visibility
 			this.hexNumberMesh.visible = !this.hexNumberMesh.visible;
 			return;
 		}
 
-		// Define grid dimensions based on hex count
-		const gridWidth = 72; // Adjust based on your hex layout
+		const gridWidth = 72;
 		const gridHeight = 48;
 		const hexSize = 50;
 
-		// Create single large texture with all hex numbers
 		const largeTexture = createLargeHexNumberTexture(gridWidth, gridHeight, hexSize);
 
-		// Hexagon grid dimensions (corrected aspect ratio)
 		const totalWidth = gridWidth * hexSize * 2;
-		const totalHeight = gridHeight * hexSize * Math.sqrt(4);
+		const totalHeight = gridHeight * hexSize * 2;
 
-		// Create a plane to apply the texture (or adjust for hexagonal shape)
 		const geometry = new THREE.PlaneGeometry(totalWidth, totalHeight);
 		const material = new THREE.MeshBasicMaterial({
 			map: largeTexture,
-			transparent: true
+			transparent: true,
+			depthWrite: false
 		});
 
 		this.hexNumberMesh = new THREE.Mesh(geometry, material);
-		this.hexNumberMesh.position.set(502.5, -651, -1); // Adjust as needed	
+		this.hexNumberMesh.position.set(502.5, -651, -1);
 		scene.add(this.hexNumberMesh);
 	};
 
-	function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour = "#ffffff") {
-		const HEX_WIDTH = Math.sqrt(3) * hexSize;  // Corrected for side-standing hexagons
-		const HEX_HEIGHT = 2 * hexSize; // Corrected for vertical stacking
-		const SCALE_FACTOR = 2;  // Increase resolution for sharp text
-		const TEXTURE_WIDTH = gridWidth * HEX_WIDTH * SCALE_FACTOR;
-		const TEXTURE_HEIGHT = gridHeight * HEX_HEIGHT * SCALE_FACTOR;
+	function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour) {
+		textColour = textColour || "#ffffff";
+		const HEX_WIDTH = Math.sqrt(3) * hexSize;
+		const HEX_HEIGHT = 2 * hexSize;
 
-		// Create canvas with refined dimensions
+		// Use half-size canvas (30MP vs original 120MP = 4x less RAM / generation time).
+		// ctx.scale(0.5, 0.5) maps all drawing coordinates to this smaller canvas
+		// while keeping the same relative positions in the texture UV space.
+		const DRAW_SCALE = 2;  // Drawing coordinate scale (original positions)
+		const CANVAS_SCALE = 0.5; // Canvas is half the original size
+		const TEXTURE_WIDTH = Math.ceil(gridWidth * HEX_WIDTH * DRAW_SCALE * CANVAS_SCALE);
+		const TEXTURE_HEIGHT = Math.ceil(gridHeight * HEX_HEIGHT * DRAW_SCALE * CANVAS_SCALE);
+
 		const canvas = document.createElement("canvas");
 		canvas.width = TEXTURE_WIDTH;
 		canvas.height = TEXTURE_HEIGHT;
 		const ctx = canvas.getContext("2d");
 
-		// Clear the canvas
-		ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+		// Scale the context down so that original DRAW_SCALE=2 positions fit in half the canvas
+		ctx.scale(CANVAS_SCALE, CANVAS_SCALE);
 
-		// Set text properties
-		const fontSize = Math.floor(hexSize * 0.2 * SCALE_FACTOR);  // Smaller text but sharp
-		ctx.globalAlpha = 0.85;
-		ctx.font = `bold ${fontSize}px Arial`;
+		ctx.clearRect(0, 0, TEXTURE_WIDTH / CANVAS_SCALE, TEXTURE_HEIGHT / CANVAS_SCALE);
+
+		const fontSize = Math.floor(hexSize * 0.2 * DRAW_SCALE);
+		ctx.font = "bold " + fontSize + "px Arial";
 		ctx.fillStyle = textColour;
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		ctx.globalAlpha = 0.6; // 50% transparency
+		ctx.globalAlpha = 0.6;
 
 		let number = 1;
 
 		for (let r = 0; r < gridHeight; r++) {
 			for (let q = 0; q < gridWidth; q++) {
-				let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2; // REDUCED COLUMN SPACING			
-				let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2; // INCREASED ROW SPACING
+				// Exact original spacing constants from SCALE_FACTOR=2 version
+				let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2;
+				let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2;
 
-				// Offset odd rows for staggered hex layout
 				if (r % 2 !== 0) x += HEX_WIDTH * 0.855;
 
-				ctx.fillText(String(number).padStart(4, '0'), x, y);
+				// Snap to even pixels so ctx.scale(0.5) always hits a whole canvas pixel
+				const px = Math.round(x / 2) * 2;
+				const py = Math.round(y / 2) * 2;
+				ctx.fillText(String(number).padStart(4, '0'), px, py);
 				number++;
 			}
 		}
 
-		// Convert canvas to a texture
 		const texture = new THREE.CanvasTexture(canvas);
+		texture.colorSpace = THREE.SRGBColorSpace;
+		texture.generateMipmaps = false;
+		texture.minFilter = THREE.LinearFilter;
+		texture.magFilter = THREE.LinearFilter;
 		texture.needsUpdate = true;
 		return texture;
 	}

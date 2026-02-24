@@ -35,7 +35,8 @@
         }
 
         gl_FragColor = finalColor;
-
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
     }
 </script>
 
@@ -59,6 +60,8 @@
 
     void main() {
         gl_FragColor = color;
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
     }
 </script>
 
@@ -180,6 +183,8 @@
 
         vec4 rotatedTexture = texture2D(spriteTexture, finalPos);
         gl_FragColor = gl_FragColor * rotatedTexture;
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
     }
 </script>
 
@@ -278,5 +283,8 @@
 
         vec4 rotatedTexture = texture2D(spriteTexture, finalPos);
         gl_FragColor = gl_FragColor * rotatedTexture;
+
+        #include <tonemapping_fragment>
+        #include <colorspace_fragment>
     }
 </script>
