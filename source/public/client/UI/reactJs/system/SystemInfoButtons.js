@@ -25,6 +25,12 @@ const Button = styled.div`
     justify-content: center;
     mix-blend-mode: ${props => props.$blend || 'normal'};
     ${Clickable}
+
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 `;
 
 class SystemInfoButtons extends React.Component {
