@@ -2484,8 +2484,8 @@ class TrekMedDisruptor extends Pulse{
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 			if ($system instanceof Structure) {  //Only checking for structure damage
 				$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
-				$fireOrder->pubnotes .= "<br>Total Damage is: $this->postArmorTotal";
-				$fireOrder->pubnotes .= "<br>reduceFacing is: $this->reduceFacing";
+//				$fireOrder->pubnotes .= "<br>Total Damage is: $this->postArmorTotal";
+//				$fireOrder->pubnotes .= "<br>reduceFacing is: $this->reduceFacing";
 			}
 			if (!$system->advancedArmor){//advanced armor prevents effect
 				if ($system instanceof Structure) {
@@ -2588,8 +2588,8 @@ class TrekDisruptorCannon extends TrekDisruptorBase {
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 			$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
 
-			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
-			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
+//			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
+//			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
 //			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
 
 			if($system->advancedArmor) return; //advanced armor prevents this
@@ -2675,8 +2675,8 @@ class TrekDisruptorCannon extends TrekDisruptorBase {
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 			$this->postArmorTotal += max(0, $damage - $armour); //clamp this so that you do not remove damage scored if armor exceeds damage
 
-			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
-			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
+//			$fireOrder->pubnotes .= "<br>Total Damage is: " . $this->postArmorTotal;
+//			$fireOrder->pubnotes .= "<br>reduceFacing is: " . $this->reduceFacing;
 //			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
 
 			if($system->advancedArmor) return; //advanced armor prevents this
