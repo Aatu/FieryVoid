@@ -256,6 +256,9 @@ window.gamedata = {
 			case 'ZStarTrek (early) Federation':
 				powerRating = 'Tier 3; Custom faction';
 				break;
+			case 'ZStarTrek Klingon':
+				powerRating = 'Tier 2; Custom faction';
+				break;
 			case 'ZStarTrek (early) Suliban':
 				powerRating = 'Tier 3; Custom faction';
 				break;
