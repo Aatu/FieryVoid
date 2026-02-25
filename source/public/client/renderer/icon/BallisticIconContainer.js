@@ -495,6 +495,22 @@ window.BallisticIconContainer = function () {
 					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
 					break;
 
+				case 'gravNetMoveHex': {
+					// Line should start at the captured target ship, not the GravityNet's own ship.
+					type = 'green';
+					const gravNetTargetIcon = ballistic.gravNetTargetId != null && ballistic.gravNetTargetId !== -1
+						? iconContainer.getById(ballistic.gravNetTargetId)
+						: null;
+					if (gravNetTargetIcon) {
+						launchPosition = this.coordinateConverter.fromHexToGame(
+							replay
+								? gravNetTargetIcon.getLastMovementOnTurn(turn)?.position
+								: gravNetTargetIcon.getLastMovement(turn)?.position
+						);
+					}
+					break;
+				}
+
 				case 'Sweeping':
 					type = 'purple';
 					if (weapon?.weaponClass === 'Particle') type = 'orange';
@@ -672,7 +688,7 @@ window.BallisticIconContainer = function () {
 		} else if (type == "blue") {
 			return "rgba(0,184,230)";
 		} else if (type == "green") {
-			return "rgba(0, 128, 0)";
+			return "rgba(0, 179, 0)";
 		} else if (type == "purple") {
 			return "rgba(204, 51, 255)";
 		} else if (type == "white") {
