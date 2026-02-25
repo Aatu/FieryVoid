@@ -13,6 +13,12 @@ class ChatManager{
 
     private static $dbManager = null;
 
+    private static function getCachePrefix() {
+        global $database_name;
+        // Use a safe fallback if for some reason db name is missing, though strictly it should be there.
+        return ($database_name ?? 'default') . '_';
+    }
+
     /**
      *  @return DBManager dbManager
      */
@@ -40,7 +46,8 @@ class ChatManager{
             
             // APCu: Update last message ID!
             if (function_exists('apcu_store') && $msgId > 0) {
-                apcu_store('chat_last_id_' . $gameid, $msgId, 3600); // 1 hour TTL
+                $prefix = self::getCachePrefix();
+                apcu_store($prefix . 'chat_last_id_' . $gameid, $msgId, 3600); // 1 hour TTL
             }
             
             return "{}";
@@ -58,7 +65,8 @@ class ChatManager{
         {
             // APCu Fast Poll - Check BEFORE DB connection!
             if (function_exists('apcu_fetch')) {
-                 $lastMsgId = apcu_fetch('chat_last_id_' . $gameid);
+                 $prefix = self::getCachePrefix();
+                 $lastMsgId = apcu_fetch($prefix . 'chat_last_id_' . $gameid);
                  if ($lastMsgId !== false && $lastid >= $lastMsgId) {
                      return "[]";
                  }
@@ -82,16 +90,15 @@ class ChatManager{
                     // Get the last key (highest ID)
                     end($msgs);
                     $latestId = key($msgs);
+                    $prefix = self::getCachePrefix();
+                    apcu_store($prefix . 'chat_last_id_' . $gameid, $latestId, 3600);
                 } else {
-                    // If no new messages, it means the client's lastid IS the latest known state.
-                    // We should update APCu with this ID so the Fast Poll check (id >= apcu_id) passes next time.
-                    if ($lastid > 0) {
-                        $latestId = $lastid;
-                    }
-                }
-
-                if ($latestId > 0) {
-                     apcu_store('chat_last_id_' . $gameid, $latestId, 3600);
+                    // No new messages: cache the current lastid (even 0) so subsequent polls
+                    // are fast-polled without hitting the DB.
+                    // Use a short TTL when empty (30s) so we periodically recheck for the first real message.
+                    $prefix = self::getCachePrefix();
+                    $ttl = ($lastid > 0) ? 3600 : 30;
+                    apcu_store($prefix . 'chat_last_id_' . $gameid, $lastid, $ttl);
                 }
             }
 
