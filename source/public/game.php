@@ -50,10 +50,8 @@
     <link href="styles/replay.css" rel="stylesheet" type="text/css">
     <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
     <script defer src="client/lib/three.min.js"></script>
     <script defer src="client/lib/THREE.MeshLine.js"></script>
     <script defer src="client/UI/reactJs/UI.bundle.js"></script>
@@ -80,7 +78,7 @@
 
     <?php include_once 'shaders.php'; ?>
     <script>
-        $(window).load(function(){
+        $(window).on("load", function(){
             
             if (<?php print($error); ?>) {
                 alert(<?php print($error); ?>);

@@ -57,7 +57,7 @@ if (isset($_POST["user"]) && isset($_POST["pass"]) && isset($_POST["pass2"])){
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
         <link href="styles/reg.css" rel="stylesheet" type="text/css">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
 	</head>
     <body class="reg-background">
