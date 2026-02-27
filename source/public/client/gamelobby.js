@@ -860,6 +860,7 @@ window.gamedata = {
 
 		if (messageOP !== '') {
 			warningText += messageOP;
+			problemFound = true; 
 		}
 
 		//Static structures present?
