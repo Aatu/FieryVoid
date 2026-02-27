@@ -104,6 +104,10 @@ class BaseShip {
 	
 	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!	
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
+
+	public $outOfTier = array(); //interpreted in gamelobby.js (fleet checker); indicates number of out-of-bounds elements, and their kind 
+	//like: EMINE => 2
+	//relevant entries and their limits before a warning is shown are listed in gamelobby.js
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
 	protected $IFFSystem = false;   
