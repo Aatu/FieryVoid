@@ -1562,9 +1562,10 @@ window.webglSprite = function () {
                             imageBitmap => {
                                 setTimeout(() => {
                                     const texture = new THREE.CanvasTexture(imageBitmap);
-        texture.colorSpace = THREE.SRGBColorSpace;
                                     texture.colorSpace = THREE.SRGBColorSpace;
-                                    texture.minFilter = THREE.LinearMipMapNearestFilter;
+                                    texture.generateMipmaps = false;
+                                    texture.minFilter = THREE.LinearFilter;
+                                    texture.magFilter = THREE.LinearFilter;
                                     resolve(texture);
                                     window.activeTextureLoads--;
                                     processQueue();
