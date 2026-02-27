@@ -22,7 +22,7 @@
         vec4 textureColor = texture2D(spriteTexture, vUv);
         vec4 finalColor = textureColor;
 
-        if (overlayAlpha > 0.0 && textureColor.a > 0.0){
+        if (overlayAlpha > 0.0 && textureColor.a > 0.1){
             //finalColor = vec4(overlayColor, textureColor.a);
             //finalColor = mix(textureColor, overlayColor, overlayAlpha);
             //finalColor = (1.0 - t1.a) * t0 + t1.a * t1;
@@ -30,9 +30,12 @@
             finalColor.a = textureColor.a;
         }
 
-        if (finalColor.a > 0.0) {
-            finalColor.a *= opacity;
+        // Discard near-transparent fringe pixels before sRGB conversion
+        // r160 gamma correction brightens faint values, making PNG edge artifacts visible
+        if (finalColor.a < 0.1) {
+            discard;
         }
+        finalColor.a *= opacity;
 
         gl_FragColor = finalColor;
         #include <tonemapping_fragment>
