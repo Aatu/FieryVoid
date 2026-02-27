@@ -35,7 +35,7 @@
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
         <link href="styles/createGame.css" rel="stylesheet" type="text/css">
-        <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+        <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>

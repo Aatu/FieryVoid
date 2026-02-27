@@ -48,7 +48,7 @@
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">   		
-		<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+		<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
 	</head>
     <body  style="background: url('./img/maps/14.PlanetsNear.jpg') no-repeat center center fixed; background-size: cover;">
         <img src="img/logo.png">		
