@@ -470,6 +470,15 @@ window.gamedata = {
 
 	/*checks fleet composition and displays alert with result*/
 	checkChoices: function () {
+		/*this is for interaction with $outOfTier array in ship SCS
+		indicates PROBLEM => (count->current count; limit->accepted count max; text->warning text if over limit)
+		*/
+		var outOfTierArray = new Array( 'WARLOCK', 'EMINE' ); //list of allowed entries - must match object below
+		var outOfTierList = {
+		    'WARLOCK': { count: 0, limit: 0, text: 'Warlock is above Tier 1' }, //Warlock: not allowed
+		    'EMINE':   { count: 0, limit: 6, text: 'Massed EMines are above Tier 1 (up to 6 are allowed)' } //EMines: up to 6 EMines allowed
+		};
+				
 		/* //Do we need to block this
 		//block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
@@ -616,6 +625,19 @@ window.gamedata = {
 			if (lship.factionAge > 2) {
 				ancientUnitPresent = true;
 			}
+
+
+
+			//potentially out-of-Tier elements
+			for (var potProblem in lship.outOfTier) {
+				var potProblemCount = lship.outOfTier[potProblem];
+				if (potProblemCount > 0) {
+					var outOfTierEntry = outOfTierList[ potProblem ];
+					if (outOfTierEntry) outOfTierEntry.count += potProblemCount;
+				}
+			}
+
+			
 			if (!lship.flight) {
 				totalShips++;
 
@@ -662,7 +684,6 @@ window.gamedata = {
 					}
 					//console.table(specialHangars);
 				}
-
 
 
 				//check hangar space available...	
@@ -874,6 +895,19 @@ window.gamedata = {
 			problemFound = true;
 		}
 
+
+		//out-of-tier units selected
+		for (var problemName in outOfTierArray) {
+			var problemEntry = outOfTierList[problemName];
+  			if (problemEntry){
+				if ( problemEntry.count > problemEntry.limit ) {
+					checkResult += problemEntry.text +"<br>";
+					problemFound = true;
+				}
+			}
+		}
+		
+		
 		checkResult += "<br>";
 
 
