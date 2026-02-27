@@ -531,7 +531,10 @@ body {
 }
 
 
-#iniGui::-webkit-scrollbar,
+#iniGui::-webkit-scrollbar{
+    width: 12px;
+}
+
 #gameinfo::-webkit-scrollbar,
 #declarationsContainer::-webkit-scrollbar,
 #combatLogContainer::-webkit-scrollbar {
