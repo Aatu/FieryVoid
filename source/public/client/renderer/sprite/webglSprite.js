@@ -129,8 +129,10 @@ window.webglSprite = function () {
                                     cx.putImageData(imgData, 0, 0);
                                     const texture = new THREE.CanvasTexture(cleanCanvas);
                                     texture.colorSpace = THREE.SRGBColorSpace;
-                                    texture.generateMipmaps = false;
-                                    texture.minFilter = THREE.LinearFilter;
+                                    // Mipmaps re-enabled: pixel cleaning above zeros transparent edge RGB so
+                                    // mip generation uses clean data with no colour bleed fringe
+                                    texture.generateMipmaps = true;
+                                    texture.minFilter = THREE.LinearMipmapLinearFilter;
                                     texture.magFilter = THREE.LinearFilter;
                                     resolve(texture);
                                     window.activeTextureLoads--;
