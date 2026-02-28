@@ -552,7 +552,7 @@ body {
 }
 
 #iniGui::-webkit-scrollbar-thumb {
-    background: #3c5574;
+    background: #3c5574b6;
     border-radius: 6px;
 }
 
@@ -563,7 +563,7 @@ body {
 }
 
 #iniGui::-webkit-scrollbar-thumb:hover {
-    background: #5a7ea8;
+    background: #5a7ea8d0;
 }
 
 #gameinfo::-webkit-scrollbar-thumb:hover,
