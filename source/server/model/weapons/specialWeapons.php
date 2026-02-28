@@ -7105,37 +7105,6 @@ class PulsarMine extends Weapon{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	} 
 
-/*
-    public function beforeFiringOrderResolution($gamedata){
-    	
-    	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
-		if($this->isOfflineOnTurn($gamedata->turn)) return; //Pulsar Mine is offline
-
-		$thisShip = $this->getUnit();
-		$deployTurn = $thisShip->getTurnDeployed($gamedata);
-		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
-
-    	$allShips = $gamedata->ships;  
-    	$relevantShips = array();
-
-		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
-		foreach($allShips as $ship){
-			if ($ship->isDestroyed()) continue;
-			if (!$ship instanceof FighterFlight && ($ship->id != $thisShip->id)) continue; //Ignore ships EXCEPT this one!			
-			if ($ship instanceof FighterFlight && $ship->team == $thisShip->team) continue;	//Ignore flights that are friendly.	
-			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore fighters that are not deployed yet!			
-			$relevantShips[] = $ship;			
-		}
-	
-		//Now check if any enemy fighters got in arc and range during their movement.
-		$targetFighters = $this->checkForValidTargets($relevantShips, $thisShip, $gamedata);
-
-    	//Now create up to 18 attacks using $targetFighters array.
-    	$this->createFireOrders($targetFighters, $thisShip, $gamedata);		
-
-    	
-	} //endof beforeFiringOrderResolution
-*/
 
     public function beforePreFiringOrderResolution($gamedata){
     	
