@@ -37,7 +37,6 @@ class BaseShip {
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
-    public $messageOP = array(); //Used by fleet checker to give specific warnings about some fleet choices e.g. Warlock, e-mines.
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;
@@ -108,6 +107,9 @@ class BaseShip {
 	public $outOfTier = array(); //interpreted in gamelobby.js (fleet checker); indicates number of out-of-bounds elements, and their kind 
 	//like: EMINE => 2
 	//relevant entries and their limits before a warning is shown are listed in gamelobby.js
+
+	//another approach to the same problem - commented out but not deleted
+	//public $messageOP = array(); //Used by fleet checker to give specific warnings about some fleet choices e.g. Warlock, e-mines.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
 	protected $IFFSystem = false;   
