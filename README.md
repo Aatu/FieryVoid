@@ -50,4 +50,5 @@ yarn run optimize-images
 
 As images are now saved in Index mode, if you want to edit them you'll need to change to RGB mode (otherwise you lose alot of functionality).  In GIMP this is easily done via by Image->Mode->RGB.
 
-If you're finding image are not updating, sometimes using ‘?v=2’ after .png can force image refresh.
+# Sticky Images
+If you're finding images are not updating after you changed them, you can sometimes add ‘?v=2’ after .png to force image refresh.
