@@ -541,7 +541,9 @@ window.gamedata = {
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
 
 		var totalEnhancementsValue = 0;
+		/* messageOP - warning
 		var messageOP = '';
+		*/
 
 		for (var i in gamedata.ships) {
 			var lship = gamedata.ships[i];
@@ -804,6 +806,7 @@ window.gamedata = {
 				}
 			}
 
+			/* messageOP - warning
 			if (lship.messageOP) {
 				for (var m in lship.messageOP) {
 					if (!messageOP.includes(lship.messageOP[m])) {
@@ -812,6 +815,7 @@ window.gamedata = {
 					}
 				}
 			}
+			*/
 
 		} //end of loop at ships preparing data
 
@@ -879,9 +883,11 @@ window.gamedata = {
 			warningFound = true;
 		}
 
+		/* messageOP - warning
 		if (messageOP !== '') {
 			warningText += messageOP;
 		}
+		*/
 
 		//Static structures present?
 		if (staticPresent) {
