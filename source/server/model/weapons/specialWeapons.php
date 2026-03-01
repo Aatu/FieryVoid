@@ -2778,14 +2778,6 @@ class RammingAttack extends Weapon{
 								$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
 							}
 						}
-			
-						// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
-						/*if ($shipMove->type == "end" && 
-							isset($collisiontargets[$ship->id]) &&
-							$terrainPosition->q == $shipMove->position->q &&
-							$terrainPosition->r == $shipMove->position->r) {
-							unset($collisiontargets[$ship->id]); // Remove from collision targets.
-						}*/
 
 						$previousPosition = $shipMove->position;
 						$previousFacing = $shipMove->getFacingAngle();
