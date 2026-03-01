@@ -2,8 +2,8 @@ import * as React from "react";
 import styled from 'styled-components';
 
 
-class InputAndLabel extends React.Component{
-    render(){
+class InputAndLabel extends React.Component {
+    render() {
         return (<Container>
             <Label>{this.props.label}</Label>
             <Input
@@ -22,16 +22,29 @@ const Container = styled.div`
     width: 100%;
     display: flex;
     padding: 10px;
+
+    @media (max-width: 765px) {
+        padding: 4px 10px;
+    }
 `;
 
 const Label = styled.span`
     width: calc(50% - 10px);
+
+    @media (max-width: 765px) {
+        font-size: 12px;
+    }
 `;
 
 const Input = styled.input`
     width: calc(50% - 10px);
+
+    @media (max-width: 765px) {
+        font-size: 12px;
+        padding: 2px;
+    }
 `;
 
 
 
-export {InputAndLabel};
+export { InputAndLabel };

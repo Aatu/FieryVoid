@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build",
+    "build": "vite build && yarn run build:legacy",
+    "build:legacy": "node scripts/bundle-legacy.js",
     "watch": "vite build --watch",
+    "watch:legacy": "node scripts/watch-legacy.js",
     "optimize-images": "node scripts/optimizeImages.mjs"
   },
   "dependencies": {

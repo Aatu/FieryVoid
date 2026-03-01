@@ -214,7 +214,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     
     <h4 id="ew">Electronic Warfare (EW):</h4>
     <!--<p>Select (left-click) a ship. The ship's EW assignments will be displayed in it's tooltip or in a box at the right of its SCS.</p>-->
-    <p>Select (double left-click) a ship. The ship's EW assignments will be displayed in it's tooltip or in a box at the right of its SCS.</p>
+    <p>Select (left-click) a ship. The ship's EW assignments will be displayed in it's tooltip or in a box at the right of its SCS.</p>
 
     <p>When you have one of your ships selected, you will see <b>Defensive EW</b> (DEW) and <b>Close Combat EW</b> (CCEW). DEW makes your ship harder to hit (by everything except fighters), while CCEW gives you a bonus to hit any fighters that come within 10 hexes. Selecting an enemy ship will show the <b>Offensive EW</b> buttons and allow you to lock onto them.</p>
 

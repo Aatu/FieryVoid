@@ -371,7 +371,7 @@ window.weaponManager = {
         });
     },
 
-    selectAllWeapons: function selectAllWeapons(ship, system) {
+    selectAllWeapons: function selectAllWeapons(ship, system, touchToggleOverride) {
         if (!gamedata.isMyShip(ship)) {
             return;
         }
@@ -389,6 +389,26 @@ window.weaponManager = {
         array = systems.filter(function (weapon) { return weapon.displayName === system.displayName });
 
         var currentWasSelected = weaponManager.isSelectedWeapon(system); //all others affected weapons will have state set the same as current! 
+
+        if (touchToggleOverride === "forceSelect") {
+            currentWasSelected = false; // Always select
+        } else if (touchToggleOverride === "forceDeselect") {
+            currentWasSelected = true; // Always unselect
+        } else if (touchToggleOverride === true) {
+            var selectable = array.filter(function (w) {
+                if (w.destroyed) return false;
+                if (gamedata.gamephase != 3 && !w.ballistic && !w.preFires) return false;
+                if (gamedata.gamephase != 1 && w.ballistic) return false;
+                if (gamedata.gamephase != 5 && w.preFires) return false;
+                if (weaponManager.hasFiringOrder(ship, w) && !w.canSplitShots) return false;
+                return true;
+            });
+
+            if (selectable.length > 0) {
+                var allSelected = selectable.every(function (w) { return weaponManager.isSelectedWeapon(w); });
+                currentWasSelected = allSelected;
+            }
+        }
 
         for (var i = 0; i < array.length; i++) {
             var system = array[i];
@@ -851,7 +871,11 @@ window.weaponManager = {
 
         if (target.Enormous) hitChance += 6;//+6 vs Enormous units
         if (shooter.Enormous) hitChance += 6;//+6 if ramming unit is Enormous
-        if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) hitChance += 2;//+2 if target is Capital and ramming unit is not
+
+		if (!shooter.flight){ //upon re-reading - this bonus does not apply to fighters
+       	 if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) hitChance += 2;//+2 if target is Capital and ramming unit is not
+		}
+		
         if ((shooter.shipSizeClass >= 3) && (target.shipSizeClass < 3)) hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
         if ((shooter.flight) && (!target.flight)) hitChance += 4;//+4 for fighter trying to ram a ship
         var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)

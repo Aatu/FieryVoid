@@ -107,11 +107,12 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — February 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>MultiPlayer (Beta)</strong> - Fiery Void now supports more than two teams, look in Create Game screen for the new options!</li>  
-        <li><strong>New System Menus</strong> - Several complex systems have received updates to their UI menus, including Self Repair, AA Controller, Thoughts Shields and Hyach Computer/Specialists.</li>          
-        <li><strong>Repeater Gunsights</strong> - Drazi ships equiped with the Particle Repeater(s) can now purchase Repeater Gunsights, see 'Ammo, Options and Enhancements' for more details.</li>         
-        <li><strong>Fleet Selection</strong> - Ships purchased with any Ammo, Options or Enhancements will now have these listed underneath them in the purchased ship list.</li> 
-        <li><strong>Disruption EW</strong> - The Disruption (DIST) Electronic Warfare ability now correctly requires line of sight.</li>                                                           
+        <li><strong>Multiplayer (Beta)</strong> - Fiery Void now supports more than two teams, look in Create Game screen for the new option!</li> 
+        <li><strong>Initial Orders</strong> - Double-click to select now only required for ELINTs, ships with allied targeting/hex weapons, or if Friendly Fire enabled.</li>          
+        <li><strong>Mobile Browsers</strong> - I've tried to improve screen layouts and provide a more consistent experience for tap/hold functionality.</li>
+        <li><strong>Toggle Background</strong> - New 'Disable Background' button added, or use hotkey 'm' to change background to default black and back.</li>                    
+        <li><strong>System Menus</strong> - Several systems have received updates to their UI menus, including Self Repair, AA Controller, Thoughts Shields and Hyach Computer/Specialists.</li>          
+        <li><strong>Fleet Selection</strong> - Ships purchased with any Ammo, Options or Enhancements will now have these listed underneath them in the purchased ship list.</li>                                                        
         <li><strong>General Fixes</strong> - Many smaller bug fixes/appearance updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

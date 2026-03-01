@@ -3,9 +3,11 @@ import styled from "styled-components";
 import { Clickable } from "../styled";
 
 const SelectorContainer = styled.div`
-    display: grid;
-    grid-template-columns: repeat(6, min-content);
+    display: flex;
+    flex-wrap: wrap;
     gap: 2px;
+    margin-right: 2px;
+    max-width: 210px; /* 6 buttons (32px w/border) + 5 gaps (2px) = 202px exact */
 `;
 
 // Reuse Button style but add selected state

@@ -16,7 +16,7 @@ class Poseidon extends BaseShip{
 		$this->customFighter = array("Thunderbolt"=>96);
 	        $this->isd = 2255;
 	        $this->notes = 'Thunderbolt capable';
-	        $this->notes .= '<br>Provides +5 Initiative for all friendly EA units';
+	        $this->notes .= '<br>Provides +5 Initiative to friendly EA units';
 
 		$this->forwardDefense = 16;
 		$this->sideDefense = 19;
@@ -30,7 +30,8 @@ class Poseidon extends BaseShip{
 		$this->iniativebonus = 5;
 
 		$this->addPrimarySystem(new Reactor(5, 28, 0, 0));
-		$this->addPrimarySystem(new CnC(6, 24, 0, 0));
+		//$this->addPrimarySystem(new CnC(6, 24, 0, 0));
+		$this->addPrimarySystem(new FlagBridge(6, 24, 0, 1, 'EA Command Bonus', 60,  true, true, true, false, array("Earth Alliance", "Earth Alliance (Early)")));				
 		$this->addPrimarySystem(new Scanner(5, 20, 3, 8));
 		$this->addPrimarySystem(new Engine(6, 25, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(5, 2));

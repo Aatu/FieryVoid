@@ -11,8 +11,8 @@ if (! isset($chatelement))
 <script>
 (function(){
 
-    const POLL_INTERVAL = 8000;
-    const REQUEST_TIMEOUT = 7000;    
+    const POLL_INTERVAL = 6000;
+    const REQUEST_TIMEOUT = 5000;    
     // Define chat first
     var chat = {
 
@@ -157,7 +157,7 @@ if (! isset($chatelement))
         startPolling: function(){
             if(chat.polling) return;
             chat.polling = true;
-            setTimeout(chat.requestChatdata, 3000); //Set initial polling to 1 sec to load chat, then it'll go to 8secs.
+            setTimeout(chat.requestChatdata, 2000); //Set initial polling to 1 sec to load chat, then it'll go to 8secs.
         },
 
         removeNewMessageTag: function(){
@@ -187,12 +187,12 @@ if (! isset($chatelement))
                 success: function(data){
                     if(!data || data.error){
                         if(data?.error) window.confirm.exception(data, function(){});
-                        setTimeout(chat.getLastTimeChecked, 8000);
+                        setTimeout(chat.getLastTimeChecked, 6000);
                         return;
                     }
                     chat.lastTimeChecked = data.lastCheckGame;
                 },
-                error: function(){ setTimeout(chat.getLastTimeChecked, 8000); }
+                error: function(){ setTimeout(chat.getLastTimeChecked, 6000); }
             }).fail(() => {});
         },
 
@@ -271,10 +271,10 @@ requestChatdata: function(){
             if(data.error){
                 window.confirm.exception(data, function(){});
                 // don't block further polling; schedule next attempt
-                setTimeout(chat.requestChatdata, 8000);
+                setTimeout(chat.requestChatdata, 6000);
             }else{
                 chat.parseChatData(data);
-                setTimeout(chat.requestChatdata, 8000);
+                setTimeout(chat.requestChatdata, 6000);
             }
         },
 

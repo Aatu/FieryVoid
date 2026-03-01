@@ -19,6 +19,10 @@ const FighterIconContainer = styled.div`
     margin: 5px;
     filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
     opacity: ${props => props.$destroyed ? '0.5' : '1'};
+
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
 `;
 
 const Container = styled.div`
@@ -53,6 +57,10 @@ const HealthBar = styled.div`
     border: 1px solid #496791;
     margin: 2px;
 
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    user-select: none;
+
     &::before {
         box-sizing: border-box;
         content: "";
@@ -76,6 +84,17 @@ const HealthText = styled.div`
 class FighterIcon extends React.Component {
 
     onSystemMouseOver(event) {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
+        // Mobile browsers fire a synthetic 'mouseover' event immediately after 'touchend'.
+        // Because child SystemIcons call stopPropagation() on their touch events,
+        // FighterIcon never activates its own this.touchActive shield.
+        // We must detect if this is a synthetic event (e.g. sourceCapabilities.firesTouchEvents)
+        if (event.nativeEvent && event.nativeEvent.sourceCapabilities && event.nativeEvent.sourceCapabilities.firesTouchEvents) {
+            return;
+        }
+
         let { ship } = this.props;
 
         webglScene.customEvent('SystemMouseOver', {
@@ -83,11 +102,81 @@ class FighterIcon extends React.Component {
             system: ship,
             element: event.target
         });
-
     }
 
     onSystemMouseOut() {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
         webglScene.customEvent('SystemMouseOut');
+    }
+
+    onFighterTouchStart(event) {
+        this.touchActive = true;
+        this.ignoreNextClick = false;
+        window.lastTouchActiveTime = Date.now();
+
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+        }
+
+        const target = event.currentTarget;
+        const touch = event.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+
+        this.longPressTimer = setTimeout(() => {
+            this.ignoreNextClick = true; // Prevent click from firing after long press
+            let { ship } = this.props;
+
+            // Long Press -> generic tooltip
+            webglScene.customEvent('SystemMouseOver', {
+                ship: ship,
+                system: ship,
+                element: target,
+                showInfo: true
+            });
+
+            this.longPressTimer = null;
+        }, 400); // 400ms hold required for info window
+    }
+
+    onFighterTouchMove(event) {
+        if (!this.longPressTimer) return;
+
+        const touch = event.touches[0];
+        const dx = touch.clientX - this.touchStartX;
+        const dy = touch.clientY - this.touchStartY;
+
+        // Cancel if they move more than 10 pixels
+        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+    }
+
+    onFighterTouchCancel(event) {
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        }
+        this.touchActive = false;
+        webglScene.customEvent('SystemMouseOut');
+    }
+
+    onFighterTouchEnd(event) {
+        if (this.longPressTimer) {
+            // Timer didn't pop, meaning this was a short tap
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
+        } else {
+            // Timer already fired (long press). Hide info on release.
+            webglScene.customEvent('SystemMouseOut');
+        }
+
+        setTimeout(() => {
+            this.touchActive = false;
+        }, 300); // Clear touch active after giving click events time to fire/be ignored
     }
 
     render() {
@@ -106,7 +195,7 @@ class FighterIcon extends React.Component {
         */
         //new version - fwd and aft systems (unit creator decides the layout)
         return (
-            <FighterIconContainer $destroyed={destroyed} $img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut}>
+            <FighterIconContainer $destroyed={destroyed} $img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
                 <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
                 <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
                 <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>

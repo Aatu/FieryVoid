@@ -34,6 +34,18 @@ Fighter weapon priority:
 10: mostly special weapons that should be fired late
 
 
+Shipborne weapon priority against fighters (with information about automatic change antiship->antifighter):
+1-2:  mostly special weapons that should be fired ASAP
+3: extremely strong weapons (heavy Raking: 7->3)
+4: strong weapons (light Raking: 8->4) (as even light Raking weapons usually equal heavy Standard ones easily)
+5: strong weapons (heavy Standard: 6->5)
+6: moderately strong weapons (Matter/Special: 9->6)
+7: moderately strong weapons (medium Standard: 5->7)
+8: weak weapons (light Standard: 4->8)
+9: VERY weak weapons (very light Standard: 3->9)
+10: mostly special weapons that should be fired late
+
+
 Explosion scale: below is proposed standarization for weapons that don't have their own special requirements for explosion size (...like EMine or Spark Field do!):
 (AoE are left out as they will usually just cover a given area)
 actually I have modified weapon constructor to do so automatically, unless overridden (do override for AoE and weapons whose animation should NOT be proportional to damage done!)

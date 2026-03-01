@@ -54,9 +54,9 @@
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
             integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
             crossorigin="anonymous"></script>
-    <script src="client/lib/three.min.js"></script>
-    <script src="client/lib/THREE.MeshLine.js"></script>
-    <script src="client/UI/reactJs/UI.bundle.js"></script>
+    <script defer src="client/lib/three.min.js"></script>
+    <script defer src="client/lib/THREE.MeshLine.js"></script>
+    <script defer src="client/UI/reactJs/UI.bundle.js"></script>
 	<!-- replaced by php include below
     <script src="static/ships.js"></script>
 	-->
@@ -73,7 +73,8 @@
     ?>
     <script>
         window.Config = {
-            HEX_SIZE: 50
+            HEX_SIZE: 50,
+            MAX_CONCURRENT_IMAGES: 40 // Limit concurrent image loads to prevent HTTP/2 errors
         };
     </script>
 
@@ -112,6 +113,8 @@
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
+    <?php $debug = isset($_GET['debug']); ?>
+    <?php if ($debug): ?>
     <script src="client/lib/graphics.js"></script>
     <script src="client/lib/HexagonMath.js"></script>
     <script src="client/lib/AbstractCanvas.js"></script>
@@ -217,7 +220,8 @@
     <script src="client/ew.js"></script>
     <script src="client/weaponManager.js"></script>
     <script src="client/damage.js"></script>
-	<script src="client/combatLog.js"></script>
+    <script src="client/combatLog.js"></script>
+    <script src="client/declarations.js"></script>
 	<script src="client/player.js"></script>
     <script src="client/ships.js"></script>
     <script src="client/movement.js"></script>
@@ -264,21 +268,26 @@
 	<script src="client/model/weapon/customBSG.js"></script>
 	<script src="client/model/weapon/customTrek.js"></script>
     <script src="client/model/weapon/customCW.js"></script>
+    <?php else: ?>
+    <script defer src="client/game.legacy.bundle.js"></script>
+    <?php endif; ?>
 </head>
 
 
 <body>
 
 
-<div id="phaseheader" class="roundedright" style="">
-    <span class="turn value"></span><span class="phase value"></span><span class="activeship value"></span><span class="waiting value"></span><span class="finished value">GAME OVER</span><span class="notlogged value">NOT LOGGED IN</span>
-    <table class="uitable">
-        <tr>
-        <td class="committurn" style="display:none"><div class="ok" ></div></td>
-        <td class="surrender" style="display:none"></td>
-        <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
-        </tr>
-    </table>
+<div id="topcontainer">
+    <div id="phaseheader" class="roundedright">
+        <span class="turn value"></span><span class="phase value"></span><span class="activeship value"></span><span class="waiting value"></span><span class="finished value">GAME OVER</span><span class="notlogged value">NOT LOGGED IN</span>
+        <table class="uitable">
+            <tr>
+            <td class="committurn" style="display:none"><div class="ok" ></div></td>
+            <td class="surrender" style="display:none"></td>
+            <td class="cancelturn" style="display:none"><div class="cancel" ></div></td>
+            </tr>
+        </table>
+    </div>
 </div>
 
 <div id="backDiv" style="">

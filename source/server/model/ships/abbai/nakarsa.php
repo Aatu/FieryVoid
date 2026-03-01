@@ -25,13 +25,14 @@ class Nakarsa extends BaseShip{
         $this->rollcost = 2;
         $this->pivotcost = 3;
         $this->iniativebonus = +5;   
-	    $this->notes = "Provides +5 Initiative for all friendly Abbai units";
+	    $this->notes = "Provides +5 Initiative to friendly Abbai units";
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
-        $this->addPrimarySystem(new CnC(5, 16, 0, 0));
+        //$this->addPrimarySystem(new CnC(5, 16, 0, 0));
+        $this->addPrimarySystem(new FlagBridge(5, 16, 0, 1, 'Abbai Command Bonus', 60,  true, true, true, false));		        
         $this->addPrimarySystem(new Scanner(5, 18, 6, 10));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 3));
- 	      $this->addPrimarySystem(new Hangar(5, 8));
+ 	    $this->addPrimarySystem(new Hangar(5, 8));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 5, 4));
    
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

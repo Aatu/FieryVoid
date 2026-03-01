@@ -417,7 +417,7 @@ class Weapon extends ShipSystem
 			break;
 			
 		case 8: //light Raking
-			$this->priorityAF = 4;
+			$this->priorityAF = 4; 
 			break;
 			
 		case 6: //heavy Standard 
@@ -428,15 +428,15 @@ class Weapon extends ShipSystem
 			$this->priorityAF = 6;
 			break;			
 			
-		case 5: 
+		case 5: //medium Standard
 			$this->priorityAF = 7;
 			break;
 			
-		case 4: 
+		case 4: //light Standard
 			$this->priorityAF = 8;
 			break;
 			
-		case 3: 
+		case 3: //very light Standard
 			$this->priorityAF = 9;
 			break;
 			
@@ -1069,9 +1069,14 @@ public function getStartLoading()
 
 		if ($target->Enormous) $hitChance+=6;//+6 vs Enormous units
 		if ($shooter->Enormous) $hitChance+=6;//+6 if ramming unit is Enormous
-		if (($target->shipSizeClass >= 3) && ($shooter->shipSizeClass <3)) $hitChance += 2;//+2 if target is Capital and ramming unit is not
-		if (($shooter->shipSizeClass >= 3) && ($target->shipSizeClass <3)) $hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
+		
+		//after re-reading the rules - this bonuss does not apply when the unit interacting is a fighter - adding appropriate restriction 
+		if ( (!($shooter instanceof FighterFlight)) && ($target->shipSizeClass >= 3) && ($shooter->shipSizeClass <3)) $hitChance += 2;//+2 if target is Capital and ramming unit is not
+		
+		if ( ($shooter->shipSizeClass >= 3) && ($target->shipSizeClass <3)) $hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
+		
 		if (($shooter instanceof FighterFlight) && (!($target instanceof FighterFlight))) $hitChance += 4;//+4 for fighter trying to ram a ship
+		
 		$targetSpeed = abs($target->getSpeed()); //I think speed cannot be negative, but just in case ;)
 		switch($targetSpeed) {
 		    case 0: //+5 if the target is not moving.
@@ -2255,4 +2260,5 @@ class checkForSelfInterceptFire
 
 
  
+
 
