@@ -27,7 +27,8 @@ class WarlockAM extends BaseShip{
 		$this->pivotcost = 3;
 		$this->iniativebonus = 0;
 
-		$this->messageOP = array(1 =>'Warlock Advanced Destroyer moves this fleet into Superior Tier.'); 
+		//$this->messageOP = array(1 =>'Warlock Advanced Destroyer moves this fleet into Superior Tier.');        
+		$outOfTier = array('WARLOCK'=>1);
 
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(80); //pass magazine capacity - 20 rounds per launcher
