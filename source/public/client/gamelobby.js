@@ -906,10 +906,10 @@ window.gamedata = {
 		for (var outOfTierIndex = 0; outOfTierIndex < outOfTierArray.length; outOfTierIndex++) {
 			var problemName = outOfTierArray[outOfTierIndex];
 
-			var potProblemCount = lship.outOfTier[potProblem];
-			if (potProblemCount > 0) {
-				var outOfTierEntry = outOfTierList[ potProblem ];
-				if (outOfTierEntry) outOfTierEntry.count += potProblemCount;
+			var potProblemEntry = outOfTierList[problemName];
+			if (potProblemEntry && (potProblemEntry.count > potProblemEntry.limit)) {
+				checkResult += potProblemEntry.text +"<br>";
+				problemFound = true;
 			}
 		}
 		
