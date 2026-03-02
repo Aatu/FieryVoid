@@ -39,7 +39,7 @@ class KlingonD5Tanker extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 5, 5));
         $this->addPrimarySystem(new Hangar(4, 2));
-		$this->addPrimarySystem(new MicroJumpSystem(4, 8, 0, 355, 5, 3, 4));   // Armor, health, power, start arc, end arc, distance, reload time 
+		$this->addPrimarySystem(new MicroJumpSystem(4, 8, 0, 330, 30, 3, 4));   // Armor, health, power, start arc, end arc, distance, reload time 
 
 		$impulseDrive = new TrekImpulseDrive(4,20,0,3,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 
@@ -69,8 +69,8 @@ class KlingonD5Tanker extends MediumShip{
 			$impulseDrive->addThruster($warpNacelle);
 			$this->addAftSystem($warpNacelle);
 
-		$this->addAftSystem(new TrekLightDisruptorArray(3, 6, 3, 0, 240));
 		$this->addAftSystem(new TrekLightDisruptorArray(3, 6, 3, 120, 360));
+		$this->addAftSystem(new TrekLightDisruptorArray(3, 6, 3, 0, 240));
 
 		$projection = new TrekShieldProjection(1, 12, 3, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$projector = new TrekShieldProjector(1, 4, 1, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics

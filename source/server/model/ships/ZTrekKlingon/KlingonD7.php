@@ -31,7 +31,7 @@ class KlingonD7 extends HeavyCombatVessel{
 	$this->canPreOrder = true;
 
  	$this->addPrimarySystem(new CloakingDevice(4, 12, 4, 0)); 
-	$this->addPrimarySystem(new MicroJumpSystem(4, 10, 0, 330, 60, 8, 4));   // Armor, health, power, start arc, end arc, distance, reload time                    
+	$this->addPrimarySystem(new MicroJumpSystem(4, 10, 0, 270, 90, 8, 4));   // Armor, health, power, start arc, end arc, distance, reload time                    
 	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
     $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
     $this->addPrimarySystem(new Scanner(4, 12, 6, 5));
@@ -67,10 +67,10 @@ class KlingonD7 extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
-	$this->addAftSystem(new TrekMedDisruptor(3, 0, 0, 330, 120));
 	$this->addAftSystem(new TrekMedDisruptor(3, 0, 0, 240, 30));
-	$this->addAftSystem(new TrekLightDisruptor(3, 0, 0, 0, 180));
+	$this->addAftSystem(new TrekMedDisruptor(3, 0, 0, 330, 120));
 	$this->addAftSystem(new TrekLightDisruptor(3, 0, 0, 180, 360));
+	$this->addAftSystem(new TrekLightDisruptor(3, 0, 0, 0, 180));
 		
 	//technical thrusters - unlimited, like for LCVs		
 	$this->addPrimarySystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
