@@ -3102,7 +3102,7 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
-        if (!(weapon instanceof Weapon)) return null; // Only show arcs for weapons
+        if (!(weapon instanceof Weapon || weapon instanceof Thruster)) return null; // Only show arcs for weapons
 
         var hexDistance = window.coordinateConverter.getHexDistance();
 
