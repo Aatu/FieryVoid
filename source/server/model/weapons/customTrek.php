@@ -2061,11 +2061,28 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 		16=>array("ForcedOfflineOneTurn")
 	);
 
+/*
 	public function setSystemDataWindow($turn){							
-		$this->data["Special"] = ".";
-		$this->data["Special"] .= "<br>.";
-
+		$this->data["Special"] = "Detection is tested at the start of the turn and before the firing phase.";
+		$this->data["Special"] .= "<br>No weapons are functionl while the cloak is engaged.";
+		$this->data["Special"] .= "<br>Bases and ELINT units detect cloaked units at 1.5 their EW rating.";
+		$this->data["Special"] .= "<br>All other units use their sensor rating. Fighters get half their offensive bonus.";
+		parent::setSystemDataWindow($turn);     
 	}	
+*/
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] = "Detection is tested at the start of the turn and before the firing phase.";
+		$this->data["Special"] .= "<br>No weapons are functionl while the cloak is engaged.";
+		$this->data["Special"] .= "<br>Bases and ELINT units detect cloaked units at 1.5 their EW rating.";
+		$this->data["Special"] .= "<br>All other units use their sensor rating. Fighters get half their offensive bonus.";
+	}
 			
 	public function getSpecialAbilityValue($args){
 		return $this->specialAbilityValue;
@@ -2223,15 +2240,17 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 						$totalDetection = floor($totalDetection * 1.5);
 					} elseif ($otherShip->hasSpecialAbility("ELINT")) {
 						//$totalDetection *= 1;				
-						$bonusDSEW = $otherShip->getEWByType("Detect Stealth", $gameData->turn);	
-						$totalDetection += $bonusDSEW;
+						$totalDetection = floor($totalDetection * 1.5);
+//						$bonusDSEW = $otherShip->getEWByType("Detect Stealth", $gameData->turn);	
+//						$totalDetection += $bonusDSEW;
 		
 					} else {
-						$totalDetection = floor($totalDetection/2); //Half sensor rating
+//						$totalDetection = floor($totalDetection/2); //Half sensor rating
+						$totalDetection = floor($totalDetection); //Sensor rating
 					}
 				} else {
 					// Fighter unit — use offensive bonus
-					$totalDetection = ceil($otherShip->offensivebonus/3);// Half of OB.
+					$totalDetection = ceil($otherShip->offensivebonus/2);// Half of OB.
 				}
 		
 				// Get distance to the stealth ship and check line of sight
@@ -2415,11 +2434,13 @@ class TrekLightDisruptor extends Pulse{
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
 			if (!$system->advancedArmor){//advanced armor prevents effect
-				if ($system instanceof Structure) return;        // don't apply to structure
-					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
-					$crit->updated = true;
-					$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
-					$system->setCritical($crit); //$system->criticals[] =  $crit;			
+				if (!$ship instanceof FighterFlight) {
+					if ($system instanceof Structure) return;        // don't apply to structure
+						$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+						$system->setCritical($crit); //$system->criticals[] =  $crit;			
+				}
 			}
 		}
 
@@ -2430,7 +2451,7 @@ class TrekLightDisruptor extends Pulse{
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-			$this->data["Special"] .= "<br>-1 armor to every system hit.";
+			$this->data["Special"] .= "-1 armor to every system hit.";
             $this->data["Special"] .= '<br>Structure armor unaffected.';
         }
         
@@ -2490,6 +2511,7 @@ class TrekMedDisruptor extends Pulse{
 //				$fireOrder->pubnotes .= "<br>reduceFacing is: $this->reduceFacing";
 			}
 			if (!$system->advancedArmor){//advanced armor prevents effect
+				if ($ship instanceof FighterFlight) return;  //does not affect fighters
 				if ($system instanceof Structure) {
 					//no need to do anything here
 				}else{
@@ -2523,7 +2545,7 @@ class TrekMedDisruptor extends Pulse{
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-			$this->data["Special"] .= "<br>-1 armor to every system hit.";
+			$this->data["Special"] .= "-1 armor to every system hit.";
             $this->data["Special"] .= '<br>If 12 or more damage strike the facing structure, the facing structure armor loses 1 point.';
         }
 
@@ -2577,7 +2599,7 @@ class TrekDisruptorCannon extends TrekDisruptorBase {
             }else{
                 $this->data["Special"] .= '<br>';
             } 
-			$this->data["Special"] .= "<br>If 12 or more damage breach shields and armor, the facing structure block loses 1 point of armor.";
+			$this->data["Special"] .= "If 12 or more damage breach shields and armor, the facing structure block loses 1 point of armor.";
         }
 
 		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -2595,6 +2617,7 @@ class TrekDisruptorCannon extends TrekDisruptorBase {
 //			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
 
 			if($system->advancedArmor) return; //advanced armor prevents this
+			if ($ship instanceof FighterFlight) return;  //does not affect fighters
 			if(!$this->alreadyReduced){
 				if ($this->postArmorTotal >= $this->reduceFacing) {
 
@@ -2682,6 +2705,7 @@ class TrekDisruptorCannon extends TrekDisruptorBase {
 //			$fireOrder->pubnotes .= "<br>already reduced outside is: " . $this->alreadyReduced;
 
 			if($system->advancedArmor) return; //advanced armor prevents this
+			if ($ship instanceof FighterFlight) return;  //does not affect fighters
 			if(!$this->alreadyReduced){
 				if ($this->postArmorTotal >= $this->reduceFacing) {
 
@@ -3410,12 +3434,29 @@ class MicroJumpSystem extends Weapon implements SpecialAbility, DefensiveSystem{
 	} //endof getCollisionLocation()
 	*/
 
-     public function setSystemDataWindow($turn){
-        $this->data["Special"] = "."; 
-        $this->data["Special"] .= "<br>.";	
+/*
+	public function setSystemDataWindow($turn){							
+		$this->data["Special"] = "The warp jump is activated before the firing phase to";
+		$this->data["Special"] .= "<br>jump the ship forward in a straight line.";
+		$this->data["Special"] .= "<br>Cannot jump through enormous units. 20% chance of failure.";
+		$this->data["Special"] .= "<br>There is a 3 turn cooldown before another jump can be initiated.";
 		parent::setSystemDataWindow($turn);     
-    }
 
+	}	
+*/
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+		$this->data["Special"] = "The warp jump is activated before the firing phase to";
+		$this->data["Special"] .= "<br>jump the ship forward in a straight line.";
+		$this->data["Special"] .= "<br>Cannot jump through enormous units. 20% chance of failure.";
+		$this->data["Special"] .= "<br>There is a 3 turn cooldown before another jump can be initiated.";
+	}
 
 	public function getDamage($fireOrder){       return 0;   } //no actual damage
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
