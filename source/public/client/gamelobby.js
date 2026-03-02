@@ -902,14 +902,14 @@ window.gamedata = {
 		}
 
 
-		//out-of-tier units selected
-		for (var problemName in outOfTierArray) {
-			var problemEntry = outOfTierList[problemName];
-  			if (problemEntry){
-				if ( problemEntry.count > problemEntry.limit ) {
-					checkResult += problemEntry.text +"<br>";
-					problemFound = true;
-				}
+		//potentially out-of-Tier elements
+		for (var outOfTierIndex = 0; outOfTierIndex < outOfTierArray.length; outOfTierIndex++) {
+			var problemName = outOfTierArray[outOfTierIndex];
+
+			var potProblemCount = lship.outOfTier[potProblem];
+			if (potProblemCount > 0) {
+				var outOfTierEntry = outOfTierList[ potProblem ];
+				if (outOfTierEntry) outOfTierEntry.count += potProblemCount;
 			}
 		}
 		
