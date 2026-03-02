@@ -263,9 +263,9 @@
                 <div class="scenario-row">
                     <label for="victory">VICTORY CONDITIONS:</label>
                     <select id="victory">
+                        <option value="More forces remaining after Turn 12">More forces remaining after Turn 12</option>                        
                         <option value="Last unit on map">Last unit on map</option>
                         <option value="Last ship on map">Last ship on map</option>
-                        <option value="More forces remaining after Turn 12">More forces remaining after Turn 12</option>
                         <option value="Other">Other</option>                    
                     </select>
                     <input type="text" id="victory_custom" class="scenario-custom-input" style="display:none;" placeholder="Enter victory conditions...">
