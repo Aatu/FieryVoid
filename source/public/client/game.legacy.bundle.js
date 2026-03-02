@@ -1581,8 +1581,10 @@ window.webglSprite = function () {
                                     cx.putImageData(imgData, 0, 0);
                                     const texture = new THREE.CanvasTexture(cleanCanvas);
                                     texture.colorSpace = THREE.SRGBColorSpace;
-                                    texture.generateMipmaps = false;
-                                    texture.minFilter = THREE.LinearFilter;
+                                    // Mipmaps re-enabled: pixel cleaning above zeros transparent edge RGB so
+                                    // mip generation uses clean data with no colour bleed fringe
+                                    texture.generateMipmaps = true;
+                                    texture.minFilter = THREE.LinearMipmapLinearFilter;
                                     texture.magFilter = THREE.LinearFilter;
                                     resolve(texture);
                                     window.activeTextureLoads--;
@@ -6436,6 +6438,7 @@ window.ShipDestroyedAnimation = function () {
 
         this.animations = [];
         this.explosionTriggered = false;
+        this.soundTriggered = false;
         this.emitterContainer = emitterContainer;
         this.movementAnimations = movementAnimations;
 
@@ -6463,11 +6466,12 @@ window.ShipDestroyedAnimation = function () {
                 time: this.time,
                 position: position
             });
+        }
 
-            // --- Trigger explosion sound ---
-            if (gamedata.playAudio) {
-                ShipDestroyedAnimation.playExplosionSound();
-            }
+        // --- Trigger explosion sound (only if not paused or reversing) ---
+        if (!this.soundTriggered && total >= this.time && gamedata.playAudio && !paused && !back) {
+            this.soundTriggered = true;
+            ShipDestroyedAnimation.playExplosionSound();
         }
 
         // --- Fadeout ---
@@ -6495,7 +6499,7 @@ window.ShipDestroyedAnimation = function () {
         try {
             const explosionSound = ShipDestroyedAnimation.cachedAudio.cloneNode(true);
             explosionSound.currentTime = 0;
-            explosionSound.play().catch(() => {});
+            explosionSound.play().catch(() => { });
         } catch (e) {
             console.warn("Explosion sound playback failed:", e);
         }
@@ -11567,7 +11571,7 @@ window.MovementPhaseStrategy = function () {
     MovementPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
 
     MovementPhaseStrategy.prototype.update = function (gamedata) {
-        
+
         doForcedMovementForActiveShip();
         PhaseStrategy.prototype.update.call(this, gamedata);
         this.selectActiveShip();
@@ -11583,13 +11587,13 @@ window.MovementPhaseStrategy = function () {
     MovementPhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager) {
         this.changeAnimationStrategy(new window.IdleAnimationStrategy(shipIcons, gamedata.turn));
 
-        
+
         doForcedMovementForActiveShip();
         PhaseStrategy.prototype.activate.call(this, shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager);
         this.selectActiveShip();
 
-        this.setPhaseHeader("MOVEMENT ORDERS", this.selectedShip.name);
-
+        var shipName = this.selectedShip ? this.selectedShip.name : "";
+        this.setPhaseHeader("MOVEMENT ORDERS", shipName);
 
         if (isMovementReady(gamedata)) {
             gamedata.showCommitButton();
@@ -11597,7 +11601,7 @@ window.MovementPhaseStrategy = function () {
             gamedata.hideCommitButton();
         }
 
-        
+
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
@@ -11616,7 +11620,7 @@ window.MovementPhaseStrategy = function () {
         this.hideMovementUI();
         this.uiManager.hideShipThrustUI();
 
-        gamedata.ships.forEach(function(ship) {
+        gamedata.ships.forEach(function (ship) {
             var icon = this.shipIconContainer.getByShip(ship);
             icon.showSideSprite(false);
             icon.setNotMoved(false);
@@ -11630,7 +11634,7 @@ window.MovementPhaseStrategy = function () {
     };
 
     MovementPhaseStrategy.prototype.onHexClicked = function (payload) {
-        PhaseStrategy.prototype.onHexClicked.call(this, payload);   
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);
     };
 
     MovementPhaseStrategy.prototype.selectShip = function (ship, payload) {
@@ -11657,12 +11661,12 @@ window.MovementPhaseStrategy = function () {
 
         if (this.selectedShip && this.shipThrustUIState) {
             return;
-        } 
+        }
 
         PhaseStrategy.prototype.showShipTooltip.call(this, ships, payload, menu, hide, ballisticsMenu);
     };
 
-    MovementPhaseStrategy.prototype.onAssignThrust = function(payload) {
+    MovementPhaseStrategy.prototype.onAssignThrust = function (payload) {
         if (payload === false) {
             this.uiManager.hideShipThrustUI();
             this.shipThrustUIState = null;
@@ -11684,20 +11688,20 @@ window.MovementPhaseStrategy = function () {
         this.uiManager.showShipThrustUI(this.shipThrustUIState);
     }
 
-    MovementPhaseStrategy.prototype.repositionThrustUi = function() {
+    MovementPhaseStrategy.prototype.repositionThrustUi = function () {
         if (this.shipThrustUIState === null) {
             return true;
         }
 
         var icon = this.shipIconContainer.getByShip(this.shipThrustUIState.ship);
         var position = window.coordinateConverter.fromGameToViewPort(icon.getPosition());
-        jQuery("#thrustUIContainer").css({left: position.x + 'px', top: position.y + 'px'})
+        jQuery("#thrustUIContainer").css({ left: position.x + 'px', top: position.y + 'px' })
 
         return true;
     }
 
     function isMovementReady(gamedata) {
-        return gamedata.getMyActiveShips().every(function(ship) {
+        return gamedata.getMyActiveShips().every(function (ship) {
             return shipManager.movement.isMovementReady(ship);
         });
     }
@@ -11707,9 +11711,9 @@ window.MovementPhaseStrategy = function () {
         gamedata.getMyActiveShips().forEach(function (ship) {
             shipManager.movement.doForcedPivot(ship);
 
-            if (ship.base && (!ship.nonRotating) ) {
+            if (ship.base && (!ship.nonRotating)) {
                 shipManager.movement.doRotate(ship);
-                
+
                 //TODO: Test if this autocommit thing works
                 gamedata.autoCommitOnMovement(ship);
             }
@@ -11731,12 +11735,12 @@ window.MovementPhaseStrategy = function () {
         this.gamedata.drawIniGUI();
     };
 
-    MovementPhaseStrategy.prototype.showAppropriateEW = function() {
+    MovementPhaseStrategy.prototype.showAppropriateEW = function () {
         this.shipIconContainer.getArray().forEach(icon => {
             icon.hideEW();
             icon.hideBDEW();
         });
-        
+
         this.ewIconContainer.hide();
     }
 
@@ -11748,7 +11752,7 @@ window.MovementPhaseStrategy = function () {
 
     MovementPhaseStrategy.prototype.selectActiveShip = function () {
 
-        var ship = gamedata.getMyActiveShips().filter(function(ship) {
+        var ship = gamedata.getMyActiveShips().filter(function (ship) {
             return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship);
         }).pop();
 
@@ -11762,14 +11766,14 @@ window.MovementPhaseStrategy = function () {
     MovementPhaseStrategy.prototype.highlightUnmovedShips = function () {
         gamedata.ships
             .filter(window.SimultaneousMovementRule.isActiveMovementShip)
-            .filter(function(ship) {
+            .filter(function (ship) {
                 return !shipManager.movement.isMovementReady(ship) || !gamedata.isMyShip(ship);
             })
             .forEach(function (ship) {
                 var icon = this.shipIconContainer.getByShip(ship);
-//                icon.showSideSprite(true); //Shows circle, not dotted circle.
+                //                icon.showSideSprite(true); //Shows circle, not dotted circle.
                 icon.setSelected(true); //This actually sets icon for enemy ships that move during same sim phase - DK 10/24
-            }, this);            
+            }, this);
     }
 
     return MovementPhaseStrategy;
@@ -13223,19 +13227,19 @@ window.ShipTooltip = function () {
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
             if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         } else {
             if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         }
 

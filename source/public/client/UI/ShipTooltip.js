@@ -297,19 +297,19 @@ window.ShipTooltip = function () {
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
             if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         } else {
             if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         }
 
