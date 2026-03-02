@@ -46,7 +46,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
   <link href="styles/confirm.css" rel="stylesheet" type="text/css">
   <link href="styles/ladder.css" rel="stylesheet" type="text/css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>
   <script src="client/player.js"></script>

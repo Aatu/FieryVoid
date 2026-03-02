@@ -168,7 +168,7 @@ window.ShipTooltip = function () {
         }
         if(shipManager.isStealthShip(ship)){
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn){
-                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Always say undetected on Deployment phase.  
+                toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else if (shipManager.isDetected(ship)) {
                 toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
             } else {

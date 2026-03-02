@@ -1,6 +1,21 @@
 <?php 
 
 header('Content-Type: application/json; charset=utf-8');
+// APCu Fast Poll: Check early, BEFORE session start or DB connections
+if (function_exists('apcu_fetch') && isset($_GET['gameid'], $_GET['lastid'])) {
+    require_once dirname(__DIR__) . '/server/varconfig.php';
+    $prefix = ($database_name ?? 'default') . '_';
+    $gameid = (int) $_GET['gameid'];
+    $lastid = (int) $_GET['lastid'];
+
+    $lastMsgId = apcu_fetch("{$prefix}chat_last_id_{$gameid}");
+    if ($lastMsgId !== false && $lastid >= $lastMsgId) {
+        //error_log("Chatdata: Fast Poll EXEMPT (lastid={$lastid}, cached={$lastMsgId}, game={$gameid}) - " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        echo "[]";
+        exit;
+    }
+}
+
 // --- Required classes ---
 require_once dirname(__DIR__) . '/server/server_load_guard.php';
 require_once dirname(__DIR__) . '/server/controller/ChatManager.php';

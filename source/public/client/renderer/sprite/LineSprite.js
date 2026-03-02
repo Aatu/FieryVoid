@@ -21,7 +21,7 @@ window.LineSprite = function () {
             transparent: true,
             opacity: this.opacity,
             map: args.texture || null,
-            blending: args.blending || null
+            blending: args.blending || THREE.NormalBlending
         });
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);

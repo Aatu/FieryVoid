@@ -2729,8 +2729,8 @@ class RammingAttack extends Weapon{
 	
 			foreach ($relevantShips as $ship) {  
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);
-				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
-				$previousFacing = $startMove->getFacingAngle();
+				//$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
+				//$previousFacing = $startMove->getFacingAngle();
 		
 				foreach ($ship->movement as $shipMove) {
 					if ($shipMove->turn == $gamedata->turn) {
@@ -2747,15 +2747,16 @@ class RammingAttack extends Weapon{
 		
 							if ($match) {
 								if (!isset($collisiontargets[$ship->id])) {
-									$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
-									$location = $this->getCollisionLocation($relativeBearing, $ship);
-									$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
+									//$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+									//$location = $this->getCollisionLocation($relativeBearing, $ship);
+									//$collisiontargets[$ship->id] = $location; // Add to array to be targeted.									
+									$collisiontargets[$ship->id] = 0; // Add to array to be targeted. Location calculated during fire()
 								}
 							}
 						}
 		
-						$previousPosition = $shipMove->position;
-						$previousFacing = $shipMove->getFacingAngle();
+						//$previousPosition = $shipMove->position;
+						//$previousFacing = $shipMove->getFacingAngle();
 					}
 				}
 			}
@@ -2763,8 +2764,8 @@ class RammingAttack extends Weapon{
 			foreach ($relevantShips as $ship) { // Look through relevant ships' movements and take appropriate action.					
 				// Now check other movements in the turn.
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
-				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
-				$previousFacing = $startMove->getFacingAngle();			
+				//$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+				//$previousFacing = $startMove->getFacingAngle();			
 
 				foreach ($ship->movement as $shipMove) {
 					if ($shipMove->turn == $gamedata->turn) {
@@ -2773,22 +2774,15 @@ class RammingAttack extends Weapon{
 						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
 							// Check if the position matches the asteroids, e.g. zero distance.
 							if ($terrainPosition->q == $shipMove->position->q && $terrainPosition->r == $shipMove->position->r) {
-								$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
-								$location = $this->getCollisionLocation($relativeBearing, $ship);
-								$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
+								//$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+								//$location = $this->getCollisionLocation($relativeBearing, $ship);
+								//$collisiontargets[$ship->id] = $location; // Add to array to be targeted.								
+								$collisiontargets[$ship->id] = 0; // Add to array to be targeted. Location calculated during fire()
 							}
 						}
-			
-						// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
-						/*if ($shipMove->type == "end" && 
-							isset($collisiontargets[$ship->id]) &&
-							$terrainPosition->q == $shipMove->position->q &&
-							$terrainPosition->r == $shipMove->position->r) {
-							unset($collisiontargets[$ship->id]); // Remove from collision targets.
-						}*/
 
-						$previousPosition = $shipMove->position;
-						$previousFacing = $shipMove->getFacingAngle();
+						//$previousPosition = $shipMove->position;
+						//$previousFacing = $shipMove->getFacingAngle();
 
 					}
 				}
@@ -7105,37 +7099,6 @@ class PulsarMine extends Weapon{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	} 
 
-/*
-    public function beforeFiringOrderResolution($gamedata){
-    	
-    	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
-		if($this->isOfflineOnTurn($gamedata->turn)) return; //Pulsar Mine is offline
-
-		$thisShip = $this->getUnit();
-		$deployTurn = $thisShip->getTurnDeployed($gamedata);
-		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
-
-    	$allShips = $gamedata->ships;  
-    	$relevantShips = array();
-
-		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
-		foreach($allShips as $ship){
-			if ($ship->isDestroyed()) continue;
-			if (!$ship instanceof FighterFlight && ($ship->id != $thisShip->id)) continue; //Ignore ships EXCEPT this one!			
-			if ($ship instanceof FighterFlight && $ship->team == $thisShip->team) continue;	//Ignore flights that are friendly.	
-			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore fighters that are not deployed yet!			
-			$relevantShips[] = $ship;			
-		}
-	
-		//Now check if any enemy fighters got in arc and range during their movement.
-		$targetFighters = $this->checkForValidTargets($relevantShips, $thisShip, $gamedata);
-
-    	//Now create up to 18 attacks using $targetFighters array.
-    	$this->createFireOrders($targetFighters, $thisShip, $gamedata);		
-
-    	
-	} //endof beforeFiringOrderResolution
-*/
 
     public function beforePreFiringOrderResolution($gamedata){
     	

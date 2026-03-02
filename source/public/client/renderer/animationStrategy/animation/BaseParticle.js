@@ -41,18 +41,17 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setTexture = function (tex) {
-        changeAttribute(this.geometry, this.index, 'textureNumber', tex);
-
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 1, tex);
         return this;
     };
 
     BaseParticle.prototype.setSize = function (size) {
-        changeAttribute(this.geometry, this.index, 'size', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 0, size);
         return this;
     };
 
     BaseParticle.prototype.setSizeChange = function (size) {
-        changeAttribute(this.geometry, this.index, 'sizeChange', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 1, size);
         return this;
     };
 
@@ -62,23 +61,23 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setOpacity = function (opacity) {
-        changeAttribute(this.geometry, this.index, 'opacity', opacity);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 2, opacity);
         return this;
     };
 
     BaseParticle.prototype.setFadeIn = function (time, speed) {
         if (!(typeof speed === 'undefined' ? 'undefined' : _typeof(speed)) === "undefined") speed = 1000;
 
-        changeAttribute(this.geometry, this.index, 'fadeInTime', time);
-        changeAttribute(this.geometry, this.index, 'fadeInSpeed', speed);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 0, time);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 1, speed);
         return this;
     };
 
     BaseParticle.prototype.setFadeOut = function (time, speed) {
         if (!(typeof speed === 'undefined' ? 'undefined' : _typeof(speed)) === "undefined") speed = 1000;
 
-        changeAttribute(this.geometry, this.index, 'fadeOutTime', time);
-        changeAttribute(this.geometry, this.index, 'fadeOutSpeed', speed);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 2, time);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 3, speed);
         return this;
     };
 
@@ -88,12 +87,12 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setAngle = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angle', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 2, mathlib.degreeToRadian(angle));
         return this;
     };
 
     BaseParticle.prototype.setAngleChange = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angleChange', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 3, mathlib.degreeToRadian(angle));
         return this;
     };
 
@@ -113,7 +112,7 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setActivationTime = function (gameTime) {
-        changeAttribute(this.geometry, this.index, 'activationGameTime', gameTime);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 0, gameTime);
         return this;
     };
 
@@ -126,6 +125,12 @@ window.BaseParticle = function () {
             target[index * values.length + i] = value;
         });
 
+        geometry.attributes[key].needsUpdate = true;
+    }
+
+    function changePackedAttribute(geometry, index, key, componentCount, offset, value) {
+        var target = geometry.attributes[key].array;
+        target[index * componentCount + offset] = value;
         geometry.attributes[key].needsUpdate = true;
     }
 

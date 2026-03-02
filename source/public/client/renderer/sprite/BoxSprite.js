@@ -15,13 +15,16 @@ window.BoxSprite = function () {
 
     BoxSprite.prototype = Object.create(webglSprite.prototype);
 
-    function createSide(geometry, p1, p2, p3, p4, i) {
-        geometry.vertices.push(p1, p2, p3, p4);
+    function createSide(positions, indices, p1, p2, p3, p4, i) {
+        positions.push(p1.x, p1.y, p1.z);
+        positions.push(p2.x, p2.y, p2.z);
+        positions.push(p3.x, p3.y, p3.z);
+        positions.push(p4.x, p4.y, p4.z);
 
         var a = i * 4;
 
-        geometry.faces.push(new THREE.Face3(a + 2, a + 1, a));
-        geometry.faces.push(new THREE.Face3(a + 2, a + 3, a + 1));
+        indices.push(a + 2, a + 1, a);
+        indices.push(a + 2, a + 3, a + 1);
 
         return ++i;
     }
@@ -30,17 +33,21 @@ window.BoxSprite = function () {
         var width = size.width;
         var height = size.height;
 
-        var geometry = new THREE.Geometry();
+        var geometry = new THREE.BufferGeometry();
+        var positions = [];
+        var indices = [];
         var i = 0;
 
-        i = createSide(geometry, new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, height / 2, 0), new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, -height / 2, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, height / 2, 0), new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, -height / 2, 0), i);
 
-        i = createSide(geometry, new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, -height / 2, 0), new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, height / 2, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, -height / 2, 0), new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, height / 2, 0), i);
 
-        i = createSide(geometry, new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2, -height / 2 + lineWidth, 0), new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2, -height / 2 + lineWidth, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2, -height / 2 + lineWidth, 0), new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2, -height / 2 + lineWidth, 0), i);
 
-        i = createSide(geometry, new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2, height / 2 - lineWidth, 0), new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2, height / 2 - lineWidth, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2, height / 2 - lineWidth, 0), new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2, height / 2 - lineWidth, 0), i);
 
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+        geometry.setIndex(indices);
         geometry.computeBoundingSphere();
 
         this.material = new THREE.MeshBasicMaterial({ color: this.color, transparent: true, opacity: this.opacity });

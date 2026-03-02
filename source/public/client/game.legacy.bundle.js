@@ -461,6 +461,7 @@ window.webglHexGridRenderer = function () {
         this.material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: HEX_OPACITY });
         this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.x += window.HexagonMath.getHexB() / 2;
+        this.mesh.position.z = -500; // Render behind everything else
         scene.add(this.mesh);
 
         drawGameSpace(scene);
@@ -490,7 +491,7 @@ window.webglHexGridRenderer = function () {
             y: 0
         };
 
-        var sprite = new window.BoxSprite(size, 10, 0, new THREE.Color(1, 1, 1), 0.5);
+        var sprite = new window.BoxSprite(size, 10, -500, new THREE.Color(1, 1, 1), 0.5);
 
         sprite.setPosition(position);
         scene.add(sprite.mesh);
@@ -540,11 +541,14 @@ window.webglHexGridRenderer = function () {
             color: 0x0000ff,
             linewidth: 30
         });
-        var geometry = new THREE.Geometry();
+
+        var points = [];
 
         getCenteredHexagonPoints(x, y, l).forEach(function (point) {
-            geometry.vertices.push(new THREE.Vector3(point.x, point.y, 0));
+            points.push(new THREE.Vector3(point.x, point.y, 0));
         });
+
+        var geometry = new THREE.BufferGeometry().setFromPoints(points);
 
         return new THREE.Line(geometry, material);
     }
@@ -733,7 +737,7 @@ window.webglScene = function () {
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
-        this.renderer.context.getExtension('OES_standard_derivatives');
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.localClippingEnabled = true;
 
         jQuery(this.renderer.domElement).addClass("webglCanvas").appendTo(canvasId);
@@ -908,6 +912,7 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.onWindowResize = function () {
+        if (!this.initialized) return; // Guard: may fire before init() completes
         this.width = jQuery('#pagecontainer').width();
         this.height = jQuery('#pagecontainer').height();
 
@@ -915,7 +920,7 @@ window.webglScene = function () {
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.coordinateConverter.onResize(window.innerWidth, window.innerHeight);
-        this.starField.cleanUp();
+        if (this.starField) this.starField.cleanUp();
     };
 
     webglScene.prototype.keyDown = function (event) {
@@ -1464,7 +1469,7 @@ window.webglSprite = function () {
         this.mesh = null;
         this.size = size;
         this.uniforms = {
-            texture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
+            spriteTexture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
             overlayAlpha: { type: 'f', value: 0.0 },
             overlayColor: { type: 'v3', value: new THREE.Color(0, 0, 0) },
             opacity: {
@@ -1556,8 +1561,29 @@ window.webglSprite = function () {
                             image,
                             imageBitmap => {
                                 setTimeout(() => {
-                                    const texture = new THREE.CanvasTexture(imageBitmap);
-                                    texture.minFilter = THREE.LinearMipMapNearestFilter;
+                                    // Draw to canvas to zero RGB on near-transparent pixels before
+                                    // texture upload. r160 sRGB gamma brightens low-alpha colour data
+                                    // in PNG transparent areas, creating a coloured fringe outline.
+                                    // Zeroing RGB below alpha 77 (~30%) removes the fringe without
+                                    // affecting intended semi-transparent areas like shroud effects.
+                                    const cleanCanvas = document.createElement('canvas');
+                                    cleanCanvas.width = imageBitmap.width;
+                                    cleanCanvas.height = imageBitmap.height;
+                                    const cx = cleanCanvas.getContext('2d', { willReadFrequently: true });
+                                    cx.drawImage(imageBitmap, 0, 0);
+                                    const imgData = cx.getImageData(0, 0, cleanCanvas.width, cleanCanvas.height);
+                                    const px = imgData.data;
+                                    for (let i = 0; i < px.length; i += 4) {
+                                        if (px[i + 3] < 77) { // alpha < ~30%: zero out RGB to prevent sRGB fringe
+                                            px[i] = px[i + 1] = px[i + 2] = 0;
+                                        }
+                                    }
+                                    cx.putImageData(imgData, 0, 0);
+                                    const texture = new THREE.CanvasTexture(cleanCanvas);
+                                    texture.colorSpace = THREE.SRGBColorSpace;
+                                    texture.generateMipmaps = false;
+                                    texture.minFilter = THREE.LinearFilter;
+                                    texture.magFilter = THREE.LinearFilter;
                                     resolve(texture);
                                     window.activeTextureLoads--;
                                     processQueue();
@@ -1580,7 +1606,7 @@ window.webglSprite = function () {
 
             loadedTextures[image].then(texture => {
                 setTimeout(() => {
-                    this.uniforms.texture.value = texture;
+                    this.uniforms.spriteTexture.value = texture;
                 }, 0);
             });
         }
@@ -1655,9 +1681,10 @@ window.ShipEWSprite = function () {
         drawDEW(context, DEW);
         drawCCEW(context, DEW, CCEW);
 
-        var texture = new THREE.Texture(canvas);
+        var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
-        this.uniforms.texture.value = texture;
+        this.uniforms.spriteTexture.value = texture;
     };
 
     function drawDEW(context, DEW) {
@@ -1675,7 +1702,7 @@ window.ShipEWSprite = function () {
         context.fillStyle = "rgba(144,185,208," + a + ")";
 
         var r1 = getDEWStart();
-        var r2 = getDEWStart() + DEW*2.5;
+        var r2 = getDEWStart() + DEW * 2.5;
 
         graphics.drawFilledCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, r1, r2);
     }
@@ -1686,7 +1713,7 @@ window.ShipEWSprite = function () {
 
     function getCCEWStart(DEW) {
 
-        return Math.ceil(TEXTURE_SIZE * 0.32) + DEW*3;
+        return Math.ceil(TEXTURE_SIZE * 0.32) + DEW * 3;
     }
 
     function drawCCEW(context, DEW, CCEW) {
@@ -1704,7 +1731,7 @@ window.ShipEWSprite = function () {
         context.fillStyle = "rgba(20,80,128," + a + ")";
 
         var r1 = getCCEWStart(DEW);
-        var r2 = getCCEWStart(DEW) + CCEW*3;
+        var r2 = getCCEWStart(DEW) + CCEW * 3;
 
         graphics.drawFilledCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, r1, r2);
     }
@@ -1738,7 +1765,7 @@ window.ShipSelectedSprite = function () {
             createTextures();
         }
 
-        this.uniforms.texture.value = chooseTexture(type, selected);
+        this.uniforms.spriteTexture.value = chooseTexture(type, selected);
     }
 
     function chooseTexture(type, selected) {
@@ -1770,20 +1797,21 @@ window.ShipSelectedSprite = function () {
         var context = canvas.getContext("2d");
         getColorByType(context, type, selected);
 
-		//Separate these so we can give different type of dotted circles different number of segments - DK 10/24
+        //Separate these so we can give different type of dotted circles different number of segments - DK 10/24
         if (selected && type == 'mine') {
             window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 12, 0.25);
         } else if (selected && type == 'ally') {
             window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 16, 0.3);
         } else if (selected && type == 'enemy') {
-            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 10, 0.20);      
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.23, TEXTURE_SIZE * 0.30, 10, 0.20);
         } else if (selected && type == 'neutral') {
-            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.22, TEXTURE_SIZE * 0.26, 4, 0.15);      
+            window.graphics.drawDottedCircle(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.22, TEXTURE_SIZE * 0.26, 4, 0.15);
         } else {
             window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
         }
 
-        var tex = new THREE.Texture(canvas);
+        var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
 
         return tex;
@@ -1791,7 +1819,7 @@ window.ShipSelectedSprite = function () {
 
     function getColorByType(context, type, selected) {
         var a = -0.1;
-    
+
         if (type == "mine" && selected) {
             context.strokeStyle = "rgba(78,220,25," + (0.60 + a) + ")";
             context.fillStyle = "rgba(78,220,25," + (0.40 + a) + ")";
@@ -1845,13 +1873,16 @@ window.BoxSprite = function () {
 
     BoxSprite.prototype = Object.create(webglSprite.prototype);
 
-    function createSide(geometry, p1, p2, p3, p4, i) {
-        geometry.vertices.push(p1, p2, p3, p4);
+    function createSide(positions, indices, p1, p2, p3, p4, i) {
+        positions.push(p1.x, p1.y, p1.z);
+        positions.push(p2.x, p2.y, p2.z);
+        positions.push(p3.x, p3.y, p3.z);
+        positions.push(p4.x, p4.y, p4.z);
 
         var a = i * 4;
 
-        geometry.faces.push(new THREE.Face3(a + 2, a + 1, a));
-        geometry.faces.push(new THREE.Face3(a + 2, a + 3, a + 1));
+        indices.push(a + 2, a + 1, a);
+        indices.push(a + 2, a + 3, a + 1);
 
         return ++i;
     }
@@ -1860,17 +1891,21 @@ window.BoxSprite = function () {
         var width = size.width;
         var height = size.height;
 
-        var geometry = new THREE.Geometry();
+        var geometry = new THREE.BufferGeometry();
+        var positions = [];
+        var indices = [];
         var i = 0;
 
-        i = createSide(geometry, new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, height / 2, 0), new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, -height / 2, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, height / 2, 0), new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2 + lineWidth, -height / 2, 0), i);
 
-        i = createSide(geometry, new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, -height / 2, 0), new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, height / 2, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, -height / 2, 0), new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2 - lineWidth, height / 2, 0), i);
 
-        i = createSide(geometry, new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2, -height / 2 + lineWidth, 0), new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2, -height / 2 + lineWidth, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(-width / 2, -height / 2, 0), new THREE.Vector3(-width / 2, -height / 2 + lineWidth, 0), new THREE.Vector3(width / 2, -height / 2, 0), new THREE.Vector3(width / 2, -height / 2 + lineWidth, 0), i);
 
-        i = createSide(geometry, new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2, height / 2 - lineWidth, 0), new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2, height / 2 - lineWidth, 0), i);
+        i = createSide(positions, indices, new THREE.Vector3(width / 2, height / 2, 0), new THREE.Vector3(width / 2, height / 2 - lineWidth, 0), new THREE.Vector3(-width / 2, height / 2, 0), new THREE.Vector3(-width / 2, height / 2 - lineWidth, 0), i);
 
+        geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3));
+        geometry.setIndex(indices);
         geometry.computeBoundingSphere();
 
         this.material = new THREE.MeshBasicMaterial({ color: this.color, transparent: true, opacity: this.opacity });
@@ -1927,6 +1962,7 @@ PlainSprite.prototype.addTextSprite = function(avail) {
     ctx.fillText("Turn " + avail, canvas.width / 2, canvas.height / 2);
 
     var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
     texture.minFilter = THREE.LinearFilter;
     texture.magFilter = THREE.LinearFilter;
     texture.needsUpdate = true;
@@ -1991,7 +2027,7 @@ window.LineSprite = function () {
             transparent: true,
             opacity: this.opacity,
             map: args.texture || null,
-            blending: args.blending || null
+            blending: args.blending || THREE.NormalBlending
         });
 
         this.mesh = new THREE.Mesh(this.geometry, this.material);
@@ -2059,22 +2095,24 @@ window.BallisticSprite = function () {
     var TEXTURE_HEX_YELLOW = null;
     var TEXTURE_HEX_PURPLE = null;
     var TEXTURE_HEX_WHITE = null;
-    var TEXTURE_HEX_CLEAR = null;             
+    var TEXTURE_HEX_CLEAR = null;
 
     function BallisticSprite(position, type, text = "", textColour = "#ffffff", imageSrc = null) {
-        HexagonSprite.call(this, -3);
+        HexagonSprite.call(this, -100);
+
+        if (!TEXTURE_HEX_ORANGE) {
+            createTextures();
+        }
 
         // If an image source is provided, create a texture with the image
         if (imageSrc) {
-            this.uniforms.texture.value = createTextureWithImage(type, text, textColour, imageSrc);
+            this.uniforms.spriteTexture.value = createTextureWithImage(type, text, textColour, imageSrc);
         } else if (text) {
-            // If there is custom text (like Thoughtwave, Ion Field, etc.), create a custom texture
-            this.uniforms.texture.value = createTextureWithText(type, text, textColour || "#ffffff");
+            this.uniforms.spriteTexture.value = createTextureWithText(type, text, textColour || "#ffffff");
+        } else if (type instanceof THREE.Texture) {
+            this.uniforms.spriteTexture.value = type;
         } else {
-            if (!TEXTURE_HEX_ORANGE) {
-                createTextures(); // Initialize all textures once
-            }
-            this.uniforms.texture.value = chooseTexture(type);
+            this.uniforms.spriteTexture.value = chooseTexture(type);
         }
 
         this.setPosition(position);
@@ -2096,7 +2134,7 @@ window.BallisticSprite = function () {
             return TEXTURE_HEX_YELLOW;
         } else if (type == "hexPurple") {
             return TEXTURE_HEX_PURPLE;
-        } else if (type == "hexWhite") { 
+        } else if (type == "hexWhite") {
             return TEXTURE_HEX_WHITE;
         } else if (type == "hexClear") {  // ✅ New hexClear case
             return TEXTURE_HEX_CLEAR;
@@ -2119,54 +2157,56 @@ window.BallisticSprite = function () {
 
     function createTexture(type) {
         var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
-        var tex = new THREE.Texture(canvas);
+        var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
         return tex;
     }
 
-	function createTextureWithImage(type, text, textColour, imageSrc) {
-	    // Create the initial hex grid texture with the colored background
-	    var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
-	    var ctx = canvas.getContext('2d');
+    function createTextureWithImage(type, text, textColour, imageSrc) {
+        // Create the initial hex grid texture with the colored background
+        var canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
+        var ctx = canvas.getContext('2d');
 
-	    // Create a temporary texture to return immediately
-	    var tex = new THREE.Texture(canvas);
-	    tex.needsUpdate = true;
+        // Create a temporary texture to return immediately
+        var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
 
-	    // Load the image asynchronously
-	    var image = new Image();
-	    image.src = imageSrc;
+        // Load the image asynchronously
+        var image = new Image();
+        image.src = imageSrc;
 
-	    image.onload = function () {
-	        // Redraw the hex grid background (without clearing the canvas)
-	        HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10, ctx);
+        image.onload = function () {
+            // Redraw the hex grid background (without clearing the canvas)
+            HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10, ctx);
 
-	        // Scale and position the image in the center of the hex
-	        var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 28% of the hex size
-	        var xPos = (TEXTURE_SIZE - imageSize) / 2;
-	        var yPos = (TEXTURE_SIZE - imageSize) / 2;
+            // Scale and position the image in the center of the hex
+            var imageSize = TEXTURE_SIZE * 0.28; // Scale image to 28% of the hex size
+            var xPos = (TEXTURE_SIZE - imageSize) / 2;
+            var yPos = (TEXTURE_SIZE - imageSize) / 2;
 
-	        ctx.drawImage(image, xPos, yPos, imageSize, imageSize);
+            ctx.drawImage(image, xPos, yPos, imageSize, imageSize);
 
-	        // Optionally draw text after the image
-	        if (text) {
-	            var fontSize = 25;
-				var initTextColour = textColour;
-				var lightenedColour = lightenColor(initTextColour, 40); // Lighten by 40%            
-	            ctx.font = `bold ${fontSize}px Arial`;
-	            ctx.fillStyle = lightenedColour || "#ffffff";
-	            ctx.textAlign = "center";
-	            ctx.textBaseline = "middle";
-	            ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 1.55);
-	        }
+            // Optionally draw text after the image
+            if (text) {
+                var fontSize = 25;
+                var initTextColour = textColour;
+                var lightenedColour = lightenColor(initTextColour, 40); // Lighten by 40%            
+                ctx.font = `bold ${fontSize}px Arial`;
+                ctx.fillStyle = lightenedColour || "#ffffff";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 1.55);
+            }
 
-	        // Update the texture with the new canvas content
-	        tex.needsUpdate = true;
-	    };
+            // Update the texture with the new canvas content
+            tex.needsUpdate = true;
+        };
 
-	    // Return the placeholder texture, which will update once the image is loaded
-	    return tex;
-	}
+        // Return the placeholder texture, which will update once the image is loaded
+        return tex;
+    }
 
     function createTextureWithText(type, text, textColour) {
         const canvas = HexagonTexture.renderHexGrid(TEXTURE_SIZE, getStrokeColorByType(type), getFillColorByType(type), 10);
@@ -2180,16 +2220,16 @@ window.BallisticSprite = function () {
         ctx.textBaseline = "middle";
 
 
-    const maxWidth = TEXTURE_SIZE * 0.45;
+        const maxWidth = TEXTURE_SIZE * 0.45;
 
-    let lines;
-    do {
-        ctx.font = `bold ${fontSize}px Arial`;
-        lines = wrapText(ctx, text, maxWidth);
-        fontSize -= 5;
-    } while (lines.some(line => ctx.measureText(line).width > maxWidth) && fontSize > 10);
+        let lines;
+        do {
+            ctx.font = `bold ${fontSize}px Arial`;
+            lines = wrapText(ctx, text, maxWidth);
+            fontSize -= 5;
+        } while (lines.some(line => ctx.measureText(line).width > maxWidth) && fontSize > 10);
 
-    ctx.font = `bold ${fontSize}px Arial`; // Ensure correct font used after loop
+        ctx.font = `bold ${fontSize}px Arial`; // Ensure correct font used after loop
 
         const lineHeight = fontSize * 1.2;
         const totalHeight = lines.length * lineHeight;
@@ -2200,7 +2240,8 @@ window.BallisticSprite = function () {
             ctx.fillText(line, TEXTURE_SIZE / 2, y);
         });
 
-        const tex = new THREE.Texture(canvas);
+        const tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
         tex.needsUpdate = true;
         return tex;
     }
@@ -2224,26 +2265,26 @@ window.BallisticSprite = function () {
         return lines;
     }
 
-	function lightenColor(hex, percent) { //Need to lighten text so it stands out from hex clouring a little!
-	    // Convert hex to RGB
-	    var num = parseInt(hex.slice(1), 16),
-	        r = (num >> 16) + Math.round(255 * percent / 100),
-	        g = ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100),
-	        b = (num & 0x0000FF) + Math.round(255 * percent / 100);
-	    
-	    // Ensure values stay within bounds
-	    r = r > 255 ? 255 : r;
-	    g = g > 255 ? 255 : g;
-	    b = b > 255 ? 255 : b;
+    function lightenColor(hex, percent) { //Need to lighten text so it stands out from hex clouring a little!
+        // Convert hex to RGB
+        var num = parseInt(hex.slice(1), 16),
+            r = (num >> 16) + Math.round(255 * percent / 100),
+            g = ((num >> 8) & 0x00FF) + Math.round(255 * percent / 100),
+            b = (num & 0x0000FF) + Math.round(255 * percent / 100);
 
-	    // Convert back to hex
-	    return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, 0)}`;
-	}
+        // Ensure values stay within bounds
+        r = r > 255 ? 255 : r;
+        g = g > 255 ? 255 : g;
+        b = b > 255 ? 255 : b;
+
+        // Convert back to hex
+        return `#${(r << 16 | g << 8 | b).toString(16).padStart(6, 0)}`;
+    }
 
 
     function getStrokeColorByType(type) {
         if (type == "hexOrange") {
-            return "rgba(250,110,5,0.40)"; 
+            return "rgba(250,110,5,0.40)";
         } else if (type == "hexRed") {
             return "rgba(230,20,10,0.40)";
         } else if (type == "hexBlue") {
@@ -2254,7 +2295,7 @@ window.BallisticSprite = function () {
             return "rgba(255, 255, 0,0.40)";
         } else if (type == "hexPurple") {
             return "rgba(127, 0, 255,0.40)";
-        } else if (type == "hexWhite") { 
+        } else if (type == "hexWhite") {
             return "rgba(255, 255, 255,0.40)";
         } else if (type == "hexClear") { // ✅ No stroke color
             return "rgba(0,0,0,0)";
@@ -2276,14 +2317,14 @@ window.BallisticSprite = function () {
             return "rgba(255, 255, 0,0.10)";
         } else if (type == "hexPurple") {
             return "rgba(127, 0, 255,0.10)";
-        } else if (type == "hexWhite") { 
+        } else if (type == "hexWhite") {
             return "rgba(255, 255, 255,0.10)";
         } else if (type == "hexClear") { // ✅ No fill color
             return "rgba(0,0,0,0)";
         } else {
             return "rgba(144,185,208,0.30)";
         }
-}
+    }
 
     return BallisticSprite;
 }();;
@@ -2293,40 +2334,40 @@ window.BallisticSprite = function () {
 
 window.BallisticLineSprite = function () {
 
-function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
-    if (!args) {
-        args = {};
-    }
-
-    this.z = z || -3;
-    this.mesh = new THREE.Object3D(); // Use Object3D to group arrows
-    this.start = start;
-    this.end = end;
-    this.width = lineWidth;
-
-    this.color = color;
-    this.opacity = opacity;
-
-    // Check for zero-length line
-    if (start.x === end.x && start.y === end.y && start.z === end.z) {
-//        console.warn("Attempted to create a BallisticLineSprite with zero-length. Skipping.");
-        this.arrowCount = 0; // No arrows to create
-        return;
-    }
-
-    this.arrowCount = 8; // Number of arrows in the series (adjustable)
-    this.arrowSpacing = mathlib.distance(start, end) / this.arrowCount; // Space between arrows
-
-    // Create the series of arrows
-    for (let i = 0; i < this.arrowCount; i++) {
-        let arrow = this.createArrow(start, end, i);
-        if (arrow) {
-            this.mesh.add(arrow); // Add the arrow to the group
+    function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
+        if (!args) {
+            args = {};
         }
-    }
 
-    this.setLineWidth(lineWidth);
-}
+        this.z = z || 3;
+        this.mesh = new THREE.Object3D(); // Use Object3D to group arrows
+        this.start = start;
+        this.end = end;
+        this.width = lineWidth;
+
+        this.color = color;
+        this.opacity = opacity;
+
+        // Check for zero-length line
+        if (start.x === end.x && start.y === end.y && start.z === end.z) {
+            //        console.warn("Attempted to create a BallisticLineSprite with zero-length. Skipping.");
+            this.arrowCount = 0; // No arrows to create
+            return;
+        }
+
+        this.arrowCount = 8; // Number of arrows in the series (adjustable)
+        this.arrowSpacing = mathlib.distance(start, end) / this.arrowCount; // Space between arrows
+
+        // Create the series of arrows
+        for (let i = 0; i < this.arrowCount; i++) {
+            let arrow = this.createArrow(start, end, i);
+            if (arrow) {
+                this.mesh.add(arrow); // Add the arrow to the group
+            }
+        }
+
+        this.setLineWidth(lineWidth);
+    }
 
     // Create an individual arrow at a specific position along the line
     BallisticLineSprite.prototype.createArrow = function (start, end, index) {
@@ -2336,11 +2377,11 @@ function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
         // Create an ArrowHelper for the arrow
         let arrow = new THREE.ArrowHelper(
             new THREE.Vector3(end.x - start.x, end.y - start.y, 0).normalize(), // Direction vector
-            new THREE.Vector3(position.x, position.y,-3), // Arrow position
+            new THREE.Vector3(position.x, position.y, this.z), // Arrow position (z depends on this.z)
             this.arrowSpacing, // Length of the arrow
             this.color, // Arrow color
-            this.width*2, // Head length (adjustable for visual impact)
-            this.width*1.8 // Head width (adjustable for visual impact)
+            this.width * 2, // Head length (adjustable for visual impact)
+            this.width * 1.8 // Head width (adjustable for visual impact)
         );
 
         //var arrowOpacity = this.opacity + 0.2;
@@ -2350,8 +2391,8 @@ function BallisticLineSprite(start, end, lineWidth, z, color, opacity, args) {
         arrow.line.material.opacity = this.opacity;
         arrow.children[1].material.transparent = true;     //Cause issues with other render if I try to make arrows transparent   
         arrow.children[1].material.opacity = this.opacity;
-    
-        
+
+
         return arrow;
     };
 
@@ -2414,21 +2455,22 @@ window.TextSprite = function () {
         var context = canvas.getContext("2d");
         context.save();
         context.fillStyle = this.color;
-        context.font =  this.fontSize + " " + this.font;
+        context.font = this.fontSize + " " + this.font;
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.shadowOffsetX = 0;
         context.shadowOffsetY = 0;
-    
+
         context.shadowColor = "rgba(0,0,0,1)";
-    
+
         context.shadowBlur = 8;
-        context.fillText(text, Math.round(size/2),  Math.round(size/2));
+        context.fillText(text, Math.round(size / 2), Math.round(size / 2));
         context.restore();
 
         var geometry = new THREE.PlaneGeometry(size, size, 1, 1);
-        
-        var texture = new THREE.Texture(canvas);
+
+        var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
 
         this.material = new THREE.MeshBasicMaterial({
@@ -2439,7 +2481,7 @@ window.TextSprite = function () {
         this.mesh = new THREE.Mesh(geometry, this.material);
     }
 
-    
+
     TextSprite.prototype.setScale = function (width, height) {
         this.mesh.scale.set(width, height, 1);
     };
@@ -2477,14 +2519,14 @@ window.TextSprite = function () {
 
 window.HexNumberSprite = function () {
     var TEXTURE_SIZE = 512;
-    var opacity = 0.85;	
+    var opacity = 0.85;
 
     function HexNumberSprite(position, type, text = "", textColour = "#ffffff", textSize = 30) {
-        HexagonSprite.call(this, -3);
+        HexagonSprite.call(this, -100);
 
-		 if (text) {
+        if (text) {
             // If there is custom text (like Thoughtwave, Ion Field, etc.), create a custom texture
-            this.uniforms.texture.value = createTextureWithText(type, text, textColour, textSize, opacity);
+            this.uniforms.spriteTexture.value = createTextureWithText(type, text, textColour, textSize, opacity);
         }
 
         this.setPosition(position);
@@ -2492,41 +2534,42 @@ window.HexNumberSprite = function () {
 
 
     HexNumberSprite.prototype = Object.create(HexagonSprite.prototype);
-/*
-function createTextureWithText(type, text, textColour, textSize) {
-
-    var canvas = HexagonTexture.renderNumberGrid(TEXTURE_SIZE, 10);
-    var ctx = canvas.getContext('2d');
+    /*
+    function createTextureWithText(type, text, textColour, textSize) {
     
-    // Set initial font size and style
-    var fontSize = textSize;
-    ctx.globalAlpha = opacity;  // Set opacity for the text
-    ctx.font = `bold ${fontSize}px Arial`;
-    ctx.fillStyle = textColour;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-
-    // Measure the text width
-    var maxWidth = TEXTURE_SIZE * 0.4;  // Max width for text (40% of texture size)
-    var textWidth = ctx.measureText(text).width;
-
-    // Adjust font size if text is too wide
-    while (textWidth > maxWidth && fontSize > 10) {
-        fontSize -= 5;  // Reduce font size in steps
+        var canvas = HexagonTexture.renderNumberGrid(TEXTURE_SIZE, 10);
+        var ctx = canvas.getContext('2d');
+        
+        // Set initial font size and style
+        var fontSize = textSize;
+        ctx.globalAlpha = opacity;  // Set opacity for the text
         ctx.font = `bold ${fontSize}px Arial`;
-        textWidth = ctx.measureText(text).width;
+        ctx.fillStyle = textColour;
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+    
+        // Measure the text width
+        var maxWidth = TEXTURE_SIZE * 0.4;  // Max width for text (40% of texture size)
+        var textWidth = ctx.measureText(text).width;
+    
+        // Adjust font size if text is too wide
+        while (textWidth > maxWidth && fontSize > 10) {
+            fontSize -= 5;  // Reduce font size in steps
+            ctx.font = `bold ${fontSize}px Arial`;
+            textWidth = ctx.measureText(text).width;
+        }
+    
+        // Draw the text centered in the middle of the texture
+        ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
+    
+        // Create and return a texture from the canvas
+        var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+    
+        return tex;
     }
-
-    // Draw the text centered in the middle of the texture
-    ctx.fillText(text, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
-
-    // Create and return a texture from the canvas
-    var tex = new THREE.Texture(canvas);
-    tex.needsUpdate = true;
-
-    return tex;
-}
-*/
+    */
     return HexNumberSprite;
 }();;
 
@@ -2536,8 +2579,14 @@ function createTextureWithText(type, text, textColour, textSize) {
 window.ShipIcon = function () {
 
     var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
+    directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
     var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
+    directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
     const THRUSTER_TEXTURE = new THREE.TextureLoader().load("./img/systemicons/thrusterICON1.png");
+    THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
+    THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 
     function ShipIcon(ship, scene) {
 
@@ -2568,6 +2617,7 @@ window.ShipIcon = function () {
         this.NotMovedSprite = null;
 
         this.selected = false;
+        this.baseZ = this.terrain ? -50 : 0;
 
         this.create(ship, scene);
         this.consumeShipdata(ship);
@@ -2689,7 +2739,7 @@ window.ShipIcon = function () {
     ShipIcon.prototype.consumeEW = function (ship) {
         var dew = ew.getDefensiveEW(ship);
         //if (ship.flight) {
-        if (ship.flight || ship.jinkinglimit > 0) {
+        if (ship.flight) {
             dew = shipManager.movement.getJinking(ship);
         }
 
@@ -2718,16 +2768,16 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
-            this.mesh.position.z = 499;
+            this.mesh.position.z = this.baseZ + (this.terrain ? 10 : 499);
             if (!this.terrain) { //No sprite for Terrain  
                 this.shipDirectionOfProwSprite.show();
                 this.shipDirectionOfMovementSprite.show();
             }
         } else {
             if (this.selected) {
-                this.mesh.position.z = 100;
+                this.mesh.position.z = this.baseZ + (this.terrain ? 5 : 100);
             } else {
-                this.mesh.position.z = 0;
+                this.mesh.position.z = this.baseZ;
             }
 
             // On mobile, if selected, don't hide sprites
@@ -2747,11 +2797,11 @@ window.ShipIcon = function () {
             if (value) {
                 this.ShipSelectedSprite.show();
                 if (!this.selected) {
-                    this.mesh.position.z = 100;
+                    this.mesh.position.z = this.baseZ + (this.terrain ? 5 : 100);
                 }
             } else {
                 if (this.selected) {
-                    this.mesh.position.z = 0;
+                    this.mesh.position.z = this.baseZ;
                 }
                 this.ShipSelectedSprite.hide();
             }
@@ -2783,7 +2833,7 @@ window.ShipIcon = function () {
     ShipIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
-        this.mesh.position.set(500, 0, 0);
+        this.mesh.position.set(500, 0, this.baseZ);
         this.mesh.renderDepth = 10;
 
         // Defined a maximum width and height, some new ships like Thirdspace are MUCH larger and benefit from this - DK 25.3.24
@@ -2805,12 +2855,12 @@ window.ShipIcon = function () {
 
         this.shipSprite.setOverlayColor(
             this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
                 : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
                     : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
         );
 
         if (ship.imageFlipped) {
@@ -3050,6 +3100,8 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+        if (!(weapon instanceof Weapon)) return null; // Only show arcs for weapons
+
         var hexDistance = window.coordinateConverter.getHexDistance();
 
         if (weapon instanceof Thruster) {
@@ -3063,6 +3115,7 @@ window.ShipIcon = function () {
 
         } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
 
             for (const arcs of allArcs) {
@@ -3080,6 +3133,7 @@ window.ShipIcon = function () {
 
         } else { //Normal weapons with circular weapon arcs
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             var arcs = shipManager.systems.getArcs(ship, weapon);
             var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
             var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
@@ -3248,7 +3302,7 @@ window.ShipIcon = function () {
         var hexDistance = window.coordinateConverter.getHexDistance();
         var dis = 20.6 * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
 
-        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 157 / 255, 0 / 255);
+        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() : new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
 
         // Create a hexagon shape
         var hexShape = new THREE.Shape();
@@ -3319,9 +3373,10 @@ window.ShipIcon = function () {
         var angleEnd = mathlib.degreeToRadian(-(systemArcs.start + offset)) + shooterRotation;
 
         var isSmallArc = false;
+        var is360Arc = Math.abs(systemArcs.start - systemArcs.end) === 360 || systemArcs.start === systemArcs.end;
 
         // If start != end, we clips. If start == end, it's a 360 circle (no clips).
-        if (systemArcs.start !== systemArcs.end) {
+        if (!is360Arc) {
             // Calculate the angular span
             var span = angleEnd - angleStart;
             while (span < 0) span += TWO_PI;
@@ -3340,7 +3395,7 @@ window.ShipIcon = function () {
         var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
         plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
         if (color == null) {
-            color = new THREE.Color(0.1, 0.5, 0.1)
+            color = new THREE.Color(0.1, 0.5, 0.1).convertSRGBToLinear()
         }
 
         if (opacity == null) {
@@ -3352,7 +3407,7 @@ window.ShipIcon = function () {
             opacity: opacity,
             transparent: true,
             side: THREE.DoubleSide,
-            clippingPlanes: systemArcs.start !== systemArcs.end ? [plane1, plane2] : [],
+            clippingPlanes: !is360Arc ? [plane1, plane2] : [],
             clipIntersection: !isSmallArc
         });
 
@@ -3478,14 +3533,14 @@ window.FlightIcon = function () {
     };
 
     FlightIcon.prototype.getFacing = function (facing) {
-		var facingActual = this.fighterObject.rotation.z;
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        var facingActual = this.fighterObject.rotation.z;
+        this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         return mathlib.radianToDegree(facingActual);
     };
 
     FlightIcon.prototype.setFacing = function (facing) {
-		var facingActual = mathlib.degreeToRadian(facing);
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        var facingActual = mathlib.degreeToRadian(facing);
+        this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         this.fighterObject.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
     };
 
@@ -3494,16 +3549,16 @@ window.FlightIcon = function () {
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
-        var overlayColour = 
-                this.terrain 
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
-                : this.mine 
-                ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
-                : this.ally 
-                ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
-                : new THREE.Color(255 / 255, 40 / 255, 40 / 255); // Red
+        var overlayColour =
+            this.terrain
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
+                : this.mine
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
+                    : this.ally
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
 
-		this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
+        this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
         this.mesh.add(this.shipDirectionOfProwSprite.mesh);
         this.shipDirectionOfProwSprite.hide();
 
@@ -3522,18 +3577,18 @@ window.FlightIcon = function () {
 
         this.mesh.add(this.fighterObject);
 
-		//29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
-        
-        this.shipEWSprite = new window.ShipEWSprite({ width: this.size*0.75, height: this.size*0.75 }, -1);
+        //29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
+
+        this.shipEWSprite = new window.ShipEWSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
-        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
-        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, 'neutral', false).hide();
+        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, 'neutral', false).hide();
         this.mesh.add(this.NotMovedSprite.mesh);
 
         scene.add(this.mesh);
@@ -3922,11 +3977,11 @@ window.ShipIconContainer = function () {
 
 window.EWIconContainer = function () {
 
-    var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255);
-    var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255);
-    var COLOR_OEW_DIST = new THREE.Color(255 / 255,  157 / 255, 0 / 255);
-    var COLOR_SDEW = new THREE.Color(109/255, 189/255, 255/255);
-    var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1);
+    var COLOR_OEW_FRIENDLY = new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear();
+    var COLOR_OEW_ENEMY = new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear();
+    var COLOR_OEW_DIST = new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
+    var COLOR_SDEW = new THREE.Color(109 / 255, 189 / 255, 255 / 255).convertSRGBToLinear();
+    var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1).convertSRGBToLinear();
 
     function EWIconContainer(coordinateConverter, scene, iconContainer) {
         this.ewIcons = [];
@@ -4042,7 +4097,7 @@ window.EWIconContainer = function () {
             return;
         }
 
-        if((shipManager.shouldBeHidden(ship)) || (shipManager.shouldBeHidden(target))) return;
+        if ((shipManager.shouldBeHidden(ship)) || (shipManager.shouldBeHidden(target))) return;
 
         var icon = getOEWIcon.call(this, ship, target, type);
         if (icon) {
@@ -4079,7 +4134,7 @@ window.EWIconContainer = function () {
             amount: amount,
             shipIcon: shipIcon,
             targetIcon: targetIcon,
-            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -3, getColor(ship, type), 0.5),
+            sprite: new LineSprite(shipIcon.getPosition(), targetIcon.getPosition(), getOEWLineWidth.call(this, amount), -5, getColor(ship, type), 0.5),
             used: true
         };
 
@@ -4089,8 +4144,8 @@ window.EWIconContainer = function () {
         return OEWIcon;
     }
 
-    function getColor(ship, type)  {
-        switch(type) {
+    function getColor(ship, type) {
+        switch (type) {
             case "OEW":
                 return gamedata.isMyOrTeamOneShip(ship) ? COLOR_OEW_FRIENDLY : COLOR_OEW_ENEMY;
             case "DIST":
@@ -4130,6 +4185,10 @@ window.BallisticIconContainer = function () {
 		this.ballisticLineIcons = [];
 		this.hexNumberIcons = [];
 		this.hexNumbersGenerated = false;
+
+		// Track lines visibility state explicitly rather than inferring from existing sprites
+		this.friendlyLinesVisible = false;
+		this.enemyLinesVisible = false;
 	}
 
 	BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
@@ -4171,8 +4230,9 @@ window.BallisticIconContainer = function () {
 
 	function generateBallisticLines() {
 		const oldIcons = this.ballisticLineIcons;
-		const isFriendlyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && icon.isFriendly);
-		const isEnemyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && !icon.isFriendly);
+		// Removed reliance on checking existing icons' visibility:
+		// const isFriendlyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && icon.isFriendly);
+		// const isEnemyLinesVisible = oldIcons.some(icon => icon.lineSprite?.isVisible && !icon.isFriendly);
 
 		this.ballisticLineIcons = oldIcons.filter(icon => {
 			if (!icon.used) {
@@ -4181,7 +4241,7 @@ window.BallisticIconContainer = function () {
 			}
 
 			if (icon.lineSprite) {
-				const shouldBeVisible = icon.isFriendly ? isFriendlyLinesVisible : isEnemyLinesVisible;
+				const shouldBeVisible = icon.isFriendly ? this.friendlyLinesVisible : this.enemyLinesVisible;
 				icon.lineSprite[shouldBeVisible ? 'show' : 'hide']();
 				icon.lineSprite.isVisible = shouldBeVisible;
 			}
@@ -4194,7 +4254,7 @@ window.BallisticIconContainer = function () {
 		if (gamedata.gamephase === -1) return; //Don't bother during Deployment phase.
 
 		gamedata.ships.filter(ship => ship.Enormous && ship.shipSizeClass == 5 && !shipManager.isDestroyed(ship)).forEach(ship => {
-		//gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
+			//gamedata.ships.filter(ship => ship.Huge > 0).forEach(ship => {
 			const position = shipManager.getShipPosition(ship);
 			/*const perimeterHexes = (ship.Huge === 2)
 				? mathlib.getPerimeterHexes(position, ship.Huge)
@@ -4359,14 +4419,14 @@ window.BallisticIconContainer = function () {
 				'1-Blanket Shield': { type: 'hexGreen', text: 'Shade Modulator', color: '#008000' },
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
 				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
-				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },	
+				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },
 				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },
 				'Priorty - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
 			};
 
-			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)){
-        		var shadingField = shipManager.systems.getSystemByName(shooter, "ShadingField");
-				if(!shadingField.isDetectedTorvalus(shooter, 20)) return; 
+			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)) {
+				var shadingField = shipManager.systems.getSystemByName(shooter, "ShadingField");
+				if (!shadingField.isDetectedTorvalus(shooter, 20)) return;
 			}
 
 			const match = modeMap[modeName];
@@ -4575,10 +4635,13 @@ window.BallisticIconContainer = function () {
 
 		// Override for special launcher hex logic
 		if (weapon?.hasSpecialLaunchHexCalculation) {
-			const launcherHex = weaponManager.getFiringHex(shooter, weapon);
-			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
-			type = 'red';
-			if (ballistic.damageclass == 'Targeter') type = 'yellow';
+			if (ballistic.damageclass === 'Targeter') {
+				type = 'yellow';
+			} else {
+				const launcherHex = weaponManager.getFiringHex(shooter, weapon);
+				launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
+				type = 'red';
+			}
 		}
 
 		// Handle specific modeName cases
@@ -4607,6 +4670,22 @@ window.BallisticIconContainer = function () {
 					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn)?.position);
 					break;
 
+				case 'gravNetMoveHex': {
+					// Line should start at the captured target ship, not the GravityNet's own ship.
+					type = 'green';
+					const gravNetTargetIcon = ballistic.gravNetTargetId != null && ballistic.gravNetTargetId !== -1
+						? iconContainer.getById(ballistic.gravNetTargetId)
+						: null;
+					if (gravNetTargetIcon) {
+						launchPosition = this.coordinateConverter.fromHexToGame(
+							replay
+								? gravNetTargetIcon.getLastMovementOnTurn(turn)?.position
+								: gravNetTargetIcon.getLastMovement(turn)?.position
+						);
+					}
+					break;
+				}
+
 				case 'Sweeping':
 					type = 'purple';
 					if (weapon?.weaponClass === 'Particle') type = 'orange';
@@ -4623,7 +4702,7 @@ window.BallisticIconContainer = function () {
 			launchPosition,
 			targetPosition,
 			3 * this.zoomScale,
-			-3,
+			-5, // Render above terrain but below ships
 			getLineColorByType(type),
 			0.5
 		);
@@ -4641,19 +4720,16 @@ window.BallisticIconContainer = function () {
 
 		scene.add(lineSprite.mesh);
 
-		// Control line visibility based on team and current toggle state
-		const isFriendlyLinesVisible = this.ballisticLineIcons.some(
-			icon => icon.lineSprite?.isVisible && icon.isFriendly
-		);
-		const isEnemyLinesVisible = this.ballisticLineIcons.some(
-			icon => icon.lineSprite?.isVisible && !icon.isFriendly
-		);
-
+		// Control line visibility based on explicit toggle state
 		const currentIcon = this.ballisticLineIcons.find(icon => icon.id === ballistic.id);
 		if (currentIcon) {
-			currentIcon.lineSprite.isVisible =
-				(isFriendly && isFriendlyLinesVisible) ||
-				(!isFriendly && isEnemyLinesVisible);
+			const shouldBeVisible = isFriendly ? this.friendlyLinesVisible : this.enemyLinesVisible;
+			if (shouldBeVisible) {
+				currentIcon.lineSprite.show();
+			} else {
+				currentIcon.lineSprite.hide();
+			}
+			currentIcon.lineSprite.isVisible = shouldBeVisible;
 		}
 	}
 
@@ -4675,11 +4751,20 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
 		const shipIds = ships.map(s => s.id);
+
+		if (ships.length > 0) {
+			if (gamedata.isMyOrTeamOneShip(ships[0])) {
+				this.friendlyLinesVisible = !this.friendlyLinesVisible;
+			} else {
+				this.enemyLinesVisible = !this.enemyLinesVisible;
+			}
+		}
+
 		this.ballisticLineIcons.forEach(icon => {
 			if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
-				const visible = icon.lineSprite.isVisible;
-				icon.lineSprite[visible ? 'hide' : 'show']();
-				icon.lineSprite.isVisible = !visible;
+				const visible = icon.isFriendly ? this.friendlyLinesVisible : this.enemyLinesVisible;
+				icon.lineSprite[visible ? 'show' : 'hide']();
+				icon.lineSprite.isVisible = visible;
 			}
 		});
 		return this;
@@ -4687,6 +4772,15 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.hideLines = function (ships) {
 		const shipIds = ships.map(s => s.id);
+
+		if (ships.length > 0) {
+			if (gamedata.isMyOrTeamOneShip(ships[0])) {
+				this.friendlyLinesVisible = false;
+			} else {
+				this.enemyLinesVisible = false;
+			}
+		}
+
 		this.ballisticLineIcons.forEach(icon => {
 			if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
 				icon.lineSprite.hide();
@@ -4698,6 +4792,15 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.showLines = function (ships) {
 		const shipIds = ships.map(s => s.id);
+
+		if (ships.length > 0) {
+			if (gamedata.isMyOrTeamOneShip(ships[0])) {
+				this.friendlyLinesVisible = true;
+			} else {
+				this.enemyLinesVisible = true;
+			}
+		}
+
 		this.ballisticLineIcons.forEach(icon => {
 			if (shipIds.includes(icon.shooterId) && icon.lineSprite) {
 				icon.lineSprite.show();
@@ -4760,7 +4863,7 @@ window.BallisticIconContainer = function () {
 		} else if (type == "blue") {
 			return "rgba(0,184,230)";
 		} else if (type == "green") {
-			return "rgba(0, 128, 0)";
+			return "rgba(0, 179, 0)";
 		} else if (type == "purple") {
 			return "rgba(204, 51, 255)";
 		} else if (type == "white") {
@@ -4772,77 +4875,84 @@ window.BallisticIconContainer = function () {
 
 	BallisticIconContainer.prototype.createHexNumbers = function (scene) {
 		if (this.hexNumberMesh) {
-			// Toggle visibility
 			this.hexNumberMesh.visible = !this.hexNumberMesh.visible;
 			return;
 		}
 
-		// Define grid dimensions based on hex count
-		const gridWidth = 72; // Adjust based on your hex layout
+		const gridWidth = 72;
 		const gridHeight = 48;
 		const hexSize = 50;
 
-		// Create single large texture with all hex numbers
 		const largeTexture = createLargeHexNumberTexture(gridWidth, gridHeight, hexSize);
 
-		// Hexagon grid dimensions (corrected aspect ratio)
 		const totalWidth = gridWidth * hexSize * 2;
-		const totalHeight = gridHeight * hexSize * Math.sqrt(4);
+		const totalHeight = gridHeight * hexSize * 2;
 
-		// Create a plane to apply the texture (or adjust for hexagonal shape)
 		const geometry = new THREE.PlaneGeometry(totalWidth, totalHeight);
 		const material = new THREE.MeshBasicMaterial({
 			map: largeTexture,
-			transparent: true
+			transparent: true,
+			depthWrite: false
 		});
 
 		this.hexNumberMesh = new THREE.Mesh(geometry, material);
-		this.hexNumberMesh.position.set(502.5, -651, -1); // Adjust as needed	
+		this.hexNumberMesh.position.set(502.5, -651, -1);
 		scene.add(this.hexNumberMesh);
 	};
 
-	function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour = "#ffffff") {
-		const HEX_WIDTH = Math.sqrt(3) * hexSize;  // Corrected for side-standing hexagons
-		const HEX_HEIGHT = 2 * hexSize; // Corrected for vertical stacking
-		const SCALE_FACTOR = 2;  // Increase resolution for sharp text
-		const TEXTURE_WIDTH = gridWidth * HEX_WIDTH * SCALE_FACTOR;
-		const TEXTURE_HEIGHT = gridHeight * HEX_HEIGHT * SCALE_FACTOR;
+	function createLargeHexNumberTexture(gridWidth, gridHeight, hexSize, textColour) {
+		textColour = textColour || "#ffffff";
+		const HEX_WIDTH = Math.sqrt(3) * hexSize;
+		const HEX_HEIGHT = 2 * hexSize;
 
-		// Create canvas with refined dimensions
+		// Use half-size canvas (30MP vs original 120MP = 4x less RAM / generation time).
+		// ctx.scale(0.5, 0.5) maps all drawing coordinates to this smaller canvas
+		// while keeping the same relative positions in the texture UV space.
+		const DRAW_SCALE = 2;  // Drawing coordinate scale (original positions)
+		const CANVAS_SCALE = 0.5; // Canvas is half the original size
+		const TEXTURE_WIDTH = Math.ceil(gridWidth * HEX_WIDTH * DRAW_SCALE * CANVAS_SCALE);
+		const TEXTURE_HEIGHT = Math.ceil(gridHeight * HEX_HEIGHT * DRAW_SCALE * CANVAS_SCALE);
+
 		const canvas = document.createElement("canvas");
 		canvas.width = TEXTURE_WIDTH;
 		canvas.height = TEXTURE_HEIGHT;
 		const ctx = canvas.getContext("2d");
 
-		// Clear the canvas
-		ctx.clearRect(0, 0, TEXTURE_WIDTH, TEXTURE_HEIGHT);
+		// Scale the context down so that original DRAW_SCALE=2 positions fit in half the canvas
+		ctx.scale(CANVAS_SCALE, CANVAS_SCALE);
 
-		// Set text properties
-		const fontSize = Math.floor(hexSize * 0.2 * SCALE_FACTOR);  // Smaller text but sharp
-		ctx.globalAlpha = 0.85;
-		ctx.font = `bold ${fontSize}px Arial`;
+		ctx.clearRect(0, 0, TEXTURE_WIDTH / CANVAS_SCALE, TEXTURE_HEIGHT / CANVAS_SCALE);
+
+		const fontSize = Math.floor(hexSize * 0.2 * DRAW_SCALE);
+		ctx.font = "bold " + fontSize + "px Arial";
 		ctx.fillStyle = textColour;
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		ctx.globalAlpha = 0.6; // 50% transparency
+		ctx.globalAlpha = 0.6;
 
 		let number = 1;
 
 		for (let r = 0; r < gridHeight; r++) {
 			for (let q = 0; q < gridWidth; q++) {
-				let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2; // REDUCED COLUMN SPACING			
-				let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2; // INCREASED ROW SPACING
+				// Exact original spacing constants from SCALE_FACTOR=2 version
+				let x = q * HEX_WIDTH * 1.7315 + HEX_WIDTH / 2;
+				let y = r * HEX_HEIGHT * 1.5 + HEX_HEIGHT / 2;
 
-				// Offset odd rows for staggered hex layout
 				if (r % 2 !== 0) x += HEX_WIDTH * 0.855;
 
-				ctx.fillText(String(number).padStart(4, '0'), x, y);
+				// Snap to even pixels so ctx.scale(0.5) always hits a whole canvas pixel
+				const px = Math.round(x / 2) * 2;
+				const py = Math.round(y / 2) * 2;
+				ctx.fillText(String(number).padStart(4, '0'), px, py);
 				number++;
 			}
 		}
 
-		// Convert canvas to a texture
-		const texture = new THREE.Texture(canvas);
+		const texture = new THREE.CanvasTexture(canvas);
+		texture.colorSpace = THREE.SRGBColorSpace;
+		texture.generateMipmaps = false;
+		texture.minFilter = THREE.LinearFilter;
+		texture.magFilter = THREE.LinearFilter;
 		texture.needsUpdate = true;
 		return texture;
 	}
@@ -4851,726 +4961,7 @@ window.BallisticIconContainer = function () {
 
 }();
 
-/*//All the old unoptimised code, keep here until I'm sure the new stuff above works! - DK June 25
-window.BallisticIconContainer = function () {
 
-	function BallisticIconContainer(coordinateConverter, scene) {
-		this.ballisticIcons = [];
-		this.ballisticLineIcons = []
-		this.coordinateConverter = coordinateConverter;
-		this.scene = scene;
-		this.zoomScale = 1;
-		this.hexNumberIcons = [];
-		this.hexNumbersGenerated = false;
-	}
-
-	BallisticIconContainer.prototype.consumeGamedata = function (gamedata, iconContainer, replayData = null) {
-		this.ballisticIcons.forEach(function (ballisticIcon) {
-			if(gamedata.gamephase !== 1) ballisticIcon.launchPosition = []; //If not cleared, doesn't always display launch hex between Initial and Movement/Firing without browser refresh - DK 12.24
-			ballisticIcon.used = false;
-		});
-
-		this.ballisticLineIcons.forEach(function (lineIcon) {
-			lineIcon.used = false;
-		});
-			   
-		if(replayData){ //True marker is passed when Replay
-			var allBallistics = replayData;
-			
-			allBallistics.forEach(function (ballistic) {
-				if(ballistic.turn === gamedata.turn){ 
-					createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, true); 
-					createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, true);
-				}	            
-			}, this);
-					
-		} else {
-			var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
-			allBallistics.forEach(function (ballistic) {
-				createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn);
-				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-			}, this);
-		}
-		
-		this.ballisticIcons = this.ballisticIcons.filter(function (icon) {
-			if (!icon.used) {
-			    
-				if (icon.launchSprite) {
-					this.scene.remove(icon.launchSprite.mesh);
-				}
-
-				if (icon.targetSprite) {
-					if (icon.targetId !== -1) {
-						iconContainer.getById(icon.targetId).mesh.remove(icon.targetSprite.mesh);
-					} else {
-						this.scene.remove(icon.targetSprite.mesh);
-					}
-				}
-				return false;
-			}
-
-			return true;
-		}, this);
-
-		//Now create ballistic lines
-		generateBallisticLines.call(this);
-		//Now create hex icons to illustrate large terrain.
-		generateTerrainHexes.call(this, gamedata);
-		//Create blue hex icons for where ships are deploying later.
-		generateReinforcementHexes.call(this, gamedata);
-
-	};
-
-
-	function generateBallisticLines() {
-		//Remove old line sprites when they are no longer required or being recreated.
-		this.ballisticLineIcons = this.ballisticLineIcons.filter(function (lineIcon) {
-			if (!lineIcon.used) {
-				if (lineIcon.lineSprite) {
-					this.scene.remove(lineIcon.lineSprite.mesh);           	
-				}
-			return false;	
-			}	
-
-		//This section looks to see if Ballistic Lines are showing at moment consumeGamedata() is called.
-		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
-		);
-
-		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
-		); 
-			    
-		this.ballisticLineIcons.forEach(lineIcon => {
-		  if (lineIcon.lineSprite) {
-			if (lineIcon.isFriendly) {
-			  // Handle friendly lines
-			  if (isFriendlyLinesVisible) {
-				lineIcon.lineSprite.show();
-				lineIcon.lineSprite.isVisible = true;
-			  } else {
-				lineIcon.lineSprite.hide();
-				lineIcon.lineSprite.isVisible = false;
-			  }
-			} else {
-			  // Handle enemy lines
-			  if (isEnemyLinesVisible) {
-				lineIcon.lineSprite.show();
-				lineIcon.lineSprite.isVisible = true;
-			  } else {
-				lineIcon.lineSprite.hide();
-				lineIcon.lineSprite.isVisible = false;
-			  }
-			}
-		  }
-		});
-		
-			return true;
-		}, this);
-	}
-
-
-	function generateTerrainHexes(gamedata) {
-		// Filter for ships with Huge value
-		gamedata.ships
-		.filter(ship => ship.Huge > 0) // Find Huge Terrain
-		.forEach(ship => {
-			if(gamedata.gamephase !== -1){ //Don't generate sprites until Terrain is in place!
-				const position = shipManager.getShipPosition(ship); // Get ship's position
-				let perimeterHexes = [];
-				// Get neighboring hexes based on the ship's size (Huge)
-				if(ship.Huge == 2){
-					perimeterHexes = mathlib.getPerimeterHexes(position, ship.Huge);
-				}else{
-					perimeterHexes = mathlib.getNeighbouringHexes(position, ship.Huge);
-				}	
-
-				// Create sprites for neighboring hexes
-				perimeterHexes.forEach(neighbour => {
-					var neighbourPosGame = this.coordinateConverter.fromHexToGame(neighbour);
-					const neighbourSprite = new BallisticSprite(neighbourPosGame, "hexWhite");
-					this.scene.add(neighbourSprite.mesh);
-
-					this.ballisticIcons.push({
-						id: -5,
-						shooterId: ship.id,
-						targetId: ship.id,
-						launchPosition: neighbour,
-						position: new hexagon.Offset(neighbourPosGame.x, neighbourPosGame.y),
-						launchSprite: neighbourSprite,
-						targetSprite: neighbourSprite,
-						used: true
-					});
-				
-				});
-			}	
-
-		});
-	}
-
-
-	function generateReinforcementHexes(gamedata) {
-		// === 2. Handle Not Deployed Ships (Blue Hexes) ===
-		gamedata.ships
-			.filter(ship => shipManager.getTurnDeployed(ship) > gamedata.turn) // Only undeployed ships
-			.filter(ship => gamedata.isMyorMyTeamShip(ship)) // Only own Team ships.		
-			.forEach(ship => {
-				const turnDeploys = shipManager.getTurnDeployed(ship);
-				const position = shipManager.getShipPosition(ship);
-				const posGame = this.coordinateConverter.fromHexToGame(position);
-					const reinforceSprite = new BallisticSprite(posGame, "hexBlue", "Deploys on Turn " + turnDeploys + "");
-					this.scene.add(reinforceSprite.mesh);
-
-					this.ballisticIcons.push({
-						id: -6,
-						shooterId: ship.id,
-						targetId: ship.id,
-						launchPosition: position,
-						position: new hexagon.Offset(position.x, position.y),
-						launchSprite: reinforceSprite,
-						targetSprite: reinforceSprite,
-						used: true
-					});
-
-			});
-	}
-
-
-
-	function createOrUpdateBallistic(ballistic, iconContainer, turn, replay = false) {
-		var icon = getBallisticIcon.call(this, ballistic.id);
-
-		if (icon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
-			updateBallisticIcon.call(this, icon, ballistic, iconContainer, turn);
-		} else {   	
-			createBallisticIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
-		}
-		
-	}		
-
-	function updateBallisticIcon(icon, ballistic, iconContainer, turn) {
-		icon.used = true;
-	}
-
-	const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
-
-	const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId )) )
-
-	BallisticIconContainer.prototype.hide = function () {
-		this.ballisticIcons.forEach(function (icon) {
-			if (icon.launchSprite) {
-				icon.launchSprite.hide();
-			}
-			if (icon.targetSprite) {
-				icon.targetSprite.hide();
-			}
-		});
-
-		return this;
-	};
-
-	BallisticIconContainer.prototype.show = function () {
-		this.ballisticIcons.forEach(function (icon) {
-			if (icon.launchSprite) {
-				icon.launchSprite.show();
-			}
-			if (icon.targetSprite) {
-				icon.targetSprite.show();
-			}
-		});
-
-		return this;
-	};	
-
-	BallisticIconContainer.prototype.onEvent = function (name, payload) {
-		var target = this['on' + name];
-		if (target && typeof target == 'function') {
-			target.call(this, payload);
-		}
-	};
-
-	BallisticIconContainer.prototype.onZoomEvent = function (payload) {
-		var zoom = payload.zoom;
-		if (zoom <= 0.5) {
-			this.zoomScale = 2 * zoom;
-			this.ballisticLineIcons.forEach(function (lineIcon) {
-				lineIcon.lineSprite.setLineWidth(this.zoomScale * 2);
-			}, this);
-		} else {
-			this.zoomScale = 1;
-		} 
-	};
-
-	function getBallisticIcon(id) {
-		return this.ballisticIcons.filter(function (icon) {
-			return icon.id === id;
-		}).pop();
-	}
-
-
-	function createOrUpdateBallisticLines(ballistic, iconContainer, turn, replay = false) {
-		var lineIcon = getBallisticLineIcon.call(this, ballistic.id);
-
-		if (lineIcon && ballistic.notes != 'PersistentEffect' && ballistic.notes != 'Split') {//We want Persistent Effects to show up in initial Orders! - DK 09.24
-			if(replay){
-				createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);	        	   	
-			}else{	
-				updateBallisticLineIcon.call(this, lineIcon, ballistic, iconContainer, turn);
-			}	
-		} else {   	
-			if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, turn, this.scene, replay);
-		}
-		
-	}	
-
-
-	function updateBallisticLineIcon(lineIcon, ballistic, iconContainer, turn) {
-		lineIcon.used = true;
-
-		if(ballistic.targetid === -1) return; //No need to update further for AoE ballistics (they don't move) 
-
-		var wasVisible = false; //Variable to track if destroyed lines were visible. If one was, they all were.
-
-		// Destroy lines where the ship is either the target.
-		if (lineIcon.lineSprite.isVisible) wasVisible = true;
-		lineIcon.lineSprite.destroy();
-		this.scene.remove(lineIcon.lineSprite.mesh);
-
-		//Now recreate them.
-		if(ballistic.notes != 'PersistentEffect') createBallisticLineIcon.call(this, ballistic, iconContainer, gamedata.turn, this.scene);
-
-		//Check if lines were visible and if so continue to show.
-		if(!wasVisible){
-			lineIcon.lineSprite.hide();
-			lineIcon.lineSprite.isVisible = false;	 	            
-		}else{
-			lineIcon.lineSprite.show();
-			lineIcon.lineSprite.isVisible = true;	            		
-		}
-	}	
-
-	//New method that toggles Ballistic Lines on and off.
-	BallisticIconContainer.prototype.toggleBallisticLines = function (ships) {
-		if (this.ballisticLineIcons) {
-			this.ballisticLineIcons.forEach(function (lineIcon) {
-				if (lineIcon.lineSprite) {
-					if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-						if (!lineIcon.lineSprite.isVisible){		                	
-							lineIcon.lineSprite.show();
-							lineIcon.lineSprite.isVisible = true;	                    
-						}else{
-							lineIcon.lineSprite.hide();
-							lineIcon.lineSprite.isVisible = false;	 		                    		             	
-						}
-					}    
-				}	            
-			});
-		}
-		return this;
-	};
-
-	BallisticIconContainer.prototype.hideLines = function (ships) {
-		this.ballisticLineIcons.forEach(function (lineIcon) {
-			if (lineIcon.lineSprite) {
-				if (ships.some(ship => ship.id === lineIcon.shooterId)) {
-					lineIcon.lineSprite.hide();
-					lineIcon.lineSprite.isVisible = false;
-				}
-			}			 	
-		});
-
-		return this;
-	};
-
-	BallisticIconContainer.prototype.showLines = function (ships) {
-		this.ballisticLineIcons.forEach(function (lineIcon) {
-			if (lineIcon.lineSprite) {
-				if (ships.some(ship => ship.id === lineIcon.shooterId)) {        	
-					lineIcon.lineSprite.show();
-					lineIcon.lineSprite.isVisible = true;
-				}
-			}		        	 	
-		});
-
-		return this;
-	};
-
-	//Called during movement phase to recreate lines after a target ship moves.
-	BallisticIconContainer.prototype.updateLinesForShip = function (ship, iconContainer) {
-
-		var wasVisibleTarget = false; //Variable to track if destroyed lines were visible. If one was, they all were.
-		
-		this.ballisticLineIcons = this.ballisticLineIcons.filter((lineIcon) => {
-			// Destroy lines where the ship is the target.
-			if (lineIcon.targetId === ship.id) {
-				if (lineIcon.lineSprite.isVisible) wasVisibleTarget = true;
-				this.scene.remove(lineIcon.lineSprite.mesh);
-				lineIcon.lineSprite.destroy();
-				return false;
-			}else{		    
-				return true;
-			}
-		});
-
-		//Now recreate line using usual method.
-		var allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');			
-		allBallistics.forEach(function (ballistic) {
-			if (ship.id === ballistic.targetid) {				
-				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn);
-			}
-		}, this);
-
-		//Check if lines were visible and if so continue to show.
-		this.ballisticLineIcons.forEach(function (lineIcon) {
-			if (lineIcon.targetId === ship.id) {
-				if(!wasVisibleTarget){
-					lineIcon.lineSprite.hide();
-					lineIcon.lineSprite.isVisible = false;	 	            
-				}else{
-					lineIcon.lineSprite.show();
-					lineIcon.lineSprite.isVisible = true;	            		
-				}
-			}
-		});        
-	};
-*/
-/*	
-	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
-
-			if(replay){
-				if(ballistic.damageclass == 'PersistentEffectPlasma' && ballistic.targetid == -1 && ballistic.notes != 'PlasmaCloud') return;
-			}
-			if(ballistic.damageclass == 'Sweeping')	return;	//For Shadow Slicers, Gravs Beams etc. Let's just rely on lines and targeting tooltip and not clutter with Hex colours.	
-
-			var shooterIcon = iconContainer.getById(ballistic.shooterid);	
-			var targetType = 'hexRed'; //Default red hex if none of the later conditions are true.
-			var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
-			var text = ""; //Additional variable that can pass text to new BallisticSprite()
-			var textColour = ""; //Additional variable that chooses base text colour for new BallisticSprite()
-			var iconImage = null; //Additional variable that can pass images to new BallisticSprite()!
-			
-			//New variables to enhance Ballistic Icons further! - DK 10.24
-			var shooter = shooterIcon.ship; //Get shooter info.
-			var modeName = null;
-			
-			if(!shooter.flight){ //Fighters don't currently have hex target weapons (plus, would need to find weaponid differently)
-				var weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
-				var modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name, so we can be more specific below!
-			}
-
-			if (ballistic.type == 'normal') { //it's direct fire after all!
-				launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement().position);
-				if(modeName){
-					switch (modeName) {			
-					case 'Shredder': //Vree Anti-Matter Shredder
-							targetType = 'hexBlue';
-							text = "Shredder";
-							textColour = "#00b8e6";				        
-					break;
-					case 'Defensive Plasma Web': //Pak'ma'ra Plasma Web Defensive
-							targetType = 'hexGreen';
-							textColour = "#787800";				        	
-					break;									
-					case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Offensive
-							targetType = 'hexGreen';
-							text = 'Plasma';
-							textColour = "#787800";				        	
-					break;
-					case 'Psychic Field': //Thirdspace Psychic Field
-							targetType = 'hexRed';
-							text = "Psychic";
-							textColour = "#e6140a";		        
-					break;						
-					case 'Second Sight': //Mindrider Second Sight
-							targetType = 'hexPurple';
-							text = "Second Sight";
-							textColour = "#7f00ff";			        
-					break;								
-					default:
-							targetType = 'hexRed';
-					break;													        
-					}				
-				}
-
-			}else if (ballistic.targetid == -1){ //Maybe its nice to have other colours for certain types of hex targetted weapons?
-				
-				if(modeName){
-					switch (modeName) {			
-					case 'Energy Mine': //Narn Energy Mine
-							targetType = 'hexRed';
-							text = "Energy Mine";
-							textColour = "#e6140a";				        
-					break;				
-					case 'Ion Storm': //Cascor Ion Field
-							targetType = 'hexPurple';
-							text = "Ion Field";
-							textColour = "#7f00ff";				        
-					break;
-					case 'Jammer': //Jammer Missile
-							targetType = 'hexPurple';
-							text = "Jammer";
-							textColour = "#7f00ff";		        
-						break;					
-					case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Persistent Effect
-							targetType = 'hexGreen';
-							text = 'Plasma';
-							textColour = "#787800";				        	
-					break;
-					case 'Proximity Launcher': //KL Proximity Laser
-							targetType = 'hexRed';
-							text = "Proximity Laser";
-							textColour = "#e6140a";		        
-					break;
-					case 'Thought Wave': //Mindrider Thoughwave
-							targetType = 'hexPurple';
-							text = "Thought Wave";
-							textColour = "#bc3782"; //Actually a pink-purple, as it blends with luanch hex Orange!	 		        
-					break;													        
-					}				
-				}
-			} 
-			 
-		//Ballistic Mines / Support etc need to be handled separately using damageClass/initializationUpdate method! - DK 10.24
-		if(ballistic.damageclass){
-			if(modeName){
-				switch (ballistic.damageclass) {	
-				case 'MultiModeHex': //Hex-Weapons with multiple modes.
-					targetType = 'hexRed';
-					text = modeName;					
-					textColour = "#e6140a";		        
-				break;											
-				case 'support': //Generic Support icon for these type of weapons. 06.24 - DK	
-					targetType = 'hexGreen';
-					iconImage = "./img/allySupport.png"; 		        
-				break;
-				}
-			}		 
-		} 
-					
-			var targetPosition = null;
-			var targetIcon = null;
-
-			if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
-				targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-			} else if (ballistic.targetid && ballistic.targetid !== -1) {
-				targetIcon = iconContainer.getById(ballistic.targetid);
-				targetPosition = { x: 0, y: 0 };
-			}
-
-			if(!shooter.flight){ //Don't create target hex for certain ship weapons.
-				if(weapon.noTargetHexIcon) targetPosition = launchPosition;
-			}	
-
-			//Create orange launch icon on firing ship.
-			var launchSprite = null;
-		    
-			//Don't create launch sprite for duplicates, persistent effects or Direct Fire/Support Weapon 
-			if ((!getByLaunchPosition(launchPosition, this.ballisticIcons)) && ballistic.notes != 'PersistentEffect' && ballistic.type !== 'normal' && ballistic.damageclass !== 'support') {        	
-					if(gamedata.isMyOrTeamOneShip(shooter)){
-						launchSprite = new BallisticSprite(launchPosition, 'hexYellow');       
-						scene.add(launchSprite.mesh);	        		
-						  }else{
-						launchSprite = new BallisticSprite(launchPosition, 'hexOrange');       
-						scene.add(launchSprite.mesh);
-					}
-			}
-
-			var targetSprite = null;
-
-			if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {	
-				if (targetIcon && targetPosition) {
-					targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);//'hex');
-					targetIcon.mesh.add(targetSprite.mesh);
-				} else if (targetPosition) {
-					targetSprite =  new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);//'hex');
-					scene.add(targetSprite.mesh);
-				}
-			}
-
-
-			this.ballisticIcons.push({
-				id: ballistic.id,
-				shooterId: ballistic.shooterid,
-				targetId: ballistic.targetid,
-				launchPosition: launchPosition,
-				position: new hexagon.Offset(ballistic.x, ballistic.y),
-				launchSprite: launchSprite,
-				targetSprite: targetSprite,
-				used: true
-			});
-    
-		
-	}//endof createBallisticIcon()
-*/
-
-/*
-	function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
-
-		if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
-
-		var shooterIcon = null;		
-		shooterIcon = iconContainer.getById(ballistic.shooterid);        
-		var targetIcon = null;
-		targetIcon = iconContainer.getById(ballistic.targetid);
-
-		//Get Launch Position and Target Position
-		var launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn).position);
-
-		var targetPosition = null;
-
-		if(targetIcon && ballistic.targetid !== -1){
-			targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovement(turn).position);
-		}else{
-			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		}
-
-		//Slightly different method for Replays.  Could I make a shipManager.movement.getLastCommitedMoveONTURN(targetIcon.ship) function???	
-		if(replay && targetIcon) targetPosition = this.coordinateConverter.fromHexToGame(targetIcon.getLastMovementOnTurn(turn).position);	
-
-		//Get shooter and modeName from it.
-		var shooter = shooterIcon.ship; //Get shooter info.
-		var modeName = null;
-		var weapon = null;	
-		if(!shooter.flight){ //Fighters would need to find weaponid differently
-			weapon = shooter.systems[ballistic.weaponid]; //Find weapon			
-			modeName = weapon.firingModes[ballistic.firingMode]; //Get actual Firing Mode name
-		}	
-
-		if(!shooter.flight){ //Don't create target hex for certain ship weapons.
-			if(weapon.noTargetHexIcon) targetPosition = launchPosition;
-		}
-
-		//Don't create a line if ballistic is in same hex (or positions are null/undefined.
-		if (launchPosition == null || targetPosition == null || 
-			(launchPosition.x === targetPosition.x && 
-			 launchPosition.y === targetPosition.y && 
-			 launchPosition.z === targetPosition.z)) {
-			return;
-		} 
-				
-		var type = 'white'; //Default white line if none of the later conditions are true.
-		if(gamedata.isMyOrTeamOneShip(shooterIcon.ship)){
-			type = 'yellow';				
-		}else{
-			type = 'orange';				
-		}
-
-		//Create line for Proximity Laser from launcher targeted hex.
-		if (weapon && weapon.hasSpecialLaunchHexCalculation) {
-			var launcherHex = weaponManager.getFiringHex(shooter, weapon);
-			launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);
-			type = 'red';
-		}
-
-		if(ballistic.type == 'normal'){
-				launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn).position);			
-				if(modeName){
-					switch (modeName) {			
-						case 'Shredder': //Vree Anti-Matter Shredder
-							type = 'blue';				        
-						break;
-						case 'Defensive Plasma Web': //Pak'ma'ra Plasma Web Defensive
-							type = 'green';				        	
-						break;									
-						case 'Anti-Fighter Plasma Web': //Pak'ma'ra Plasma Web Offensive
-							type = 'green';				        	
-						break;									
-						default:
-							type = 'white';
-						break;													        
-					}				
-				}	 
-		}
-		
-		if(ballistic.damageclass){
-			switch (ballistic.damageclass) {	
-				case 'support': //Generic Support icon for these type of weapons. 06.24 - DK	
-					type = 'green';
-					launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getLastMovement(turn).position); //More important to show where ship support weapon originates, not hex.								        
-				break;
-				case 'Sweeping': //Shadow Slicer
-					type = 'purple'; //Default for slicers
-					if(weapon.weaponClass == "Gravitic"){
-						type = 'green'; //But now other weapon types use sweeping.
-					}else if(weapon.weaponClass == "Psychic"){ //Thirdspace Psionic Concentrator
-						type = 'red';
-					}else if(weapon.weaponClass == "Molecular" && !(weapon instanceof MolecularSlicerBeamL)){ //Shadow Multiphased Cutters,, leave slicers as purple.
-						type = 'blue';
-					}else if(weapon.weaponClass == "Particle"){ //Mindrider Telekinetic Cutter
-						type = 'orange';
-					}else if(weapon.weaponClass == "Electromagnetic"){ //Vorlon Discharge Gunsb
-						type = 'yellow';
-					}														        
-				break;					
-			}		 
-		}
-			
-			var lineSprite = null;	        
-			var isFriendly = gamedata.isMyOrTeamOneShip(shooter);
-
-			this.ballisticLineIcons.push({
-				id: ballistic.id,
-				shooterId: ballistic.shooterid,
-				targetId: ballistic.targetid,
-				lineSprite: lineSprite =  new BallisticLineSprite(launchPosition, targetPosition, 3 * this.zoomScale, -3, getLineColorByType(type), 0.5),
-				used: true,
-				isFriendly: isFriendly
-			});
-
-			scene.add(lineSprite.mesh);
-
-		//Need some checks here to handle when lines are toggled on and new ballistic fireORder/line is added
-
-		var isFriendlyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === true
-		);
-
-		var isEnemyLinesVisible = this.ballisticLineIcons.some(lineIcon => 
-		  lineIcon.lineSprite?.isVisible === true && lineIcon?.isFriendly === false
-		);  
-
-		var ballisticIdToFind = ballistic.id;
-		var currentIcon = this.ballisticLineIcons.find(lineIcon => lineIcon.id === ballisticIdToFind );
-
-		if(isFriendly && isFriendlyLinesVisible){
-			currentIcon.lineSprite.isVisible = true;		
-		}else if(!isFriendly && isEnemyLinesVisible){
-			currentIcon.lineSprite.isVisible = true;						
-		}else{
-			currentIcon.lineSprite.isVisible = false;			
-		}
-		
-	}//endof createBallisticLineIcon()
-
-
-	function getBallisticLineIcon(id) {
-		return this.ballisticLineIcons.filter(function (lineIcon) {
-			return lineIcon.id === id;
-		}).pop();
-	}
-*/
-
-
-/* //Future functions that I might need/use - DK 12.24
-	BallisticIconContainer.prototype.showForShip = function (ship) {
-		this.ballisticLineIcons.filter(function (lineIcon) {
-			return lineIcon.shooterId === ship.id || icon.targetId === ship.id;
-		}).forEach(function (lineIcon) {
-			lineIcon.lineSprite.setStartAndEnd(lineIcon.shooterIcon.getPosition(), lineIcon.targetIcon.getPosition());
-			lineIcon.lineSprite.show();
-		}, this);
-	};
-
-	BallisticIconContainer.prototype.showByShip = function (ship) {
-		this.ballisticLineIcons.filter(function (lineIcon) {
-			return lineIcon.shooterId === ship.id;
-		}).forEach(function (lineIcon) {
-			lineIcon.lineSprite.setStartAndEnd(lineIcon.shipIcon.getPosition(), lineIcon.targetIcon.getPosition());
-			lineIcon.lineSprite.show();
-			lineIcon.lineSprite.isVisible = true;            
-		}, this);
-	};
-*/
 ;
 
 /* Source: client/renderer/animationStrategy/AnimationStrategy.js */
@@ -6429,7 +5820,7 @@ window.ShipMovementAnimation = function () {
 
     ShipMovementAnimation.prototype = Object.create(Animation.prototype);
 
-    ShipMovementAnimation.prototype.update = function (gameData) {};
+    ShipMovementAnimation.prototype.update = function (gameData) { };
 
     ShipMovementAnimation.prototype.stop = function () {
         Animation.prototype.stop.call(this);
@@ -6534,123 +5925,123 @@ window.ShipMovementAnimation = function () {
             length -= animation.length;
         });
 
-if (!current) {
-    result.animation = this.hexAnimations[this.hexAnimations.length - 1];
-    result.done = 1;
-    return result;
-}
+        if (!current) {
+            result.animation = this.hexAnimations[this.hexAnimations.length - 1];
+            result.done = 1;
+            return result;
+        }
 
-// --- FIX: handle zero-length animations safely ---
-if (current.length <= 0) {
-    result.animation = current;
-    result.done = 0;     // A zero-length animation is always "at the start"
-    return result;
-}
+        // --- FIX: handle zero-length animations safely ---
+        if (current.length <= 0) {
+            result.animation = current;
+            result.done = 0;     // A zero-length animation is always "at the start"
+            return result;
+        }
 
-var done = length / current.length;
-result.animation = current;
-result.done = isFinite(done) ? done : 0;
-return result;
+        var done = length / current.length;
+        result.animation = current;
+        result.done = isFinite(done) ? done : 0;
+        return result;
     }
-/*
+    /*
+        function buildCurves(shipIcon, turn) {
+            var moves = shipIcon.getMovements(turn);
+    
+            if (moves.length <= 1) {
+                return [];
+            }
+    
+            return moves.map(function (move, i) {
+                var start = i === 0 ? null : moves[i - 1];
+                var next = moves[i + 1] ? moves[i + 1] : null;
+    
+                var movementPoints = getMovementPoints.call(this, move.position, next ? next.position : null, start ? start.position : null);
+    
+                var curve = buildCurve(movementPoints.start, movementPoints.end, movementPoints.control);
+    
+                var turnData = calculateTurn(start, move);
+    
+                return { move: move, curve: curve, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle, length: calculateCurveLength(curve) };
+            }, this);
+        }
+    */
     function buildCurves(shipIcon, turn) {
-        var moves = shipIcon.getMovements(turn);
+        var moves = shipIcon.getMovementsReplay(turn);
 
+        // Filter out moves that don't actually change anything
+        moves = moves.filter(function (move, i, arr) {
+            var prev = i > 0 ? arr[i - 1] : null;
+
+            // If no previous, always keep the first
+            if (!prev) return true;
+
+            var posChanged = !prev.position.equals(move.position); // assumes .equals() exists for Offset
+            var facingChanged = prev.facing !== move.facing;
+            var headingChanged = prev.heading !== move.heading;
+
+            return posChanged || facingChanged || headingChanged;
+        });
+
+        //Seems to rule out speed 0 units form being animated mainly.
         if (moves.length <= 1) {
-            return [];
+            if (gamedata.turn == 1 && moves.length == 1) { //Turn 1 needs a special case so that Speed 0 pivots etc aren't skipped.
+                if (moves[0].oldFacings.length == 0) {
+                    return [];
+                }
+            } else {
+                return [];
+            }
         }
 
         return moves.map(function (move, i) {
-            var start = i === 0 ? null : moves[i - 1];
+            var start;
+
+            if (i === 0) {
+                if (turn === 1 && Array.isArray(move.oldFacings) && move.oldFacings.length > 0) {
+                    // For Turn 1 only → synthesize a "start" from oldFacings/oldHeadings
+                    start = {
+                        position: move.position,
+                        facing: move.oldFacings[0],
+                        heading: (Array.isArray(move.oldHeadings) && move.oldHeadings.length > 0)
+                            ? move.oldHeadings[0]
+                            : undefined,
+                        turn: 0
+                    };
+                } else {
+                    // For Turn ≥ 2, getMovementsReplay already gave us the last prev-turn move
+                    start = moves[i - 1] || null;
+                }
+            } else {
+                start = moves[i - 1];
+            }
+
             var next = moves[i + 1] ? moves[i + 1] : null;
 
-            var movementPoints = getMovementPoints.call(this, move.position, next ? next.position : null, start ? start.position : null);
+            var movementPoints = getMovementPoints.call(
+                this,
+                move.position,
+                next ? next.position : null,
+                start ? start.position : null
+            );
 
-            var curve = buildCurve(movementPoints.start, movementPoints.end, movementPoints.control);
+            var curve = buildCurve(
+                movementPoints.start,
+                movementPoints.end,
+                movementPoints.control
+            );
 
             var turnData = calculateTurn(start, move);
 
-            return { move: move, curve: curve, turnAngle: turnData.turnAngle, startAngle: turnData.startAngle, endAngle: turnData.endAngle, length: calculateCurveLength(curve) };
+            return {
+                move: move,
+                curve: curve,
+                turnAngle: turnData.turnAngle,
+                startAngle: turnData.startAngle,
+                endAngle: turnData.endAngle,
+                length: calculateCurveLength(curve)
+            };
         }, this);
     }
-*/
-function buildCurves(shipIcon, turn) {
-    var moves = shipIcon.getMovementsReplay(turn);
-
-    // Filter out moves that don't actually change anything
-    moves = moves.filter(function (move, i, arr) {
-        var prev = i > 0 ? arr[i - 1] : null;
-
-        // If no previous, always keep the first
-        if (!prev) return true;
-
-        var posChanged = !prev.position.equals(move.position); // assumes .equals() exists for Offset
-        var facingChanged = prev.facing !== move.facing;
-        var headingChanged = prev.heading !== move.heading;
-
-        return posChanged || facingChanged || headingChanged;
-    });
-
-    //Seems to rule out speed 0 units form being animated mainly.
-    if (moves.length <= 1) {
-        if(gamedata.turn == 1 && moves.length == 1){ //Turn 1 needs a special case so that Speed 0 pivots etc aren't skipped.
-            if(moves[0].oldFacings.length == 0){            
-                return [];
-            }
-        }else{
-            return [];
-        }    
-    }
-
-    return moves.map(function (move, i) {
-        var start;
-
-        if (i === 0) {
-            if (turn === 1 && Array.isArray(move.oldFacings) && move.oldFacings.length > 0) {
-                // For Turn 1 only → synthesize a "start" from oldFacings/oldHeadings
-                start = {
-                    position: move.position,
-                    facing: move.oldFacings[0],
-                    heading: (Array.isArray(move.oldHeadings) && move.oldHeadings.length > 0)
-                        ? move.oldHeadings[0]
-                        : undefined,
-                    turn: 0
-                };
-            } else {
-                // For Turn ≥ 2, getMovementsReplay already gave us the last prev-turn move
-                start = moves[i-1] || null;
-            }
-        } else {
-            start = moves[i - 1];
-        }
-
-        var next = moves[i + 1] ? moves[i + 1] : null;
-
-        var movementPoints = getMovementPoints.call(
-            this,
-            move.position,
-            next ? next.position : null,
-            start ? start.position : null
-        );
-
-        var curve = buildCurve(
-            movementPoints.start,
-            movementPoints.end,
-            movementPoints.control
-        );
-
-        var turnData = calculateTurn(start, move);
-
-        return {
-            move: move,
-            curve: curve,
-            turnAngle: turnData.turnAngle,
-            startAngle: turnData.startAngle,
-            endAngle: turnData.endAngle,
-            length: calculateCurveLength(curve)
-        };
-    }, this);
-}
 
 
     function calculateCurveLength(curve) {
@@ -6685,72 +6076,72 @@ function buildCurves(shipIcon, turn) {
 
         return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
-/* //Old version
+    /* //Old version
+        function buildTurn(endMove, startFacing) {
+            if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
+            var facings = endMove.oldFacings.concat(endMove.facing);
+    
+            var turn = 0;
+            var lastFacing = null;
+    
+            facings.forEach(function (facing) {
+                if (lastFacing === null) {
+                    lastFacing = facing;
+                    return;
+                }
+    
+                var angleLast = mathlib.hexFacingToAngle(lastFacing);
+                var angleNew = mathlib.hexFacingToAngle(facing);
+    
+                var right = mathlib.getAngleBetween(angleLast, angleNew, true);
+                var left = mathlib.getAngleBetween(angleLast, angleNew, false);
+    
+                if (Math.abs(right) < Math.abs(left)) {
+                    turn += right;
+                } else {
+                    turn += left;
+                }
+    
+                lastFacing = facing;
+            });
+    
+            return turn;
+        }
+    */
+
     function buildTurn(endMove, startFacing) {
-        if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
-        var facings = endMove.oldFacings.concat(endMove.facing);
 
-        var turn = 0;
-        var lastFacing = null;
+        // Build the correct sequence without mutating endMove
+        const sequence = [startFacing];
 
-        facings.forEach(function (facing) {
+        if (Array.isArray(endMove.oldFacings) && endMove.oldFacings.length > 0) {
+            sequence.push(...endMove.oldFacings);
+        }
+
+        sequence.push(endMove.facing);
+
+        let totalTurn = 0;
+        let lastFacing = null;
+
+        sequence.forEach(function (facing) {
             if (lastFacing === null) {
                 lastFacing = facing;
                 return;
             }
 
-            var angleLast = mathlib.hexFacingToAngle(lastFacing);
-            var angleNew = mathlib.hexFacingToAngle(facing);
+            const angleLast = mathlib.hexFacingToAngle(lastFacing);
+            const angleNew = mathlib.hexFacingToAngle(facing);
 
-            var right = mathlib.getAngleBetween(angleLast, angleNew, true);
-            var left = mathlib.getAngleBetween(angleLast, angleNew, false);
+            const right = mathlib.getAngleBetween(angleLast, angleNew, true);
+            const left = mathlib.getAngleBetween(angleLast, angleNew, false);
 
-            if (Math.abs(right) < Math.abs(left)) {
-                turn += right;
-            } else {
-                turn += left;
-            }
+            totalTurn += Math.abs(right) < Math.abs(left) ? right : left;
 
             lastFacing = facing;
         });
 
-        return turn;
+        return totalTurn;
     }
-*/
-
-function buildTurn(endMove, startFacing) {
-
-    // Build the correct sequence without mutating endMove
-    const sequence = [startFacing];
-
-    if (Array.isArray(endMove.oldFacings) && endMove.oldFacings.length > 0) {
-        sequence.push(...endMove.oldFacings);
-    }
-
-    sequence.push(endMove.facing);
-
-    let totalTurn = 0;
-    let lastFacing = null;
-
-    sequence.forEach(function (facing) {
-        if (lastFacing === null) {
-            lastFacing = facing;
-            return;
-        }
-
-        const angleLast = mathlib.hexFacingToAngle(lastFacing);
-        const angleNew = mathlib.hexFacingToAngle(facing);
-
-        const right = mathlib.getAngleBetween(angleLast, angleNew, true);
-        const left = mathlib.getAngleBetween(angleLast, angleNew, false);
-
-        totalTurn += Math.abs(right) < Math.abs(left) ? right : left;
-
-        lastFacing = facing;
-    });
-
-    return totalTurn;
-}
 
     function getMovementPoints(currentHex, nextHex, lastHex) {
 
@@ -6823,7 +6214,7 @@ function buildTurn(endMove, startFacing) {
         //var path = new THREE.Path( curve.getPoints( 50 ) );
 
         //var geometry = path.createPointsGeometry( 50 );
-        var geometry = new THREE.Geometry().setFromPoints(curve.getPoints(50));
+        var geometry = new THREE.BufferGeometry().setFromPoints(curve.getPoints(50));
         var material = new THREE.LineBasicMaterial({ color: 0xffffff, opacity: 0.5 });
 
         var curveObject = new THREE.Line(geometry, material);
@@ -8103,18 +7494,17 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setTexture = function (tex) {
-        changeAttribute(this.geometry, this.index, 'textureNumber', tex);
-
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 1, tex);
         return this;
     };
 
     BaseParticle.prototype.setSize = function (size) {
-        changeAttribute(this.geometry, this.index, 'size', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 0, size);
         return this;
     };
 
     BaseParticle.prototype.setSizeChange = function (size) {
-        changeAttribute(this.geometry, this.index, 'sizeChange', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 1, size);
         return this;
     };
 
@@ -8124,23 +7514,23 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setOpacity = function (opacity) {
-        changeAttribute(this.geometry, this.index, 'opacity', opacity);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 2, opacity);
         return this;
     };
 
     BaseParticle.prototype.setFadeIn = function (time, speed) {
         if (!(typeof speed === 'undefined' ? 'undefined' : _typeof(speed)) === "undefined") speed = 1000;
 
-        changeAttribute(this.geometry, this.index, 'fadeInTime', time);
-        changeAttribute(this.geometry, this.index, 'fadeInSpeed', speed);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 0, time);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 1, speed);
         return this;
     };
 
     BaseParticle.prototype.setFadeOut = function (time, speed) {
         if (!(typeof speed === 'undefined' ? 'undefined' : _typeof(speed)) === "undefined") speed = 1000;
 
-        changeAttribute(this.geometry, this.index, 'fadeOutTime', time);
-        changeAttribute(this.geometry, this.index, 'fadeOutSpeed', speed);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 2, time);
+        changePackedAttribute(this.geometry, this.index, 'fadeData', 4, 3, speed);
         return this;
     };
 
@@ -8150,12 +7540,12 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setAngle = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angle', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 2, mathlib.degreeToRadian(angle));
         return this;
     };
 
     BaseParticle.prototype.setAngleChange = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angleChange', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 3, mathlib.degreeToRadian(angle));
         return this;
     };
 
@@ -8175,7 +7565,7 @@ window.BaseParticle = function () {
     };
 
     BaseParticle.prototype.setActivationTime = function (gameTime) {
-        changeAttribute(this.geometry, this.index, 'activationGameTime', gameTime);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 0, gameTime);
         return this;
     };
 
@@ -8188,6 +7578,12 @@ window.BaseParticle = function () {
             target[index * values.length + i] = value;
         });
 
+        geometry.attributes[key].needsUpdate = true;
+    }
+
+    function changePackedAttribute(geometry, index, key, componentCount, offset, value) {
+        var target = geometry.attributes[key].array;
+        target[index * componentCount + offset] = value;
         geometry.attributes[key].needsUpdate = true;
     }
 
@@ -8237,33 +7633,33 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setTexture = function (tex) {
-        changeAttribute(this.geometry, this.index, 'textureNumber', tex);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 1, tex);
 
         return this;
     };
-    
+
     StarParticle.prototype.setParallaxFactor = function (parallaxFactor) {
-        changeAttribute(this.geometry, this.index, 'parallaxFactor', -1.0 + parallaxFactor);
+        changePackedAttribute(this.geometry, this.index, 'starData', 3, 0, -1.0 + parallaxFactor);
         return this;
     };
 
     StarParticle.prototype.setSineFrequency = function (sineFrequency) {
-        changeAttribute(this.geometry, this.index, 'sineFrequency', sineFrequency);
+        changePackedAttribute(this.geometry, this.index, 'starData', 3, 1, sineFrequency);
         return this;
     };
 
     StarParticle.prototype.setSineAmplitude = function (sineAmplitude) {
-        changeAttribute(this.geometry, this.index, 'sineAmplitude', sineAmplitude);
+        changePackedAttribute(this.geometry, this.index, 'starData', 3, 2, sineAmplitude);
         return this;
     };
 
     StarParticle.prototype.setSize = function (size) {
-        changeAttribute(this.geometry, this.index, 'size', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 0, size);
         return this;
     };
 
     StarParticle.prototype.setSizeChange = function (size) {
-        changeAttribute(this.geometry, this.index, 'sizeChange', size);
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 1, size);
         return this;
     };
 
@@ -8273,7 +7669,7 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setOpacity = function (opacity) {
-        changeAttribute(this.geometry, this.index, 'opacity', opacity);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 2, opacity);
         return this;
     };
 
@@ -8283,12 +7679,12 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setAngle = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angle', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 2, mathlib.degreeToRadian(angle));
         return this;
     };
 
     StarParticle.prototype.setAngleChange = function (angle) {
-        changeAttribute(this.geometry, this.index, 'angleChange', mathlib.degreeToRadian(angle));
+        changePackedAttribute(this.geometry, this.index, 'sizeAngleData', 4, 3, mathlib.degreeToRadian(angle));
         return this;
     };
 
@@ -8298,7 +7694,7 @@ window.StarParticle = function () {
     };
 
     StarParticle.prototype.setActivationTime = function (gameTime) {
-        changeAttribute(this.geometry, this.index, 'activationGameTime', gameTime);
+        changePackedAttribute(this.geometry, this.index, 'timeTextureData', 3, 0, gameTime);
         return this;
     };
 
@@ -8314,6 +7710,12 @@ window.StarParticle = function () {
         geometry.attributes[key].needsUpdate = true;
     }
 
+    function changePackedAttribute(geometry, index, key, componentCount, offset, value) {
+        var target = geometry.attributes[key].array;
+        target[index * componentCount + offset] = value;
+        geometry.attributes[key].needsUpdate = true;
+    }
+
     return StarParticle;
 }();;
 
@@ -8326,6 +7728,8 @@ window.ParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
+    texture.colorSpace = THREE.SRGBColorSpace;
 
     function ParticleEmitter(scene, particleCount, args) {
         Animation.call(this);
@@ -8352,26 +7756,19 @@ window.ParticleEmitter = function () {
         var uniforms = {
             gameTime: { type: 'f', value: 0.0 },
             zoomLevel: { type: 'f', value: 1.0 },
-            texture: { type: 't', value: texture }
+            spriteTexture: { type: 't', value: texture }
         };
 
         this.particleGeometry = new THREE.BufferGeometry();
 
-        this.particleGeometry.addAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('size', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sizeChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('opacity', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('activationGameTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('textureNumber', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+        this.particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+
+        this.particleGeometry.setAttribute('sizeAngleData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('fadeData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('timeTextureData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
 
 
         this.particleGeometry.dynamic = true;
@@ -8420,14 +7817,14 @@ window.ParticleEmitter = function () {
         this.active = false;
     };
 
-    ParticleEmitter.prototype.reset = function () {};
+    ParticleEmitter.prototype.reset = function () { };
 
     ParticleEmitter.prototype.cleanUp = function () {
         this.mesh.material.dispose();
         this.scene.remove(this.mesh);
     };
 
-    ParticleEmitter.prototype.update = function (gameData) {};
+    ParticleEmitter.prototype.update = function (gameData) { };
 
     ParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
         this.particleMaterial.uniforms.gameTime.value = total;
@@ -8478,6 +7875,8 @@ window.StarParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
+    texture.colorSpace = THREE.SRGBColorSpace;
 
     function StarParticleEmitter(scene, particleCount, args) {
         Animation.call(this);
@@ -8505,25 +7904,20 @@ window.StarParticleEmitter = function () {
         customMatrix.set(0.00078125, 0, 0, 0, 0, 0.0024813895781637717, 0, 0, 0, 0, -0.001, 0, -0, -0, -0, 1)
 
         var uniforms = {
-            gameTime: { type: 'f', value: 0.0 },
-            texture: { type: 't', value: texture },
-            customMatrix: { type: 'm4', value: customMatrix}
+            cameraPosition: { type: 'v3', value: new THREE.Vector3(0, 0, 0) },
+            gameTime: { type: 'f', value: 0 },
+            spriteTexture: { type: 't', value: texture },
+            customMatrix: { type: 'm4', value: new THREE.Matrix4() }
         };
 
         this.particleGeometry = new THREE.BufferGeometry();
 
-        this.particleGeometry.addAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('size', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sizeChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('opacity', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('activationGameTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('textureNumber', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('parallaxFactor', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sineFrequency', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sineAmplitude', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+        this.particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+
+        this.particleGeometry.setAttribute('sizeAngleData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('timeTextureData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('starData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
 
         this.particleGeometry.dynamic = true;
 
@@ -8573,25 +7967,25 @@ window.StarParticleEmitter = function () {
         this.active = false;
     };
 
-    StarParticleEmitter.prototype.reset = function () {};
+    StarParticleEmitter.prototype.reset = function () { };
 
     StarParticleEmitter.prototype.cleanUp = function () {
         this.mesh.material.dispose();
         this.scene.remove(this.mesh);
     };
 
-    StarParticleEmitter.prototype.update = function (gameData) {};
+    StarParticleEmitter.prototype.update = function (gameData) { };
 
     StarParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
         this.particleMaterial.uniforms.gameTime.value = total;
 
-        
+
         if (zoom === 1) {
             var width = window.webglScene.width;
             var height = window.webglScene.height;
 
-            var camera = new THREE.OrthographicCamera( width / -2, width / 2, height / 2, height / -2, -1000, 1000);
-            camera.left =  width / -2;
+            var camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, -1000, 1000);
+            camera.left = width / -2;
             camera.right = width / 2;
             camera.top = height / 2;
             camera.bottom = height / -2;
@@ -8602,11 +7996,11 @@ window.StarParticleEmitter = function () {
 
             this.particleMaterial.uniforms.customMatrix.value = camera.projectionMatrix;
         }
-        
+
         this.mesh.material.needsUpdate = true;
     };
 
-    
+
 
     StarParticleEmitter.prototype.done = function () {
         if (this.onDoneCallback) {
@@ -8690,6 +8084,8 @@ window.ParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
+    texture.colorSpace = THREE.SRGBColorSpace;
 
     function ParticleEmitter(scene, particleCount, args) {
         Animation.call(this);
@@ -8716,26 +8112,19 @@ window.ParticleEmitter = function () {
         var uniforms = {
             gameTime: { type: 'f', value: 0.0 },
             zoomLevel: { type: 'f', value: 1.0 },
-            texture: { type: 't', value: texture }
+            spriteTexture: { type: 't', value: texture }
         };
 
         this.particleGeometry = new THREE.BufferGeometry();
 
-        this.particleGeometry.addAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('size', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sizeChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('opacity', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeInSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('fadeOutSpeed', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('activationGameTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('textureNumber', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+        this.particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('velocity', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('acceleration', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+
+        this.particleGeometry.setAttribute('sizeAngleData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('fadeData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('timeTextureData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
 
 
         this.particleGeometry.dynamic = true;
@@ -8784,14 +8173,14 @@ window.ParticleEmitter = function () {
         this.active = false;
     };
 
-    ParticleEmitter.prototype.reset = function () {};
+    ParticleEmitter.prototype.reset = function () { };
 
     ParticleEmitter.prototype.cleanUp = function () {
         this.mesh.material.dispose();
         this.scene.remove(this.mesh);
     };
 
-    ParticleEmitter.prototype.update = function (gameData) {};
+    ParticleEmitter.prototype.update = function (gameData) { };
 
     ParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
         this.particleMaterial.uniforms.gameTime.value = total;
@@ -9154,7 +8543,7 @@ window.LaserEffect = function () {
 
         if (args.systemDestroyedEffect) {
             args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + Math.random() * this.duration);
-            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + Math.random() * this.duration, 'crit');            
+            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + Math.random() * this.duration, 'crit');
         }
 
         // --- Cached laser sound setup ---
@@ -9185,7 +8574,7 @@ window.LaserEffect = function () {
                 this.laserSound = LaserEffect.cachedAudio.cloneNode(true);
                 this.laserSound.volume = this.soundVolume;
                 this.laserSound.currentTime = 0;
-                this.laserSound.play().catch(() => {});
+                this.laserSound.play().catch(() => { });
                 this.playedSound = true;
             } catch (e) {
                 console.warn("Laser sound playback failed:", e);
@@ -9252,9 +8641,14 @@ window.LaserEffect = function () {
 
     function createLaser(color, opacity, width) {
         const startAndEnd = getStartAndEnd.call(this);
+
+        const tex = new THREE.TextureLoader().load("img/effect/laser19.png");
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.colorSpace = THREE.SRGBColorSpace;
+
         return new LineSprite(startAndEnd.start, startAndEnd.end, width, 201, color, opacity, {
             blending: THREE.AdditiveBlending,
-            texture: new THREE.TextureLoader().load("img/effect/laser19.png")
+            texture: tex
         });
     }
 
@@ -9265,9 +8659,9 @@ window.LaserEffect = function () {
         const start = this.weapon.hasSpecialLaunchHexCalculation
             ? this.weaponOrigin
             : {
-                  x: this.shooter.getPosition().x + this.startOffset.x,
-                  y: this.shooter.getPosition().y + this.startOffset.y
-              };
+                x: this.shooter.getPosition().x + this.startOffset.x,
+                y: this.shooter.getPosition().y + this.startOffset.y
+            };
 
         const end = { x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y };
 
@@ -9440,7 +8834,7 @@ window.LaserEffect = function () {
         var start = this.shooter.getPosition();
         start.x += this.startOffset.x;
         start.y += this.startOffset.y;
-		}
+        }
         var end = { x: endPosition.x + offsetVelocity.x, y: endPosition.y + offsetVelocity.y };
         return { start: start, end: end };
     }
@@ -12421,14 +11815,14 @@ window.PreFiringPhaseStrategy = function () {
     };
 
     PreFiringPhaseStrategy.prototype.onHexClicked = function (payload) {
-        this.lastClickedShipId = -1;           
-        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+        this.lastClickedShipId = -1;
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);
         var hex = payload.hex;
 
         if (!this.selectedShip) {
             return;
         }
-				
+
         var hexTarget = gamedata.selectedSystems.some(function (system) {
             return system instanceof Weapon && system.hextarget === true;
         });
@@ -12463,33 +11857,33 @@ window.PreFiringPhaseStrategy = function () {
             return system instanceof Weapon && system.hextarget === true;
         });
 
-        if (gamedata.rules && gamedata.rules.friendlyFire  === 1 || hexWeaponSelected) {              
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1 || hexWeaponSelected) {
 
             //if(gamedata.isMyorMyTeamShip(this.selectedShip) && weaponManager.hasShipWeaponsSelected()){            
-            if(gamedata.isMyorMyTeamShip(this.selectedShip)){
-                var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn); 
-                var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);                   
+            if (gamedata.isMyorMyTeamShip(this.selectedShip)) {
+                var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+                var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
                 menu.addButton("selectShip",
-                    function() {
+                    function () {
                         return this.selectedShip !== ship;
                     },
                     function () {
                         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
                         this.showShipEW(this.selectedShip);
-                    }.bind(this), "Select ship"); 
-                if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);                
-            }else{ //Remove this else block if we don't want to stadnardise double-click to select in Firing Phases
-                this.setSelectedShip(ship); 
+                    }.bind(this), "Select ship");
+                if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+            } else { //Remove this else block if we don't want to stadnardise double-click to select in Firing Phases
+                this.setSelectedShip(ship);
                 var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
                 var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
                 if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
             }
         } else {
-            this.setSelectedShip(ship); 
+            this.setSelectedShip(ship);
             var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
             var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
-            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);            
-        }    
+            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+        }
 
     };
 
@@ -12499,10 +11893,10 @@ window.PreFiringPhaseStrategy = function () {
     };
 
     PreFiringPhaseStrategy.prototype.targetShip = function (ship, payload) {
-        if(shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn){ //Selected ships is not deployed yet - DK May 2025
+        if (shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
             this.showShipTooltip(ship, payload, menu, false);
-            return;  
-        }   
+            return;
+        }
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
         this.showShipTooltip(ship, payload, menu, false);
     };
@@ -12512,17 +11906,17 @@ window.PreFiringPhaseStrategy = function () {
         var weapon = payload.weapon;
 
         if (this.selectedShip !== ship) {
-            this.lastClickedShipId = -1;               
+            this.lastClickedShipId = -1;
             this.setSelectedShip(ship);
         }
 
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
     };
 
     PreFiringPhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-		//added extra check for combat pivots to allow cancelling these when flight has 0 thrust - DK 10.24
-        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)) { 
+        //added extra check for combat pivots to allow cancelling these when flight has 0 thrust - DK 10.24
+        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)) {
             this.drawMovementUI(this.selectedShip);
         }
     };
@@ -12535,27 +11929,28 @@ window.PreFiringPhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
 
-        if (gamedata.rules && gamedata.rules.friendlyFire  === 1) {        
-            if (gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {        
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
                 weaponManager.targetShip(this.selectedShip, ship, system);
             }
-        }else{
-            if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) { 
+        } else {
+            if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
                 weaponManager.targetShip(this.selectedShip, ship, system);
-            }                               
-        }    
+            }
+        }
 
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
     };
 
-    PreFiringPhaseStrategy.prototype.onShowTargetedHexagonInArc = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship.              
+    PreFiringPhaseStrategy.prototype.onShowTargetedHexagonInArc = function (payload) { //When a gravity designates a target add a hexagon equal to move range around target ship.              
         var shooterIcon = this.shipIconContainer.getByShip(payload.shooter);
         var targetIcon = this.shipIconContainer.getByShip(payload.target);
-        targetIcon.showTargetedHexagonInArc(payload.shooter, shooterIcon, payload.system, payload.system.moveDistance);
-    };  
+        var size = payload.size !== undefined ? payload.size : payload.system.moveDistance;
+        targetIcon.showTargetedHexagonInArc(payload.shooter, shooterIcon, payload.system, size, payload.color, payload.opacity);
+    };
 
-    PreFiringPhaseStrategy.prototype.onRemoveTargetedHexagonInArc = function(payload){ //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
-        var targetIcon = this.shipIconContainer.getByShip(payload.target);        
+    PreFiringPhaseStrategy.prototype.onRemoveTargetedHexagonInArc = function (payload) { //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
+        var targetIcon = this.shipIconContainer.getByShip(payload.target);
         targetIcon.removeTargetedHexagonInArc(payload.system);
     };
 
@@ -12597,18 +11992,18 @@ window.FirePhaseStrategy = function () {
         PhaseStrategy.prototype.deactivate.call(this);
         this.shipIconContainer.getArray().forEach(function (icon) {
             icon.removeHexagonArcs();
-        });        
+        });
     };
 
     FirePhaseStrategy.prototype.onHexClicked = function (payload) {
-        this.lastClickedShipId = -1;        
-        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+        this.lastClickedShipId = -1;
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);
         var hex = payload.hex;
 
         if (!this.selectedShip) {
             return;
         }
-				
+
         var hexTarget = gamedata.selectedSystems.some(function (system) {
             return system instanceof Weapon && system.hextarget === true;
         });
@@ -12643,36 +12038,36 @@ window.FirePhaseStrategy = function () {
             return system instanceof Weapon && system.hextarget === true;
         });
 
-        if (gamedata.rules && gamedata.rules.friendlyFire  === 1 || hexWeaponSelected) {              
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1 || hexWeaponSelected) {
 
             //if(gamedata.isMyorMyTeamShip(this.selectedShip) && weaponManager.hasShipWeaponsSelected()){            
-            if(gamedata.isMyorMyTeamShip(this.selectedShip)){
-                var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn); 
-                var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);                   
+            if (gamedata.isMyorMyTeamShip(this.selectedShip)) {
+                var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
+                var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
                 menu.addButton("selectShip",
-                    function() {
+                    function () {
                         return this.selectedShip !== ship;
                     },
                     function () {
                         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
                         this.showShipEW(this.selectedShip);
-                    }.bind(this), "Select ship"); 
-                if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);                
-            }else{ //Remove this else block if we don't want to stadnardise double-click to select in Firing Phases
-                this.setSelectedShip(ship); 
+                    }.bind(this), "Select ship");
+                if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+            } else { //Remove this else block if we don't want to stadnardise double-click to select in Firing Phases
+                this.setSelectedShip(ship);
                 var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
                 var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
                 if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
             }
         } else {
-            this.setSelectedShip(ship); 
+            this.setSelectedShip(ship);
             var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
             var ballisticsMenu = new ShipTooltipBallisticsMenu(this.shipIconContainer, this.gamedata.turn, true, this.selectedShip);
-            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);            
-        }    
+            if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false, ballisticsMenu);
+        }
 
     };
-    
+
 
     FirePhaseStrategy.prototype.deselectShip = function (ship) {
         PhaseStrategy.prototype.deselectShip.call(this, ship);
@@ -12680,10 +12075,10 @@ window.FirePhaseStrategy = function () {
     };
 
     FirePhaseStrategy.prototype.targetShip = function (ship, payload) {
-        if(shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn){ //Selected ships is not deployed yet - DK May 2025
+        if (shipManager.getTurnDeployed(this.selectedShip) > gamedata.turn) { //Selected ships is not deployed yet - DK May 2025
             this.showShipTooltip(ship, payload, menu, false);
-            return;  
-        }   
+            return;
+        }
         var menu = new ShipTooltipFireMenu(this.selectedShip, ship, this.gamedata.turn);
         if (!gamedata.showLoS) this.showShipTooltip(ship, payload, menu, false);
     };
@@ -12693,17 +12088,17 @@ window.FirePhaseStrategy = function () {
         var weapon = payload.weapon;
 
         if (this.selectedShip !== ship) {
-            this.lastClickedShipId = -1;             
+            this.lastClickedShipId = -1;
             this.setSelectedShip(ship);
         }
 
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
     };
 
     FirePhaseStrategy.prototype.setSelectedShip = function (ship) {
         PhaseStrategy.prototype.setSelectedShip.call(this, ship);
-		//added extra check for combat pivots to allow cancelling these when flight has 0 thrust - DK 10.24
-        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)) { 
+        //added extra check for combat pivots to allow cancelling these when flight has 0 thrust - DK 10.24
+        if (shipManager.movement.canPivot(ship) || (shipManager.movement.countCombatPivot(ship) > 0)) {
             this.drawMovementUI(this.selectedShip);
         }
     };
@@ -12716,27 +12111,28 @@ window.FirePhaseStrategy = function () {
         var ship = payload.ship;
         var system = payload.system;
 
-        if (gamedata.rules && gamedata.rules.friendlyFire  === 1) {        
-            if (gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {        
+        if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
+            if (gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
                 weaponManager.targetShip(this.selectedShip, ship, system);
             }
-        }else{
-            if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) { 
+        } else {
+            if (gamedata.isEnemy(ship, this.selectedShip) && gamedata.selectedSystems.length > 0 && weaponManager.canCalledshot(ship, system, this.selectedShip)) {
                 weaponManager.targetShip(this.selectedShip, ship, system);
-            }                               
-        }    
+            }
+        }
 
-        PhaseStrategy.prototype.onSystemDataChanged.call(this, {ship: ship});
+        PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship });
     };
 
-    FirePhaseStrategy.prototype.onShowTargetedHexagonInArc = function(payload){ //When a gravity designates a target add a hexagon equal to move range around target ship.              
+    FirePhaseStrategy.prototype.onShowTargetedHexagonInArc = function (payload) { //When a gravity designates a target add a hexagon equal to move range around target ship.              
         var shooterIcon = this.shipIconContainer.getByShip(payload.shooter);
         var targetIcon = this.shipIconContainer.getByShip(payload.target);
-        targetIcon.showTargetedHexagonInArc(payload.shooter, shooterIcon, payload.system, payload.size, payload.color, payload.opacity);
-    };  
+        var size = payload.size !== undefined ? payload.size : payload.system.moveDistance;
+        targetIcon.showTargetedHexagonInArc(payload.shooter, shooterIcon, payload.system, size, payload.color, payload.opacity);
+    };
 
-    FirePhaseStrategy.prototype.onRemoveTargetedHexagonInArc = function(payload){ //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
-        var targetIcon = this.shipIconContainer.getByShip(payload.target);        
+    FirePhaseStrategy.prototype.onRemoveTargetedHexagonInArc = function (payload) { //When a gravity designates a move target location for its target, remove the hexgon(equal to move range)
+        var targetIcon = this.shipIconContainer.getByShip(payload.target);
         targetIcon.removeTargetedHexagonInArc(payload.system);
     };
 
@@ -12755,8 +12151,8 @@ window.ReplayPhaseStrategy = function () {
         this.currentTurn = null;
         this.currentPhase = null;
         this.replayTurn = null;
-        this.replayPhase = null;    
-		this.allBallistics = null;  //New variable added so that ballisticLineIcons can be rendered during Replay - DK 12/24 
+        this.replayPhase = null;
+        this.allBallistics = null;  //New variable added so that ballisticLineIcons can be rendered during Replay - DK 12/24 
 
         this.loading = false;
     }
@@ -12782,7 +12178,7 @@ window.ReplayPhaseStrategy = function () {
         this.shipWindowManager = shipWindowManager;
         gamedata.replay = true;
         this.createReplayUI();
-        
+
         startReplayOrRequestGamedata.call(this);
 
         activatePause.call(this);
@@ -12791,15 +12187,17 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
-        infowindow.informPhase(5000, function () {});
-        document.getElementById('combatLogContainer').style.display = 'none'; //Hide print Log buttons
+        infowindow.informPhase(5000, function () { });
+        var combatLogContainer = document.getElementById('combatLogContainer');
+        if (combatLogContainer) combatLogContainer.style.display = 'none'; //Hide print Log buttons
         return this;
     };
 
     ReplayPhaseStrategy.prototype.deactivate = function () {
         PhaseStrategy.prototype.deactivate.call(this, true);
-        gamedata.replay = false;        
-        document.getElementById('combatLogContainer').style.display = 'block'; //Show print Log buttons
+        gamedata.replay = false;
+        var combatLogContainer = document.getElementById('combatLogContainer');
+        if (combatLogContainer) combatLogContainer.style.display = 'block'; //Show print Log buttons
         return this;
     };
 
@@ -12811,10 +12209,10 @@ window.ReplayPhaseStrategy = function () {
         startReplayOrRequestGamedata.call(this);
     };
 
-    ReplayPhaseStrategy.prototype.done = function () {};
+    ReplayPhaseStrategy.prototype.done = function () { };
 
     ReplayPhaseStrategy.prototype.onHexClicked = function (payload) {
-        PhaseStrategy.prototype.onHexClicked.call(this, payload);           
+        PhaseStrategy.prototype.onHexClicked.call(this, payload);
     };
 
     ReplayPhaseStrategy.prototype.selectShip = function (ship, payload) {
@@ -12857,12 +12255,12 @@ window.ReplayPhaseStrategy = function () {
         }
     };
 
-    ReplayPhaseStrategy.prototype.showAppropriateEW = function() {
+    ReplayPhaseStrategy.prototype.showAppropriateEW = function () {
         this.shipIconContainer.getArray().forEach(icon => {
             icon.hideEW();
             icon.hideBDEW();
         });
-        
+
         this.ewIconContainer.hide();
         if (this.selectedShip) {
             this.showShipEW(this.selectedShip);
@@ -12972,7 +12370,7 @@ window.ReplayPhaseStrategy = function () {
         } else {
             // 🔊 Turn sound ON            
             gamedata.playAudio = true;
-              
+
         }
 
         window.dispatchEvent(new CustomEvent("soundToggled"));
@@ -13057,8 +12455,8 @@ window.ReplayPhaseStrategy = function () {
             success: function (data) {
                 gamedata.parseServerData(data); 
                 //New section called at this point so that ballisticIcons can be rendered during Replay - DK 10/24  
-				this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');		
-        		this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);         		
+                this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(gamedata.turn, 'ballistic');		
+                this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);         		
                 stopLoading.call(this);
             }.bind(this),
             error: ajaxInterface.errorAjax
@@ -13091,67 +12489,67 @@ window.ReplayPhaseStrategy = function () {
     }    
     
 */
-//New versions to use ajaxWithRetry()
-function requestReplayGamedata() {
-    startLoading.call(this);
+    //New versions to use ajaxWithRetry()
+    function requestReplayGamedata() {
+        startLoading.call(this);
 
-    ajaxInterface.ajaxWithRetry({
-        type: 'GET',
-        url: 'replay.php',
-        dataType: 'json',
-        data: {
-            turn: this.replayTurn,
-            gameid: this.gamedata.gameid,
-            time: new Date().getTime()
-        },
-        success: function (data) {
-            gamedata.parseServerData(data);
-            gamedata.replay = true;
-            // New section so ballisticIcons render during Replay
-            this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(
-                gamedata.turn,
-                'ballistic'
-            );
+        ajaxInterface.ajaxWithRetry({
+            type: 'GET',
+            url: 'replay.php',
+            dataType: 'json',
+            data: {
+                turn: this.replayTurn,
+                gameid: this.gamedata.gameid,
+                time: new Date().getTime()
+            },
+            success: function (data) {
+                gamedata.parseServerData(data);
+                gamedata.replay = true;
+                // New section so ballisticIcons render during Replay
+                this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(
+                    gamedata.turn,
+                    'ballistic'
+                );
 
-            this.ballisticIconContainer.consumeGamedata(
-                this.gamedata,
-                this.shipIconContainer,
-                this.allBallistics
-            );
-        }.bind(this),
-        error: ajaxInterface.errorAjax,
-        complete: function () {
-            stopLoading.call(this);
-        }.bind(this)
-    });
-}
+                this.ballisticIconContainer.consumeGamedata(
+                    this.gamedata,
+                    this.shipIconContainer,
+                    this.allBallistics
+                );
+            }.bind(this),
+            error: ajaxInterface.errorAjax,
+            complete: function () {
+                stopLoading.call(this);
+            }.bind(this)
+        });
+    }
 
-function requestPlayableGamedata() {
-    startLoading.call(this);
+    function requestPlayableGamedata() {
+        startLoading.call(this);
 
-    ajaxInterface.ajaxWithRetry({
-        type: 'GET',
-        url: 'gamedata.php',
-        dataType: 'json',
-        data: {
-            turn: -1,
-            phase: 0,
-            activeship: -1,
-            gameid: gamedata.gameid,
-            playerid: gamedata.thisplayer || -1,
-            time: new Date().getTime(),
-            force: true
-        },
-        success: function (data) {
-            gamedata.replay = false;
-            gamedata.parseServerData(data);
-        }.bind(this),
-        error: ajaxInterface.errorAjax,
-        complete: function () {
-            stopLoading.call(this);
-        }.bind(this)
-    });
-}
+        ajaxInterface.ajaxWithRetry({
+            type: 'GET',
+            url: 'gamedata.php',
+            dataType: 'json',
+            data: {
+                turn: -1,
+                phase: 0,
+                activeship: -1,
+                gameid: gamedata.gameid,
+                playerid: gamedata.thisplayer || -1,
+                time: new Date().getTime(),
+                force: true
+            },
+            success: function (data) {
+                gamedata.replay = false;
+                gamedata.parseServerData(data);
+            }.bind(this),
+            error: ajaxInterface.errorAjax,
+            complete: function () {
+                stopLoading.call(this);
+            }.bind(this)
+        });
+    }
 
 
     function startLoading() {
@@ -13462,36 +12860,36 @@ window.HexagonTexture = function () {
     function createCanvas(width, height, debug) {
         return window.AbstractCanvas.create(width, height, debug);
     }
-/*
-HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
-    var hexSize = canvasSize / 4;
-    var width = canvasSize;
-    var height = canvasSize;
-
-    var canvas = createCanvas(width, height, false);
-    var context = canvas.getContext("2d");
-
-    var offsetX = hexSize * Math.cos(Math.PI / 6);
-    var offsetY = hexSize * Math.sin(Math.PI / 6);
-
-    // Loop through to draw hexagons
-    for (var row = 0; row < height / (2 * hexSize); row++) {
-        for (var col = 0; col < width / (2 * hexSize); col++) {
-            var x = col * 2 * offsetX;
-            var y = row * hexSize * 1.5;
-
-            // Offset alternate rows
-            if (col % 2 === 1) {
-                y += hexSize * 0.75;
+    /*
+    HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
+        var hexSize = canvasSize / 4;
+        var width = canvasSize;
+        var height = canvasSize;
+    
+        var canvas = createCanvas(width, height, false);
+        var context = canvas.getContext("2d");
+    
+        var offsetX = hexSize * Math.cos(Math.PI / 6);
+        var offsetY = hexSize * Math.sin(Math.PI / 6);
+    
+        // Loop through to draw hexagons
+        for (var row = 0; row < height / (2 * hexSize); row++) {
+            for (var col = 0; col < width / (2 * hexSize); col++) {
+                var x = col * 2 * offsetX;
+                var y = row * hexSize * 1.5;
+    
+                // Offset alternate rows
+                if (col % 2 === 1) {
+                    y += hexSize * 0.75;
+                }
+    
+                this.graphics.drawCenteredHexagonNumber(context, x, y, hexSize);
             }
-
-            this.graphics.drawCenteredHexagonNumber(context, x, y, hexSize);
         }
-    }
-
-    return canvas;
-};
-*/
+    
+        return canvas;
+    };
+    */
     HexagonTexture.prototype.getTexture = function (canvas, gridWidth, gridHeight) {
 
         if (gridWidth == undefined) {
@@ -13502,7 +12900,8 @@ HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
             gridHeight = 1;
         }
 
-        var texture = new THREE.Texture(canvas);
+        var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;
@@ -13695,7 +13094,7 @@ window.ShipTooltip = function () {
         }
         if(shipManager.isStealthShip(ship)){
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn){
-                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Always say undetected on Deployment phase.  
+                toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else if (shipManager.isDetected(ship)) {
                 toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
             } else {
@@ -17362,7 +16761,7 @@ window.mathlib = {
 			return; //No start selectd yet, or tool just activated.			
 		}
 		//var blockedHexes = weaponManager.getBlockedHexes();
-	    var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.   	
+		var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.   	
 
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
 	},
@@ -17517,7 +16916,8 @@ window.mathlib = {
 		ctx.font = `bold ${fontSize}px Arial`;
 		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
 
-		const texture = new THREE.Texture(canvas);
+		const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
 		texture.needsUpdate = true;
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
@@ -17544,7 +16944,8 @@ window.mathlib = {
 			markerCtx.fillStyle = hexToRgba(color);
 			markerCtx.fill();
 
-			const markerTexture = new THREE.Texture(markerCanvas);
+			const markerTexture = new THREE.CanvasTexture(markerCanvas);
+        markerTexture.colorSpace = THREE.SRGBColorSpace;
 			markerTexture.needsUpdate = true;
 
 			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
@@ -42986,19 +42387,19 @@ GraviticShifter.prototype = Object.create(Gravitic.prototype);
 GraviticShifter.prototype.constructor = GraviticShifter;
 
 GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
-	var mod = 0;
+    var mod = 0;
 
-    if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
-    
+    if (target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
+
     /* //Removed since OEW lock on allies enabled - DK 17.1.26    
     if(shooter.team == target.team){
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
         var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
         mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
     }
-    */        
-    
-	return mod; 
+    */
+
+    return mod;
 };
 
 var GravityNet = function GravityNet(json, ship) {
@@ -43008,25 +42409,25 @@ GravityNet.prototype = Object.create(Gravitic.prototype);
 GravityNet.prototype.constructor = GravityNet;
 
 GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
-	var mod = 0;
+    var mod = 0;
 
-    if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
-    
+    if (target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
+
     /* //Removed since OEW lock on allies enabled - DK 17.1.26
     if(shooter.team == target.team){
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
         var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
         mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
     } 
-    */       
-    
-	return mod; 
+    */
+
+    return mod;
 };
 
-GravityNet.prototype.initializationUpdate = function() {
-    if(gamedata.gamephase == 1 || gamedata.gamephase == 5){ //update weapon data field to show this gravity net's max movement distance or return to TBD
+GravityNet.prototype.initializationUpdate = function () {
+    if (gamedata.gamephase == 1 || gamedata.gamephase == 5) { //update weapon data field to show this gravity net's max movement distance or return to TBD
         this.data["Move Distance"] = this.moveDistance;
-    } 
+    }
     if (this.fireOrders.length > 0) {
         this.hextarget = true;
         this.ignoresLoS = false;
@@ -43035,16 +42436,16 @@ GravityNet.prototype.initializationUpdate = function() {
                 webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });
             } else if (weaponManager.isSelectedWeapon(this) && this.target) {
                 webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });//Remove any old sprites to prevent duplication.
-                webglScene.customEvent("ShowTargetedHexagonInArc", { shooter: this.ship, target: this.target, system: this});
+                webglScene.customEvent("ShowTargetedHexagonInArc", { shooter: this.ship, target: this.target, system: this });
             }
         }
-    }else{
+    } else {
         this.hextarget = false;
-        this.ignoresLoS = false; 
-        if(this.target){   
-            webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this});
-        }                
-    } 
+        this.ignoresLoS = false;
+        if (this.target) {
+            webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });
+        }
+    }
 
     return this;
 };
@@ -43054,7 +42455,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     if (this.fireOrders.length > 0) {
         return;
-    } 
+    }
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -43063,7 +42464,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         var calledid = -1; //No called shots.     
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -43077,83 +42478,88 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'gravitic', 
+            damageclass: 'gravitic',
             chance: chance,
             hitmod: 0,
             notes: "Split"
-        }; 
+        };
         this.target = target; //store current target to this gravity net object.       
         fireOrdersArray.push(fire); // Store each fire order
-        
-        webglScene.customEvent("ShowTargetedHexagonInArc", {shooter: shooter, target: target, system: this});
+
+        webglScene.customEvent("ShowTargetedHexagonInArc", { shooter: shooter, target: target, system: this });
         this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.        
     }
-    
+
     return fireOrdersArray; // Return all fire orders
-};    
+};
 
 GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
-    
+
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
     if (this.fireOrders.length > 1) {
         return;
-    }         
+    }
     var targetMoveHexValid = this.validateTargetMoveHex(hexpos, this.moveDistance);
 
     var fireOrdersArray = []; // Store multiple fire orders
 
-    if(targetMoveHexValid){
+    if (targetMoveHexValid) {
         for (var s = 0; s < shotsOnTarget; s++) {
-                var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-                var fire = {
-                    id: fireid,
-                    type: 'prefiring',
-                    shooterid: shooter.id,
-                    targetid: -1,
-                    weaponid: this.id,
-                    calledid: -1,
-                    turn: gamedata.turn,
-                    firingMode: this.firingMode,
-                    shots: this.defaultShots,
-                    x: hexpos.q,
-                    y: hexpos.r,
-                    damageclass: 'gravNetMoveHex', 
-                    notes: "split"                
-                };
+            var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+            // Capture the target ship ID from the first fire order so BallisticIconContainer 
+            // can draw the line starting from the target ship rather than the firing ship.
+            var gravNetTargetId = (this.fireOrders.length > 0) ? this.fireOrders[0].targetid : -1;
+            var fire = {
+                id: fireid,
+                type: 'prefiring',
+                shooterid: shooter.id,
+                targetid: -1,
+                weaponid: this.id,
+                calledid: -1,
+                turn: gamedata.turn,
+                firingMode: this.firingMode,
+                shots: this.defaultShots,
+                x: hexpos.q,
+                y: hexpos.r,
+                damageclass: 'gravNetMoveHex',
+                notes: "split",
+                gravNetTargetId: gravNetTargetId // ID of ship being moved, used as line start point
+            };
             fireOrdersArray.push(fire);
-        }  
-        webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this}); 
+        }
+        webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });
     }
     return fireOrdersArray; // Return all fire orders
-};  
+};
 
-GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //function to validate desired target movement hex, will check LOS from target ship to move hex and range and make sure no collisions occur.
+
+GravityNet.prototype.validateTargetMoveHex = function (hexpos, maxmoverange) { //function to validate desired target movement hex, will check LOS from target ship to move hex and range and make sure no collisions occur.
 
     //get gravNetTargetHex to check range and LOS for gravNetTargetMovementHex
     //Target of grav net which will be used as shooter for grav net target hex.
     var valid = false; //default to false
     var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex), this should always be the first fire order
-    if (gravNetTargetFireOrder){	// check that the grav net firing ship set a fire order
+    if (gravNetTargetFireOrder) {	// check that the grav net firing ship set a fire order
         var targetShip = gamedata.getShip(gravNetTargetFireOrder.targetid);
         var targetShipHex = shipManager.getShipPosition(targetShip);
         var targetMoveHex = hexpos;
         var dist = targetShipHex.distanceTo(targetMoveHex);
-        if(dist <= maxmoverange){            
+        if (dist <= maxmoverange) {
             //var blockedHexes = weaponManager.getBlockedHexes();
-	        var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.             
+            var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.             
             var loSBlocked = mathlib.isLoSBlocked(targetShipHex, targetMoveHex, blockedHexes);
-            if(!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)){//make sure hexpos is a not a blocked hex and LOS is not blocked      
-                valid = true ;  
-            }    
-        }                 
+            if (!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)) {//make sure hexpos is a not a blocked hex and LOS is not blocked      
+                valid = true;
+            }
+        }
     }
 
     return valid;
-};             
+};
 
 GravityNet.prototype.checkFinished = function () {
-	if(this.fireOrders.length > 1) return true;
+    if (this.fireOrders.length > 1) return true;
     return false;
 };
 
@@ -43170,29 +42576,29 @@ UltraLightGraviticBolt.prototype = Object.create(Gravitic.prototype);
 UltraLightGraviticBolt.prototype.constructor = UltraLightGraviticBolt;
 
 
-var GraviticLance = function(json, ship) {
-    Weapon.call( this, json, ship);
+var GraviticLance = function (json, ship) {
+    Weapon.call(this, json, ship);
 };
-GraviticLance.prototype = Object.create( Weapon.prototype );
+GraviticLance.prototype = Object.create(Weapon.prototype);
 GraviticLance.prototype.constructor = GraviticLance;
 
-GraviticLance.prototype.initializationUpdate = function() {
-	if(this.firingMode == 3){
-		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
-	} else {
-		delete this.data["Shots Remaining"];
-	}
-
-    var ship = this.ship;
-	if(gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
-        const targetId = Object.keys(this.sustainedTarget)[0];
-        const target = gamedata.getShip(targetId);
-		this.data["Current Target"] = target.name;
-	}else{
-        delete this.data["Current Target"];       
+GraviticLance.prototype.initializationUpdate = function () {
+    if (this.firingMode == 3) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
     }
 
-	return this;
+    var ship = this.ship;
+    if (gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0) {
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+        this.data["Current Target"] = target.name;
+    } else {
+        delete this.data["Current Target"];
+    }
+
+    return this;
 };
 
 GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system) {
@@ -43206,9 +42612,9 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
     }
     */
 
-	if(this.firingMode == 3 && this.fireOrders.length > 1) return;  
+    if (this.firingMode == 3 && this.fireOrders.length > 1) return;
 
-    var shotsOnTarget = 1;  
+    var shotsOnTarget = 1;
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
@@ -43216,7 +42622,7 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
         var calledid = -1; //Grav Beams are raking, can never called shot.
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -43230,20 +42636,20 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Sweeping', 
+            damageclass: 'Sweeping',
             chance: chance,
             hitmod: 0,
             notes: "Split"
         };
-        
+
         fireOrdersArray.push(fire); // Store each fire order
     }
-    
+
     return fireOrdersArray; // Return all fire orders
 };
 
 GraviticLance.prototype.checkFinished = function () {
-	if(this.firingMode == 3 && this.fireOrders.length > 1) return true;    
+    if (this.firingMode == 3 && this.fireOrders.length > 1) return true;
     return false;
 };
 
@@ -43309,7 +42715,7 @@ GraviticCutter.prototype.getMaxBoost = function () {
 var HypergravitonBeam = function HypergravitonBeam(json, ship) {
     Gravitic.call(this, json, ship);
 };
-HypergravitonBeam.prototype = Object.create(Gravitic .prototype);
+HypergravitonBeam.prototype = Object.create(Gravitic.prototype);
 HypergravitonBeam.prototype.constructor = HypergravitonBeam;
 
 HypergravitonBeam.prototype.initBoostableInfo = function () {
@@ -43344,7 +42750,7 @@ HypergravitonBeam.prototype.clearBoost = function () {
 var HypergravitonBlaster = function HypergravitonBlaster(json, ship) {
     Gravitic.call(this, json, ship);
 };
-HypergravitonBlaster.prototype = Object.create(Gravitic .prototype);
+HypergravitonBlaster.prototype = Object.create(Gravitic.prototype);
 HypergravitonBlaster.prototype.constructor = HypergravitonBlaster;
 
 HypergravitonBlaster.prototype.initBoostableInfo = function () {
@@ -43382,13 +42788,13 @@ var MedAntigravityBeam = function MedAntigravityBeam(json, ship) {
 MedAntigravityBeam.prototype = Object.create(Gravitic.prototype);
 MedAntigravityBeam.prototype.constructor = MedAntigravityBeam;
 
-MedAntigravityBeam.prototype.initializationUpdate = function() {
-	if(this.firingMode == 2){
-		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
-	} else {
-		delete this.data["Shots Remaining"];
-	}
-	return this;
+MedAntigravityBeam.prototype.initializationUpdate = function () {
+    if (this.firingMode == 2) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
+    }
+    return this;
 };
 
 MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
@@ -43402,7 +42808,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         }
     } 
     */
-	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
+    if (this.firingMode == 2 && this.fireOrders.length > 1) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -43411,7 +42817,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         var calledid = -1; //Raking, cannot called shot.       
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -43425,20 +42831,20 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Sweeping', 
+            damageclass: 'Sweeping',
             chance: chance,
             hitmod: 0,
             notes: "Split"
         };
-        
+
         fireOrdersArray.push(fire); // Store each fire order
     }
-    
+
     return fireOrdersArray; // Return all fire orders
 };
 
 MedAntigravityBeam.prototype.checkFinished = function () {
-	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
     return false;
 };
 
@@ -43448,13 +42854,13 @@ var AntigravityBeam = function AntigravityBeam(json, ship) {
 AntigravityBeam.prototype = Object.create(Gravitic.prototype);
 AntigravityBeam.prototype.constructor = AntigravityBeam;
 
-AntigravityBeam.prototype.initializationUpdate = function() {
-	if(this.firingMode == 2){
-		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
-	} else {
-		delete this.data["Shots Remaining"];
-	}
-	return this;
+AntigravityBeam.prototype.initializationUpdate = function () {
+    if (this.firingMode == 2) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
+    }
+    return this;
 };
 
 AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
@@ -43468,7 +42874,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         }
     } 
     */
-	if(this.firingMode == 2 && this.fireOrders.length > 2) return; 
+    if (this.firingMode == 2 && this.fireOrders.length > 2) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -43477,7 +42883,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         var calledid = -1; //Raking, cannot called shot.       
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -43491,20 +42897,20 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Sweeping', 
+            damageclass: 'Sweeping',
             chance: chance,
             hitmod: 0,
             notes: "Split"
         };
-        
+
         fireOrdersArray.push(fire); // Store each fire order
     }
-    
+
     return fireOrdersArray; // Return all fire orders
 };
 
 AntigravityBeam.prototype.checkFinished = function () {
-	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
     return false;
 };;
 

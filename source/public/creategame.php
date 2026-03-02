@@ -35,7 +35,7 @@
         <link href="styles/lobby.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">        
         <link href="styles/createGame.css" rel="stylesheet" type="text/css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+        <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
 <!--		<script src="client/helper.js"></script>-->
         <script src="client/mathlib.js"></script>
         <script src="client/UI/confirm.js"></script>
@@ -225,8 +225,8 @@
                     <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
                     <select id="customfactions">
                         <option value="Allowed">Allowed</option>
-                        <option value="Custom factions only">Custom factions only</option>                        
-                        <option value="Custom ships in official factions only">Custom ships in official factions only</option>                         
+                        <option value="Custom factions only">Custom factions allowed</option>                        
+                        <option value="Custom ships in official factions only">Custom ships in official factions allowed</option>                         
                         <option value="Not allowed" selected>Not allowed</option>
                     </select>
                 </div>

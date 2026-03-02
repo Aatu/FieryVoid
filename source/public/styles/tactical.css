@@ -213,6 +213,7 @@ body {
 #phaseheader .value.activeship {
     color: #aabcd4;
     margin-left: 15px;
+    text-transform: none;
 }
 
 .finished {
@@ -530,7 +531,10 @@ body {
 }
 
 
-#iniGui::-webkit-scrollbar,
+#iniGui::-webkit-scrollbar{
+    width: 12px;
+}
+
 #gameinfo::-webkit-scrollbar,
 #declarationsContainer::-webkit-scrollbar,
 #combatLogContainer::-webkit-scrollbar {
@@ -548,7 +552,7 @@ body {
 }
 
 #iniGui::-webkit-scrollbar-thumb {
-    background: #3c5574;
+    background: #3c5574b6;
     border-radius: 6px;
 }
 
@@ -559,7 +563,7 @@ body {
 }
 
 #iniGui::-webkit-scrollbar-thumb:hover {
-    background: #5a7ea8;
+    background: #5a7ea8d0;
 }
 
 #gameinfo::-webkit-scrollbar-thumb:hover,
@@ -942,7 +946,7 @@ body {
     border: 1px solid #496791;
     color: #deebffdc;
     background-color: #0a3340;
-    margin-top: 50px;
+    margin-top: 45px;
     width: 260px;
     height: auto;
     position: absolute;
@@ -952,7 +956,7 @@ body {
     padding-top: 10px;
     padding-bottom: 10px;
     border-radius: 0px 10px 10px 0px;
-    max-height: 550px;
+    max-height: 500px;
     overflow-y: auto;
 }
 
@@ -1258,7 +1262,7 @@ body {
     }
 
     #logcontainer.large {
-        height: 50vh;
+        height: 300px;
     }
 
     #iniGui {
