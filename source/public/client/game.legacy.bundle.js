@@ -3657,15 +3657,15 @@ window.DeploymentIcon = function () {
 
     function getColorByType(type) {
         if (type == "own") {
-            return new THREE.Color(160 / 255, 250 / 255, 100 / 255);
+            return new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear();
         } else if (type == "ally") {
-            return new THREE.Color(100 / 255, 170 / 255, 250 / 255);
+            return new THREE.Color(100 / 255, 170 / 255, 250 / 255).convertSRGBToLinear();
         } else if (type == "terrain") {
-            return new THREE.Color(255 / 255, 255 / 255, 255 / 255);
+            return new THREE.Color(255 / 255, 255 / 255, 255 / 255).convertSRGBToLinear();
         } else {
-            return new THREE.Color(250 / 255, 100 / 255, 100 / 255);
+            return new THREE.Color(250 / 255, 100 / 255, 100 / 255).convertSRGBToLinear();
         }
-    }
+    }    
 
     return DeploymentIcon;
 }();;
