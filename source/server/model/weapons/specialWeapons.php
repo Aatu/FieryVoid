@@ -2485,7 +2485,8 @@ class RammingAttack extends Weapon{
 						0, 0, 1, 0, 0,
 						$targetMovement->position->q, $targetMovement->position->r, $type, -1
 					);
-					$newFireOrder->chosenLocation = $location;				
+					$newFireOrder->chosenLocation = $location;	
+Debug::log("newFireOrder->chosenLocation " . $newFireOrder->chosenLocation);									
 					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
 					$newFireOrder->addToDB = true;
 					$this->fireOrders[] = $newFireOrder;			
@@ -2831,7 +2832,7 @@ class RammingAttack extends Weapon{
 
 
 	public function calculateHitBase($gamedata, $fireOrder)
-	{
+	{		
 		if($fireOrder->damageclass == "TerrainCollision" || $fireOrder->damageclass == "TerrainCrash"){ //These attacks automatically hit.
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
@@ -2872,7 +2873,7 @@ class RammingAttack extends Weapon{
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
 		$this->gamedata = $gamedata;
-		
+Debug::log("fireOrder->chosenLocation2 " . $fireOrder->chosenLocation);				
 		//preventing double hit on the same target!
 		if($this->checkAlreadyRammed($fireOrder->targetid)){
 			$target = $gamedata->getShipById($fireOrder->targetid);		
@@ -2893,8 +2894,9 @@ class RammingAttack extends Weapon{
 			$shooter = $this->unit; //technically this unit after all
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
-
-			$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+Debug::log("fireOrder->damageclass " . $fireOrder->damageclass);	
+			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') $fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+Debug::log("fireOrder->chosenLocation3 " . $fireOrder->chosenLocation);					
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
@@ -2929,6 +2931,7 @@ class RammingAttack extends Weapon{
 			$fireOrder->calledid = -1; //just in case!
 			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
 		}
+Debug::log("fireOrder->chosenLocation4 " . $fireOrder->chosenLocation);		
 	} //endof function fire
 
 	
