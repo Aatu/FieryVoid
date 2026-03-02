@@ -2485,8 +2485,7 @@ class RammingAttack extends Weapon{
 						0, 0, 1, 0, 0,
 						$targetMovement->position->q, $targetMovement->position->r, $type, -1
 					);
-					$newFireOrder->chosenLocation = $location;	
-Debug::log("newFireOrder->chosenLocation " . $newFireOrder->chosenLocation);									
+					$newFireOrder->chosenLocation = $location;									
 					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
 					$newFireOrder->addToDB = true;
 					$this->fireOrders[] = $newFireOrder;			
@@ -2872,8 +2871,7 @@ Debug::log("newFireOrder->chosenLocation " . $newFireOrder->chosenLocation);
 
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
-		$this->gamedata = $gamedata;
-Debug::log("fireOrder->chosenLocation2 " . $fireOrder->chosenLocation);				
+		$this->gamedata = $gamedata;			
 		//preventing double hit on the same target!
 		if($this->checkAlreadyRammed($fireOrder->targetid)){
 			$target = $gamedata->getShipById($fireOrder->targetid);		
@@ -2894,9 +2892,12 @@ Debug::log("fireOrder->chosenLocation2 " . $fireOrder->chosenLocation);
 			$shooter = $this->unit; //technically this unit after all
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
-Debug::log("fireOrder->damageclass " . $fireOrder->damageclass);	
-			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') $fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
-Debug::log("fireOrder->chosenLocation3 " . $fireOrder->chosenLocation);					
+
+			//Location is already determined for Terrain collisions/crashes.
+			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') {
+				$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+			}
+
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
