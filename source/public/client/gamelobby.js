@@ -908,7 +908,7 @@ window.gamedata = {
 
 			var potProblemEntry = outOfTierList[problemName];
 			if (potProblemEntry && (potProblemEntry.count > potProblemEntry.limit)) {
-				checkResult += potProblemEntry.text +"<br>";
+				checkResult += potProblemEntry.text + " <b><span style='color: red;'>NOT OK!</span></b>" +"<br>";
 				problemFound = true;
 			}
 		}
