@@ -561,7 +561,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     z-index: 4;
 
     @media (max-width: 765px) {
-        top: 40px;
+        top: 50px;
     }
 
 `,uu=Q(gk)`
