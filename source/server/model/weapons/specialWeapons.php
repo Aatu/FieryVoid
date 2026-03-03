@@ -2835,6 +2835,7 @@ class RammingAttack extends Weapon{
 		if($fireOrder->damageclass == "TerrainCollision" || $fireOrder->damageclass == "TerrainCrash"){ //These attacks automatically hit.
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
+			//Skip parent as auto-hit, but also stop us overwriting chosenLocation which has already been set.
 		}else{
 			parent::calculateHitBase($gamedata, $fireOrder);			
 		}
