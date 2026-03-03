@@ -225,8 +225,8 @@
                     <label for="customfactions">CUSTOM FACTIONS / UNITS:</label>
                     <select id="customfactions">
                         <option value="Allowed">Allowed</option>
-                        <option value="Custom factions only">Custom factions allowed</option>                        
-                        <option value="Custom ships in official factions only">Custom ships in official factions allowed</option>                         
+                        <option value="Custom factions allowed">Custom factions allowed</option>                        
+                        <option value="Custom ships in official factions allowed">Custom ships in official factions allowed</option>                         
                         <option value="Not allowed" selected>Not allowed</option>
                     </select>
                 </div>
