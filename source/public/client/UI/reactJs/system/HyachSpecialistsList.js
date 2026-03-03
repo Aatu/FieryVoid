@@ -212,11 +212,11 @@ class HyachSpecialistsList extends Component {
                                     ) : (
                                         <>
                                             {/* Cancel / Use */}
-                                            <ActionIcon onClick={() => this.handleCancel(className)} disabled={!canCancel}>
-                                                <img src="./img/systemicons/Specialistclasses/iconMinus.png" style={{ width: '12px', height: '12px' }} alt="Cancel" />
-                                            </ActionIcon>
                                             <ActionIcon onClick={() => this.handleUse(className)} disabled={!canUse}>
                                                 <img src="./img/systemicons/Specialistclasses/iconPlus.png" style={{ width: '12px', height: '12px' }} alt="Use" />
+                                            </ActionIcon>                                            
+                                            <ActionIcon onClick={() => this.handleCancel(className)} disabled={!canCancel}>
+                                                <img src="./img/systemicons/Specialistclasses/iconMinus.png" style={{ width: '12px', height: '12px' }} alt="Cancel" />
                                             </ActionIcon>
                                         </>
                                     )}
