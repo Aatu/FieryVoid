@@ -272,7 +272,12 @@ class BaseShip {
             }     
             //No jump engine, or hasn't jumped, set value to 0 as normal.
             $effectiveValue = 0;               
-        }    
+        } 
+        
+        if($this instanceof Mine && $this->spawned){
+            //Mines which have been created by weapons, don't count towards Fleet Value
+            $effectiveValue = 0;   
+        }
 
 		/*moved
 		$cnc = $this->getSystemByName("CnC");
@@ -284,9 +289,13 @@ class BaseShip {
   		*/		
 		
 		if($effectiveValue>0){ //check for critical systems: Sensors, Engine, C&C - if none are active, reduce combat value appropriately
-			$cncPresent = false;
+			
+            if($this instanceof Mine) return $effectiveValue; //If mine exists at all, it's worth it's full value. 
+
+            $cncPresent = false;
 			$enginePresent = false;
-			$scannerPresent = false;
+			$scannerPresent = false;          
+
 			foreach ($this->systems as $system) {
 				if (!$system->isDestroyed()) {
 					if ($system instanceOf Scanner) $scannerPresent = true;
@@ -1080,8 +1089,16 @@ class BaseShip {
 					}
 					break;			
 				case 1: //MCV/LCV
-					if($this->osat){				
-						$this->notes .= 'OSAT';
+					if($this->osat){	
+                        if($this instanceof Mine){
+                            if($this->spawned){
+						        $this->notes .= 'Mine (Spawned)';
+                            }else{
+						        $this->notes .= 'Mine';
+                            }    
+                        }else{			
+						    $this->notes .= 'OSAT';
+                        }
 					}else if($this instanceof LCV){
 						$this->notes .= 'Light Ship';
 					}else{
@@ -1182,7 +1199,7 @@ class BaseShip {
 						if ($ability=='ReactorFlux'){
 							$this->notes .= '<br>Power Fluctuations';
 						}
-					}if ($reactor instanceof MagGravReactor && !$this->isTerrain()) {
+					}if ($reactor instanceof MagGravReactor && !$this->isTerrain() && !$this->mine) {
 						$this->notes .= '<br>Mag-Gravitic Reactor';
 					}
 					break; //checking one Reactor is enough
@@ -2842,8 +2859,7 @@ class LightShip extends BaseShip{ //is this used anywhere?...
 
 class OSAT extends MediumShip{
     public $osat = true;
-    public $canvasSize = 100;
-	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario!    
+    public $canvasSize = 100;  
 
     public function isDisabled(){
         return false;
@@ -2863,12 +2879,35 @@ class OSAT extends MediumShip{
 }
 
 
+class Mine extends OSAT{
+    public $mine = true;
+    public $canvasSize = 80;  
+    public $trueStealth = true;
+    public $signature = 0;
+    public $activated = false; //For DEW mines. 
+    public $spawned = false; //To denote if a mine was spawned by a launcher DURING the game, e.g. doesn't count for CPV
+
+    public function isDisabled(){
+        return false;
+    }
+
+
+    public function getLocations(){
+        $locs = array();
+
+        $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+
+        return $locs;
+    }
+}
 
 
 class StarBase extends BaseShip{
     public $base = true;
     public $Enormous = true;
-	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario! 
 
     public function isDisabled(){
         if ($this->isPowerless())

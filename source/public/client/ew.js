@@ -364,6 +364,35 @@ window.ew = {
         return null;
     },
 
+
+    getDetectMEW: function getDetectMEW(ship) {
+
+        for (var i in ship.EW) {
+            var EWentry = ship.EW[i];
+            if (EWentry.turn != gamedata.turn) continue;
+
+            if (EWentry.type == "Detect Mines") {
+                return EWentry.amount;
+            }
+        }
+
+        return 0;
+    },
+
+    getDetectMEWentry: function getDetectMEWentry(ship) {
+
+        for (var i in ship.EW) {
+            var EWentry = ship.EW[i];
+            if (EWentry.turn != gamedata.turn) continue;
+
+            if (EWentry.type == "Detect Mines") {
+                return EWentry;
+            }
+        }
+
+        return null;
+    },
+
     getEntryByTargetAndType: function getEntryByTargetAndType(ship, target, type, turn) {
         return ship.EW.filter(function (entry) {
             return entry.shipid === ship.id && (target === null || entry.targetid === target.id) && entry.type === type && entry.turn === turn;
@@ -449,6 +478,8 @@ window.ew = {
             ship.EW.push({ shipid: ship.id, type: "CCEW", amount: 1, targetid: -1, turn: gamedata.turn });
         } else if (entry == "Detect Stealth") {
             ship.EW.push({ shipid: ship.id, type: "Detect Stealth", amount: 1, targetid: -1, turn: gamedata.turn });
+        } else if (entry == "Detect Mines") {
+            ship.EW.push({ shipid: ship.id, type: "Detect Mines", amount: 1, targetid: -1, turn: gamedata.turn });
         }else if (entry == "BDEW") {
             if (ew.getEWByType("DIST", ship) > 0 || ew.getEWByType("SOEW", ship) > 0 || ew.getEWByType("SDEW", ship) > 0) {
                 window.confirm.error("You cannot use blanket protection together with other ELINT functions.", function () {});

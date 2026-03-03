@@ -14,6 +14,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" },
         { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: addOEW, info: "Add OEW" },
         { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
+        { className: "addMDEW", condition: [isSelf, notFlight, enemyMines], action: addMDEW, info: "Add Mine Detection" },
+        { className: "removeMDEW", condition: [isSelf, notFlight, enemyMines], action: removeMDEW, info: "Remove Mine Detection" },
         { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
         { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
         //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
@@ -26,15 +28,13 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" },
         { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW" },
         { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, hasBDEW], action: removeBDEW, info: "Remove BDEW" },
-        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW], action: addDetectSEW, info: "Add Detect Stealth" },
+        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: addDetectSEW, info: "Add Detect Stealth" },
         { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, hasDSEW], action: removeDetectSEW, info: "Remove Detect Stealth" },
         { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
-        //{ className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
-        //{ className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" } 				        
+        { className: "removeMultiOrder", condition: [hasShipWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }				        
     ];
 
 
@@ -103,6 +103,22 @@ window.ShipTooltipInitialOrdersMenu = function () {
         if (!entry) return;
         ew.deassignEW(this.selectedShip, entry);
     }
+
+    function addMDEW() {
+        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Mines", this.turn);
+
+        if (!entry) {
+            ew.assignEW(this.selectedShip, "Detect Mines");
+        } else {
+            ew.assignEW(this.selectedShip, entry);
+        }
+    }
+
+    function removeMDEW() {
+        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Mines", this.turn);
+        if (!entry) return;
+        ew.deassignEW(this.selectedShip, entry);
+    }    
 
     function addBDEW() {
         var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "BDEW", this.turn);
@@ -232,6 +248,14 @@ window.ShipTooltipInitialOrdersMenu = function () {
     function doesNotHaveBDEW() {
         return ew.getEWByType("BDEW", this.selectedShip) === 0;
     }
+
+    function enemyStealth() {
+        return gamedata.isStealthPresent;
+    } 
+    
+    function enemyMines() {
+        return gamedata.areMinesPresent;
+    }     
 
     function doesNotHaveOtherElintEWThanBDEW() {
         return ew.getEWByType("SDEW", this.selectedShip) === 0 && ew.getEWByType("DIST", this.selectedShip) === 0 && ew.getEWByType("SOEW", this.selectedShip) === 0 && ew.getEWByType("Detect Stealth", this.selectedShip) === 0;

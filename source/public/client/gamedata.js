@@ -26,6 +26,8 @@ window.gamedata = {
     playAudio: true, //To allow toggling of audio during Replay.    
     showLoS: false,
     blockedHexes: Array(),
+    isStealthPresent: false,
+    areMinesPresent: false,
 
     mouseOverShipId: -1,
 
@@ -130,7 +132,7 @@ window.gamedata = {
     getFirstFriendlyShip: function getFirstFriendlyShip() {
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
-            if (gamedata.isMyShip(ship)) {
+            if (gamedata.isMyShip(ship) && !ship.mine) {
                 return ship;
             }
         }
@@ -142,7 +144,7 @@ window.gamedata = {
 
             if (shipManager.getTurnDeployed(ship) > gamedata.turn) continue;
 
-            if (gamedata.isMyShip(ship)) {
+            if (gamedata.isMyShip(ship) && !ship.mine) {
                 return ship;
             }
         }
@@ -171,17 +173,17 @@ window.gamedata = {
             return gamedata.activeship.map(function (id) {
                 return gamedata.getShip(id);
             }).filter(function (ship) {
-                return ship && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
+                return ship && !ship.mine && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
             });
         } else {
             return [gamedata.getShip(gamedata.activeship)].filter(function (ship) {
-                return ship && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
+                return ship && !ship.mine && !gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !(shipManager.getTurnDeployed(ship) > gamedata.turn);
             });
         }
     },
 
     getMyActiveShips: function getMyActiveShips() {
-        return gamedata.getActiveShips().filter(gamedata.isMyShip)
+        return gamedata.getActiveShips().filter(ship => gamedata.isMyShip(ship) && !ship.mine);
     },
 
     getShip: function getShip(id) {
@@ -196,11 +198,13 @@ window.gamedata = {
 
     isMyShip: function isMyShip(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it.
+        //if (ship.mine && (gamedata.gamephase !== -1)) return false;           
         return ship.userid === gamedata.thisplayer;
     },
 
     isMyorMyTeamShip: function isMyorMyTeamShip(ship) {
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid) && (gamedata.gamephase !== -1)) return false; //Players can purchase Terrain, and will need to select to deploy it. 
+        //if (ship.mine && (gamedata.gamephase !== -1)) return false;        
         if (ship.userid === gamedata.thisplayer) return true;
         if (ship.team === gamedata.getPlayerTeam()) return true;
 
@@ -1360,11 +1364,8 @@ getActiveShipName: function getActiveShipName() {
             //To recalculate fleet list values in Info Tab without refreshing page
             fleetListManager.reset();
             fleetListManager.displayFleetLists();
-        } //else {
-        //To refresh whether player has committed their orders when a new phase begins.
-        //fleetListManager.refreshed = false;
-        //fleetListManager.displayFleetLists();
-        //}
+        }
+
 
         gamedata.setPhaseClass();
         //		window.helper.doUpdateHelpContent(gamedata.gamephase,0);        
@@ -1391,6 +1392,7 @@ getActiveShipName: function getActiveShipName() {
         var ships = gamedata.ships.filter(function (ship) {
             return !shipManager.isDestroyed(ship)
                 && !gamedata.isTerrain(ship.shipSizeClass, ship.userid)
+                && !ship.mine
                 && !gamedata.hasSlotSurrendered(ship.slot)
                 && shipManager.getTurnDeployed(ship) <= gamedata.turn;
         });
@@ -1579,6 +1581,8 @@ getActiveShipName: function getActiveShipName() {
         gamedata.elintShips = Array();
         gamedata.gamespace = serverdata.gamespace;
         gamedata.blockedHexes = serverdata.blockedHexes;
+        gamedata.isStealthPresent = serverdata.isStealthPresent;
+        gamedata.areMinesPresent = serverdata.areMinesPresent;
 
         shipManager.initiated = 0;
 

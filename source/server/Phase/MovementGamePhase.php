@@ -15,7 +15,7 @@ class MovementGamePhase implements Phase
             // Skip destroyed, terrain, or undeployed ships
             if (
                 $ship->isDestroyed() ||
-                $ship->base || $ship->smallBase ||
+                $ship->base || $ship->smallBase || $ship->mine ||
                 $ship->isTerrain() ||
                 ($ship->getTurnDeployed($gameData) > $gameData->turn)
             ) {
@@ -86,7 +86,7 @@ class MovementGamePhase implements Phase
         }
     }
 
-	/*old version - before changes - in case of need of rollback*/
+	/*//old version - before changes - in case of need of rollback
     public function process_bak(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
         foreach ($gameData->getMyActiveShips() as $ship) {
@@ -119,6 +119,7 @@ class MovementGamePhase implements Phase
             return $this->setNextActiveShip($gameData, $dbManager);
         }
     }
+    */
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
@@ -132,11 +133,21 @@ class MovementGamePhase implements Phase
 				}
 			}
 		}
-		//Added August 2024 for Mindriders.       
-		foreach ($ships as $ship){ //generate system-specific information if necessary
+
+        if($gameData->areMinesPresent){ //There are mines in the game, check if any have been detected.        
+            foreach ($gameData->ships as $ship) {
+                if ($ship->mine) {
+                    $ship->generateIndividualNotes($gameData, $dbManager);
+                    $ship->saveIndividualNotes($dbManager);
+                }
+            }
+        }    
+
+		//Added August 2024 for Mindrider Contraction.       
+		foreach ($ships as $ship){ //generate system-specific information if necessary    
 			$ship->generateIndividualNotes($gameData, $dbManager);
 		}		
-		foreach ($ships as $ship){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+		foreach ($ships as $ship){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!         
 			$ship->saveIndividualNotes($dbManager);
 		} 
 		
@@ -153,6 +164,7 @@ class MovementGamePhase implements Phase
         $firstship = null;
         foreach ($gameData->ships as $ship){
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
+            if($ship->mine) continue; //Ignore mines
             if($ship->getTurnDeployed($gameData) > $gameData->turn) continue;
             if ($firstship == null)
                 $firstship = $ship;

@@ -111,10 +111,21 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 		
 
 
+        if($gameData->areMinesPresent){ //There are mines in the game, check if any have been detected.        
+            foreach ($gameData->ships as $ship) {
+                if ($ship->mine) {
+                    $ship->generateIndividualNotes($gameData, $dbManager);
+                    $ship->saveIndividualNotes($dbManager);
+                }
+            }
+        } 
+
 		foreach ($ships as $currShip){ //generate system-specific information if necessary
+            if ($currShip->mine) continue;
 			$currShip->generateIndividualNotes($gameData, $dbManager);
 		}		
 		foreach ($ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+            if ($currShip->mine) continue;
 			$currShip->saveIndividualNotes($dbManager);
 		}
 

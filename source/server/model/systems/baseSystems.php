@@ -154,6 +154,16 @@ class Stealth extends ShipSystem implements SpecialAbility{
 						$noteValue = 1;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					}
+				}
+
+			case 4: //Firing phase Advance(), always called even if phase not needed in game.
+				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
+					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
+						$notekey = 'detected';
+						$noteHuman = 'Ship detected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
 				}else{ //Ship is already detected, but can it now become undetected again by breaking all line of sight? 
 					if($this->isUndetected($ship, $gameData)){ //Line of Sight test
 						//Prepare note for database!		
@@ -387,6 +397,269 @@ class Stealth extends ShipSystem implements SpecialAbility{
     }
 
 } //endof Stealth
+
+
+class MineStealth extends ShipSystem implements SpecialAbility{    
+    public $name = "mineStealth";
+    public $displayName = "Stealth System";
+	public $iconPath =  "stealth.png";
+	public $isTargetable = false; //cannot be targeted ever!	
+    public $specialAbilities = array("Stealth");
+    public $primary = true;
+	public $detected = false;
+	public $canOffLine = true;
+    
+    function __construct($armour, $maxhealth, $powerReq){
+        parent::__construct($armour, $maxhealth, $powerReq, 1);
+    }
+    
+    public function setSystemDataWindow($turn){
+			$this->data["Special"] = "<br>Cannot be targeted by ballistic weapons at all from over 5 hexes away.";
+            $this->data["Special"] .= "Ship is invisible to enemies until reveals itself or is detected.";
+			$this->data["Special"] .= "<br>It is revealed immediately if any EW abilities (other than DEW) are used or fires a weapon.";
+			$this->data["Special"] .= "<br>Can also be detected by enemy ships at start of Firing Phase if in range (See FAQ for full rules).";							
+	}	
+    
+
+    public function getSpecialAbilityValue($args){
+        return $this->specialAbilityValue;        
+    }
+
+
+	public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+        $ship = $this->getUnit();
+		if (!$ship instanceof Mine) return; //This system is for mines only!
+		if($ship->isDestroyed()) return; //No point generating new notes if ship destroyed.
+		if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
+
+		$this->onIndividualNotesLoaded($gameData); //Check current detection status.
+
+        switch($gameData->phase){
+			case 1: //Initial Orders - Check for any ballistic launches
+				if(!$this->detected){ //Mine has not been detected, check.
+					//Did stealth ship launch any ballistics?
+					$ballisticOrEWOrOffline = $this->isMineDetectedInitial($ship, $gameData);
+
+					if($ballisticOrEWOrOffline){ //There was a ballistic launch this turn.  Create note for ship to be marked detected.
+						//Prepare note for database!		
+						$notekey = 'detected';
+						$noteHuman = 'Ship detected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue							
+					}
+				}	
+			break;
+
+			case 2: //Movement phase Process()
+				if(!$this->detected){ //Mine has not been detected, check.
+					if($this->isMineDetectedMovement($ship, $gameData)){ //Now check if ship just been detected this turn?							
+					$notekey = 'detected';
+					$noteHuman = 'Ship detected';
+					$noteValue = 1;
+					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+				}	
+
+
+			case 4: //Post-Firing phase Advance(), always called even if phase not needed in game.
+				if(!$this->detected){ //Mine has not been detected, check.
+					if($this->isMineDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
+						$notekey = 'detected';
+						$noteHuman = 'Ship detected';
+						$noteValue = 1;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+					}
+				}
+
+			break;			
+					
+        }
+    } //endof function generateIndividualNotes	
+ 	
+
+	public function onIndividualNotesLoaded($gamedata){
+		//Sort notes by turn, and then phase so latest detection note is always last.
+		$this->sortNotes();
+
+		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+			switch($currNote->notekey){
+				case 'detected': 
+					if($currNote->notevalue == 1) $this->detected = true;
+				break;							
+			}
+		}
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();		
+	} //endof function onIndividualNotesLoaded
+
+
+	private function sortNotes() {
+		usort($this->individualNotes, function($a, $b) {
+			// Compare by turn first
+			if ($a->turn == $b->turn) {
+				// If turns are equal, compare by phase
+				return ($a->phase < $b->phase) ? -1 : 1;
+			}
+			return ($a->turn < $b->turn) ? -1 : 1;
+		});
+	}
+
+	//DEW mines can fire and use EW I think.
+	private function isMineDetectedInitial($mine, $gameData) {
+        if($this->isOfflineOnTurn()) return true; //Stealth deactivated.
+
+		foreach($mine->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				if($weapon->firedOffensivelyOnTurn($gameData->turn)) {
+					return true;
+				}	
+			}
+		}
+
+		// If the ship used offensive or ELINT EW, it is revealed
+		$usedEW = $mine->getAllEWExceptDEW($gameData->turn); // Has used any EW except DEW?
+		if($usedEW > 0) return true;
+
+		return false;
+	}	
+
+	public function isMineDetectedMovement($mine, $gameData){
+
+		// Mines are stationary — their position is always their deploy-move position.
+		// We deliberately avoid getHexPos() because mines have no subsequent movement
+		// records and getHexPos() would crash on a null movement.
+		$pos = null;
+		foreach ($mine->movement as $move) {
+			if ($move->type === 'deploy') {
+				$pos = $move->position;
+				break;
+			}
+		}
+		if ($pos === null) return false; // Mine has no deploy move yet, can't be detected
+
+		$blockedHexes = $gameData->blockedHexes;
+
+		foreach ($gameData->ships as $otherShip) {
+			// Skip friendly ships
+			if($otherShip->team === $mine->team) continue; 
+			if($otherShip->isTerrain()) continue; //Ignore Terrain
+			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+	
+			$totalDetection = 0;
+	
+			if(!$otherShip instanceof FighterFlight){
+				if($otherShip->isDisabled()) continue;
+				// Not a fighter — use scanner systems
+				foreach($otherShip->systems as $system){
+					if($system instanceof Scanner){
+						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){
+							$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
+						}
+					}
+					//Apply mineSweeper bonus	
+					if($otherShip->minesweeperbonus > 0) $totalDetection += $otherShip->minesweeperbonus;	
+				}
+			} else{
+				$totalDetection = ceil($otherShip->offensivebonus / 2);
+			}		
+
+			// Use explicit OffsetCoordinates for distance/LoS so we never call getHexPos() on the mine
+			$otherPos = $otherShip->getHexPos();
+			$distance = mathlib::getDistanceHex($pos, $otherPos);
+			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
+
+			// If within detection range, and LoS not blocked the mine is detected
+			if (($totalDetection > $distance + $mine->signature) && !$noLoS) { 	
+				return true; //Just return, if one ship can see the mine then all can.
+			}
+		}	
+
+		return false; //No other conditions were true, not detected.
+
+	}
+
+	//Runs at end of Initial Orers and Firing Phases.
+	private function isMineDetectedFire($mine, $gameData) {
+
+		// If the ship has fired this turn, it is revealed
+		foreach($mine->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				$firingOrders = $weapon->getFireOrders($gameData->turn);
+				foreach ($firingOrders as $fireOrder) { 
+					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1.
+						return true; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					}	
+				}	
+			}
+		}
+		/*			
+		// Mines are stationary — their position is always their deploy-move position.
+		// We deliberately avoid getHexPos() because mines have no subsequent movement
+		// records and getHexPos() would crash on a null movement.
+		$pos = null;
+		foreach ($mine->movement as $move) {
+			if ($move->type === 'deploy') {
+				$pos = $move->position;
+				break;
+			}
+		}
+		if ($pos === null) return false; // Mine has no deploy move yet, can't be detected
+
+		$blockedHexes = $gameData->blockedHexes;
+
+		foreach ($gameData->ships as $otherShip) {
+			// Skip friendly ships
+			if($otherShip->team === $mine->team) continue; 
+			if($otherShip->isTerrain()) continue; //Ignore Terrain
+			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+	
+			$totalDetection = 0;
+	
+			if(!$otherShip instanceof FighterFlight){
+				if($otherShip->isDisabled()) continue;
+				// Not a fighter — use scanner systems
+				foreach($otherShip->systems as $system){
+					if($system instanceof Scanner){
+						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){
+							$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
+						}
+					}
+					//Apply mineSweeper bonus	
+					if($otherShip->minesweeperbonus > 0) $totalDetection += $otherShip->minesweeperbonus;	
+				}
+			} else{
+				$totalDetection = ceil($otherShip->offensivebonus / 3);
+			}		
+
+			// Use explicit OffsetCoordinates for distance/LoS so we never call getHexPos() on the mine
+			$otherPos = $otherShip->getHexPos();
+			$distance = mathlib::getDistanceHex($pos, $otherPos);
+			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
+
+			// If within detection range, and LoS not blocked the mine is detected
+			if (($totalDetection > $distance + $mine->signature) && !$noLoS) {  
+				return true; //Just return, if one ship can see the mine then all can.
+			}
+		}	
+		*/
+		return false; //No other conditions were true, not detected.
+
+	}
+	
+
+	public function criticalPhaseEffects($ship, $gamedata) {	
+		parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply base effects.
+
+	}//endof function criticalPhaseEffects
+
+
+	public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->detected = $this->detected;	        
+        return $strippedSystem;
+    }
+
+} //endof mineStealth
 
 
 class Fighterimprsensors extends ShipSystem implements SpecialAbility{    
@@ -7576,7 +7849,7 @@ class AmmoBLMineB extends AmmoMissileTemplate{
 
     public $hextarget = true; 
 	public $mineRange = 3;
-		public $animationExplosionScale = 0.25; //single hex explosion	
+	public $animationExplosionScale = 0.25; //single hex explosion	
 
     public function getDamage($fireOrder){        return Dice::d(10, 1)+16;   } 
 		

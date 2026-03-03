@@ -18,3 +18,9 @@ var LightEnergyMine = function LightEnergyMine(json, ship) {
 };
 LightEnergyMine.prototype = Object.create(Aoe.prototype);
 LightEnergyMine.prototype.constructor = LightEnergyMine;
+
+var CaptorMine = function CaptorMine(json, ship) {
+    Aoe.call(this, json, ship);
+};
+CaptorMine.prototype = Object.create(Aoe.prototype);
+CaptorMine.prototype.constructor = CaptorMine;

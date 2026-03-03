@@ -85,8 +85,12 @@ class Enhancements{
 
 		case 'Terrain':
 			Enhancements::blockStandardEnhancements($unit);
-			//$unit->enhancementOptionsDisabled[] = 'DEPLOY'; //Terrain cannot jump into a scenario!  
-			break;	  
+			break;	
+			
+		case 'Mines':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IFF_SYS';			
+			break;	  			
 	
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);

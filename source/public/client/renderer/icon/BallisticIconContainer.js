@@ -300,11 +300,14 @@ window.BallisticIconContainer = function () {
 			}
 
 			// Damage class-based override logic
-			if (ballistic.damageclass && modeName) {
-				switch (ballistic.damageclass) {
+			if (ballistic.damageclass && modeName) {							
+				switch (ballistic.damageclass) {				
 					case 'MultiModeHex':
+						const isFriendly = gamedata.isMyOrTeamOneShip(shooter);		
+						var modeText = isFriendly ? modeName : weapon.getModeNameForEnemy();
+
 						targetType = 'hexRed';
-						text = modeName;
+						text = modeText;
 						textColour = '#e6140a';
 						break;
 					case 'support':

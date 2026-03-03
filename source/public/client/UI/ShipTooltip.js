@@ -2,10 +2,10 @@
 
 window.ShipTooltip = function () {
 
-    var HTML = '<div class="shipNameContainer">' + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>' + 
-    '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red; text-decoration: bold;"><span>TARGETING</span></div>' + 
-    '<div class="fire targeting"></div>' + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red;"><span>INCOMING:</span></div>' + 
-    '<div class="ballistics incoming"></div>' + '<div class="buttons"></div>' + '</div>';
+    var HTML = '<div class="shipNameContainer">' + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>' +
+        '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red; text-decoration: bold;"><span>TARGETING</span></div>' +
+        '<div class="fire targeting"></div>' + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red;"><span>INCOMING:</span></div>' +
+        '<div class="ballistics incoming"></div>' + '<div class="buttons"></div>' + '</div>';
 
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu) {
         this.element = jQuery(HTML);
@@ -65,9 +65,9 @@ window.ShipTooltip = function () {
     };
 
     ShipTooltip.prototype.update = function (ship, selectedShip) {
-
         if (selectedShip) {
             this.selectedShip = selectedShip;
+            //this.showTargeting = shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip);
         }
 
         if (selectedShip && this.menu) {
@@ -166,8 +166,8 @@ window.ShipTooltip = function () {
             toDisplay += 'Half-Phased; ';
             rollPivotModifier -= 50;
         }
-        if(shipManager.isStealthShip(ship)){
-            if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn){
+        if (ship.trueStealth) {
+            if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) {
                 toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else if (shipManager.isDetected(ship)) {
                 toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
@@ -175,16 +175,16 @@ window.ShipTooltip = function () {
                 toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
             }
         }
- 
-        if (gamedata.gamephase == 3){
-            if(Object.values(ship.skinDancing).includes(true)){ 
+
+        if (gamedata.gamephase == 3) {
+            if (Object.values(ship.skinDancing).includes(true)) {
                 toDisplay += '<span style="color:limegreen;">Skin Dancing</span>; '; //Notify player that unit is skin dancing this turn.                  
-            }else if(Object.values(ship.skinDancing).includes("Aborted")){
+            } else if (Object.values(ship.skinDancing).includes("Aborted")) {
                 toDisplay += '<span style="color:orange;">Skin Dance Aborted</span>; '; //Notify player that unit is skin dancing this turn.  
-            }  else if(Object.values(ship.skinDancing).includes("Failed")){
+            } else if (Object.values(ship.skinDancing).includes("Failed")) {
                 toDisplay += '<span style="color:red;">Failed Skin Dancing</span>; '; //Notify player that unit is skin dancing this turn.  
-            }        
-        }        
+            }
+        }
 
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
@@ -261,25 +261,23 @@ window.ShipTooltip = function () {
             }
         }
 
-        /* 		
-                if (ew.getSupportedDEW(ship)) {
-                    this.addEntryElement('Support DEW: ' + ew.getSupportedDEW(ship), ship.flight !== true);
-                }
-        */
-        if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
-            var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+        var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+        //if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+        if (dewValue > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24 
             this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
         }
 
+        var MDEW = ew.getDetectMEW(ship);
+        if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+            this.addEntryElement('Detect Mines: ' + MDEW, ship.flight !== true);
+        }
+
         if (shipManager.isElint(ship)) {
-            this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
+            if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
             this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
         }
 
-
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
-        //      var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
-        //      var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
 
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
         var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
@@ -297,19 +295,19 @@ window.ShipTooltip = function () {
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
             if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         } else {
             if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         }
 

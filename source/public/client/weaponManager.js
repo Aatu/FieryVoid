@@ -1042,6 +1042,7 @@ window.weaponManager = {
         var soew = 0;
         var dist = 0;
         var oew = 0;
+        var mdew = 0; //Mine detection EWc1
 
         if (weapon.useOEW) {
             oew = ew.getTargetingEW(shooter, target);
@@ -1060,6 +1061,12 @@ window.weaponManager = {
         }
 
         var mod = 0;
+
+        if(target.mine){
+            mdew = ew.getDetectMEW(shooter);
+            var mineBonus = (mdew + shooter.minesweeperbonus) - distance - target.signature;
+            mod += Math.max(0, mineBonus);
+        }
 
         mod -= target.getHitChangeMod(shooter, weapon);
 

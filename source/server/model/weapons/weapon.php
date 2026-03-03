@@ -1368,7 +1368,14 @@ public function getStartLoading()
 			$oew = 0;
 			$soew = 0;
 		}		
-		
+
+        //Special to-hit bonuses when shooting mines
+        if($target instanceof Mine){
+            $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn);
+            $mineBonus = ($mdew + $shooter->minesweeperbonus) - $distanceForPenalty - $target->signature;
+            $mod += max(0, $mineBonus);
+        }        
+
 		$rngPenaltyMultiplier = max($noLockPenalty,$jammerValue);
 		if(!$this->noLockPenalty) $rngPenaltyMultiplier = 0;
 		if($rngPenaltyMultiplier > 0){			
@@ -1729,6 +1736,7 @@ public function getStartLoading()
         foreach ($ships1 as $ship) {
             if ($ship === $target) continue;// make certain the target doesn't get the damage twice
             if ($ship->isDestroyed()) continue; //no point allocating
+            if ($ship->mine) return; //Immune to collateral damage
             $relativeBearing = $ship->getBearingOnUnit($target);//actual direction the damage comes from is from unit directly hit!
             if ($ship instanceof FighterFlight) {
                 foreach ($ship->systems as $fighter) {

@@ -20,13 +20,13 @@ shipManager.systems = {
     },
 
     getFighterForSystem: function getFighterForSystem(ship, system) {
-        
-        return ship.systems.find(function(fighter) {
+
+        return ship.systems.find(function (fighter) {
             return fighter && fighter.systems.includes(system);
         })
     },
 
-    isDestroyed: function isDestroyed(ship, system) {		
+    isDestroyed: function isDestroyed(ship, system) {
         if (system.parentId > 0) {
             var parentSystem = system;
 
@@ -74,38 +74,38 @@ shipManager.systems = {
         return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"));
     },
 
-    getOutput: function(ship, system){
-		if (!system){
-			console.log("ERROR: getOutput system missing");
-			console.trace();
-		}
-		
-		if (this.isDestroyed(ship, system))
-			return 0;
-        
-		if (shipManager.power.isOffline(ship, system))
-			return 0;
-		
-		var output = system.output + system.outputMod + shipManager.power.getBoost(system);
-        	output = Math.max(0,output); //output cannot be negative!
+    getOutput: function (ship, system) {
+        if (!system) {
+            console.log("ERROR: getOutput system missing");
+            console.trace();
+        }
+
+        if (this.isDestroyed(ship, system))
+            return 0;
+
+        if (shipManager.power.isOffline(ship, system))
+            return 0;
+
+        var output = system.output + system.outputMod + shipManager.power.getBoost(system);
+        output = Math.max(0, output); //output cannot be negative!
 
         return output;
     },
 
-    getOutputNoBoost: function getOutputNoBoost(ship, system){
-		if (!system){
-			console.log("ERROR: getOutputNoBoost system missing");
-			console.trace();
-		}
-		
-		if (this.isDestroyed(ship, system))
-			return 0;
-        
-		if (shipManager.power.isOffline(ship, system))
-			return 0;
-		
-		var output = system.output + system.outputMod;
-        	output = Math.max(0,output); //output cannot be negative!
+    getOutputNoBoost: function getOutputNoBoost(ship, system) {
+        if (!system) {
+            console.log("ERROR: getOutputNoBoost system missing");
+            console.trace();
+        }
+
+        if (this.isDestroyed(ship, system))
+            return 0;
+
+        if (shipManager.power.isOffline(ship, system))
+            return 0;
+
+        var output = system.output + system.outputMod;
+        output = Math.max(0, output); //output cannot be negative!
 
         return output;
     },
@@ -209,7 +209,7 @@ shipManager.systems = {
         if (system.boostable) {
             system = system.initBoostableInfo();
         }
-		system = system.initializationUpdate(); //very rarely - system needs to update data not on a particular event
+        system = system.initializationUpdate(); //very rarely - system needs to update data not on a particular event
 
         if (system.name == "engine") {
             system.addInfo();
@@ -239,7 +239,7 @@ shipManager.systems = {
                     var figsys = system.systems[a];
 
                     if ((figsys.name == name)
-						&& (!shipManager.systems.isDestroyed(ship,figsys)) ) { //only on alive fighters!
+                        && (!shipManager.systems.isDestroyed(ship, figsys))) { //only on alive fighters!
                         return figsys;
                     }
                 }
@@ -251,10 +251,10 @@ shipManager.systems = {
 
         return null;
     },
-	
+
 
     getSystemListByName: function getSystemByName(ship, name) {
-		var toReturn = Array();
+        var toReturn = Array();
         for (var i in ship.systems) {
             var system = ship.systems[i];
             if (system.fighter) {
@@ -262,7 +262,7 @@ shipManager.systems = {
                     var figsys = system.systems[a];
 
                     if ((figsys.name == name)
-						&& (!shipManager.systems.isDestroyed(ship,figsys)) ) { //only on alive fighters!
+                        && (!shipManager.systems.isDestroyed(ship, figsys))) { //only on alive fighters!
                         toReturn.push(figsys);
                     }
                 }
@@ -297,7 +297,7 @@ shipManager.systems = {
     },
 
 
-    getMultipleArcs: function getMultipleArcs(ship, weapon) {    
+    getMultipleArcs: function getMultipleArcs(ship, weapon) {
         const arcs = [];
 
         const isRolled = shipManager.movement.isRolled(ship);
@@ -309,7 +309,7 @@ shipManager.systems = {
 
         for (let i = 0; i < weapon.startArcArray.length; i++) {
             const start = weapon.startArcArray[i];
-            const end   = weapon.endArcArray[i];
+            const end = weapon.endArcArray[i];
 
             // Skip unmatched pairs
             if (end === undefined) continue;
@@ -317,7 +317,7 @@ shipManager.systems = {
             if (isRolled) {
                 arcs.push({
                     start: mathlib.addToDirection(end, end * -2),
-                    end:   mathlib.addToDirection(start, start * -2)
+                    end: mathlib.addToDirection(start, start * -2)
                 });
             } else {
                 arcs.push({ start, end });
@@ -325,7 +325,7 @@ shipManager.systems = {
         }
 
         return arcs;
-    },    
+    },
 
 
     getDisplayName: function getDisplayName(system) {
@@ -376,11 +376,20 @@ shipManager.systems = {
     getStructureSystem: function getStructureSystem(ship, location) {
         if (ship.flight) {
             return null;
-        } else if (!ship.structures[location]) {
-            return null;
         }
 
-        return shipManager.systems.getSystem(ship, ship.structures[location]);
+        if (ship.structures && ship.structures[location]) {
+            return shipManager.systems.getSystem(ship, ship.structures[location]);
+        }
+
+        // Fallback for dynamically created ships (e.g. mines) that don't have structures array serialized
+        for (var i in ship.systems) {
+            if (ship.systems[i].name == "structure" && ship.systems[i].location == location) {
+                return ship.systems[i];
+            }
+        }
+
+        return null;
     },
 
     groupSystems: function groupSystems(systems) {
@@ -431,7 +440,7 @@ shipManager.systems = {
         var aft = ship.systems[1].armour[1];
         var side = ship.systems[1].armour[2];
 
-        var armour =  front + " / " + side + " / " + aft;
+        var armour = front + " / " + side + " / " + aft;
 
         return armour;
     },
@@ -453,96 +462,96 @@ shipManager.systems = {
         for (var i = 0; i < system.damage.length; i++) {
             var damage = system.damage[i].damage - system.damage[i].armour;
             //if (damage > 0) {// healing is a thing!
-                total += damage;
+            total += damage;
             //}
         }
 
         return total;
     },
 
-	//Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
-	getNegativeBFCP: function getNegativeBFCP() {
-			var shipNames = new Array();
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-                var deployTurn = shipManager.getTurnDeployed(ship);
-			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
-                if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
-				if (ship.unavailable) continue;
-				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;			
-				if (!(shipManager.systems.getSystemByName(ship, "hyachComputer"))) continue; //Does it have a computer?
-				if (shipManager.isDestroyed(ship)) continue;
-				var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));
-				if(shipManager.systems.isDestroyed(ship, computer)) continue; 										
-				if (computer.BFCPtotal_used > computer.output){ //Is the total BFCP used greater than output and Computer NOT destroyed, usually due to damage to Computer.
-					shipNames[counter] = ship.name;
-					counter++;
-				}
-			}
-			return shipNames;
-		},	//endof getNegativeBFCP
+    //Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
+    getNegativeBFCP: function getNegativeBFCP() {
+        var shipNames = new Array();
+        var counter = 0;
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+            if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+            if (ship.unavailable) continue;
+            if (ship.flight) continue;
+            if (ship.userid != gamedata.thisplayer) continue;
+            if (!(shipManager.systems.getSystemByName(ship, "hyachComputer"))) continue; //Does it have a computer?
+            if (shipManager.isDestroyed(ship)) continue;
+            var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));
+            if (shipManager.systems.isDestroyed(ship, computer)) continue;
+            if (computer.BFCPtotal_used > computer.output) { //Is the total BFCP used greater than output and Computer NOT destroyed, usually due to damage to Computer.
+                shipNames[counter] = ship.name;
+                counter++;
+            }
+        }
+        return shipNames;
+    },	//endof getNegativeBFCP
 
-	//Looks for ships with Hyach Specialists and lists any where these have not been selected in Deployment Phase.
-	getUnusedSpecialists: function getUnusedSpecialists() {
-			var shipNames = new Array();
-			var counter = 0;
+    //Looks for ships with Hyach Specialists and lists any where these have not been selected in Deployment Phase.
+    getUnusedSpecialists: function getUnusedSpecialists() {
+        var shipNames = new Array();
+        var counter = 0;
 
-				for (var i in gamedata.ships) {
-                    var ship = gamedata.ships[i];
-			        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                    
-                    var deployTurn = shipManager.getTurnDeployed(ship);                    
-                    if(deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if (deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
 
-                    if (shipManager.isDestroyed(ship)) continue;
-                    if (ship.unavailable) continue;
-                    if (ship.flight) continue;
-                    if (ship.userid != gamedata.thisplayer) continue;	 		
-                    if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
+            if (shipManager.isDestroyed(ship)) continue;
+            if (ship.unavailable) continue;
+            if (ship.flight) continue;
+            if (ship.userid != gamedata.thisplayer) continue;
+            if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
 
-                    var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));						
-                        if (specialists.canSelectAnything()){ //Can anymore Specialists be selected?
-                            shipNames[counter] = ship.name;
-                            counter++;
-                        }
-				}
-					
-			return shipNames;
-		},	//endof getUnusedSpecialists
+            var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));
+            if (specialists.canSelectAnything()) { //Can anymore Specialists be selected?
+                shipNames[counter] = ship.name;
+                counter++;
+            }
+        }
 
-		// Looks for ships with Thirdspace Shield Generators or ThoughtShieldGenerators and compiles a list of any with negative capacity.
-		checkShieldGenValue: function checkShieldGenValue() {
-			var shipNames = [];
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                
-				if (ship.unavailable) continue;
-				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;
+        return shipNames;
+    },	//endof getUnusedSpecialists
 
-                var deployTurn = shipManager.getTurnDeployed(ship);
-				if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+    // Looks for ships with Thirdspace Shield Generators or ThoughtShieldGenerators and compiles a list of any with negative capacity.
+    checkShieldGenValue: function checkShieldGenValue() {
+        var shipNames = [];
+        var counter = 0;
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+            if (ship.unavailable) continue;
+            if (ship.flight) continue;
+            if (ship.userid != gamedata.thisplayer) continue;
 
-				// Check for either ThirdspaceShieldGenerator or ThoughtShieldGenerator
-				var generator = shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator") || 
-								shipManager.systems.getSystemByName(ship, "ThoughtShieldGenerator");
-				if (!generator) continue; // No generator found
-				
-				if (shipManager.isDestroyed(ship)) continue;
-				if (shipManager.systems.isDestroyed(ship, generator)) continue;
-				
-				if (generator.storedCapacity != 0) { // Generator is not zero, either too much or too little shield allocation.
-					shipNames[counter] = ship.name;
-					counter++;
-				}
-			}
-			return shipNames;
-		}, // end of checkShieldGenValue
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+
+            // Check for either ThirdspaceShieldGenerator or ThoughtShieldGenerator
+            var generator = shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator") ||
+                shipManager.systems.getSystemByName(ship, "ThoughtShieldGenerator");
+            if (!generator) continue; // No generator found
+
+            if (shipManager.isDestroyed(ship)) continue;
+            if (shipManager.systems.isDestroyed(ship, generator)) continue;
+
+            if (generator.storedCapacity != 0) { // Generator is not zero, either too much or too little shield allocation.
+                shipNames[counter] = ship.name;
+                counter++;
+            }
+        }
+        return shipNames;
+    }, // end of checkShieldGenValue
 
     getSystemListThrustBoosted: function getSystemListThrustBoosted(ship) { //For Nexus PLasma Charge, but coulod be used for other Thrust-boosted system - DK 25.3.24
-		var toReturn = Array();
+        var toReturn = Array();
         for (var i in ship.systems) {
             var system = ship.systems[i];
 
@@ -556,7 +565,7 @@ shipManager.systems = {
 
 
     getSystemListEWBoosted: function getSystemListEWBoosted(ship) { //Instead of listing weapons like Psionic Lances separately, call one function - DK 25.3.24
-		var toReturn = Array();
+        var toReturn = Array();
         for (var i in ship.systems) {
             var system = ship.systems[i];
 
@@ -566,11 +575,11 @@ shipManager.systems = {
         }
 
         return toReturn;
-    },    
+    },
 
-    hasBorderHighlight: function hasBorderHighlight(ship, system) { 
+    hasBorderHighlight: function hasBorderHighlight(ship, system) {
         // Try to prioritise effects and optimise performance. Can only return ONE border highlight colour.
-        
+
         // Check Abbai faction-specific conditions
         if (ship.faction === "Abbai Matriarchate") {
             const mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
@@ -578,18 +587,18 @@ shipManager.systems = {
             // Uncomment if orange highlight for "MayOverheat === 1" is required
             // if (mayOverheat === 1) return 'orange';
         }
-    
+
         // Check CnC critical effects (most important first)
         if (system.name === "cnC") {
-            const cnCCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);            
+            const cnCCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);
             for (const crit of cnCCrits) {
-                if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite", 
-                     "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
+                if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite",
+                    "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
                     return 'Red';
                 }
             }
         }
-    
+
         // Check critical effects for the current system
         const allCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);
         for (const crit of allCrits) {
@@ -602,17 +611,17 @@ shipManager.systems = {
                 return 'Orange';
             }
         }
-    
+
         // Check for overloading systems
         if (shipManager.power.isOverloading(ship, system)) {
             return 'Yellow';
         }
-    
+
         // No highlight if none of the conditions are met
         return null;
     },
 
-    
+
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);
         var max = system.maxhealth;

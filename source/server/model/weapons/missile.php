@@ -1096,7 +1096,7 @@ class AmmoMissileRackS extends Weapon{
 	{
 		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
 		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
-		//remember that appropriate enhancements need to be enabled on ehip itself, too!
+		//remember that appropriate enhancements need to be enabled on ship itself, too!
 		
 		if(!$this->availableAmmoAlreadySet){
 			$this->ammoClassesArray[] =  new AmmoMissileB();
@@ -2201,7 +2201,7 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 	
 	public $animation = "bolt";
 	public $animationColor = array(245, 90, 90);
-    public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
+    public $animationExplosionScale = 0.25; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
 	public $animationExplosionType = "AoE";
 		
@@ -2302,14 +2302,59 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 			$this->fireOrders[] = $newFireOrder;
 		    $originalFireOrder->pubnotes .= "Mine launched. ";								
 		}else{ //No valid targets.
-			//CAN I GENERATE A NEW NOTE HERE FOR NEXT TURN?  Need to pass finalHexTarget and firingMode.
-		    $originalFireOrder->pubnotes .= "Mine launched, but no valid target for it to attack. ";
+		    $originalFireOrder->pubnotes .= "Mine launched, but no valid target to attack this turn.";
+			$this->createLoiteringMine($gamedata, $originalFireOrder, $shooter, $mineRange, $IFFSystem);
 		}
 
-		//FireOrdeers this Turn now dealt with, do fireOrders from any previous turns use new function?
-
 	} //endof beforeFiringOrderResolution
-	
+
+
+    public function createLoiteringMine($gamedata, $fireOrder, $shooter, $mineRange, $IFFSystem){
+		$mine = null;
+		switch($mineRange){ //We can discern mine type here by it's range.
+			case 2:
+				$mine = new spawnCaptorKLH($gamedata->id, $shooter->userid, "Kovost-H Captor Mine", $shooter->slot);					
+				break;
+			case 3:
+				$mine = new spawnCaptorKLB($gamedata->id, $shooter->userid, "Kovost Captor Mine", $shooter->slot);
+				break;
+			case 5:
+				$mine = new spawnCaptorKLW($gamedata->id, $shooter->userid, "Kovost-W Captor Mine", $shooter->slot);			
+				break;
+			default:
+				$mine = new spawnCaptorKLB($gamedata->id, $shooter->userid, "Kovost Captor Mine", $shooter->slot);
+				break;			
+		}	
+		if($mine !== null) {
+			$shipid = Manager::insertSingleShip($gamedata, $mine, $shooter->userid);
+
+			if($IFFSystem){ //Pass IFF enhancement on to newly created mine!
+				Manager::insertSingleEnhancement($gamedata, $shipid, 'IFF_SYS', 1, 'Identify Friend or Foe (IFF) System');
+			}
+
+		//Create new movement orders to $targetPos.
+        $deployMine = new MovementOrder(null, "deploy", new OffsetCoordinate($fireOrder->x, $fireOrder->y), 0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0);
+		//Add movement order to database
+		Manager::insertSingleMovement($gamedata->id, $shipid, $deployMine);	
+
+        // Initialize weapon loading so the mine doesn't spawn uncharged
+        $mine->id = $shipid;
+        SystemData::initSystemData($gamedata->turn, $gamedata->id);
+        foreach ($mine->systems as $system) {
+            $system->setInitialSystemData($mine);
+            if ($system instanceof Weapon) {
+                $load = $system->getStartLoading();
+                if ($load) {
+                    $load->loading = $system->loadingtime; // Set to fully loaded
+                    SystemData::addDataForSystem($system->id, 0, $shipid, $load->toJSON());
+                }
+            }
+        }
+        Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+		}
+	}
+
 	    
     public function calculateHitBase($gamedata, $fireOrder)
     {

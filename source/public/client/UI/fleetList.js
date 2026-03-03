@@ -1,176 +1,224 @@
 "use strict";
 
-jQuery(function () {});
+jQuery(function () { });
 
 window.fleetListManager = {
 
     initialized: false,
     refreshed: true,
 
-    prepare: function prepare() {},
+    prepare: function prepare() { },
 
     displayFleetLists: function displayFleetLists() {
-    if (!fleetListManager.initialized) {
-        $("#gameinfo .fleetlistentry").remove();
-        const template = $("#logcontainer .fleetlistentry");
+        if (!fleetListManager.initialized) {
+            $("#gameinfo .fleetlistentry").remove();
+            const template = $("#logcontainer .fleetlistentry");
 
-        for (const i in gamedata.slots) {
-            const slot = gamedata.slots[i];
-            if (slot.playerid === gamedata.thisplayer) {
-                fleetListManager.createFleetList(slot, template);
+            for (const i in gamedata.slots) {
+                const slot = gamedata.slots[i];
+                if (slot.playerid === gamedata.thisplayer) {
+                    fleetListManager.createFleetList(slot, template);
+                }
             }
-        }
 
-        for (const i in gamedata.slots) {
-            const slot = gamedata.slots[i];
-            if (slot.playerid !== gamedata.thisplayer) {
-                fleetListManager.createFleetList(slot, template);
+            for (const i in gamedata.slots) {
+                const slot = gamedata.slots[i];
+                if (slot.playerid !== gamedata.thisplayer) {
+                    fleetListManager.createFleetList(slot, template);
+                }
             }
+
+            fleetListManager.initialized = true;
+        } else if (!fleetListManager.refreshed) { //Just refresh whether orders committed or not.
+            // Only update turnTaken text if refreshing
+            for (const i in gamedata.slots) {
+                const slot = gamedata.slots[i];
+                fleetListManager.updateTurnTakenInFleetHeader(slot);
+            }
+
+            // Reset the flag
+            fleetListManager.refreshed = true;
         }
 
-        fleetListManager.initialized = true;
-    } else if (!fleetListManager.refreshed) { //Just refresh whether orders committed or not.
-        // Only update turnTaken text if refreshing
-        for (const i in gamedata.slots) {
-            const slot = gamedata.slots[i];
-            fleetListManager.updateTurnTakenInFleetHeader(slot);
-        }
+        fleetListManager.updateFleetList();
+    },
 
-        // Reset the flag
-        fleetListManager.refreshed = true;
-    }
+    createFleetList: function createFleetList(slot, template) {
+        var shipArray = new Array();
 
-    fleetListManager.updateFleetList();
-},
+        // Clone the template and append to gameinfo
+        var fleetlistentry = template.clone(true).appendTo("#gameinfo");
 
-createFleetList: function createFleetList(slot, template) {
-    var shipArray = new Array();
+        // CHANGED: Use a unique class based on slot ID instead of just playerid (to avoid DOM selector collisions)
+        fleetlistentry.addClass("slot_" + slot.slot);
 
-    // Clone the template and append to gameinfo
-    var fleetlistentry = template.clone(true).appendTo("#gameinfo");
-
-    // CHANGED: Use a unique class based on slot ID instead of just playerid (to avoid DOM selector collisions)
-    fleetlistentry.addClass("slot_" + slot.slot);
-
-    // Set the fleet list header
-    fleetlistentry.find(".fleetheader").html(
-        "<span class='headername'>FLEET LIST - </span><span class='playername'>" + slot.playername + "</span>"
-    );
-
-    // Build list of ships for this player
-    for (var i in gamedata.ships) {
-        var ship = gamedata.ships[i];
-        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
-        if (ship.userid == slot.playerid && ship.slot == slot.slot) {
-            shipArray.push(ship);
-        }
-    }
-
-    var fleetlisttable = fleetlistentry.find(".fleetlist");
-
-    // CHANGED: Only search for the template inside this fleetlistentry, not globally
-    template = fleetlistentry.find(".fleetlistline");
-
-    var fleetlistline = template.clone(true);
-
-    // Remove original template line (so it doesn’t get duplicated)
-    fleetlistentry.find(".fleetlistline").remove();
-
-    // Create and append the header row
-    fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Current Value</span></span>");
-    fleetlistline.appendTo(fleetlisttable);
-
-    var totalBaseValue = 0;
-    var totalCurrValue = 0;
-
-    // Add each ship to the list
-    for (var index in shipArray) {
-        ship = shipArray[index];
-        fleetlistline = template.clone(true);
-
-        var shiptype = "unknown";
-        switch (ship.shipSizeClass) {
-            case -1:
-                shiptype = "Squadron";
-                break;
-            case 1:
-                shiptype = "MCV";
-                break;
-            case 2:
-                shiptype = "HCV";
-                break;
-            case 3:
-                shiptype = "Capital";
-                break;
-            default:
-                break;
-        }
-
-        var baseValue = ship.pointCost;
-        if (ship.flight === true) {
-            // Flights have cost calculated per 6 fighters
-            baseValue = ship.pointCost * (ship.flightSize / 6);
-        }
-        baseValue = Math.round(baseValue + ship.pointCostEnh + ship.pointCostEnh2);
-        var currValue = Math.round(baseValue * ship.combatValue / 100);
-
-        totalBaseValue += baseValue;
-        totalCurrValue += currValue;
-
-        fleetlistline.html(
-            "<span id='" + ship.id + "'>" +
-            "<span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span>" +
-            "<span class='shipclass'>" + ship.shipClass + "</span>" +
-            "<span class='shiptype'>" + shiptype + "</span>" +
-            "<span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span>" +
-            "<span class='value'>" + currValue + '/' + baseValue + "CP</span>" +
-            "<span class='shipstatus'></span></span>"
+        // Set the fleet list header
+        fleetlistentry.find(".fleetheader").html(
+            "<span class='headername'>FLEET LIST - </span><span class='playername'>" + slot.playername + "</span>"
         );
 
-        fleetlistline.appendTo(fleetlisttable);
-    }
+        var mineGroups = {};
 
-    var phaseLabel = "Initial"
-    switch(gamedata.gamephase){
+        // Build list of ships for this player
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 
-        case -1:
-            phaseLabel = "Pre-Turn";
-            break;            
-        case 2:
-            phaseLabel = "Movement";
-            break;
-        case 5:
-            phaseLabel = "Pre-Firing";
-            break;  
-        case 3:
-            phaseLabel = "Firing";
-            break;                                                  
-    }
-
-    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for " + phaseLabel + " Orders]</span>";
-
-    if(slot.surrendered !== null){
-        if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
-            turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
+            if (ship.userid == slot.playerid && ship.slot == slot.slot) {
+                if (ship.mine) {
+                    if (!mineGroups[ship.shipClass]) {
+                        mineGroups[ship.shipClass] = [];
+                    }
+                    mineGroups[ship.shipClass].push(ship);
+                } else {
+                    shipArray.push(ship);
+                }
+            }
         }
-    }else if (slot.waiting){
-        turnTaken = "<span style='color:green;'>&nbsp;&nbsp;[Orders committed]</span>";
-    } 
-    
-    var deploys = "";
-    if(slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
 
-    // Update fleet header with value totals
-    fleetlistentry.find(".fleetheader").html(
-        deploys + "<span class='headername'>FLEET LIST - </span>" +
-        "<span class='playername'>" + slot.playername + 
-        ": " + totalCurrValue + " / " + totalBaseValue + " CP" +
-         "<span class='turnTaken'>" + turnTaken + "</span>"
-    );
+        var fleetlisttable = fleetlistentry.find(".fleetlist");
 
-    // Add ship click handler
-    $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
-},
+        // CHANGED: Only search for the template inside this fleetlistentry, not globally
+        template = fleetlistentry.find(".fleetlistline");
+
+        var fleetlistline = template.clone(true);
+
+        // Remove original template line (so it doesn’t get duplicated)
+        fleetlistentry.find(".fleetlistline").remove();
+
+        // Create and append the header row
+        fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Current Value</span></span>");
+        fleetlistline.appendTo(fleetlisttable);
+
+        var totalBaseValue = 0;
+        var totalCurrValue = 0;
+
+        // Add each ship to the list
+        for (var index in shipArray) {
+            ship = shipArray[index];
+            fleetlistline = template.clone(true);
+
+            var shiptype = "unknown";
+            switch (ship.shipSizeClass) {
+                case -1:
+                    shiptype = "Squadron";
+                    break;
+                case 1:
+                    shiptype = "MCV";
+                    break;
+                case 2:
+                    shiptype = "HCV";
+                    break;
+                case 3:
+                    shiptype = "Capital";
+                    break;
+                default:
+                    break;
+            }
+
+            var baseValue = ship.pointCost;
+            if (ship.flight === true) {
+                // Flights have cost calculated per 6 fighters
+                baseValue = ship.pointCost * (ship.flightSize / 6);
+            }
+            baseValue = Math.round(baseValue + ship.pointCostEnh + ship.pointCostEnh2);
+            var currValue = Math.round(baseValue * ship.combatValue / 100);
+
+            totalBaseValue += baseValue;
+            totalCurrValue += currValue;
+
+            fleetlistline.html(
+                "<span id='" + ship.id + "'>" +
+                "<span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span>" +
+                "<span class='shipclass'>" + ship.shipClass + "</span>" +
+                "<span class='shiptype'>" + shiptype + "</span>" +
+                "<span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span>" +
+                "<span class='value'>" + currValue + '/' + baseValue + "CP</span>" +
+                "<span class='shipstatus'></span></span>"
+            );
+
+            fleetlistline.appendTo(fleetlisttable);
+        }
+
+        // Add grouped mines to the list
+        for (var mineClass in mineGroups) {
+            var mines = mineGroups[mineClass];
+            var mineCount = mines.length;
+            var firstMine = mines[0];
+
+            fleetlistline = template.clone(true);
+            var shiptype = "Mine";
+
+            var combinedBaseValue = 0;
+            var combinedCurrValue = 0;
+
+            for (var m in mines) {
+                var mine = mines[m];
+                var mBaseValue = Math.round(mine.pointCost + mine.pointCostEnh + mine.pointCostEnh2);
+                var mCurrValue = Math.round(mBaseValue * mine.combatValue / 100);
+                combinedBaseValue += mBaseValue;
+                combinedCurrValue += mCurrValue;
+            }
+
+            totalBaseValue += combinedBaseValue;
+            totalCurrValue += combinedCurrValue;
+
+            var displayName = mineClass + " (" + mineCount + ")";
+
+            fleetlistline.html(
+                "<span>" +
+                "<span class='shipname' style='cursor:default;' title='Mines cannot be selected here'>" + displayName + "</span>" +
+                "<span class='shipclass'>" + mineClass + "</span>" +
+                "<span class='shiptype'>" + shiptype + "</span>" +
+                "<span class='initiative'>" + shipManager.getIniativeOrder(firstMine) + "</span>" +
+                "<span class='value'>" + combinedCurrValue + '/' + combinedBaseValue + "CP</span>" +
+                "<span class='shipstatus'></span></span>"
+            );
+
+            fleetlistline.appendTo(fleetlisttable);
+        }
+
+        var phaseLabel = "Initial"
+        switch (gamedata.gamephase) {
+
+            case -1:
+                phaseLabel = "Pre-Turn";
+                break;
+            case 2:
+                phaseLabel = "Movement";
+                break;
+            case 5:
+                phaseLabel = "Pre-Firing";
+                break;
+            case 3:
+                phaseLabel = "Firing";
+                break;
+        }
+
+        var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for " + phaseLabel + " Orders]</span>";
+
+        if (slot.surrendered !== null) {
+            if (slot.surrendered <= gamedata.turn) { //Surrendered on this turn or before.
+                turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
+            }
+        } else if (slot.waiting) {
+            turnTaken = "<span style='color:green;'>&nbsp;&nbsp;[Orders committed]</span>";
+        }
+
+        var deploys = "";
+        if (slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
+
+        // Update fleet header with value totals
+        fleetlistentry.find(".fleetheader").html(
+            deploys + "<span class='headername'>FLEET LIST - </span>" +
+            "<span class='playername'>" + slot.playername +
+            ": " + totalCurrValue + " / " + totalBaseValue + " CP" +
+            "<span class='turnTaken'>" + turnTaken + "</span>"
+        );
+
+        // Add ship click handler
+        $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
+    },
 
 
     updateTurnTakenInFleetHeader: function updateTurnTakenInFleetHeader(slot) {
@@ -180,19 +228,19 @@ createFleetList: function createFleetList(slot, template) {
         if (!header.length) return; // Just in case something went wrong
 
         var phaseLabel = "Initial"
-        switch(gamedata.gamephase){
+        switch (gamedata.gamephase) {
             case -1:
                 phaseLabel = "Pre-Turn";
-                break;            
+                break;
             case 2:
                 phaseLabel = "Movement";
                 break;
             case 5:
                 phaseLabel = "Pre-Firing";
-                break;  
+                break;
             case 3:
                 phaseLabel = "Firing";
-                break;                                                  
+                break;
         }
 
         const html = slot.waiting
@@ -209,11 +257,11 @@ createFleetList: function createFleetList(slot, template) {
             if (slot.playerid === playerId) {
                 slot.waiting = true; //Set this manually for front end to know, gamedata will not refect it yet with page refresh
                 fleetListManager.refreshed = false;
-                fleetListManager.displayFleetLists();                
+                fleetListManager.displayFleetLists();
             }
         }
 
-    }, 
+    },
 
 
     doScrollToShip: function doScrollToShip(e) {
@@ -227,11 +275,11 @@ createFleetList: function createFleetList(slot, template) {
         var shipId = shipNameEntry.dataset["shipid"];
         var ship = gamedata.getShip(shipId);
 
-        if(shipManager.shouldBeHidden(ship)){ //Enemy, stealth equipped and undetected, or not deployed yet.
+        if (shipManager.shouldBeHidden(ship)) { //Enemy, stealth equipped and undetected, or not deployed yet.
             return; //Do not scroll to Stealthed ships
-        } else{
-            window.webglScene.customEvent('ScrollToShip', {shipId: shipId});
-        }    
+        } else {
+            window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
+        }
     },
 
     updateFleetList: function updateFleetList() {
@@ -242,12 +290,12 @@ createFleetList: function createFleetList(slot, template) {
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
-                if(shipManager.hasJumpedNotDestroyed(ship)){
+                if (shipManager.hasJumpedNotDestroyed(ship)) {
                     $("#" + ship.id).addClass("jumped");
-                    $("#" + ship.id + " .initiative").html("Jumped");                     
-                } else {                
+                    $("#" + ship.id + " .initiative").html("Jumped");
+                } else {
                     $("#" + ship.id).addClass("destroyed");
-                    $("#" + ship.id + " .initiative").html("Destroyed");                    
+                    $("#" + ship.id + " .initiative").html("Destroyed");
                 }
             }
         }
@@ -255,6 +303,6 @@ createFleetList: function createFleetList(slot, template) {
 
     reset: function reset() {
         fleetListManager.initialized = false;
-    },      
+    },
 
 };

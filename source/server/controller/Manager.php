@@ -1452,6 +1452,10 @@ class Manager{
 		self::$dbManager->insertIndividualNote($note);
     }  
     
+    public static function insertSystemData($data) {
+        self::$dbManager->insertSystemData($data);
+    }
+    
     public static function insertSingleMovement($gameid, $shipid, $movement){                
 		self::$dbManager->insertMovement($gameid, $shipid, $movement);
     }        
@@ -1463,8 +1467,12 @@ class Manager{
     }
     
     public static function insertSingleShip($gamedata, $ship, $userid){          
-		self::$dbManager->submitShip($gamedata->id, $ship, $userid);;
-    }    
+		return self::$dbManager->submitShip($gamedata->id, $ship, $userid);
+    } 
+    
+    public static function insertSingleEnhancement($gameData, $id, $enhID, $enhNo, $enhName){          
+		self::$dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
+    }       
                  
 
     //Used by Pakmara Plasma Web to retrieve fire orders in workflow and get most recent id etc

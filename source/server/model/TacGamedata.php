@@ -19,6 +19,8 @@ class TacGamedata {
     public $waitingForThisPlayer = false;
     public $rules;
     public $blockedHexes;
+    public $isStealthPresent = false;
+    public $areMinesPresent = false;
     
     
     function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $description='', $gamespace = null, $rules = null){
@@ -95,6 +97,8 @@ class TacGamedata {
         $strippedGamedata->rules = $this->rules;
         $strippedGamedata->forPlayer = $this->forPlayer;
         $strippedGamedata->blockedHexes = $this->blockedHexes;
+        $strippedGamedata->isStealthPresent = $this->isStealthPresent;
+        $strippedGamedata->areMinesPresent = $this->areMinesPresent;        
 
         return $strippedGamedata;
     }
@@ -136,12 +140,12 @@ class TacGamedata {
                 }
 
             }
-            $this->markUnavailableShips();
+            $this->markUnavailableSetMarkers(); //Sets isStealthPresent and areMinesPresent too!
             $ship->onConstructed($this->turn, $this->phase, $this);
         }
     }
 
-    public function markUnavailableShips()
+    public function markUnavailableSetMarkers()
     {
         if ($this->phase < 0)
             return;
@@ -153,6 +157,12 @@ class TacGamedata {
             if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
             } 
+
+            //Just a convenient place to set Stealth/Mine variable since we're already going through ships in the game.
+            if($ship->userid !== $this->forPlayer){
+                if($ship->trueStealth && !$ship instanceof Mine  && !$ship->isDestroyed()) $this->isStealthPresent = true;
+                if($ship instanceof Mine && !$ship->isDestroyed()) $this->areMinesPresent = true;
+            }                
         }
     }
     
@@ -323,6 +333,7 @@ class TacGamedata {
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()) continue;
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
+            if($ship->mine) continue; //Ignore terrain like asteroids.            
             if($ship->getTurnDeployed($this) > $this->turn) continue;                          
             return $ship;
         }        
@@ -393,7 +404,7 @@ class TacGamedata {
             $ships = [];
     
             foreach ($this->ships as $ship) {
-                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
+                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && !$ship->mine && ($ship->getTurnDeployed($this) <= $this->turn)) {
                     array_push($ships, $ship);
                 }
             }
@@ -402,7 +413,7 @@ class TacGamedata {
         }
     
         foreach ($this->ships as $ship) {
-            if ($ship->id == $this->activeship && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
+            if ($ship->id == $this->activeship && !$ship->isTerrain() && !$ship->mine && ($ship->getTurnDeployed($this) <= $this->turn)) {
                 return [$ship];
             }
         }
@@ -497,6 +508,7 @@ class TacGamedata {
 	    foreach ($this->ships as $ship){
 	        if ($ship->unavailable) continue;
 	        if ($ship->isTerrain()) continue; 
+	        if ($ship->mine) continue;           
 	        if ($ship->isDestroyed()) continue;                         
 
 	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
@@ -537,7 +549,7 @@ class TacGamedata {
 	    foreach ($this->ships as $ship){
 	        if ($ship->unavailable) continue;
 	        if ($ship->isTerrain()) continue;  
-
+	        if ($ship->mine) continue;     
 			if ($ship->team == $shooter->team)	        
 				continue;
 	        if ($ship->isDestroyed()) continue;              
