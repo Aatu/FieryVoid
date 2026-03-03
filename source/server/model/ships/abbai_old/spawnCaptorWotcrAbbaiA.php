@@ -15,7 +15,7 @@ class spawnCaptorWotcrAbbaiA extends Mine{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 0;
+        $this->signature = 5;
         
         $this->turncost = 0;
         $this->turndelaycost = 0;
@@ -23,7 +23,7 @@ class spawnCaptorWotcrAbbaiA extends Mine{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
-        $this->spawned = true;
+        //$this->spawned = true;
        		    	    	    	    
         //Block all enhancements for Terrain units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 

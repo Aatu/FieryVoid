@@ -15,7 +15,7 @@ class captorWotcrAbbaiA extends Mine{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 0;
+        $this->signature = 5;
         
         $this->turncost = 0;
         $this->turndelaycost = 0;
