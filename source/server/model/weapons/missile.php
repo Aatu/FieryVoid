@@ -2482,6 +2482,50 @@ class AbbaiMineLauncher extends BallisticMineLauncher{
 		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
 	}	
 	
+    public function createLoiteringMine($gamedata, $fireOrder, $shooter, $mineRange, $IFFSystem){
+		$mine = null;
+		switch($mineRange){ //We can discern mine type here by it's range.
+			case 4:
+				$mine = new spawnCaptorWotcrAbbaiA($gamedata->id, $shooter->userid, "Bistif-A Captor Mine", $shooter->slot);					
+				break;
+			case 7:
+				$mine = new spawnCaptorWotcrAbbaiB($gamedata->id, $shooter->userid, "Bistif-B Captor Mine", $shooter->slot);
+				break;
+			default:
+				$mine = new spawnCaptorWotcrAbbaiA($gamedata->id, $shooter->userid, "Bistif-A Captor Mine", $shooter->slot);
+				break;			
+		}	
+		if($mine !== null) {
+			$shipid = Manager::insertSingleShip($gamedata, $mine, $shooter->userid);
+
+			if($IFFSystem){ //Pass IFF enhancement on to newly created mine!
+				Manager::insertSingleEnhancement($gamedata, $shipid, 'IFF_SYS', 1, 'Identify Friend or Foe (IFF) System');
+			}
+
+		//Create new movement orders to $targetPos.
+        $deployMine = new MovementOrder(null, "deploy", new OffsetCoordinate($fireOrder->x, $fireOrder->y), 0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0);
+		//Add movement order to database
+		Manager::insertSingleMovement($gamedata->id, $shipid, $deployMine);	
+
+        // Initialize weapon loading so the mine doesn't spawn uncharged
+        $mine->id = $shipid;
+        SystemData::initSystemData($gamedata->turn, $gamedata->id);
+        foreach ($mine->systems as $system) {
+            $system->setInitialSystemData($mine);
+            if ($system instanceof Weapon) {
+                $load = $system->getStartLoading();
+                if ($load) {
+                    $load->loading = $system->loadingtime; // Set to fully loaded
+                    SystemData::addDataForSystem($system->id, 0, $shipid, $load->toJSON());
+                }
+            }
+        }
+        Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+		}
+	}
+
+
 } //endof class AbbaiMineLauncher
 
 ?>

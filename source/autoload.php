@@ -3483,7 +3483,11 @@ spl_autoload_register(
                 'captormineklh' => '/server/model/ships/korlyan/captorMineKLH.php',	
                 'spawncaptorklb' => '/server/model/ships/korlyan/spawnCaptorKLB.php',	
                 'spawncaptorklw' => '/server/model/ships/korlyan/spawnCaptorKLW.php',	                                
-                'spawncaptorklh' => '/server/model/ships/korlyan/spawnCaptorKLH.php',	                
+                'spawncaptorklh' => '/server/model/ships/korlyan/spawnCaptorKLH.php',
+                'captorwotcrabbaia' => '/server/model/ships/abbai_old/captorWotcrAbbaiA.php',	                                
+                'captorwotcrabbaib' => '/server/model/ships/abbai_old/captorWotcrAbbaiB.php',                     
+                'spawncaptorwotcrabbaia' => '/server/model/ships/abbai_old/spawnCaptorWotcrAbbaiA.php',	                                
+                'spawncaptorwotcrabbaib' => '/server/model/ships/abbai_old/spawnCaptorWotcrAbbaiB.php',                	                
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',
