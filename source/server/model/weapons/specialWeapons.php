@@ -2485,7 +2485,7 @@ class RammingAttack extends Weapon{
 						0, 0, 1, 0, 0,
 						$targetMovement->position->q, $targetMovement->position->r, $type, -1
 					);
-					$newFireOrder->chosenLocation = $location;				
+					$newFireOrder->chosenLocation = $location;									
 					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
 					$newFireOrder->addToDB = true;
 					$this->fireOrders[] = $newFireOrder;			
@@ -2729,8 +2729,8 @@ class RammingAttack extends Weapon{
 	
 			foreach ($relevantShips as $ship) {  
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);
-				//$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
-				//$previousFacing = $startMove->getFacingAngle();
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
+				$previousFacing = $startMove->getFacingAngle();
 		
 				foreach ($ship->movement as $shipMove) {
 					if ($shipMove->turn == $gamedata->turn) {
@@ -2747,16 +2747,15 @@ class RammingAttack extends Weapon{
 		
 							if ($match) {
 								if (!isset($collisiontargets[$ship->id])) {
-									//$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
-									//$location = $this->getCollisionLocation($relativeBearing, $ship);
-									//$collisiontargets[$ship->id] = $location; // Add to array to be targeted.									
-									$collisiontargets[$ship->id] = 0; // Add to array to be targeted. Location calculated during fire()
+									$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+									$location = $this->getCollisionLocation($relativeBearing, $ship);
+									$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
 								}
 							}
 						}
 		
-						//$previousPosition = $shipMove->position;
-						//$previousFacing = $shipMove->getFacingAngle();
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
 					}
 				}
 			}
@@ -2764,8 +2763,8 @@ class RammingAttack extends Weapon{
 			foreach ($relevantShips as $ship) { // Look through relevant ships' movements and take appropriate action.					
 				// Now check other movements in the turn.
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
-				//$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
-				//$previousFacing = $startMove->getFacingAngle();			
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+				$previousFacing = $startMove->getFacingAngle();			
 
 				foreach ($ship->movement as $shipMove) {
 					if ($shipMove->turn == $gamedata->turn) {
@@ -2774,15 +2773,14 @@ class RammingAttack extends Weapon{
 						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
 							// Check if the position matches the asteroids, e.g. zero distance.
 							if ($terrainPosition->q == $shipMove->position->q && $terrainPosition->r == $shipMove->position->r) {
-								//$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
-								//$location = $this->getCollisionLocation($relativeBearing, $ship);
-								//$collisiontargets[$ship->id] = $location; // Add to array to be targeted.								
-								$collisiontargets[$ship->id] = 0; // Add to array to be targeted. Location calculated during fire()
+								$relativeBearing = $this->getTempBearing($previousPosition, $terrainPosition, $ship, $previousFacing);
+								$location = $this->getCollisionLocation($relativeBearing, $ship);
+								$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
 							}
 						}
 
-						//$previousPosition = $shipMove->position;
-						//$previousFacing = $shipMove->getFacingAngle();
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
 
 					}
 				}
@@ -2833,10 +2831,11 @@ class RammingAttack extends Weapon{
 
 
 	public function calculateHitBase($gamedata, $fireOrder)
-	{
+	{		
 		if($fireOrder->damageclass == "TerrainCollision" || $fireOrder->damageclass == "TerrainCrash"){ //These attacks automatically hit.
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
+			//Skip parent as auto-hit, but also stop us overwriting chosenLocation which has already been set.
 		}else{
 			parent::calculateHitBase($gamedata, $fireOrder);			
 		}
@@ -2873,8 +2872,7 @@ class RammingAttack extends Weapon{
 
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
-		$this->gamedata = $gamedata;
-		
+		$this->gamedata = $gamedata;			
 		//preventing double hit on the same target!
 		if($this->checkAlreadyRammed($fireOrder->targetid)){
 			$target = $gamedata->getShipById($fireOrder->targetid);		
@@ -2896,7 +2894,11 @@ class RammingAttack extends Weapon{
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
 
-			$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+			//Location is already determined for Terrain collisions/crashes.
+			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') {
+				$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+			}
+
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
@@ -2931,6 +2933,7 @@ class RammingAttack extends Weapon{
 			$fireOrder->calledid = -1; //just in case!
 			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
 		}
+Debug::log("fireOrder->chosenLocation4 " . $fireOrder->chosenLocation);		
 	} //endof function fire
 
 	
