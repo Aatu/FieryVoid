@@ -11,7 +11,7 @@ class captorMineKLB extends Mine{
         $this->shipClass = "Kovost Captor Mine";
 		$this->occurence = "common";
 		//$this->variantOf = 'Kalavar Orbital Satellite (2240)';
-        $this->isd = 2194;
+        $this->isd = 2208;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

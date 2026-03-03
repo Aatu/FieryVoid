@@ -11,7 +11,7 @@ class spawnCaptorKLW extends Mine{
         $this->shipClass = "Kovost Captor Mine";
 		$this->occurence = "common";
 		$this->variantOf = 'NONE';
-        $this->isd = 2194;
+        $this->isd = 2208;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
