@@ -506,7 +506,7 @@ class CaptorMine extends Weapon{
 
     public function setMaxDamage()
     {
-        $this->maxDamage = ($this->diceType * $this->dice) * $this->damageBonus ;
+        $this->maxDamage = ($this->diceType * $this->dice) + $this->damageBonus ;
     }
 
 } //endof class CaptorMine
