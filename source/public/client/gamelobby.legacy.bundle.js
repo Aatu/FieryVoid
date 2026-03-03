@@ -492,6 +492,7 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		var selectedSlot = playerManager.getSlotById(slotid);
 
+		var totalPointsSpent = 0;
 		var units10 = 0;
 		var units33 = 0;
 		var points10 = 0;
@@ -539,6 +540,8 @@ window.gamedata = {
 		for (var i in gamedata.ships) {
 			var lship = gamedata.ships[i];
 			if (lship.slot != slotid) continue;
+
+			totalPointsSpent += lship.pointCost;
 
 			if (lship.limited == 10) {
 				points10 += lship.pointCost;
@@ -881,6 +884,11 @@ window.gamedata = {
 
 		var limit10 = Math.floor(selectedSlot.points * 0.1);
 		var limit33 = Math.floor(selectedSlot.points * 0.33);
+		if(selectedSlot.points == -1){ //If unlimited points, assess against points spent so far.
+			limit10 = totalPointsSpent;
+			limit33 = totalPointsSpent;
+		}
+
 		var oneOverAllowed = false;
 		checkResult += "<br><u><b>Deployment restrictions:</b></u><br><br>";
 		checkResult += " - 10% bracket: " + points10 + "/" + limit10 + ": ";
