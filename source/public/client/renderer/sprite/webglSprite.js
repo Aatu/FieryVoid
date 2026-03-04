@@ -17,7 +17,7 @@ window.webglSprite = function () {
         this.mesh = null;
         this.size = size;
         this.uniforms = {
-            texture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
+            spriteTexture: { type: 't', value: new THREE.DataTexture(null, 0, 0) },
             overlayAlpha: { type: 'f', value: 0.0 },
             overlayColor: { type: 'v3', value: new THREE.Color(0, 0, 0) },
             opacity: {
@@ -109,8 +109,31 @@ window.webglSprite = function () {
                             image,
                             imageBitmap => {
                                 setTimeout(() => {
-                                    const texture = new THREE.CanvasTexture(imageBitmap);
-                                    texture.minFilter = THREE.LinearMipMapNearestFilter;
+                                    // Draw to canvas to zero RGB on near-transparent pixels before
+                                    // texture upload. r160 sRGB gamma brightens low-alpha colour data
+                                    // in PNG transparent areas, creating a coloured fringe outline.
+                                    // Zeroing RGB below alpha 77 (~30%) removes the fringe without
+                                    // affecting intended semi-transparent areas like shroud effects.
+                                    const cleanCanvas = document.createElement('canvas');
+                                    cleanCanvas.width = imageBitmap.width;
+                                    cleanCanvas.height = imageBitmap.height;
+                                    const cx = cleanCanvas.getContext('2d', { willReadFrequently: true });
+                                    cx.drawImage(imageBitmap, 0, 0);
+                                    const imgData = cx.getImageData(0, 0, cleanCanvas.width, cleanCanvas.height);
+                                    const px = imgData.data;
+                                    for (let i = 0; i < px.length; i += 4) {
+                                        if (px[i + 3] < 77) { // alpha < ~30%: zero out RGB to prevent sRGB fringe
+                                            px[i] = px[i + 1] = px[i + 2] = 0;
+                                        }
+                                    }
+                                    cx.putImageData(imgData, 0, 0);
+                                    const texture = new THREE.CanvasTexture(cleanCanvas);
+                                    texture.colorSpace = THREE.SRGBColorSpace;
+                                    // Mipmaps re-enabled: pixel cleaning above zeros transparent edge RGB so
+                                    // mip generation uses clean data with no colour bleed fringe
+                                    texture.generateMipmaps = true;
+                                    texture.minFilter = THREE.LinearMipmapLinearFilter;
+                                    texture.magFilter = THREE.LinearFilter;
                                     resolve(texture);
                                     window.activeTextureLoads--;
                                     processQueue();
@@ -133,7 +156,7 @@ window.webglSprite = function () {
 
             loadedTextures[image].then(texture => {
                 setTimeout(() => {
-                    this.uniforms.texture.value = texture;
+                    this.uniforms.spriteTexture.value = texture;
                 }, 0);
             });
         }

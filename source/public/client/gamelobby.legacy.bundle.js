@@ -492,6 +492,7 @@ window.gamedata = {
 		var slotid = gamedata.selectedSlot;
 		var selectedSlot = playerManager.getSlotById(slotid);
 
+		var totalPointsSpent = 0;
 		var units10 = 0;
 		var units33 = 0;
 		var points10 = 0;
@@ -539,6 +540,8 @@ window.gamedata = {
 		for (var i in gamedata.ships) {
 			var lship = gamedata.ships[i];
 			if (lship.slot != slotid) continue;
+
+			totalPointsSpent += lship.pointCost;
 
 			if (lship.limited == 10) {
 				points10 += lship.pointCost;
@@ -881,6 +884,11 @@ window.gamedata = {
 
 		var limit10 = Math.floor(selectedSlot.points * 0.1);
 		var limit33 = Math.floor(selectedSlot.points * 0.33);
+		if(selectedSlot.points == -1){ //If unlimited points, assess against points spent so far.
+			limit10 = totalPointsSpent;
+			limit33 = totalPointsSpent;
+		}
+
 		var oneOverAllowed = false;
 		checkResult += "<br><u><b>Deployment restrictions:</b></u><br><br>";
 		checkResult += " - 10% bracket: " + points10 + "/" + limit10 + ": ";
@@ -12083,7 +12091,7 @@ window.mathlib = {
 			return; //No start selectd yet, or tool just activated.			
 		}
 		//var blockedHexes = weaponManager.getBlockedHexes();
-	    var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.   	
+		var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.   	
 
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
 	},
@@ -12238,7 +12246,8 @@ window.mathlib = {
 		ctx.font = `bold ${fontSize}px Arial`;
 		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
 
-		const texture = new THREE.Texture(canvas);
+		const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
 		texture.needsUpdate = true;
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
@@ -12265,7 +12274,8 @@ window.mathlib = {
 			markerCtx.fillStyle = hexToRgba(color);
 			markerCtx.fill();
 
-			const markerTexture = new THREE.Texture(markerCanvas);
+			const markerTexture = new THREE.CanvasTexture(markerCanvas);
+        markerTexture.colorSpace = THREE.SRGBColorSpace;
 			markerTexture.needsUpdate = true;
 
 			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });
@@ -25136,19 +25146,19 @@ GraviticShifter.prototype = Object.create(Gravitic.prototype);
 GraviticShifter.prototype.constructor = GraviticShifter;
 
 GraviticShifter.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
-	var mod = 0;
+    var mod = 0;
 
-    if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
-    
+    if (target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
+
     /* //Removed since OEW lock on allies enabled - DK 17.1.26    
     if(shooter.team == target.team){
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
         var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
         mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
     }
-    */        
-    
-	return mod; 
+    */
+
+    return mod;
 };
 
 var GravityNet = function GravityNet(json, ship) {
@@ -25158,25 +25168,25 @@ GravityNet.prototype = Object.create(Gravitic.prototype);
 GravityNet.prototype.constructor = GravityNet;
 
 GravityNet.prototype.calculateSpecialHitChanceMod = function (shooter, target) {
-	var mod = 0;
+    var mod = 0;
 
-    if(target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
-    
+    if (target.gravitic || target.factionAge >= 3) mod = -3; //-15% to hit gravitic and/or Ancient targets.    
+
     /* //Removed since OEW lock on allies enabled - DK 17.1.26
     if(shooter.team == target.team){
         var distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);        
         var rangePenalty = weaponManager.calculateRangePenalty(distance, this);
         mod += rangePenalty; //refund range penalty for friendly units since OEW lock on allies not possible.
     } 
-    */       
-    
-	return mod; 
+    */
+
+    return mod;
 };
 
-GravityNet.prototype.initializationUpdate = function() {
-    if(gamedata.gamephase == 1 || gamedata.gamephase == 5){ //update weapon data field to show this gravity net's max movement distance or return to TBD
+GravityNet.prototype.initializationUpdate = function () {
+    if (gamedata.gamephase == 1 || gamedata.gamephase == 5) { //update weapon data field to show this gravity net's max movement distance or return to TBD
         this.data["Move Distance"] = this.moveDistance;
-    } 
+    }
     if (this.fireOrders.length > 0) {
         this.hextarget = true;
         this.ignoresLoS = false;
@@ -25185,16 +25195,16 @@ GravityNet.prototype.initializationUpdate = function() {
                 webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });
             } else if (weaponManager.isSelectedWeapon(this) && this.target) {
                 webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });//Remove any old sprites to prevent duplication.
-                webglScene.customEvent("ShowTargetedHexagonInArc", { shooter: this.ship, target: this.target, system: this});
+                webglScene.customEvent("ShowTargetedHexagonInArc", { shooter: this.ship, target: this.target, system: this });
             }
         }
-    }else{
+    } else {
         this.hextarget = false;
-        this.ignoresLoS = false; 
-        if(this.target){   
-            webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this});
-        }                
-    } 
+        this.ignoresLoS = false;
+        if (this.target) {
+            webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });
+        }
+    }
 
     return this;
 };
@@ -25204,7 +25214,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     if (this.fireOrders.length > 0) {
         return;
-    } 
+    }
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -25213,7 +25223,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         var calledid = -1; //No called shots.     
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -25227,83 +25237,88 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'gravitic', 
+            damageclass: 'gravitic',
             chance: chance,
             hitmod: 0,
             notes: "Split"
-        }; 
+        };
         this.target = target; //store current target to this gravity net object.       
         fireOrdersArray.push(fire); // Store each fire order
-        
-        webglScene.customEvent("ShowTargetedHexagonInArc", {shooter: shooter, target: target, system: this});
+
+        webglScene.customEvent("ShowTargetedHexagonInArc", { shooter: shooter, target: target, system: this });
         this.hextarget = true; //switch gravNet from shipTarget mode to hexTarget mode.        
     }
-    
+
     return fireOrdersArray; // Return all fire orders
-};    
+};
 
 GravityNet.prototype.doMultipleHexFireOrders = function (shooter, hexpos) {
-    
+
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon in Split mode.
 
     if (this.fireOrders.length > 1) {
         return;
-    }         
+    }
     var targetMoveHexValid = this.validateTargetMoveHex(hexpos, this.moveDistance);
 
     var fireOrdersArray = []; // Store multiple fire orders
 
-    if(targetMoveHexValid){
+    if (targetMoveHexValid) {
         for (var s = 0; s < shotsOnTarget; s++) {
-                var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-                var fire = {
-                    id: fireid,
-                    type: 'prefiring',
-                    shooterid: shooter.id,
-                    targetid: -1,
-                    weaponid: this.id,
-                    calledid: -1,
-                    turn: gamedata.turn,
-                    firingMode: this.firingMode,
-                    shots: this.defaultShots,
-                    x: hexpos.q,
-                    y: hexpos.r,
-                    damageclass: 'gravNetMoveHex', 
-                    notes: "split"                
-                };
+            var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+            // Capture the target ship ID from the first fire order so BallisticIconContainer 
+            // can draw the line starting from the target ship rather than the firing ship.
+            var gravNetTargetId = (this.fireOrders.length > 0) ? this.fireOrders[0].targetid : -1;
+            var fire = {
+                id: fireid,
+                type: 'prefiring',
+                shooterid: shooter.id,
+                targetid: -1,
+                weaponid: this.id,
+                calledid: -1,
+                turn: gamedata.turn,
+                firingMode: this.firingMode,
+                shots: this.defaultShots,
+                x: hexpos.q,
+                y: hexpos.r,
+                damageclass: 'gravNetMoveHex',
+                notes: "split",
+                gravNetTargetId: gravNetTargetId // ID of ship being moved, used as line start point
+            };
             fireOrdersArray.push(fire);
-        }  
-        webglScene.customEvent("RemoveTargetedHexagonInArc", {target: this.target, system: this}); 
+        }
+        webglScene.customEvent("RemoveTargetedHexagonInArc", { target: this.target, system: this });
     }
     return fireOrdersArray; // Return all fire orders
-};  
+};
 
-GravityNet.prototype.validateTargetMoveHex = function(hexpos, maxmoverange){ //function to validate desired target movement hex, will check LOS from target ship to move hex and range and make sure no collisions occur.
+
+GravityNet.prototype.validateTargetMoveHex = function (hexpos, maxmoverange) { //function to validate desired target movement hex, will check LOS from target ship to move hex and range and make sure no collisions occur.
 
     //get gravNetTargetHex to check range and LOS for gravNetTargetMovementHex
     //Target of grav net which will be used as shooter for grav net target hex.
     var valid = false; //default to false
     var gravNetTargetFireOrder = this.fireOrders[0];//get fireorder of grav net firing ship (So we can use it's hex as fireing hex), this should always be the first fire order
-    if (gravNetTargetFireOrder){	// check that the grav net firing ship set a fire order
+    if (gravNetTargetFireOrder) {	// check that the grav net firing ship set a fire order
         var targetShip = gamedata.getShip(gravNetTargetFireOrder.targetid);
         var targetShipHex = shipManager.getShipPosition(targetShip);
         var targetMoveHex = hexpos;
         var dist = targetShipHex.distanceTo(targetMoveHex);
-        if(dist <= maxmoverange){            
+        if (dist <= maxmoverange) {
             //var blockedHexes = weaponManager.getBlockedHexes();
-	        var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.             
+            var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.             
             var loSBlocked = mathlib.isLoSBlocked(targetShipHex, targetMoveHex, blockedHexes);
-            if(!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)){//make sure hexpos is a not a blocked hex and LOS is not blocked      
-                valid = true ;  
-            }    
-        }                 
+            if (!loSBlocked && !blockedHexes.some(blocked => blocked.q === targetMoveHex.q && blocked.r === targetMoveHex.r)) {//make sure hexpos is a not a blocked hex and LOS is not blocked      
+                valid = true;
+            }
+        }
     }
 
     return valid;
-};             
+};
 
 GravityNet.prototype.checkFinished = function () {
-	if(this.fireOrders.length > 1) return true;
+    if (this.fireOrders.length > 1) return true;
     return false;
 };
 
@@ -25320,29 +25335,29 @@ UltraLightGraviticBolt.prototype = Object.create(Gravitic.prototype);
 UltraLightGraviticBolt.prototype.constructor = UltraLightGraviticBolt;
 
 
-var GraviticLance = function(json, ship) {
-    Weapon.call( this, json, ship);
+var GraviticLance = function (json, ship) {
+    Weapon.call(this, json, ship);
 };
-GraviticLance.prototype = Object.create( Weapon.prototype );
+GraviticLance.prototype = Object.create(Weapon.prototype);
 GraviticLance.prototype.constructor = GraviticLance;
 
-GraviticLance.prototype.initializationUpdate = function() {
-	if(this.firingMode == 3){
-		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
-	} else {
-		delete this.data["Shots Remaining"];
-	}
-
-    var ship = this.ship;
-	if(gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0){
-        const targetId = Object.keys(this.sustainedTarget)[0];
-        const target = gamedata.getShip(targetId);
-		this.data["Current Target"] = target.name;
-	}else{
-        delete this.data["Current Target"];       
+GraviticLance.prototype.initializationUpdate = function () {
+    if (this.firingMode == 3) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
     }
 
-	return this;
+    var ship = this.ship;
+    if (gamedata.gamephase !== -2 && shipManager.power.isOverloading(ship, this) && Object.keys(this.sustainedTarget).length > 0) {
+        const targetId = Object.keys(this.sustainedTarget)[0];
+        const target = gamedata.getShip(targetId);
+        this.data["Current Target"] = target.name;
+    } else {
+        delete this.data["Current Target"];
+    }
+
+    return this;
 };
 
 GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system) {
@@ -25356,9 +25371,9 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
     }
     */
 
-	if(this.firingMode == 3 && this.fireOrders.length > 1) return;  
+    if (this.firingMode == 3 && this.fireOrders.length > 1) return;
 
-    var shotsOnTarget = 1;  
+    var shotsOnTarget = 1;
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
@@ -25366,7 +25381,7 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
         var calledid = -1; //Grav Beams are raking, can never called shot.
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -25380,20 +25395,20 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Sweeping', 
+            damageclass: 'Sweeping',
             chance: chance,
             hitmod: 0,
             notes: "Split"
         };
-        
+
         fireOrdersArray.push(fire); // Store each fire order
     }
-    
+
     return fireOrdersArray; // Return all fire orders
 };
 
 GraviticLance.prototype.checkFinished = function () {
-	if(this.firingMode == 3 && this.fireOrders.length > 1) return true;    
+    if (this.firingMode == 3 && this.fireOrders.length > 1) return true;
     return false;
 };
 
@@ -25459,7 +25474,7 @@ GraviticCutter.prototype.getMaxBoost = function () {
 var HypergravitonBeam = function HypergravitonBeam(json, ship) {
     Gravitic.call(this, json, ship);
 };
-HypergravitonBeam.prototype = Object.create(Gravitic .prototype);
+HypergravitonBeam.prototype = Object.create(Gravitic.prototype);
 HypergravitonBeam.prototype.constructor = HypergravitonBeam;
 
 HypergravitonBeam.prototype.initBoostableInfo = function () {
@@ -25494,7 +25509,7 @@ HypergravitonBeam.prototype.clearBoost = function () {
 var HypergravitonBlaster = function HypergravitonBlaster(json, ship) {
     Gravitic.call(this, json, ship);
 };
-HypergravitonBlaster.prototype = Object.create(Gravitic .prototype);
+HypergravitonBlaster.prototype = Object.create(Gravitic.prototype);
 HypergravitonBlaster.prototype.constructor = HypergravitonBlaster;
 
 HypergravitonBlaster.prototype.initBoostableInfo = function () {
@@ -25532,13 +25547,13 @@ var MedAntigravityBeam = function MedAntigravityBeam(json, ship) {
 MedAntigravityBeam.prototype = Object.create(Gravitic.prototype);
 MedAntigravityBeam.prototype.constructor = MedAntigravityBeam;
 
-MedAntigravityBeam.prototype.initializationUpdate = function() {
-	if(this.firingMode == 2){
-		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
-	} else {
-		delete this.data["Shots Remaining"];
-	}
-	return this;
+MedAntigravityBeam.prototype.initializationUpdate = function () {
+    if (this.firingMode == 2) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
+    }
+    return this;
 };
 
 MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
@@ -25552,7 +25567,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         }
     } 
     */
-	if(this.firingMode == 2 && this.fireOrders.length > 1) return; 
+    if (this.firingMode == 2 && this.fireOrders.length > 1) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -25561,7 +25576,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         var calledid = -1; //Raking, cannot called shot.       
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -25575,20 +25590,20 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Sweeping', 
+            damageclass: 'Sweeping',
             chance: chance,
             hitmod: 0,
             notes: "Split"
         };
-        
+
         fireOrdersArray.push(fire); // Store each fire order
     }
-    
+
     return fireOrdersArray; // Return all fire orders
 };
 
 MedAntigravityBeam.prototype.checkFinished = function () {
-	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
     return false;
 };
 
@@ -25598,13 +25613,13 @@ var AntigravityBeam = function AntigravityBeam(json, ship) {
 AntigravityBeam.prototype = Object.create(Gravitic.prototype);
 AntigravityBeam.prototype.constructor = AntigravityBeam;
 
-AntigravityBeam.prototype.initializationUpdate = function() {
-	if(this.firingMode == 2){
-		this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
-	} else {
-		delete this.data["Shots Remaining"];
-	}
-	return this;
+AntigravityBeam.prototype.initializationUpdate = function () {
+    if (this.firingMode == 2) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
+    }
+    return this;
 };
 
 AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, system) {
@@ -25618,7 +25633,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         }
     } 
     */
-	if(this.firingMode == 2 && this.fireOrders.length > 2) return; 
+    if (this.firingMode == 2 && this.fireOrders.length > 2) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -25627,7 +25642,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         var calledid = -1; //Raking, cannot called shot.       
 
         var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
-        if(chance < 1) continue;
+        if (chance < 1) continue;
 
         var fire = {
             id: fireid,
@@ -25641,20 +25656,20 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
             shots: 1,
             x: "null",
             y: "null",
-            damageclass: 'Sweeping', 
+            damageclass: 'Sweeping',
             chance: chance,
             hitmod: 0,
             notes: "Split"
         };
-        
+
         fireOrdersArray.push(fire); // Store each fire order
     }
-    
+
     return fireOrdersArray; // Return all fire orders
 };
 
 AntigravityBeam.prototype.checkFinished = function () {
-	if(this.firingMode == 2 && this.fireOrders.length > 1) return true;    
+    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
     return false;
 };;
 

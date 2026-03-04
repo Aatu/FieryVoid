@@ -353,7 +353,7 @@ window.mathlib = {
 			return; //No start selectd yet, or tool just activated.			
 		}
 		//var blockedHexes = weaponManager.getBlockedHexes();
-	    var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.   	
+		var blockedHexes = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.   	
 
 		mathlib.checkLineOfSightSprite(start, targetHex, blockedHexes);
 	},
@@ -508,7 +508,8 @@ window.mathlib = {
 		ctx.font = `bold ${fontSize}px Arial`;
 		ctx.fillText(distanceText, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2);
 
-		const texture = new THREE.Texture(canvas);
+		const texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
 		texture.needsUpdate = true;
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
@@ -535,7 +536,8 @@ window.mathlib = {
 			markerCtx.fillStyle = hexToRgba(color);
 			markerCtx.fill();
 
-			const markerTexture = new THREE.Texture(markerCanvas);
+			const markerTexture = new THREE.CanvasTexture(markerCanvas);
+        markerTexture.colorSpace = THREE.SRGBColorSpace;
 			markerTexture.needsUpdate = true;
 
 			const markerMaterial = new THREE.SpriteMaterial({ map: markerTexture, transparent: true });

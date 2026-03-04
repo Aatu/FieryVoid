@@ -6,6 +6,8 @@ window.StarParticleEmitter = function () {
     var SHADER_FRAGMENT = null;
 
     var texture = new THREE.TextureLoader().load("img/effect/effectTextures1024.png");
+        texture.colorSpace = THREE.SRGBColorSpace;
+    texture.colorSpace = THREE.SRGBColorSpace;
 
     function StarParticleEmitter(scene, particleCount, args) {
         Animation.call(this);
@@ -33,25 +35,20 @@ window.StarParticleEmitter = function () {
         customMatrix.set(0.00078125, 0, 0, 0, 0, 0.0024813895781637717, 0, 0, 0, 0, -0.001, 0, -0, -0, -0, 1)
 
         var uniforms = {
-            gameTime: { type: 'f', value: 0.0 },
-            texture: { type: 't', value: texture },
-            customMatrix: { type: 'm4', value: customMatrix}
+            cameraPosition: { type: 'v3', value: new THREE.Vector3(0, 0, 0) },
+            gameTime: { type: 'f', value: 0 },
+            spriteTexture: { type: 't', value: texture },
+            customMatrix: { type: 'm4', value: new THREE.Matrix4() }
         };
 
         this.particleGeometry = new THREE.BufferGeometry();
 
-        this.particleGeometry.addAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('size', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sizeChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setDynamic(true));
-        this.particleGeometry.addAttribute('opacity', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('activationGameTime', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('textureNumber', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angle', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('angleChange', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('parallaxFactor', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sineFrequency', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
-        this.particleGeometry.addAttribute('sineAmplitude', new THREE.Float32BufferAttribute(new Float32Array(particleCount), 1).setDynamic(true));
+        this.particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+
+        this.particleGeometry.setAttribute('sizeAngleData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 4), 4).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('timeTextureData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
+        this.particleGeometry.setAttribute('starData', new THREE.Float32BufferAttribute(new Float32Array(particleCount * 3), 3).setUsage(THREE.DynamicDrawUsage));
 
         this.particleGeometry.dynamic = true;
 
@@ -101,25 +98,25 @@ window.StarParticleEmitter = function () {
         this.active = false;
     };
 
-    StarParticleEmitter.prototype.reset = function () {};
+    StarParticleEmitter.prototype.reset = function () { };
 
     StarParticleEmitter.prototype.cleanUp = function () {
         this.mesh.material.dispose();
         this.scene.remove(this.mesh);
     };
 
-    StarParticleEmitter.prototype.update = function (gameData) {};
+    StarParticleEmitter.prototype.update = function (gameData) { };
 
     StarParticleEmitter.prototype.render = function (now, total, last, delta, zoom) {
         this.particleMaterial.uniforms.gameTime.value = total;
 
-        
+
         if (zoom === 1) {
             var width = window.webglScene.width;
             var height = window.webglScene.height;
 
-            var camera = new THREE.OrthographicCamera( width / -2, width / 2, height / 2, height / -2, -1000, 1000);
-            camera.left =  width / -2;
+            var camera = new THREE.OrthographicCamera(width / -2, width / 2, height / 2, height / -2, -1000, 1000);
+            camera.left = width / -2;
             camera.right = width / 2;
             camera.top = height / 2;
             camera.bottom = height / -2;
@@ -130,11 +127,11 @@ window.StarParticleEmitter = function () {
 
             this.particleMaterial.uniforms.customMatrix.value = camera.projectionMatrix;
         }
-        
+
         this.mesh.material.needsUpdate = true;
     };
 
-    
+
 
     StarParticleEmitter.prototype.done = function () {
         if (this.onDoneCallback) {

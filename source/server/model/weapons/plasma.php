@@ -1547,25 +1547,6 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 						break; //Don't check the others, retrieved in Descending order so first one is the one we want!
 					}
 				}
-
-
-/*
- 				//ALTERNATIVE METHOD - Sort through fireOrders and find the one that doesn't match, assign it to this fireOrder!
-                $existingFiringOrders = $this->getFireOrders($gamedata->turn);
-
-                $existingOrderIds = array_map(function($order) {
-                    return $order->id;
-                }, $existingFiringOrders);
-
-                $unmatchedFireOrders = array_filter($dbFireOrders, function($dbOrder) use ($existingOrderIds) {
-                    return !in_array($dbOrder->id, $existingOrderIds);
-                });
-
-                foreach ($unmatchedFireOrders as $unmatchedOrder) {
-                    $newDamageFireOrder->id = $unmatchedOrder->id;
-                    break;
-                }
-*/
         }
 
 	}//End of createFireOrders()	

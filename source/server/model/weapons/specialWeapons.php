@@ -2485,7 +2485,7 @@ class RammingAttack extends Weapon{
 						0, 0, 1, 0, 0,
 						$targetMovement->position->q, $targetMovement->position->r, $type, -1
 					);
-					$newFireOrder->chosenLocation = $location;				
+					$newFireOrder->chosenLocation = $location;									
 					$newFireOrder->pubnotes = "<br>COLLISION! Ship collided with terrain during its movement!";
 					$newFireOrder->addToDB = true;
 					$this->fireOrders[] = $newFireOrder;			
@@ -2778,14 +2778,6 @@ class RammingAttack extends Weapon{
 								$collisiontargets[$ship->id] = $location; // Add to array to be targeted.
 							}
 						}
-			
-						// If the movement type is "end", and ship on Asteroid coordinates, remove the ship from collision targets as auto-ram chance with Enormous units will do the work here.
-						/*if ($shipMove->type == "end" && 
-							isset($collisiontargets[$ship->id]) &&
-							$terrainPosition->q == $shipMove->position->q &&
-							$terrainPosition->r == $shipMove->position->r) {
-							unset($collisiontargets[$ship->id]); // Remove from collision targets.
-						}*/
 
 						$previousPosition = $shipMove->position;
 						$previousFacing = $shipMove->getFacingAngle();
@@ -2839,10 +2831,11 @@ class RammingAttack extends Weapon{
 
 
 	public function calculateHitBase($gamedata, $fireOrder)
-	{
+	{		
 		if($fireOrder->damageclass == "TerrainCollision" || $fireOrder->damageclass == "TerrainCrash"){ //These attacks automatically hit.
 			$fireOrder->needed = 100; //always true
 			$fireOrder->updated = true;
+			//Skip parent as auto-hit, but also stop us overwriting chosenLocation which has already been set.
 		}else{
 			parent::calculateHitBase($gamedata, $fireOrder);			
 		}
@@ -2879,8 +2872,7 @@ class RammingAttack extends Weapon{
 
 	public function fire($gamedata, $fireOrder){
 		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
-		$this->gamedata = $gamedata;
-		
+		$this->gamedata = $gamedata;			
 		//preventing double hit on the same target!
 		if($this->checkAlreadyRammed($fireOrder->targetid)){
 			$target = $gamedata->getShipById($fireOrder->targetid);		
@@ -2902,7 +2894,11 @@ class RammingAttack extends Weapon{
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
 
-			$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+			//Location is already determined for Terrain collisions/crashes.
+			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') {
+				$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+			}
+
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
         		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
@@ -2937,6 +2933,7 @@ class RammingAttack extends Weapon{
 			$fireOrder->calledid = -1; //just in case!
 			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
 		}
+Debug::log("fireOrder->chosenLocation4 " . $fireOrder->chosenLocation);		
 	} //endof function fire
 
 	
@@ -7105,37 +7102,6 @@ class PulsarMine extends Weapon{
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 	} 
 
-/*
-    public function beforeFiringOrderResolution($gamedata){
-    	
-    	if($this->isDestroyed($gamedata->turn)) return;//Pulsar Mine is destroyed
-		if($this->isOfflineOnTurn($gamedata->turn)) return; //Pulsar Mine is offline
-
-		$thisShip = $this->getUnit();
-		$deployTurn = $thisShip->getTurnDeployed($gamedata);
-		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't fire weapon!
-
-    	$allShips = $gamedata->ships;  
-    	$relevantShips = array();
-
-		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
-		foreach($allShips as $ship){
-			if ($ship->isDestroyed()) continue;
-			if (!$ship instanceof FighterFlight && ($ship->id != $thisShip->id)) continue; //Ignore ships EXCEPT this one!			
-			if ($ship instanceof FighterFlight && $ship->team == $thisShip->team) continue;	//Ignore flights that are friendly.	
-			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore fighters that are not deployed yet!			
-			$relevantShips[] = $ship;			
-		}
-	
-		//Now check if any enemy fighters got in arc and range during their movement.
-		$targetFighters = $this->checkForValidTargets($relevantShips, $thisShip, $gamedata);
-
-    	//Now create up to 18 attacks using $targetFighters array.
-    	$this->createFireOrders($targetFighters, $thisShip, $gamedata);		
-
-    	
-	} //endof beforeFiringOrderResolution
-*/
 
     public function beforePreFiringOrderResolution($gamedata){
     	

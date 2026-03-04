@@ -168,7 +168,7 @@ window.ShipTooltip = function () {
         }
         if(shipManager.isStealthShip(ship)){
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn){
-                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Always say undetected on Deployment phase.  
+                toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else if (shipManager.isDetected(ship)) {
                 toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
             } else {
@@ -297,19 +297,19 @@ window.ShipTooltip = function () {
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
             if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         } else {
             if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         }
 

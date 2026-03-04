@@ -6466,15 +6466,17 @@ class AmmoMagazine extends ShipSystem {
 	//Reduce number of Interceptor missile when one is ordered to intercept.
 	public function doDrawAmmo($gameData, $modeName){
         $ship = $this->getUnit();		
-	 //PREPARE APPROPRIATE NOTES FOR AMMO USED TO INTERCEPT	
-            $notekey = 'AmmoUsed';
-            $noteHuman = 'Ammunition Magazine - a round is drawn';
-            $noteValue = $modeName;
-            $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+		//PREPARE APPROPRIATE NOTES FOR AMMO USED TO INTERCEPT	
+        $notekey = 'AmmoUsed';
+        $noteHuman = 'Ammunition Magazine - a round is drawn';
+        $noteValue = $modeName;
+        $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+			
 		if  ($noteValue == 'Interceptor'){//doDrawAmmo() maybe used for other direct fire weapons, make this specific?          
-	 		$this->interceptorUsed += 1;//Interceptor just used!
-			}                    
-            $this->ammoAlreadyUsed = array(); 
+			$this->interceptorUsed += 1;//Interceptor just used!
+		}    
+
+        $this->ammoAlreadyUsed = array(); 
 	}	
 		
  public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only

@@ -324,7 +324,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Fighter: Offensive Bonus</li>
                 </ul>
             </li>
-            <li>ELINT ships can spend EW points on 'Detect Stealth' to increase detection range by +2 per point invested in this way.</li>
+            <li>Where an opponent has stealth ships present, ELINT ships can spend EW points on 'Detect Stealth' to increase detection range by +2 per point invested in this way.</li>
             <li>After being detected, Stealth ships can become undetected by breaking line of sight with ALL enemy vessels at the end of a turn and not firing any weapons.</li>
             <li>If their scanner or computer system is destroyed, their defense increases by 15% for the battle.</li>
             <li>Stealth ships also receive the same benefits as Minbari Jammer-equipped ships from a certain distance:
