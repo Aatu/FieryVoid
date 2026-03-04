@@ -1272,10 +1272,12 @@ public function getStartLoading()
             $effectiveOB = $shooter->offensivebonus;
             $firstFighter = $shooter->getSampleFighter();
             $OBcrit = $firstFighter->hasCritical("tmpsensordown");
-            if ($OBcrit > 0) {
-                $effectiveOB = $shooter->offensivebonus - $OBcrit;
-                $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
-            }
+            $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn); //-1 OB for each point of Mine Detect
+            $effectiveOB = $shooter->offensivebonus - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
+            
+            //if ($OBcrit > 0) {
+            $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
+            //}
   
             if (!$this->ballistic) {
                 $dew = 0;
@@ -1467,7 +1469,7 @@ public function getStartLoading()
 	        $defenceMod = $targetCnC->hasCritical("ProfileIncreased");
 	        $defence += $defenceMod;
 		}else{             
-            if ($target->hasSpecialAbility("Petals")){ //Does ship have Specialists system?
+            if ($target->hasSpecialAbility("Petals")){ //Does ship have Petals system?
                 $petals = $target->getSystemByName("FtrPetals");
                 if($petals->isActive()){
 	                $defence += 1;
