@@ -154,59 +154,13 @@ shipManager.systems = {
                     }
                 }
             }
-            /* Cleaned 19.8.25 - DK
-            if (system.duoWeapon || system.dualWeapon) {
-                for (var i in system.weapons) {
-                    var weapon = system.weapons[i];
-
-                    if (weapon.id == id) {
-                        return weapon;
-                    }
-                }
-            }
-
-            if (system.dualWeapon) {
-                if (system.weapons[system.firingMode].duoWeapon) {
-                    for (var i in system.weapons[system.firingMode].weapons) {
-                        var duoWeapon = system.weapons[system.firingMode].weapons[i];
-
-                        if (duoWeapon.id == id) {
-                            return duoWeapon;
-                        }
-                    }
-                }
-            }
-            */
         }
 
         return null;
     },
 
     initializeSystem: function initializeSystem(system) {
-        /* Cleaned 19.8.25 - DK		        
-        if (system.dualWeapon && system.weapons == null) {
-            return system;
-        }
 
-        if (system.dualWeapon) {
-            var selectedWeapon = system.weapons[system.firingMode];
-
-            if (selectedWeapon.duoWeapon) {
-                selectedWeapon.damage = system.weapons[1].damage;
-            } else {
-                selectedWeapon.damage = system.damage;
-            }
-
-            selectedWeapon.power = system.power;
-            selectedWeapon.firingMode = system.firingMode;
-            selectedWeapon.firingModes = system.firingModes;
-            selectedWeapon.dualWeapon = true;
-            selectedWeapon.initialized = true;
-
-            selectedWeapon.destroyed = system.destroyed;
-            return selectedWeapon;
-        }
-        */
         if (system.boostable) {
             system = system.initBoostableInfo();
         }
