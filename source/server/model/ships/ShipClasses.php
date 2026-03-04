@@ -34,6 +34,7 @@ class BaseShip {
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
 	public $combatValue = 100; //current combat value, as percentage of original
+    public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning    
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
@@ -274,7 +275,7 @@ class BaseShip {
             $effectiveValue = 0;               
         } 
         
-        if($this instanceof Mine && $this->spawned){
+        if($this instanceof Mine && $this->spawned !== -1){
             //Mines which have been created by weapons, don't count towards Fleet Value
             $effectiveValue = 0;   
         }
@@ -549,6 +550,7 @@ class BaseShip {
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
         $strippedShip->skinDancing = $this->skinDancing;
+        $strippedShip->spawned = $this->spawned;        
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
@@ -1091,7 +1093,7 @@ class BaseShip {
 				case 1: //MCV/LCV
 					if($this->osat){	
                         if($this instanceof Mine){
-                            if($this->spawned){
+                            if($this->spawned !== -1){
 						        $this->notes .= 'Mine (Spawned)';
                             }else{
 						        $this->notes .= 'Mine';
@@ -2885,7 +2887,7 @@ class Mine extends OSAT{
     public $trueStealth = true;
     public $signature = 0;
     public $activated = false; //For DEW mines. 
-    public $spawned = false; //To denote if a mine was spawned by a launcher DURING the game, e.g. doesn't count for CPV
+    public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
 
     public function isDisabled(){
         return false;

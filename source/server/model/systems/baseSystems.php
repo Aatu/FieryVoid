@@ -414,10 +414,10 @@ class MineStealth extends ShipSystem implements SpecialAbility{
     }
     
     public function setSystemDataWindow($turn){
-			$this->data["Special"] = "<br>Cannot be targeted by ballistic weapons at all from over 5 hexes away.";
+			$ship = $this->getUnit();	
+			$this->data["Special"] = "<br>Mine signature: " . $ship->signature . ".";
             $this->data["Special"] .= "Ship is invisible to enemies until reveals itself or is detected.";
-			$this->data["Special"] .= "<br>It is revealed immediately if any EW abilities (other than DEW) are used or fires a weapon.";
-			$this->data["Special"] .= "<br>Can also be detected by enemy ships at start of Firing Phase if in range (See FAQ for full rules).";							
+			$this->data["Special"] .= "<br>Can be detected by enemy ships during Movement Phase if they have greater Detect Mines EW than Distance + Signature.";											
 	}	
     
 
@@ -443,7 +443,7 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 					if($ballisticOrEWOrOffline){ //There was a ballistic launch this turn.  Create note for ship to be marked detected.
 						//Prepare note for database!		
 						$notekey = 'detected';
-						$noteHuman = 'Ship detected';
+						$noteHuman = 'Mine detected';
 						$noteValue = 1;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue							
 					}
@@ -454,7 +454,7 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 				if(!$this->detected){ //Mine has not been detected, check.
 					if($this->isMineDetectedMovement($ship, $gameData)){ //Now check if ship just been detected this turn?							
 					$notekey = 'detected';
-					$noteHuman = 'Ship detected';
+					$noteHuman = 'Mine detected';
 					$noteValue = 1;
 					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					}
@@ -465,7 +465,7 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 				if(!$this->detected){ //Mine has not been detected, check.
 					if($this->isMineDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
 						$notekey = 'detected';
-						$noteHuman = 'Ship detected';
+						$noteHuman = 'Mine detected';
 						$noteValue = 1;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					}
@@ -560,9 +560,11 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 					if($otherShip->minesweeperbonus > 0) $totalDetection += $otherShip->minesweeperbonus;	
 				}
 			} else{
-				$totalDetection = ceil($otherShip->offensivebonus / 2);
+				//$totalDetection = ceil($otherShip->offensivebonus / 2);
+				$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
+				
 			}		
-
+ 
 			// Use explicit OffsetCoordinates for distance/LoS so we never call getHexPos() on the mine
 			$otherPos = $otherShip->getHexPos();
 			$distance = mathlib::getDistanceHex($pos, $otherPos);
