@@ -130,11 +130,83 @@ class MovementGamePhase implements Phase
 					if(!$dbManager->isMovementAlreadySubmitted($gameData->id, $ship->id, $gameData->turn)){ //in case of wrong activeship indicated - do not re-send orders! (...but proceed with other actions)
 						$dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
 					}
+					// Update in-memory movement data so that subsequent checks (like mine detection) use the actual new position	
+					$activeShip->movement = $ship->movement;
 				}
 			}
 		}
 
         if($gameData->areMinesPresent){ //There are mines in the game, check if any have been detected.        
+            // --- HYDRATE MOVEMENT RECORDS ---
+            // $gameData->ships contains the full JSON-decoded representation from the DB or frontend.
+            // During the interval between phase changes, empty movement instructions or single
+            // newly-created instructions might be stored as `stdClass` objects or associative arrays.
+            // We MUST hydrate them into full MovementOrder and OffsetCoordinate objects before
+            // Mine detection or other backend systems loop through getHexPos().
+            foreach ($gameData->ships as $gdShip) {
+                $hydratedMovements = [];
+                if (is_array($gdShip->movement) && !empty($gdShip->movement)) {
+                    foreach ($gdShip->movement as $move) {
+                        if (is_object($move) && !($move instanceof MovementOrder)) {
+                            // Decoded as stdClass
+                            $posX = isset($move->position->x) ? clone $move->position->x : (isset($move->position['x']) ? $move->position['x'] : 0);
+                            $posY = isset($move->position->y) ? clone $move->position->y : (isset($move->position['y']) ? $move->position['y'] : 0);
+                            
+                            $hydratedMovements[] = new MovementOrder(
+                                $move->id ?? -1,
+                                $move->type ?? '',
+                                new OffsetCoordinate($posX, $posY),
+                                $move->xOffset ?? 0,
+                                $move->yOffset ?? 0,
+                                $move->speed ?? 0,
+                                $move->heading ?? 0,
+                                $move->facing ?? 0,
+                                $move->preturn ?? false,
+                                $move->turn ?? $gameData->turn,
+                                $move->value ?? 0,
+                                $move->at_initiative ?? 0
+                            );
+                        } elseif (is_array($move)) {
+                            // Decoded as associative array
+                            $posX = isset($move['position']['x']) ? clone $move['position']['x'] : (isset($move['position']->x) ? $move['position']->x : 0);
+                            $posY = isset($move['position']['y']) ? clone $move['position']['y'] : (isset($move['position']->y) ? $move['position']->y : 0);
+
+                            $hydratedMovements[] = new MovementOrder(
+                                $move['id'] ?? -1,
+                                $move['type'] ?? '',
+                                new OffsetCoordinate($posX, $posY),
+                                $move['xOffset'] ?? 0,
+                                $move['yOffset'] ?? 0,
+                                $move['speed'] ?? 0,
+                                $move['heading'] ?? 0,
+                                $move['facing'] ?? 0,
+                                $move['preturn'] ?? false,
+                                $move['turn'] ?? $gameData->turn,
+                                $move['value'] ?? 0,
+                                $move['at_initiative'] ?? 0
+                            );
+                        } else {
+                            // Already a MovementOrder object
+                            $hydratedMovements[] = $move;
+                        }
+                    }
+                } else {
+                    // If the array was explicitly 'null' or empty, we must inject a dummy 
+                    // coordinate object to prevent getHexPos() from failing.
+                    $hydratedMovements[] = new MovementOrder(-1, 'start', new OffsetCoordinate(0, 0), 0, 0, 0, 0, 0, false, $gameData->turn, 0, 0);
+                }
+                
+                $gdShip->movement = $hydratedMovements;
+                
+                // Re-sync the hydrated array back to the matching $activeShips proxy so
+                // memory references stay aligned for the remainder of the phase.
+                foreach ($activeShips as $activeShip) {
+                    if ($gdShip->id === $activeShip->id) {
+                        $activeShip->movement = $hydratedMovements;
+                    }
+                }
+            }
+
             foreach ($gameData->ships as $ship) {
                 if ($ship->mine) {
                     $ship->generateIndividualNotes($gameData, $dbManager);
