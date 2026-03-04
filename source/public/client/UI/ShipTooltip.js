@@ -269,7 +269,7 @@ window.ShipTooltip = function () {
 
         var MDEW = ew.getDetectMEW(ship);
         if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
-            this.addEntryElement('Detect Mines: ' + MDEW, ship.flight !== true);
+            this.addEntryElement('Detect Mines: ' + MDEW);
         }
 
         if (shipManager.isElint(ship)) {
