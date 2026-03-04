@@ -63,13 +63,18 @@ class SystemInfo extends React.Component {
         var specialName = 'Special';
         var reactKey = 0; //needed for react so each line has unique key!
 
+        let displayOffensiveBonus = ship.offensivebonus;
+        if (ship.flight && gamedata.areMinesPresent) {
+            displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
+        }
+
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>
                 <InfoHeader>{system.displayName}</InfoHeader>
 
                 {!ship.flight && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)}
                 {!ship.flight && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
-                {ship.flight && getEntry('Offensive bonus', ship.offensivebonus * 5)}
+                {ship.flight && getEntry('Offensive bonus', displayOffensiveBonus * 5)}
 
                 {system.firingModes && getEntry('Firing mode', system.firingModes[system.firingMode])}
 
