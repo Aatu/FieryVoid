@@ -40,7 +40,7 @@ class MovementGamePhase implements Phase
             );
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
 
-            // Perform post-move stealth check for ships with that ability (e.g. Torvalus)
+            // Perform post-move stealth check for ships with that ability (e.g. Hyach, Torvalus)
             if ($ship->trueStealth) {
                 $ship->checkStealth($gameData);
             }
