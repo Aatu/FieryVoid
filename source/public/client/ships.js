@@ -984,7 +984,7 @@ window.shipManager = {
     shouldBeHidden: function (ship) {
         if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
-        if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spaawned yet.
+        if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
         if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         return false;
     },
@@ -993,6 +993,8 @@ window.shipManager = {
 
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return 1; //Bases and OSATs never 'jump in', returns Turn 1.
+        } else if (ship.spawned !== undefined && ship.spawned !== -1) {
+            return ship.spawned; //Spawned units enter the game on ship.spawned turn.
         } else {
             //return Math.max(ship.deploysOnTurn, slot.depavailable);
             var slot = playerManager.getSlotById(ship.slot);
@@ -1006,6 +1008,7 @@ window.shipManager = {
             return depTurn;
         }
     },
+
 
     //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
     playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {

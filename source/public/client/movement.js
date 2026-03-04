@@ -1789,6 +1789,7 @@ shipManager.movement = {
     },
 
     canTurn: function canTurn(ship, right) {
+        if (ship.mine) return false;        
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
