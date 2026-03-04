@@ -1081,7 +1081,9 @@ window.weaponManager = {
             //var firstFighter = shipManager.systems.getSystem(shooter, 1); //should be the same as below...
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
-            oew = shooter.offensivebonus - OBcrit;
+            mdew = ew.getDetectMEW(shooter); //-1 OB for each point fo Mine Detect
+            oew = shooter.offensivebonus - OBcrit - (mdew * 2); //Every point of mdew costs 2 OB
+
             if (weapon.ballistic) { //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
                 var shooterLoSBlocked = false;
                 //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 

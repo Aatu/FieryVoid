@@ -278,6 +278,7 @@ class CaptorMine extends Weapon{
     public $priorityAF = 5;
     public $firingModes = array(1 => "Captor");
     public $range = 0;
+    public $distanceRange = 50; //So that shots don't cancel if target moves far away after triggering a mine.    
     private $diceType = 1; //What type of dice are used.
     private $dice = 1; //How many damage dice are there
     private $damageBonus = 0; //What is flat damage bonus
@@ -298,6 +299,11 @@ class CaptorMine extends Weapon{
 
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
+
+    public function setSystemDataWindow($turn){
+            $this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
+			$this->data["Special"] .= "<br>Range is halved against Jammer equipped units.";											
+	}	
 
     public function beforePreFiringOrderResolution($gamedata){
         
@@ -356,8 +362,6 @@ class CaptorMine extends Weapon{
 			);		
             $newFireOrder->chosenLocation = $chosenLocation;
             $this->locationHit = $chosenLocation;
-//Debug::log("newFireOrder->chosenLocation " . $newFireOrder->chosenLocation);
-//Debug::log("this->locationHit " . $this->locationHit);
 
 			$newFireOrder->addToDB = true;
 			$this->fireOrders[] = $newFireOrder;
@@ -373,9 +377,7 @@ class CaptorMine extends Weapon{
 	} //endof beforePreFiringOrderResolution
 
 	public function fire($gamedata, $fireOrder){
-//Debug::log("fireOrder->chosenLocation1 " . $fireOrder->chosenLocation);        
-		$fireOrder->chosenLocation = $this->locationHit;
-//Debug::log("fireOrder->chosenLocation2 " . $fireOrder->chosenLocation);          
+		$fireOrder->chosenLocation = $this->locationHit;        
 		
 		parent::fire($gamedata, $fireOrder);
 	}
@@ -398,7 +400,7 @@ class CaptorMine extends Weapon{
             $previousFacing = $unitStartLoc->getFacingAngle();
 								
 			//Check if unit can be attacked in its starting position	
-			if($this->checkTargetConditions( $minePosition, $unitStartLoc->position,$gamedata)){
+			if($this->checkTargetConditions( $minePosition, $unitStartLoc->position,$gamedata, $mine, $unit)){
                    $relativeBearing = $this->getMineBearing($minePosition, $unitStartLoc->position, $unit, $previousFacing);
                    $location = $this->getHitSection($relativeBearing, $unit);
                    return ['unit' => $unit, 'location' => $location];
@@ -410,7 +412,7 @@ class CaptorMine extends Weapon{
 	                // Only interested in moves where unit enters a NEW hex!
 	                if ($unitMove->type == "move" || $unitMove->type == "slipleft" || $unitMove->type == "slipright") {
 
-                        if($this->checkTargetConditions($minePosition, $unitMove->position, $gamedata)) {
+                        if($this->checkTargetConditions($minePosition, $unitMove->position, $gamedata,  $mine, $unit)) {
                            //get bearing / location and return that too		    			
                             $relativeBearing = $this->getMineBearing($minePosition, $previousPosition, $unit, $previousFacing);
                             $location = $this->getHitSection($relativeBearing, $unit);
@@ -472,11 +474,15 @@ class CaptorMine extends Weapon{
 
 
 
-	private function checkTargetConditions($minePosition, $targetPostion, $gamedata){
+	private function checkTargetConditions($minePosition, $targetPostion, $gamedata, $mine, $target){
 		
 		$distance =	mathlib::getDistanceHex($minePosition, $targetPostion);//Compare starting positions.						
+
+		$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $target));
 		
-	    if ($distance > $this->range) return false; //Not within range, skip LoS check and return false.
+		$effectiveRange = ($jammerValue > 0) ? floor($this->range / 2) : $this->range;
+		
+	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
 
         //Captor Mines 'launch' like other ballistics so should obey LoS?
 		$loSBlocked = $this->isLoSBlocked($minePosition, $targetPostion, $gamedata); //Returns true is LoS blocked
@@ -484,13 +490,6 @@ class CaptorMine extends Weapon{
 
 		return true;
 	}	
-
-
-    public function setSystemDataWindow($turn)
-    {
-        parent::setSystemDataWindow($turn);
-        $this->data["Special"] = ".";
-    }
 
     //getDamage in itself depends on actually hit ship - this function is meaningless here, really!
     public function getDamage($fireOrder)
