@@ -2183,7 +2183,15 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 class BallisticMineLauncher extends AmmoMissileRackS{
 	public $name = "BallisticMineLauncher";
     public $displayName = "Ballistic Mine Launcher";
-    public $iconPath = "BallisticMineLauncher.png";    
+    public $iconPath = "BallisticMineLauncher.png";
+
+    // Ship classes that this weapon can dynamically spawn mid-game.
+    // game.php reads this to preload blueprints into window.staticShips.
+    public $spawnableClasses = [
+        'spawnCaptorKLB',
+        'spawnCaptorKLH',
+        'spawnCaptorKLW',
+    ];
 	
     public $range = 30;
     public $distanceRange = 60;
@@ -2556,7 +2564,13 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 class AbbaiMineLauncher extends BallisticMineLauncher{
 	public $name = "AbbaiMineLauncher";
     public $displayName = "Mine Launcher";
-    public $iconPath = "AbbaiMineLauncher.png";    
+    public $iconPath = "AbbaiMineLauncher.png";
+
+    // Overrides parent — Abbai launcher spawns its own mine types.
+    public $spawnableClasses = [
+        'spawnCaptorWotcrAbbaiA',
+        'spawnCaptorWotcrAbbaiB',
+    ];
 	
     public $range = 20;
     public $distanceRange = 40;   

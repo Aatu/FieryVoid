@@ -67,6 +67,32 @@
             }
         }
         $staticShips = ShipLoader::getShipsByClass($shipClasses);
+
+        // Auto-discover dynamically spawnable ship blueprints from weapon system properties.
+        // Any weapon with a $spawnableClasses array will have its listed classes preloaded here,
+        // so the frontend has their full blueprint when a mine/unit is spawned mid-game.
+        $spawnableClasses = [];
+        foreach ($staticShips as $faction => $shipBlueprints) {
+            foreach ($shipBlueprints as $blueprint) {
+                foreach ($blueprint->systems as $system) {
+                    if (!empty($system->spawnableClasses)) {
+                        foreach ($system->spawnableClasses as $cls) {
+                            $spawnableClasses[] = $cls;
+                        }
+                    }
+                }
+            }
+        }
+        if (!empty($spawnableClasses)) {
+            $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));
+            foreach ($spawnableStaticShips as $faction => $classes) {
+                if (!isset($staticShips[$faction])) $staticShips[$faction] = [];
+                foreach ($classes as $classKey => $blueprint) {
+                    $staticShips[$faction][$classKey] = $blueprint;
+                }
+            }
+        }
+
         echo '<script>window.staticShips = ' . json_encode($staticShips) . ';</script>';
     ?>
     <script>
