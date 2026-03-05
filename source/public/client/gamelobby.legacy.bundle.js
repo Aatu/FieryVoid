@@ -17771,55 +17771,32 @@ MineStealth.prototype.constructor = MineStealth;
 
 MineStealth.prototype.isDetectedMine = function (ship) {
 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
-	if (this.detected) return true; //Already detected.
+
+	if (Array.isArray(this.detected)) {
+		var myTeam = gamedata.getPlayerTeam();
+		if (this.detected.includes(myTeam)) return true;
+	} else if (this.detected === true) {
+		return true; //Already detected (legacy/fallback).
+	}
+
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
 
-	/* //Mine notes happen during Movement, so no need to check Phases 3 and 5 like other stealth.
-	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
-
-	// Check all enemy ships to see if any can detect this ship
-	for (const otherShip of gamedata.ships) {
-		if (otherShip.team === ship.team) continue; // Skip friendly ships
-		if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-		if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
-
-		let totalDetection = 0;
-
-		if (!otherShip.flight) {
-			if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
-			// Not a fighter — use scanner systems for detection
-			const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
-			const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
-			const scanners = [...standardScanners, ...elintScanners];
-
-			for (const scanner of scanners) {
-				if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
-					totalDetection += ew.getEWByType("Detect Mines", otherShip);
-				}
-			}
-			if(otherShip.minesweeperbonus > 0) totalDetection += otherShip.minesweeperbonus; 
-		} else {
-			// Fighter unit — use offensive bonus
-			if (otherShip.offensivebonus) totalDetection = Math.ceil(otherShip.offensivebonus / 2);
-		}
-
-		// Get distance to the stealth ship and check line of sight
-		const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
-		var loSBlocked = false;
-
-		var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.		
-		var shipPos = shipManager.getShipPosition(ship);
-		var otherShipPos = shipManager.getShipPosition(otherShip);
-		loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
-
-		// If within detection range, the ship is revealed
-		if ((totalDetection > distance + ship.signature) && !loSBlocked) { //In range and LoS not blocked.
-			this.detected = true;
-			return true; //Just return, if one ship can see the stealthed ship then all can.
-		}
-	}
-	*/
 	//No one detected the ship
+	return false;
+};
+
+MineStealth.prototype.isMineRevealed = function (ship) {
+	var myTeam = gamedata.getPlayerTeam();
+
+	// Always revealed to friendly players
+	if (ship.team === myTeam) return true;
+
+	if (Array.isArray(this.revealInfo)) {
+		if (this.revealInfo.includes(myTeam)) return true;
+	} else if (this.revealInfo === true) {
+		return true; // Legacy fallback
+	}
+
 	return false;
 };
 
@@ -23967,7 +23944,15 @@ var CaptorMine = function CaptorMine(json, ship) {
 };
 CaptorMine.prototype = Object.create(Aoe.prototype);
 CaptorMine.prototype.constructor = CaptorMine;
-;
+
+CaptorMine.prototype.initializationUpdate = function () {
+    var ship = this.ship;
+    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+        this.range = 0;
+    }  
+    return this  
+}    ;
 
 /* Source: client/model/weapon/molecular.js */
 "use strict";

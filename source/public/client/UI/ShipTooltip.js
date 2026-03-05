@@ -103,7 +103,14 @@ window.ShipTooltip = function () {
 
 
     function createForSingleShip(ship) {
-        jQuery('<span class="name value ' + getAllyClass(ship) + '">' + ship.name + '</span>').appendTo(this.element.find('.namecontainer'));
+        var shipNameDisplay = ship.name;
+        if (ship.mine) {
+            var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+            if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                shipNameDisplay = "Mine";
+            }
+        }
+        jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + '</span>').appendTo(this.element.find('.namecontainer'));
 
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
@@ -321,8 +328,14 @@ window.ShipTooltip = function () {
     function createForMultipleShips(ships) {
         ships.forEach(function (ship, i) {
             var comma = i < ships.length - 1 ? ',' : '';
-
-            jQuery('<span class="name value ' + getAllyClass(ship) + '">' + ship.name + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
+            var shipNameDisplay = ship.name;
+            if (ship.mine) {
+                var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+                if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                    shipNameDisplay = "Mine";
+                }
+            }
+            jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
 
             $(".ballistics", this.element).hide();
         }, this);

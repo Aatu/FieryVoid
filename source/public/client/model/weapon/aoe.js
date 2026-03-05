@@ -24,3 +24,12 @@ var CaptorMine = function CaptorMine(json, ship) {
 };
 CaptorMine.prototype = Object.create(Aoe.prototype);
 CaptorMine.prototype.constructor = CaptorMine;
+
+CaptorMine.prototype.initializationUpdate = function () {
+    var ship = this.ship;
+    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+        this.range = 0;
+    }  
+    return this  
+}    

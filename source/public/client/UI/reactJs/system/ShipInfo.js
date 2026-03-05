@@ -74,12 +74,23 @@ class ShipInfo extends React.Component {
 
 		var reactKey = 0; //needed for react so each line has unique key!
 
+		var isRevealed = true;
+		if (ship.mine) {
+			var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+			if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+				isRevealed = false;
+				hitChart = new Array();
+				notes = ["No details known, scan with OEW to identify."];
+				enhArray = new Array();
+			}
+		}
+
 		return (
 			<InfoContainer>
-				{ship.flight && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{displayOffensiveBonus * 5}</Entry>}
-				{ship.flight && <Entry key={reactKey++}><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
-				{ship.flight && <Entry key={reactKey++}><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
-				{ship.flight && <Entry key={reactKey++}>&nbsp;</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{displayOffensiveBonus * 5}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
+				{ship.flight && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
 
 				{Object.keys(notes).length > 0 && <Entry key={reactKey++}><Header>NOTES:</Header>&nbsp;</Entry>}
 				{Object.keys(notes).length > 0 &&
@@ -93,11 +104,11 @@ class ShipInfo extends React.Component {
 				}
 				{Object.keys(hitChart).length > 0 && <Entry key={reactKey++}>&nbsp;</Entry>}
 
-				{ship.enhancementTooltip != '' && <Entry key={reactKey++}><Header>ENHANCEMENTS:</Header>&nbsp;</Entry>}
-				{ship.enhancementTooltip != '' &&
+				{ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}><Header>ENHANCEMENTS:</Header>&nbsp;</Entry>}
+				{ship.enhancementTooltip != '' && isRevealed &&
 					Object.keys(enhArray).map(i => <Entry key={reactKey++}>{enhArray[i]}</Entry>)
 				}
-				{ship.enhancementTooltip != '' && <Entry key={reactKey++}>&nbsp;</Entry>}
+				{ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
 
 			</InfoContainer>
 		);
