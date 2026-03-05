@@ -278,11 +278,11 @@ class CaptorMine extends Weapon{
     public $priorityAF = 5;
     public $firingModes = array(1 => "Captor");
     public $range = 0;
-    public $distanceRange = 50; //So that shots don't cancel if target moves far away after triggering a mine.    
+    public $distanceRange = 60; //So that shots don't cancel if target moves far away after triggering a mine.    
     private $diceType = 1; //What type of dice are used.
     private $dice = 1; //How many damage dice are there
     private $damageBonus = 0; //What is flat damage bonus
-    private $locationHit = 0;   
+    //private $locationHit = 0;   
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $accuracy, $diceType, $dice, $damageBonus){
 	//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -305,7 +305,7 @@ class CaptorMine extends Weapon{
 			$this->data["Special"] .= "<br>Range is halved against Jammer equipped units.";											
 	}	
 
-    public function beforePreFiringOrderResolution($gamedata){
+    public function beforeFiringOrderResolution($gamedata){
         
         if($this->isOfflineOnTurn()) return; //Mine weapon deactivated.
 
@@ -346,26 +346,27 @@ class CaptorMine extends Weapon{
 		}
 	
         $mineTarget = null;
-        $chosenLocation = 0;
+        //$chosenLocation = 0;
 		//Now check if any enemy units entered range and attack first one
-		$targetData = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);	
+		//$targetData = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);
+		$mineTarget = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);	        	
 
-		if ($targetData !== null) { // Check if we found a valid target
-            $mineTarget = $targetData['unit'];
-            $chosenLocation = $targetData['location'];
+		if ($mineTarget !== null) { // Check if we found a valid target
+            //$mineTarget = $targetData['unit'];
+            //$chosenLocation = $targetData['location'];
 
 			$newFireOrder = new FireOrder(
-				-1, "prefiring", $mine->id, $mineTarget->id,
+				-1, "ballistic", $mine->id, $mineTarget->id,
 				$this->id, -1, $gamedata->turn, 1, 
 				0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
 				0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
 			);		
-            $newFireOrder->chosenLocation = $chosenLocation;
-            $this->locationHit = $chosenLocation;
+            //$newFireOrder->chosenLocation = $chosenLocation;
+            //$this->locationHit = $chosenLocation;
 
 			$newFireOrder->addToDB = true;
 			$this->fireOrders[] = $newFireOrder;
-		    $newFireOrder->pubnotes .= " Mine attacks a target. ";								
+		    //$newFireOrder->pubnotes .= " Mine attacks a target. ";								
 		
             //Now create a damage order to destroy mine.
             $structure = $mine->getStructureSystem(0);            
@@ -377,7 +378,7 @@ class CaptorMine extends Weapon{
 	} //endof beforePreFiringOrderResolution
 
 	public function fire($gamedata, $fireOrder){
-		$fireOrder->chosenLocation = $this->locationHit;        
+		//$fireOrder->chosenLocation = $this->locationHit;        
 		
 		parent::fire($gamedata, $fireOrder);
 	}
@@ -396,14 +397,15 @@ class CaptorMine extends Weapon{
 			$unitStartLoc = $unit->getLastTurnMovement($gamedata->turn);
             if($unitStartLoc == null) continue;
             
-            $previousPosition = $unitStartLoc->position;
-            $previousFacing = $unitStartLoc->getFacingAngle();
+            //$previousPosition = $unitStartLoc->position;
+            //$previousFacing = $unitStartLoc->getFacingAngle();
 								
 			//Check if unit can be attacked in its starting position	
 			if($this->checkTargetConditions( $minePosition, $unitStartLoc->position,$gamedata, $mine, $unit)){
-                   $relativeBearing = $this->getMineBearing($minePosition, $unitStartLoc->position, $unit, $previousFacing);
-                   $location = $this->getHitSection($relativeBearing, $unit);
-                   return ['unit' => $unit, 'location' => $location];
+                //$relativeBearing = $this->getMineBearing($minePosition, $unitStartLoc->position, $unit, $previousFacing);
+                //$location = $this->getHitSection($relativeBearing, $unit);
+                //return ['unit' => $unit, 'location' => $location];
+                return $unit;                   
 			}	
 
 			//Now check other movements in turn	
@@ -414,17 +416,18 @@ class CaptorMine extends Weapon{
 
                         if($this->checkTargetConditions($minePosition, $unitMove->position, $gamedata,  $mine, $unit)) {
                            //get bearing / location and return that too		    			
-                            $relativeBearing = $this->getMineBearing($minePosition, $previousPosition, $unit, $previousFacing);
-                            $location = $this->getHitSection($relativeBearing, $unit);
-                            return ['unit' => $unit, 'location' => $location];
+                            //$relativeBearing = $this->getMineBearing($minePosition, $previousPosition, $unit, $previousFacing);
+                            //$location = $this->getHitSection($relativeBearing, $unit);
+                            //return ['unit' => $unit, 'location' => $location];
+                            return $unit;
                        }else{
-                            $previousPosition = $unitMove->position;
-                            $previousFacing = $unitMove->getFacingAngle();
+                            //$previousPosition = $unitMove->position;
+                            //$previousFacing = $unitMove->getFacingAngle();
                             continue;
                         }
                     } else {
-                        $previousPosition = $unitMove->position;
-                        $previousFacing = $unitMove->getFacingAngle();
+                        //$previousPosition = $unitMove->position;
+                        //$previousFacing = $unitMove->getFacingAngle();
                     }    		 		 		
 				}
 			}					
@@ -434,6 +437,7 @@ class CaptorMine extends Weapon{
 		
 	}//end of checkForValidTargets    
 
+    /*
 	private function getMineBearing($minePosition, $shipPosition, $ship, $facing){
 		$relativeBearing = 0;	
 		$oPos = mathlib::hexCoToPixel($shipPosition);//Convert to pixel format		
@@ -471,7 +475,7 @@ class CaptorMine extends Weapon{
 		
 		return 0; // Should not happen but return default if so.
 	} 
-
+    */
 
 
 	private function checkTargetConditions($minePosition, $targetPostion, $gamedata, $mine, $target){
