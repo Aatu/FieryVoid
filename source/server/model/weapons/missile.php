@@ -2543,13 +2543,12 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
 		$this->data["Special"] = 'Available firing modes depend on ammo, tracked in Ammo Magazine system.';
 		$this->data["Special"] .= '<br>Hex-targeted weapon with a 25% chance to scatter.';
-		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it lands, up to its maximum radius (halved against units with Jammer).';	
-		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it lands, up to its maximum radius (halved against units with Jammer) and can be intercepted.';	
+		$this->data["Special"] .= '<br>Damage, Fire Control and Range from target hex depends on ammo type:';	
 		$this->data["Special"] .= '<br>  - Basic: 1d10 + 16 damage, +40 to hit and 3 hex radius.';	
 		$this->data["Special"] .= '<br>  - Wide-Range: 1d10 + 12 damage, +30 to hit and 5 hex radius.';	
 		$this->data["Special"] .= '<br>  - Heavy: 1d10 + 24 damage, +25 to hit and 2 hex radius.';	
-		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destryoed or finds a target.';				
-		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
+		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destryoed or finds a target. See FV FAQ for details about Mines.';																				
 	}	
 
         public function stripForJson() {
@@ -2600,15 +2599,14 @@ class AbbaiMineLauncher extends BallisticMineLauncher{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
-		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		$this->data["Special"] = 'Available firing modes depend on ammo, tracked in Ammo Magazine system.';
 		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
-		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius and can be intercepted.';
 		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
-		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
+		$this->data["Special"] .= '<br>Damage, Fire Control and Range from target hex depends on ammo type:';	
 		$this->data["Special"] .= '<br>  - Basic: 12 damage, +10 to hit and 4 hex radius.';	
 		$this->data["Special"] .= '<br>  - Wide-Range: 12 damage, +10 to hit and 7 hex radius.';	
-		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';
-		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
+		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destryoed or finds a target. See FV FAQ for details about Mines.';															
 	}	
 	
     public function createLoiteringMine($gamedata, $fireOrder, $shooter, $mineRange, $IFFSystem){
