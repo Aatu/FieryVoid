@@ -41479,7 +41479,8 @@ MolecularSlicerBeamL.prototype.checkForWastedShots = function () {
 		}
 	}	
 	
-	if(this.data["Remaining Dice"] > 0 && hasIntercept == true) return false
+	if(this.data["Remaining Dice"] == 0) return false	
+	//if(this.data["Remaining Dice"] > 0 && hasIntercept == true) return false
 
 	return true;
 };
