@@ -212,22 +212,22 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 
 	private function isDetectedInitial($ship, $gameData) {
-		$revealed = false;
+		$detected = false;
 
 		foreach($ship->systems as $weapon){ //Check for weapon fire.
 			if($weapon instanceof Weapon){
 				if($weapon->firedOffensivelyOnTurn($gameData->turn)) {
-					$revealed = true;
-					return $revealed;
+					$detected = true;
+					return $detected;
 				}	
 			}
 		}
 
 		// If the ship used offensive or ELINT EW, it is revealed
 		$usedEW = $ship->getAllEWExceptDEW($gameData->turn); // Has used any EW except DEW?
-		if($usedEW > 0) $revealed = true;
+		if($usedEW > 0) $detected = true;
 
-		return $revealed;
+		return $detected;
 	}	
 
 	//Callled from MovementPhaseStrategy->advance() at the end of movement round.				
