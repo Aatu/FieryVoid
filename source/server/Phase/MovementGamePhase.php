@@ -42,11 +42,11 @@ class MovementGamePhase implements Phase
 
             // Perform post-move stealth check for ships with that ability (e.g. Hyach, Torvalus)
             if ($ship->trueStealth) {
-                $ship->checkStealth($gameData);
+                $ship->checkStealth($latestgameData);
             }
 
             // Track slots that have pre-firing ships ready to shoot
-            if ($ship->hasSpecialAbility("PreFiring") && $ship->hasPreFireWeaponsReady($gameData)) {
+            if ($ship->hasSpecialAbility("PreFiring") && $ship->hasPreFireWeaponsReady($latestgameData)) {
                 $preFiringSlots[$ship->slot] = true; // use associative key to ensure uniqueness
             }
         }
