@@ -145,7 +145,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 					}
 				}	
 			break;
-
+			/*	
 			case 5: //Pre-Firing phase Advance(), always called even if phase not needed in game.
 				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
 					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
@@ -155,7 +155,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
 					}
 				}
-
+			*/	
 			case 4: //Firing phase Advance(), always called even if phase not needed in game.
 				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
 					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
@@ -230,20 +230,8 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		return $revealed;
 	}	
 
-
-	private function isDetectedFire($ship, $gameData) {
-		// If the ship has fired this turn, it is revealed
-		foreach($ship->systems as $weapon){ //Check for weapon fire.
-			if($weapon instanceof Weapon){
-				$firingOrders = $weapon->getFireOrders($gameData->turn);
-				foreach ($firingOrders as $fireOrder) { 
-					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1.
-						return true; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
-					}	
-				}	
-			}
-		}
-
+	//Callled from MovementPhaseStrategy->advance() at the end of movement round.				
+	public function isDetectedMovement($ship, $gameData) {
 		// Check all enemy ships to see if any can detect this ship at end of turn
 		//$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
 		$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
@@ -288,6 +276,21 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 			// If within detection range, and LoS not blocked the ship is detected
 			if ($totalDetection >= $distance && !$noLoS) {  
+
+				$note = new IndividualNote(
+						-1,
+						$gameData->id,
+						$gameData->turn,
+						$gameData->phase,
+						$ship->id,
+						$this->id,
+						'detected',
+						"Detected - M",
+						1
+				);
+
+				Manager::insertIndividualNote($note);	
+
 				return true; //Just return, if one ship can see the stealthed ship then all can.
 			}
 		}
@@ -296,6 +299,19 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 	}
 
+	private function isDetectedFire($ship, $gameData) {
+		// If the ship has fired this turn, it is revealed
+		foreach($ship->systems as $weapon){ //Check for weapon fire.
+			if($weapon instanceof Weapon){
+				$firingOrders = $weapon->getFireOrders($gameData->turn);
+				foreach ($firingOrders as $fireOrder) { 
+					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1.
+						return true; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					}	
+				}	
+			}
+		}
+	}		
 
 	private function isUndetected($ship, $gameData) {		
 		//$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.

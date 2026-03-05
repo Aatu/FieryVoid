@@ -945,13 +945,21 @@ class BaseShip {
     }
 
     public function checkStealth($gamedata)
-    {         
+    {        
+        //Check Torvalus at start of Initial Orders and end of Movement 
         if($this->faction == "Torvalus Speculators"){
             $shadingField = $this->getSystemByName("ShadingField");
             if($shadingField) $shadingField->checkStealthNextPhase($gamedata);
         }
 
-        //Trek block.
+        //Check Hyach subs at end of movement
+        if($this->faction == "Hyach Gerontocracy" && $gamedata->phase == 2){
+            $stealth = $this->getSystemByName("Stealth");
+            if($stealth) $stealth->isDetectedMovement($this, $gamedata);
+        }
+
+
+        //Check Trek at start of Initial Orders and end of Movement 
         if($this->hasSpecialAbility("Cloaking")){           
             $cloakingDevice = $this->getSystemByName("CloakingDevice");
             if($cloakingDevice) $cloakingDevice->checkStealthNextPhase($gamedata);
