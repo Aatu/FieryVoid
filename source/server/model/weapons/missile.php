@@ -2606,7 +2606,8 @@ class AbbaiMineLauncher extends BallisticMineLauncher{
 		$this->data["Special"] .= '<br>Damage, Fire Control and Range from target hex depends on ammo type:';	
 		$this->data["Special"] .= '<br>  - Basic: 12 damage, +10 to hit and 4 hex radius.';	
 		$this->data["Special"] .= '<br>  - Wide-Range: 12 damage, +10 to hit and 7 hex radius.';	
-		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destryoed or finds a target. See FV FAQ for details about Mines.';															
+		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destroyed or it finds a target.';															
+		$this->data["Special"] .= '<br>See Fiery Void FAQ for more details about Mines.';		
 	}	
 	
     public function createLoiteringMine($gamedata, $fireOrder, $shooter, $mineRange, $IFFSystem){
