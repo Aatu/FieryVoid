@@ -11004,6 +11004,7 @@ window.DeploymentPhaseStrategy = function () {
         if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
             if (this.selectedShip) this.deselectShip(this.selectedShip);
             this.setPhaseHeader("PRE-TURN ORDERS");
+            this.replayUI = new ReplayUI().activate();            
             gamedata.showCommitButton();
             /*//Can auto-click it if we want.
 
