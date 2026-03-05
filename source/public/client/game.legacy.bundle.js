@@ -7227,11 +7227,35 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 "use strict";
 
 window.HexTargetedWeaponFireAnimation = function () {
-/*
-    function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer, logAnimation) {
+    /*
+        function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer, logAnimation) {
+    
+            this.duration = 0;
+            this.allFire = weaponManager.getAllHexTargetedBallistics();
+            this.time = time || 0;
+            this.animations = [];
+            this.shipIconContainer = shipIconContainer;
+            this.movementAnimations = movementAnimations;
+            this.particleEmitterContainer = particleEmitterContainer;
+            this.turn = turn;
+            this.logAnimation = logAnimation;
+    
+            this.duration = 0;
+    
+            this.animations = [];
+    
+            this.allFire.forEach(function (fire) {
+    
+                this.logAnimation.addLogEntryFire(fire.fireOrder, this.time + this.duration);
+    
+                this.duration += buildAnimation.call(this, fire, this.duration + this.time);
+            }, this);
+        }
+    */
+
+    function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer, logAnimation, fires) {
 
         this.duration = 0;
-        this.allFire = weaponManager.getAllHexTargetedBallistics();
         this.time = time || 0;
         this.animations = [];
         this.shipIconContainer = shipIconContainer;
@@ -7240,38 +7264,14 @@ window.HexTargetedWeaponFireAnimation = function () {
         this.turn = turn;
         this.logAnimation = logAnimation;
 
-        this.duration = 0;
-
-        this.animations = [];
+        // 🔧 Use the provided fires (per ship) if given, else fall back to global.
+        this.allFire = fires || weaponManager.getAllHexTargetedBallistics();
 
         this.allFire.forEach(function (fire) {
-
             this.logAnimation.addLogEntryFire(fire.fireOrder, this.time + this.duration);
-
             this.duration += buildAnimation.call(this, fire, this.duration + this.time);
         }, this);
     }
-*/
-
-function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContainer, turn, particleEmitterContainer, logAnimation, fires) {
-
-    this.duration = 0;
-    this.time = time || 0;
-    this.animations = [];
-    this.shipIconContainer = shipIconContainer;
-    this.movementAnimations = movementAnimations;
-    this.particleEmitterContainer = particleEmitterContainer;
-    this.turn = turn;
-    this.logAnimation = logAnimation;
-
-    // 🔧 Use the provided fires (per ship) if given, else fall back to global.
-    this.allFire = fires || weaponManager.getAllHexTargetedBallistics();
-
-    this.allFire.forEach(function (fire) {
-        this.logAnimation.addLogEntryFire(fire.fireOrder, this.time + this.duration);
-        this.duration += buildAnimation.call(this, fire, this.duration + this.time);
-    }, this);
-}
 
     HexTargetedWeaponFireAnimation.prototype = Object.create(Animation.prototype);
 
@@ -7295,31 +7295,43 @@ function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContai
 
         var weapon = fire.weapon;
         var shooter = fire.shooter;
-        if(shipManager.shouldBeHidden(shooter)) return 0;
+        if (shipManager.shouldBeHidden(shooter)) return 0;
 
-        var startPosition = FireAnimationHelper.getShipPositionForFiring(this.shipIconContainer.getByShip(shooter), time, this.movementAnimations, weapon, this.turn);
+        var icon = this.shipIconContainer.getByShip(shooter);
+        var startPosition = FireAnimationHelper.getShipPositionForFiring(icon, time, this.movementAnimations, weapon, this.turn);
         var endPosition = window.coordinateConverter.fromHexToGame(new hexagon.Offset(fire.fireOrder.x, fire.fireOrder.y));
-		
+
+        // Guard: some fire orders (e.g. CaptorMine) store null for x/y because they are
+        // not truly hex-targeted. Fall back to startPosition — the mine fires at a target
+        // in its own hex, so this is the correct position anyway.
+        if (!endPosition || isNaN(endPosition.x) || isNaN(endPosition.y)) {
+            endPosition = startPosition;
+        }
+
+        // Abort entirely if we still have no valid positions (prevents NaN geometry crash).
+        if (!startPosition || isNaN(startPosition.x) || isNaN(startPosition.y)) return 0;
+        if (!endPosition || isNaN(endPosition.x) || isNaN(endPosition.y)) return 0;
+
         var modeIteration = fire.fireOrder.firingMode; //change weapons data to reflect mode actually used - DK - 6 Jan 24
-            if(modeIteration != weapon.firingMode){
-                while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
+        if (modeIteration != weapon.firingMode) {
+            while (modeIteration != weapon.firingMode) { //will loop until correct mode is found
                 weapon.changeFiringMode();
-                }
             }
-            
-		var color;		
-		if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
-		    color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
-		} else {
-		    color = new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255);
-		}
-		
-        if (weapon.specialPosNoLauncher){
-		var hit = true;       	
-        }else{
-        var hit = fire.fireOrder.shotshit !== 0;
-		}
-		
+        }
+
+        var color;
+        if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
+            color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
+        } else {
+            color = new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255);
+        }
+
+        if (weapon.specialPosNoLauncher) {
+            var hit = true;
+        } else {
+            var hit = fire.fireOrder.shotshit !== 0;
+        }
+
         var shot = null;
 
         var cameraAnimation = new CameraPositionAnimation(endPosition, time);
@@ -7337,7 +7349,7 @@ function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContai
                     damage: 0,
                     time: time
                 });
-            break;
+                break;
             case 'ball':
             default:
                 shot = new TorpedoEffect(this.particleEmitterContainer, {
@@ -7356,15 +7368,15 @@ function HexTargetedWeaponFireAnimation(time, movementAnimations, shipIconContai
 
         this.animations.push(shot);
         if (hit || weapon instanceof ThoughtWave) {
-                var explosion = new Explosion(this.particleEmitterContainer, {
-                    size: 60 * weapon.animationExplosionScale,
-                    position: endPosition,
-                    type: "emp",
-                    color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255), //Always use weapon colour - DK - 4 Jan 24
-                    time: time + shot.getDuration()
-                });
-                this.animations.push(explosion);
-                duration += 1000;  
+            var explosion = new Explosion(this.particleEmitterContainer, {
+                size: 60 * weapon.animationExplosionScale,
+                position: endPosition,
+                type: "emp",
+                color: new THREE.Color(weapon.animationColor[0] / 255, weapon.animationColor[1] / 255, weapon.animationColor[2] / 255), //Always use weapon colour - DK - 4 Jan 24
+                time: time + shot.getDuration()
+            });
+            this.animations.push(explosion);
+            duration += 1000;
         }
 
         return duration;
