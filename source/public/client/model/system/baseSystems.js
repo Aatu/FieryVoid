@@ -289,7 +289,9 @@ Stealth.prototype.isDetectedStealth = function (ship) {
 	if (usedEW > 0) {
 		return true; //If so, revealed.
 	}
-	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
+	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
+	
+	/*
 	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
 
 	// Check all enemy ships to see if any can detect this ship
@@ -344,7 +346,7 @@ Stealth.prototype.isDetectedStealth = function (ship) {
 			return true; //Just return, if one ship can see the stealthed ship then all can.
 		}
 	}
-
+	*/
 	//No one detected the ship
 	return false;
 };
