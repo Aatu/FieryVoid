@@ -17696,7 +17696,9 @@ Stealth.prototype.constructor = Stealth;
 
 Stealth.prototype.isDetectedStealth = function (ship) {
 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
-	if (this.detected) return true; //Already detected.
+	//if (ship.team === gamedata.getPlayerTeam()) return true; // Friendly ships are always visible
+	if (this.detected === true) return true; // Fallback support for boolean
+	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
 
 	// If the ship used offensive or ELINT EW, it is revealed
 	const usedEW = ew.getAllEWExceptDEW(ship); //Has used any EW abilities except DEW?

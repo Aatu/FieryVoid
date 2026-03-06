@@ -58,7 +58,8 @@ class Stealth extends ShipSystem implements SpecialAbility{
     public $displayName = "Stealth systems";
     public $specialAbilities = array("Jammer", "Stealth");
     public $primary = true;
-	public $detected = false;
+	public $detected = false; // Legacy fallback
+	public $detectedNew = array(); // Multi-team tracking array
     
     function __construct($armour, $maxhealth, $powerReq){
         parent::__construct($armour, $maxhealth, $powerReq, 1);
@@ -129,50 +130,37 @@ class Stealth extends ShipSystem implements SpecialAbility{
 		if($ship->getTurnDeployed($gameData) > $gameData->turn)	return; //Ship not deployed yet.		
 
 		$this->onIndividualNotesLoaded($gameData); //Check current detection status.
+		if (!is_array($this->detectedNew)) $this->detectedNew = array();
 
         switch($gameData->phase){
 			case 1: //Initial Orders - Check for any ballistic launches
-				if(!$this->detected){ //Only check if ship has not been already detected at some point.
-					//Did stealth ship launch any ballistics?
-					$ballisticOrEW = $this->isDetectedInitial($ship, $gameData);
+				$newlyDetectingTeams = $this->isDetectedInitial($ship, $gameData);
 
-					if($ballisticOrEW){ //There was a ballistic launch this turn.  Create note for ship to be marked detected.
-						//Prepare note for database!		
-						$notekey = 'detected';
-						$noteHuman = 'Ship detected';
-						$noteValue = 1;
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue							
-					}
-				}	
-			break;
-			/*	
-			case 5: //Pre-Firing phase Advance(), always called even if phase not needed in game.
-				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
-					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
-						$notekey = 'detected';
-						$noteHuman = 'Ship detected';
-						$noteValue = 1;
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				foreach ($newlyDetectingTeams as $teamId) {
+					if (!in_array($teamId, $this->detectedNew)) {
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,'detected','Ship detected',"Team:" . $teamId);
+						$this->detectedNew[] = $teamId; // update in memory for this phase
 					}
 				}
-			*/	
+			break;
 			case 4: //Firing phase Advance(), always called even if phase not needed in game.
-				if(!$this->detected){ //Ship has not already been detected, check if it is detected now.
-					if($this->isDetectedFire($ship, $gameData)){ //Now check if ship just been detected this turn?		
-						$notekey = 'detected';
-						$noteHuman = 'Ship detected';
-						$noteValue = 1;
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+				$newlyDetectingTeams = $this->isDetectedFire($ship, $gameData); 
+				foreach ($newlyDetectingTeams as $teamId) {
+					if (!in_array($teamId, $this->detectedNew)) {
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,'detected','Ship detected',"Team:" . $teamId);
+						$this->detectedNew[] = $teamId; // update in memory for this phase
 					}
-				}else{ //Ship is already detected, but can it now become undetected again by breaking all line of sight? 
-					if($this->isUndetected($ship, $gameData)){ //Line of Sight test
-						//Prepare note for database!		
-						$notekey = 'undetected';
-						$noteHuman = 'Ship undetected';
-						$noteValue = 1;
-						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
-					}
+				}
 
+				$undetectedTeams = $this->isUndetected($ship, $gameData); 
+				foreach ($undetectedTeams as $teamId) {
+					// We only generate undetected notes against teams that previously detected us.
+					// We also permit generation if the legacy boolean happens to be stuck 'true' from an old save format.
+					if (in_array($teamId, $this->detectedNew) || $this->detected) {
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,'undetected','Ship undetected',"Team:" . $teamId);
+						$this->detectedNew = array_values(array_diff($this->detectedNew, [$teamId]));
+						$this->detected = false; // Crucial: ensure json_encode clears legacy visibility immediately!
+					}
 				}
 			break;			
 					
@@ -183,14 +171,25 @@ class Stealth extends ShipSystem implements SpecialAbility{
 	public function onIndividualNotesLoaded($gamedata){
 		//Sort notes by turn, and then phase so latest detection note is always last.
 		$this->sortNotes();
+		if (!is_array($this->detectedNew)) $this->detectedNew = array();
 
 		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
 			switch($currNote->notekey){
 				case 'detected': 
-					if($currNote->notevalue == 1) $this->detected = true;
+						$this->detected = true; // Support legacy single-boolean saves
+					if (strpos($currNote->notevalue, 'Team:') === 0) {
+						$teamId = (int) substr($currNote->notevalue, 5);
+						if (!in_array($teamId, $this->detectedNew)) {
+							$this->detectedNew[] = $teamId;
+						}
+					}
 				break;
 				case 'undetected': 
-					if($currNote->notevalue == 1) $this->detected = false;
+						$this->detected = false; // Support legacy single-boolean saves
+					if (strpos($currNote->notevalue, 'Team:') === 0) {
+						$teamId = (int) substr($currNote->notevalue, 5);
+						$this->detectedNew = array_values(array_diff($this->detectedNew, [$teamId]));
+					}
 				break;								
 			}
 		}
@@ -218,30 +217,45 @@ class Stealth extends ShipSystem implements SpecialAbility{
 			if($weapon instanceof Weapon){
 				if($weapon->firedOffensivelyOnTurn($gameData->turn)) {
 					$detected = true;
-					return $detected;
+					break;
 				}	
 			}
 		}
 
-		// If the ship used offensive or ELINT EW, it is revealed
-		$usedEW = $ship->getAllEWExceptDEW($gameData->turn); // Has used any EW except DEW?
-		if($usedEW > 0) $detected = true;
+		if (!$detected) {
+			// If the ship used offensive or ELINT EW, it is revealed
+			$usedEW = $ship->getAllEWExceptDEW($gameData->turn); // Has used any EW except DEW?
+			if($usedEW > 0) $detected = true;
+		}
 
-		return $detected;
+		$detectedTeams = array();
+		if ($detected) {
+			// Revealed to all enemy teams
+			foreach ($gameData->slots as $slot) {
+				$teamId = (int)$slot->team;
+				if ($teamId != $ship->team && !in_array($teamId, $detectedTeams)) {
+					$detectedTeams[] = $teamId;
+				}
+			}
+		}
+
+		return $detectedTeams;
 	}	
 
 	//Callled from MovementPhaseStrategy->advance() at the end of movement round.				
 	public function isDetectedMovement($ship, $gameData) {
 		// Check all enemy ships to see if any can detect this ship at end of turn
-		//$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
 		$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
 		$pos = $ship->getHexPos(); //Just do this once outside loop		
+
+		if (!is_array($this->detectedNew)) $this->detectedNew = array();
 
 		foreach ($gameData->ships as $otherShip) {
 			// Skip friendly ships
 			if($otherShip->team === $ship->team) continue;
 			if($otherShip->isTerrain()) continue; //Ignore Terrain
 			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+			if(in_array($otherShip->team, $this->detectedNew)) continue; // team already detects the ship
 	
 			$totalDetection = 0;
 	
@@ -260,7 +274,6 @@ class Stealth extends ShipSystem implements SpecialAbility{
 					$totalDetection *= 3;				
 					$bonusDSEW = $otherShip->getEWByType("Detect Stealth", $gameData->turn);	
 					$totalDetection += $bonusDSEW*2;
-	
 				} else {
 					$totalDetection *= 2;
 				}
@@ -286,76 +299,105 @@ class Stealth extends ShipSystem implements SpecialAbility{
 						$this->id,
 						'detected',
 						"Detected - M",
-						1
+						"Team:" . $otherShip->team
 				);
 
 				Manager::insertIndividualNote($note);	
 
-				return true; //Just return, if one ship can see the stealthed ship then all can.
+				$this->detectedNew[] = $otherShip->team; // Add to in-memory array so we don't insert duplicate notes for this team
 			}
 		}
 
 		return false; //No other conditions were true, not detected.
-
 	}
 
 	private function isDetectedFire($ship, $gameData) {
+		$detected = false;
 		// If the ship has fired this turn, it is revealed
 		foreach($ship->systems as $weapon){ //Check for weapon fire.
 			if($weapon instanceof Weapon){
 				$firingOrders = $weapon->getFireOrders($gameData->turn);
 				foreach ($firingOrders as $fireOrder) { 
 					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1.
-						return true; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+						$detected = true;
+						break 2;
 					}	
 				}	
 			}
 		}
+
+		$detectedTeams = array();
+		if ($detected) {
+			// Revealed to all enemy teams
+			foreach ($gameData->slots as $slot) {
+				$teamId = (int)$slot->team;
+				if ($teamId != $ship->team && !in_array($teamId, $detectedTeams)) {
+					$detectedTeams[] = $teamId;
+				}
+			}
+		}
+		return $detectedTeams;
 	}		
 
 	private function isUndetected($ship, $gameData) {		
-		//$blockedHexes = $gameData->getBlockedHexes(); //Save outside loop as this won't change.
 		$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
 		$shipPosition = $ship->getHexPos(); //Save outside loop as this won't change.
-		$canStealth = true; //Default to being able to stealth again, then prove if it can't below.
-
-		//Check all enemy ships for line of sight, if none then ship can stealth again.
-		if (!empty($blockedHexes)) {  //No point checking if there are no blocked hexes.
-			foreach($gameData->ships as $enemyShip){
-				if($enemyShip->team == $ship->team) continue; //ignore ships in same team.
-				if($enemyShip->isTerrain()) continue; //Ignore Terrain
-				if($enemyShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
-
-				$enemyPosition = $enemyShip->getHexPos();
-				$noLoS = false; //False means LoS not blocked
-			
-				$noLoS = Mathlib::isLoSBlocked($shipPosition, $enemyPosition, $blockedHexes);				
-
-				if(!$noLoS){ //The enemy unit can see this ship LoS not blocked.
-					$canStealth = false;
-					return $canStealth; //Just return, only need one enemy ship to have LoS to fail check.
-				}
-			}
-		}else{//Just return false, nothing to block LoS.			
-			$canStealth = false;
-			return $canStealth; 
-		}	
 
 		//Check for weapon fire.
 		foreach($ship->systems as $weapon){ 
 			if($weapon instanceof Weapon){
 				$firingOrders = $weapon->getFireOrders($gameData->turn);
 				foreach ($firingOrders as $fireOrder) { 
-					if($fireOrder->type == "normal"){ //Ballistics already handled in Phase 1, and shouldn't prevent re-stealth at end of turn.						
-						$canStealth = false;
-						return $canStealth; //Just return, fired in Firing Phase revealing itself again even without LoS. Although who know at what without LoS...
+					if($fireOrder->type == "normal"){ 					
+						return array(); // Cannot stealth against anyone
 					}	
 				}	
 			}
 		}
+
+		$undetectedTeams = array();
+
+		if (!is_array($this->detectedNew)) return array();
+
+		// Check all enemy teams to see if we can stealth against them
+		$enemyTeams = array();
+		foreach ($gameData->slots as $slot) {
+			$teamId = (int)$slot->team;
+			if ($teamId != $ship->team && !in_array($teamId, $enemyTeams)) {
+				$enemyTeams[] = $teamId;
+			}
+		}
+
+		foreach ($enemyTeams as $teamId) {
+			$canStealthAgainstTeam = true;
+
+			if (!empty($blockedHexes)) {
+				// Check all enemy ships in this team
+				foreach($gameData->ships as $enemyShip){
+					if($enemyShip->team != $teamId) continue;
+					if($enemyShip->isTerrain()) continue; 
+					if($enemyShip->isDestroyed()) continue; 
+
+					$enemyPosition = $enemyShip->getHexPos();			
+					$noLoS = Mathlib::isLoSBlocked($shipPosition, $enemyPosition, $blockedHexes);				
+
+					if(!$noLoS){ // The enemy unit can see this ship
+						$canStealthAgainstTeam = false;
+						break; 
+					}
+				}
+			} else {
+				$canStealthAgainstTeam = false;
+			}
+
+			if ($canStealthAgainstTeam) {
+				$undetectedTeams[] = $teamId;
+			}
+		}
  
-		return $canStealth;
+		return $undetectedTeams;
 	}	
+
 
 
 	public function criticalPhaseEffects($ship, $gamedata) {	
@@ -409,6 +451,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->detected = $this->detected;	        
+        $strippedSystem->detectedNew = $this->detectedNew;	        
         return $strippedSystem;
     }
 

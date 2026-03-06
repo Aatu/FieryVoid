@@ -1297,6 +1297,8 @@ class Manager{
                 $value["name"] ?? "Unnamed",
                 $value["slot"] ?? 0
             );
+
+			$ship->team = $value["team"] ?? 0;
     
             $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
             $ship->setMovements($movements);
