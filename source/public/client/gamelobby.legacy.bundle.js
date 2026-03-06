@@ -28775,6 +28775,19 @@ CloakingDevice.prototype.doIndividualNotesTransfer = function () {
 			this.individualNotesTransfer.push(1);
 		}
 	}
+};
+
+CloakingDevice.prototype.isDetectedTrek = function (ship) {
+	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
+	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.       
+	if (this.detected === true) return true; // Fallback support for boolean legacy saves
+	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
+	if (shipManager.systems.isDestroyed(ship, this)) return true;
+	if (shipManager.power.isOffline(ship, this)) return true;
+
+	/* //Check server side at end of Movement
+	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
+
 	// Check all enemy ships to see if any can detect this ship
 	for (const otherShip of gamedata.ships) {
 		if (otherShip.team === ship.team) continue; // Skip friendly ships
@@ -28826,7 +28839,7 @@ CloakingDevice.prototype.doIndividualNotesTransfer = function () {
 			return true; //Just return, if one ship can see the stealthed ship then all can.
 		}
 	}
-    */
+	*/
 	// No one detected the ship
 	return false;
 };
