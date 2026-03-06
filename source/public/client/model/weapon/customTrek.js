@@ -292,7 +292,8 @@ CloakingDevice.prototype.doIndividualNotesTransfer = function () {
 CloakingDevice.prototype.isDetectedTrek = function (ship) {
     if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
     if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.       
-    if (this.detected) return true; //Already detected. 
+    if (this.detected === true) return true; // Fallback support for boolean legacy saves
+    if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
     if (shipManager.systems.isDestroyed(ship, this)) return true;
     if (shipManager.power.isOffline(ship, this)) return true;
 
@@ -438,12 +439,12 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
     var shooterPos = shipManager.getShipPosition(shooter);
     var heading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
 
-    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)){
+    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)) {
         var html = "You cannot Warp Jump onto Terrain!";
         confirm.warning(html);
         return false;
-        
-    }    
+
+    }
 
     const hexDirections = [0, 60, 120, 180, 240, 300];
 
