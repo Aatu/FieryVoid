@@ -31261,10 +31261,17 @@ window.fleetListManager = {
 
             if (ship.userid == slot.playerid && ship.slot == slot.slot) {
                 if (ship.mine) {
-                    if (!mineGroups[ship.shipClass]) {
-                        mineGroups[ship.shipClass] = [];
+                    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+                    var shipClass = ship.shipClass;  
+                    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                        shipClass = "Mine";
                     }
-                    mineGroups[ship.shipClass].push(ship);
+
+                    if (!mineGroups[shipClass]) {
+                        mineGroups[shipClass] = [];
+                    }
+
+                    mineGroups[shipClass].push(ship);
                 } else {
                     shipArray.push(ship);
                 }
