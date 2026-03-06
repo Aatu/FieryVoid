@@ -1628,7 +1628,7 @@ public function getStartLoading()
             }
 
             //interception?
-            if ($rolled > $needed && $rolled <= $needed + ($fireOrder->totalIntercept * 5)) { //$fireOrder->pubnotes .= "Shot intercepted. ";
+            if ($rolled > $needed && $rolled <= $needed + ($fireOrder->totalIntercept)) { //$fireOrder->pubnotes .= "Shot intercepted. ";
                 if ($this->damageType == 'Pulse') {
                     $fireOrder->intercepted += $this->maxpulses;
                 } else {
