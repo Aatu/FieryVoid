@@ -6595,7 +6595,7 @@ class MindriderHangar extends ShipSystem{
 			});
 		}
 
-
+		//Called in Deployment->advance() and Movement->advance()				
 		public function checkStealthNextPhase($gamedata, $range = 15){				
 				$ship = $this->getUnit();
 					if($gamedata->phase == 1){ 
