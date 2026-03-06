@@ -2158,7 +2158,8 @@ ShadingField.prototype.getOutput = function (ship, system) {
 ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
-	if (this.detected) return true; //Already detected.
+	if (this.detected === true) return true; // Fallback support for boolean legacy saves
+	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
 	if (shipManager.systems.isDestroyed(ship, this)) return true;
 	if (shipManager.power.isOffline(ship, this)) return true;
 

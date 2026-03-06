@@ -21288,7 +21288,7 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        if (!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
+        if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
 
         //Check for skin-dancing ships, these can't be targeted unless the shooter is also skin-dancing on same target, they also have their own rules about firing.
         if (gamedata.gamephase == 3) {
@@ -21532,12 +21532,20 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        if (!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.        
+        var hidden = weaponManager.isHidden(selectedShip); //Block invisible ships from firing where appropriate.        
 
         var toUnselect = Array();
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
+
+            if(hidden && weapon.name !== 'TransverseDrive' && weapon.name !== 'MicroJumpSystem'){
+                var html = "You cannot fire weapons on a turn when you are stealthed.";
+                confirm.warning(html);
+                toUnselect.push(weapon);                                
+                continue;
+            }    
+
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) continue;
 
@@ -22139,22 +22147,20 @@ window.weaponManager = {
         if (ship.faction == "Torvalus Speculators") {
             var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
             if (shadingField.active) {
-                var html = "You cannot fire weapons on a turn when your Shading Field was active.";
-                confirm.warning(html);
-                return false; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
+                return true; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
             }
         }
 
         if (shipManager.hasSpecialAbility(ship, "Cloaking")) {
             var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");
             if (cloakingDevice.active) {
-                var html = "You cannot fire weapons on a turn when your Cloaking Device was active.";
-                confirm.warning(html);
-                return false; //Cloaking Device active this turn, ship cannot fire.
+                //var html = "You cannot fire weapons on a turn when your Cloaking Device was active.";
+                //confirm.warning(html);
+                return true; //Cloaking Device active this turn, ship cannot fire.
             }
         }
 
-        return true;
+        return false;
     },
 
     checkSkindancing: function checkSkindancing(selectedShip, ship) {
@@ -36934,7 +36940,8 @@ ShadingField.prototype.getOutput = function (ship, system) {
 ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
-	if (this.detected) return true; //Already detected.
+	if (this.detected === true) return true; // Fallback support for boolean legacy saves
+	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
 	if (shipManager.systems.isDestroyed(ship, this)) return true;
 	if (shipManager.power.isOffline(ship, this)) return true;
 

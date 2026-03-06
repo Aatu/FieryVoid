@@ -6414,6 +6414,7 @@ class MindriderHangar extends ShipSystem{
 		public $specialAbilities = array("Jammer", "Stealth");
 		public $primary = true;
 		public $detected = true;
+		public $detectedNew = array(); // New multi-team array logic
 		//defensive system
 		public $defensiveSystem = true;
 		public $tohitPenalty = 0;
@@ -6444,6 +6445,10 @@ class MindriderHangar extends ShipSystem{
 		public function getDefensiveType()
 		{
 			return "Shield";
+		}
+
+		public function isActivated(){
+			return $this->active;			
 		}
 		
 		public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
@@ -6558,13 +6563,25 @@ class MindriderHangar extends ShipSystem{
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.
 			$this->sortNotes();
+			if (!is_array($this->detectedNew)) $this->detectedNew = array();
+
 			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
 				switch($currNote->notekey){
 					case 'detected': 
 						$this->detected = true;
+						if (strpos($currNote->notevalue, 'Team:') === 0) {
+							$teamId = (int) substr($currNote->notevalue, 5);
+							if (!in_array($teamId, $this->detectedNew)) {
+								$this->detectedNew[] = $teamId;
+							}
+						}
 					break;
 					case 'undetected': 
 						$this->detected = false;						
+						if (strpos($currNote->notevalue, 'Team:') === 0) {
+							$teamId = (int) substr($currNote->notevalue, 5);
+							$this->detectedNew = array_values(array_diff($this->detectedNew, [$teamId]));
+						}
 					break;
 					case 'Shaded': 
 						if($currNote->turn == $gamedata->turn || $gamedata->phase == -1 && $currNote->turn == $gamedata->turn-1){					
@@ -6597,48 +6614,74 @@ class MindriderHangar extends ShipSystem{
 
 		//Called in Deployment->advance() and Movement->advance()				
 		public function checkStealthNextPhase($gamedata, $range = 15){				
-				$ship = $this->getUnit();
-					if($gamedata->phase == 1){ 
-						$noteHuman1 = 'D-detectedActive';
-						$noteHuman2 = 'D-undetectedActive';						
-						$noteHuman3 = 'D-NotActive';						
-					}else{
-						$noteHuman1 = '2-detectedActive';
-						$noteHuman2 = '2-undetectedActive';						
-						$noteHuman3 = '2-NotActive';						
-					}
+			$ship = $this->getUnit();
+			if($gamedata->phase == 1){ 
+				$noteHuman1 = 'D-detectedActive';
+				$noteHuman2 = 'D-undetectedActive';						
+				$noteHuman3 = 'D-NotActive';						
+			}else{
+				$noteHuman1 = '2-detectedActive';
+				$noteHuman2 = '2-undetectedActive';						
+				$noteHuman3 = '2-NotActive';						
+			}
 
-				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point).					
-				if ($this->active) {
-					if ($this->isDetected($ship, $gamedata, $range)) {
+			// Get all enemy teams in the game
+			$enemyTeams = array();
+			foreach ($gamedata->slots as $slot) {
+				$teamId = (int)$slot->team;
+				if ($teamId != $ship->team && !in_array($teamId, $enemyTeams)) {
+					$enemyTeams[] = $teamId;
+				}
+			}
+
+			// If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point).					
+			if ($this->active) {
+				$detectingTeams = $this->isDetected($ship, $gamedata, $range);
+
+				foreach ($enemyTeams as $teamId) {
+					if (in_array($teamId, $detectingTeams)) {
 						$notekey   = 'detected';
 						$noteHuman = $noteHuman1;
-						$noteValue = 1;							
+						$noteValue = "Team:" . $teamId;							
 					} else {
 						$notekey   = 'undetected';
 						$noteHuman = $noteHuman2;
-						$noteValue = 1;							
+						$noteValue = "Team:" . $teamId;							
 					}
-				} else {
+
+					$note = new IndividualNote(
+							-1,
+							$gamedata->id,
+							$gamedata->turn,
+							$gamedata->phase,
+							$ship->id,
+							$this->id,
+							$notekey,
+							$noteHuman,
+							$noteValue
+					);
+					Manager::insertIndividualNote($note);	
+				}
+			} else {
+				foreach ($enemyTeams as $teamId) {
 					$notekey   = 'detected';
 					$noteHuman = $noteHuman3; //Not shaded yet or was shaded and then turned off.
-					$noteValue = 0;						
+					$noteValue = "Team:" . $teamId;						
+
+					$note = new IndividualNote(
+							-1,
+							$gamedata->id,
+							$gamedata->turn,
+							$gamedata->phase,
+							$ship->id,
+							$this->id,
+							$notekey,
+							$noteHuman,
+							$noteValue
+					);
+					Manager::insertIndividualNote($note);	
 				}
-
-				$note = new IndividualNote(
-						-1,
-						$gamedata->id,
-						$gamedata->turn,
-						$gamedata->phase,
-						$ship->id,
-						$this->id,
-						$notekey,
-						$noteHuman,
-						$noteValue
-				);
-
-				Manager::insertIndividualNote($note);	
-					
+			}
 		}
 
 
@@ -6647,12 +6690,16 @@ class MindriderHangar extends ShipSystem{
 			//$blockedHexes = $gameData->getBlockedHexes(); //Just do this once outside loop
 			$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop				
 			$pos = $ship->getHexPos(); //Just do this once outside loop	
+			
+			$detectedTeams = array();
 
 			foreach ($gameData->ships as $otherShip) {
 				// Skip friendly ships
-				if($otherShip->team === $ship->team) continue;
+				$teamId = (int)$otherShip->team;
+				if($teamId == $ship->team) continue;
 				if($otherShip->isTerrain()) continue; //Ignore Terrain
 				if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+				if(in_array($teamId, $detectedTeams)) continue;
 
 				// If within detection range, and LoS not blocked the ship is detected
 				// Get distance to the stealth ship and check line of sight
@@ -6662,16 +6709,17 @@ class MindriderHangar extends ShipSystem{
 
 				// If within detection range, and LoS not blocked the ship is detected
 				if($distance <= $range && !$noLoS){
-					return true;
+					$detectedTeams[] = $teamId;
 				}		
 			}
 
-			return false;			
+			return $detectedTeams;			
 		}	
 
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->detected = $this->detected;
+			$strippedSystem->detectedNew = is_array($this->detectedNew) ? $this->detectedNew : array();
 			$strippedSystem->active = $this->active;				        
 			return $strippedSystem;
 		}
