@@ -296,6 +296,7 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
     if (shipManager.systems.isDestroyed(ship, this)) return true;
     if (shipManager.power.isOffline(ship, this)) return true;
 
+    /* //Check server side at end of Movement
     if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
 
     // Check all enemy ships to see if any can detect this ship
@@ -349,7 +350,7 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
             return true; //Just return, if one ship can see the stealthed ship then all can.
         }
     }
-
+    */
     // No one detected the ship
     return false;
 };

@@ -290,7 +290,7 @@ Stealth.prototype.isDetectedStealth = function (ship) {
 		return true; //If so, revealed.
 	}
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
-	
+
 	/*
 	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
 
@@ -368,6 +368,7 @@ MineStealth.prototype.isDetectedMine = function (ship) {
 	}
 
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
+	if (shipManager.power.isOffline(ship, this)) return true;
 
 	//No one detected the ship
 	return false;
@@ -2157,11 +2158,11 @@ ShadingField.prototype.getOutput = function (ship, system) {
 ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
-	//var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
 	if (this.detected) return true; //Already detected.
 	if (shipManager.systems.isDestroyed(ship, this)) return true;
 	if (shipManager.power.isOffline(ship, this)) return true;
 
+	/* //Check server side at end of Movement/After Transverse Jump
 	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
 
 	// Check all enemy ships to see if any can detect this ship
@@ -2187,7 +2188,7 @@ ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 			return true; //Just return, if one ship can see the stealthed ship then all can.
 		}
 	}
-
+	*/
 	// No one detected the ship
 	return false;
 };
