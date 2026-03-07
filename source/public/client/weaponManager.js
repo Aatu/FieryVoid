@@ -1232,6 +1232,7 @@ window.weaponManager = {
 
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
+        if(target.mine && weapon.canShootMines) weapon.fireControl[1] = -4; //Can shoot at mines, but at a penalty.        
 
         if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
             var bonusfirecontrol = 0;
@@ -1692,8 +1693,12 @@ window.weaponManager = {
             }
 
             if (!ship.flight && ship.shipSizeClass < 2 && weapon.fireControl[1] === null) {
-                debug && console.log("can't fire small ships");
-                continue;
+                if(ship.mine && weapon.canShootMines){
+                    //Do nothing in certain circumstances e.g. Interceptors firing at mines.
+                }else{
+                    debug && console.log("can't fire small ships");
+                    continue;
+                }    
             }
 
             if (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null) {

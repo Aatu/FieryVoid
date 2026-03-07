@@ -32,6 +32,7 @@
 	    public $boostable = true;
 	    public $boostEfficiency = 0;
 	    public $maxBoostLevel = 1;
+		protected $canShootMines = true; //marker to let weapons that normally can't shoot MCVs to shoot mines.
     
         public function getDefensiveType()
         {
@@ -74,11 +75,22 @@
 	    public function beforeFiringOrderResolution($gamedata){		
 		    parent::beforeFiringOrderResolution($gamedata);
 	        if($this->getBoostLevel($gamedata->turn) > 0){
-	            $this->intercept = 0; //If wepaon is boosted for Offensive Mode, cannot intercept!      	
+	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!      	
             	$this->fireControl = array(6, null, null);
 	        }        
 		} //endof function beforeFiringOrderResolution
-        
+  
+		
+		public function calculateHitBase($gamedata, $fireOrder)
+		{	
+			parent::calculateHitBase($gamedata, $fireOrder);
+
+			$targetShip = $gamedata->getShipById($fireOrder->targetid); 
+			if($targetShip instanceof Mine) $fireOrder->needed -= 20;	//-20% to hit mines.	
+					
+		}// end of function calculateHitBase 
+
+
         public function setSystemDataWindow($turn){
             //$this->data["Weapon type"] = "Particle";
             //$this->data["Damage type"] = "Standard";
@@ -87,7 +99,7 @@
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             } 
             $this->data["Special"] = "Energy Web: -15 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters and mines (-20% to hit) by boosting this system in Initial Orders Phase (at zero cost).";
             $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";             
             parent::setSystemDataWindow($turn);
         }
@@ -104,7 +116,8 @@
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->fireControl = $this->fireControl;
-			$strippedSystem->intercept = $this->intercept;								
+			$strippedSystem->intercept = $this->intercept;		
+			$strippedSystem->canShootMines = $this->canShootMines;										
 			return $strippedSystem;
 		}        
                       
@@ -135,7 +148,7 @@
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             }          
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters and mines (-20% to hit) by boosting this system in Initial Orders Phase (at zero cost).";
             $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";              
         }
     }
@@ -156,7 +169,7 @@
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             }            
             $this->data["Special"] = "Energy Web: -10 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters and mines (-20% to hit) by boosting this system in Initial Orders Phase (at zero cost).";
             $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";  
 		}
 
@@ -742,7 +755,7 @@ class HeavyInterceptorBattery extends InterceptorMkI{
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             }                         
             $this->data["Special"] = "Energy Web: -20 to hit on arc with active Interceptor.";
-            $this->data["Special"] .= "<br>Can be fired offensively at fighters by boosting this system in Initial Orders Phase (at zero cost).";
+            $this->data["Special"] .= "<br>Can be fired offensively at fighters and mines (-20% to hit) by boosting this system in Initial Orders Phase (at zero cost).";
             $this->data["Special"] .= "<br>However, when boosted system loses its Intercept Rating (E-Web is unaffected).";  
 		 }
 

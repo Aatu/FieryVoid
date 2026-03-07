@@ -182,6 +182,7 @@ class Weapon extends ShipSystem
 	protected $canTargetAllies = false; //To allow front end to target allies.
 	protected $canTargetAlliesArray = array(); //To allow front end to target allies.
     protected $canTargetAll = false; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
+	protected $canShootMines = false; //marker to let weapons that normally can't shoot MCVs to shoot mines.    
 
 	//Weapons are repaired before "average system", but after really important things! 
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
