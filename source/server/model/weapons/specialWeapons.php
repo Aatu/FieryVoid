@@ -8035,7 +8035,8 @@ class SecondSight extends Weapon{
 		  foreach($allShips as $ship){
 			  if($ship->isDestroyed()) continue;		
 			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.
-			  if ($ship->isTerrain()) continue;			  
+			  if ($ship->isTerrain()) continue;		
+			  if ($target instanceof Mine) continue;				  	  
 			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!			  	
 			  $relevantShips[] = $ship;			
 		  }
@@ -8215,7 +8216,8 @@ class ThoughtWave extends Plasma{
 		foreach($allShips as $ship){
 			if($ship->isDestroyed()) continue;		
 			if ($ship->faction == "Mindriders") continue;//Mindriders not affected.
-			if ($ship->isTerrain()) continue;				
+			if ($ship->isTerrain()) continue;	
+			if ($target instanceof Mine) continue;							
 			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!				
 			$relevantShips[] = $ship;			
 		}
