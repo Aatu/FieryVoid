@@ -1426,7 +1426,8 @@ class SparkFieldHandler{
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating	
-				if ($target->isTerrain()) continue;				
+				if ($target->isTerrain()) continue;	
+				if ($target instanceof Mine) continue;			
 				if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!							
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//add to target list
