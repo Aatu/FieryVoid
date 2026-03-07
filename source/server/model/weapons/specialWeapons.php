@@ -6618,8 +6618,7 @@ class ProximityLaserLauncher extends Weapon{
 						}
 
 					$target = new OffsetCoordinate($launcherFireOrder->x, $launcherFireOrder->y);
-					$launchPos = $target; 	            
-					//break;				       
+					$launchPos = $target; 	            			       
 				}
 
 				//Check in case something went wrong, in which case use default to prevent error.	
@@ -6687,28 +6686,10 @@ class ProximityLaserLauncher extends Weapon{
 			}	
 		}
 
-		/*//If Proximity Laser is destroyed, destroy this paired launcher as well. No longer required
-		public function criticalPhaseEffects($ship, $gamedata)
-	    { 
-		  	parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase!
-	  	 	    
-			if(!$this->isDestroyed()) return;//Laser is not destroyed, all is well.
-			
-			if($this->isDestroyed()){ //Or if destroyed, find launcher and destroy it too.
-				$launcher = $this->launcher;
-				$launcherHealth = $launcher->getRemainingHealth();	//Just in case it's higher than 1 for some reason...						
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $launcher->id, $launcherHealth, 0, 0, -1, true, false, "Proximity Laser Destroyed - Launcher removed");
-				$damageEntry->updated = true;
-				$this->damage[] = $damageEntry;								
-			}
-						
-	    } //endof function criticalPhaseEffects	
-	    */
-	    
+    
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
             $strippedSystem->ammunition = $this->ammunition;
-            //$strippedSystem->launcher = $this->launcher; 
             $strippedSystem->hasSpecialLaunchHexCalculation = $this->hasSpecialLaunchHexCalculation;                              
             return $strippedSystem;
         }
