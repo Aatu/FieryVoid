@@ -282,6 +282,7 @@ class CaptorMine extends Weapon{
     private $diceType = 1; //What type of dice are used.
     private $dice = 1; //How many damage dice are there
     private $damageBonus = 0; //What is flat damage bonus
+    public $autoFireOnly = false; // for weapons that should never be fired manually    
     //private $locationHit = 0;   
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $accuracy, $diceType, $dice, $damageBonus){
@@ -334,7 +335,7 @@ class CaptorMine extends Weapon{
     	$allShips = $gamedata->ships;  
     	$relevantUnits = array();
 
-		//Make a list of relelvant ships e.g. this ship and enemy fighters in the game.
+		//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
 		foreach($allShips as $ship){
             if ($ship instanceof Terrain) continue;
             if ($ship->mine) continue;            
