@@ -12,6 +12,7 @@ class WeaponEM  {
 			$EMHardened = $ship->getEMHardened();
 			if($ship->advancedArmor) return true;
 			if($EMHardened) return true;
+			if($ship instanceof Mine) return true;
 		}else if ($system){
 			if($system->advancedArmor) return true;
 		}
