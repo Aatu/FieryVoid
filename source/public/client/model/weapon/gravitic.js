@@ -207,6 +207,14 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         return;
     }
 
+    if (target.mine) { //Can't move mines.
+        return;
+    } 
+    
+    if (target.shipSizeClass > 3) { //Can't mvoe enormous or larger units.   
+        return;
+    }        
+
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
