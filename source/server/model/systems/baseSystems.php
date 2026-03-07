@@ -661,7 +661,8 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 		foreach ($gameData->ships as $otherShip) {
 			// Skip friendly ships
 			if($otherShip->team === $mine->team) continue; 
-			if($otherShip->isTerrain()) continue; //Ignore Terrain
+			if($otherShip instanceof Terrain) continue; //Ignore Terrain
+			if($otherShip instanceof Mine) continue; //Ignore other mines			
 			if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
 	
 			$totalDetection = 0;

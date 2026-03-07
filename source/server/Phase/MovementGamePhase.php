@@ -146,12 +146,15 @@ class MovementGamePhase implements Phase
             $fullGamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
             //$gameData->ships = $fullGamedata->ships;
 
-            foreach ($fullGamedata->ships as $gdShip) {
+            foreach ($fullGamedata->ships as $gdShip) {                 
+                if($gdShip instanceof Terrain) continue;
+                if($gdShip instanceof Mine) continue;
+                if($gdShip->isDestroyed()) continue;
+
                 $hydratedMovements = [];
                 if (is_array($gdShip->movement) && !empty($gdShip->movement)) {
                     foreach ($gdShip->movement as $move) {
-
-                        if($move->turn == $gameData->turn){
+                        if($move->turn == $gameData->turn){ //Only hydrate this turn.
                         
                             if (is_object($move) && !($move instanceof MovementOrder)) {
                                 // Decoded as stdClass
@@ -207,7 +210,7 @@ Debug::log("lastMove1 " . $lastMove->speed);
                 
                 if(!empty($hydratedMovements)){
                     $gdShip->movement = $hydratedMovements;
-                }else{
+                }else{ //No moves, hydrate with last known movement from previous turn
                     $lastMove = $gdShip->getLastMovement();
                     if ($lastMove) {
 Debug::log("lastMove2 " . $lastMove->speed);	                        
