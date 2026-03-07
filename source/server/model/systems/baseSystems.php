@@ -265,6 +265,7 @@ class Stealth extends ShipSystem implements SpecialAbility{
 				foreach($otherShip->systems as $system){
 					if($system instanceof Scanner){
 						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()) $totalDetection += $system->output;
+						break;
 					}
 				}	
 				// Apply detection multiplier based on ship type
@@ -672,11 +673,14 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 					if($system instanceof Scanner){
 						if(!$system->isDestroyed() && !$system->isOfflineOnTurn()){
 							$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
+							break;
 						}
-					}
-					//Apply mineSweeper bonus	
-					if($otherShip->minesweeperbonus > 0) $totalDetection += $otherShip->minesweeperbonus;	
+					}	
 				}
+//Debug::log("totalDetectionDM " . $totalDetection);					
+				//Apply mineSweeper bonus	
+				if($otherShip->minesweeperbonus > 0) $totalDetection += $otherShip->minesweeperbonus;
+//Debug::log("totalDetectionMS " . $totalDetection);								
 			} else{
 				//$totalDetection = ceil($otherShip->offensivebonus / 2);
 				$totalDetection += $otherShip->getEWByType("Detect Mines", $gameData->turn);
@@ -687,7 +691,12 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 			$otherPos = $otherShip->getHexPos();
 			$distance = mathlib::getDistanceHex($pos, $otherPos);
 			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
-
+Debug::log("otherShip " . $otherShip->name);
+Debug::log("otherShip " . $mine->name);	
+Debug::log("totalDetectionFinal " . $totalDetection);	
+Debug::log("distance " . $distance);	
+//Debug::log("noLoS " . $noLoS);	
+//Debug::log("mine->signature " . $mine->signature);	
 			// If within detection range, and LoS not blocked the mine is detected
 			if (($totalDetection > $distance + $mine->signature) && !$noLoS) { 	
 				if (!in_array($otherShip->team, $detectingTeams)) {
