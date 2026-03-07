@@ -719,6 +719,61 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 
 	}
 	
+	public function markDetected($gameData, $mine) {
+
+			$enemyTeams = array();
+			$newindividualNotes = array();
+
+			foreach($gameData->slots as $s) {
+				if ($s->team !== $mine->team && !in_array($s->team, $enemyTeams)) {
+					$enemyTeams[] = $s->team;
+				}
+			}
+
+			foreach($enemyTeams as $team) {
+				if (!is_array($this->detected)) $this->detected = array();
+				if (!in_array($team, $this->detected)) {
+					$notekey = 'detected';
+					$noteHuman = 'Mine detected';
+					$noteValue = $team;
+					$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$mine->id,$this->id,$notekey,$noteHuman,$noteValue);
+				}				
+				
+				foreach($newindividualNotes as $note){ //Insert notes directly into db.
+					Manager::insertIndividualNote($note);	
+				}
+					
+			}												
+	}				
+
+	public function markRevealed($gameData, $mine) {
+
+		$enemyTeams = array();
+		$newindividualNotes = array();
+
+		foreach($gameData->slots as $s) {
+			if ($s->team !== $mine->team && !in_array($s->team, $enemyTeams)) {
+				$enemyTeams[] = $s->team;
+			}
+		}
+
+		foreach($enemyTeams as $team) {	
+			if (!is_array($this->revealInfo)) $this->revealInfo = array();
+			if (!in_array($team, $this->revealInfo)) {
+			//Prepare note for database!		
+			$notekey = 'infoRevealed';
+			$noteHuman = 'Mine Info Revealed';
+			$noteValue = $team; //Should be integer of team that knows mine info.
+			$newindividualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$mine->id,$this->id,$notekey,$noteHuman,$noteValue);
+			}												
+			
+			foreach($newindividualNotes as $note){ //Insert notes directly into db.
+				Manager::insertIndividualNote($note);	
+			}
+					
+		}												
+	}		
+
 
 	public function criticalPhaseEffects($ship, $gamedata) {	
 		parent::criticalPhaseEffects($ship, $gamedata); // Call parent to apply base effects.
@@ -7773,6 +7828,136 @@ class AmmoMissileX extends AmmoMissileTemplate{
 	} //endof function onDamagedSystem	
 
 } //endof class AmmoMissileX
+
+
+//ammunition for AmmoMagazine - Class Z Antimine (for official Missile Racks)
+class AmmoMissileZ extends AmmoMissileTemplate{	
+	public $name = 'ammoMissileZ';
+	public $displayName = 'Antimine Missile';
+	public $modeName = 'Z - Antimine';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_Z'; //enhancement name to be enabled
+	public $enhancementDescription = '(AMMO) Antimine Missile';
+	public $enhancementPrice = 8; //PV per missile;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(null, 3, null); //MODIFIER for weapon fire control! Should be 3
+	public $minDamage = 15;
+	public $maxDamage = 15;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 5;
+	public $priorityAF = 5;
+	public $noOverkill = false;
+    public $useOEW = false;
+	public $hidetarget = false;
+    public $calledShotMod = 0;   	
+	
+    public $ballistic = true;
+    public $hextarget = true;    
+    
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 15;
+    }	
+
+
+	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder){
+//Debug::log("x " . $originalFireOrder->x);
+//Debug::log("y " . $originalFireOrder->y);
+		$targetHex = new OffsetCoordinate($originalFireOrder->x, $originalFireOrder->y);
+		$fired = false;
+		$ship = $weapon->getUnit();
+		
+		$ships0 = $gamedata->getShipsInDistance($targetHex);
+		foreach ($ships0 as $targetShip) {
+			if(!$targetShip instanceof Mine) continue;
+			if($targetShip->team == $ship->team) continue;
+	        if ($targetShip->isDestroyed()) continue;   			
+				
+			$newFireOrder = new FireOrder(
+			-1, "ballistic", $originalFireOrder->shooterid, $targetShip->id,
+				$weapon->id, -1, $gamedata->turn, $originalFireOrder->firingMode, 
+				0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+				0,0,"Hex",-1 //X, Y, damageclass, resolutionorder
+			);
+			$newFireOrder->addToDB = true;
+			$weapon->fireOrders[] = $newFireOrder;
+			$fired = true;	
+			break;			
+		}	
+		
+		if(!$fired){			
+			$shooter = $gamedata->getShipById($originalFireOrder->shooterid);		
+			$targetMine = $gamedata->getClosestEnemyMine($shooter, $targetHex, 3);
+			if($targetMine !== null){
+				$newFireOrder = new FireOrder(
+				-1, "ballistic", $originalFireOrder->shooterid, $targetMine->id,
+					$weapon->id, -1, $gamedata->turn, $originalFireOrder->firingMode, 
+					0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
+					0,0,"Scanned",-1 //X, Y, damageclass, resolutionorder
+				);
+				$newFireOrder->addToDB = true;
+				$weapon->fireOrders[] = $newFireOrder;
+				$fired = true;	
+			}				
+		}		
+
+		if(!$fired){
+			$originalFireOrder->pubnotes = "<br>No mines detected, munition lost.";	
+		}
+	
+
+	}//endof function beforeFiringOrderResolution   
+
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{	
+		if($fireOrder->targetid == -1){
+			$fireOrder->needed = 100; //always true
+			$fireOrder->updated = true;	
+		}else{
+			//parent::calculateHitBase($gamedata, $fireOrder);
+			if($fireOrder->damageclass == "Scanned") $fireOrder->needed -= 15;	//-15% to hit is not in orignal hex.
+		}	
+			    
+	}// end of function calculateHitBase  
+
+
+     public function fire($gamedata, $fireOrder) 	//For Multiwarhead missiles
+    {
+
+		if($fireOrder->targetid == -1){
+	        //$rolled = Dice::d(100);
+	        //$fireOrder->rolled = $rolled;
+			// Do NOT set shotshit++ here - this hex fire order is just the launch marker.
+			// The actual hit/damage is handled by the secondary mine-targeting fire order via parent::fire().
+			//$fireOrder->pubnotes .= " Antimine missile fired.";	
+			return;
+		}else{
+
+			if($fireOrder->targetid !== -1){ //Not hex shot,
+				$targetMine = $gamedata->getShipById($fireOrder->targetid);	
+				$mineStealthSystem = $targetMine->getSystemByName("MineStealth");
+
+				$mineStealthSystem->markDetected($gamedata, $targetMine); //Mine was fired at, detect it for this team.
+			}
+		}	
+
+	}//end of function fire
+            
+    public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
+    {
+		$mineStealthSystem = $ship->getSystemByName("MineStealth");		
+		$mineStealthSystem->markRevealed($gamedata, $ship); //Mine was hit, so reveal its info too.
+
+        parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+    }//endof function onDamagedSystem
+
+	
+} //endof class AmmoMissilez
+
 
 //ammunition for AmmoMagazine - Class FB Missile (Fighter Basic Missile)
 class AmmoMissileFB extends AmmoMissileTemplate{	

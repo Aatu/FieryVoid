@@ -220,7 +220,7 @@ window.BallisticIconContainer = function () {
 			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
 		} else if (ballistic.targetid && ballistic.targetid !== -1) {
 			targetIcon = iconContainer.getById(ballistic.targetid);
-			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
+			//targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
 		}
 
 		if (!shooter.flight && weapon?.noTargetHexIcon) {
@@ -230,6 +230,7 @@ window.BallisticIconContainer = function () {
 		// Mode-specific icon logic
 		if (modeName) {
 			const modeMap = {
+				'Z - Antimine': { type: 'hexRed', text: 'Antimine', color: '#e6140a' },
 				'Shredder': { type: 'hexBlue', text: 'Shredder', color: '#00b8e6' },
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
@@ -260,12 +261,17 @@ window.BallisticIconContainer = function () {
 				text = match.text || text;
 				textColour = match.color || textColour;
 
-				// Call splash hex generation for cases where weapon affects more than one hex
-				if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
-					if (gamedata.thisplayer === shooter.userid || replay) {
+				// Call splash hex generation for cases where weapon affects more than one hex.
+				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
+				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
+				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
+					if ((gamedata.thisplayer === shooter.userid || replay) && targetPosition) {
 						let sizes = [];
 
 						switch (modeName) {
+							case 'Z - Antimine':
+								sizes = [3];
+								break;
 							case 'Ion Storm':
 								sizes = [1, 2];
 								break;
@@ -300,10 +306,10 @@ window.BallisticIconContainer = function () {
 			}
 
 			// Damage class-based override logic
-			if (ballistic.damageclass && modeName) {							
-				switch (ballistic.damageclass) {				
+			if (ballistic.damageclass && modeName) {
+				switch (ballistic.damageclass) {
 					case 'MultiModeHex':
-						const isFriendly = gamedata.isMyOrTeamOneShip(shooter);		
+						const isFriendly = gamedata.isMyOrTeamOneShip(shooter);
 						var modeText = isFriendly ? modeName : weapon.getModeNameForEnemy();
 
 						targetType = 'hexRed';

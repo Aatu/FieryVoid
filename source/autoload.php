@@ -3085,6 +3085,8 @@ spl_autoload_register(
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
                 		'ammomissilex' => '/server/model/systems/baseSystems.php',
                 		'ammomissilej' => '/server/model/systems/baseSystems.php',
+                		'ammomissilez' => '/server/model/systems/baseSystems.php',                        
+
                 		 //Ballistic Mines            
                 		'ammoblmineb' => '/server/model/systems/baseSystems.php',                  		                		                                 			'ammoblminew' => '/server/model/systems/baseSystems.php',
              			'ammoblmineh' => '/server/model/systems/baseSystems.php',                				                 		                		

@@ -1113,7 +1113,8 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileM();
 			$this->ammoClassesArray[] =  new AmmoMissileKK();
 			$this->ammoClassesArray[] =  new AmmoMissileX();
-			$this->ammoClassesArray[] =  new AmmoMissileI();								
+			$this->ammoClassesArray[] =  new AmmoMissileI();
+			$this->ammoClassesArray[] =  new AmmoMissileZ();											
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1508,10 +1509,10 @@ class AmmoMissileRackS extends Weapon{
 		}
 		if ($currAmmo) $currAmmo->fire($gamedata, $fireOrder);
 
-	        // Check if !$this->hextarget as these modes cannot use normal fire() function.
-        if (!$this->hextarget) {
+	    // Check if hextarget as these modes cannot use normal fire() function.
+        if ($fireOrder->targetid !== -1) {
             // Call the parent method for weapon hit calculation if not hex targeted.		
-        parent::fire($gamedata, $fireOrder);
+        	parent::fire($gamedata, $fireOrder);
 		}
 		
 	}//endof function fire	
@@ -1527,19 +1528,19 @@ class AmmoMissileRackS extends Weapon{
 	    }
 	    
 	    // Check if $currAmmo is not null before calling the method
-	            if($currAmmo){
-	                return $currAmmo->calculateRangePenalty($distance);
-	            }else{
-	                return 0;
-	            }
-	    parent::calculateRangePenalty($distance);        
-		}//endof function calculateRangePenalty
+	    if($currAmmo){
+	        return $currAmmo->calculateRangePenalty($distance);
+	    }else{
+	        return 0;
+	    }
+	    //parent::calculateRangePenalty($distance);        
+	}//endof function calculateRangePenalty
 
 
     public function calculateHitBase($gamedata, $fireOrder)
     {
-         // Check if !$this->hextarget as these modes cannot use normal calculateHitBase() function.
-        if (!$this->hextarget) {
+         // Check if hextarget as these modes cannot use normal calculateHitBase() function.
+        if ($fireOrder->targetid !== -1) {
             // Call the parent method for weapon hit calculation if not hex targeted.
             parent::calculateHitBase($gamedata, $fireOrder);
         }  
@@ -1826,7 +1827,8 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 			$this->ammoClassesArray = array();
 			$this->ammoClassesArray[] =  new AmmoMissileI(); 			
 			$this->ammoClassesArray[] =  new AmmoMissileA();
-			$this->ammoClassesArray[] =  new AmmoMissileC();			
+			$this->ammoClassesArray[] =  new AmmoMissileC();
+			$this->ammoClassesArray[] =  new AmmoMissileZ();							
 
 			$this->availableAmmoAlreadySet = true;
 		}						
@@ -2173,7 +2175,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$strippedSystem->rangeArray = $this->rangeArray;
 			$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
 			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;
-			$strippedSystem->noHexTargeting = $this->noHexTargeting;													$strippedSystem->iconPath = $this->iconPath;			
+			$strippedSystem->noHexTargeting = $this->noHexTargeting;													
+			$strippedSystem->iconPath = $this->iconPath;			
 			return $strippedSystem;
 		}
 

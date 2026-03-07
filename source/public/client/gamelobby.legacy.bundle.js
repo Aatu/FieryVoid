@@ -21139,7 +21139,7 @@ var GuardianArray = function GuardianArray(json, ship) {
     Particle.call(this, json, ship);
 };
 GuardianArray.prototype = Object.create(Particle.prototype);
-PairedParticleGun.prototype.constructor = GuardianArray;
+GuardianArray.prototype.constructor = GuardianArray;
 
 var ParticleCannon = function ParticleCannon(json, ship) {
     Particle.call(this, json, ship);
@@ -25111,6 +25111,14 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
     if (this.fireOrders.length > 0) {
         return;
     }
+
+    if (target.mine) { //Can't move mines.
+        return;
+    } 
+    
+    if (target.shipSizeClass > 3) { //Can't mvoe enormous or larger units.   
+        return;
+    }        
 
     var fireOrdersArray = []; // Store multiple fire orders
 

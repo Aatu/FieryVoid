@@ -4403,7 +4403,7 @@ window.BallisticIconContainer = function () {
 			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
 		} else if (ballistic.targetid && ballistic.targetid !== -1) {
 			targetIcon = iconContainer.getById(ballistic.targetid);
-			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
+			//targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
 		}
 
 		if (!shooter.flight && weapon?.noTargetHexIcon) {
@@ -4413,6 +4413,7 @@ window.BallisticIconContainer = function () {
 		// Mode-specific icon logic
 		if (modeName) {
 			const modeMap = {
+				'Z - Antimine': { type: 'hexRed', text: 'Antimine', color: '#e6140a' },
 				'Shredder': { type: 'hexBlue', text: 'Shredder', color: '#00b8e6' },
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
@@ -4443,12 +4444,17 @@ window.BallisticIconContainer = function () {
 				text = match.text || text;
 				textColour = match.color || textColour;
 
-				// Call splash hex generation for cases where weapon affects more than one hex
-				if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
-					if (gamedata.thisplayer === shooter.userid || replay) {
+				// Call splash hex generation for cases where weapon affects more than one hex.
+				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
+				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
+				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
+					if ((gamedata.thisplayer === shooter.userid || replay) && targetPosition) {
 						let sizes = [];
 
 						switch (modeName) {
+							case 'Z - Antimine':
+								sizes = [3];
+								break;
 							case 'Ion Storm':
 								sizes = [1, 2];
 								break;
@@ -4483,10 +4489,10 @@ window.BallisticIconContainer = function () {
 			}
 
 			// Damage class-based override logic
-			if (ballistic.damageclass && modeName) {							
-				switch (ballistic.damageclass) {				
+			if (ballistic.damageclass && modeName) {
+				switch (ballistic.damageclass) {
 					case 'MultiModeHex':
-						const isFriendly = gamedata.isMyOrTeamOneShip(shooter);		
+						const isFriendly = gamedata.isMyOrTeamOneShip(shooter);
 						var modeText = isFriendly ? modeName : weapon.getModeNameForEnemy();
 
 						targetType = 'hexRed';
@@ -10303,7 +10309,14 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
-        if (shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+        if (shipManager.shouldBeHidden(ship)){
+            if(weaponManager.hasHexWeaponsSelected()){
+                weaponManager.targetHex(this.selectedShip, payload.hex);
+                return;
+            }else{
+                return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+            }    
+        }
 
         if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;
@@ -21364,8 +21377,12 @@ window.weaponManager = {
             }
 
             if (!ship.flight && ship.shipSizeClass < 2 && weapon.fireControl[1] === null) {
-                debug && console.log("can't fire small ships");
-                continue;
+                if(target.mine && weapon.canTargetMines){
+                    //Do nothing in certain circumstances e.g. Interceptors firing at mines.
+                }else{
+                    debug && console.log("can't fire small ships");
+                    continue;
+                }    
             }
 
             if (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null) {
@@ -38503,7 +38520,7 @@ var GuardianArray = function GuardianArray(json, ship) {
     Particle.call(this, json, ship);
 };
 GuardianArray.prototype = Object.create(Particle.prototype);
-PairedParticleGun.prototype.constructor = GuardianArray;
+GuardianArray.prototype.constructor = GuardianArray;
 
 var ParticleCannon = function ParticleCannon(json, ship) {
     Particle.call(this, json, ship);
@@ -42475,6 +42492,14 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
     if (this.fireOrders.length > 0) {
         return;
     }
+
+    if (target.mine) { //Can't move mines.
+        return;
+    } 
+    
+    if (target.shipSizeClass > 3) { //Can't mvoe enormous or larger units.   
+        return;
+    }        
 
     var fireOrdersArray = []; // Store multiple fire orders
 
