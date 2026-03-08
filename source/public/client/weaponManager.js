@@ -2254,7 +2254,16 @@ window.weaponManager = {
 
                 var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
 
-                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam) continue;
+                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam){
+                    for(var i in weapon.fireOrders){
+                        var otherBall = weapon.fireOrders[i]; 
+                        if(otherBall.shooterid == shooter.id && otherBall.damageclass !== "SecondAttack"){
+                            break;
+                        }else{
+                            continue;	
+                        }
+                    }
+                }    
 
                 results.push({
                     id: fireOrder.id,

@@ -4396,8 +4396,18 @@ window.BallisticIconContainer = function () {
 
 		if (replay) {
 			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) hideTargetAlways = true;	
-		}
+			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team){
+				for(var i in weapon.fireOrders){
+					var otherBall = weapon.fireOrders[i]; 
+					if(otherBall.damageclass == "SecondAttack"){
+						hideTargetAlways = false; //stays false effecitvely
+						break;
+					}else{
+						hideTargetAlways = true; //No second attack after hex shot, don't show e.g. Ballistic Mine Launchers.	
+					}
+				}			 
+			}
+		}	
 
 		let targetPosition = null;
 		let targetIcon = null;
@@ -4525,7 +4535,7 @@ window.BallisticIconContainer = function () {
 
 		// TARGET SPRITE
 		let targetSprite = null;
-		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
+		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetid, this.ballisticIcons)) {
 			if (targetPosition) {
 				targetSprite = new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);
 				if (targetIcon) {
@@ -21945,7 +21955,16 @@ window.weaponManager = {
 
                 var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
 
-                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam) continue;
+                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam){
+                    for(var i in weapon.fireOrders){
+                        var otherBall = weapon.fireOrders[i]; 
+                        if(otherBall.shooterid == shooter.id && otherBall.damageclass !== "SecondAttack"){
+                            break;
+                        }else{
+                            continue;	
+                        }
+                    }
+                }    
 
                 results.push({
                     id: fireOrder.id,

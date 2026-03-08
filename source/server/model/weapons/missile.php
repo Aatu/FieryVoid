@@ -2216,7 +2216,6 @@ class BallisticMineLauncher extends AmmoMissileRackS{
     public $animationExplosionScaleArray = array();
 	public $animationExplosionType = "AoE";
 	protected $alwaysHideFireOrders = true;
-    public $noInterceptDegradation = true; //if true, this weapon will be intercepted without degradation!		
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 21; //Not sure these can explode in same way as Missile Racks.  Set above threshold for now.  
@@ -2307,10 +2306,10 @@ class BallisticMineLauncher extends AmmoMissileRackS{
     
 		if ($mineTarget instanceof BaseShip || $mineTarget instanceof FighterFlight) { // Check if $mineTarget is a valid ship/fighter flight
 			$newFireOrder = new FireOrder(
-				-1, "normal", $shooter->id, $mineTarget->id,
+				-1, "ballistic", $shooter->id, $mineTarget->id,
 				$this->id, -1, $gamedata->turn, $originalFireOrder->firingMode, 
 				0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-				0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+				0,0,'SecondAttack',-1 //X, Y, damageclass, resolutionorder
 			);		
 			$newFireOrder->addToDB = true;
 			$this->fireOrders[] = $newFireOrder;
@@ -2488,7 +2487,7 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 	    
     public function calculateHitBase($gamedata, $fireOrder)
     {
-		if ($fireOrder->type == 'ballistic') {				
+		if ($fireOrder->targetid == -1) {				
 			$fireOrder->needed = 100;				
 			$fireOrder->updated = true;
 		} else{
@@ -2500,12 +2499,12 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 
 
 	public function fire($gamedata, $fireOrder){
-		if($fireOrder->type == 'ballistic') { //initial "tareting location" Shredder shot should not actually be resolved
+		if($fireOrder->targetid == -1) { //initial "tareting location".
 			$fireOrder->shotshit++;	//This however does NOT cause the hex targeted shot to explode on hex, or cause hit on ship in hex :|
 	       	$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!		     		
 		}else{ //Normal fire routine for direct shots.			
 			$this->hextarget = false;
-		weapon::fire($gamedata, $fireOrder);		
+			weapon::fire($gamedata, $fireOrder);		
 		}
 	}//endof fire
 
