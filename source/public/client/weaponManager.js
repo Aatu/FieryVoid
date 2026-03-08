@@ -2214,6 +2214,7 @@ window.weaponManager = {
         });
     },
 
+    /*
     getAllHexTargetedBallistics: function getAllHexTargetedBallistics() { //that's all hex targeted weapons, not just ballistics
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
@@ -2230,8 +2231,44 @@ window.weaponManager = {
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid)
             };
-        });
+        })
     },
+    */
+
+    getAllHexTargetedBallistics: function () {
+
+        var results = [];
+        var playerTeam = gamedata.getPlayerTeam();
+
+        for (var s = 0; s < gamedata.ships.length; s++) {
+
+            var shooter = gamedata.ships[s];
+            var fires = weaponManager.getAllFireOrders(shooter);
+
+            for (var f = 0; f < fires.length; f++) {
+
+                var fireOrder = fires[f];
+
+                if (fireOrder.targetid !== -1) continue;
+                if (fireOrder.rolled === 0) continue;
+
+                var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
+
+                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam) continue;
+
+                results.push({
+                    id: fireOrder.id,
+                    fireOrder: fireOrder,
+                    shots: fireOrder.shots,
+                    shooter: shooter,
+                    weapon: weapon
+                });
+            }
+        }
+
+        return results;
+    },
+
 
     getAllPreFireOrdersForDisplayingAgainst: function getAllPreFireOrdersForDisplayingAgainst(target) {
         return gamedata.ships.reduce(function (fires, shooter) {
@@ -2554,9 +2591,9 @@ window.weaponManager = {
             fires = fires.filter(function (fireOrder) {
                 //attempt to show hex-targeted non-ballistics as well
                 toReturn = false;
-                if (fireOrder.type == type) {
+                if (fireOrder.type == type) {//Is ballistic generally.
                     toReturn = true;
-                }
+                }  
                 //show hex-targeted direct fire as ballistics, too
                 if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.targetid == -1)) {
                     toReturn = true;

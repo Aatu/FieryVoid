@@ -4359,9 +4359,6 @@ window.BallisticIconContainer = function () {
 
 	//To create coloured hexes signifying ballistic launches and other effects.
 	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
-		if (replay) {
-			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-		}
 
 		if (ballistic.damageclass === 'Sweeping') return;
 
@@ -4395,13 +4392,20 @@ window.BallisticIconContainer = function () {
 			modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
 		}
 
+		let hideTargetAlways = false;
+
+		if (replay) {
+			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
+			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) hideTargetAlways = true;	
+		}
+
 		let targetPosition = null;
 		let targetIcon = null;
 		let splash = false;
 
-		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
+		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null" && !hideTargetAlways) {
 			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		} else if (ballistic.targetid && ballistic.targetid !== -1) {
+		} else if (ballistic.targetid && ballistic.targetid !== -1 && !hideTargetAlways) {
 			targetIcon = iconContainer.getById(ballistic.targetid);
 			//targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
 		}
@@ -4609,7 +4613,7 @@ window.BallisticIconContainer = function () {
 
 	//To create ballistic lines between launches and targets.
 	function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
-		//if(ballistic.damageclass == 'Targeter') return;
+		//if(ballistic.damageclass == 'Targeter') return;		
 		if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
 
 		const shooterIcon = iconContainer.getById(ballistic.shooterid);
@@ -4619,7 +4623,9 @@ window.BallisticIconContainer = function () {
 		let shooter = shooterIcon.ship;
 		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
 		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
-
+		if (replay) {
+			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;	
+		}
 		// Get launch position (may be overwritten later)
 		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
 		let targetPosition;
@@ -21899,6 +21905,7 @@ window.weaponManager = {
         });
     },
 
+    /*
     getAllHexTargetedBallistics: function getAllHexTargetedBallistics() { //that's all hex targeted weapons, not just ballistics
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
@@ -21915,8 +21922,44 @@ window.weaponManager = {
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid)
             };
-        });
+        })
     },
+    */
+
+    getAllHexTargetedBallistics: function () {
+
+        var results = [];
+        var playerTeam = gamedata.getPlayerTeam();
+
+        for (var s = 0; s < gamedata.ships.length; s++) {
+
+            var shooter = gamedata.ships[s];
+            var fires = weaponManager.getAllFireOrders(shooter);
+
+            for (var f = 0; f < fires.length; f++) {
+
+                var fireOrder = fires[f];
+
+                if (fireOrder.targetid !== -1) continue;
+                if (fireOrder.rolled === 0) continue;
+
+                var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
+
+                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam) continue;
+
+                results.push({
+                    id: fireOrder.id,
+                    fireOrder: fireOrder,
+                    shots: fireOrder.shots,
+                    shooter: shooter,
+                    weapon: weapon
+                });
+            }
+        }
+
+        return results;
+    },
+
 
     getAllPreFireOrdersForDisplayingAgainst: function getAllPreFireOrdersForDisplayingAgainst(target) {
         return gamedata.ships.reduce(function (fires, shooter) {
@@ -22239,9 +22282,9 @@ window.weaponManager = {
             fires = fires.filter(function (fireOrder) {
                 //attempt to show hex-targeted non-ballistics as well
                 toReturn = false;
-                if (fireOrder.type == type) {
+                if (fireOrder.type == type) {//Is ballistic generally.
                     toReturn = true;
-                }
+                }  
                 //show hex-targeted direct fire as ballistics, too
                 if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.targetid == -1)) {
                     toReturn = true;

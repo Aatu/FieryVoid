@@ -2215,11 +2215,14 @@ class BallisticMineLauncher extends AmmoMissileRackS{
     public $animationExplosionScale = 0.25; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
 	public $animationExplosionType = "AoE";
-		
+	protected $alwaysHideFireOrders = true;
+    public $noInterceptDegradation = true; //if true, this weapon will be intercepted without degradation!		
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 21; //Not sure these can explode in same way as Missile Racks.  Set above threshold for now.  
 	
+
+
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 7;
@@ -2556,7 +2559,8 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
-            $strippedSystem->specialPosNoLauncher = $this->specialPosNoLauncher;                              
+            $strippedSystem->specialPosNoLauncher = $this->specialPosNoLauncher; 
+            $strippedSystem->alwaysHideFireOrders = $this->alwaysHideFireOrders;			                             
             return $strippedSystem;
         }
 	

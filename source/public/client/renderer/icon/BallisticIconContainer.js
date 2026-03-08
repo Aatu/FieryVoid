@@ -176,9 +176,6 @@ window.BallisticIconContainer = function () {
 
 	//To create coloured hexes signifying ballistic launches and other effects.
 	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
-		if (replay) {
-			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-		}
 
 		if (ballistic.damageclass === 'Sweeping') return;
 
@@ -212,13 +209,20 @@ window.BallisticIconContainer = function () {
 			modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
 		}
 
+		let hideTargetAlways = false;
+
+		if (replay) {
+			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
+			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) hideTargetAlways = true;	
+		}
+
 		let targetPosition = null;
 		let targetIcon = null;
 		let splash = false;
 
-		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
+		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null" && !hideTargetAlways) {
 			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		} else if (ballistic.targetid && ballistic.targetid !== -1) {
+		} else if (ballistic.targetid && ballistic.targetid !== -1 && !hideTargetAlways) {
 			targetIcon = iconContainer.getById(ballistic.targetid);
 			//targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
 		}
@@ -426,7 +430,7 @@ window.BallisticIconContainer = function () {
 
 	//To create ballistic lines between launches and targets.
 	function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
-		//if(ballistic.damageclass == 'Targeter') return;
+		//if(ballistic.damageclass == 'Targeter') return;		
 		if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
 
 		const shooterIcon = iconContainer.getById(ballistic.shooterid);
@@ -436,7 +440,9 @@ window.BallisticIconContainer = function () {
 		let shooter = shooterIcon.ship;
 		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
 		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
-
+		if (replay) {
+			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;	
+		}
 		// Get launch position (may be overwritten later)
 		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
 		let targetPosition;

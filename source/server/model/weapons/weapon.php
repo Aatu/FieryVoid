@@ -98,8 +98,7 @@ class Weapon extends ShipSystem
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
     public $hidetarget = false;
 	public $hidetargetArray = array();  //for weapons that do not show their target
-    //public $duoWeapon = false; 
-    //public $dualWeapon = false;
+	protected $alwaysHideFireOrders = true;    
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
@@ -358,6 +357,10 @@ class Weapon extends ShipSystem
 	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
 	{
 		return true;
+	}
+
+	public function alwaysHideFireOrders(){
+		return $this->alwaysHideFireOrders;
 	}
 
     public function getRange($fireOrder)
