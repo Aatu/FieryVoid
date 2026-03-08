@@ -138,7 +138,6 @@ class MovementGamePhase implements Phase
 
         if($gameData->areMinesPresent){ //There are mines in the game, check if any have been detected.        
             // --- HYDRATE MOVEMENT RECORDS ---
-            // $gameData->ships contains the full JSON-decoded representation from the DB or frontend.
             // During the interval between phase changes, empty movement instructions or single
             // newly-created instructions might be stored as `stdClass` objects or associative arrays.
             // We MUST hydrate them into full MovementOrder and OffsetCoordinate objects before
