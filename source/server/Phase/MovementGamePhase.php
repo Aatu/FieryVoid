@@ -203,7 +203,7 @@ class MovementGamePhase implements Phase
                 } else {
                     $lastMove = $gdShip->getLastMovement();
                     if ($lastMove) {
-Debug::log("lastMove1 " . $lastMove->speed);	                        
+//Debug::log("lastMove1 " . $lastMove->speed);	                        
                         $hydratedMovements[] = new MovementOrder(-1, 'start', $lastMove->position, 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gameData->turn, 0, 0);
                     }
                 }
@@ -213,7 +213,7 @@ Debug::log("lastMove1 " . $lastMove->speed);
                 }else{ //No moves, hydrate with last known movement from previous turn
                     $lastMove = $gdShip->getLastMovement();
                     if ($lastMove) {
-Debug::log("lastMove2 " . $lastMove->speed);	                        
+//Debug::log("lastMove2 " . $lastMove->speed);	                        
                         $hydratedMovements[] = new MovementOrder(-1, 'start', $lastMove->position, 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gameData->turn, 0, 0);
                     }                                 
                 }    
