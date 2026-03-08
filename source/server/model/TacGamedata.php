@@ -663,18 +663,18 @@ class TacGamedata {
                     $ship->EW = Array();
                     
                     foreach($ship->systems as $system){
-			//Marcin Sawicki: do send PREVIOUS TURNS Power for Jammer!
-			if($system instanceof Jammer){
-				$power2 = array();
-				foreach($system->power as $powentry){
-					if($powentry->turn < $this->turn){
-						$power2[] = $powentry;
-					}
-				}
-				$system->power = $power2;
-			}else{
-                        	$system->power = array();
-			}
+                        //Marcin Sawicki: do send PREVIOUS TURNS Power for Jammer!
+                        if($system instanceof Jammer){
+                            $power2 = array();
+                            foreach($system->power as $powentry){
+                                if($powentry->turn < $this->turn){
+                                    $power2[] = $powentry;
+                                }
+                            }
+                            $system->power = $power2;
+                        }else{
+                            $system->power = array();
+                        }
                     }
                 }
             }
@@ -702,7 +702,7 @@ class TacGamedata {
                 $weapon = $ship->getSystemById($fire->weaponid);
                 
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires){
-                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we won't THESE fireorders to be passed to Front End for Replay.
+                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
                         unset($system->fireOrders[$i]);
                     }    
                 }
