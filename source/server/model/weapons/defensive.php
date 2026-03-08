@@ -201,20 +201,36 @@
 
         public $damageType = "Standard";
         public $weaponClass = "Particle";
-        
+		protected $canShootMines = true; //marker to let weapons that normally can't shoot MCVs to shoot mines.        
         
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
+		public function calculateHitBase($gamedata, $fireOrder)
+		{	
+			parent::calculateHitBase($gamedata, $fireOrder);
+
+			$targetShip = $gamedata->getShipById($fireOrder->targetid); 
+			if($targetShip instanceof Mine) $fireOrder->needed -= 20;	//-20% to hit mines.	
+					
+		}// end of function calculateHitBase 
+
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
             $this->data["Special"] = "Can intercept fire directed at other ships, as long as Guardian is between firing unit and target and has firing unit in arc.";
+            $this->data["Special"] .= "Can fire offensively at Mines, but has -20% to hit.";			
         }
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }
         public function setMinDamage(){     $this->minDamage = 6 ;      }
         public function setMaxDamage(){     $this->maxDamage = 15 ;      }        
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->canShootMines = $this->canShootMines;										
+			return $strippedSystem;
+		}   
 
     }
 
@@ -238,10 +254,11 @@
 
         public $rangePenalty = 6;
         public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
+		protected $canShootMines = true; //marker to let weapons that normally can't shoot MCVs to shoot mines.   		
 
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Special"] = "Can intercept fire directed at other ships, as long as Guardian is between firing unit and target and has firing unit in arc.";
+            $this->data["Special"] = "Can intercept fire directed at other ships, as long as Sentinel Defense is between firing unit and target and has firing unit in arc.";
         }
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
