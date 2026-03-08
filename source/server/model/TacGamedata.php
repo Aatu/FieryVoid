@@ -53,6 +53,12 @@ class TacGamedata {
         return PhaseFactory::get($this->phase);
     }
     
+    public function getPlayerTeam() {
+        foreach ($this->slots as $slot) {
+            if ($slot->userid == $this->forPlayer) return $slot->team;
+        }
+    }
+
     public function setTurn($turn)
     {
         self::$currentTurn = $turn;
@@ -619,7 +625,7 @@ class TacGamedata {
     public function prepareForPlayer($all = false){
         $this->setWaiting();
         $this->calculateTurndelays();
-        if (!$all) {
+        if (!$all) {             
             $this->deleteHiddenData();
         }
         $this->setPreTurnTasks();
@@ -689,28 +695,28 @@ class TacGamedata {
                 foreach ($ship->systems as $fighter){
                     $this->hideSystemFireOrders($fighter);
                 } 
-            } else {
+            } else {                 
                 $this->hideSystemFireOrders($ship);
             }
         }
     }
 
-    private function hideSystemFireOrders($ship){
-        foreach ($ship->systems as $system){
-            for ($i = sizeof($system->fireOrders)-1; $i>=0; $i--){
+    private function hideSystemFireOrders($ship){         
+        foreach ($ship->systems as $system){             
+            for ($i = sizeof($system->fireOrders)-1; $i>=0; $i--){                 
                 $fire = $system->fireOrders[$i]; 
                 $weapon = $ship->getSystemById($fire->weaponid);
                 
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires){
-                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.
+                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.                         
                         unset($system->fireOrders[$i]);
                     }    
                 }
-                if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
+                if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){                   
                     unset($system->fireOrders[$i]);
                 }
 
-                if ($fire->turn == $this->turn && $weapon->preFires && $this->phase == 5){
+                if ($fire->turn == $this->turn && $weapon->preFires && $this->phase == 5){                        
                     unset($system->fireOrders[$i]);
                 }                
                
@@ -727,7 +733,7 @@ class TacGamedata {
                             $ball->targetposition  = null;
 
                         }
-                    }
+                    }    
                 }
             }
         }
