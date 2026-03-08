@@ -106,8 +106,10 @@
     <script>
         $(window).on("load", function(){
             
-            if (<?php print($error); ?>) {
-                alert(<?php print($error); ?>);
+            var serverError = <?php print($error); ?>;
+            if (serverError) {
+                var errorMsg = serverError.error || JSON.stringify(serverError);
+                alert("Server Error: " + errorMsg + (serverError.logid ? " [LogID: " + serverError.logid + "]" : ""));
             }
             
             gamedata.parseServerData(<?php print($serverdataJSON); ?>);
@@ -592,7 +594,7 @@
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
-    <div id="background" style="background-image:url(img/maps/<?php print($serverdata ? $serverdata->background : ""); ?>)"></div>
+    <div id="background" <?php if ($serverdata && !empty($serverdata->background)) echo 'style="background-image:url(img/maps/' . $serverdata->background . ')"'; ?>></div>
     <div id="webgl" class="tacticalcanvas"></div>
 
 

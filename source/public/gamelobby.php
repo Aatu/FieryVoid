@@ -379,7 +379,7 @@
 
 		</script>
 	</head>
-	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
+	<body <?php if ($gamelobbydata && !empty($gamelobbydata->background)) echo 'style="background-image:url(img/maps/' . $gamelobbydata->background . ')"'; ?>>
 
   <header class="pageheader">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">
