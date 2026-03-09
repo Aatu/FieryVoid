@@ -2894,6 +2894,7 @@ class Mine extends OSAT{
     public $canvasSize = 80;  
     public $trueStealth = true;
     public $signature = 0;
+    public $detectedSignature = 0;
     public $activated = false; //For DEW mines. 
     public $spawned = -1; //To denote the turn a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $canPreOrder = true;//Needed to set ranges for spawned Mines in Pre-Turn phase.
