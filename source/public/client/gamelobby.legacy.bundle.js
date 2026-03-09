@@ -23968,17 +23968,7 @@ CaptorMine.prototype.initializationUpdate = function () {
 		this.range = 0;
 	}
 
-	this.data["Max Range"] = this.range;
-
-	var setRanges = false;
-	
-	if (gamedata.gamephase !== -1) {
-		if (this.allocatedRanges["Capitals-HCVs"] !== null) this.data["Capital-HCV range"] = this.allocatedRanges["Capitals-HCVs"];
-		if (this.allocatedRanges["LCVs-MCVs"] !== null) this.data["LCV-MCV range"] = this.allocatedRanges["LCVs-MCVs"];
-		if (this.allocatedRanges["Fighters"] !== null) this.data["Fighter range"] = this.allocatedRanges["Fighters"];
-		setRanges = true;
-	}
-	
+	this.refreshData();
 	return this
 }
 
@@ -23994,6 +23984,15 @@ CaptorMine.prototype.getCurrClass = function () { //get current FC class for dis
 
 CaptorMine.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	var ship = this.ship;
+	var spawned = Number(ship.spawned);
+	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
+	//console.log("Mine: " + ship.name + " (id: " + ship.id + ") | spawned: " + ship.spawned + " | turn: " + gamedata.turn + " | deploymentTurn: " + deploymentTurn);
+
+	if (gamedata.turn !== deploymentTurn) {
+		//console.log("  BLOCKED: Not deployment turn");
+		return false;
+	}
 	this.getCurrClass();
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
 
@@ -24009,6 +24008,10 @@ CaptorMine.prototype.canIncrease = function () { //check if can increase rating 
 	return true;
 };
 CaptorMine.prototype.canDecrease = function () { //can decrease if something was increased
+	var ship = this.ship;
+	var spawned = Number(ship.spawned);
+	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
+	if (gamedata.turn !== deploymentTurn) return false;
 	this.getCurrClass(); //Should be getCurrClass or similar? The method in aoe.js is getCurrClass
 	if (this.currClass == '') return false;
 
@@ -24018,6 +24021,7 @@ CaptorMine.prototype.canDecrease = function () { //can decrease if something was
 };
 CaptorMine.prototype.doIncrease = function () { //increase BFCP usage
 	this.getCurrClass();
+
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
 
 	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
@@ -24028,7 +24032,7 @@ CaptorMine.prototype.doIncrease = function () { //increase BFCP usage
 		//this.BFCPtotal_used++;
 	}
 	this.mineSet = true; //user changed something, assume they are content.	
-	//this.refreshData();
+	this.refreshData();
 };
 CaptorMine.prototype.doDecrease = function () { //decrease BFCP usage
 	this.getCurrClass();
@@ -24041,22 +24045,23 @@ CaptorMine.prototype.doDecrease = function () { //decrease BFCP usage
 		//this.BFCPtotal_used--;
 	}
 	this.mineSet = true; //user changed something, assume they are content.	
-	//this.refreshData();
+	this.refreshData();
 };
-/*
+
 CaptorMine.prototype.refreshData = function () { //refresh description to show correct values
 	var classes = Object.keys(this.allocatedRanges);
 	var entryName = '';
 	var currType = '';
+
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
 		//entry should exist, just change it to show current values
 		entryName = ' - ' + currType;
-		this.data[entryName] = this.allocatedRanges[currType];
+		this.data[entryName + " range"] = this.allocatedRanges[currType];
 	}
 
 };
-*/
+
 CaptorMine.prototype.canPropagate = function () { //can propagate if set to >0
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
 	if (this.allocatedRanges[this.currClass] > 0) return true;
@@ -24114,7 +24119,8 @@ CaptorMine.prototype.canIncreaseAnything = function () { //returns true if any B
 	} while ((toReturn != true) && (lookingAt != startingFrom));
 	return toReturn;
 };//Endof CaptorMine
-*/;
+*/
+;
 
 /* Source: client/model/weapon/molecular.js */
 "use strict";

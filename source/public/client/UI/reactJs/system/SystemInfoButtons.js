@@ -652,7 +652,7 @@ const canAAdecrease = (ship, system) => canAA(ship, system) && system.canDecreas
 const canAApropagate = (ship, system) => canAA(ship, system) && system.canPropagate() != '';
 */
 
-const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn) && (system.name == 'CaptorMine') ;
+const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn-1) && (system.name == 'CaptorMine') ;
 
 //can do something with Hyach Computer
 const canBFCP = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'hyachComputer');

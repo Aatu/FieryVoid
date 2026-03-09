@@ -1469,7 +1469,10 @@ class Manager{
     }
     
     public static function insertSingleShip($gamedata, $ship, $userid){          
-		return self::$dbManager->submitShip($gamedata->id, $ship, $userid);
+		$id = self::$dbManager->submitShip($gamedata->id, $ship, $userid);
+		$ship->id = $id;
+		$gamedata->ships[$id] = $ship;
+		return $id;
     } 
     
     public static function insertSingleEnhancement($gameData, $id, $enhID, $enhNo, $enhName){          

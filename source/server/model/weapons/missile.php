@@ -2340,6 +2340,7 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 		}	
 		if($mine !== null) {
 			$shipid = Manager::insertSingleShip($gamedata, $mine, $shooter->userid);
+			$mine->spawned = $gamedata->turn;
 
 			if($IFFSystem){ //Pass IFF enhancement on to newly created mine!
 				Manager::insertSingleEnhancement($gamedata, $shipid, 'IFF_SYS', 1, 'Identify Friend or Foe (IFF) System');
@@ -2631,6 +2632,7 @@ class AbbaiMineLauncher extends BallisticMineLauncher{
 		}	
 		if($mine !== null) {
 			$shipid = Manager::insertSingleShip($gamedata, $mine, $shooter->userid);
+			$mine->spawned = $gamedata->turn;
 
 			if($IFFSystem){ //Pass IFF enhancement on to newly created mine!
 				Manager::insertSingleEnhancement($gamedata, $shipid, 'IFF_SYS', 1, 'Identify Friend or Foe (IFF) System');

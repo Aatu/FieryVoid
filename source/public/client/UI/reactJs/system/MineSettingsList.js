@@ -167,8 +167,11 @@ class MineSettingsList extends Component {
             ctrl.setCurrShipType(className);
 
             let safety = 0;
+            // Get target value from our reference system
+            const targetValue = (system.allocatedRanges[className] === null) ? system.range : system.allocatedRanges[className];
+
             while (
-                ((ctrl.allocatedRanges[className] === null ? ctrl.range : ctrl.allocatedRanges[className]) < allocated)
+                ((ctrl.allocatedRanges[className] === null ? ctrl.range : ctrl.allocatedRanges[className]) < targetValue)
                 && ctrl.canIncrease()
                 && safety < 100
             ) {
@@ -177,7 +180,7 @@ class MineSettingsList extends Component {
             }
 
             while (
-                ((ctrl.allocatedRanges[className] === null ? ctrl.range : ctrl.allocatedRanges[className]) > allocated)
+                ((ctrl.allocatedRanges[className] === null ? ctrl.range : ctrl.allocatedRanges[className]) > targetValue)
                 && ctrl.canDecrease()
                 && safety < 100
             ) {

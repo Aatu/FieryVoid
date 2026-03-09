@@ -284,7 +284,7 @@ class CaptorMine extends Weapon{
     private $damageBonus = 0; //What is flat damage bonus
     public $autoFireOnly = false; // for weapons that should never be fired manually 
 	public $currClass = '';//for front end.       
-    public $allocatedRanges = array('Fighters' => null, 'LCVs-MCVs' => null, 'Capitals-HCVs' => null); //Ranges allocated for given ship type 
+    public $allocatedRanges = array('Capitals-HCVs' => null, 'LCVs-MCVs' => null, 'Fighters' => null); //Ranges allocated for given ship type 
     public $setRanges = array(); //Ranges allocated for given ship type     
     public $mineSet = false; //For front end, to confirm mine ranges have been manually set.
 
@@ -305,6 +305,10 @@ class CaptorMine extends Weapon{
     }
 
     public function setSystemDataWindow($turn){
+        $this->data["Max Range"] = $this->range;
+            foreach($this->allocatedRanges as $shipType=>$range){
+                $this->data[' - '.$shipType.' range'] =  $range;
+            }         
             $this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
 			$this->data["Special"] .= "<br>Set ranges for different types of enemy on turn that Mine deploys, these cannot then be changed.";	            
 			$this->data["Special"] .= "<br>Range is halved against Jammer equipped units.";											
@@ -371,7 +375,7 @@ class CaptorMine extends Weapon{
                     $this->allocatedRanges[$shipType] = $rangeValue;
                 //}
             }
-            
+                      
             //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
             $this->individualNotes = array();
         
