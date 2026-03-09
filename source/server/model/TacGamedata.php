@@ -432,7 +432,15 @@ class TacGamedata {
         foreach($this->ships as $ship){
             if(!$ship->canPreOrder) continue; //Can't pre-Order, filters out irreleveant ships and Terrain            
             if ($ship->userid != $playerId) continue; //Not players ship
-            if($ship->isDestroyed()) continue;            
+            if($ship->isDestroyed()) continue; 
+
+            
+//Debug::log("name " . $ship->name); 
+//Debug::log("name " . $ship->spawned);    
+
+            if($ship instanceof Mine && $ship->spawned == $this->turn){
+                return true; //trigger pre-turn phase so Mine settings can be applied at the start of next turn.
+            }
             
             //Torvalus block, other blocks could be added.
             if($ship->faction == "Torvalus Speculators"){

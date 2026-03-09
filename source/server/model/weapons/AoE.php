@@ -282,8 +282,11 @@ class CaptorMine extends Weapon{
     private $diceType = 1; //What type of dice are used.
     private $dice = 1; //How many damage dice are there
     private $damageBonus = 0; //What is flat damage bonus
-    public $autoFireOnly = false; // for weapons that should never be fired manually    
-    //private $locationHit = 0;   
+    public $autoFireOnly = false; // for weapons that should never be fired manually 
+	public $currClass = '';//for front end.       
+    public $allocatedRanges = array('Fighters' => null, 'LCVs-MCVs' => null, 'Capitals-HCVs' => null); //Ranges allocated for given ship type 
+    public $setRanges = array(); //Ranges allocated for given ship type     
+    public $mineSet = false; //For front end, to confirm mine ranges have been manually set.
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $accuracy, $diceType, $dice, $damageBonus){
 	//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -296,15 +299,85 @@ class CaptorMine extends Weapon{
         $this->range = $range;
         $this->fireControl[0] = $accuracy; 
         $this->fireControl[1] = $accuracy;  
-        $this->fireControl[2] = $accuracy;                              
+        $this->fireControl[2] = $accuracy;
 
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
 
     public function setSystemDataWindow($turn){
             $this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
+			$this->data["Special"] .= "<br>Set ranges for different types of enemy on turn that Mine deploys, these cannot then be changed.";	            
 			$this->data["Special"] .= "<br>Range is halved against Jammer equipped units.";											
 	}	
+
+
+	public function doIndividualNotesTransfer(){
+	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
+	    if (is_array($this->individualNotesTransfer)) {
+//Debug::log("reached " . "1"); 
+//var_dump($this->individualNotesTransfer);             
+	        foreach ($this->individualNotesTransfer as $shipType => $rangeValue) {
+//Debug::log("reached " . "2");                  
+	            $this->setRanges[$shipType] = $rangeValue; //Temporarily fill values to generate notes.
+//Debug::log("setRangeTransfer " . $this->setRanges[$shipType]);                
+	        }
+	    }                                	   
+	    $this->individualNotesTransfer = array(); // Empty, just in case
+	}	    
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+//Debug::log("reached " . $ship->name);            
+		switch($gameData->phase){
+						
+				case -1: //Deployment/Pre-Turn phase
+					//data returned as allocatedBFCP table, with one value passed per BFCP point in each FCType e.g. 'Fighter' mean +1 in allocatedBFCP['Fighter']
+					if($ship->userid == $gameData->forPlayer){ //only own ships, otherwise bad things may happen!
+//Debug::log("reached " . "3");    							
+						//$shipTypes = array_keys($this->allocatedRanges); //Extract keys Fighter, MCV, Capital.
+						//$rangeValues = array_values($this->allocatedRanges);//Extract values for those keys.																	
+						foreach ($this->setRanges as $shipType => $rangeValue) { //Will always be three keys.
+						    // Find the FC Type of the current key in $keys array
+						    //$index = array_search($shipType, $shipTypes);
+
+						    // Use the Ship Type to access the corresponding value in $rangeValues array
+						    //$rangeSet = $rangeValues[$index];	
+//Debug::log("shipType " . $shipType);
+//Debug::log("rangeValue " . $rangeValue);     
+ 												
+							$notekey = $shipType;
+							$noteHuman = 'Mine Range set';
+							$notevalue = $rangeValue;
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
+						}			
+		}								
+			break;				
+		}
+	} //endof function generateIndividualNotes
+	
+
+    public function onIndividualNotesLoaded($gamedata)
+    {
+//Debug::log("turn " . $gamedata->turn);        
+            //Otherwise, what were the points set this turn at end of Initial Orders.
+            foreach ($this->individualNotes as $currNote) {	    	
+                $shipType = $currNote->notekey;
+                $rangeValue = $currNote->notevalue;
+//Debug::log("shipType " . $shipType);
+//Debug::log("rangeValue " . $rangeValue);  
+                // Check if the key exists in $this->allocatedBFCP
+                //if (array_key_exists($shipType, $this->allocatedRanges)) {
+                    // Increment the value associated with the appropriate key e.g. Fighter, MCV, Capital.
+                    $this->allocatedRanges[$shipType] = $rangeValue;
+                //}
+            }
+            
+            //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+            $this->individualNotes = array();
+        
+            
+    }//endof onIndividualNotesLoaded
+
 
     public function beforeFiringOrderResolution($gamedata){
         
@@ -338,18 +411,18 @@ class CaptorMine extends Weapon{
 		//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
 		foreach($allShips as $ship){
             if ($ship instanceof Terrain) continue;
-            if ($ship->mine) continue;            
+            if ($ship->mine) continue;  
+            if ($ship->base || $ship instanceof OSAT) continue; //They are movement activated.          
 			if ($ship->isDestroyed()) continue;		
 			if ($ship->id == $mine->id) continue; // Mine should never target itself!
 			if ($ship->team == $mine->team && $IFFSystem) continue;	//Ignore friendly units if IFF purchased.	
-			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore fighters that are not deployed yet!			
+			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore units that are not deployed yet!			
 			$relevantUnits[] = $ship;			
 		}
 	
         $mineTarget = null;
         //$chosenLocation = 0;
 		//Now check if any enemy units entered range and attack first one
-		//$targetData = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);
 		$mineTarget = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);	        	
 
 		if ($mineTarget !== null) { // Check if we found a valid target
@@ -366,8 +439,7 @@ class CaptorMine extends Weapon{
             //$this->locationHit = $chosenLocation;
 
 			$newFireOrder->addToDB = true;
-			$this->fireOrders[] = $newFireOrder;
-		    //$newFireOrder->pubnotes .= " Mine attacks a target. ";								
+			$this->fireOrders[] = $newFireOrder;							
 		
             //Now create a damage order to destroy mine.
             $structure = $mine->getStructureSystem(0);            
@@ -482,9 +554,25 @@ class CaptorMine extends Weapon{
 	private function checkTargetConditions($minePosition, $targetPostion, $gamedata, $mine, $target){
 		
 		$distance =	mathlib::getDistanceHex($minePosition, $targetPostion);//Compare starting positions.						
+        $effectiveRange = $this->range; //Start with max range.
 
+        $shipType = 'Capitals-HCVs'; //Default as Captials.
+        $FCIndex = $target->getFireControlIndex(); //Get FC array index of potential target.
+        if($FCIndex == 0){ //Fighters
+            $shipType = 'Fighters';          
+        }else if($FCIndex == 1){ //LCV or MCV
+            $shipType = 'LCVs-MCVs';                    
+        }
+
+//Debug::log("FCIndex " . $FCIndex);        
+        if($this->allocatedRanges[$shipType] !== null) $effectiveRange = $this->allocatedRanges[$shipType]; //Find and set appropriate range for this type of target.
+
+//Debug::log("Fighters " . $this->allocatedRanges['Capitals-HCVs']);
+//Debug::log("MCV " . $this->allocatedRanges['LCVs-MCVs']);
+//Debug::log("Caps " . $this->allocatedRanges['Fighters']);
+
+        //take into account jammer effects.                    
 		$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $target));
-		
 		$effectiveRange = ($jammerValue > 0) ? floor($this->range / 2) : $this->range;
 		
 	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
@@ -512,5 +600,12 @@ class CaptorMine extends Weapon{
     {
         $this->maxDamage = ($this->diceType * $this->dice) + $this->damageBonus ;
     }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->allocatedRanges = $this->allocatedRanges; 			                             
+        return $strippedSystem;
+    }
+	    
 
 } //endof class CaptorMine

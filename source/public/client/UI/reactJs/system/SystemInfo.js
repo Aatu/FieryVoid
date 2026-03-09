@@ -84,10 +84,10 @@ class SystemInfo extends React.Component {
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
             if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-                    systemDisplayName = "Mine";
-                    specialEntry = ["No details known, scan with OEW to identify."];
-                    if (firingModeDisplay) {
-                        firingModeDisplay = "N/A";
+                systemDisplayName = "Mine";
+                specialEntry = ["No details known, scan with OEW to identify."];
+                if (firingModeDisplay) {
+                    firingModeDisplay = "N/A";
                 }
             }
         }
@@ -210,7 +210,7 @@ const getCriticals = (system) => [<InfoHeader key="criticalHeader">Damage</InfoH
 );
 
 const getEntry = (header, value, key) => {
-    if (value.replace) {
+    if (value && value.replace) {
         value = value.replace(/<br>/gm, "\n");
     }
 

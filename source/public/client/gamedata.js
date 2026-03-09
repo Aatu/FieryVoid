@@ -294,8 +294,44 @@ window.gamedata = {
             }
         }
 
+        // CHECK for Mine settings
+        if (gamedata.gamephase == -1) {
+            var mines = [];
+            var html = '';
+
+            for (var i in gamedata.ships) {
+                var ship = gamedata.ships[i];
+                if (ship.userid == gamedata.thisplayer) {
+                    if (ship.mine) {
+                        mines.push(ship);
+                    }
+                }
+            }
+
+            var unsetMines = false;
+            if (mines) {
+                for (var i = 0; i < mines.length; i++) {
+                    var mine = mines[i];
+                    for (var j in mine.systems) {
+                        var sys = mine.systems[j];                        
+                        if (sys.name == "CaptorMine") {  
+                            //if(Object.values(sys.allocatedRanges).includes(null));
+                            if(!sys.mineSet){
+                                unsetMines = true;
+                                html += "<br>You have not set ranges for all your Mines, they will default to their maximum range."
+                                break;
+                            }
+                        }                       
+                    }
+                    if (unsetMines) break; // break outer loop                    
+                }
+            }
+            
+            confirm.confirm(html + "<br>Are you sure you wish to commit your orders?", gamedata.doCommit);        
+                
+
         // CHECK for NO EW
-        if (gamedata.gamephase == 1) {
+        }else if (gamedata.gamephase == 1) {
             var myShips = [];
 
             for (var ship in gamedata.ships) {
