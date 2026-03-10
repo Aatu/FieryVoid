@@ -24052,12 +24052,15 @@ CaptorMine.prototype.refreshData = function () { //refresh description to show c
 	var classes = Object.keys(this.allocatedRanges);
 	var entryName = '';
 	var currType = '';
+	var range = null;
 
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
+		range = this.allocatedRanges[currType];
+		if(range == null) range = this.range;
 		//entry should exist, just change it to show current values
 		entryName = ' - ' + currType;
-		this.data[entryName + " range"] = this.allocatedRanges[currType];
+		this.data[entryName + " range"] = range;
 	}
 
 };
