@@ -274,8 +274,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Detection is done at the END of each committed Movement Phase segment (i.e. not DURING a unit's movement, to prevent players detecting a mine and then cancelling back their moves etc) 
                 and mines will be revealed if your 'Detect Mines' EW + Minesweeper Bonus is GREATER THAN the Distance to the mine + the mine's signature.</li>
             <li>Once detected you will not automatically know what type of mine has been discovered, to get this information you'll need to scan it with at least 1 OEW after initial detection.</li>
-            <li></li>            
-            <li></li>
+
             <li>To shoot at mines, in addition to the usual modifiers there are some unique modifiers.                
                 <ul class="circle-list">
                     <li>All mines have a basic profile of 60,</li>                    
