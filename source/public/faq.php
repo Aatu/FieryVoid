@@ -255,7 +255,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h3 id="mines" >Mines & Minesweeping</h3>
         <ul>
             <li>Currently only Captor Mines are implemented in Fiery Void, and only when launched by Mine Launcher weapons (e.g. Kor-Lyan and Abbai WotCR factions).</li>
-            <li>Once deployed by their launchers, mines will initially be stealthed and won't become viisble to enemies until they attack, or are detected.</li>
+            <li>Once deployed, mines will initially be stealthed and won't become visible to enemies until they attack, or are detected.  
+                On the turn that they are spawned you will have the opportunity to tailored their ranges for Captials/HCVs, MCV/LCVs, Fighters from 0 up to their maximum range. 
+                You do this by clicking on the mine weapons system icon during Deployment/Pre-Turn Orders phase.  
+                Once set these ranges will apply for the rest of the game, and if you choose not to set the ranges they will default to their maximum range.  
+                You can set the ranges of all mines of the same type using the propagate buttons in the Mine Settings menu.</li>
             <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase.  
                 Fighters and Shuttles can do this also, converting their Offensive Bonus (OB) in to 'Detect Mines' EW points, at a cost of 10 OB per point of 'Detect Mines' EW 
                 (Note - any OB used in this way will not be available for firing later in the turn).
@@ -268,7 +272,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <li>Detection is done at the END of each committed Movement Phase segment (i.e. not DURING a unit's movement, to prevent players detecting a mine and then cancelling back their moves etc) 
-                and mines will be revealed if the Distance + Signature is LESS THAN your 'Detect Mines' EW + Minesweeper Bonus.</li>
+                and mines will be revealed if your 'Detect Mines' EW + Minesweeper Bonus is GREATER THAN the Distance to the mine + the mine's signature.</li>
             <li>Once detected you will not automatically know what type of mine has been discovered, to get this information you'll need to scan it with at least 1 OEW after initial detection.</li>
             <li></li>            
             <li></li>
