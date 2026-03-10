@@ -567,18 +567,20 @@ class CaptorMine extends Weapon{
         }else if($FCIndex == 1){ //LCV or MCV
             $shipType = 'LCVs-MCVs';                    
         }
-
-//Debug::log("FCIndex " . $FCIndex);        
+//Debug::log("mineName " . $mine->name); 
+//Debug::log("FCIndex " . $FCIndex); 
+//Debug::log("shipType " . $shipType);  
+//Debug::log("effectiveRange1 " . $effectiveRange);       
         if($this->allocatedRanges[$shipType] !== null) $effectiveRange = $this->allocatedRanges[$shipType]; //Find and set appropriate range for this type of target.
-
-//Debug::log("Fighters " . $this->allocatedRanges['Capitals-HCVs']);
+//Debug::log("effectiveRange2 " . $effectiveRange);    
+//Debug::log("Caps " . $this->allocatedRanges['Capitals-HCVs']);
 //Debug::log("MCV " . $this->allocatedRanges['LCVs-MCVs']);
-//Debug::log("Caps " . $this->allocatedRanges['Fighters']);
+//Debug::log("Fighters " . $this->allocatedRanges['Fighters']);
 
         //take into account jammer effects.                    
 		$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $target));
-		$effectiveRange = ($jammerValue > 0) ? floor($this->range / 2) : $this->range;
-		
+		if($jammerValue > 0) $effectiveRange = floor($this->range / 2);
+//Debug::log("effectiveRange3 " . $effectiveRange);    		
 	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
 
         //Captor Mines 'launch' like other ballistics so should obey LoS?
