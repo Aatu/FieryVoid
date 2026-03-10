@@ -318,7 +318,7 @@ window.gamedata = {
                             //if(Object.values(sys.allocatedRanges).includes(null));
                             if(!sys.mineSet){
                                 unsetMines = true;
-                                html += "<br>You have not set ranges for all your Mines, they will default to their maximum range."
+                                html += "You have not set ranges for all your Mines, they will default to their maximum range.<br>"
                                 break;
                             }
                         }                       
