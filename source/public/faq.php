@@ -278,10 +278,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>To shoot at mines, in addition to the usual modifiers there are some unique modifiers.                
                 <ul class="circle-list">
                     <li>All mines have a basic profile of 60,</li>                    
-                    <li>The firing ship's 'Detect Mines' EW for that turn, is added to any Minesweeper Bonus it has and acts as a 'General Lock On'.</li>
-                    <li>If there is a positive difference between the Distance and Signature of the mine combined, to you total 'Detect Mines' score, this is added to your hit chance.  
-                        E.g. If you have 10 EW allocated to mine detection and you spot a mine with a signature of 1 at range three, the minimum detection needed is 4 EW. Therefore, the
-                        detecting ship has a +6 to hit the mine, but would still have a double range penalty if there wasn't a full OEW lock on the mine.</li>
+                    <li>The firing ship's 'Detect Mines' EW for that turn is added to any inherent Minesweeper Bonus it has and acts as a 'General Lock On'.</li>
+                    <li>If your 'General Lock On' score is greater than the Distance and Signature of the mine added together, this is added to your hit chance.  
+                        E.g. If you have 10 EW allocated to mine detection and you spot a mine with a Signature of 1 at range 3, the minimum detection needed is 4 EW. Therefore, the
+                        detecting ship has a +6 (multiplied by 5) to hit the mine.  So you'd gain +30% to hit, but would still have a double range penalty if there wasn't a OEW lock on the mine as per usual.</li>
                 </ul>
             </li>                        
             
