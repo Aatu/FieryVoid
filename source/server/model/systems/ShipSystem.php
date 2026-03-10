@@ -33,6 +33,7 @@ class ShipSystem {
     public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)
+    public $isAlwaysCalledShot = false; //can this system be targeted by called shot even if weapon cannot normally do so?
     
     public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
 	
@@ -53,6 +54,7 @@ class ShipSystem {
 	protected $doCountForCombatValue = true; //false means this system is skipped when evaluating ships' combat value!
 	
 	protected $tagList = array(); //tags for TAG hit chart entry; REMEMBER TAGS SHOULD BE MADE USING CAPITAL LETTERS!
+	public $hasSystemHitChart = false; //Has a hitChart that is rolled everytime this system is hit. 
 	
 	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.
 	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted	
@@ -69,6 +71,7 @@ class ShipSystem {
         $strippedSystem = new stdClass();
         $strippedSystem->id = $this->id;
         $strippedSystem->name = $this->name;
+        $strippedSystem->isAlwaysCalledShot = $this->isAlwaysCalledShot;
         $strippedSystem->damage = $this->damage;
         $strippedSystem->criticals = $this->criticals;
         $strippedSystem->critData = $this->critData;
@@ -78,6 +81,7 @@ class ShipSystem {
         $strippedSystem->outputMod = $this->outputMod;
         $strippedSystem->destroyed = $this->destroyed;
 		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer; //necessary		 
+        $strippedSystem->fireControlIndexOverride = $this->getFireControlIndexOverride();
 
 		//ship enhancements - check if this system is affected...
 		$strippedSystem = Enhancements::addSystemEnhancementsForJSON($this->unit, $this, $strippedSystem);//modifies $strippedSystem object
@@ -115,6 +119,10 @@ class ShipSystem {
 		$tag = strtoupper($tag);
 		if(in_array($tag,$this->tagList)) $toReturn = true;		
 		return $toReturn;
+	}
+
+	public function getFireControlIndexOverride(){
+		return null;
 	}
 
 	public function checkforCalledShotBonus(){
@@ -1240,8 +1248,7 @@ class ShipSystem {
     public function setInitialSystemData($ship)
     {
     }
-	
-	
+
 	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false){ //hook - systems that can affect damage dealing will return positive value; strongest one will be chosen to interact
 		return 0;
 	}

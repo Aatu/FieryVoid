@@ -1169,6 +1169,7 @@
 				}               
 				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
 			}
+            return $damage;
 		}//endof onDamagedSystem
 		
 		//overkill should return damaged system itself, even if it is destroyed! - necessary for redefined doDamage to work properly

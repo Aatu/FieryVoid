@@ -3388,15 +3388,18 @@ spl_autoload_register(
                 'damagesystem' => '/server/model/cricialClasses.php',
 
 				//Kirishiac
+
+                'kirishiacorbital' => '/server/model/systems/baseSystems.php',
 				'ultramattercannon' => '/server/model/weapons/matter.php',								
 				'hypergravitonbeam' => '/server/model/weapons/gravitic.php',								
 				'hypergravitonblaster' => '/server/model/weapons/gravitic.php',								
 				'antigravitybeam' => '/server/model/weapons/gravitic.php',								
-				'medantigravitybeam' => '/server/model/weapons/gravitic.php',								
+				'medantigravitybeam' => '/server/model/weapons/gravitic.php',
+
 
 //				'kirishiacconqueror' => '/server/model/ships/kirishiac/kirishiacConqueror.php',
 //				'kirishiackingship' => '/server/model/ships/kirishiac/kirishiacKingship.php',
-//				'kirishiaclordship' => '/server/model/ships/kirishiac/kirishiacLordship.php',
+				'kirishiaclordship' => '/server/model/ships/kirishiac/kirishiacLordship.php',
 //				'kirishiacwarrior' => '/server/model/ships/kirishiac/kirishiacWarrior.php',
 //				'kirishiacwarriortest' => '/server/model/ships/kirishiac/kirishiacWarriorTest.php',
 

@@ -1332,7 +1332,7 @@ class HypergravitonBlaster extends Weapon {
 		public $raking = 20;
 		public $damageType = 'Raking'; 
     	public $weaponClass = "Gravitic";
-		public $fireingModes = array(1=>"Raking");
+		public $firingModes = array(1=>"Raking");
     	
 		protected $thrustBoosted = true;//Variable FRont End looks for to use thrust as boost. 
 	    protected $thrustPerBoost = 6; //Variable showing how much thrust is used per boost.
@@ -1618,21 +1618,20 @@ class MedAntigravityBeam extends Gravitic{
 class AntigravityBeam extends Gravitic{
 		public $name = "AntigravityBeam";
         public $displayName = "Antigravity Beam";
-        public $iconPath = "AntigravityBeam.png";
+        Public $iconPath = "AntigravityBeam.png";
         public $animation = "laser";
         public $animationColor = array(250, 251, 196);
-
         public $factionAge = 3;//Primordial weapon, which sometimes has consequences!
-
+        private $pairing = null; //allows attaching to orbital
+        public $isTargetable = null;
+        
+        
         public $intercept = 3;
 		public $priority = 5; 		
     	public $gunsArray = array(1=>1, 2=>3); //one mount, but three Beam shots!
-		
-        public $loadingtime = 1;
-		
-        public $rangePenaltyArray = array(1=>0.5, 2=>0.5);
+	    public $loadingtime = 1;
+		        public $rangePenaltyArray = array(1=>0.5, 2=>0.5);
         public $fireControlArray = array( 1=>array(5, 3, 1), 2=>array(5, 3, 1) ); 
-
         public $damageType = "Standard";
 		public $damageTypeArray = array(1=>'Standard', 2=>'Standard'); 
 		public $weaponClass = "Gravitic";
@@ -1642,10 +1641,16 @@ class AntigravityBeam extends Gravitic{
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
         public $canSplitShotsArray = array(1=>false, 2=>true );          
 
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){ //maxhealth and power reqirement are fixed; left option to override with hand-written values
-			if ( $maxhealth == 0 ) $maxhealth = 6;
-			if ( $powerReq == 0 ) $powerReq = 3;
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $isTargetable, $pairing){ //$orientation is 0,60,120,180,240,300 - regarding graphics
+		    $this->isTargetable = $isTargetable;
+            $this->pairing = $pairing;
+		    $this->displayName = 'Antigravity Beam ' . $pairing . ''; 				
+		    //maxhealth and power reqirement are fixed; left option to override with hand-written values       
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+			if ( $powerReq == 0 ) $powerReq = 3;           
+            
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+            $this->addTag('Antigravity Beam'); //needed to properly allocate hits on Kirishiac orbitals, where most of these weapons are used
         }
 
         public function setSystemDataWindow($turn){
@@ -1659,7 +1664,11 @@ class AntigravityBeam extends Gravitic{
 			$this->data["Special"] .= "<br> - A single antigravity beam (3d10+6)."; 
 			$this->data["Special"] .= "<br> - Split into three beams (1d10+2, each)."; 
 		}
-	
+
+        public function getPairing(){ //getter for pairing, allows to get attached/paired systems/weps
+				return $this->pairing;
+		}
+        
 		public function getDamage($fireOrder){
 			switch($this->firingMode){
 				case 1:
