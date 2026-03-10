@@ -1065,7 +1065,7 @@ class BaseShip {
         }
 		
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
-		protected function notesFill($sampleFighter = null){
+		public function notesFill($sampleFighter = null){
 			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
 			//	return;
 			//}
