@@ -13158,7 +13158,49 @@ window.ShipTooltip = function () {
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) {
                 toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else if (shipManager.isDetected(ship)) {
-                toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
+                var detectedTeamsStr = "";
+
+                // Check if we have more than 2 teams in the game
+                var uniqueTeams = [];
+                for (var i in gamedata.slots) {
+                    var team = parseInt(gamedata.slots[i].team, 10);
+                    if (team > 0 && !uniqueTeams.includes(team)) {
+                        uniqueTeams.push(team);
+                    }
+                }
+
+                if (uniqueTeams.length > 2) {
+                    var stealthSys = null;
+                    if (ship.mine) {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
+                    } else if (ship.faction == "Torvalus Speculators") {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "ShadingField");
+                    } else if (shipManager.getSpecialAbilityStealth(ship, "Cloaking")) {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "CloakingDevice");
+                    } else if (shipManager.getSpecialAbilityStealth(ship, "Stealth")) {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "stealth");
+                    }
+
+                    if (stealthSys && Array.isArray(stealthSys.detectedNew) && stealthSys.detectedNew.length > 0) {
+                        // Ensure unique team numbers
+                        var uniqueDetectedTeams = [];
+                        for (var i = 0; i < stealthSys.detectedNew.length; i++) {
+                            var detectedTeam = parseInt(stealthSys.detectedNew[i], 10);
+                            if (detectedTeam > 0 && !uniqueDetectedTeams.includes(detectedTeam)) {
+                                uniqueDetectedTeams.push(detectedTeam);
+                            }
+                        }
+
+                        // Sort team numbers for readability
+                        uniqueDetectedTeams.sort(function (a, b) { return a - b; });
+
+                        if (uniqueDetectedTeams.length > 0) {
+                            detectedTeamsStr = " (Teams: " + uniqueDetectedTeams.join(", ") + ")";
+                        }
+                    }
+                }
+
+                toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
             } else {
                 toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
             }
@@ -31325,17 +31367,22 @@ window.fleetListManager = {
             $("#gameinfo .fleetlistentry").remove();
             const template = $("#logcontainer .fleetlistentry");
 
+            var uniqueTeams = [];
             for (const i in gamedata.slots) {
-                const slot = gamedata.slots[i];
-                if (slot.playerid === gamedata.thisplayer) {
-                    fleetListManager.createFleetList(slot, template);
+                var team = parseInt(gamedata.slots[i].team, 10);
+                if (team > 0 && !uniqueTeams.includes(team)) {
+                    uniqueTeams.push(team);
                 }
             }
+            uniqueTeams.sort(function (a, b) { return a - b; });
 
-            for (const i in gamedata.slots) {
-                const slot = gamedata.slots[i];
-                if (slot.playerid !== gamedata.thisplayer) {
-                    fleetListManager.createFleetList(slot, template);
+            for (var t = 0; t < uniqueTeams.length; t++) {
+                var currentTeam = uniqueTeams[t];
+                for (const i in gamedata.slots) {
+                    const slot = gamedata.slots[i];
+                    if (parseInt(slot.team, 10) === currentTeam) {
+                        fleetListManager.createFleetList(slot, template);
+                    }
                 }
             }
 
@@ -31363,9 +31410,11 @@ window.fleetListManager = {
         // CHANGED: Use a unique class based on slot ID instead of just playerid (to avoid DOM selector collisions)
         fleetlistentry.addClass("slot_" + slot.slot);
 
+        var teamName = "TEAM " + slot.team;
+
         // Set the fleet list header
         fleetlistentry.find(".fleetheader").html(
-            "<span class='headername'>FLEET LIST - </span><span class='playername'>" + slot.playername + "</span>"
+            "<span class='headername'>" + teamName + " - </span><span class='playername'>" + slot.playername + "</span>"
         );
 
         var mineGroups = {};
@@ -31378,7 +31427,7 @@ window.fleetListManager = {
             if (ship.userid == slot.playerid && ship.slot == slot.slot) {
                 if (ship.mine) {
                     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-                    var shipClass = ship.shipClass;  
+                    var shipClass = ship.shipClass;
                     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
                         shipClass = "Mine";
                     }
@@ -31528,7 +31577,7 @@ window.fleetListManager = {
 
         // Update fleet header with value totals
         fleetlistentry.find(".fleetheader").html(
-            deploys + "<span class='headername'>FLEET LIST - </span>" +
+            deploys + "<span class='headername'>" + teamName + " - </span>" +
             "<span class='playername'>" + slot.playername +
             ": " + totalCurrValue + " / " + totalBaseValue + " CP" +
             "<span class='turnTaken'>" + turnTaken + "</span>"

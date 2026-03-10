@@ -177,7 +177,49 @@ window.ShipTooltip = function () {
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) {
                 toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else if (shipManager.isDetected(ship)) {
-                toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
+                var detectedTeamsStr = "";
+
+                // Check if we have more than 2 teams in the game
+                var uniqueTeams = [];
+                for (var i in gamedata.slots) {
+                    var team = parseInt(gamedata.slots[i].team, 10);
+                    if (team > 0 && !uniqueTeams.includes(team)) {
+                        uniqueTeams.push(team);
+                    }
+                }
+
+                if (uniqueTeams.length > 2) {
+                    var stealthSys = null;
+                    if (ship.mine) {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
+                    } else if (ship.faction == "Torvalus Speculators") {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "ShadingField");
+                    } else if (shipManager.getSpecialAbilityStealth(ship, "Cloaking")) {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "CloakingDevice");
+                    } else if (shipManager.getSpecialAbilityStealth(ship, "Stealth")) {
+                        stealthSys = shipManager.systems.getSystemByName(ship, "stealth");
+                    }
+
+                    if (stealthSys && Array.isArray(stealthSys.detectedNew) && stealthSys.detectedNew.length > 0) {
+                        // Ensure unique team numbers
+                        var uniqueDetectedTeams = [];
+                        for (var i = 0; i < stealthSys.detectedNew.length; i++) {
+                            var detectedTeam = parseInt(stealthSys.detectedNew[i], 10);
+                            if (detectedTeam > 0 && !uniqueDetectedTeams.includes(detectedTeam)) {
+                                uniqueDetectedTeams.push(detectedTeam);
+                            }
+                        }
+
+                        // Sort team numbers for readability
+                        uniqueDetectedTeams.sort(function (a, b) { return a - b; });
+
+                        if (uniqueDetectedTeams.length > 0) {
+                            detectedTeamsStr = " (Teams: " + uniqueDetectedTeams.join(", ") + ")";
+                        }
+                    }
+                }
+
+                toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
             } else {
                 toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
             }
