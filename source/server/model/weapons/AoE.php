@@ -305,7 +305,7 @@ class CaptorMine extends Weapon{
     }
 
     public function setSystemDataWindow($turn){
-        $this->data["Max Range"] = $this->range;
+            $this->data["Max Range"] = $this->range;
             foreach($this->allocatedRanges as $shipType=>$range){
                 $this->data[' - '.$shipType.' range'] =  $range;
             }         

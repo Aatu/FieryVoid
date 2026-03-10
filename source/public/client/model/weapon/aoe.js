@@ -118,11 +118,22 @@ CaptorMine.prototype.refreshData = function () { //refresh description to show c
 	var entryName = '';
 	var currType = '';
 	var range = null;
+	var hiddenDisplay = '';
+	var ship = this.ship;
+
+    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+        hiddenDisplay = "?";
+		this.data["Max Range"] = hiddenDisplay;		
+    }else{
+		this.data["Max Range"] = this.range;			
+	}
 
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
 		range = this.allocatedRanges[currType];
 		if(range == null) range = this.range;
+		if(hiddenDisplay == '?') range = hiddenDisplay;
 		//entry should exist, just change it to show current values
 		entryName = ' - ' + currType;
 		this.data[entryName + " range"] = range;
