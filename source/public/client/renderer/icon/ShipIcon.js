@@ -287,9 +287,9 @@ window.ShipIcon = function () {
                         : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
         );
 
-        if (ship.imageFlipped) {
-            this.shipSprite.mesh.scale.y = -1;
-        }
+        //if (ship.imageFlipped) { //Old variable used to manually flip iamges in older version of THREE.js - DK
+        //    this.shipSprite.mesh.scale.y = -1;
+        //}
 
         this.mesh.add(this.shipSprite.mesh);
 
