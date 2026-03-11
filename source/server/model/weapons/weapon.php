@@ -98,8 +98,7 @@ class Weapon extends ShipSystem
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
     public $hidetarget = false;
 	public $hidetargetArray = array();  //for weapons that do not show their target
-    //public $duoWeapon = false; 
-    //public $dualWeapon = false;
+	protected $alwaysHideFireOrders = true;    
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
@@ -182,6 +181,7 @@ class Weapon extends ShipSystem
 	protected $canTargetAllies = false; //To allow front end to target allies.
 	protected $canTargetAlliesArray = array(); //To allow front end to target allies.
     protected $canTargetAll = false; //Allows weapon to target allies AND enemies, pass to Front End in strpForJson()
+	protected $canShootMines = false; //marker to let weapons that normally can't shoot MCVs to shoot mines.    
 
 	//Weapons are repaired before "average system", but after really important things! 
 	public $repairPriority = 5;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
@@ -357,6 +357,10 @@ class Weapon extends ShipSystem
 	public function canInterceptAtAll($gd, $fire, $shooter, $target, $interceptingShip, $firingweapon)
 	{
 		return true;
+	}
+
+	public function alwaysHideFireOrders(){
+		return $this->alwaysHideFireOrders;
 	}
 
     public function getRange($fireOrder)
@@ -1272,10 +1276,12 @@ public function getStartLoading()
             $effectiveOB = $shooter->offensivebonus;
             $firstFighter = $shooter->getSampleFighter();
             $OBcrit = $firstFighter->hasCritical("tmpsensordown");
-            if ($OBcrit > 0) {
-                $effectiveOB = $shooter->offensivebonus - $OBcrit;
-                $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
-            }
+            $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn); //-1 OB for each point of Mine Detect
+            $effectiveOB = $shooter->offensivebonus - $OBcrit - ($mdew * 2); //Every point of mdew costs 2 OB
+            
+            //if ($OBcrit > 0) {
+            $effectiveOB = max(0, $effectiveOB); //cannot bring OB below 0!
+            //}
   
             if (!$this->ballistic) {
                 $dew = 0;
@@ -1368,7 +1374,14 @@ public function getStartLoading()
 			$oew = 0;
 			$soew = 0;
 		}		
-		
+
+        //Special to-hit bonuses when shooting mines
+        if($target instanceof Mine){
+            $mdew = $shooter->getEWByType("Detect Mines", $gamedata->turn);
+            $mineBonus = ($mdew + $shooter->minesweeperbonus) - $distanceForPenalty - $target->signature;
+            $mod += max(0, $mineBonus);
+        }        
+
 		$rngPenaltyMultiplier = max($noLockPenalty,$jammerValue);
 		if(!$this->noLockPenalty) $rngPenaltyMultiplier = 0;
 		if($rngPenaltyMultiplier > 0){			
@@ -1460,7 +1473,7 @@ public function getStartLoading()
 	        $defenceMod = $targetCnC->hasCritical("ProfileIncreased");
 	        $defence += $defenceMod;
 		}else{             
-            if ($target->hasSpecialAbility("Petals")){ //Does ship have Specialists system?
+            if ($target->hasSpecialAbility("Petals")){ //Does ship have Petals system?
                 $petals = $target->getSystemByName("FtrPetals");
                 if($petals->isActive()){
 	                $defence += 1;
@@ -1619,7 +1632,7 @@ public function getStartLoading()
             }
 
             //interception?
-            if ($rolled > $needed && $rolled <= $needed + ($fireOrder->totalIntercept * 5)) { //$fireOrder->pubnotes .= "Shot intercepted. ";
+            if ($rolled > $needed && $rolled <= $needed + ($fireOrder->totalIntercept)) { //$fireOrder->pubnotes .= "Shot intercepted. ";
                 if ($this->damageType == 'Pulse') {
                     $fireOrder->intercepted += $this->maxpulses;
                 } else {
@@ -1729,6 +1742,7 @@ public function getStartLoading()
         foreach ($ships1 as $ship) {
             if ($ship === $target) continue;// make certain the target doesn't get the damage twice
             if ($ship->isDestroyed()) continue; //no point allocating
+            if ($ship->mine) return; //Immune to collateral damage
             $relativeBearing = $ship->getBearingOnUnit($target);//actual direction the damage comes from is from unit directly hit!
             if ($ship instanceof FighterFlight) {
                 foreach ($ship->systems as $fighter) {
@@ -2216,7 +2230,7 @@ full Advanced Armor effects (by rules) for reference:
 
     public function isLoSBlocked($shooterPos, $targetPos, $gamedata) {
         //$blockedLosHex = $gamedata->getBlockedHexes();
-		$blockedHexes = $gamedata->blockedHexes; //Just do this once outside loop	        
+		$blockedLosHex = $gamedata->blockedHexes; //Just do this once outside loop	        
 
         $noLoS = false;
         if (!empty($blockedLosHex)) {            

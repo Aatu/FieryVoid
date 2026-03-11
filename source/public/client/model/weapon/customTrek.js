@@ -292,10 +292,12 @@ CloakingDevice.prototype.doIndividualNotesTransfer = function () {
 CloakingDevice.prototype.isDetectedTrek = function (ship) {
     if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
     if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.       
-    if (this.detected) return true; //Already detected. 
+    if (this.detected === true) return true; // Fallback support for boolean legacy saves
+    if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
     if (shipManager.systems.isDestroyed(ship, this)) return true;
     if (shipManager.power.isOffline(ship, this)) return true;
 
+    /* //Check server side at end of Movement
     if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
 
     // Check all enemy ships to see if any can detect this ship
@@ -349,7 +351,7 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
             return true; //Just return, if one ship can see the stealthed ship then all can.
         }
     }
-
+    */
     // No one detected the ship
     return false;
 };
@@ -437,12 +439,12 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
     var shooterPos = shipManager.getShipPosition(shooter);
     var heading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
 
-    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)){
+    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)) {
         var html = "You cannot Warp Jump onto Terrain!";
         confirm.warning(html);
         return false;
-        
-    }    
+
+    }
 
     const hexDirections = [0, 60, 120, 180, 240, 300];
 

@@ -150,6 +150,7 @@
 
 					//enhancements (for fleet selection)
 					Enhancements::setEnhancementOptions($ship);
+					$ship->notesFill();
 					
 					if (!isset($ships[$ship->faction])){
 						$ships[$ship->faction] = array();
@@ -230,6 +231,7 @@
 
 					//enhancements (for fleet selection)
 					Enhancements::setEnhancementOptions($ship);
+					$ship->notesFill();
 					
 					if (!isset($ships[$ship->faction])){
 						$ships[$ship->faction] = array();
@@ -277,6 +279,7 @@
         
 					//enhancements (for fleet selection)
 					Enhancements::setEnhancementOptions($ship);
+					$ship->notesFill();
 					
 					if (!isset($ships[$ship->faction])){
 						$ships[$ship->faction] = array();

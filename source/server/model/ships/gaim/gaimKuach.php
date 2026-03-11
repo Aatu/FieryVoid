@@ -21,6 +21,7 @@ class gaimKuach extends HeavyCombatVesselLeftRight{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
+        $this->minesweeperbonus = 4;
 
         $this->addPrimarySystem(new Reactor(5, 12, 0, 6));
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));

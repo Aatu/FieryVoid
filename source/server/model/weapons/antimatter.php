@@ -572,6 +572,12 @@ class AntiprotonGun extends AntimatterWeapon{
 						if ($targetUnit === $shooter) continue; //do not target self
 						if ($targetUnit->isDestroyed()) continue; //no point engaging dead ships
 						if (isset(AntimatterShredder::$alreadyEngaged[$targetUnit->id])) continue; //unit already engaged
+						
+						$pos = $shooter->getHexPos();
+						$targetPos = $targetUnit->getHexPos();						
+						$loSBlocked = $this->isLoSBlocked($pos, $targetPos, $gamedata); //Returns true is LoS blocked
+						if($loSBlocked) continue; //LoS Blocked						
+
 						$relativeBearing = $shooter->getBearingOnUnit($targetUnit);
 						if (mathlib::getDistance($shooter->getCoPos(), $targetUnit->getCoPos()) > 0){ //check arc only if target  is not on the same hex!
 							if (!(mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc))) continue; //must be in arc

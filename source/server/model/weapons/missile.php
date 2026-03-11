@@ -1096,7 +1096,7 @@ class AmmoMissileRackS extends Weapon{
 	{
 		//VERY IMPORTANT: fill $ammoClassesArray (cannot be done as constants!
 		//classes representing POTENTIALLY available ammo - so firing modes are always shown in the same order
-		//remember that appropriate enhancements need to be enabled on ehip itself, too!
+		//remember that appropriate enhancements need to be enabled on ship itself, too!
 		
 		if(!$this->availableAmmoAlreadySet){
 			$this->ammoClassesArray[] =  new AmmoMissileB();
@@ -1113,7 +1113,8 @@ class AmmoMissileRackS extends Weapon{
 			$this->ammoClassesArray[] =  new AmmoMissileM();
 			$this->ammoClassesArray[] =  new AmmoMissileKK();
 			$this->ammoClassesArray[] =  new AmmoMissileX();
-			$this->ammoClassesArray[] =  new AmmoMissileI();								
+			$this->ammoClassesArray[] =  new AmmoMissileI();
+			$this->ammoClassesArray[] =  new AmmoMissileZ();											
 			$this->availableAmmoAlreadySet = true;
 		}
 	
@@ -1508,10 +1509,10 @@ class AmmoMissileRackS extends Weapon{
 		}
 		if ($currAmmo) $currAmmo->fire($gamedata, $fireOrder);
 
-	        // Check if !$this->hextarget as these modes cannot use normal fire() function.
-        if (!$this->hextarget) {
+	    // Check if hextarget as these modes cannot use normal fire() function.
+        if ($fireOrder->targetid !== -1) {
             // Call the parent method for weapon hit calculation if not hex targeted.		
-        parent::fire($gamedata, $fireOrder);
+        	parent::fire($gamedata, $fireOrder);
 		}
 		
 	}//endof function fire	
@@ -1527,19 +1528,19 @@ class AmmoMissileRackS extends Weapon{
 	    }
 	    
 	    // Check if $currAmmo is not null before calling the method
-	            if($currAmmo){
-	                return $currAmmo->calculateRangePenalty($distance);
-	            }else{
-	                return 0;
-	            }
-	    parent::calculateRangePenalty($distance);        
-		}//endof function calculateRangePenalty
+	    if($currAmmo){
+	        return $currAmmo->calculateRangePenalty($distance);
+	    }else{
+	        return 0;
+	    }
+	    //parent::calculateRangePenalty($distance);        
+	}//endof function calculateRangePenalty
 
 
     public function calculateHitBase($gamedata, $fireOrder)
     {
-         // Check if !$this->hextarget as these modes cannot use normal calculateHitBase() function.
-        if (!$this->hextarget) {
+         // Check if hextarget as these modes cannot use normal calculateHitBase() function.
+        if ($fireOrder->targetid !== -1) {
             // Call the parent method for weapon hit calculation if not hex targeted.
             parent::calculateHitBase($gamedata, $fireOrder);
         }  
@@ -1826,7 +1827,8 @@ class AmmoMissileRackD extends AmmoMissileRackS{
 			$this->ammoClassesArray = array();
 			$this->ammoClassesArray[] =  new AmmoMissileI(); 			
 			$this->ammoClassesArray[] =  new AmmoMissileA();
-			$this->ammoClassesArray[] =  new AmmoMissileC();			
+			$this->ammoClassesArray[] =  new AmmoMissileC();
+			$this->ammoClassesArray[] =  new AmmoMissileZ();							
 
 			$this->availableAmmoAlreadySet = true;
 		}						
@@ -2173,7 +2175,8 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 			$strippedSystem->rangeArray = $this->rangeArray;
 			$strippedSystem->firedInRapidMode = $this->firedInRapidMode;			
 			$strippedSystem->firedInLongRangeMode = $this->firedInLongRangeMode;
-			$strippedSystem->noHexTargeting = $this->noHexTargeting;													$strippedSystem->iconPath = $this->iconPath;			
+			$strippedSystem->noHexTargeting = $this->noHexTargeting;													
+			$strippedSystem->iconPath = $this->iconPath;			
 			return $strippedSystem;
 		}
 
@@ -2183,7 +2186,15 @@ class AmmoMissileRackF extends AmmoMissileRackS {
 class BallisticMineLauncher extends AmmoMissileRackS{
 	public $name = "BallisticMineLauncher";
     public $displayName = "Ballistic Mine Launcher";
-    public $iconPath = "BallisticMineLauncher.png";    
+    public $iconPath = "BallisticMineLauncher.png";
+
+    // Ship classes that this weapon can dynamically spawn mid-game.
+    // game.php reads this to preload blueprints into window.staticShips.
+    public $spawnableClasses = [
+        'spawnCaptorKLB',
+        'spawnCaptorKLH',
+        'spawnCaptorKLW',
+    ];
 	
     public $range = 30;
     public $distanceRange = 60;
@@ -2201,14 +2212,16 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 	
 	public $animation = "bolt";
 	public $animationColor = array(245, 90, 90);
-    public $animationExplosionScale = 0; //0 means it will be set automatically by standard constructor, based on average damage yield
+    public $animationExplosionScale = 0.25; //0 means it will be set automatically by standard constructor, based on average damage yield
     public $animationExplosionScaleArray = array();
 	public $animationExplosionType = "AoE";
-		
+	protected $alwaysHideFireOrders = true;
 
     protected $rackExplosionDamage = 0; //how much damage will this weapon do in case of catastrophic explosion
     protected $rackExplosionThreshold = 21; //Not sure these can explode in same way as Missile Racks.  Set above threshold for now.  
 	
+
+
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 7;
@@ -2286,34 +2299,196 @@ class BallisticMineLauncher extends AmmoMissileRackS{
         $IFFSystem = $shooter->getIFFSystem();
 		
 		if ($IFFSystem){ ////Returns true if ship has the Identify Friend or Foe Enhancment.
-		    $mineTarget = $gamedata->getClosestEnemyShip($shooter, $finalHexTarget, $mineRange); //Find the closest enemy ship only, then attack it.
+		    $mineTarget = $this->getClosestEnemyShip($gamedata, $shooter, $finalHexTarget, $mineRange); //Find the closest viable enemy ship only, then attack it.
 		}else{	
-		    $mineTarget = $gamedata->getClosestShip($finalHexTarget, $mineRange); //Just find the closest ship, then attack it.			
+		    $mineTarget = $this->getClosestShip($gamedata, $shooter, $finalHexTarget, $mineRange); //Just find the closest viable ship, then attack it.			
 		}        
     
 		if ($mineTarget instanceof BaseShip || $mineTarget instanceof FighterFlight) { // Check if $mineTarget is a valid ship/fighter flight
 			$newFireOrder = new FireOrder(
-				-1, "normal", $shooter->id, $mineTarget->id,
+				-1, "ballistic", $shooter->id, $mineTarget->id,
 				$this->id, -1, $gamedata->turn, $originalFireOrder->firingMode, 
 				0, 0, 1, 0, 0, //needed, rolled, shots, shotshit, intercepted
-				0,0,$this->weaponClass,-1 //X, Y, damageclass, resolutionorder
+				0,0,'SecondAttack',-1 //X, Y, damageclass, resolutionorder
 			);		
 			$newFireOrder->addToDB = true;
 			$this->fireOrders[] = $newFireOrder;
-		    $originalFireOrder->pubnotes .= "Mine launched. ";								
+		    $originalFireOrder->pubnotes .= "<br>Mine launched. ";								
 		}else{ //No valid targets.
-			//CAN I GENERATE A NEW NOTE HERE FOR NEXT TURN?  Need to pass finalHexTarget and firingMode.
-		    $originalFireOrder->pubnotes .= "Mine launched, but no valid target for it to attack. ";
+		    $originalFireOrder->pubnotes .= "<br>Mine launched, but no valid target to attack this turn.";
+			$this->createLoiteringMine($gamedata, $originalFireOrder, $shooter, $mineRange, $IFFSystem);
 		}
 
-		//FireOrdeers this Turn now dealt with, do fireOrders from any previous turns use new function?
-
 	} //endof beforeFiringOrderResolution
+
+
+    public function createLoiteringMine($gamedata, $fireOrder, $shooter, $mineRange, $IFFSystem){
+		$mine = null;
+		switch($mineRange){ //We can discern mine type here by it's range.
+			case 2:
+				$mine = new spawnCaptorKLH($gamedata->id, $shooter->userid, "Kovost-H Captor Mine", $shooter->slot);					
+				break;
+			case 3:
+				$mine = new spawnCaptorKLB($gamedata->id, $shooter->userid, "Kovost Captor Mine", $shooter->slot);
+				break;
+			case 5:
+				$mine = new spawnCaptorKLW($gamedata->id, $shooter->userid, "Kovost-W Captor Mine", $shooter->slot);			
+				break;
+			default:
+				$mine = new spawnCaptorKLB($gamedata->id, $shooter->userid, "Kovost Captor Mine", $shooter->slot);
+				break;			
+		}	
+		if($mine !== null) {
+			$shipid = Manager::insertSingleShip($gamedata, $mine, $shooter->userid);
+			$mine->spawned = $gamedata->turn;
+
+			if($IFFSystem){ //Pass IFF enhancement on to newly created mine!
+				Manager::insertSingleEnhancement($gamedata, $shipid, 'IFF_SYS', 1, 'Identify Friend or Foe (IFF) System');
+			}
+
+			//Create new movement orders to $targetPos.
+			$deployMine = new MovementOrder(null, "deploy", new OffsetCoordinate($fireOrder->x, $fireOrder->y), 0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0);
+			//Add movement order to database
+			Manager::insertSingleMovement($gamedata->id, $shipid, $deployMine);	
+
+			// Initialize weapon loading so the mine doesn't spawn uncharged
+			$mine->id = $shipid;
+			SystemData::initSystemData($gamedata->turn, $gamedata->id);
+			foreach ($mine->systems as $system) {
+				$system->setInitialSystemData($mine);
+				if ($system instanceof Weapon) {
+					$load = $system->getStartLoading();
+					if ($load) {
+						$load->loading = $system->loadingtime; // Set to fully loaded
+						SystemData::addDataForSystem($system->id, 0, $shipid, $load->toJSON());
+					}
+				}
+			}
+			Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+			//Now create a note so we remember what turn mine was created.
+			$note = new IndividualNote(
+						-1,
+						$gamedata->id,
+						1, // Set to 1 so the note is loaded in replay for all turns
+						1, // Set to 1
+						$shooter->id,
+						$this->id,
+						$shipid,
+						"New Mine spawned",
+						$gamedata->turn
+			);
+
+			Manager::insertIndividualNote($note);
+
+		}
+	}
+
+
+	public function onIndividualNotesLoaded($gamedata){
+		foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
+        	$ship = $gamedata->getShipById($currNote->notekey);		
+			$ship->spawned = $currNote->notevalue; //Update spawned value to turn that mine was created.						
+		}
+
+		//and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
+		$this->individualNotes = array();		
+	} //endof function onIndividualNotesLoaded
+
+
+	public function getClosestShip($gamedata, $mine, $pos, $maxRange = 0){
+
+	    if ($pos instanceof BaseShip) {
+	        $pos = $pos->getHexPos();
+	    }
+
+	    if (!($pos instanceof OffsetCoordinate)) {
+	        throw new Exception("only OffsetCoordinate supported");
+	    }
+
+	    $closestShips = array(); // Array to store equally closest ships
+	    $closestDistance = 100; // Initialize with a large value
+
+	    foreach ($gamedata->ships as $ship){
+	        if ($ship->unavailable) continue;
+	        if ($ship->isTerrain()) continue; 
+	        if ($ship->mine) continue;           
+	        if ($ship->isDestroyed()) continue;                         
+
+			$jammerValue = $ship->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $ship));
+			$effectiveMaxRange = ($jammerValue > 0) ? floor($maxRange / 2) : $maxRange;
+
+	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
+
+	        if ($distance <= $effectiveMaxRange && $distance < $closestDistance){
+	            // New closest distance found, clear the array and add this ship
+	            $closestShips = array($ship);
+	            $closestDistance = $distance;
+	        } elseif ($distance == $closestDistance) {
+	            // Add ship to equally close ships
+	            $closestShips[] = $ship;
+	        }
+	    }
+
+	    // Randomly select among equally close ships
+	    if (!empty($closestShips)) {
+	        $randomIndex = array_rand($closestShips);
+	        return $closestShips[$randomIndex];
+	    } else {
+	        return null; // No ships found within range
+	    }
+	}
+
 	
+	public function getClosestEnemyShip($gamedata, $mine, $pos, $maxRange = 0){
+
+	    if ($pos instanceof BaseShip) {
+	        $pos = $pos->getHexPos();
+	    }
+
+	    if (!($pos instanceof OffsetCoordinate)) {
+	        throw new Exception("only OffsetCoordinate supported");
+	    }
+
+	    $closestShips = array(); // Array to store equally closest ships
+	    $closestDistance = 100; // Initialize with a large value
+
+	    foreach ($gamedata->ships as $ship){
+	        if ($ship->unavailable) continue;
+	        if ($ship->isTerrain()) continue;  
+	        if ($ship->mine) continue;     
+			if ($ship->team == $mine->team)	        
+				continue;
+	        if ($ship->isDestroyed()) continue;              
+		
+			$jammerValue = $ship->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $ship));
+			$effectiveMaxRange = ($jammerValue > 0) ? floor($maxRange / 2) : $maxRange;		
+
+	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
+
+	        if ($distance <= $effectiveMaxRange && $distance < $closestDistance){
+	            // New closest distance found, clear the array and add this ship
+	            $closestShips = array($ship);
+	            $closestDistance = $distance;
+	        } elseif ($distance == $closestDistance) {
+	            // Add ship to equally close ships
+	            $closestShips[] = $ship;
+	        }
+	    }
+
+	    // Randomly select among equally close ships
+	    if (!empty($closestShips)) {
+	        $randomIndex = array_rand($closestShips);
+	        return $closestShips[$randomIndex];
+	    } else {
+	        return null; // No ships found within range
+	    }
+	}
+
 	    
     public function calculateHitBase($gamedata, $fireOrder)
     {
-		if ($fireOrder->type == 'ballistic') {				
+		if ($fireOrder->targetid == -1) {				
 			$fireOrder->needed = 100;				
 			$fireOrder->updated = true;
 		} else{
@@ -2325,12 +2500,12 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 
 
 	public function fire($gamedata, $fireOrder){
-		if($fireOrder->type == 'ballistic') { //initial "tareting location" Shredder shot should not actually be resolved
+		if($fireOrder->targetid == -1) { //initial "tareting location".
 			$fireOrder->shotshit++;	//This however does NOT cause the hex targeted shot to explode on hex, or cause hit on ship in hex :|
 	       	$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!		     		
 		}else{ //Normal fire routine for direct shots.			
 			$this->hextarget = false;
-		weapon::fire($gamedata, $fireOrder);		
+			weapon::fire($gamedata, $fireOrder);		
 		}
 	}//endof fire
 
@@ -2372,21 +2547,20 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
-		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		$this->data["Special"] = 'Available firing modes depend on ammo, tracked in Ammo Magazine system.';
 		$this->data["Special"] .= '<br>Hex-targeted weapon with a 25% chance to scatter.';
-		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
-		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
-		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it lands, up to its maximum radius (halved against units with Jammer) and can be intercepted.';	
+		$this->data["Special"] .= '<br>Damage, Fire Control and Range from target hex depends on ammo type:';	
 		$this->data["Special"] .= '<br>  - Basic: 1d10 + 16 damage, +40 to hit and 3 hex radius.';	
 		$this->data["Special"] .= '<br>  - Wide-Range: 1d10 + 12 damage, +30 to hit and 5 hex radius.';	
-		$this->data["Special"] .= '<br>  - Heavy: 1d10 + 24 damage, +25 to hit and 2 hex radius.';
-		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';
-		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
+		$this->data["Special"] .= '<br>  - Heavy: 1d10 + 24 damage, +25 to hit and 2 hex radius.';	
+		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destryoed or finds a target. See FV FAQ for details about Mines.';																				
 	}	
 
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
-            $strippedSystem->specialPosNoLauncher = $this->specialPosNoLauncher;                              
+            $strippedSystem->specialPosNoLauncher = $this->specialPosNoLauncher; 
+            $strippedSystem->alwaysHideFireOrders = $this->alwaysHideFireOrders;			                             
             return $strippedSystem;
         }
 	
@@ -2396,7 +2570,13 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 class AbbaiMineLauncher extends BallisticMineLauncher{
 	public $name = "AbbaiMineLauncher";
     public $displayName = "Mine Launcher";
-    public $iconPath = "AbbaiMineLauncher.png";    
+    public $iconPath = "AbbaiMineLauncher.png";
+
+    // Overrides parent — Abbai launcher spawns its own mine types.
+    public $spawnableClasses = [
+        'spawnCaptorWotcrAbbaiA',
+        'spawnCaptorWotcrAbbaiB',
+    ];
 	
     public $range = 20;
     public $distanceRange = 40;   
@@ -2426,17 +2606,77 @@ class AbbaiMineLauncher extends BallisticMineLauncher{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
-		$this->data["Special"] = 'Available firing modes depend on ammo bought as unit enhancements. Ammunition available is tracked by central Ammunition Magazine system.';
+		$this->data["Special"] = 'Available firing modes depend on ammo, tracked in Ammo Magazine system.';
 		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
-		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius.';
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius and can be intercepted.';
 		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
-		$this->data["Special"] .= '<br>Damage, Firecontrol and Range from target hex depends on ammo type:';	
+		$this->data["Special"] .= '<br>Damage, Fire Control and Range from target hex depends on ammo type:';	
 		$this->data["Special"] .= '<br>  - Basic: 12 damage, +10 to hit and 4 hex radius.';	
 		$this->data["Special"] .= '<br>  - Wide-Range: 12 damage, +10 to hit and 7 hex radius.';	
-		$this->data["Special"] .= '<br>If no targets are available the mine will deactivate.';
-		$this->data["Special"] .= '<br>The mine attack can be intercepted under normal ballistic rules.';																
+		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destroyed or it finds a target.';															
+		$this->data["Special"] .= '<br>See Fiery Void FAQ for more details about Mines.';		
 	}	
 	
+    public function createLoiteringMine($gamedata, $fireOrder, $shooter, $mineRange, $IFFSystem){
+		$mine = null;
+		switch($mineRange){ //We can discern mine type here by it's range.
+			case 4:
+				$mine = new spawnCaptorWotcrAbbaiA($gamedata->id, $shooter->userid, "Bistif-A Captor Mine", $shooter->slot);					
+				break;
+			case 7:
+				$mine = new spawnCaptorWotcrAbbaiB($gamedata->id, $shooter->userid, "Bistif-B Captor Mine", $shooter->slot);
+				break;
+			default:
+				$mine = new spawnCaptorWotcrAbbaiA($gamedata->id, $shooter->userid, "Bistif-A Captor Mine", $shooter->slot);
+				break;			
+		}	
+		if($mine !== null) {
+			$shipid = Manager::insertSingleShip($gamedata, $mine, $shooter->userid);
+			$mine->spawned = $gamedata->turn;
+
+			if($IFFSystem){ //Pass IFF enhancement on to newly created mine!
+				Manager::insertSingleEnhancement($gamedata, $shipid, 'IFF_SYS', 1, 'Identify Friend or Foe (IFF) System');
+			}
+
+		//Create new movement orders to $targetPos.
+        $deployMine = new MovementOrder(null, "deploy", new OffsetCoordinate($fireOrder->x, $fireOrder->y), 0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0);
+		//Add movement order to database
+		Manager::insertSingleMovement($gamedata->id, $shipid, $deployMine);	
+
+        // Initialize weapon loading so the mine doesn't spawn uncharged
+        $mine->id = $shipid;
+        SystemData::initSystemData($gamedata->turn, $gamedata->id);
+        foreach ($mine->systems as $system) {
+            $system->setInitialSystemData($mine);
+            if ($system instanceof Weapon) {
+                $load = $system->getStartLoading();
+                if ($load) {
+                    $load->loading = $system->loadingtime; // Set to fully loaded
+                    SystemData::addDataForSystem($system->id, 0, $shipid, $load->toJSON());
+                }
+            }
+        }
+        Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+			//Now create a note so we remember what turn mine was created.
+			$note = new IndividualNote(
+						-1,
+						$gamedata->id,
+						1, // Set to 1 so the note is loaded in replay for all turns
+						1, 
+						$shooter->id,
+						$this->id,
+						$shipid,
+						"New Mine spawned",
+						$gamedata->turn
+			);
+
+			Manager::insertIndividualNote($note);
+
+		}
+	}
+
+
 } //endof class AbbaiMineLauncher
 
 ?>

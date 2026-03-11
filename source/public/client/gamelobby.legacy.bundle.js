@@ -3550,6 +3550,7 @@ window.ajaxInterface = {
             var newShip = {
                 'phpclass': ship.phpclass,
                 'userid': ship.userid,
+                'team': ship.team,
                 'id': ship.id,
                 'name': ship.name,
                 'pointCostEnh': Math.round(ship.pointCostEnh),
@@ -3803,6 +3804,7 @@ window.ajaxInterface = {
             var newShip = {
                 'phpclass': ship.phpclass,
                 'userid': ship.userid,
+                'team': ship.team,
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,
@@ -6612,10 +6614,10 @@ window.shipManager = {
         } else {
             if (!ship.base) {
                 var stru = shipManager.systems.getStructureSystem(ship, 0);
-                if (shipManager.systems.isDestroyed(ship, stru)) {
+                if (stru && shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-                if (!gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+                if (!gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !ship.mine) {
                     var react = shipManager.systems.getSystemByName(ship, "reactor");
                     if (shipManager.systems.isDestroyed(ship, react)) {
                         return true;
@@ -6623,10 +6625,10 @@ window.shipManager = {
                 }
             } else {
                 var stru = shipManager.systems.getStructureSystem(ship, 0);
-                if (shipManager.systems.isDestroyed(ship, stru)) {
+                if (stru && shipManager.systems.isDestroyed(ship, stru)) {
                     return true;
                 }
-                if (!gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+                if (!gamedata.isTerrain(ship.shipSizeClass, ship.userid) && !ship.mine) {
                     var mainReactor = shipManager.systems.getSystemByNameInLoc(ship, "reactor", 0);
                     if (shipManager.systems.isDestroyed(ship, mainReactor)) {
                         return true;
@@ -6780,7 +6782,7 @@ window.shipManager = {
 
         // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
         var validShips = gamedata.ships.filter(function (s) {
-            return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s.shipSizeClass, s.userid) && !(shipManager.getTurnDeployed(s) > gamedata.turn);
+            return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s.shipSizeClass, s.userid) && !s.mine && !(shipManager.getTurnDeployed(s) > gamedata.turn);
         });
 
         for (var i in validShips) {
@@ -7011,16 +7013,7 @@ window.shipManager = {
 
         for (var i in gamedata.ships) {
             var othership = gamedata.ships[i];
-            /*
-            if (othership.flight === true) continue; //can escort only ships
-            if (othership.id == ship.id) continue; //self
-            if (gamedata.isEnemy(ship, othership)) continue; //no escorting opponent
 
-            var oPos = shipManager.movement.getPositionAtStartOfTurn(othership);
-            var tPos = shipManager.movement.getPositionAtStartOfTurn(ship);
-
-            if (oPos.equals(tPos)){
-            */
             if (shipManager.isEscorting(ship, othership)) {
                 if (resultTxt != '') resultTxt += ', ';
                 resultTxt += othership.name;
@@ -7031,15 +7024,18 @@ window.shipManager = {
     },
 
     //Called in various places to identify a ship as having ability to be invisible to enemy.
+    /*
     isStealthShip: function (ship) {
         return ship.trueStealth;
     },   
+    */
 
     //Generic function called from various front end functions.  Checks if ships should be shown/interactable or not.
     shouldBeHidden: function (ship) {
         if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
-        if (!gamedata.isMyorMyTeamShip(ship) && shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
+        if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
+        if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         return false;
     },
 
@@ -7047,6 +7043,8 @@ window.shipManager = {
 
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return 1; //Bases and OSATs never 'jump in', returns Turn 1.
+        } else if (ship.spawned !== undefined && ship.spawned !== -1) {
+            return ship.spawned; //Spawned units enter the game on ship.spawned turn.
         } else {
             //return Math.max(ship.deploysOnTurn, slot.depavailable);
             var slot = playerManager.getSlotById(ship.slot);
@@ -7061,6 +7059,7 @@ window.shipManager = {
         }
     },
 
+
     //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
     playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {
         var hasDeployed = true;
@@ -7073,13 +7072,6 @@ window.shipManager = {
         }
         return hasDeployed;
     },
-
-    /*
-    markAsDetected: function (stealthSystem) {
-        //var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
-        if (stealthSystem) stealthSystem.detected = true;
-    },
-    */
 
     //Need abridged version of this to prevent false positive returns from main function when a system is offline e.g. cloaking devices
     getSpecialAbilityStealth: function getSpecialAbilityStealth(ship, ability) {
@@ -7096,214 +7088,44 @@ window.shipManager = {
 
     //Main Front End check on whether a stealth ship is detected or not, called in various places and diverts to appropriate systems.
     isDetected: function (ship) {
+        if (ship.mine) {
+            var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+            if (stealthSystem) {
+                return stealthSystem.isDetectedMine(ship);
+            } else {
+                return true; //No stealth system, is detected I guess.
+            }
+        }
+
         if (ship.faction == "Torvalus Speculators") {
-            var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");            
-            if(shadingField){
+            var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
+            if (shadingField) {
                 return shadingField.isDetectedTorvalus(ship, 15);
-            }else{
+            } else {
                 return true; //Torvalus with no Shading field, is detected I guess.
             }
         }
-        if(shipManager.getSpecialAbilityStealth(ship, "Cloaking")){
-            var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");             
-            if(cloakingDevice){
+        if (shipManager.getSpecialAbilityStealth(ship, "Cloaking")) {
+            var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");
+            if (cloakingDevice) {
                 return cloakingDevice.isDetectedTrek(ship);
-            }else{
+            } else {
                 return true; //No cloak, is detected I guess.
-            }                       
+            }
         }
 
-        if(shipManager.getSpecialAbilityStealth(ship, "Stealth")){
-            var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");             
-            if(stealthSystem){
+        if (shipManager.getSpecialAbilityStealth(ship, "Stealth")) {
+            var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
+            if (stealthSystem) {
                 return stealthSystem.isDetectedStealth(ship);
-            }else{
+            } else {
                 return true; //No stealth system, is detected I guess.
-            }                       
+            }
         }
 
         return true; //No one had any stealth systems, shouldn't reach here but just in case.
-
-        /*
-        if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
-        var stealthSystem = shipManager.systems.getSystemByName(ship, "stealth");
-        if (stealthSystem && stealthSystem.detected) return true; //Already detected.
-
-        // If the ship used offensive or ELINT EW, it is revealed
-        const usedEW = ew.getAllEWExceptDEW(ship); //Has used any EW abilities except DEW?
-        if (usedEW > 0) {
-            return true; //If so, revealed.
-        }
-        if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
-        if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
-
-        // Check all enemy ships to see if any can detect this ship
-        for (const otherShip of gamedata.ships) {
-            if (otherShip.team === ship.team) continue; // Skip friendly ships
-            if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-            if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
-
-            let totalDetection = 0;
-
-            if (!otherShip.flight) {
-                if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
-                // Not a fighter — use scanner systems for detection
-                const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
-                const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
-                const scanners = [...standardScanners, ...elintScanners];
-
-                for (const scanner of scanners) {
-                    if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
-                        totalDetection += scanner.output;
-                    }
-                }
-
-                // Apply detection multiplier based on ship type
-                if (otherShip.base) {
-                    totalDetection *= 5;
-                } else if (shipManager.hasSpecialAbility(otherShip, "ELINT")) {
-                    totalDetection *= 3;
-                    //Then add any Detect Stealth bonus here.
-                    var bonusDSEW = ew.getEWByType("Detect Stealth", otherShip);
-                    totalDetection += bonusDSEW * 2;
-                } else {
-                    totalDetection *= 2;
-                }
-            } else {
-                // Fighter unit — use offensive bonus
-                if (otherShip.offensivebonus) totalDetection = otherShip.offensivebonus;
-            }
-
-            // Get distance to the stealth ship and check line of sight
-            const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
-            var loSBlocked = false;
-            //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-	        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.              
-            var shipPos = shipManager.getShipPosition(ship);
-            var otherShipPos = shipManager.getShipPosition(otherShip);
-            loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
-
-            // If within detection range, the ship is revealed
-            if (totalDetection >= distance && !loSBlocked) { //In range and LoS not blocked.
-                shipManager.markAsDetected(ship, stealthSystem);
-                return true; //Just return, if one ship can see the stealthed ship then all can.
-            }
-        }
-
-        // No one detected the ship
-        return false;
-        */
-        
     },
 
-    /*
-    isDetectedTorvalus: function (ship, detection = 15) {
-        if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
-        if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
-        var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
-        if (shadingField && shadingField.detected) return true; //Already detected.
-        if (shipManager.systems.isDestroyed(ship, shadingField)) return true; 
-        if (shipManager.power.isOffline(ship, shadingField)) return true;                
-
-        if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
-
-        // Check all enemy ships to see if any can detect this ship
-        for (const otherShip of gamedata.ships) {
-            if (otherShip.team === ship.team) continue; // Skip friendly ships
-            if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-            if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
-
-            let totalDetection = detection; //Shading Field detection range is always 15.
-
-            // Get distance to the stealth ship and check line of sight
-            const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
-            var loSBlocked = false;
-            //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-	        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.            
-            var shipPos = shipManager.getShipPosition(ship);
-            var otherShipPos = shipManager.getShipPosition(otherShip);
-            loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // True is LoSBlocked          
-
-            // If within detection range, the ship is revealed
-            if (distance <= totalDetection && !loSBlocked) { //In range and LoS not blocked.
-                shadingField.detected = true;
-                return true; //Just return, if one ship can see the stealthed ship then all can.
-            }
-        }
-
-        // No one detected the ship
-        return false;
-    },
-    */
-    /*
-    isDetectedTrek: function (ship) {
-        if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
-        if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.      
-        
-        var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");  
-        if (cloakingDevice && cloakingDevice.detected) return true; //Already detected. 
-        if (shipManager.systems.isDestroyed(ship, cloakingDevice)) return true; 
-        if (shipManager.power.isOffline(ship, cloakingDevice)) return true;              
-
-        if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
-
-        // Check all enemy ships to see if any can detect this ship
-        for (const otherShip of gamedata.ships) {
-            if (otherShip.team === ship.team) continue; // Skip friendly ships
-            if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-            if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
-
-            let totalDetection = 0;
-
-            if (!otherShip.flight) {
-                if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
-                // Not a fighter — use scanner systems for detection
-                const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
-                const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
-                const scanners = [...standardScanners, ...elintScanners];
-
-                for (const scanner of scanners) {
-                    if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
-                        totalDetection += scanner.output;
-                    }
-                }
-
-                // Apply detection multiplier based on ship type
-                if (otherShip.base) {
-                    totalDetection = Math.floor(totalDetection * 1.5);
-                } else if (shipManager.hasSpecialAbility(otherShip, "ELINT")) {
-                    //totalDetection *= 1;
-                    //Then add any Detect Stealth bonus here.
-                    var bonusDSEW = ew.getEWByType("Detect Stealth", otherShip);
-                    totalDetection += bonusDSEW;
-                } else {
-                    totalDetection = Math.floor(totalDetection * 0.5);
-                }
-            } else {
-                // Fighter unit — use offensive bonus
-                if (otherShip.offensivebonus) totalDetection = Math.ceil(otherShip.offensivebonus / 3);
-            }
-
-            // Get distance to the stealth ship and check line of sight
-            const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
-            var loSBlocked = false;
-            //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-	        var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.            
-            var shipPos = shipManager.getShipPosition(ship);
-            var otherShipPos = shipManager.getShipPosition(otherShip);
-            loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
-
-            // If within detection range, the ship is revealed
-            if (totalDetection >= distance && !loSBlocked) { //In range and LoS not blocked.
-                shipManager.markAsDetected(cloakingDevice);
-                return true; //Just return, if one ship can see the stealthed ship then all can.
-            }
-        }
-
-        // No one detected the ship
-        return false;
-    },
-    */
 
 };
 ;
@@ -7520,13 +7342,14 @@ shipManager.systems = {
     },
 
     getFighterForSystem: function getFighterForSystem(ship, system) {
-        
-        return ship.systems.find(function(fighter) {
+
+        return ship.systems.find(function (fighter) {
             return fighter && fighter.systems.includes(system);
         })
     },
 
-    isDestroyed: function isDestroyed(ship, system) {		
+    isDestroyed: function isDestroyed(ship, system) {
+        if (!system) return false;
         if (system.parentId > 0) {
             var parentSystem = system;
 
@@ -7574,38 +7397,38 @@ shipManager.systems = {
         return shipManager.systems.isDestroyed(ship, shipManager.systems.getSystemByName(ship, "reactor"));
     },
 
-    getOutput: function(ship, system){
-		if (!system){
-			console.log("ERROR: getOutput system missing");
-			console.trace();
-		}
-		
-		if (this.isDestroyed(ship, system))
-			return 0;
-        
-		if (shipManager.power.isOffline(ship, system))
-			return 0;
-		
-		var output = system.output + system.outputMod + shipManager.power.getBoost(system);
-        	output = Math.max(0,output); //output cannot be negative!
+    getOutput: function (ship, system) {
+        if (!system) {
+            console.log("ERROR: getOutput system missing");
+            console.trace();
+        }
+
+        if (this.isDestroyed(ship, system))
+            return 0;
+
+        if (shipManager.power.isOffline(ship, system))
+            return 0;
+
+        var output = system.output + system.outputMod + shipManager.power.getBoost(system);
+        output = Math.max(0, output); //output cannot be negative!
 
         return output;
     },
 
-    getOutputNoBoost: function getOutputNoBoost(ship, system){
-		if (!system){
-			console.log("ERROR: getOutputNoBoost system missing");
-			console.trace();
-		}
-		
-		if (this.isDestroyed(ship, system))
-			return 0;
-        
-		if (shipManager.power.isOffline(ship, system))
-			return 0;
-		
-		var output = system.output + system.outputMod;
-        	output = Math.max(0,output); //output cannot be negative!
+    getOutputNoBoost: function getOutputNoBoost(ship, system) {
+        if (!system) {
+            console.log("ERROR: getOutputNoBoost system missing");
+            console.trace();
+        }
+
+        if (this.isDestroyed(ship, system))
+            return 0;
+
+        if (shipManager.power.isOffline(ship, system))
+            return 0;
+
+        var output = system.output + system.outputMod;
+        output = Math.max(0, output); //output cannot be negative!
 
         return output;
     },
@@ -7653,63 +7476,17 @@ shipManager.systems = {
                     }
                 }
             }
-            /* Cleaned 19.8.25 - DK
-            if (system.duoWeapon || system.dualWeapon) {
-                for (var i in system.weapons) {
-                    var weapon = system.weapons[i];
-
-                    if (weapon.id == id) {
-                        return weapon;
-                    }
-                }
-            }
-
-            if (system.dualWeapon) {
-                if (system.weapons[system.firingMode].duoWeapon) {
-                    for (var i in system.weapons[system.firingMode].weapons) {
-                        var duoWeapon = system.weapons[system.firingMode].weapons[i];
-
-                        if (duoWeapon.id == id) {
-                            return duoWeapon;
-                        }
-                    }
-                }
-            }
-            */
         }
 
         return null;
     },
 
     initializeSystem: function initializeSystem(system) {
-        /* Cleaned 19.8.25 - DK		        
-        if (system.dualWeapon && system.weapons == null) {
-            return system;
-        }
 
-        if (system.dualWeapon) {
-            var selectedWeapon = system.weapons[system.firingMode];
-
-            if (selectedWeapon.duoWeapon) {
-                selectedWeapon.damage = system.weapons[1].damage;
-            } else {
-                selectedWeapon.damage = system.damage;
-            }
-
-            selectedWeapon.power = system.power;
-            selectedWeapon.firingMode = system.firingMode;
-            selectedWeapon.firingModes = system.firingModes;
-            selectedWeapon.dualWeapon = true;
-            selectedWeapon.initialized = true;
-
-            selectedWeapon.destroyed = system.destroyed;
-            return selectedWeapon;
-        }
-        */
         if (system.boostable) {
             system = system.initBoostableInfo();
         }
-		system = system.initializationUpdate(); //very rarely - system needs to update data not on a particular event
+        system = system.initializationUpdate(); //very rarely - system needs to update data not on a particular event
 
         if (system.name == "engine") {
             system.addInfo();
@@ -7739,7 +7516,7 @@ shipManager.systems = {
                     var figsys = system.systems[a];
 
                     if ((figsys.name == name)
-						&& (!shipManager.systems.isDestroyed(ship,figsys)) ) { //only on alive fighters!
+                        && (!shipManager.systems.isDestroyed(ship, figsys))) { //only on alive fighters!
                         return figsys;
                     }
                 }
@@ -7751,10 +7528,10 @@ shipManager.systems = {
 
         return null;
     },
-	
+
 
     getSystemListByName: function getSystemByName(ship, name) {
-		var toReturn = Array();
+        var toReturn = Array();
         for (var i in ship.systems) {
             var system = ship.systems[i];
             if (system.fighter) {
@@ -7762,7 +7539,7 @@ shipManager.systems = {
                     var figsys = system.systems[a];
 
                     if ((figsys.name == name)
-						&& (!shipManager.systems.isDestroyed(ship,figsys)) ) { //only on alive fighters!
+                        && (!shipManager.systems.isDestroyed(ship, figsys))) { //only on alive fighters!
                         toReturn.push(figsys);
                     }
                 }
@@ -7797,7 +7574,7 @@ shipManager.systems = {
     },
 
 
-    getMultipleArcs: function getMultipleArcs(ship, weapon) {    
+    getMultipleArcs: function getMultipleArcs(ship, weapon) {
         const arcs = [];
 
         const isRolled = shipManager.movement.isRolled(ship);
@@ -7809,7 +7586,7 @@ shipManager.systems = {
 
         for (let i = 0; i < weapon.startArcArray.length; i++) {
             const start = weapon.startArcArray[i];
-            const end   = weapon.endArcArray[i];
+            const end = weapon.endArcArray[i];
 
             // Skip unmatched pairs
             if (end === undefined) continue;
@@ -7817,7 +7594,7 @@ shipManager.systems = {
             if (isRolled) {
                 arcs.push({
                     start: mathlib.addToDirection(end, end * -2),
-                    end:   mathlib.addToDirection(start, start * -2)
+                    end: mathlib.addToDirection(start, start * -2)
                 });
             } else {
                 arcs.push({ start, end });
@@ -7825,7 +7602,7 @@ shipManager.systems = {
         }
 
         return arcs;
-    },    
+    },
 
 
     getDisplayName: function getDisplayName(system) {
@@ -7876,11 +7653,20 @@ shipManager.systems = {
     getStructureSystem: function getStructureSystem(ship, location) {
         if (ship.flight) {
             return null;
-        } else if (!ship.structures[location]) {
-            return null;
         }
 
-        return shipManager.systems.getSystem(ship, ship.structures[location]);
+        if (ship.structures && ship.structures[location]) {
+            return shipManager.systems.getSystem(ship, ship.structures[location]);
+        }
+
+        // Fallback for dynamically created ships (e.g. mines) that don't have structures array serialized
+        for (var i in ship.systems) {
+            if (ship.systems[i].name == "structure" && ship.systems[i].location == location) {
+                return ship.systems[i];
+            }
+        }
+
+        return null;
     },
 
     groupSystems: function groupSystems(systems) {
@@ -7931,7 +7717,7 @@ shipManager.systems = {
         var aft = ship.systems[1].armour[1];
         var side = ship.systems[1].armour[2];
 
-        var armour =  front + " / " + side + " / " + aft;
+        var armour = front + " / " + side + " / " + aft;
 
         return armour;
     },
@@ -7953,96 +7739,96 @@ shipManager.systems = {
         for (var i = 0; i < system.damage.length; i++) {
             var damage = system.damage[i].damage - system.damage[i].armour;
             //if (damage > 0) {// healing is a thing!
-                total += damage;
+            total += damage;
             //}
         }
 
         return total;
     },
 
-	//Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
-	getNegativeBFCP: function getNegativeBFCP() {
-			var shipNames = new Array();
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-                var deployTurn = shipManager.getTurnDeployed(ship);
-			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
-                if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
-				if (ship.unavailable) continue;
-				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;			
-				if (!(shipManager.systems.getSystemByName(ship, "hyachComputer"))) continue; //Does it have a computer?
-				if (shipManager.isDestroyed(ship)) continue;
-				var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));
-				if(shipManager.systems.isDestroyed(ship, computer)) continue; 										
-				if (computer.BFCPtotal_used > computer.output){ //Is the total BFCP used greater than output and Computer NOT destroyed, usually due to damage to Computer.
-					shipNames[counter] = ship.name;
-					counter++;
-				}
-			}
-			return shipNames;
-		},	//endof getNegativeBFCP
+    //Looks for ships with Hyach Computer and lists any where the balance of BFCP is negative for error message.
+    getNegativeBFCP: function getNegativeBFCP() {
+        var shipNames = new Array();
+        var counter = 0;
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+            if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+            if (ship.unavailable) continue;
+            if (ship.flight) continue;
+            if (ship.userid != gamedata.thisplayer) continue;
+            if (!(shipManager.systems.getSystemByName(ship, "hyachComputer"))) continue; //Does it have a computer?
+            if (shipManager.isDestroyed(ship)) continue;
+            var computer = (shipManager.systems.getSystemByName(ship, "hyachComputer"));
+            if (shipManager.systems.isDestroyed(ship, computer)) continue;
+            if (computer.BFCPtotal_used > computer.output) { //Is the total BFCP used greater than output and Computer NOT destroyed, usually due to damage to Computer.
+                shipNames[counter] = ship.name;
+                counter++;
+            }
+        }
+        return shipNames;
+    },	//endof getNegativeBFCP
 
-	//Looks for ships with Hyach Specialists and lists any where these have not been selected in Deployment Phase.
-	getUnusedSpecialists: function getUnusedSpecialists() {
-			var shipNames = new Array();
-			var counter = 0;
+    //Looks for ships with Hyach Specialists and lists any where these have not been selected in Deployment Phase.
+    getUnusedSpecialists: function getUnusedSpecialists() {
+        var shipNames = new Array();
+        var counter = 0;
 
-				for (var i in gamedata.ships) {
-                    var ship = gamedata.ships[i];
-			        if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                    
-                    var deployTurn = shipManager.getTurnDeployed(ship);                    
-                    if(deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if (deployTurn !== gamedata.turn) continue;   //Don't bother checking for ships that haven't deployed yet.
 
-                    if (shipManager.isDestroyed(ship)) continue;
-                    if (ship.unavailable) continue;
-                    if (ship.flight) continue;
-                    if (ship.userid != gamedata.thisplayer) continue;	 		
-                    if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
+            if (shipManager.isDestroyed(ship)) continue;
+            if (ship.unavailable) continue;
+            if (ship.flight) continue;
+            if (ship.userid != gamedata.thisplayer) continue;
+            if (!(shipManager.systems.getSystemByName(ship, "hyachSpecialists"))) continue; //Does it Specialists?
 
-                    var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));						
-                        if (specialists.canSelectAnything()){ //Can anymore Specialists be selected?
-                            shipNames[counter] = ship.name;
-                            counter++;
-                        }
-				}
-					
-			return shipNames;
-		},	//endof getUnusedSpecialists
+            var specialists = (shipManager.systems.getSystemByName(ship, "hyachSpecialists"));
+            if (specialists.canSelectAnything()) { //Can anymore Specialists be selected?
+                shipNames[counter] = ship.name;
+                counter++;
+            }
+        }
 
-		// Looks for ships with Thirdspace Shield Generators or ThoughtShieldGenerators and compiles a list of any with negative capacity.
-		checkShieldGenValue: function checkShieldGenValue() {
-			var shipNames = [];
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-			    if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;                
-				if (ship.unavailable) continue;
-				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;
+        return shipNames;
+    },	//endof getUnusedSpecialists
 
-                var deployTurn = shipManager.getTurnDeployed(ship);
-				if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+    // Looks for ships with Thirdspace Shield Generators or ThoughtShieldGenerators and compiles a list of any with negative capacity.
+    checkShieldGenValue: function checkShieldGenValue() {
+        var shipNames = [];
+        var counter = 0;
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+            if (ship.unavailable) continue;
+            if (ship.flight) continue;
+            if (ship.userid != gamedata.thisplayer) continue;
 
-				// Check for either ThirdspaceShieldGenerator or ThoughtShieldGenerator
-				var generator = shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator") || 
-								shipManager.systems.getSystemByName(ship, "ThoughtShieldGenerator");
-				if (!generator) continue; // No generator found
-				
-				if (shipManager.isDestroyed(ship)) continue;
-				if (shipManager.systems.isDestroyed(ship, generator)) continue;
-				
-				if (generator.storedCapacity != 0) { // Generator is not zero, either too much or too little shield allocation.
-					shipNames[counter] = ship.name;
-					counter++;
-				}
-			}
-			return shipNames;
-		}, // end of checkShieldGenValue
+            var deployTurn = shipManager.getTurnDeployed(ship);
+            if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+
+            // Check for either ThirdspaceShieldGenerator or ThoughtShieldGenerator
+            var generator = shipManager.systems.getSystemByName(ship, "ThirdspaceShieldGenerator") ||
+                shipManager.systems.getSystemByName(ship, "ThoughtShieldGenerator");
+            if (!generator) continue; // No generator found
+
+            if (shipManager.isDestroyed(ship)) continue;
+            if (shipManager.systems.isDestroyed(ship, generator)) continue;
+
+            if (generator.storedCapacity != 0) { // Generator is not zero, either too much or too little shield allocation.
+                shipNames[counter] = ship.name;
+                counter++;
+            }
+        }
+        return shipNames;
+    }, // end of checkShieldGenValue
 
     getSystemListThrustBoosted: function getSystemListThrustBoosted(ship) { //For Nexus PLasma Charge, but coulod be used for other Thrust-boosted system - DK 25.3.24
-		var toReturn = Array();
+        var toReturn = Array();
         for (var i in ship.systems) {
             var system = ship.systems[i];
 
@@ -8056,7 +7842,7 @@ shipManager.systems = {
 
 
     getSystemListEWBoosted: function getSystemListEWBoosted(ship) { //Instead of listing weapons like Psionic Lances separately, call one function - DK 25.3.24
-		var toReturn = Array();
+        var toReturn = Array();
         for (var i in ship.systems) {
             var system = ship.systems[i];
 
@@ -8066,11 +7852,11 @@ shipManager.systems = {
         }
 
         return toReturn;
-    },    
+    },
 
-    hasBorderHighlight: function hasBorderHighlight(ship, system) { 
+    hasBorderHighlight: function hasBorderHighlight(ship, system) {
         // Try to prioritise effects and optimise performance. Can only return ONE border highlight colour.
-        
+
         // Check Abbai faction-specific conditions
         if (ship.faction === "Abbai Matriarchate") {
             const mayOverheat = shipManager.criticals.countCriticalOnTurn(system, "MayOverheat", gamedata.turn);
@@ -8078,18 +7864,18 @@ shipManager.systems = {
             // Uncomment if orange highlight for "MayOverheat === 1" is required
             // if (mayOverheat === 1) return 'orange';
         }
-    
+
         // Check CnC critical effects (most important first)
         if (system.name === "cnC") {
-            const cnCCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);            
+            const cnCCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);
             for (const crit of cnCCrits) {
-                if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite", 
-                     "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
+                if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite",
+                    "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
                     return 'Red';
                 }
             }
         }
-    
+
         // Check critical effects for the current system
         const allCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);
         for (const crit of allCrits) {
@@ -8102,17 +7888,17 @@ shipManager.systems = {
                 return 'Orange';
             }
         }
-    
+
         // Check for overloading systems
         if (shipManager.power.isOverloading(ship, system)) {
             return 'Yellow';
         }
-    
+
         // No highlight if none of the conditions are met
         return null;
     },
 
-    
+
     getRemainingHealth: function getRemainingHealth(system) {
         var damage = shipManager.systems.getTotalDamage(system);
         var max = system.maxhealth;
@@ -11045,6 +10831,7 @@ shipManager.movement = {
     },
 
     canTurn: function canTurn(ship, right) {
+        if (ship.mine) return false;        
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
@@ -11181,12 +10968,12 @@ shipManager.movement = {
     canGraviticTurn: function canGraviticTurn(ship, right) {
         //if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
+        if (!ship.gravitic) return false;        
         if(!ship.flight) return false; //Fighters only for now.
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         //if (shipManager.systems.isEngineDestroyed(ship)) return false;
 
-        //if (shipManager.movement.isRolling(ship) && !ship.gravitic) return false;
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         var previous = shipManager.movement.getLastCommitedMove(ship);
@@ -11205,18 +10992,10 @@ shipManager.movement = {
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
-        //var pivoting = shipManager.movement.isPivoting(ship);
-        //if (pivoting != "no" && !ship.gravitic) {
-        //    return false;
-        //}
-        //var rolling = shipManager.movement.isRolling(ship);
-        //if (rolling && !ship.gravitic) {
-        //    return false;
-        //}
 
-        if (ship.gravitic && ship.flight && shipManager.movement.isOutOfAlignment(ship)) {
-            return true;
-        }
+        if (shipManager.movement.isGoingBackwards(ship)) return true; //Backwards ships can grav turn always.
+
+        if (ship.flight && shipManager.movement.isOutOfAlignment(ship)) return true; //No going backward but not facing forward, can grav turn
 
         return false;
     },    
@@ -15520,177 +15299,239 @@ window.shipWindowManager = {
 /* Source: client/UI/fleetList.js */
 "use strict";
 
-jQuery(function () {});
+jQuery(function () { });
 
 window.fleetListManager = {
 
     initialized: false,
     refreshed: true,
 
-    prepare: function prepare() {},
+    prepare: function prepare() { },
 
     displayFleetLists: function displayFleetLists() {
-    if (!fleetListManager.initialized) {
-        $("#gameinfo .fleetlistentry").remove();
-        const template = $("#logcontainer .fleetlistentry");
+        if (!fleetListManager.initialized) {
+            $("#gameinfo .fleetlistentry").remove();
+            const template = $("#logcontainer .fleetlistentry");
 
-        for (const i in gamedata.slots) {
-            const slot = gamedata.slots[i];
-            if (slot.playerid === gamedata.thisplayer) {
-                fleetListManager.createFleetList(slot, template);
+            var uniqueTeams = [];
+            for (const i in gamedata.slots) {
+                var team = parseInt(gamedata.slots[i].team, 10);
+                if (team > 0 && !uniqueTeams.includes(team)) {
+                    uniqueTeams.push(team);
+                }
             }
-        }
+            uniqueTeams.sort(function (a, b) { return a - b; });
 
-        for (const i in gamedata.slots) {
-            const slot = gamedata.slots[i];
-            if (slot.playerid !== gamedata.thisplayer) {
-                fleetListManager.createFleetList(slot, template);
+            for (var t = 0; t < uniqueTeams.length; t++) {
+                var currentTeam = uniqueTeams[t];
+                for (const i in gamedata.slots) {
+                    const slot = gamedata.slots[i];
+                    if (parseInt(slot.team, 10) === currentTeam) {
+                        fleetListManager.createFleetList(slot, template);
+                    }
+                }
             }
+
+            fleetListManager.initialized = true;
+        } else if (!fleetListManager.refreshed) { //Just refresh whether orders committed or not.
+            // Only update turnTaken text if refreshing
+            for (const i in gamedata.slots) {
+                const slot = gamedata.slots[i];
+                fleetListManager.updateTurnTakenInFleetHeader(slot);
+            }
+
+            // Reset the flag
+            fleetListManager.refreshed = true;
         }
 
-        fleetListManager.initialized = true;
-    } else if (!fleetListManager.refreshed) { //Just refresh whether orders committed or not.
-        // Only update turnTaken text if refreshing
-        for (const i in gamedata.slots) {
-            const slot = gamedata.slots[i];
-            fleetListManager.updateTurnTakenInFleetHeader(slot);
-        }
+        fleetListManager.updateFleetList();
+    },
 
-        // Reset the flag
-        fleetListManager.refreshed = true;
-    }
+    createFleetList: function createFleetList(slot, template) {
+        var shipArray = new Array();
 
-    fleetListManager.updateFleetList();
-},
+        // Clone the template and append to gameinfo
+        var fleetlistentry = template.clone(true).appendTo("#gameinfo");
 
-createFleetList: function createFleetList(slot, template) {
-    var shipArray = new Array();
+        // CHANGED: Use a unique class based on slot ID instead of just playerid (to avoid DOM selector collisions)
+        fleetlistentry.addClass("slot_" + slot.slot);
 
-    // Clone the template and append to gameinfo
-    var fleetlistentry = template.clone(true).appendTo("#gameinfo");
+        var teamName = "TEAM " + slot.team;
 
-    // CHANGED: Use a unique class based on slot ID instead of just playerid (to avoid DOM selector collisions)
-    fleetlistentry.addClass("slot_" + slot.slot);
-
-    // Set the fleet list header
-    fleetlistentry.find(".fleetheader").html(
-        "<span class='headername'>FLEET LIST - </span><span class='playername'>" + slot.playername + "</span>"
-    );
-
-    // Build list of ships for this player
-    for (var i in gamedata.ships) {
-        var ship = gamedata.ships[i];
-        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
-        if (ship.userid == slot.playerid && ship.slot == slot.slot) {
-            shipArray.push(ship);
-        }
-    }
-
-    var fleetlisttable = fleetlistentry.find(".fleetlist");
-
-    // CHANGED: Only search for the template inside this fleetlistentry, not globally
-    template = fleetlistentry.find(".fleetlistline");
-
-    var fleetlistline = template.clone(true);
-
-    // Remove original template line (so it doesn’t get duplicated)
-    fleetlistentry.find(".fleetlistline").remove();
-
-    // Create and append the header row
-    fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Current Value</span></span>");
-    fleetlistline.appendTo(fleetlisttable);
-
-    var totalBaseValue = 0;
-    var totalCurrValue = 0;
-
-    // Add each ship to the list
-    for (var index in shipArray) {
-        ship = shipArray[index];
-        fleetlistline = template.clone(true);
-
-        var shiptype = "unknown";
-        switch (ship.shipSizeClass) {
-            case -1:
-                shiptype = "Squadron";
-                break;
-            case 1:
-                shiptype = "MCV";
-                break;
-            case 2:
-                shiptype = "HCV";
-                break;
-            case 3:
-                shiptype = "Capital";
-                break;
-            default:
-                break;
-        }
-
-        var baseValue = ship.pointCost;
-        if (ship.flight === true) {
-            // Flights have cost calculated per 6 fighters
-            baseValue = ship.pointCost * (ship.flightSize / 6);
-        }
-        baseValue = Math.round(baseValue + ship.pointCostEnh + ship.pointCostEnh2);
-        var currValue = Math.round(baseValue * ship.combatValue / 100);
-
-        totalBaseValue += baseValue;
-        totalCurrValue += currValue;
-
-        fleetlistline.html(
-            "<span id='" + ship.id + "'>" +
-            "<span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span>" +
-            "<span class='shipclass'>" + ship.shipClass + "</span>" +
-            "<span class='shiptype'>" + shiptype + "</span>" +
-            "<span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span>" +
-            "<span class='value'>" + currValue + '/' + baseValue + "CP</span>" +
-            "<span class='shipstatus'></span></span>"
+        // Set the fleet list header
+        fleetlistentry.find(".fleetheader").html(
+            "<span class='headername'>" + teamName + " - </span><span class='playername'>" + slot.playername + "</span>"
         );
 
-        fleetlistline.appendTo(fleetlisttable);
-    }
+        var mineGroups = {};
 
-    var phaseLabel = "Initial"
-    switch(gamedata.gamephase){
+        // Build list of ships for this player
+        for (var i in gamedata.ships) {
+            var ship = gamedata.ships[i];
+            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 
-        case -1:
-            phaseLabel = "Pre-Turn";
-            break;            
-        case 2:
-            phaseLabel = "Movement";
-            break;
-        case 5:
-            phaseLabel = "Pre-Firing";
-            break;  
-        case 3:
-            phaseLabel = "Firing";
-            break;                                                  
-    }
+            if (ship.userid == slot.playerid && ship.slot == slot.slot) {
+                if (ship.mine) {
+                    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+                    var shipClass = ship.shipClass;
+                    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                        shipClass = "Mine";
+                    }
 
-    var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for " + phaseLabel + " Orders]</span>";
+                    if (!mineGroups[shipClass]) {
+                        mineGroups[shipClass] = [];
+                    }
 
-    if(slot.surrendered !== null){
-        if(slot.surrendered <= gamedata.turn){ //Surrendered on this turn or before.
-            turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
+                    mineGroups[shipClass].push(ship);
+                } else {
+                    shipArray.push(ship);
+                }
+            }
         }
-    }else if (slot.waiting){
-        turnTaken = "<span style='color:green;'>&nbsp;&nbsp;[Orders committed]</span>";
-    } 
-    
-    var deploys = "";
-    if(slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
 
-    // Update fleet header with value totals
-    fleetlistentry.find(".fleetheader").html(
-        deploys + "<span class='headername'>FLEET LIST - </span>" +
-        "<span class='playername'>" + slot.playername + 
-        ": " + totalCurrValue + " / " + totalBaseValue + " CP" +
-         "<span class='turnTaken'>" + turnTaken + "</span>"
-    );
+        var fleetlisttable = fleetlistentry.find(".fleetlist");
 
-    // Add ship click handler
-    $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
-},
+        // CHANGED: Only search for the template inside this fleetlistentry, not globally
+        template = fleetlistentry.find(".fleetlistline");
+
+        var fleetlistline = template.clone(true);
+
+        // Remove original template line (so it doesn’t get duplicated)
+        fleetlistentry.find(".fleetlistline").remove();
+
+        // Create and append the header row
+        fleetlistline.html("<span><span class='shipname header'>Ship Name</span><span class='shipclass header'>Ship Class</span><span class='shiptype header'>Type</span><span class='initiative header'>Initiative</span><span class='value header'>Current Value</span></span>");
+        fleetlistline.appendTo(fleetlisttable);
+
+        var totalBaseValue = 0;
+        var totalCurrValue = 0;
+
+        // Add each ship to the list
+        for (var index in shipArray) {
+            ship = shipArray[index];
+            fleetlistline = template.clone(true);
+
+            var shiptype = "unknown";
+            switch (ship.shipSizeClass) {
+                case -1:
+                    shiptype = "Squadron";
+                    break;
+                case 1:
+                    shiptype = "MCV";
+                    break;
+                case 2:
+                    shiptype = "HCV";
+                    break;
+                case 3:
+                    shiptype = "Capital";
+                    break;
+                default:
+                    break;
+            }
+
+            var baseValue = ship.pointCost;
+            if (ship.flight === true) {
+                // Flights have cost calculated per 6 fighters
+                baseValue = ship.pointCost * (ship.flightSize / 6);
+            }
+            baseValue = Math.round(baseValue + ship.pointCostEnh + ship.pointCostEnh2);
+            var currValue = Math.round(baseValue * ship.combatValue / 100);
+
+            totalBaseValue += baseValue;
+            totalCurrValue += currValue;
+
+            fleetlistline.html(
+                "<span id='" + ship.id + "'>" +
+                "<span class='shipname clickable' data-shipid='" + ship.id + "'>" + ship.name + "</span>" +
+                "<span class='shipclass'>" + ship.shipClass + "</span>" +
+                "<span class='shiptype'>" + shiptype + "</span>" +
+                "<span class='initiative'>" + shipManager.getIniativeOrder(ship) + "</span>" +
+                "<span class='value'>" + currValue + '/' + baseValue + "CP</span>" +
+                "<span class='shipstatus'></span></span>"
+            );
+
+            fleetlistline.appendTo(fleetlisttable);
+        }
+
+        // Add grouped mines to the list
+        for (var mineClass in mineGroups) {
+            var mines = mineGroups[mineClass];
+            var mineCount = mines.length;
+            var firstMine = mines[0];
+
+            fleetlistline = template.clone(true);
+            var shiptype = "Mine";
+
+            var combinedBaseValue = 0;
+            var combinedCurrValue = 0;
+
+            for (var m in mines) {
+                var mine = mines[m];
+                var mBaseValue = Math.round(mine.pointCost + mine.pointCostEnh + mine.pointCostEnh2);
+                var mCurrValue = Math.round(mBaseValue * mine.combatValue / 100);
+                combinedBaseValue += mBaseValue;
+                combinedCurrValue += mCurrValue;
+            }
+
+            totalBaseValue += combinedBaseValue;
+            totalCurrValue += combinedCurrValue;
+
+            var displayName = mineClass + " (" + mineCount + ")";
+
+            fleetlistline.html(
+                "<span>" +
+                "<span class='shipname' style='cursor:default;' title='Mines cannot be selected here'>" + displayName + "</span>" +
+                "<span class='shipclass'>" + mineClass + "</span>" +
+                "<span class='shiptype'>" + shiptype + "</span>" +
+                "<span class='initiative'>" + shipManager.getIniativeOrder(firstMine) + "</span>" +
+                "<span class='value'>" + combinedCurrValue + '/' + combinedBaseValue + "CP</span>" +
+                "<span class='shipstatus'></span></span>"
+            );
+
+            fleetlistline.appendTo(fleetlisttable);
+        }
+
+        var phaseLabel = "Initial"
+        switch (gamedata.gamephase) {
+
+            case -1:
+                phaseLabel = "Pre-Turn";
+                break;
+            case 2:
+                phaseLabel = "Movement";
+                break;
+            case 5:
+                phaseLabel = "Pre-Firing";
+                break;
+            case 3:
+                phaseLabel = "Firing";
+                break;
+        }
+
+        var turnTaken = "<span style='color:orange'>&nbsp;&nbsp;[Waiting for " + phaseLabel + " Orders]</span>";
+
+        if (slot.surrendered !== null) {
+            if (slot.surrendered <= gamedata.turn) { //Surrendered on this turn or before.
+                turnTaken = "<span style='color:red'>&nbsp;&nbsp;[Surrendered on Turn " + slot.surrendered + "]</span>"; //Check surrendered first.
+            }
+        } else if (slot.waiting) {
+            turnTaken = "<span style='color:green;'>&nbsp;&nbsp;[Orders committed]</span>";
+        }
+
+        var deploys = "";
+        if (slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
+
+        // Update fleet header with value totals
+        fleetlistentry.find(".fleetheader").html(
+            deploys + "<span class='headername'>" + teamName + " - </span>" +
+            "<span class='playername'>" + slot.playername +
+            ": " + totalCurrValue + " / " + totalBaseValue + " CP" +
+            "<span class='turnTaken'>" + turnTaken + "</span>"
+        );
+
+        // Add ship click handler
+        $(".clickable", fleetlistentry).on("click", fleetListManager.doScrollToShip);
+    },
 
 
     updateTurnTakenInFleetHeader: function updateTurnTakenInFleetHeader(slot) {
@@ -15700,19 +15541,19 @@ createFleetList: function createFleetList(slot, template) {
         if (!header.length) return; // Just in case something went wrong
 
         var phaseLabel = "Initial"
-        switch(gamedata.gamephase){
+        switch (gamedata.gamephase) {
             case -1:
                 phaseLabel = "Pre-Turn";
-                break;            
+                break;
             case 2:
                 phaseLabel = "Movement";
                 break;
             case 5:
                 phaseLabel = "Pre-Firing";
-                break;  
+                break;
             case 3:
                 phaseLabel = "Firing";
-                break;                                                  
+                break;
         }
 
         const html = slot.waiting
@@ -15729,11 +15570,11 @@ createFleetList: function createFleetList(slot, template) {
             if (slot.playerid === playerId) {
                 slot.waiting = true; //Set this manually for front end to know, gamedata will not refect it yet with page refresh
                 fleetListManager.refreshed = false;
-                fleetListManager.displayFleetLists();                
+                fleetListManager.displayFleetLists();
             }
         }
 
-    }, 
+    },
 
 
     doScrollToShip: function doScrollToShip(e) {
@@ -15747,11 +15588,11 @@ createFleetList: function createFleetList(slot, template) {
         var shipId = shipNameEntry.dataset["shipid"];
         var ship = gamedata.getShip(shipId);
 
-        if(shipManager.shouldBeHidden(ship)){ //Enemy, stealth equipped and undetected, or not deployed yet.
+        if (shipManager.shouldBeHidden(ship)) { //Enemy, stealth equipped and undetected, or not deployed yet.
             return; //Do not scroll to Stealthed ships
-        } else{
-            window.webglScene.customEvent('ScrollToShip', {shipId: shipId});
-        }    
+        } else {
+            window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
+        }
     },
 
     updateFleetList: function updateFleetList() {
@@ -15762,12 +15603,12 @@ createFleetList: function createFleetList(slot, template) {
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
-                if(shipManager.hasJumpedNotDestroyed(ship)){
+                if (shipManager.hasJumpedNotDestroyed(ship)) {
                     $("#" + ship.id).addClass("jumped");
-                    $("#" + ship.id + " .initiative").html("Jumped");                     
-                } else {                
+                    $("#" + ship.id + " .initiative").html("Jumped");
+                } else {
                     $("#" + ship.id).addClass("destroyed");
-                    $("#" + ship.id + " .initiative").html("Destroyed");                    
+                    $("#" + ship.id + " .initiative").html("Destroyed");
                 }
             }
         }
@@ -15775,7 +15616,7 @@ createFleetList: function createFleetList(slot, template) {
 
     reset: function reset() {
         fleetListManager.initialized = false;
-    },      
+    },
 
 };;
 
@@ -16772,6 +16613,10 @@ Weapon.prototype.getAmmo = function (fireOrder) {
 	return null;
 };
 
+Weapon.prototype.getModeNameForEnemy = function (fireOrder) {
+	return this.weaponClass.firingMode[1];
+};
+
 Weapon.prototype.translateFCtoD100txt = function (fireControl) {
 	var FCtxt = '';
 	var i = 0;
@@ -17722,6 +17567,7 @@ CnC.prototype.constructor = CnC;
 
 CnC.prototype.initializationUpdate = function () {
 	var ship = this.ship;
+	if (!this.data) this.data = {};
 	if (ship.factionAge > 2 || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
 		this.data["Marine Units"] = 'N/A';
 	} else {
@@ -17865,74 +17711,115 @@ Stealth.prototype = Object.create(ShipSystem.prototype);
 Stealth.prototype.constructor = Stealth;
 
 Stealth.prototype.isDetectedStealth = function (ship) {
- 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
-    if (this.detected) return true; //Already detected.
+	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
+	//if (ship.team === gamedata.getPlayerTeam()) return true; // Friendly ships are always visible
+	if (this.detected === true) return true; // Fallback support for boolean
+	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
 
-    // If the ship used offensive or ELINT EW, it is revealed
-    const usedEW = ew.getAllEWExceptDEW(ship); //Has used any EW abilities except DEW?
-    if (usedEW > 0) {
-        return true; //If so, revealed.
-    }
-    if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.  
-    if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
+	// If the ship used offensive or ELINT EW, it is revealed
+	const usedEW = ew.getAllEWExceptDEW(ship); //Has used any EW abilities except DEW?
+	if (usedEW > 0) {
+		return true; //If so, revealed.
+	}
+	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
 
-    // Check all enemy ships to see if any can detect this ship
-    for (const otherShip of gamedata.ships) {
-        if (otherShip.team === ship.team) continue; // Skip friendly ships
-        if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-        if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
+	/*
+	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
 
-        let totalDetection = 0;
+	// Check all enemy ships to see if any can detect this ship
+	for (const otherShip of gamedata.ships) {
+		if (otherShip.team === ship.team) continue; // Skip friendly ships
+		if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
+		if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
 
-        if (!otherShip.flight) {
-            if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
-            // Not a fighter — use scanner systems for detection
-            const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
-            const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
-            const scanners = [...standardScanners, ...elintScanners];
+		let totalDetection = 0;
 
-            for (const scanner of scanners) {
-                if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
-                    totalDetection += scanner.output;
-                }
-            }
+		if (!otherShip.flight) {
+			if (shipManager.isDisabled(otherShip)) continue; //Skip disabled ships               
+			// Not a fighter — use scanner systems for detection
+			const standardScanners = shipManager.systems.getSystemListByName(otherShip, "scanner");
+			const elintScanners = shipManager.systems.getSystemListByName(otherShip, "elintScanner");
+			const scanners = [...standardScanners, ...elintScanners];
 
-            // Apply detection multiplier based on ship type
-            if (otherShip.base) {
-                totalDetection *= 5;
-            } else if (shipManager.hasSpecialAbility(otherShip, "ELINT")) {
-                totalDetection *= 3;
-                //Then add any Detect Stealth bonus here.
-                var bonusDSEW = ew.getEWByType("Detect Stealth", otherShip);
-                totalDetection += bonusDSEW * 2;
-            } else {
-                totalDetection *= 2;
-            }
-        } else {
-            // Fighter unit — use offensive bonus
-            if (otherShip.offensivebonus) totalDetection = otherShip.offensivebonus;
-        }
+			for (const scanner of scanners) {
+				if (!shipManager.systems.isDestroyed(otherShip, scanner) && !shipManager.power.isOfflineOnTurn(otherShip, scanner, gamedata.turn)) {
+					totalDetection += scanner.output;
+				}
+			}
 
-        // Get distance to the stealth ship and check line of sight
-        const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
-        var loSBlocked = false;
-        //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-	    var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.		
-        var shipPos = shipManager.getShipPosition(ship);
-        var otherShipPos = shipManager.getShipPosition(otherShip);
-        loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
+			// Apply detection multiplier based on ship type
+			if (otherShip.base) {
+				totalDetection *= 5;
+			} else if (shipManager.hasSpecialAbility(otherShip, "ELINT")) {
+				totalDetection *= 3;
+				//Then add any Detect Stealth bonus here.
+				var bonusDSEW = ew.getEWByType("Detect Stealth", otherShip);
+				totalDetection += bonusDSEW * 2;
+			} else {
+				totalDetection *= 2;
+			}
+		} else {
+			// Fighter unit — use offensive bonus
+			if (otherShip.offensivebonus) totalDetection = otherShip.offensivebonus;
+		}
 
-        // If within detection range, the ship is revealed
-        if (totalDetection >= distance && !loSBlocked) { //In range and LoS not blocked.
-        	this.detected = true;
-            return true; //Just return, if one ship can see the stealthed ship then all can.
-        }
-    }
+		// Get distance to the stealth ship and check line of sight
+		const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
+		var loSBlocked = false;
+		//var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+		var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.		
+		var shipPos = shipManager.getShipPosition(ship);
+		var otherShipPos = shipManager.getShipPosition(otherShip);
+		loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // Defaults to false (LoS NOT blocked)            
 
-    //No one detected the ship
-    return false;
+		// If within detection range, the ship is revealed
+		if (totalDetection >= distance && !loSBlocked) { //In range and LoS not blocked.
+			this.detected = true;
+			return true; //Just return, if one ship can see the stealthed ship then all can.
+		}
+	}
+	*/
+	//No one detected the ship
+	return false;
 };
 
+var MineStealth = function MineStealth(json, ship) {
+	ShipSystem.call(this, json, ship);
+};
+MineStealth.prototype = Object.create(ShipSystem.prototype);
+MineStealth.prototype.constructor = MineStealth;
+
+MineStealth.prototype.isDetectedMine = function (ship) {
+	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.          
+
+	if (Array.isArray(this.detected)) {
+		var myTeam = gamedata.getPlayerTeam();
+		if (this.detected.includes(myTeam)) return true;
+	} else if (this.detected === true) {
+		return true; //Already detected (legacy/fallback).
+	}
+
+	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
+	if (shipManager.power.isOffline(ship, this)) return true;
+
+	//No one detected the ship
+	return false;
+};
+
+MineStealth.prototype.isMineRevealed = function (ship) {
+	var myTeam = gamedata.getPlayerTeam();
+
+	// Always revealed to friendly players
+	if (ship.team === myTeam) return true;
+
+	if (Array.isArray(this.revealInfo)) {
+		if (this.revealInfo.includes(myTeam)) return true;
+	} else if (this.revealInfo === true) {
+		return true; // Legacy fallback
+	}
+
+	return false;
+};
 
 var Fighteradvsensors = function Fighteradvsensors(json, ship) {
 	ShipSystem.call(this, json, ship);
@@ -19151,7 +19038,7 @@ PowerCapacitor.prototype.getRegeneration = function () {
 	if (boostCount > 0) {//boosted!
 		regeneration += Math.round(this.nominalOutput * 0.5);
 	}
-	if(this.active) regeneration += this.nominalOutput; //Double if weapons/shields have been shutdown.
+	if (this.active) regeneration += this.nominalOutput; //Double if weapons/shields have been shutdown.
 	return regeneration;
 };
 PowerCapacitor.prototype.hasMaxBoost = function () {
@@ -19167,59 +19054,59 @@ PowerCapacitor.prototype.doIndividualNotesTransfer = function () { //prepare ind
 	powerRemaining = powerRemaining + this.getRegeneration();
 	powerRemaining = Math.min(powerRemaining, this.powerMax);
 	//this.individualNotesTransfer.push(powerRemaining);
-    this.individualNotesTransfer = {
-        powerRemaining: powerRemaining,
-        doubled: this.active === true
-    };
+	this.individualNotesTransfer = {
+		powerRemaining: powerRemaining,
+		doubled: this.active === true
+	};
 
-    return true;
+	return true;
 };
 
 PowerCapacitor.prototype.canActivate = function () {
-	if(gamedata.gamephase == 1 && !this.active) return true;
-	
+	if (gamedata.gamephase == 1 && !this.active) return true;
+
 	return false;
 };
 
 PowerCapacitor.prototype.canDeactivate = function () {
-	if(gamedata.gamephase == 1 && this.active) return true;
-	
+	if (gamedata.gamephase == 1 && this.active) return true;
+
 	return false;
 };
 
 PowerCapacitor.prototype.doActivate = function () {
 	var ship = this.ship;
-		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
-		//If you boost one Shading field in a flight, boost them all.
-		if (ship) {
-			for (var i in ship.systems) {
-				var system = ship.systems[i]; //The fighter
-				if (shipManager.systems.isDestroyed(ship, system)) continue;
-					if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
-						system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
-						system.reactivated = true; //To prevent it from immediately being powered back on.
-					}				
+	var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+	//If you boost one Shading field in a flight, boost them all.
+	if (ship) {
+		for (var i in ship.systems) {
+			var system = ship.systems[i]; //The fighter
+			if (shipManager.systems.isDestroyed(ship, system)) continue;
+			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+				system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
+				system.reactivated = true; //To prevent it from immediately being powered back on.
 			}
 		}
-		this.active = true;
-		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+	}
+	this.active = true;
+	webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 };
 
 PowerCapacitor.prototype.doDeactivate = function () {
 	var ship = this.ship;
-		var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
-		//If you boost one Shading field in a flight, boost them all.
-		this.active = false;			
-		if (ship) {
-			for (var i in ship.systems) {
-				var system = ship.systems[i]; //The fighter
-				if (shipManager.systems.isDestroyed(ship, system)) continue;
-					if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
-						shipManager.power.setOnline(ship, system);
-					}				
+	var flight = gamedata.getShip(ship.flightid);//Need to conver tto full ship info.
+	//If you boost one Shading field in a flight, boost them all.
+	this.active = false;
+	if (ship) {
+		for (var i in ship.systems) {
+			var system = ship.systems[i]; //The fighter
+			if (shipManager.systems.isDestroyed(ship, system)) continue;
+			if (system.name == "eMShield" || system instanceof Weapon && system.name !== "RammingAttack") { //Is shading Field but not this one
+				shipManager.power.setOnline(ship, system);
 			}
-		}	
-		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+		}
+	}
+	webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 };
 
 var BSGHybrid = function BSGHybrid(json, ship) {
@@ -19577,16 +19464,16 @@ ShadingField.prototype.initializationUpdate = function () {
 	}
 	var power = this.powerReq;
 
-    if(gamedata.gamephase == -1){
-        var ship = this.ship;
-        if(shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) this.active = false;    
-    }	
+	if (gamedata.gamephase == -1) {
+		var ship = this.ship;
+		if (shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) this.active = false;
+	}
 
-	if(power == 0){
+	if (power == 0) {
 		this.data["Power Used"] = 'None';
-	}else{
-		this.data["Power Used"] = this.powerReq;		
-	}	
+	} else {
+		this.data["Power Used"] = this.powerReq;
+	}
 	return this;
 }
 
@@ -19603,15 +19490,15 @@ ShadingField.prototype.getDefensiveHitChangeMod = function (target, shooter, wea
 };
 
 ShadingField.prototype.canActivate = function () {
-    var ship = this.ship;	
-	if(gamedata.gamephase == -1 && !this.active && !shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) return true;
-	
+	var ship = this.ship;
+	if (gamedata.gamephase == -1 && !this.active && !shipManager.power.isOfflineOnTurn(ship, this, gamedata.turn)) return true;
+
 	return false;
 };
 
 ShadingField.prototype.canDeactivate = function () {
-	if(gamedata.gamephase == -1 && this.active) return true;
-	
+	if (gamedata.gamephase == -1 && this.active) return true;
+
 	return false;
 };
 
@@ -19637,7 +19524,7 @@ ShadingField.prototype.doActivate = function () {
 			}
 			webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 		}
-	}else{
+	} else {
 		this.active = true;
 	}
 };
@@ -19664,7 +19551,7 @@ ShadingField.prototype.doDeactivate = function () {
 			}
 			webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 		}
-	}else{
+	} else {
 		this.active = false;
 	}
 };
@@ -19701,41 +19588,42 @@ ShadingField.prototype.getOutput = function (ship, system) {
 };
 
 ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
-    if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
-    if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
-    //var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
-    if (this.detected) return true; //Already detected.
-    if (shipManager.systems.isDestroyed(ship, this)) return true; 
-    if (shipManager.power.isOffline(ship, this)) return true;                
+	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
+	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
+	if (this.detected === true) return true; // Fallback support for boolean legacy saves
+	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
+	if (shipManager.systems.isDestroyed(ship, this)) return true;
+	if (shipManager.power.isOffline(ship, this)) return true;
 
-    if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
+	/* //Check server side at end of Movement/After Transverse Jump
+	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
 
-    // Check all enemy ships to see if any can detect this ship
-    for (const otherShip of gamedata.ships) {
-        if (otherShip.team === ship.team) continue; // Skip friendly ships
-        if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
-        if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
+	// Check all enemy ships to see if any can detect this ship
+	for (const otherShip of gamedata.ships) {
+		if (otherShip.team === ship.team) continue; // Skip friendly ships
+		if (gamedata.isTerrain(otherShip.shipSizeClass, otherShip.userid)) continue; //Skip Terrain 
+		if (shipManager.isDestroyed(otherShip)) continue; //Skip destroyed
 
-        let totalDetection = detection; //Shading Field detection range is always 15.
+		let totalDetection = detection; //Shading Field detection range is always 15.
 
-        // Get distance to the stealth ship and check line of sight
-        const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
-        var loSBlocked = false;
-        //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-	    var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.			
-        var shipPos = shipManager.getShipPosition(ship);
-        var otherShipPos = shipManager.getShipPosition(otherShip);
-        loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // True is LoSBlocked          
+		// Get distance to the stealth ship and check line of sight
+		const distance = parseFloat(mathlib.getDistanceBetweenShipsInHex(ship, otherShip));
+		var loSBlocked = false;
+		//var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
+		var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.			
+		var shipPos = shipManager.getShipPosition(ship);
+		var otherShipPos = shipManager.getShipPosition(otherShip);
+		loSBlocked = mathlib.isLoSBlocked(shipPos, otherShipPos, blockedLosHex); // True is LoSBlocked          
 
-        // If within detection range, the ship is revealed
-        if (distance <= totalDetection && !loSBlocked) { //In range and LoS not blocked.
-            this.detected = true;
-            return true; //Just return, if one ship can see the stealthed ship then all can.
-        }
-    }
-
-    // No one detected the ship
-    return false;
+		// If within detection range, the ship is revealed
+		if (distance <= totalDetection && !loSBlocked) { //In range and LoS not blocked.
+			this.detected = true;
+			return true; //Just return, if one ship can see the stealthed ship then all can.
+		}
+	}
+	*/
+	// No one detected the ship
+	return false;
 };
 
 
@@ -19751,39 +19639,39 @@ FtrPetals.prototype.initializationUpdate = function () {
 		this.outputDisplay = "OPEN";
 		var ship = this.ship;
 		var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.
-		
+
 		//Incredibly specific here, but it avoids alot of issues trying to pass effects from server
-		if(ship.name == "VorlonHeavyFighterFlight"){
-			flight.forwardDefense = 8; 
+		if (ship.name == "VorlonHeavyFighterFlight") {
+			flight.forwardDefense = 8;
 			flight.sideDefense = 10;
 			flight.freethrust = 16;
 			ship.armour[2] = 1; //Reduce side armour of fighters
 			ship.armour[3] = 1; //Reduce side armour of fighters			
-		}else if(ship.name == "VorlonAssaultFighterFlight"){
-			flight.forwardDefense = 11; 
+		} else if (ship.name == "VorlonAssaultFighterFlight") {
+			flight.forwardDefense = 11;
 			flight.sideDefense = 13;
 			flight.freethrust = 15;
 			ship.armour[2] = 2; //Reduce side armour of fighters
 			ship.armour[3] = 2; //Reduce side armour of fighters
 		}
-	} else{
+	} else {
 		this.outputDisplay = "-";
 		var ship = this.ship;
 		var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.			
 		//Incredibly specific here, but it avoids alot of issues trying to pass effects from server
-		if(ship.name == "VorlonHeavyFighterFlight"){
-			flight.forwardDefense = 7; 
+		if (ship.name == "VorlonHeavyFighterFlight") {
+			flight.forwardDefense = 7;
 			flight.sideDefense = 9;
 			flight.freethrust = 14;
 			ship.armour[2] = 3; //Reduce side armour of fighters
 			ship.armour[3] = 3; //Reduce side armour of fighters			
-		}else if(ship.name == "VorlonAssaultFighterFlight"){
-			flight.forwardDefense = 10; 
+		} else if (ship.name == "VorlonAssaultFighterFlight") {
+			flight.forwardDefense = 10;
 			flight.sideDefense = 12;
 			flight.freethrust = 13;
 			ship.armour[2] = 4; //Reduce side armour of fighters
 			ship.armour[3] = 4; //Reduce side armour of fighters
-		}			
+		}
 	}
 
 	this.data["Power Used"] = 'None';
@@ -19793,14 +19681,14 @@ FtrPetals.prototype.initializationUpdate = function () {
 
 
 FtrPetals.prototype.canActivate = function () {
-	if(gamedata.gamephase == 1 && !this.active) return true;
-	
+	if (gamedata.gamephase == 1 && !this.active) return true;
+
 	return false;
 };
 
 FtrPetals.prototype.canDeactivate = function () {
-	if(gamedata.gamephase == 1 && this.active) return true;
-	
+	if (gamedata.gamephase == 1 && this.active) return true;
+
 	return false;
 };
 
@@ -19822,7 +19710,7 @@ FtrPetals.prototype.doActivate = function () {
 
 				}
 			}
-		}		
+		}
 
 		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 	}
@@ -19842,12 +19730,12 @@ FtrPetals.prototype.doDeactivate = function () {
 					if (fighterSystem.name == "FtrPetals") { //Is shading Field but not this one
 						if (fighterSystem.active) { //Is  boosted.
 							fighterSystem.active = false; //Set boost marker for notes.	
-																
+
 						}
 					}
 				}
 			}
-		}	
+		}
 
 		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
 	}
@@ -21258,7 +21146,7 @@ var GuardianArray = function GuardianArray(json, ship) {
     Particle.call(this, json, ship);
 };
 GuardianArray.prototype = Object.create(Particle.prototype);
-PairedParticleGun.prototype.constructor = GuardianArray;
+GuardianArray.prototype.constructor = GuardianArray;
 
 var ParticleCannon = function ParticleCannon(json, ship) {
     Particle.call(this, json, ship);
@@ -24055,23 +23943,204 @@ VortexDisruptor.prototype.constructor = VortexDisruptor;;
 "use strict";
 
 var Aoe = function Aoe(json, ship) {
-    Weapon.call(this, json, ship);
+	Weapon.call(this, json, ship);
 };
 Aoe.prototype = Object.create(Weapon.prototype);
 Aoe.prototype.constructor = Aoe;
 
 var EnergyMine = function EnergyMine(json, ship) {
-    Aoe.call(this, json, ship);
+	Aoe.call(this, json, ship);
 };
 EnergyMine.prototype = Object.create(Aoe.prototype);
 EnergyMine.prototype.constructor = EnergyMine;
 
 
 var LightEnergyMine = function LightEnergyMine(json, ship) {
-    Aoe.call(this, json, ship);
+	Aoe.call(this, json, ship);
 };
 LightEnergyMine.prototype = Object.create(Aoe.prototype);
 LightEnergyMine.prototype.constructor = LightEnergyMine;
+
+
+var CaptorMine = function CaptorMine(json, ship) {
+	Aoe.call(this, json, ship);
+};
+CaptorMine.prototype = Object.create(Aoe.prototype);
+CaptorMine.prototype.constructor = CaptorMine;
+
+CaptorMine.prototype.initializationUpdate = function () {
+	var ship = this.ship;
+	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+		this.range = 0;
+	}
+
+	this.refreshData();
+	return this
+}
+
+CaptorMine.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
+	if (this.currClass == '') {
+		var classes = Object.keys(this.allocatedRanges); //Allocated is always the same for HC, so can serve same purpose as availableAA did.
+		if (classes.length > 0) {
+			this.currClass = classes[0];
+		}
+	}
+	return this.currClass;
+};
+
+CaptorMine.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	var ship = this.ship;
+	var spawned = Number(ship.spawned);
+	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
+	//console.log("Mine: " + ship.name + " (id: " + ship.id + ") | spawned: " + ship.spawned + " | turn: " + gamedata.turn + " | deploymentTurn: " + deploymentTurn);
+
+	if (gamedata.turn !== deploymentTurn) {
+		//console.log("  BLOCKED: Not deployment turn");
+		return false;
+	}
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+
+	//how many are allocated?
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	//how many are allowed?
+	var allowed = this.range;
+	if (allocated >= allowed) return false; //full allowance for this FC type filled	
+
+	//if (available <= 0) { //Could go under 0 after damage?
+	//	return false;
+	//}
+	return true;
+};
+CaptorMine.prototype.canDecrease = function () { //can decrease if something was increased
+	var ship = this.ship;
+	var spawned = Number(ship.spawned);
+	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
+	if (gamedata.turn !== deploymentTurn) return false;
+	this.getCurrClass(); //Should be getCurrClass or similar? The method in aoe.js is getCurrClass
+	if (this.currClass == '') return false;
+
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	if (allocated > 0) return true;
+	return false;
+};
+CaptorMine.prototype.doIncrease = function () { //increase BFCP usage
+	this.getCurrClass();
+
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+
+	if (allocated < this.range) { //else use regular pool 
+		this.allocatedRanges[this.currClass] = allocated + 1;
+
+		//this.BFCPtotal_used++;
+	}
+	this.mineSet = true; //user changed something, assume they are content.	
+	this.refreshData();
+};
+CaptorMine.prototype.doDecrease = function () { //decrease BFCP usage
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
+	//Decrease could be in current turn, or from previous turn allocation.
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+
+	if (allocated > 0) {
+		this.allocatedRanges[this.currClass] = allocated - 1;
+		//this.BFCPtotal_used--;
+	}
+	this.mineSet = true; //user changed something, assume they are content.	
+	this.refreshData();
+};
+
+CaptorMine.prototype.refreshData = function () { //refresh description to show correct values
+	var classes = Object.keys(this.allocatedRanges);
+	var entryName = '';
+	var currType = '';
+	var range = null;
+	var hiddenDisplay = '';
+	var ship = this.ship;
+
+    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+        hiddenDisplay = "?";
+		this.data["Max Range"] = hiddenDisplay;		
+    }else{
+		this.data["Max Range"] = this.range;			
+	}
+
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		range = this.allocatedRanges[currType];
+		if(range == null) range = this.range;
+		if(hiddenDisplay == '?') range = hiddenDisplay;
+		//entry should exist, just change it to show current values
+		entryName = ' - ' + currType;
+		this.data[entryName + " range"] = range;
+	}
+
+};
+
+CaptorMine.prototype.canPropagate = function () { //can propagate if set to >0
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
+	if (this.allocatedRanges[this.currClass] > 0) return true;
+	return false;
+};
+
+CaptorMine.prototype.getRangeAllocated = function (rangeIndex) { //returns setting for current FC type
+
+	var rangeSet = 0;
+	var rangeValues = Object.values(this.allocatedRanges);
+	rangeSet = rangeValues[rangeIndex];
+	return rangeSet;
+};
+CaptorMine.prototype.setCurrShipType = function (shipType) { //sets indicated FC type as current (or sets empty as current)
+	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
+	var classes = Object.keys(this.allocatedRanges);
+	var currType = '';
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		if (currType == shipType) { //exists!
+			this.currClass = currType;
+			return; //no need to loop further
+		}
+	}
+};
+CaptorMine.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+
+	if (gamedata.gamephase == -1) {
+		this.individualNotesTransfer = {};
+		//every point is denoted as single entry with damage class name
+		var shipCategories = Object.keys(this.allocatedRanges);
+		var rangeValues = Object.values(this.allocatedRanges);
+
+		for (var i = 0; i < shipCategories.length; i++) {
+			var currType = shipCategories[i];
+			if (rangeValues[i] == null) rangeValues[i] = this.range; //Set to max range if nothing set by player.
+
+			// Initialize the array for the current spec
+			this.individualNotesTransfer[currType] = rangeValues[i];
+		}
+	}
+	return true;
+};
+/*
+CaptorMine.prototype.canIncreaseAnything = function () { //returns true if any BFCP points can currently be allocated
+	var toReturn = false;
+	var startingFrom = this.getCurrClass(); //so we know where we should stop checking
+	var lookingAt = startingFrom;
+	do {
+		if (this.canIncrease()) {
+			toReturn = true;
+		} else {
+			lookingAt = this.nextCurrClass();
+		}
+	} while ((toReturn != true) && (lookingAt != startingFrom));
+	return toReturn;
+};//Endof CaptorMine
+*/
 ;
 
 /* Source: client/model/weapon/molecular.js */
@@ -24239,7 +24308,8 @@ MolecularSlicerBeamL.prototype.checkForWastedShots = function () {
 		}
 	}	
 	
-	if(this.data["Remaining Dice"] > 0 && hasIntercept == true) return false
+	if(this.data["Remaining Dice"] == 0) return false	
+	//if(this.data["Remaining Dice"] > 0 && hasIntercept == true) return false
 
 	return true;
 };
@@ -25216,6 +25286,14 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         return;
     }
 
+    if (target.mine) { //Can't move mines.
+        return;
+    } 
+    
+    if (target.shipSizeClass > 3) { //Can't mvoe enormous or larger units.   
+        return;
+    }        
+
     var fireOrdersArray = []; // Store multiple fire orders
 
     for (var s = 0; s < shotsOnTarget; s++) {
@@ -26168,6 +26246,10 @@ BallisticMineLauncher.prototype.initializationUpdate = function() {
 	return this;
 };
 
+BallisticMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
+	return "Mine";
+};
+
 var AbbaiMineLauncher = function AbbaiMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -26181,6 +26263,10 @@ AbbaiMineLauncher.prototype.initializationUpdate = function() {
 		if(aFireOrder)	aFireOrder.damageclass = 'MultiModeHex';
 	}			        
 	return this;
+};
+
+AbbaiMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
+	return "Mine";
 };
     
 ;
@@ -28903,10 +28989,12 @@ CloakingDevice.prototype.doIndividualNotesTransfer = function () {
 CloakingDevice.prototype.isDetectedTrek = function (ship) {
     if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
     if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.       
-    if (this.detected) return true; //Already detected. 
+    if (this.detected === true) return true; // Fallback support for boolean legacy saves
+    if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
     if (shipManager.systems.isDestroyed(ship, this)) return true;
     if (shipManager.power.isOffline(ship, this)) return true;
 
+    /* //Check server side at end of Movement
     if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Firing Phase (and Initial Phase should be handled on server via detected value).
 
     // Check all enemy ships to see if any can detect this ship
@@ -28960,7 +29048,7 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
             return true; //Just return, if one ship can see the stealthed ship then all can.
         }
     }
-
+    */
     // No one detected the ship
     return false;
 };
@@ -29048,12 +29136,12 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
     var shooterPos = shipManager.getShipPosition(shooter);
     var heading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
 
-    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)){
+    if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)) {
         var html = "You cannot Warp Jump onto Terrain!";
         confirm.warning(html);
         return false;
-        
-    }    
+
+    }
 
     const hexDirections = [0, 60, 120, 180, 240, 300];
 

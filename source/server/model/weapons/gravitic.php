@@ -1008,7 +1008,8 @@ class GraviticShifter extends Weapon implements SpecialAbility{
     }
 
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-        if($ship->Enormous) return; //No effect on Enormous units
+        if ($ship->Enormous) return; //No effect on Enormous units
+        if ($ship instanceof Mine) return; //No point.
 
 		$lastMove = $ship->getLastMovement();
         $newFacing = $lastMove->facing; //Initialise as current facing.

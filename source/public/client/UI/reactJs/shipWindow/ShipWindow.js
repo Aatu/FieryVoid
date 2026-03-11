@@ -236,10 +236,20 @@ class ShipWindow extends React.Component {
         const { ship } = this.props;
         const isMyTeam = ship.team === window.gamedata.getPlayerTeam();
 
+        var unitName = ship.shipClass;
+        var shipName = ship.name;
+        if (ship.mine) {
+            var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+            if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                unitName = "Mine";
+                shipName = "Mine";
+            }
+        }
+
         if (ship.flight) {
             return (
                 <ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} team={ship.team}>
-                    <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
+                    <Header><span>{shipName}</span> {unitName}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
                     <FighterList ship={ship} />
                 </ShipWindowContainer>
             )
@@ -248,7 +258,7 @@ class ShipWindow extends React.Component {
         const systemsByLocation = sortIntoLocations(ship);
 
         return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} team={ship.team}>
-            <Header><span>{ship.name}</span> {ship.shipClass}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
+            <Header><span>{shipName}</span> {unitName}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
             <Column $top>
                 <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onClick={this.onShipClick.bind(this)} onTouchStart={this.onShipTouchStart.bind(this)} onTouchMove={this.onShipTouchMove.bind(this)} onTouchEnd={this.onShipTouchEnd.bind(this)} onTouchCancel={this.onShipTouchCancel.bind(this)} />
                 {systemsByLocation[1].length > 0 && <ShipSection location={1} ship={ship} systems={systemsByLocation[1]} />}

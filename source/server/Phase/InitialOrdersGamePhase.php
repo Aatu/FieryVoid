@@ -108,13 +108,15 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
             $dbManager->submitPower($gameData->id, $gameData->turn, $powers);
         }
-		
+
 
 
 		foreach ($ships as $currShip){ //generate system-specific information if necessary
+            if ($currShip->mine) continue;
 			$currShip->generateIndividualNotes($gameData, $dbManager);
 		}		
 		foreach ($ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+            if ($currShip->mine) continue;
 			$currShip->saveIndividualNotes($dbManager);
 		}
 
@@ -136,6 +138,14 @@ public function advance(TacGamedata $gameData, DBManager $dbManager)
 
         $gd = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id); 
 		
+        if($gd->areMinesPresent){ //There are mines in the game, check if any have been detected.        
+            foreach ($gd->ships as $ship) {
+                if ($ship->mine) {
+                    $ship->generateIndividualNotes($gd, $dbManager);
+                    $ship->saveIndividualNotes($dbManager);
+                }
+            }
+        } 
 
         foreach ($ships as $ship){
             if ($ship->userid != $gameData->forPlayer) continue;

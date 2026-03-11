@@ -3085,6 +3085,8 @@ spl_autoload_register(
                 		'ammomissilekk' => '/server/model/systems/baseSystems.php',
                 		'ammomissilex' => '/server/model/systems/baseSystems.php',
                 		'ammomissilej' => '/server/model/systems/baseSystems.php',
+                		'ammomissilez' => '/server/model/systems/baseSystems.php',                        
+
                 		 //Ballistic Mines            
                 		'ammoblmineb' => '/server/model/systems/baseSystems.php',                  		                		                                 			'ammoblminew' => '/server/model/systems/baseSystems.php',
              			'ammoblmineh' => '/server/model/systems/baseSystems.php',                				                 		                		
@@ -3473,6 +3475,21 @@ spl_autoload_register(
 				'grapplingclaw' => '/server/model/weapons/specialWeapons.php',					
 				'claweagle' => '/server/model/ships/drazi/claweagle.php',										
 				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',
+
+                //mines
+				'minestealth' => '/server/model/systems/baseSystems.php',
+                'mine' => '/server/model/ships/ShipClasses.php',
+                'captormine' => '/server/model/weapons/AoE.php',	
+                'captormineklb' => '/server/model/ships/korlyan/captorMineKLB.php',	
+                'captormineklw' => '/server/model/ships/korlyan/captorMineKLW.php',	                                
+                'captormineklh' => '/server/model/ships/korlyan/captorMineKLH.php',	
+                'spawncaptorklb' => '/server/model/ships/korlyan/spawnCaptorKLB.php',	
+                'spawncaptorklw' => '/server/model/ships/korlyan/spawnCaptorKLW.php',	                                
+                'spawncaptorklh' => '/server/model/ships/korlyan/spawnCaptorKLH.php',
+                'captorwotcrabbaia' => '/server/model/ships/abbai_old/captorWotcrAbbaiA.php',	                                
+                'captorwotcrabbaib' => '/server/model/ships/abbai_old/captorWotcrAbbaiB.php',                     
+                'spawncaptorwotcrabbaia' => '/server/model/ships/abbai_old/spawnCaptorWotcrAbbaiA.php',	                                
+                'spawncaptorwotcrabbaib' => '/server/model/ships/abbai_old/spawnCaptorWotcrAbbaiB.php',                	                
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

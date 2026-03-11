@@ -12,6 +12,7 @@ class WeaponEM  {
 			$EMHardened = $ship->getEMHardened();
 			if($ship->advancedArmor) return true;
 			if($EMHardened) return true;
+			if($ship instanceof Mine) return true;
 		}else if ($system){
 			if($system->advancedArmor) return true;
 		}
@@ -1426,7 +1427,8 @@ class SparkFieldHandler{
 			foreach($inAoE as $targetID=>$target){		
 				if ($shooter->id == $target->id) continue;//does not threaten self!
 				if ($target->isDestroyed()) continue; //no point allocating	
-				if ($target->isTerrain()) continue;				
+				if ($target->isTerrain()) continue;	
+				if ($target instanceof Mine) continue;			
 				if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!							
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//add to target list
@@ -5646,6 +5648,7 @@ class PsychicFieldHandler{
 				if ($target->isDestroyed()) continue; //no point allocating	
 				if ($target->team == $shooter->team) continue; //No effect on units in same team.
 				if ($target->isTerrain()) continue;
+				if ($target instanceof Mine) continue;					
 				if ($target->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!									
 				if (in_array($target->id,$alreadyTargeted,true)) continue;//each target only once 
 				//add to target list
@@ -6615,8 +6618,7 @@ class ProximityLaserLauncher extends Weapon{
 						}
 
 					$target = new OffsetCoordinate($launcherFireOrder->x, $launcherFireOrder->y);
-					$launchPos = $target; 	            
-					//break;				       
+					$launchPos = $target; 	            			       
 				}
 
 				//Check in case something went wrong, in which case use default to prevent error.	
@@ -6684,28 +6686,10 @@ class ProximityLaserLauncher extends Weapon{
 			}	
 		}
 
-		/*//If Proximity Laser is destroyed, destroy this paired launcher as well. No longer required
-		public function criticalPhaseEffects($ship, $gamedata)
-	    { 
-		  	parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase!
-	  	 	    
-			if(!$this->isDestroyed()) return;//Laser is not destroyed, all is well.
-			
-			if($this->isDestroyed()){ //Or if destroyed, find launcher and destroy it too.
-				$launcher = $this->launcher;
-				$launcherHealth = $launcher->getRemainingHealth();	//Just in case it's higher than 1 for some reason...						
-				$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $launcher->id, $launcherHealth, 0, 0, -1, true, false, "Proximity Laser Destroyed - Launcher removed");
-				$damageEntry->updated = true;
-				$this->damage[] = $damageEntry;								
-			}
-						
-	    } //endof function criticalPhaseEffects	
-	    */
-	    
+    
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
             $strippedSystem->ammunition = $this->ammunition;
-            //$strippedSystem->launcher = $this->launcher; 
             $strippedSystem->hasSpecialLaunchHexCalculation = $this->hasSpecialLaunchHexCalculation;                              
             return $strippedSystem;
         }
@@ -8033,7 +8017,8 @@ class SecondSight extends Weapon{
 		  foreach($allShips as $ship){
 			  if($ship->isDestroyed()) continue;		
 			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.
-			  if ($ship->isTerrain()) continue;			  
+			  if ($ship->isTerrain()) continue;		
+			  if ($target instanceof Mine) continue;				  	  
 			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!			  	
 			  $relevantShips[] = $ship;			
 		  }
@@ -8213,7 +8198,8 @@ class ThoughtWave extends Plasma{
 		foreach($allShips as $ship){
 			if($ship->isDestroyed()) continue;		
 			if ($ship->faction == "Mindriders") continue;//Mindriders not affected.
-			if ($ship->isTerrain()) continue;				
+			if ($ship->isTerrain()) continue;	
+			if ($target instanceof Mine) continue;							
 			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!				
 			$relevantShips[] = $ship;			
 		}
