@@ -104,15 +104,12 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — February 2026</h3>
+      <h3>Latest Updates — March 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Multiplayer (Beta)</strong> - Fiery Void now supports more than two teams, look in Create Game screen for the new option!</li> 
-        <li><strong>Initial Orders</strong> - Double-click to select now only required for ELINTs, ships with allied targeting/hex weapons, or if Friendly Fire enabled.</li>          
-        <li><strong>Mobile Browsers</strong> - I've tried to improve screen layouts and provide a more consistent experience for tap/hold functionality.</li>
-        <li><strong>Toggle Background</strong> - New 'Disable Background' button added, or use hotkey 'm' to change background to default black and back.</li>                    
-        <li><strong>System Menus</strong> - Several systems have received updates to their UI menus, including Self Repair, AA Controller, Thoughts Shields and Hyach Computer/Specialists.</li>          
-        <li><strong>Fleet Selection</strong> - Ships purchased with any Ammo, Options or Enhancements will now have these listed underneath them in the purchased ship list.</li>                                                        
+        <li><strong>Ballistic Mines</strong> - Mine launchers now leave persistent Captor Mines if no immediate targets.  Mine detection and other mine mechanics added, see FAQ for info!</li> 
+        <li><strong>Stealth Update</strong> - Multiplayer support added for units that can stealth e.g. Hyach Subs, Torvalus.</li>          
+        <li><strong>Fleet Checker</strong> - New warning added when fleet choices include 'Superior' tier units.</li>                    
         <li><strong>General Fixes</strong> - Many smaller bug fixes/appearance updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
