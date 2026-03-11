@@ -29174,7 +29174,8 @@ MicroJumpSystem.prototype.getDefensiveHitChangeMod = function (target, shooter, 
 
 MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
     var shooterPos = shipManager.getShipPosition(shooter);
-    var heading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
+    var targetCompassHeading = mathlib.getCompassHeadingOfPoint(shooterPos, target);
+    var shooterFacing = shipManager.getShipHeadingAngle(shooter);
 
     if (Object.values(gamedata.blockedHexes).some(h => h.q === target.q && h.r === target.r)) {
         var html = "You cannot Warp Jump onto Terrain!";
@@ -29201,7 +29202,8 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
     const tolerance = 0.5; // degrees
 
     for (let dir of validDirections) {
-        let delta = Math.abs(heading - dir);
+        let absoluteDir = mathlib.addToDirection(dir, shooterFacing);
+        let delta = Math.abs(targetCompassHeading - absoluteDir);
         delta = delta > 180 ? 360 - delta : delta;
 
         if (delta <= tolerance) {
