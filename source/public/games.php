@@ -107,7 +107,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — March 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Ballistic Mines</strong> - Mine launchers now leave persistent Captor Mines if no immediate targets.  Mine detection and other mine mechanics added, see FAQ for info!</li> 
+        <li><strong>Mines & Minesweeping</strong> - Groundwork for Mines laid, with detection and other mine mechanics added, see FAQ for more info!</li>         
+        <li><strong>Ballistic Mines</strong> - Mine launchers now leave persistent Captor Mines if no immediate targets.</li> 
         <li><strong>Stealth Update</strong> - Multiplayer support added for units that can stealth e.g. Hyach Subs, Torvalus.</li>          
         <li><strong>Fleet Checker</strong> - New warning added when fleet choices include 'Superior' tier units.</li>                    
         <li><strong>General Fixes</strong> - Many smaller bug fixes/appearance updates. Thanks for the reports!</li>           
