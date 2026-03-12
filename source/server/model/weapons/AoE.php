@@ -263,7 +263,7 @@ class CaptorMine extends Weapon{
     public $name = "CaptorMine";
     public $displayName = "Captor Mine";
 	public $iconPath = "EWLightEnergyMine.png";
-    public $animation = "bolt";
+    public $animation = "torpedo";
     public $animationColor = array(141, 240, 255);
     public $animationExplosionScale = 0.25;        
     public $isTargetable = false; //cannot be targeted ever!        
@@ -273,7 +273,8 @@ class CaptorMine extends Weapon{
     public $canOffline = true;
     public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!        
     public $damageType = 'Standard';//mode of dealing damage
-    public $weaponClass = 'Ballistic';//weapon class
+    public $doNotIntercept = false; //for attacks that are not subject to interception at all - like fields and ramming
+    public $uninterceptable = false;
     public $priority = 6;
     public $priorityAF = 5;
     public $firingModes = array(1 => "Captor");
@@ -620,13 +621,14 @@ class ProximityMine extends Weapon{
     public $name = "ProximityMine";
     public $displayName = "Proximity Mine";
 	public $iconPath = "EWLightEnergyMine.png";
-    public $animation = "bolt";
+    public $animation = "ball";
     public $animationColor = array(141, 240, 255);
-    public $animationExplosionScale = 0.5;        
+    public $animationExplosionScale = 1;        
     public $isTargetable = false; //cannot be targeted ever!        
     public $loadingtime = 1;
     public $ballistic = true;
     public $preFires = true;
+    public $hextarget = true; //Actually yes.
     public $hidetarget = true;
     public $canOffline = true;
     public $fireControlMod = array(0, 0, 0); //MODIFIER for weapon fire control!        
@@ -802,14 +804,14 @@ class ProximityMine extends Weapon{
 			$relevantUnits[] = $ship;			
 		}
 	
-        $mineTarget = null;
+        $targetUnit = null;
         $chosenLocation = 0;
 		//Now check if any enemy units entered range and attack first one
-		$mineTarget = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);	        	
+		$targetUnit = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);	        	
 
-		if ($mineTarget !== null) { // Check if we found a valid target
-            $mineTarget = $mineTarget['unit'];
-            $chosenLocation = $mineTarget['location'];
+		if ($targetUnit !== null) { // Check if we found a valid target
+            $mineTarget = $targetUnit['unit'];
+            $chosenLocation = $targetUnit['location'];
 
 			$newFireOrder = new FireOrder(
 				-1, "prefiring", $mine->id, $mineTarget->id,
