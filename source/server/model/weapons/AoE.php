@@ -310,9 +310,9 @@ class CaptorMine extends Weapon{
             foreach($this->allocatedRanges as $shipType=>$range){
                 $this->data[' - '.$shipType.' range'] =  $range;
             }         
-            $this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
+            $this->data["Special"] = "Attacks as a ballistic weapon during the firing phase against first viable target.";
 			$this->data["Special"] .= "<br>Set ranges for different types of enemy on turn that Mine deploys, these cannot then be changed.";	            
-			$this->data["Special"] .= "<br>Range is halved against Jammer equipped units.";											
+			$this->data["Special"] .= "<br>All range are halved against Jammer-equipped units.";											
 	}	
 
 
@@ -580,7 +580,7 @@ class CaptorMine extends Weapon{
 
         //take into account jammer effects.                    
 		$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $target));
-		if($jammerValue > 0) $effectiveRange = floor($this->range / 2);
+		if($jammerValue > 0) $effectiveRange = floor($effectiveRange / 2);
 //Debug::log("effectiveRange3 " . $effectiveRange);    		
 	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
 
@@ -658,9 +658,6 @@ class ProximityMine extends Weapon{
         $this->dice = $dice;
         $this->damageBonus = $damageBonus;   
         $this->range = $range;
-        //$this->fireControl[0] = $accuracy; 
-        //$this->fireControl[1] = $accuracy;  
-        //$this->fireControl[2] = $accuracy;
 
         parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
     }
@@ -670,9 +667,8 @@ class ProximityMine extends Weapon{
             foreach($this->allocatedShipTypes as $shipType=>$range){
                 $this->data[' - Attack '.$shipType] =  $range;
             }         
-            $this->data["Special"] = "Ship is invisible to enemies until reveals itself or is detected.";
-			$this->data["Special"] .= "<br>Set types of enemies that will trigger mine explosion on the turn that Mine deploys, these cannot then be changed.";	            
-			//$this->data["Special"] .= "<br>Range is halved against Jammer equipped units.";											
+            $this->data["Special"] = "Automatically damages first viable target at the start of Firing Phase.";
+			$this->data["Special"] .= "<br>Set types of enemies that will trigger mine explosion on the turn that Mine deploys, these cannot then be changed.";	            											
 	}	
 
 
