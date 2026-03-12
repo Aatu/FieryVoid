@@ -260,7 +260,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 You do this by clicking on the mine weapons system icon during Deployment/Pre-Turn Orders phase.  
                 Once set these ranges will apply for the rest of the game, and if you choose not to set the ranges they will default to their maximum range.  
                 You can set the ranges of all mines of the same type using the propagate buttons in the Mine Settings menu.</li>
-            <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase.  
+            <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase, an EW option that will only appear if the opponenet has mines in the game.  
                 Fighters and Shuttles can do this also, converting their Offensive Bonus (OB) in to 'Detect Mines' EW points, at a cost of 10 OB per point of 'Detect Mines' EW 
                 (Note - any OB used in this way will not be available for firing later in the turn).
                 The detection calculation depends on a number of factors e.g.
