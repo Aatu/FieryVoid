@@ -73,8 +73,7 @@ try {
             exit;
         }
         header('Pragma: cache');
-        
-        if (!ob_start("ob_gzhandler")) ob_start(); //Try gzip, fall back to default
+        ob_start(); // Buffer output, gzip is handled natively by zlib.output_compression
         
         echo file_get_contents($jsonPath);
         ob_end_flush();
