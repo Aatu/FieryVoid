@@ -10,6 +10,7 @@ import HyachSpecialistsList from "./HyachSpecialistsList";
 import ShieldGeneratorList from "./ShieldGeneratorList";
 import PowerCapacitor from "./PowerCapacitor";
 import MineSettingsList from "./MineSettingsList";
+import ProximityMineSettingsList from "./ProximityMineSettingsList";
 
 const Container = styled.div`
     display:flex;
@@ -585,6 +586,7 @@ class SystemInfoButtons extends React.Component {
 				*/}
 
 				{canMineSettings(ship, system) && <MineSettingsList system={system} ship={ship} />}
+				{canProxMineSettings(ship, system) && <ProximityMineSettingsList system={system} ship={ship} />}
 				
 
 				{(canTSShield(ship, system) || canTSShieldGen(ship, system)) && <ShieldGeneratorList system={system} ship={ship} />}
@@ -654,6 +656,8 @@ const canAApropagate = (ship, system) => canAA(ship, system) && system.canPropag
 
 const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn-1) && (system.name == 'CaptorMine') ;
 
+const canProxMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn-1) && (system.name == 'ProximityMine') ;
+
 //can do something with Hyach Computer
 const canBFCP = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'hyachComputer');
 
@@ -708,7 +712,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 	|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
 	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSelectAllWeapons(ship, system)
-	|| canMineSettings(ship, system);
+	|| canMineSettings(ship, system) || canProxMineSettings(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 

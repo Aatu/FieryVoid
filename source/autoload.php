@@ -3479,7 +3479,10 @@ spl_autoload_register(
                 //mines
 				'minestealth' => '/server/model/systems/baseSystems.php',
                 'mine' => '/server/model/ships/ShipClasses.php',
-                'captormine' => '/server/model/weapons/AoE.php',	
+                'captormine' => '/server/model/weapons/AoE.php',
+                'proximitymine' => '/server/model/weapons/AoE.php',   
+                'captormineterrain' => '/server/model/ships/terrain/captorMineTerrain.php',
+                'proxmineterrain' => '/server/model/ships/terrain/proxMineTerrain.php',                
                 'captormineklb' => '/server/model/ships/korlyan/captorMineKLB.php',	
                 'captormineklw' => '/server/model/ships/korlyan/captorMineKLW.php',	                                
                 'captormineklh' => '/server/model/ships/korlyan/captorMineKLH.php',	
