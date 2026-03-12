@@ -1,5 +1,10 @@
 <?php 
 
+// Force GZIP compression as these JSON payloads can be massive (e.g. 5MB+)
+ini_set('zlib.output_compression', 'On');
+// Allow the script more time to dynamically compile a faction if the cache is completely cold
+set_time_limit(60);
+
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
