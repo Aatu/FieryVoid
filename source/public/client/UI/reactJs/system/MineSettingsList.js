@@ -230,7 +230,12 @@ class MineSettingsList extends Component {
                         <Row key={type}>
                             <Icon src={`./img/systemicons/BFCPclasses/${type}.png`} alt={type} />
                             <Name>{type}</Name>
-                            <Controls>
+                            <Controls
+                                onWheel={(e) => {
+                                    if (e.deltaY < 0 && canIncrease(type)) this.handleIncrease(type);
+                                    else if (e.deltaY > 0 && canDecrease(type)) this.handleDecrease(type);
+                                }}
+                            >
                                 <ActionButton
                                     onClick={() => this.handleDecrease(type)}
                                     disabled={!canDecrease(type)}
