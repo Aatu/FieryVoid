@@ -15,7 +15,7 @@ class proxMineTerrain extends Mine{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 0;
+        $this->signature = 2;
         $this->detectedSignature = 0;           
         
         $this->turncost = 0;
