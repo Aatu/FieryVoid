@@ -11,7 +11,7 @@ class KlingonTransport extends LCV{
         $this->shipClass = "Klingon Transport";
 
 		$this->unofficial = true;
-        $this->canvasSize = 100;
+        $this->canvasSize = 65;
 		$this->isd = 2138;
         
         $this->forwardDefense = 11;
@@ -32,7 +32,7 @@ class KlingonTransport extends LCV{
         $this->addPrimarySystem(new Reactor(3, 18, 0, 4));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
         $this->addPrimarySystem(new Scanner(3, 9, 4, 3));
-		$this->addPrimarySystem(new MicroJumpSystem(2, 6, 0, 355, 5, 4, 4));   // Armor, health, power, start arc, end arc, distance, reload time 
+		$this->addPrimarySystem(new MicroJumpSystem(2, 6, 0, 330, 30, 4, 4));   // Armor, health, power, start arc, end arc, distance, reload time 
 
 		$impulseDrive = new TrekImpulseDrive(3,12,0,2,2); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 

@@ -2865,9 +2865,9 @@ window.ShipIcon = function () {
                         : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
         );
 
-        if (ship.imageFlipped) {
-            this.shipSprite.mesh.scale.y = -1;
-        }
+        //if (ship.imageFlipped) { //Old variable used to manually flip iamges in older version of THREE.js - DK
+        //    this.shipSprite.mesh.scale.y = -1;
+        //}
 
         this.mesh.add(this.shipSprite.mesh);
 
@@ -3108,7 +3108,7 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
-        if (!(weapon instanceof Weapon)) return null; // Only show arcs for weapons
+        if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
 
         var hexDistance = window.coordinateConverter.getHexDistance();
 
@@ -3671,7 +3671,7 @@ window.DeploymentIcon = function () {
         } else {
             return new THREE.Color(250 / 255, 100 / 255, 100 / 255).convertSRGBToLinear();
         }
-    }
+    }    
 
     return DeploymentIcon;
 }();;
@@ -46670,6 +46670,7 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
         }
     }
 
+    //No roll flipping, as side direction are symmetrical :)    
     const validDirections = hexDirections.filter(dir =>
         isInArc(dir, this.startArc, this.endArc)
     );

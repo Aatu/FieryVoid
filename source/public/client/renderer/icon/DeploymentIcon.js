@@ -47,7 +47,7 @@ window.DeploymentIcon = function () {
         } else {
             return new THREE.Color(250 / 255, 100 / 255, 100 / 255).convertSRGBToLinear();
         }
-    }
+    }    
 
     return DeploymentIcon;
 }();
