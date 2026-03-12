@@ -213,18 +213,18 @@ window.BallisticIconContainer = function () {
 
 		if (replay) {
 			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team){
-				for(var i in weapon.fireOrders){
-					var otherBall = weapon.fireOrders[i]; 
-					if(otherBall.damageclass == "SecondAttack"){
+			if (weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) {
+				for (var i in weapon.fireOrders) {
+					var otherBall = weapon.fireOrders[i];
+					if (otherBall.damageclass == "SecondAttack") {
 						hideTargetAlways = false; //stays false effecitvely
 						break;
-					}else{
+					} else {
 						hideTargetAlways = true; //No second attack after hex shot, don't show e.g. Ballistic Mine Launchers.	
 					}
-				}			 
+				}
 			}
-		}	
+		}
 
 		let targetPosition = null;
 		let targetIcon = null;
@@ -451,7 +451,7 @@ window.BallisticIconContainer = function () {
 		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
 		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
 		if (replay) {
-			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;	
+			if (weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;
 		}
 		// Get launch position (may be overwritten later)
 		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
@@ -778,7 +778,7 @@ window.BallisticIconContainer = function () {
 		ctx.fillStyle = textColour;
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		ctx.globalAlpha = 0.6;
+		ctx.globalAlpha = 0.5;
 
 		let number = 1;
 
