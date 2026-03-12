@@ -282,7 +282,7 @@ class CaptorMine extends Weapon{
     private $diceType = 1; //What type of dice are used.
     private $dice = 1; //How many damage dice are there
     private $damageBonus = 0; //What is flat damage bonus
-    public $autoFireOnly = false; // for weapons that should never be fired manually 
+    public $autoFireOnly = true; // for weapons that should never be fired manually 
 	public $currClass = '';//for front end.       
     public $allocatedRanges = array('Capitals-HCVs' => null, 'LCVs-MCVs' => null, 'Fighters' => null); //Ranges allocated for given ship type 
     public $setRanges = array(); //Ranges allocated for given ship type     
