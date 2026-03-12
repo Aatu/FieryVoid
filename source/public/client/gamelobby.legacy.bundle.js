@@ -29147,7 +29147,6 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
         }
     }
 
-    //No roll flipping, as side direction are symmetrical :)    
     const validDirections = hexDirections.filter(dir =>
         isInArc(dir, this.startArc, this.endArc)
     );

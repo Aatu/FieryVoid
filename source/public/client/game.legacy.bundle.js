@@ -3108,7 +3108,7 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
-        if (!(weapon instanceof Weapon) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
+        if (!(weapon instanceof Weapon)) return null; // Only show arcs for weapons
 
         var hexDistance = window.coordinateConverter.getHexDistance();
 
@@ -46670,7 +46670,6 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
         }
     }
 
-    //No roll flipping, as side direction are symmetrical :)    
     const validDirections = hexDirections.filter(dir =>
         isInArc(dir, this.startArc, this.endArc)
     );
