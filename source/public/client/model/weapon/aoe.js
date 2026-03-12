@@ -287,7 +287,9 @@ ProximityMine.prototype.refreshData = function () { //refresh description to sho
     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
         hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;		
-    }
+    }else{
+		this.data["Max Range"] = this.range;		
+	}
 	
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
