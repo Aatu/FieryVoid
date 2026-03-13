@@ -4396,7 +4396,7 @@ window.BallisticIconContainer = function () {
 
 		if (replay) {
 			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team){
+			if (!shooter.flight && weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) {
 				for(var i in weapon.fireOrders){
 					var otherBall = weapon.fireOrders[i]; 
 					if(otherBall.damageclass == "SecondAttack"){
@@ -13157,53 +13157,78 @@ window.ShipTooltip = function () {
         if (ship.trueStealth) {
             if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) {
                 toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
-            } else if (shipManager.isDetected(ship)) {
-                    var detectedTeamsStr = "";
-                if(ship.team == gamedata.getPlayerTeam()){ //Only own player needs to see full team list that's detected their ship.
-                    // Check if we have more than 2 teams in the game
-                    var uniqueTeams = [];
-                    for (var i in gamedata.slots) {
-                        var team = parseInt(gamedata.slots[i].team, 10);
-                        if (team > 0 && !uniqueTeams.includes(team)) {
-                            uniqueTeams.push(team);
+            } else {
+                var isShipDetected = shipManager.isDetected(ship);
+                var stealthSys = null;
+                
+                if (ship.mine) {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
+                } else if (ship.faction == "Torvalus Speculators") {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "ShadingField");
+                } else if (shipManager.getSpecialAbilityStealth(ship, "Cloaking")) {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "CloakingDevice");
+                } else if (shipManager.getSpecialAbilityStealth(ship, "Stealth")) {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "stealth");
+                }
+
+                if (!isShipDetected && ship.team == gamedata.getPlayerTeam()) {
+                    if (stealthSys) {
+                        if (Array.isArray(stealthSys.detected) && stealthSys.detected.length > 0) {
+                            isShipDetected = true;
+                        } else if (stealthSys.detected === true) {
+                            isShipDetected = true;
+                        } else if (Array.isArray(stealthSys.detectedNew) && stealthSys.detectedNew.length > 0) {
+                            isShipDetected = true;
+                        } else if (stealthSys.detectedNew === true) {
+                            isShipDetected = true;
                         }
                     }
+                }
 
-                    if (uniqueTeams.length > 2) {
-                        var stealthSys = null;
-                        if (ship.mine) {
-                            stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
-                        } else if (ship.faction == "Torvalus Speculators") {
-                            stealthSys = shipManager.systems.getSystemByName(ship, "ShadingField");
-                        } else if (shipManager.getSpecialAbilityStealth(ship, "Cloaking")) {
-                            stealthSys = shipManager.systems.getSystemByName(ship, "CloakingDevice");
-                        } else if (shipManager.getSpecialAbilityStealth(ship, "Stealth")) {
-                            stealthSys = shipManager.systems.getSystemByName(ship, "stealth");
+                if (isShipDetected) {
+                    var detectedTeamsStr = "";
+                    if(ship.team == gamedata.getPlayerTeam()){ //Only own player needs to see full team list that's detected their ship.
+                        // Check if we have more than 2 teams in the game
+                        var uniqueTeams = [];
+                        for (var i in gamedata.slots) {
+                            var team = parseInt(gamedata.slots[i].team, 10);
+                            if (team > 0 && !uniqueTeams.includes(team)) {
+                                uniqueTeams.push(team);
+                            }
                         }
 
-                        if (stealthSys && Array.isArray(stealthSys.detectedNew) && stealthSys.detectedNew.length > 0) {
-                            // Ensure unique team numbers
-                            var uniqueDetectedTeams = [];
-                            for (var i = 0; i < stealthSys.detectedNew.length; i++) {
-                                var detectedTeam = parseInt(stealthSys.detectedNew[i], 10);
-                                if (detectedTeam > 0 && !uniqueDetectedTeams.includes(detectedTeam)) {
-                                    uniqueDetectedTeams.push(detectedTeam);
+                        if (uniqueTeams.length > 2) {
+                            var detectedArray = [];
+                            if (stealthSys && Array.isArray(stealthSys.detectedNew)) {
+                                detectedArray = stealthSys.detectedNew;
+                            } else if (stealthSys && Array.isArray(stealthSys.detected)) {
+                                detectedArray = stealthSys.detected;
+                            }
+
+                            if (detectedArray.length > 0) {
+                                // Ensure unique team numbers
+                                var uniqueDetectedTeams = [];
+                                for (var i = 0; i < detectedArray.length; i++) {
+                                    var detectedTeam = parseInt(detectedArray[i], 10);
+                                    if (detectedTeam > 0 && !uniqueDetectedTeams.includes(detectedTeam)) {
+                                        uniqueDetectedTeams.push(detectedTeam);
+                                    }
+                                }
+
+                                // Sort team numbers for readability
+                                uniqueDetectedTeams.sort(function (a, b) { return a - b; });
+
+                                if (uniqueDetectedTeams.length > 0) {
+                                    detectedTeamsStr = " (Teams: " + uniqueDetectedTeams.join(", ") + ")";
                                 }
                             }
-
-                            // Sort team numbers for readability
-                            uniqueDetectedTeams.sort(function (a, b) { return a - b; });
-
-                            if (uniqueDetectedTeams.length > 0) {
-                                detectedTeamsStr = " (Teams: " + uniqueDetectedTeams.join(", ") + ")";
-                            }
                         }
-                    }
-                } 
+                    } 
 
-                toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
-            } else {
-                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
+                    toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
+                } else {
+                    toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
+                }
             }
         }
 
