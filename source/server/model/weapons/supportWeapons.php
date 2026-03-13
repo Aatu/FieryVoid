@@ -1022,7 +1022,7 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 		//Check for detection in 20 hexes.
 		$shadingField = $ship->getSystemByName("ShadingField");
 		if($shadingField){ //Shading Field exists.
-			if(!$shadingField->detected && $shadingField->active){ //Currently undetected and Shaded.
+			if(!$shadingField->detected && $shadingField->isActivated()){ //Currently undetected and Shaded.
 				$shadingField->checkStealthNextPhase($gamedata, 20);
 			} 
 		}	

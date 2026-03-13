@@ -287,9 +287,9 @@ window.ShipIcon = function () {
                         : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
         );
 
-        if (ship.imageFlipped) {
-            this.shipSprite.mesh.scale.y = -1;
-        }
+        //if (ship.imageFlipped) { //Old variable used to manually flip iamges in older version of THREE.js - DK
+        //    this.shipSprite.mesh.scale.y = -1;
+        //}
 
         this.mesh.add(this.shipSprite.mesh);
 
@@ -328,13 +328,15 @@ window.ShipIcon = function () {
 
         var movesByHexAndTurn = [];
 
-        this.defaultPosition = {
-            turn: movements[0].turn,
-            facing: movements[0].facing,
-            heading: movements[0].heading,
-            position: new hexagon.Offset(movements[0].position),
-            offset: { x: movements[0].xOffset, y: movements[0].yOffset }
-        };
+        if (movements && movements.length > 0 && movements[0]) {
+            this.defaultPosition = {
+                turn: movements[0].turn,
+                facing: movements[0].facing,
+                heading: movements[0].heading,
+                position: new hexagon.Offset(movements[0].position),
+                offset: { x: movements[0].xOffset || 0, y: movements[0].yOffset || 0 }
+            };
+        }
 
         var lastMovement = null;
 
@@ -345,13 +347,17 @@ window.ShipIcon = function () {
         }).forEach(function (movement) { */
 
         //Replacement code below
-        Object.values(movements)
-            .filter(movement => movement.type !== 'start')
+        movements.filter(function (movement) {
+            return movement.type !== 'start';
+        })
             // During replay, exclude preFire moves from the main movement path – they will
             // be animated separately in ReplayAnimationStrategy, after the relevant weapon hits.
-            .filter(movement => !(gamedata.replay && movement.type === 'prefire' && movement.turn === gamedata.turn))
-            .filter(movement => movement.commit)
-            .forEach(movement => {
+            .filter(function (movement) {
+                return !(gamedata.replay && movement.type === 'prefire' && movement.turn === gamedata.turn);
+            })
+            .filter(function (movement) {
+                return movement.commit;
+            }).forEach(function (movement) {
 
                 if (lastMovement && movement.turn !== lastMovement.turn) {
 
@@ -371,14 +377,14 @@ window.ShipIcon = function () {
 
                 lastMovement = movement;
             });
+
         this.preFireMovements = []; //reset
-        Object.values(movements)
-            .filter(m => m.type === 'prefire')
-            .forEach(m => {
+        movements.filter(function (m) { return m.type === 'prefire'; })
+            .forEach(function (m) {
                 if (!this.preFireMovements.some(existing => existing.id === m.id)) {
                     if (m.turn == gamedata.turn) this.preFireMovements.push(m);
                 }
-            });
+            }, this);
 
 
         this.movements = movesByHexAndTurn;
@@ -524,7 +530,7 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
-        if (!(weapon instanceof Weapon || weapon instanceof Thruster)) return null; // Only show arcs for weapons
+        if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
 
         var hexDistance = window.coordinateConverter.getHexDistance();
 

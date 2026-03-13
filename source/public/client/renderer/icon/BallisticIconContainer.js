@@ -176,9 +176,6 @@ window.BallisticIconContainer = function () {
 
 	//To create coloured hexes signifying ballistic launches and other effects.
 	function createBallisticIcon(ballistic, iconContainer, turn, scene, replay = false) {
-		if (replay) {
-			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-		}
 
 		if (ballistic.damageclass === 'Sweeping') return;
 
@@ -212,15 +209,32 @@ window.BallisticIconContainer = function () {
 			modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
 		}
 
+		let hideTargetAlways = false;
+
+		if (replay) {
+			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
+			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team){
+				for(var i in weapon.fireOrders){
+					var otherBall = weapon.fireOrders[i]; 
+					if(otherBall.damageclass == "SecondAttack"){
+						hideTargetAlways = false; //stays false effecitvely
+						break;
+					}else{
+						hideTargetAlways = true; //No second attack after hex shot, don't show e.g. Ballistic Mine Launchers.	
+					}
+				}			 
+			}
+		}	
+
 		let targetPosition = null;
 		let targetIcon = null;
 		let splash = false;
 
-		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null") {
+		if (ballistic.targetid === -1 && ballistic.x !== "null" && ballistic.y !== "null" && !hideTargetAlways) {
 			targetPosition = this.coordinateConverter.fromHexToGame(new hexagon.Offset(ballistic.x, ballistic.y));
-		} else if (ballistic.targetid && ballistic.targetid !== -1) {
+		} else if (ballistic.targetid && ballistic.targetid !== -1 && !hideTargetAlways) {
 			targetIcon = iconContainer.getById(ballistic.targetid);
-			targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
+			//targetPosition = { x: 0, y: 0 }; // placeholder — the mesh will handle it
 		}
 
 		if (!shooter.flight && weapon?.noTargetHexIcon) {
@@ -230,6 +244,7 @@ window.BallisticIconContainer = function () {
 		// Mode-specific icon logic
 		if (modeName) {
 			const modeMap = {
+				'Z - Antimine': { type: 'hexRed', text: 'Antimine', color: '#e6140a' },
 				'Shredder': { type: 'hexBlue', text: 'Shredder', color: '#00b8e6' },
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
@@ -260,12 +275,17 @@ window.BallisticIconContainer = function () {
 				text = match.text || text;
 				textColour = match.color || textColour;
 
-				// Call splash hex generation for cases where weapon affects more than one hex
-				if (['Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
-					if (gamedata.thisplayer === shooter.userid || replay) {
+				// Call splash hex generation for cases where weapon affects more than one hex.
+				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
+				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
+				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
+					if ((gamedata.thisplayer === shooter.userid || replay) && targetPosition) {
 						let sizes = [];
 
 						switch (modeName) {
+							case 'Z - Antimine':
+								sizes = [3];
+								break;
 							case 'Ion Storm':
 								sizes = [1, 2];
 								break;
@@ -303,8 +323,11 @@ window.BallisticIconContainer = function () {
 			if (ballistic.damageclass && modeName) {
 				switch (ballistic.damageclass) {
 					case 'MultiModeHex':
+						const isFriendly = gamedata.isMyOrTeamOneShip(shooter);
+						var modeText = isFriendly ? modeName : weapon.getModeNameForEnemy();
+
 						targetType = 'hexRed';
-						text = modeName;
+						text = modeText;
 						textColour = '#e6140a';
 						break;
 					case 'support':
@@ -329,7 +352,7 @@ window.BallisticIconContainer = function () {
 
 		// TARGET SPRITE
 		let targetSprite = null;
-		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetId, this.ballisticIcons)) {
+		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetid, this.ballisticIcons)) {
 			if (targetPosition) {
 				targetSprite = new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);
 				if (targetIcon) {
@@ -417,7 +440,7 @@ window.BallisticIconContainer = function () {
 
 	//To create ballistic lines between launches and targets.
 	function createBallisticLineIcon(ballistic, iconContainer, turn, scene, replay = false) {
-		//if(ballistic.damageclass == 'Targeter') return;
+		//if(ballistic.damageclass == 'Targeter') return;		
 		if (ballistic.targetid === -1 && ballistic.x == "null" && ballistic.y == "null") return; // Skip creation of enemy hidden weapons, can cause visual bugs.
 
 		const shooterIcon = iconContainer.getById(ballistic.shooterid);
@@ -427,7 +450,9 @@ window.BallisticIconContainer = function () {
 		let shooter = shooterIcon.ship;
 		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
 		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
-
+		if (replay) {
+			if( weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;	
+		}
 		// Get launch position (may be overwritten later)
 		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
 		let targetPosition;

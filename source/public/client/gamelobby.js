@@ -470,6 +470,15 @@ window.gamedata = {
 
 	/*checks fleet composition and displays alert with result*/
 	checkChoices: function () {
+		/*this is for interaction with $outOfTier array in ship SCS
+		indicates PROBLEM => (count->current count; limit->accepted count max; text->warning text if over limit)
+		*/
+		var outOfTierArray = new Array( 'WARLOCK', 'EMINE' ); //list of allowed entries - must match object below
+		var outOfTierList = {
+		    'WARLOCK': { count: 0, limit: 0, text: 'Warlock is above Tier 1' }, //Warlock: not allowed
+		    'EMINE':   { count: 0, limit: 6, text: 'Massed EMines are above Tier 1 (up to 6 are allowed)' } //EMines: up to 6 EMines allowed
+		};
+				
 		/* //Do we need to block this
 		//block if player already has confirmed fleet (in any slot)
 		for (var i in gamedata.slots)  { //check all slots
@@ -533,7 +542,9 @@ window.gamedata = {
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
 
 		var totalEnhancementsValue = 0;
+		/* messageOP - warning
 		var messageOP = '';
+		*/
 
 		for (var i in gamedata.ships) {
 			var lship = gamedata.ships[i];
@@ -619,6 +630,19 @@ window.gamedata = {
 			if (lship.factionAge > 2) {
 				ancientUnitPresent = true;
 			}
+
+
+
+			//potentially out-of-Tier elements
+			for (var potProblem in lship.outOfTier) {
+				var potProblemCount = lship.outOfTier[potProblem];
+				if (potProblemCount > 0) {
+					var outOfTierEntry = outOfTierList[ potProblem ];
+					if (outOfTierEntry) outOfTierEntry.count += potProblemCount;
+				}
+			}
+
+			
 			if (!lship.flight) {
 				totalShips++;
 
@@ -665,7 +689,6 @@ window.gamedata = {
 					}
 					//console.table(specialHangars);
 				}
-
 
 
 				//check hangar space available...	
@@ -786,6 +809,7 @@ window.gamedata = {
 				}
 			}
 
+			/* messageOP - warning
 			if (lship.messageOP) {
 				for (var m in lship.messageOP) {
 					if (!messageOP.includes(lship.messageOP[m])) {
@@ -794,6 +818,7 @@ window.gamedata = {
 					}
 				}
 			}
+			*/
 
 		} //end of loop at ships preparing data
 
@@ -861,9 +886,11 @@ window.gamedata = {
 			warningFound = true;
 		}
 
+		/* messageOP - warning
 		if (messageOP !== '') {
 			warningText += messageOP;
 		}
+		*/
 
 		//Static structures present?
 		if (staticPresent) {
@@ -877,6 +904,19 @@ window.gamedata = {
 			problemFound = true;
 		}
 
+
+		//potentially out-of-Tier elements
+		for (var outOfTierIndex = 0; outOfTierIndex < outOfTierArray.length; outOfTierIndex++) {
+			var problemName = outOfTierArray[outOfTierIndex];
+
+			var potProblemEntry = outOfTierList[problemName];
+			if (potProblemEntry && (potProblemEntry.count > potProblemEntry.limit)) {
+				checkResult += potProblemEntry.text + " <b><span style='color: red;'>NOT OK!</span></b>" +"<br>";
+				problemFound = true;
+			}
+		}
+		
+		
 		checkResult += "<br>";
 
 

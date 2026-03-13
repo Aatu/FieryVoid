@@ -93,6 +93,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Class P - Piercing Missile (2244)</strong> - Range 20 - Damage 30 - Fire Control: -/+3/+3 - Deals piercing damage,</li>  
       <li><strong>Class S - Stealth Missile (2252)</strong> - Range 20 - Damage 20- Fire Control: +3/+3/+3 - Kor-Lyan only, missile target not revealed to enemy player.</li>   
       <li><strong>Class X - HARM Missile (2248)</strong> - Range 20 - Damage 0 - Fire Control: -/+3/+3 - Hit chance increased by 5% per point OEW and CCEW target is using, causes -1d6 scanner output next turn.</li>       
+      <li><strong>Class Z - Antimine Missile (2249)</strong> - Range 20 - Damage 15 - Fire Control: -/-/- - Hex targeted.  Attacks any mines within 3 hexes. Hit chance +15% if mine in same hex.</li>       
+    </ul>    
     </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
     

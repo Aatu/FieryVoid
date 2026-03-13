@@ -44,7 +44,7 @@ class FireGamePhase implements Phase
                 $playersSkipped[$slot->playerid] = true; // Assume skipped initially
             }
 
-            $doDeployment = $gameData->checkDeploymentPhaseForPlayer($slot->playerid);                
+            $doDeployment = $servergamedata->checkDeploymentPhaseForPlayer($slot->playerid);                
             if ($slot->depavailable == $gameData->turn+1 || $doDeployment){
                 //Slot is deploying next turn, ensure that database know it completed this Firing Phase
                 $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 3, $gameData->turn);   

@@ -15,7 +15,7 @@ class MovementGamePhase implements Phase
             // Skip destroyed, terrain, or undeployed ships
             if (
                 $ship->isDestroyed() ||
-                $ship->base || $ship->smallBase ||
+                $ship->base || $ship->smallBase || $ship->mine ||
                 $ship->isTerrain() ||
                 ($ship->getTurnDeployed($gameData) > $gameData->turn)
             ) {
@@ -40,13 +40,13 @@ class MovementGamePhase implements Phase
             );
             $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
 
-            // Perform post-move stealth check for ships with that ability (e.g. Torvalus)
+            // Perform post-move stealth check for ships with that ability (e.g. Hyach, Torvalus)
             if ($ship->trueStealth) {
-                $ship->checkStealth($gameData);
+                $ship->checkStealth($latestgameData);
             }
 
             // Track slots that have pre-firing ships ready to shoot
-            if ($ship->hasSpecialAbility("PreFiring") && $ship->hasPreFireWeaponsReady($gameData)) {
+            if ($ship->hasSpecialAbility("PreFiring") && $ship->hasPreFireWeaponsReady($latestgameData)) {
                 $preFiringSlots[$ship->slot] = true; // use associative key to ensure uniqueness
             }
         }
@@ -86,7 +86,7 @@ class MovementGamePhase implements Phase
         }
     }
 
-	/*old version - before changes - in case of need of rollback*/
+	/*//old version - before changes - in case of need of rollback
     public function process_bak(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
         foreach ($gameData->getMyActiveShips() as $ship) {
@@ -119,6 +119,7 @@ class MovementGamePhase implements Phase
             return $this->setNextActiveShip($gameData, $dbManager);
         }
     }
+    */
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
@@ -129,14 +130,115 @@ class MovementGamePhase implements Phase
 					if(!$dbManager->isMovementAlreadySubmitted($gameData->id, $ship->id, $gameData->turn)){ //in case of wrong activeship indicated - do not re-send orders! (...but proceed with other actions)
 						$dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, $ship->movement);
 					}
+					// Update in-memory movement data so that subsequent checks (like mine detection) use the actual new position	
+					$activeShip->movement = $ship->movement;
 				}
 			}
 		}
-		//Added August 2024 for Mindriders.       
-		foreach ($ships as $ship){ //generate system-specific information if necessary
+
+        if($gameData->areMinesPresent){ //There are mines in the game, check if any have been detected.        
+            // --- HYDRATE MOVEMENT RECORDS ---
+            // During the interval between phase changes, empty movement instructions or single
+            // newly-created instructions might be stored as `stdClass` objects or associative arrays.
+            // We MUST hydrate them into full MovementOrder and OffsetCoordinate objects before
+            // Mine detection or other backend systems loop through getHexPos().
+            $fullGamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
+            //$gameData->ships = $fullGamedata->ships;
+
+            foreach ($fullGamedata->ships as $gdShip) {                 
+                if($gdShip instanceof Terrain) continue;
+                if($gdShip instanceof Mine) continue;
+                if($gdShip->isDestroyed()) continue;
+
+                $hydratedMovements = [];
+                if (is_array($gdShip->movement) && !empty($gdShip->movement)) {
+                    foreach ($gdShip->movement as $move) {
+                        if($move->turn == $gameData->turn){ //Only hydrate this turn.
+                        
+                            if (is_object($move) && !($move instanceof MovementOrder)) {
+                                // Decoded as stdClass
+                                $posX = isset($move->position->x) ? clone $move->position->x : (isset($move->position['x']) ? $move->position['x'] : 0);
+                                $posY = isset($move->position->y) ? clone $move->position->y : (isset($move->position['y']) ? $move->position['y'] : 0);
+                                
+                                $hydratedMovements[] = new MovementOrder(
+                                    $move->id ?? -1,
+                                    $move->type ?? '',
+                                    new OffsetCoordinate($posX, $posY),
+                                    $move->xOffset ?? 0,
+                                    $move->yOffset ?? 0,
+                                    $move->speed ?? 0,
+                                    $move->heading ?? 0,
+                                    $move->facing ?? 0,
+                                    $move->preturn ?? false,
+                                    $move->turn ?? $gameData->turn,
+                                    $move->value ?? 0,
+                                    $move->at_initiative ?? 0
+                                );
+                            } elseif (is_array($move)) {
+                                // Decoded as associative array
+                                $posX = isset($move['position']['x']) ? clone $move['position']['x'] : (isset($move['position']->x) ? $move['position']->x : 0);
+                                $posY = isset($move['position']['y']) ? clone $move['position']['y'] : (isset($move['position']->y) ? $move['position']->y : 0);
+
+                                $hydratedMovements[] = new MovementOrder(
+                                    $move['id'] ?? -1,
+                                    $move['type'] ?? '',
+                                    new OffsetCoordinate($posX, $posY),
+                                    $move['xOffset'] ?? 0,
+                                    $move['yOffset'] ?? 0,
+                                    $move['speed'] ?? 0,
+                                    $move['heading'] ?? 0,
+                                    $move['facing'] ?? 0,
+                                    $move['preturn'] ?? false,
+                                    $move['turn'] ?? $gameData->turn,
+                                    $move['value'] ?? 0,
+                                    $move['at_initiative'] ?? 0
+                                );
+                            } else {
+                                // Already a MovementOrder object
+                                $hydratedMovements[] = $move;
+                            }
+                        }
+                    }    
+                } else {
+                    $lastMove = $gdShip->getLastMovement();
+                    if ($lastMove) {
+//Debug::log("lastMove1 " . $lastMove->speed);	                        
+                        $hydratedMovements[] = new MovementOrder(-1, 'start', $lastMove->position, 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gameData->turn, 0, 0);
+                    }
+                }
+                
+                if(!empty($hydratedMovements)){
+                    $gdShip->movement = $hydratedMovements;
+                }else{ //No moves, hydrate with last known movement from previous turn
+                    $lastMove = $gdShip->getLastMovement();
+                    if ($lastMove) {
+//Debug::log("lastMove2 " . $lastMove->speed);	                        
+                        $hydratedMovements[] = new MovementOrder(-1, 'start', $lastMove->position, 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gameData->turn, 0, 0);
+                    }                                 
+                }    
+                
+                // Re-sync the hydrated array back to the matching $activeShips proxy so
+                // memory references stay aligned for the remainder of the phase.
+                foreach ($activeShips as $activeShip) {
+                    if ($gdShip->id === $activeShip->id) {
+                        $activeShip->movement = $hydratedMovements;
+                    }
+                }
+            }
+
+            foreach ($gameData->ships as $ship) {
+                if ($ship->mine) {
+                    $ship->generateIndividualNotes($gameData, $dbManager);
+                    $ship->saveIndividualNotes($dbManager);
+                }
+            }
+        }    
+
+		//Added August 2024 for Mindrider Contraction.       
+		foreach ($ships as $ship){ //generate system-specific information if necessary    
 			$ship->generateIndividualNotes($gameData, $dbManager);
 		}		
-		foreach ($ships as $ship){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
+		foreach ($ships as $ship){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!         
 			$ship->saveIndividualNotes($dbManager);
 		} 
 		
@@ -153,6 +255,7 @@ class MovementGamePhase implements Phase
         $firstship = null;
         foreach ($gameData->ships as $ship){
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
+            if($ship->mine) continue; //Ignore mines
             if($ship->getTurnDeployed($gameData) > $gameData->turn) continue;
             if ($firstship == null)
                 $firstship = $ship;

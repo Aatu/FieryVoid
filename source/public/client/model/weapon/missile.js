@@ -492,6 +492,10 @@ BallisticMineLauncher.prototype.initializationUpdate = function() {
 	return this;
 };
 
+BallisticMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
+	return "Mine";
+};
+
 var AbbaiMineLauncher = function AbbaiMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -505,5 +509,9 @@ AbbaiMineLauncher.prototype.initializationUpdate = function() {
 		if(aFireOrder)	aFireOrder.damageclass = 'MultiModeHex';
 	}			        
 	return this;
+};
+
+AbbaiMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
+	return "Mine";
 };
     

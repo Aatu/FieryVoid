@@ -2047,6 +2047,7 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 	public $specialAbilities = array("Cloaking");
 	public $primary = true;
 	public $detected = true;
+	public $detectedNew = array(); // New multi-team array logic
 	protected $active = false; //To track in Front End whether system was ever activate this turn during Deployment/PreOrders.			
 		
 	function __construct($armour, $maxhealth, $powerReq, $output){
@@ -2127,13 +2128,25 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 		public function onIndividualNotesLoaded($gamedata){
 			//Sort notes by turn, and then phase so latest detection note is always last.
 			$this->sortNotes();
+			if (!is_array($this->detectedNew)) $this->detectedNew = array();
+
 			foreach ($this->individualNotes as $currNote){ //Search all notes, they should be process in order so the latest event applies.
 				switch($currNote->notekey){
 					case 'detected': 
 						$this->detected = true;
+						if (strpos($currNote->notevalue, 'Team:') === 0) {
+							$teamId = (int) substr($currNote->notevalue, 5);
+							if (!in_array($teamId, $this->detectedNew)) {
+								$this->detectedNew[] = $teamId;
+							}
+						}
 					break;
 					case 'undetected': 
 						$this->detected = false;						
+						if (strpos($currNote->notevalue, 'Team:') === 0) {
+							$teamId = (int) substr($currNote->notevalue, 5);
+							$this->detectedNew = array_values(array_diff($this->detectedNew, [$teamId]));
+						}
 					break;
 					case 'Cloaked': 
 						if($currNote->turn == $gamedata->turn || $gamedata->phase == -1 && $currNote->turn == $gamedata->turn-1){					
@@ -2166,49 +2179,74 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 
 
 		public function checkStealthNextPhase($gamedata){
-					
-				$ship = $this->getUnit();
-					if($gamedata->phase == 1){ 
-						$noteHuman1 = 'D-detectedActive';
-						$noteHuman2 = 'D-undetectedActive';						
-						$noteHuman3 = 'D-NotActive';						
-					}else{
-						$noteHuman1 = '2-detectedActive';
-						$noteHuman2 = '2-undetectedActive';						
-						$noteHuman3 = '2-NotActive';						
-					}
+			$ship = $this->getUnit();
+			if($gamedata->phase == 1){ 
+				$noteHuman1 = 'D-detectedActive';
+				$noteHuman2 = 'D-undetectedActive';						
+				$noteHuman3 = 'D-NotActive';						
+			}else{
+				$noteHuman1 = '2-detectedActive';
+				$noteHuman2 = '2-undetectedActive';						
+				$noteHuman3 = '2-NotActive';						
+			}
 
-				//If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point).					
-				if ($this->active) {
-					if ($this->isDetected($ship, $gamedata)) {
+			// Get all enemy teams in the game
+			$enemyTeams = array();
+			foreach ($gamedata->slots as $slot) {
+				$teamId = (int)$slot->team;
+				if ($teamId != $ship->team && !in_array($teamId, $enemyTeams)) {
+					$enemyTeams[] = $teamId;
+				}
+			}
+
+			// If we're checking during DeploymentGamePhase->Advance (actually Phase 1 at this point).					
+			if ($this->active) {
+				$detectingTeams = $this->isDetected($ship, $gamedata);
+
+				foreach ($enemyTeams as $teamId) {
+					if (in_array($teamId, $detectingTeams)) {
 						$notekey   = 'detected';
 						$noteHuman = $noteHuman1;
-						$noteValue = 1;							
+						$noteValue = "Team:" . $teamId;							
 					} else {
 						$notekey   = 'undetected';
 						$noteHuman = $noteHuman2;
-						$noteValue = 1;							
+						$noteValue = "Team:" . $teamId;							
 					}
-				} else {
-					$notekey   = 'detected';
-					$noteHuman = $noteHuman3; //Not shaded yet or was shaded and then turned off.
-					$noteValue = 0;						
+
+					$note = new IndividualNote(
+							-1,
+							$gamedata->id,
+							$gamedata->turn,
+							$gamedata->phase,
+							$ship->id,
+							$this->id,
+							$notekey,
+							$noteHuman,
+							$noteValue
+					);
+					Manager::insertIndividualNote($note);	
 				}
+			} else {
+				foreach ($enemyTeams as $teamId) {
+					$notekey   = 'detected';
+					$noteHuman = $noteHuman3; //Not cloaked or was cloaked and then turned off.
+					$noteValue = "Team:" . $teamId;						
 
-				$note = new IndividualNote(
-						-1,
-						$gamedata->id,
-						$gamedata->turn,
-						$gamedata->phase,
-						$ship->id,
-						$this->id,
-						$notekey,
-						$noteHuman,
-						$noteValue
-				);
-
-				Manager::insertIndividualNote($note);	
-					
+					$note = new IndividualNote(
+							-1,
+							$gamedata->id,
+							$gamedata->turn,
+							$gamedata->phase,
+							$ship->id,
+							$this->id,
+							$notekey,
+							$noteHuman,
+							$noteValue
+					);
+					Manager::insertIndividualNote($note);	
+				}
+			}
 		}
 
 
@@ -2219,11 +2257,15 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 			$blockedHexes = $gameData->blockedHexes; //Just do this once outside loop			
 			$pos = $ship->getHexPos(); //Just do this once outside loop		
 
+			$detectedTeams = array();
+
 			foreach ($gameData->ships as $otherShip) {
 				// Skip friendly ships
-				if($otherShip->team === $ship->team) continue;
+				$teamId = (int)$otherShip->team;
+				if($teamId == $ship->team) continue;
 				if($otherShip->isTerrain()) continue; //Ignore Terrain
 				if($otherShip->isDestroyed()) continue; //Ignore destroyed enemy ships.
+				if(in_array($teamId, $detectedTeams)) continue;
 		
 				$totalDetection = 0;
 		
@@ -2260,17 +2302,18 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 
 				// If within detection range, and LoS not blocked the ship is detected
 				if ($totalDetection >= $distance && !$noLoS) {  
-					return true; //Just return, if one ship can see the stealthed ship then all can.
+					$detectedTeams[] = $teamId;
 				}
 			}
 
-			return false; //No other conditions were true, not detected.		
+			return $detectedTeams; //Return all teams that can detect the ship.		
 		}	
 
 
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->detected = $this->detected;
+			$strippedSystem->detectedNew = is_array($this->detectedNew) ? $this->detectedNew : array();
 			$strippedSystem->active = $this->active;				        
 			return $strippedSystem;
 		}

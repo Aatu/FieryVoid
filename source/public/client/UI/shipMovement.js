@@ -347,7 +347,7 @@ window.UI = {
             //GRAVITIC TURN LEFT
             var graviticTurnLeft = UI.shipMovement.graviticTurnLeftElement;
             if (shipManager.movement.canGraviticTurn(ship, false)) {
-                UI.shipMovement.drawUIElement(graviticTurnLeft, pos.x, pos.y, s, dis * 1.4, angle, "img/graviticTurnLeft.png", "graviticTurnLeftCanvas", shipHeading);
+                UI.shipMovement.drawUIElement(graviticTurnLeft, pos.x, pos.y, s, dis * 1.4, angle, "img/graviticTurnLeft1.png", "graviticTurnLeftCanvas", shipHeading);
             } else {
                 graviticTurnLeft.hide();
             }     
@@ -386,7 +386,7 @@ window.UI = {
             //GRAVTIC TURN RIGHT
             var graviticTurnRight = UI.shipMovement.graviticTurnRightElement;
             if (shipManager.movement.canGraviticTurn(ship, false)) {
-                UI.shipMovement.drawUIElement(graviticTurnRight, pos.x, pos.y, s, dis * 1.4, angle, "img/graviticTurnRight.png", "graviticTurnRightCanvas", shipHeading);
+                UI.shipMovement.drawUIElement(graviticTurnRight, pos.x, pos.y, s, dis * 1.4, angle, "img/graviticTurnRight1.png", "graviticTurnRightCanvas", shipHeading);
             } else {
                 graviticTurnRight.hide();
             }   
