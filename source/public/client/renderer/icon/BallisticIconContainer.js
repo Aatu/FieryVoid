@@ -213,7 +213,7 @@ window.BallisticIconContainer = function () {
 
 		if (replay) {
 			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-			if (weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) {
+			if (!shooter.flight && weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) {
 				for (var i in weapon.fireOrders) {
 					var otherBall = weapon.fireOrders[i];
 					if (otherBall.damageclass == "SecondAttack") {
