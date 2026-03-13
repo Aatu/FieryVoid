@@ -4,7 +4,7 @@ class captorMineTerrain extends Mine{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 15;
+		$this->pointCost = 16;
 		$this->faction = "Terrain";
         $this->phpclass = "captorMineTerrain";
         $this->imagePath = "img/ships/korlyan_mine.png";
@@ -15,8 +15,7 @@ class captorMineTerrain extends Mine{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 0;
-        $this->detectedSignature = 0;           
+        $this->signature = 0;         
         
         $this->turncost = 0;
         $this->turndelaycost = 0;
