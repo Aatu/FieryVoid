@@ -4396,7 +4396,7 @@ window.BallisticIconContainer = function () {
 
 		if (replay) {
 			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
-			if (weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) {
+			if (!shooter.flight && weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) {
 				for (var i in weapon.fireOrders) {
 					var otherBall = weapon.fireOrders[i];
 					if (otherBall.damageclass == "SecondAttack") {
@@ -13315,73 +13315,81 @@ window.ShipTooltip = function () {
             toDisplay += listEscorting;
         }
         this.addEntryElement(toDisplay, toDisplay != '');
+        
+        if(ship.mine){
+            toDisplay = 'Signature: ' + ship.signature;
+            this.addEntryElement(toDisplay);
+        }else{
+            //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
+            this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total " + ship.iniative + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
 
-        //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
-        this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total " + ship.iniative + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
+            /*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
+            toDisplay = shipManager.systems.getMisc(ship);
+            this.addEntryElement(toDisplay, toDisplay!=''); //miscellanous info from systems - special information o be shown here
+            */
 
-        /*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
-        toDisplay = shipManager.systems.getMisc(ship);
-        this.addEntryElement(toDisplay, toDisplay!=''); //miscellanous info from systems - special information o be shown here
-        */
+            //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
+            var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
+            var speed = shipManager.movement.getSpeed(ship);
+            var baseTurnCost = ship.turncost;
+            if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
+            var turncost = Math.ceil(speed * baseTurnCost);
+            var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
 
-        //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
-        var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
-        var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
-        if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
-        var turncost = Math.ceil(speed * baseTurnCost);
-        var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
+            this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
+            this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
+            toDisplay = ''; //display Agile status
+            if (ship.agile) toDisplay = ', Agile';
+            this.addEntryElement('Turn Cost: ' + turncost + ' (' + ship.turncost + '); Turn Delay: ' + turnDelayCost + ' (' + ship.turndelaycost + ')' + toDisplay);
 
-        this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
-        this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
-        toDisplay = ''; //display Agile status
-        if (ship.agile) toDisplay = ', Agile';
-        this.addEntryElement('Turn Cost: ' + turncost + ' (' + ship.turncost + '); Turn Delay: ' + turnDelayCost + ' (' + ship.turndelaycost + ')' + toDisplay);
+            var thrustRemaining = Math.max(shipManager.movement.getRemainingEngineThrust(ship), 0);//EngineShorted can make this go negative.
 
-        var thrustRemaining = Math.max(shipManager.movement.getRemainingEngineThrust(ship), 0);//EngineShorted can make this go negative.
+            toDisplay = 'Thrust: ' + thrustRemaining + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
+            this.addEntryElement(toDisplay, toDisplay != '');
+            //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
 
-        toDisplay = 'Thrust: ' + thrustRemaining + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
-        this.addEntryElement(toDisplay, toDisplay != '');
-        //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
-
-        toDisplay = 'Speed: ' + shipManager.movement.getSpeed(ship);
-        if (currDelay > 0) toDisplay += ' (delay ' + currDelay + ')';
-        toDisplay += ' (acc cost: ' + ship.accelcost + ')';
-        this.addEntryElement(toDisplay);
-        this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
-
-        if (this.selectedShip) {
-            if (!gamedata.isMyShip(ship)) {
-                this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
+            toDisplay = 'Speed: ' + shipManager.movement.getSpeed(ship);
+            if (currDelay > 0) toDisplay += ' (delay ' + currDelay + ')';
+            toDisplay += ' (acc cost: ' + ship.accelcost + ')';
+            this.addEntryElement(toDisplay);
+            this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
+            if(ship.mine){
+                toDisplay = 'Signature: ' + ship.signature;
+                this.addEntryElement(toDisplay);
             }
+        
+            if (this.selectedShip) {
+                if (!gamedata.isMyShip(ship)) {
+                    this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
+                }
 
-            if (shipManager.isElint(this.selectedShip)) {
-                if (shipManager.hasSpecialAbility(this.selectedShip, "ConstrainedEW")) {//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.            	
-                    this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 4, this.selectedShip !== ship && ship.flight !== true);
-                } else {
-                    this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship && ship.flight !== true);
+                if (shipManager.isElint(this.selectedShip)) {
+                    if (shipManager.hasSpecialAbility(this.selectedShip, "ConstrainedEW")) {//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.            	
+                        this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 4, this.selectedShip !== ship && ship.flight !== true);
+                    } else {
+                        this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship && ship.flight !== true);
+                    }
                 }
             }
-        }
 
-        var dewValue = ew.getSupportedDEW(ship).toFixed(2);
-        //if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
-        if (dewValue > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24 
-            this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
-        }
+            var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+            //if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+            if (dewValue > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24 
+                this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
+            }
 
-        var MDEW = ew.getDetectMEW(ship);
-        if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
-            this.addEntryElement('Detect Mines: ' + MDEW);
-        }
+            var MDEW = ew.getDetectMEW(ship);
+            if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+                this.addEntryElement('Detect Mines: ' + MDEW);
+            }
 
-        if (shipManager.isElint(ship)) {
-            if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
-            this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
-        }
+            if (shipManager.isElint(ship)) {
+                if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
+                this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
+            }
 
-        this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
-
+            this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
+        }    
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
         var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
         fDef = parseFloat(fDef.toFixed(2));
@@ -13732,8 +13740,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipInitialOrdersMenu.buttons = [
-        { className: "addCCEW", condition: [isSelf, notFlight], action: addCCEW, info: "Add CCEW" },
-        { className: "removeCCEW", condition: [isSelf, notFlight], action: removeCCEW, info: "Remove CCEW" },
+        { className: "addCCEW", condition: [isSelf, notFlight, notMine], action: addCCEW, info: "Add CCEW" },
+        { className: "removeCCEW", condition: [isSelf, notFlight, notMine], action: removeCCEW, info: "Remove CCEW" },
         { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: addOEW, info: "Add OEW" },
         { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
         { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection" },
@@ -13752,7 +13760,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW, hasBDEW], action: removeBDEW, info: "Remove BDEW" },
         { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: addDetectSEW, info: "Add Detect Stealth" },
         { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, hasDSEW], action: removeDetectSEW, info: "Remove Detect Stealth" },
-        { className: "removeAllEW", condition: [isSelf, notFlight], action: removeAllEW, info: "Remove All EW" },
+        { className: "removeAllEW", condition: [isSelf, notFlight, notMine], action: removeAllEW, info: "Remove All EW" },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasShipWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
@@ -13951,6 +13959,10 @@ window.ShipTooltipInitialOrdersMenu = function () {
 
     function notFlight() {
         return (!this.selectedShip || !this.selectedShip.flight) && (!this.targetedShip || !this.targetedShip.flight);
+    }
+
+    function notMine() {
+        return (!this.selectedShip || !this.selectedShip.mine);
     }
 
     function sourceNotFlight() {
@@ -15277,35 +15289,35 @@ window.gamedata = {
         if (gamedata.gamephase == -1) {
             var mines = [];
             var html = '';
+            if(gamedata.areMinesPresent){
+                for (var i in gamedata.ships) {
+                    var ship = gamedata.ships[i];
+                    if (ship.userid == gamedata.thisplayer) {
+                        if (ship.mine) {
+                            mines.push(ship);
+                        }
+                    }
+                }
 
-            for (var i in gamedata.ships) {
-                var ship = gamedata.ships[i];
-                if (ship.userid == gamedata.thisplayer) {
-                    if (ship.mine) {
-                        mines.push(ship);
+                var unsetMines = false;
+                if (mines) {
+                    for (var i = 0; i < mines.length; i++) {
+                        var mine = mines[i];
+                        for (var j in mine.systems) {
+                            var sys = mine.systems[j];                        
+                            if (sys.name == "CaptorMine" || sys.name == "ProximityMine" || sys.name == "MineControllerDEW") {  
+
+                                if(!sys.mineSet){
+                                    unsetMines = true;
+                                    html += "You have not set ranges for all your Mines, they will default to their maximum range.<br>"
+                                    break;
+                                }
+                            }                       
+                        }
+                        if (unsetMines) break; // break outer loop                    
                     }
                 }
             }
-
-            var unsetMines = false;
-            if (mines) {
-                for (var i = 0; i < mines.length; i++) {
-                    var mine = mines[i];
-                    for (var j in mine.systems) {
-                        var sys = mine.systems[j];                        
-                        if (sys.name == "CaptorMine") {  
-                            //if(Object.values(sys.allocatedRanges).includes(null));
-                            if(!sys.mineSet){
-                                unsetMines = true;
-                                html += "You have not set ranges for all your Mines, they will default to their maximum range.<br>"
-                                break;
-                            }
-                        }                       
-                    }
-                    if (unsetMines) break; // break outer loop                    
-                }
-            }
-            
             confirm.confirm(html + "<br>Are you sure you wish to commit your orders?", gamedata.doCommit);        
                 
 
@@ -28140,6 +28152,7 @@ shipManager.power = {
 
 			if (ship.flight) continue;
 			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (ship.mine) continue;
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
@@ -28163,7 +28176,8 @@ shipManager.power = {
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
-				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;							
+				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;	
+				if (ship.mine) continue;										
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
 				if (ship.userid != gamedata.thisplayer) continue;
@@ -37340,6 +37354,171 @@ FtrPetals.prototype.doIndividualNotesTransfer = function () {
 };
 
 
+var MineControllerDEW = function MineControllerDEW(json, ship) {
+	ShipSystem.call(this, json, ship);
+};
+MineControllerDEW.prototype = Object.create(ShipSystem.prototype);
+MineControllerDEW.prototype.constructor = MineControllerDEW;
+
+MineControllerDEW.prototype.initializationUpdate = function () {
+	var ship = this.ship;
+	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+		this.range = 0;
+	}
+
+	this.refreshData();
+	return this
+}
+
+MineControllerDEW.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
+	if (this.currClass == '') {
+		var classes = Object.keys(this.allocatedRanges); //Allocated is always the same for HC, so can serve same purpose as availableAA did.
+		if (classes.length > 0) {
+			this.currClass = classes[0];
+		}
+	}
+	return this.currClass;
+};
+
+MineControllerDEW.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
+	var ship = this.ship;
+	var spawned = Number(ship.spawned);
+	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
+	//console.log("Mine: " + ship.name + " (id: " + ship.id + ") | spawned: " + ship.spawned + " | turn: " + gamedata.turn + " | deploymentTurn: " + deploymentTurn);
+
+	if (gamedata.turn !== deploymentTurn) {
+		//console.log("  BLOCKED: Not deployment turn");
+		return false;
+	}
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+
+	//how many are allocated?
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	//how many are allowed?
+	var allowed = this.range;
+	if (allocated >= allowed) return false; //full allowance for this FC type filled	
+
+	return true;
+};
+
+MineControllerDEW.prototype.canDecrease = function () { //can decrease if something was increased
+	var ship = this.ship;
+	var spawned = Number(ship.spawned);
+	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
+	if (gamedata.turn !== deploymentTurn) return false;
+	this.getCurrClass(); //Should be getCurrClass or similar? The method in aoe.js is getCurrClass
+	if (this.currClass == '') return false;
+
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	if (allocated > 0) return true;
+	return false;
+};
+
+MineControllerDEW.prototype.doIncrease = function () { //increase BFCP usage
+	this.getCurrClass();
+
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+
+	if (allocated < this.range) { //else use regular pool 
+		this.allocatedRanges[this.currClass] = allocated + 1;
+
+	}
+	this.mineSet = true; //user changed something, assume they are content.	
+	this.refreshData();
+};
+
+MineControllerDEW.prototype.doDecrease = function () { //decrease BFCP usage
+	this.getCurrClass();
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
+	//Decrease could be in current turn, or from previous turn allocation.
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+
+	if (allocated > 0) {
+		this.allocatedRanges[this.currClass] = allocated - 1;
+	}
+	this.mineSet = true; //user changed something, assume they are content.	
+	this.refreshData();
+};
+
+MineControllerDEW.prototype.refreshData = function () { //refresh description to show correct values
+	var classes = Object.keys(this.allocatedRanges);
+	var entryName = '';
+	var currType = '';
+	var range = null;
+	var hiddenDisplay = '';
+	var ship = this.ship;
+	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
+
+    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+        //hiddenDisplay = "?";
+		this.data["Max Range"] = hiddenDisplay;		
+    }else{
+		this.data["Max Range"] = this.rangeSetting;			
+	}
+
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		range = this.allocatedRanges[currType];
+		if(range == null) range = this.rangeSetting;
+		if(hiddenDisplay == '?') range = hiddenDisplay;
+		//entry should exist, just change it to show current values
+		entryName = ' - ' + currType;
+		this.data[entryName + " range"] = range;
+	}
+
+};
+
+MineControllerDEW.prototype.canPropagate = function () { //can propagate if set to >0
+	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
+	if (this.allocatedRanges[this.currClass] > 0) return true;
+	return false;
+};
+
+MineControllerDEW.prototype.getRangeAllocated = function (rangeIndex) { //returns setting for current FC type
+
+	var rangeSet = 0;
+	var rangeValues = Object.values(this.allocatedRanges);
+	rangeSet = rangeValues[rangeIndex];
+	return rangeSet;
+};
+
+MineControllerDEW.prototype.setCurrShipType = function (shipType) { //sets indicated FC type as current (or sets empty as current)
+	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
+	var classes = Object.keys(this.allocatedRanges);
+	var currType = '';
+	for (var i = 0; i < classes.length; i++) {
+		currType = classes[i];
+		if (currType == shipType) { //exists!
+			this.currClass = currType;
+			return; //no need to loop further
+		}
+	}
+};
+
+MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+
+	if (gamedata.gamephase == -1) {
+		this.individualNotesTransfer = {};
+		//every point is denoted as single entry with damage class name
+		var shipCategories = Object.keys(this.allocatedRanges);
+		var rangeValues = Object.values(this.allocatedRanges);
+
+		for (var i = 0; i < shipCategories.length; i++) {
+			var currType = shipCategories[i];
+			if (rangeValues[i] == null) rangeValues[i] = this.range; //Set to max range if nothing set by player.
+
+			// Initialize the array for the current spec
+			this.individualNotesTransfer[currType] = rangeValues[i];
+		}
+	}
+	return true;
+};
 ;
 
 /* Source: client/model/system/defensive.js */
@@ -41649,10 +41828,11 @@ CaptorMine.prototype.refreshData = function () { //refresh description to show c
 	var range = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
+	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-        hiddenDisplay = "?";
+        //hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;		
     }else{
 		this.data["Max Range"] = this.range;			
@@ -41811,12 +41991,14 @@ ProximityMine.prototype.refreshData = function () { //refresh description to sho
 	var attack = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
+	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 	
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-        hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;		
-    }
+    }else{
+		this.data["Max Range"] = this.range;		
+	}
 	
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
@@ -41839,15 +42021,7 @@ ProximityMine.prototype.canPropagate = function () { //can propagate if set to >
 	//if (this.allocatedShipTypes[this.currClass] > 0) return true;
 	return false;
 };
-/*
-ProximityMine.prototype.getRangeAllocated = function (rangeIndex) { //returns setting for current FC type
 
-	var rangeSet = 0;
-	var rangeValues = Object.values(this.allocatedShipTypes);
-	rangeSet = rangeValues[rangeIndex];
-	return rangeSet;
-};
-*/
 
 ProximityMine.prototype.setCurrShipType = function (shipType) { //sets indicated FC type as current (or sets empty as current)
 	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible

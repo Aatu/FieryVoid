@@ -286,14 +286,31 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </li>                        
             
             <li>There are several different types of mine in B5 Wars, as Captor Mines are the only ones currently available in FV at this time only their details are listed below.</li>
+            <li>All mines will automatically attack the first unit that comes into their range, even allies unless you have purchases the Identify Friend or Fore enhancement for the mine or mine launcher.</li>
             <li>Captor Mines:
                 <ul class="circle-list">
-                    <li>These have a range within which they will launch at the first viable target during movement, and then resolve the attack as ballistic weapon during Firing Phase.  
+                    <li>These mines a range within which they will launch at the first viable target during movement, 
+                        and then resolve the attack as ballistic weapon during Firing Phase.  
                         As such, these type of mines can be intercepted in the same way as other ballistic weapons.</li>
                     <li>Units equipped with Jammers halve the range at which a captor mine will attack them.</li>
-                    <li>Captor mine is destroyed whether it hits or not.</li>                    
+                    <li>A captor mine is destroyed whether it hits or not.</li>                    
                 </ul>
-            </li>      
+            </li>  
+            <li>Proximity Mines:
+                <ul class="circle-list">
+                    <li>These mines a range within which they explode and damage the first viable target during movement. They resolve this attack just before the Firing Phase, similar to Terrain collisions.</li>
+                    <li>Proximity mines automaticall hit their target and are destroyed after they attack.</li>                    
+                </ul>
+            </li> 
+            <li>DEW Mines:
+                <ul class="circle-list">
+                    <li>These mines come equipped with weapons and will fire these autoamtically at the first viable target it enoucnters during the movement phase, 
+                        these attacks are then resolved normally during the Firing Phase.</li>
+                    <li>DEW mines become detected once they fire, and they must fire all their weapons at the same target.  
+                        They don't not benefit from having a weapon lock, but do get an accuracy bonus to their shot.</li>
+                    <li>Once they have been detected their signature reduces to a lower value.</li>                        
+                </ul>
+            </li>                              
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 5px;
+    margin-top: 0px;
     width: 100%;
     min-width: 200px;
     opacity: 0.95;
@@ -155,7 +155,6 @@ class MineSettingsList extends Component {
                 var ctrl = otherUnit.systems[iSys];
                 if (otherUnit.shipClass == ship.shipClass && ctrl.name === system.name) {
                     allOwnMines.push(ctrl);
-                    break;
                 }
             }
         }
@@ -196,7 +195,11 @@ class MineSettingsList extends Component {
     render() {
         const { system } = this.props;
 
-        if (!system || !system.range) return null;
+        if (!system) return null;
+
+        system.range = system.range || system.rangeSetting;
+
+        if (!system.range) return null;
 
         const allocatedRangesMap = system.allocatedRanges || {};
         const shipTypes = Object.keys(allocatedRangesMap);

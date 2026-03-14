@@ -120,10 +120,11 @@ CaptorMine.prototype.refreshData = function () { //refresh description to show c
 	var range = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
+	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-        hiddenDisplay = "?";
+        //hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;		
     }else{
 		this.data["Max Range"] = this.range;			
@@ -282,10 +283,10 @@ ProximityMine.prototype.refreshData = function () { //refresh description to sho
 	var attack = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
+	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 	
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-        hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;		
     }else{
 		this.data["Max Range"] = this.range;		
@@ -312,15 +313,7 @@ ProximityMine.prototype.canPropagate = function () { //can propagate if set to >
 	//if (this.allocatedShipTypes[this.currClass] > 0) return true;
 	return false;
 };
-/*
-ProximityMine.prototype.getRangeAllocated = function (rangeIndex) { //returns setting for current FC type
 
-	var rangeSet = 0;
-	var rangeValues = Object.values(this.allocatedShipTypes);
-	rangeSet = rangeValues[rangeIndex];
-	return rangeSet;
-};
-*/
 
 ProximityMine.prototype.setCurrShipType = function (shipType) { //sets indicated FC type as current (or sets empty as current)
 	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
