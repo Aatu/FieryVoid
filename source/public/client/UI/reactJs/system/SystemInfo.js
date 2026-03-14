@@ -81,14 +81,13 @@ class SystemInfo extends React.Component {
         var systemDisplayName = system.displayName;
         var firingModeDisplay = system.firingModes ? system.firingModes[system.firingMode] : null;
 
+        let isUnrevealedMine = false;
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
             if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                isUnrevealedMine = true;
                 systemDisplayName = "Mine";
                 specialEntry = ["No details known, scan with OEW to identify."];
-                if (firingModeDisplay) {
-                    firingModeDisplay = "N/A";
-                }
             }
         }
 
@@ -96,31 +95,31 @@ class SystemInfo extends React.Component {
             <SystemInfoTooltip position={getPosition(boundingBox)}>
                 <InfoHeader>{systemDisplayName}</InfoHeader>
 
-                {!ship.flight && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)}
-                {!ship.flight && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
-                {ship.flight && getEntry('Offensive bonus', displayOffensiveBonus * 5)}
+                {!ship.flight && !isUnrevealedMine && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)}
+                {!ship.flight && !isUnrevealedMine && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
+                {ship.flight && !isUnrevealedMine && getEntry('Offensive bonus', displayOffensiveBonus * 5)}
 
-                {system.firingModes && getEntry('Firing mode', firingModeDisplay)}
+                {system.firingModes && !isUnrevealedMine && getEntry('Firing mode', firingModeDisplay)}
 
-                {system.missileArray && Object.keys(system.missileArray).length > 0 && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
+                {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
-                {Object.keys(system.data).map((key, i) => (key != specialName && getEntry(key, system.data[key], 'data' + i)))}
+                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && getEntry(key, system.data[key], 'data' + i)))}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&
                     Object.keys(specialEntry).map(i => <Entry key={`special-${reactKey++}`}>{specialEntry[i]}</Entry>)
                 }
 
-                {Object.keys(system.critData).length > 0 && getCriticals(system)}
+                {Object.keys(system.critData).length > 0 && !isUnrevealedMine && getCriticals(system)}
 
-                {(!gamedata.isMyShip(ship) &&
+                {(!gamedata.isMyShip(ship) && !isUnrevealedMine &&
                     (gamedata.gamephase == 3 || gamedata.gamephase == 1) &&
                     gamedata.waiting == false &&
                     gamedata.selectedSystems.length > 0 && selectedShip) &&
                     getCalledShot(ship, selectedShip, system)}
 
 
-                {(gamedata.isMyShip(ship) &&
+                {(gamedata.isMyShip(ship) && !isUnrevealedMine &&
                     gamedata.rules &&
                     gamedata.rules.friendlyFire === 1 &&
                     (gamedata.gamephase == 3 || gamedata.gamephase == 5 || gamedata.gamephase == 1) &&

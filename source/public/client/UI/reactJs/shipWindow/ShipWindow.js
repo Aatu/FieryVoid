@@ -110,6 +110,28 @@ const ShipImage = styled.div`
     user-select: none;
 `;
 
+const UnknownSystemIcon = styled.div`
+    position: relative;
+    box-sizing: border-box;
+    width: 50px;
+    height: 50px;
+    margin: auto;
+    border: 1px solid #496791;
+    background-color: black;
+    color: #e3c182;
+    font-family: arial;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+`;
+
 
 class ShipWindow extends React.Component {
     constructor(props) {
@@ -215,6 +237,52 @@ class ShipWindow extends React.Component {
         }, 300); // Clear touch active after giving click events time to fire/be ignored
     }
 
+    onUnknownMouseOver(event) {
+        if (this.touchActive) return;
+        if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
+
+        let { ship } = this.props;
+        let stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+
+        webglScene.customEvent('SystemMouseOver', {
+            ship: ship,
+            system: stealthSystem ? stealthSystem : ship.systems[0],
+            element: event.currentTarget,
+            showInfo: true
+        });
+    }
+
+    onUnknownTouchStart(event) {
+        this.touchActive = true;
+        this.ignoreNextClick = false;
+        window.lastTouchActiveTime = Date.now();
+
+        if (this.longPressTimer) {
+            clearTimeout(this.longPressTimer);
+        }
+
+        const target = event.currentTarget;
+        const touch = event.touches[0];
+        this.touchStartX = touch.clientX;
+        this.touchStartY = touch.clientY;
+
+        this.longPressTimer = setTimeout(() => {
+            this.ignoreNextClick = true; // Prevent click from firing after long press
+            let { ship } = this.props;
+            let stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+
+            // Long Press -> generic tooltip
+            webglScene.customEvent('SystemMouseOver', {
+                ship: ship,
+                system: stealthSystem ? stealthSystem : ship.systems[0],
+                element: target,
+                showInfo: true
+            });
+
+            this.longPressTimer = null;
+        }, 400); // 400ms hold required for info window
+    }
+
     onShipMouseOut() {
         if (this.touchActive) return;
         if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
@@ -238,11 +306,14 @@ class ShipWindow extends React.Component {
 
         var unitName = ship.shipClass;
         var shipName = ship.name;
+        let isUnrevealedMine = false;
+
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
             if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
                 unitName = "Mine";
                 shipName = "Mine";
+                isUnrevealedMine = true;
             }
         }
 
@@ -253,6 +324,16 @@ class ShipWindow extends React.Component {
                     <FighterList ship={ship} />
                 </ShipWindowContainer>
             )
+        }
+
+        if (isUnrevealedMine) {
+            return (<ShipWindowContainer ref={this.elementRef} onClick={shipWindowClicked} onContextMenu={e => { e.preventDefault(); e.stopPropagation(); }} $isMyTeam={isMyTeam} team={ship.team}>
+                <Header><span>{shipName}</span> {unitName}<CloseButton onClick={this.close.bind(this)}>✕</CloseButton></Header>
+                <Column $top>
+                    <ShipImage img={ship.imagePath} onMouseOver={this.onShipMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onClick={this.onShipClick.bind(this)} onTouchStart={this.onShipTouchStart.bind(this)} onTouchMove={this.onShipTouchMove.bind(this)} onTouchEnd={this.onShipTouchEnd.bind(this)} onTouchCancel={this.onShipTouchCancel.bind(this)} />
+                    <UnknownSystemIcon onMouseOver={this.onUnknownMouseOver.bind(this)} onMouseOut={this.onShipMouseOut.bind(this)} onTouchStart={this.onUnknownTouchStart.bind(this)} onTouchMove={this.onShipTouchMove.bind(this)} onTouchEnd={this.onShipTouchEnd.bind(this)} onTouchCancel={this.onShipTouchCancel.bind(this)}>?</UnknownSystemIcon>
+                </Column>
+            </ShipWindowContainer>)
         }
 
         const systemsByLocation = sortIntoLocations(ship);

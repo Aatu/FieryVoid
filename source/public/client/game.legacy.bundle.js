@@ -2576,7 +2576,7 @@ window.HexNumberSprite = function () {
 }();;
 
 /* Source: client/renderer/icon/ShipIcon.js */
-﻿'use strict';
+'use strict';
 
 window.ShipIcon = function () {
 
@@ -3117,13 +3117,13 @@ window.ShipIcon = function () {
             this.showThrusterIcon(ship, weapon); //Creates small thruster icon on relevant side of ship on hover over system.
 
         } else if (weapon.shootsStraight) { //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
-            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             var arcs = shipManager.systems.getArcs(ship, weapon);
             this.showStraightArcs(weapon, hexDistance, arcs);
 
         } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
+            if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
             var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
 
             for (const arcs of allArcs) {
@@ -3142,6 +3142,7 @@ window.ShipIcon = function () {
         } else { //Normal weapons with circular weapon arcs
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
+            if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
             var arcs = shipManager.systems.getArcs(ship, weapon);
             var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
             var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
@@ -3213,9 +3214,11 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
-        const dis = weapon.rangePenalty === 0
+        var dis = weapon.rangePenalty === 0
             ? hexDistance * (weapon.range + 0.5)
             : 50 / weapon.rangePenalty * hexDistance;
+
+        if (weapon.range > 0 && dis > hexDistance * (weapon.range + 0.5)) dis = hexDistance * (weapon.range + 0.5);
 
         const shipFacing = this.getFacing(); // ship's facing in degrees
 
@@ -13317,7 +13320,7 @@ window.ShipTooltip = function () {
         this.addEntryElement(toDisplay, toDisplay != '');
         
         if(ship.mine){
-            toDisplay = 'Signature: ' + ship.signature;
+            if(gamedata.isMyorMyTeamShip(ship)) toDisplay = 'Signature: ' + ship.signature;
             this.addEntryElement(toDisplay);
         }else{
             //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
@@ -13353,10 +13356,6 @@ window.ShipTooltip = function () {
             toDisplay += ' (acc cost: ' + ship.accelcost + ')';
             this.addEntryElement(toDisplay);
             this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
-            if(ship.mine){
-                toDisplay = 'Signature: ' + ship.signature;
-                this.addEntryElement(toDisplay);
-            }
         
             if (this.selectedShip) {
                 if (!gamedata.isMyShip(ship)) {
@@ -13746,13 +13745,13 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
         { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection" },
         { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection" },
-        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
+        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
         { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
         //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
         //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
         //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
         //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
-        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" },
+        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" },
         { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" },
         { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" },
         { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" },
@@ -13962,7 +13961,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
     }
 
     function notMine() {
-        return (!this.selectedShip || !this.selectedShip.mine);
+        return (!this.selectedShip || !this.selectedShip.mine) && (!this.targetedShip || !this.targetedShip.mine);
     }
 
     function sourceNotFlight() {
@@ -37452,14 +37451,30 @@ MineControllerDEW.prototype.refreshData = function () { //refresh description to
 	var range = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
-	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
+	if(gamedata.gamephase !== -2){
+		if(!gamedata.isMyOrTeamOneShip(ship)){
+			hiddenDisplay = '?';
+		}
+	} 
+
+			for(var i in ship.systems){
+				var weapon = ship.systems[i];
+				if(weapon instanceof Weapon && weapon.name !== "RammingAttack"){
+					weapon.data["Fire control (fighter/med/cap)"] = weapon.translateFCtoD100txt(weapon.fireControl);
+					weapon.range = this.rangeSetting;	
+					//weapon.data["Range"] = this.rangeSetting;					
+				}				
+			}	
 
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
         //hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;		
     }else{
-		this.data["Max Range"] = this.rangeSetting;			
+		this.data["Max Range"] = this.rangeSetting;	
+		
+		
+
 	}
 
 	for (var i = 0; i < classes.length; i++) {

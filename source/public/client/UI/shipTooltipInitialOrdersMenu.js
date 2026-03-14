@@ -16,13 +16,13 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
         { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection" },
         { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection" },
-        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
+        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
         { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
         //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
         //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
         //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
         //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
-        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" },
+        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" },
         { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" },
         { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" },
         { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" },
@@ -232,7 +232,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
     }
 
     function notMine() {
-        return (!this.selectedShip || !this.selectedShip.mine);
+        return (!this.selectedShip || !this.selectedShip.mine) && (!this.targetedShip || !this.targetedShip.mine);
     }
 
     function sourceNotFlight() {

@@ -289,7 +289,7 @@ window.ShipTooltip = function () {
         this.addEntryElement(toDisplay, toDisplay != '');
         
         if(ship.mine){
-            toDisplay = 'Signature: ' + ship.signature;
+            if(gamedata.isMyorMyTeamShip(ship)) toDisplay = 'Signature: ' + ship.signature;
             this.addEntryElement(toDisplay);
         }else{
             //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
@@ -325,10 +325,6 @@ window.ShipTooltip = function () {
             toDisplay += ' (acc cost: ' + ship.accelcost + ')';
             this.addEntryElement(toDisplay);
             this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
-            if(ship.mine){
-                toDisplay = 'Signature: ' + ship.signature;
-                this.addEntryElement(toDisplay);
-            }
         
             if (this.selectedShip) {
                 if (!gamedata.isMyShip(ship)) {

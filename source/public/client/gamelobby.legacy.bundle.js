@@ -19893,14 +19893,30 @@ MineControllerDEW.prototype.refreshData = function () { //refresh description to
 	var range = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
-	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
+	if(gamedata.gamephase !== -2){
+		if(!gamedata.isMyOrTeamOneShip(ship)){
+			hiddenDisplay = '?';
+		}
+	} 
+
+			for(var i in ship.systems){
+				var weapon = ship.systems[i];
+				if(weapon instanceof Weapon && weapon.name !== "RammingAttack"){
+					weapon.data["Fire control (fighter/med/cap)"] = weapon.translateFCtoD100txt(weapon.fireControl);
+					weapon.range = this.rangeSetting;	
+					//weapon.data["Range"] = this.rangeSetting;					
+				}				
+			}	
 
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
         //hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;		
     }else{
-		this.data["Max Range"] = this.rangeSetting;			
+		this.data["Max Range"] = this.rangeSetting;	
+		
+		
+
 	}
 
 	for (var i = 0; i < classes.length; i++) {

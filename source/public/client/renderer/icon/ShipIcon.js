@@ -1,4 +1,4 @@
-﻿'use strict';
+'use strict';
 
 window.ShipIcon = function () {
 
@@ -539,13 +539,13 @@ window.ShipIcon = function () {
             this.showThrusterIcon(ship, weapon); //Creates small thruster icon on relevant side of ship on hover over system.
 
         } else if (weapon.shootsStraight) { //Some weapons can only fire in straight lines e.g. Transverse Drive.  Show rectangular arcs along hex lines instead.
-            var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             var arcs = shipManager.systems.getArcs(ship, weapon);
             this.showStraightArcs(weapon, hexDistance, arcs);
 
         } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
+            if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
             var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
 
             for (const arcs of allArcs) {
@@ -564,6 +564,7 @@ window.ShipIcon = function () {
         } else { //Normal weapons with circular weapon arcs
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
             if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
+            if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
             var arcs = shipManager.systems.getArcs(ship, weapon);
             var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
             var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
@@ -635,9 +636,11 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showStraightArcs = function (weapon, hexDistance, arcs) {
-        const dis = weapon.rangePenalty === 0
+        var dis = weapon.rangePenalty === 0
             ? hexDistance * (weapon.range + 0.5)
             : 50 / weapon.rangePenalty * hexDistance;
+
+        if (weapon.range > 0 && dis > hexDistance * (weapon.range + 0.5)) dis = hexDistance * (weapon.range + 0.5);
 
         const shipFacing = this.getFacing(); // ship's facing in degrees
 
