@@ -635,6 +635,10 @@ class BaseShip {
             if(($this->faction == "Pak'ma'ra Confederacy") && (!($this instanceof FighterFlight))	){
                 return $this->doPakmaraInitiativeBonus($gamedata);
             }
+			//Polaren have speial initiative bonus
+            if((($this->faction == "Nexus Polaren Confederacy (early)") || ($this->faction == "Nexus Polaren Confederacy (early)")) && (!($this instanceof FighterFlight))	){
+                return $this->doPolarenInitiativeBonus($gamedata);
+            }
            /* 
 		   if($this->faction == "Hyach Gerontocracy"){
 		        return $this->doHyachInitiativeBonus($gamedata) + $flagBridgeBonus;
@@ -780,6 +784,29 @@ class BaseShip {
 	        //    debug::log($this->phpclass."- bonus: ".$mod);
 	        return $this->iniativebonus - $mod*5;
     	} //end of doPakmaraInitiativeBonus    
+
+
+        private function doPolarenInitiativeBonus($gamedata){
+        	
+	        $mod = 0;
+			$alivePolarenShips = 0;
+				
+				foreach($gamedata->ships as $ship){
+	                if(
+	                     (($ship->faction == "Nexus Polaren Confederacy (early)") || ($ship->faction == "Nexus Polaren Confederacy (early)")) //Correct faction
+	                    && ($this->userid == $ship->userid) //of same player
+	                    && (!($ship instanceOf FighterFlight)) //actually a ship
+	                    && (!$ship->isDestroyed())){
+	                        $alivePolarenShips++;
+	                }
+					$mod = floor(($alivePolarenShips)/4); //Divide by four and round down
+					if ($mod > 10) $mod = 10;
+	            }
+	                
+	        //    debug::log($this->phpclass."- bonus: ".$mod);
+	        return $this->iniativebonus + $mod*5;
+    	} //end of doPolarenInitiativeBonus    
+
 
         /*    
         private function doHyachInitiativeBonus($gamedata){

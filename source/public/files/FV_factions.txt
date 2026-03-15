@@ -647,12 +647,12 @@ Factions that point for point will have uphill battle against Tier 1, yet otherw
  - Star Trek (TOS) Federation  (custom faction - Star Trek universe)
  - Star Wars (custom faction (or rather factions), Star Wars universe - with VERY different playstyle, consider them difficult to fly!)
  - ZBSG Colonials
- - ZNexus Brixadii Clans (custom faction - Nexus universe)
- - ZNexus Craytan Union (custom faction - Nexus universe)
- - ZNexus Dalithorn Commonwealth (custom faction - Nexus universe)
- - ZNexus Makar Federation (custom faction - Nexus universe)
- - ZNexus Sal-bez Coalition (custom faction - Nexus universe)
- - ZNexus Velrax Republic (custom faction - Nexus universe)
+ - Nexus Brixadii Clans (custom faction - Nexus universe)
+ - Nexus Craytan Union (custom faction - Nexus universe)
+ - Nexus Dalithorn Commonwealth (custom faction - Nexus universe)
+ - Nexus Makar Federation (custom faction - Nexus universe)
+ - Nexus Sal-bez Coalition (custom faction - Nexus universe)
+ - Nexus Velrax Republic (custom faction - Nexus universe)
 
 
 Tier 3 - Low Performance Competitive
@@ -667,13 +667,14 @@ Factions that point for point will have uphill battle against Tier 2, and quite 
  - Markab Theocracy
  - Rogolon Dynasty
  - Usuuth Coalition
- - ZEscalation Blood Sword Raiders  (custom faction - Escalation Wars universe)
- - ZNexus Brixadii Clans (early) (custom faction - Nexus universe)
- - ZNexus Craytan Union (early) (custom faction - Nexus universe)
- - ZNexus Dalithorn Commonwealth (early) (custom faction - Nexus universe)
- - ZNexus Makar Federation (early) (custom faction - Nexus universe)
- - ZNexus Sal-bez Coalition (early) (custom faction - Nexus universe)
- - ZNexus Velrax Republic (early) (custom faction - Nexus universe)
+ - Escalation Blood Sword Raiders  (custom faction - Escalation Wars universe)
+ - Nexus Brixadii Clans (early) (custom faction - Nexus universe)
+ - Nexus Craytan Union (early) (custom faction - Nexus universe)
+ - Nexus Dalithorn Commonwealth (early) (custom faction - Nexus universe)
+ - Nexus Makar Federation (early) (custom faction - Nexus universe)
+ - Nexus Polaren Confederacy (early) (custom faction - Nexus universe)
+ - Nexus Sal-bez Coalition (early) (custom faction - Nexus universe)
+ - Nexus Velrax Republic (early) (custom faction - Nexus universe)
  - ZStarTrek Federation (early) (custom faction - Star Trek universe)
  - ZStarTrek Suliban (early) (custom faction - Star Trek universe)
 
@@ -704,12 +705,12 @@ Fighters - The Colonial fighters use a pulse style weapon that has an alternate 
 Raptor - The Raptor super-heavy fighter is a support unit that provides +5 initiative to friendly Colonial fighters.
 
 
-zESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
+ESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
 The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.
 - This faction uses ships acquired from the Kastan, and have access to the same technologies as that faction
 
 
-zESCALATION CHOUKA (custom, alternate universe faction)
+ESCALATION CHOUKA (custom, alternate universe faction)
 The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. The Chouka were more technologically advanced than the Circasians, but lacked the tactical experience and fleet assets to combat the more numerous and maneuverable Circasian fleet.
 The ships included here are the Chouka spacecraft that served during the Chouka War period. They are armed with a mix of plasma and laser weapons, with older Chouka ships relying on plasma weapons while their newer ships rely on lasers in the anti-shipping role. Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.
 As with the Circasians, the Chouka are best used against minor B5 powers (Alacans, Mitoc, Raiders), however some of their larger, more powerful units are roughly the equivalent of Dilgar-war era Earth Alliance. 
@@ -719,13 +720,13 @@ Twin Laser Cannon - This Chouka weapon is an advancement over the basic Light La
 Light Energy Mine - This is a smaller version of the Energy Mine used by the Narn. It has shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine. This weapon is being substituted for the Ballistic Mine Launchers these ships historically were deployed with.
 
 
-zESCALATION CHOUKA RAIDERS (custom, alternate universe faction)
+ESCALATION CHOUKA RAIDERS (custom, alternate universe faction)
 This group of raiders operated in and around Chouka controlled territories and were directly financed by the Chouka Theocracy. They were an early threat to the Circasian Empire as it expanded its own sphere of influence. 
 These raiders operate cast-off Chouka military and civilian ships and fighters. Their weapons are sourced from the Chouka, along with limited supplies from other black market sources.
 Because of their ties to the Chouka government, these raiders are fairly well armed compared to the Circasian and Chouka fleets and are comparable to other low tech raiders in the B5 universe.
 
 
-zESCALATION CIRCASIAN (custom, alternate universe faction)
+ESCALATION CIRCASIAN (custom, alternate universe faction)
 The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political manuevering and conquest they were able to eventually carve out a major imperium of their own.
 The ships included here are low tech units the Circasians used during the Chouka War period. These vessels are principally armed with light particle, plasma, and laser weapons. Anything more powerful is beyond their level of technology at the start of the war.
 They are capable opponents against the minor B5 powers (Alacans, Hurr, Usuuth) but will be completely overwhelmed by more capable units.
@@ -736,7 +737,7 @@ The Circasian faction was created by Tyrel Lohr for his Escalation Wars setting.
 Fiery Void encoding done in collaboration with Geoffrey Stano.
 
 
-zESCALATION KASTAN (custom, alternate universe faction)
+ESCALATION KASTAN (custom, alternate universe faction)
 The Kastan Imperial Monarchy inhabits a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). Navigating the rapids has forced the Kastan to be superb pilots. The 
 Kastan have had limited interactions with their neighbours, although they do engage in trade and have been known to sell out their services as mercenaries. Most of their active political ambitions have focused on the coreward sectors, having fought back against an invasion by the Ingalli in recent history.
 - Plasma Cannons: older Kastan ships made heavy use of light, medium, and heavy plasma weapons
@@ -746,7 +747,7 @@ Kastan have had limited interactions with their neighbours, although they do eng
 - Pulse Torpedo: this weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range
 
 
-zESCALATION SSHEL'ATH (custom, alternate universe faction)
+ESCALATION SSHEL'ATH (custom, alternate universe faction)
 The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction 
 was ill-advised. It wasn't until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds. The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. Only their faces 
 are inelastic and they are highly resistant to radiation.
@@ -757,12 +758,12 @@ Electron Polarizer - A flash mode electromagnetic weapon, this can destroy or sh
 
 NEXUS SETTING
 The Nexus setting is designed by Jeremy and Geoffrey Stano. The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, Federation of Makar, 
-Sal-bez Coalition, and the Velrax Republic. By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. Over time the factions evolve better units and these are 
+Polaren Confederacy, Sal-bez Coalition, and the Velrax Republic. By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. Over time the factions evolve better units and these are 
 available to play as well. The Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. These tech levels correspond to various conflicts 
 each faction faced and were major drivers in the evolution of the Nexus fleets. In general, the earliest units are equivalent to "The Rest" or low "Tier 2" factions. The most advanced units are strong "Tier 2" 
 designs. The individual factions descriptions below will provide more details. The Nexus factions also make extensive use of refits. Specialized weapons for each faction are shown.
 
-zNEXUS BRIXADII (custom, alternate universe faction)
+NEXUS BRIXADII (custom, alternate universe faction)
 The Brixadii Clans are a spinward power within the Nexus sector, having fought with the Dalithorn Commonwealth early on and having hostile relations with the Velrax Republic. The Brixadii's 
 technology is primarily focused around particle weapons. These are rugged, easy to repair, and low mass. The Clans have begun to specialize in pulsar technology as this affords superior mass to damage 
 ratios. This last point is important as the key feature that defines the Clans are their extremely maneuverable ships. They have few longer-ranged weapons, but prefer high-speed firing passes or getting 
@@ -776,7 +777,7 @@ If You want interesting low tech faction then by all means use it, just be warne
 - Tech Level 3: War of Ascendancy through the First War of Control (2110s through 2150s)
 
 
-zNEXUS CRAYTAN (custom, alternate universe faction)
+NEXUS CRAYTAN (custom, alternate universe faction)
 Formally known as the Union of Craytan States, the Craytan are an early opponent of the Sal-bez Coalition due in part to a botched first contact by the Sal-bez. The Craytan share a lot in common with 
 the Dalithorn Commonwealth from a technological standpoint. Many of their systems are air-breathing systems converted for use in space. These are quite basic, but the Craytan have found 
 these to be effective for their needs. Plasma would become a speialization as an improvement over the older, ammunition-based systems. The Craytan do not use fighters in the traditional sense. They initially 
@@ -795,7 +796,7 @@ show the limitations of the Polten, but the Craytan would choose to create a mor
 - Tech Level 3: Daybreak War era through the First War of Control (2130s through 2150s)
 
 
-zNEXUS DALITHORN  (custom, alternate universe faction)
+NEXUS DALITHORN  (custom, alternate universe faction)
 The Dalithorn Commonwealth are likely the lowest tech of the main Nexus powers. They managed to leverage their position across a major trade route to keep their sovereignty up to the later years of
 the First War of Control in the 2150s. They primarily use terrestrial weapons converted for use in space combat. While individually weak, many of the weapons are treated as matter weapons, allowing
 the Dalithorn to cause damage. While simple, a number of their weapons are still effective, such as the gas gun. The Commonwealth does not use fighters in the traditional sense. They only
@@ -808,7 +809,7 @@ field super-heavy fighters, but these are typically slow. However, their size an
 - Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s)
 
 
-zNEXUS MAKAR  (custom, alternate universe faction)
+NEXUS MAKAR  (custom, alternate universe faction)
 The Makar Federation is made up of two species to arise from the homeworld of Makar; a blend of 'home' from both languages. The Federation consists of the land dwelling Hitat and the squid-like Qom Yomin.
 The Hitat make up the majority of the Federation's combat forces, but the Qom Yomin contribute a variety of support units. Additionally, being aquatic, Qom Yomin ships have larger ramming values if they 
 are rammed. The Makar have been shaped by the Reshmiyar Invasion and their subsequent rebellion that took place early in their space faring history.
@@ -819,9 +820,22 @@ are rammed. The Makar have been shaped by the Reshmiyar Invasion and their subse
 - Tech Level 1: Pre-contact through the Jump War (up through the 2050s)
 - Tech Level 2: Jump War era through the War of Ascendancy era (2050s through the 2110s)
 - Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s)
+ 
+
+NEXUS POLAREN  (custom, alternate universe faction, playtest)
+The Polaren are a difficult faction to quantify. Outwardly, they look like plants, but they are highly mobile and have many animal-like characteristics.They can derive energy from photosynthesis, but also
+chemosynthesis by "eating" the atmosphere. This ability has led to the Polaren not being fully trusted by the other powers after they captured two Sal-bez worlds and heavily terraformed them to be toxic 
+to other factions. Polaren politics are just as hard to quantify with a dizzy array of every changing alliances. The Polaren were one of the earliest space-faring factions and have fought several civil wars 
+due to their political differences. The Polaren developed numerous "non-violent" weapons to be able to disable opposing ships. The allowed them to be captured, but more importantly, return the ship to service
+relatively quickly. The Polaren had to adapt when they encountered the Sal-bez in order to help their ships cause more damage to their targets. Due to Polaren physiology, they use light combat vessels extensively,
+even among the Nexus factions. The Polaren also have an low-level telepathic ability that intensifies in larger numbers. 
+- Initiative Bonus: For every four Polaren light combat vessels or larger, the Polaren gain +5 initiative up to a total of +50.
+- Radiation Cannons: The Polaren are exceptionally hardy to radiation (needed due to conditions on their homeworld) and use rad cannons to quickly disable and board opposing vessels
+- Nexus LCVs: Unlike the Babylon 5 powers, the Nexus powers focused more effort on their LCVs. As such, LCVs can be deployed independently.
+- Tech Level 1: Pre-contact (Garentithean Revolt) through the Polaren Conflict (up through the 2120s)
 
 
-zNEXUS SAL-BEZ  (custom, alternate universe faction)
+NEXUS SAL-BEZ  (custom, alternate universe faction)
 The Sal-bez Coalition is an insectoid race that started as a typical queen / worker arrangement, but during the Enlightenment of Fire, the Sal-bez won their freedom. They are now a fiercly individualistic society. 
 The Coalition did not have a traditional military upon reaching for the stars and their early units are exclusively civilian designs using industrial systems as makeshift weapons. As the Sal-bez grew (and 
 discovered several technology caches from a previous power), they began to field purpose-built combat vessels that would ultimately lead to the Coalition becoming one of the most powerful of the Nexus factions.
@@ -833,7 +847,7 @@ discovered several technology caches from a previous power), they began to field
 - Tech Level 3: Polaren Conflict era through the First War of Control (2120s through the 2150s)
 
 
-zNEXUS VELRAX  (custom, alternate universe faction)
+NEXUS VELRAX  (custom, alternate universe faction)
 The Velrax Republic is potentially the most aggressive faction within the Nexus setting. They have engaged the Brixadii Clans, Dalithorn Commonwealth, and Makar Federation by the early 2100s. The Velrax are 
 the most prolific users of fighters, which are supported with a rigid fleet structure. The Velrax field well armed "strike" carriers supported by anti-ship focused "gunships". Everything revolves around supporting 
 their fighter operations. The carriers utilize plasma waves to break up enemy forces at range, and gunships with plasma and lasers to single out anti-fighter units. Also, some Velrax carry plasma arcs used to strip 

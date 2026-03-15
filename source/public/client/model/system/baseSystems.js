@@ -383,6 +383,15 @@ NexusLCVController.prototype.hasMaxBoost = function () {
 	return true;
 };
 
+var NexusPolarenLCVController = function NexusPolarenLCVController(json, ship) {
+	ShipSystem.call(this, json, ship);
+};
+NexusPolarenLCVController.prototype = Object.create(ShipSystem.prototype);
+NexusPolarenLCVController.prototype.constructor = NexusPolarenLCVController;
+NexusPolarenLCVController.prototype.hasMaxBoost = function () {
+	return true;
+};
+
 var ConnectionStrut = function (json, ship) {
 	ShipSystem.call(this, json, ship);
 }

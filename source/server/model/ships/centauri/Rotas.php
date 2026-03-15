@@ -4,12 +4,12 @@ class Rotas extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 270;
-	$this->faction = "Centauri Republic";
+	$this->pointCost = 240;
+	$this->faction = "What If";
 	$this->phpclass = "Rotas";
-	$this->shipClass = "Rotas Interceptor";
-		$this->variantOf = "Rutarian Strike Fighters";
-		$this->occurence = "common";
+	$this->shipClass = "House Valheru Rotas Interceptor";
+//		$this->variantOf = "Rutarian Strike Fighters";
+//		$this->occurence = "common";
 	$this->imagePath = "img/ships/Rotas.png";
 	$this->unofficial = true;
 
