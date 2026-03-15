@@ -23,6 +23,12 @@ const ModeButton = styled.div`
     border: 1px solid ${props => props.selected ? 'yellow' : 'transparent'}; 
     position: relative;
     box-shadow: ${props => props.selected ? '0 0 5px #0cf' : 'none'};
+
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 `;
 
 export default class FiringModeSelector extends React.Component {

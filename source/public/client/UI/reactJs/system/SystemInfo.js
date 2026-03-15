@@ -45,12 +45,22 @@ class SystemInfo extends React.Component {
 
         if (system instanceof Ship) {
             var unitName = ship.shipClass;
+            var shipName = ship.name;
             if (system.flight) { //display fighter name instead of flight name!
                 unitName = system.systems[1].displayName;
             }
+
+            if (ship.mine) {
+                var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+                if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                    unitName = "Mine";
+                    shipName = "Mine";
+                }
+            }
+
             return (
                 <SystemInfoTooltip ship position={getPosition(boundingBox)}>
-                    <InfoHeader><ShipNameHeader>{ship.name}</ShipNameHeader> - {unitName}</InfoHeader>
+                    <InfoHeader><ShipNameHeader>{shipName}</ShipNameHeader> - {unitName}</InfoHeader>
                     <ShipInfo ship={ship} />
                 </SystemInfoTooltip>
             );
@@ -63,15 +73,34 @@ class SystemInfo extends React.Component {
         var specialName = 'Special';
         var reactKey = 0; //needed for react so each line has unique key!
 
+        let displayOffensiveBonus = ship.offensivebonus;
+        if (ship.flight && gamedata.areMinesPresent) {
+            displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
+        }
+
+        var systemDisplayName = system.displayName;
+        var firingModeDisplay = system.firingModes ? system.firingModes[system.firingMode] : null;
+
+        if (ship.mine) {
+            var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+            if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                systemDisplayName = "Mine";
+                specialEntry = ["No details known, scan with OEW to identify."];
+                if (firingModeDisplay) {
+                    firingModeDisplay = "N/A";
+                }
+            }
+        }
+
         return (
             <SystemInfoTooltip position={getPosition(boundingBox)}>
-                <InfoHeader>{system.displayName}</InfoHeader>
+                <InfoHeader>{systemDisplayName}</InfoHeader>
 
                 {!ship.flight && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)}
                 {!ship.flight && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
-                {ship.flight && getEntry('Offensive bonus', ship.offensivebonus * 5)}
+                {ship.flight && getEntry('Offensive bonus', displayOffensiveBonus * 5)}
 
-                {system.firingModes && getEntry('Firing mode', system.firingModes[system.firingMode])}
+                {system.firingModes && getEntry('Firing mode', firingModeDisplay)}
 
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
@@ -181,7 +210,7 @@ const getCriticals = (system) => [<InfoHeader key="criticalHeader">Damage</InfoH
 );
 
 const getEntry = (header, value, key) => {
-    if (value.replace) {
+    if (value && value.replace) {
         value = value.replace(/<br>/gm, "\n");
     }
 

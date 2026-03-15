@@ -20,6 +20,7 @@ class Leevan extends HeavyCombatVessel{
         $this->rollcost = 1;
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
+        $this->minesweeperbonus = 3;
 
         $this->occurence = "uncommon";
         $this->variantOf = "Navask Escort Destroyer";

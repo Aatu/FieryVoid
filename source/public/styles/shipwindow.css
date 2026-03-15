@@ -15,6 +15,22 @@
     box-shadow: 5px 5px 10px black;
 }
 
+.shipwindow::-webkit-scrollbar {
+    width: 8px;
+}
+
+.shipwindow::-webkit-scrollbar-track {
+    background: #0d1620;
+}
+
+.shipwindow::-webkit-scrollbar-thumb {
+    background: #3c5574;
+}
+
+.shipwindow::-webkit-scrollbar-thumb:hover {
+    background: #5a7ea8;
+}
+
 
 .shipwindow .value {
     margin-top: 7px;

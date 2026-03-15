@@ -2,10 +2,10 @@
 
 window.ShipTooltip = function () {
 
-    var HTML = '<div class="shipNameContainer">' + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>' + 
-    '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red; text-decoration: bold;"><span>TARGETING</span></div>' + 
-    '<div class="fire targeting"></div>' + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red;"><span>INCOMING:</span></div>' + 
-    '<div class="ballistics incoming"></div>' + '<div class="buttons"></div>' + '</div>';
+    var HTML = '<div class="shipNameContainer">' + '<div class="namecontainer" style="border-bottom:1px solid white;margin-bottom:3px;"></div>' +
+        '<div class="fire" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red; text-decoration: bold;"><span>TARGETING</span></div>' +
+        '<div class="fire targeting"></div>' + '<div class="ballistics" style=";margin:3px 0px 3px 0px; padding:2px 0px 0px 0px;border-top:1px solid white;color:red;"><span>INCOMING:</span></div>' +
+        '<div class="ballistics incoming"></div>' + '<div class="buttons"></div>' + '</div>';
 
     function ShipTooltip(selectedShip, ships, position, showTargeting, menu, hexagon, ballisticsMenu) {
         this.element = jQuery(HTML);
@@ -65,9 +65,9 @@ window.ShipTooltip = function () {
     };
 
     ShipTooltip.prototype.update = function (ship, selectedShip) {
-
         if (selectedShip) {
             this.selectedShip = selectedShip;
+            //this.showTargeting = shipManager.systems.selectedShipHasSelectedWeapons(this.selectedShip);
         }
 
         if (selectedShip && this.menu) {
@@ -103,7 +103,14 @@ window.ShipTooltip = function () {
 
 
     function createForSingleShip(ship) {
-        jQuery('<span class="name value ' + getAllyClass(ship) + '">' + ship.name + '</span>').appendTo(this.element.find('.namecontainer'));
+        var shipNameDisplay = ship.name;
+        if (ship.mine) {
+            var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+            if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                shipNameDisplay = "Mine";
+            }
+        }
+        jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + '</span>').appendTo(this.element.find('.namecontainer'));
 
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
@@ -166,25 +173,93 @@ window.ShipTooltip = function () {
             toDisplay += 'Half-Phased; ';
             rollPivotModifier -= 50;
         }
-        if(shipManager.isStealthShip(ship)){
-            if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn){
-                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Always say undetected on Deployment phase.  
-            } else if (shipManager.isDetected(ship)) {
-                toDisplay += '<span style="color:red;">Detected</span>; '; //Notify player that their Stealth ship is detected.
+        if (ship.trueStealth) {
+            if (gamedata.gamephase == -1 && shipManager.getTurnDeployed(ship) == gamedata.turn) {
+                toDisplay += '<span style="color:limegreen;">Deploying</span>; '; //Always say undetected on Deployment phase.  
             } else {
-                toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
+                var isShipDetected = shipManager.isDetected(ship);
+                var stealthSys = null;
+                
+                if (ship.mine) {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
+                } else if (ship.faction == "Torvalus Speculators") {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "ShadingField");
+                } else if (shipManager.getSpecialAbilityStealth(ship, "Cloaking")) {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "CloakingDevice");
+                } else if (shipManager.getSpecialAbilityStealth(ship, "Stealth")) {
+                    stealthSys = shipManager.systems.getSystemByName(ship, "stealth");
+                }
+
+                if (!isShipDetected && ship.team == gamedata.getPlayerTeam()) {
+                    if (stealthSys) {
+                        if (Array.isArray(stealthSys.detected) && stealthSys.detected.length > 0) {
+                            isShipDetected = true;
+                        } else if (stealthSys.detected === true) {
+                            isShipDetected = true;
+                        } else if (Array.isArray(stealthSys.detectedNew) && stealthSys.detectedNew.length > 0) {
+                            isShipDetected = true;
+                        } else if (stealthSys.detectedNew === true) {
+                            isShipDetected = true;
+                        }
+                    }
+                }
+
+                if (isShipDetected) {
+                    var detectedTeamsStr = "";
+                    if(ship.team == gamedata.getPlayerTeam()){ //Only own player needs to see full team list that's detected their ship.
+                        // Check if we have more than 2 teams in the game
+                        var uniqueTeams = [];
+                        for (var i in gamedata.slots) {
+                            var team = parseInt(gamedata.slots[i].team, 10);
+                            if (team > 0 && !uniqueTeams.includes(team)) {
+                                uniqueTeams.push(team);
+                            }
+                        }
+
+                        if (uniqueTeams.length > 2) {
+                            var detectedArray = [];
+                            if (stealthSys && Array.isArray(stealthSys.detectedNew)) {
+                                detectedArray = stealthSys.detectedNew;
+                            } else if (stealthSys && Array.isArray(stealthSys.detected)) {
+                                detectedArray = stealthSys.detected;
+                            }
+
+                            if (detectedArray.length > 0) {
+                                // Ensure unique team numbers
+                                var uniqueDetectedTeams = [];
+                                for (var i = 0; i < detectedArray.length; i++) {
+                                    var detectedTeam = parseInt(detectedArray[i], 10);
+                                    if (detectedTeam > 0 && !uniqueDetectedTeams.includes(detectedTeam)) {
+                                        uniqueDetectedTeams.push(detectedTeam);
+                                    }
+                                }
+
+                                // Sort team numbers for readability
+                                uniqueDetectedTeams.sort(function (a, b) { return a - b; });
+
+                                if (uniqueDetectedTeams.length > 0) {
+                                    detectedTeamsStr = " (Teams: " + uniqueDetectedTeams.join(", ") + ")";
+                                }
+                            }
+                        }
+                    } 
+
+                    toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
+                } else {
+                    toDisplay += '<span style="color:limegreen;">Undetected</span>; '; //Notify player that their Stealth ship is detected.            
+                }
             }
         }
- 
-        if (gamedata.gamephase == 3){
-            if(Object.values(ship.skinDancing).includes(true)){ 
+
+        if (gamedata.gamephase == 3) {
+            if (Object.values(ship.skinDancing).includes(true)) {
                 toDisplay += '<span style="color:limegreen;">Skin Dancing</span>; '; //Notify player that unit is skin dancing this turn.                  
-            }else if(Object.values(ship.skinDancing).includes("Aborted")){
+            } else if (Object.values(ship.skinDancing).includes("Aborted")) {
                 toDisplay += '<span style="color:orange;">Skin Dance Aborted</span>; '; //Notify player that unit is skin dancing this turn.  
-            }  else if(Object.values(ship.skinDancing).includes("Failed")){
+            } else if (Object.values(ship.skinDancing).includes("Failed")) {
                 toDisplay += '<span style="color:red;">Failed Skin Dancing</span>; '; //Notify player that unit is skin dancing this turn.  
-            }        
-        }        
+            }
+        }
 
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
@@ -261,25 +336,23 @@ window.ShipTooltip = function () {
             }
         }
 
-        /* 		
-                if (ew.getSupportedDEW(ship)) {
-                    this.addEntryElement('Support DEW: ' + ew.getSupportedDEW(ship), ship.flight !== true);
-                }
-        */
-        if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
-            var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+        var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+        //if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+        if (dewValue > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24 
             this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
         }
 
+        var MDEW = ew.getDetectMEW(ship);
+        if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+            this.addEntryElement('Detect Mines: ' + MDEW);
+        }
+
         if (shipManager.isElint(ship)) {
-            this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
+            if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
             this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
         }
 
-
         this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
-        //      var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
-        //      var sDef = weaponManager.calculateBaseHitChange(ship, ship.sideDefense) * 5;
 
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
         var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
@@ -297,19 +370,19 @@ window.ShipTooltip = function () {
         if (gamedata.rules && gamedata.rules.friendlyFire === 1) {
             if (this.selectedShip && this.showTargeting && this.selectedShip.id != ship.id) {
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         } else {
             if (this.selectedShip && gamedata.isEnemy(ship, this.selectedShip) && this.showTargeting) { //Old version before allied targeting
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else if (this.selectedShip && gamedata.canTargetAlly(ship) && this.showTargeting) {//30 June 2024 - DK - Added for Ally targeting.
                 weaponManager.targetingShipTooltip(this.selectedShip, ship, this.element, null);
-                $(".fire", this.element).show();
+                this.element.find(".fire").css({ "display": "block", "visibility": "visible" });
             } else {
-                $(".fire", this.element).hide();
+                this.element.find(".fire").css("display", "none");
             }
         }
 
@@ -323,8 +396,14 @@ window.ShipTooltip = function () {
     function createForMultipleShips(ships) {
         ships.forEach(function (ship, i) {
             var comma = i < ships.length - 1 ? ',' : '';
-
-            jQuery('<span class="name value ' + getAllyClass(ship) + '">' + ship.name + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
+            var shipNameDisplay = ship.name;
+            if (ship.mine) {
+                var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+                if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                    shipNameDisplay = "Mine";
+                }
+            }
+            jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
 
             $(".ballistics", this.element).hide();
         }, this);

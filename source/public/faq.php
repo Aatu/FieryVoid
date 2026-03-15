@@ -39,7 +39,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
-                <li><a href="#ladder">Online Ladder</a></li>                
+                <li><a href="#ladder">Online Ladder</a></li> 
+                <li><a href="#mines">Mines</a></li>                               
                 <li><a href="#ruler">Ruler Tool</a></li>
                 <li><a href="#savedfleets">Saved Fleets</a></li>
                 <li><a href="#skindancing">Skin Dancing</a></li>                                                       
@@ -251,6 +252,51 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
+        <h3 id="mines" >Mines & Minesweeping</h3>
+        <ul>
+            <li>Currently only Captor Mines are implemented in Fiery Void, and only when launched by Mine Launcher weapons (e.g. Kor-Lyan and Abbai WotCR factions).</li>
+            <li>Once deployed, mines will initially be stealthed and won't become visible to enemies until they attack, or are detected.  
+                On the turn that they are spawned you will have the opportunity to tailored their ranges for Captials/HCVs, MCV/LCVs, Fighters from 0 up to their maximum range. 
+                You do this by clicking on the mine weapons system icon during Deployment/Pre-Turn Orders phase.  
+                Once set these ranges will apply for the rest of the game, and if you choose not to set the ranges they will default to their maximum range.  
+                You can set the ranges of all mines of the same type using the propagate buttons in the Mine Settings menu.</li>
+            <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase.  
+                Fighters and Shuttles can do this also, converting their Offensive Bonus (OB) in to 'Detect Mines' EW points, at a cost of 10 OB per point of 'Detect Mines' EW 
+                (Note - any OB used in this way will not be available for firing later in the turn).
+                The detection calculation depends on a number of factors e.g.
+                <ul class="circle-list">
+                    <li>Number of 'Detect Mines' EW,</li>
+                    <li>Minesweeper Bonus,</li>                    
+                    <li>Distance to currently hidden enemy mine,</li>
+                    <li>The mine's signature'.</li>
+                </ul>
+            </li>
+            <li>Detection is done at the END of each committed Movement Phase segment (i.e. not DURING a unit's movement, to prevent players detecting a mine and then cancelling back their moves etc) 
+                and mines will be revealed if your 'Detect Mines' EW + Minesweeper Bonus is GREATER THAN the Distance to the mine + the mine's signature.</li>
+            <li>Once detected you will not automatically know what type of mine has been discovered, to get this information you'll need to scan it with at least 1 OEW after initial detection.</li>
+
+            <li>To shoot at mines, in addition to the usual modifiers there are some unique modifiers.                
+                <ul class="circle-list">
+                    <li>All mines have a basic profile of 60,</li>                    
+                    <li>The firing ship's 'Detect Mines' EW for that turn is added to any inherent Minesweeper Bonus it has and acts as a 'General Lock On'.</li>
+                    <li>If your 'General Lock On' score is greater than the Distance and Signature of the mine added together, this is added to your hit chance.  
+                        E.g. If you have 10 EW allocated to mine detection and you spot a mine with a Signature of 1 at range 3, the minimum detection needed is 4 EW. Therefore, the
+                        detecting ship has a +6 (multiplied by 5) to hit the mine.  So you'd gain +30% to hit, but would still have a double range penalty if there wasn't a OEW lock on the mine as per usual.</li>
+                </ul>
+            </li>                        
+            
+            <li>There are several different types of mine in B5 Wars, as Captor Mines are the only ones currently available in FV at this time only their details are listed below.</li>
+            <li>Captor Mines:
+                <ul class="circle-list">
+                    <li>These have a range within which they will launch at the first viable target during movement, and then resolve the attack as ballistic weapon during Firing Phase.  
+                        As such, these type of mines can be intercepted in the same way as other ballistic weapons.</li>
+                    <li>Units equipped with Jammers halve the range at which a captor mine will attack them.</li>
+                    <li>Captor mine is destroyed whether it hits or not.</li>                    
+                </ul>
+            </li>      
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
 
         <h3 id="ruler" >Ruler Tool</h3>
         <ul>
@@ -324,7 +370,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Fighter: Offensive Bonus</li>
                 </ul>
             </li>
-            <li>ELINT ships can spend EW points on 'Detect Stealth' to increase detection range by +2 per point invested in this way.</li>
+            <li>Where an opponent has stealth ships present, ELINT ships can spend EW points on 'Detect Stealth' to increase detection range by +2 per point invested in this way.</li>
             <li>After being detected, Stealth ships can become undetected by breaking line of sight with ALL enemy vessels at the end of a turn and not firing any weapons.</li>
             <li>If their scanner or computer system is destroyed, their defense increases by 15% for the battle.</li>
             <li>Stealth ships also receive the same benefits as Minbari Jammer-equipped ships from a certain distance:

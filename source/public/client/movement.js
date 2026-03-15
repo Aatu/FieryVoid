@@ -1789,6 +1789,7 @@ shipManager.movement = {
     },
 
     canTurn: function canTurn(ship, right) {
+        if (ship.mine) return false;        
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
@@ -1925,12 +1926,12 @@ shipManager.movement = {
     canGraviticTurn: function canGraviticTurn(ship, right) {
         //if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
+        if (!ship.gravitic) return false;        
         if(!ship.flight) return false; //Fighters only for now.
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         //if (shipManager.systems.isEngineDestroyed(ship)) return false;
 
-        //if (shipManager.movement.isRolling(ship) && !ship.gravitic) return false;
         if (shipManager.movement.checkHasUncommitted(ship)) return false;
         var turndelay = shipManager.movement.calculateCurrentTurndelay(ship);
         var previous = shipManager.movement.getLastCommitedMove(ship);
@@ -1949,18 +1950,10 @@ shipManager.movement = {
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
         }
-        //var pivoting = shipManager.movement.isPivoting(ship);
-        //if (pivoting != "no" && !ship.gravitic) {
-        //    return false;
-        //}
-        //var rolling = shipManager.movement.isRolling(ship);
-        //if (rolling && !ship.gravitic) {
-        //    return false;
-        //}
 
-        if (ship.gravitic && ship.flight && shipManager.movement.isOutOfAlignment(ship)) {
-            return true;
-        }
+        if (shipManager.movement.isGoingBackwards(ship)) return true; //Backwards ships can grav turn always.
+
+        if (ship.flight && shipManager.movement.isOutOfAlignment(ship)) return true; //No going backward but not facing forward, can grav turn
 
         return false;
     },    

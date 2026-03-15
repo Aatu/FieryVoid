@@ -203,7 +203,7 @@ const Container = styled.div`
     z-index: 4;
 
     @media (max-width: 765px) {
-        top: 40px;
+        top: 50px;
     }
 
 `;

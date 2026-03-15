@@ -117,6 +117,10 @@ Weapon.prototype.getAmmo = function (fireOrder) {
 	return null;
 };
 
+Weapon.prototype.getModeNameForEnemy = function (fireOrder) {
+	return this.weaponClass.firingMode[1];
+};
+
 Weapon.prototype.translateFCtoD100txt = function (fireControl) {
 	var FCtxt = '';
 	var i = 0;

@@ -34,10 +34,10 @@ class BaseShip {
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
 	public $combatValue = 100; //current combat value, as percentage of original
+    public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning    
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
-    public $messageOP = array(); //Used by fleet checker to give specific warnings about some fleet choices e.g. Warlock, e-mines.
     public $slot;
     public $unavailable = false;
     public $minesweeperbonus = 0;
@@ -104,6 +104,13 @@ class BaseShip {
 	
 	public $hangarRequired = ''; //usually empty, but some ships (LCVs primarily) do require hangar space!	
 	public $unitSize = 1; //typically ships are berthed in dedicated space, 1 per slot - but other arrangements are certainly possible.
+
+	public $outOfTier = array(); //interpreted in gamelobby.js (fleet checker); indicates number of out-of-bounds elements, and their kind 
+	//like: EMINE => 2
+	//relevant entries and their limits before a warning is shown are listed in gamelobby.js
+
+	//another approach to the same problem - commented out but not deleted
+	//public $messageOP = array(); //Used by fleet checker to give specific warnings about some fleet choices e.g. Warlock, e-mines.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
 	protected $IFFSystem = false;   
@@ -272,7 +279,12 @@ class BaseShip {
             }     
             //No jump engine, or hasn't jumped, set value to 0 as normal.
             $effectiveValue = 0;               
-        }    
+        } 
+        
+        if($this instanceof Mine && $this->spawned !== -1){
+            //Mines which have been created by weapons, don't count towards Fleet Value
+            $effectiveValue = 0;   
+        }
 
 		/*moved
 		$cnc = $this->getSystemByName("CnC");
@@ -284,9 +296,13 @@ class BaseShip {
   		*/		
 		
 		if($effectiveValue>0){ //check for critical systems: Sensors, Engine, C&C - if none are active, reduce combat value appropriately
-			$cncPresent = false;
+			
+            if($this instanceof Mine) return $effectiveValue; //If mine exists at all, it's worth it's full value. 
+
+            $cncPresent = false;
 			$enginePresent = false;
-			$scannerPresent = false;
+			$scannerPresent = false;          
+
 			foreach ($this->systems as $system) {
 				if (!$system->isDestroyed()) {
 					if ($system instanceOf Scanner) $scannerPresent = true;
@@ -540,6 +556,7 @@ class BaseShip {
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
         $strippedShip->skinDancing = $this->skinDancing;
+        $strippedShip->spawned = $this->spawned;        
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
@@ -934,13 +951,21 @@ class BaseShip {
     }
 
     public function checkStealth($gamedata)
-    {         
+    {        
+        //Check Torvalus at start of Initial Orders and end of Movement 
         if($this->faction == "Torvalus Speculators"){
             $shadingField = $this->getSystemByName("ShadingField");
             if($shadingField) $shadingField->checkStealthNextPhase($gamedata);
         }
 
-        //Trek block.
+        //Check Hyach subs at end of movement
+        if($this->faction == "Hyach Gerontocracy" && $gamedata->phase == 2){
+            $stealth = $this->getSystemByName("Stealth");
+            if($stealth) $stealth->isDetectedMovement($this, $gamedata);
+        }
+
+
+        //Check Trek at start of Initial Orders and end of Movement 
         if($this->hasSpecialAbility("Cloaking")){           
             $cloakingDevice = $this->getSystemByName("CloakingDevice");
             if($cloakingDevice) $cloakingDevice->checkStealthNextPhase($gamedata);
@@ -1046,7 +1071,7 @@ class BaseShip {
         }
 		
 		/* fill notes with information contained in various attributes, not so readily accessible to player*/
-		protected function notesFill($sampleFighter = null){
+		public function notesFill($sampleFighter = null){
 			//if (TacGamedata::$currentTurn >= 1){ //in later turns notes will be displayed from pre-compiled cache! no point generating them every time
 			//	return;
 			//}
@@ -1080,8 +1105,16 @@ class BaseShip {
 					}
 					break;			
 				case 1: //MCV/LCV
-					if($this->osat){				
-						$this->notes .= 'OSAT';
+					if($this->osat){	
+                        if($this instanceof Mine){
+                            if($this->spawned !== -1){
+						        $this->notes .= 'Mine (Spawned)';
+                            }else{
+						        $this->notes .= 'Mine';
+                            }    
+                        }else{			
+						    $this->notes .= 'OSAT';
+                        }
 					}else if($this instanceof LCV){
 						$this->notes .= 'Light Ship';
 					}else{
@@ -1182,7 +1215,7 @@ class BaseShip {
 						if ($ability=='ReactorFlux'){
 							$this->notes .= '<br>Power Fluctuations';
 						}
-					}if ($reactor instanceof MagGravReactor && !$this->isTerrain()) {
+					}if ($reactor instanceof MagGravReactor && !$this->isTerrain() && !$this->mine) {
 						$this->notes .= '<br>Mag-Gravitic Reactor';
 					}
 					break; //checking one Reactor is enough
@@ -2842,8 +2875,7 @@ class LightShip extends BaseShip{ //is this used anywhere?...
 
 class OSAT extends MediumShip{
     public $osat = true;
-    public $canvasSize = 100;
-	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario!    
+    public $canvasSize = 100;  
 
     public function isDisabled(){
         return false;
@@ -2863,12 +2895,37 @@ class OSAT extends MediumShip{
 }
 
 
+class Mine extends OSAT{
+    public $mine = true;
+    public $canvasSize = 80;  
+    public $trueStealth = true;
+    public $signature = 0;
+    public $detectedSignature = 0;
+    public $activated = false; //For DEW mines. 
+    public $spawned = -1; //To denote the turn a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
+    public $canPreOrder = true;//Needed to set ranges for spawned Mines in Pre-Turn phase.
+
+    public function isDisabled(){
+        return false;
+    }
+
+
+    public function getLocations(){
+        $locs = array();
+
+        $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+
+        return $locs;
+    }
+}
 
 
 class StarBase extends BaseShip{
     public $base = true;
     public $Enormous = true;
-	public $enhancementOptionsDisabled = array('DEPLOY'); //Base cannot jump into a scenario! 
 
     public function isDisabled(){
         if ($this->isPowerless())

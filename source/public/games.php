@@ -46,7 +46,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
   <link href="styles/confirm.css" rel="stylesheet" type="text/css">
   <link href="styles/ladder.css" rel="stylesheet" type="text/css">
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>
   <script src="client/player.js"></script>
@@ -104,15 +104,13 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — February 2026</h3>
+      <h3>Latest Updates — March 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Multiplayer (Beta)</strong> - Fiery Void now supports more than two teams, look in Create Game screen for the new option!</li> 
-        <li><strong>Initial Orders</strong> - Double-click to select now only required for ELINTs, ships with allied targeting/hex weapons, or if Friendly Fire enabled.</li>          
-        <li><strong>Mobile Browsers</strong> - I've tried to improve screen layouts and provide a more consistent experience for tap/hold functionality.</li>
-        <li><strong>Toggle Background</strong> - New 'Disable Background' button added, or use hotkey 'm' to change background to default black and back.</li>                    
-        <li><strong>System Menus</strong> - Several systems have received updates to their UI menus, including Self Repair, AA Controller, Thoughts Shields and Hyach Computer/Specialists.</li>          
-        <li><strong>Fleet Selection</strong> - Ships purchased with any Ammo, Options or Enhancements will now have these listed underneath them in the purchased ship list.</li>                                                        
+        <li><strong>Mines & Minesweeping</strong> - Groundwork for Mines laid, with detection and other mine mechanics added, see FAQ for more info!</li>         
+        <li><strong>Ballistic Mines</strong> - Mine launchers now leave persistent Captor Mines if no immediate targets.</li> 
+        <li><strong>Stealth Update</strong> - Multiplayer support added for units that can stealth e.g. Hyach Subs, Torvalus.</li>          
+        <li><strong>Fleet Checker</strong> - New warning added when fleet choices include 'Superior' tier units.</li>                    
         <li><strong>General Fixes</strong> - Many smaller bug fixes/appearance updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

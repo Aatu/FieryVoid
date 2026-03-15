@@ -186,6 +186,16 @@ class HyachComputerList extends Component {
                 ctrl.doIncrease();
                 safety++;
             }
+
+            while (
+                ctrl.getCurrAllocated() > allocated
+                && ctrl.canDecrease()
+                && safety < 100
+            ) {
+                ctrl.doDecrease();
+                safety++;
+            }
+
             if (safety >= 100) console.warn("BFCP Propagation safety break for", ctrl);
         }
 
@@ -218,7 +228,7 @@ class HyachComputerList extends Component {
         };
 
         const canPropagate = (type) => {
-            return (allocatedBFCP[type] > 0);
+            return (allocatedBFCP[type] >= 0);
         };
 
         return (

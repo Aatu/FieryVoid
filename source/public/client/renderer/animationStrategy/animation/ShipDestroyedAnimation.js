@@ -11,6 +11,7 @@ window.ShipDestroyedAnimation = function () {
 
         this.animations = [];
         this.explosionTriggered = false;
+        this.soundTriggered = false;
         this.emitterContainer = emitterContainer;
         this.movementAnimations = movementAnimations;
 
@@ -38,11 +39,12 @@ window.ShipDestroyedAnimation = function () {
                 time: this.time,
                 position: position
             });
+        }
 
-            // --- Trigger explosion sound ---
-            if (gamedata.playAudio) {
-                ShipDestroyedAnimation.playExplosionSound();
-            }
+        // --- Trigger explosion sound (only if not paused or reversing) ---
+        if (!this.soundTriggered && total >= this.time && gamedata.playAudio && !paused && !back) {
+            this.soundTriggered = true;
+            ShipDestroyedAnimation.playExplosionSound();
         }
 
         // --- Fadeout ---
@@ -70,7 +72,7 @@ window.ShipDestroyedAnimation = function () {
         try {
             const explosionSound = ShipDestroyedAnimation.cachedAudio.cloneNode(true);
             explosionSound.currentTime = 0;
-            explosionSound.play().catch(() => {});
+            explosionSound.play().catch(() => { });
         } catch (e) {
             console.warn("Explosion sound playback failed:", e);
         }

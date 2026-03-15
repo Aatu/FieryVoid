@@ -269,7 +269,14 @@ window.PhaseStrategy = function () {
     };
 
     PhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
-        if (shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+        if (shipManager.shouldBeHidden(ship)){
+            if(weaponManager.hasHexWeaponsSelected()){
+                weaponManager.targetHex(this.selectedShip, payload.hex);
+                return;
+            }else{
+                return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
+            }    
+        }
 
         if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;

@@ -78,15 +78,21 @@ const getEW = ship => {
     list.push(<Entry key={`ccew-scs-${ship.id}`}><EntryHeader>CCEW:</EntryHeader>{formatEW(CCEWamount)}</Entry>);
 
     let bdew = ew.getBDEW(ship) * 0.25;
-    let DetectSEW = ew.getDetectSEW(ship);
+    let detectSEW = ew.getDetectSEW(ship); //Detect stealth
+    let detectMEW = ew.getDetectMEW(ship); //Detect mines
 
     if (shipManager.hasSpecialAbility(ship, "ConstrainedEW")) bdew = ew.getBDEW(ship) * 0.2;
 
     if (bdew) {
         list.push(<Entry key={`bdew-scs-${ship.id}`}><EntryHeader>BDEW:</EntryHeader>{formatEW(bdew)}</Entry>);
     }
-    if (DetectSEW) {
-        list.push(<Entry key={`DetectSEW-scs-${ship.id}`}><EntryHeader>Detect Stealth:</EntryHeader>{formatEW(DetectSEW)}</Entry>);
+
+     if (detectMEW) {
+        list.push(<Entry key={`DetectMEW-scs-${ship.id}`}><EntryHeader>Detect Mines:</EntryHeader>{formatEW(detectMEW)}</Entry>);
+    }
+    
+    if (detectSEW) {
+        list.push(<Entry key={`DetectSEW-scs-${ship.id}`}><EntryHeader>Detect Stealth:</EntryHeader>{formatEW(detectSEW)}</Entry>);
     }
 
     list = list.concat(ship.EW
