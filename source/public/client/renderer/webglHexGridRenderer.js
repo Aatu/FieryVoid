@@ -33,6 +33,7 @@ window.webglHexGridRenderer = function () {
         this.material = new THREE.MeshBasicMaterial({ map: texture, transparent: true, opacity: HEX_OPACITY });
         this.mesh = new THREE.Mesh(geometry, this.material);
         this.mesh.position.x += window.HexagonMath.getHexB() / 2;
+        this.mesh.position.z = -500; // Render behind everything else
         scene.add(this.mesh);
 
         drawGameSpace(scene);
@@ -62,7 +63,7 @@ window.webglHexGridRenderer = function () {
             y: 0
         };
 
-        var sprite = new window.BoxSprite(size, 10, 0, new THREE.Color(1, 1, 1), 0.5);
+        var sprite = new window.BoxSprite(size, 10, -500, new THREE.Color(1, 1, 1), 0.5);
 
         sprite.setPosition(position);
         scene.add(sprite.mesh);
@@ -112,11 +113,14 @@ window.webglHexGridRenderer = function () {
             color: 0x0000ff,
             linewidth: 30
         });
-        var geometry = new THREE.Geometry();
+
+        var points = [];
 
         getCenteredHexagonPoints(x, y, l).forEach(function (point) {
-            geometry.vertices.push(new THREE.Vector3(point.x, point.y, 0));
+            points.push(new THREE.Vector3(point.x, point.y, 0));
         });
+
+        var geometry = new THREE.BufferGeometry().setFromPoints(points);
 
         return new THREE.Line(geometry, material);
     }

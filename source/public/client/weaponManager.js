@@ -1042,6 +1042,7 @@ window.weaponManager = {
         var soew = 0;
         var dist = 0;
         var oew = 0;
+        var mdew = 0; //Mine detection EWc1
 
         if (weapon.useOEW) {
             oew = ew.getTargetingEW(shooter, target);
@@ -1061,6 +1062,12 @@ window.weaponManager = {
 
         var mod = 0;
 
+        if(target.mine){
+            mdew = ew.getDetectMEW(shooter);
+            var mineBonus = (mdew + shooter.minesweeperbonus) - distance - target.signature;
+            mod += Math.max(0, mineBonus);
+        }
+
         mod -= target.getHitChangeMod(shooter, weapon);
 
         if (weapon.specialHitChanceCalculation) { //Does the weapon itself have any special mods?
@@ -1074,7 +1081,9 @@ window.weaponManager = {
             //var firstFighter = shipManager.systems.getSystem(shooter, 1); //should be the same as below...
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
-            oew = shooter.offensivebonus - OBcrit;
+            mdew = ew.getDetectMEW(shooter); //-1 OB for each point fo Mine Detect
+            oew = shooter.offensivebonus - OBcrit - (mdew * 2); //Every point of mdew costs 2 OB
+
             if (weapon.ballistic) { //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
                 var shooterLoSBlocked = false;
                 //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 
@@ -1223,6 +1232,7 @@ window.weaponManager = {
 
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
+        if(target.mine && weapon.canShootMines) weapon.fireControl[1] = -4; //Can shoot at mines, but at a penalty.        
 
         if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
             var bonusfirecontrol = 0;
@@ -1607,7 +1617,7 @@ window.weaponManager = {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        if (!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
+        if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
 
         //Check for skin-dancing ships, these can't be targeted unless the shooter is also skin-dancing on same target, they also have their own rules about firing.
         if (gamedata.gamephase == 3) {
@@ -1683,8 +1693,12 @@ window.weaponManager = {
             }
 
             if (!ship.flight && ship.shipSizeClass < 2 && weapon.fireControl[1] === null) {
-                debug && console.log("can't fire small ships");
-                continue;
+                if(ship.mine && weapon.canShootMines){
+                    //Do nothing in certain circumstances e.g. Interceptors firing at mines.
+                }else{
+                    debug && console.log("can't fire small ships");
+                    continue;
+                }    
             }
 
             if (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null) {
@@ -1851,12 +1865,20 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        if (!weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.        
+        var hidden = weaponManager.isHidden(selectedShip); //Block invisible ships from firing where appropriate.        
 
         var toUnselect = Array();
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
+
+            if(hidden && weapon.name !== 'TransverseDrive' && weapon.name !== 'MicroJumpSystem'){
+                var html = "You cannot fire weapons on a turn when you are stealthed.";
+                confirm.warning(html);
+                toUnselect.push(weapon);                                
+                continue;
+            }    
+
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) continue;
 
@@ -2192,6 +2214,7 @@ window.weaponManager = {
         });
     },
 
+    /*
     getAllHexTargetedBallistics: function getAllHexTargetedBallistics() { //that's all hex targeted weapons, not just ballistics
         return gamedata.ships.reduce(function (fires, shooter) {
             return fires.concat(weaponManager.getAllFireOrders(shooter).filter(function (fire) {
@@ -2208,8 +2231,53 @@ window.weaponManager = {
                 shooter: shooter,
                 weapon: shipManager.systems.getSystem(shooter, fireOrder.weaponid)
             };
-        });
+        })
     },
+    */
+
+    getAllHexTargetedBallistics: function () {
+
+        var results = [];
+        var playerTeam = gamedata.getPlayerTeam();
+
+        for (var s = 0; s < gamedata.ships.length; s++) {
+
+            var shooter = gamedata.ships[s];
+            var fires = weaponManager.getAllFireOrders(shooter);
+
+            for (var f = 0; f < fires.length; f++) {
+
+                var fireOrder = fires[f];
+
+                if (fireOrder.targetid !== -1) continue;
+                if (fireOrder.rolled === 0) continue;
+
+                var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
+
+                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam){
+                    for(var i in weapon.fireOrders){
+                        var otherBall = weapon.fireOrders[i]; 
+                        if(otherBall.shooterid == shooter.id && otherBall.damageclass !== "SecondAttack"){
+                            break;
+                        }else{
+                            continue;	
+                        }
+                    }
+                }    
+
+                results.push({
+                    id: fireOrder.id,
+                    fireOrder: fireOrder,
+                    shots: fireOrder.shots,
+                    shooter: shooter,
+                    weapon: weapon
+                });
+            }
+        }
+
+        return results;
+    },
+
 
     getAllPreFireOrdersForDisplayingAgainst: function getAllPreFireOrdersForDisplayingAgainst(target) {
         return gamedata.ships.reduce(function (fires, shooter) {
@@ -2458,22 +2526,20 @@ window.weaponManager = {
         if (ship.faction == "Torvalus Speculators") {
             var shadingField = shipManager.systems.getSystemByName(ship, "ShadingField");
             if (shadingField.active) {
-                var html = "You cannot fire weapons on a turn when your Shading Field was active.";
-                confirm.warning(html);
-                return false; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
+                return true; //Shading Field active this turn, ship cannot fire.   If one Field active on fighters, all should be.
             }
         }
 
         if (shipManager.hasSpecialAbility(ship, "Cloaking")) {
             var cloakingDevice = shipManager.systems.getSystemByName(ship, "CloakingDevice");
             if (cloakingDevice.active) {
-                var html = "You cannot fire weapons on a turn when your Cloaking Device was active.";
-                confirm.warning(html);
-                return false; //Cloaking Device active this turn, ship cannot fire.
+                //var html = "You cannot fire weapons on a turn when your Cloaking Device was active.";
+                //confirm.warning(html);
+                return true; //Cloaking Device active this turn, ship cannot fire.
             }
         }
 
-        return true;
+        return false;
     },
 
     checkSkindancing: function checkSkindancing(selectedShip, ship) {
@@ -2534,9 +2600,9 @@ window.weaponManager = {
             fires = fires.filter(function (fireOrder) {
                 //attempt to show hex-targeted non-ballistics as well
                 toReturn = false;
-                if (fireOrder.type == type) {
+                if (fireOrder.type == type) {//Is ballistic generally.
                     toReturn = true;
-                }
+                }  
                 //show hex-targeted direct fire as ballistics, too
                 if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.targetid == -1)) {
                     toReturn = true;

@@ -85,8 +85,12 @@ class Enhancements{
 
 		case 'Terrain':
 			Enhancements::blockStandardEnhancements($unit);
-			//$unit->enhancementOptionsDisabled[] = 'DEPLOY'; //Terrain cannot jump into a scenario!  
-			break;	  
+			break;	
+			
+		case 'Mines':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IFF_SYS';			
+			break;	  			
 	
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
@@ -856,7 +860,18 @@ class Enhancements{
 		  }
 		  $enhID = 'AMMO_X'; //HARM Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-				$ammoClass = new AmmoMissileX();
+			$ammoClass = new AmmoMissileZ();
+			$ammoSize = $ammoClass->size;
+			$actualCapacity = floor($magazineCapacity/$ammoSize);
+			$enhName = $ammoClass->enhancementDescription;
+			$enhLimit = $actualCapacity;		
+			$enhPrice = $ammoClass->getPrice($ship); 
+			$enhPriceStep = 0; //flat rate
+			$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+		  $enhID = 'AMMO_Z'; //Antimine Missiles
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoMissileZ();
 				$ammoSize = $ammoClass->size;
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
@@ -864,7 +879,7 @@ class Enhancements{
 			  $enhPrice = $ammoClass->getPrice($ship); 
 			  $enhPriceStep = 0; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
-		  }
+		  }		  
 		  $enhID = 'MINE_BLB'; //Ballistic Launcher Basic Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoBLMineB();
@@ -2015,7 +2030,10 @@ class Enhancements{
 						break;						
 					case 'AMMO_X': //HARM Missile						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileX(), $enhCount, true); //do notify dependent weapons, too!
-						break;	
+						break;
+					case 'AMMO_Z': //Antimine Missile						
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoMissileZ(), $enhCount, true); //do notify dependent weapons, too!
+						break;								
 					case 'MINE_BLB': //Ballistic Launcher Basic Mine						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBLMineB(), $enhCount, true); //do notify dependent weapons, too!
 						break;

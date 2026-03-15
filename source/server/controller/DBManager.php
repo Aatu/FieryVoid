@@ -2192,7 +2192,7 @@ class DBManager
             FROM 
                 tac_shipmovement
             WHERE
-                gameid = ? AND (turn = 1 OR turn = ? OR turn = ?) 
+                gameid = ? AND (turn = 1 OR turn = ? OR turn = ? OR type = 'deploy' OR type = 'start') 
             ORDER BY
                 shipid ASC, id ASC
         ");

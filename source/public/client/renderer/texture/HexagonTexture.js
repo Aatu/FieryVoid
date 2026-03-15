@@ -55,36 +55,36 @@ window.HexagonTexture = function () {
     function createCanvas(width, height, debug) {
         return window.AbstractCanvas.create(width, height, debug);
     }
-/*
-HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
-    var hexSize = canvasSize / 4;
-    var width = canvasSize;
-    var height = canvasSize;
-
-    var canvas = createCanvas(width, height, false);
-    var context = canvas.getContext("2d");
-
-    var offsetX = hexSize * Math.cos(Math.PI / 6);
-    var offsetY = hexSize * Math.sin(Math.PI / 6);
-
-    // Loop through to draw hexagons
-    for (var row = 0; row < height / (2 * hexSize); row++) {
-        for (var col = 0; col < width / (2 * hexSize); col++) {
-            var x = col * 2 * offsetX;
-            var y = row * hexSize * 1.5;
-
-            // Offset alternate rows
-            if (col % 2 === 1) {
-                y += hexSize * 0.75;
+    /*
+    HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
+        var hexSize = canvasSize / 4;
+        var width = canvasSize;
+        var height = canvasSize;
+    
+        var canvas = createCanvas(width, height, false);
+        var context = canvas.getContext("2d");
+    
+        var offsetX = hexSize * Math.cos(Math.PI / 6);
+        var offsetY = hexSize * Math.sin(Math.PI / 6);
+    
+        // Loop through to draw hexagons
+        for (var row = 0; row < height / (2 * hexSize); row++) {
+            for (var col = 0; col < width / (2 * hexSize); col++) {
+                var x = col * 2 * offsetX;
+                var y = row * hexSize * 1.5;
+    
+                // Offset alternate rows
+                if (col % 2 === 1) {
+                    y += hexSize * 0.75;
+                }
+    
+                this.graphics.drawCenteredHexagonNumber(context, x, y, hexSize);
             }
-
-            this.graphics.drawCenteredHexagonNumber(context, x, y, hexSize);
         }
-    }
-
-    return canvas;
-};
-*/
+    
+        return canvas;
+    };
+    */
     HexagonTexture.prototype.getTexture = function (canvas, gridWidth, gridHeight) {
 
         if (gridWidth == undefined) {
@@ -95,7 +95,8 @@ HexagonTexture.prototype.renderNumberGrid = function (canvasSize, repeat) {
             gridHeight = 1;
         }
 
-        var texture = new THREE.Texture(canvas);
+        var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
         texture.wrapS = THREE.RepeatWrapping;
         texture.wrapT = THREE.RepeatWrapping;

@@ -424,6 +424,7 @@ window.ajaxInterface = {
             var newShip = {
                 'phpclass': ship.phpclass,
                 'userid': ship.userid,
+                'team': ship.team,
                 'id': ship.id,
                 'name': ship.name,
                 'pointCostEnh': Math.round(ship.pointCostEnh),
@@ -677,6 +678,7 @@ window.ajaxInterface = {
             var newShip = {
                 'phpclass': ship.phpclass,
                 'userid': ship.userid,
+                'team': ship.team,
                 'slot': ship.slot,
                 'id': ship.id,
                 'name': ship.name,

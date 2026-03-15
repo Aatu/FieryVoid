@@ -19,6 +19,8 @@ class TacGamedata {
     public $waitingForThisPlayer = false;
     public $rules;
     public $blockedHexes;
+    public $isStealthPresent = false;
+    public $areMinesPresent = false;
     
     
     function __construct($id, $turn, $phase, $activeship, $forPlayer, $name, $status, $points, $background, $creator, $description='', $gamespace = null, $rules = null){
@@ -51,6 +53,12 @@ class TacGamedata {
         return PhaseFactory::get($this->phase);
     }
     
+    public function getPlayerTeam() {
+        foreach ($this->slots as $slot) {
+            if ($slot->userid == $this->forPlayer) return $slot->team;
+        }
+    }
+
     public function setTurn($turn)
     {
         self::$currentTurn = $turn;
@@ -95,6 +103,8 @@ class TacGamedata {
         $strippedGamedata->rules = $this->rules;
         $strippedGamedata->forPlayer = $this->forPlayer;
         $strippedGamedata->blockedHexes = $this->blockedHexes;
+        $strippedGamedata->isStealthPresent = $this->isStealthPresent;
+        $strippedGamedata->areMinesPresent = $this->areMinesPresent;        
 
         return $strippedGamedata;
     }
@@ -136,12 +146,12 @@ class TacGamedata {
                 }
 
             }
-            $this->markUnavailableShips();
+            $this->markUnavailableSetMarkers(); //Sets isStealthPresent and areMinesPresent too!
             $ship->onConstructed($this->turn, $this->phase, $this);
         }
     }
 
-    public function markUnavailableShips()
+    public function markUnavailableSetMarkers()
     {
         if ($this->phase < 0)
             return;
@@ -153,6 +163,12 @@ class TacGamedata {
             if($turnDeploys > $this->turn){
                 $ship->unavailable = true;
             } 
+
+            //Just a convenient place to set Stealth/Mine variable since we're already going through ships in the game.
+            if($ship->userid !== $this->forPlayer){
+                if($ship->trueStealth && !$ship instanceof Mine  && !$ship->isDestroyed()) $this->isStealthPresent = true;
+                if($ship instanceof Mine && !$ship->isDestroyed()) $this->areMinesPresent = true;
+            }                
         }
     }
     
@@ -323,6 +339,7 @@ class TacGamedata {
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()) continue;
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
+            if($ship->mine) continue; //Ignore terrain like asteroids.            
             if($ship->getTurnDeployed($this) > $this->turn) continue;                          
             return $ship;
         }        
@@ -393,7 +410,7 @@ class TacGamedata {
             $ships = [];
     
             foreach ($this->ships as $ship) {
-                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
+                if (in_array($ship->id, $this->activeship) && !$ship->isTerrain() && !$ship->mine && ($ship->getTurnDeployed($this) <= $this->turn)) {
                     array_push($ships, $ship);
                 }
             }
@@ -402,7 +419,7 @@ class TacGamedata {
         }
     
         foreach ($this->ships as $ship) {
-            if ($ship->id == $this->activeship && !$ship->isTerrain() && ($ship->getTurnDeployed($this) <= $this->turn)) {
+            if ($ship->id == $this->activeship && !$ship->isTerrain() && !$ship->mine && ($ship->getTurnDeployed($this) <= $this->turn)) {
                 return [$ship];
             }
         }
@@ -415,7 +432,15 @@ class TacGamedata {
         foreach($this->ships as $ship){
             if(!$ship->canPreOrder) continue; //Can't pre-Order, filters out irreleveant ships and Terrain            
             if ($ship->userid != $playerId) continue; //Not players ship
-            if($ship->isDestroyed()) continue;            
+            if($ship->isDestroyed()) continue; 
+
+            
+//Debug::log("name " . $ship->name); 
+//Debug::log("name " . $ship->spawned);    
+
+            if($ship instanceof Mine && $ship->spawned == $this->turn){
+                return true; //trigger pre-turn phase so Mine settings can be applied at the start of next turn.
+            }
             
             //Torvalus block, other blocks could be added.
             if($ship->faction == "Torvalus Speculators"){
@@ -497,6 +522,7 @@ class TacGamedata {
 	    foreach ($this->ships as $ship){
 	        if ($ship->unavailable) continue;
 	        if ($ship->isTerrain()) continue; 
+	        if ($ship->mine) continue;           
 	        if ($ship->isDestroyed()) continue;                         
 
 	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
@@ -537,9 +563,48 @@ class TacGamedata {
 	    foreach ($this->ships as $ship){
 	        if ($ship->unavailable) continue;
 	        if ($ship->isTerrain()) continue;  
-
+	        if ($ship->mine) continue;     
 			if ($ship->team == $shooter->team)	        
 				continue;
+	        if ($ship->isDestroyed()) continue;              
+		        
+	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
+
+	        if ($distance <= $maxRange && $distance < $closestDistance){
+	            // New closest distance found, clear the array and add this ship
+	            $closestShips = array($ship);
+	            $closestDistance = $distance;
+	        } elseif ($distance == $closestDistance) {
+	            // Add ship to equally close ships
+	            $closestShips[] = $ship;
+	        }
+	    }
+
+	    // Randomly select among equally close ships
+	    if (!empty($closestShips)) {
+	        $randomIndex = array_rand($closestShips);
+	        return $closestShips[$randomIndex];
+	    } else {
+	        return null; // No ships found within range
+	    }
+	}
+
+	public function getClosestEnemyMine($shooter, $pos, $maxRange = 0){
+
+	    if ($pos instanceof BaseShip) {
+	        $pos = $pos->getHexPos();
+	    }
+
+	    if (!($pos instanceof OffsetCoordinate)) {
+	        throw new Exception("only OffsetCoordinate supported");
+	    }
+
+	    $closestShips = array(); // Array to store equally closest ships
+	    $closestDistance = 100; // Initialize with a large value
+
+	    foreach ($this->ships as $ship){
+            if(!$ship instanceof Mine) continue;
+			if ($ship->team == $shooter->team) continue;
 	        if ($ship->isDestroyed()) continue;              
 		        
 	        $distance = Mathlib::getDistanceHex($ship->getHexPos(), $pos);
@@ -568,7 +633,7 @@ class TacGamedata {
     public function prepareForPlayer($all = false){
         $this->setWaiting();
         $this->calculateTurndelays();
-        if (!$all) {
+        if (!$all) {             
             $this->deleteHiddenData();
         }
         $this->setPreTurnTasks();
@@ -612,18 +677,18 @@ class TacGamedata {
                     $ship->EW = Array();
                     
                     foreach($ship->systems as $system){
-			//Marcin Sawicki: do send PREVIOUS TURNS Power for Jammer!
-			if($system instanceof Jammer){
-				$power2 = array();
-				foreach($system->power as $powentry){
-					if($powentry->turn < $this->turn){
-						$power2[] = $powentry;
-					}
-				}
-				$system->power = $power2;
-			}else{
-                        	$system->power = array();
-			}
+                        //Marcin Sawicki: do send PREVIOUS TURNS Power for Jammer!
+                        if($system instanceof Jammer){
+                            $power2 = array();
+                            foreach($system->power as $powentry){
+                                if($powentry->turn < $this->turn){
+                                    $power2[] = $powentry;
+                                }
+                            }
+                            $system->power = $power2;
+                        }else{
+                            $system->power = array();
+                        }
                     }
                 }
             }
@@ -638,28 +703,28 @@ class TacGamedata {
                 foreach ($ship->systems as $fighter){
                     $this->hideSystemFireOrders($fighter);
                 } 
-            } else {
+            } else {                 
                 $this->hideSystemFireOrders($ship);
             }
         }
     }
 
-    private function hideSystemFireOrders($ship){
-        foreach ($ship->systems as $system){
-            for ($i = sizeof($system->fireOrders)-1; $i>=0; $i--){
+    private function hideSystemFireOrders($ship){         
+        foreach ($ship->systems as $system){             
+            for ($i = sizeof($system->fireOrders)-1; $i>=0; $i--){                 
                 $fire = $system->fireOrders[$i]; 
                 $weapon = $ship->getSystemById($fire->weaponid);
                 
                 if ($fire->turn == $this->turn && !$weapon->ballistic && $this->phase == 3 && !$weapon->preFires){
-                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we won't THESE fireorders to be passed to Front End for Replay.
+                    if($fire->damageclass != 'TerrainCrash' && $fire->damageclass != 'TerrainCollision' && $fire->damageclass != 'AutoRam'){ //RammingAttack isn't PreFire, but we want THESE fireorders to be passed to Front End for Replay.                         
                         unset($system->fireOrders[$i]);
                     }    
                 }
-                if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){
+                if ($fire->turn == $this->turn && $weapon->ballistic && $this->phase == 1){                   
                     unset($system->fireOrders[$i]);
                 }
 
-                if ($fire->turn == $this->turn && $weapon->preFires && $this->phase == 5){
+                if ($fire->turn == $this->turn && $weapon->preFires && $this->phase == 5){                        
                     unset($system->fireOrders[$i]);
                 }                
                
@@ -676,7 +741,7 @@ class TacGamedata {
                             $ball->targetposition  = null;
 
                         }
-                    }
+                    }    
                 }
             }
         }

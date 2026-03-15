@@ -72,14 +72,14 @@ window.FlightIcon = function () {
     };
 
     FlightIcon.prototype.getFacing = function (facing) {
-		var facingActual = this.fighterObject.rotation.z;
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        var facingActual = this.fighterObject.rotation.z;
+        this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         return mathlib.radianToDegree(facingActual);
     };
 
     FlightIcon.prototype.setFacing = function (facing) {
-		var facingActual = mathlib.degreeToRadian(facing);
-		this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
+        var facingActual = mathlib.degreeToRadian(facing);
+        this.shipDirectionOfProwSprite.mesh.rotation.z = facingActual;
         this.fighterObject.rotation.z = facingActual;//mathlib.degreeToRadian(facing);
     };
 
@@ -88,16 +88,16 @@ window.FlightIcon = function () {
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
-        var overlayColour = 
-                this.terrain 
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
-                : this.mine 
-                ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
-                : this.ally 
-                ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
-                : new THREE.Color(255 / 255, 40 / 255, 40 / 255); // Red
+        var overlayColour =
+            this.terrain
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
+                : this.mine
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
+                    : this.ally
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
 
-		this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
+        this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
         this.mesh.add(this.shipDirectionOfProwSprite.mesh);
         this.shipDirectionOfProwSprite.hide();
 
@@ -116,18 +116,18 @@ window.FlightIcon = function () {
 
         this.mesh.add(this.fighterObject);
 
-		//29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
-        
-        this.shipEWSprite = new window.ShipEWSprite({ width: this.size*0.75, height: this.size*0.75 }, -1);
+        //29.03.2022: people called for more visible circles - change from the same as ship image to half again as large (original: this.size / 2, new: this.size*0.75 ); unit icon and arrows size left as previously
+
+        this.shipEWSprite = new window.ShipEWSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
-        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
-        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size*0.75, height: this.size*0.75 }, -2, 'neutral', false).hide();
+        this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, 'neutral', false).hide();
         this.mesh.add(this.NotMovedSprite.mesh);
 
         scene.add(this.mesh);

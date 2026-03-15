@@ -62,7 +62,7 @@ window.webglScene = function () {
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
-        this.renderer.context.getExtension('OES_standard_derivatives');
+        this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.localClippingEnabled = true;
 
         jQuery(this.renderer.domElement).addClass("webglCanvas").appendTo(canvasId);
@@ -237,6 +237,7 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.onWindowResize = function () {
+        if (!this.initialized) return; // Guard: may fire before init() completes
         this.width = jQuery('#pagecontainer').width();
         this.height = jQuery('#pagecontainer').height();
 
@@ -244,7 +245,7 @@ window.webglScene = function () {
 
         this.renderer.setSize(window.innerWidth, window.innerHeight);
         this.coordinateConverter.onResize(window.innerWidth, window.innerHeight);
-        this.starField.cleanUp();
+        if (this.starField) this.starField.cleanUp();
     };
 
     webglScene.prototype.keyDown = function (event) {

@@ -73,6 +73,23 @@ if ($ipCount > $maxIP) {
 }
 
 // ----------------------
+// APCu Prefix (must match Manager.php / ChatManager.php)
+// ----------------------
+// Load the database name from varconfig.php so we can build the correct key prefix.
+$_slg_prefix = '';
+global $database_name;
+if (!empty($database_name)) {
+    $_slg_prefix = $database_name . '_';
+} else {
+    // Fallback: load it directly (global.php should have already done this, but just in case)
+    $_slg_varconfig = dirname(__DIR__) . '/server/varconfig.php';
+    if (file_exists($_slg_varconfig)) {
+        include_once $_slg_varconfig;
+        $_slg_prefix = ($database_name ?? 'default') . '_';
+    }
+}
+
+// ----------------------
 // Fast Poll Exemption
 // ----------------------
 // If this is a polling request that will be served from APCu, we skip the global limit.
@@ -80,26 +97,25 @@ $isFastPoll = false;
 
 if (isset($_SERVER['PHP_SELF'])) {
     if (strpos($_SERVER['PHP_SELF'], 'chatdata.php') !== false && isset($_GET['gameid'], $_GET['lastid'])) {
-        $key = 'chat_last_id_' . $_GET['gameid'];
+        $key = $_slg_prefix . 'chat_last_id_' . $_GET['gameid'];
         $lastMsgId = apcu_fetch($key);
-        if ($lastMsgId !== false && $_GET['lastid'] >= $lastMsgId) {
+        if ($lastMsgId !== false && (int)$_GET['lastid'] >= $lastMsgId) {
             $isFastPoll = true;
+            //error_log("Load Guard: Fast Poll EXEMPT (Chatdata) - " . $_SERVER['REMOTE_ADDR']);
         }
     } elseif (strpos($_SERVER['PHP_SELF'], 'gamedata.php') !== false && isset($_GET['gameid'], $_GET['last_time'])) {
-        $key = 'game_' . $_GET['gameid'] . '_last_update';
+        $key = $_slg_prefix . 'game_' . $_GET['gameid'] . '_last_update';
         $serverTime = apcu_fetch($key);
         if ($serverTime !== false && $serverTime <= (float)$_GET['last_time']) {
             $isFastPoll = true;
-             // DEBUG LOG
-             //error_log("Load Guard: Fast Poll EXEMPT (Gamedata) - " . $_SERVER['REMOTE_ADDR']);
+            //error_log("Load Guard: Fast Poll EXEMPT (Gamedata) - " . $_SERVER['REMOTE_ADDR']);
         }
     } elseif (strpos($_SERVER['PHP_SELF'], 'game.php') !== false && isset($_GET['gameid'])) {
-         // Exemppt game.php ONLY if the JSON cache is hot
-         // This prevents the "Process Pile-up" on shared hosting by allowing cached page loads to bypass the concurrency queue
+         // Exempt game.php ONLY if the JSON cache is hot
          $userid = $_SESSION['user'] ?? null;
          if ($userid) {
              // 1. Check for Generation Lock
-             $lockKey = "game_lock_" . $_GET['gameid'] . "_" . $userid;
+             $lockKey = $_slg_prefix . "game_lock_" . $_GET['gameid'] . "_" . $userid;
              if (apcu_exists($lockKey)) {
                  $isFastPoll = true;
                  // SHORT-CIRCUIT: Optimization to save memory. 
@@ -110,14 +126,14 @@ if (isset($_SERVER['PHP_SELF'])) {
                  </body></html>';
                  exit;
              } else {
-                 $cacheKey = "game_" . $_GET['gameid'] . "_user_" . $userid . "_json";
+                 $cacheKey = $_slg_prefix . "game_" . $_GET['gameid'] . "_user_" . $userid . "_json";
                  $cached = apcu_fetch($cacheKey);
                  // Verify timestamp
                  if ($cached && isset($cached['ts'])) {
-                     $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
+                     $lastUpdate = apcu_fetch($_slg_prefix . "game_" . $_GET['gameid'] . "_last_update");
                      if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
                          $isFastPoll = true;
-                         // error_log("Load Guard: Fast Poll EXEMPT (Game Page) - " . $_SERVER['REMOTE_ADDR']);
+                         //error_log("Load Guard: Fast Poll EXEMPT (Game Page) - " . $_SERVER['REMOTE_ADDR']);
                      }
                  }
              }
@@ -126,7 +142,7 @@ if (isset($_SERVER['PHP_SELF'])) {
           // EXEMPTION for Games List
           $userid = $_SESSION['user'] ?? null;
           if ($userid) {
-             $lockKey = "gameslist_lock_" . $userid;
+             $lockKey = $_slg_prefix . "gameslist_lock_" . $userid;
              if (apcu_exists($lockKey)) {
                  $isFastPoll = true;
                  // SHORT-CIRCUIT
@@ -137,7 +153,7 @@ if (isset($_SERVER['PHP_SELF'])) {
                  exit;
              } else {
                  // Also fast poll if we have a valid short-term cache
-                 $cacheKey = "gameslist_" . $userid;
+                 $cacheKey = $_slg_prefix . "gameslist_" . $userid;
                  if (apcu_exists($cacheKey)) {
                      $isFastPoll = true;
                  }
@@ -148,9 +164,7 @@ if (isset($_SERVER['PHP_SELF'])) {
          $userid = $_SESSION['user'] ?? null;
          if ($userid) {
              // 1. Check if we are LOCKED (Generation in progress)
-             // If locked, we want to let this request through immediately so it can hit the 
-             // "Loading..." page in gamelobby.php and exit, rather than queuing up here.
-             $lockKey = "gamelobby_lock_" . $_GET['gameid'] . "_" . $userid;
+             $lockKey = $_slg_prefix . "gamelobby_lock_" . $_GET['gameid'] . "_" . $userid;
              if (apcu_exists($lockKey)) {
                  $isFastPoll = true;
                  // SHORT-CIRCUIT
@@ -161,11 +175,11 @@ if (isset($_SERVER['PHP_SELF'])) {
                  exit;
              } else {
                  // 2. Check if we have valid CACHED data
-                 $cacheKey = "gamelobby_" . $_GET['gameid'] . "_user_" . $userid . "_json";
+                 $cacheKey = $_slg_prefix . "gamelobby_" . $_GET['gameid'] . "_user_" . $userid . "_json";
                  $cached = apcu_fetch($cacheKey);
                  // Verify timestamp
                  if ($cached && isset($cached['ts'])) {
-                     $lastUpdate = apcu_fetch("game_" . $_GET['gameid'] . "_last_update");
+                     $lastUpdate = apcu_fetch($_slg_prefix . "game_" . $_GET['gameid'] . "_last_update");
                      if ($lastUpdate && abs($cached['ts'] - $lastUpdate) < 0.001) {
                          $isFastPoll = true;
                          //error_log("Load Guard: Fast Poll EXEMPT (Game Lobby) - " . $_SERVER['REMOTE_ADDR']);

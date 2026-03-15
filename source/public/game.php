@@ -50,10 +50,8 @@
     <link href="styles/replay.css" rel="stylesheet" type="text/css">
     <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"
-            integrity="sha256-VazP97ZCwtekAsvgPBSUwPFKdrwD3unUfSGVYrahUqU="
-            crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
     <script defer src="client/lib/three.min.js"></script>
     <script defer src="client/lib/THREE.MeshLine.js"></script>
     <script defer src="client/UI/reactJs/UI.bundle.js"></script>
@@ -69,6 +67,32 @@
             }
         }
         $staticShips = ShipLoader::getShipsByClass($shipClasses);
+
+        // Auto-discover dynamically spawnable ship blueprints from weapon system properties.
+        // Any weapon with a $spawnableClasses array will have its listed classes preloaded here,
+        // so the frontend has their full blueprint when a mine/unit is spawned mid-game.
+        $spawnableClasses = [];
+        foreach ($staticShips as $faction => $shipBlueprints) {
+            foreach ($shipBlueprints as $blueprint) {
+                foreach ($blueprint->systems as $system) {
+                    if (!empty($system->spawnableClasses)) {
+                        foreach ($system->spawnableClasses as $cls) {
+                            $spawnableClasses[] = $cls;
+                        }
+                    }
+                }
+            }
+        }
+        if (!empty($spawnableClasses)) {
+            $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));
+            foreach ($spawnableStaticShips as $faction => $classes) {
+                if (!isset($staticShips[$faction])) $staticShips[$faction] = [];
+                foreach ($classes as $classKey => $blueprint) {
+                    $staticShips[$faction][$classKey] = $blueprint;
+                }
+            }
+        }
+
         echo '<script>window.staticShips = ' . json_encode($staticShips) . ';</script>';
     ?>
     <script>
@@ -80,10 +104,12 @@
 
     <?php include_once 'shaders.php'; ?>
     <script>
-        $(window).load(function(){
+        $(window).on("load", function(){
             
-            if (<?php print($error); ?>) {
-                alert(<?php print($error); ?>);
+            var serverError = <?php print($error); ?>;
+            if (serverError) {
+                var errorMsg = serverError.error || JSON.stringify(serverError);
+                alert("Server Error: " + errorMsg + (serverError.logid ? " [LogID: " + serverError.logid + "]" : ""));
             }
             
             gamedata.parseServerData(<?php print($serverdataJSON); ?>);
@@ -115,159 +141,159 @@
 <!--	<script src="client/helper.js"></script>-->
     <?php $debug = isset($_GET['debug']); ?>
     <?php if ($debug): ?>
-    <script src="client/lib/graphics.js"></script>
-    <script src="client/lib/HexagonMath.js"></script>
-    <script src="client/lib/AbstractCanvas.js"></script>
-    <script src="client/Settings.js"></script>
-    <script src="client/renderer/webglHexGridRenderer.js"></script>
-    <script src="client/renderer/canvasHexGridRenderer.js"></script>
-    <script src="client/renderer/webglScene.js"></script>
-    <script src="client/renderer/webglScrolling.js"></script>
-    <script src="client/renderer/webglZooming.js"></script>
-    <script src="client/renderer/PhaseDirector.js"></script>
-    <script src="client/renderer/Animation.js"></script>
+    <script defer src="client/lib/graphics.js"></script>
+    <script defer src="client/lib/HexagonMath.js"></script>
+    <script defer src="client/lib/AbstractCanvas.js"></script>
+    <script defer src="client/Settings.js"></script>
+    <script defer src="client/renderer/webglHexGridRenderer.js"></script>
+    <script defer src="client/renderer/canvasHexGridRenderer.js"></script>
+    <script defer src="client/renderer/webglScene.js"></script>
+    <script defer src="client/renderer/webglScrolling.js"></script>
+    <script defer src="client/renderer/webglZooming.js"></script>
+    <script defer src="client/renderer/PhaseDirector.js"></script>
+    <script defer src="client/renderer/Animation.js"></script>
 
-    <script src="client/renderer/shipWindowManager.js"></script>
+    <script defer src="client/renderer/shipWindowManager.js"></script>
 
-    <script src="client/renderer/sprite/webglSprite.js"></script>
-    <script src="client/renderer/sprite/HexagonSprite.js"></script>
-    <script src="client/renderer/sprite/ShipEWSprite.js"></script>
-    <script src="client/renderer/sprite/ShipSelectedSprite.js"></script>
-    <script src="client/renderer/sprite/BoxSprite.js"></script>
-    <script src="client/renderer/sprite/PlainSprite.js"></script>
-    <script src="client/renderer/sprite/LineSprite.js"></script>
-    <script src="client/renderer/sprite/BallisticSprite.js"></script>
-    <script src="client/renderer/sprite/BallisticLineSprite.js"></script>
-    <script src="client/renderer/sprite/TextSprite.js"></script>
-    <script src="client/renderer/sprite/HexNumberSprite.js"></script>    
+    <script defer src="client/renderer/sprite/webglSprite.js"></script>
+    <script defer src="client/renderer/sprite/HexagonSprite.js"></script>
+    <script defer src="client/renderer/sprite/ShipEWSprite.js"></script>
+    <script defer src="client/renderer/sprite/ShipSelectedSprite.js"></script>
+    <script defer src="client/renderer/sprite/BoxSprite.js"></script>
+    <script defer src="client/renderer/sprite/PlainSprite.js"></script>
+    <script defer src="client/renderer/sprite/LineSprite.js"></script>
+    <script defer src="client/renderer/sprite/BallisticSprite.js"></script>
+    <script defer src="client/renderer/sprite/BallisticLineSprite.js"></script>
+    <script defer src="client/renderer/sprite/TextSprite.js"></script>
+    <script defer src="client/renderer/sprite/HexNumberSprite.js"></script>    
     
-    <script src="client/renderer/icon/ShipIcon.js"></script>
-    <script src="client/renderer/icon/FlightIcon.js"></script>
-    <script src="client/renderer/icon/DeploymentIcon.js"></script>
+    <script defer src="client/renderer/icon/ShipIcon.js"></script>
+    <script defer src="client/renderer/icon/FlightIcon.js"></script>
+    <script defer src="client/renderer/icon/DeploymentIcon.js"></script>
 
-    <script src="client/lib/coordinateConverter.js"></script>
-    <script src="client/renderer/icon/ShipIconContainer.js"></script>
-    <script src="client/renderer/icon/EWIconContainer.js"></script>
-    <script src="client/renderer/icon/BallisticIconContainer.js"></script>
+    <script defer src="client/lib/coordinateConverter.js"></script>
+    <script defer src="client/renderer/icon/ShipIconContainer.js"></script>
+    <script defer src="client/renderer/icon/EWIconContainer.js"></script>
+    <script defer src="client/renderer/icon/BallisticIconContainer.js"></script>
 
-    <script src="client/renderer/animationStrategy/AnimationStrategy.js"></script>
-    <script src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
-    <script src="client/renderer/animationStrategy/ReplayAnimationStrategy.js"></script>
-    <script src="client/renderer/animationStrategy/animation/Animation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/LogAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/CameraPositionAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ShipDestroyedAnimation.js"></script>  
-    <script src="client/renderer/animationStrategy/animation/ShipJumpAnimation.js"></script>
+    <script defer src="client/renderer/animationStrategy/AnimationStrategy.js"></script>
+    <script defer src="client/renderer/animationStrategy/IdleAnimationStrategy.js"></script>
+    <script defer src="client/renderer/animationStrategy/ReplayAnimationStrategy.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/Animation.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/ShipMovementAnimation.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/LogAnimation.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/CameraPositionAnimation.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/ShipDestroyedAnimation.js"></script>  
+    <script defer src="client/renderer/animationStrategy/animation/ShipJumpAnimation.js"></script>
 
-    <script src="client/renderer/animationStrategy/animation/FireAnimationHelper.js"></script>
-    <script src="client/renderer/animationStrategy/animation/AllWeaponFireAgainstShipAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/HexTargetedWeaponFireAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleEmitterContainer.js"></script>
-    <script src="client/renderer/animationStrategy/animation/BaseParticle.js"></script>
-    <script src="client/renderer/animationStrategy/animation/StarParticle.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
-    <script src="client/renderer/animationStrategy/animation/StarParticleEmitter.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleAnimation.js"></script>
-    <script src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/LaserEffect.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/MissileEffect.js"></script>    
-    <script src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/BlinkEffect.js"></script>    
-    <script src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>
-    <script src="client/renderer/animationStrategy/animation/effects/ShipJumpPoint.js"></script>  
+    <script defer src="client/renderer/animationStrategy/animation/FireAnimationHelper.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/AllWeaponFireAgainstShipAnimation.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/HexTargetedWeaponFireAnimation.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/ParticleEmitterContainer.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/BaseParticle.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/StarParticle.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/StarParticleEmitter.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/ParticleAnimation.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/ParticleEmitter.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/Explosion.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/LaserEffect.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/BoltEffect.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/MissileEffect.js"></script>    
+    <script defer src="client/renderer/animationStrategy/animation/effects/TorpedoEffect.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/BlinkEffect.js"></script>    
+    <script defer src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/ShipJumpPoint.js"></script>  
 
-    <script src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
-    <script src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
-    <script src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
-    <script src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
-    <script src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
-    <script src="client/renderer/phaseStrategy/PreFiringPhaseStrategy.js"></script>    
-    <script src="client/renderer/phaseStrategy/FirePhaseStrategy.js"></script>
-    <script src="client/renderer/phaseStrategy/ReplayPhaseStrategy.js"></script>
-    <script src="client/renderer/terrain/StarField.js"></script>
-
-
-    <script src="client/renderer/texture/HexagonTexture.js"></script>
+    <script defer src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
+    <script defer src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
+    <script defer src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
+    <script defer src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
+    <script defer src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
+    <script defer src="client/renderer/phaseStrategy/PreFiringPhaseStrategy.js"></script>    
+    <script defer src="client/renderer/phaseStrategy/FirePhaseStrategy.js"></script>
+    <script defer src="client/renderer/phaseStrategy/ReplayPhaseStrategy.js"></script>
+    <script defer src="client/renderer/terrain/StarField.js"></script>
 
 
-    <script src="client/UI/ShipTooltip.js"></script>
-    <script src="client/UI/SelectFromShips.js"></script>
-    <script src="client/UI/shipTooltipMenu.js"></script>
-    <script src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
-    <script src="client/UI/shipTooltipFireMenu.js"></script>
-    <script src="client/UI/ShipTooltipBallisticsMenu.js"></script>
-	<script src="client/UI/moveTooltip.js"></script>
+    <script defer src="client/renderer/texture/HexagonTexture.js"></script>
 
 
-    <script src="client/ShipMovementCallbacks.js"></script>
+    <script defer src="client/UI/ShipTooltip.js"></script>
+    <script defer src="client/UI/SelectFromShips.js"></script>
+    <script defer src="client/UI/shipTooltipMenu.js"></script>
+    <script defer src="client/UI/shipTooltipInitialOrdersMenu.js"></script>
+    <script defer src="client/UI/shipTooltipFireMenu.js"></script>
+    <script defer src="client/UI/ShipTooltipBallisticsMenu.js"></script>
+	<script defer src="client/UI/moveTooltip.js"></script>
 
 
-    <script src="client/model/hexagon/Cube.js"></script>
-    <script src="client/model/hexagon/Offset.js"></script>
-    <script src="client/gameRules/SimultaneousMovementRule.js"></script>
+    <script defer src="client/ShipMovementCallbacks.js"></script>
 
-    <script src="client/UI/botPanel.js"></script>
-    <script src="client/UI/replayUI.js"></script>
-    <script src="client/gamedata.js"></script>
-    <script src="client/windowevents.js"></script>
-    <script src="client/mathlib.js"></script>
-    <script src="client/lib/seedRandom.js"></script>
-    <script src="client/ajaxInterface.js"></script>
-    <script src="client/ew.js"></script>
-    <script src="client/weaponManager.js"></script>
-    <script src="client/damage.js"></script>
-    <script src="client/combatLog.js"></script>
-    <script src="client/declarations.js"></script>
-	<script src="client/player.js"></script>
-    <script src="client/ships.js"></script>
-    <script src="client/movement.js"></script>
-    <script src="client/criticals.js"></script>
-    <script src="client/systems.js"></script>
-	<script src="client/power.js"></script>
-    <script src="client/UI/shipMovement.js"></script>
-    <script src="client/UI/infowindow.js"></script>
-	<script src="client/UI/systemInfo.js"></script>
-    <script src="client/UI/shipwindow.js"></script>
-    <script src="client/UI/fleetList.js"></script>
-	<script src="client/UI/gameInfo.js"></script>
-    <script src="client/UI/flightwindow.js"></script>
-	<script src="client/UI/confirm.js"></script>
-	<script src="client/model/ship.js"></script>
-    <script src="client/model/shipSystem.js"></script>
-    <script src="client/model/systemFactory.js"></script>
-    <script src="client/model/system/baseSystems.js"></script>
-    <script src="client/model/system/defensive.js"></script>
-    <script src="client/model/weapon/ammo.js"></script>
-    <script src="client/model/weapon/ammoWeapons.js"></script>    
-    <script src="client/model/weapon/laser.js"></script>
-    <script src="client/model/weapon/particle.js"></script>
-    <script src="client/model/weapon/matter.js"></script>
-    <script src="client/model/weapon/plasma.js"></script>
-    <script src="client/model/weapon/special.js"></script>
-    <script src="client/model/weapon/supportWeapons.js"></script>    
-    <script src="client/model/weapon/torpedo.js"></script>
-    <script src="client/model/weapon/pulse.js"></script>
-    <script src="client/model/weapon/electromagnetic.js"></script>
-    <script src="client/model/weapon/aoe.js"></script>
-    <script src="client/model/weapon/molecular.js"></script>
-    <script src="client/model/weapon/antimatter.js"></script>
-    <!--<script src="client/model/weapon/dualWeapon.js"></script>-->
-    <!--<script src="client/model/weapon/duoWeapon.js"></script>-->
-    <script src="client/model/weapon/gravitic.js"></script>
-    <script src="client/model/weapon/missile.js"></script>
-    <script src="client/model/weapon/ion.js"></script>
-    <script src="client/model/weapon/customs.js"></script>
-    <script src="client/model/weapon/customSW.js"></script>
-    <script src="client/model/weapon/customNexus.js"></script>
-	<script src="client/model/weapon/customEscalation.js"></script>
-    <script src="client/model/weapon/customDevelopment.js"></script>
-	<script src="client/model/weapon/customBSG.js"></script>
-	<script src="client/model/weapon/customTrek.js"></script>
-    <script src="client/model/weapon/customCW.js"></script>
+
+    <script defer src="client/model/hexagon/Cube.js"></script>
+    <script defer src="client/model/hexagon/Offset.js"></script>
+    <script defer src="client/gameRules/SimultaneousMovementRule.js"></script>
+
+    <script defer src="client/UI/botPanel.js"></script>
+    <script defer src="client/UI/replayUI.js"></script>
+    <script defer src="client/gamedata.js"></script>
+    <script defer src="client/windowevents.js"></script>
+    <script defer src="client/mathlib.js"></script>
+    <script defer src="client/lib/seedRandom.js"></script>
+    <script defer src="client/ajaxInterface.js"></script>
+    <script defer src="client/ew.js"></script>
+    <script defer src="client/weaponManager.js"></script>
+    <script defer src="client/damage.js"></script>
+    <script defer src="client/combatLog.js"></script>
+    <script defer src="client/declarations.js"></script>
+	<script defer src="client/player.js"></script>
+    <script defer src="client/ships.js"></script>
+    <script defer src="client/movement.js"></script>
+    <script defer src="client/criticals.js"></script>
+    <script defer src="client/systems.js"></script>
+	<script defer src="client/power.js"></script>
+    <script defer src="client/UI/shipMovement.js"></script>
+    <script defer src="client/UI/infowindow.js"></script>
+	<script defer src="client/UI/systemInfo.js"></script>
+    <script defer src="client/UI/shipwindow.js"></script>
+    <script defer src="client/UI/fleetList.js"></script>
+	<script defer src="client/UI/gameInfo.js"></script>
+    <script defer src="client/UI/flightwindow.js"></script>
+	<script defer src="client/UI/confirm.js"></script>
+	<script defer src="client/model/ship.js"></script>
+    <script defer src="client/model/shipSystem.js"></script>
+    <script defer src="client/model/systemFactory.js"></script>
+    <script defer src="client/model/system/baseSystems.js"></script>
+    <script defer src="client/model/system/defensive.js"></script>
+    <script defer src="client/model/weapon/ammo.js"></script>
+    <script defer src="client/model/weapon/ammoWeapons.js"></script>    
+    <script defer src="client/model/weapon/laser.js"></script>
+    <script defer src="client/model/weapon/particle.js"></script>
+    <script defer src="client/model/weapon/matter.js"></script>
+    <script defer src="client/model/weapon/plasma.js"></script>
+    <script defer src="client/model/weapon/special.js"></script>
+    <script defer src="client/model/weapon/supportWeapons.js"></script>    
+    <script defer src="client/model/weapon/torpedo.js"></script>
+    <script defer src="client/model/weapon/pulse.js"></script>
+    <script defer src="client/model/weapon/electromagnetic.js"></script>
+    <script defer src="client/model/weapon/aoe.js"></script>
+    <script defer src="client/model/weapon/molecular.js"></script>
+    <script defer src="client/model/weapon/antimatter.js"></script>
+    <!--<script defer src="client/model/weapon/dualWeapon.js"></script>-->
+    <!--<script defer src="client/model/weapon/duoWeapon.js"></script>-->
+    <script defer src="client/model/weapon/gravitic.js"></script>
+    <script defer src="client/model/weapon/missile.js"></script>
+    <script defer src="client/model/weapon/ion.js"></script>
+    <script defer src="client/model/weapon/customs.js"></script>
+    <script defer src="client/model/weapon/customSW.js"></script>
+    <script defer src="client/model/weapon/customNexus.js"></script>
+	<script defer src="client/model/weapon/customEscalation.js"></script>
+    <script defer src="client/model/weapon/customDevelopment.js"></script>
+	<script defer src="client/model/weapon/customBSG.js"></script>
+	<script defer src="client/model/weapon/customTrek.js"></script>
+    <script defer src="client/model/weapon/customCW.js"></script>
     <?php else: ?>
     <script defer src="client/game.legacy.bundle.js"></script>
     <?php endif; ?>
@@ -568,7 +594,7 @@
 <div id="playerSettings"></div>
 <div id="shipThrust"></div>
 <div id="pagecontainer" oncontextmenu="return false;">
-    <div id="background" style="background-image:url(img/maps/<?php print($serverdata ? $serverdata->background : ""); ?>)"></div>
+    <div id="background" <?php if ($serverdata && !empty($serverdata->background)) echo 'style="background-image:url(img/maps/' . $serverdata->background . ')"'; ?>></div>
     <div id="webgl" class="tacticalcanvas"></div>
 
 

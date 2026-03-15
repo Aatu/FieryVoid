@@ -55,14 +55,15 @@
 <html>
 	<head>
 		<title>Fiery Void - Gamelobby</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--To try and ix mobile scroll juddering caused by viewport recalculation repaints -->
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">          
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-        <script src="client/lib/jquery-ui-1.8.15.custom.min.js"></script>
+        <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">        
 		
 		<!-- replaced by php include below
@@ -378,7 +379,7 @@
 
 		</script>
 	</head>
-	<body style="background-image:url(img/maps/<?php print($gamelobbydata->background); ?>)">
+	<body <?php if ($gamelobbydata && !empty($gamelobbydata->background)) echo 'style="background-image:url(img/maps/' . $gamelobbydata->background . ')"'; ?>>
 
   <header class="pageheader">
     <img src="img/logo.png" alt="Fiery Void Logo" class="logo">

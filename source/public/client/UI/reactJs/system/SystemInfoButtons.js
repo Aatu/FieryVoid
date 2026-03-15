@@ -9,6 +9,7 @@ import HyachComputerList from "./HyachComputerList";
 import HyachSpecialistsList from "./HyachSpecialistsList";
 import ShieldGeneratorList from "./ShieldGeneratorList";
 import PowerCapacitor from "./PowerCapacitor";
+import MineSettingsList from "./MineSettingsList";
 
 const Container = styled.div`
     display:flex;
@@ -25,6 +26,12 @@ const Button = styled.div`
     justify-content: center;
     mix-blend-mode: ${props => props.$blend || 'normal'};
     ${Clickable}
+
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 `;
 
 class SystemInfoButtons extends React.Component {
@@ -577,6 +584,9 @@ class SystemInfoButtons extends React.Component {
 				{canSpecdecrease(ship, system) && <Button onClick={this.Specdecrease.bind(this)} img="./img/systemicons/Specialistclasses/iconMinus.png"></Button>}
 				*/}
 
+				{canMineSettings(ship, system) && <MineSettingsList system={system} ship={ship} />}
+				
+
 				{(canTSShield(ship, system) || canTSShieldGen(ship, system)) && <ShieldGeneratorList system={system} ship={ship} />}
 				{/*
 				{canTSShieldIncrease(ship, system) && <Button onClick={this.TSShieldIncrease25.bind(this)} img="./img/systemicons/ShieldGenclasses/iconPlus25.png"></Button>}
@@ -642,10 +652,12 @@ const canAAdecrease = (ship, system) => canAA(ship, system) && system.canDecreas
 const canAApropagate = (ship, system) => canAA(ship, system) && system.canPropagate() != '';
 */
 
+const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn-1) && (system.name == 'CaptorMine') ;
+
 //can do something with Hyach Computer
 const canBFCP = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'hyachComputer');
-const canBFCPdisplayCurrClass = (ship, system) => canBFCP(ship, system) && system.getCurrClass() != '';
-/*
+
+/*const canBFCPdisplayCurrClass = (ship, system) => canBFCP(ship, system) && system.getCurrClass() != '';
 const getBFCPcurrClassImg = (ship, system) => './img/systemicons/BFCPclasses/' + system.getCurrClass() + '.png';
 const getBFCPcurrClassName = (ship, system) => system.getCurrClass();
 const canBFCPincrease = (ship, system) => canBFCP(ship, system) && system.canIncrease() != '';
@@ -695,7 +707,8 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 	|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
-	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSelectAllWeapons(ship, system);
+	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSelectAllWeapons(ship, system)
+	|| canMineSettings(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 

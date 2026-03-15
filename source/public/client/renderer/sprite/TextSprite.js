@@ -22,21 +22,22 @@ window.TextSprite = function () {
         var context = canvas.getContext("2d");
         context.save();
         context.fillStyle = this.color;
-        context.font =  this.fontSize + " " + this.font;
+        context.font = this.fontSize + " " + this.font;
         context.textAlign = 'center';
         context.textBaseline = 'middle';
         context.shadowOffsetX = 0;
         context.shadowOffsetY = 0;
-    
+
         context.shadowColor = "rgba(0,0,0,1)";
-    
+
         context.shadowBlur = 8;
-        context.fillText(text, Math.round(size/2),  Math.round(size/2));
+        context.fillText(text, Math.round(size / 2), Math.round(size / 2));
         context.restore();
 
         var geometry = new THREE.PlaneGeometry(size, size, 1, 1);
-        
-        var texture = new THREE.Texture(canvas);
+
+        var texture = new THREE.CanvasTexture(canvas);
+        texture.colorSpace = THREE.SRGBColorSpace;
         texture.needsUpdate = true;
 
         this.material = new THREE.MeshBasicMaterial({
@@ -47,7 +48,7 @@ window.TextSprite = function () {
         this.mesh = new THREE.Mesh(geometry, this.material);
     }
 
-    
+
     TextSprite.prototype.setScale = function (width, height) {
         this.mesh.scale.set(width, height, 1);
     };

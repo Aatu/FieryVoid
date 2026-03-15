@@ -92,7 +92,7 @@ window.ReplayAnimationStrategy = function () {
 
             // Filter out enemy stealth ships that are undetected
             if (!gamedata.isMyorMyTeamShip(ship)) {
-                if (shipManager.isStealthShip(ship) && !shipManager.isDetected(ship)) {
+                if (ship.trueStealth && !shipManager.isDetected(ship)) {
                     return; // Skip this ship
                 }
             }
@@ -366,7 +366,7 @@ window.ReplayAnimationStrategy = function () {
 
     function animateShipDestruction(time, logAnimation) {
         this.gamedata.ships.filter(function (ship) {
-            return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight;
+            return shipManager.getTurnDestroyed(ship) === this.turn && !ship.flight && !ship.mine;
         }, this).forEach(function (ship) {
             var jumped = shipManager.hasJumpedNotDestroyed(ship);
             if (jumped) {

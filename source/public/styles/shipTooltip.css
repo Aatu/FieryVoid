@@ -2,6 +2,8 @@
     display: flex;
     margin: 10px 0;
     justify-content: center;
+    max-width: 300px;
+    flex-wrap: wrap;
 }
 
 .shipNameContainer .buttons .menu .action-buttons button {
@@ -93,6 +95,16 @@
 
 .removeDetectSEW {
     background-image: url("../img/removeDetectSEW.png");
+
+}
+
+.addMDEW {
+    background-image: url("../img/addMDEW.png");
+
+}
+
+.removeMDEW {
+    background-image: url("../img/removeMDEW.png");
 
 }
 

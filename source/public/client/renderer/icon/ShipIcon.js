@@ -3,8 +3,14 @@
 window.ShipIcon = function () {
 
     var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
+    directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
     var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
+    directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
+    directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
     const THRUSTER_TEXTURE = new THREE.TextureLoader().load("./img/systemicons/thrusterICON1.png");
+    THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
+    THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 
     function ShipIcon(ship, scene) {
 
@@ -35,6 +41,7 @@ window.ShipIcon = function () {
         this.NotMovedSprite = null;
 
         this.selected = false;
+        this.baseZ = this.terrain ? -50 : 0;
 
         this.create(ship, scene);
         this.consumeShipdata(ship);
@@ -156,7 +163,7 @@ window.ShipIcon = function () {
     ShipIcon.prototype.consumeEW = function (ship) {
         var dew = ew.getDefensiveEW(ship);
         //if (ship.flight) {
-        if (ship.flight || ship.jinkinglimit > 0) {
+        if (ship.flight) {
             dew = shipManager.movement.getJinking(ship);
         }
 
@@ -185,16 +192,16 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.setHighlighted = function (value) {
         if (value) {
-            this.mesh.position.z = 499;
+            this.mesh.position.z = this.baseZ + (this.terrain ? 10 : 499);
             if (!this.terrain) { //No sprite for Terrain  
                 this.shipDirectionOfProwSprite.show();
                 this.shipDirectionOfMovementSprite.show();
             }
         } else {
             if (this.selected) {
-                this.mesh.position.z = 100;
+                this.mesh.position.z = this.baseZ + (this.terrain ? 5 : 100);
             } else {
-                this.mesh.position.z = 0;
+                this.mesh.position.z = this.baseZ;
             }
 
             // On mobile, if selected, don't hide sprites
@@ -214,11 +221,11 @@ window.ShipIcon = function () {
             if (value) {
                 this.ShipSelectedSprite.show();
                 if (!this.selected) {
-                    this.mesh.position.z = 100;
+                    this.mesh.position.z = this.baseZ + (this.terrain ? 5 : 100);
                 }
             } else {
                 if (this.selected) {
-                    this.mesh.position.z = 0;
+                    this.mesh.position.z = this.baseZ;
                 }
                 this.ShipSelectedSprite.hide();
             }
@@ -250,7 +257,7 @@ window.ShipIcon = function () {
     ShipIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
-        this.mesh.position.set(500, 0, 0);
+        this.mesh.position.set(500, 0, this.baseZ);
         this.mesh.renderDepth = 10;
 
         // Defined a maximum width and height, some new ships like Thirdspace are MUCH larger and benefit from this - DK 25.3.24
@@ -272,17 +279,17 @@ window.ShipIcon = function () {
 
         this.shipSprite.setOverlayColor(
             this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255) // Off-white (#dedede)
+                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
                 : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) // Light green
+                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
                     : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255) // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255) // Red
+                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
+                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
         );
 
-        if (ship.imageFlipped) {
-            this.shipSprite.mesh.scale.y = -1;
-        }
+        //if (ship.imageFlipped) { //Old variable used to manually flip iamges in older version of THREE.js - DK
+        //    this.shipSprite.mesh.scale.y = -1;
+        //}
 
         this.mesh.add(this.shipSprite.mesh);
 
@@ -321,13 +328,15 @@ window.ShipIcon = function () {
 
         var movesByHexAndTurn = [];
 
-        this.defaultPosition = {
-            turn: movements[0].turn,
-            facing: movements[0].facing,
-            heading: movements[0].heading,
-            position: new hexagon.Offset(movements[0].position),
-            offset: { x: movements[0].xOffset, y: movements[0].yOffset }
-        };
+        if (movements && movements.length > 0 && movements[0]) {
+            this.defaultPosition = {
+                turn: movements[0].turn,
+                facing: movements[0].facing,
+                heading: movements[0].heading,
+                position: new hexagon.Offset(movements[0].position),
+                offset: { x: movements[0].xOffset || 0, y: movements[0].yOffset || 0 }
+            };
+        }
 
         var lastMovement = null;
 
@@ -338,13 +347,17 @@ window.ShipIcon = function () {
         }).forEach(function (movement) { */
 
         //Replacement code below
-        Object.values(movements)
-            .filter(movement => movement.type !== 'start')
+        movements.filter(function (movement) {
+            return movement.type !== 'start';
+        })
             // During replay, exclude preFire moves from the main movement path – they will
             // be animated separately in ReplayAnimationStrategy, after the relevant weapon hits.
-            .filter(movement => !(gamedata.replay && movement.type === 'prefire' && movement.turn === gamedata.turn))
-            .filter(movement => movement.commit)
-            .forEach(movement => {
+            .filter(function (movement) {
+                return !(gamedata.replay && movement.type === 'prefire' && movement.turn === gamedata.turn);
+            })
+            .filter(function (movement) {
+                return movement.commit;
+            }).forEach(function (movement) {
 
                 if (lastMovement && movement.turn !== lastMovement.turn) {
 
@@ -364,14 +377,14 @@ window.ShipIcon = function () {
 
                 lastMovement = movement;
             });
+
         this.preFireMovements = []; //reset
-        Object.values(movements)
-            .filter(m => m.type === 'prefire')
-            .forEach(m => {
+        movements.filter(function (m) { return m.type === 'prefire'; })
+            .forEach(function (m) {
                 if (!this.preFireMovements.some(existing => existing.id === m.id)) {
                     if (m.turn == gamedata.turn) this.preFireMovements.push(m);
                 }
-            });
+            }, this);
 
 
         this.movements = movesByHexAndTurn;
@@ -517,6 +530,8 @@ window.ShipIcon = function () {
 
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
+        if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
+
         var hexDistance = window.coordinateConverter.getHexDistance();
 
         if (weapon instanceof Thruster) {
@@ -530,6 +545,7 @@ window.ShipIcon = function () {
 
         } else if (weapon.splitArcs) { //Some weapons might have two separate arcs, like Shadow Battlecruiser.
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             var allArcs = shipManager.systems.getMultipleArcs(ship, weapon);
 
             for (const arcs of allArcs) {
@@ -547,6 +563,7 @@ window.ShipIcon = function () {
 
         } else { //Normal weapons with circular weapon arcs
             var dis = weapon.rangePenalty === 0 ? hexDistance * weapon.range : 50 / weapon.rangePenalty * hexDistance;
+            if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             var arcs = shipManager.systems.getArcs(ship, weapon);
             var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
             var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
@@ -715,7 +732,7 @@ window.ShipIcon = function () {
         var hexDistance = window.coordinateConverter.getHexDistance();
         var dis = 20.6 * hexDistance; //Need the extra 0.6 just to cover the 20th hex visually - DK
 
-        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255) : new THREE.Color(255 / 255, 157 / 255, 0 / 255);
+        var color = gamedata.isMyShip(this.ship) ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() : new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
 
         // Create a hexagon shape
         var hexShape = new THREE.Shape();
@@ -786,9 +803,10 @@ window.ShipIcon = function () {
         var angleEnd = mathlib.degreeToRadian(-(systemArcs.start + offset)) + shooterRotation;
 
         var isSmallArc = false;
+        var is360Arc = Math.abs(systemArcs.start - systemArcs.end) === 360 || systemArcs.start === systemArcs.end;
 
         // If start != end, we clips. If start == end, it's a 360 circle (no clips).
-        if (systemArcs.start !== systemArcs.end) {
+        if (!is360Arc) {
             // Calculate the angular span
             var span = angleEnd - angleStart;
             while (span < 0) span += TWO_PI;
@@ -807,7 +825,7 @@ window.ShipIcon = function () {
         var normal2 = new THREE.Vector3(Math.cos(angleEnd - Math.PI / 2), Math.sin(angleEnd - Math.PI / 2), 0);
         plane2.setFromNormalAndCoplanarPoint(normal2, shooterWorldPos);
         if (color == null) {
-            color = new THREE.Color(0.1, 0.5, 0.1)
+            color = new THREE.Color(0.1, 0.5, 0.1).convertSRGBToLinear()
         }
 
         if (opacity == null) {
@@ -819,7 +837,7 @@ window.ShipIcon = function () {
             opacity: opacity,
             transparent: true,
             side: THREE.DoubleSide,
-            clippingPlanes: systemArcs.start !== systemArcs.end ? [plane1, plane2] : [],
+            clippingPlanes: !is360Arc ? [plane1, plane2] : [],
             clipIntersection: !isSmallArc
         });
 
