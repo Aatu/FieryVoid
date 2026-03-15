@@ -431,6 +431,8 @@ window.ajaxInterface = {
                 'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
 
+            if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
+
             newShip.systems = Array();
 
             if (ship.userid === gamedata.thisplayer) {
@@ -685,6 +687,9 @@ window.ajaxInterface = {
                 'pointCostEnh': Math.round(ship.pointCostEnh),
                 'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
+
+            if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
+
             newShip.movement = Array();
             newShip.EW = Array();
             newShip.systems = Array();

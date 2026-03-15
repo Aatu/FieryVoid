@@ -48,6 +48,7 @@ class BaseShip {
 	public $mine = false;
     public $SixSidedShip = false;
 	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
+    public $bulkBuy = 1; //Variable to track mass purchases in Fleet Selection.
 
 	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
 	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
