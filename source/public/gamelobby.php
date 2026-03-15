@@ -511,7 +511,7 @@ $optionsUsed = '';
     }
 
     if ($allowMines == true) {
-        $optionsUsed .= ', Allow Mines';
+        $optionsUsed .= ', Mines Allowed';
     }
 
     if ($asteroids == true) { // Asteroid terrain rules in play
