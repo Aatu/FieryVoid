@@ -26,6 +26,7 @@ class HyachDovoch extends FighterFlight
 		$this->notes = 'Contains a Dovoch fighter with Interdictor';       
 
 		$this->iniativebonus = 18 *5;
+		$this->notes .= "<br>You need to have at least two fighters to generate one with an interdictor.";
 		
 		// Ensure static generation captures the Dovoch at index 1
 		if (defined('IN_STATIC_GENERATION')) {
