@@ -26,6 +26,7 @@ class HyachDovoch extends FighterFlight
 		$this->notes = 'Contains a Dovoch fighter with Interdictor';       
 
 		$this->iniativebonus = 18 *5;
+		$this->flightSize = 6;
 		$this->populate();
 	}
 
@@ -43,10 +44,12 @@ class HyachDovoch extends FighterFlight
 			$fighter->imagePath = "img/ships/HyachDartha.png";
 			$fighter->iconPath = "img/ships/HyachDartha_Large.png";
 
-			if ($i == 1) {
-				$frontGun2 = new FtrInterdictor(330, 30);
-				$fighter->addFrontSystem($frontGun2);
-//			$fighter->displayName = "Dovoch";	//FV appears to take one sample fighter name and apply to all, so this didn't work unfortunately.			
+            $actualIndex = $current + $i;
+
+			if ($actualIndex == 1) {
+                $frontGun2 = new FtrInterdictor(330, 30);
+                $fighter->addFrontSystem($frontGun2);
+                $fighter->displayName = "Dovoch"; // Should work now because the frontend SystemFactory has been fixed to load individual fighter data!
 			} else {
 				$frontGun = new LtBlastLaser(330, 30);
 				$fighter->addFrontSystem($frontGun);
