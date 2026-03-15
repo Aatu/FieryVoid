@@ -3629,13 +3629,13 @@ window.FlightIcon = function () {
 
 window.DeploymentIcon = function () {
 
-    function DeploymentIcon(position, size, type, scene, avail) {
+    function DeploymentIcon(position, size, type, scene, avail, holes) {
         this.z = -2;
         this.mesh = null;
         this.size = size;
         this.color = getColorByType(type);
         this.opacity = 0.5;        
-        if(type == "terrain"){
+        if (type == "terrain" || type == "mine") {
             this.opacity = 0.2;
         }
 
@@ -3646,11 +3646,54 @@ window.DeploymentIcon = function () {
 
         var lineWidth = 10;
 
-        var borders = new window.BoxSprite(size, lineWidth, this.z, this.color, this.opacity);
-        this.mesh.add(borders.mesh);
+        if (holes && holes.length > 0) {
+            // Use Stencil Buffer to flawlessly cut holes in the mesh (ignores Earcut topology limits)
+            var stencilGroup = new THREE.Group();
+            this.mesh.add(stencilGroup);
 
-        var plain = new window.PlainSprite({ width: size.width + lineWidth, height: size.height + lineWidth }, this.z, this.color, this.opacity * 0.5, avail);
-        this.mesh.add(plain.mesh);
+            holes.forEach(function(hole) {
+                var hw = hole.size.width;
+                var hh = hole.size.height;
+                var hx = hole.position.x - position.x;
+                var hy = hole.position.y - position.y;
+                
+                // 1. Stencil write mask
+                var holeGeom = new THREE.PlaneGeometry(hw, hh);
+                var holeMat = new THREE.MeshBasicMaterial({
+                    colorWrite: false,
+                    depthWrite: false,
+                    stencilWrite: true,
+                    stencilRef: 1,
+                    stencilFunc: THREE.AlwaysStencilFunc,
+                    stencilZPass: THREE.ReplaceStencilOp
+                });
+                var holeMesh = new THREE.Mesh(holeGeom, holeMat);
+                holeMesh.position.set(hx, hy, 0);
+                holeMesh.renderOrder = -1; // Render hole masks before the map
+                stencilGroup.add(holeMesh);
+            }.bind(this));
+
+            // 3. Draw the main map, but only where stencil == 0 (outside the holes)
+            var plainGeom = new THREE.PlaneGeometry(size.width + lineWidth, size.height + lineWidth);
+            var plainMat = new THREE.MeshBasicMaterial({ 
+                color: this.color, 
+                transparent: true, 
+                opacity: this.opacity * 0.5,
+                stencilWrite: true,
+                stencilRef: 0,
+                stencilFunc: THREE.EqualStencilFunc
+            });
+            var plainMesh = new THREE.Mesh(plainGeom, plainMat);
+            plainMesh.position.z = this.z;
+            plainMesh.renderOrder = 0;
+            this.mesh.add(plainMesh);
+        } else {
+            var borders = new window.BoxSprite(size, lineWidth, this.z, this.color, this.opacity);
+            this.mesh.add(borders.mesh);
+
+            var plain = new window.PlainSprite({ width: size.width + lineWidth, height: size.height + lineWidth }, this.z, this.color, this.opacity * 0.5, avail);
+            this.mesh.add(plain.mesh);
+        }
 
         scene.add(this.mesh);
         this.hide();
@@ -3671,6 +3714,8 @@ window.DeploymentIcon = function () {
             return new THREE.Color(100 / 255, 170 / 255, 250 / 255).convertSRGBToLinear();
         } else if (type == "terrain") {
             return new THREE.Color(255 / 255, 255 / 255, 255 / 255).convertSRGBToLinear();
+        } else if (type == "mine") {
+            return new THREE.Color(255 / 255, 165 / 255, 0).convertSRGBToLinear(); // Orange
         } else {
             return new THREE.Color(250 / 255, 100 / 255, 100 / 255).convertSRGBToLinear();
         }
@@ -11083,7 +11128,7 @@ window.DeploymentPhaseStrategy = function () {
         if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
             if (this.selectedShip) this.deselectShip(this.selectedShip);
             this.setPhaseHeader("PRE-TURN ORDERS");
-            this.replayUI = new ReplayUI().activate();            
+            this.replayUI = new ReplayUI().activate();
             gamedata.showCommitButton();
             /*//Can auto-click it if we want.
 
@@ -11103,6 +11148,8 @@ window.DeploymentPhaseStrategy = function () {
             icon.ownSprite.hide();
             icon.enemySprite.hide();
             icon.allySprite.hide();
+            icon.terrainSprite.hide();
+            if (icon.mineSprite) icon.mineSprite.hide();
         });
         //You can refresh screen if player has no ships, but not sure it's really necessary.        
         //if(!shipManager.playerHasDeployedShips(gamedata.thisplayer)) window.location.reload(); 
@@ -11147,7 +11194,7 @@ window.DeploymentPhaseStrategy = function () {
             mathlib.clearLosSprite();
         }
 
-        if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn) 
+        if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn)
             || (shipManager.getTurnDeployed(ship) < gamedata.turn) && ship.canPreOrder)) { //Own ship and deploys this turn, just select it. Means that late-deployers can't deploy on ships with canPreOrder (unless they click very edge of hex), but that's rare.
             this.selectShip(ship, payload);
         } else { //Neither of the above is true, allow to deploy.  Even on hexes occupied by ships that deployed earlier in game.
@@ -11203,6 +11250,9 @@ window.DeploymentPhaseStrategy = function () {
         var icon = getSlotById(ship.slot, deploymentSprites);
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             icon.terrainSprite.show();
+        } else if (ship.mine) {
+            // Mines can be selected from any slot, display visual boundary of map
+            icon.mineSprite.show();
         } else if (gamedata.isMyShip(ship)) {
             icon.ownSprite.show();
         } else {
@@ -11216,6 +11266,7 @@ window.DeploymentPhaseStrategy = function () {
         icon.enemySprite.hide();
         icon.allySprite.hide();
         icon.terrainSprite.hide();
+        if (icon.mineSprite) icon.mineSprite.hide();
     }
 
     function getSlotById(slotId, deploymentSprites) {
@@ -11225,6 +11276,29 @@ window.DeploymentPhaseStrategy = function () {
     }
 
     function createSlotSprites(gamedata, scene) {
+        var myTeam = gamedata.getPlayerTeam();
+        var enemyHoles = [];
+
+        // 10 hex buffer required around enemy deployment zones
+        var hexWidth = window.HexagonMath.getHexWidth() - 2;
+        var hexHeight = window.HexagonMath.getHexRowHeight() - 2;
+        var bufferX = hexWidth * 10;
+        var bufferY = hexHeight * 10;
+
+        Object.keys(gamedata.slots).forEach(function (key) {
+            var slot = gamedata.slots[key];
+            if (slot.team != myTeam) {
+                var deploymentData = getDeploymentData(slot);
+                enemyHoles.push({
+                    position: deploymentData.position,
+                    size: {
+                        width: deploymentData.size.width + (bufferX * 2),
+                        height: deploymentData.size.height + (bufferY * 2)
+                    }
+                });
+            }
+        });
+
         return Object.keys(gamedata.slots).map(function (key) {
             var slot = gamedata.slots[key];
 
@@ -11238,6 +11312,10 @@ window.DeploymentPhaseStrategy = function () {
 
             var terrainSprite = new DeploymentIcon(mapData.position, mapData.size, 'terrain', scene, 1);
 
+            // Give mines 1 extra hex of padding so they can deploy on the extreme board edges
+            var mineMapData = getMapData(true);
+            var mineSprite = new DeploymentIcon(mineMapData.position, mineMapData.size, 'mine', scene, 1, enemyHoles);
+
             return {
                 slotId: key,
                 team: slot.team,
@@ -11246,8 +11324,10 @@ window.DeploymentPhaseStrategy = function () {
                 allySprite: allySprite,
                 enemySprite: enemySprite,
                 terrainSprite: terrainSprite,
+                mineSprite: mineSprite,
                 playerid: deploymentData.playerid,
-                available: deploymentData.available
+                available: deploymentData.available,
+                deploymentData: deploymentData // Added to check bounds later 
             };
         });
     }
@@ -11271,7 +11351,7 @@ window.DeploymentPhaseStrategy = function () {
     }
 
     function validateTerrainDeployment(hex) {
-        var mapData = getMapData();
+        var mapData = getMapData(false);
         var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
 
         var offsetPosition = {
@@ -11282,7 +11362,56 @@ window.DeploymentPhaseStrategy = function () {
         return Math.abs(offsetPosition.x) < Math.floor(mapData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(mapData.size.height / 2);
     }
 
-    function getMapData() {
+    function validateMineDeployment(hex, ship, deploymentSprites) {
+        // Mines use the +1 hex padded bounds for edge deployment
+        var mapData = getMapData(true);
+        var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
+
+        var offsetPosition = {
+            x: mapData.position.x - hexPositionInGame.x,
+            y: mapData.position.y - hexPositionInGame.y
+        };
+
+        if (!(Math.abs(offsetPosition.x) < Math.floor(mapData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(mapData.size.height / 2))) {
+            return false;
+        }
+
+        var myTeam = gamedata.getPlayerTeam();
+        var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
+
+        // 10 hex buffer required around enemy deployment zones
+        var hexWidth = window.HexagonMath.getHexWidth();
+        var hexHeight = window.HexagonMath.getHexRowHeight();
+
+        var bufferX = hexWidth * 10;
+        var bufferY = hexHeight * 10;
+
+        for (var i = 0; i < deploymentSprites.length; i++) {
+            var icon = deploymentSprites[i];
+
+            // Only consider enemy areas
+            if (icon.team == myTeam) continue;
+
+            var depData = icon.deploymentData;
+
+            var offsetPosition = {
+                x: depData.position.x - hexPositionInGame.x,
+                y: depData.position.y - hexPositionInGame.y
+            };
+
+            // Expanded bounding box with the 10-hex buffer
+            var isWithinX = Math.abs(offsetPosition.x) <= Math.floor(depData.size.width / 2) + bufferX;
+            var isWithinY = Math.abs(offsetPosition.y) <= Math.floor(depData.size.height / 2) + bufferY;
+
+            if (isWithinX && isWithinY) {
+                return false; // Found inside a restricted enemy zone
+            }
+        }
+
+        return true;
+    }
+
+    function getMapData(padding) {
 
         var mapHeight = 0;
         var mapWidth = 0;
@@ -11295,6 +11424,11 @@ window.DeploymentPhaseStrategy = function () {
 
         if (mapHeight <= 0) mapHeight = 48 * window.Config.HEX_SIZE * 1.5;
         if (mapWidth <= 0) mapWidth = 72 * window.Config.HEX_SIZE * 1.73;
+
+        if (padding) {
+            mapHeight += window.HexagonMath.getHexRowHeight();
+            mapWidth += window.HexagonMath.getHexWidth();
+        }
 
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;
@@ -11354,6 +11488,8 @@ window.DeploymentPhaseStrategy = function () {
         }
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {//return true;
             return validateTerrainDeployment(hex);
+        } else if (ship.mine) {
+            return validateMineDeployment(hex, ship, deploymentSprites);
         } else {
             var icon = getSlotById(ship.slot, deploymentSprites);
             return icon.isValidDeploymentPosition(hex);
