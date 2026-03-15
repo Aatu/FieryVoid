@@ -244,6 +244,9 @@ class Enhancements{
 			if ($system instanceof BallisticMineLauncher || $system instanceof AbbaiMineLauncher){
 		  	$enhPrice += 4;
 		    }
+			if($system instanceof CaptorMine || $system instanceof ProximityMine || $system instanceof MineControllerDEW){
+				$enhPrice += ceil($ship->pointCost * 0.1); //10% cost.
+			}
 		  }  
 		  $enhPriceStep = 0; //flat rate
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
