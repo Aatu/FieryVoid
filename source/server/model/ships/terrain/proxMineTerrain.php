@@ -10,7 +10,7 @@ class proxMineTerrain extends Mine{
         $this->imagePath = "img/ships/korlyan_mine.png";
         $this->shipClass = "Proximity Mine";
 		$this->occurence = "common";
-		$this->variantOf = 'NONE';
+		//$this->variantOf = 'NONE';
         $this->isd = 2200;
         
         $this->forwardDefense = 12;
