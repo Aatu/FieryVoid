@@ -182,11 +182,11 @@ window.DeploymentPhaseStrategy = function () {
         var myTeam = gamedata.getPlayerTeam();
         var enemyHoles = [];
 
-        // 10 hex buffer required around enemy deployment zones
-        var hexWidth = window.HexagonMath.getHexWidth() - 2;
-        var hexHeight = window.HexagonMath.getHexRowHeight() - 2;
-        var bufferX = hexWidth * 10;
-        var bufferY = hexHeight * 10;
+        // 10 hex buffer required around enemy deployment zones (reduced by 1/5th hex for edge slack)
+        var hexWidth = window.HexagonMath.getHexWidth();
+        var hexHeight = window.HexagonMath.getHexRowHeight();
+        var bufferX = hexWidth * 9.5;
+        var bufferY = hexHeight * 9.5;
 
         Object.keys(gamedata.slots).forEach(function (key) {
             var slot = gamedata.slots[key];
@@ -282,12 +282,12 @@ window.DeploymentPhaseStrategy = function () {
         var myTeam = gamedata.getPlayerTeam();
         var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
 
-        // 10 hex buffer required around enemy deployment zones
+        // 10 hex buffer required around enemy deployment zones (reduced by 1/5th hex for edge slack)
         var hexWidth = window.HexagonMath.getHexWidth();
         var hexHeight = window.HexagonMath.getHexRowHeight();
 
-        var bufferX = hexWidth * 10;
-        var bufferY = hexHeight * 10;
+        var bufferX = hexWidth * 9.8;
+        var bufferY = hexHeight * 9.8;
 
         for (var i = 0; i < deploymentSprites.length; i++) {
             var icon = deploymentSprites[i];
