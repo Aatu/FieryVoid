@@ -8,7 +8,6 @@ window.SystemFactory = (function () {
                 return window.SystemFactory.createSystemsFromJsonFighter(systemsJson, ship, fighter, staticSystemsSource);
             }
             var systems = Array();
-            var index = 0;
             for (var i in systemsJson) {
 
                 var jsonSystem = systemsJson[i];
@@ -17,28 +16,18 @@ window.SystemFactory = (function () {
                 if (staticSystemsSource) {
                     if (ship.flight) {
                         var keys = Object.keys(staticSystemsSource);
-                        if (keys.length > index) {
-                            staticSystem = staticSystemsSource[keys[index]];
-                        } else if (keys.length > 0) {
-                            staticSystem = staticSystemsSource[keys[0]];
-                        }
+                        if (keys.length > 0) staticSystem = staticSystemsSource[keys[0]];
                     } else if (staticSystemsSource[jsonSystem.id]) {
                         staticSystem = staticSystemsSource[jsonSystem.id];
                     }
                 } else if (ship.systems) {
-                    if (ship.flight) {
-                        var shipKeys = Object.keys(ship.systems);
-                        staticSystem = shipKeys.length > index ? ship.systems[shipKeys[index]] : getFirstSystem(ship);
-                    } else {
-                        staticSystem = ship.systems[jsonSystem.id];
-                    }
+                    staticSystem = ship.flight ? getFirstSystem(ship) : ship.systems[jsonSystem.id];
                 }
 
                 var system = SystemFactory.createSystemFromJson(jsonSystem, staticSystem, ship);
 
                 //if(system.initializeOnLoad) system.initializationUpdate(); //Not used by any systems yet, but available if you wanted to runs system.initialisationUpdate() immediately on page load.                 
                 systems[system.id] = system;
-                index++;
             }
 
             return systems;
