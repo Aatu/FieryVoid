@@ -143,7 +143,8 @@ class MineSettingsList extends Component {
         console.log("Propagating Mine settings for:", className);
 
         system.setCurrShipType(className);
-        const allocated = (system.allocatedRanges[className] === null) ? system.range : system.allocatedRanges[className];
+        const systemMaxRange = system.range || system.rangeSetting;
+        const allocated = (system.allocatedRanges[className] === null) ? systemMaxRange : system.allocatedRanges[className];
 
         var allOwnMines = [];
         for (var i in gamedata.ships) {
@@ -167,10 +168,12 @@ class MineSettingsList extends Component {
 
             let safety = 0;
             // Get target value from our reference system
-            const targetValue = (system.allocatedRanges[className] === null) ? system.range : system.allocatedRanges[className];
+            const targetValue = (system.allocatedRanges[className] === null) ? systemMaxRange : system.allocatedRanges[className];
+
+            const getCtrlRange = (c) => c.range || c.rangeSetting;
 
             while (
-                ((ctrl.allocatedRanges[className] === null ? ctrl.range : ctrl.allocatedRanges[className]) < targetValue)
+                ((ctrl.allocatedRanges[className] === null ? getCtrlRange(ctrl) : ctrl.allocatedRanges[className]) < targetValue)
                 && ctrl.canIncrease()
                 && safety < 100
             ) {
@@ -179,7 +182,7 @@ class MineSettingsList extends Component {
             }
 
             while (
-                ((ctrl.allocatedRanges[className] === null ? ctrl.range : ctrl.allocatedRanges[className]) > targetValue)
+                ((ctrl.allocatedRanges[className] === null ? getCtrlRange(ctrl) : ctrl.allocatedRanges[className]) > targetValue)
                 && ctrl.canDecrease()
                 && safety < 100
             ) {

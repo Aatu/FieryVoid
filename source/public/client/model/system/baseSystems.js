@@ -2329,10 +2329,10 @@ MineControllerDEW.prototype.constructor = MineControllerDEW;
 
 MineControllerDEW.prototype.initializationUpdate = function () {
 	var ship = this.ship;
-	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	/*var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
 	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
 		this.range = 0;
-	}
+	}*/
 
 	this.refreshData();
 	return this
@@ -2363,9 +2363,9 @@ MineControllerDEW.prototype.canIncrease = function () { //check if can increase 
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
 
 	//how many are allocated?
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
 	//how many are allowed?
-	var allowed = this.range;
+	var allowed = this.rangeSetting;
 	if (allocated >= allowed) return false; //full allowance for this FC type filled	
 
 	return true;
@@ -2379,7 +2379,7 @@ MineControllerDEW.prototype.canDecrease = function () { //can decrease if someth
 	this.getCurrClass(); //Should be getCurrClass or similar? The method in aoe.js is getCurrClass
 	if (this.currClass == '') return false;
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
 	if (allocated > 0) return true;
 	return false;
 };
@@ -2389,9 +2389,9 @@ MineControllerDEW.prototype.doIncrease = function () { //increase BFCP usage
 
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
 
-	if (allocated < this.range) { //else use regular pool 
+	if (allocated < this.rangeSetting) { //else use regular pool 
 		this.allocatedRanges[this.currClass] = allocated + 1;
 
 	}
@@ -2403,7 +2403,7 @@ MineControllerDEW.prototype.doDecrease = function () { //decrease BFCP usage
 	this.getCurrClass();
 	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
 	//Decrease could be in current turn, or from previous turn allocation.
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.range : this.allocatedRanges[this.currClass];
+	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
 
 	if (allocated > 0) {
 		this.allocatedRanges[this.currClass] = allocated - 1;
@@ -2419,37 +2419,37 @@ MineControllerDEW.prototype.refreshData = function () { //refresh description to
 	var range = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
-	if(gamedata.gamephase !== -2){
-		if(!gamedata.isMyOrTeamOneShip(ship)){
+	if (gamedata.gamephase !== -2) {
+		if (!gamedata.isMyOrTeamOneShip(ship)) {
 			hiddenDisplay = '?';
 		}
-	} 
+	}
 
-			for(var i in ship.systems){
-				var weapon = ship.systems[i];
-				if(weapon instanceof Weapon && weapon.name !== "RammingAttack"){
-					weapon.data["Fire control (fighter/med/cap)"] = weapon.translateFCtoD100txt(weapon.fireControl);
-					weapon.range = this.rangeSetting;	
-					//weapon.data["Range"] = this.rangeSetting;					
-				}				
-			}	
+	for (var i in ship.systems) {
+		var weapon = ship.systems[i];
+		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
+			weapon.data["Fire control (fighter/med/cap)"] = weapon.translateFCtoD100txt(weapon.fireControl);
+			weapon.range = this.rangeSetting;
+			//weapon.data["Range"] = this.rangeSetting;					
+		}
+	}
 
-    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-        //hiddenDisplay = "?";
-		this.data["Max Range"] = hiddenDisplay;		
-    }else{
-		this.data["Max Range"] = this.rangeSetting;	
-		
-		
+	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+		//hiddenDisplay = "?";
+		this.data["Max Range"] = hiddenDisplay;
+	} else {
+		this.data["Max Range"] = this.rangeSetting;
+
+
 
 	}
 
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
 		range = this.allocatedRanges[currType];
-		if(range == null) range = this.rangeSetting;
-		if(hiddenDisplay == '?') range = hiddenDisplay;
+		if (range == null) range = this.rangeSetting;
+		if (hiddenDisplay == '?') range = hiddenDisplay;
 		//entry should exist, just change it to show current values
 		entryName = ' - ' + currType;
 		this.data[entryName + " range"] = range;
@@ -2494,7 +2494,7 @@ MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare 
 
 		for (var i = 0; i < shipCategories.length; i++) {
 			var currType = shipCategories[i];
-			if (rangeValues[i] == null) rangeValues[i] = this.range; //Set to max range if nothing set by player.
+			if (rangeValues[i] == null) rangeValues[i] = this.rangeSetting; //Set to max range if nothing set by player.
 
 			// Initialize the array for the current spec
 			this.individualNotesTransfer[currType] = rangeValues[i];
