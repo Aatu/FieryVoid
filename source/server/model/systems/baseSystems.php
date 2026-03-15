@@ -6796,6 +6796,7 @@ class MineControllerDEW extends ShipSystem{
     public $name = "MineControllerDEW";
     public $displayName = "Mine Controller";
 	public $iconPath = "Computer.png";
+    public $outputType = "settings";	
     //public $animation = "torpedo";
     //public $animationColor = array(141, 240, 255);
     //public $animationExplosionScale = 0.25;        
