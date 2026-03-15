@@ -1783,13 +1783,10 @@ window.gamedata = {
 			var isCustomShip;
 			var isd;
 
-
-			//this.orderShipListOnName(shipList); //alphabetical sort
 			this.orderShipListOnPV(shipList); //perhaps more appropriate here, as alphabetical order will be shot to hell anyway
 
 			gamedata.setShipsFromFaction(faction, shipList);
 
-			//show separately: immobile objects (bases/OSATs), every ship size, fighters
 			//show separately: immobile objects (bases/OSATs), every ship size, fighters
 			var sizeClassHeaders = ['Fighters', 'Medium Ships', 'Heavy Ships', 'Capital Ships', 'Immobile Structures'];
 			for (var desiredSize = 4; desiredSize >= 0; desiredSize--) {
@@ -1801,8 +1798,10 @@ window.gamedata = {
 				// Convert jquery object to raw DOM node for fragment
 				fragment.appendChild(h[0]);
 
-				for (var index = 0; index < shipList.length; index++) {
+				for (var index = 0; index < shipList.length; index++) {						
 					ship = shipList[index];
+					if (gamedata.rules && !gamedata.rules.allowMines && ship.mine) continue; //Skip mines if not allowed in scenario
+
 					isCustomShip = isCustomFaction || ship.unofficial === true;
 					let customShipHighlight = (!isCustomFaction && ship.unofficial === true) ? ' highlight-custom-ship' : '';
 					isd = ship.isd;
@@ -1835,6 +1834,7 @@ window.gamedata = {
 					for (var indexV = 0; indexV < shipList.length; indexV++) {
 						shipV = shipList[indexV];
 						if (shipV.variantOf != ship.shipClass) continue;//that's not a variant of current base ship
+						
 						isCustomShip = isCustomFaction || shipV.unofficial === true;
 						let customShipHighlight = (!isCustomFaction && shipV.unofficial === true) ? ' highlight-custom-ship' : '';
 						shipDisplayName = this.prepareClassName(shipV);

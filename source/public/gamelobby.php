@@ -424,6 +424,7 @@ $optionsUsed = '';
     $simMv = false;
     $desperate = false;
     $friendlyFire = false;    
+    $allowMines = false;
     $asteroids = false;
     $moons = false;
     $initiativeCategories = null;
@@ -451,6 +452,10 @@ $optionsUsed = '';
         if (isset($gamelobbydata->rules->friendlyFire)) {
             $friendlyFire = true;  
         }        
+
+        if (isset($gamelobbydata->rules->allowMines)) {
+            $allowMines = true;  
+        }    
 
         if (isset($gamelobbydata->rules->asteroids)) {
             $asteroids = true;
@@ -505,6 +510,9 @@ $optionsUsed = '';
         $optionsUsed .= '';
     }
 
+    if ($allowMines == true) {
+        $optionsUsed .= ', Allow Mines';
+    }
 
     if ($asteroids == true) { // Asteroid terrain rules in play
         $optionsUsed .= ', Asteroids ('. $asteroidsNo . ')';
