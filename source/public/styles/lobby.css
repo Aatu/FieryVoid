@@ -263,7 +263,8 @@
     cursor: pointer;
     color: #578bec;
     font-size: 13px;
-    margin-left: 10px;
+    margin-left: 3px;
+    margin-right: 3px;    
     text-decoration: none;
 }
 
