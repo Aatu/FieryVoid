@@ -11174,7 +11174,14 @@ window.DeploymentPhaseStrategy = function () {
         }
 
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
-            if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
+            var shipsInHex = shipManager.getShipsInSameHex(this.selectedShip, hex);
+            var isBlocked = false;
+            
+            if (!this.selectedShip.mine) {
+                isBlocked = shipsInHex.some(function(s) { return !s.mine; });
+            }
+
+            if (!isBlocked) {
                 shipManager.movement.deploy(this.selectedShip, hex);
                 this.onShipMovementChanged({ ship: this.selectedShip });
                 this.drawMovementUI(this.selectedShip);
@@ -11192,6 +11199,35 @@ window.DeploymentPhaseStrategy = function () {
         if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;
             mathlib.clearLosSprite();
+        }
+
+        // If we have a selected ship actively ready to deploy, and we click a valid DIFFERENT ship that is already placed on the map
+        if (this.selectedShip && this.selectedShip.id !== ship.id) {
+            var isPlacedOnMap = false;
+            if (ship.movement && ship.movement.length > 0) {
+                isPlacedOnMap = ship.movement[0].commit === true; 
+            }
+            if (isPlacedOnMap && (this.selectedShip.mine || ship.mine)) {
+                // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
+                // a valid, legal deployment drop for our CURRENTLY selected piece.
+                // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.
+                if (validateDeploymentPosition(this.selectedShip, payload.hex, this.deploymentSprites)) {
+                    // Finally, don't show the deploy pop-up if the selected unit is already occupying this exact hex!
+                    // getShipPosition can return raw {x,y} from the movement array, so we guarantee it's formatted as {q,r} hex coordinates
+                    var rawPos = shipManager.getShipPosition(this.selectedShip);
+                    var selectedPos = new hexagon.Offset(rawPos);
+                    
+                    if (!selectedPos || selectedPos.q !== payload.hex.q || selectedPos.r !== payload.hex.r) {
+                        this.showSelectFromShips([ship], payload);
+                        return;
+                    } else {
+                        // The selected ship is indeed legally placed, but it's ALREADY in the hex we clicked on.
+                        // We shouldn't show a deploy menu or fall through to auto-deploy. We simply swap the selection.
+                        this.selectShip(ship, payload);
+                        return;
+                    }
+                }
+            }
         }
 
         if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn)
@@ -13687,6 +13723,27 @@ window.SelectFromShips = function () {
 
     function create() {
         console.log("CREATE select form ships", this.ships)
+        
+        // --- INJECT CUSTOM "DEPLOY HERE" BUTTON DURING DEPLOYMENT PHASE ---
+        if (gamedata.gamephase == -1 && this.phaseStrategy.selectedShip) {
+            // Guarantee we don't present the deployment option if the unit is ALREADY right here
+            var rawPos = shipManager.getShipPosition(this.phaseStrategy.selectedShip);
+            var parsedSelectedPos = new hexagon.Offset(rawPos);
+            
+            if (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r) {
+                var selectedName = this.phaseStrategy.selectedShip.name;
+                var deployButton = jQuery(
+                    '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
+                ).on('click', function () {
+                    this.phaseStrategy.onHexClicked(this.payload);
+                    this.destroy();
+                }.bind(this));
+                
+                this.element.append(deployButton);
+            }
+        }
+        // ------------------------------------------------------------------
+
         this.ships.forEach(function (ship) {
             var deployedText = "";
             var deployTurn = shipManager.getTurnDeployed(ship);
@@ -13721,6 +13778,13 @@ window.SelectFromShips = function () {
             } else {
                 var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + ship.name + deployedText + ' </div>')
                     .on('click', function () {
+                        // We are actively overriding normal `onShipClicked` handling so that selecting an element from this menu selects it normally.
+                        // However, onShipClicked now inherently blocks selection if we have *another* deployable active!
+                        // So we clear it here first.
+                        if (gamedata.gamephase == -1 && this.phaseStrategy.selectedShip) {
+                            this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
+                        }
+                        
                         this.phaseStrategy.onShipClicked(ship, this.payload);
                         if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
                             this.destroy();

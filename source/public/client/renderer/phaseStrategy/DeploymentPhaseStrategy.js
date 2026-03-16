@@ -77,7 +77,14 @@ window.DeploymentPhaseStrategy = function () {
         }
 
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
-            if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
+            var shipsInHex = shipManager.getShipsInSameHex(this.selectedShip, hex);
+            var isBlocked = false;
+            
+            if (!this.selectedShip.mine) {
+                isBlocked = shipsInHex.some(function(s) { return !s.mine; });
+            }
+
+            if (!isBlocked) {
                 shipManager.movement.deploy(this.selectedShip, hex);
                 this.onShipMovementChanged({ ship: this.selectedShip });
                 this.drawMovementUI(this.selectedShip);
@@ -95,6 +102,35 @@ window.DeploymentPhaseStrategy = function () {
         if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;
             mathlib.clearLosSprite();
+        }
+
+        // If we have a selected ship actively ready to deploy, and we click a valid DIFFERENT ship that is already placed on the map
+        if (this.selectedShip && this.selectedShip.id !== ship.id) {
+            var isPlacedOnMap = false;
+            if (ship.movement && ship.movement.length > 0) {
+                isPlacedOnMap = ship.movement[0].commit === true; 
+            }
+            if (isPlacedOnMap && (this.selectedShip.mine || ship.mine)) {
+                // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
+                // a valid, legal deployment drop for our CURRENTLY selected piece.
+                // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.
+                if (validateDeploymentPosition(this.selectedShip, payload.hex, this.deploymentSprites)) {
+                    // Finally, don't show the deploy pop-up if the selected unit is already occupying this exact hex!
+                    // getShipPosition can return raw {x,y} from the movement array, so we guarantee it's formatted as {q,r} hex coordinates
+                    var rawPos = shipManager.getShipPosition(this.selectedShip);
+                    var selectedPos = new hexagon.Offset(rawPos);
+                    
+                    if (!selectedPos || selectedPos.q !== payload.hex.q || selectedPos.r !== payload.hex.r) {
+                        this.showSelectFromShips([ship], payload);
+                        return;
+                    } else {
+                        // The selected ship is indeed legally placed, but it's ALREADY in the hex we clicked on.
+                        // We shouldn't show a deploy menu or fall through to auto-deploy. We simply swap the selection.
+                        this.selectShip(ship, payload);
+                        return;
+                    }
+                }
+            }
         }
 
         if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn)
