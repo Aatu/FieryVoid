@@ -27,7 +27,8 @@ class PolarenColonyJumpship extends BaseShip{
 		$this->iniativebonus = -4;
          
         $this->addPrimarySystem(new Reactor(4, 35, 0, 0));
-		$this->addPrimarySystem(new FlagBridge(4, 28, 0, 1, 'Polaren Command Bonus', 60,  true, true, true, false, array("Nexus Polaren Confederacy (early)", "Nexus Polaren Confederacy (early)")));
+        $this->addPrimarySystem(new CnC(4, 28, 0, 0));
+//		$this->addPrimarySystem(new FlagBridge(4, 28, 0, 1, 'Polaren Command Bonus', 60,  true, true, true, false, array("Nexus Polaren Confederacy (early)", "Nexus Polaren Confederacy (early)")));
         $this->addPrimarySystem(new ELINTScanner(3, 25, 7, 8));
 		$this->addPrimarySystem(new Hangar(2, 10));
 		$this->addPrimarySystem(New JumpEngine(2, 30, 9, 50));
