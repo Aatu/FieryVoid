@@ -13,7 +13,7 @@ class PolarenAkrynev extends BaseShipNoAft{
 			$this->variantOf = "Remava Medium Cruiser";
 			$this->occurence = "uncommon";
 		$this->unofficial = true;
-		$this->isd = 2108;
+		$this->isd = 2116;
          
         $this->fighters = array("assault shuttles"=>2); //2 breaching pods    
 		

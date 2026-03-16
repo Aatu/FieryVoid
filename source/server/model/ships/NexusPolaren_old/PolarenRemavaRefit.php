@@ -13,7 +13,7 @@ class PolarenRemavaRefit extends BaseShipNoAft{
 			$this->variantOf = "Remava Medium Cruiser";
 			$this->occurence = "common";
 		$this->unofficial = true;
-		$this->isd = 2108;
+		$this->isd = 2119;
          
         $this->fighters = array("assault shuttles"=>2); //2 breaching pods    
 		

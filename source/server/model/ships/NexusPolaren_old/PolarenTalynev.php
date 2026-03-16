@@ -11,7 +11,7 @@ class PolarenTalynev extends LCV{
 			$this->canvasSize = 70; //img has 200px per side
         $this->shipClass = "Talynev Cutter";
 		$this->unofficial = true;
-			$this->isd = 1800;
+			$this->isd = 1714;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';

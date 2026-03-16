@@ -9,7 +9,7 @@ class PolarenGratherin extends HeavyCombatVesselLeftRight{
         $this->phpclass = "PolarenGratherin";
         $this->imagePath = "img/ships/Nexus/polarenGratherin.png";
         $this->shipClass = "Gratherin Destroyer";
-	    $this->isd = 2198;
+	    $this->isd = 1770;
         $this->canvasSize = 125;
 
         $this->fighters = array("assault shuttles"=>1); //1 breaching pod    

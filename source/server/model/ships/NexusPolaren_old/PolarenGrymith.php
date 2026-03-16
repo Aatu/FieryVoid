@@ -11,7 +11,7 @@ class PolarenGrymith extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Grymith Light Scout";
 			$this->variantOf = "Gratherin Destroyer";
 			$this->occurence = "rare";
-	    $this->isd = 2198;
+	    $this->isd = 1770;
         $this->canvasSize = 125;
 
         $this->forwardDefense = 15;

@@ -12,7 +12,7 @@ class PolarenFyron extends MediumShip{
 		$this->unofficial = true;
         $this->canvasSize = 110;
         $this->agile = true;
-	    $this->isd = 2120;
+	    $this->isd = 2119;
 
 	    $this->notes = 'Atmospheric capable';
         

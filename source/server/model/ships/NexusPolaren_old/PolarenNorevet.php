@@ -11,7 +11,7 @@ class PolarenNorevet extends MediumShip{
         $this->shipClass = "Norevet Heavy Frigate";
 		$this->unofficial = true;
         $this->canvasSize = 110;
-	    $this->isd = 2120;
+	    $this->isd = 1721;
 
 	    $this->notes = 'Atmospheric capable';
         

@@ -13,7 +13,7 @@ class PolarenGrantir extends MediumShip{
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 110;
-	    $this->isd = 2120;
+	    $this->isd = 1717;
 
         $this->fighters = array("assault shuttles"=>1); //1 breaching pod    
 	    $this->notes = 'Atmospheric capable';

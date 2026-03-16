@@ -12,7 +12,7 @@ class PolarenOranet extends BaseShipNoAft{
         $this->shipClass = "Oranet Jump Cruiser";
 		$this->limited = 10;
 		$this->unofficial = true;
-		$this->isd = 2108;
+		$this->isd = 2112;
          
         $this->fighters = array("assault shuttles"=>2); //2 breaching pods    
 		

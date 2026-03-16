@@ -11,7 +11,7 @@ class PolarenWyrith extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Wyrith Tender";
 			$this->variantOf = "Gratherin Destroyer";
 			$this->occurence = "uncommon";
-	    $this->isd = 2198;
+	    $this->isd = 1714;
         $this->canvasSize = 125;
 
         $this->fighters = array("assault shuttles"=>1); //1 breaching pod    

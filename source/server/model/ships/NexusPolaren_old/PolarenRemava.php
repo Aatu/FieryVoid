@@ -11,7 +11,7 @@ class PolarenRemava extends BaseShipNoAft{
 			$this->canvasSize = 165; //img has 200px per side
         $this->shipClass = "Remava Medium Cruiser";
 		$this->unofficial = true;
-		$this->isd = 2108;
+		$this->isd = 1778;
          
         $this->fighters = array("assault shuttles"=>2); //2 breaching pods    
 		

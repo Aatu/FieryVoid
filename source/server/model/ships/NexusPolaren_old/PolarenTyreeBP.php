@@ -10,7 +10,7 @@ class PolarenTyreeBP extends FighterFlight{
         $this->shipClass = "Tyree Breaching Pods";
 		$this->imagePath = "img/ships/Nexus/polarenTyree.png";
 
-		$this->isd = 2105;
+		$this->isd = 1770;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 9;

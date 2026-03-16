@@ -13,7 +13,7 @@ class PolarenArimetAssault extends LCV{
 			$this->variantOf = "Arimet Cutter";
 			$this->occurence = "common";
 		$this->unofficial = true;
-		$this->isd = 1800;
+		$this->isd = 2110;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';

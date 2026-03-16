@@ -14,7 +14,7 @@ class PolarenOranetRefit extends BaseShipNoAft{
 			$this->occurence = "common";
 		$this->limited = 10;
 		$this->unofficial = true;
-		$this->isd = 2108;
+		$this->isd = 2120;
          
         $this->fighters = array("assault shuttles"=>2); //2 breaching pods    
 		

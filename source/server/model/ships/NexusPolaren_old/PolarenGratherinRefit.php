@@ -11,7 +11,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Gratherin Destroyer (refit)";
 			$this->variantOf = "Gratherin Destroyer";
 			$this->occurence = "common";
-	    $this->isd = 2198;
+	    $this->isd = 2119;
         $this->canvasSize = 125;
 
         $this->fighters = array("assault shuttles"=>1); //1 breaching pod    

@@ -13,7 +13,7 @@ class PolarenNorevetRefit extends MediumShip{
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 110;
-	    $this->isd = 2120;
+	    $this->isd = 2118;
 
 	    $this->notes = 'Atmospheric capable';
         

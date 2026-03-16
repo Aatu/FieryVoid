@@ -14,7 +14,7 @@ class PolarenDrinev extends MediumShip{
 		$this->unofficial = true;
         $this->canvasSize = 110;
         $this->agile = true;
-	    $this->isd = 2120;
+	    $this->isd = 1730;
 
 	    $this->notes = 'Atmospheric capable';
         

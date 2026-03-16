@@ -13,7 +13,7 @@ class PolarenTalynevAssault extends LCV{
 			$this->variantOf = "Talynev Cutter";
 			$this->occurence = "common";
 		$this->unofficial = true;
-		$this->isd = 1800;
+		$this->isd = 1716;
 
         $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';

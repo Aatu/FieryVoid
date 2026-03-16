@@ -11,7 +11,7 @@ class PolarenPermion extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Permion Support Destroyer";
 			$this->variantOf = "Gratherin Destroyer";
 			$this->occurence = "uncommon";
-	    $this->isd = 2198;
+	    $this->isd = 2120;
         $this->canvasSize = 125;
 
         $this->forwardDefense = 15;

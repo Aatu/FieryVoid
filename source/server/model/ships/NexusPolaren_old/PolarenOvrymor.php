@@ -11,7 +11,7 @@ class PolarenOvrymor extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Ovrymor Heavy Escort";
 			$this->variantOf = "Gratherin Destroyer";
 			$this->occurence = "uncommon";
-	    $this->isd = 2198;
+	    $this->isd = 2119;
         $this->canvasSize = 125;
 
         $this->forwardDefense = 15;

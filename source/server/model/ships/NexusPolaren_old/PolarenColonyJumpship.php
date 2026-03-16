@@ -12,7 +12,7 @@ class PolarenColonyJumpship extends BaseShip{
         $this->shipClass = "Colony Jumpship";
 		$this->limited = 10;
 		$this->unofficial = true;
-		$this->isd = 2108;
+		$this->isd = 2033;
          
         $this->fighters = array("assault shuttles"=>4); //2 breaching pods    
 		
