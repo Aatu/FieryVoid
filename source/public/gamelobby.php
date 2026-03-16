@@ -272,19 +272,42 @@
                     $(this).toggle(isVisible);
                 });
 
-                // Group headers visibility stays unchanged
+                // Group headers visibility
                 $('.factiongroup-header').each(function () {
                     let header = $(this);
                     let hasVisibleFaction = false;
                     let next = header.next();
-                    while (next.length && !next.hasClass('factiongroup-header')) {
-                        if (next.hasClass('faction') && next.is(':visible')) {
-                            hasVisibleFaction = true;
-                            break;
+
+                    if (next.hasClass('faction-group-container')) {
+                        // Check if any faction inside the container is NOT hidden by the filter
+                        // We avoid :visible because it checks parent visibility (which might be collapsed)
+                        next.find('.faction').each(function() {
+                            if ($(this).css('display') !== 'none') {
+                                hasVisibleFaction = true;
+                                return false; // break
+                            }
+                        });
+                    } else {
+                        while (next.length && !next.hasClass('factiongroup-header')) {
+                            if (next.hasClass('faction') && next.is(':visible')) {
+                                hasVisibleFaction = true;
+                                break;
+                            }
+                            next = next.next();
                         }
-                        next = next.next();
                     }
+                    
                     header.toggle(hasVisibleFaction);
+                    if (next.hasClass('faction-group-container')) {
+                        if (!hasVisibleFaction) {
+                            next.hide();
+                        } else {
+                            // If it has visible factions and it's NOT collapsed, it should be visible
+                            // However, we don't want to force it open if the user collapsed it.
+                            // But usually if it's visible it should be block.
+                            // Let's just rely on the fact that if anything is visible and it's not hidden, it stays as is.
+                        }
+                    }
                 });
             }
 

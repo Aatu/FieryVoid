@@ -1605,7 +1605,24 @@ window.gamedata = {
 			const entries = groups[groupName];
 			if (entries.length === 0) continue;
 
-			const groupHeader = $('<div class="factiongroup-header" data-tier="' + groupName + '">' + groupName + '</div>').appendTo("#store");
+			const startClosed = false; // Factions start open as requested
+			const iconText = startClosed ? '[+]' : '[-]';
+			const groupHeader = $('<div class="factiongroup-header clickable" data-tier="' + groupName + '"><span class="faction-toggle-icon">' + iconText + '</span>' + groupName + '</div>').appendTo("#store");
+
+			const displayStyle = startClosed ? 'display:none;' : 'display:block;';
+			const groupContainer = $('<div class="faction-group-container" style="' + displayStyle + '"></div>').appendTo("#store");
+
+			groupHeader.on("click", function (container) {
+				return function () {
+					container.slideToggle(150);
+					var icon = $(this).find('.faction-toggle-icon');
+					if (icon.text() === '[+]') {
+						icon.text('[-]');
+					} else {
+						icon.text('[+]');
+					}
+				};
+			}(groupContainer));
 
 			entries.sort((a, b) => a.faction.localeCompare(b.faction));
 
@@ -1624,7 +1641,7 @@ window.gamedata = {
 
 				group.find('.factionname').on("click", this.expandFaction);
 
-				$("#store").append(group);
+				groupContainer.append(group);
 			});
 		}
 
@@ -1865,15 +1882,15 @@ window.gamedata = {
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
 				var startClosed = (desiredSize === 4 || desiredSize === 5); // 4 = Immobile Structures, 5 = Mines
-				
+
 				var iconText = startClosed ? '[+]' : '[-]';
-				h = $('<div class="shipsizehdr clickable" data-faction="' + faction + '"><span class="toggleicon" style="display:inline-block; width:20px;">' + iconText + '</span><span class="shiptype">' + sizeClassHeaders[desiredSize] + ':</span></div>');
-				
+				h = $('<div class="shipsizehdr clickable" data-faction="' + faction + '"><span class="toggleicon">' + iconText + '</span><span class="shiptype">' + sizeClassHeaders[desiredSize] + ':</span></div>');
+
 				var displayStyle = startClosed ? 'display:none;' : 'display:block;';
 				var categoryContainer = $('<div class="category-container" style="' + displayStyle + '"></div>');
-				
+
 				h.on("click", function (container) {
-					return function() {
+					return function () {
 						container.slideToggle(150);
 						var icon = $(this).find('.toggleicon');
 						if (icon.text() === '[+]') {
@@ -1883,7 +1900,7 @@ window.gamedata = {
 						}
 					};
 				}(categoryContainer));
-				
+
 				fragment.appendChild(h[0]);
 				fragment.appendChild(categoryContainer[0]);
 

@@ -4,7 +4,7 @@
     position: fixed !important;
 }
 
-.team-header{
+.team-header {
     font-size: 16px;
     margin-top: 5px;
     margin-left: 5px;
@@ -143,7 +143,7 @@
 }
 
 .store span {
-    padding-left: 0px;
+    padding-left: 10px;
 
 }
 
@@ -154,9 +154,30 @@
 .factiongroup-header {
     font-weight: bold;
     font-size: 18px;
-    margin: 12px 5px 5px 5px;
+    margin: 12px 5px 5px 0px;
     color: #6495ED;
     font-family: "Bruno Ace SC", sans-serif;
+}
+
+.factiongroup-header.clickable {
+    cursor: pointer;
+}
+
+.factiongroup-header .faction-toggle-icon {
+    display: inline-block;
+    width: 25px;
+    /* Increased slightly for better spacing */
+    text-align: center;
+    font-family: monospace;
+    /* Mono font ensures [+] and [-] are same width */
+    color: #6495ED;
+    /* Matching header color */
+    font-weight: bold;
+    margin-right: 6px;
+    padding-left: 5px;
+    vertical-align: top;
+    position: relative;
+    top: -1px;
 }
 
 .store .faction {
@@ -180,18 +201,27 @@
 .store .shipsizehdr {
     color: #d0dbec;
     margin-left: 6px;
-    margin-top: 2px;
+    margin-top: 3px;
+    margin-bottom: 3px;
     font-size: 14px;
 }
 
 .store .shipsizehdr .toggleicon {
     display: inline-block;
-    width: 20px;
+    width: 25px;
+    text-align: center;
+    font-family: monospace;
     color: #d0dbec;
-    font-weight: normal;
+    font-weight: bold;
     cursor: pointer;
-    padding-left: 0px;    
-    padding-bottom: 2px;    
+    margin-right: 5px;
+    vertical-align: top;
+    position: relative;
+    top: -1px;
+}
+
+.category-container {
+    margin-left: 10px;
 }
 
 .store .storeship {
@@ -201,7 +231,7 @@
     margin-right: 5px;
     margin-left: 20px;
     font-size: 14px;
-    font-weight: normal;       
+    font-weight: normal;
 }
 
 .store .variant {
@@ -230,6 +260,11 @@
     font-weight: bold;
     display: inline-block;
     min-width: 150px;
+}
+
+.shiptype {
+    padding-left: 2px !important;
+    font-weight: bold;
 }
 
 .boughtShiptype {
@@ -273,9 +308,10 @@
     cursor: pointer;
     color: #578bec;
     font-size: 13px;
-    margin-left: 3px;
-    margin-right: 3px;    
+    margin-left: 1px;
+    margin-right: 1px;
     text-decoration: none;
+    padding-left: 4px;
 }
 
 .ship-actions .clickable:hover {
@@ -344,18 +380,18 @@
     border-radius: 3px;
     transition: background 0.2s;
     margin-top: 2px !important;
-  background: #7a2121;
-  font-size: 0.85em;
-  /* Smaller than Add Team */
-  border: 1px solid #a77272;
-  width: auto;
-  text-align: center;
-  box-sizing: border-box;
-  height: auto;
-  line-height: normal;
-  padding: 2px 8px;
-  display: inline-block;
-  vertical-align: middle;    
+    background: #7a2121;
+    font-size: 0.85em;
+    /* Smaller than Add Team */
+    border: 1px solid #a77272;
+    width: auto;
+    text-align: center;
+    box-sizing: border-box;
+    height: auto;
+    line-height: normal;
+    padding: 2px 8px;
+    display: inline-block;
+    vertical-align: middle;
 }
 
 .value {
@@ -760,7 +796,7 @@
 .lobby-leave-container .lobby-leave-button {
     /* Add custom styles here */
     background: #7a2121;
-    border: 1px solid #a77272;        
+    border: 1px solid #a77272;
     margin-right: 0px;
     margin-top: 3px;
 }
