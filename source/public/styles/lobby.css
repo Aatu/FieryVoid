@@ -143,7 +143,7 @@
 }
 
 .store span {
-    padding-left: 5px;
+    padding-left: 0px;
 
 }
 
@@ -182,6 +182,16 @@
     margin-left: 6px;
     margin-top: 2px;
     font-size: 14px;
+}
+
+.store .shipsizehdr .toggleicon {
+    display: inline-block;
+    width: 20px;
+    color: #d0dbec;
+    font-weight: normal;
+    cursor: pointer;
+    padding-left: 0px;    
+    padding-bottom: 2px;    
 }
 
 .store .storeship {

@@ -1865,9 +1865,29 @@ window.gamedata = {
 				var fragment = document.createDocumentFragment();
 
 				//display header
-				h = $('<div class="shipsizehdr" data-faction="' + faction + '"><span class="shiptype">' + sizeClassHeaders[desiredSize] + ':</span></div>');
-				// Convert jquery object to raw DOM node for fragment
+				var isCollapsible = true; // All categories are collapsible now
+				var startClosed = (desiredSize === 4 || desiredSize === 5); // 4 = Immobile Structures, 5 = Mines
+				
+				var iconText = startClosed ? '[+]' : '[-]';
+				h = $('<div class="shipsizehdr clickable" data-faction="' + faction + '"><span class="toggleicon" style="display:inline-block; width:20px;">' + iconText + '</span><span class="shiptype">' + sizeClassHeaders[desiredSize] + ':</span></div>');
+				
+				var displayStyle = startClosed ? 'display:none;' : 'display:block;';
+				var categoryContainer = $('<div class="category-container" style="' + displayStyle + '"></div>');
+				
+				h.on("click", function (container) {
+					return function() {
+						container.slideToggle(150);
+						var icon = $(this).find('.toggleicon');
+						if (icon.text() === '[+]') {
+							icon.text('[-]');
+						} else {
+							icon.text('[+]');
+						}
+					};
+				}(categoryContainer));
+				
 				fragment.appendChild(h[0]);
+				fragment.appendChild(categoryContainer[0]);
 
 				for (var index = 0; index < shipList.length; index++) {
 					ship = shipList[index];
@@ -1903,7 +1923,11 @@ window.gamedata = {
 					$(".addship", h).on("click", buyHandler);
 					$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
 
-					fragment.appendChild(h[0]);
+					if (isCollapsible) {
+						categoryContainer.append(h);
+					} else {
+						fragment.appendChild(h[0]);
+					}
 					//search for variants of the base design above...
 					for (var indexV = 0; indexV < shipList.length; indexV++) {
 						shipV = shipList[indexV];
@@ -1926,7 +1950,11 @@ window.gamedata = {
 						$(".addship", h).on("click", buyHandlerV);
 						$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
 
-						fragment.appendChild(h[0]);
+						if (isCollapsible) {
+							categoryContainer.append(h);
+						} else {
+							fragment.appendChild(h[0]);
+						}
 					} //end of variant
 				} //end of base design
 
