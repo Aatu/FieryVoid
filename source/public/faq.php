@@ -38,6 +38,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
+                <li><a href="#escorts">Fighter Escorts</a></li>                
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
                 <li><a href="#mines">Mines</a></li>                               
@@ -224,6 +225,18 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Damage from Energy Mine, targeting from Mass Driver, and power from Improved Reactor also consider Enormous size.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+        <h3 id="escorts" >Fighter Escorts</h3>
+        <ul>
+            <li>Fighter units can escort friendly ships and in doing so use their guns to help shoot down ballistic weapons targeted at that ship.</li>
+            <li>To escort a ship, the fighter unit must start AND end its movement in the same hex as the ship they are escorting.  Where this is the case,
+                the fighters will use their weapons to intercept ballistics on behalf of the ship providing all other conditions of intercept are true e.g. 
+                their weapons have an intercept rating, the incoming shot is in arc, the fighters are not jinking etc.        
+            </li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
 
         <h3 id="jump" >Jump Drives</h3>
         <ul>
