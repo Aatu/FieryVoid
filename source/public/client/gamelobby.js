@@ -1884,7 +1884,7 @@ window.gamedata = {
 				var startClosed = (desiredSize === 4 || desiredSize === 5); // 4 = Immobile Structures, 5 = Mines
 
 				var iconText = startClosed ? '[+]' : '[-]';
-				h = $('<div class="shipsizehdr clickable" data-faction="' + faction + '"><span class="toggleicon">' + iconText + '</span><span class="shiptype">' + sizeClassHeaders[desiredSize] + ':</span></div>');
+				h = $('<div class="shipsizehdr clickable" data-faction="' + faction + '"><span class="toggleicon">' + iconText + '</span><span class="categoryType">' + sizeClassHeaders[desiredSize] + ':</span></div>');
 
 				var displayStyle = startClosed ? 'display:none;' : 'display:block;';
 				var categoryContainer = $('<div class="category-container" style="' + displayStyle + '"></div>');
