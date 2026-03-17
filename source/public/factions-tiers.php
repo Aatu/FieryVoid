@@ -475,8 +475,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li><strong>Sensor:</strong> +1 EW this turn.  Removes a Scanner critical if applicable.</li>                
                     <li><strong>Targeting:</strong> All weapons have +3% to hit this turn.</li>                
                     <li><strong>Thruster:</strong> Remove limits on Thruster ratings and improves Engine efficiency by 1 point.</li>                
-                    <li><strong>Weapon:</strong> Generates two extra Bonus Fire Control Points (BFCP) this turn.</li>
-                    <li><strong>Computer:</strong> +3 damage to all weapons this turn.</li>                      
+                    <li><strong>Weapon:</strong> +3 damage to all weapons this turn.</li>                      
                 </ul>
             </li>              
         <h5>Interdictors </h5>
