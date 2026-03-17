@@ -621,6 +621,44 @@ body {
     color: #e0e7ef;
 }
 
+#gameinfo {
+    position: relative;
+}
+
+#gameInfoButtons {
+    position: absolute;
+    /* Absolute positioning */
+    font-size: 14px;
+    font-style: normal;
+    color: #e0e7ef;
+    top: 0;
+    /* Align to the top */
+    right: 0;
+    /* Align to the right */
+    padding-top: 2px;
+    padding-right: 2px;
+    /* Adjust for padding from the right side */
+    z-index: 11;
+    /* Make sure it's on top */
+    opacity: 0.95;
+    margin-right: 5px;
+}
+
+#gameInfoButtons input[type="button"] {
+    font-size: 13px;
+    cursor: pointer;
+    padding: 3px 8px 3px 8px;
+    margin-top: 3px;
+    margin-right: 0px;
+    margin-left: 3px;
+    margin-bottom: 3px;
+    /* Add space between buttons */
+    border: 1px solid #587e8d;
+    background: #215a7a;
+    border-radius: 4px;
+    color: #e0e7ef;
+}
+
 
 #LogActual {
     padding-top: 3px;
@@ -697,7 +735,7 @@ body {
 }
 
 .fleetlistentry {
-    padding-top: 10px;
+    padding-top: 15px;
     padding-left: 5px;
     padding-bottom: 5px;
     float: left;
