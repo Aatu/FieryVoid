@@ -440,7 +440,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Ships with ‘Haphazard Targeting Systems’ in their notes have a lot of Targeting Arrays and this risks having them interfere with one other. After they have been ordered to fire, they have a chance to malfunction  This chance being reduced or removed if one or two Targeting Arrays are destroyed or deactivated.  
                 With no Arrays disabled, there is 1 in 6 chance of malfunction, with one Array disabled this drops to a 1 in 8 chance.  With two or more arrays disabled none of the other arrays will malfunction.</li>
         <h5>Escort Arrays</h5>
-            <li>These operate in exactly the same way as Targeting Arrays above, however they also provide the hit chance increases to friendly ships within 5 hexes.</li>
+            <li>These operate in exactly the same way as Targeting Arrays above, however they also provide their hit chance increase to friendly ships within 5 hexes.</li>
         <h5>Special Shells </h5>
             <li>The Grome Rail guns each have access to a number of different shells for their railguns, the effects for these are outlined in <a style="font-size: 14px;" href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements</a>.</li>                                      
     <a class="back-to-top" href="#top">↩ Back to Top</a>
