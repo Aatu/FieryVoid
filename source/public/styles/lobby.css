@@ -211,17 +211,29 @@
     width: 25px;
     text-align: center;
     font-family: monospace;
-    color: #d0dbec;
+    color: #b4bdca;
     font-weight: bold;
     cursor: pointer;
-    margin-right: 5px;
+    margin-right: 3px;
     vertical-align: top;
     position: relative;
     top: -1px;
 }
 
+.categoryType {
+    padding-left: 1px !important;
+    font-weight: bold;
+    color: #d0dbec;
+}
+
 .category-container {
     margin-left: 10px;
+    padding-left: 0px;
+    padding-bottom: 2px;
+}
+
+.pointcost {
+    padding-left: 5px !important;
 }
 
 .store .storeship {
@@ -263,8 +275,8 @@
 }
 
 .shiptype {
-    padding-left: 2px !important;
-    font-weight: bold;
+    padding-left: 3px !important;
+    font-weight: normal;
 }
 
 .boughtShiptype {
@@ -310,6 +322,8 @@
     font-size: 13px;
     margin-left: 1px;
     margin-right: 1px;
+    margin-left: 3px;
+    margin-right: 3px;
     text-decoration: none;
     padding-left: 4px;
 }
