@@ -1875,6 +1875,7 @@ window.gamedata = {
 			var sizeClassHeaders = ['Fighters', 'Medium Ships', 'Heavy Ships', 'Capital Ships', 'Immobile Structures', 'Mines'];
 			for (var desiredSize = 5; desiredSize >= 0; desiredSize--) {
 				if (desiredSize === 5 && gamedata.rules && !gamedata.rules.allowMines && !gamedata.rules.fleetTest) continue;
+				if (faction === "Terrain" && desiredSize < 4) continue; // Terrain faction has no ships or fighters
 
 				// Create a fragment for this size category
 				var fragment = document.createDocumentFragment();
@@ -1882,14 +1883,20 @@ window.gamedata = {
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
 				var startClosed = (desiredSize === 4 || desiredSize === 5); // 4 = Immobile Structures, 5 = Mines
+				if (faction === "Terrain") {
+					startClosed = false;
+				}
 
 				var iconText = startClosed ? '[+]' : '[-]';
-				h = $('<div class="shipsizehdr clickable" data-faction="' + faction + '"><span class="toggleicon">' + iconText + '</span><span class="categoryType">' + sizeClassHeaders[desiredSize] + ':</span></div>');
+				var headerElem = $('<div class="shipsizehdr clickable" data-faction="' + faction + '"><span class="toggleicon">' + iconText + '</span><span class="categoryType">' + sizeClassHeaders[desiredSize] + ':</span></div>');
 
 				var displayStyle = startClosed ? 'display:none;' : 'display:block;';
 				var categoryContainer = $('<div class="category-container" style="' + displayStyle + '"></div>');
+				var hasShips = false; // Track if we actually add anything to this category
 
-				h.on("click", function (container) {
+				h = null; // We use headerElem for the header, and h for the ships later
+
+				headerElem.on("click", function (container) {
 					return function () {
 						container.slideToggle(150);
 						var icon = $(this).find('.toggleicon');
@@ -1901,8 +1908,7 @@ window.gamedata = {
 					};
 				}(categoryContainer));
 
-				fragment.appendChild(h[0]);
-				fragment.appendChild(categoryContainer[0]);
+				// Don't append to fragment yet, wait to see if it's empty
 
 				for (var index = 0; index < shipList.length; index++) {
 					ship = shipList[index];
@@ -1938,11 +1944,8 @@ window.gamedata = {
 					$(".addship", h).on("click", buyHandler);
 					$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, ship.phpclass, faction, ship.id, false));
 
-					if (isCollapsible) {
-						categoryContainer.append(h);
-					} else {
-						fragment.appendChild(h[0]);
-					}
+					categoryContainer.append(h); // We always use categoryContainer now
+					hasShips = true;
 					//search for variants of the base design above...
 					for (var indexV = 0; indexV < shipList.length; indexV++) {
 						shipV = shipList[indexV];
@@ -1965,13 +1968,16 @@ window.gamedata = {
 						$(".addship", h).on("click", buyHandlerV);
 						$(".showship", h).on("click", gamedata.onShipContextMenu.bind(this, shipV.phpclass, faction, ship.id, false));
 
-						if (isCollapsible) {
-							categoryContainer.append(h);
-						} else {
-							fragment.appendChild(h[0]);
-						}
+						categoryContainer.append(h); // We always use categoryContainer now
+						hasShips = true;
 					} //end of variant
 				} //end of base design
+
+				// Only append the header and container if this category actually has ships
+				if (hasShips) {
+					fragment.appendChild(headerElem[0]);
+					fragment.appendChild(categoryContainer[0]);
+				}
 
 				// Append the entire fragment for this size class to the DOM at once
 				targetNode.appendChild(fragment);

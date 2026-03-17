@@ -80,8 +80,14 @@ window.DeploymentPhaseStrategy = function () {
             var shipsInHex = shipManager.getShipsInSameHex(this.selectedShip, hex);
             var isBlocked = false;
             
-            if (!this.selectedShip.mine) {
-                isBlocked = shipsInHex.some(function(s) { return !s.mine; });
+            var hasTerrain = shipsInHex.some(function(s) { 
+                return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3); 
+            });
+
+            if (hasTerrain) {
+                isBlocked = true;
+            } else if (!(this.selectedShip.mine || this.selectedShip.flight)) {
+                isBlocked = shipsInHex.some(function(s) { return !(s.mine || s.flight); });
             }
 
             if (!isBlocked) {
@@ -110,7 +116,9 @@ window.DeploymentPhaseStrategy = function () {
             if (ship.movement && ship.movement.length > 0) {
                 isPlacedOnMap = ship.movement[0].commit === true; 
             }
-            if (isPlacedOnMap && (this.selectedShip.mine || ship.mine)) {
+            
+            var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (ship.Huge > 0 && ship.Huge <= 3);
+            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight)) {
                 // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
                 // a valid, legal deployment drop for our CURRENTLY selected piece.
                 // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.

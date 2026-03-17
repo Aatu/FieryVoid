@@ -74,7 +74,21 @@ window.SelectFromShips = function () {
             var rawPos = shipManager.getShipPosition(this.phaseStrategy.selectedShip);
             var parsedSelectedPos = new hexagon.Offset(rawPos);
             
-            if (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r) {
+            // Replicate the exact isBlocked occupancy check from DeploymentPhaseStrategy to explicitly deny the button appearing when dropping onto illegal stacked hexes
+            var isBlocked = false;
+            var shipsInHex = shipManager.getShipsInSameHex(this.phaseStrategy.selectedShip, this.payload.hex);
+            
+            var hasTerrain = shipsInHex.some(function(s) {
+                return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3);
+            });
+            
+            if (hasTerrain) {
+                isBlocked = true;
+            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight)) {
+                isBlocked = shipsInHex.some(function(s) { return !(s.mine || s.flight); });
+            }
+            
+            if (!isBlocked && (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r)) {
                 var selectedName = this.phaseStrategy.selectedShip.name;
                 var deployButton = jQuery(
                     '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'

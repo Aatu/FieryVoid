@@ -11177,8 +11177,14 @@ window.DeploymentPhaseStrategy = function () {
             var shipsInHex = shipManager.getShipsInSameHex(this.selectedShip, hex);
             var isBlocked = false;
             
-            if (!this.selectedShip.mine) {
-                isBlocked = shipsInHex.some(function(s) { return !s.mine; });
+            var hasTerrain = shipsInHex.some(function(s) { 
+                return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3); 
+            });
+
+            if (hasTerrain) {
+                isBlocked = true;
+            } else if (!(this.selectedShip.mine || this.selectedShip.flight)) {
+                isBlocked = shipsInHex.some(function(s) { return !(s.mine || s.flight); });
             }
 
             if (!isBlocked) {
@@ -11207,7 +11213,9 @@ window.DeploymentPhaseStrategy = function () {
             if (ship.movement && ship.movement.length > 0) {
                 isPlacedOnMap = ship.movement[0].commit === true; 
             }
-            if (isPlacedOnMap && (this.selectedShip.mine || ship.mine)) {
+            
+            var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (ship.Huge > 0 && ship.Huge <= 3);
+            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight)) {
                 // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
                 // a valid, legal deployment drop for our CURRENTLY selected piece.
                 // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.
@@ -13382,7 +13390,7 @@ window.ShipTooltip = function () {
             } else {
                 var isShipDetected = shipManager.isDetected(ship);
                 var stealthSys = null;
-                
+
                 if (ship.mine) {
                     stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
                 } else if (ship.faction == "Torvalus Speculators") {
@@ -13409,7 +13417,7 @@ window.ShipTooltip = function () {
 
                 if (isShipDetected) {
                     var detectedTeamsStr = "";
-                    if(ship.team == gamedata.getPlayerTeam()){ //Only own player needs to see full team list that's detected their ship.
+                    if (ship.team == gamedata.getPlayerTeam()) { //Only own player needs to see full team list that's detected their ship.
                         // Check if we have more than 2 teams in the game
                         var uniqueTeams = [];
                         for (var i in gamedata.slots) {
@@ -13445,7 +13453,7 @@ window.ShipTooltip = function () {
                                 }
                             }
                         }
-                    } 
+                    }
 
                     toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
                 } else {
@@ -13485,16 +13493,16 @@ window.ShipTooltip = function () {
         if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
         var listEscorting = shipManager.listEscorting(ship);
         if (listEscorting != '') {
-            toDisplay += 'Escorting: ';
+            toDisplay += '<span class="escorting">Escorting: </span>';
             //list of unit names
             toDisplay += listEscorting;
         }
         this.addEntryElement(toDisplay, toDisplay != '');
-        
-        if(ship.mine){
-            if(gamedata.isMyorMyTeamShip(ship)) toDisplay = 'Signature: ' + ship.signature;
+
+        if (ship.mine) {
+            if (gamedata.isMyorMyTeamShip(ship)) toDisplay = 'Signature: ' + ship.signature;
             this.addEntryElement(toDisplay);
-        }else{
+        } else {
             //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
             this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total " + ship.iniative + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
 
@@ -13528,7 +13536,7 @@ window.ShipTooltip = function () {
             toDisplay += ' (acc cost: ' + ship.accelcost + ')';
             this.addEntryElement(toDisplay);
             this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
-        
+
             if (this.selectedShip) {
                 if (!gamedata.isMyShip(ship)) {
                     this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
@@ -13560,7 +13568,7 @@ window.ShipTooltip = function () {
             }
 
             this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
-        }    
+        }
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
         var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
         fDef = parseFloat(fDef.toFixed(2));
@@ -13730,7 +13738,21 @@ window.SelectFromShips = function () {
             var rawPos = shipManager.getShipPosition(this.phaseStrategy.selectedShip);
             var parsedSelectedPos = new hexagon.Offset(rawPos);
             
-            if (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r) {
+            // Replicate the exact isBlocked occupancy check from DeploymentPhaseStrategy to explicitly deny the button appearing when dropping onto illegal stacked hexes
+            var isBlocked = false;
+            var shipsInHex = shipManager.getShipsInSameHex(this.phaseStrategy.selectedShip, this.payload.hex);
+            
+            var hasTerrain = shipsInHex.some(function(s) {
+                return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3);
+            });
+            
+            if (hasTerrain) {
+                isBlocked = true;
+            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight)) {
+                isBlocked = shipsInHex.some(function(s) { return !(s.mine || s.flight); });
+            }
+            
+            if (!isBlocked && (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r)) {
                 var selectedName = this.phaseStrategy.selectedShip.name;
                 var deployButton = jQuery(
                     '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
@@ -24798,7 +24820,8 @@ window.shipManager = {
         //var ships = shipManager.getShipsInSameHex(ship);
         //for (var i in ships) {
         //var othership = ships[i];
-        if (gamedata.turn == 1) return true; //on turn 1 all friendly ships can be protected!
+
+        //if (gamedata.turn == 1) return true; //on turn 1 all friendly ships can be protected! NO LONGER REQUIRED - DK Mar 2026
 
         for (var i in gamedata.ships) { //doesn't need to be on the same hex NOW... only at the start and end of move :)
             var othership = gamedata.ships[i];
@@ -24823,7 +24846,7 @@ window.shipManager = {
         var resultTxt = '';
         if (!ship.flight) return resultTxt;
 
-        if (gamedata.turn == 1) return 'All'; //turn 1: all ships can be escorted
+        //if (gamedata.turn == 1) return 'All'; //turn 1: all ships can be escorted. NO LONGER REQUIRED - DK Mar 2026
 
         for (var i in gamedata.ships) {
             var othership = gamedata.ships[i];

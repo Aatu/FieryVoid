@@ -179,7 +179,7 @@ window.ShipTooltip = function () {
             } else {
                 var isShipDetected = shipManager.isDetected(ship);
                 var stealthSys = null;
-                
+
                 if (ship.mine) {
                     stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
                 } else if (ship.faction == "Torvalus Speculators") {
@@ -206,7 +206,7 @@ window.ShipTooltip = function () {
 
                 if (isShipDetected) {
                     var detectedTeamsStr = "";
-                    if(ship.team == gamedata.getPlayerTeam()){ //Only own player needs to see full team list that's detected their ship.
+                    if (ship.team == gamedata.getPlayerTeam()) { //Only own player needs to see full team list that's detected their ship.
                         // Check if we have more than 2 teams in the game
                         var uniqueTeams = [];
                         for (var i in gamedata.slots) {
@@ -242,7 +242,7 @@ window.ShipTooltip = function () {
                                 }
                             }
                         }
-                    } 
+                    }
 
                     toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
                 } else {
@@ -282,16 +282,16 @@ window.ShipTooltip = function () {
         if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
         var listEscorting = shipManager.listEscorting(ship);
         if (listEscorting != '') {
-            toDisplay += 'Escorting: ';
+            toDisplay += '<span class="escorting">Escorting: </span>';
             //list of unit names
             toDisplay += listEscorting;
         }
         this.addEntryElement(toDisplay, toDisplay != '');
-        
-        if(ship.mine){
-            if(gamedata.isMyorMyTeamShip(ship)) toDisplay = 'Signature: ' + ship.signature;
+
+        if (ship.mine) {
+            if (gamedata.isMyorMyTeamShip(ship)) toDisplay = 'Signature: ' + ship.signature;
             this.addEntryElement(toDisplay);
-        }else{
+        } else {
             //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
             this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total " + ship.iniative + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
 
@@ -325,7 +325,7 @@ window.ShipTooltip = function () {
             toDisplay += ' (acc cost: ' + ship.accelcost + ')';
             this.addEntryElement(toDisplay);
             this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
-        
+
             if (this.selectedShip) {
                 if (!gamedata.isMyShip(ship)) {
                     this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
@@ -357,7 +357,7 @@ window.ShipTooltip = function () {
             }
 
             this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
-        }    
+        }
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
         var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
         fDef = parseFloat(fDef.toFixed(2));
