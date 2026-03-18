@@ -168,7 +168,9 @@ window.confirm = {
     },
 
     getTotalCostMine: function getTotalCostMine() {
-        var baseCost = parseFloat($(".confirm .totalUnitCostAmount").data("baseCost")) || parseFloat($(".confirm .totalUnitCostAmount").data("value"));
+        // Fallback to generic .totalUnitCostAmount for safety if the class isn't strictly defined
+        var baseCostTarget = $(".confirm .totalMineCostAmount").length ? $(".confirm .totalMineCostAmount") : $(".confirm .totalUnitCostAmount");
+        var baseCost = parseFloat(baseCostTarget.data("baseCost")) || parseFloat(baseCostTarget.first().data("value"));
 
         //add enhancement cost	   
         var enhCost = 0;
@@ -181,7 +183,8 @@ window.confirm = {
             target = $(".confirm .selectAmount.shpenh" + enhNo);
         }
 
-        var totalCost = baseCost + enhCost;
+        var costPerMine = baseCost + enhCost;
+        var totalCost = costPerMine;
 
         // If buying mines, multiply final total by designated quantity
         var mineQuantity = parseInt($(".confirm #mineQuantity").val());
@@ -189,10 +192,21 @@ window.confirm = {
             totalCost *= mineQuantity;
         }
 
-        var totalCostSpan = $(".confirm .totalUnitCostAmount");
-        totalCostSpan.data("value", totalCost); // This updates the DOM data
+        // Update specifically the "Cost Per Mine" and "Total Unit Cost"
+        var costPerMineSpan = $(".confirm .costPerMineAmount");
+        if (costPerMineSpan.length) {
+            costPerMineSpan.data("value", costPerMine);
+            costPerMineSpan.html(costPerMine);
+        }
 
-        totalCostSpan.html(totalCost);
+        var totalCostSpan = $(".confirm .totalMineCostAmount");
+        if (totalCostSpan.length) {
+            totalCostSpan.data("value", totalCost); // This updates the DOM data
+            totalCostSpan.html(totalCost);
+        } else {
+            // Fallback
+            $(".confirm .totalUnitCostAmount").first().html(totalCost);
+        }
     },
 
     increaseFlightSize: function increaseFlightSize(e) {
@@ -1218,8 +1232,10 @@ window.confirm = {
         var pointCost = ship.pointCost;
 
         $(".totalUnitCostText", totalItem).html("Cost Per Mine");
-        $(".totalUnitCostAmount", totalItem).html(pointCost);
-        $(".totalUnitCostAmount", totalItem).data("value", pointCost);
+        var perMineAmountSpan = $(".totalUnitCostAmount", totalItem);
+        perMineAmountSpan.html(pointCost);
+        perMineAmountSpan.data("value", pointCost);
+        perMineAmountSpan.addClass("costPerMineAmount");
 
         $(totalItem).show();
 
@@ -1286,10 +1302,12 @@ window.confirm = {
         var totalTemplate = $(".totalUnitCost");
         var totalItem = totalTemplate.clone(true).prependTo(e);
 
-        $(".totalUnitCostText", totalItem).html("Total Unit Cost");
-        $(".totalUnitCostAmount", totalItem).html(ship.pointCost);
-        $(".totalUnitCostAmount", totalItem).data("value", ship.pointCost);
-        $(".totalUnitCostAmount", totalItem).data("baseCost", ship.pointCost);
+        $(".totalUnitCostText", totalItem).html("Total Mine Purchase Cost");
+        var totalCostAmountSpan = $(".totalUnitCostAmount", totalItem);
+        totalCostAmountSpan.html(ship.pointCost);
+        totalCostAmountSpan.data("value", ship.pointCost);
+        totalCostAmountSpan.data("baseCost", ship.pointCost);
+        totalCostAmountSpan.addClass("totalMineCostAmount");
         $(totalItem).show();
 
 
