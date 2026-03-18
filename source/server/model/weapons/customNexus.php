@@ -5424,20 +5424,16 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 
         public $name = "NexusHeavyMaser";
         public $displayName = "Heavy Maser";
-		public $iconPath = "NexusHeavyMaser.png";
+		public $iconPath = "HeavyMaser.png";
 		
         public $animation = "laser";
-        //public $animationColor = array(240, 90, 90);
         public $animationColor = array(100, 30, 15);
-//        public $animationExplosionScale = 0.16;
-//        public $animationWidth = 3;
-//        public $animationWidth2 = 0.3;
-        public $priority = 8;
+        public $priority = 6;
 
-        public $loadingtime = 3;
+        public $loadingtime = 2;
 
         public $rangePenalty = 0.5;
-        public $fireControl = array(-1, 3, 3); // fighters, <mediums, <capitals
+        public $fireControl = array(-4, 1, 2); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser";
@@ -5455,17 +5451,19 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             //maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ){
-                $maxhealth = 8;
+                $maxhealth = 7;
             }
             if ( $powerReq == 0 ){
-                $powerReq = 7;
+                $powerReq = 4;
             }
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
         public function setSystemDataWindow($turn){
-            //$this->data["Special"] = '<br>Armor counts as double.';
-            $this->data["Special"] = '<br>Armor is doubled, and damage doubled for criticals.';
+            $this->data["Special"] = "<br>Armor is doubled, and damage from turn of firing doubled for criticals/dropout rolls.";
+            $this->data["Special"] .= "<br>Forces a critical roll even if armor is not penetrated.";
+			$this->data["Special"] .= "<br>Forces critical on any system or fighter hit, even if Maser does not penetrate armor.";
+			$this->data["Special"] .= "<br>No overkill damage.";
             parent::setSystemDataWindow($turn);
         }
 
@@ -5476,12 +5474,80 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 		$system->forceCriticalRoll = true;
 	} //endof function onDamagedSystem
 
-        public function getDamage($fireOrder){ return Dice::d(10, 3)+4;   }
-        public function setMinDamage(){     $this->minDamage = 7 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 34 ;      }  
+        public function getDamage($fireOrder){ return Dice::d(10, 3)+3;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 33 ;      }  
 		
     }  //endof NexusHeavyMaser
 	
+
+
+
+
+    class NexusLightMaser extends Laser{
+        public $trailColor = array(140, 210, 255);
+
+        public $name = "NexusLightMaser";
+        public $displayName = "Light Maser";
+		public $iconPath = "LightMaser.png";
+		
+        public $animation = "laser";
+        public $animationColor = array(100, 30, 15);
+        public $priority = 2;
+
+        public $loadingtime = 1;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; 
+        public $weaponClass = "Laser";
+        public $firingModes = array( 1 => "Standard");
+
+        public $noOverkill = true;		
+
+        public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos=null){ //Maser treats armor as doubled
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+            $armour = $armour * 2;
+            $armour = max(0,$armour);
+            return $armour;
+        }
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 4;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 2;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function setSystemDataWindow($turn){
+            $this->data["Special"] = "<br>Armor is doubled, and damage from turn of firing doubled for criticals/dropout rolls.";
+            $this->data["Special"] .= "<br>Forces a critical roll even if armor is not penetrated.";
+			$this->data["Special"] .= "<br>Forces critical on any system or fighter hit, even if Maser does not penetrate armor.";
+			$this->data["Special"] .= "<br>No overkill damage.";
+            parent::setSystemDataWindow($turn);
+        }
+
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
+		$system->critRollMod+=max(0, ($damage-$armour)); //+twice damage to all critical/dropout rolls on system hit this turn
+		$system->forceCriticalRoll = true;
+	} //endof function onDamagedSystem
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+1;   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 11 ;      }  
+		
+    }  //endof NexusLightMaser
+
+
+
+
 
     class NexusPointDefenseLaser extends Weapon{
         public $name = "NexusPointDefenseLaser";
@@ -8141,6 +8207,759 @@ public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
 		}
 
 	} //end of class NexusWaterCaster
+
+
+
+
+
+
+class NexusLightRadCannon extends Weapon{
+    /*Radiation Cannon - Cascor weapon (with LOTS of specials; essentially it's all special, with no base damage effect whatsover*/
+	public $name = "NexusLightRadCannon";
+	public $displayName = "Light Rad Cannon";
+	public $iconPath = "LightRadCannon.png";
+	
+	public $animation = "bolt";//behaves like a bolt
+	public $animationColor = array(150, 10, 10); //make it deep red...
+	public $animationExplosionScale = 0.3; //will be recalculated anyway
+	
+	public $loadingtime = 2;
+	public $noOverkill = true; //does not overkill
+        
+	public $rangePenalty = 0.66; //-1/2hexes
+	public $fireControl = array(null, 1, 2); // fighters, <mediums, <capitals 
+	
+	public $intercept = 0;
+	public $priority = 2;// should go first/very early due to ignoring actual durability of system hit
+		
+	public $firingModes = array(1=>'Irradiate'); //just a convenient name
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Ion"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+		
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 4;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		
+		$this->animationExplosionScale = $this->dynamicScale(24);//scale weapon using Heavy Bolter damage output - this seems appropriate (effect is lesser but, let's say, encompassing, deserves recognition)
+	}
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "Doesn't actually deal damage except as noted below. Automatically hits shields if interposed.";      
+		$this->data["Special"] .= "<br>Effect depends on system hit:";    
+		$this->data["Special"] .= "<br> - Structure: 6 boxes marked destroyed (regardless of armor)."; 
+		$this->data["Special"] .= "<br> - Shield: system destroyed."; 
+		$this->data["Special"] .= "<br> - Gravitic Shield reduces generator output by 1, too."; 
+		$this->data["Special"] .= "<br> - Weapon, Thruster or Jump Engine: system destroyed."; 
+		$this->data["Special"] .= "<br> - C&C: critical roll forced (at +1)."; 
+		$this->data["Special"] .= "<br> - Scanner: output reduced by 1."; 
+		$this->data["Special"] .= "<br> - Engine: output reduced by 1."; 
+		//and disable a tendril on diffuser, but there's no diffuser in game to disable at the moment
+		$this->data["Special"] .= "<br>No effect on any other system. Note that armor and shields do not affect above effects.";
+		$this->data["Special"] .= "<br>Does not affect ships of advanced species (eg. Ancient-born or older).";  		    
+	}	
+	
+	//don't care about armor whatsover - due to "marking damage boxes destroyed" rather than dealing true damage
+	//due to that ignore Adaptive Armor as well effectively
+	public function getSystemArmourComplete($target, $system, $gamedata, $fireOrder, $pos = null){
+		return 0;
+	}
+	
+	protected function beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata){
+		//fighters are untargetable, so we know it's a ship
+		//hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly) (use instanceof Shield to determine!)
+		
+		//no effect on advanced ships!
+		if($target->factionAge > 2) return;
+		
+		//first - find bearing from target to firing ship (needed to determine whether shield interacts with incoming shot)
+		$relativeBearing = $target->getBearingOnUnit($shooter);
+
+		//are there any active shields affecting shot?
+		$affectingShields = array();
+		foreach($target->systems as $shield){
+			if( ($shield instanceOf Shield)  //this is an actual shield!
+				&& (!$shield->isDestroyed()) //not destroyed
+				&& (!$shield->isOfflineOnTurn($gamedata->turn)) //powered up
+			   	&& (mathlib::isInArc($relativeBearing, $shield->startArc, $shield->endArc)) //actually in arc to affect
+			) {
+				$affectingShields[] = $shield;
+			}
+		}
+		$countShields = count($affectingShields);
+		if($countShields > 0){ //hit shield if active in arc and not destroyed (proceed to onDamagedSystem directly)
+			//choose randomly from relevant shields
+			$chosenID = Dice::d($countShields,1)-1; //array elements numeration starts at 0
+			$shield = $affectingShields[$chosenID];			
+			$this->onDamagedSystem($target, $shield, 0, 0, $gamedata, $fireOrder);
+		} else { //otherwise hit normally (parent beforeDamage) (...for 0 damage...) , actual effect handled in onDamagedSystem 
+			parent::beforeDamage($target, $shooter, $fireOrder, $pos, $gamedata);
+		}
+	}//endof function beforeDamage
+	
+	//weapon formally always does 0 damage; now apply appropriate effect depending on system hit!
+	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		if ($ship->isDestroyed()) return; //no point allocating
+		if ($system->isDestroyed()) return; //no point allocating
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		$shooterID = $shooter->id;
+		$remHealth = $system->getRemainingHealth();
+		
+		if($system instanceOf Structure) { //Structure: mark 6 damage (but no more than Structure actually possesses!)
+            $destroyed = false;
+			$dmgToDo = min(6,$remHealth);			
+			if($dmgToDo >= $remHealth) $destroyed = true;	
+			if($dmgToDo > 0 ) {			
+				$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $dmgToDo, 0, 0, $fireOrder->id, $destroyed, false, "", $this->weaponClass, $shooterID, $this->id);
+				$damageEntry->updated = true;
+				$system->damage[] = $damageEntry;
+			}
+		} else if($system instanceOf Shield) { //Shield: destroy; if Gravitic Shield - find generator and apply -1 output 
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, false, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+			if($system instanceOf GraviticShield){ //if Gravitic Shield - find generator and apply -1 output 
+				foreach( $ship->systems as $generator){
+					if( ($generator instanceOf ShieldGenerator)
+					  && (!$generator->isDestroyed())
+					){
+						$crit = new OutputReduced1(-1, $ship->id, $generator->id, "OutputReduced1", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = false;
+						$generator->criticals[] =  $crit;
+						break; //don't look for further Generators
+					}
+				}
+			}
+		} else if( ($system instanceOf Weapon)    //weapon, thruster, jump drive - destroy outright
+			or ($system instanceOf Thruster)
+			or ($system instanceOf JumpEngine)
+		) {
+			$damageEntry = new DamageEntry(-1, $ship->id, -1, $fireOrder->turn, $system->id, $remHealth, 0, 0, $fireOrder->id, true, false, "", $this->weaponClass, $shooterID, $this->id);
+			$damageEntry->updated = true;
+			$system->damage[] = $damageEntry;
+		} else if($system instanceOf CnC) { //C&C: critical roll forced (at +2).
+			$system->forceCriticalRoll = true;
+			$system->critRollMod += 1;
+		} else if($system instanceOf Scanner) { //Scanner: output reduced by 1.
+			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = false;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
+		} else if($system instanceOf Engine) { //Engine: output reduced by 2.
+			$crit = new OutputReduced1(-1, $ship->id, $system->id, "OutputReduced1", $gamedata->turn);
+			$crit->updated = true;
+			$crit->inEffect = false;
+			$system->setCritical($crit); //$system->criticals[] =  $crit;
+		} //other systems: no effect!			 
+	}//endof function onDamagedSystem
+			
+	public function getDamage($fireOrder){       return 0; /*no actual damage, just various effects*/  }
+	public function setMinDamage(){     $this->minDamage = 6 ; /*mark as 6 damage for display and interception purposes, it actually does as much on Structure...*/     }
+	public function setMaxDamage(){     $this->maxDamage = 6 ;      }
+} //endof class NexusLightRadCannon
+
+
+
+
+
+
+
+
+class NexusSandCaster extends Weapon implements DefensiveSystem{        
+    public $name = "NexusSandCaster";
+    public $displayName = "Sand Caster";
+	public $iconPath = "PlasmaWeb.png";
+
+    public $animation = "ball";
+    public $animationColor = array(210, 180, 140);    	
+    public $animationExplosionScale = 0.5;
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  
+
+    public $ballistic = false;
+    public $hextarget = true;
+    public $hidetarget = false;
+    public $priority = 1; //to show effect quickly
+ 	public $priorityArray = array(1=>1, 2=>2);        
+                
+    public $uninterceptable = true; //just so nothing tries to actually intercept this weapon
+    public $doNotIntercept = true; //do not intercept this weapon, period
+	public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+    public $useOEW = false; //not important, really
+        		
+    public $loadingtime = 1;
+    public $intercept = 0; 
+
+	public $tohitPenalty = 0;
+	public $damagePenalty = 0;        
+         		
+	public $range = 100;
+    public $rangeArray = array(1=>100, 2=>4); //range is essentially unlimited for Defensive, but limited for Offensive.
+	public $rangePenalty= 0;
+	public $rangePenaltyArray = array(1=>0, 2=>0); //no range penalty in either mode                  
+        
+    public $boostable = true;
+    public $boostEfficiency = 0;
+    public $maxBoostLevel = 1;     
+		
+	public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
+	public $damageTypeArray = array(1=>'Matter', 2=>'Matter'); //indicates that this weapon does Plasma damage in Offensive mode    	
+    public $firingMode = "Defensive";
+        
+    public $firingModes = array(
+            1 => "Defensive Sand Caster",
+			2 => "Anti-Fighter Sand Caster",			
+    );
+    
+    public $fireControlArray = array( 1=>array(0,0,0), 2=>array(0, null, null)); // fighters, <mediums, <capitals 
+		
+	private static $alreadyEngagedDirect = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
+	private static $alreadyEngagedClouded = array();
+	protected $autoHit = true;//To show 100% hit chance in front end.				
+
+    protected $possibleCriticals = array(
+            17=>array("OutputReduced1", "ReducedRangeValue"));  //Provding Outputreduced1 works then replace reduced range from TT with reduced damage for Offensive mode
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 4;
+        if ( $powerReq == 0 ) $powerReq = 2;            
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+	//Defensive system functions
+	public function getDefensiveType()
+    {
+        return "Shield";
+    }
+    
+	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon) {
+	    // Variable initialization
+	    $output = 0;
+	    $targetpos = null;
+
+	    // Checking whether the weapon is actually ordered to intercept
+	    foreach ($this->fireOrders as $fire) {
+	        if ($fire->firingMode == "1" && $fire->turn == $turn) {
+	            $targetpos = new OffsetCoordinate($fire->x, $fire->y);
+	            $output = 2;
+
+	            // Determine position the shot is coming from
+	            if (!$weapon->ballistic) { // Direct fire
+	                $pos = $shooter->getHexPos();
+	            } else { // Ballistic
+	                $movement = $shooter->getLastTurnMovement($fire->turn); 
+	                $pos = $movement->position;
+	            }
+
+	            // If Web is ordered to intercept somewhere else - cannot intercept this shot
+	            if ($pos != $targetpos) {
+	                $output = 0;
+	                break; // Exit the loop early if interception is not possible
+	            }
+	        }
+	    }
+
+	    // Return the actual value
+	    return $output;
+	} // End of getDefensiveHitChangeMod
+
+
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon) {
+
+	    // Variable initialization
+	    $output = 0;
+	    $targetpos = null;
+
+	    // Plasma Web damage reduction only works against three types of weapons.
+	    if ($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle' && $weapon->name != 'AntimatterTorpedo' && $weapon->name != 'Plasma' && $weapon->name != 'Ion') {
+	        return 0;
+	    }
+	    
+	    // Checking whether the weapon is actually ordered to intercept
+	    foreach ($this->fireOrders as $fire) {
+	        if ($fire->firingMode == "1" && $fire->turn == $turn) {
+	            $targetpos = new OffsetCoordinate($fire->x, $fire->y);
+	            $output = 2;
+
+	            // Determine the position the shot is coming from
+	            if (!$weapon->ballistic) { // Direct fire
+	                $pos = $shooter->getHexPos();
+	            } else { // Ballistic
+	                $movement = $shooter->getLastTurnMovement($fire->turn);
+	                $pos = $movement->position;
+	            }
+
+	            // If Web is ordered to intercept somewhere else - cannot intercept this shot
+	            if ($pos != $targetpos) {
+	                $output = 0;
+	                break; // Exit the loop early if interception is not possible
+	            }
+	        }
+	    }
+
+	    // Return the actual value
+	    return $output;
+	} // End of getDefensiveDamageMod
+			
+
+    public function beforeFiringOrderResolution($gamedata){
+    	
+		//Start by checking for Ballistic fireOrder, if there isn't one there's no need to do anything!
+		$firingOrders = $this->getFireOrders($gamedata->turn);
+						    	
+		$cloudFireOrder = null;
+			foreach ($firingOrders as $fireOrder) { 
+				if ($fireOrder->type == "ballistic") { 
+					$cloudFireOrder = $fireOrder;
+					break; //no need to search further
+				}
+			}    			
+								
+		if($cloudFireOrder==null) return; //no appropriate fire order, end of work.  
+
+		// Store the original coordinates
+		$originalX = $cloudFireOrder->x;
+		$originalY = $cloudFireOrder->y;
+
+		//Check through fireOrders, only interested in Persistent Effect orders created in Initial Orders Phase
+		foreach ($firingOrders as $cloudFireOrder) { 		
+			if (($cloudFireOrder->type == "ballistic") &&  ($cloudFireOrder->damageclass == 'PersistentEffectPlasma')) { 	//Double-check.	
+
+				//fireOrder found, proceed to check whether any fighters passed through it.   	
+		    	$thisShip = $this->getUnit();		    	  
+		    	$allShips = $gamedata->ships;
+		    	$relevantShips = array();
+
+				//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
+				foreach($allShips as $ship){
+					if (!$ship instanceof FighterFlight) continue; //Ignore ships.
+					if($ship->isDestroyed()) continue;//Ignore destroyed flights.
+					if($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue; //Ship not deployed yet.												
+					$relevantShips[] = $ship;			
+				}
+
+				//Now check if any enemy fighters got in arc and range during their movement.
+				$targetFighters = $this->checkForValidTargets($relevantShips, $cloudFireOrder, $gamedata);	
+				
+				if(!empty($targetFighters))	$this->createFireOrders($targetFighters, $thisShip, $gamedata, $cloudFireOrder);
+			}
+		}
+
+		// Restore the original coordinates
+		$cloudFireOrder->notes = 'SandCloud';
+		$cloudFireOrder->x = $originalX;
+		$cloudFireOrder->y = $originalY;
+    	
+	}//endof beforeFiringOrderResolution
+
+
+	private function convertOffsetCoordinateToArray($offsetCoordinate) {
+	    return array((string)$offsetCoordinate->q, (string)$offsetCoordinate->r);
+	}
+
+
+	private function checkForValidTargets($relevantShips, $cloudFireOrder, $gamedata) {
+	    $targetFighters = array(); // Initialize array for fighters to be fired at.		
+	    $plasmaPosition = array((string)$cloudFireOrder->x, (string)$cloudFireOrder->y); // Convert plasma cloud position to a string array.
+	
+	    foreach ($relevantShips as $flight) { // Look through relevant ships and take appropriate action.					
+	        // Check starting position first.
+
+	        // Now check other movements in the turn.
+	        foreach ($flight->movement as $fighterMove) {
+	            if ($fighterMove->turn == $gamedata->turn) {
+
+	                // Only interested in moves where flight enters a NEW hex!
+	                if ($fighterMove->type == "move" || $fighterMove->type == "slipleft" || $fighterMove->type == "slipright") {
+	                    // Convert OffsetCoordinate to array format for comparison
+	                    $fighterPositionArray = $this->convertOffsetCoordinateToArray($fighterMove->position);
+
+	                    // Check if the position matches the plasma cloud
+	                    if ($fighterPositionArray === $plasmaPosition) {
+	                        $targetFighters[] = $flight; // Add to array to be targeted.
+	                    }
+	                }
+	            }
+	        }
+	    }			
+
+	    return $targetFighters; 
+	} // end of checkForValidTargets
+
+
+	private function createFireOrders($targetFighters, $thisShip, $gamedata, $cloudFireOrder){
+
+		foreach ($targetFighters as $target) {
+
+		    // Create a key from the coordinates of the fire order
+		    $coordinatesKey = $cloudFireOrder->x . ',' . $cloudFireOrder->y; // This will be the key for the array
+		 
+			// Check if the target has been engaged by a Plasma Cloud at these coordinates
+			if (isset(PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey])) {
+				if (PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey]['engaged'] === true) {
+				    // Target was already engaged at these coordinates
+				    return; // unit already engaged by a Plasma Web at these coordinates, don't create new fireOrder
+				}
+			}
+	
+		    // Create a new FireOrder
+		    $newDamageFireOrder = new FireOrder(
+		        -1, "ballistic", $thisShip->id, $target->id,
+		        $this->id, -1, $gamedata->turn, 2, 
+		        100, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
+		        $cloudFireOrder->x, $cloudFireOrder->y, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
+		    );
+			$newDamageFireOrder->notes = 'Attack on fighters passing through';
+	        // Store the engagement with coordinates as the key
+	        PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey] = [
+	            'engaged' => true, // marking engagement
+	            'coordinates' => ['x' => $newDamageFireOrder->x, 'y' => $newDamageFireOrder->y] // store the x and y coordinates while they are still the cloud coordinate.
+	        ];		 	                
+
+			//Then change coordinates so AoE Damage and Replay are function correctly
+			$movement = null;
+		    foreach ($target->movement as $move){
+		        $movement = $move;
+		    }
+
+	        $targetPositionArray = $this->convertOffsetCoordinateToArray($movement->position);
+
+			$newDamageFireOrder->x = $targetPositionArray[0];
+			$newDamageFireOrder->y = $targetPositionArray[1];	
+				
+		    $newDamageFireOrder->addToDB = false;//Will be manually entered immediately below!
+		    $this->fireOrders[] = $newDamageFireOrder;
+		        
+		    //Save the fire order to database
+            Manager::insertSingleFiringOrder($gamedata, $newDamageFireOrder);
+            // Retrieve and handle fire orders from the DB
+			$dbFireOrders = Manager::retrieveFiringOrdersForWeapon($gamedata, $thisShip->id, $this->id);
+
+
+				if($dbFireOrders != null){
+					foreach($dbFireOrders as $dbFire){
+						$newDamageFireOrder->id = $dbFire->id;//Change id of newFireOrder to id assigned by database.
+						break; //Don't check the others, retrieved in Descending order so first one is the one we want!
+					}
+				}
+
+        }
+
+	}//End of createFireOrders()	
+
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') return; //Don't resolve ballistic 'cloud' fireOrders.
+			
+		$this->changeFiringMode($fireOrder->firingMode);
+			
+		$fireOrder->needed = 100;				
+		$fireOrder->updated = true;
+		$fireOrder->shots = 1;					
+		$fireOrder->notes .= 'Sand Caster direct shot.';
+
+//		if($fireOrder->type == "ballistic" && $fireOrder->damageclass != 'PersistentEffectPlasma') $fireOrder->notes = 'Attack on fighters passing through';
+				
+		if ($fireOrder->targetid != -1 && $fireOrder->type == "normal") {//Correct any direct fireOrders that targeted a ship.
+			$targetship = $gamedata->getShipById($fireOrder->targetid);
+			//insert correct target coordinates: last turns' target position
+			$targetShip = $gamedata->getShipById($fireOrder->targetid);			
+ 			$targetpos = $targetShip->getHexPos();
+			$fireOrder->x = $targetpos->q;
+			$fireOrder->y = $targetpos->r;
+			$fireOrder->targetid = -1; //correct the error
+			$fireOrder->calledid = -1; //just in case
+		} 		
+	}		
+		
+		
+	public function fire($gamedata, $fireOrder){
+		if($fireOrder->firingMode == 1) return; //Don't animate Defensive fire, it clogs up Replay
+		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') {
+            Manager::insertSingleFiringOrder($gamedata, $fireOrder); //But do insert to db for replay
+			return; //Don't resolve ballistic 'cloud' fireOrders.
+		}	
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+
+		$this->changeFiringMode($fireOrder->firingMode);		
+										
+		switch($this->firingMode){
+			case 1:	
+				$rolled = Dice::d(100);
+				$fireOrder->rolled = $rolled; ///and auto-hit
+				$fireOrder->shotshit++;
+											
+				$fireOrder->pubnotes .= "Damage and Hit Chance reduction effects applied to weapons fired from target hex."; //just information for player				
+								
+				break;
+									
+			case 2:		
+								
+				$rolled = Dice::d(100);
+				$fireOrder->rolled = $rolled; ///and auto-hit ;)
+				$fireOrder->shotshit++;
+				
+				if($fireOrder->type == "ballistic"){ //Plasma cloud attack, shouldn't draw power.
+					$fireOrder->pubnotes .= "<br>Sand cloud(s) damages fighters that pass through.";//just information for player.				
+				
+					//deal damage!  Will be to a particular flight, not genuinely AoE!
+					$targetFlight = $gamedata->getShipById($fireOrder->targetid);						
+					$this->AOEdamage($targetFlight, $shooter, $fireOrder, $gamedata);	
+					
+					$fireOrder->targetid = -1; //Do not need targetid anymore, change to -1			
+				
+				}else{//Anti-Fighter mode FIRED this turn, draw power if not boosted.
+					if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
+						PlasmaBattery::shipDrawPower($this->unit);
+					}
+									
+					$fireOrder->pubnotes .= "Sand cloud created on hex, remains in place until next Firing Phase!"; //just information for player.
+					
+					//deal damage!
+					$target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+					$ships1 = $gamedata->getShipsInDistance($target); //all ships on target hex
+								
+					foreach ($ships1 as $targetShip) if ($targetShip instanceOf FighterFlight) {
+						$this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+					}											
+
+				}
+			
+				break;
+
+		}	
+
+		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!			
+		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+						
+	} //endof function fire		
+	
+	
+	//and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
+	//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
+	public function AOEdamage($target, $shooter, $fireOrder, $gamedata){
+
+		$coordinatesKey = $fireOrder->x . ',' . $fireOrder->y; // This will be the key for the array
+	
+		if($fireOrder->type == "normal"){
+	        if (isset(PakmaraPlasmaWeb::$alreadyEngagedDirect[$target->id])){
+	        	$fireOrder->pubnotes .= "<br> No effect on fighters already damaged by a Sand Caster on this hex." ; //just information for player.
+	        	return; //unit already engaged by a previous direct Plasma Web at this hex.
+			}	
+			if (isset(PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey])) {
+				if (PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey]['engaged'] === true) {
+				    // Target was already engaged at these coordinates
+	        		$fireOrder->pubnotes .= "<br> No effect on fighters already damaged by a Sand Caster on this hex." ; //just information for player.				    
+				    return; // unit already engaged by a Plasma Web cloud at these coordinates, don't cause further damage.
+				}
+			}					
+		}	
+
+        if ($target->isDestroyed()) return; //no point allocating
+			
+        foreach ($target->systems as $fighter) {
+            if ($fighter == null || $fighter->isDestroyed()) {
+                    continue;
+        	}
+                
+		    //roll (and modify as appropriate) damage for this particular fighter:
+		    $damage = $this->getDamage($fireOrder);
+		    $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
+		    $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
+
+		    $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+		}			                
+
+		if($fireOrder->type == "normal"){		    		    
+			NexusSandCaster::$alreadyEngagedDirect[$target->id] = true;//mark engaged
+		}	
+	
+	}//endof AOEdamage()
+	
+		
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= 'DEFENSIVE - Fires at hex during the Firing Phase.';
+			$this->data["Special"] .= '<br>Applies -10 Intercept against all enemy fire from hex, and -2 damage against Antimatter, Ion, Laser, Particle, and Plasma attacks.';
+			$this->data["Special"] .= '<br>For Ballistic weapons, target hex from where shot was launched.';			
+			$this->data["Special"] .= '<br>ANTI-FIGHTER - Creates sand cloud dealing D6+1 Matter damage to all fighters in hex.';
+			$this->data["Special"] .= '<br>Must be boosted (no power cost) in Initial Orders for anti-fighter mode.';
+			$this->data["Special"] .= '<br>Cloud remains during next Movement Phase, damaging fighters moving through it.';			
+			$this->data["Special"] .= '<br>Sand Casters are NOT cumulative, each effect applies only once.';		 
+	 }
+
+	private function getBoostLevel($turn){
+		$boostLevel = 0;
+		foreach ($this->power as $i){
+				if ($i->turn != $turn) continue;
+				if ($i->type == 2){
+						$boostLevel += $i->amount;
+				}
+		}
+		return $boostLevel;
+	}
+
+   public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+		$ship = $this->getUnit();
+		
+		switch($gameData->phase){
+					
+				case 4: //Firing phase
+					
+				      $firingOrders = $this->getFireOrders($gameData->turn);
+			    	
+				      $originalFireOrder = null;
+					      
+				        foreach ($firingOrders as $fireOrder) { 				              		
+				            if ($fireOrder->type == "normal" && $fireOrder->firingMode == 2) { //Not the ballistic cloud effect, and not generated fireOrders passing through cloud.
+				                $originalFireOrder = $fireOrder;
+				                break; //no need to search further
+				                }
+							}    			
+						
+				    	if($originalFireOrder==null) return; //no appropriate fire order, end of work						
+							
+						$notekey = 'xCoordinate';
+						$noteHuman = 'Create Sand Cloud fireOrder x';
+						$notevalue = $originalFireOrder->x;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue   
+					
+						$notekey = 'yCoordinate';
+						$noteHuman = 'Create Sand Cloud fireOrder y';
+						$notevalue = $originalFireOrder->y;
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue 
+						
+				break;				
+		}
+	} //endof function generateIndividualNotes
+	
+
+	public function onIndividualNotesLoaded($gamedata)
+	{
+	    $ship = $this->getUnit();
+	    $xCoordinate = null;
+	    $yCoordinate = null;
+
+		//Look at last turn's Firing Phase notes and create ballistic 'cloud' firing orders where appropriate.  Purely visual effect so players can see where cloud is, actual damage will come from beforeFiringOrderResolution() and associated routines
+		if($gamedata->phase == 1){
+	    
+		    // Ensure individualNotes is initialized properly
+		    if (is_array($this->individualNotes)) {
+		        foreach ($this->individualNotes as $currNote) {	
+		            if ($currNote->turn == $gamedata->turn-1) {	    	            	
+		            	 
+		                // Check for x and y coordinates
+		                switch ($currNote->notekey) {
+		                    case 'xCoordinate':
+		                        $xCoordinate = $currNote->notevalue;
+		                        break;
+		                    case 'yCoordinate':
+		                        $yCoordinate = $currNote->notevalue;
+		                        break;
+		                }
+		                
+		                // Only proceed if both coordinates are set
+		                if ($xCoordinate !== null && $yCoordinate !== null) {
+
+		                    // Create a new FireOrder
+		                    $newFireOrder = new FireOrder(
+		                        -1, "ballistic", $ship->id, -1,
+		                        $this->id, -1, $gamedata->turn, 2, 
+		                        1, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
+		                        $xCoordinate, $yCoordinate, 'PersistentEffectPlasma', -1 // X, Y, damageclass, resolutionorder
+		                    ); 
+		                    
+							$newFireOrder->notes = "PersistentEffect";
+		                    $newFireOrder->addToDB = true;	                    
+		                    $this->fireOrders[] = $newFireOrder;
+		                    
+		                    // Clear coordinates once used
+		                    $xCoordinate = $yCoordinate = null;
+		                }
+		            }
+		        }
+		    }
+		}
+		
+	    // Clear individual notes, they're no longer needed
+	    $this->individualNotes = array();	
+
+		//Need to refresh ballistic fireOrder notes in Movement Phase for some reason.  These are used in Front End to display hex sprites!  
+		$firingOrders = $this->getFireOrders($gamedata->turn);				    	
+		$ballisticFireOrder = null;
+			foreach ($firingOrders as $fireOrder) { 
+				if ($fireOrder->type == "ballistic") { 
+					$ballisticFireOrder = $fireOrder;
+					break; //no need to search further
+					}
+				}    			
+								
+		if($ballisticFireOrder==null) return; //no appropriate fire order, end of work    
+
+		if($ballisticFireOrder->notes == "") $ballisticFireOrder->notes .= "PersistentEffect";			
+		    	
+	}//endof individualNotesLoaded()
+
+
+		public function getDamage($fireOrder){
+        	switch($this->firingMode){ 
+            	case 1:
+                	return 0; 
+			    			break;
+            	case 2:
+            	   	return Dice::d(6,1)+2;
+			    			break;		    			
+        	}
+		}
+
+		public function setMinDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->minDamage = 0;
+								break;
+						case 2:
+								$this->minDamage = 2;
+								break;							
+				}
+				$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		}							
+		
+		public function setMaxDamage(){
+				switch($this->firingMode){
+						case 1:
+								$this->maxDamage = 0;
+								break;
+						case 2:
+								$this->maxDamage = 7;
+								break;								
+				}
+				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		}
+
+
+    public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            $strippedSystem->autoHit = $this->autoHit;
+			$strippedSystem->noProjectile = $this->noProjectile;                                                   
+            return $strippedSystem;
+	}
+
+} //end of class NexusSandCaster
+
+
+
+
+
 
 
 

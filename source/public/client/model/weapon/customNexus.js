@@ -1166,6 +1166,50 @@ NexusRAMLauncher.prototype.calculateSpecialRangePenalty = function (distance) {
     return rangePenalty;
 };
 
+var NexusLightMaser = function NexusLightMaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+NexusLightMaser.prototype = Object.create(Laser.prototype);
+NexusLightMaser.prototype.constructor = NexusLightMaser;
+
+var NexusHeavyMaser = function NexusHeavyMaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+NexusHeavyMaser.prototype = Object.create(Laser.prototype);
+NexusHeavyMaser.prototype.constructor = NexusHeavyMaser;
+
+var NexusLightRadCannon = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+NexusLightRadCannon.prototype = Object.create( Weapon.prototype );
+NexusLightRadCannon.prototype.constructor = NexusLightRadCannon;
+
+var NexusSandCaster = function  NexusSandCaster(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusSandCaster.prototype = Object.create(Weapon.prototype);
+NexusSandCaster.prototype.constructor =  NexusSandCaster;
+
+NexusSandCaster.prototype.initializationUpdate = function () {
+    if(this.firingMode == 2){
+        const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
+        if(rangeCrit > 0) this.range = 1;
+        this.data['Range'] = this.range;   
+    }    
+	return this;
+}	
+
+NexusSandCaster.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+            return;
+        }
+    }
+};
 
 
 
