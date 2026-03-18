@@ -798,6 +798,9 @@ class Manager{
             }
     
             $ship->enhancementOptions = $value["enhancementOptions"] ?? [];
+            
+            // Map Mine deployment properties from frontend payload
+            $ship->bulkBuy = $value["bulkBuy"] ?? 1;
     
             $systems = $value["systems"] ?? [];
             foreach ($systems as $i => $system) {
@@ -1303,6 +1306,10 @@ class Manager{
             $ship->pointCostEnh = ($value["pointCostEnh"] ?? 0) + ($value["pointCostEnh2"] ?? 0);
             $ship->setMovements($movements);
             $ship->EW = $EW;
+            
+            if (isset($value["bulkBuy"])) {
+                $ship->bulkBuy = $value["bulkBuy"];
+            }
     
             if ($ship instanceof FighterFlight) {
                 $ship->flightSize = $value["flightSize"] ?? 1;

@@ -110,7 +110,7 @@ window.ajaxInterface = {
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({ faction: String(factionRequest) }),
-            timeout: 15000,
+            timeout: 30000,
             retryCodes: [503, 507], // 400 is fatal, do not retry
             maxAttempts: 3, // Limit retries to prevent piling on load
 
@@ -210,12 +210,12 @@ window.ajaxInterface = {
                 // Retry if status matches allowed codes and attempts remain
                 const retryCodes = options.retryCodes || [503, 507];
 
-                // Retry if status matches allowed codes, OR is timeout, OR is network error (0)
+                // Retry if status matches allowed codes, OR is network error (0)
+                // Note: Not retrying on 'timeout' for faction loads padding UI with errors
                 const isRetryableCode = xhr && retryCodes.includes(xhr.status);
-                const isTimeout = textStatus === 'timeout';
                 const isNetworkError = xhr && xhr.status === 0 && textStatus !== 'abort';
 
-                if ((isRetryableCode || isTimeout || isNetworkError) && attempt < maxAttempts) {
+                if ((isRetryableCode || isNetworkError) && attempt < maxAttempts) {
                     const delay = baseDelay * Math.pow(2, attempt) + Math.random() * 50;
                     console.warn(`AJAX issue (${textStatus || xhr.status}), retrying in ${Math.round(delay)}ms (attempt ${attempt}/${maxAttempts})`);
                     isRetrying = true;
@@ -430,6 +430,8 @@ window.ajaxInterface = {
                 'pointCostEnh': Math.round(ship.pointCostEnh),
                 'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
+
+            if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
 
             newShip.systems = Array();
 
@@ -685,6 +687,9 @@ window.ajaxInterface = {
                 'pointCostEnh': Math.round(ship.pointCostEnh),
                 'pointCostEnh2': Math.round(ship.pointCostEnh2)
             };
+
+            if (ship.bulkBuy !== undefined) newShip.bulkBuy = ship.bulkBuy;
+
             newShip.movement = Array();
             newShip.EW = Array();
             newShip.systems = Array();

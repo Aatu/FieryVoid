@@ -412,7 +412,7 @@ class PlasmaGun extends Plasma{
         }   
         
         public function getDamage($fireOrder){        return Dice::d(3)+6;   }
-        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMinDamage(){     $this->minDamage = 7 ;      }
         public function setMaxDamage(){     $this->maxDamage = 9 ;      }
 
     }

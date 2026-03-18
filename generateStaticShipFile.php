@@ -3,6 +3,7 @@
 // 12.2025 - Refactored to generate single shipsCombined.js
 
 ob_start("ob_gzhandler"); 	
+define('IN_STATIC_GENERATION', true);
 include_once './source/public/global.php';
 
 // ----------------------

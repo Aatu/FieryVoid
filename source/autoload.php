@@ -345,6 +345,7 @@ spl_autoload_register(
                 'forcedofflineoneturn' => '/server/model/cricialClasses.php',
                 'fleettestrule' => '/server/model/FleetTestRule.php',
                 'friendlyfirerule' => '/server/model/FriendlyFireRule.php',
+                'allowminesrule' => '/server/model/AllowMinesRule.php',
                 'frazi' => '/server/model/ships/narn/frazi.php',
                 'freetrader' => '/server/model/ships/llort/freeTrader.php',
                 'freetraderpulsar' => '/server/model/ships/llort/freeTraderPulsar.php',
@@ -2939,7 +2940,7 @@ spl_autoload_register(
 				'hyachokathkur' => '/server/model/ships/hyach/HyachOkathKur.php',
 				'hyachsenchlatkam' => '/server/model/ships/hyach/HyachSenchlatKam.php',
 				'hyachsenchlatkes' => '/server/model/ships/hyach/HyachSenchlatKes.php',
-				'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php', //OBSELETE	
+				//'hyachsenchlatkir' => '/server/model/ships/hyach/HyachSenchlatKir.php', //OBSELETE	
 				'hyachtachilakor' => '/server/model/ships/hyach/HyachTachilaKor.php',
 				'hyachtakaltikal' => '/server/model/ships/hyach/HyachTakaltiKal.php',
 				'hyachtakaltikam' => '/server/model/ships/hyach/HyachTakaltiKam.php',
@@ -2951,17 +2952,17 @@ spl_autoload_register(
 				'axor' => '/server/model/ships/korlyan/Axor.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
-				'kalavaram' => '/server/model/ships/korlyan/KalavarAM.php', //OBSELETE	
-				'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php', //OBSELETE	
+				//'kalavaram' => '/server/model/ships/korlyan/KalavarAM.php', //OBSELETE	
+				//'kalavarearlyam' => '/server/model/ships/korlyan/KalavarEarlyAM.php', //OBSELETE	
 				'kalavaroriginalam' => '/server/model/ships/korlyan/KalavarOriginalAM.php',
 				'kaltiam' => '/server/model/ships/korlyan/KaltiAM.php',
-				'koloskam' => '/server/model/ships/korlyan/KoloskAM.php', //OBSELETE	
-				'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php', //OBSELETE	
+				//'koloskam' => '/server/model/ships/korlyan/KoloskAM.php', //OBSELETE	
+				//'koloskearlyam' => '/server/model/ships/korlyan/KoloskEarlyAM.php', //OBSELETE	
 				'koloskovaam' => '/server/model/ships/korlyan/KoloskovaAM.php',
 				'koshaam' => '/server/model/ships/korlyan/KoshaAM.php',
 				'koshaearlyam' => '/server/model/ships/korlyan/KoshaEarlyAM.php',
-				'koskovaam' => '/server/model/ships/korlyan/KoskovaAM.php', //OBSELETE	
-				'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php', //OBSELETE	
+				//'koskovaam' => '/server/model/ships/korlyan/KoskovaAM.php', //OBSELETE	
+				//'koskovaearlyam' => '/server/model/ships/korlyan/KoskovaEarlyAM.php', //OBSELETE	
 				'leklantam' => '/server/model/ships/korlyan/LeklantAM.php',
 				'leklantearlyam' => '/server/model/ships/korlyan/LeklantEarlyAM.php',
 				'lekra' => '/server/model/ships/korlyan/Lekra.php',
@@ -2971,11 +2972,11 @@ spl_autoload_register(
 				'raklaviam' => '/server/model/ships/korlyan/RaklaviAM.php',
 				'solyrnam' => '/server/model/ships/korlyan/SolyrnAM.php',
 				'soskaam' => '/server/model/ships/korlyan/SoskaAM.php',
-				'talokiam' => '/server/model/ships/korlyan/TalokiAM.php',	//OBSELETE			
-				'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php', //OBSELETE	
+				//'talokiam' => '/server/model/ships/korlyan/TalokiAM.php',	//OBSELETE			
+				//'talokiearlyam' => '/server/model/ships/korlyan/TalokiEarlyAM.php', //OBSELETE	
 				'talokioriginalam' => '/server/model/ships/korlyan/TalokiOriginalAM.php',
 				'vaklaram' => '/server/model/ships/korlyan/VaklarAM.php',			
-				'trylkanam' => '/server/model/ships/korlyan/TrylkanAM.php', //OBSELETE	
+				//'trylkanam' => '/server/model/ships/korlyan/TrylkanAM.php', //OBSELETE	
 				'verlokaam' => '/server/model/ships/korlyan/VerlokaAM.php',								
                 //New versions of KL ships with remade PRoximity Laser, leaving the old ones above for a while to prevent games breaking.
 				'kalavaramnew' => '/server/model/ships/korlyan/KalavarAMNew.php',	
@@ -2993,8 +2994,8 @@ spl_autoload_register(
 				'limpetbore' => '/server/model/cricialClasses.php',                
 				'limpetboretravelling' => '/server/model/cricialClasses.php', 
 				
-         		'proximitylaser' => '/server/model/weapons/specialWeapons.php',  //OBSELETE
-         		'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php', //OBSELETE
+         		//'proximitylaser' => '/server/model/weapons/specialWeapons.php',  //OBSELETE
+         		//'proximitylaserlauncher' => '/server/model/weapons/specialWeapons.php', //OBSELETE
          		'proximitylasernew' => '/server/model/weapons/specialWeapons.php',                      		 
          		'multidefenselauncher' => '/server/model/weapons/customNexus.php', //missile racks themselves
          		'limpetboretorpedo' => '/server/model/weapons/torpedo.php', 				
@@ -3479,7 +3480,12 @@ spl_autoload_register(
                 //mines
 				'minestealth' => '/server/model/systems/baseSystems.php',
                 'mine' => '/server/model/ships/ShipClasses.php',
-                'captormine' => '/server/model/weapons/AoE.php',	
+                'captormine' => '/server/model/weapons/AoE.php',
+                'proximitymine' => '/server/model/weapons/AoE.php', 
+                'minecontrollerdew' => '/server/model/weapons/baseSystems.php',                   
+                'captormineterrain' => '/server/model/ships/terrain/captorMineTerrain.php',
+                'proxmineterrain' => '/server/model/ships/terrain/proxMineTerrain.php', 
+                'dewmineterrain' => '/server/model/ships/terrain/dewMineTerrain.php',                               
                 'captormineklb' => '/server/model/ships/korlyan/captorMineKLB.php',	
                 'captormineklw' => '/server/model/ships/korlyan/captorMineKLW.php',	                                
                 'captormineklh' => '/server/model/ships/korlyan/captorMineKLH.php',	

@@ -9,6 +9,54 @@ FV is licensed under GNU GPLv3
 
 # Installing development environment
 
+Make sure you have the following installed on your machine:
+
+- Docker and Docker Compose
+- Node.js and Yarn (for client-side frontend bundling) - Primarily Yarn.
+
+1. Build and Start the Environment
+Open a terminal in the project root folder (c:\FV_env\FieryVoid) and run:
+
+docker-compose up -d --build
+This will build and start the Nginx, PHP, and MariaDB containers in the background.
+
+(Note: The database is automatically initialized from db/emptyDatabase.sql on the very first start and securely saved to a persistent Docker volume).
+
+2. Accessing the Application
+Web Interface: Point your browser to http://localhost
+
+Database Access: You can connect to the database from a local client at localhost:3306 with the following credentials:
+User: root
+Password: fieryvoid (or possibly just leave blank)
+Database: B5CGM
+
+3. Setup Client-Side Development (Yarn)
+Since FieryVoid bundles legacy code, you'll need to install the Node dependencies locally so things recompile when you make edits:
+
+
+# First time setup
+yarn install
+# To watch and auto-rebuild JS files while editing
+yarn watch:legacy
+# To do a one-off build
+yarn build
+
+
+4. Interacting with the PHP Container
+If you need to run server-side scripts (like to generate new staticship files after adding new units, or changing class variables on server) or explore the backend container, you can drop into the PHP container's bash shell:
+
+docker-compose exec php bash
+
+Then navigate to /usr/src/current and run 'php generateStaticShipFile.php'
+
+5. Troubleshooting / Clean Rebuild
+If your containers get out of sync or you need to cleanly force a rebuild of the environment, use:
+
+docker-compose up -d --build --force-recreate
+
+
+## VAGRANT IS NO LONGER USED! ##
+
 1. Install virtualbox https://www.virtualbox.org/
 1. Install vagrant https://www.vagrantup.com/
 1. Make sure you have ssh client and terminal
@@ -44,11 +92,15 @@ How to edit client side now:
 You'll need to run yarn watch:legacy in FV folder when editing client files now, similar to how we run yarn watch when editing React files.
 
 # Image Optimiser:
+
+As images are now saved in Index mode, if you want to edit them you'll need to change to RGB mode (otherwise you lose alot of functionality).  In GIMP this is easily done via by Image->Mode->RGB.
+
+Do NOT run the command below when you add images, it's just something we should do every few months.
+
 Open your terminal in the project root (c:\FV_env\FieryVoid).
 Run the command:
 yarn run optimize-images
 
-As images are now saved in Index mode, if you want to edit them you'll need to change to RGB mode (otherwise you lose alot of functionality).  In GIMP this is easily done via by Image->Mode->RGB.
 
 # Sticky Images
 If you're finding images are not updating after you changed them, you can sometimes add ‘?v=2’ after .png to force image refresh.

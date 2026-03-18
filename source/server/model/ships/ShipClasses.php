@@ -48,6 +48,7 @@ class BaseShip {
 	public $mine = false;
     public $SixSidedShip = false;
 	public $isCombatUnit = true; //is this a combat unit (as opposed to non-combat - transport, freighter, civilian, explorer, diplomatic ship, yacht...)
+    public $bulkBuy = 1; //Variable to track mass purchases in Fleet Selection.
 
 	//non-combat ships cannot be taken in pickup battles by standard tourtnament rules
 	//rule of thumb is that if it has cargo bays, then it's not a combat ship - but it's far from proof
@@ -2900,8 +2901,8 @@ class Mine extends OSAT{
     public $canvasSize = 80;  
     public $trueStealth = true;
     public $signature = 0;
-    public $detectedSignature = 0;
-    public $activated = false; //For DEW mines. 
+    public $detectedSignature = -1; //Adjusted signature for detected DEW mines, also seves as a way to identift these type of mines.
+    //public $activated = false; //For DEW mines. 
     public $spawned = -1; //To denote the turn a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $canPreOrder = true;//Needed to set ranges for spawned Mines in Pre-Turn phase.
 
@@ -2920,6 +2921,14 @@ class Mine extends OSAT{
 
         return $locs;
     }
+
+    public function stripForJson() {
+        $strippedShip = parent::stripForJson();
+        if($this->detectedSignature !== -1) $strippedShip->signature = $this->signature; //Need to send updated Signature values for DEW mine weapons.
+        return $strippedShip;
+    }    
+
+
 }
 
 

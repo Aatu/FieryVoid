@@ -169,6 +169,10 @@
                 </div>    
 
                 <div class="settings-group movementspacecontainer">
+                     <input id="allowMinesCheck" type="checkbox" name="allowMinesCheck"> <label for="allowMinesCheck" class="clickable">Allow Mines</label>
+                </div>                 
+                
+                <div class="settings-group movementspacecontainer">
                      <input id="friendlyFireCheck" type="checkbox" name="friendlyFireCheck"> <label for="friendlyFireCheck" class="clickable">Friendly Fire</label>
                 </div>
 

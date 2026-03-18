@@ -26,6 +26,13 @@ class HyachDovoch extends FighterFlight
 		$this->notes = 'Contains a Dovoch fighter with Interdictor';       
 
 		$this->iniativebonus = 18 *5;
+		$this->notes .= "<br>You need to have at least two fighters to generate one with an interdictor.";
+		
+		// Ensure static generation captures the Dovoch at index 1
+		if (defined('IN_STATIC_GENERATION')) {
+			$this->flightSize = 6;
+		}
+		
 		$this->populate();
 	}
 
@@ -43,10 +50,12 @@ class HyachDovoch extends FighterFlight
 			$fighter->imagePath = "img/ships/HyachDartha.png";
 			$fighter->iconPath = "img/ships/HyachDartha_Large.png";
 
-			if ($i == 1) {
+			$actualIndex = $current + $i;
+
+			if ($actualIndex == 1) {
 				$frontGun2 = new FtrInterdictor(330, 30);
 				$fighter->addFrontSystem($frontGun2);
-//			$fighter->displayName = "Dovoch";	//FV appears to take one sample fighter name and apply to all, so this didn't work unfortunately.			
+				$fighter->displayName = "Dovoch";
 			} else {
 				$frontGun = new LtBlastLaser(330, 30);
 				$fighter->addFrontSystem($frontGun);

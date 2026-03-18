@@ -157,8 +157,8 @@ window.fleetListManager = {
         // Add grouped mines to the list
         for (var mineClass in mineGroups) {
             var mines = mineGroups[mineClass];
-            var mineCount = mines.length;
             var firstMine = mines[0];
+            var bulkBuy = 0;
 
             fleetlistline = template.clone(true);
             var shiptype = "Mine";
@@ -168,16 +168,36 @@ window.fleetListManager = {
 
             for (var m in mines) {
                 var mine = mines[m];
-                var mBaseValue = Math.round(mine.pointCost + mine.pointCostEnh + mine.pointCostEnh2);
+                var mCount = mine.bulkBuy || 1;
+                bulkBuy += mCount;
+                var mBaseValue = Math.round((mine.pointCost + mine.pointCostEnh + mine.pointCostEnh2) * mCount);
                 var mCurrValue = Math.round(mBaseValue * mine.combatValue / 100);
                 combinedBaseValue += mBaseValue;
                 combinedCurrValue += mCurrValue;
             }
 
-            totalBaseValue += combinedBaseValue;
-            totalCurrValue += combinedCurrValue;
+            var uniqueClassCount = Object.keys(mineGroups).length;
+            var surchargeMultiplier = 1 + ((uniqueClassCount - 1) * 0.10);
 
-            var displayName = mineClass + " (" + mineCount + ")";
+            // Apply fleet-wide 100pt premium and class surcharges uniformly to the display values
+            // To make it look right on a per-row basis, we take the raw mine group cost, 
+            // add its proportional share of the 100pt premium, and multiply by surcharge.
+            var rawTotalMineCost = 0;
+            for (var mC in mineGroups) {
+                for (var mm in mineGroups[mC]) {
+                    var mmCount = mineGroups[mC][mm].bulkBuy || 1;
+                    rawTotalMineCost += Math.round((mineGroups[mC][mm].pointCost + mineGroups[mC][mm].pointCostEnh + mineGroups[mC][mm].pointCostEnh2) * mmCount);
+                }
+            }
+
+            var GroupProportion = combinedBaseValue / rawTotalMineCost;
+            var finalGroupBaseValue = Math.round((combinedBaseValue + (100 * GroupProportion)) * surchargeMultiplier);
+            var finalGroupCurrValue = Math.round(finalGroupBaseValue * firstMine.combatValue / 100);
+
+            totalBaseValue += finalGroupBaseValue;
+            totalCurrValue += finalGroupCurrValue;
+
+            var displayName = mineClass + " (" + bulkBuy + ")";
 
             fleetlistline.html(
                 "<span>" +

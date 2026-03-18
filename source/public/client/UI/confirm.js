@@ -114,6 +114,10 @@ window.confirm = {
 
     getTotalCost: function getTotalCost() {
 
+        if ($(".confirm #mineQuantity").length > 0) {
+            return confirm.getTotalCostMine();
+        }
+
         var flightSize = $(".fighterAmount").html();
         if (!flightSize) {
             flightSize = 1;
@@ -160,6 +164,33 @@ window.confirm = {
 
         var totalCostSpan = $(".confirm .totalUnitCostAmount");
         totalCostSpan.data("value", totalCost);
+        totalCostSpan.html(totalCost);
+    },
+
+    getTotalCostMine: function getTotalCostMine() {
+        var baseCost = parseFloat($(".confirm .totalUnitCostAmount").data("baseCost")) || parseFloat($(".confirm .totalUnitCostAmount").data("value"));
+
+        //add enhancement cost	   
+        var enhCost = 0;
+        var enhNo = 0;
+        var target = $(".confirm .selectAmount.shpenh" + enhNo);
+        while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
+            enhCost += target.data("enhCost");
+            //go to next enhancement
+            enhNo++;
+            target = $(".confirm .selectAmount.shpenh" + enhNo);
+        }
+
+        var totalCost = baseCost + enhCost;
+
+        // If buying mines, multiply final total by designated quantity
+        var mineQuantity = parseInt($(".confirm #mineQuantity").val());
+        if (!isNaN(mineQuantity) && mineQuantity > 0) {
+            totalCost *= mineQuantity;
+        }
+
+        var totalCostSpan = $(".confirm .totalUnitCostAmount");
+        totalCostSpan.data("value", totalCost); // This updates the DOM data
 
         totalCostSpan.html(totalCost);
     },
@@ -1178,6 +1209,145 @@ window.confirm = {
         a.fadeIn(250);
     },
 
+    showBuyMine: function showBuyMine(ship, callback) {
+        var e = $(this.whtml);
+
+        var totalTemplate = $(".totalUnitCost");
+        var totalItem = totalTemplate.clone(true).prependTo(e);
+
+        var pointCost = ship.pointCost;
+
+        $(".totalUnitCostText", totalItem).html("Cost Per Mine");
+        $(".totalUnitCostAmount", totalItem).html(pointCost);
+        $(".totalUnitCostAmount", totalItem).data("value", pointCost);
+
+        $(totalItem).show();
+
+        //ship enhancements
+        for (var i in ship.enhancementOptions) {
+            var enhancement = ship.enhancementOptions[i];
+            var enhID = enhancement[0];
+            var enhName = enhancement[1];
+            var enhLimit = enhancement[3];
+            var enhPrice = enhancement[4];
+            var enhPriceStep = enhancement[5];
+            var enhIsOption = enhancement[6];
+
+            var template = $(".missileSelectItem");
+            var item = template.clone(true).prependTo(e);
+
+            var selectAmountItem = $(".selectAmount", item);
+
+            selectAmountItem.html("0");
+            selectAmountItem.attr("contenteditable", "true");
+            selectAmountItem.addClass("shpenh" + i);
+            selectAmountItem.data('enhID', enhID);
+            selectAmountItem.data('count', 0);
+            selectAmountItem.data('enhCost', 0);
+            selectAmountItem.data('min', 0);
+            selectAmountItem.data('max', enhLimit);
+            selectAmountItem.data('enhPrice', enhPrice);
+            selectAmountItem.data('enhPriceStep', enhPriceStep);
+
+            selectAmountItem.on("focus", confirm.selectAllTextOnFocus);
+            selectAmountItem.on("input", confirm.handleInputChange);
+            selectAmountItem.on("keydown", confirm.preventNonNumericInput);
+            selectAmountItem.on("wheel", confirm.handleMouseWheel);
+
+            //Add (OPTION) at the beginning of name of options
+            if (enhIsOption) enhName = " <span style='color:rgb(224, 185, 57) ;'>(OPTION)</span> " + enhName;
+
+            var nameExpanded = enhName;
+            nameExpanded = nameExpanded + ' (';
+            if (enhLimit > 1) nameExpanded += 'up to ' + enhLimit + ' levels, ';
+            nameExpanded += enhPrice + 'pts';
+            if ((enhPriceStep != 0) && (enhLimit > 1)) {
+                nameExpanded = nameExpanded + ' plus ' + enhPriceStep + 'pts per level';
+            }
+            nameExpanded = nameExpanded + ')';
+
+            $(".selectText", item).html(nameExpanded);
+            $(item).show();
+
+            var plusButton = $(".plusButton", item);
+            plusButton.data("enhNo", i);
+            var minusButton = $(".minusButton", item);
+            minusButton.data("enhNo", i);
+
+            $(".plusButton", item).on("click", confirm.doOnPlusEnhancement);
+            $(".minusButton", item).on("click", confirm.doOnMinusEnhancement);
+        }
+
+        if (ship.enhancementOptions && ship.enhancementOptions.length > 0) {
+            $('<div class="missileselect"><label>Here you may select enhancements (applied to ALL mines in this purchase).</label></div>').prependTo(e);
+        }
+
+        // Added to support Enhancement select recalculations in getTotalCost()
+        var totalTemplate = $(".totalUnitCost");
+        var totalItem = totalTemplate.clone(true).prependTo(e);
+
+        $(".totalUnitCostText", totalItem).html("Total Unit Cost");
+        $(".totalUnitCostAmount", totalItem).html(ship.pointCost);
+        $(".totalUnitCostAmount", totalItem).data("value", ship.pointCost);
+        $(".totalUnitCostAmount", totalItem).data("baseCost", ship.pointCost);
+        $(totalItem).show();
+
+
+        // Mine Settings Fields
+        var html = '<div class="mineSettings">';
+        html += '<div style="margin-bottom: 5px;">Mines will be placed randomly within the player\'s deployment zone boundaries based on the quantity specified. (NOTE: 10% class surcharge added separately to fleet total)</div>';
+        html += '<label>Quantity: <input type="number" id="mineQuantity" value="10" min="1" style="width: 50px; text-align: center;"></label><br>';
+        html += '</div>';
+
+        var settingsBlock = $(html).prependTo(e);
+
+        // Add mousewheel scroll support to the input field
+        $('#mineQuantity', settingsBlock).on('wheel', function (e) {
+            e.preventDefault();
+            var step = parseInt($(this).attr('step')) || 1;
+            var val = parseInt($(this).val()) || 1;
+
+            if (e.originalEvent.deltaY < 0) {
+                $(this).val(val + step);
+            } else {
+                var min = parseInt($(this).attr('min')) || 1;
+                if (val - step >= min) {
+                    $(this).val(val - step);
+                }
+            }
+            confirm.getTotalCost();
+        });
+
+        $('#mineQuantity', settingsBlock).on('input', function () {
+            confirm.getTotalCost();
+        });
+
+        $('<label>Configure ' + ship.shipClass + ' Purchase:</label><br>').prependTo(e);
+
+        $(".confirmok", e).on("click", function () {
+            var q = parseInt($('#mineQuantity', e).val());
+
+            if (isNaN(q) || q < 1) q = 1;
+
+            var results = {
+                quantity: q
+            };
+
+            var shipclass = $(this).data("shipclass");
+            callback(results, shipclass);
+            $(".confirm").remove();
+        });
+
+        $(".confirmcancel", e).on("click", function () {
+            $(".confirm").remove();
+        });
+
+        $(".confirmok", e).data("shipclass", ship.phpclass);
+
+        var a = e.appendTo("body");
+        confirm.getTotalCost();
+        a.fadeIn(250);
+    },
 
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {

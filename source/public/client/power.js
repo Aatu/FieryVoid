@@ -221,6 +221,7 @@ shipManager.power = {
 
 			if (ship.flight) continue;
 			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (ship.mine) continue;
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
@@ -244,7 +245,8 @@ shipManager.power = {
 			var counter = 0;
 			for (var i in gamedata.ships) {
 				var ship = gamedata.ships[i];
-				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;							
+				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;	
+				if (ship.mine) continue;										
 				if (ship.unavailable) continue;
 				if (ship.flight) continue;
 				if (ship.userid != gamedata.thisplayer) continue;

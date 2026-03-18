@@ -281,6 +281,53 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     critNames: critNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
+            case "ball":
+                if (weapon.name === "ProximityMine") {
+                    var targetPos = getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired);
+                    var duration = 1000;
+                    var explosion = new Explosion(this.particleEmitterContainer, {
+                        size: 60 * weapon.animationExplosionScale,
+                        position: weaponOrigin,
+                        type: "emp",
+                        color: color,
+                        time: startTime
+                    });
+
+                    if (hit && damagedNames && this.systemDestroyedEffect) {
+                        this.systemDestroyedEffect.add(targetPos, damagedNames, startTime + 500);
+                    }
+                    if (hit && critNames && this.systemDestroyedEffect) {
+                        this.systemDestroyedEffect.add(targetPos, critNames, startTime + 500, 'crit');
+                    }
+
+                    var playedImpactSound = false;
+                    var soundVolume = 0.1;
+                    if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
+                        TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.wav");
+                    }
+
+                    return {
+                        render: function(now, total, last, delta, zoom, back, paused) {
+                            explosion.render(now, total, last, delta, zoom, back, paused);
+                            if (total >= startTime && !playedImpactSound && gamedata.playAudio && !paused && !back) {
+                                try {
+                                    if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
+                                        var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
+                                        explosionSound.volume = soundVolume;
+                                        explosionSound.currentTime = 0;
+                                        explosionSound.play().catch(function() {});
+                                    }
+                                    playedImpactSound = true;
+                                } catch (e) {
+                                    console.warn("Mine explosion sound failed:", e);
+                                }
+                            }
+                        },
+                        getDuration: function() { return duration; },
+                        cleanUp: function() { explosion.cleanUp(); }
+                    };
+                }
+                // Fallthrough for other weapons using ball/torpedo
             case "torpedo":
                 return new TorpedoEffect(this.particleEmitterContainer, {
                     size: 150 * weapon.animationExplosionScale,

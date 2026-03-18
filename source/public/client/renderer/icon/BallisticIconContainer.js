@@ -214,17 +214,17 @@ window.BallisticIconContainer = function () {
 		if (replay) {
 			if (ballistic.damageclass === 'PersistentEffectPlasma' && ballistic.targetid === -1 && ballistic.notes !== 'PlasmaCloud') return;
 			if (!shooter.flight && weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) {
-				for(var i in weapon.fireOrders){
-					var otherBall = weapon.fireOrders[i]; 
-					if(otherBall.damageclass == "SecondAttack"){
+				for (var i in weapon.fireOrders) {
+					var otherBall = weapon.fireOrders[i];
+					if (otherBall.damageclass == "SecondAttack") {
 						hideTargetAlways = false; //stays false effecitvely
 						break;
-					}else{
+					} else {
 						hideTargetAlways = true; //No second attack after hex shot, don't show e.g. Ballistic Mine Launchers.	
 					}
-				}			 
+				}
 			}
-		}	
+		}
 
 		let targetPosition = null;
 		let targetIcon = null;
@@ -353,8 +353,8 @@ window.BallisticIconContainer = function () {
 		// TARGET SPRITE
 		let targetSprite = null;
 		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetid, this.ballisticIcons)) {
-			if (targetPosition) {
-				targetSprite = new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);
+			if (targetPosition || targetIcon) {
+				targetSprite = new BallisticSprite(targetPosition || { x: 0, y: 0 }, targetType, text, textColour, iconImage);
 				if (targetIcon) {
 					targetIcon.mesh.add(targetSprite.mesh);
 				} else {
@@ -372,13 +372,13 @@ window.BallisticIconContainer = function () {
 			launchSprite,
 			targetSprite,
 			used: true,
-			splash: true
+			splash: splash
 		});
 	}
 
-	const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
+	const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition && icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
 
-	const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId)))
+	const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => (targetId !== -1 && icon.targetId === targetId) || (position && icon.position && icon.position.x === position.x && icon.position.y === position.y))
 
 
 	function updateBallisticIcon(icon) {
@@ -451,7 +451,7 @@ window.BallisticIconContainer = function () {
 		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
 		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
 		if (replay) {
-			if( !shooter.flight && weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;	
+			if (weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;
 		}
 		// Get launch position (may be overwritten later)
 		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
@@ -778,7 +778,7 @@ window.BallisticIconContainer = function () {
 		ctx.fillStyle = textColour;
 		ctx.textAlign = "center";
 		ctx.textBaseline = "middle";
-		ctx.globalAlpha = 0.6;
+		ctx.globalAlpha = 0.5;
 
 		let number = 1;
 
