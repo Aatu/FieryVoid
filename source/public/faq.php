@@ -229,7 +229,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="escorts" >Fighter Escorts</h3>
         <ul>
-            <li>Fighter units can escort friendly ships and in doing so use their guns to help shoot down ballistic weapons targeted at that ship.</li>
+            <li>Fighter units can escort friendly ships that are in the same hex in order to use their guns to help intercept ballistic weapons targeted at that ship(s).</li>
             <li>To escort a ship, the fighter unit must start AND end its movement in the same hex as the ship they are escorting.  Where this is the case,
                 the fighters will use their weapons to intercept ballistics on behalf of the ship providing all other conditions of intercept are true e.g. 
                 their weapons have an intercept rating, the incoming shot is in arc, the fighters are not jinking etc.        
