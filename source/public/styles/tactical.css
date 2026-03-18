@@ -626,15 +626,13 @@ body {
 }
 
 #gameInfoButtons {
-    position: absolute;
-    /* Absolute positioning */
+    position: relative;
+    /* Relative positioning to flow normally in the element */
+    text-align: right;
+    /* Align buttons to the right */
     font-size: 14px;
     font-style: normal;
     color: #e0e7ef;
-    top: 0;
-    /* Align to the top */
-    right: 0;
-    /* Align to the right */
     padding-top: 2px;
     padding-right: 2px;
     /* Adjust for padding from the right side */
@@ -735,7 +733,7 @@ body {
 }
 
 .fleetlistentry {
-    padding-top: 15px;
+    padding-top: 10px;
     padding-left: 5px;
     padding-bottom: 5px;
     float: left;
