@@ -44,6 +44,14 @@
     <title>Fiery Void</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui' />
+
+    <!-- Preload critical bundles to parallelize their download with the large inline JSON payloads below -->
+    <link rel="preload" href="client/UI/reactJs/UI.bundle.js" as="script">
+    <?php $debug = isset($_GET['debug']); ?>
+    <?php if (!$debug): ?>
+    <link rel="preload" href="client/game.legacy.bundle.js" as="script">
+    <?php endif; ?>
+    
     <link href="styles/tactical.css" rel="stylesheet" type="text/css">
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
@@ -139,7 +147,6 @@
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
-    <?php $debug = isset($_GET['debug']); ?>
     <?php if ($debug): ?>
     <script defer src="client/lib/graphics.js"></script>
     <script defer src="client/lib/HexagonMath.js"></script>
