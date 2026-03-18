@@ -376,8 +376,6 @@ window.gamedata = {
 		if (ship.mine && ship.bulkBuy && ship.bulkBuy > 1) {
 			displayCost = ((ship.pointCost + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0)) * ship.bulkBuy);
 			displayName = ship.name + ' (' + ship.bulkBuy + ')';
-		} else if (ship.flight) {
-			displayCost = ship.pointCost * ship.flightSize / 6;
 		}
 
 		if (ship.mine && ship.bulkBuy && ship.bulkBuy > 1) {
@@ -1381,8 +1379,6 @@ window.gamedata = {
 			if (ship.mine && ship.bulkBuy && ship.bulkBuy > 1) {
 				displayCost = ((ship.pointCost + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0)) * ship.bulkBuy);
 				displayName = ship.name + ' (' + ship.bulkBuy + ')';
-			} else if (ship.flight) {
-				displayCost = ship.pointCost * ship.flightSize / 6;
 			}
 
 			if (ship.mine && ship.bulkBuy && ship.bulkBuy > 1) {
