@@ -31,7 +31,8 @@ class Octuran extends BaseShip{
         $this->pivotcost = 4;
          
         $this->addPrimarySystem(new Reactor(8, 35, 0, 0));
-        $this->addPrimarySystem(new CnC(8, 25, 0, 0));
+//        $this->addPrimarySystem(new CnC(8, 25, 0, 0));
+		$this->addPrimarySystem(new FlagBridge(8, 25, 0, 1, 'Valheru Command Bonus', 60,  true, true, true, false, array("Centauri Republic", "Centauri Republic (WotCR)")));
         $this->addPrimarySystem(new Scanner(8, 22, 6, 10));
         $this->addPrimarySystem(new Engine(7, 26, 0, 10, 3));
 		$this->addPrimarySystem(new Hangar(7, 13, 12));

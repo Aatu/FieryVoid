@@ -15,4 +15,3 @@ nano*
 *.log
 /node_modules
 /source/public/static
-*.legacy.bundle.js

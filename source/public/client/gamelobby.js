@@ -203,6 +203,9 @@ window.gamedata = {
 			case "Escalation Wars Sshel'ath Alliance":
 				powerRating = 'Tier 2; Custom faction';
 				break;
+			case "House Valheru":
+				powerRating = 'Tier 1; Custom Centauri faction';
+				break;
 			case 'Nexus Brixadii Clans (early)':
 				powerRating = 'Tier 3; Custom faction';
 				break;
@@ -225,10 +228,13 @@ window.gamedata = {
 				powerRating = 'Tier 2; Custom faction';
 				break;
 			case 'Nexus Makar Federation (early)':
-				powerRating = 'Tier 3; Custom faction, Playtest';
+				powerRating = 'Tier 3; Custom faction';
 				break;
 			case 'Nexus Makar Federation':
-				powerRating = 'Tier 2; Custom faction, Playtest';
+				powerRating = 'Tier 2; Custom faction';
+				break;
+			case 'Nexus Polaren Confederacy (early)':
+				powerRating = 'Tier 3; Custom faction, Playtest';
 				break;
 			case 'Nexus Sal-bez Coalition (early)':
 				powerRating = 'Tier 3; Custom faction';

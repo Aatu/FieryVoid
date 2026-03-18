@@ -1080,7 +1080,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
 <h3 id="customfactions" style="">CUSTOM FACTIONS</h3>
     <p>These factions have been created by the community using the Fiery Void framework.  Some of them should be considered balanced against each other (e.g. Nexus units will be fairly balanced against other Nexus units), 
-        but will unusually be unbalanced one way or another against the official B5 Wars factions.</p>         
+        but will usually be unbalanced one way or another against the official B5 Wars factions.</p>         
 
     <h4 id="bsg" style="">Battlestar Galactica</h4>
     <p>The Battlestar Galactica ‘Colonials’ (Tier 2) and the ‘12 Colonies of Kobol’ (Tier 1) factions are parallel creations by Fred and Kirill respectively. 
@@ -1124,7 +1124,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             They were an early threat to the Circasian Empire as it expanded its own sphere of influence. These raiders operate cast-off Chouka military and civilian ships and fighters. 
             Their weapons are sourced from the Chouka, along with limited supplies from other black market sources. 
             Because of their ties to the Chouka government, these raiders are fairly well armed compared to the Circasian and Chouka fleets and are comparable to other low tech raiders in the B5 universe.</p>
-    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>
 
     <h4 id="chouka" style="">CHOUKA THEOCRACY</h4>
         <p>The Chouka Theocracy was a minor regional power in the Escalation Wars universe, and the Circasian's opponents in their first major interstellar war. 
@@ -1134,11 +1134,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h5>Point Plasma Guns</h5>
             <li>A specialized, flak-style system to defend their ships. This can intercept for friendly units and is capable of intercepting lasers.</li>
         <h5>Gravitic Tracting Rod</h5>
-            <li>This rare device was only found on the Apostle Holy Cruiser. It was used to tractor on to smaller craft and draw them closer to dock with the ship for boarding. 
-                In Fiery Void, the Tracting Rod instead gives the target an initiative a thrust penalty.</li>
+            <li>This rare device was only found on the Apostle Holy Cruiser. It was used to tractor on to smaller craft and draw them closer to dock with the ship for boarding.</li>
         <h5>Light Energy Mine</h5>
             <li>This is a smaller version of the Energy Mine used by the Narn. It has a shorter range (25 hexes) and does less damage (10/5) than the conventional Energy Mine.</li>                
-    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>
 
     <h4 id="circasian" style="">CIRCASIAN EMPIRE</h4>
         <p>The Circasians are one of the two central powers in the Escalation Wars milieu. These Dilgar-like humanoids started as a small minor power surrounded by other, more established empires but through political maneuvering and conquest they were able to eventually carve out a major imperium of their own. 
@@ -1149,7 +1148,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h5>Particle Lance</h5>
             <li>An avenue of advanced R&D before the war, this weapon was an attempt to develop a heavier version of the Light Particle Cannon. 
                 Like the Gravitic Lance, this weapon is capable of firing as one more powerful weapon or as two weaker Light Particle Cannons.</li>              
-    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>
 
     <h4 id="kastan" style="">KASTAN IMPERIAN MONARCHY</h4>
         <p>The Kastan inhabit a remote location of hyperspace deep within the Rapids of Rodirra, a treacherous section of hyperspace that makes travel to or from the Kastan territories difficult at best (and impossible at worst). 
@@ -1160,7 +1159,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>The Kastan developed an effective short range anti-fighter laser weapon for their ships.</li>
         <h5>Pulse Torpedo</h5>
             <li>This weapon fires a number of small munitions at a target, designed to strip targets of weapons and external systems prior to closing to close range.</li>               
-    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>
+    <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>
     
     <h4 id="sshelath" style="">SSHEL'ATH ALLIANCE</h4>
         <p>The Sshel'ath Alliance was formed out of the civil war between the two largest Sshel'ath factions. The early Alliance focused on growth of the homeworld, as they were blocked by the more established Chouka Theocracy and Novon Trade Lords. Two conflicts with the Novon showed that action against this faction  was ill-advised. 
@@ -1173,7 +1172,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>The EM Torpedo was developed to counter Novon shields. This ballistic weapon releases a large electromagnetic pulse and can destroy or short out enemy systems.</li>
         <h5>Electron Polarizer</h5>
             <li>A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.</li>                
-    <a class="back-to-top" href="#escalationwars">↩ Back to Nexus Universe</a>    
+    <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>    
 
 
 
@@ -1181,8 +1180,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="nexus" style="">NEXUS UNIVERSE</h4>
     <p>The Nexus setting is designed by Jeremy and Geoffrey Stano. 
         The current factions in Fiery Void (and described below) are the Brixadii Clans, Union of Craytan States, Dalithorn Commonwealth, 
-        Federation of Makar, Sal-bez Coalition, and the Velrax Republic. 
-        The Polaren should make their first appearance by the end of 2025. </p>
+        Federation of Makar, Polaren Confederacy, Sal-bez Coalition, and the Velrax Republic.  </p>
     <p>By design, Nexus is a lower tech setting. It is characterized by more basic weapons and lower sensor values. 
         Over time the factions evolve better units and these are available to play as well. 
         The Nexus factions can be sub-divided into four "tech levels" or "tech eras", of which the first three are available in Fiery Void. 
@@ -1198,6 +1196,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><a href="#crayton">UNION OF CRAYTON STATES</a></li>                
             <li><a href="#dalithorn">DALITHORN COMMONWEALTH</a></li>
             <li><a href="#makar">FEDERATION OF MAKAR</a></li>
+            <li><a href="#polaren">POLAREN CONFEDERACY</a></li>
             <li><a href="#salbez">SAL-BEZ COALITION</a></li>   
             <li><a href="#velrax">VELRAX REPUBLIC</a></li>                                                                      
         </ul>     
@@ -1293,6 +1292,32 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>Tech Level 1: Pre-contact through the Jump War (up through the 2050s).</li>
                 <li>Tech Level 2: Jump War era through the War of Ascendancy era (2050s through the 2110s).</li> 
                 <li>Tech Level 3: War of Ascendancy through the First War of Control (2110s through th 2150s).</li>                  
+            </ul> 
+    <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
+
+    <h4 id="polaren" style="">POLAREN CONFEDERACY</h4>
+        <p>The Polaren are a difficult faction to quantify. Outwardly, they look like plants, but they are highly mobile and have many animal-like characteristics.
+			They can derive energy from photosynthesis, but also chemosynthesis by "eating" the atmosphere. 
+			This ability has led to the Polaren not being fully trusted by the other powers after they captured two Sal-bez worlds and heavily terraformed them to be toxic to other factions. 
+			Polaren politics are just as hard to quantify with a dizzy array of every changing alliances. The Polaren were one of the earliest space-faring factions and have fought several civil wars due to their political differences. 
+			The Polaren developed numerous "non-violent" weapons to be able to disable opposing ships. The allowed them to be captured, but more importantly, return the ship to service relatively quickly. 
+			The Polaren had to adapt when they encountered the Sal-bez in order to help their ships cause more damage to their targets. 
+			Due to Polaren physiology, they use light combat vessels extensively,even among the Nexus factions. The Polaren also have an low-level telepathic ability that intensifies in larger numbers.</p> 
+
+        <h5>Initiative Bonus</h5>
+            <li>For every four Polaren light combat vessels or larger, the Polaren gain +5 initiative up to a total of +50.</li>
+
+        <h5>Radiation Cannons</h5>
+            <li>The Polaren are exceptionally hardy to radiation (needed due to conditions on their homeworld) and use rad cannons to quickly disable and board opposing vessels.</li>
+        
+        <h5>Sand Caster</h5>
+            <li>This operates nearly identically to a plasma web, but has slightly better range.</li> 
+
+        <h5>Tech Levels</h5>
+            <ul class="circle-list">
+                <li>Tech Level 1: Pre-contact through the Garentithean Revolt and Tyr Discovery (up through the 2050s).</li>
+                <li>Tech Level 2: Tyr Discovery era through the Polarn Conflict era (2050s through the 2120s).</li> 
+                <li>Tech Level 3: Polaren Conflict era through the First War of Control (2120s through th 2150s).</li>                  
             </ul> 
     <a class="back-to-top" href="#nexus">↩ Back to Nexus Universe</a>
 
@@ -1439,6 +1464,16 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Drazi Freehold (WotCR)</li>
         <li>Pak'ma'ra Confederacy</li>
         <li>Raiders & Privateers</li>
+        <li>Escalation Wars Chouka Theocracy</li>
+        <li>Escalation Wars Circasian Empire</li>
+        <li>Escalation Wars Kastan Monarchy</li>
+        <li>Escalation Wars Sshel'ath Alliance</li>
+        <li>Nexus Brixadii Clans</li>
+        <li>Nexus Craytan Union</li>
+        <li>Nexus Dalithorn Commonwealth</li>
+        <li>Nexus Makar Federation</li>
+        <li>Nexus Sal-bez Coalition</li>
+        <li>Nexus Velrax Republic</li>
     <a class="back-to-top" href="#top">↩ Back to Top</a>    
 
     <h4 id="tier3" style="">TIER 3 - LOW COMPETITIVENESS </h4>
@@ -1454,6 +1489,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li>Markab Theocracy</li>
         <li>Rogolon Dynasty</li>
         <li>Usuuth Coalition</li>
+        <li>Escalation Wars Blood Sword Raiders</li>
+        <li>Escalation Wars Chouka Raiders</li>
+        <li>Nexus Brixadii Clans (early)</li>
+        <li>Nexus Craytan Union (early)</li>
+        <li>Nexus Dalithorn Commonwealth (early)</li>
+        <li>Nexus Makar Federation (early)</li>
+        <li>Nexus Sal-bez Coalition (early)</li>
+        <li>Nexus Velrax Republic (early)</li>
     <a class="back-to-top" href="#top">↩ Back to Top</a>    
 
     <h4 id="unbalanced" style="">UNBALANCED FLEETS</h4>
@@ -1465,6 +1508,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
        <li>Geoff,</li>         
        <li>Interstellar Alliance's all-White Star fleet,</li>
        <li>Narn Regime, where over 6 Energy Mines are taken,</li>
+       <li>Nexus Polaren Confederacy (playtest),</li>         
        <li>Sorithian, as they are simply too weak,</li>
        <li>Streib, as they are not really designed for normal competitve play,</li>
        <li>Yolu without points reevaluation</li>  

@@ -3120,6 +3120,67 @@ class NexusLCVController extends ShipSystem {
     }
 
 } //end of NexusLCVController
+
+
+class NexusPolarenLCVController extends ShipSystem {
+
+    public static $controllerList = array();
+    public $name = "NexusPolarenLCVController";
+    public $displayName = "Polaren LCV Controller";
+    public $iconPath = "hkControlNode.png";
+    public $boostable = true;
+    public $maxBoostLevel = 2;
+	
+    public static function addControllerNexus($controller){
+	    NexusPolarenLCVController::$controllerList[] = $controller; //add controller to list
+    }
+	
+
+    function __construct($armour, $maxhealth, $powerReq, $output ){
+        parent::__construct($armour, $maxhealth, $powerReq, $output );
+        $this->boostEfficiency = $powerReq;
+	    NexusPolarenLCVController::addControllerNexus($this);
+    }    
+	
+    public static function getIniBonus($unit){ //get current Initiative bonus; current = actual as of last turn
+	    $iniBonus = 0;
+	    $turn = TacGamedata::$currentTurn-1;
+	    $turn = max(1,$turn);
+	    //strongest system applies
+	    foreach(NexusPolarenLCVController::$controllerList as $controller){
+		$controllerShip = $controller->getUnit();
+		if($unit->userid == $controllerShip->userid){ //only for the same player...
+			if ( ($controller->isDestroyed($turn))
+			     || ($controller->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect
+	    		$iniBonus = max($controller->getOutputOnTurn($turn),$iniBonus); 
+		}
+	    }
+	    $iniBonus = $iniBonus * 5; //d20->d100
+	    $iniBonus = max(0,$iniBonus); 
+	    return $iniBonus;
+    }
+	
+    public function getOutputOnTurn($turn){
+        $output = parent::getOutput();
+        foreach ($this->power as $power){
+            if ($power->turn == $turn && $power->type == 2){
+                $output += $power->amount;
+            }    
+        }
+        return $output;
+    }
+	
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);     
+        $this->data["Special"] = "Gives indicated Initiative bonus to all friendly Polaren LCVs.";	     
+        $this->data["Special"] .= "<br>Only strongest bonus applies.";	     	     
+        $this->data["Special"] .= "<br>Any changes are effective on NEXT TURN.";	
+    }
+
+} //end of NexusPolarenLCVController
+
+
 	
 /*custom system - Drakh Raider Controller*/
 class DrakhRaiderController extends ShipSystem {
