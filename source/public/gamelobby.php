@@ -303,9 +303,10 @@
                             next.hide();
                         } else {
                             // If it has visible factions and it's NOT collapsed, it should be visible
-                            // However, we don't want to force it open if the user collapsed it.
-                            // But usually if it's visible it should be block.
-                            // Let's just rely on the fact that if anything is visible and it's not hidden, it stays as is.
+                            var icon = header.find('.faction-toggle-icon');
+                            if (icon.text() === '[-]') {
+                                next.show();
+                            }
                         }
                     }
                 });
