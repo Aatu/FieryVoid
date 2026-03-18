@@ -353,8 +353,8 @@ window.BallisticIconContainer = function () {
 		// TARGET SPRITE
 		let targetSprite = null;
 		if (!getByTargetIdOrTargetPosition(targetPosition, ballistic.targetid, this.ballisticIcons)) {
-			if (targetPosition) {
-				targetSprite = new BallisticSprite(targetPosition, targetType, text, textColour, iconImage);
+			if (targetPosition || targetIcon) {
+				targetSprite = new BallisticSprite(targetPosition || { x: 0, y: 0 }, targetType, text, textColour, iconImage);
 				if (targetIcon) {
 					targetIcon.mesh.add(targetSprite.mesh);
 				} else {
@@ -372,13 +372,13 @@ window.BallisticIconContainer = function () {
 			launchSprite,
 			targetSprite,
 			used: true,
-			splash: true
+			splash: splash
 		});
 	}
 
-	const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
+	const getByLaunchPosition = (position, icons) => icons.find(icon => icon.launchPosition && icon.launchPosition.x === position.x && icon.launchPosition.y === position.y)
 
-	const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => position && ((icon.position.x === position.x && icon.position.y === position.y) || (targetId !== -1 && icon.targetId === targetId)))
+	const getByTargetIdOrTargetPosition = (position, targetId, icons) => icons.find(icon => (targetId !== -1 && icon.targetId === targetId) || (position && icon.position && icon.position.x === position.x && icon.position.y === position.y))
 
 
 	function updateBallisticIcon(icon) {
