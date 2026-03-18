@@ -799,8 +799,9 @@ window.shipManager = {
             if (shipManager.isDestroyed(ship2)) continue;
 
             //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
-            var depTurn = shipManager.getTurnDeployed(ship2);
-            if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
+            // NO LONGER REQUIRED - Overridden by explicit isBlocked rules in Deployment Phase.
+            //var depTurn = shipManager.getTurnDeployed(ship2);
+            //if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
 
             var pos2 = shipManager.getShipPosition(ship2);
 

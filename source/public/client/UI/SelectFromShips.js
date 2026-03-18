@@ -119,9 +119,17 @@ window.SelectFromShips = function () {
                     '<div class="name value button ' + getAllyClass(ship) + '">' + '(' + noOfFighters + ') ' + ship.name + deployedText + ' </div>'
                 )
                     .on('click', function () {
-                        this.phaseStrategy.onShipClicked(ship, this.payload);
-                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                        if (gamedata.gamephase === -1) {
+                            if (this.phaseStrategy.selectedShip) {
+                                this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
+                            }
+                            this.phaseStrategy.selectShip(ship, this.payload);
                             this.destroy();
+                        } else {
+                            this.phaseStrategy.onShipClicked(ship, this.payload);
+                            if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                                this.destroy();
+                            }
                         }
                     }.bind(this))
                     .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))
@@ -136,16 +144,17 @@ window.SelectFromShips = function () {
             } else {
                 var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + ship.name + deployedText + ' </div>')
                     .on('click', function () {
-                        // We are actively overriding normal `onShipClicked` handling so that selecting an element from this menu selects it normally.
-                        // However, onShipClicked now inherently blocks selection if we have *another* deployable active!
-                        // So we clear it here first.
-                        if (gamedata.gamephase == -1 && this.phaseStrategy.selectedShip) {
-                            this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
-                        }
-                        
-                        this.phaseStrategy.onShipClicked(ship, this.payload);
-                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                        if (gamedata.gamephase === -1) {
+                            if (this.phaseStrategy.selectedShip) {
+                                this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
+                            }
+                            this.phaseStrategy.selectShip(ship, this.payload);
                             this.destroy();
+                        } else {
+                            this.phaseStrategy.onShipClicked(ship, this.payload);
+                            if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                                this.destroy();
+                            }
                         }
                     }.bind(this))
                     .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))

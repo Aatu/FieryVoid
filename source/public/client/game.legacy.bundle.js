@@ -13783,9 +13783,17 @@ window.SelectFromShips = function () {
                     '<div class="name value button ' + getAllyClass(ship) + '">' + '(' + noOfFighters + ') ' + ship.name + deployedText + ' </div>'
                 )
                     .on('click', function () {
-                        this.phaseStrategy.onShipClicked(ship, this.payload);
-                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                        if (gamedata.gamephase === -1) {
+                            if (this.phaseStrategy.selectedShip) {
+                                this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
+                            }
+                            this.phaseStrategy.selectShip(ship, this.payload);
                             this.destroy();
+                        } else {
+                            this.phaseStrategy.onShipClicked(ship, this.payload);
+                            if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                                this.destroy();
+                            }
                         }
                     }.bind(this))
                     .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))
@@ -13800,16 +13808,17 @@ window.SelectFromShips = function () {
             } else {
                 var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + ship.name + deployedText + ' </div>')
                     .on('click', function () {
-                        // We are actively overriding normal `onShipClicked` handling so that selecting an element from this menu selects it normally.
-                        // However, onShipClicked now inherently blocks selection if we have *another* deployable active!
-                        // So we clear it here first.
-                        if (gamedata.gamephase == -1 && this.phaseStrategy.selectedShip) {
-                            this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
-                        }
-                        
-                        this.phaseStrategy.onShipClicked(ship, this.payload);
-                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                        if (gamedata.gamephase === -1) {
+                            if (this.phaseStrategy.selectedShip) {
+                                this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
+                            }
+                            this.phaseStrategy.selectShip(ship, this.payload);
                             this.destroy();
+                        } else {
+                            this.phaseStrategy.onShipClicked(ship, this.payload);
+                            if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                                this.destroy();
+                            }
                         }
                     }.bind(this))
                     .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))
@@ -24685,8 +24694,9 @@ window.shipManager = {
             if (shipManager.isDestroyed(ship2)) continue;
 
             //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
-            var depTurn = shipManager.getTurnDeployed(ship2);
-            if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
+            // NO LONGER REQUIRED - Overridden by explicit isBlocked rules in Deployment Phase.
+            //var depTurn = shipManager.getTurnDeployed(ship2);
+            //if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
 
             var pos2 = shipManager.getShipPosition(ship2);
 
