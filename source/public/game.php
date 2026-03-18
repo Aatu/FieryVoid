@@ -798,6 +798,7 @@
     <div id="gameinfo" class="logPanelEntry" style="display:none;">
         <div id="gameInfoButtons">
             <input type="button" value="Fiery Void FAQ" onclick="window.open('faq.php', '_blank');">
+            <input type="button" value="Factions & Tiers" onclick="window.open('factions-tiers.php', '_blank');">
         </div>
     </div>
     <div id="declarations" class="logPanelEntry" style="display:none;"> <!-- fire and EW declarations review -->
