@@ -440,6 +440,10 @@
     display: none;
 }
 
+.store .shipshidden .category-container {
+    display: none !important;
+}
+
 .store .shipshidden .shipsizehdr {
     display: none;
 }
