@@ -113,35 +113,37 @@
     <?php include_once 'shaders.php'; ?>
     <script>
         $(window).on("load", function(){
-            
-            var serverError = <?php print($error); ?>;
-            if (serverError) {
-                var errorMsg = serverError.error || JSON.stringify(serverError);
-                alert("Server Error: " + errorMsg + (serverError.logid ? " [LogID: " + serverError.logid + "]" : ""));
-            }
-            
-            gamedata.parseServerData(<?php print($serverdataJSON); ?>);
-            
-			if (gamedata.thisplayer == -1){
-				$(".notlogged").show();
-				$(".waiting").hide();
-				gamedata.waiting = false;
-			}
+            // Yield execution to allow the browser to paint whatever HTML is currently visible
+            setTimeout(function() {
+                var serverError = <?php print($error); ?>;
+                if (serverError) {
+                    var errorMsg = serverError.error || JSON.stringify(serverError);
+                    alert("Server Error: " + errorMsg + (serverError.logid ? " [LogID: " + serverError.logid + "]" : ""));
+                }
+                
+                gamedata.parseServerData(<?php print($serverdataJSON); ?>);
+                
+                if (gamedata.thisplayer == -1){
+                    $(".notlogged").show();
+                    $(".waiting").hide();
+                    gamedata.waiting = false;
+                }
 
-            webglScene.init(
-                '#webgl',
-                jQuery('#pagecontainer'),
-                new window.webglHexGridRenderer(graphics),
-                new window.phaseDirector(graphics),
-                gamedata,
-                window.coordinateConverter
-            );
+                webglScene.init(
+                    '#webgl',
+                    jQuery('#pagecontainer'),
+                    new window.webglHexGridRenderer(graphics),
+                    new window.phaseDirector(graphics),
+                    gamedata,
+                    window.coordinateConverter
+                );
 
-			window.UIManagerInstance = new window.UIManager($("body")[0]);
-            window.UIManagerInstance.PlayerSettings(window.Settings);
-            window.UIManagerInstance.FullScreen();
-            window.UIManagerInstance.EwButtons();
-            $("#pagecontainer").show();
+                window.UIManagerInstance = new window.UIManager($("body")[0]);
+                window.UIManagerInstance.PlayerSettings(window.Settings);
+                window.UIManagerInstance.FullScreen();
+                window.UIManagerInstance.EwButtons();
+                $("#pagecontainer").show();
+            }, 100);
         });
         
             
