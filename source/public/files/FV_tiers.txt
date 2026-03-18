@@ -81,13 +81,14 @@ Factions that point for point will have uphill battle against Tier 2, and quite 
  - Markab Theocracy
  - Rogolon 
  - Usuuth
- - ZEscalation Blood Sword Raiders  (custom faction - Escalation Wars universe)
- - ZNexus Brixadii Clans (early) (custom faction - Nexus universe)
- - ZNexus Craytan Union (early) (custom faction - Nexus universe)
- - ZNexus Dalithorn Commonwealth (early) (custom faction - Nexus universe)
- - ZNexus Makar Federation (early) (custom faction - Nexus universe)
- - ZNexus Sal-bez Coalition (early) (custom faction - Nexus universe)
- - ZNexus Velrax Republic (early) (custom faction - Nexus universe)
+ - Escalation Blood Sword Raiders  (custom faction - Escalation Wars universe)
+ - Nexus Brixadii Clans (early) (custom faction - Nexus universe)
+ - Nexus Craytan Union (early) (custom faction - Nexus universe)
+ - Nexus Dalithorn Commonwealth (early) (custom faction - Nexus universe)
+ - Nexus Makar Federation (early) (custom faction - Nexus universe)
+ - Nexus Polaren Confederacy (early) (custom faction - Nexus universe)
+ - Nexus Sal-bez Coalition (early) (custom faction - Nexus universe)
+ - Nexus Velrax Republic (early) (custom faction - Nexus universe)
  - ZStarTrek Federation (early) (custom faction - Star Trek universe)
  - ZStarTrek Suliban (early) (custom faction - Star Trek universe)
 

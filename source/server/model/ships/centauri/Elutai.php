@@ -4,14 +4,14 @@ class Elutai extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
         
-        $this->pointCost = 575;
-        $this->faction = "Centauri Republic";
+        $this->pointCost = 640;
+        $this->faction = "What If";
         $this->phpclass = "Elutai";
         $this->imagePath = "img/ships/Elutai3.png";
-        $this->shipClass = "Elutai Bombardment Destroyer";
-			$this->variantOf = "Kutai Gunship";
-			$this->occurence = "rare";
-	    $this->isd = 2234;
+        $this->shipClass = "House Valheru Elutai Bombardment Destroyer";
+//			$this->variantOf = "Kutai Gunship";
+//			$this->occurence = "rare";
+	    $this->isd = 2134;
 		$this->unofficial = true;
 
 	    $this->notes = 'Common variant if part of a House Valheru only force.';

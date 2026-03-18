@@ -205,6 +205,9 @@ window.gamedata = {
 			case "Escalation Wars Sshel'ath Alliance":
 				powerRating = 'Tier 2; Custom faction';
 				break;
+			case "House Valheru":
+				powerRating = 'Tier 1; Custom Centauri faction';
+				break;
 			case 'Nexus Brixadii Clans (early)':
 				powerRating = 'Tier 3; Custom faction';
 				break;
@@ -227,10 +230,13 @@ window.gamedata = {
 				powerRating = 'Tier 2; Custom faction';
 				break;
 			case 'Nexus Makar Federation (early)':
-				powerRating = 'Tier 3; Custom faction, Playtest';
+				powerRating = 'Tier 3; Custom faction';
 				break;
 			case 'Nexus Makar Federation':
-				powerRating = 'Tier 2; Custom faction, Playtest';
+				powerRating = 'Tier 2; Custom faction';
+				break;
+			case 'Nexus Polaren Confederacy (early)':
+				powerRating = 'Tier 3; Custom faction, Playtest';
 				break;
 			case 'Nexus Sal-bez Coalition (early)':
 				powerRating = 'Tier 3; Custom faction';
@@ -17897,6 +17903,15 @@ NexusLCVController.prototype.hasMaxBoost = function () {
 	return true;
 };
 
+var NexusPolarenLCVController = function NexusPolarenLCVController(json, ship) {
+	ShipSystem.call(this, json, ship);
+};
+NexusPolarenLCVController.prototype = Object.create(ShipSystem.prototype);
+NexusPolarenLCVController.prototype.constructor = NexusPolarenLCVController;
+NexusPolarenLCVController.prototype.hasMaxBoost = function () {
+	return true;
+};
+
 var ConnectionStrut = function (json, ship) {
 	ShipSystem.call(this, json, ship);
 }
@@ -27985,6 +28000,50 @@ NexusRAMLauncher.prototype.calculateSpecialRangePenalty = function (distance) {
     return rangePenalty;
 };
 
+var NexusLightMaser = function NexusLightMaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+NexusLightMaser.prototype = Object.create(Laser.prototype);
+NexusLightMaser.prototype.constructor = NexusLightMaser;
+
+var NexusHeavyMaser = function NexusHeavyMaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+NexusHeavyMaser.prototype = Object.create(Laser.prototype);
+NexusHeavyMaser.prototype.constructor = NexusHeavyMaser;
+
+var NexusLightRadCannon = function(json, ship)
+{
+    Weapon.call( this, json, ship);
+}
+NexusLightRadCannon.prototype = Object.create( Weapon.prototype );
+NexusLightRadCannon.prototype.constructor = NexusLightRadCannon;
+
+var NexusSandCaster = function  NexusSandCaster(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NexusSandCaster.prototype = Object.create(Weapon.prototype);
+NexusSandCaster.prototype.constructor =  NexusSandCaster;
+
+NexusSandCaster.prototype.initializationUpdate = function () {
+    if(this.firingMode == 2){
+        const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
+        if(rangeCrit > 0) this.range = 1;
+        this.data['Range'] = this.range;   
+    }    
+	return this;
+}	
+
+NexusSandCaster.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+            return;
+        }
+    }
+};
 
 
 
