@@ -647,11 +647,11 @@ body {
     cursor: pointer;
     padding: 3px 8px 3px 8px;
     margin-top: 3px;
-    margin-right: 0px;
+    margin-right: 5px;
     margin-left: 3px;
     margin-bottom: 3px;
     /* Add space between buttons */
-    border: 1px solid #587e8d;
+    border: 1px solid #e0e7ef3b;
     background: #215a7a;
     border-radius: 4px;
     color: #e0e7ef;

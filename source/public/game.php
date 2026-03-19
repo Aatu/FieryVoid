@@ -807,6 +807,7 @@
     <div id="gameinfo" class="logPanelEntry" style="display:none;">
         <div id="gameInfoButtons">
             <input type="button" value="Fiery Void FAQ" onclick="window.open('faq.php', '_blank');">
+            <input type="button" value="Ammo, Options & Enhancements" onclick="window.open('ammo-options-enhancements.php', '_blank');">            
             <input type="button" value="Factions & Tiers Info" onclick="window.open('factions-tiers.php', '_blank');">
         </div>
     </div>
