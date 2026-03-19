@@ -4407,17 +4407,17 @@ window.ajaxInterface = {
                 time = 20000;
             } else {
                 time = 4000;
-                if (ajaxInterface.pollcount > 1) time = 5000;
-                if (ajaxInterface.pollcount > 3) time = 10000;
-                if (ajaxInterface.pollcount > 10) time = 60000;
+                if (ajaxInterface.pollcount > 3) time = 6000;
+                if (ajaxInterface.pollcount > 6) time = 8000;
+                if (ajaxInterface.pollcount > 15) time = 30000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
         } else {
             // In-Game timings
             time = 4000;
-            if (ajaxInterface.pollcount > 1) time = 5000;
-            if (ajaxInterface.pollcount > 3) time = 10000;
-            if (ajaxInterface.pollcount > 10) time = 60000;
+            if (ajaxInterface.pollcount > 3) time = 6000;
+            if (ajaxInterface.pollcount > 6) time = 8000;
+            if (ajaxInterface.pollcount > 15) time = 30000;
             if (ajaxInterface.pollcount > 40) time = 1800000;
         }
 
@@ -22495,15 +22495,6 @@ var MatterGun = function MatterGun(json, ship) {
 MatterGun.prototype = Object.create(Matter.prototype);
 MatterGun.prototype.constructor = MatterGun;
 
-//OLD VERSION OF FLAK CANNON - STILL USED ON SOME BSG SHIPS SO I HAVEN'T REMOVED - DK
-/*
-var FlakCannon = function FlakCannon(json, ship) {
-    Matter.call(this, json, ship);
-};
-FlakCannon.prototype = Object.create(Matter.prototype);
-FlakCannon.prototype.constructor = FlakCannon;
-*/
-//NEW VERSION
 var GromeFlakCannon = function GromeFlakCannon(json, ship) {
     Matter.call(this, json, ship);
 };
