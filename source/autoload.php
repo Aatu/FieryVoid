@@ -3572,11 +3572,10 @@ spl_autoload_register(
                         'octuran' => '/server/model/ships/HouseValheru/Octuran.php',
                         'phobos' => '/server/model/ships/HouseValheru/Phobos.php',
                         'primo' => '/server/model/ships/HouseValheru/Primo.php',
-                        'primosecundus' => '/server/model/ships/HouseValheru/PrimoSucundus.php',
+                        'primosecundus' => '/server/model/ships/HouseValheru/PrimoSecundus.php',
                         'rizek' => '/server/model/ships/HouseValheru/Rizek.php',
                         'rotas' => '/server/model/ships/HouseValheru/Rotas.php',
                         'sultana' => '/server/model/ships/HouseValheru/Sultana.php',
-						'vorcharian' => '/server/model/ships/HouseValheru/Vorcharian.php',
 						'vorchariand' => '/server/model/ships/HouseValheru/VorcharianD.php',
 
                         //What If - Alternate design concepts
