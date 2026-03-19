@@ -854,12 +854,9 @@ window.gamedata = {
 
 		} //end of loop at ships preparing data
 
-		var calcPoints = selectedSlot.points;
-		if (calcPoints == -1) { //If unlimited points, assess against points spent so far.
-			calcPoints = totalPointsSpent;			
-		}
 
-		checkResult = "Total fleet limit: " + (calcPoints == -1 ? "Unlimited" : calcPoints) + "<br><br>";
+
+		checkResult = "Total fleet limit: " + (selectedSlot.points == -1 ? "Unlimited" : selectedSlot.points) + "<br><br>";
 
 		//check: overall fleet traits
 		checkResult += "Jump engine: "; //Jump Engine present?
@@ -872,17 +869,17 @@ window.gamedata = {
 		checkResult += "<br>";
 
 		checkResult += "Capital ships: " + capitalShips + ": "; //Capital Ship present?
-		//var capsRequired = Math.floor(scalcPoints/3000);//1 per 3000, round down; so 1 at 3000, 2 at 6000, 3 at 9000, 10 at 30000
+		//var capsRequired = Math.floor(selectedSlot.points/3000);//1 per 3000, round down; so 1 at 3000, 2 at 6000, 3 at 9000, 10 at 30000
 		//let's decrease the requirement at larger battles: 1 per 4000, round up, with first 2499 not counted; so 1 at 2500, 2 at 6500, 3 at 10500, 10 at 42500
 		var capsRequired = 0;
 		if (!ancientUnitPresent) { //regular limit: one per 5000 points, starting at 3000
-			if (calcPoints >= 3000) {
-				//capsRequired = Math.ceil((calcPoints-2499)/4000); //previous: one per 4000 points above 2499
-				capsRequired = Math.ceil(calcPoints / 5000);
+			if (selectedSlot.points >= 3000) {
+				//capsRequired = Math.ceil((selectedSlot.points-2499)/4000); //previous: one per 4000 points above 2499
+				capsRequired = Math.ceil(selectedSlot.points / 5000);
 			}
 		} else { //Ancient-level limit: one per 15000 points, starting at 5000			
-			if (calcPoints >= 5000) {
-				capsRequired = Math.ceil(calcPoints / 15000);
+			if (selectedSlot.points >= 5000) {
+				capsRequired = Math.ceil(selectedSlot.points / 15000);
 			}
 		}
 
@@ -955,12 +952,12 @@ window.gamedata = {
 		checkResult += "<br>";
 
 
-		var limit10 = Math.floor(calcPoints * 0.1);
-		var limit33 = Math.floor(calcPoints * 0.33);
-		/*if (calcPoints == -1) { //If unlimited points, assess against points spent so far.
+		var limit10 = Math.floor(selectedSlot.points * 0.1);
+		var limit33 = Math.floor(selectedSlot.points * 0.33);
+		if (selectedSlot.points == -1) { //If unlimited points, assess against points spent so far.
 			limit10 = totalPointsSpent;
 			limit33 = totalPointsSpent;
-		}*/
+		}
 
 		var oneOverAllowed = false;
 		checkResult += "<br><u><b>Deployment restrictions:</b></u><br><br>";
@@ -997,9 +994,9 @@ window.gamedata = {
 
 		//variant restrictions
 		checkResult += "<br><u><b>Variant restrictions:</b></u><br><br>";
-		var limitPerHull = Math.floor(calcPoints / 1100); //turnament rules: 3, but it's for 3500 points
+		var limitPerHull = Math.floor(selectedSlot.points / 1100); //turnament rules: 3, but it's for 3500 points
 		if (ancientUnitPresent) { //Ancients have way fewer total units...
-			limitPerHull = Math.floor(calcPoints / 3000);
+			limitPerHull = Math.floor(selectedSlot.points / 3000);
 		}
 		limitPerHull = Math.max(limitPerHull, 2); //always allow at least 2!
 		var currRlimit = 0;
@@ -1060,11 +1057,10 @@ window.gamedata = {
 		var limitRTotal = 0;
 
 		if (ancientUnitPresent) { //Ancients have way fewer total units...
-			limitUTotal = Math.floor(calcPoints / 4000);
-		} else if ((calcPoints - 1500) > 0) {
-			limitUTotal = Math.floor((calcPoints - 1500) / 1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
+			limitUTotal = Math.floor(selectedSlot.points / 4000);
+		} else if ((selectedSlot.points - 1500) > 0) {
+			limitUTotal = Math.floor((selectedSlot.points - 1500) / 1000); //limit Uncommon units per fleet; turnament rules: 2, but it's for 3500 points
 		}
-
 		limitUTotal = Math.max(limitUTotal, 2); //always allow at least 2! 
 		limitRTotal = Math.floor(limitUTotal / 2); //limit Rare units per fleet; turnament rules: 1, but it's for 3500 points    
 		var limitUTotalResult = "<span style='color: #33cc33;'>OK</span>";
