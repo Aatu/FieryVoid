@@ -44,6 +44,14 @@
     <title>Fiery Void</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui' />
+
+    <!-- Preload critical bundles to parallelize their download with the large inline JSON payloads below -->
+    <link rel="preload" href="client/UI/reactJs/UI.bundle.js" as="script">
+    <?php $debug = isset($_GET['debug']); ?>
+    <?php if (!$debug): ?>
+    <link rel="preload" href="client/game.legacy.bundle.js" as="script">
+    <?php endif; ?>
+    
     <link href="styles/tactical.css" rel="stylesheet" type="text/css">
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
@@ -105,41 +113,42 @@
     <?php include_once 'shaders.php'; ?>
     <script>
         $(window).on("load", function(){
-            
-            var serverError = <?php print($error); ?>;
-            if (serverError) {
-                var errorMsg = serverError.error || JSON.stringify(serverError);
-                alert("Server Error: " + errorMsg + (serverError.logid ? " [LogID: " + serverError.logid + "]" : ""));
-            }
-            
-            gamedata.parseServerData(<?php print($serverdataJSON); ?>);
-            
-			if (gamedata.thisplayer == -1){
-				$(".notlogged").show();
-				$(".waiting").hide();
-				gamedata.waiting = false;
-			}
+            // Yield execution to allow the browser to paint whatever HTML is currently visible
+            setTimeout(function() {
+                var serverError = <?php print($error); ?>;
+                if (serverError) {
+                    var errorMsg = serverError.error || JSON.stringify(serverError);
+                    alert("Server Error: " + errorMsg + (serverError.logid ? " [LogID: " + serverError.logid + "]" : ""));
+                }
+                
+                gamedata.parseServerData(<?php print($serverdataJSON); ?>);
+                
+                if (gamedata.thisplayer == -1){
+                    $(".notlogged").show();
+                    $(".waiting").hide();
+                    gamedata.waiting = false;
+                }
 
-            webglScene.init(
-                '#webgl',
-                jQuery('#pagecontainer'),
-                new window.webglHexGridRenderer(graphics),
-                new window.phaseDirector(graphics),
-                gamedata,
-                window.coordinateConverter
-            );
+                webglScene.init(
+                    '#webgl',
+                    jQuery('#pagecontainer'),
+                    new window.webglHexGridRenderer(graphics),
+                    new window.phaseDirector(graphics),
+                    gamedata,
+                    window.coordinateConverter
+                );
 
-			window.UIManagerInstance = new window.UIManager($("body")[0]);
-            window.UIManagerInstance.PlayerSettings(window.Settings);
-            window.UIManagerInstance.FullScreen();
-            window.UIManagerInstance.EwButtons();
-            $("#pagecontainer").show();
+                window.UIManagerInstance = new window.UIManager($("body")[0]);
+                window.UIManagerInstance.PlayerSettings(window.Settings);
+                window.UIManagerInstance.FullScreen();
+                window.UIManagerInstance.EwButtons();
+                $("#pagecontainer").show();
+            }, 100);
         });
         
             
     </script>
 <!--	<script src="client/helper.js"></script>-->
-    <?php $debug = isset($_GET['debug']); ?>
     <?php if ($debug): ?>
     <script defer src="client/lib/graphics.js"></script>
     <script defer src="client/lib/HexagonMath.js"></script>

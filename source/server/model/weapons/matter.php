@@ -463,26 +463,27 @@ class GromeFlakCannon extends Weapon{
     public $animationExplosionScale = 0.5;
         
     public $priorityArray = array(1=>1, 2=>1);
-	public $uninterceptableArray = array(1=>false, 2=>true);
-	public $doNotInterceptArray = array(1=>false, 2=>true);
-
+	//public $uninterceptableArray = array(1=>false, 2=>true);
+	//public $doNotInterceptArray = array(1=>false, 2=>true);
     public $intercept = 3;
     public $freeintercept = true; //can intercept fire directed at different unit
     public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
     public $loadingtime = 1;
 	public $canInterceptUninterceptable = true;
 
-	public $rangeArray = array(1=>0, 2=>100); //let's put maximum range here, but generous one
-	
-    public $rangePenaltyArray = array(1=>2, 2=>0);
-    public $fireControlArray = array( 1=>array(4, null, null), 2=>array(0, 0, 0)); // fighters, <mediums, <capitals 
-	
-	public $firingModes = array(1=>'Anti-Fighter', 2=>'Defensive');
-	public $damageTypeArray = array(1=>'Flash', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
-    public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-    
+	//public $rangeArray = array(1=>0, 2=>100); //let's put maximum range here, but generous one
+    //public $rangePenaltyArray = array(1=>2, 2=>0);
+    public $rangePenalty = 2;    
+    //public $fireControlArray = array( 1=>array(4, null, null), 2=>array(0, 0, 0)); // fighters, <mediums, <capitals 
+    public $fireControlArray = array( 1=>array(4, null, null)); // fighters, <mediums, <capitals 	
+	//public $firingModes = array(1=>'Anti-Fighter', 2=>'Defensive');
+	public $firingModes = array(1=>'Anti-Fighter');    
+	//public $damageTypeArray = array(1=>'Flash', 2=>'Standard');
+	public $damageTypeArray = array(1=>'Flash');    
+    //public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+    public $weaponClassArray = array(1=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	    
 	protected $autoHit = false;//To show 100% hit chance in front end.    
-	protected $autoHitArray = array(1=>false, 2=>true); //To show 100% hit chance in front end.   
+	//protected $autoHitArray = array(1=>false, 2=>true); //To show 100% hit chance in front end.   
 	
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 4;
@@ -495,8 +496,8 @@ class GromeFlakCannon extends Weapon{
 			$this->data["Special"] = "Intercepts all shots from an enemy ship automatically if not fired.";
 			$this->data["Special"] .= "<br>Will also automatically intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
 			$this->data["Special"] .= "<br>Can intercept uninterceptable weapons at 50% effectiveness, but not when intercepting for other units.";			
-			$this->data["Special"] .= "<br>Can also be MANUALLY targeted to intercept specific units in Defensive firing mode";
-			$this->data["Special"] .= "<br>In this mode it will automatically hit and intercept all fire from targeted ship at the Flak Cannon-firing ship (except ballistics).";
+			//$this->data["Special"] .= "<br>Can also be MANUALLY targeted to intercept specific units in Defensive firing mode";
+			//$this->data["Special"] .= "<br>In this mode it will automatically hit and intercept all fire from targeted ship at the Flak Cannon-firing ship (except ballistics).";
 	}
 
 
@@ -533,7 +534,7 @@ class GromeFlakCannon extends Weapon{
 			}
 	}//endof function calculateHitBase
   
-   
+/*   
 	public function fire($gamedata, $fireOrder) { 
 
 			switch($this->firingMode){
@@ -557,6 +558,7 @@ class GromeFlakCannon extends Weapon{
 					break;
 			}
 	} //endof function fire
+    */ 
 			
 	public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
 			$distance = mathlib::getDistanceHex($interceptingShip, $target);
@@ -623,45 +625,45 @@ class GromeFlakCannon extends Weapon{
 	}//endof function fireDefensively	
 
     public function getDamage($fireOrder){ 
-		switch($this->firingMode){
-			case 1:
-				return Dice::d(10, 1)+2; //Anti-fighter shot
-				break;	
+		//switch($this->firingMode){
+		//	case 1:
+		return Dice::d(10, 1)+2; //Anti-fighter shot
+		//		break;	
 
-			case 2:
-				return 0; //Manual intercept
-				break;
-		}
+		//	case 2:
+		//		return 0; //Manual intercept
+		//		break;
+		//}
 	}
 	
     public function setMinDamage(){ 
-		switch($this->firingMode){
-			case 1:
+		//switch($this->firingMode){
+		//	case 1:
 				$this->minDamage = 3; //Anti-fighter shot
-				break;	
-			case 2:
-				$this->minDamage = 0; //Manual intercept
-				break;
-		}
-		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+		//		break;	
+		//	case 2:
+		//		$this->minDamage = 0; //Manual intercept
+		//		break;
+		//}
+		//$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
 	
     public function setMaxDamage(){
-		switch($this->firingMode){
-			case 1:
+		//switch($this->firingMode){
+		//	case 1:
 				$this->maxDamage = 12; //Anti-fighter shot
-				break;	
-			case 2:
-				$this->maxDamage = 0; //Manual intercept
-				break;
-		}
-		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+		//		break;	
+		//	case 2:
+		//		$this->maxDamage = 0; //Manual intercept
+		//		break;
+		//}
+		//$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
-            $strippedSystem->autoHit = $this->autoHit;
-            $strippedSystem->autoHitArray = $this->autoHitArray;                                       
+            //$strippedSystem->autoHit = $this->autoHit;
+            //$strippedSystem->autoHitArray = $this->autoHitArray;                                       
             return $strippedSystem;
 		}
 
