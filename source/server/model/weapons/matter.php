@@ -462,7 +462,7 @@ class GromeFlakCannon extends Weapon{
     public $animationColor = array(255, 250, 230);
     public $animationExplosionScale = 0.5;
         
-    public $priorityArray = array(1=>1, 2=>1);
+    public $priority = 1;
 	//public $uninterceptableArray = array(1=>false, 2=>true);
 	//public $doNotInterceptArray = array(1=>false, 2=>true);
     public $intercept = 3;
@@ -475,13 +475,13 @@ class GromeFlakCannon extends Weapon{
     //public $rangePenaltyArray = array(1=>2, 2=>0);
     public $rangePenalty = 2;    
     //public $fireControlArray = array( 1=>array(4, null, null), 2=>array(0, 0, 0)); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(4, null, null)); // fighters, <mediums, <capitals 	
+    public $fireControl = array(4, null, null); // fighters, <mediums, <capitals 	
 	//public $firingModes = array(1=>'Anti-Fighter', 2=>'Defensive');
 	public $firingModes = array(1=>'Anti-Fighter');    
 	//public $damageTypeArray = array(1=>'Flash', 2=>'Standard');
-	public $damageTypeArray = array(1=>'Flash');    
+	public $damageType = 'Flash';    
     //public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-    public $weaponClassArray = array(1=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	    
+    public $weaponClass = 'Matter'; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	    
 	protected $autoHit = false;//To show 100% hit chance in front end.    
 	//protected $autoHitArray = array(1=>false, 2=>true); //To show 100% hit chance in front end.   
 	
@@ -534,14 +534,14 @@ class GromeFlakCannon extends Weapon{
 			}
 	}//endof function calculateHitBase
   
-/*   
+
 	public function fire($gamedata, $fireOrder) { 
 
 			switch($this->firingMode){
 				case 1:
 					parent::fire($gamedata, $fireOrder);
 					break;
-				
+				//Leave old manual method for legacy games
 				case 2:
 					$shooter = $gamedata->getShipById($fireOrder->shooterid);
 					$movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -558,7 +558,7 @@ class GromeFlakCannon extends Weapon{
 					break;
 			}
 	} //endof function fire
-    */ 
+    
 			
 	public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
 			$distance = mathlib::getDistanceHex($interceptingShip, $target);
@@ -625,39 +625,39 @@ class GromeFlakCannon extends Weapon{
 	}//endof function fireDefensively	
 
     public function getDamage($fireOrder){ 
-		//switch($this->firingMode){
-		//	case 1:
+		switch($this->firingMode){
+			case 1:
 		return Dice::d(10, 1)+2; //Anti-fighter shot
-		//		break;	
+				break;	
 
-		//	case 2:
-		//		return 0; //Manual intercept
-		//		break;
-		//}
+			case 2:
+				return 0; //Manual intercept
+				break;
+		}
 	}
 	
     public function setMinDamage(){ 
-		//switch($this->firingMode){
-		//	case 1:
+		switch($this->firingMode){
+			case 1:
 				$this->minDamage = 3; //Anti-fighter shot
-		//		break;	
-		//	case 2:
-		//		$this->minDamage = 0; //Manual intercept
-		//		break;
-		//}
-		//$this->minDamageArray[$this->firingMode] = $this->minDamage;
+				break;	
+			case 2: //Leave old manual method for legacy games
+				$this->minDamage = 0; //Manual intercept
+				break;
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
 	}
 	
     public function setMaxDamage(){
-		//switch($this->firingMode){
-		//	case 1:
+		switch($this->firingMode){
+			case 1:
 				$this->maxDamage = 12; //Anti-fighter shot
-		//		break;	
-		//	case 2:
-		//		$this->maxDamage = 0; //Manual intercept
-		//		break;
-		//}
-		//$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+				break;	
+			case 2: //Leave old manual method for legacy games
+				$this->maxDamage = 0; //Manual intercept
+				break;
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 	}
 
         public function stripForJson() {
