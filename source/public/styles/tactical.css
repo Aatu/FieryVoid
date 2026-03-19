@@ -639,7 +639,7 @@ body {
     z-index: 11;
     /* Make sure it's on top */
     opacity: 0.95;
-    margin-right: 5px;
+    margin-right: 0px;
 }
 
 #gameInfoButtons input[type="button"] {
