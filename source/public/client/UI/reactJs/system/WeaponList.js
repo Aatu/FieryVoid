@@ -34,7 +34,7 @@ class WeaponList extends React.Component{
         } 
         
         return ship.systems
-            .filter(system => system.weapon || system.outputType === "thrust" || system.outputType === "EW" || system.outputType === "power");
+            .filter(system => system.weapon || system.outputType === "thrust" || system.outputType === "EW" || system.outputType === "power" || system.outputType === "settings");
             //.filter(weapon => (gamePhase === 1 && weapon.ballistic) || (gamePhase === 3 && !weapon.ballistic))
     }
 

@@ -6282,7 +6282,7 @@ class PsionicConcentratorLight extends Weapon{
 } //endof class PsionicConcentratorLight
 
 
-
+/*
 //Kor-Lyan system, used to designate where attached Proximity Laser shots originates by targeting a hex and automatically hitting.
 class ProximityLaserLauncher extends Weapon{
 
@@ -6360,13 +6360,13 @@ class ProximityLaserLauncher extends Weapon{
 		} //endof function fire	
 
      	
-		public function getDamage($fireOrder){       return 0; /*no actual damage*/  }
+		public function getDamage($fireOrder){       return 0;  }
 		public function setMinDamage(){     $this->minDamage = 0 ;      }
 		public function setMaxDamage(){     $this->maxDamage = 0 ;      }
 	
 }//endof class ProximityLaserLauncher
-
-
+*/
+/*
    class ProximityLaser extends Weapon{        
         public $name = "ProximityLaser";
         public $displayName = "Proximity Laser";
@@ -6523,7 +6523,7 @@ class ProximityLaserLauncher extends Weapon{
         public function setMinDamage(){     $this->minDamage = 11 ;      }
         public function setMaxDamage(){     $this->maxDamage = 38 ;      }    
     }
-
+*/
 
    class ProximityLaserNew extends Weapon{        
         public $name = "ProximityLaserNew";

@@ -16,8 +16,7 @@ class captorMineKLH extends Mine{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 0;
-        $this->detectedSignature = 0;           
+        $this->signature = 0;       
         
         $this->turncost = 0;
         $this->turndelaycost = 0;

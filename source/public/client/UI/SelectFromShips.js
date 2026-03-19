@@ -67,6 +67,41 @@ window.SelectFromShips = function () {
 
     function create() {
         console.log("CREATE select form ships", this.ships)
+        
+        // --- INJECT CUSTOM "DEPLOY HERE" BUTTON DURING DEPLOYMENT PHASE ---
+        if (gamedata.gamephase == -1 && this.phaseStrategy.selectedShip) {
+            // Guarantee we don't present the deployment option if the unit is ALREADY right here
+            var rawPos = shipManager.getShipPosition(this.phaseStrategy.selectedShip);
+            var parsedSelectedPos = new hexagon.Offset(rawPos);
+            
+            // Replicate the exact isBlocked occupancy check from DeploymentPhaseStrategy to explicitly deny the button appearing when dropping onto illegal stacked hexes
+            var isBlocked = false;
+            var shipsInHex = shipManager.getShipsInSameHex(this.phaseStrategy.selectedShip, this.payload.hex);
+            
+            var hasTerrain = shipsInHex.some(function(s) {
+                return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3);
+            });
+            
+            if (hasTerrain) {
+                isBlocked = true;
+            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight)) {
+                isBlocked = shipsInHex.some(function(s) { return !(s.mine || s.flight); });
+            }
+            
+            if (!isBlocked && (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r)) {
+                var selectedName = this.phaseStrategy.selectedShip.name;
+                var deployButton = jQuery(
+                    '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
+                ).on('click', function () {
+                    this.phaseStrategy.onHexClicked(this.payload);
+                    this.destroy();
+                }.bind(this));
+                
+                this.element.append(deployButton);
+            }
+        }
+        // ------------------------------------------------------------------
+
         this.ships.forEach(function (ship) {
             var deployedText = "";
             var deployTurn = shipManager.getTurnDeployed(ship);
@@ -84,9 +119,17 @@ window.SelectFromShips = function () {
                     '<div class="name value button ' + getAllyClass(ship) + '">' + '(' + noOfFighters + ') ' + ship.name + deployedText + ' </div>'
                 )
                     .on('click', function () {
-                        this.phaseStrategy.onShipClicked(ship, this.payload);
-                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                        if (gamedata.gamephase === -1) {
+                            if (this.phaseStrategy.selectedShip) {
+                                this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
+                            }
+                            this.phaseStrategy.selectShip(ship, this.payload);
                             this.destroy();
+                        } else {
+                            this.phaseStrategy.onShipClicked(ship, this.payload);
+                            if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                                this.destroy();
+                            }
                         }
                     }.bind(this))
                     .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))
@@ -101,9 +144,17 @@ window.SelectFromShips = function () {
             } else {
                 var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + ship.name + deployedText + ' </div>')
                     .on('click', function () {
-                        this.phaseStrategy.onShipClicked(ship, this.payload);
-                        if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                        if (gamedata.gamephase === -1) {
+                            if (this.phaseStrategy.selectedShip) {
+                                this.phaseStrategy.deselectShip(this.phaseStrategy.selectedShip);
+                            }
+                            this.phaseStrategy.selectShip(ship, this.payload);
                             this.destroy();
+                        } else {
+                            this.phaseStrategy.onShipClicked(ship, this.payload);
+                            if (this.phaseStrategy.selectedShip && this.phaseStrategy.selectedShip.id === ship.id) {
+                                this.destroy();
+                            }
                         }
                     }.bind(this))
                     .on('mouseover', function () { this.phaseStrategy.onMouseOverShip(ship, this.payload) }.bind(this))

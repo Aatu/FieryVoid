@@ -298,35 +298,35 @@ window.gamedata = {
         if (gamedata.gamephase == -1) {
             var mines = [];
             var html = '';
+            if(gamedata.areMinesPresent){
+                for (var i in gamedata.ships) {
+                    var ship = gamedata.ships[i];
+                    if (ship.userid == gamedata.thisplayer) {
+                        if (ship.mine) {
+                            mines.push(ship);
+                        }
+                    }
+                }
 
-            for (var i in gamedata.ships) {
-                var ship = gamedata.ships[i];
-                if (ship.userid == gamedata.thisplayer) {
-                    if (ship.mine) {
-                        mines.push(ship);
+                var unsetMines = false;
+                if (mines) {
+                    for (var i = 0; i < mines.length; i++) {
+                        var mine = mines[i];
+                        for (var j in mine.systems) {
+                            var sys = mine.systems[j];                        
+                            if (sys.name == "CaptorMine" || sys.name == "ProximityMine" || sys.name == "MineControllerDEW") {  
+
+                                if(!sys.mineSet){
+                                    unsetMines = true;
+                                    html += "You have not set ranges for all your Mines, they will default to their maximum range.<br>"
+                                    break;
+                                }
+                            }                       
+                        }
+                        if (unsetMines) break; // break outer loop                    
                     }
                 }
             }
-
-            var unsetMines = false;
-            if (mines) {
-                for (var i = 0; i < mines.length; i++) {
-                    var mine = mines[i];
-                    for (var j in mine.systems) {
-                        var sys = mine.systems[j];                        
-                        if (sys.name == "CaptorMine") {  
-                            //if(Object.values(sys.allocatedRanges).includes(null));
-                            if(!sys.mineSet){
-                                unsetMines = true;
-                                html += "You have not set ranges for all your Mines, they will default to their maximum range.<br>"
-                                break;
-                            }
-                        }                       
-                    }
-                    if (unsetMines) break; // break outer loop                    
-                }
-            }
-            
             confirm.confirm(html + "<br>Are you sure you wish to commit your orders?", gamedata.doCommit);        
                 
 

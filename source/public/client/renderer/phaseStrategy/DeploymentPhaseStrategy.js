@@ -31,7 +31,7 @@ window.DeploymentPhaseStrategy = function () {
         if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
             if (this.selectedShip) this.deselectShip(this.selectedShip);
             this.setPhaseHeader("PRE-TURN ORDERS");
-            this.replayUI = new ReplayUI().activate();            
+            this.replayUI = new ReplayUI().activate();
             gamedata.showCommitButton();
             /*//Can auto-click it if we want.
 
@@ -51,6 +51,8 @@ window.DeploymentPhaseStrategy = function () {
             icon.ownSprite.hide();
             icon.enemySprite.hide();
             icon.allySprite.hide();
+            icon.terrainSprite.hide();
+            if (icon.mineSprite) icon.mineSprite.hide();
         });
         //You can refresh screen if player has no ships, but not sure it's really necessary.        
         //if(!shipManager.playerHasDeployedShips(gamedata.thisplayer)) window.location.reload(); 
@@ -75,7 +77,20 @@ window.DeploymentPhaseStrategy = function () {
         }
 
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
-            if (shipManager.getShipsInSameHex(this.selectedShip, hex).length == 0) {
+            var shipsInHex = shipManager.getShipsInSameHex(this.selectedShip, hex);
+            var isBlocked = false;
+            
+            var hasTerrain = shipsInHex.some(function(s) { 
+                return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3); 
+            });
+
+            if (hasTerrain) {
+                isBlocked = true;
+            } else if (!(this.selectedShip.mine || this.selectedShip.flight)) {
+                isBlocked = shipsInHex.some(function(s) { return !(s.mine || s.flight); });
+            }
+
+            if (!isBlocked) {
                 shipManager.movement.deploy(this.selectedShip, hex);
                 this.onShipMovementChanged({ ship: this.selectedShip });
                 this.drawMovementUI(this.selectedShip);
@@ -95,7 +110,38 @@ window.DeploymentPhaseStrategy = function () {
             mathlib.clearLosSprite();
         }
 
-        if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn) 
+        // If we have a selected ship actively ready to deploy, and we click a valid DIFFERENT ship that is already placed on the map
+        if (this.selectedShip && this.selectedShip.id !== ship.id) {
+            var isPlacedOnMap = false;
+            if (ship.movement && ship.movement.length > 0) {
+                isPlacedOnMap = ship.movement[0].commit === true; 
+            }
+            
+            var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (ship.Huge > 0 && ship.Huge <= 3);
+            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight)) {
+                // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
+                // a valid, legal deployment drop for our CURRENTLY selected piece.
+                // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.
+                if (validateDeploymentPosition(this.selectedShip, payload.hex, this.deploymentSprites)) {
+                    // Finally, don't show the deploy pop-up if the selected unit is already occupying this exact hex!
+                    // getShipPosition can return raw {x,y} from the movement array, so we guarantee it's formatted as {q,r} hex coordinates
+                    var rawPos = shipManager.getShipPosition(this.selectedShip);
+                    var selectedPos = new hexagon.Offset(rawPos);
+                    
+                    if (!selectedPos || selectedPos.q !== payload.hex.q || selectedPos.r !== payload.hex.r) {
+                        this.showSelectFromShips([ship], payload);
+                        return;
+                    } else {
+                        // The selected ship is indeed legally placed, but it's ALREADY in the hex we clicked on.
+                        // We shouldn't show a deploy menu or fall through to auto-deploy. We simply swap the selection.
+                        this.selectShip(ship, payload);
+                        return;
+                    }
+                }
+            }
+        }
+
+        if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn)
             || (shipManager.getTurnDeployed(ship) < gamedata.turn) && ship.canPreOrder)) { //Own ship and deploys this turn, just select it. Means that late-deployers can't deploy on ships with canPreOrder (unless they click very edge of hex), but that's rare.
             this.selectShip(ship, payload);
         } else { //Neither of the above is true, allow to deploy.  Even on hexes occupied by ships that deployed earlier in game.
@@ -151,6 +197,9 @@ window.DeploymentPhaseStrategy = function () {
         var icon = getSlotById(ship.slot, deploymentSprites);
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             icon.terrainSprite.show();
+        } else if (ship.mine) {
+            // Mines can be selected from any slot, display visual boundary of map
+            icon.mineSprite.show();
         } else if (gamedata.isMyShip(ship)) {
             icon.ownSprite.show();
         } else {
@@ -164,6 +213,7 @@ window.DeploymentPhaseStrategy = function () {
         icon.enemySprite.hide();
         icon.allySprite.hide();
         icon.terrainSprite.hide();
+        if (icon.mineSprite) icon.mineSprite.hide();
     }
 
     function getSlotById(slotId, deploymentSprites) {
@@ -173,6 +223,29 @@ window.DeploymentPhaseStrategy = function () {
     }
 
     function createSlotSprites(gamedata, scene) {
+        var myTeam = gamedata.getPlayerTeam();
+        var enemyHoles = [];
+
+        // 10 hex buffer required around enemy deployment zones (reduced by 1/5th hex for edge slack)
+        var hexWidth = window.HexagonMath.getHexWidth();
+        var hexHeight = window.HexagonMath.getHexRowHeight();
+        var bufferX = hexWidth * 9.5;
+        var bufferY = hexHeight * 9.5;
+
+        Object.keys(gamedata.slots).forEach(function (key) {
+            var slot = gamedata.slots[key];
+            if (slot.team != myTeam) {
+                var deploymentData = getDeploymentData(slot);
+                enemyHoles.push({
+                    position: deploymentData.position,
+                    size: {
+                        width: deploymentData.size.width + (bufferX * 2),
+                        height: deploymentData.size.height + (bufferY * 2)
+                    }
+                });
+            }
+        });
+
         return Object.keys(gamedata.slots).map(function (key) {
             var slot = gamedata.slots[key];
 
@@ -186,6 +259,10 @@ window.DeploymentPhaseStrategy = function () {
 
             var terrainSprite = new DeploymentIcon(mapData.position, mapData.size, 'terrain', scene, 1);
 
+            // Give mines 1 extra hex of padding so they can deploy on the extreme board edges
+            var mineMapData = getMapData(true);
+            var mineSprite = new DeploymentIcon(mineMapData.position, mineMapData.size, 'mine', scene, 1, enemyHoles);
+
             return {
                 slotId: key,
                 team: slot.team,
@@ -194,8 +271,10 @@ window.DeploymentPhaseStrategy = function () {
                 allySprite: allySprite,
                 enemySprite: enemySprite,
                 terrainSprite: terrainSprite,
+                mineSprite: mineSprite,
                 playerid: deploymentData.playerid,
-                available: deploymentData.available
+                available: deploymentData.available,
+                deploymentData: deploymentData // Added to check bounds later 
             };
         });
     }
@@ -219,7 +298,7 @@ window.DeploymentPhaseStrategy = function () {
     }
 
     function validateTerrainDeployment(hex) {
-        var mapData = getMapData();
+        var mapData = getMapData(false);
         var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
 
         var offsetPosition = {
@@ -230,7 +309,56 @@ window.DeploymentPhaseStrategy = function () {
         return Math.abs(offsetPosition.x) < Math.floor(mapData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(mapData.size.height / 2);
     }
 
-    function getMapData() {
+    function validateMineDeployment(hex, ship, deploymentSprites) {
+        // Mines use the +1 hex padded bounds for edge deployment
+        var mapData = getMapData(true);
+        var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
+
+        var offsetPosition = {
+            x: mapData.position.x - hexPositionInGame.x,
+            y: mapData.position.y - hexPositionInGame.y
+        };
+
+        if (!(Math.abs(offsetPosition.x) < Math.floor(mapData.size.width / 2) && Math.abs(offsetPosition.y) < Math.floor(mapData.size.height / 2))) {
+            return false;
+        }
+
+        var myTeam = gamedata.getPlayerTeam();
+        var hexPositionInGame = window.coordinateConverter.fromHexToGame(hex);
+
+        // 10 hex buffer required around enemy deployment zones (reduced by 1/5th hex for edge slack)
+        var hexWidth = window.HexagonMath.getHexWidth();
+        var hexHeight = window.HexagonMath.getHexRowHeight();
+
+        var bufferX = hexWidth * 9.8;
+        var bufferY = hexHeight * 9.8;
+
+        for (var i = 0; i < deploymentSprites.length; i++) {
+            var icon = deploymentSprites[i];
+
+            // Only consider enemy areas
+            if (icon.team == myTeam) continue;
+
+            var depData = icon.deploymentData;
+
+            var offsetPosition = {
+                x: depData.position.x - hexPositionInGame.x,
+                y: depData.position.y - hexPositionInGame.y
+            };
+
+            // Expanded bounding box with the 10-hex buffer
+            var isWithinX = Math.abs(offsetPosition.x) <= Math.floor(depData.size.width / 2) + bufferX;
+            var isWithinY = Math.abs(offsetPosition.y) <= Math.floor(depData.size.height / 2) + bufferY;
+
+            if (isWithinX && isWithinY) {
+                return false; // Found inside a restricted enemy zone
+            }
+        }
+
+        return true;
+    }
+
+    function getMapData(padding) {
 
         var mapHeight = 0;
         var mapWidth = 0;
@@ -243,6 +371,11 @@ window.DeploymentPhaseStrategy = function () {
 
         if (mapHeight <= 0) mapHeight = 48 * window.Config.HEX_SIZE * 1.5;
         if (mapWidth <= 0) mapWidth = 72 * window.Config.HEX_SIZE * 1.73;
+
+        if (padding) {
+            mapHeight += window.HexagonMath.getHexRowHeight();
+            mapWidth += window.HexagonMath.getHexWidth();
+        }
 
 
         //position.x -= window.coordinateConverter.getHexWidth() / 2;
@@ -302,6 +435,8 @@ window.DeploymentPhaseStrategy = function () {
         }
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {//return true;
             return validateTerrainDeployment(hex);
+        } else if (ship.mine) {
+            return validateMineDeployment(hex, ship, deploymentSprites);
         } else {
             var icon = getSlotById(ship.slot, deploymentSprites);
             return icon.isValidDeploymentPosition(hex);

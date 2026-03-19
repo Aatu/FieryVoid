@@ -799,8 +799,9 @@ window.shipManager = {
             if (shipManager.isDestroyed(ship2)) continue;
 
             //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
-            var depTurn = shipManager.getTurnDeployed(ship2);
-            if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
+            // NO LONGER REQUIRED - Overridden by explicit isBlocked rules in Deployment Phase.
+            //var depTurn = shipManager.getTurnDeployed(ship2);
+            //if (depTurn !== gamedata.turn && !ship2.Enormous) continue;
 
             var pos2 = shipManager.getShipPosition(ship2);
 
@@ -934,7 +935,8 @@ window.shipManager = {
         //var ships = shipManager.getShipsInSameHex(ship);
         //for (var i in ships) {
         //var othership = ships[i];
-        if (gamedata.turn == 1) return true; //on turn 1 all friendly ships can be protected!
+
+        //if (gamedata.turn == 1) return true; //on turn 1 all friendly ships can be protected! NO LONGER REQUIRED - DK Mar 2026
 
         for (var i in gamedata.ships) { //doesn't need to be on the same hex NOW... only at the start and end of move :)
             var othership = gamedata.ships[i];
@@ -959,7 +961,7 @@ window.shipManager = {
         var resultTxt = '';
         if (!ship.flight) return resultTxt;
 
-        if (gamedata.turn == 1) return 'All'; //turn 1: all ships can be escorted
+        //if (gamedata.turn == 1) return 'All'; //turn 1: all ships can be escorted. NO LONGER REQUIRED - DK Mar 2026
 
         for (var i in gamedata.ships) {
             var othership = gamedata.ships[i];

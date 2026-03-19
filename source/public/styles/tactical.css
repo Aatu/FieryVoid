@@ -395,6 +395,22 @@ body {
     color: #33adff;
 }
 
+.name-value-button-ally {
+    border-top: 1px solid #444;
+    border-bottom: 1px solid #444;
+    background: rgba(20, 79, 128, 0.212);
+    font-weight: normal;
+    margin-bottom: 4px;
+    color: #33adff;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+
+.escorting {
+    color: orange;
+    font-weight: bold;
+}
 
 #weaponTargetingContainer {
     display: none;
@@ -531,7 +547,7 @@ body {
 }
 
 
-#iniGui::-webkit-scrollbar{
+#iniGui::-webkit-scrollbar {
     width: 12px;
 }
 
@@ -598,6 +614,42 @@ body {
     margin-top: 3px;
     margin-right: 0px;
     margin-left: 3px;
+    /* Add space between buttons */
+    border: 1px solid #587e8d;
+    background: #215a7a;
+    border-radius: 4px;
+    color: #e0e7ef;
+}
+
+#gameinfo {
+    position: relative;
+}
+
+#gameInfoButtons {
+    position: relative;
+    /* Relative positioning to flow normally in the element */
+    text-align: right;
+    /* Align buttons to the right */
+    font-size: 14px;
+    font-style: normal;
+    color: #e0e7ef;
+    padding-top: 2px;
+    padding-right: 2px;
+    /* Adjust for padding from the right side */
+    z-index: 11;
+    /* Make sure it's on top */
+    opacity: 0.95;
+    margin-right: 5px;
+}
+
+#gameInfoButtons input[type="button"] {
+    font-size: 13px;
+    cursor: pointer;
+    padding: 3px 8px 3px 8px;
+    margin-top: 3px;
+    margin-right: 0px;
+    margin-left: 3px;
+    margin-bottom: 3px;
     /* Add space between buttons */
     border: 1px solid #587e8d;
     background: #215a7a;

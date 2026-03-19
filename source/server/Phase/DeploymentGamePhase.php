@@ -92,6 +92,10 @@ class DeploymentGamePhase implements Phase
         $hexWidth = cos(30/180*pi()) * 2;
         $hexHeight = sin(30/180*pi()) + 1;
 
+        if (isset($ship->mine) && $ship->mine) {
+            return self::validateMineDeploymentArea($gamedata, $ship, $move, $hexpos, $hexWidth, $hexHeight);
+        }
+
         if ($slot->deptype == "box"){
             $depw = $slot->depwidth*$hexWidth;
             $deph = $slot->depheight*$hexHeight;
@@ -127,6 +131,40 @@ class DeploymentGamePhase implements Phase
 
         return false;
 
+    }
+
+    private static function validateMineDeploymentArea($gamedata, $ship, $move, $hexpos, $hexWidth, $hexHeight) {
+        $myTeam = $gamedata->slots[$ship->slot]->team;
+
+        // 9.5 hex buffer required around enemy deployment zones
+        $bufferX = $hexWidth * 9.5;
+        $bufferY = $hexHeight * 9.5;
+
+        foreach ($gamedata->slots as $slot) {
+            // Only consider enemy areas
+            if ($slot->team == $myTeam) continue;
+
+            $deppos = Mathlib::hexCoToPixel(new OffsetCoordinate($slot->depx, $slot->depy));
+            
+            // Expected boundaries matching the client UI
+            $depw = $slot->depwidth * $hexWidth;
+            $deph = $slot->depheight * $hexHeight;
+
+            $offsetPosition = [
+                "x" => $deppos["x"] - $hexpos["x"],
+                "y" => $deppos["y"] - $hexpos["y"]
+            ];
+
+            // Expanded bounding box with the buffer
+            $isWithinX = abs($offsetPosition["x"]) <= floor($depw / 2) + $bufferX;
+            $isWithinY = abs($offsetPosition["y"]) <= floor($deph / 2) + $bufferY;
+
+            if ($isWithinX && $isWithinY) {
+                return false; // Found inside a restricted enemy zone
+            }
+        }
+
+        return true;
     }
 
     private static function validateDeployment(TacGamedata $gamedata, $ships)

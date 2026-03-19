@@ -179,7 +179,7 @@ window.ShipTooltip = function () {
             } else {
                 var isShipDetected = shipManager.isDetected(ship);
                 var stealthSys = null;
-                
+
                 if (ship.mine) {
                     stealthSys = shipManager.systems.getSystemByName(ship, "mineStealth");
                 } else if (ship.faction == "Torvalus Speculators") {
@@ -206,7 +206,7 @@ window.ShipTooltip = function () {
 
                 if (isShipDetected) {
                     var detectedTeamsStr = "";
-                    if(ship.team == gamedata.getPlayerTeam()){ //Only own player needs to see full team list that's detected their ship.
+                    if (ship.team == gamedata.getPlayerTeam()) { //Only own player needs to see full team list that's detected their ship.
                         // Check if we have more than 2 teams in the game
                         var uniqueTeams = [];
                         for (var i in gamedata.slots) {
@@ -242,7 +242,7 @@ window.ShipTooltip = function () {
                                 }
                             }
                         }
-                    } 
+                    }
 
                     toDisplay += '<span style="color:red;">Detected' + detectedTeamsStr + '</span>; '; //Notify player that their Stealth ship is detected.
                 } else {
@@ -282,78 +282,82 @@ window.ShipTooltip = function () {
         if (ship.hasNavigator === true) toDisplay += 'Navigator; ';
         var listEscorting = shipManager.listEscorting(ship);
         if (listEscorting != '') {
-            toDisplay += 'Escorting: ';
+            toDisplay += '<span class="escorting">Escorting: </span>';
             //list of unit names
             toDisplay += listEscorting;
         }
         this.addEntryElement(toDisplay, toDisplay != '');
 
-        //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
-        this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total " + ship.iniative + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
+        if (ship.mine) {
+            if (gamedata.isMyorMyTeamShip(ship)) toDisplay = 'Signature: ' + ship.signature;
+            this.addEntryElement(toDisplay);
+        } else {
+            //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
+            this.addEntryElement("Ini Order: " + shipManager.getIniativeOrder(ship) + " (total " + ship.iniative + "): base " + ship.iniativebonus + "; mod " + ship.iniativeadded);
 
-        /*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
-        toDisplay = shipManager.systems.getMisc(ship);
-        this.addEntryElement(toDisplay, toDisplay!=''); //miscellanous info from systems - special information o be shown here
-        */
+            /*miscellanous info - once inserted, now disappeared; if it's needed, look for source code in Abbai branch!
+            toDisplay = shipManager.systems.getMisc(ship);
+            this.addEntryElement(toDisplay, toDisplay!=''); //miscellanous info from systems - special information o be shown here
+            */
 
-        //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
-        var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
-        var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
-        if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
-        var turncost = Math.ceil(speed * baseTurnCost);
-        var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
+            //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
+            var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
+            var speed = shipManager.movement.getSpeed(ship);
+            var baseTurnCost = ship.turncost;
+            if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
+            var turncost = Math.ceil(speed * baseTurnCost);
+            var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
 
-        this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
-        this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
-        toDisplay = ''; //display Agile status
-        if (ship.agile) toDisplay = ', Agile';
-        this.addEntryElement('Turn Cost: ' + turncost + ' (' + ship.turncost + '); Turn Delay: ' + turnDelayCost + ' (' + ship.turndelaycost + ')' + toDisplay);
+            this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
+            this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
+            toDisplay = ''; //display Agile status
+            if (ship.agile) toDisplay = ', Agile';
+            this.addEntryElement('Turn Cost: ' + turncost + ' (' + ship.turncost + '); Turn Delay: ' + turnDelayCost + ' (' + ship.turndelaycost + ')' + toDisplay);
 
-        var thrustRemaining = Math.max(shipManager.movement.getRemainingEngineThrust(ship), 0);//EngineShorted can make this go negative.
+            var thrustRemaining = Math.max(shipManager.movement.getRemainingEngineThrust(ship), 0);//EngineShorted can make this go negative.
 
-        toDisplay = 'Thrust: ' + thrustRemaining + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
-        this.addEntryElement(toDisplay, toDisplay != '');
-        //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
+            toDisplay = 'Thrust: ' + thrustRemaining + '/' + shipManager.movement.getFullEngineThrust(ship);//thrust: remaining/full
+            this.addEntryElement(toDisplay, toDisplay != '');
+            //this.addEntryElement('Unused thrust: ' + shipManager.movement.getRemainingEngineThrust(ship), ship.flight || gamedata.gamephase === 2);
 
-        toDisplay = 'Speed: ' + shipManager.movement.getSpeed(ship);
-        if (currDelay > 0) toDisplay += ' (delay ' + currDelay + ')';
-        toDisplay += ' (acc cost: ' + ship.accelcost + ')';
-        this.addEntryElement(toDisplay);
-        this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
+            toDisplay = 'Speed: ' + shipManager.movement.getSpeed(ship);
+            if (currDelay > 0) toDisplay += ' (delay ' + currDelay + ')';
+            toDisplay += ' (acc cost: ' + ship.accelcost + ')';
+            this.addEntryElement(toDisplay);
+            this.addEntryElement('Armor (F/S/A): ' + flightArmour, ship.flight === true);
 
-        if (this.selectedShip) {
-            if (!gamedata.isMyShip(ship)) {
-                this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
-            }
+            if (this.selectedShip) {
+                if (!gamedata.isMyShip(ship)) {
+                    this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
+                }
 
-            if (shipManager.isElint(this.selectedShip)) {
-                if (shipManager.hasSpecialAbility(this.selectedShip, "ConstrainedEW")) {//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.            	
-                    this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 4, this.selectedShip !== ship && ship.flight !== true);
-                } else {
-                    this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship && ship.flight !== true);
+                if (shipManager.isElint(this.selectedShip)) {
+                    if (shipManager.hasSpecialAbility(this.selectedShip, "ConstrainedEW")) {//Mindrider ships have less efficient ELINT abilities - DK 19.07.24.            	
+                        this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 4, this.selectedShip !== ship && ship.flight !== true);
+                    } else {
+                        this.addEntryElement('DIST: ' + ew.getOffensiveEW(this.selectedShip, ship, "DIST") / 3, this.selectedShip !== ship && ship.flight !== true);
+                    }
                 }
             }
+
+            var dewValue = ew.getSupportedDEW(ship).toFixed(2);
+            //if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+            if (dewValue > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24 
+                this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
+            }
+
+            var MDEW = ew.getDetectMEW(ship);
+            if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
+                this.addEntryElement('Detect Mines: ' + MDEW);
+            }
+
+            if (shipManager.isElint(ship)) {
+                if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
+                this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
+            }
+
+            this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
         }
-
-        var dewValue = ew.getSupportedDEW(ship).toFixed(2);
-        //if (ew.getSupportedDEW(ship)) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
-        if (dewValue > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24 
-            this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
-        }
-
-        var MDEW = ew.getDetectMEW(ship);
-        if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
-            this.addEntryElement('Detect Mines: ' + MDEW);
-        }
-
-        if (shipManager.isElint(ship)) {
-            if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
-            this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
-        }
-
-        this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);
-
         //Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24
         var fDef = weaponManager.calculateBaseHitChange(ship, ship.forwardDefense) * 5;
         fDef = parseFloat(fDef.toFixed(2));

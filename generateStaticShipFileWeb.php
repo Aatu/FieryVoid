@@ -24,6 +24,7 @@ ini_set('memory_limit', '-1'); // Unlimited memory
 set_time_limit(300); // 5 minutes
 
 //// ─── Includes ──────────────────────────────────────────────────────
+define('IN_STATIC_GENERATION', true);
 require_once __DIR__ . '/source/public/global.php';
 
 //// ─── Config ────────────────────────────────────────────────────────

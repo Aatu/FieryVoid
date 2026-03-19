@@ -350,68 +350,93 @@ public function addMoons($gameData, $dbManager, $smallCount, $mediumCount, $larg
                 }
 
                 if ($ship->userid == $gameData->forPlayer){
-                    $id = $dbManager->submitShip($gameData->id, $ship, $gameData->forPlayer);
-
-                    
-                    //unit enhancements
-                    foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
-                        $enhID = $enhancementEntry[0];
-                        $enhName = $enhancementEntry[1];
-                        $enhNo = $enhancementEntry[2];
-                        if ($enhNo > 0){ //actually taken
-                            $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
+//Debug::log("bulkBuy " . $ship->bulkBuy);
+                    $bulkBuy = isset($ship->bulkBuy) ? $ship->bulkBuy : 1;
+//Debug::log("bulkBuy2 " . $bulkBuy);                    
+                    for ($m = 0; $m < $bulkBuy; $m++) {
+                        
+                        // For mines, clone the ship object to save it individually without random movement
+                        if (isset($ship->mine) && $ship->mine) {
+                            $mineToSave = clone $ship;
+                            $mineToSave->userid = $gameData->forPlayer; // Ensure ownership
+                            
+                            // Deep clone systems so they don't share references and get overwritten
+                            $clonedSystems = array();
+                            foreach($ship->systems as $sys) {
+                                $clonedSys = clone $sys;
+                                $clonedSystems[] = $clonedSys;
+                            }
+                            $mineToSave->systems = $clonedSystems;
+                            
+                            $id = $dbManager->submitShip($gameData->id, $mineToSave, $gameData->forPlayer);
+                            $mineToSave->id = $id; // Set the newly generated DB ID so it doesn't collide
+                            $savedShip = $mineToSave;
+                        } else {
+                            $id = $dbManager->submitShip($gameData->id, $ship, $gameData->forPlayer);
+                            $ship->id = $id;
+                            $savedShip = $ship;
                         }
-                    }
-                    
-                    // Check if ship uses variable flight size
-                    if($ship instanceof FighterFlight){
-                        $dbManager->submitFlightSize($gameData->id, $id, $ship->flightSize);
 
-                        $firstFighter = $ship->systems[1];
-                        $ammo = false;
-
-                        foreach ($firstFighter->systems as $weapon){
-                            if(isset($weapon->missileArray)){
-                                $ammo = $weapon->missileArray[1]->amount;
-                                break;
+                        //unit enhancements
+                        foreach($ship->enhancementOptions as $enhancementEntry){ //ID,readableName,numberTaken,limit,price,priceStep
+                            $enhID = $enhancementEntry[0];
+                            $enhName = $enhancementEntry[1];
+                            $enhNo = $enhancementEntry[2];
+                            if ($enhNo > 0){ //actually taken
+                                $dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
                             }
                         }
+                        
+                        // Check if ship uses variable flight size
+                        if($ship instanceof FighterFlight){
+                            $dbManager->submitFlightSize($gameData->id, $id, $ship->flightSize);
 
-                        if ($ammo){
-                            foreach($ship->systems as $fighter){
-                                foreach ($fighter->systems as $weapon){
-                                    if(isset($weapon->missileArray)){
-                                        $weapon->missileArray[1]->amount = $ammo;
-                                        $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $ammo, 0);
+                            $firstFighter = $ship->systems[1];
+                            $ammo = false;
+
+                            foreach ($firstFighter->systems as $weapon){
+                                if(isset($weapon->missileArray)){
+                                    $ammo = $weapon->missileArray[1]->amount;
+                                    break;
+                                }
+                            }
+
+                            if ($ammo){
+                                foreach($ship->systems as $fighter){
+                                    foreach ($fighter->systems as $weapon){
+                                        if(isset($weapon->missileArray)){
+                                            $weapon->missileArray[1]->amount = $ammo;
+                                            $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $ammo, 0);
+                                        }
+                                    }
+                                }
+                            }
+                            else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
+                                foreach($ship->systems as $fighter){
+                                    foreach($fighter->systems as $weapon){
+                                        if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
+                                            $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $weapon->ammunition, 0);
+                                        }
                                     }
                                 }
                             }
                         }
-                        else{//Marcin Sawicki: generalized version of gun ammo initialization for fighters (not for missile launchers!)
-                            foreach($ship->systems as $fighter){
-                                foreach($fighter->systems as $weapon){
-                                    if(isset($weapon->ammunition) && (!isset($weapon->missileArray)) && ($weapon->ammunition > 0) ){
-                                        $dbManager->submitAmmo($id, $weapon->id, $gameData->id, $weapon->firingMode, $weapon->ammunition, 0);
+                        else{
+                            foreach($ship->systems as $systemIndex=>$system){
+                                if(isset($system->missileArray)){
+                                    // this system has a missileArray. It uses ammo
+                                    foreach($system->missileArray as $firingMode=>$ammo){
+                                        $dbManager->submitAmmo($id, $system->id, $gameData->id, $firingMode, $ammo->amount, 0);
+                                    }
+                                }
+                                else if($system instanceof Weapon) { //count ammo for other weapons as well!
+                                    if(isset($system->ammunition) && ($system->ammunition > 0)){
+                                        $dbManager->submitAmmo($id, $system->id, $gameData->id, $system->firingMode, $system->ammunition, 0);
                                     }
                                 }
                             }
                         }
-                    }
-                    else{
-                        foreach($ship->systems as $systemIndex=>$system){
-                            if(isset($system->missileArray)){
-                                // this system has a missileArray. It uses ammo
-                                foreach($system->missileArray as $firingMode=>$ammo){
-                                    $dbManager->submitAmmo($id, $system->id, $gameData->id, $firingMode, $ammo->amount, 0);
-                                }
-                            }
-                            else if($system instanceof Weapon) { //count ammo for other weapons as well!
-                                if(isset($system->ammunition) && ($system->ammunition > 0)){
-                                    $dbManager->submitAmmo($id, $system->id, $gameData->id, $system->firingMode, $system->ammunition, 0);
-                                }
-                            }
-                        }
-                    }
+                    } // End of bulkBuy loop
                 }
             }
 

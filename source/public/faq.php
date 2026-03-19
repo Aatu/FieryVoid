@@ -38,6 +38,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
+                <li><a href="#escorts">Fighter Escorts</a></li>                
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
                 <li><a href="#mines">Mines</a></li>                               
@@ -225,6 +226,18 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
+
+        <h3 id="escorts" >Fighter Escorts</h3>
+        <ul>
+            <li>Fighter units can escort friendly ships that are in the same hex in order to use their guns to help intercept ballistic weapons targeted at that ship(s).</li>
+            <li>To escort a ship, the fighter unit must start AND end its movement in the same hex as the ship they are escorting.  Where this is the case,
+                the fighters will use their weapons to intercept ballistics on behalf of the ship providing all other conditions of intercept are true e.g. 
+                their weapons have an intercept rating, the incoming shot is in arc, the fighters are not jinking etc.        
+            </li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
         <h3 id="jump" >Jump Drives</h3>
         <ul>
             <li>The Jump Drive system usually cannot be turned off unless seriously damaged, but some scenarios allow it.</li>
@@ -260,7 +273,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 You do this by clicking on the mine weapons system icon during Deployment/Pre-Turn Orders phase.  
                 Once set these ranges will apply for the rest of the game, and if you choose not to set the ranges they will default to their maximum range.  
                 You can set the ranges of all mines of the same type using the propagate buttons in the Mine Settings menu.</li>
-            <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase.  
+            <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase, an EW option that will only appear if the opponenet has mines in the game.  
                 Fighters and Shuttles can do this also, converting their Offensive Bonus (OB) in to 'Detect Mines' EW points, at a cost of 10 OB per point of 'Detect Mines' EW 
                 (Note - any OB used in this way will not be available for firing later in the turn).
                 The detection calculation depends on a number of factors e.g.
@@ -286,14 +299,31 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </li>                        
             
             <li>There are several different types of mine in B5 Wars, as Captor Mines are the only ones currently available in FV at this time only their details are listed below.</li>
+            <li>All mines will automatically attack the first unit that comes into their range, even allies unless you have purchases the Identify Friend or Fore enhancement for the mine or mine launcher.</li>
             <li>Captor Mines:
                 <ul class="circle-list">
-                    <li>These have a range within which they will launch at the first viable target during movement, and then resolve the attack as ballistic weapon during Firing Phase.  
+                    <li>These mines a range within which they will launch at the first viable target during movement, 
+                        and then resolve the attack as ballistic weapon during Firing Phase.  
                         As such, these type of mines can be intercepted in the same way as other ballistic weapons.</li>
                     <li>Units equipped with Jammers halve the range at which a captor mine will attack them.</li>
-                    <li>Captor mine is destroyed whether it hits or not.</li>                    
+                    <li>A captor mine is destroyed whether it hits or not.</li>                    
                 </ul>
-            </li>      
+            </li>  
+            <li>Proximity Mines:
+                <ul class="circle-list">
+                    <li>These mines a range within which they explode and damage the first viable target during movement. They resolve this attack just before the Firing Phase, similar to Terrain collisions.</li>
+                    <li>Proximity mines automaticall hit their target and are destroyed after they attack.</li>                    
+                </ul>
+            </li> 
+            <li>DEW Mines:
+                <ul class="circle-list">
+                    <li>These mines come equipped with weapons and will fire these autoamtically at the first viable target it enoucnters during the movement phase, 
+                        these attacks are then resolved normally during the Firing Phase.</li>
+                    <li>DEW mines become detected once they fire, and they must fire all their weapons at the same target.  
+                        They don't not benefit from having a weapon lock, but do get an accuracy bonus to their shot.</li>
+                    <li>Once they have been detected their signature reduces to a lower value.</li>                        
+                </ul>
+            </li>                              
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

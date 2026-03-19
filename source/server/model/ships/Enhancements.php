@@ -244,6 +244,9 @@ class Enhancements{
 			if ($system instanceof BallisticMineLauncher || $system instanceof AbbaiMineLauncher){
 		  	$enhPrice += 4;
 		    }
+			if($system instanceof CaptorMine || $system instanceof ProximityMine || $system instanceof MineControllerDEW){
+				$enhPrice += ceil($ship->pointCost * 0.1); //10% cost.
+			}
 		  }  
 		  $enhPriceStep = 0; //flat rate
 		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
@@ -1701,6 +1704,20 @@ class Enhancements{
 						}
 						break;	
 
+
+					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.
+						foreach ($ship->systems as $system){
+							if ($system instanceof GrapplingClaw){							
+								$system->ammunition += $enhCount;
+							}
+						}
+						foreach ($ship->systems as $system){
+							if ($system instanceof CombatTransporter){							
+								$system->ammunition += $enhCount;
+							}
+						}
+						break;	
+
 					case 'GUNSIGHT'://Split fire: allows Particle Repeaters to split their shots.
 						foreach ($ship->systems as $system){
 							if ($system instanceof ParticleRepeater){
@@ -1716,19 +1733,6 @@ class Enhancements{
 						break;	
 
 					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
-						break;	
-
-					case 'EXT_MRN'://Extra marines, increase contingent per Claw by 1.
-						foreach ($ship->systems as $system){
-							if ($system instanceof GrapplingClaw){							
-								$system->ammunition += $enhCount;
-							}
-						}
-						foreach ($ship->systems as $system){
-							if ($system instanceof CombatTransporter){							
-								$system->ammunition += $enhCount;
-							}
-						}
 						break;	
 												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.

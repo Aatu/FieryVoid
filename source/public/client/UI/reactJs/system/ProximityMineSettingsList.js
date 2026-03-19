@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 0px;
+    margin-top: 5px;
     width: 100%;
     min-width: 200px;
     opacity: 0.95;
@@ -64,12 +64,13 @@ const Controls = styled.div`
 `;
 
 const Value = styled.div`
-    width: 20px;
+    width: 30px;
     text-align: center;
+    font-weight: bold;
+    color: ${props => props.$active ? '#4CAF50' : '#F44336'};
 `;
 
 const ActionButton = styled.div`
-    width: 16px;
     height: 16px;
     background: #683333;
     border: 1px solid #641b1b;
@@ -78,10 +79,9 @@ const ActionButton = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 14px;
-    padding: 0;
+    font-size: 11px;
+    padding: 0 4px;
     opacity: 0.9;
-
 
     &:hover {
         background: #854242;
@@ -96,39 +96,21 @@ const ActionButton = styled.div`
     `}
 `;
 
-const Divider = styled.span`
-    display: inline-block;
-    width: 1px;
-    height: 10px;
-    background-color: #f2f2f2;
-    margin: 0 4px;
-    font-weight: bold;     
-    vertical-align: middle;
-    opacity: 0.7;
-`;
-
-class MineSettingsList extends Component {
+class ProximityMineSettingsList extends Component {
     constructor(props) {
         super(props);
         this.listRef = React.createRef();
     }
 
-    handleIncrease(className) {
+    handleToggle(className) {
         const { system } = this.props;
         system.setCurrShipType(className);
 
-        if (system.canIncrease()) {
-            system.doIncrease();
+        if (system.canSet()) {
+            system.doSet();
             this.forceUpdate();
-        }
-    }
-
-    handleDecrease(className) {
-        const { system } = this.props;
-        system.setCurrShipType(className);
-
-        if (system.canDecrease()) {
-            system.doDecrease();
+        } else if (system.canUnset()) {
+            system.doUnset();
             this.forceUpdate();
         }
     }
@@ -143,8 +125,7 @@ class MineSettingsList extends Component {
         console.log("Propagating Mine settings for:", className);
 
         system.setCurrShipType(className);
-        const systemMaxRange = system.range || system.rangeSetting;
-        const allocated = (system.allocatedRanges[className] === null) ? systemMaxRange : system.allocatedRanges[className];
+        const targetValue = system.allocatedShipTypes[className];
 
         var allOwnMines = [];
         for (var i in gamedata.ships) {
@@ -156,6 +137,7 @@ class MineSettingsList extends Component {
                 var ctrl = otherUnit.systems[iSys];
                 if (otherUnit.shipClass == ship.shipClass && ctrl.name === system.name) {
                     allOwnMines.push(ctrl);
+                    break;
                 }
             }
         }
@@ -167,29 +149,21 @@ class MineSettingsList extends Component {
             ctrl.setCurrShipType(className);
 
             let safety = 0;
-            // Get target value from our reference system
-            const targetValue = (system.allocatedRanges[className] === null) ? systemMaxRange : system.allocatedRanges[className];
-
-            const getCtrlRange = (c) => c.range || c.rangeSetting;
 
             while (
-                ((ctrl.allocatedRanges[className] === null ? getCtrlRange(ctrl) : ctrl.allocatedRanges[className]) < targetValue)
-                && ctrl.canIncrease()
-                && safety < 100
+                (ctrl.allocatedShipTypes[className] !== targetValue)
+                && (targetValue ? ctrl.canSet() : ctrl.canUnset())
+                && safety < 10
             ) {
-                ctrl.doIncrease();
+                if (targetValue) {
+                    ctrl.doSet();
+                } else {
+                    ctrl.doUnset();
+                }
                 safety++;
             }
 
-            while (
-                ((ctrl.allocatedRanges[className] === null ? getCtrlRange(ctrl) : ctrl.allocatedRanges[className]) > targetValue)
-                && ctrl.canDecrease()
-                && safety < 100
-            ) {
-                ctrl.doDecrease();
-                safety++;
-            }
-            if (safety >= 100) console.warn("Mine Settings Propagation safety break for", ctrl);
+            if (safety >= 10) console.warn("Mine Settings Propagation safety break for", ctrl);
         }
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
@@ -200,26 +174,17 @@ class MineSettingsList extends Component {
 
         if (!system) return null;
 
-        system.range = system.range || system.rangeSetting;
-
-        if (!system.range) return null;
-
-        const allocatedRangesMap = system.allocatedRanges || {};
-        const shipTypes = Object.keys(allocatedRangesMap);
+        const allocatedShipTypesMap = system.allocatedShipTypes || {};
+        const shipTypes = Object.keys(allocatedShipTypesMap);
 
         const getVisibleValue = (type) => {
-            const val = allocatedRangesMap[type];
-            return val === null ? system.range : val;
+            return allocatedShipTypesMap[type] ? "YES" : "NO";
         };
 
-        const canIncrease = (type) => {
-            const allocated = getVisibleValue(type);
-            return allocated < system.range;
-        };
-
-        const canDecrease = (type) => {
-            const allocated = getVisibleValue(type);
-            return allocated > 0;
+        const canToggle = (type) => {
+            const spawned = Number(this.props.ship.spawned);
+            const deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
+            return window.gamedata.turn === deploymentTurn;
         };
 
         const canPropagate = (type) => {
@@ -229,37 +194,27 @@ class MineSettingsList extends Component {
         return (
             <Container>
                 <Header>
-                    Set Mine Range
+                    Set Target Types
                 </Header>
                 <ListContainer ref={this.listRef}>
                     {shipTypes.map(type => (
                         <Row key={type}>
                             <Icon src={`./img/systemicons/BFCPclasses/${type}.png`} alt={type} />
                             <Name>{type}</Name>
-                            <Controls
-                                onWheel={(e) => {
-                                    if (e.deltaY < 0 && canIncrease(type)) this.handleIncrease(type);
-                                    else if (e.deltaY > 0 && canDecrease(type)) this.handleDecrease(type);
-                                }}
-                            >
+                            <Controls>
+                                <Value $active={allocatedShipTypesMap[type]}>{getVisibleValue(type)}</Value>
                                 <ActionButton
-                                    onClick={() => this.handleDecrease(type)}
-                                    disabled={!canDecrease(type)}
+                                    onClick={() => this.handleToggle(type)}
+                                    disabled={!canToggle(type)}
+                                    style={{ marginLeft: '5px' }}
                                 >
-                                    -
-                                </ActionButton>
-                                <Value>{getVisibleValue(type)}</Value>
-                                <ActionButton
-                                    onClick={() => this.handleIncrease(type)}
-                                    disabled={!canIncrease(type)}
-                                >
-                                    +
+                                    Toggle
                                 </ActionButton>
                                 <ActionButton
                                     title="Propagate to all mines of same type"
                                     onClick={() => this.handlePropagate(type)}
                                     disabled={!canPropagate(type)}
-                                    style={{ marginLeft: '5px' }}
+                                    style={{ marginLeft: '5px', width: '16px', padding: '0' }}
                                 >
                                     <img src="./img/systemicons/BFCPclasses/minePropagate.png" alt="Propagate" style={{ width: '12px', height: '12px' }} />
                                 </ActionButton>
@@ -268,12 +223,10 @@ class MineSettingsList extends Component {
                     ))}
                     {shipTypes.length === 0 && <Row>No ship types available</Row>}
                 </ListContainer>
-                <div style={{ padding: '5px', textAlign: 'center', fontSize: '10px', color: '#f2f2f2' }}>
-                    Max Range: {system.range}
-                </div>
+
             </Container>
         );
     }
 }
 
-export default MineSettingsList;
+export default ProximityMineSettingsList;

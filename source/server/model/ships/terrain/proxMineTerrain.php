@@ -1,21 +1,21 @@
 <?php
-class spawnCaptorKLB extends Mine{
+class proxMineTerrain extends Mine{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 0;
-		$this->faction = "Kor-Lyan Kingdoms";
-        $this->phpclass = "spawnCaptorKLB";
+		$this->pointCost = 15;
+		$this->faction = "Terrain";
+        $this->phpclass = "proxMineTerrain";
         $this->imagePath = "img/ships/korlyan_mine.png";
-        $this->shipClass = "Kovost Captor Mine";
+        $this->shipClass = "Proximity Mine";
 		$this->occurence = "common";
-		$this->variantOf = 'NONE';
-        $this->isd = 2208;
+		//$this->variantOf = 'NONE';
+        $this->isd = 2200;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 0;          
+        $this->signature = 2;        
         
         $this->turncost = 0;
         $this->turndelaycost = 0;
@@ -23,15 +23,14 @@ class spawnCaptorKLB extends Mine{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
-        //$this->spawned = true;
        		    	    	    	    
-        //Block all enhancements for Terrain units when bought
+        //Block all enhancements for Mine units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 2));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
-        $this->addPrimarySystem(new CaptorMine(0, 1, 1, 0, 360, 3, 8, 10, 1, 16)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $accuracy, $diceType, $dice, $damageBonus 
+        $this->addPrimarySystem(new ProximityMine(0, 1, 1, 0, 360, 1, 1, 0, 20)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $diceType, $dice, $damageBonus 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(0, 1));

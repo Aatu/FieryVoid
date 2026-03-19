@@ -145,6 +145,7 @@ jQuery(function ($) {
     $("#movementcheck").on("click", createGame.doMovementCheck);
     $("#desperatecheck").on("click", createGame.doDesperateCheck);
     $("#terraincheck").on("click", createGame.doTerrainCheck);
+    $("#allowMinesCheck").on("click", createGame.doAllowMinesCheck);
     $("#friendlyFireCheck").on("click", createGame.doFriendlyFireCheck);
     $("#laddercheck").on("click", createGame.doLadderCheck);
 
@@ -421,6 +422,16 @@ window.createGame = {
         } else {
             $("#movementDropdown").hide();
             delete createGame.rules.initiativeCategories;
+        }
+    },
+
+    doAllowMinesCheck: function doAllowMinesCheck(data) {
+        var checkval = $("#allowMinesCheck:checked").val();
+
+        if (checkval == "on") {
+            createGame.rules.allowMines = 1;
+        } else {
+            delete createGame.rules.allowMines;
         }
     },
 

@@ -1,5 +1,10 @@
 <?php 
 
+// Force GZIP compression as these JSON payloads can be massive (e.g. 5MB+)
+ini_set('zlib.output_compression', 'On');
+// Allow the script more time to dynamically compile a faction if the cache is completely cold
+set_time_limit(60);
+
 header('Content-Type: application/json; charset=utf-8');
 
 require_once 'global.php';
@@ -68,8 +73,7 @@ try {
             exit;
         }
         header('Pragma: cache');
-        
-        if (!ob_start("ob_gzhandler")) ob_start(); //Try gzip, fall back to default
+        ob_start(); // Buffer output, gzip is handled natively by zlib.output_compression
         
         echo file_get_contents($jsonPath);
         ob_end_flush();
