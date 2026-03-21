@@ -3026,6 +3026,352 @@ class GromeHvyRailgun extends Weapon{
 	} //end of FtrDefenseGun
 
 
+// Weapons for the Orieni from The Great Crusade
+
+    class WarLance extends LaserLance{
+        public $name = "WarLance";
+        public $displayName = "War Lance";
+        public $animationColor = array(220, 100, 11);
+
+        public $loadingtime = 4;
+
+        public $priority = 7;
+        public $priorityArray = array(1=>7, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(-5, 3, 4), 2=>array(null,-1,0) ); //Raking and Piercing mode
+
+        public $rangePenalty = 0.5;
+        //public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 9;
+            if ( $powerReq == 0 ) $powerReq = 6;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 5)+15; }
+        public function setMinDamage(){ $this->minDamage = 20 ; }
+        public function setMaxDamage(){ $this->maxDamage = 65 ; }
+    }
+
+    class LightLaserLance extends LaserLance{
+        public $name = "LightLaserLance";
+        public $displayName = "Light Laaser Lance";
+        public $animationColor = array(220, 100, 11);
+
+        public $loadingtime = 2;
+
+        public $priority = 4;
+        public $priorityArray = array(1=>4, 2=>2); //Piercing shots go early, to do damage while sections aren't detroyed yet!
+
+            public $firingModes = array(
+                1 => "Raking",
+                2 => "Piercing"
+            );
+        
+            public $damageTypeArray=array(1=>'Raking', 2=>'Piercing');
+            public $fireControlArray = array( 1=>array(-5, 3, 4), 2=>array(null,-1,0) ); //Raking and Piercing mode
+
+        public $rangePenalty = 0.66;
+        //public $fireControl = array(-5, 3, 3); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 5;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+10; }
+        public function setMinDamage(){ $this->minDamage = 12 ; }
+        public function setMaxDamage(){ $this->maxDamage = 30 ; }
+    }
+
+    class ImpRapidGatling extends Matter{
+        public $name = "ImpRapidGatling";
+        public $displayName = "Improved Gatling Railgun";
+        public $iconPath = "rapidGatling.png";
+
+        public $guns = 2;
+        public $intercept = 1;
+        public $loadingtime = 1;
+        public $ballisticIntercept = true;
+        public $priority = 5; //low damage, worth firing early!
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(6, 4, 3); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 2;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Can intercept ballistic weapons only.";
+        }
+	    
+        public function getDamage($fireOrder){        return Dice::d(6, 2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+    }
+
+    class GaussRifle extends MatterCannon
+    {
+        public $name = "GaussRifle";
+        public $displayName = "Gauss Rifle";
+
+        public $loadingtime = 2;        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-6, 3, 4); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 4;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 1)+15;   }
+        public function setMinDamage(){     $this->minDamage = 16 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 25 ;      }
+    }
+
+    class HeavyGaussRifle extends MatterCannon
+    {
+        public $name = "HeavyGaussRifle";
+        public $displayName = "Heavy Gauss Rifle";
+
+        public $loadingtime = 3;        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(null, 3, 3); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 12;
+            if ( $powerReq == 0 ) $powerReq = 5;
+                parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+18;   }
+        public function setMinDamage(){     $this->minDamage = 21 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 48 ;      }
+    }
+
+class OrieniFlakArray extends Weapon{ 
+    public $name = "OrieniFlakArray";
+    public $displayName = "Flak Array";
+	public  $iconPath = "FlakCannon.png";
+
+	public $animation = "bolt";
+    public $animationColor = array(255, 250, 230);
+//    public $animationExplosionScale = 0.5;
+        
+    public $guns = 2;
+    public $priority = 1;
+    public $intercept = 3;
+    public $freeintercept = true; //can intercept fire directed at different unit
+    public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
+    public $loadingtime = 1;
+	public $canInterceptUninterceptable = true;
+
+    public $rangePenalty = 2;    
+    public $fireControl = array(5, 4, 3); // fighters, <mediums, <capitals 	
+	public $firingModes = array(1=>'Offensive Mode');    
+	public $damageType = 'Flash';    
+    public $weaponClass = 'Matter'; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	    
+	protected $autoHit = false;//To show 100% hit chance in front end.    
+	
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 3;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = "Intercepts all shots from an enemy ship automatically if not fired.";
+			$this->data["Special"] .= "<br>Will also automatically intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
+			$this->data["Special"] .= "<br>Can intercept uninterceptable weapons at 50% effectiveness, but not when intercepting for other units.";			
+			$this->data["Special"] .= "<br>Offensive mode can target any unit.";			
+	}
+
+	public function calculateHitBase($gamedata, $fireOrder){
+			$this->changeFiringMode($fireOrder->firingMode);  //needs to be outside the switch routine
+
+			switch($this->firingMode){
+				case 1:
+		
+				parent::calculateHitBase($gamedata, $fireOrder);
+				break;
+		
+			case 2: 		
+				//hit chance always 100 - so it always hits and is correctly animated
+				$fireOrder->needed = 100; //auto hit!
+				$fireOrder->updated = true;
+
+				//while we're at it - we may add appropriate interception orders!	
+				if ($fireOrder->targetid >= 0) {//actual target is chosen...				
+				$targetShip = $gamedata->getShipById($fireOrder->targetid);
+				$allOrders = $targetShip->getAllFireOrders($gamedata->turn);
+				
+					foreach($allOrders as $subOrder) {
+						if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->shooterid) ){ //something is firing at protected unit - except ballistics!
+							$subWeapon = $targetShip->getSystemById($subOrder->weaponid);
+							if(!$subWeapon->doNotIntercept){//just those that outright cannot be intercepted - like ramming or mass driver - will not be affected
+								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);//50% effectiveness for lasers etc handled here.
+								$subOrder->numInterceptors++;
+							}
+						}
+					}		
+				}
+				break;
+			}
+	}//endof function calculateHitBase
+
+	public function fire($gamedata, $fireOrder) { 
+
+			switch($this->firingMode){
+				case 1:
+					parent::fire($gamedata, $fireOrder);
+					break;
+				//Leave old manual method for legacy games
+				case 2:
+					$shooter = $gamedata->getShipById($fireOrder->shooterid);
+					$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+					$posLaunch = $movement->position;//at moment of launch!!!		
+					$rolled = Dice::d(100);
+					$fireOrder->rolled = $rolled; ///and auto-hit ;)
+					$fireOrder->shotshit++;
+					$fireOrder->pubnotes .= "<br>Interception applied to all weapons on target unit that are firing at Flak Cannon-firing ship. ";
+
+					$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+					TacGamedata::$lastFiringResolutionNo++;    //note for further shots
+					$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!
+
+					break;
+			}
+	} //endof function fire
+			
+	public function canFreeInterceptShot($gamedata, $fireOrder, $shooter, $target, $interceptingShip, $firingWeapon){
+			$distance = mathlib::getDistanceHex($interceptingShip, $target);
+			if ($distance > 5) return false;//target must be within 5 hexes			
+			if ($firingWeapon->uninterceptable) return false; //Cannot free intercept lasers etc.  Only matters for first shot.
+								
+			//both source and target of fire must be in arc
+			//first check target
+			$targetBearing = $interceptingShip->getBearingOnUnit($target);
+			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
+			//check on source - launch hex for ballistics, current position for direct fire
+			if ($firingWeapon->ballistic){
+				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
+				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
+				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
+			}else{ //direct fire
+				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
+			}
+			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
+						
+			return true;
+			
+	}//endof function canFreeInterceptShot
+
+	public function getInterceptionMod($gamedata, $fireOrder){
+		
+		$interceptMod = parent::getInterceptionMod($gamedata, $fireOrder);
+
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $firingweapon = $shooter->getSystemById($fireOrder->weaponid);		
+
+		if($firingweapon->uninterceptable) $interceptMod = $interceptMod/2;	//It is marked uninterceptable e.g. lasers 50 % effectiveness.	
+		
+		return $interceptMod;
+	}
+	
+	//on weapon being ordered to intercept - note which shot (fireorder, actually) was intercepted and intercept others at same target!
+	public function fireDefensively($gamedata, $intercepted) //Gamedata and a fireOrder passed.
+	{		
+        $shooter = $gamedata->getShipById($intercepted->shooterid);
+		$ship = $this->getUnit();      					
+
+		$allOrders = $shooter->getAllFireOrders($gamedata->turn);
+		
+			foreach($allOrders as $subOrder) {
+				//Now intercept everything else fired by Shooter at protected unit - but not original shot!								
+				if (($subOrder->targetid == $intercepted->targetid) && ($subOrder->id != $intercepted->id) ){ 
+					$subWeapon = $shooter->getSystemById($subOrder->weaponid);
+					if(!$subWeapon->doNotIntercept){//Can be intercepted e.g. not Ramming / Mass Driver.
+							if(!$subWeapon->uninterceptable){//Not marked uninterceptable, no further checks.		
+								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
+								$subOrder->numInterceptors++;						
+							}else{//It is marked uninterceptable e.g. lasers
+								if($subOrder->targetid == $ship->id){ //Has shooter targeted ship with Flak Cannon e.g. Not free intercept!, if so intercept at 50% effectiveness.
+									$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);//50% effectiveness handled here.
+									$subOrder->numInterceptors++;
+								}
+							}
+					}					
+				}
+			}					
+	}//endof function fireDefensively	
+
+    public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+		return Dice::d(10, 1)+6; //Offensive mode
+				break;	
+
+			case 2:
+				return 0; //Manual intercept
+				break;
+		}
+	}
+	
+    public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 7; //Offensive mode
+				break;	
+			case 2: //Leave old manual method for legacy games
+				$this->minDamage = 0; //Manual intercept
+				break;
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+	
+    public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 16; //Offensive mode
+				break;	
+			case 2: //Leave old manual method for legacy games
+				$this->maxDamage = 0; //Manual intercept
+				break;
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();    
+            return $strippedSystem;
+		}
+
+}	//endof class OrieniFlakArray
+
 
 
 

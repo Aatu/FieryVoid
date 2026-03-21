@@ -44985,7 +44985,46 @@ var FtrDefenseGun = function FtrDefenseGun(json, ship) {
     Weapon.call(this, json, ship);
 };
 FtrDefenseGun.prototype = Object.create(Weapon.prototype);
-FtrDefenseGun.prototype.constructor = FtrDefenseGun;;
+FtrDefenseGun.prototype.constructor = FtrDefenseGun;
+
+
+
+
+var WarLance = function WarLance(json, ship) {
+    Laser.call(this, json, ship);
+};
+WarLance.prototype = Object.create(Laser.prototype);
+WarLance.prototype.constructor = WarLance;
+
+var LightLaserLance = function LightLaserLance(json, ship) {
+    Laser.call(this, json, ship);
+};
+LightLaserLance.prototype = Object.create(Laser.prototype);
+LightLaserLance.prototype.constructor = LightLaserLance;
+
+var ImpRapidGatling = function ImpRapidGatling(json, ship) {
+    Matter.call(this, json, ship);
+};
+ImpRapidGatling.prototype = Object.create(Matter.prototype);
+ImpRapidGatling.prototype.constructor = ImpRapidGatling;
+
+var GaussRifle = function GaussRifle(json, ship) {
+    Matter.call(this, json, ship);
+};
+GaussRifle.prototype = Object.create(Matter.prototype);
+GaussRifle.prototype.constructor = GaussRifle;
+
+var HeavyGaussRifle = function HeavyGaussRifle(json, ship) {
+    Matter.call(this, json, ship);
+};
+HeavyGaussRifle.prototype = Object.create(Matter.prototype);
+HeavyGaussRifle.prototype.constructor = HeavyGaussRifle;
+
+var OrieniFlakArray = function OrieniFlakArray(json, ship) {
+    Matter.call(this, json, ship);
+};
+OrieniFlakArray.prototype = Object.create(Matter.prototype);
+OrieniFlakArray.prototype.constructor = OrieniFlakArray;;
 
 /* Source: client/model/weapon/customSW.js */
 "use strict";

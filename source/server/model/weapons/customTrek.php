@@ -2479,10 +2479,12 @@ class TrekLightDisruptor extends Pulse{
 			if (!$system->advancedArmor){//advanced armor prevents effect
 				if (!$ship instanceof FighterFlight) {
 					if ($system instanceof Structure) return;        // don't apply to structure
+					if (($damage-$armour) > 0) {
 						$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
 						$crit->updated = true;
 						$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
-						$system->setCritical($crit); //$system->criticals[] =  $crit;			
+						$system->setCritical($crit); //$system->criticals[] =  $crit;
+					}
 				}
 			}
 		}
@@ -2558,10 +2560,12 @@ class TrekMedDisruptor extends Pulse{
 				if ($system instanceof Structure) {
 					//no need to do anything here
 				}else{
-					$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
-					$crit->updated = true;
-					$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
-					$system->setCritical($crit); //$system->criticals[] =  $crit;	
+					if (($damage-$armour) > 0) {
+						$crit = new ArmorReduced(-1, $ship->id, $system->id, "ArmorReduced", $gamedata->turn);
+						$crit->updated = true;
+						$crit->inEffect = true; //in effect immediately, affecting further damage in the same turn!
+						$system->setCritical($crit); //$system->criticals[] =  $crit;	
+					}
 				}
 				if(!$this->alreadyReduced){ //if enough damage gets through shields and armor, structure armor is reduced
 					if ($this->postArmorTotal >= $this->reduceFacing) {
@@ -3119,7 +3123,6 @@ class MicroJumpSystem extends Weapon implements SpecialAbility, DefensiveSystem{
 	public $repairPriority = 6;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 	private $baseLoadingTime = 4; //Can be altered by a IncreasedRecharge1 critical, so we need to remember it's base value.
     public $ignoresLoS = false; //I assume we're not warping thru Terrain.
-
 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $loading){
 		if ( $maxhealth == 0 ) $maxhealth = 9; //Set these as you like.
