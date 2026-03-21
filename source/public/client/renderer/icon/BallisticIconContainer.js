@@ -451,7 +451,7 @@ window.BallisticIconContainer = function () {
 		let weapon = !shooter.flight ? shooter.systems[ballistic.weaponid] : null;
 		let modeName = weapon?.firingModes?.[ballistic.firingMode] ?? null;
 		if (replay) {
-			if (weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;
+			if (!shooter.flight && weapon.alwaysHideFireOrders && gamedata.getPlayerTeam() !== shooter.team) return;
 		}
 		// Get launch position (may be overwritten later)
 		let launchPosition = this.coordinateConverter.fromHexToGame(shooterIcon.getFirstMovementOnTurn(turn)?.position);
