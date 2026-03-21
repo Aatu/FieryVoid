@@ -18930,17 +18930,17 @@ window.ajaxInterface = {
                 time = 20000;
             } else {
                 time = 4000;
-                if (ajaxInterface.pollcount > 1) time = 5000;
-                if (ajaxInterface.pollcount > 3) time = 10000;
-                if (ajaxInterface.pollcount > 10) time = 60000;
+                if (ajaxInterface.pollcount > 3) time = 6000;
+                if (ajaxInterface.pollcount > 6) time = 8000;
+                if (ajaxInterface.pollcount > 15) time = 30000;
                 if (ajaxInterface.pollcount > 40) time = 1800000;
             }
         } else {
             // In-Game timings
             time = 4000;
-            if (ajaxInterface.pollcount > 1) time = 5000;
-            if (ajaxInterface.pollcount > 3) time = 10000;
-            if (ajaxInterface.pollcount > 10) time = 60000;
+            if (ajaxInterface.pollcount > 3) time = 6000;
+            if (ajaxInterface.pollcount > 6) time = 8000;
+            if (ajaxInterface.pollcount > 15) time = 30000;
             if (ajaxInterface.pollcount > 40) time = 1800000;
         }
 
@@ -20971,10 +20971,10 @@ window.weaponManager = {
         if (target.Enormous) hitChance += 6;//+6 vs Enormous units
         if (shooter.Enormous) hitChance += 6;//+6 if ramming unit is Enormous
 
-		if (!shooter.flight){ //upon re-reading - this bonus does not apply to fighters
-       	 if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) hitChance += 2;//+2 if target is Capital and ramming unit is not
-		}
-		
+        if (!shooter.flight) { //upon re-reading - this bonus does not apply to fighters
+            if ((target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) hitChance += 2;//+2 if target is Capital and ramming unit is not
+        }
+
         if ((shooter.shipSizeClass >= 3) && (target.shipSizeClass < 3)) hitChance -= 2;//-2 if shooter is Capital and rammed unit is not
         if ((shooter.flight) && (!target.flight)) hitChance += 4;//+4 for fighter trying to ram a ship
         var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)
@@ -21161,7 +21161,7 @@ window.weaponManager = {
 
         var mod = 0;
 
-        if(target.mine){
+        if (target.mine) {
             mdew = ew.getDetectMEW(shooter);
             var mineBonus = (mdew + shooter.minesweeperbonus) - distance - target.signature;
             mod += Math.max(0, mineBonus);
@@ -21331,7 +21331,7 @@ window.weaponManager = {
 
 
         var firecontrol = weaponManager.getFireControl(target, weapon);
-        if(target.mine && weapon.canShootMines) weapon.fireControl[1] = -4; //Can shoot at mines, but at a penalty.        
+        if (target.mine && weapon.canShootMines) weapon.fireControl[1] = -4; //Can shoot at mines, but at a penalty.        
 
         if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
             var bonusfirecontrol = 0;
@@ -21792,12 +21792,12 @@ window.weaponManager = {
             }
 
             if (!ship.flight && ship.shipSizeClass < 2 && weapon.fireControl[1] === null) {
-                if(ship.mine && weapon.canShootMines){
+                if (ship.mine && weapon.canShootMines) {
                     //Do nothing in certain circumstances e.g. Interceptors firing at mines.
-                }else{
+                } else {
                     debug && console.log("can't fire small ships");
                     continue;
-                }    
+                }
             }
 
             if (ship.shipSizeClass >= 2 && weapon.fireControl[2] === null) {
@@ -21971,12 +21971,12 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
-            if(hidden && weapon.name !== 'TransverseDrive' && weapon.name !== 'MicroJumpSystem'){
+            if (hidden && weapon.name !== 'TransverseDrive' && weapon.name !== 'MicroJumpSystem') {
                 var html = "You cannot fire weapons on a turn when you are stealthed.";
                 confirm.warning(html);
-                toUnselect.push(weapon);                                
+                toUnselect.push(weapon);
                 continue;
-            }    
+            }
 
 
             if (shipManager.systems.isDestroyed(selectedShip, weapon) || !weaponManager.isLoaded(weapon)) continue;
@@ -22353,16 +22353,19 @@ window.weaponManager = {
 
                 var weapon = shipManager.systems.getSystem(shooter, fireOrder.weaponid);
 
-                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam){
-                    for(var i in weapon.fireOrders){
-                        var otherBall = weapon.fireOrders[i]; 
-                        if(otherBall.shooterid == shooter.id && otherBall.damageclass !== "SecondAttack"){
+                if (weapon.alwaysHideFireOrders && shooter.team !== playerTeam) {
+                    var hasSecondAttack = false;
+                    for (var i in weapon.fireOrders) {
+                        var otherBall = weapon.fireOrders[i];
+                        if (otherBall.shooterid == shooter.id && otherBall.damageclass == "SecondAttack") {
+                            hasSecondAttack = true;
                             break;
-                        }else{
-                            continue;	
                         }
                     }
-                }    
+                    if (!hasSecondAttack) {
+                        continue;
+                    }
+                }
 
                 results.push({
                     id: fireOrder.id,
@@ -22701,7 +22704,7 @@ window.weaponManager = {
                 toReturn = false;
                 if (fireOrder.type == type) {//Is ballistic generally.
                     toReturn = true;
-                }  
+                }
                 //show hex-targeted direct fire as ballistics, too
                 if ((!toReturn) && (type == 'ballistic') && (fireOrder.type == 'normal' || fireOrder.type == 'prefiring') && (fireOrder.targetid == -1)) {
                     toReturn = true;
@@ -40063,15 +40066,6 @@ var MatterGun = function MatterGun(json, ship) {
 MatterGun.prototype = Object.create(Matter.prototype);
 MatterGun.prototype.constructor = MatterGun;
 
-//OLD VERSION OF FLAK CANNON - STILL USED ON SOME BSG SHIPS SO I HAVEN'T REMOVED - DK
-/*
-var FlakCannon = function FlakCannon(json, ship) {
-    Matter.call(this, json, ship);
-};
-FlakCannon.prototype = Object.create(Matter.prototype);
-FlakCannon.prototype.constructor = FlakCannon;
-*/
-//NEW VERSION
 var GromeFlakCannon = function GromeFlakCannon(json, ship) {
     Matter.call(this, json, ship);
 };

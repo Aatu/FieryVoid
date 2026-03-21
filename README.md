@@ -91,6 +91,8 @@ How to edit client side now:
 
 You'll need to run yarn watch:legacy in FV folder when editing client files now, similar to how we run yarn watch when editing React files.
 
+When uploading your branch to gitHub it's best not to include these files, as they will need to be regenerated anyway for the branch being deployed live and it makes merging easier not to have several versions of the bundles.
+
 # Image Optimiser:
 
 As images are now saved in Index mode, if you want to edit them you'll need to change to RGB mode (otherwise you lose alot of functionality).  In GIMP this is easily done via by Image->Mode->RGB.

@@ -315,7 +315,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Proximity mines automaticall hit their target and are destroyed after they attack.</li>                    
                 </ul>
             </li> 
-            <li>DEW Mines:
+            <li>Direct Energy Weapon (DEW) Mines:
                 <ul class="circle-list">
                     <li>These mines come equipped with weapons and will fire these autoamtically at the first viable target it enoucnters during the movement phase, 
                         these attacks are then resolved normally during the Firing Phase.</li>

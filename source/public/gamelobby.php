@@ -57,6 +57,13 @@
 		<title>Fiery Void - Gamelobby</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0"> <!--To try and ix mobile scroll juddering caused by viewport recalculation repaints -->
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+		<!-- Preload critical bundle to parallelize download with large inline JSON payloads below -->
+		<?php $debug = isset($_GET['debug']); ?>
+		<?php if (!$debug): ?>
+		<link rel="preload" href="client/gamelobby.legacy.bundle.js" as="script">
+		<?php endif; ?>
+
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
@@ -76,7 +83,6 @@
 		
 <!--		<script src="client/helper.js"></script>-->
     <!--		<script src="client/helper.js"></script>-->
-    <?php $debug = isset($_GET['debug']); ?>
     <?php if ($debug): ?>
     <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
