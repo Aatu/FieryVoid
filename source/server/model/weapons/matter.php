@@ -15,7 +15,7 @@
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-		//Matter ignores armor! - now this is hadled by default routines, $weaponClass= 'Matter' is enough
+		//Matter ignores armor! - now this is hadled by defromault routines, $weaponClass= 'Matter' is enough
 	/*no need due to noOverkill trait
         protected function getOverkillSystem($target, $shooter, $system, $pos, $fireOrder, $gamedata)
         {

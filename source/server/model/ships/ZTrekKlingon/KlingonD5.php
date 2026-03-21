@@ -32,7 +32,7 @@ class KlingonD5 extends MediumShip{
 		$this->canPreOrder = true;
 
 		$this->addPrimarySystem(new CloakingDevice(4, 10, 4, 0));
-        $this->addPrimarySystem(new Reactor(4, 18, 0, 4));
+        $this->addPrimarySystem(new Reactor(4, 18, 0, 0));
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 5, 5));
         $this->addPrimarySystem(new Hangar(4, 2));

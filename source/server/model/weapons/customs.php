@@ -3179,31 +3179,22 @@ class OrieniFlakArray extends Weapon{
 
 	public $animation = "bolt";
     public $animationColor = array(255, 250, 230);
-    public $animationExplosionScale = 0.5;
-
-    public $guns = 2;
+//    public $animationExplosionScale = 0.5;
         
-    public $priorityArray = array(1=>1, 2=>1);
-	public $uninterceptableArray = array(1=>false, 2=>true);
-	public $doNotInterceptArray = array(1=>false, 2=>true);
-
+    public $guns = 2;
+    public $priority = 1;
     public $intercept = 3;
     public $freeintercept = true; //can intercept fire directed at different unit
     public $freeinterceptspecial = true; //has own custom routine for deciding whether third party interception is legal
     public $loadingtime = 1;
 	public $canInterceptUninterceptable = true;
 
-	public $rangeArray = array(1=>0, 2=>100); //let's put maximum range here, but generous one
-	
-    public $rangePenaltyArray = array(1=>2, 2=>0);
-    public $fireControlArray = array( 1=>array(5, 4, 3), 2=>array(0, 0, 0)); // fighters, <mediums, <capitals 
-	
-	public $firingModes = array(1=>'Offensive', 2=>'Defensive');
-	public $damageTypeArray = array(1=>'Flash', 2=>'Standard'); //indicates that this weapon does damage in Pulse mode
-    public $weaponClassArray = array(1=>'Matter', 2=>'Matter'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
-    
+    public $rangePenalty = 2;    
+    public $fireControl = array(5, 4, 3); // fighters, <mediums, <capitals 	
+	public $firingModes = array(1=>'Offensive Mode');    
+	public $damageType = 'Flash';    
+    public $weaponClass = 'Matter'; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	    
 	protected $autoHit = false;//To show 100% hit chance in front end.    
-	protected $autoHitArray = array(1=>false, 2=>true); //To show 100% hit chance in front end.   
 	
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 			if ( $maxhealth == 0 ) $maxhealth = 6;
@@ -3216,8 +3207,7 @@ class OrieniFlakArray extends Weapon{
 			$this->data["Special"] = "Intercepts all shots from an enemy ship automatically if not fired.";
 			$this->data["Special"] .= "<br>Will also automatically intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 5 hexes.";
 			$this->data["Special"] .= "<br>Can intercept uninterceptable weapons at 50% effectiveness, but not when intercepting for other units.";			
-			$this->data["Special"] .= "<br>Can also be MANUALLY targeted to intercept specific units in Defensive firing mode";
-			$this->data["Special"] .= "<br>In this mode it will automatically hit and intercept all fire from targeted ship at the Flak Cannon-firing ship (except ballistics).";
+			$this->data["Special"] .= "<br>Offensive mode can target any unit.";			
 	}
 
 	public function calculateHitBase($gamedata, $fireOrder){
@@ -3252,15 +3242,14 @@ class OrieniFlakArray extends Weapon{
 				break;
 			}
 	}//endof function calculateHitBase
-  
-   
+
 	public function fire($gamedata, $fireOrder) { 
 
 			switch($this->firingMode){
 				case 1:
 					parent::fire($gamedata, $fireOrder);
 					break;
-				
+				//Leave old manual method for legacy games
 				case 2:
 					$shooter = $gamedata->getShipById($fireOrder->shooterid);
 					$movement = $shooter->getLastTurnMovement($fireOrder->turn);
@@ -3343,7 +3332,7 @@ class OrieniFlakArray extends Weapon{
     public function getDamage($fireOrder){ 
 		switch($this->firingMode){
 			case 1:
-				return Dice::d(10, 1)+6; //Offensive mode
+		return Dice::d(10, 1)+6; //Offensive mode
 				break;	
 
 			case 2:
@@ -3357,7 +3346,7 @@ class OrieniFlakArray extends Weapon{
 			case 1:
 				$this->minDamage = 7; //Offensive mode
 				break;	
-			case 2:
+			case 2: //Leave old manual method for legacy games
 				$this->minDamage = 0; //Manual intercept
 				break;
 		}
@@ -3369,7 +3358,7 @@ class OrieniFlakArray extends Weapon{
 			case 1:
 				$this->maxDamage = 16; //Offensive mode
 				break;	
-			case 2:
+			case 2: //Leave old manual method for legacy games
 				$this->maxDamage = 0; //Manual intercept
 				break;
 		}
@@ -3378,8 +3367,6 @@ class OrieniFlakArray extends Weapon{
 
         public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
-            $strippedSystem->autoHit = $this->autoHit;
-            $strippedSystem->autoHitArray = $this->autoHitArray;                                       
             return $strippedSystem;
 		}
 

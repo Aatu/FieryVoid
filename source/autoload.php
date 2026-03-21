@@ -1593,6 +1593,7 @@ spl_autoload_register(
 				'lightgatlinggun' => '/server/model/weapons/customNexus.php',
 				'nexusminigun' => '/server/model/weapons/customNexus.php',
 				'nexusminigunftr' => '/server/model/weapons/customNexus.php',
+				'nexussandcaster' => '/server/model/weapons/customNexus.php',
 				'nexusshattergun' => '/server/model/weapons/customNexus.php',
 				'nexusshattergunftr' => '/server/model/weapons/customNexus.php',
 				'nexusultralightrailgun' => '/server/model/weapons/customNexus.php',
@@ -3586,6 +3587,12 @@ spl_autoload_register(
 						
 				// For the future
 				'hvyassaultlaser' => '/server/model/weapons/lasers.php',
+				'warlance' => '/server/model/weapons/customs.php',
+				'lightlaserlance' => '/server/model/weapons/customs.php',
+				'imprapidgatling' => '/server/model/weapons/customs.php',
+				'gaussrifle' => '/server/model/weapons/customs.php',
+				'heavygaussrifle' => '/server/model/weapons/customs.php',
+				'orieniflakarray' => '/server/model/weapons/customs.php',
 
 	
 				//let's end this with unit enhancement class...		    

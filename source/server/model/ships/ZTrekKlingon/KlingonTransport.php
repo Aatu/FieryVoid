@@ -29,7 +29,7 @@ class KlingonTransport extends LCV{
 		$this->canPreOrder = true;
 
 		$this->addPrimarySystem(new CloakingDevice(3, 6, 4, 0));
-        $this->addPrimarySystem(new Reactor(3, 18, 0, 4));
+        $this->addPrimarySystem(new Reactor(3, 18, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 99, 0, 0)); //C&C should be unhittable anyway
         $this->addPrimarySystem(new Scanner(3, 9, 4, 3));
 		$this->addPrimarySystem(new MicroJumpSystem(2, 6, 0, 330, 30, 4, 4));   // Armor, health, power, start arc, end arc, distance, reload time 
