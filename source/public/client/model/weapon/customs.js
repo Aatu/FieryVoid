@@ -305,3 +305,110 @@ var OrieniFlakArray = function OrieniFlakArray(json, ship) {
 };
 OrieniFlakArray.prototype = Object.create(Matter.prototype);
 OrieniFlakArray.prototype.constructor = OrieniFlakArray;
+
+var HvyGraviticBolt = function HvyGraviticBolt(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+HvyGraviticBolt.prototype = Object.create(Gravitic.prototype);
+HvyGraviticBolt.prototype.constructor = HvyGraviticBolt;
+
+HvyGraviticBolt.prototype.initBoostableInfo = function () {
+    // Needed because it can change during initial phase
+    // because of adding extra power.
+
+    if (window.weaponManager.isLoaded(this)) {
+        /*no longer needed!
+        this.loadingtime = 1 + shipManager.power.getBoost(this);
+        this.turnsloaded = 1 + shipManager.power.getBoost(this);
+        this.normalload = 1 + shipManager.power.getBoost(this);
+        */
+    } else {
+        var count = shipManager.power.getBoost(this);
+
+        for (var i = 0; i < count; i++) {
+            shipManager.power.unsetBoost(null, this);
+        }
+    }
+
+    this.intercept = this.getInterceptRating();
+    this.data.Intercept = this.getInterceptRating() * -5;
+
+    return this;
+};
+
+HvyGraviticBolt.prototype.getInterceptRating = function () {
+    return 1 + shipManager.power.getBoost(this);
+};
+
+HvyGraviticBolt.prototype.clearBoost = function () {
+    for (var i in system.power) {
+        var power = system.power[i];
+        if (power.turn != gamedata.turn) continue;
+        if (power.type == 2) {
+            system.power.splice(i, 1);
+            return;
+        }
+    }
+};
+
+HvyGraviticBolt.prototype.hasMaxBoost = function () {
+    return true;
+};
+
+HvyGraviticBolt.prototype.getMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
+var BoltRailgun = function BoltRailgun(json, ship) {
+    Matter.call(this, json, ship);
+};
+BoltRailgun.prototype = Object.create(Matter.prototype);
+BoltRailgun.prototype.constructor = BoltRailgun;
+
+var EarlyParticleCannon = function EarlyParticleCannon(json, ship) {
+    Particle.call(this, json, ship);
+};
+EarlyParticleCannon.prototype = Object.create(Particle.prototype);
+EarlyParticleCannon.prototype.constructor = EarlyParticleCannon;
+
+var LightParticleGun = function LightParticleGun(json, ship) {
+    Particle.call(this, json, ship);
+};
+LightParticleGun.prototype = Object.create(Particle.prototype);
+LightParticleGun.prototype.constructor = LightParticleGun;
+
+var ChargedParticleGun = function ChargedParticleGun(json, ship) {
+    Particle.call(this, json, ship);
+};
+ChargedParticleGun.prototype = Object.create(Particle.prototype);
+ChargedParticleGun.prototype.constructor = ChargedParticleGun;
+
+var InterceptorArray = function InterceptorArray(json, ship) {
+	Weapon.call(this, json, ship);
+};
+InterceptorArray.prototype = Object.create(Weapon.prototype);
+InterceptorArray.prototype.constructor = InterceptorArray;
+
+var HvyPlasmaGunFtr = function HvyPlasmaGunFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+HvyPlasmaGunFtr.prototype = Object.create(Weapon.prototype);
+HvyPlasmaGunFtr.prototype.constructor = HvyPlasmaGunFtr;
+
+var FusionGun = function FusionGun(json, ship) {
+	Molecular.call(this, json, ship);
+};
+FusionGun.prototype = Object.create(Molecular.prototype);
+FusionGun.prototype.constructor = FusionGun;
+
+var HeavySlugCannon = function HeavySlugCannon(json, ship) {
+    Matter.call(this, json, ship);
+};
+HeavySlugCannon.prototype = Object.create(Matter.prototype);
+HeavySlugCannon.prototype.constructor = HeavySlugCannon;
+
+var AttackLaser = function AttackLaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+AttackLaser.prototype = Object.create(Laser.prototype);
+AttackLaser.prototype.constructor = AttackLaser;

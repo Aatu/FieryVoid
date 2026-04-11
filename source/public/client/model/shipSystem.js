@@ -6,6 +6,17 @@ var ShipSystem = function ShipSystem(json, ship) {
 	for (var i in json) {
 		this[i] = json[i];
 	}
+
+	// Optimization #2: Server omits empty arrays/default values to reduce JSON.
+	// Ensure safe defaults exist for properties that may not be sent.
+	if (this.damage === undefined) this.damage = [];
+	if (this.criticals === undefined) this.criticals = [];
+	if (this.critData === undefined) this.critData = [];
+	if (this.power === undefined) this.power = [];
+	if (this.specialAbilities === undefined) this.specialAbilities = [];
+	if (this.outputMod === undefined) this.outputMod = 0;
+	if (this.destroyed === undefined) this.destroyed = false;
+	if (this.individualNotesTransfer === undefined) this.individualNotesTransfer = "";
 };
 
 ShipSystem.prototype = {
@@ -107,7 +118,21 @@ SuperHeavyFighter.prototype.constructor = SuperHeavyFighter;
 
 var Weapon = function Weapon(json, ship) {
 	ShipSystem.call(this, json, ship);
-	//this.targetsShips = true;
+
+	// Optimization #2: Server omits zero/empty weapon properties.
+	// Ensure safe defaults for properties that may not be sent.
+	if (this.turnsloadedArray === undefined) this.turnsloadedArray = [];
+	if (this.overloadturns === undefined) this.overloadturns = 0;
+	if (this.overloadshots === undefined) this.overloadshots = 0;
+	if (this.extraoverloadshots === undefined) this.extraoverloadshots = 0;
+	if (this.extraoverloadshotsArray === undefined) this.extraoverloadshotsArray = [];
+	if (this.sustainedTarget === undefined) this.sustainedTarget = [];
+	if (this.fireControlArray === undefined) this.fireControlArray = [];
+	if (this.rangeArray === undefined) this.rangeArray = [];
+	if (this.rangePenaltyArray === undefined) this.rangePenaltyArray = [];
+	if (this.minDamageArray === undefined) this.minDamageArray = [];
+	if (this.maxDamageArray === undefined) this.maxDamageArray = [];	
+
 };
 
 Weapon.prototype = Object.create(ShipSystem.prototype);

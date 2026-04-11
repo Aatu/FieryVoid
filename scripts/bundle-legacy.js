@@ -80,7 +80,8 @@ function extractScriptSources(content, excluded) {
         const lineMatch = line.match(scriptRegex);
         if (lineMatch) {
             let src = lineMatch[1];
-            if (!excluded.includes(src) && !src.startsWith('https://')) {
+            // Skip excluded files, external URLs, and dynamic PHP tags
+            if (!excluded.includes(src) && !src.startsWith('https://') && !src.includes('<?php')) {
                 sources.push(src);
             }
         }

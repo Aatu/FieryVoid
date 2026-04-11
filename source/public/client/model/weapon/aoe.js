@@ -123,12 +123,12 @@ CaptorMine.prototype.refreshData = function () { //refresh description to show c
 	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-        //hiddenDisplay = "?";
-		this.data["Max Range"] = hiddenDisplay;		
-    }else{
-		this.data["Max Range"] = this.range;			
-	}
+    //if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+    //    //hiddenDisplay = "?";
+	//	this.data["Max Range"] = hiddenDisplay;		
+    //}else{
+	//	this.data["Max Range"] = this.range;			
+	//}
 
 	this.data["Fire control (fighter/med/cap)"] = this.fireControl[0]*5 + '/' + this.fireControl[1]*5 + '/' + this.fireControl[2]*5;
 
@@ -294,11 +294,11 @@ ProximityMine.prototype.refreshData = function () { //refresh description to sho
 	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 	
     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-    if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-		this.data["Max Range"] = hiddenDisplay;		
-    }else{
-		this.data["Max Range"] = this.range;		
-	}
+    //if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+	//	this.data["Max Range"] = hiddenDisplay;		
+    //}else{
+	//	this.data["Max Range"] = this.range;		
+	//}
 	
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];

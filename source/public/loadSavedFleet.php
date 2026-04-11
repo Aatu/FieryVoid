@@ -1,4 +1,5 @@
 <?php
+ob_start();
 header('Content-Type: application/json; charset=utf-8');
 require_once 'global.php';
 
@@ -18,6 +19,7 @@ try {
     // Load ships from Manager
     $fleetData = Manager::loadSavedFleet($listid);
 
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         'success' => true,
         'list' => $fleetData['list'],
@@ -26,6 +28,7 @@ try {
 
 } catch (Exception $e) {
     $logid = Debug::error($e);
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         'success' => false,
         'error'   => $e->getMessage(),

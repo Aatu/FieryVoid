@@ -1,4 +1,5 @@
 <?php 
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -13,6 +14,7 @@ $turn   = isset($_GET['turn'])   ? (int)$_GET['turn']   : 0;
 
 if ($gameid <= 0 || $shipid <= 0) {
     http_response_code(400);
+    if(ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Missing or invalid gameid/shipid.']);
     exit;
 }
@@ -47,15 +49,18 @@ try {
     if ($row) {
         // Optional: Log for debugging
         Debug::log('Adaptive armour row found for game '.$gameid.', ship '.$shipid);
+        if(ob_get_length()) ob_clean();
         echo json_encode($row, JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE);
     } else {
         Debug::log('No adaptive armour found for game '.$gameid.', ship '.$shipid);
+        if(ob_get_length()) ob_clean();
         echo json_encode(['status' => 'empty']);
     }
 
 } catch (Throwable $e) {
     $logid = Debug::error($e);
     http_response_code(500);
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         'error' => $e->getMessage(),
         'logid' => $logid

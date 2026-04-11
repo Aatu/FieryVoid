@@ -8,8 +8,9 @@ class AtlasStarfury extends FighterFlight{
         $this->faction = "Earth Alliance (Early)";
         $this->phpclass = "AtlasStarfury";
         $this->shipClass = "Starfury: Atlas Heavy flight (2212)";
-			$this->variantOf = "Starfury: Flying Fox Heavy flight";
-			$this->occurence = "uncommon";
+			//$this->variantOf = "Starfury: Flying Fox Heavy flight";
+		$this->variantOf = "NONE";            
+		$this->occurence = "uncommon";
         $this->imagePath = "img/ships/aries.png";
 	    $this->isd = 2212;
  		$this->unofficial = 'S'; //HRT design released after AoG demise

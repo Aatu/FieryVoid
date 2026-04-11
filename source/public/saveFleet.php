@@ -1,4 +1,5 @@
 <?php
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -60,6 +61,7 @@ try {
     ]);
 }
 
+if(ob_get_length()) ob_clean();
 echo $ret;
 
 exit;

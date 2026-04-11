@@ -53,3 +53,12 @@
   ExpiresByType application/pdf "access plus 1 month"
   ExpiresByType application/x-shockwave-flash "access plus 1 month"
 </IfModule>
+
+# Long-term Caching for Bundled Assets
+# These assets are versioned via PHP (e.g. game.legacy.bundle.js?v=TIMESTAMP)
+# So we can safely cache them "forever" with the immutable flag.
+<FilesMatch "\.bundle\.js$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </IfModule>
+</FilesMatch>

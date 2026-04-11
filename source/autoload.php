@@ -103,7 +103,8 @@ spl_autoload_register(
                 'baseshipnoaft' => '/server/model/ships/ShipClasses.php',
                 'baseshipnofwd' => '/server/model/ships/ShipClasses.php',
                 'bashnar' => '/server/model/ships/brakiri/bashnar.php',
-                'bastarfoxftr' => '/server/model/ships/beltalliance/baStarfoxFtr.php',
+                //'bastarfoxftr' => '/server/model/ships/beltalliance/baStarfoxFtr.php',
+                'bastarfoxftram' => '/server/model/ships/beltalliance/baStarfoxFtrAM.php',                
                 'basurveyship' => '/server/model/ships/beltalliance/baSurveyShip.php',
                 'batrado' => '/server/model/ships/brakiri/batrado.php',
                 'batradoearly' => '/server/model/ships/brakiri/batradoEarly.php',
@@ -845,7 +846,8 @@ spl_autoload_register(
 				//'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
 				'rogolontussova' => '/server/model/ships/rogolon/rogolonTussova.php',
                 'rogolonvasturshf' => '/server/model/ships/rogolon/rogolonVasturSHF.php',
-                'rogolonvostorshf' => '/server/model/ships/rogolon/rogolonVostorSHF.php',
+                //'rogolonvostorshf' => '/server/model/ships/rogolon/rogolonVostorSHF.php',
+                'rogolonvostorshfam' => '/server/model/ships/rogolon/rogolonVostorSHFAM.php',                
 				
 				
                 'rolentha' => '/server/model/ships/minbari/rolentha.php',
@@ -953,7 +955,8 @@ spl_autoload_register(
 		'sorithiantyancarrier' => '/server/model/ships/smallraces/sorithiantyancarrier.php',
 		'sorithiantyancarrierrefit' => '/server/model/ships/smallraces/sorithiantyancarrierrefit.php',
 		'sorithianzolori' => '/server/model/ships/smallraces/sorithianzolori.php',
-		'sorithianzolorii' => '/server/model/ships/smallraces/sorithianzolorii.php',
+		//'sorithianzolorii' => '/server/model/ships/smallraces/sorithianzolorii.php',
+		'sorithianzoloriiam' => '/server/model/ships/smallraces/sorithianzoloriiAM.php',        
 		'sorithianzoloriii' => '/server/model/ships/smallraces/sorithianzoloriii.php',
 		    
 		'sparkfield' => '/server/model/weapons/specialWeapons.php',
@@ -2143,9 +2146,11 @@ spl_autoload_register(
 				//Rich Bax Early Earth Alliance
                 'bagammaftr' => '/server/model/ships/beltalliance/baGammaFtr.php',
                 'basentinelftr' => '/server/model/ships/beltalliance/baSentinelFtr.php',
+                'basentinelftram' => '/server/model/ships/beltalliance/baSentinelFtrAM.php',                
 
                 'ariesstarfury' => '/server/model/ships/EA_old/ariesStarfury.php',
-                'atlasstarfury' => '/server/model/ships/EA_old/atlasStarfury.php',
+                //'atlasstarfury' => '/server/model/ships/EA_old/atlasStarfury.php',
+                'atlasstarfuryam' => '/server/model/ships/EA_old/atlasStarfuryAM.php',                
                 'atlasstarfuryrefitam' => '/server/model/ships/EA_old/atlasStarfuryRefitAM.php',
                 'avengeralpha' => '/server/model/ships/EA_old/avengerAlpha.php',
                 'cottenalpha' => '/server/model/ships/EA_old/cottenAlpha.php',
@@ -2708,6 +2713,7 @@ spl_autoload_register(
 				'drolla' => '/server/model/ships/corillani/Drolla.php',
 				'plasmablast' => '/server/model/weapons/plasma.php',
 				'corillanithorkaosat' => '/server/model/ships/corillani/CorillaniThorkaOSAT.php',
+				'corillaniurshtalubase' => '/server/model/ships/corillani/CorillaniUrshtaluBase.php',
 				
 				//Vree
 				'sixsidedship' => '/server/model/ships/ShipClasses.php',
@@ -3050,6 +3056,7 @@ spl_autoload_register(
          		'abbaiminelauncher' => '/server/model/weapons/missile.php', 	 
 
 
+
 				//Star Wars - Clone Wars testing
 
 				//weapons
@@ -3157,6 +3164,7 @@ spl_autoload_register(
                 		'ammomissilerackr' => '/server/model/weapons/missile.php',
                 		'ammobombrack' => '/server/model/weapons/missile.php',
                 		'ammofighterrack' => '/server/model/weapons/missile.php',
+                        'missilelost' => '/server/model/cricialClasses.php', 
 						
  				//Direct Fire Weapons that use Ammo Magazine
 						'ammodirectweapon' => '/server/model/weapons/ammoWeapons.php',							
@@ -3232,6 +3240,7 @@ spl_autoload_register(
 						'garundaam' => '/server/model/ships/corillani/GarundaAM.php',
 						'llartolam' => '/server/model/ships/corillani/LlartolAM.php',
 						'mollantaam' => '/server/model/ships/corillani/MollantaAM.php',
+						'torellanam' => '/server/model/ships/corillani/TorellanAM.php',
 						'intonaam' => '/server/model/ships/corillani/IntonaAM.php',
 						
 						//Descari
@@ -3529,23 +3538,22 @@ spl_autoload_register(
                 'mine' => '/server/model/ships/ShipClasses.php',
                 'captormine' => '/server/model/weapons/AoE.php',
                 'proximitymine' => '/server/model/weapons/AoE.php', 
-                'minecontrollerdew' => '/server/model/weapons/baseSystems.php',                   
+                'minecontrollerdew' => '/server/model/weapons/baseSystems.php', 
+                
+                
+                //Terrain / Test Mines - 4
                 'captormineterrain' => '/server/model/ships/terrain/captorMineTerrain.php',
                 'proxmineterrain' => '/server/model/ships/terrain/proxMineTerrain.php', 
                 'dewmineterrainbeam' => '/server/model/ships/terrain/dewMineTerrainBeam.php', 
                 'dewmineterrainmissile' => '/server/model/ships/terrain/dewMineTerrainMissile.php',                                              
-                'captormineklb' => '/server/model/ships/korlyan/captorMineKLB.php',	
-                'captormineklw' => '/server/model/ships/korlyan/captorMineKLW.php',	                                
-                'captormineklh' => '/server/model/ships/korlyan/captorMineKLH.php',	
-                'spawncaptorklb' => '/server/model/ships/korlyan/spawnCaptorKLB.php',	
-                'spawncaptorklw' => '/server/model/ships/korlyan/spawnCaptorKLW.php',	                                
-                'spawncaptorklh' => '/server/model/ships/korlyan/spawnCaptorKLH.php',
+
+                //Abbai WotCR - 4
                 'captorwotcrabbaia' => '/server/model/ships/abbai_old/captorWotcrAbbaiA.php',	                                
                 'captorwotcrabbaib' => '/server/model/ships/abbai_old/captorWotcrAbbaiB.php',                     
                 'spawncaptorwotcrabbaia' => '/server/model/ships/abbai_old/spawnCaptorWotcrAbbaiA.php',	                                
                 'spawncaptorwotcrabbaib' => '/server/model/ships/abbai_old/spawnCaptorWotcrAbbaiB.php', 
                 
-                //Centauri Mines
+                //Centauri Mines - 12
                 'proxmineraji' => '/server/model/ships/centauri/proxMineRaji.php',  
                 'captorminecoranta' => '/server/model/ships/centauri/captorMineCorantA.php',
                 'captorminecorantb' => '/server/model/ships/centauri/captorMineCorantB.php', 
@@ -3559,14 +3567,14 @@ spl_autoload_register(
                 'dewmineocarad' => '/server/model/ships/centauri/dewMineOcaraD.php', 
                 'dewmineocarae' => '/server/model/ships/centauri/dewMineOcaraE.php',  
                 
-                //Centauri WotCR Mines
+                //Centauri WotCR Mines - 5
                 'proxminerakir' => '/server/model/ships/centauri_old/proxMineRakir.php',                 
                 'captorminekaran' => '/server/model/ships/centauri_old/captorMineKaran.php',
                 'captorminekota' => '/server/model/ships/centauri_old/captorMineKota.php',                
                 'dewmineacara' => '/server/model/ships/centauri_old/dewMineAcarA.php', 
                 'dewmineacarb' => '/server/model/ships/centauri_old/dewMineAcarB.php',                                 
 
-                //Earth Alliance Mines
+                //Earth Alliance Mines - 9
                 'proxminep1' => '/server/model/ships/EA/proxMineP1.php', 
                 'proxminep2' => '/server/model/ships/EA/proxMineP2.php',                 
                 'proxminep3' => '/server/model/ships/EA/proxMineP3.php',
@@ -3577,14 +3585,14 @@ spl_autoload_register(
                 'dewmined2' => '/server/model/ships/EA/dewMineD2.php',
                 'dewmined3' => '/server/model/ships/EA/dewMineD3.php',                                
 
-                //Minbari Mines
+                //Minbari Mines - 5
                 'proxminesivhal' => '/server/model/ships/minbari/proxMineSivhal.php',
                 'proxminesivhaljam' => '/server/model/ships/minbari/proxMineSivhalJam.php',   
                 'captorminelastahan' => '/server/model/ships/minbari/captorMineLastahan.php',
                 'captorminelastahanjam' => '/server/model/ships/minbari/captorMineLastahanJam.php', 
                 'dewmineevial' => '/server/model/ships/minbari/dewMineEvial.php',   
                 
-                //Narn Mines
+                //Narn Mines - 6
                 'proxminedpar' => '/server/model/ships/narn/proxMineDPar.php',
                 'captorminedgoth' => '/server/model/ships/narn/captorMineDGoth.php', 
                 'dewminedmal' => '/server/model/ships/narn/dewMineDMal.php',                                  
@@ -3592,7 +3600,7 @@ spl_autoload_register(
                 'dewminedkak' => '/server/model/ships/narn/dewMineDKak.php', 
                 'dewminedshal' => '/server/model/ships/narn/dewMineDShal.php',   
                 
-                //Abbai Mines
+                //Abbai Mines - 6
                 'proxmineathili1' => '/server/model/ships/abbai/proxMineAthili1.php',                   
                 'proxmineathili2' => '/server/model/ships/abbai/proxMineAthili2.php',                
                 'captorminebaica1' => '/server/model/ships/abbai/captorMineBaica1.php',                   
@@ -3600,47 +3608,47 @@ spl_autoload_register(
                 'dewmineeliria1' => '/server/model/ships/abbai/dewMineEliria1.php',                   
                 'dewmineeliria2' => '/server/model/ships/abbai/dewMineEliria2.php', 
                 
-                //Brakiri Mines
+                //Brakiri Mines - 3
                 'proxminerehsap' => '/server/model/ships/brakiri/proxMineRehsaP.php',  
                 'captorminerehsac' => '/server/model/ships/brakiri/captorMineRehsaC.php',                   
                 'dewminerehsag' => '/server/model/ships/brakiri/dewMineRehsaG.php',
                 
-                //Drazi Mines
+                //Drazi Mines - 7
                 'proxminedr' => '/server/model/ships/drazi/proxMineDR.php',  
                 'proxminedb' => '/server/model/ships/drazi/proxMineDB.php', 
                 'proxminedx' => '/server/model/ships/drazi/proxMineDX.php', 
-                'minedff' => '/server/model/ships/drazi/mineFF.php', 
+                'mineff' => '/server/model/ships/drazi/mineFF.php', 
                 'dewminebt' => '/server/model/ships/drazi/dewMineBT.php',  
                 'dewminebp' => '/server/model/ships/drazi/dewMineBP.php', 
                 'dewminebr' => '/server/model/ships/drazi/dewMineBR.php', 
 
-                //Gaim Mines
+                //Gaim Mines - 4
                 'proxminegaim20' => '/server/model/ships/gaim/proxMineGaim20.php',  
                 'captorminegaima' => '/server/model/ships/gaim/captorMineGaimA.php',
                 'captorminegaimb' => '/server/model/ships/gaim/captorMineGaimB.php',                 
                 'dewminegaima' => '/server/model/ships/gaim/dewMineGaimA.php',
 
-                //Pakmara Mines
+                //Pakmara Mines - 4
                 'proxminepalfa' => '/server/model/ships/pakmara/proxMinePalfa.php',
                 'captorminetilor' => '/server/model/ships/pakmara/captorMineTilor.php',                 
                 'dewminecoltu' => '/server/model/ships/pakmara/dewMineColtu.php', 
                 'dewminecorti' => '/server/model/ships/pakmara/dewMineCorti.php',                                  
 
-                //Vree Mines
+                //Vree Mines - 3
                 'proxminev' => '/server/model/ships/vree/proxMineV.php',
                 'captorminez' => '/server/model/ships/vree/captorMineZ.php',                 
                 'dewminex' => '/server/model/ships/vree/dewMineX.php', 
 
-                //Civilian Mines
+                //Civilian Mines - 2
                 'proxminedefender' => '/server/model/ships/civilians/proxMineDefender.php',
                 'captorminepaladin' => '/server/model/ships/civilians/captorMinePaladin.php',     
                 
-                //Descari Mines
+                //Descari Mines - 3
                 'captorminesirna' => '/server/model/ships/descari/captorMineSirna.php',                 
                 'dewminesircha' => '/server/model/ships/descari/dewMineSircha.php', 
                 'dewminesircho' => '/server/model/ships/descari/dewMineSircho.php', 
                 
-                //Dilgar Mines
+                //Dilgar Mines - 10
                 'proxmineintavia' => '/server/model/ships/dilgar/proxMineIntaviA.php',
                 'proxmineintavib' => '/server/model/ships/dilgar/proxMineIntaviB.php',  
                 'captorminesilklata' => '/server/model/ships/dilgar/captorMineSilklatA.php',
@@ -3652,16 +3660,90 @@ spl_autoload_register(
                 'dewminetravikb' => '/server/model/ships/dilgar/dewMineTravikB.php', 
                 'dewminetravikc' => '/server/model/ships/dilgar/dewMineTravikC.php',   
                 
-                //Orieni Mines
+                //Orieni Mines - 4
                 'captormineclaw' => '/server/model/ships/orieni/captorMineClaw.php',
                 'captorminetalon' => '/server/model/ships/orieni/captorMineTalon.php',
                 'dewminearcher' => '/server/model/ships/orieni/dewMineArcher.php', 
                 'dewminebalista' => '/server/model/ships/orieni/dewMineBalista.php',                                   
                 
-                //Usuuth Mines
+                //Usuuth Mines - 3
                 'captormineruga' => '/server/model/ships/usuuth/captorMineRuga.php',
                 'proxmineorthine' => '/server/model/ships/usuuth/proxMineOrthine.php',
                 'proxminesootha' => '/server/model/ships/usuuth/proxMineSootha.php',                                                  
+
+                //Hyach Mines - 7
+                'proxmineechalival' => '/server/model/ships/hyach/proxMineEchaliVal.php',  
+                'captormineelaskvor' => '/server/model/ships/hyach/captorMineElaskVor.php',                   
+                'dewmineavalsar' => '/server/model/ships/hyach/dewMineAvalSar.php',
+                'dewmineilanisar' => '/server/model/ships/hyach/dewMineIlaniSar.php', 
+                'dewminenalinasar' => '/server/model/ships/hyach/dewMineNalinaSar.php', 
+                'dewminemaschatsar' => '/server/model/ships/hyach/dewMineMaschatSar.php', 
+                'dewmineloirnisar' => '/server/model/ships/hyach/dewMineLoirniSar.php',                                                                                
+
+                //Cascor Mines - 6
+                'proxmineraqar' => '/server/model/ships/cascor/proxMineRaqar.php', 
+                'proxminerashaq' => '/server/model/ships/cascor/proxMineRashaq.php',                                 
+                'proxmineraccan' => '/server/model/ships/cascor/proxMineRaccan.php',  
+                'captorminetorqi' => '/server/model/ships/cascor/captorMineTorqi.php',
+                'captorminetralati' => '/server/model/ships/cascor/captorMineTralati.php',                
+                'dewminesonoraq' => '/server/model/ships/cascor/dewMineSonoraq.php',                   
+
+                //Ipsha Mines - 3
+                'proxminespore' => '/server/model/ships/ipsha/proxMineSpore.php',                 
+                'captorminecyst' => '/server/model/ships/ipsha/captorMineCyst.php',
+                'dewmineblast' => '/server/model/ships/ipsha/dewMineBlast.php',     
+                
+                //Kor-Lyan Mines - 11
+                'captormineklb' => '/server/model/ships/korlyan/captorMineKLB.php',	
+                'captormineklw' => '/server/model/ships/korlyan/captorMineKLW.php',	                                
+                'captormineklh' => '/server/model/ships/korlyan/captorMineKLH.php',	
+                'spawncaptorklb' => '/server/model/ships/korlyan/spawnCaptorKLB.php',	
+                'spawncaptorklw' => '/server/model/ships/korlyan/spawnCaptorKLW.php',	                                
+                'spawncaptorklh' => '/server/model/ships/korlyan/spawnCaptorKLH.php',
+                'dewminetonkar' => '/server/model/ships/korlyan/dewMineTonkar.php',
+                'dewminetonkat' => '/server/model/ships/korlyan/dewMineTonkat.php', 
+                'dewminetonkal' => '/server/model/ships/korlyan/dewMineTonkal.php', 
+                'dewminetraska' => '/server/model/ships/korlyan/dewMineTraska.php', 
+                'dewminetalivos' => '/server/model/ships/korlyan/dewMineTalivos.php',                                                                                  
+
+                //Torata Mines - 7
+                'proxmine11' => '/server/model/ships/torata/proxMine11.php', 
+                'captormine21' => '/server/model/ships/torata/captorMine21.php',
+                'dewmine31' => '/server/model/ships/torata/dewMine31.php',
+                'dewmine32' => '/server/model/ships/torata/dewMine32.php', 
+                'dewmine33' => '/server/model/ships/torata/dewMine33.php', 
+                'dewmine34' => '/server/model/ships/torata/dewMine34.php', 
+                'dewmine41' => '/server/model/ships/torata/dewMine41.php', 
+                
+                //Grome Mines - 5
+                'proxminemoltha' => '/server/model/ships/grome/proxMineMoltha.php', 
+                'proxmineghinsh' => '/server/model/ships/grome/proxMineGhinsh.php',
+                'proxminetranas' => '/server/model/ships/grome/proxMineTranas.php', 
+                'dewminelektha' => '/server/model/ships/grome/dewMineLektha.php', 
+                'dewminegalakar' => '/server/model/ships/grome/dewMineGalakar.php',                                                  
+
+                //Hurr Mines - 18
+                'proxminehp1' => '/server/model/ships/hurr/proxMineHP1.php',
+                'proxminehp2' => '/server/model/ships/hurr/proxMineHP2.php', 
+                'proxminehraji' => '/server/model/ships/hurr/proxMineHRaji.php',                
+                'proxminehrehsap' => '/server/model/ships/hurr/proxMineHRehsaP.php', 
+                'proxminehdr' => '/server/model/ships/hurr/proxMineHDR.php',  
+                'proxminehdb' => '/server/model/ships/hurr/proxMineHDB.php', 
+                'proxminehdx' => '/server/model/ships/hurr/proxMineHDX.php', 
+                'proxminehpalfa' => '/server/model/ships/hurr/proxMineHPalfa.php',                
+
+                'captorminehc1' => '/server/model/ships/hurr/captorMineHC1.php',
+                'captorminehc2' => '/server/model/ships/hurr/captorMineHC2.php',
+                'captorminehcoranta' => '/server/model/ships/hurr/captorMineHCorantA.php',
+                'captorminehcorantb' => '/server/model/ships/hurr/captorMineHCorantB.php', 
+                'captorminehtilor' => '/server/model/ships/hurr/captorMineHTilor.php',                                 
+
+                'dewminehd2' => '/server/model/ships/hurr/dewMineHD2.php',                
+                'dewminehekosa' => '/server/model/ships/hurr/dewMineHEkosA.php',               
+                'dewminehbp' => '/server/model/ships/hurr/dewMineHBP.php', 
+                'dewminehcorti' => '/server/model/ships/hurr/dewMineHCorti.php',   
+
+                'minehff' => '/server/model/ships/hurr/mineHFF.php',                                 
 
 
 						//Satyra (Wolfgang campaign)
@@ -3687,8 +3769,10 @@ spl_autoload_register(
 						'dargarian' => '/server/model/ships/HouseValheru/Dargarian.php',
 						'darius' => '/server/model/ships/HouseValheru/Darius.php',
 						'elutai' => '/server/model/ships/HouseValheru/Elutai.php',
+						'elutissa' => '/server/model/ships/HouseValheru/Elutissa.php',
 						'gladiator' => '/server/model/ships/HouseValheru/Gladiator.php',
 						'jara' => '/server/model/ships/HouseValheru/Jara.php',
+						'jarissa' => '/server/model/ships/HouseValheru/Jarissa.php',
 						'kitsune' => '/server/model/ships/HouseValheru/Kitsune.php',
 						'liana' => '/server/model/ships/HouseValheru/Liana.php',
                         'maximillian' => '/server/model/ships/HouseValheru/Maximillian.php',
@@ -3707,6 +3791,14 @@ spl_autoload_register(
 						'gquan_wi' => '/server/model/ships/whatif/gquan_WI.php',	
 						'vorchan_wi' => '/server/model/ships/whatif/vorchan_WI.php',
 
+
+						//Great Crusade Orieni weapons
+						'warlance' => '/server/model/weapons/customs.php',
+						'lightlaserlance' => '/server/model/weapons/customs.php',
+						'imprapidgatling' => '/server/model/weapons/customs.php',
+						'gaussrifle' => '/server/model/weapons/customs.php',
+						'heavygaussrifle' => '/server/model/weapons/customs.php',
+						'orieniflakarray' => '/server/model/weapons/customs.php',
 
                         //Great Crusade Orieni
 						'benevolentgcam' => '/server/model/ships/GreatCrusadeOrieni/benevolentGCAM.php',	
@@ -3734,15 +3826,21 @@ spl_autoload_register(
 						'zealotgc' => '/server/model/ships/GreatCrusadeOrieni/zealotGC.php',	
 
 
+
+
+
 						
 				// For the future
+				'attacklaser' => '/server/model/weapons/customs.php',
+				'boltrailgun' => '/server/model/weapons/customs.php',
+				'chargedparticlegun' => '/server/model/weapons/customs.php',
+				'earlyparticlecannon' => '/server/model/weapons/customs.php',
+				'fusiongun' => '/server/model/weapons/customs.php',
+				'heavyslugcannon' => '/server/model/weapons/customs.php',
 				'hvyassaultlaser' => '/server/model/weapons/lasers.php',
-				'warlance' => '/server/model/weapons/customs.php',
-				'lightlaserlance' => '/server/model/weapons/customs.php',
-				'imprapidgatling' => '/server/model/weapons/customs.php',
-				'gaussrifle' => '/server/model/weapons/customs.php',
-				'heavygaussrifle' => '/server/model/weapons/customs.php',
-				'orieniflakarray' => '/server/model/weapons/customs.php',
+				'hvygraviticbolt' => '/server/model/weapons/customs.php',
+				'hvyplasmagunftr' => '/server/model/weapons/customs.php',
+				'interceptorarray' => '/server/model/weapons/customs.php',
 
 	
 				//let's end this with unit enhancement class...		    

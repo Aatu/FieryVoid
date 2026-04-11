@@ -2135,13 +2135,17 @@ window.weaponManager = {
                 var fighter = ship.systems[i];
                 for (var a in fighter.systems) {
                     var system = fighter.systems[a];
-                    var hasOrder = weaponManager.hasFiringOrder(ship, system);
-                    if (hasOrder) return true;
+                    if(system.weapon){
+                        var orders = weaponManager.getAllFireOrdersFromSystem(system);
+                        if (orders.length > 0) return true;
+                    }  
                 }
             } else {
                 var system = ship.systems[i];
-                var hasOrder = weaponManager.hasFiringOrder(ship, system);
-                if (hasOrder) return true;
+                if(system.weapon){
+                    var orders = weaponManager.getAllFireOrdersFromSystem(system);
+                    if (orders.length > 0) return true;
+                }    
             }
         }
         return false;

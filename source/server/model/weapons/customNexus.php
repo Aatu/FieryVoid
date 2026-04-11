@@ -8373,9 +8373,8 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
     public $name = "NexusSandCaster";
     public $displayName = "Sand Caster";
 	public $iconPath = "PlasmaWeb.png";
-
     public $animation = "ball";
-    public $animationColor = array(210, 180, 140);    	
+    public $animationColor = array(75, 250, 90);    	
     public $animationExplosionScale = 0.5;
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.  
 
@@ -8404,7 +8403,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
     public $boostable = true;
     public $boostEfficiency = 0;
     public $maxBoostLevel = 1;     
-		
+
 	public $weaponClassArray = array(1=>'Matter', 2=>'Matter');
 	public $damageTypeArray = array(1=>'Matter', 2=>'Matter'); //indicates that this weapon does Plasma damage in Offensive mode    	
     public $firingMode = "Defensive";
@@ -8413,7 +8412,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
             1 => "Defensive Sand Caster",
 			2 => "Anti-Fighter Sand Caster",			
     );
-    
+
     public $fireControlArray = array( 1=>array(0,0,0), 2=>array(0, null, null)); // fighters, <mediums, <capitals 
 		
 	private static $alreadyEngagedDirect = array(); //units that were already engaged by a Plasma Web this turn (multiple Webs do not stack).
@@ -8434,7 +8433,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
     {
         return "Shield";
     }
-    
+
 	public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon) {
 	    // Variable initialization
 	    $output = 0;
@@ -8466,14 +8465,13 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 	    return $output;
 	} // End of getDefensiveHitChangeMod
 
-
 	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon) {
 
 	    // Variable initialization
 	    $output = 0;
 	    $targetpos = null;
 
-	    // Sand Caster damage reduction only works against three types of weapons.
+	    // Sand Caster damage reduction works against multiple types of weapons.
 	    if ($weapon->weaponClass != 'Laser' && $weapon->weaponClass != 'Antimatter' && $weapon->weaponClass != 'Particle' && $weapon->name != 'AntimatterTorpedo' && $weapon->name != 'Plasma' && $weapon->name != 'Ion') {
 	        return 0;
 	    }
@@ -8503,16 +8501,15 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 	    // Return the actual value
 	    return $output;
 	} // End of getDefensiveDamageMod
-			
 
-    public function beforeFiringOrderResolution($gamedata){
+    public function beforePreFiringOrderResolution($gamedata){
     	
 		//Start by checking for Ballistic fireOrder, if there isn't one there's no need to do anything!
 		$firingOrders = $this->getFireOrders($gamedata->turn);
 						    	
 		$cloudFireOrder = null;
 			foreach ($firingOrders as $fireOrder) { 
-				if ($fireOrder->type == "ballistic") { 
+				if ($fireOrder->type == 'ballistic') { 
 					$cloudFireOrder = $fireOrder;
 					break; //no need to search further
 				}
@@ -8526,7 +8523,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 
 		//Check through fireOrders, only interested in Persistent Effect orders created in Initial Orders Phase
 		foreach ($firingOrders as $cloudFireOrder) { 		
-			if (($cloudFireOrder->type == "ballistic") &&  ($cloudFireOrder->damageclass == 'PersistentEffectPlasma')) { 	//Double-check.	
+			if (($cloudFireOrder->type == 'ballistic') &&  ($cloudFireOrder->damageclass == 'PersistentEffectSand')) { 	//Double-check.	
 
 				//fireOrder found, proceed to check whether any fighters passed through it.   	
 		    	$thisShip = $this->getUnit();		    	  
@@ -8555,11 +8552,9 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
     	
 	}//endof beforeFiringOrderResolution
 
-
 	private function convertOffsetCoordinateToArray($offsetCoordinate) {
 	    return array((string)$offsetCoordinate->q, (string)$offsetCoordinate->r);
 	}
-
 
 	private function checkForValidTargets($relevantShips, $cloudFireOrder, $gamedata) {
 	    $targetFighters = array(); // Initialize array for fighters to be fired at.		
@@ -8589,7 +8584,6 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 	    return $targetFighters; 
 	} // end of checkForValidTargets
 
-
 	private function createFireOrders($targetFighters, $thisShip, $gamedata, $cloudFireOrder){
 
 		foreach ($targetFighters as $target) {
@@ -8607,12 +8601,12 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 	
 		    // Create a new FireOrder
 		    $newDamageFireOrder = new FireOrder(
-		        -1, "ballistic", $thisShip->id, $target->id,
+		        -1, "prefiring", $thisShip->id, $target->id,
 		        $this->id, -1, $gamedata->turn, 2, 
-		        100, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
-		        $cloudFireOrder->x, $cloudFireOrder->y, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
-		    );
-			$newDamageFireOrder->notes = 'Attack on fighters passing through';
+		        100, 0, 1, 1, 0, // needed, rolled, shots, shotshit, intercepted
+		        $cloudFireOrder->x, $cloudFireOrder->y, 'PersistentEffectSand', -1 // X, Y, damageclass, resolutionorder
+		    ); 
+		    $newDamageFireOrder->notes = 'Attack on fighters passing through';
 	        // Store the engagement with coordinates as the key
 	        NexusSandCaster::$alreadyEngagedClouded[$target->id][$coordinatesKey] = [
 	            'engaged' => true, // marking engagement
@@ -8624,11 +8618,13 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 		    foreach ($target->movement as $move){
 		        $movement = $move;
 		    }
-
-	        $targetPositionArray = $this->convertOffsetCoordinateToArray($movement->position);
+			
+/*
+			$targetPositionArray = $this->convertOffsetCoordinateToArray($movement->position);
 
 			$newDamageFireOrder->x = $targetPositionArray[0];
 			$newDamageFireOrder->y = $targetPositionArray[1];	
+*/
 				
 		    $newDamageFireOrder->addToDB = false;//Will be manually entered immediately below!
 		    $this->fireOrders[] = $newDamageFireOrder;
@@ -8649,10 +8645,9 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 
 	}//End of createFireOrders()	
 
-
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
-		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') return; //Don't resolve ballistic 'cloud' fireOrders.
+		if($fireOrder->damageclass == 'PersistentEffectSand') return; //Don't resolve hit resolution for cloud markers or fighter hits.
 			
 		$this->changeFiringMode($fireOrder->firingMode);
 			
@@ -8663,7 +8658,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 
 //		if($fireOrder->type == "ballistic" && $fireOrder->damageclass != 'PersistentEffectPlasma') $fireOrder->notes = 'Attack on fighters passing through';
 				
-		if ($fireOrder->targetid != -1 && $fireOrder->type == "normal") {//Correct any direct fireOrders that targeted a ship.
+		if ($fireOrder->targetid != -1 && $fireOrder->type == 'normal') {//Correct any direct fireOrders that targeted a ship.
 			$targetship = $gamedata->getShipById($fireOrder->targetid);
 			//insert correct target coordinates: last turns' target position
 			$targetShip = $gamedata->getShipById($fireOrder->targetid);			
@@ -8674,18 +8669,22 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 			$fireOrder->calledid = -1; //just in case
 		} 		
 	}		
-		
-		
+
 	public function fire($gamedata, $fireOrder){
 		if($fireOrder->firingMode == 1) return; //Don't animate Defensive fire, it clogs up Replay
-		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') {
-            Manager::insertSingleFiringOrder($gamedata, $fireOrder); //But do insert to db for replay
+//Debug::log("fireOrder->type1 " . $fireOrder->type);
+//Debug::log("fireOrder->damageclass1 " . $fireOrder->damageclass);
+		if($fireOrder->type == 'ballistic' && $fireOrder->damageclass == 'PersistentEffectSand') {
+			$fireOrder->notes = 'SandCloud';
+//Debug::log("fireOrder->notes1 " . $fireOrder->notes);
+	        $fireOrder->updated = true;				
 			return; //Don't resolve ballistic 'cloud' fireOrders.
-		}	
+		}
+//Debug::log("fireOrder->notes2 " . $fireOrder->notes);			
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
 		$this->changeFiringMode($fireOrder->firingMode);		
-										
+//Debug::log("fireOrder->firingMode " . $fireOrder->firingMode);										
 		switch($this->firingMode){
 			case 1:	
 				$rolled = Dice::d(100);
@@ -8700,11 +8699,12 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 								
 				$rolled = Dice::d(100);
 				$fireOrder->rolled = $rolled; ///and auto-hit ;)
-				$fireOrder->shotshit++;
+				$fireOrder->shotshit = 1;
 				
-				if($fireOrder->type == "ballistic"){ //Plasma cloud attack, shouldn't draw power.
+				if($fireOrder->type == 'prefiring'){ //Plasma cloud attack, shouldn't draw power.
 					$fireOrder->pubnotes .= "<br>Sand cloud(s) damages fighters that pass through.";//just information for player.				
-				
+//Debug::log("fireOrder->type2 " . $fireOrder->type);
+//Debug::log("fireOrder->damageclass2 " . $fireOrder->damageclass);				
 					//deal damage!  Will be to a particular flight, not genuinely AoE!
 					$targetFlight = $gamedata->getShipById($fireOrder->targetid);						
 					$this->AOEdamage($targetFlight, $shooter, $fireOrder, $gamedata);	
@@ -8712,9 +8712,9 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 					$fireOrder->targetid = -1; //Do not need targetid anymore, change to -1			
 				
 				}else{//Anti-Fighter mode FIRED this turn, draw power if not boosted.
-//					if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
-//						PlasmaBattery::shipDrawPower($this->unit);
-//					}
+					if ($this->getBoostLevel(TacGamedata::$currentTurn) <=0 ) { //not boosted...
+						PlasmaBattery::shipDrawPower($this->unit);
+					}
 									
 					$fireOrder->pubnotes .= "Sand cloud created on hex, remains in place until next Firing Phase!"; //just information for player.
 					
@@ -8735,17 +8735,17 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!			
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+	    $fireOrder->updated = true;		
 						
 	} //endof function fire		
-	
-	
+
 	//and now actual damage dealing for Offensive Mode - and we already know fighter is hit (fire()) doesn't pass anything else)
 	//source hex will be taken from firing unit, damage will be individually rolled for each fighter hit
 	public function AOEdamage($target, $shooter, $fireOrder, $gamedata){
 
 		$coordinatesKey = $fireOrder->x . ',' . $fireOrder->y; // This will be the key for the array
 	
-		if($fireOrder->type == "normal"){
+		if($fireOrder->type == 'normal'){
 	        if (isset(NexusSandCaster::$alreadyEngagedDirect[$target->id])){
 	        	$fireOrder->pubnotes .= "<br> No effect on fighters already damaged by a Sand Caster on this hex." ; //just information for player.
 	        	return; //unit already engaged by a previous direct Plasma Web at this hex.
@@ -8774,13 +8774,12 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 		    $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
 		}			                
 
-		if($fireOrder->type == "normal"){		    		    
+		if($fireOrder->type == 'normal'){		    		    
 			NexusSandCaster::$alreadyEngagedDirect[$target->id] = true;//mark engaged
 		}	
 	
 	}//endof AOEdamage()
-	
-		
+
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
 			if (!isset($this->data["Special"])) {
@@ -8820,7 +8819,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 				      $originalFireOrder = null;
 					      
 				        foreach ($firingOrders as $fireOrder) { 				              		
-				            if ($fireOrder->type == "normal" && $fireOrder->firingMode == 2) { //Not the ballistic cloud effect, and not generated fireOrders passing through cloud.
+				            if ($fireOrder->type == 'normal' && $fireOrder->firingMode == 2) { //Not the ballistic cloud effect, and not generated fireOrders passing through cloud.
 				                $originalFireOrder = $fireOrder;
 				                break; //no need to search further
 				                }
@@ -8829,19 +8828,18 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 				    	if($originalFireOrder==null) return; //no appropriate fire order, end of work						
 							
 						$notekey = 'xCoordinate';
-						$noteHuman = 'Create Sand Cloud fireOrder x';
+						$noteHuman = 'Create Sand Caster fireOrder x';
 						$notevalue = $originalFireOrder->x;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue   
 					
 						$notekey = 'yCoordinate';
-						$noteHuman = 'Create Sand Cloud fireOrder y';
+						$noteHuman = 'Create Sands Cloud fireOrder y';
 						$notevalue = $originalFireOrder->y;
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue 
 						
 				break;				
 		}
 	} //endof function generateIndividualNotes
-	
 
 	public function onIndividualNotesLoaded($gamedata)
 	{
@@ -8875,10 +8873,10 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 		                        -1, "ballistic", $ship->id, -1,
 		                        $this->id, -1, $gamedata->turn, 2, 
 		                        1, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
-		                        $xCoordinate, $yCoordinate, 'PersistentEffectPlasma', -1 // X, Y, damageclass, resolutionorder
+		                        $xCoordinate, $yCoordinate, 'PersistentEffectSand', -1 // X, Y, damageclass, resolutionorder
 		                    ); 
 		                    
-							$newFireOrder->notes = "PersistentEffect";
+							$newFireOrder->notes = "PersistentSand";
 		                    $newFireOrder->addToDB = true;	                    
 		                    $this->fireOrders[] = $newFireOrder;
 		                    
@@ -8897,7 +8895,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 		$firingOrders = $this->getFireOrders($gamedata->turn);				    	
 		$ballisticFireOrder = null;
 			foreach ($firingOrders as $fireOrder) { 
-				if ($fireOrder->type == "ballistic") { 
+				if ($fireOrder->type == 'ballistic') { 
 					$ballisticFireOrder = $fireOrder;
 					break; //no need to search further
 					}
@@ -8905,10 +8903,9 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 								
 		if($ballisticFireOrder==null) return; //no appropriate fire order, end of work    
 
-		if($ballisticFireOrder->notes == "") $ballisticFireOrder->notes .= "PersistentEffect";			
+		if($ballisticFireOrder->notes == "") $ballisticFireOrder->notes .= "PersistentSand";			
 		    	
 	}//endof individualNotesLoaded()
-
 
 		public function getDamage($fireOrder){
         	switch($this->firingMode){ 
@@ -8916,7 +8913,7 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
                 	return 0; 
 			    			break;
             	case 2:
-            	   	return Dice::d(6,1)+2;
+            	   	return Dice::d(6,1)+1;
 			    			break;		    			
         	}
 		}
@@ -8939,12 +8936,11 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 								$this->maxDamage = 0;
 								break;
 						case 2:
-								$this->maxDamage = 8;
+								$this->maxDamage = 7;
 								break;								
 				}
 				$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
 		}
-
 
     public function stripForJson() {
             $strippedSystem = parent::stripForJson();    
@@ -8952,13 +8948,8 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 			$strippedSystem->noProjectile = $this->noProjectile;                                                   
             return $strippedSystem;
 	}
-
+	
 } //end of class NexusSandCaster
-
-
-
-
-
 
 
 
@@ -9916,6 +9907,15 @@ class MultiDefenseLauncher extends Weapon {
     }        
 
 } //endof class MultiDefenseLauncher
+
+
+
+
+
+
+
+
+
 
 
 

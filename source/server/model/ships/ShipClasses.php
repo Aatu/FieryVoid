@@ -554,12 +554,12 @@ class BaseShip {
         $strippedShip->rolled = $this->rolled;
         $strippedShip->rolling = $this->rolling;
         $strippedShip->slotid = $this->slotid;
-        $strippedShip->EW = $this->EW;
+        if (isset($this->EW) && !empty($this->EW)) $strippedShip->EW = $this->EW; //Terrain/Mines don't have EW for example.
         $strippedShip->movement = $this->movement; 
         $strippedShip->faction = $this->faction; 
         $strippedShip->phpclass = $this->phpclass;
-        $strippedShip->skinDancing = $this->skinDancing;
-        $strippedShip->spawned = $this->spawned;        
+        if ($this->skinDancing) $strippedShip->skinDancing = $this->skinDancing;
+        if ($this->spawned !== null && $this->spawned !== -1) $strippedShip->spawned = $this->spawned;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
@@ -616,7 +616,7 @@ class BaseShip {
 		}				
 	
 		
-		$strippedShip->enhancementOptions = array(); //no point in sending options information...
+		//$strippedShip->enhancementOptions = array(); // can remove - will be emptied in front end when ships are built - DK
         return $strippedShip;
     }
 	 
@@ -1190,6 +1190,9 @@ class BaseShip {
 			if($this->gravitic) $this->notes .= '<br>Gravitic Drive';	
 			//Minesweeper
 			if($this->minesweeperbonus > 0) $this->notes .= '<br>Minesweeper: ' . $this->minesweeperbonus;	
+			if($this instanceof Mine && $this->signature > 0) $this->notes .= '<br>Signature: ' . $this->signature;	//Add signature value for mines here as well
+			if($this instanceof Mine && $this->mineType == 'DEW') $this->notes .= '<br>Detected Signature: ' . $this->detectedSignature;	//Add signature value for mines here as well 
+
 			//Advanced Armor
 			if($this->advancedArmor) $this->notes .= '<br>Advanced Armor';
 			if($this->hardAdvancedArmor) $this->notes .= '<br>Hardened Advanced Armor';   // GTS Hardened advanced armor
@@ -2944,7 +2947,7 @@ class Mine extends OSAT{
     public $canPreOrder = true;//Needed to set ranges for spawned Mines in Pre-Turn phase.
     protected $variableDamage = 0; //Amount by which mine set damage can vary, looked for in Enhancements
     protected $commandControl = false;
-    public $multiSettings = false;
+    //public $multiSettings = false;
 
 
     public function isDisabled(){

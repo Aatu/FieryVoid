@@ -35,6 +35,9 @@ class technicalTargetDrone extends VreeCapital
 
 		$this->VreeHitLocations = false;
 
+
+
+
 		$this->addPrimarySystem(new Reactor(6, 18, 0, 0));
 		$this->addPrimarySystem(new Hangar(6, 1));
 		$this->addPrimarySystem(new CnC(6, 12, 0, 0));
@@ -78,12 +81,22 @@ class technicalTargetDrone extends VreeCapital
 */
 //        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 8, false));	
 
-        $this->addFrontSystem(new WarLance(3, 9, 3, 270, 90));	
-        $this->addFrontSystem(new LightLaserLance(3, 6, 5, 270, 90));	
-        $this->addFrontSystem(new ImpRapidGatling(3, 4, 2, 270, 90));	
-        $this->addFrontSystem(new GaussRifle(3, 8, 4, 270, 90));	
-        $this->addFrontSystem(new HeavyGaussRifle(3, 12, 5, 270, 90));	
-        $this->addFrontSystem(new OrieniFlakArray(3, 6, 3, 270, 90));	
+
+/*
+        $this->addFrontSystem(new HvyGraviticBolt(3, 8, 3, 270, 90));	
+        $this->addFrontSystem(new HvyGraviticBolt(3, 8, 3, 270, 90));	
+        $this->addFrontSystem(new HvyGraviticBolt(3, 8, 3, 270, 90));	
+        $this->addFrontSystem(new HvyGraviticBolt(3, 8, 3, 270, 90));	
+
+        $this->addFrontSystem(new BoltRailgun(3, 4, 1, 270, 90));	
+        $this->addFrontSystem(new EarlyParticleCannon(3, 7, 6, 270, 90));	
+        $this->addFrontSystem(new LightParticleGun(3, 2, 1, 270, 90));	
+        $this->addFrontSystem(new ChargedParticleGun(3, 4, 1, 270, 90));	
+        $this->addFrontSystem(new InterceptorArray(3, 6, 2, 270, 90));	
+        $this->addFrontSystem(new FusionGun(3, 5, 1, 270, 90));	
+        $this->addFrontSystem(new HeavySlugCannon(3, 4, 1, 270, 90));	
+        $this->addFrontSystem(new AttackLaser(3, 2, 1, 270, 90));	
+*/
 
 		$structArmor = 0;
 		$structHP = 50;

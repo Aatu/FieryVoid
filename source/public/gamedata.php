@@ -1,4 +1,5 @@
 <?php
+ob_start(); // Buffer any stray whitespace from included legacy files
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -93,6 +94,19 @@ try {
         "file" => $e->getFile(),
         "line" => $e->getLine()
     ]);
+}
+
+// Clean any stray text/whitespace that was output by included files
+if(ob_get_length()) ob_clean();
+
+// Phase 4: ETag Cache Optimization
+// Calculate ETag on the raw JSON to allow 304 Not Modified responses.
+$etag = '"' . md5($ret) . '"';
+header("ETag: $etag");
+
+if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag) {
+    header("HTTP/1.1 304 Not Modified");
+    exit;
 }
 
 echo $ret;

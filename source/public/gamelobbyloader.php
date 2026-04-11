@@ -1,4 +1,5 @@
 <?php 
+ob_start();
 
 // Force GZIP compression as these JSON payloads can be massive (e.g. 5MB+)
 ini_set('zlib.output_compression', 'On');
@@ -18,6 +19,7 @@ session_write_close();
 
 if (!$playerid) {
     http_response_code(401);
+    if(ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Not logged in.']);
     exit;
 }
@@ -42,6 +44,7 @@ $factionRequest = $input['faction'] ?? $_POST['faction'] ?? $_GET['faction'] ?? 
 
 if (!$factionRequest) {
     http_response_code(400);
+    if(ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Missing faction parameter']);
     exit;
 }
@@ -73,20 +76,22 @@ try {
             exit;
         }
         header('Pragma: cache');
-        ob_start(); // Buffer output, gzip is handled natively by zlib.output_compression
+        // Buffer output, gzip is handled natively by zlib.output_compression
         
+        if(ob_get_length()) ob_clean();
         echo file_get_contents($jsonPath);
-        ob_end_flush();
         exit;
     }
 
     // 2. Fallback to dynamic generation e.g. old method
     $ships = ShipLoader::getAllShips($factionRequest);
+    if(ob_get_length()) ob_clean();
     echo json_encode($ships, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE);
 
 } catch (Throwable $e) {
     $logid = Debug::error($e);
     http_response_code(500);
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         'error' => $e->getMessage(),
         'code'  => $e->getCode(),

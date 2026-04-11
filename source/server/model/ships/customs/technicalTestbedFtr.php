@@ -50,7 +50,8 @@ class TechnicalTestbedFtr extends FighterFlight{
 			//ramming attack - no room to show it cleanly on Aft, Diffuser and Tendrils take a lot of room...			
 			$fighter->addFrontSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
-			$fighter->addFrontSystem(new ftrPolarityCannon(330, 30, 1));//arcfrom, arcto, numberofguns		
+			$fighter->addFrontSystem(new HvyPlasmaGunFtr(330, 30, 1));//arcfrom, arcto, numberofguns		
+//			$fighter->addFrontSystem(new ftrPolarityCannon(330, 30, 1));//arcfrom, arcto, numberofguns		
 			//$fighter->addFrontSystem(new LightPlasmaAccelerator(330, 30, 1));//arcfrom, arcto, numberofguns		
 			
 			//Trek-style shielding

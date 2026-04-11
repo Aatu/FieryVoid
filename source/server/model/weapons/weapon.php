@@ -293,11 +293,12 @@ class Weapon extends ShipSystem
 
 		if ($this instanceof Weapon) {
 			$strippedSystem->turnsloaded = $this->turnsloaded;
-			$strippedSystem->turnsloadedArray = $this->turnsloadedArray;
-			$strippedSystem->overloadturns = $this->overloadturns;
-			$strippedSystem->overloadshots = $this->overloadshots;
-			$strippedSystem->extraoverloadshots = $this->extraoverloadshots;
-			$strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
+			//Don't send empty arrays/strings in JSON payload
+			if (!empty($this->turnsloadedArray)) $strippedSystem->turnsloadedArray = $this->turnsloadedArray;
+			if ($this->overloadturns !== 0) $strippedSystem->overloadturns = $this->overloadturns;
+			if ($this->overloadshots !== 0) $strippedSystem->overloadshots = $this->overloadshots;
+			if ($this->extraoverloadshots !== 0) $strippedSystem->extraoverloadshots = $this->extraoverloadshots;
+			if (!empty($this->extraoverloadshotsArray)) $strippedSystem->extraoverloadshotsArray = $this->extraoverloadshotsArray;
 			$strippedSystem->fireOrders = $this->fireOrders;         
 			
 			if(isset($this->ammunition)){
@@ -307,13 +308,13 @@ class Weapon extends ShipSystem
 			/*this needs to be sent only if weapon suffered crits!*/
 			if (count($this->criticals)>0) { //if there was a critical, send all potentially changed data; otherwise, they should be standard and don't need to be sent extra!				
 				$strippedSystem->range = $this->range;
-				$strippedSystem->rangeArray = $this->rangeArray;	
+				if (!empty($this->rangeArray)) $strippedSystem->rangeArray = $this->rangeArray;	
 				$strippedSystem->rangePenalty = $this->rangePenalty;
-   				$strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;    
+   				if (!empty($this->rangePenaltyArray)) $strippedSystem->rangePenaltyArray = $this->rangePenaltyArray;    
 				$strippedSystem->minDamage = $this->minDamage;
 				$strippedSystem->maxDamage = $this->maxDamage;
-				$strippedSystem->minDamageArray = $this->minDamageArray;
-				$strippedSystem->maxDamageArray = $this->maxDamageArray;
+				if (!empty($this->minDamageArray)) $strippedSystem->minDamageArray = $this->minDamageArray;
+				if (!empty($this->maxDamageArray)) $strippedSystem->maxDamageArray = $this->maxDamageArray;
 				$strippedSystem->data = $this->data;    
 			}
 		//Hyach Specialists sometimes require additional info to be sent to front end.
@@ -327,11 +328,11 @@ class Weapon extends ShipSystem
 				}
 				if ($specsUsed == 'Weapon'){ //Weapon modifies damage, show in system window.
 					if ($this->maxDamage > 0){
-												
+											
 						$newMinDamage = $this->minDamage+3;
 						$newMaxDamage = $this->maxDamage+3;	
-       				if ($this->minDamage != $this->maxDamage){									
-						$this->data["Damage"] = $newMinDamage . "-" . $newMaxDamage;
+       				if ($this->minDamage != $this->maxDamage){								
+					$this->data["Damage"] = $newMinDamage . "-" . $newMaxDamage;
 					}else{
 						$this->data["Damage"] = $newMaxDamage;						
 					}					
@@ -345,14 +346,18 @@ class Weapon extends ShipSystem
         if($ship instanceof Mine && ($ship->mineType == 'DEW' || $ship->mineType == 'Captor')){ 
             //Need to send updated Fire Control values for DEW/Captor mine weapons.
 			$strippedSystem->fireControl = $this->fireControl;
-			$strippedSystem->fireControlArray = $this->fireControlArray;  
+			if (!empty($this->fireControlArray)) $strippedSystem->fireControlArray = $this->fireControlArray;  
 			$strippedSystem->autoFireOnly = $this->autoFireOnly; //DEW weapons need to know they are actually autofire on a mine. 
             $strippedSystem->canTargetAll = $this->canTargetAll;                        
         }elseif ($ship instanceof Mine && $ship->getCommandControl()){ 
             //Command Controller can change certain variables, so we need to pass in JSON.
-            $strippedSystem->preFires = $this->preFires; 	 
+            if (isset($this->preFires)) $strippedSystem->preFires = $this->preFires; 	 
             $strippedSystem->autoFireOnly = $this->autoFireOnly;                                            
-        } 				
+        }
+
+        if (isset($this->fireControlArray) && !empty($this->fireControlArray) && !isset($strippedSystem->fireControlArray)) {
+            $strippedSystem->fireControlArray = $this->fireControlArray;
+        }
 			
 		}
         return $strippedSystem;
@@ -2132,6 +2137,7 @@ full Advanced Armor effects (by rules) for reference:
 	/*weapons with special effects affecting system hit will redefine this*/
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder)
     {
+        if($system instanceof Fighter && $damage >= 2) $system->checkMissileLoss($ship, $gamedata); //Damage to fighters carrying missiles can 
         return;
     }
 

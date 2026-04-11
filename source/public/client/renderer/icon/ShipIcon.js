@@ -245,10 +245,12 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.setNotMoved = function (value) {
-        if (value) {
-            this.NotMovedSprite.show();
-        } else {
-            this.NotMovedSprite.hide();
+        if (!this.terrain) {
+            if (value) {
+                this.NotMovedSprite.show();
+            } else {
+                this.NotMovedSprite.hide();
+            }
         }
 
         this.selected = value;

@@ -1407,14 +1407,14 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	} // End of getDefensiveDamageMod
 			
 
-    public function beforeFiringOrderResolution($gamedata){
+    public function beforePreFiringOrderResolution($gamedata){
     	
 		//Start by checking for Ballistic fireOrder, if there isn't one there's no need to do anything!
 		$firingOrders = $this->getFireOrders($gamedata->turn);
 						    	
 		$cloudFireOrder = null;
 			foreach ($firingOrders as $fireOrder) { 
-				if ($fireOrder->type == "ballistic") { 
+				if ($fireOrder->type == 'ballistic') { 
 					$cloudFireOrder = $fireOrder;
 					break; //no need to search further
 				}
@@ -1428,7 +1428,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 		//Check through fireOrders, only interested in Persistent Effect orders created in Initial Orders Phase
 		foreach ($firingOrders as $cloudFireOrder) { 		
-			if (($cloudFireOrder->type == "ballistic") &&  ($cloudFireOrder->damageclass == 'PersistentEffectPlasma')) { 	//Double-check.	
+			if (($cloudFireOrder->type == 'ballistic') &&  ($cloudFireOrder->damageclass == 'PersistentEffectPlasma')) { 	//Double-check.	
 
 				//fireOrder found, proceed to check whether any fighters passed through it.   	
 		    	$thisShip = $this->getUnit();		    	  
@@ -1451,7 +1451,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		}
 
 		// Restore the original coordinates
-		$cloudFireOrder->notes = 'PlasmaCloud';
+		$cloudFireOrder->notes = 'PersistentEffect';
 		$cloudFireOrder->x = $originalX;
 		$cloudFireOrder->y = $originalY;
     	
@@ -1509,12 +1509,12 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 	
 		    // Create a new FireOrder
 		    $newDamageFireOrder = new FireOrder(
-		        -1, "ballistic", $thisShip->id, $target->id,
+		        -1, "prefiring", $thisShip->id, $target->id,
 		        $this->id, -1, $gamedata->turn, 2, 
-		        100, 0, 1, 0, 0, // needed, rolled, shots, shotshit, intercepted
-		        $cloudFireOrder->x, $cloudFireOrder->y, $this->weaponClass, -1 // X, Y, damageclass, resolutionorder
-		    );
-			$newDamageFireOrder->notes = 'Attack on fighters passing through';
+		        100, 0, 1, 1, 0, // needed, rolled, shots, shotshit, intercepted
+		        $cloudFireOrder->x, $cloudFireOrder->y, 'PersistentEffectPlasma', -1 // X, Y, damageclass, resolutionorder
+		    ); 
+		    $newDamageFireOrder->notes = 'Attack on fighters passing through';
 	        // Store the engagement with coordinates as the key
 	        PakmaraPlasmaWeb::$alreadyEngagedClouded[$target->id][$coordinatesKey] = [
 	            'engaged' => true, // marking engagement
@@ -1526,11 +1526,13 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		    foreach ($target->movement as $move){
 		        $movement = $move;
 		    }
-
-	        $targetPositionArray = $this->convertOffsetCoordinateToArray($movement->position);
+			
+/*
+			$targetPositionArray = $this->convertOffsetCoordinateToArray($movement->position);
 
 			$newDamageFireOrder->x = $targetPositionArray[0];
 			$newDamageFireOrder->y = $targetPositionArray[1];	
+*/
 				
 		    $newDamageFireOrder->addToDB = false;//Will be manually entered immediately below!
 		    $this->fireOrders[] = $newDamageFireOrder;
@@ -1554,7 +1556,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 	public function calculateHitBase($gamedata, $fireOrder)
 	{
-		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') return; //Don't resolve ballistic 'cloud' fireOrders.
+		if($fireOrder->damageclass == 'PersistentEffectPlasma') return; //Don't resolve hit resolution for cloud markers or fighter hits.
 			
 		$this->changeFiringMode($fireOrder->firingMode);
 			
@@ -1565,7 +1567,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 //		if($fireOrder->type == "ballistic" && $fireOrder->damageclass != 'PersistentEffectPlasma') $fireOrder->notes = 'Attack on fighters passing through';
 				
-		if ($fireOrder->targetid != -1 && $fireOrder->type == "normal") {//Correct any direct fireOrders that targeted a ship.
+		if ($fireOrder->targetid != -1 && $fireOrder->type == 'normal') {//Correct any direct fireOrders that targeted a ship.
 			$targetship = $gamedata->getShipById($fireOrder->targetid);
 			//insert correct target coordinates: last turns' target position
 			$targetShip = $gamedata->getShipById($fireOrder->targetid);			
@@ -1580,14 +1582,19 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 	public function fire($gamedata, $fireOrder){
 		if($fireOrder->firingMode == 1) return; //Don't animate Defensive fire, it clogs up Replay
-		if($fireOrder->type == "ballistic" && $fireOrder->damageclass == 'PersistentEffectPlasma') {
-            Manager::insertSingleFiringOrder($gamedata, $fireOrder); //But do insert to db for replay
+//Debug::log("fireOrder->type1 " . $fireOrder->type);
+//Debug::log("fireOrder->damageclass1 " . $fireOrder->damageclass);
+		if($fireOrder->type == 'ballistic' && $fireOrder->damageclass == 'PersistentEffectPlasma') {
+			$fireOrder->notes = 'PersistentEffect';
+//Debug::log("fireOrder->notes1 " . $fireOrder->notes);
+	        $fireOrder->updated = true;				
 			return; //Don't resolve ballistic 'cloud' fireOrders.
-		}	
+		}
+//Debug::log("fireOrder->notes2 " . $fireOrder->notes);			
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
 		$this->changeFiringMode($fireOrder->firingMode);		
-										
+//Debug::log("fireOrder->firingMode " . $fireOrder->firingMode);										
 		switch($this->firingMode){
 			case 1:	
 				$rolled = Dice::d(100);
@@ -1602,11 +1609,12 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 								
 				$rolled = Dice::d(100);
 				$fireOrder->rolled = $rolled; ///and auto-hit ;)
-				$fireOrder->shotshit++;
+				$fireOrder->shotshit = 1;
 				
-				if($fireOrder->type == "ballistic"){ //Plasma cloud attack, shouldn't draw power.
+				if($fireOrder->type == 'prefiring'){ //Plasma cloud attack, shouldn't draw power.
 					$fireOrder->pubnotes .= "<br>Plasma cloud(s) damages fighters that pass through.";//just information for player.				
-				
+//Debug::log("fireOrder->type2 " . $fireOrder->type);
+//Debug::log("fireOrder->damageclass2 " . $fireOrder->damageclass);				
 					//deal damage!  Will be to a particular flight, not genuinely AoE!
 					$targetFlight = $gamedata->getShipById($fireOrder->targetid);						
 					$this->AOEdamage($targetFlight, $shooter, $fireOrder, $gamedata);	
@@ -1637,6 +1645,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		TacGamedata::$lastFiringResolutionNo++;    //note for further shots
 		$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;//mark order in which firing was handled!			
 		$fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+	    $fireOrder->updated = true;		
 						
 	} //endof function fire		
 	
@@ -1647,7 +1656,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 
 		$coordinatesKey = $fireOrder->x . ',' . $fireOrder->y; // This will be the key for the array
 	
-		if($fireOrder->type == "normal"){
+		if($fireOrder->type == 'normal'){
 	        if (isset(PakmaraPlasmaWeb::$alreadyEngagedDirect[$target->id])){
 	        	$fireOrder->pubnotes .= "<br> No effect on fighters already damaged by a Plasma Web on this hex." ; //just information for player.
 	        	return; //unit already engaged by a previous direct Plasma Web at this hex.
@@ -1676,7 +1685,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		    $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
 		}			                
 
-		if($fireOrder->type == "normal"){		    		    
+		if($fireOrder->type == 'normal'){		    		    
 			PakmaraPlasmaWeb::$alreadyEngagedDirect[$target->id] = true;//mark engaged
 		}	
 	
@@ -1724,7 +1733,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				      $originalFireOrder = null;
 					      
 				        foreach ($firingOrders as $fireOrder) { 				              		
-				            if ($fireOrder->type == "normal" && $fireOrder->firingMode == 2) { //Not the ballistic cloud effect, and not generated fireOrders passing through cloud.
+				            if ($fireOrder->type == 'normal' && $fireOrder->firingMode == 2) { //Not the ballistic cloud effect, and not generated fireOrders passing through cloud.
 				                $originalFireOrder = $fireOrder;
 				                break; //no need to search further
 				                }
@@ -1801,7 +1810,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		$firingOrders = $this->getFireOrders($gamedata->turn);				    	
 		$ballisticFireOrder = null;
 			foreach ($firingOrders as $fireOrder) { 
-				if ($fireOrder->type == "ballistic") { 
+				if ($fireOrder->type == 'ballistic') { 
 					$ballisticFireOrder = $fireOrder;
 					break; //no need to search further
 					}

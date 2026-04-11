@@ -4,11 +4,12 @@ class BASentinelFtr extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 228;
-	$this->faction = "Belt Alliance";
-    $this->phpclass = "BASentinelFtr";
-    $this->shipClass = "BA Sentinel Fighters";
-	$this->imagePath = "img/ships/BASentinel.png";
+        $this->pointCost = 228;
+        $this->faction = "Belt Alliance";
+        $this->phpclass = "BASentinelFtr";
+        $this->shipClass = "BA Sentinel Fighters";
+        $this->imagePath = "img/ships/BASentinel.png";
+	    $this->variantOf = 'NONE';    //Replaced with Ammo version      
 
         $this->isd = 2261;
         

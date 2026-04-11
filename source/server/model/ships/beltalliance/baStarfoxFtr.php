@@ -9,6 +9,7 @@ class BAStarfoxFtr extends FighterFlight{
         $this->phpclass = "BAStarfoxFtr";
         $this->shipClass = "BA Starfox Fighters";
         $this->imagePath = "img/ships/BAStarFox.png";
+	    $this->variantOf = 'NONE';    //Replaced with Ammo version    
         $this->forwardDefense = 7;
         $this->sideDefense = 9;
         $this->freethrust = 9;

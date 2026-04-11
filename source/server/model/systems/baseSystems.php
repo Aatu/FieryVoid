@@ -451,8 +451,11 @@ class Stealth extends ShipSystem implements SpecialAbility{
 
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
-        $strippedSystem->detected = $this->detected;	        
-        $strippedSystem->detectedNew = $this->detectedNew;	        
+        $strippedSystem->detected = $this->detected;
+        if (isset($this->detectedNew) && !empty($this->detectedNew)) {
+            $strippedSystem->detectedNew = $this->detectedNew;
+        }  			        
+        //$strippedSystem->detectedNew = $this->detectedNew;	        
         return $strippedSystem;
     }
 
@@ -708,12 +711,7 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 			$otherPos = $otherShip->getHexPos();
 			$distance = mathlib::getDistanceHex($pos, $otherPos);
 			$noLoS = !empty($blockedHexes) && Mathlib::isLoSBlocked($pos, $otherPos, $blockedHexes);
-//Debug::log("otherShip " . $otherShip->name);
-//Debug::log("otherShip " . $mine->name);	
-//Debug::log("totalDetectionFinal " . $totalDetection);	
-//Debug::log("distance " . $distance);	
-//Debug::log("noLoS " . $noLoS);	
-//Debug::log("mine->signature " . $mine->signature);	
+	
 			// If within detection range, and LoS not blocked the mine is detected
 			if (($totalDetection > $distance + $mine->signature) && !$noLoS) { 	
 				if (!in_array($otherShip->team, $detectingTeams)) {
@@ -809,8 +807,14 @@ class MineStealth extends ShipSystem implements SpecialAbility{
 
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
-        $strippedSystem->detected = $this->detected;
-        $strippedSystem->revealInfo = $this->revealInfo;			        
+        if (isset($this->detected) && !empty($this->detected)) {
+            $strippedSystem->detected = $this->detected;
+        }  		
+        //$strippedSystem->detected = $this->detected;
+        if (isset($this->revealInfo) && !empty($this->revealInfo)) {
+            $strippedSystem->revealInfo = $this->revealInfo;
+        }  		
+        //$strippedSystem->revealInfo = $this->revealInfo;			        
         return $strippedSystem;
     }
 
@@ -3514,8 +3518,14 @@ public function onIndividualNotesLoaded($gamedata)
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        $strippedSystem->allocatedBFCP = $this->allocatedBFCP;
-        $strippedSystem->BFCPtotal_used = $this->BFCPtotal_used;
+        if (isset($this->allocatedBFCP) && !empty($this->allocatedBFCP)) {
+            $strippedSystem->allocatedBFCP = $this->allocatedBFCP;
+        }  			
+        //$strippedSystem->allocatedBFCP = $this->allocatedBFCP;
+        if (isset($this->BFCPtotal_used) && !empty($this->BFCPtotal_used)) {
+            $strippedSystem->BFCPtotal_used = $this->BFCPtotal_used;
+        }  		
+        //$strippedSystem->BFCPtotal_used = $this->BFCPtotal_used;
 		
         return $strippedSystem;
     }
@@ -4042,14 +4052,38 @@ class HyachSpecialists extends ShipSystem implements SpecialAbility{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        $strippedSystem->allocatedSpec = $this->allocatedSpec;
-        $strippedSystem->availableSpec = $this->availableSpec;      
-      	$strippedSystem->currSelectedSpec = $this->currSelectedSpec;		        
-      	$strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;        
-        $strippedSystem->specTotal_used = $this->specTotal_used;       
-        $strippedSystem->specAllocatedCount = $this->specAllocatedCount;      
-        $strippedSystem->specDecreased = $this->specDecreased;
-        $strippedSystem->specIncreased = $this->specIncreased;                             		
+        if (isset($this->allocatedSpec) && !empty($this->allocatedSpec)) {
+            $strippedSystem->allocatedSpec = $this->allocatedSpec;
+        } 		
+        //$strippedSystem->allocatedSpec = $this->allocatedSpec;
+        if (isset($this->availableSpec) && !empty($this->availableSpec)) {
+            $strippedSystem->availableSpec = $this->availableSpec;
+        } 		
+        //$strippedSystem->availableSpec = $this->availableSpec;  
+        if (isset($this->currSelectedSpec) && !empty($this->currSelectedSpec)) {
+            $strippedSystem->currSelectedSpec = $this->currSelectedSpec;
+        } 			    
+      	//$strippedSystem->currSelectedSpec = $this->currSelectedSpec;
+        if (isset($this->currAllocatedSpec) && !empty($this->currAllocatedSpec)) {
+            $strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;
+        } 				        
+      	//$strippedSystem->currAllocatedSpec = $this->currAllocatedSpec;  
+        if (isset($this->specTotal_used) && !empty($this->specTotal_used)) {
+            $strippedSystem->specTotal_used = $this->specTotal_used;
+        } 		      
+        //$strippedSystem->specTotal_used = $this->specTotal_used;
+        if (isset($this->specAllocatedCount) && !empty($this->specAllocatedCount)) {
+            $strippedSystem->specAllocatedCount = $this->specAllocatedCount;
+        } 			       
+        //$strippedSystem->specAllocatedCount = $this->specAllocatedCount;
+        if (isset($this->specDecreased) && !empty($this->specDecreased)) {
+            $strippedSystem->specDecreased = $this->specDecreased;
+        } 			      
+        //$strippedSystem->specDecreased = $this->specDecreased;
+        if (isset($this->specIncreased) && !empty($this->specIncreased)) {
+            $strippedSystem->specIncreased = $this->specIncreased;
+        } 			
+        //$strippedSystem->specIncreased = $this->specIncreased;                             		
         return $strippedSystem;
     }
 	
@@ -4378,11 +4412,26 @@ class AdaptiveArmorController extends ShipSystem{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        $strippedSystem->allocatedAA = $this->allocatedAA;
-        $strippedSystem->availableAA = $this->availableAA;
-        $strippedSystem->currchangedAA = $this->currchangedAA;
-        $strippedSystem->AAtotal_used = $this->AAtotal_used;
-        $strippedSystem->AApreallocated_used = $this->AApreallocated_used;
+        if (isset($this->allocatedAA) && !empty($this->allocatedAA)) {
+            $strippedSystem->allocatedAA = $this->allocatedAA;
+        }        		
+        //$strippedSystem->allocatedAA = $this->allocatedAA;
+        if (isset($this->availableAA) && !empty($this->availableAA)) {
+            $strippedSystem->availableAA = $this->availableAA;
+        }  		
+        //$strippedSystem->availableAA = $this->availableAA;
+        if (isset($this->currchangedAA) && !empty($this->currchangedAA)) {
+            $strippedSystem->currchangedAA = $this->currchangedAA;
+        }  			
+        //$strippedSystem->currchangedAA = $this->currchangedAA;
+        if (isset($this->AAtotal_used) && !empty($this->AAtotal_used)) {
+            $strippedSystem->AAtotal_used = $this->AAtotal_used;
+        }  		
+        //$strippedSystem->AAtotal_used = $this->AAtotal_used;
+        if (isset($this->AApreallocated_used) && !empty($this->AApreallocated_used)) {
+            $strippedSystem->AApreallocated_used = $this->AApreallocated_used;
+        }  				
+        //$strippedSystem->AApreallocated_used = $this->AApreallocated_used;
 		
         return $strippedSystem;
     }
@@ -5082,8 +5131,11 @@ class SelfRepair extends ShipSystem{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;		
-		//$strippedSystem->output = $this->getOutput();	//actual output is constant, and outputMod is correctly shown in front end!	
-        $strippedSystem->priorityChanges = $this->priorityChanges;	
+		//$strippedSystem->output = $this->getOutput();	//actual output is constant, and outputMod is correctly shown in front end!
+        if (isset($this->priorityChanges) && !empty($this->priorityChanges)) {
+            $strippedSystem->priorityChanges = $this->priorityChanges;
+        }  				
+        //$strippedSystem->priorityChanges = $this->priorityChanges;	
         return $strippedSystem;
     }
 	
@@ -5779,7 +5831,10 @@ capacitor is completely emptied.
 	    $strippedSystem->powerMax = $this->getMaxCapacity();
 		$strippedSystem->nominalOutput = $this->output;
 		//$strippedSystem->powerReceivedFromFrontEnd = $this->powerReceivedFromFrontEnd;
-		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
+        if ($this->individualNotesTransfer !== '' && $this->individualNotesTransfer !== null) {
+            $strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
+        }		
+		//$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
 		$strippedSystem->active = $this->active;
 		$strippedSystem->doubled = $this->doubled;					
         return $strippedSystem;
@@ -6274,9 +6329,9 @@ class ThirdspaceShieldGenerator extends ShipSystem{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        $strippedSystem->shieldPresets = $this->shieldPresets;
-        $strippedSystem->storedCapacity = $this->storedCapacity;       
-        $strippedSystem->presetCurrClass = $this->presetCurrClass;  
+        //$strippedSystem->shieldPresets = $this->shieldPresets;
+        if ($this->storedCapacity !== 0) $strippedSystem->storedCapacity = $this->storedCapacity;       
+        if ($this->presetCurrClass !== '') $strippedSystem->presetCurrClass = $this->presetCurrClass;  
 		
         return $strippedSystem;
     }
@@ -6339,9 +6394,9 @@ class ThoughtShieldGenerator extends ShipSystem{
 	public function stripForJson(){
         $strippedSystem = parent::stripForJson();
         $strippedSystem->data = $this->data;
-        $strippedSystem->shieldPresets = $this->shieldPresets;
-        $strippedSystem->storedCapacity = $this->storedCapacity;       
-        $strippedSystem->presetCurrClass = $this->presetCurrClass;  
+        //$strippedSystem->shieldPresets = $this->shieldPresets;
+        if ($this->storedCapacity !== 0) $strippedSystem->storedCapacity = $this->storedCapacity;       
+        if ($this->presetCurrClass !== '') $strippedSystem->presetCurrClass = $this->presetCurrClass;  
 		
         return $strippedSystem;
     }
@@ -6861,7 +6916,10 @@ class MindriderHangar extends ShipSystem{
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->detected = $this->detected;
-			$strippedSystem->detectedNew = is_array($this->detectedNew) ? $this->detectedNew : array();
+			if (isset($this->detectedNew) && !empty($this->detectedNew)) {
+				$strippedSystem->detectedNew = $this->detectedNew;
+			}  			
+			//$strippedSystem->detectedNew = is_array($this->detectedNew) ? $this->detectedNew : array();
 			$strippedSystem->active = $this->active;				        
 			return $strippedSystem;
 		}
@@ -7059,10 +7117,12 @@ class MineControllerDEW extends ShipSystem{
 			//Loop through mine's weapon and create fire orders against target.		
 			foreach($mine->systems as $weapon){		
 				if($weapon instanceof Weapon && $weapon->name !== "RammingAttack"){
+					if($weapon->isDestroyed($gamedata->turn)) return;//Is destroyed (shouldn't happen)
  					
-					if($weapon->getTurnsloaded() >= $weapon->getNormalLoad() && !$weapon->firedOnTurn($gamedata->turn)){ //is Loaded (will this blocked ballistics if they fired in Initial Orders?)
+					if($weapon->getTurnsloaded() >= $weapon->getNormalLoad() && !$weapon->firedOnTurn($gamedata->turn)){ //is Loaded.  Accelerator weapons should only fire when fully loaded too.
 
-						if($mine->getCommandControl()){            
+						if($mine->getCommandControl()){  
+							if($weapon->isOfflineOnTurn($gamedata->turn)) return; //Is been turned offline							          
 							$firingOrders = $weapon->getFireOrders($gamedata->turn);
 							
 							$hasFireOrder = null;
@@ -7189,8 +7249,8 @@ class MineControllerDEW extends ShipSystem{
 	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
 
         $loSBlocked = false;
-        if (!empty($blockedLosHex)) {            
-            $loSBlocked = Mathlib::isLoSBlocked($minePosition, $targetPostion, $blockedLosHex);
+        if (!empty($gamedata->blockedHexes)) {            
+            $loSBlocked = Mathlib::isLoSBlocked($minePosition, $targetPostion, $gamedata->blockedHexes);
         }		
 		if($loSBlocked) return false; //LoS Blocked
 
@@ -7573,7 +7633,7 @@ class AmmoMissileL extends AmmoMissileTemplate{
 	public $enhancementPrice = 6;
 	
 	public $rangeMod = 10; //MODIFIER for launch range
-	public $distanceRangeMod = 10; //MODIFIER for distance range
+	public $distanceRangeMod = 30; //MODIFIER for distance range
 	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
 	public $minDamage = 15;
 	public $maxDamage = 15;	
@@ -7605,7 +7665,7 @@ class AmmoMissileH extends AmmoMissileTemplate{
 	public $enhancementPrice = 4;
 	
 	public $rangeMod = -10; //MODIFIER for launch range
-	public $distanceRangeMod = -10; //MODIFIER for distance range
+	public $distanceRangeMod = -30; //MODIFIER for distance range
 	public $fireControlMod = array(0, 3, 3); //MODIFIER for weapon fire control!
 	public $minDamage = 30;
 	public $maxDamage = 30;	
@@ -7724,7 +7784,7 @@ class AmmoMissileP extends AmmoMissileTemplate{
 class AmmoMissileD extends AmmoMissileTemplate{	
 	public $name = 'ammoMissileD';
 	public $displayName = 'Light Missile';
-	public $modeName = 'D - Light';
+	public $modeName = 'D-Light';
 	public $size = 1; //how many store slots are required for a single round
 	public $enhancementName = 'AMMO_D'; //enhancement name to be enabled
 	public $enhancementDescription = '(AMMO) Light Missile'; //enhancement description
@@ -7740,6 +7800,7 @@ class AmmoMissileD extends AmmoMissileTemplate{
 	public $priority = 6;
 	public $priorityAF = 5;
 	public $noOverkill = false;
+	public $useOEW = false;
 	public $hidetarget = false;
 		
     public function getDamage($fireOrder) //actual function to be called, as with weapon!
@@ -8291,8 +8352,7 @@ class AmmoMissileZ extends AmmoMissileTemplate{
 
 
 	public function beforeFiringOrderResolution($gamedata, $weapon, $originalFireOrder){
-//Debug::log("x " . $originalFireOrder->x);
-//Debug::log("y " . $originalFireOrder->y);
+
 		$targetHex = new OffsetCoordinate($originalFireOrder->x, $originalFireOrder->y);
 		$fired = false;
 		$ship = $weapon->getUnit();
@@ -8332,7 +8392,7 @@ class AmmoMissileZ extends AmmoMissileTemplate{
 		}		
 
 		if(!$fired){
-			$originalFireOrder->pubnotes = "<br>No mines detected, munition lost.";	
+			$originalFireOrder->pubnotes = "<br>No mines detected.";	
 		}
 	
 
@@ -8558,6 +8618,35 @@ class AmmoMissileFD extends AmmoMissileTemplate{
     }
 } //endof class AmmoMissileFD
 
+class AmmoMissileFDum extends AmmoMissileTemplate{	
+	public $name = 'AmmoMissileFDum';
+	public $displayName = 'Dummy Missile';
+	public $modeName = 'XDummy'; //R to differentiate from D - on mode change first letter is displayed!
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'AMMO_DUM'; //enhancement name to be enabled
+	public $enhancementDescription = '(AMMO) Dummy Missile'; 
+	public $enhancementPrice = 1; //PV per missile; originally it's 8 for Kor-Lyan and 10 for everyone else
+	
+	public $fireControlMod = array(null, null, null); //Should never fire.
+	public $minDamage = 0;
+	public $maxDamage = 0;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 10;
+	public $priorityAF = 10; //at the very end of queue - to drop out fighters that actually survived other impacts
+		
+    public function getDamage($fireOrder) //actual function to be called, as with weapon!
+    {
+        return 0;
+    }
+	
+	function getPrice($unit) //some missiles might have different price depending on unit being fitted!
+	{
+		return $this->enhancementPrice;
+	}	
+
+} //endof class AmmoMissileDum
+
 
 //ammunition for AmmoMagazine - Basic Mine for BallisticMineLauncher
 class AmmoBLMineB extends AmmoMissileTemplate{	
@@ -8708,6 +8797,9 @@ class AmmoBistifB extends AmmoMissileTemplate{
     public function getDamage($fireOrder){        return 12;   } 
 
 } //endof class AmmoBistifB
+
+
+
 
 
 ?>

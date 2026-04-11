@@ -691,7 +691,7 @@ class GromeFlakCannon extends Weapon{
 								$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);
 								$subOrder->numInterceptors++;						
 							}else{//It is marked uninterceptable e.g. lasers
-								if($subOrder->targetid == $ship->id){ //Has shooter targeted ship with Flak Cannon e.g. Not free intercept!, if so intercept at 50% effectiveness.
+								if($subOrder->targetid == $ship->id){ //Has shooter targeted ship with the Flak Cannon e.g. Not free intercept!, if so intercept at 50% effectiveness.
 									$subOrder->totalIntercept += $this->getInterceptionMod($gamedata, $subOrder);//50% effectiveness handled here.
 									$subOrder->numInterceptors++;
 								}

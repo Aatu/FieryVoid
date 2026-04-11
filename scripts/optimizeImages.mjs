@@ -29,7 +29,7 @@ async function optimize() {
         let processedCount = 0;
         let errorCount = 0;
 
-        const MIN_SAVINGS_PERCENT = 10; // Only save if we reduce size by at least 10%
+        const MIN_SAVINGS_PERCENT = 20; // Only save if we reduce size by at least 10%
 
         for (const file of images) {
             try {

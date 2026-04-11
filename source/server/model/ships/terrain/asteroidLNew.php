@@ -8,12 +8,13 @@ class asteroidLNew  extends Terrain{
 		$this->faction = "Terrain";       
 		$this->factionAge = 1;        
         $this->phpclass = "asteroidLNew";
-        $this->imagePath = "img/ships/AsteroidL1.png";
-        $this->canvasSize = 256;
+        $this->imagePath = "img/ships/asteroidField1.png";
+        $this->canvasSize = 200;
         $this->shipClass = "Asteroid (Large)";
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
-        $this->notes .= "<br>Ships (but not fighters) entering this hex take collision damage";
+        $this->notes = "Blocks line of sight";          
+        $this->notes .= "<br>Units passing through this hex take collision damage";
         $this->isd = 0;       
 
 		$this->base = true;

@@ -1,4 +1,5 @@
 <?php
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -16,6 +17,7 @@ $turn   = isset($_GET['turn'])   ? (int)$_GET['turn']   : 0;
 
 if ($gameid <= 0 || $turn < 0) {
     http_response_code(400);
+    if(ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Missing or invalid gameid/turn.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -27,11 +29,14 @@ try {
     if (!is_string($ret)) {
         $ret = json_encode($ret, JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR);
     }
-
+    
+    if(ob_get_length()) ob_clean();
     echo $ret;
 
 } catch (Throwable $e) {
     $logid = Debug::error($e);
+    
+    if(ob_get_length()) ob_clean();
     http_response_code(500);
     echo json_encode([
         'error' => $e->getMessage(),

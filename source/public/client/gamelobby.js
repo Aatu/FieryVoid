@@ -2717,8 +2717,8 @@ window.gamedata = {
 		var name = $(".confirm input").val();
 		ship.name = name;
 		ship.pointCost = newPointCost;
-		ship.pointCostEnh = originalShipData.pointCostEnh;
-		ship.pointCostEnh2 = originalShipData.pointCostEnh2;
+		ship.pointCostEnh = 0;
+		ship.pointCostEnh2 = 0;
 		ship.userid = gamedata.thisplayer;
 
 		if (ship.flight) {
@@ -2731,36 +2731,27 @@ window.gamedata = {
 
 		//do note enhancements bought (if any)
 		var enhNo = 0;
-		var hadTaken = 0;
 		var nowTaken = 0;
 		var target = $(".selectAmount.shpenh" + enhNo);
 		while (typeof target.data("enhPrice") != 'undefined') { //as long as there are enhancements defined...
-			hadTaken = originalShipData.enhancementOptions[enhNo][2];
 			nowTaken = target.data("count");
-			if (nowTaken > 0 || hadTaken > 0) { //enhancement picked - note!
+			if (nowTaken > 0) { //enhancement picked - note!
 				ship.enhancementOptions[enhNo][2] = nowTaken;
-				var newCost = 0;
 				if (!ship.enhancementOptions[enhNo][6]) { //this is an actual enhancement (as opposed to option) - note value!
 					if (ship.flight) {
-						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						newCost = (nowTaken - hadTaken) * target.data("enhPrice") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh += newCost;
+						ship.pointCostEnh += target.data("enhCost") * flightSize;
 					} else {
-						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
-						newCost = (nowTaken - hadTaken) * target.data("enhPrice"); //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh += newCost;
+						ship.pointCostEnh += target.data("enhCost");
 					}
 				} else { //this is an option - still note value, just separately!
 					if (ship.flight) {
-						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice") * flightSize;						
-						newCost = (nowTaken - hadTaken) * target.data("enhPrice") * flightSize; //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 += newCost;
+						ship.pointCostEnh2 += target.data("enhCost") * flightSize;
 					} else {
-						//originalCost = originalShipData.enhancementOptions[enhNo][2] * target.data("enhPrice");						
-						newCost = (nowTaken - hadTaken) * target.data("enhPrice"); //Add new enhancement, could be negative if enhancements have been removed.
-						ship.pointCostEnh2 += newCost;
+						ship.pointCostEnh2 += target.data("enhCost");
 					}
 				}
+			} else {
+				ship.enhancementOptions[enhNo][2] = 0;
 			}
 			//go to next enhancement
 			enhNo++;

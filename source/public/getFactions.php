@@ -1,4 +1,5 @@
 <?php
+ob_start();
 
 /**
  * getFactions.php – Returns all available factions as JSON
@@ -19,6 +20,7 @@ session_write_close(); // ✅ Release session lock immediately
 // ✅ Authorization check
 if (!$playerid) {
     http_response_code(401);
+    if(ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Unauthorized'], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -27,6 +29,7 @@ try {
     $factions = Manager::getAllFactions();
 
     // ✅ Encode safely with numeric check & partial output to prevent fatal on bad UTF‑8
+    if(ob_get_length()) ob_clean();
     echo json_encode(
         $factions,
         JSON_NUMERIC_CHECK | JSON_UNESCAPED_UNICODE | JSON_PARTIAL_OUTPUT_ON_ERROR
@@ -35,6 +38,7 @@ try {
 } catch (Throwable $e) {
     $logid = Debug::error($e);
     http_response_code(500);
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         'error' => $e->getMessage(),
         'code'  => $e->getCode(),

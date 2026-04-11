@@ -315,7 +315,7 @@ class CaptorMine extends Weapon{
 
     public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Max Range"] = $this->range;        
+            $this->data["Range"] = $this->range;       
             foreach($this->allocatedRanges as $shipType=>$range){
                 $this->data[' - '.$shipType.' range'] =  $range;
             }         
@@ -535,8 +535,10 @@ class CaptorMine extends Weapon{
 		if($jammerValue > 0) $effectiveRange = floor($effectiveRange / 2);	
 	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
 
-        //Captor Mines 'launch' like other ballistics so should obey LoS?
-		$loSBlocked = $this->isLoSBlocked($minePosition, $targetPostion, $gamedata); //Returns true is LoS blocked
+        $loSBlocked = false;
+        if (!empty($gamedata->blockedHexes)) { 
+		    $loSBlocked = $this->isLoSBlocked($minePosition, $targetPostion, $gamedata); //Returns true is LoS blocked
+        }
 		if($loSBlocked) return false; //LoS Blocked
 
 		return true;
@@ -632,7 +634,7 @@ class ProximityMine extends Weapon implements SpecialAbility{
 
     public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-            $this->data["Max Range"] = $this->range;
+            $this->data["Range"] = $this->range;
             foreach($this->allocatedShipTypes as $shipType=>$range){
                 $this->data[' - Attack '.$shipType] =  $range;
             }         
@@ -917,8 +919,10 @@ class ProximityMine extends Weapon implements SpecialAbility{
 		
 	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
 
-        //Proximity mines can't damage if Terrain in the way.
-		$loSBlocked = $this->isLoSBlocked($minePosition, $targetPostion, $gamedata); //Returns true is LoS blocked
+        $loSBlocked = false;
+        if (!empty($gamedata->blockedHexes)) { 
+		    $loSBlocked = $this->isLoSBlocked($minePosition, $targetPostion, $gamedata); //Returns true is LoS blocked
+        }
 		if($loSBlocked) return false; //LoS Blocked
 
 		return true;
@@ -1030,7 +1034,10 @@ class ProximityMine extends Weapon implements SpecialAbility{
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();    
         $strippedSystem->allocatedShipTypes = $this->allocatedShipTypes;      
-        $strippedSystem->autoHit = $this->autoHit; 	                  			                             
+        $strippedSystem->autoHit = $this->autoHit; 	 
+        if (isset($this->potentialTargets) && !empty($this->potentialTargets)) {
+            $strippedSystem->potentialTargets = $this->potentialTargets;
+        } 	                         			                             
         $strippedSystem->potentialTargets = $this->potentialTargets;
         return $strippedSystem;
     }

@@ -1,4 +1,5 @@
 <?php
+ob_start();
 
 // Load global config and classes
 require_once 'global.php';
@@ -19,6 +20,7 @@ $userid = (int)$_SESSION["user"];
 $ret = json_encode(Manager::getTacGames($userid), JSON_NUMERIC_CHECK);
 
 // Output JSON response
+if(ob_get_length()) ob_clean();
 header('Content-Type: application/json; charset=utf-8');
 echo $ret;
 

@@ -298,7 +298,7 @@
         public $fireControl = array(2, 3, 4); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
-			if ( $maxhealth == 0 ) $maxhealth = 4;
+			if ( $maxhealth == 0 ) $maxhealth = 6;
 			if ( $powerReq == 0 ) $powerReq = 2;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
@@ -629,7 +629,9 @@
 
         public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
-			$strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+            if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
+                $strippedSystem->sustainedTarget = $this->sustainedTarget;
+            }                       			
 			return $strippedSystem;
 		}    
 

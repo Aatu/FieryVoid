@@ -424,14 +424,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         Despite being one of the weaker factions they have a number of interesting systems.
     </p>
        <h5>Antiquated Sensors</h5>
-            <li>These sensors cannot be boosted beyond their base state.</li>    
+            <li>These sensors cannot be boosted beyond their base output.</li>    
         <h5>Connection Struts</h5>
-            <li>While Grome vessels have huge structure blocks, they are very fragile. If a connection strut is hit, the damage to the structure is doubled.</li>
+            <li>While Grome vessels have huge structure blocks, they are very fragile. If a connection strut is hit, the damage is doubled and applied to the relevant structure block.</li>
         <h5>Flak Cannons</h5>
-            <li>These can also engage fighters and deal matter damage in flash mode. While effective in this role, the main ability is its defensive fire.</li>
-            <li>It is capable of intercepting all fire from a single ship using the normal interception rules. Therefore three Flak Cannons can generate a -6 to hit from all fire from an enemy.</li>
-            <li>In addition, the Flak Cannon can intercept friendly units as long as the friendly unit is within 5 hexes and both the friendly and firing unit are in arc, it is able to engage.</li>
-            <li>The Flak Cannon can also intercept uninterceptable weapons like lasers to an extent (50% interecpt is applied), but only when they are fired at the Flak Cannon-equipped ship e.g. it cannot intercept this type of weapon at all for friendly units</li>
+            <li>These can engage fighters and deal matter damage in flash mode. While effective in this role, their main benefit is their impressive defensive fire.</li>
+            <li>When a Flak Cannon intercepts a shot from an enemy it will also intercept all other fire from that ship using the normal interception degradation rules e.g. three Flak Cannons could generate -30% to hit from all fire from an enemy.</li>
+            <li>In addition, the Flak Cannon can intercept friendly units as long as the friendly unit is within 5 hexes and both the friendly and firing unit are in arc.</li>
+            <li>The Flak Cannon can also intercept uninterceptable weapons such as lasers to an extent (only 50% interecpt is applied), but only when they are fired at the Flak Cannon-equipped ship e.g. it cannot intercept this type of weapon at all for friendly units</li>
         <h5>Light and Heavy Railguns</h5>
             <li>Smaller and larger versions, respectively, of the standard railgun.</li>
         <h5>Targeting Array</h5>

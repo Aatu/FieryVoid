@@ -343,7 +343,7 @@ class SystemIcon extends React.Component {
                 $boosted={isBoosted(ship, system)}
             >
                 <SystemText>{getText(ship, system)}</SystemText>
-                {!fighter && <HealthBar $scs={scs} $health={getStructureLeft(ship, system)} $criticals={hasCriticals(system)} />}
+                {(!fighter || hasCriticals(system)) && <HealthBar $scs={scs} $health={getStructureLeft(ship, system)} $criticals={hasCriticals(system)} />}
             </System>
         )
     }

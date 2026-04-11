@@ -54,6 +54,7 @@ class BadgerStarfuryAM extends FighterFlight{
 			$this->enhancementOptionsEnabled[] = 'AMMO_FH';//add enhancement options for missiles - Class-FH
 			$this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
 			$this->enhancementOptionsEnabled[] = 'AMMO_FD';//add enhancement options for missiles - Class-FD
+			$this->enhancementOptionsEnabled[] = 'AMMO_DUM';//add enhancement options for missiles - Class-FD             
 			
             $frontGun = new PairedParticleGun(330, 30, 4);
             $frontGun->displayName = "Uni-Pulse Cannon";

@@ -2325,7 +2325,10 @@ class CloakingDevice extends ShipSystem implements SpecialAbility{
 		public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->detected = $this->detected;
-			$strippedSystem->detectedNew = is_array($this->detectedNew) ? $this->detectedNew : array();
+			if (isset($this->detectedNew) && !empty($this->detectedNew)) {
+				$strippedSystem->detectedNew = $this->detectedNew;
+			}  					
+			//$strippedSystem->detectedNew = is_array($this->detectedNew) ? $this->detectedNew : array();
 			$strippedSystem->active = $this->active;				        
 			return $strippedSystem;
 		}

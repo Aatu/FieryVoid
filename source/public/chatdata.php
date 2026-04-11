@@ -1,4 +1,5 @@
 <?php 
+ob_start();
 
 header('Content-Type: application/json; charset=utf-8');
 // APCu Fast Poll: Check early, BEFORE session start or DB connections
@@ -11,6 +12,7 @@ if (function_exists('apcu_fetch') && isset($_GET['gameid'], $_GET['lastid'])) {
     $lastMsgId = apcu_fetch("{$prefix}chat_last_id_{$gameid}");
     if ($lastMsgId !== false && $lastid >= $lastMsgId) {
         //error_log("Chatdata: Fast Poll EXEMPT (lastid={$lastid}, cached={$lastMsgId}, game={$gameid}) - " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        if(ob_get_length()) ob_clean();
         echo "[]";
         exit;
     }
@@ -32,6 +34,7 @@ session_write_close(); // allow concurrent AJAX
 
 if (!$playerid) {
     http_response_code(401);
+    if(ob_get_length()) ob_clean();
     echo json_encode(['error' => 'Not logged in.'], JSON_UNESCAPED_UNICODE);
     exit;
 }
@@ -65,6 +68,7 @@ try {
     }
 
     // --- Output JSON ---
+    if(ob_get_length()) ob_clean();
     if (is_string($ret)) {
         // ChatManager already returned JSON
         echo $ret;
@@ -75,6 +79,7 @@ try {
 } catch (Throwable $e) {
     $logid = Debug::error($e);
     http_response_code(500);
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         'error' => $e->getMessage(),
         'code'  => $e->getCode(),

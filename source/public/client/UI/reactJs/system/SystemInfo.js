@@ -19,6 +19,16 @@ const SystemInfoTooltip = styled(Tooltip)`
     opacity:0.8;
 `;
 
+const Divider = styled.div`
+    height: 1px;
+    background: rgba(189, 234, 250, 0.3);
+    margin: 5px 0;
+`;
+
+const CRIT_DESCRIPTIONS = {
+    MissileLost: "A missile was lost to damage"
+};
+
 export const Entry = styled(TooltipEntry)`
     text-align: left;
     /*color: #5e85bc;*/
@@ -110,7 +120,7 @@ class SystemInfo extends React.Component {
                     Object.keys(specialEntry).map(i => <Entry key={`special-${reactKey++}`}>{specialEntry[i]}</Entry>)
                 }
 
-                {Object.keys(system.critData).length > 0 && !isUnrevealedMine && getCriticals(system)}
+                {(Object.keys(system.critData).length > 0 || (system.criticals && system.criticals.length > 0)) && !isUnrevealedMine && getCriticals(system)}
 
                 {(!gamedata.isMyShip(ship) && !isUnrevealedMine &&
                     (gamedata.gamephase == 3 || gamedata.gamephase == 1) &&
@@ -159,54 +169,68 @@ const getCalledShot = (ship, selectedShip, system) => {
     }
 }
 
-const getCriticals = (system) => [<InfoHeader key="criticalHeader">Damage</InfoHeader>].concat(
-    Object.keys(system.critData).map(i => {
-        let noOfCrits = 0;
-        var endEffectMin = 0;
-        var endEffectMax = 0;
-        var infinitePresent = false;
-        var wearsOffText = "";
-        endEffectMin = 0;
-        endEffectMax = 0;
-        infinitePresent = false;
-        wearsOffText = "";
+const getCriticals = (system) => {
+    const critKeys = Object.keys(system.critData).length > 0
+        ? Object.keys(system.critData)
+        : [...new Set((system.criticals || []).map(c => c.phpclass))];
 
-        for (const j in system.criticals) {
-            if (system.criticals[j].phpclass == i) {
-                if ((system.criticals[j].turn <= gamedata.turn) /*check whether it's actually a current critical*/
-                    && ((system.criticals[j].turnend == 0) || (system.criticals[j].turnend >= gamedata.turn))
-                ) {
-                    noOfCrits++;
-                    if (noOfCrits == 1) {
-                        endEffectMin = system.criticals[j].turnend;
-                        endEffectMax = system.criticals[j].turnend;
-                        infinitePresent = (system.criticals[j].turnend == 0); //0 means infinite
+    if (critKeys.length === 0) return null;
+
+    return [
+        <Divider key="critDivider" />,
+        <InfoHeader key="criticalHeader">Criticals</InfoHeader>
+    ].concat(
+        critKeys.map(phpClass => {
+            let noOfCrits = 0;
+            var endEffectMin = 0;
+            var endEffectMax = 0;
+            var infinitePresent = false;
+            var wearsOffText = "";
+            endEffectMin = 0;
+            endEffectMax = 0;
+            infinitePresent = false;
+            wearsOffText = "";
+
+            for (const j in system.criticals) {
+                if (system.criticals[j].phpclass == phpClass) {
+                    if ((system.criticals[j].turn <= gamedata.turn) /*check whether it's actually a current critical*/
+                        && ((system.criticals[j].turnend == 0) || (system.criticals[j].turnend >= gamedata.turn))
+                    ) {
+                        noOfCrits++;
+                        if (noOfCrits == 1) {
+                            endEffectMin = system.criticals[j].turnend;
+                            endEffectMax = system.criticals[j].turnend;
+                            infinitePresent = (system.criticals[j].turnend == 0); //0 means infinite
+                        }
+                        if (system.criticals[j].turnend > 0) {
+                            if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
+                            if ((system.criticals[j].turnend < endEffectMin) || (endEffectMin == 0)) endEffectMin = system.criticals[j].turnend;
+                        } else infinitePresent = true;
                     }
-                    if (system.criticals[j].turnend > 0) {
-                        if (system.criticals[j].turnend > endEffectMax) endEffectMax = system.criticals[j].turnend;
-                        if ((system.criticals[j].turnend < endEffectMin) || (endEffectMin == 0)) endEffectMin = system.criticals[j].turnend;
-                    } else infinitePresent = true;
                 }
             }
-        }
 
-        if (endEffectMin > 0) {
-            wearsOffText = " (until end of turn " + endEffectMin;
-            if (infinitePresent) {
-                wearsOffText = wearsOffText + "+";
-            } else if (endEffectMax > endEffectMin) {
-                wearsOffText = wearsOffText + "-" + endEffectMax;
+            if (endEffectMin > 0) {
+                wearsOffText = " (until end of turn " + endEffectMin;
+                if (infinitePresent) {
+                    wearsOffText = wearsOffText + "+";
+                } else if (endEffectMax > endEffectMin) {
+                    wearsOffText = wearsOffText + "-" + endEffectMax;
+                }
+                wearsOffText = wearsOffText + ")";
             }
-            wearsOffText = wearsOffText + ")";
-        }
 
-        if (noOfCrits > 1) {
-            return (<Entry key={`critical-${i}`}>({noOfCrits} x) {system.critData[i]} {wearsOffText}</Entry>);
-        } else if (noOfCrits == 1) {
-            return (<Entry key={`critical-${i}`}>{system.critData[i]} {wearsOffText}</Entry>);
-        }
-    })
-);
+            const description = system.critData[phpClass] || CRIT_DESCRIPTIONS[phpClass] || phpClass;
+
+            if (noOfCrits > 1) {
+                return (<Entry key={`critical-${phpClass}`}>({noOfCrits} x) {description} {wearsOffText}</Entry>);
+            } else if (noOfCrits == 1) {
+                return (<Entry key={`critical-${phpClass}`}>{description} {wearsOffText}</Entry>);
+            }
+            return null;
+        })
+    );
+};
 
 const getEntry = (header, value, key) => {
     if (value && value.replace) {

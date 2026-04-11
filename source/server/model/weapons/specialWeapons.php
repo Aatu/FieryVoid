@@ -1462,7 +1462,7 @@ class SparkField extends Weapon implements DefensiveSystem{
         //public $animationWidth = 1;
         //public $trailLength = 1;
 	
-	public $boostable = true;
+		public $boostable = true;
         public $boostEfficiency = 2;
         public $maxBoostLevel = 4;
 	
@@ -1489,7 +1489,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	public $damagePenalty = 0;
 	
 	protected $targetList = array(); //weapon will hit units on this list rather than target from firing order; filled by SparkFieldHandler!
-	
+	private $damageMod = 0;
 	
  	protected $possibleCriticals = array( //no point in range reduced crit; but reduced damage is really nasty for this weapon!
             14=>"ReducedDamage"
@@ -1511,20 +1511,29 @@ class SparkField extends Weapon implements DefensiveSystem{
 		    $this->range = $this->getAoE($turn);
 		      parent::setSystemDataWindow($turn);  
 		      //$this->data["AoE"] = $this->getAoE($turn);
-		      $this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
-		      $this->data["Special"] .= "<br>It should not be fired manually."; 
-		      $this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
-		      $this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
-		      $this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
-		      $this->data["Special"] .= "<br>Multiple overlapping Spark Fields will only cause 1 (strongest) attack on a particular target."; 
-		      $this->data["Special"] .= "<br>With CUSTOM Spark Curtain enhancement acts as anti-Ballistic shield (reducing hit chance only, by 2+boost)."; 
-	    }	//endof function setSystemDataWindow
+			  $ship = $this->getUnit();
+			  if($ship instanceof Mine){
+				$this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
+				$this->data["Special"] .= "<br>It cannot be fired manually."; 
+				$this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
+				$this->data["Special"] .= "<br>Deals 1-6 damage with a range of 4 hexes.";  
+				$this->data["Special"] .= "<br>If multiple Spark Fields overlap, only strongest will attack."; 			
+			  }else{
+				$this->data["Special"] = "This weapons automatically affects all units (friend or foe) in area of effect.";  
+				$this->data["Special"] .= "<br>It cannot be fired manually."; 
+				$this->data["Special"] .= "<br>Ignores armor, but cannot damage ship structure.";  
+				$this->data["Special"] .= "<br>Base damage is 1d6+1, range 2 hexes.";  
+				$this->data["Special"] .= "<br>Can be boosted, for +2 AoE and -1 damage per level."; 
+				$this->data["Special"] .= "<br>If multiple Spark Fields overlap, only strongest will attack."; 		
+				$this->data["Special"] .= "<br>With CUSTOM Spark Curtain enhancement acts as anti-Ballistic shield (reducing hit chance only, by 2+boost)."; 
+			  }
+		}	//endof function setSystemDataWindow
 	
 	
 	
 	public function getAoE($turn){
 		$boostlevel = $this->getBoostLevel($turn);
-		$aoe = 2+(2*$boostlevel);
+		$aoe = $this->baseOutput +(2*$boostlevel);
 		return $aoe;
 	}
 	
@@ -1606,7 +1615,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	}
 	
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $baseOutput = 2, $damageMod = 0, $boostable = true)
 	{
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
 		if ( $maxhealth == 0 ){
@@ -1615,6 +1624,10 @@ class SparkField extends Weapon implements DefensiveSystem{
 		if ( $powerReq == 0 ){
 			$powerReq = 2;
 		}
+		//Some settings can be different from Mine version.
+		$this->baseOutput = $baseOutput; 
+		$this->damageMod -= $damageMod; 	
+		$this->boostable = $boostable;
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
 		SparkFieldHandler::addSparkField($this);//so all Spark Fields are accessible together, and firing orders can be uniformly created
 	}
@@ -1663,22 +1676,23 @@ class SparkField extends Weapon implements DefensiveSystem{
 	
 	
 	public function getDamage($fireOrder){        
-		$damageRolled = Dice::d(6, 1)+1;
+		$damageRolled = Dice::d(6, 1)+1 + $this->damageMod; //damageMod is for Mine version, which is set at 1d6 and can't be boosted.
 		$boostlevel = $this->getBoostLevel($fireOrder->turn);
 		$damageRolled -= $boostlevel; //-1 per level of boost
 		$damageRolled = max(0,$damageRolled); //cannot do less than 0	
 		return $damageRolled;   
 	}
         public function setMinDamage(){    
-		$this->minDamage = 2 ;	      		
+		$this->minDamage = 2 + $this->damageMod ;	      		
 	}
         public function setMaxDamage(){   
-		$this->maxDamage = 7 ;	    
+		$this->maxDamage = 7 + $this->damageMod ;	    
 	}	
 
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
-		$strippedSystem->noProjectile = $this->noProjectile;															
+		$strippedSystem->noProjectile = $this->noProjectile;
+		$strippedSystem->baseOutput = $this->baseOutput;																	
 		return $strippedSystem;
 	} 
 	
@@ -6567,11 +6581,12 @@ class ProximityLaserLauncher extends Weapon{
 		public $range = 30; 
 		
         //function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing){
-		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){		
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $ammunition = 10){		
  			//$this->pairing = $pairing;
 			//$this->displayName = 'Proximity Laser ' . $pairing . ''; 
 			$this->startArcArray[] = $startArc; 
-			$this->endArcArray[] = $endArc;						
+			$this->endArcArray[] = $endArc;		
+			$this->ammunition = $ammunition;				
 			if ( $maxhealth == 0 ) $maxhealth = 6;
 			if ( $powerReq == 0 ) $powerReq = 6;				        	       	
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);

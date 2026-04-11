@@ -38,8 +38,9 @@ class Jara extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
 		
         $this->addFrontSystem(new TwinArray(2, 6, 2, 180, 60));
+		$this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 180));
-		$this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
+//		$this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
 		
@@ -61,8 +62,7 @@ class Jara extends MediumShip{
                 ),
                 1=> array(
                         6 => "Thruster",
-                        8 => "Heavy Particle Beam",
-                        12 => "Twin Array",
+                        10 => "Twin Array",
                         17 => "Structure",
                         20 => "Primary",
                 ),

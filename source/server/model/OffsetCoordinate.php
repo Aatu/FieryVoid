@@ -74,7 +74,7 @@ class OffsetCoordinate
     }
 
     public function equals(OffsetCoordinate $position): bool {
-        return $this->q === $position->q && $this->r = $position->r;
+        return $this->q === $position->q && $this->r === $position->r;
     }
 
     public function toCube(): CubeCoordinate

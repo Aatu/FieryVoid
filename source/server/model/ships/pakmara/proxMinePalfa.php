@@ -24,7 +24,8 @@ class proxMinePalfa extends Mine{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
-        $this->mineType = 'Proximity';         
+        $this->mineType = 'Proximity';  
+        $this->IFFSystem = true;              
        		    	    	    	    
         //Block all enhancements for Mine units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 

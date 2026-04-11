@@ -1,4 +1,5 @@
 <?php 
+ob_start();
 
 
 // Debugging (remove or adjust for production)
@@ -41,6 +42,7 @@ if (isset($_POST["gameid"])) {
 }
 
 // Output JSON response
+if(ob_get_length()) ob_clean();
 header('Content-Type: application/json; charset=utf-8');
 echo $ret;
 

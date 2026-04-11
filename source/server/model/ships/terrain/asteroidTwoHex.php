@@ -14,6 +14,7 @@ class asteroidTwoHex  extends Terrain{
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes = "Occupies multiple hexes";
+        $this->notes .= "<br>Blocks line of sight";         
         $this->notes .= "<br>Units entering terrain's hexes will automatically ram"; 
         $this->isd = 0;       
 

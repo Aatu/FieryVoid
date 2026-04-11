@@ -1,6 +1,6 @@
 import * as React from "react";
 import styled from "styled-components"
-import SystemInfoButtons, { canDoAnything } from "./SystemInfoButtons";
+import SystemInfoButtons, { canDoAnything, hasStyledMenu } from "./SystemInfoButtons";
 import { Tooltip, TooltipHeader, TooltipEntry } from '../common'
 
 const InfoHeader = styled(TooltipHeader)`
@@ -42,16 +42,7 @@ class SystemInfoMenu extends React.Component {
         }
 
         return (
-            <SystemInfoTooltip position={getPosition(boundingBox)} opacity={(
-                system.name === 'SelfRepair' ||
-                system.name === 'adaptiveArmorController' ||
-                system.name === 'hyachComputer' ||
-                system.name === 'hyachSpecialists' ||
-                system.name === 'ThoughtShield' ||
-                system.name === 'ThirdspaceShield'||
-                system.name === 'ThoughtShieldGenerator' ||
-                system.name === 'ThirdspaceShieldGenerator'||
-                system.name === 'powerCapacitor') ? 0.9 : 0.8}>
+            <SystemInfoTooltip position={getPosition(boundingBox)} opacity={hasStyledMenu(ship, system) ? 0.95 : 0.8}>
                 <SystemInfoButtons {...this.props} />
             </SystemInfoTooltip>
         )

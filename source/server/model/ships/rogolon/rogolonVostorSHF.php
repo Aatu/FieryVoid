@@ -9,8 +9,9 @@ class RogolonVostorSHF extends SuperHeavyFighter{
         $this->phpclass = "RogolonVostorSHF";
         $this->shipClass = "Vostor Assault Fighter";
         $this->imagePath = "img/ships/RogolonVostor.png";
+	    $this->variantOf = 'NONE';    //Replaced with Ammo version           
 	
-	$this->isd = 1959;
+	    $this->isd = 1959;
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
@@ -44,9 +45,15 @@ class RogolonVostorSHF extends SuperHeavyFighter{
 			$fighter->imagePath = "img/ships/RogolonVostor.png";
 			$fighter->iconPath = "img/ships/RogolonVostor_Large.png";
 
-			$fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
+            //ammo magazine itself (AND its missile options)
+            $ammoMagazine = new AmmoMagazine(4); //pass magazine capacity - actual number of rounds, NOT number of salvoes
+            $fighter->addAftSystem($ammoMagazine); //fit to ship immediately
+            $ammoMagazine->addAmmoEntry(new AmmoMissileFY(), 0); //add Dogfight missile as an option - but do NOT load any actual missiles at this moment - so weapon data is actually filled with _something_!
+            $this->enhancementOptionsEnabled[] = 'AMMO_FB';//add enhancement options for missiles - Class-FY
+
+            $fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base 
 			$fighter->addFrontSystem(new RogolonLtPlasmaGun(330, 30, 5, 2));
-			$fighter->addFrontSystem(new FighterMissileRack(4, 330, 30));
+            $fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base 
 
 			$fighter->addAftSystem(new RogolonLtPlasmaGun(150, 210, 5, 1));
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack

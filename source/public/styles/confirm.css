@@ -311,7 +311,6 @@
 
 @media only screen and (max-width: 765px) {
     .confirm {
-        width: 35% !important;
         min-width: unset;
     }
 }

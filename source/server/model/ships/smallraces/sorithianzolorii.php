@@ -9,6 +9,8 @@ class SorithianZolorII extends FighterFlight{
         $this->phpclass = "SorithianZolorII";
         $this->shipClass = "Sorithian Zolor II Fighters";
         $this->imagePath = "img/ships/BAStarFox.png";
+	    $this->variantOf = 'NONE';    //Replaced with Ammo version  
+
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
         $this->freethrust = 9;

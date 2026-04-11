@@ -1,4 +1,5 @@
 <?php
+ob_start();
 header('Content-Type: application/json; charset=utf-8');
 require_once 'global.php';
 
@@ -17,9 +18,11 @@ try {
 
     $ret = Manager::deleteSavedFleet($id);
 
+    if(ob_get_length()) ob_clean();
     echo json_encode(['listId' => $id, 'success' => true], JSON_NUMERIC_CHECK);
 } catch (Exception $e) {
     $logid = Debug::error($e);
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         "error" => $e->getMessage(),
         "code"  => $e->getCode(),

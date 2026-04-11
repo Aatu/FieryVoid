@@ -376,11 +376,11 @@ window.ew = {
             if (EWentry.turn != gamedata.turn) continue;
 
             if (EWentry.type == "Detect Mines") {
-                return EWentry.amount;
+                return EWentry.amount + ship.minesweeperbonus;
             }
         }
 
-        return 0;
+        return ship.minesweeperbonus;
     },
 
     getDetectMEWentry: function getDetectMEWentry(ship) {

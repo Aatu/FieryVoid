@@ -30,7 +30,7 @@ class mineFF extends Mine{
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
-        $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 2));
+        $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 1));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
         $this->addPrimarySystem(new Hangar(0, 1)); 
         

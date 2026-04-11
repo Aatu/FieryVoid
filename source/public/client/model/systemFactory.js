@@ -77,7 +77,24 @@ window.SystemFactory = (function () {
             if (staticSystem && staticSystem.fighter) return new Fighter(systemJson, staticSystem, ship);
             var name = systemJson.name.charAt(0).toUpperCase() + systemJson.name.slice(1);
 
-            var args = Object.assign(Object.assign({}, staticSystem), systemJson);
+            // Optimization #2 Regression Fix: Ensure stateful properties (managed by server) 
+            // are NOT blindly merged from the live instance if they were pruned in the JSON.
+            // This prevents "shadowing" of old data that leads to duplication.
+            var base = Object.assign({}, staticSystem);
+            
+            if (staticSystem && staticSystem.ship) { // This is a live instance, not just a blueprint
+                var stateful = [
+                    'damage', 'criticals', 'power', 'sustainedTarget',
+                    'turnsloadedArray', 'overloadturns', 'overloadshots', 
+                    'extraoverloadshots', 'extraoverloadshotsArray', 'fireControlArray'
+                ];
+                
+                stateful.forEach(function(key) {
+                    delete base[key];
+                });
+            }
+
+            var args = Object.assign(base, systemJson);
             var system = new window[name](args, ship);
 
             return system;

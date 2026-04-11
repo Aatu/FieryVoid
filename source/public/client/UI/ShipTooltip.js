@@ -353,14 +353,16 @@ window.ShipTooltip = function () {
                 this.addEntryElement('Support DEW: ' + dewValue, ship.flight !== true);
             }
 
-            var MDEW = ew.getDetectMEW(ship);
+            var MDEW = ew.getDetectMEW(ship);           
             if (MDEW > 0) {//Amended because Mindrider Constrained EW can create over 2 decimal places in Ship Tooltip! DK - 20.7.24	
                 this.addEntryElement('Detect Mines: ' + MDEW);
             }
 
+            var BDEW = ew.getEWByType('BDEW', ship) * 0.25; 
+            BDEW = parseFloat(BDEW.toFixed(2));                        
             if (shipManager.isElint(ship)) {
                 if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
-                this.addEntryElement('Blanket DEW: ' + ew.getEWByType('BDEW', ship), ship.flight !== true);
+                this.addEntryElement('Blanket DEW: ' + BDEW, ship.flight !== true);
             }
 
             this.addEntryElement('DEW: ' + ew.getDefensiveEW(ship) + ' CCEW: ' + ew.getCCEW(ship), ship.flight !== true);

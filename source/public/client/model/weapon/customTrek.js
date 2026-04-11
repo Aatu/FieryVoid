@@ -293,7 +293,30 @@ CloakingDevice.prototype.isDetectedTrek = function (ship) {
     if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
     if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.       
     if (this.detected === true) return true; // Fallback support for boolean legacy saves
-    if (Array.isArray(this.detectedNew) && this.detectedNew.includes(gamedata.getPlayerTeam())) return true; // Already detected by our team.
+	var myTeam = gamedata.getPlayerTeam();    
+    if (Array.isArray(this.detectedNew) && this.detectedNew.includes(myTeam)) return true; // Already detected by our team.
+    
+	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
+        var enemyTeams = [];
+        for (var i in gamedata.slots) {
+            var slot = gamedata.slots[i];
+            if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
+                enemyTeams.push(slot.team);
+            }
+        }
+
+        var allOthersDetected = (enemyTeams.length > 0);
+        for (var j = 0; j < enemyTeams.length; j++) {
+            var teamId = enemyTeams[j];
+            if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
+                allOthersDetected = false;
+                break;
+            }
+        }
+
+        if (allOthersDetected) return true;
+	}	    
+    
     if (shipManager.systems.isDestroyed(ship, this)) return true;
     if (shipManager.power.isOffline(ship, this)) return true;
 

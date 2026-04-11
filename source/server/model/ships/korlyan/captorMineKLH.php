@@ -10,8 +10,8 @@ class captorMineKLH extends Mine{
         $this->imagePath = "img/ships/korlyan_mine.png";
         $this->shipClass = "Kovost-H Captor Mine";
 		$this->occurence = "common";
-		//$this->variantOf = "Kovost Captor Mine";
-		$this->variantOf = 'NONE';        
+		$this->variantOf = "Kovost Captor Mine";
+		//$this->variantOf = 'NONE';        
         $this->isd = 2208;
         
         $this->forwardDefense = 12;

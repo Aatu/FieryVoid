@@ -4,7 +4,7 @@ class Dargarian extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 685;
+		$this->pointCost = 700;
 		$this->faction = "House Valheru";
         $this->phpclass = "Dargarian";
         $this->imagePath = "img/ships/dargarian4.png";
@@ -37,9 +37,12 @@ class Dargarian extends BaseShip{
 		$this->addPrimarySystem(new Hangar(6, 7));
         $this->addPrimarySystem(new TwinArray(4, 6, 2, 90, 270));
 		
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
+//      $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
+//      $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
+//		$this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
+        $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
+        $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
+		$this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
         $this->addFrontSystem(new HeavyArray(4, 8, 4, 300, 60));
         $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(5, 10, 0, 3, 1));
@@ -51,11 +54,13 @@ class Dargarian extends BaseShip{
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
         
 		$this->addLeftSystem(new HeavyArray(4, 8, 4, 240, 360));
-		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
+//		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 360));
+		$this->addLeftSystem(new HeavyParticleBeam(3, 6, 2, 180, 360));
 		$this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
 		
 		$this->addRightSystem(new HeavyArray(4, 8, 4, 0, 120));
-		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
+//		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
+		$this->addRightSystem(new HeavyParticleBeam(3, 6, 2, 0, 180));
 		$this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
@@ -79,7 +84,7 @@ class Dargarian extends BaseShip{
             1=> array( //Forward
                     3 => "Thruster",
                     6 => "Heavy Array",
-                    9 => "Twin Array",
+                    9 => "Heavy Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
@@ -93,14 +98,14 @@ class Dargarian extends BaseShip{
             3=> array( //Port
                     3 => "Thruster",
                     6 => "Heavy Array",
-                    9 => "Twin Array",
+                    9 => "Heavy Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
             4=> array( //Starboard
                     3 => "Thruster",
                     6 => "Heavy Array",
-                    9 => "Twin Array",
+                    9 => "Heavy Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             )

@@ -235,7 +235,9 @@
 
         public function stripForJson(){
             $strippedSystem = parent::stripForJson();
-            $strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+            if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
+                $strippedSystem->sustainedTarget = $this->sustainedTarget;
+            }                   			
             return $strippedSystem;
         }    
 
@@ -308,6 +310,10 @@
         public $displayName = "Battle Laser";
         public $animation = "laser";
         public $animationColor = array(255, 58, 31);
+
+        public $startArcArray = array(); 
+        public $endArcArray = array();        
+        protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
 		
         //public $animationExplosionScale = 0.45;
         //public $animationWidth = 4;
@@ -335,11 +341,33 @@
 		public $fireControl = array(-3, 3, 4);
         public $fireControlArray = array( 1=>array(-3, 3, 4), 2=>array(null,-1,0) ); //Raking and Piercing mode
     
+/*
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             if ( $maxhealth == 0 ) $maxhealth = 6;
             if ( $powerReq == 0 ) $powerReq = 6;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
+*/
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){           			
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 6;     
+
+            if($startArc2 !== null || $endArc2 !== null){      
+                $this->startArcArray[0] = $startArc; //Set rear arcs manually
+                $this->endArcArray[0] = $endArc; 
+                $this->startArcArray[1] = $startArc2;
+                $this->endArcArray[1] = $endArc2; 
+                $this->splitArcs = true;                          
+            }                                   
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+		public function stripForJson() {
+			$strippedSystem = parent::stripForJson();    
+			$strippedSystem->splitArcs = $this->splitArcs;        						                                        
+			return $strippedSystem;
+		}	            
 
 		public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
@@ -638,7 +666,9 @@
 
             public function stripForJson(){
                 $strippedSystem = parent::stripForJson();
-                $strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+                if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
+                    $strippedSystem->sustainedTarget = $this->sustainedTarget;
+                }                     			
                 return $strippedSystem;
             }    
 
@@ -857,7 +887,9 @@
 
         public function stripForJson(){
             $strippedSystem = parent::stripForJson();
-            $strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+            if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
+                $strippedSystem->sustainedTarget = $this->sustainedTarget;
+            }                     			
             return $strippedSystem;
         }   
 
@@ -1701,7 +1733,9 @@ class LaserAccelerator extends Laser{
 
         public function stripForJson(){
             $strippedSystem = parent::stripForJson();
-            $strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+            if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
+                $strippedSystem->sustainedTarget = $this->sustainedTarget;
+            }                     			
             return $strippedSystem;
         }           
 

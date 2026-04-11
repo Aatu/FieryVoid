@@ -347,7 +347,9 @@ class CustomMatterStream extends Matter {
 
         public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
-			$strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+            if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
+                $strippedSystem->sustainedTarget = $this->sustainedTarget;
+            }                       			
 			return $strippedSystem;
 		}    		
 
@@ -2646,7 +2648,9 @@ class GromeHvyRailgun extends Weapon{
 
         public function stripForJson(){
 			$strippedSystem = parent::stripForJson();
-			$strippedSystem->sustainedTarget = $this->sustainedTarget;	//Needed for front end hit calculation                      			
+            if (isset($this->sustainedTarget) && !empty($this->sustainedTarget)) {
+                $strippedSystem->sustainedTarget = $this->sustainedTarget;
+            }                        			
 			return $strippedSystem;
 		}    
 
@@ -3378,6 +3382,388 @@ class OrieniFlakArray extends Weapon{
 
 
 
+class HvyGraviticBolt extends Gravitic
+    {
+        public $name = "HvyGraviticBolt";
+        public $displayName = "Heavy Gravitic Bolt";
+        public $animation = "bolt";
+		public $iconPath = "HvyGraviticBolt.png";
+        public $animationColor = array(99, 255, 00);
+
+        public $boostable = true;
+        public $boostEfficiency = 3;
+        public $maxBoostLevel = 2;
+        public $loadingtime = 2;
+        public $curDamage = 12;
+        public $priority = 5;
+		
+        public $rangePenalty = 0.5;
+        public $fireControl = array(0, 2, 4); // fighters, <mediums, <capitals 
+        public $intercept = 1;
+        
+		public $damageType = 'Standard'; 
+    	public $weaponClass = "Gravitic"; 
+	    
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 3;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+        public function setSystemDataWindow($turn){
+	    $this->data["Special"] = "Standard power: 12 damage, intercept -5,  no cooldown";
+	    $this->data["Special"] .= "<br>Double power: 16 damage, intercept -10, cooldown 1 turns";
+	    $this->data["Special"] .= "<br>Triple power: 20 damage, intercept -15, cooldown 2 turns and forced critical";
+        
+            switch($this->getBoostLevel($turn)){
+                case 0:
+                    $this->data["Damage"] = '12';
+                    break;
+                case 1:
+                    $this->data["Damage"] = '16';
+                    break;
+                case 2:
+                    $this->data["Damage"] = '20';
+                    break;
+                default:
+                    $this->data["Damage"] = '12';
+                    break;
+            }            
+            
+            $this->curDamage = $this->getCurDamage($turn);
+            
+            parent::setSystemDataWindow($turn);
+        }
+
+        private function getBoostLevel($turn){
+            $boostLevel = 0;
+            foreach ($this->power as $i){
+                    if ($i->turn != $turn)
+                            continue;
+
+                    if ($i->type == 2){
+                            $boostLevel += $i->amount;
+                    }
+            }
+
+            return $boostLevel;
+        }
+        
+        private function getCurDamage($turn){
+            $dam = 12;
+            
+            switch($this->getBoostLevel($turn)){
+                case 1:
+                    $dam = 16;
+                    break;
+                case 2:
+                    $dam = 20;
+                    break;
+                default:
+                    break;
+            }            
+            
+            return $dam;
+        }
+
+        public function getInterceptRating($turn){
+            return 1 + $this->getBoostLevel($turn);            
+        }
+        
+        public function getNormalLoad(){
+            return $this->loadingtime + $this->maxBoostLevel;
+        }
+        
+        public function getLoadingTime(){
+			return $this->loadingtime;
+        }
+
+        public function getTurnsloaded(){
+			return $this->turnsloaded;
+        }        
+
+	protected function applyCooldown($gamedata){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+		
+		if($currBoostlevel > 0){
+			$cooldownLength = $currBoostlevel ;
+			$finalTurn = $gamedata->turn + $cooldownLength;
+			$crit = new ForcedOfflineForTurns(-1, $this->unit->id, $this->id, "ForcedOfflineForTurns", $gamedata->turn, $finalTurn);
+			$crit->updated = true;
+			$this->criticals[] =  $crit;
+		}
+	}	
+	    
+        public function fire($gamedata, $fireOrder){
+		$currBoostlevel = $this->getBoostLevel($gamedata->turn);
+            $this->setTimes();
+                        
+            parent::fire($gamedata, $fireOrder);
+		
+            // If fully boosted: test for possible crit.
+            if($currBoostlevel === $this->maxBoostLevel){
+            	$this->forceCriticalRoll = true;
+            }
+		
+		$this->applyCooldown($gamedata);
+        }
+	    
+	    // applying cooldown when firing defensively, too
+
+	    public function fireDefensively($gamedata, $interceptedWeapon)
+	    {
+		if ($this->firedDefensivelyAlready==0){ //in case of multiple interceptions during one turn - suffer backlash only once
+			$this->applyCooldown($gamedata);	
+		}
+		parent::fireDefensively($gamedata, $interceptedWeapon);
+	    }
+
+        public function setTimes(){		
+                $this->loadingtime = 1;
+                $this->turnsloaded = 1;
+                $this->normalload = 2;
+        }
+        
+        public function getDamage($fireOrder){        return $this->getCurDamage($fireOrder->turn);   }
+        public function setMinDamage(){  $this->minDamage = $this->curDamage ;      }
+        public function setMaxDamage(){  $this->maxDamage = $this->curDamage ;      }
+
+    }//endof HvyGraviticBolt
+
+    class BoltRailgun extends Matter{
+        public $name = "BoltRailgun";
+        public $displayName = "Bolt Railgun";
+        public $iconPath = "rapidGatling.png";
+
+        public $guns = 1;
+        public $intercept = 1;
+        public $loadingtime = 1;
+        public $ballisticIntercept = true;
+        public $priority = 4; //low damage, worth firing early!
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(3, 1, 0); // fighters, <mediums, <capitals 
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Can intercept ballistic weapons only.";
+        }
+	    
+        public function getDamage($fireOrder){        return Dice::d(6, 1)+1;   }
+        public function setMinDamage(){     $this->minDamage = 2 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 7 ;      }
+    }
+
+    class EarlyParticleCannon extends ParticleCannon{
+        public $name = "EarlyParticleCannon";
+        public $displayName = "Early Particle Cannon";
+	    
+        public $fireControl = array(0, 2, 3); // fighters, <mediums, <capitals
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 7;
+            if ( $powerReq == 0 ) $powerReq = 6;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+        public function getDamage($fireOrder){ return Dice::d(10, 2)+10;   }
+        public function setMinDamage(){     $this->minDamage = 12 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 30 ;      }
+    }
+
+    class LightParticleGun extends StdParticleBeam{
+        public $name = "LightParticleGun";
+        public $displayName = "Light Particle gun";
+        public $iconPath = "lightParticleBeamShip.png";
+
+        public $priority = 3;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(3, 1, 0); // fighters, <mediums, <capitals
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 1;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+        public function getDamage($fireOrder){        return Dice::d(10)+2;   }
+        public function setMinDamage(){     $this->minDamage = 3 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 12 ;      }
+    }
+
+    class ChargedParticleGun extends StdParticleBeam{
+        public $name = "ChargedParticleGun";
+        public $displayName = "Charged Particle Gun";
+        public $iconPath = "lightParticleBeamShip.png";
+
+        public $priority = 3;
+
+        public $rangePenalty = 2;
+        public $fireControl = array(3, 1, 1); // fighters, <mediums, <capitals
+
+		function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+			if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;            
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		}
+
+        public function getDamage($fireOrder){        return Dice::d(10)+5;   }
+        public function setMinDamage(){     $this->minDamage = 6 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 11 ;      }
+    }
+
+    class InterceptorArray extends Interdictor{
+        public $name = "InterceptorArray";
+        public $displayName = "Interceptor Array";
+		public $iconPath = "Interdictor.png";
+
+        public $intercept = 3;
+
+		public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+            $this->data["Special"] = "May intercept for friendly units. Must have friendly and enemy unit in arc and have friendly unit within 3 hexes.";
+            $this->data["Special"] .= "<br>Only one interdictor can be applied to any incoming shot, including ballistics.";
+        }
+                
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 2;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+    }  // end of class Interdictor
+
+    class HvyPlasmaGunFtr extends Weapon{  
+        public $name = "HvyPlasmaGunFtr";
+        public $displayName = "Heavy Plasma Gun";
+
+	    public $rof = 1;
+        public $intercept = 2;
+        
+        public $loadingtime = 1;
+		public $priority = 6;//VERY large fighter weapon
+        
+        public $rangePenalty = 1.5;
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+        public $damageType = "Standard";
+        public $weaponClass = "Plasma"; 
+
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(3,3)+6;   }
+        public function setMinDamage(){     $this->minDamage = 9 /*- $this->dp*/;      }
+        public function setMaxDamage(){     $this->maxDamage = 15 /*- $this->dp*/;      }
+
+    }
+
+    class FusionGun extends FusionCannon{
+        public $name = "FusionGun";
+        public $displayName = "Fusion Gun";
+
+        public $rangePenalty = 1.5;
+        public $fireControl = array(3, 2, 2); // fighters, <mediums, <capitals
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 5;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10)+7;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 17 ;      }
+        
+    }
+
+    class HeavySlugCannon extends Matter{
+        public $name = "HeavySlugCannon";
+        public $displayName = "Heavy Slug Cannon";
+        public $iconPath = "rapidGatling.png";
+
+        public $guns = 2;
+        public $intercept = 1;
+        public $loadingtime = 1;
+        public $ballisticIntercept = true;
+        public $priority = 3; //low damage, worth firing early!
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(3, 1, 0); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 4;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+            $this->data["Special"] .= "Can intercept ballistic weapons only.";
+        }
+	    
+        public function getDamage($fireOrder){        return 4;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 4 ;      }
+    }
+
+    class AttackLaser extends Laser{
+        public $name = "AttackLaser";
+        public $displayName = "Attack Laser";
+        public $iconPath = "defenseLaser.png";
+
+        public $intercept = 2;
+        public $loadingtime = 1;
+        public $priority = 3; //low damage, worth firing early!
+        
+        public $rangePenalty = 2;
+        public $fireControl = array(4, 2, 2); // fighters, <mediums, <capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		        //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+        }
+	    
+        public function getDamage($fireOrder){        return Dice::d(10)+3;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 13 ;      }
+		
+    }
 
 
 

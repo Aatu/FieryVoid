@@ -1,4 +1,5 @@
 <?php
+ob_start();
 header('Content-Type: application/json; charset=utf-8');
 require_once 'global.php';
 
@@ -8,9 +9,11 @@ session_write_close();
 
 try {
     $fleets = Manager::getSavedFleets($playerid);
+    if(ob_get_length()) ob_clean();
     echo json_encode(['fleets' => $fleets, 'success' => true], JSON_NUMERIC_CHECK);
 } catch (Exception $e) {
     $logid = Debug::error($e);
+    if(ob_get_length()) ob_clean();
     echo json_encode([
         'error' => $e->getMessage(),
         'code' => $e->getCode(),

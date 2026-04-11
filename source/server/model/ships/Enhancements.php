@@ -879,7 +879,7 @@ class Enhancements{
 			  $enhName = $ammoClass->enhancementDescription;
 			  $enhLimit = $actualCapacity;		
 			  $enhPrice = $ammoClass->getPrice($ship); 
-			  $enhPriceStep = 0; //flat rate
+			  $enhPriceStep = 1; //flat rate
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
 		  $enhID = 'AMMO_I'; //Interceptor Missiles
@@ -1543,6 +1543,17 @@ class Enhancements{
 			  $enhPriceStep = 0; //flat rate
 			  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		  }
+		  $enhID = 'AMMO_DUM'; //Dummy Fighter Missiles
+		  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option is enabled
+			$ammoClass = new AmmoMissileFDum();
+			$ammoSize = $ammoClass->size;
+			$actualCapacity = floor($magazineCapacity/$ammoSize);
+			$enhName = $ammoClass->enhancementDescription;
+			$enhLimit = $actualCapacity;
+			$enhPrice = $ammoClass->getPrice($flight); 
+			$enhPriceStep = 0; //flat rate
+			$flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }		  
 	  } //end of magazine-requiring options
 	  
 	  
@@ -1694,6 +1705,11 @@ class Enhancements{
 							$ftrAM->addAmmoEntry(new AmmoMissileFD(), $enhCount, true); //do notify dependent weapons, too!
 						}
 						break;
+					case 'AMMO_DUM': //Dummy Fighter Missile
+						foreach($flight->systems as $craft) foreach($craft->systems as $ftrAM) if ($ftrAM->name == 'ammoMagazine') {
+							$ftrAM->addAmmoEntry(new AmmoMissileFDum(), $enhCount, true); //do notify dependent weapons, too!
+						}
+						break;						
 						
 				}
 			}			

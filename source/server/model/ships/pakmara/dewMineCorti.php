@@ -25,7 +25,8 @@ class dewMineCorti extends Mine{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
-        $this->mineType = 'DEW';         
+        $this->mineType = 'DEW';      
+        $this->IFFSystem = true;         
        		    	    	    	    
         //Block all enhancements for Mine units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');

@@ -1,5 +1,4 @@
 <?php
-
 // Load global config and classes
 require_once 'global.php';
 
@@ -107,11 +106,13 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — April 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>The Great Crusade Begins!</strong> - A new custom faction based on the 'Great Crusade' Orieni Imperiuim added, thanks to Geoffrey!</li>          
-        <li><strong>The Polaren Confederacy</strong> - A whole new faction added to the the custom Nexus universe, thanks to Geoffrey!</li>                   
-        <li><strong>Even More Mines!</strong> - Command Control enhancements added. Mine units added for Dilgar, Orieni, League 1 factions, Descari and Usuuth.</li>
-        <li><strong>Light Combat Vessels</strong> - LCVs now have their own section within Faction Lists in Fleet Selection.</li>                                                                 
-        <li><strong>General Fixes</strong> - Many smaller bug fixes/appearance updates. Thanks for the reports!</li>           
+        <li><strong>A Galaxy Full of Mines!</strong> - Final mine units added for League-2 Factions; Cascor, Grome, Hurr, Hyach, Ipsha, Kor-Lyan and Torata.</li>         
+        <li><strong>Game and Website Optimisation</strong> - Optimised encoding and size of JSON payload, hopefully this will lead to quicker loading times / increased web page stability.</li>                   
+        <li><strong>Fighters Missiles</strong> - Dealing 2+ damage to a fighter will destroy a missile in its Ammo Magazine, Dummy Missiles now available for purchase.</li> 
+        <li><strong>New Units</strong> - New custom units for House Valheru and the Corillani, thanks to Geoffrey!.</li>                  
+        <li><strong>Pivoting Gravtic Ships</strong> - Gravitic ships should now use the correct thrusters when turning or side-slipping.</li>  
+        <li><strong>Stabilised Missiles</strong> - Missile systems on Bases and OSATs should now show their correct range values in system tooltips.</li>                                                                 
+        <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>

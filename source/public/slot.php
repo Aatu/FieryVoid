@@ -1,4 +1,5 @@
 <?php
+ob_start();
 /*
 header('Content-Type: application/json; charset=utf-8');
 
@@ -121,6 +122,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		
 		
 	}
+    if(ob_get_length()) ob_clean();
+    header('Content-Type: application/json; charset=utf-8');
     print($ret);
 ?>
 

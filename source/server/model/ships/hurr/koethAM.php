@@ -42,6 +42,7 @@ class KoethAM extends FighterFlight{
 			//Hurr have option of using Basic or Dogfight missiles
 			$this->enhancementOptionsEnabled[] = 'AMMO_FB';//add enhancement options for missiles - Class-FB
 			$this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
+			$this->enhancementOptionsEnabled[] = 'AMMO_DUM';//add enhancement options for missiles - Class-FD            
 			
 			
 		$fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));

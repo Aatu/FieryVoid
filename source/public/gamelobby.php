@@ -1,17 +1,18 @@
 <?php
-    include_once 'global.php';
-    session_write_close(); // Prevent session locking for concurrent loads
-	
-	if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
-		header('Location: index.php');
-        exit;
-	}
-    
-    	if (isset($_GET["leave"]) && isset($_GET["gameid"])){
-		Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
-		header('Location: games.php');
-        exit;
-	}
+// Load global config and classes
+require_once 'global.php';
+session_write_close(); // Prevent session locking for concurrent loads
+
+if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
+    header('Location: index.php');
+    exit;
+}
+
+if (isset($_GET["leave"]) && isset($_GET["gameid"])){
+    Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
+    header('Location: games.php');
+    exit;
+}
 	
 	
 	$gameid = null;
@@ -72,7 +73,7 @@
 		<!-- Preload critical bundle to parallelize download with large inline JSON payloads below -->
 		<?php $debug = isset($_GET['debug']); ?>
 		<?php if (!$debug): ?>
-		<link rel="preload" href="client/gamelobby.legacy.bundle.js" as="script">
+		<link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/gamelobby.legacy.bundle.js'); ?>" as="script">
 		<?php endif; ?>
 
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
@@ -143,7 +144,7 @@
         <script src="client/model/weapon/customTrek.js"></script>		
         <script src="client/model/weapon/customCW.js"></script>
     <?php else: ?>
-    <script defer src="client/gamelobby.legacy.bundle.js"></script>
+    <script defer src="<?php echo AssetLoader::getAssetUrl('client/gamelobby.legacy.bundle.js'); ?>"></script>
     <?php endif; ?>		
 		<script>
 			
@@ -1247,7 +1248,4 @@ All trademarks and copyrights remain the property of their respective owners.
 
 
 	</body>
-
-
-
 </html>

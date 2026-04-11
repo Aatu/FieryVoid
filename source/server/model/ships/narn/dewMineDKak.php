@@ -30,7 +30,19 @@ class dewMineDKak extends Mine{
 		$this->outOfTier = array('EMINE'=>1);           
        		    	    	    	    
         //Block all enhancements for Mine units when bought
-		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 
+		Enhancements::nonstandardEnhancementSet($this, 'Mines');
+        
+		// Remove IFF_SYS from enabled array because it's added by the 'Mines' set, but this unit already has one.
+		$iffIndex = array_search('IFF_SYS', $this->enhancementOptionsEnabled);
+		if ($iffIndex !== false) {
+			unset($this->enhancementOptionsEnabled[$iffIndex]);
+		}
+
+		// Remove MINE_CTRL from enabled array because it's added by the 'Mines' set, but this unit already has one.
+		$contIndex = array_search('MINE_CTRL', $this->enhancementOptionsEnabled);
+		if ($contIndex !== false) {
+			unset($this->enhancementOptionsEnabled[$contIndex]);
+		}           
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 2));

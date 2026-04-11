@@ -18,6 +18,14 @@ window.FireAnimationHelper = {
 
         var animation = movementAnimations[icon.shipId];
 
+        // Guard: a mine (or any unit) that was skipped during animateMovement
+        // (e.g. an undetected stealth unit that fires) will have no animation entry.
+        // Fall back to the icon's last known position so the replay doesn't crash.
+        if (!animation) {
+            var lastMove = icon.getLastMovement();
+            return window.coordinateConverter.fromHexToGame(lastMove.position);
+        }
+
         var data = animation.getPositionAndFacingAtTime(time);
         return data.position;
     }

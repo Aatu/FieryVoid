@@ -9,6 +9,7 @@ import HyachComputerList from "./HyachComputerList";
 import HyachSpecialistsList from "./HyachSpecialistsList";
 import ShieldGeneratorList from "./ShieldGeneratorList";
 import PowerCapacitor from "./PowerCapacitor";
+import SystemActivation from "./SystemActivation";
 import MineSettingsList from "./MineSettingsList";
 import ProximityMineSettingsList from "./ProximityMineSettingsList";
 
@@ -549,8 +550,7 @@ class SystemInfoButtons extends React.Component {
 				{canSelectAllWeapons(ship, system) && <Button title="Select all weapons of this type" onClick={this.selectAllWeapons.bind(this)} img="./img/selectAllWeapons.png" $blend="screen"></Button>}
 				{canSelectAllWeapons(ship, system) && <Button title="Deselect all weapons of this type" onClick={this.deselectAllWeapons.bind(this)} img="./img/deselectAllWeapons.png" $blend="screen"></Button>}
 
-				{canActivate(ship, system) && <Button title="Activate" onClick={this.activate.bind(this)} img="./img/systemicons/Specialistclasses/select.png"></Button>}
-				{canDeactivate(ship, system) && <Button title="Deactivate" onClick={this.deactivate.bind(this)} img="./img/systemicons/Specialistclasses/unselect.png"></Button>}
+				{canSystemActivation(ship, system) && <SystemActivation ship={ship} system={system} />}
 
 				{/* Adaptive Armor List Integration */}
 				{/* Adaptive Armor List Integration */}
@@ -587,7 +587,7 @@ class SystemInfoButtons extends React.Component {
 
 				{canMineSettings(ship, system) && <MineSettingsList system={system} ship={ship} />}
 				{canProxMineSettings(ship, system) && <ProximityMineSettingsList system={system} ship={ship} />}
-				
+
 
 				{(canTSShield(ship, system) || canTSShieldGen(ship, system)) && <ShieldGeneratorList system={system} ship={ship} />}
 				{/*
@@ -654,9 +654,9 @@ const canAAdecrease = (ship, system) => canAA(ship, system) && system.canDecreas
 const canAApropagate = (ship, system) => canAA(ship, system) && system.canPropagate() != '';
 */
 
-const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn-1) && (system.name == 'CaptorMine' || system.name == 'MineControllerDEW') ;
+const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn - 1) && (system.name == 'CaptorMine' || system.name == 'MineControllerDEW');
 
-const canProxMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn-1) && (system.name == 'ProximityMine') ;
+const canProxMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn - 1) && (system.name == 'ProximityMine');
 
 //can do something with Hyach Computer
 const canBFCP = (ship, system) => (gamedata.gamephase === 1) && (system.name == 'hyachComputer');
@@ -711,7 +711,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canRemoveFireOrder(ship, system) || canChangeFiringMode(ship, system)
 	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 	|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
-	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSelectAllWeapons(ship, system)
+	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
 	|| canMineSettings(ship, system) || canProxMineSettings(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
@@ -772,6 +772,28 @@ const canPowerCapacitor = (ship, system) => {
 	//console.log("canPowerCapacitor FALSE: ", system.name);
 	return false;
 }
+
+export const canSystemActivation = (ship, system) => {
+	if (canPowerCapacitor(ship, system)) return false;//power capacitor is handled by its own component
+
+	if (system.canActivate && typeof system.canActivate === 'function' && system.canActivate()) return true;
+	if (system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate()) return true;
+
+	return false;
+};
+
+export const hasStyledMenu = (ship, system) => {
+	return canAA(ship, system) ||
+		canBFCP(ship, system) ||
+		canSpec(ship, system) ||
+		canMineSettings(ship, system) ||
+		canProxMineSettings(ship, system) ||
+		(canTSShield(ship, system) || canTSShieldGen(ship, system)) ||
+		(canThoughtShield(ship, system) || canThoughtShieldGen(ship, system)) ||
+		canSelfRepairList(ship, system) ||
+		canPowerCapacitor(ship, system) ||
+		canSystemActivation(ship, system);
+};
 
 
 export default SystemInfoButtons;

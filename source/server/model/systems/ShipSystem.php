@@ -69,15 +69,79 @@ class ShipSystem {
         $strippedSystem = new stdClass();
         $strippedSystem->id = $this->id;
         $strippedSystem->name = $this->name;
-        $strippedSystem->damage = $this->damage;
-        $strippedSystem->criticals = $this->criticals;
-        $strippedSystem->critData = $this->critData;
-        $strippedSystem->power = $this->power;
-        $strippedSystem->specialAbilities = $this->specialAbilities;
+
+        // Optimization #2 and #4: Prune Historical Damage Entries and empty arrays
+        if (!empty($this->damage)) {
+            $currentTurn = TacGamedata::$currentTurn;
+            // The client needs the immediate previous turn's damage for Replay Animations and the immediate Combat Log
+            $thresholdTurn = $currentTurn - 1; 
+            
+            $newDamageArray = [];
+            $sumDamage = 0;
+            $sumArmour = 0;
+            $lastDestroyed = false;
+            $lastUndestroyed = false;
+            $lastTurnDestroyed = 0;
+
+            foreach ($this->damage as $entry) {
+                // Aggregate any damage older than the required animation threshold
+                if ($entry->turn < $thresholdTurn) {
+                    $sumDamage += $entry->damage;
+                    $sumArmour += $entry->armour;
+                    
+                    if ($entry->destroyed) {
+                        $lastDestroyed = true;
+                        $lastUndestroyed = false;
+                        $lastTurnDestroyed = $entry->turn;
+                    }
+                    if ($entry->undestroyed) {
+                        $lastDestroyed = false;
+                        $lastUndestroyed = true;
+                        // Turn destroyed tracking is only kept for actual destruction
+                        // Undestroy clears it in the front-end, let's clear it here too just in case.
+                        $lastTurnDestroyed = $entry->turn;
+                    }
+                } else {
+                    // Current turn AND Previous turn damage entries are included in full for Replay Animations & Combat Log
+                    $newDamageArray[] = clone $entry;
+                }
+            }
+
+            // Provide the synthetic historical summary entry if relevant damages occurred
+            if ($sumDamage != 0 || $lastDestroyed || $lastUndestroyed || $sumArmour != 0) {
+                // We use the first entry as a base to clone from, ensuring properties exist
+                $synthetic = clone $this->damage[0];
+                $synthetic->id = -1;
+                $synthetic->turn = $lastDestroyed ? $lastTurnDestroyed : ($thresholdTurn - 1);
+                $synthetic->damage = $sumDamage;
+                $synthetic->armour = $sumArmour;
+                $synthetic->destroyed = $lastDestroyed;
+                $synthetic->undestroyed = $lastUndestroyed;
+                $synthetic->fireorderid = -1;
+                $synthetic->pubnotes = "";
+                $synthetic->damageclass = "Historical";
+                $synthetic->shooterid = -1;
+                $synthetic->weaponid = -1;
+                
+                array_unshift($newDamageArray, $synthetic);
+            }
+            
+            if (!empty($newDamageArray)) {
+                $strippedSystem->damage = $newDamageArray;
+            }
+        }
+		//Don't send empty arrays in JSON payload
+        if (!empty($this->criticals)) $strippedSystem->criticals = $this->criticals;
+        if (!empty($this->critData)) $strippedSystem->critData = $this->critData;
+        if (!empty($this->power)) $strippedSystem->power = $this->power;
+        if (!empty($this->specialAbilities)) $strippedSystem->specialAbilities = $this->specialAbilities;
+
         $strippedSystem->output = $this->output;
-        $strippedSystem->outputMod = $this->outputMod;
-        $strippedSystem->destroyed = $this->destroyed;
-		$strippedSystem->individualNotesTransfer = $this->individualNotesTransfer; //necessary		 
+        if ($this->outputMod !== 0) $strippedSystem->outputMod = $this->outputMod;
+        if ($this->destroyed) $strippedSystem->destroyed = $this->destroyed;
+        if ($this->individualNotesTransfer !== '' && $this->individualNotesTransfer !== null) {
+            $strippedSystem->individualNotesTransfer = $this->individualNotesTransfer;
+        }
 
 		//ship enhancements - check if this system is affected...
 		$strippedSystem = Enhancements::addSystemEnhancementsForJSON($this->unit, $this, $strippedSystem);//modifies $strippedSystem object
@@ -796,7 +860,10 @@ class ShipSystem {
 	public function onIndividualNotesLoaded($gamedata){
 		$this->individualNotes = array();//delete notes, after reaction on their load they serve no further purpose
 	}
-		
+		public function getIndividualNotes(){
+		return $this->individualNotes;
+	}
+	
 	
     public function setUnit($unit){
 		$this->unit = $unit;    

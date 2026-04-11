@@ -474,7 +474,7 @@ shipManager.movement = {
             if (name == "slipright") { //slip to Stbd requres Port thruster
                 reqThrusterName = "port";
             }
-            var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName);
+            var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName, false, true);
             requiredThrust[requiredThruster] = slipcost;
         }
 
@@ -1037,7 +1037,7 @@ shipManager.movement = {
     canTurnIntoPivot: function canTurnIntoPivot(ship, right) {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
-        if(ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
+        if (ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
 
         /*cannot turn into pivot if unit is aligned...*/
         if (!shipManager.movement.isOutOfAlignment(ship)) return false;
@@ -1432,30 +1432,30 @@ shipManager.movement = {
     },
 
     hasNegativeThrust: function hasNegativeThrust(ship) {
-            if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
-            if (ship.unavailable) return false;
-            if (ship.flight) return false;
-            if (ship.userid != gamedata.thisplayer) return false;
-            if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) return false;
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+        if (ship.unavailable) return false;
+        if (ship.flight) return false;
+        if (ship.userid != gamedata.thisplayer) return false;
+        if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) return false;
 
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if (deployTurn > gamedata.turn) return false;  //Don't bother checking for ships that haven't deployed yet.
+        var deployTurn = shipManager.getTurnDeployed(ship);
+        if (deployTurn > gamedata.turn) return false;  //Don't bother checking for ships that haven't deployed yet.
 
-            // Get the list of engine systems
-            var engines = shipManager.systems.getSystemListByName(ship, "engine");
-            if (!engines || engines.length === 0) return false; // Skip if no engines are found
+        // Get the list of engine systems
+        var engines = shipManager.systems.getSystemListByName(ship, "engine");
+        if (!engines || engines.length === 0) return false; // Skip if no engines are found
 
-            // Check if all engines are destroyed or offline
-            var allEnginesDestroyedOrOffline = engines.every(engine =>
-                shipManager.systems.isDestroyed(ship, engine) ||
-                shipManager.power.isOffline(ship, engine)
-            );
-            if (allEnginesDestroyedOrOffline) return false; // Skip if all engines are destroyed or offline
+        // Check if all engines are destroyed or offline
+        var allEnginesDestroyedOrOffline = engines.every(engine =>
+            shipManager.systems.isDestroyed(ship, engine) ||
+            shipManager.power.isOffline(ship, engine)
+        );
+        if (allEnginesDestroyedOrOffline) return false; // Skip if all engines are destroyed or offline
 
-            // Check if the remaining thrust is negative for any engine
-            var hasNegativeThrust = engines.some(engine =>
-                shipManager.movement.getRemainingEngineThrust(ship, engine) < 0
-            );
+        // Check if the remaining thrust is negative for any engine
+        var hasNegativeThrust = engines.some(engine =>
+            shipManager.movement.getRemainingEngineThrust(ship, engine) < 0
+        );
 
         return hasNegativeThrust;
     },
@@ -1789,7 +1789,7 @@ shipManager.movement = {
     },
 
     canTurn: function canTurn(ship, right) {
-        if (ship.mine) return false;        
+        if (ship.mine) return false;
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
@@ -1857,9 +1857,9 @@ shipManager.movement = {
             shipManager.movement.doDeploymentTurn(ship, right);
             return;
         }
-        
+
         shipManager.movement.doNormalTurn(ship, right);
-    },   
+    },
 
     doNormalTurn: function doNormalTurn(ship, right, gravitic = false) {
         var requiredThrust = shipManager.movement.calculateRequiredThrust(ship, right);
@@ -1887,7 +1887,7 @@ shipManager.movement = {
         newfacing = mathlib.addToHexFacing(lastMovement.facing, step);
         newheading = mathlib.addToHexFacing(lastMovement.heading, step);
 
-        if(ship.flight && !gravitic) newfacing = newheading; //fighter automatically change facing to heading unless Gravitic and choosing not to do so.    
+        if (ship.flight && !gravitic) newfacing = newheading; //fighter automatically change facing to heading unless Gravitic and choosing not to do so.    
 
         if (ship.flight || ship.osat) {
             commit = true;
@@ -1926,8 +1926,8 @@ shipManager.movement = {
     canGraviticTurn: function canGraviticTurn(ship, right) {
         //if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
-        if (!ship.gravitic) return false;        
-        if(!ship.flight) return false; //Fighters only for now.
+        if (!ship.gravitic) return false;
+        if (!ship.flight) return false; //Fighters only for now.
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         //if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -1956,7 +1956,7 @@ shipManager.movement = {
         if (ship.flight && shipManager.movement.isOutOfAlignment(ship)) return true; //No going backward but not facing forward, can grav turn
 
         return false;
-    },    
+    },
 
 
     doGraviticTurn: function doGraviticTurn(ship, right) {
@@ -1964,11 +1964,11 @@ shipManager.movement = {
             return false;
         }
 
-        if(ship.flight){
+        if (ship.flight) {
             shipManager.movement.doNormalTurn(ship, right, true);
-        }else{}  
+        } else { }
 
-    }, 
+    },
 
 
     autoAssignThrust: function autoAssignThrust(ship) {
@@ -2112,13 +2112,13 @@ shipManager.movement = {
         requiredThrust[0] = any;
 
         var reqThrusterName = "main";
-        var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName);
+        var requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName, false, true);
         requiredThrust[requiredThruster] = rear;
         reqThrusterName = "stbd";
         if (right) { //turn to Stbd requres Port thruster
             reqThrusterName = "port";
         }
-        requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName);
+        requiredThruster = shipManager.movement.thrusterDirectionRequired(ship, reqThrusterName, false, true);
         requiredThrust[requiredThruster] = side;
 
         return requiredThrust;
@@ -2358,7 +2358,7 @@ shipManager.movement = {
       
       DIRECTION may be text ("port","stbd","main","retro")
     */
-    thrusterDirectionRequired: function thrusterDirectionRequired(ship, direction, accel = false) {
+    thrusterDirectionRequired: function thrusterDirectionRequired(ship, direction, accel = false, isTurnOrSlip = false) {
         var orientationRequired = shipManager.movement.directionNoFromName(direction);
 
         if (orientationRequired > 2 && shipManager.movement.isRolled(ship)) { //rolled reverses side requirements
@@ -2386,8 +2386,8 @@ shipManager.movement = {
                         break;
                 }
             }
-        } else { //ship is gravitic! reverse only if going _strictly_ backwards
-            if (shipManager.movement.isGoingBackwards(ship) && (!shipManager.movement.isOutOfAlignment(ship))) { //moving STRICTLY backwards reverses all requirements
+        } else { //ship is gravitic! reverse requirements if going backwards
+            if (shipManager.movement.isGoingBackwards(ship) && (isTurnOrSlip || !shipManager.movement.isOutOfAlignment(ship))) { //moving backwards reverses all requirements
                 switch (orientationRequired) {
                     case 1:
                         orientationRequired = 2;
@@ -2405,8 +2405,8 @@ shipManager.movement = {
             }
         }
 
-        //Gravitic allowsfurther rotations if pivoted (eg. not moving exactly forward or backwards)...
-        if (ship.gravitic) {
+        //Gravitic allows further rotations if pivoted (eg. not moving exactly forward or backwards)...
+        if (ship.gravitic && !isTurnOrSlip) {
             if (shipManager.movement.isPivotedPort(ship)) { //pivoted to Port means: Stbd is Retro, Main is Stbd, Port is Main, Retro is Port
                 switch (orientationRequired) {
                     case 1:

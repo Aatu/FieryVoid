@@ -8,7 +8,7 @@ class captorMineRehsaC extends Mine{
 	    $this->faction = "Brakiri Syndicracy";
         $this->phpclass = "captorMineRehsaC";
         $this->imagePath = "img/ships/brakiriMine.png";
-        $this->shipClass = "Captor Mine";
+        $this->shipClass = "Rehsa-C Captor Mine";
 		$this->occurence = "common";
 		//$this->variantOf = 'NONE';
         $this->isd = 2200;

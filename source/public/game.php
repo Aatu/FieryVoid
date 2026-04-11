@@ -1,6 +1,6 @@
 <?php
-    require_once 'global.php'; // ✅ Critical dependency
-    session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
+require_once 'global.php'; // ✅ Critical dependency
+session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 
 	$gameid = 1;
 	$thisplayer = -1;
@@ -46,10 +46,10 @@
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui' />
 
     <!-- Preload critical bundles to parallelize their download with the large inline JSON payloads below -->
-    <link rel="preload" href="client/UI/reactJs/UI.bundle.js" as="script">
+    <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>" as="script">
     <?php $debug = isset($_GET['debug']); ?>
     <?php if (!$debug): ?>
-    <link rel="preload" href="client/game.legacy.bundle.js" as="script">
+    <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/game.legacy.bundle.js'); ?>" as="script">
     <?php endif; ?>
     
     <link href="styles/tactical.css" rel="stylesheet" type="text/css">
@@ -62,7 +62,7 @@
     <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
     <script defer src="client/lib/three.min.js"></script>
     <script defer src="client/lib/THREE.MeshLine.js"></script>
-    <script defer src="client/UI/reactJs/UI.bundle.js"></script>
+    <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>"></script>
 	<!-- replaced by php include below
     <script src="static/ships.js"></script>
 	-->
@@ -143,7 +143,7 @@
                 window.UIManagerInstance.FullScreen();
                 window.UIManagerInstance.EwButtons();
                 $("#pagecontainer").show();
-            }, 100);
+            }, 50);
         });
         
             
@@ -305,7 +305,7 @@
 	<script defer src="client/model/weapon/customTrek.js"></script>
     <script defer src="client/model/weapon/customCW.js"></script>
     <?php else: ?>
-    <script defer src="client/game.legacy.bundle.js"></script>
+    <script defer src="<?php echo AssetLoader::getAssetUrl('client/game.legacy.bundle.js'); ?>"></script>
     <?php endif; ?>
 </head>
 

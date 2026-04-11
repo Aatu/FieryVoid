@@ -267,7 +267,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="mines" >Mines & Minesweeping</h3>
         <ul>
-            <li>There are three types of mines n Fiery Void, Captor, Direct Nergy Weapons (DEW) and Proximity.  These are described in more detail below.</li>
+            <li>There are three types of mines in Fiery Void, Captor, Direct Enrgy Weapons (DEW) and Proximity.  These are described in more detail below.</li>
             <li>Buying & Deploying Mines:
                 <ul class="circle-list">
                     <li>In game where the 'Mines Allowed' option has been enable in Create Game screen you can purchase mines in Fleet Selection from your Facion's list.</li>
