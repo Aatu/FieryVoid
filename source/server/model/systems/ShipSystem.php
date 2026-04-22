@@ -368,422 +368,316 @@ class ShipSystem {
 	
 	}//endof getMarineRollMod	
 
-	public function doWreakHavocMission($critical, $ship, $gamedata){
-		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.
-		if($cnc){
-			foreach($cnc->criticals as $critDisabled){
-				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) return;//Already captured, no more havoc!					
+	public function initMarineMission($critical, $ship, $gamedata, $name, $checkCaptured = true) {
+		if ($checkCaptured) {
+			$cnc = $ship->getSystemByName("CnC");
+			if ($cnc) {
+				foreach ($cnc->criticals as $critDisabled) {
+					if ($critDisabled->phpclass == "ShipDisabled" && $critDisabled->turn <= $gamedata->turn) {
+						return null; // Already captured, no more work here.
+					}
+				}
 			}
 		}
 
-		//Create fireOrder to show the attempted marine action.		          
 		$rammingSystem = $ship->getSystemByName("RammingAttack");
-		$newFireOrder = null;
+		if (!$rammingSystem) return null; // Should not happen on ships.
 
-		if ($rammingSystem) { // actually exists! - it should on every ship!
-			$shotsHit = 1; //Marines always attempt their mission.
-					
-			$newFireOrder = new FireOrder(
-				-1, "normal", $ship->id, $ship->id,
-				$rammingSystem->id, -1, $gamedata->turn, 1,
-				100, 100, 1, $shotsHit, 0,
-				0, 0, 'WreakHavoc', 10000
-			);
-					
-			$newFireOrder->addToDB = true;
-			$rammingSystem->fireOrders[] = $newFireOrder;
+		$newFireOrder = new FireOrder(
+			-1, "normal", $ship->id, $ship->id,
+			$rammingSystem->id, -1, $gamedata->turn, 1,
+			100, 100, 1, 1, 0,
+			0, 0, $name, 10000
+		);
+
+		$newFireOrder->addToDB = true;
+		$rammingSystem->fireOrders[] = $newFireOrder;
+
+		return $newFireOrder;
+	}
+
+	public function endMarineMission($critical, $gamedata, $fireOrder = null, $note = "") {
+		$critical->turnend = $gamedata->turn;
+		$critical->forceModify = true;
+		$critical->updated = true;
+		if ($fireOrder && $note) {
+			$fireOrder->pubnotes .= $note;
 		}
+	}
+
+	public function applyMarineDamage($ship, $gamedata, $targetSystem, $damageAmount, $missionName, $fireOrder) {
+		$maxDamage = $targetSystem->getRemainingHealth();
+		$damageCaused = min($damageAmount, $maxDamage);
+		$systemDestroyed = ($damageAmount >= $maxDamage);
+
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $targetSystem->id, $damageCaused, 0, 0, -1, $systemDestroyed, false, "", $missionName);
+		$damageEntry->updated = true;
+		
+		$rammingSystem = $ship->getSystemByName("RammingAttack");
+		if ($rammingSystem) {
+			$damageEntry->shooterid = $ship->id;
+			$damageEntry->weaponid = $rammingSystem->id;
+		}
+
+		$targetSystem->damage[] = $damageEntry;
+
+		if (!$systemDestroyed) {
+			$crits = array();
+			$targetSystem->testCritical($ship, $gamedata, $crits);
+		}
+
+		return $systemDestroyed;
+	}
+
+	public function returnMarines($gamedata, $ship, $podInfo) {
+		if (!$podInfo || !is_array($podInfo)) return false;
+
+		$shooterId = (int)$podInfo['id'];
+		$userid = $podInfo['userid'];
+		$team = $podInfo['team'];
+
+		// 1. Try to find the original pod first (Priority)
+		$originalPod = $gamedata->getShipById($shooterId);
+		if ($originalPod && !$originalPod->isDestroyed() && $originalPod->team == $team && isset($originalPod->attached[$ship->id])) {
+			if ($this->incrementMarineAmmo($originalPod, $gamedata)) return true;
+		}
+
+		// 2. Identify all other attached ships for fallback
+		$attachedSameUser = array();
+		$attachedSameTeam = array();
+
+		foreach ($ship->hasAttached as $attachedShipId => $loc) {
+			if ($attachedShipId == $shooterId) continue; // Skip as already checked in step 1
+
+			$attachedShip = $gamedata->getShipById($attachedShipId);
+			if (!$attachedShip || $attachedShip->isDestroyed()) continue;
+
+			if ($attachedShip->userid == $userid && $attachedShip->team == $team) {
+				$attachedSameUser[] = $attachedShip;
+			} else if ($attachedShip->team == $team) {
+				$attachedSameTeam[] = $attachedShip;
+			}
+		}
+
+		// 3. Fallback Priority 1: Same User's pods attached to this ship
+		foreach ($attachedSameUser as $fallbackShip) {
+			if ($this->incrementMarineAmmo($fallbackShip, $gamedata)) return true;
+		}
+
+		// 4. Fallback Priority 2: Any Team pod attached to this ship
+		foreach ($attachedSameTeam as $fallbackShip) {
+			if ($this->incrementMarineAmmo($fallbackShip, $gamedata)) return true;
+		}
+
+		return false;
+	}
+
+	private function incrementMarineAmmo($pod, $gamedata) {
+		// If it is a fighter flight, the Marines system is on individual fighters
+		if ($pod instanceof FighterFlight) {
+			foreach ($pod->systems as $fighter) {
+				if ($fighter instanceof Fighter && !$fighter->isDestroyed()) {
+					foreach ($fighter->systems as $system) {
+						if ($system->name == "Marines") {
+							$system->ammunition++;
+							Manager::updateAmmoInfo($pod->id, $system->id, $gamedata->id, $system->firingMode, $system->ammunition, $gamedata->turn);
+							return true;
+						}
+					}
+				}
+			}
+		} else {
+			// Normal ship
+			foreach ($pod->systems as $system) {
+				if ($system->name == "Marines") {
+					$system->ammunition++;
+					Manager::updateAmmoInfo($pod->id, $system->id, $gamedata->id, $system->firingMode, $system->ammunition, $gamedata->turn);
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	public function doWreakHavocMission($critical, $ship, $gamedata){
+		$newFireOrder = $this->initMarineMission($critical, $ship, $gamedata, 'WreakHavoc');
+		if (!$newFireOrder) return;
 
 		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);					    			
-		$wreakHavocRoll = max(0, Dice::d(10) + $rollMod); //Main roll for effect of Marines sabotage.
+		$wreakHavocRoll = max(0, Dice::d(10) + $rollMod);
 
-			//Now apply effect based on the rolled dice!
-		if ($wreakHavocRoll <= 1) { 		    //Damage to a random primary system.
-
-				$attackedSystem = null;  // Initialize $attackedSystem to null
+		switch (true) {
+			case ($wreakHavocRoll <= 1): //Damage to a random primary system.
+				$rammingSystem = $ship->getSystemByName("RammingAttack");
 				do {
-				    $attackedSystem = $ship->getHitSystem($ship, $newFireOrder, $rammingSystem, $gamedata, 0);
-				} while ($attackedSystem instanceof Structure);// Re-roll $attackedSystem until it is not an instance of Structure.
+					$attackedSystem = $ship->getHitSystem($ship, $newFireOrder, $rammingSystem, $gamedata, 0);
+				} while ($attackedSystem instanceof Structure);
 	
-				$maxDamage = $attackedSystem->getRemainingHealth();
 				$damageDealt = Dice::d(6, 1);
-				$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.					
+				$damageDealt = min($damageDealt, $this->getRemainingHealth());				
+				$newFireOrder->pubnotes .= "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit deals $damageDealt damage to the " . $attackedSystem->displayName .".";
+				$this->applyMarineDamage($ship, $gamedata, $attackedSystem, $damageDealt, 'WreakHavoc', $newFireOrder);
+				break;
 
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - A marine unit deals $damageDealt damage to the " . $attackedSystem->displayName .".";
-						
-				if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
-					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, true, false, "", "WreakHavoc");
-					$damageEntry->updated = true;
-					$attackedSystem->damage[] = $damageEntry;			
-				}else{ //Not enough to destroy, just damage system instead.
-					$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $attackedSystem->id, $damageCaused, 0, 0, -1, false, false, "", "WreakHavoc");
-					$damageEntry->updated = true;
-					$attackedSystem->damage[] = $damageEntry;
-					$crits = array(); 
-					$crits = $attackedSystem->testCritical($ship, $gamedata, $crits);//Damage caused, need to force critical test outside normal routine
-				}
-
-				if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
-			        $damageEntry->shooterid = $ship->id; // additional field
-			        $damageEntry->weaponid = $rammingSystem->id; // additional field
-			    }				
-									
-		}//endof Rolled 1 or less
-
-			if ($wreakHavocRoll == 2) { //Reduce initiative next turn.
+			case ($wreakHavocRoll == 2): //Reduce initiative next turn.
 				$cnc = $ship->getSystemByName("CnC");
-				$effectInitiative = Dice::d(6,1);//strength of effect: 1d6
-				$effectInitiative5 = $effectInitiative * 5;
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines disrupt internal operations, initiative reduced by $effectInitiative5 next turn.";						
-										
-				if($cnc){
-					for($i=1; $i<=$effectInitiative;$i++){
-						$crit = new tmpinidown(-1, $ship->id, $cnc->id, 'tmpinidown', $gamedata->turn); 
-						$crit->updated = true;
-				        $cnc->criticals[] =  $crit;
+				$effectInitiative = Dice::d(6,1);
+				$newFireOrder->pubnotes .= "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines disrupt internal operations, initiative reduced by " . ($effectInitiative * 5) . " next turn.";						
+				if ($cnc) {
+					for ($i=1; $i<=$effectInitiative; $i++) {
+						$this->addCritical($ship->id, 'tmpinidown', $gamedata);
 					}				
 				}		
-			}//endof Rolled 2
+				break;
 
-			if ($wreakHavocRoll == 3) { //Reduce EW next turn
+			case ($wreakHavocRoll == 3): //Reduce EW next turn
 				$scanner = $ship->getSystemByName("Scanner");
-				$effectSensors = Dice::d(3,1);//strength of effect: 1d3
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marine set up a jamming device, EW reduced by $effectSensors next turn.";						
-										
-				if($scanner){
-					for($i=1; $i<=$effectSensors;$i++){
+				$effectSensors = Dice::d(3,1);
+				$newFireOrder->pubnotes .= "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marine set up a jamming device, EW reduced by $effectSensors next turn.";						
+				if ($scanner) {
+					for ($i=1; $i<=$effectSensors; $i++) {
 						$crit = new OutputReduced1(-1, $ship->id, $scanner->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
 						$crit->updated = true;
-				        $scanner->criticals[] =  $crit;
+						$scanner->criticals[] = $crit;
 					}				
 				}
-			}//endof Rolled 3
+				break;
 
-			if ($wreakHavocRoll == 4) { //reduce thrust next turn
+			case ($wreakHavocRoll == 4): //reduce thrust next turn
+				$newFireOrder->pubnotes .= "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines sabotage engine conduits, thrust reduced next turn.";
+				if ($ship->gravitic || $ship instanceof OSAT) {
+					$newFireOrder->pubnotes .= " No effect on this vessel.";
+					return;
+				}
 				$engine = $ship->getSystemByName("Engine");
-				$effectEngine = Dice::d(3,1);//strength of effect: 1d3				
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines sabotage engine conduits, thrust reduced by $effectEngine next turn unless gravitic ship or an OSAT.";					
-				if($ship->gravitic) return; //No effect on Gravitic engines.
-				if($ship instanceof OSAT) return; //OSATs have no engines.					
-
-														
-				if($engine){
-					for($i=1; $i<=$effectEngine;$i++){
+				$effectEngine = Dice::d(3,1);
+				if ($engine) {
+					for ($i=1; $i<=$effectEngine; $i++) {
 						$crit = new OutputReduced1(-1, $ship->id, $engine->id, 'OutputReduced1', $gamedata->turn+1, $gamedata->turn+1); 
 						$crit->updated = true;
-				        $engine->criticals[] =  $crit;
+						$engine->criticals[] = $crit;
 					}				
 				}												
-			}//endof Rolled 4
+				break;
 
-			if ($wreakHavocRoll == 5) { //Increase hit profile next turn
-				//+1 to hit this ship next turn
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines place a signal emitter on target ship, its defence profile is increased by 5% next turn.";				
+			case ($wreakHavocRoll == 5): //Increase hit profile next turn
+				$newFireOrder->pubnotes .= "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines place a signal emitter on target ship, its defence profile is increased by 5% next turn.";				
 				$cnc = $ship->getSystemByName("CnC");				
-					if($cnc){
-						$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, 'ProfileIncreased', $gamedata->turn+1, $gamedata->turn+1); //Ends next turn.
-						$crit->updated = true;
-						$cnc->criticals[] =  $crit;					
-					}							
-			}//endof Rolled 5
+				if ($cnc) {
+					$crit = new ProfileIncreased(-1, $ship->id, $cnc->id, 'ProfileIncreased', $gamedata->turn+1, $gamedata->turn+1);
+					$crit->updated = true;
+					$cnc->criticals[] = $crit;					
+				}							
+				break;
 									
-			if ($wreakHavocRoll >= 6 && $wreakHavocRoll <= 8) { //No effect this turn, try again next turn
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marine fail to sabotage ship this turn. They will try again next turn.";
-			}//endof Rolled between 6 and 8
+			case ($wreakHavocRoll >= 6 && $wreakHavocRoll <= 8): //No effect this turn
+				$newFireOrder->pubnotes .= "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marine fail to sabotage ship this turn. They will try again next turn.";
+				break;
 
-			if ($wreakHavocRoll >= 9) { // Failed and Marines eliminated during Sabotage attempt.
-				$critical->turnend = $gamedata->turn;//End Marines mission this turn
-				$critical->forceModify = true; //actually save the change.
-				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines eliminated whilst attempting to sabotage enemy ship.";									
-			}//endof Rolled 9 or more
-					 
-	}//endof doWreakHavocMission()
+			case ($wreakHavocRoll >= 9): //Eliminated
+				$this->endMarineMission($critical, $gamedata, $newFireOrder, "<br>Roll(Mod): $wreakHavocRoll($rollMod) - WREAK HAVOC - Marines eliminated whilst attempting to sabotage enemy ship.");
+				break;
+		}
+	}
 
 
 
-	public function doSabotageMission($critical, $ship, $gamedata){ //loading exisiting notes is done in dbmanager->getSystemDataForShips()	
-		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.
-		if($cnc){
-			foreach($cnc->criticals as $critDisabled){
-				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn) return;//Already captured, no more sabotage!					
+	public function doSabotageMission($critical, $ship, $gamedata){
+		$newFireOrder = $this->initMarineMission($critical, $ship, $gamedata, 'Sabotage');
+		if (!$newFireOrder) return;
+
+		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);						    			
+		$sabotageRoll = max(0, Dice::d(10) + $rollMod);
+
+		$damageDealt = 0;
+		$eliminated = false;
+		$canMoveToCnC = false;
+		$msg = "";
+
+		if ($sabotageRoll <= 1) {
+			$damageDealt = Dice::d(6, 3) + 2;
+			$damageDealt = min($damageDealt, $this->getRemainingHealth());			
+			$canMoveToCnC = true;
+			$msg = "causes $damageDealt damage";
+		} else if ($sabotageRoll <= 3) {
+			$damageDealt = Dice::d(6, 1) + 2;
+			$damageDealt = min($damageDealt, $this->getRemainingHealth());
+			$canMoveToCnC = true;
+			$msg = "causes $damageDealt damage";
+		} else if ($sabotageRoll <= 5) {
+			$damageDealt = Dice::d(6, 1) + 2;
+			$damageDealt = min($damageDealt, $this->getRemainingHealth());			
+			$eliminated = true;
+			$msg = "causes $damageDealt damage, but is eliminated.";
+		} else if ($sabotageRoll <= 8) {
+			$newFireOrder->pubnotes .= "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - Marine unit fails to damage " . $this->displayName . ". They will try again next turn.";
+			return;
+		} else {
+			$eliminated = true;
+			$msg = "is eliminated.";
+		}
+
+		$newFireOrder->pubnotes .= "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - A marine unit $msg";
+
+		if ($damageDealt > 0) {
+			$destroyed = $this->applyMarineDamage($ship, $gamedata, $this, $damageDealt, 'Sabotage', $newFireOrder);
+			if ($destroyed && $canMoveToCnC) {
+				if ($this->returnMarines($gamedata, $ship, $critical->param)) {
+                    $newFireOrder->pubnotes .= " and returns to a friendly pod.";
+                    $this->endMarineMission($critical, $gamedata);
+                    return;
+                }
+
+				$cnc = $ship->getSystemByName("CnC");				
+				if ($cnc) {
+					$critClass = ($critical->phpclass == "SabotageElite") ? 'SabotageElite' : 'Sabotage';
+					$wreackCrit = new $critClass(-1, $ship->id, $cnc->id, $critClass, $gamedata->turn+1);
+					$wreackCrit->param = $critical->param; // Pass on the pod info!
+					$wreackCrit->updated = true;
+					$cnc->criticals[] = $wreackCrit;
+                    $newFireOrder->pubnotes .= " and switches to Wreak Havoc mission.";
+				}
+				$this->endMarineMission($critical, $gamedata); // Terminate this specific system sabotage, moved to CnC.
+				return;
+			}else{
+                $newFireOrder->pubnotes .= " and will continue sabotage operations next turn.";
 			}
 		}
 
-		//Create fireOrder to show the attempted marine action.		          
-		$rammingSystem = $ship->getSystemByName("RammingAttack");
-		$newFireOrder = null;
-
-		if ($rammingSystem) { // actually exists! - it should on every ship!			
-			$newFireOrder = new FireOrder(
-				-1, "normal", $ship->id, $ship->id,
-				$rammingSystem->id, -1, $gamedata->turn, 1,
-				100, 100, 1, 1, 0,
-				0, 0, 'Sabotage', 10000
-			);
-					
-			$newFireOrder->addToDB = true;
-			$rammingSystem->fireOrders[] = $newFireOrder;
+		if ($eliminated) {
+			$this->endMarineMission($critical, $gamedata);
 		}
-
-		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);						    			
-		$sabotageRoll = max(0, Dice::d(10) + $rollMod); //Main roll for effect of Marines sabotage.
-					
-				//Now apply effect based on the rolled dice!				
-				if ($sabotageRoll <= 1) { // Explodes	- Full damage      
-					$maxDamage = $this->getRemainingHealth();
-					$damageDealt = Dice::d(6, 3) + 2;
-					$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - Marine unit causes $damageCaused damage to " . $this->displayName ." and will continue sabotage operations.";	
-				
-					if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
-						$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "Sabotage");
-						$damageEntry->updated = true;
-						$this->damage[] = $damageEntry;
-						
-							//Then move Marines to CnC for Wreck Havoc
-							$cnc = $ship->getSystemByName("CnC");				
-							if($cnc){
-									if($critical->phpclass == "SabotageElite"){//Are Marines Elite?
-										$wreackCrit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
-										$wreackCrit->updated = true;
-										$cnc->criticals[] =  $wreackCrit;					
-									}else{//Not Elite Marines					
-										$wreackCrit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
-										$wreackCrit->updated = true;
-										$cnc->criticals[] =  $wreackCrit;
-									}	
-							}
-							
-						$critical->turnend = $gamedata->turn;//This Sabotage crit now ends, has moved to CnC.
-						$critical->forceModify = true; //actually save the change.
-						$critical->updated = true; //actually save the change cd!	
-							    		         	
-					}else{ //Not enough to destroy, just damage system instead.
-						$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, false, false, "", "Sabotage");
-						$damageEntry->updated = true;
-						$this->damage[] = $damageEntry;
-						$crits = array(); 
-						$crits = $this->testCritical($ship, $gamedata, $crits); //Damage caused, need to force critical test outside normal routine
-					}
-
-					if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
-					    $damageEntry->shooterid = $ship->id; // additional field
-					    $damageEntry->weaponid = $rammingSystem->id; // additional field
-					 }									
-				}//endof Rolled 1 or less	
-				
-				if ($sabotageRoll >= 2 && $sabotageRoll <= 3) { // Explodes - but reduced Damage, marines survive.	      
-					$maxDamage = $this->getRemainingHealth();
-					$damageDealt = Dice::d(6, 1) + 2;
-					$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - A marine unit causes $damageCaused damage to " . $this->displayName ." and will continue sabotage operations.";						
-						
-						if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
-									$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "Sabotage");
-									$damageEntry->updated = true;
-									$this->damage[] = $damageEntry;
-									
-								//Then move Marines to CnC for Wreck Havoc
-								$cnc = $ship->getSystemByName("CnC");				
-								if($cnc){
-										if($critical->phpclass == "SabotageElite"){//Are Marines Elite?
-											$wreackCrit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
-											$wreackCrit->updated = true;
-											$cnc->criticals[] =  $wreackCrit;					
-										}else{//Not Elite Marines					
-											$wreackCrit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
-											$wreackCrit->updated = true;
-											$cnc->criticals[] =  $wreackCrit;
-										}		    		
-					            }
-					            
-					    $critical->turnend = $gamedata->turn;//This Sabotage crit now ends, have moved to CnC.
-						$critical->forceModify = true; //actually save the change.
-						$critical->updated = true; //actually save the change cd!        
-					            
-					            										
-						}else{ //Not enough to destroy, just damage system instead.
-								$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, false, false, "", "Sabotage");
-								$damageEntry->updated = true;
-								$this->damage[] = $damageEntry;
-								$crits = array(); 
-								$crits = $this->testCritical($ship, $gamedata, $crits); //Damage caused, need to force critical test outside normal routine
-						}		
-
-						if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
-							$damageEntry->shooterid = $ship->id; // additional field
-							$damageEntry->weaponid = $rammingSystem->id; // additional field
-						}								
-				}//endof Rolled between 2 or 3			
-
-				if ($sabotageRoll >= 4 && $sabotageRoll <= 5) { //Explodes - reduced Damage and Marines eliminated.
-					$maxDamage = $this->getRemainingHealth();
-					$damageDealt = Dice::d(6, 1) + 2;
-					$damageCaused = min($damageDealt, $maxDamage); //Don't cause more damage than system's health remaining.
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - A marine unit causes $damageCaused damage to " . $this->displayName .", but is eliminated during sabotage mission.";						
-						
-						if ($damageDealt >= $maxDamage){	//Deals enough to destroy system	        
-									$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "Sabotage");
-									$damageEntry->updated = true;
-									$this->damage[] = $damageEntry;							
-						}else{ //Not enough to destroy, just damage system instead.
-									$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, false, false, "", "Sabotage");
-									$damageEntry->updated = true;
-									$this->damage[] = $damageEntry;
-									$crits = array(); 
-									$crits = $this->testCritical($ship, $gamedata, $crits); //Damage caused, need to force critical test outside normal routine
-						}		
-
-						if ($rammingSystem) { // add extra data to damage entry - so the firing order can be identified!
-							$damageEntry->shooterid = $ship->id; // additional field
-							$damageEntry->weaponid = $rammingSystem->id; // additional field
-						}
-						
-						$critical->turnend = $gamedata->turn;//Marines are eliminated.
-						$critical->forceModify = true; //actually save the change.
-						$critical->updated = true; //actually save the change cd!										
-				}//endof Rolled between 4 or 5		
-						
-				if ($sabotageRoll >= 6 && $sabotageRoll <= 8) { // No damage, try again next turn.						
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - Marine unit fails to damage " . $this->displayName .". They will try again next turn.";								        	      	
-				}//endof Rolled between 6 or 8	
-
-				if ($sabotageRoll >= 9 ) { // Failed and Marines eliminated during Sabotage attempt.					
-					$critical->turnend = $gamedata->turn;//End Marines mission this turn
-					$critical->forceModify = true; //actually save the change.
-					$critical->updated = true; //actually save the change cd!
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $sabotageRoll($rollMod) - SABOTAGE - Marine unit was eliminated attempting to damage " . $this->displayName .".";	
-					
-					$critical->turnend = $gamedata->turn;//Marines are eliminated.
-					$critical->forceModify = true; //actually save the change.
-					$critical->updated = true; //actually save the change cd!						
-									
-				}//endof Rolled 9 or more											
+	}
 	
-	}//endof doSabotageMission()
 		
 
 	public function doCaptureMission($critical, $ship, $gamedata){ 
+		$newFireOrder = $this->initMarineMission($critical, $ship, $gamedata, 'Capture');
+		if (!$newFireOrder) return;
 
-		$cnc = $ship->getSystemByName("CnC");	
-			foreach ($cnc->criticals as $cncCrit){
-				if($cncCrit->phpclass == "ShipDisabled" && $cncCrit->turn <= $gamedata->turn) return;//Ship already captured, no more work here.	
-			}		
+		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);
+		$attackerRoll = max(0, Dice::d(100) + ($rollMod * 10));
 
-		//Create fireOrder to show the attempted marine action.
-		$rammingSystem = $ship->getSystemByName("RammingAttack");	
-		$newFireOrder = null;
-
-		if ($rammingSystem) { // actually exists! - it should on every ship!
-			$shotsHit = 1;//Marines always try to carry out their mission.
-							
-			$newFireOrder = new FireOrder(
-				-1, "normal", $ship->id, $ship->id,
-				$rammingSystem->id, -1, $gamedata->turn, 1,
-				100, 100, 1, $shotsHit, 0,
-				0, 0, 'Capture', 10000
-			);
-							
-		$newFireOrder->addToDB = true;
-		$rammingSystem->fireOrders[] = $newFireOrder;
+		if ($attackerRoll <= 50) {
+			$cnc = $ship->getSystemByName("CnC");
+			if ($cnc) {
+				$this->addCritical($ship->id, 'DefenderLost', $gamedata);
+			}						
+			$newFireOrder->pubnotes .= "<br>Roll(Mod): $attackerRoll(" . ($rollMod * 10) . ") - CAPTURE - Marines eliminate a defender.";    	      	
+		} else {
+			$newFireOrder->pubnotes .= "<br>Roll(Mod): $attackerRoll(" . ($rollMod * 10) . ") - CAPTURE - Marines do not eliminate a defender.";
 		}
-	
-		$attackerRollMod = $this->getMarineRollMod($critical, $ship, $gamedata);						    			
-		$attackerRollMod10 = $attackerRollMod * 10;
-		$attackerRoll = max(0, Dice::d(100) + $attackerRollMod10); //Roll for whether attackers kill a defender.							
-		
-			//Now resolve the attackers roll							
-			if ($attackerRoll <= 50) { // Marines kill a defender.
-				if($cnc){
-						$newCrit = new DefenderLost(-1, $ship->id, $cnc->id, 'DefenderLost', $gamedata->turn); 
-						$newCrit->updated = true;
-				        $cnc->criticals[] =  $newCrit;				
-				}						
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $attackerRoll($attackerRollMod10) - CAPTURE - Marines eliminate a defender.";    	      	
-			}
-					
-			if ($attackerRoll >= 51) {				
-					$newFireOrder->pubnotes = "<br>Roll(Mod): $attackerRoll($attackerRollMod10) - CAPTURE - Marines do not eliminate a defender.";
-			}				
 
-			//Now defenders strike back!
-			$defRollMod = $this->getMarineRollMod($critical, $ship, $gamedata);
-			$defRollMod10 = $defRollMod * 10;//Multiply by 10
-			$defenderRoll = max(0, Dice::d(100) + $defRollMod10);//Roll for whether Defenders kill an attacker.
-
-			if ($defenderRoll >= 75) { // Defenders eliminate the attacking Marines.
-				$critical->turnend = $gamedata->turn;//End Capture crit this turn
-				$critical->forceModify = true; //actually save the change.
-				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes .= " Defenders eliminate a marine unit. Roll(Mod): $defenderRoll($defRollMod10).";	
-			}else{
-				$newFireOrder->pubnotes .= " Defenders do not eliminate any marines. Roll(Mod): $defenderRoll($defRollMod10).";					
-			}
+		$defenderRoll = max(0, Dice::d(100) + ($rollMod * 10));
+		if ($defenderRoll >= 75) {
+			$this->endMarineMission($critical, $gamedata, $newFireOrder, " Defenders eliminate a marine unit. Roll(Mod): $defenderRoll(" . ($rollMod * 10) . ").");
+		} else {
+			$newFireOrder->pubnotes .= " Defenders do not eliminate any marines. Roll(Mod): $defenderRoll(" . ($rollMod * 10) . ").";					
+		}
 			
-		$this->checkShipCaptured($critical, $ship, $gamedata);	//Check if last defender eliminated and ship still under attack.
-					
-	}//end of doCaptureMission()	
+		$this->checkShipCaptured($critical, $ship, $gamedata);
+	}
 
-
-	public function doRescueMission($critical, $ship, $gamedata){ 
-
-		//Create fireOrder to show the attempted marine action.
-		$rammingSystem = $ship->getSystemByName("RammingAttack");
-		$newFireOrder = null;
-
-		if ($rammingSystem) { // actually exists! - it should on every ship!							
-			$newFireOrder = new FireOrder(
-				-1, "normal", $ship->id, $ship->id,
-				$rammingSystem->id, -1, $gamedata->turn, 1,
-				100, 100, 1, 1, 0,
-				0, 0, 'Rescue', 10000
-			);
-							
-			$newFireOrder->addToDB = true;
-			$rammingSystem->fireOrders[] = $newFireOrder;
-		}
-
-		$cnc = $ship->getSystemByName("CnC");//$this should be CnC, but just in case.
-		if($cnc){
-			foreach($cnc->criticals as $critDisabled){
-				if($critDisabled->phpclass == "ShipDisabled"  && $critDisabled->turn <= $gamedata->turn){
-				$newFireOrder->pubnotes = "<br>RESCUE - Enemy ship has been captured, marines automatically completes their rescue mission!";					
-					return;//Already captured, no more sabotage!					
-				}
-			}
-		}
-
-		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);										    			
-		$rescueRoll = max(0, Dice::d(10) + $rollMod); //Main roll for effect of Marines Rescue mission.
-
-		//Now apply effect based on the rolled dice!				
-		if ($rescueRoll <= 2) { // Successful rescue!					
-				$critical->turnend = $gamedata->turn;//Success, end mission!
-				$critical->forceModify = true; //actually save the change.
-				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines successfully complete their rescue mission!";								        	      	
-		}			
-		
-		if ($rescueRoll >= 3 && $rescueRoll <= 4) { // //Success (more or less), end mission!						
-				$critical->turnend = $gamedata->turn;//Extend Marine mission to next turn.
-				$critical->forceModify = true; //actually save the change.
-				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines complete their rescue mission, but take heavy causalties.";									        	      	
-		}			
-
-		if ($rescueRoll >= 5 && $rescueRoll <= 6) { // No result, try again next turn.						
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines fail to complete a rescue mission. They will try again next turn.";								        	      	
-		}
-
-		if ($rescueRoll >= 7 ) { // Failed and Marines eliminated during Rescue attempt.					
-				$critical->turnend = $gamedata->turn;//End Marines mission this turn
-				$critical->forceModify = true; //actually save the change.
-				$critical->updated = true; //actually save the change cd!
-				$newFireOrder->pubnotes = "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines are eliminated attempting their rescue mission.";							        	      	
-		}
-				
-	}//endof doRescueMission()
 
 
 	public function checkShipCaptured($critical, $ship, $gamedata){
@@ -831,11 +725,87 @@ class ShipSystem {
 					$rammingSystem->fireOrders[] = $newFireOrder;
 				}				
 				
-				$newFireOrder->pubnotes = "<br>Attacking Marines overcome defenders and disable the ship for the rest of the scenario.";	
+				$newFireOrder->pubnotes = "<br>Attacking Marines overcome defenders and disable the ship for the rest of the scenario.";
+
+				// All but one marine unit should return to their pods if they can.
+				$marineUnits = array();
+				foreach ($ship->systems as $system) {
+					foreach ($system->criticals as $crit) {
+						if (in_array($crit->phpclass, array('CaptureShip', 'CaptureShipElite', 'Sabotage', 'SabotageElite', 'RescueMission', 'RescueMissionElite'))) {
+							if ($crit->turnend == 0 || $crit->turnend > $gamedata->turn) {
+								$marineUnits[] = $crit;
+							}
+						}
+					}
+				}
+
+				if (count($marineUnits) > 1) {
+					$stayIndex = 0;
+					foreach ($marineUnits as $i => $unit) {
+						if ($unit->phpclass == "CaptureShip" || $unit->phpclass == "CaptureShipElite") {
+							$stayIndex = $i;
+							break;
+                        }
+                    }
+
+					foreach ($marineUnits as $i => $unit) {
+						if ($i == $stayIndex) continue;
+						if ($this->returnMarines($gamedata, $ship, $unit->param)) {
+							$this->endMarineMission($unit, $gamedata);
+							$newFireOrder->pubnotes .= "<br>A marine unit returns to its pod.";
+                        }
+                    }
+                }
 			}										
 		}
 	}//endof checkShipCaptured()
 
+
+	public function doRescueMission($critical, $ship, $gamedata){ 
+		$newFireOrder = $this->initMarineMission($critical, $ship, $gamedata, 'Rescue', false); // false = don't auto-return if captured, we need custom note.
+		if (!$newFireOrder) return;
+
+		$cnc = $ship->getSystemByName("CnC");
+		if ($cnc) {
+			foreach ($cnc->criticals as $critDisabled) {
+				if ($critDisabled->phpclass == "ShipDisabled" && $critDisabled->turn <= $gamedata->turn) {
+					$newFireOrder->pubnotes .= "<br>RESCUE - Enemy ship captured, marines automatically complete rescue mission!";					
+					return;
+				}
+			}
+		}
+
+		$rollMod = $this->getMarineRollMod($critical, $ship, $gamedata);										    			
+		$rescueRoll = max(0, Dice::d(10) + $rollMod);
+
+		switch (true) {
+			case ($rescueRoll <= 2):
+				$this->endMarineMission($critical, $gamedata, $newFireOrder, "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines successfully complete their rescue mission!");
+				if ($this->returnMarines($gamedata, $ship, $critical->param)) {
+                    $newFireOrder->pubnotes .= " Marines return to pod.";
+                } else {
+					$cnc = $ship->getSystemByName("CnC");				
+					if ($cnc) {
+						$critClass = (strpos($critical->phpclass, 'Elite') !== false) ? 'SabotageElite' : 'Sabotage';
+						$wreackCrit = new $critClass(-1, $ship->id, $cnc->id, $critClass, $gamedata->turn+1);
+						$wreackCrit->param = $critical->param; // Pass on the pod info!
+						$wreackCrit->updated = true;
+						$cnc->criticals[] = $wreackCrit;
+						$newFireOrder->pubnotes .= " No pods available, marines switch to Wreak Havoc mission.";
+					}
+				}
+				break;
+			case ($rescueRoll <= 4):
+				$this->endMarineMission($critical, $gamedata, $newFireOrder, "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines complete their rescue mission, but take heavy causalties.");
+				break;
+			case ($rescueRoll <= 6):
+				$newFireOrder->pubnotes .= "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines fail to complete a rescue mission. They will try again next turn.";
+				break;
+			default:
+				$this->endMarineMission($critical, $gamedata, $newFireOrder, "<br>Roll(Mod): $rescueRoll($rollMod) - RESCUE - Marines are eliminated attempting a rescue mission.");
+				break;
+		}
+	}
 	
 	
 	/*saves individual notes (if any new ones exist) to database*/

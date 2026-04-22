@@ -744,6 +744,48 @@ window.PhaseStrategy = function () {
         }
         this.ballisticIconContainer.updateLinesForShip(ship, this.shipIconContainer);
         this.redrawMovementUI(ship);
+
+        // Mirror movement to attached units (e.g. pods) - DK 04/26
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var location = ship.hasAttached[attachedId];
+                var attachedShip = gamedata.getShip(attachedId);
+
+                if (!attachedShip || attachedShip.detached || shipManager.isDestroyed(attachedShip)) continue;
+
+                var newMovements = [];
+                // 1. Maintain the pod's movement history for previous turns
+                for (var m = 0; m < attachedShip.movement.length; m++) {
+                    if (attachedShip.movement[m].turn < gamedata.turn) {
+                        newMovements.push(attachedShip.movement[m]);
+                    }
+                }
+
+                var locOffset = shipManager.movement.getAttachedFacingOffset(location);
+                var facingAdjustment = shipManager.movement.isRolled(ship) ? 3 : 0;
+
+                // 2. Clone parent movements for the CURRENT turn
+                for (var i = 0; i < ship.movement.length; i++) {
+                    var move = ship.movement[i];
+                    if (move.turn != gamedata.turn) continue;
+
+                    var attachedMove = JSON.parse(JSON.stringify(move));
+                    attachedMove.id = -1;
+                    attachedMove.type = "attached";
+                    attachedMove.facing = mathlib.addToHexFacing(move.facing, locOffset + facingAdjustment);
+                    newMovements.push(attachedMove);
+                }
+
+                attachedShip.movement = newMovements;
+
+                // Refresh the pod's visual state
+                this.shipIconContainer.getByShip(attachedShip).consumeMovement(attachedShip.movement);
+                if (this.animationStrategy) {
+                    this.animationStrategy.shipMovementChanged(attachedShip);
+                }
+                this.ballisticIconContainer.updateLinesForShip(attachedShip, this.shipIconContainer);
+            }
+        }
     };
 
     PhaseStrategy.prototype.onShowAllEW = function (payload) {

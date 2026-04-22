@@ -71,7 +71,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo. 
     This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). 
     You are therefore encouraged to observe the total number of missiles a fighter can have, but if you do not (whether by omission or intentionally) - you will get an extra missile variety, but no extra missiles. 
-    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons).</p>
+    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons) and will lose a missile they are caerrying if they take 2 or more damage from a single shot.</p>
 
     <p>Missiles do not use firing ships OEW and their built-in guidance package is usually combined into weapons' Fire control, rather than being kept separate.  Fighter missiles do benefit from the fighter's offensive bonus.</p>
     <p>Ammo listings usually mention ISD year for when that missile type becomes available (if two dates the first refers to Kor-Lyan only). This is not enforced by Fiery Void so players will need to do this themselves.</p>
@@ -105,8 +105,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       <li><strong>Class FD - Dropout Missile (2221/2245)</strong> - Range 10 - Damage 6 - Fire Control: +3/+1/+1 - Increase chance of dropout on fighters,</li>      
       <li><strong>Class FH - Heavy Fighter Missile(2226/2245)</strong> - Range 5 - Damage 15 - Fire Control: +1/+3/+3 - Limited to 1 per fighter (2 per Super Heavy Fighter),</li>  
       <li><strong>Class FL - Long Range Fighter Missile (2226/2245)</strong> - Range 15 - Damage 8 - Fire Control: +3/+3/+3,</li>   
-      <li><strong>Class FY - Dogfight Missile (2165)</strong> - Range 8 - Damage 6 - Fire Control: +3/+3/+3 - Cannot snap-fire in Fiery Void.</li>  
+      <li><strong>Class FY - Dogfight Missile (2165)</strong> - Range 8 - Damage 6 - Fire Control: +3/+3/+3 - Cannot snap-fire in Fiery Void.</li>
+      <li><strong>Class DUM - Dummy Missile (2145)</strong> - Does not fire, but will always be the first missile lost to damage to preserve real munitions.</li>          
     </ul>
+
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
     <h3 id="shells" style="margin-top: 20px;">Grome Shells</h3>

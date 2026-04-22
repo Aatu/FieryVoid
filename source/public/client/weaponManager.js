@@ -492,6 +492,28 @@ window.weaponManager = {
         var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.        
         var loSBlocked = false; //Default to LoS not blocked.
         var skinDanceBlocked = null;
+        // Attached pod logic
+        var attachedUnitHidden = false;
+        if (selectedShip.hasAttached && Object.keys(selectedShip.hasAttached).length > 0) {
+            var keys = Object.keys(selectedShip.hasAttached);
+            if (keys.includes(ship.id.toString())) {
+                attachedUnitHidden = true; // Parent cannot target the attached pod
+            }
+        }
+        if (ship.attached && Object.keys(ship.attached).length > 0) {
+            var hostId = Object.keys(ship.attached)[0];
+            var podLocation = parseInt(ship.attached[hostId]);
+            if (!isNaN(podLocation) && podLocation !== 0) {
+                var hostShip = gamedata.getShip(hostId);
+                var hostSections = weaponManager.getShipHittingSide(selectedShip, hostShip);
+                if (hostShip) {
+                    if (!hostSections.includes(podLocation)) {
+                        attachedUnitHidden = true; // Pod is attached to a side not facing the shooter
+                    }
+                }
+            }
+        }
+
 
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
@@ -541,7 +563,7 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (ship.Huge > 0) { //Cannot Target larger terrain.
+                    if (ship.Huge > 0 | attachedUnitHidden) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
@@ -917,6 +939,7 @@ window.weaponManager = {
     //calculate hit chance for Boarding Action - different procedure
     calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon) {
         if (target.flight || target.userid == -5) return 0;//Cannot board fighters or terrain, null FC stops this but showing 0% is more informative for players!
+        if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit         
         var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
         if (jinking > 0) return 0;
 
@@ -977,7 +1000,29 @@ window.weaponManager = {
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
 
         if (weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
-
+        /*
+        // Attached pod logic
+        if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit
+        if (shooter.hasAttached && Object.keys(shooter.hasAttached).length > 0) {
+            var keys = Object.keys(shooter.hasAttached);
+            if (keys.includes(target.id.toString())) {
+                return 0; // Parent cannot target the attached pod
+            }
+        }
+        if (target.attached && Object.keys(target.attached).length > 0) {
+            var hostId = Object.keys(target.attached)[0];
+            var podLocation = parseInt(target.attached[hostId]);
+            if (!isNaN(podLocation) && podLocation !== 0) {
+                var hostShip = gamedata.getShip(hostId);
+                if (hostShip) {
+                    var hittableSides = weaponManager.getShipHittingSide(shooter, hostShip);
+                    if (!hittableSides.includes(podLocation)) {
+                        return 0; // Pod is attached to a side not facing the shooter
+                    }
+                }
+            }
+        }
+        */
         /*//If skin-dancing shots which have a front arc automatically hit.
         if (gamedata.gamephase == 3 && !weapon.ballistic && shooter.skinDancing[target.id] === true) {
             var inFrontArc = mathlib.isInArc(0, weapon.startArc, weapon.endArc);
@@ -1165,7 +1210,7 @@ window.weaponManager = {
             noLockPenalty = 0.5;
         }
 
-		if(shooter.mine) noLockPenalty = 0; //A lock-on is assumed for Mines, but Jammer may still apply below.       
+        if (shooter.mine) noLockPenalty = 0; //A lock-on is assumed for Mines, but Jammer may still apply below.       
 
         //noLockMod =  rangePenalty * noLockPenalty; //moved lower   
         var jammermod = 0;
@@ -1618,7 +1663,7 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if(selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.      
+        if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.      
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
         if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
@@ -1636,7 +1681,13 @@ window.weaponManager = {
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
-
+            if (weapon.isBoardingAction && weapon.firingMode == 2 && !system){
+                if(gamedata.rules.desperate === undefined || (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)){
+                    var html = "You cannot choose to Wreak Havoc unless Desperate scenario rules are in effect.";
+                    confirm.warning(html);  
+                    return;                  
+                }                
+            }    
             //Only need to check first weapon
             if (blockedLosHex && blockedLosHex.length > 0 && !loSBlocked) {
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -2135,17 +2186,17 @@ window.weaponManager = {
                 var fighter = ship.systems[i];
                 for (var a in fighter.systems) {
                     var system = fighter.systems[a];
-                    if(system.weapon){
+                    if (system.weapon) {
                         var orders = weaponManager.getAllFireOrdersFromSystem(system);
                         if (orders.length > 0) return true;
-                    }  
+                    }
                 }
             } else {
                 var system = ship.systems[i];
-                if(system.weapon){
+                if (system.weapon) {
                     var orders = weaponManager.getAllFireOrdersFromSystem(system);
                     if (orders.length > 0) return true;
-                }    
+                }
             }
         }
         return false;
@@ -2423,14 +2474,16 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
-    getDamagesCausedBy: function getDamagesCausedBy(fire, damages) {
+    getDamagesCausedBy: function getDamagesCausedBy(fire, damages, ships = null) {
 
         if (!damages) {
             damages = [];
         }
 
-        for (var i in gamedata.ships) {
-            var ship = gamedata.ships[i];
+        var shipsToIterate = ships || gamedata.ships;
+
+        for (var i in shipsToIterate) {
+            var ship = shipsToIterate[i];
             var list = Array();
 
             for (var a in ship.systems) {
@@ -2496,7 +2549,7 @@ window.weaponManager = {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
-            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit"
+            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding"
         ];
 
         return shortLogTypes.includes(fire.damageclass);

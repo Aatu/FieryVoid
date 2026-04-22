@@ -15,7 +15,7 @@ class proxMineOrthine extends Mine{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 2;        
+        $this->signature = 3;        
         
         $this->turncost = 0;
         $this->turndelaycost = 0;

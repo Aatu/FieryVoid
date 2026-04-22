@@ -2,13 +2,13 @@
 
 window.ShipIcon = function () {
 
-    var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
+    var directionOfMovementTexture = new THREE.TextureLoader().load(window.AssetManager.getSmartImagePath('./img/directionOfMovement.png'));
     directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
     directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
-    var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
+    var directionOfProwTexture = new THREE.TextureLoader().load(window.AssetManager.getSmartImagePath('./img/directionOfProw.png'));
     directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
     directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
-    const THRUSTER_TEXTURE = new THREE.TextureLoader().load("./img/systemicons/thrusterICON1.png");
+    const THRUSTER_TEXTURE = new THREE.TextureLoader().load(window.AssetManager.getSmartImagePath("./img/systemicons/thrusterICON1.png"));
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 

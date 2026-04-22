@@ -334,8 +334,56 @@
         }
         
 
-        public static function setPreturnMovementStatusForShip($ship, $turn){
-            $turn = $turn -1;
+        public static function setPreturnMovementStatusForShip($ship, $turn, $gamedata = null){
+            $turn = $turn -1;                 
+            
+			// Handle attached ships synchronization
+			if ($gamedata && !empty($ship->attached)) {             
+				$parentId = key($ship->attached);
+				$parent = $gamedata->getShipById($parentId);
+				if ($parent) {
+					$rolled = self::isRolled($parent, $turn);
+					$rolling = self::isRolling($parent, $turn);
+					$pivoting = self::isPivoting($parent, $turn); // 0: false, 1: left, 2:right
+					$lastmove = $parent->getLastMovement();
+					
+					$location = $ship->attached[$parent->id];
+					$locOffset = self::getAttachedFacingOffset($location);
+					
+					// Breaching pods as FighterFlight units cannot roll themselves, 
+					// so we adjust their absolute facing by 180 degrees (+3) instead.
+					$facingOffset = $locOffset;
+					if ($ship instanceof FighterFlight && $rolled) {
+						$facingOffset = ($facingOffset + 3) % 6;
+					}
+					
+					$movements = array();            
+					
+					if ($pivoting == 1){
+						$movements[] = new MovementOrder(null, "isPivotingLeft", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, ($lastmove->facing + $facingOffset)%6, true, ($turn+1), 0, $ship->iniative);
+					}else if ($pivoting == 2){
+						$movements[] = new MovementOrder(null, "isPivotingRight", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, ($lastmove->facing + $facingOffset)%6, true, ($turn+1), 0, $ship->iniative);
+					}
+					
+					if ($rolling && !($ship instanceof FighterFlight)){
+						$movements[] = new MovementOrder(null, "isRolling", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, ($lastmove->facing + $facingOffset)%6, true, ($turn+1), 0, $ship->iniative);
+						$rolled = !$rolled;
+					}
+					
+					if ($rolled && !($ship instanceof FighterFlight)){
+						$movements[] = new MovementOrder(null, "isRolled", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, ($lastmove->facing + $facingOffset)%6, true, ($turn+1), 0, $ship->iniative);
+					}
+					
+					// Ensure the pod always has at least one movement order for the new turn 
+					// to synchronize its speed, heading, and position with the host ship.
+					if (empty($movements)) {
+						$movements[] = new MovementOrder(null, "sync", $lastmove->position, 0,0, $lastmove->speed, $lastmove->heading, ($lastmove->facing + $facingOffset)%6, true, ($turn+1), 0, $ship->iniative);
+					}
+					
+					return $movements;
+				}         
+			}
+
             $rolled = self::isRolled($ship, $turn);
             $rolling = self::isRolling($ship, $turn);
             $pivoting = self::isPivoting($ship, $turn); // 0: false, 1: left, 2:right
@@ -380,6 +428,7 @@
             return $movements;
             
         }//endof setPreturnMovementStatusForShip()
+
  
         
          public static function isRolled($ship, $turn = -1){
@@ -607,6 +656,19 @@
 			return $newMovement;
 
 		}//endof doStuckEngine()
+
+		public static function getAttachedFacingOffset($location) {
+			$locOffset = 0;
+			if ($location == 1) $locOffset = 3; // Forward section, pod faces Aft
+			else if ($location == 2) $locOffset = 0; // Aft section, pod faces Forward
+			else if (in_array($location, [3, 32])) $locOffset = 1; // Port, pod faces Starboard-Forward
+			else if ($location == 31) $locOffset = 2; // Port-Forward, pod faces Starboard-Aft
+			else if (in_array($location, [4, 42])) $locOffset = 5; // Starboard, pod faces Port-Forward
+			else if ($location == 41) $locOffset = 4; // Starboard-Forward, pod faces Port-Aft
+			
+			return $locOffset;
+		}
+
     
 
     }

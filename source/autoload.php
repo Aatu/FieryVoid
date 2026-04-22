@@ -1706,7 +1706,7 @@ spl_autoload_register(
 
 //                'pakmarasimsalle' => '/server/model/ships/pakmara/PakmaraSimSallE.php',					
 //                'pakmarasimsalle2' => '/server/model/ships/pakmara/PakmaraSimSallE2.php',					
-				'plasmaweb' => '/server/model/weapons/customNexus.php',
+//				'plasmaweb' => '/server/model/weapons/customNexus.php',
 //				'plasmablast' => '/server/model/weapons/customNexus.php',
 				'testmissile' => '/server/model/weapons/customNexus.php',
 				'testmissile2' => '/server/model/weapons/customNexus.php',
@@ -3585,6 +3585,8 @@ spl_autoload_register(
                 'dewmined2' => '/server/model/ships/EA/dewMineD2.php',
                 'dewmined3' => '/server/model/ships/EA/dewMineD3.php',                                
 
+
+
                 //Minbari Mines - 5
                 'proxminesivhal' => '/server/model/ships/minbari/proxMineSivhal.php',
                 'proxminesivhaljam' => '/server/model/ships/minbari/proxMineSivhalJam.php',   
@@ -3596,7 +3598,7 @@ spl_autoload_register(
                 'proxminedpar' => '/server/model/ships/narn/proxMineDPar.php',
                 'captorminedgoth' => '/server/model/ships/narn/captorMineDGoth.php', 
                 'dewminedmal' => '/server/model/ships/narn/dewMineDMal.php',                                  
-                'dewminebtath' => '/server/model/ships/narn/dewMineDTath.php', 
+                'dewminedtath' => '/server/model/ships/narn/dewMineDTath.php', 
                 'dewminedkak' => '/server/model/ships/narn/dewMineDKak.php', 
                 'dewminedshal' => '/server/model/ships/narn/dewMineDShal.php',   
                 
@@ -3646,7 +3648,8 @@ spl_autoload_register(
                 //Descari Mines - 3
                 'captorminesirna' => '/server/model/ships/descari/captorMineSirna.php',                 
                 'dewminesircha' => '/server/model/ships/descari/dewMineSircha.php', 
-                'dewminesircho' => '/server/model/ships/descari/dewMineSircho.php', 
+                'dewminesircho' => '/server/model/ships/descari/dewMineSircho.php',
+                'dewminedd3' => '/server/model/ships/descari/dewMineDD3.php',                 
                 
                 //Dilgar Mines - 10
                 'proxmineintavia' => '/server/model/ships/dilgar/proxMineIntaviA.php',

@@ -38,8 +38,7 @@ class Altareus extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new BallisticTorpedo(4, 5, 6, 300, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
+        $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
 		$LCVRail = new DockingCollar(3, 8);
 			$LCVRail->displayName = "LCV Rail";        
 			$this->addFrontSystem($LCVRail);
@@ -48,8 +47,7 @@ class Altareus extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         $this->addAftSystem(new JumpEngine(3, 10, 3, 20));
         $this->addAftSystem(new BallisticTorpedo(4, 5, 6, 120, 240));
-        $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
-        $this->addAftSystem(new TwinArray(3, 6, 2, 90, 270));
+        $this->addAftSystem(new HeavyParticleBeam(3, 6, 2, 90, 270));
 		$LCVRail = new DockingCollar(3, 8);
 			$LCVRail->displayName = "LCV Rail";        
 			$this->addAftSystem($LCVRail);
@@ -72,7 +70,7 @@ class Altareus extends HeavyCombatVessel{
                 1=> array(
                     3 => "Thruster",
                     6 => "LCV Rail",
-                    9 => "Twin Array",
+                    9 => "Heavy Particle Beam",
 					11 => "Ballistic Torpedo",
                     18 => "Structure",
                     20 => "Primary",
@@ -80,7 +78,7 @@ class Altareus extends HeavyCombatVessel{
                 2=> array(
                     4 => "Thruster",
                     6 => "LCV Rail",
-                    8 => "Twin Array",
+                    8 => "Heavy Particle Beam",
                     9 => "Jump Engine",
 					11 => "Ballistic Torpedo",
                     18 => "Structure",

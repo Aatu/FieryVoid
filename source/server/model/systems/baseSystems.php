@@ -2260,6 +2260,40 @@ class CnC extends ShipSystem implements SpecialAbility {
 			
 		}
 		
+		// Boarding Action Detach / Destroy logic
+		if (!empty($ship->hasAttached)) {
+			foreach ($ship->hasAttached as $shooterId => $location) {
+				$boardingShip = $gamedata->getShipById($shooterId);
+				if ($boardingShip && !$boardingShip->isDestroyed()) {
+					$struct = $ship->getStructureSystem($location);
+					if (!$struct) $struct = $ship->getStructureSystem(0); // Fallback to primary structure
+
+					if ($struct && $struct->isDestroyed()) {
+						// Target structure destroyed, kill the boarding ship
+						if ($boardingShip instanceof FighterFlight) {
+							foreach ($boardingShip->systems as $fighter) {
+								if (!$fighter->isDestroyed()) {
+									$damageEntry = new DamageEntry(-1, $boardingShip->id, -1, $gamedata->turn, $fighter->id, $fighter->getRemainingHealth(), 0, 0, -1, true, false, "Target structure destroyed", "Standard", -1, -1);
+									$damageEntry->updated = true;
+									$fighter->damage[] = $damageEntry;
+								}
+							}
+						} /*else { //We don't need ship logic, only FighterFlight units attached atm.
+							$boardingStruct = $boardingShip->getStructureSystem(0);
+							if ($boardingStruct && !$boardingStruct->isDestroyed()) {
+								$damageEntry = new DamageEntry(-1, $boardingShip->id, -1, $gamedata->turn, $boardingStruct->id, $boardingStruct->getRemainingHealth(), 0, 0, -1, true, false, "Target structure destroyed", "Standard", -1, -1);
+								$damageEntry->updated = true;
+								$boardingStruct->damage[] = $damageEntry;
+							}
+						}*/
+					} else if ($ship->isDestroyed()) {
+						// Parent ship destroyed but not the structure, detach!
+						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,"Detached","Detached",$shooterId . "=>Detach");
+					}
+				}
+			}
+		}
+
 	}
 	
 	
@@ -2280,6 +2314,44 @@ class CnC extends ShipSystem implements SpecialAbility {
             $strippedSystem->marines = $this->marines;                             
             return $strippedSystem;
         }
+
+	public function onIndividualNotesLoaded($gamedata) {
+		//parent::onIndividualNotesLoaded($gamedata);
+		$ship = $this->getUnit();
+		
+		if (is_array($this->individualNotes)) {
+			$remainingNotes = array();
+			foreach ($this->individualNotes as $currNote) {
+				if ($currNote->notekey === 'Attached') {
+					$parts = explode('=>', $currNote->notevalue);
+					if (count($parts) === 2) {
+						$shooterId = (int)$parts[0];
+						$location = (int)$parts[1];
+						$ship->hasAttached[$shooterId] = $location;
+						
+						$boardingShip = $gamedata->getShipById($shooterId);
+						if ($boardingShip) {
+							$boardingShip->attached[$ship->id] = $location;
+						}
+					}
+				} else if ($currNote->notekey === 'Detached') {
+					$parts = explode('=>', $currNote->notevalue);
+					if (count($parts) === 2) {
+						$shooterId = (int)$parts[0];
+						unset($ship->hasAttached[$shooterId]);
+						
+						$boardingShip = $gamedata->getShipById($shooterId);
+						if ($boardingShip) {
+							unset($boardingShip->attached[$ship->id]);
+						}
+					}
+				} else {
+					$remainingNotes[] = $currNote;
+				}
+			}
+			$this->individualNotes = $remainingNotes;
+		}
+	}
 			
 } //endof class CnC
 
@@ -4219,6 +4291,7 @@ class AdaptiveArmorController extends ShipSystem{
 		}
 		$weaponClassArray[] = $weapon->weaponClass;
 		foreach($weaponClassArray as $weaponClass){
+			if($weaponClass == "Boarding") continue; //Exclude unnecessary types of weapon.
 			//check if already defined, if not - add to both tables
 			if (!isset($this->allocatedAA[$weaponClass])){
 				$this->availableAA[$weaponClass] = 0;
@@ -6959,6 +7032,7 @@ class MineControllerDEW extends ShipSystem{
 
     public function setSystemDataWindow($turn){
             $this->data["Max Range"] = $this->rangeSetting;
+            $this->data["Accuracy"] = $this->accuracy;			
             foreach($this->allocatedRanges as $shipType=>$range){
                 $this->data[' - '.$shipType.' range'] =  $range;
             }         
@@ -7028,15 +7102,15 @@ class MineControllerDEW extends ShipSystem{
 
 			foreach($mine->systems as $weapon){		
 				if($weapon instanceof Weapon  && $weapon->name !== "RammingAttack"){
-					if($weapon->fireControl[0] !== null) $weapon->fireControl[0] = $this->accuracy;
-					if($weapon->fireControl[1] !== null) $weapon->fireControl[1] = $this->accuracy;
-					if($weapon->fireControl[2] !== null) $weapon->fireControl[2] = $this->accuracy;
+					if($weapon->fireControl[0] !== null) $weapon->fireControl[0] = $weapon->fireControl[0] + $this->accuracy;
+					if($weapon->fireControl[1] !== null) $weapon->fireControl[1] = $weapon->fireControl[1] + $this->accuracy;
+					if($weapon->fireControl[2] !== null) $weapon->fireControl[2] = $weapon->fireControl[2] + $this->accuracy;
 
 					if (!empty($weapon->fireControlArray)) {
 						foreach ($weapon->fireControlArray as $mode => $fcArray) {
-							if ($weapon->fireControlArray[$mode][0] !== null) $weapon->fireControlArray[$mode][0] = $this->accuracy;
-							if ($weapon->fireControlArray[$mode][1] !== null) $weapon->fireControlArray[$mode][1] = $this->accuracy;
-							if ($weapon->fireControlArray[$mode][2] !== null) $weapon->fireControlArray[$mode][2] = $this->accuracy;
+							if ($weapon->fireControlArray[$mode][0] !== null) $weapon->fireControlArray[$mode][0] = $weapon->fireControlArray[$mode][0] + $this->accuracy;
+							if ($weapon->fireControlArray[$mode][1] !== null) $weapon->fireControlArray[$mode][1] = $weapon->fireControlArray[$mode][1] + $this->accuracy;
+							if ($weapon->fireControlArray[$mode][2] !== null) $weapon->fireControlArray[$mode][2] = $weapon->fireControlArray[$mode][2] + $this->accuracy;
 						}
 					}
 

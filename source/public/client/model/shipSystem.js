@@ -12,6 +12,7 @@ var ShipSystem = function ShipSystem(json, ship) {
 	if (this.damage === undefined) this.damage = [];
 	if (this.criticals === undefined) this.criticals = [];
 	if (this.critData === undefined) this.critData = [];
+	if (this.fireOrders === undefined) this.fireOrders = [];		
 	if (this.power === undefined) this.power = [];
 	if (this.specialAbilities === undefined) this.specialAbilities = [];
 	if (this.outputMod === undefined) this.outputMod = 0;

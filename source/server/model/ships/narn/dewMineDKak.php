@@ -10,7 +10,7 @@ class dewMineDKak extends Mine{
         $this->imagePath = "img/ships/narnMine.png";
         $this->shipClass = "D'Kak DEW Mine";
 		$this->occurence = "common";
-		//$this->variantOf = 'NONE';
+        $this->variantOf = "D'Shal DEW Mine";
         $this->isd = 2200;
         
         $this->forwardDefense = 12;

@@ -1,9 +1,9 @@
 <?php
-ob_start(); // Buffer any stray whitespace from included legacy files
+// global.php handles output buffering and compression via fv_compress_output()
+require_once 'global.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-require_once 'global.php';
 
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -97,20 +97,12 @@ try {
 }
 
 // Clean any stray text/whitespace that was output by included files
+// Note: global.php's universal handler will capture $ret for compression.
 if(ob_get_length()) ob_clean();
-
-// Phase 4: ETag Cache Optimization
-// Calculate ETag on the raw JSON to allow 304 Not Modified responses.
-$etag = '"' . md5($ret) . '"';
-header("ETag: $etag");
-
-if (isset($_SERVER['HTTP_IF_NONE_MATCH']) && $_SERVER['HTTP_IF_NONE_MATCH'] === $etag) {
-    header("HTTP/1.1 304 Not Modified");
-    exit;
-}
 
 echo $ret;
 exit;
+
 
 /* //Old version
 	ob_start("ob_gzhandler"); 

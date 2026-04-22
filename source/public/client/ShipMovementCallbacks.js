@@ -16,6 +16,12 @@ window.ShipMovementCallbacks = function () {
         this.updateCallback({ ship: this.ship });
     };
 
+    ShipMovementCallbacks.prototype.detachCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.doDetach(this.ship);
+        this.updateCallback({ ship: this.ship });
+    };
+
     ShipMovementCallbacks.prototype.morejinkCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doJink(this.ship, 1);

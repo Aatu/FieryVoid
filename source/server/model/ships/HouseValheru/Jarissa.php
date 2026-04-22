@@ -37,14 +37,14 @@ class Jarissa extends MediumShip{
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
 		
-        $this->addFrontSystem(new HeavyParticleBeam(2, 6, 2, 180, 60));
+        $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 180, 60));
 		$this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
-        $this->addFrontSystem(new HeavyParticleBeam(2, 6, 2, 300, 180));
+        $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 300, 180));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
 		
-		$this->addAftSystem(new HeavyParticleBeam(2, 6, 2, 120, 360));
-        $this->addAftSystem(new HeavyParticleBeam(2, 6, 2, 0, 240));
+		$this->addAftSystem(new TwinArray(3, 6, 2, 120, 360));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 0, 240));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
        
@@ -67,7 +67,7 @@ class Jarissa extends MediumShip{
                 ),
                 2=> array(
                         6 => "Thruster",
-                        10 => "Heavy Particle Beam",
+                        10 => "Twin Array",
                         17 => "Structure",
                         20 => "Primary",
                 ),

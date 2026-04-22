@@ -8,7 +8,7 @@ class dewMineBR extends Mine{
         $this->faction = "Drazi Freehold";
         $this->phpclass = "dewMineBR";
         $this->imagePath = "img/ships/draziMine.png";
-        $this->shipClass = "Type-BP DEW Mine";
+        $this->shipClass = "Type-BR DEW Mine";
 		$this->occurence = "common";
 		$this->variantOf = "Type-BT DEW Mine";
         $this->isd = 2200;

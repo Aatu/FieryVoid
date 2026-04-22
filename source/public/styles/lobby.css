@@ -143,7 +143,7 @@
 }
 
 .store span {
-    padding-left: 10px;
+    padding-left: 5px;
 
 }
 
@@ -190,6 +190,21 @@
     font-weight: 525;
 }
 
+.store .factionname .faction-toggle-icon {
+    display: inline-block;
+    width: 25px;
+    text-align: center;
+    font-family: monospace;
+    color: #b4bdca;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right: 0px;
+    vertical-align: top;
+    position: relative;
+    top: -1px;
+    padding-left: 15px;
+}
+
 .store .ship {
     color: #90b1ee;
     /* previous value #81a7ec */
@@ -200,7 +215,7 @@
 
 .store .shipsizehdr {
     color: #d0dbec;
-    margin-left: 6px;
+    margin-left: 20px;
     margin-top: 3px;
     margin-bottom: 3px;
     font-size: 14px;
@@ -227,7 +242,7 @@
 }
 
 .category-container {
-    margin-left: 10px;
+    margin-left: 20px;
     padding-left: 0px;
     padding-bottom: 2px;
 }
@@ -611,7 +626,7 @@
 .filter-container-style {
     margin-top: 0px;
     margin-left: 5px;
-    font-size: 12px;
+    font-size: 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -623,6 +638,7 @@
     margin-right: 5px;
     text-decoration: underline;
     color: #8bcaf2;
+    font-size: 14px;    
 }
 
 .filter-pipe-separator {
@@ -635,6 +651,7 @@
     text-decoration: underline;
     margin-right: 5px;
     color: #8bcaf2;
+    font-size: 14px;    
 }
 
 .isd-filter-label-style {
@@ -644,6 +661,7 @@
 
 .filter-by-isd-text {
     margin-right: 2px;
+    font-size: 14px;    
 }
 
 .isd-input-style {
@@ -655,7 +673,7 @@
 .reset-isd-link-style {
     text-decoration: underline;
     margin-left: 3px;
-    font-size: 11px;
+    font-size: 12px;
     color: #8bcaf2;
 }
 
@@ -669,6 +687,7 @@
 
 .tier-label-style {
     margin-left: 5px;
+    font-size: 14px;
 }
 
 .tier-pipe-separator {
@@ -837,4 +856,12 @@
 #mapPreview {
     display: block;
     min-width: 480px;
+}
+
+.factionsubgroup-header {
+    margin-left: 20px;
+}
+
+.factionsubgroup-header + .faction-group-container {
+    margin-left: 20px;
 }

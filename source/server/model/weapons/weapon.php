@@ -1179,7 +1179,34 @@ public function getStartLoading()
     
                     return;
                 }
-
+        /* //Handled in Front End        
+        // Attached pod facing restriction: pod can only be shot if its attachment location on the host ship faces the shooter
+        if (!empty($target->attached)) {
+            $hostShipId = key($target->attached);
+            $podLocation = (int)$target->attached[$hostShipId];
+            
+            if ($podLocation !== 0) {
+                $hostShip = $gamedata->getShipById($hostShipId);
+                if ($hostShip) {
+                    $relativeBearing = $hostShip->getBearingOnUnit($shooter);
+                    $locs = $hostShip->getLocations();
+                    $locationFacesShooter = false;
+                    foreach ($locs as $loc) {
+                        if ($loc['loc'] === $podLocation && mathlib::isInArc($relativeBearing, $loc['min'], $loc['max'])) {
+                            $locationFacesShooter = true;
+                            break;
+                        }
+                    }
+                    if (!$locationFacesShooter) {
+                        $fireOrder->needed = 0;
+                        $fireOrder->updated = true;
+                        $fireOrder->pubnotes .= "<br>Boarding pod is on an unexposed facing and cannot be targeted from this angle.";
+                        return;
+                    }
+                }
+            }
+        }
+        */        
         $pos = $shooter->getHexPos();
 		$targetPos = $target->getHexPos();
         $jammermod = 0;
@@ -1631,11 +1658,22 @@ public function getStartLoading()
         $target = $gamedata->getShipById($fireOrder->targetid);
         if($target == null) {
             $rolled = Dice::d(100);
-            $fireOrder->notes .= " FIRING SHOT: rolled: $rolled, needed: $$fireOrder->needed\n";
+            $fireOrder->notes .= " FIRING SHOT: rolled: $rolled, needed: $fireOrder->needed\n";
             $fireOrder->rolled = $rolled; //I think this is needed to generate a combat log note.           
             return; //Somehow a hex targeted weapon made it to the normal fire function, don't proceed.
-        }    
-
+        } 
+        
+        if ($shooter instanceof Mine){ //Don't fire if hit chances are less than 0, and remove fireOrder so shot isn't saved to db.
+            if ($fireOrder->needed <= 0){
+                foreach ($this->fireOrders as $key => $fo) {
+                    if ($fo->id === $fireOrder->id) {
+                        unset($this->fireOrders[$key]);
+                        break;
+                    }
+                }
+                return;
+            }
+        }
 
         $fireOrder->needed -= $fireOrder->totalIntercept;
         $notes = "Interception: " . $fireOrder->totalIntercept . " sources:" . $fireOrder->numInterceptors . ", final to hit: " . $fireOrder->needed;

@@ -9413,7 +9413,13 @@ class BattleLaserFtr extends BattleLaser {
         public function getDamage($fireOrder){        return Dice::d(6)+$this->damagebonus;   }
         public function setMinDamage(){     $this->minDamage = 1+$this->damagebonus ;      }
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
+
     } //endof GatlingGunFtr
+
+
+
+
+
 
 
 

@@ -30,10 +30,13 @@ var Ship = function Ship(json) {
 
     this.hexOffsets = json.hexOffsets || this.hexOffsets || null;
 
-    // Optimization #2: Server omits empty/default ship-level properties.
+    // Optimization: Server omits empty/default ship-level properties.
     if (this.EW === undefined || this.EW === null) this.EW = [];
     if (this.spawned === undefined) this.spawned = -1;
     if (this.skinDancing === undefined) this.skinDancing = false;
+    if (this.hasAttached === undefined || this.hasAttached === false) this.hasAttached = {};
+    if (this.attached === undefined || this.attached === false) this.attached = {};
+
     if (json.enhancementOptions === undefined && (window.gamedata && window.gamedata.status !== 'LOBBY')) {
         this.enhancementOptions = [];
     }

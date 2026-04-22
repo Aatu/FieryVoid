@@ -329,10 +329,10 @@ FtrInterdictor.prototype.constructor = FtrInterdictor;
 
 
 var ThirdspaceShield = function ThirdspaceShield(json, ship) {
-	ShipSystem.call(this, json, ship);
+	Shield.call(this, json, ship);
 	this.defensiveType = "none";
 };
-ThirdspaceShield.prototype = Object.create(ShipSystem.prototype);
+ThirdspaceShield.prototype = Object.create(Shield.prototype);
 ThirdspaceShield.prototype.constructor = ThirdspaceShield;
 ThirdspaceShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
 	//this is made to be a shield just to display arc visually, no actual protection

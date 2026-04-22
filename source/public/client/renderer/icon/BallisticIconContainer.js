@@ -248,6 +248,8 @@ window.BallisticIconContainer = function () {
 				'Shredder': { type: 'hexBlue', text: 'Shredder', color: '#00b8e6' },
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
+				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
+				'Anti-Fighter Sand Caster': { type: 'hexYellow', text: 'Sand', color: '#787800' },				
 				'Psychic Field': { type: 'hexRed', text: 'Psychic', color: '#e6140a' },
 				'Second Sight': { type: 'hexPurple', text: 'Second Sight', color: '#7f00ff' },
 				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },

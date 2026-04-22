@@ -10,7 +10,7 @@ class dewMineDShal extends Mine{
         $this->imagePath = "img/ships/narnMine.png";
         $this->shipClass = "D'Shal DEW Mine";
 		$this->occurence = "common";
-		//$this->variantOf = 'NONE';
+		//$this->variantOf = '"D'Shal DEW Mine";
         $this->isd = 2200;
         
         $this->forwardDefense = 12;
@@ -25,7 +25,6 @@ class dewMineDShal extends Mine{
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
         $this->mineType = 'DEW';  
-        $this->notes = 'Must be fired manually';
         
 		$this->outOfTier = array('EMINE'=>1);           
        		    	    	    	    

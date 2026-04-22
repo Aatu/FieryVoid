@@ -71,7 +71,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 
 		<!-- Preload critical bundle to parallelize download with large inline JSON payloads below -->
-		<?php $debug = isset($_GET['debug']); ?>
+		<?php $debug = (isset($_GET['debug']) || isset($_GET['DEBUG'])); ?>
 		<?php if (!$debug): ?>
 		<link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/gamelobby.legacy.bundle.js'); ?>" as="script">
 		<?php endif; ?>
@@ -82,6 +82,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">          
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
         <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+        <script src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
         <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">        
 		

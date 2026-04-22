@@ -1,5 +1,5 @@
 <?php
-class PolarenNorevet extends MediumShip{
+class PolarenNorevet extends MediumShipLeftRight{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);

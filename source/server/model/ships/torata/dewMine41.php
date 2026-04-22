@@ -4,7 +4,7 @@ class dewMine41 extends Mine{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 80;
+		$this->pointCost = 64;
 		$this->faction = "Torata Regency";
         $this->phpclass = "dewMine41";
         $this->imagePath = "img/ships/torataMine.png";
@@ -41,6 +41,8 @@ class dewMine41 extends Mine{
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 4));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
         $this->addPrimarySystem(new MineControllerDEW(0, 1, 0, 8, 4)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range/output, $accuracy 
+        $this->addPrimarySystem(new LightParticleBeamShip(0, 1, 1, 0, 360));
+        $this->addPrimarySystem(new LightParticleBeamShip(0, 1, 1, 0, 360));          
         $this->addPrimarySystem(new LaserAccelerator(0, 1, 1, 0, 360)); 
         $this->addPrimarySystem(new LightParticleBeamShip(0, 1, 1, 0, 360));
         $this->addPrimarySystem(new LightParticleBeamShip(0, 1, 1, 0, 360));                

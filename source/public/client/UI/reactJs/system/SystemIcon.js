@@ -372,11 +372,11 @@ const getDestroyed = (ship, system) => shipManager.systems.isDestroyed(ship, sys
 
 const getBackgroundImage = (system) => {
     if ((system.name == "thruster") && (!system.iconPath)) { //technical thrusters have predefined image!
-        return './img/systemicons/thruster' + system.direction + '.png';
+        return window.AssetManager.getSmartImagePath('./img/systemicons/thruster' + system.direction + '.png');
     } else if (system.iconPath) {
-        return `./img/systemicons/${system.iconPath}`;
+        return window.AssetManager.getSmartImagePath(`./img/systemicons/${system.iconPath}`);
     } else {
-        return `./img/systemicons/${system.name}.png`;
+        return window.AssetManager.getSmartImagePath(`./img/systemicons/${system.name}.png`);
     }
 }
 

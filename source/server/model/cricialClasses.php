@@ -493,19 +493,19 @@ class MayOverheat extends Critical {
 
 class Sabotage extends Critical{
 	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
-    public $description = "Enemy marine unit is undertaking sabotage operations"; 
+    public $description = "Marine are sabotaging this system"; 
 	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
     }
 } 
 
 class SabotageElite extends Critical{
 	//Used by Breaching Pods to mark when Marines are trying to sabotage a system / wreck havoc.
-    public $description = "Elite marine unit is undertaking sabotage operations"; 
+    public $description = "Elite Marines are sabotaging this system"; 
 	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
     }
 } 
 
@@ -519,37 +519,37 @@ class ProfileIncreased extends Critical{
 
 class CaptureShip extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "Enemy marines are attempting to capture this ship"; 
+    public $description = "Marines attempting to capture this ship"; 
 	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
     }
 } 
 
 class CaptureShipElite extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "Elite marines are attempting to capture this ship"; 
+    public $description = "Elite marines attempting to capture this ship"; 
 	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
     }
 } 
 
 class RescueMission extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "An Marine unit is conducting a rescue mission"; 
+    public $description = "Marines are conducting a rescue mission"; 
 	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
     }
 } 
 
 class RescueMissionElite extends Critical{
 	//Used by Breaching Pods to mark when Marines are conducting a Rescue mission for scenarios etc
-    public $description = "An elite Marine unit is conducting a rescue mission"; 
+    public $description = "Marines are conducting a rescue mission"; 
 	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
     }
 } 
 
@@ -557,8 +557,8 @@ class DefenderLost extends Critical{
 	//To record when defending marines are killed.
     public $description = "Defender lost"; 
 	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
-    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true );
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0, $forInfo = false, $param = null){  	
+    parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend, true, $param);
     }
 } 
 

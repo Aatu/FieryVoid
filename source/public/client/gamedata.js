@@ -1516,7 +1516,7 @@ getActiveShipName: function getActiveShipName() {
             td.className = "iniImage";
 
             var img = document.createElement("img");
-            img.src = ships[i].imagePath;
+            img.src = window.AssetManager.getSmartImagePath(ships[i].imagePath);
 
             if (ships[i].flight) {
                 td.classList.add("flight");

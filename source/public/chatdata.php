@@ -1,5 +1,6 @@
-<?php 
-ob_start();
+<?php
+// global.php handles output buffering and compression
+require_once 'global.php';
 
 header('Content-Type: application/json; charset=utf-8');
 // APCu Fast Poll: Check early, BEFORE session start or DB connections

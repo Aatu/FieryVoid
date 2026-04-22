@@ -296,6 +296,7 @@ const SoundButton = styled(MainButton)`
         props.$toggled
             ? 'url("./img/soundOn.png")'
             : 'url("./img/soundOff.png")'};
+    border: 1px solid #3793c8;
     border-right: none;
 `;
 

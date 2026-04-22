@@ -11,6 +11,24 @@ error_reporting(E_ALL);
 require_once dirname(__DIR__) . '/autoload.php';
 require_once dirname(__DIR__) . '/server/lib/AssetLoader.php';
 
+set_exception_handler(function ($e) {
+    Debug::error($e);
+    if (ini_get('display_errors')) {
+        echo "<h1>Fatal Error</h1>";
+        echo "<p>" . $e->getMessage() . "</p>";
+        echo "<pre>" . $e->getTraceAsString() . "</pre>";
+    }
+});
+
+set_error_handler(function ($errno, $errstr, $file, $line) {
+    if (!(error_reporting() & $errno)) {
+        return;
+    }
+    throw new ErrorException($errstr, $errno, 0, $file, $line);
+});
+
+
+
 // Prevent PHP from sending legacy 1981 headers if a session starts
 session_cache_limiter(''); 
 session_start();

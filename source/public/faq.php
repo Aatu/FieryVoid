@@ -117,15 +117,21 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="boarding" style="margin-top: 15px;">Boarding Actions & Marines</h3>
         <ul>
-            <li>Many factions have access to Breaching Pods, which come equipped with a marines that can undertake boarding actions.</li>
-            <li>During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Sabotage, Capture Ship and Rescue).</li>
-            <li>Pods first roll to attach on a d10, but success is automatic if they are moving faster than the target ship and the speed difference is not higher than pods thrust rating. 
-                If the speed difference to target is greater than pod thrust rating it is unable to attach. 
+            <li>Many factions have access to Breaching Pods, which come equipped with marines that can undertake boarding actions.</li>
+            <br>              
+            <li>During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Capture Ship, Sabotage and Rescue).</li>
+            <li>Pods will initially roll to attach on a d10 in the same way that normal weapons roll to hit enemies, 
+                but the calculation is very different and success is automatic if they are moving faster than the target ship and the speed difference between the two units is not higher than pod's thrust rating. 
+                If the speed difference to target is greater than pod thrust rating it is simply unable to attach. 
                 If the target is moving faster, each point of speed difference is -10% chance to attach.  
-                Pods cannot attached to ships with Advanced Armor and certain factions like Llort have +1 to attach rolls.</li>
-            <br>                 
-            <li>Once attached, the Pod will roll a d10 again on the following table to try and deliver the Marines, with a base chance of 50% to successfully board the vessel.  
-                Unsuccessful marines may be lost or return safely their pod.</li>                           
+                Pods cannot attach to ships with Advanced Armor and certain factions like Llort have +1 to attach rolls.</li>
+            <li>Breaching Pods will remain attached to a vessels facing structure block until they choose to Detach in the Movement Phase, or the vessel is destroyed 
+                (providing that the structure location the pod is attached to is NOT also destryed).  If the structure block a pod is attached to IS detroyed before the Pod detaches, then the Pod is automatically destroyed.  
+                While attached, Pods matach speed and heading with their host ship, and suffer -10 Initiative penalty.  When the Detach they will automatically face away from the host ship to which they were attached.</li>
+            <li>Units can shoot at attached pods, providing they are in arc of the structure location the pod is attached to, and will roll to hit them as normal. However any shot aimed at a pod will automatically hit the vessel it is attached to as well.</li>                 
+            <br>               
+            <li>After the attach roll, the Pod will attempt to deliver its marines by rolling on a d10 again on the following table, with a base chance of 50% to successfully board the vessel.  
+                Depedning on the roll, unsuccessful marines may be lost in the attempt or return safely their pod.</li>                           
             <li><strong>DELIVERY TABLE (D10):</strong>
                 <ul class="circle-list">
                     <li>1-5 - Marines successfully delivered.</li>
@@ -154,12 +160,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <ul class="circle-list">
                     <li><strong>CAPTURE: </strong>Marines will fight the defending marine contingents directly (defenders are shown in CnC tooltip!).  
                     This has been simplified from Tabletop, and now only involves two dice rolls per attacker, one to see if marines eliminate a defender (50% base chance) and a second to see if marines are eliminated (25% base chance).  
-                    If the attacking marines manage to defeat all defenders, the enemy ship is immediately be disabled for the remainder of the battle so long as there are still at least one attacking marine unit on board.
+                    If the attacking marines manage to defeat all defenders, the enemy ship is immediately be disabled for the remainder of the battle so long as there is still at least one attacking marine unit on board.
+                    After a successful capture, one marine unit will remain on the ship and the remainder will return to attached Breaching Pods if available
                     </li>
                     <br>                     
-                    <li><strong>SABOTAGE: </strong>Marines can either attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) 
-                    or Wreak Havoc on the ship more generally (e.g. minor damage to a Primary system, EW/Initiative/Thrust/Defence Profile penalties) by targeting it in the normal fashion.</li>  
-                    <li>In both cases, Marines will roll on a d10 the following tables to see how successful their mission has been:</li>
+                    <li><strong>SABOTAGE: </strong>Using this firing mode, Marines can attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) 
+                    or, if Desperate Rules are in effect, Wreak Havoc on the enemy ship (e.g. inflict minor damage to a Primary system or penatlies to ship's EW/Initiative/Thrust/Defence Profile) by targeting the ship itself, and not a specific system.   
+                    In both cases, Marines will roll on a d10 the following tables to see how successful their mission has been:</li>
+                    <li>Note - Marines which target a specific system and are successful in destroying it will then move to a Wreak Havoc mission providing they have not been eliminated.</li>                    
+
                     <li><strong>SABOTAGE TABLE (D10):</strong>
                         <ul class="circle-list">
                             <li>1 - Deal 3d6 damage to target system.</li>
@@ -168,7 +177,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                             <li>6-8 - No effect, Marines will try again next turn.</li>
                             <li>9+ - No effect, Marines were eliminated.</li> 
                         </ul>
-                    </li>                           
+                    </li>      
+                   
                     <li><strong>WREAK HAVOC TABLE (D10):</strong>
                         <ul class="circle-list">
                             <li>1 - Deal 1d6 damage to a non-Structure system on Primary Hit Chart.</li>
@@ -180,13 +190,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                             <li>9+ - No effect, Marines were eliminated.</li>                                                         
                         </ul>
                     </li>   
-                    <li>NOTE - Marines which target a specific system and are successful in destroying it will then move to a Wreak Havoc mission providing they have not been eliminated.</li>
+                    <li>NOTE - Marines which are successful in destroying their target system will return to an attached Breaching Pod if one is available, 
+                        otherwise they will swtich to a Wreak Havoc mission on the enemy vessel.</li>
                     <br>                    
                     <li><strong>RESCUE: </strong>For scenarios only, Marines will attach their pod and attempt to board as normal.  
-                    Then, from the following turn, the Combat Log will provide players with updates on the progress of their Rescue mission.</li>
+                    Then, from the following turn, the Combat Log will update players on the progress of their Rescue mission each turn.</li>
+
                     <li><strong>RESCUE TABLE:</strong>
                         <ul class="circle-list">
-                            <li>1-2 - Rescue is successful, Marines survive.</li>
+                            <li>1-2 - Rescue is successful, Marines survive and return to a Breaching Pod if one is available.</li>
                             <li>3-4 - Rescue is successful, but Marines eliminated.</li>
                             <li>5-6 - Rescue fails this turn, Marines will try again next turn.</li>
                             <li>7+ - Rescue fails, Marines were eliminated.</li> 
@@ -195,7 +207,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <br>   
-            <li>Note - Unlike Tabletop where Pods STAY attached to enemy units, this is not the case in FV and they are free to move the following turn.</li>
+            <li>Note - Ships euipped with Grappling Claws use the same rules to attach and deliver Marines as described above, however they do not currently attach to the enemy vessel in the same way as Breaching Pods.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -306,6 +318,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>If your 'General Lock On' score is greater than the Distance and Signature of the mine added together, this is added to your hit chance.  
                         E.g. If you have 10 EW allocated to mine detection and you spot a mine with a Signature of 1 at range 3, the minimum detection needed is 4 EW. Therefore, the
                         detecting ship has a +6 (multiplied by 5) to hit the mine.  So you'd gain +30% to hit, but would still have a double range penalty if there wasn't a OEW lock on the mine as per usual.</li>
+                    <li>Unless a mine is equipped with the Command Controller enhancement, it will not use its weapons to intercept.</li>    
                 </ul>
             </li>                        
             

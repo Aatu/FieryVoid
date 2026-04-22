@@ -2413,14 +2413,28 @@ MineControllerDEW.prototype.constructor = MineControllerDEW;
 
 MineControllerDEW.prototype.initializationUpdate = function () {
 	var ship = this.ship;
-	/*var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-		this.range = 0;
-	}*/
+
+	if (gamedata.gamephase == -2 && !this.FCRefreshed){//Buying phase, need to set FC for DEW weapons in Front End only.
+		this.refreshFireControl();
+	}
 
 	this.refreshData();
 	return this
 }
+
+MineControllerDEW.prototype.refreshFireControl = function () { //refresh description to show correct values
+
+	var ship = this.ship;
+	for (var i in ship.systems) {
+		var weapon = ship.systems[i];
+		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
+			if (weapon.fireControl[0] !== null)  weapon.fireControl[0] = weapon.fireControl[0] + this.data["Accuracy"];
+			if (weapon.fireControl[1] !== null)  weapon.fireControl[1] = weapon.fireControl[1] + this.data["Accuracy"];
+			if (weapon.fireControl[2] !== null)  weapon.fireControl[2] = weapon.fireControl[2] + this.data["Accuracy"];								
+		}
+	}
+	this.FCRefreshed = true;
+};
 
 MineControllerDEW.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
 	if (this.currClass == '') {

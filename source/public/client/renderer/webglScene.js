@@ -62,6 +62,7 @@ window.webglScene = function () {
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.localClippingEnabled = true;
 
@@ -364,7 +365,7 @@ window.webglScene = function () {
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
 
-        console.log(payload);
+        //console.log(payload);        
         if (this.lastPositionClicked) {
             //console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
         }

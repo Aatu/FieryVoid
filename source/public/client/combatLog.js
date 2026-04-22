@@ -39,7 +39,7 @@ window.combatLog = {
         
     },
 
-    logFireOrders: function logFireOrders(orders, printedLog = false) {
+    logFireOrders: function logFireOrders(orders, printedLog = false, ships = null) {
 
         orders = [].concat(orders);
 
@@ -81,7 +81,7 @@ window.combatLog = {
             if (fire.shots > 0) ordersC += 1;
 			if (fire.shotshit>0) ordersChit += 1;
 			if (fire.intercepted>0) ordersCintercepted += 1;
-            weaponManager.getDamagesCausedBy(fire, damages);
+            weaponManager.getDamagesCausedBy(fire, damages, ships);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
             //if (fire.shots > 0){ //otherwise shot is purely technical ... BUT show it too!
@@ -426,7 +426,7 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
 
     // Check if this turn's data is already cached
     if (combatLog.logCache[turn]) {
-        combatLog.showLog(combatLog.logCache[turn]);
+        combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
         return;
     }
 
@@ -445,9 +445,9 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
             );
 
             // Store in cache
-            combatLog.logCache[turn] = allFireOrders;
+            combatLog.logCache[turn] = {allFireOrders: allFireOrders, ships: data.ships};
 
-            combatLog.showLog(allFireOrders);
+            combatLog.showLog(allFireOrders, data.ships);
         }.bind(this),
         error: ajaxInterface.errorAjax
     });
@@ -504,7 +504,7 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
         });
     },
 
-    showLog: function showLog(allFireOrders) {
+    showLog: function showLog(allFireOrders, ships = null) {
         // Get the current turn from the combat log system
         var currentTurn = window.combatLog.getDisplayTurn();
     
@@ -521,7 +521,7 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
     
         // Process fire orders if any
         allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
-            combatLog.logFireOrders(logEntry, true);
+            combatLog.logFireOrders(logEntry, true, ships);
         });
     
         // Show the LogActual div

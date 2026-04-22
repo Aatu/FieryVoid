@@ -4,7 +4,7 @@ class Kitsune extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 210;
+	$this->pointCost = 180;
     $this->faction = "House Valheru";
 	$this->phpclass = "Kitsune";
 	$this->shipClass = "Kitsune Anti-fighter Platform";

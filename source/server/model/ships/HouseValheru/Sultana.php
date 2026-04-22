@@ -31,14 +31,14 @@ class Sultana extends HeavyCombatVessel{
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 360));
+        $this->addFrontSystem(new Plasmastream(4, 10, 5, 240, 360));
         $this->addFrontSystem(new Dualplasmastream(4, 10, 10, 300, 60));
-        $this->addFrontSystem(new TwinArray(3, 6, 2, 0, 180));
+        $this->addFrontSystem(new Plasmastream(4, 10, 5, 0, 120));
         
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
-        $this->addAftSystem(new Plasmastream(4, 10, 5, 0, 135));
-        $this->addAftSystem(new Plasmastream(4, 10, 5, 225, 360));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 180, 360));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 60));
@@ -58,13 +58,13 @@ class Sultana extends HeavyCombatVessel{
                 1=> array(
                     3 => "Thruster",
                     6 => "Dual Plasma Stream",
-                    8 => "Twin Array",
+                    9 => "Plasma Stream",
                     18 => "Structure",
                     20 => "Primary",
                 ),
                 2=> array(
                     6 => "Thruster",
-                    9 => "Plasma Stream",
+                    8 => "Twin Array",
                     18 => "Structure",
                     20 => "Primary",
 			),

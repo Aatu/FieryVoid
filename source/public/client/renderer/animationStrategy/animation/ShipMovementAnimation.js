@@ -22,9 +22,11 @@ window.ShipMovementAnimation = function () {
         */
 
         this.endPause = 0;
+        this.cameraFollow = true;
 
         Animation.call(this);
     }
+
 
     ShipMovementAnimation.prototype = Object.create(Animation.prototype);
 
@@ -54,7 +56,7 @@ window.ShipMovementAnimation = function () {
         this.shipIcon.setPosition(positionAndFacing.position);
         this.shipIcon.setFacing(-positionAndFacing.facing);
 
-        if (total > this.time && total < this.time + this.duration + this.endPause && !paused) {
+        if (this.cameraFollow && total > this.time && total < this.time + this.duration + this.endPause && !paused) {
             window.webglScene.moveCameraTo(positionAndFacing.position);
         }
     };

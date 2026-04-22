@@ -1204,7 +1204,7 @@ class Manager{
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
         
         foreach ($servergamedata->ships as $key=>$ship){
-            $movement = Movement::setPreturnMovementStatusForShip($ship, $servergamedata->turn);
+            $movement = Movement::setPreturnMovementStatusForShip($ship, $servergamedata->turn, $servergamedata);
             self::$dbManager->submitMovement($servergamedata->id, $ship->id, $servergamedata->turn, $movement, true);
         }
     }

@@ -401,7 +401,11 @@ class Firing
         $interceptingShip = $weapon->getUnit();
         $firingweapon = $shooter->getSystemById($fire->weaponid);	
         
-        if($interceptingShip instanceof Mine) return false; //Mines generally can't intercept using their weapons.        
+        if($interceptingShip instanceof Mine){
+            if(!$interceptingShip->getCommandControl()){
+                return false; //Mines generally can't intercept using their weapons, unless they have command controller upgrade.        
+            }
+        }
 
         if ($firingweapon->doNotIntercept){ //some attacks simply aren't subject to interception - like being in a field, or ramming attacks
             //Debug::log("Target weapon cannot be intercepted\n");
@@ -1034,6 +1038,32 @@ public static function firePreFiringWeapons($gamedata){
             return;
 
         $weapon = $ship->getSystemById($fire->weaponid);
+        $target = $gamedata->getShipById($fire->targetid);
+
+        // If the target is an attached pod, weapon fires against it normally, but we also spawn a duplicate automatic hit against the host ship
+        if ($target && !empty($target->attached)) {
+            $hostShipId = key($target->attached);
+            $hostShip = $gamedata->getShipById($hostShipId);
+            if ($hostShip && !$hostShip->isDestroyed() && $hostShip->userid !== -5) {
+                $savedAmmo = null;
+                if (property_exists($weapon, 'ammunition')) $savedAmmo = $weapon->ammunition;
+                
+                $hostFire = new FireOrder(-1, $fire->type, $fire->shooterid, $hostShipId, $fire->weaponid, -1, $fire->turn, $fire->firingMode, 100, 1, $fire->shots, $fire->shotshit, $fire->intercepted, $fire->x, $fire->y, $fire->damageclass);
+                $hostFire->needed = 100;
+                $hostFire->rolled = 1;
+                $hostFire->pubnotes = " Automatically on ship from shooting at an attached pod.";
+                $hostFire->targetid = $hostShipId;
+                $hostFire->id = -1; // New order
+                $hostFire->addToDB = true;
+                $hostFire->shotshit = 0;
+                $hostFire->intercepted = 0;
+                
+                $weapon->fire($gamedata, $hostFire);
+                $weapon->fireOrders[] = $hostFire;
+                
+                if ($savedAmmo !== null) $weapon->ammunition = $savedAmmo;
+            }
+        }
 
         $weapon->fire($gamedata, $fire);
 

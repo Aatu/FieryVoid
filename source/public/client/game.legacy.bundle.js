@@ -737,6 +737,7 @@ window.webglScene = function () {
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
+        this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
         this.renderer.outputColorSpace = THREE.SRGBColorSpace;
         this.renderer.localClippingEnabled = true;
 
@@ -1039,7 +1040,7 @@ window.webglScene = function () {
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
 
-        console.log(payload);
+        //console.log(payload);        
         if (this.lastPositionClicked) {
             //console.log("direction", mathlib.getCompassHeadingOfPoint(hexPos, this.lastPositionClicked));
         }
@@ -1557,46 +1558,58 @@ window.webglSprite = function () {
                     };
 
                     const loadTask = () => {
-                        imageBitmapLoader.load(
-                            image,
-                            imageBitmap => {
-                                setTimeout(() => {
-                                    // Draw to canvas to zero RGB on near-transparent pixels before
-                                    // texture upload. r160 sRGB gamma brightens low-alpha colour data
-                                    // in PNG transparent areas, creating a coloured fringe outline.
-                                    // Zeroing RGB below alpha 77 (~30%) removes the fringe without
-                                    // affecting intended semi-transparent areas like shroud effects.
-                                    const cleanCanvas = document.createElement('canvas');
-                                    cleanCanvas.width = imageBitmap.width;
-                                    cleanCanvas.height = imageBitmap.height;
-                                    const cx = cleanCanvas.getContext('2d', { willReadFrequently: true });
-                                    cx.drawImage(imageBitmap, 0, 0);
-                                    const imgData = cx.getImageData(0, 0, cleanCanvas.width, cleanCanvas.height);
-                                    const px = imgData.data;
-                                    for (let i = 0; i < px.length; i += 4) {
-                                        if (px[i + 3] < 77) { // alpha < ~30%: zero out RGB to prevent sRGB fringe
-                                            px[i] = px[i + 1] = px[i + 2] = 0;
-                                        }
+                        const smartPath = window.AssetManager.getSmartImagePath(image);
+
+                        const onImageSuccess = imageBitmap => {
+                            setTimeout(() => {
+                                const cleanCanvas = document.createElement('canvas');
+                                cleanCanvas.width = imageBitmap.width;
+                                cleanCanvas.height = imageBitmap.height;
+                                const cx = cleanCanvas.getContext('2d', { willReadFrequently: true });
+                                cx.drawImage(imageBitmap, 0, 0);
+                                const imgData = cx.getImageData(0, 0, cleanCanvas.width, cleanCanvas.height);
+                                const px = imgData.data;
+                                for (let i = 0; i < px.length; i += 4) {
+                                    if (px[i + 3] < 77) {
+                                        px[i] = px[i + 1] = px[i + 2] = 0;
                                     }
-                                    cx.putImageData(imgData, 0, 0);
-                                    const texture = new THREE.CanvasTexture(cleanCanvas);
-                                    texture.colorSpace = THREE.SRGBColorSpace;
-                                    // Mipmaps re-enabled: pixel cleaning above zeros transparent edge RGB so
-                                    // mip generation uses clean data with no colour bleed fringe
-                                    texture.generateMipmaps = true;
-                                    texture.minFilter = THREE.LinearMipmapLinearFilter;
-                                    texture.magFilter = THREE.LinearFilter;
-                                    resolve(texture);
-                                    window.activeTextureLoads--;
-                                    processQueue();
-                                }, 0);
-                            },
-                            undefined,
-                            (err) => {
-                                console.error("Error loading texture:", image, err);
-                                reject(err);
+                                }
+                                cx.putImageData(imgData, 0, 0);
+                                const texture = new THREE.CanvasTexture(cleanCanvas);
+                                texture.colorSpace = THREE.SRGBColorSpace;
+                                texture.generateMipmaps = true;
+                                texture.minFilter = THREE.LinearMipmapLinearFilter;
+                                texture.magFilter = THREE.LinearFilter;
+                                resolve(texture);
                                 window.activeTextureLoads--;
                                 processQueue();
+                            }, 0);
+                        };
+
+                        imageBitmapLoader.load(
+                            smartPath,
+                            onImageSuccess,
+                            undefined,
+                            (err) => {
+                                if (smartPath !== image) {
+                                    console.warn("WebP failed, falling back to PNG:", smartPath);
+                                    imageBitmapLoader.load(
+                                        image,
+                                        onImageSuccess,
+                                        undefined,
+                                        (errFallback) => {
+                                            console.error("Critical texture failure:", image, errFallback);
+                                            reject(errFallback);
+                                            window.activeTextureLoads--;
+                                            processQueue();
+                                        }
+                                    );
+                                } else {
+                                    console.error("Error loading texture:", image, err);
+                                    reject(err);
+                                    window.activeTextureLoads--;
+                                    processQueue();
+                                }
                             }
                         );
                     };
@@ -2580,13 +2593,13 @@ window.HexNumberSprite = function () {
 
 window.ShipIcon = function () {
 
-    var directionOfMovementTexture = new THREE.TextureLoader().load('./img/directionOfMovement.png');
+    var directionOfMovementTexture = new THREE.TextureLoader().load(window.AssetManager.getSmartImagePath('./img/directionOfMovement.png'));
     directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
     directionOfMovementTexture.colorSpace = THREE.SRGBColorSpace;
-    var directionOfProwTexture = new THREE.TextureLoader().load('./img/directionOfProw.png');
+    var directionOfProwTexture = new THREE.TextureLoader().load(window.AssetManager.getSmartImagePath('./img/directionOfProw.png'));
     directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
     directionOfProwTexture.colorSpace = THREE.SRGBColorSpace;
-    const THRUSTER_TEXTURE = new THREE.TextureLoader().load("./img/systemicons/thrusterICON1.png");
+    const THRUSTER_TEXTURE = new THREE.TextureLoader().load(window.AssetManager.getSmartImagePath("./img/systemicons/thrusterICON1.png"));
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
     THRUSTER_TEXTURE.colorSpace = THREE.SRGBColorSpace;
 
@@ -4510,6 +4523,8 @@ window.BallisticIconContainer = function () {
 				'Shredder': { type: 'hexBlue', text: 'Shredder', color: '#00b8e6' },
 				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },
 				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
+				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
+				'Anti-Fighter Sand Caster': { type: 'hexYellow', text: 'Sand', color: '#787800' },				
 				'Psychic Field': { type: 'hexRed', text: 'Psychic', color: '#e6140a' },
 				'Second Sight': { type: 'hexPurple', text: 'Second Sight', color: '#7f00ff' },
 				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },
@@ -5365,44 +5380,114 @@ window.ReplayAnimationStrategy = function () {
     }
 
     function animateMovement(time) {
-        this.gamedata.ships.forEach(function (ship) {
+        var animatedShips = {}; // Track ships already processed in a group
 
-            // Filter out enemy stealth ships that are undetected —
-            // BUT always include ships that have fire orders this turn:
-            // a mine that fired must appear in movementAnimations so the
-            // weapon-fire animation phase can look up its position.
-            // This is also the fix for spectator view where getPlayerTeam()
-            // returns undefined and isDetected() always evaluates to false.
-            if (!gamedata.isMyorMyTeamShip(ship)) {
-                if (ship.trueStealth && !shipManager.isDetected(ship)) {
-                    if (!weaponManager.shipHasFiringOrder(ship)) { //Check it hasn't fired tho to prevent bugs from mines firing their opening shot etc.
-                        return; // Skip this ship
+        // Helper to check for detach order
+        var hasDetachOrder = function (ship) {
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (!icon) return false;
+            return icon.getMovementsReplay(this.turn).some(m => m.type === 'detach');
+        }.bind(this);
+
+        this.gamedata.ships.forEach(function (ship, index) {
+            if (animatedShips[ship.id]) return;
+
+            // Check if this ship is attached to someone else
+            var hostId = null;
+            if (ship.attached && Object.keys(ship.attached).length > 0) {
+                hostId = Object.keys(ship.attached)[0];
+            }
+
+            if (hostId) {
+                var host = this.gamedata.getShip(hostId);
+                if (host) {
+                    var hostIndex = this.gamedata.ships.indexOf(host);
+                    var detached = hasDetachOrder(ship);
+
+                    // Case: Pod detaches and moves BEFORE host -> Animate alone now
+                    if (detached && index < hostIndex) {
+                        // proceed with normal animation for this ship alone
+                    } else {
+                        // Case: Pod is attached, or detaches LATER -> Wait for host loop
+                        return;
                     }
                 }
             }
 
-            var icon = this.shipIconContainer.getByShip(ship);
+            // This ship is either independent, a host, or an early-detaching pod.
+            var group = [ship];
 
-            var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
-            setMovementAnimationDuration.call(this, animation);
+            // If this is a host, find all pods that should move with it now
+            this.gamedata.ships.forEach(function (otherShip, otherIndex) {
+                if (animatedShips[otherShip.id] || otherShip.id === ship.id) return;
 
-            if (animation.getLength() > 0) {
-                var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
+                if (otherShip.attached && otherShip.attached[ship.id]) {
+                    var otherDetached = hasDetachOrder(otherShip);
+                    // If it doesn't detach, it ALWAYS moves with host.
+                    // If it detaches but moves AFTER host (or host index is same somehow), it moves with host.
+                    if (!otherDetached || otherIndex > index) {
+                        group.push(otherShip);
+                    }
+                }
+            });
+
+            var maxDuration = 0;
+            var groupAnimations = [];
+            var startPosition = null;
+
+            // First pass: create animations and find camera anchor
+            group.forEach(function (member) {
+                // Filter out undetected etc (original logic)
+                if (!gamedata.isMyorMyTeamShip(member)) {
+                    if (member.trueStealth && !shipManager.isDetected(member)) {
+                        if (!weaponManager.shipHasFiringOrder(member)) {
+                            animatedShips[member.id] = true;
+                            return;
+                        }
+                    }
+                }
+
+                var icon = this.shipIconContainer.getByShip(member);
+                var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
+                setMovementAnimationDuration.call(this, animation);
+
+                animation.cameraFollow = false; // Default off for group members
+
+                if (animation.getLength() > 0) {
+                    if (!startPosition || member.id === ship.id) { // Use "anchor" ship for camera if possible, otherwise first available
+                        startPosition = animation.getStartPosition();
+                        animation.cameraFollow = true; // This ship will move the camera
+                    }
+                    maxDuration = Math.max(maxDuration, animation.getDuration());
+                }
+
+                groupAnimations.push({ ship: member, animation: animation });
+                animatedShips[member.id] = true;
+            }, this);
+
+            // Add camera pan if needed
+            if (startPosition) {
+                var cameraAnimation = new CameraPositionAnimation(startPosition, time, 0);
                 this.animations.push(cameraAnimation);
                 time += cameraAnimation.getDuration();
             }
 
-            animation.setTime(time);
-            this.animations.push(animation);
-            this.movementAnimations[ship.id] = animation;
+            // Second pass: set the correct start time (after camera pan)
+            groupAnimations.forEach(function (entry) {
+                entry.animation.setTime(time);
+                this.animations.push(entry.animation);
+                this.movementAnimations[entry.ship.id] = entry.animation;
+            }, this);
 
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                time += animation.getDuration();
+                time += maxDuration;
             }
+
         }, this);
 
         return time;
     }
+
 
     function animateWeaponPreFire(time, logAnimation) {
         var shipList = [];
@@ -5943,9 +6028,11 @@ window.ShipMovementAnimation = function () {
         */
 
         this.endPause = 0;
+        this.cameraFollow = true;
 
         Animation.call(this);
     }
+
 
     ShipMovementAnimation.prototype = Object.create(Animation.prototype);
 
@@ -5975,7 +6062,7 @@ window.ShipMovementAnimation = function () {
         this.shipIcon.setPosition(positionAndFacing.position);
         this.shipIcon.setFacing(-positionAndFacing.facing);
 
-        if (total > this.time && total < this.time + this.duration + this.endPause && !paused) {
+        if (this.cameraFollow && total > this.time && total < this.time + this.duration + this.endPause && !paused) {
             window.webglScene.moveCameraTo(positionAndFacing.position);
         }
     };
@@ -10951,6 +11038,48 @@ window.PhaseStrategy = function () {
         }
         this.ballisticIconContainer.updateLinesForShip(ship, this.shipIconContainer);
         this.redrawMovementUI(ship);
+
+        // Mirror movement to attached units (e.g. pods) - DK 04/26
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var location = ship.hasAttached[attachedId];
+                var attachedShip = gamedata.getShip(attachedId);
+
+                if (!attachedShip || attachedShip.detached || shipManager.isDestroyed(attachedShip)) continue;
+
+                var newMovements = [];
+                // 1. Maintain the pod's movement history for previous turns
+                for (var m = 0; m < attachedShip.movement.length; m++) {
+                    if (attachedShip.movement[m].turn < gamedata.turn) {
+                        newMovements.push(attachedShip.movement[m]);
+                    }
+                }
+
+                var locOffset = shipManager.movement.getAttachedFacingOffset(location);
+                var facingAdjustment = shipManager.movement.isRolled(ship) ? 3 : 0;
+
+                // 2. Clone parent movements for the CURRENT turn
+                for (var i = 0; i < ship.movement.length; i++) {
+                    var move = ship.movement[i];
+                    if (move.turn != gamedata.turn) continue;
+
+                    var attachedMove = JSON.parse(JSON.stringify(move));
+                    attachedMove.id = -1;
+                    attachedMove.type = "attached";
+                    attachedMove.facing = mathlib.addToHexFacing(move.facing, locOffset + facingAdjustment);
+                    newMovements.push(attachedMove);
+                }
+
+                attachedShip.movement = newMovements;
+
+                // Refresh the pod's visual state
+                this.shipIconContainer.getByShip(attachedShip).consumeMovement(attachedShip.movement);
+                if (this.animationStrategy) {
+                    this.animationStrategy.shipMovementChanged(attachedShip);
+                }
+                this.ballisticIconContainer.updateLinesForShip(attachedShip, this.shipIconContainer);
+            }
+        }
     };
 
     PhaseStrategy.prototype.onShowAllEW = function (payload) {
@@ -12711,14 +12840,17 @@ window.MovementPhaseStrategy = function () {
 
     function doForcedMovementForActiveShip() {
         gamedata.getMyActiveShips().forEach(function (ship) {
-            shipManager.movement.doForcedPivot(ship);
+            shipManager.movement.doForcedPivot(ship, true);
 
             if (ship.base && (!ship.nonRotating)) {
-                shipManager.movement.doRotate(ship);
+                shipManager.movement.doRotate(ship, true);
 
                 //TODO: Test if this autocommit thing works
                 gamedata.autoCommitOnMovement(ship);
             }
+            //if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+                // Mirroring is now handled by onShipMovementChanged in PhaseStrategy.js - DK 04/26
+            //}
         });
     }
 
@@ -14185,6 +14317,33 @@ window.ShipTooltip = function () {
             }
         }
 
+        if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
+            var targetId = Object.keys(ship.attached)[0];
+            var location = Object.values(ship.attached)[0];
+            var locationTip = '';
+            
+            if (location == 1){
+                locationTip = 'Front';
+            }else if (location == 2){
+                locationTip = 'Aft';                
+            }else if (location == 3 || location == 31 || location == 32){
+                locationTip = 'Port';             
+            }else if (location == 4 || location == 41 || location == 42){
+                locationTip = 'Starboard';   
+            }    
+
+            var targetShip = gamedata.getShip(targetId);
+            if (targetShip) {
+                toDisplay += '<span style="color:limegreen;">Attached to ' + targetShip.name + ' [' + locationTip + ']</span>; ';
+            }
+        }
+        
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            var keys = Object.keys(ship.hasAttached);
+            if (keys.length > 0) {
+                toDisplay += '<span style="color:orange;">Ship is being Boarded!</span>; ';
+            }
+        }
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
         } else if (ship.osat) {
@@ -14220,7 +14379,7 @@ window.ShipTooltip = function () {
                 if (!gamedata.isMyShip(ship)) {
                     this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
                 }
-            }    
+            }
 
         } else {
             //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
@@ -14282,8 +14441,8 @@ window.ShipTooltip = function () {
                 this.addEntryElement('Detect Mines: ' + MDEW);
             }
 
-            var BDEW = ew.getEWByType('BDEW', ship) * 0.25; 
-            BDEW = parseFloat(BDEW.toFixed(2));                        
+            var BDEW = ew.getEWByType('BDEW', ship) * 0.25;
+            BDEW = parseFloat(BDEW.toFixed(2));
             if (shipManager.isElint(ship)) {
                 if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
                 this.addEntryElement('Blanket DEW: ' + BDEW, ship.flight !== true);
@@ -15324,6 +15483,12 @@ window.ShipMovementCallbacks = function () {
 		if (event.which == 3) while (shipManager.movement.hasDeletableMovements(this.ship)){//r-click
 			shipManager.movement.deleteMove(this.ship);	
 		}
+        this.updateCallback({ ship: this.ship });
+    };
+
+    ShipMovementCallbacks.prototype.detachCallback = function (e) {
+        e.stopPropagation();
+        shipManager.movement.doDetach(this.ship);
         this.updateCallback({ ship: this.ship });
     };
 
@@ -17459,7 +17624,7 @@ getActiveShipName: function getActiveShipName() {
             td.className = "iniImage";
 
             var img = document.createElement("img");
-            img.src = ships[i].imagePath;
+            img.src = window.AssetManager.getSmartImagePath(ships[i].imagePath);
 
             if (ships[i].flight) {
                 td.classList.add("flight");
@@ -19385,10 +19550,12 @@ window.ajaxInterface = {
             newShip.systems = Array();
 
             if (ship.userid === gamedata.thisplayer) {
-                for (var a = ship.movement.length - 1; a >= 0; a--) {
-                    var move = ship.movement[a];
-                    if (move.turn == gamedata.turn) {
-                        newShip.movement[a] = move;
+                if (!(Object.keys(ship.attached).length !== 0 && !ship.detached)) {
+                    for (var a = ship.movement.length - 1; a >= 0; a--) {
+                        var move = ship.movement[a];
+                        if (move.turn == gamedata.turn) {
+                            newShip.movement[a] = move;
+                        }
                     }
                 }
 
@@ -21391,6 +21558,28 @@ window.weaponManager = {
         var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.        
         var loSBlocked = false; //Default to LoS not blocked.
         var skinDanceBlocked = null;
+        // Attached pod logic
+        var attachedUnitHidden = false;
+        if (selectedShip.hasAttached && Object.keys(selectedShip.hasAttached).length > 0) {
+            var keys = Object.keys(selectedShip.hasAttached);
+            if (keys.includes(ship.id.toString())) {
+                attachedUnitHidden = true; // Parent cannot target the attached pod
+            }
+        }
+        if (ship.attached && Object.keys(ship.attached).length > 0) {
+            var hostId = Object.keys(ship.attached)[0];
+            var podLocation = parseInt(ship.attached[hostId]);
+            if (!isNaN(podLocation) && podLocation !== 0) {
+                var hostShip = gamedata.getShip(hostId);
+                var hostSections = weaponManager.getShipHittingSide(selectedShip, hostShip);
+                if (hostShip) {
+                    if (!hostSections.includes(podLocation)) {
+                        attachedUnitHidden = true; // Pod is attached to a side not facing the shooter
+                    }
+                }
+            }
+        }
+
 
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
@@ -21440,7 +21629,7 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (ship.Huge > 0) { //Cannot Target larger terrain.
+                    if (ship.Huge > 0 | attachedUnitHidden) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
@@ -21816,6 +22005,7 @@ window.weaponManager = {
     //calculate hit chance for Boarding Action - different procedure
     calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon) {
         if (target.flight || target.userid == -5) return 0;//Cannot board fighters or terrain, null FC stops this but showing 0% is more informative for players!
+        if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit         
         var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
         if (jinking > 0) return 0;
 
@@ -21876,7 +22066,29 @@ window.weaponManager = {
     calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
 
         if (weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
-
+        /*
+        // Attached pod logic
+        if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit
+        if (shooter.hasAttached && Object.keys(shooter.hasAttached).length > 0) {
+            var keys = Object.keys(shooter.hasAttached);
+            if (keys.includes(target.id.toString())) {
+                return 0; // Parent cannot target the attached pod
+            }
+        }
+        if (target.attached && Object.keys(target.attached).length > 0) {
+            var hostId = Object.keys(target.attached)[0];
+            var podLocation = parseInt(target.attached[hostId]);
+            if (!isNaN(podLocation) && podLocation !== 0) {
+                var hostShip = gamedata.getShip(hostId);
+                if (hostShip) {
+                    var hittableSides = weaponManager.getShipHittingSide(shooter, hostShip);
+                    if (!hittableSides.includes(podLocation)) {
+                        return 0; // Pod is attached to a side not facing the shooter
+                    }
+                }
+            }
+        }
+        */
         /*//If skin-dancing shots which have a front arc automatically hit.
         if (gamedata.gamephase == 3 && !weapon.ballistic && shooter.skinDancing[target.id] === true) {
             var inFrontArc = mathlib.isInArc(0, weapon.startArc, weapon.endArc);
@@ -22064,7 +22276,7 @@ window.weaponManager = {
             noLockPenalty = 0.5;
         }
 
-		if(shooter.mine) noLockPenalty = 0; //A lock-on is assumed for Mines, but Jammer may still apply below.       
+        if (shooter.mine) noLockPenalty = 0; //A lock-on is assumed for Mines, but Jammer may still apply below.       
 
         //noLockMod =  rangePenalty * noLockPenalty; //moved lower   
         var jammermod = 0;
@@ -22517,7 +22729,7 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if(selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.      
+        if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.      
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
         if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
@@ -22535,7 +22747,13 @@ window.weaponManager = {
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
-
+            if (weapon.isBoardingAction && weapon.firingMode == 2 && !system){
+                if(gamedata.rules.desperate === undefined || (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)){
+                    var html = "You cannot choose to Wreak Havoc unless Desperate scenario rules are in effect.";
+                    confirm.warning(html);  
+                    return;                  
+                }                
+            }    
             //Only need to check first weapon
             if (blockedLosHex && blockedLosHex.length > 0 && !loSBlocked) {
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -23034,17 +23252,17 @@ window.weaponManager = {
                 var fighter = ship.systems[i];
                 for (var a in fighter.systems) {
                     var system = fighter.systems[a];
-                    if(system.weapon){
+                    if (system.weapon) {
                         var orders = weaponManager.getAllFireOrdersFromSystem(system);
                         if (orders.length > 0) return true;
-                    }  
+                    }
                 }
             } else {
                 var system = ship.systems[i];
-                if(system.weapon){
+                if (system.weapon) {
                     var orders = weaponManager.getAllFireOrdersFromSystem(system);
                     if (orders.length > 0) return true;
-                }    
+                }
             }
         }
         return false;
@@ -23322,14 +23540,16 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
-    getDamagesCausedBy: function getDamagesCausedBy(fire, damages) {
+    getDamagesCausedBy: function getDamagesCausedBy(fire, damages, ships = null) {
 
         if (!damages) {
             damages = [];
         }
 
-        for (var i in gamedata.ships) {
-            var ship = gamedata.ships[i];
+        var shipsToIterate = ships || gamedata.ships;
+
+        for (var i in shipsToIterate) {
+            var ship = shipsToIterate[i];
             var list = Array();
 
             for (var a in ship.systems) {
@@ -23395,7 +23615,7 @@ window.weaponManager = {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
-            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit"
+            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding"
         ];
 
         return shortLogTypes.includes(fire.damageclass);
@@ -23698,7 +23918,7 @@ window.combatLog = {
         
     },
 
-    logFireOrders: function logFireOrders(orders, printedLog = false) {
+    logFireOrders: function logFireOrders(orders, printedLog = false, ships = null) {
 
         orders = [].concat(orders);
 
@@ -23740,7 +23960,7 @@ window.combatLog = {
             if (fire.shots > 0) ordersC += 1;
 			if (fire.shotshit>0) ordersChit += 1;
 			if (fire.intercepted>0) ordersCintercepted += 1;
-            weaponManager.getDamagesCausedBy(fire, damages);
+            weaponManager.getDamagesCausedBy(fire, damages, ships);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
             //if (fire.shots > 0){ //otherwise shot is purely technical ... BUT show it too!
@@ -24085,7 +24305,7 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
 
     // Check if this turn's data is already cached
     if (combatLog.logCache[turn]) {
-        combatLog.showLog(combatLog.logCache[turn]);
+        combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
         return;
     }
 
@@ -24104,9 +24324,9 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
             );
 
             // Store in cache
-            combatLog.logCache[turn] = allFireOrders;
+            combatLog.logCache[turn] = {allFireOrders: allFireOrders, ships: data.ships};
 
-            combatLog.showLog(allFireOrders);
+            combatLog.showLog(allFireOrders, data.ships);
         }.bind(this),
         error: ajaxInterface.errorAjax
     });
@@ -24163,7 +24383,7 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
         });
     },
 
-    showLog: function showLog(allFireOrders) {
+    showLog: function showLog(allFireOrders, ships = null) {
         // Get the current turn from the combat log system
         var currentTurn = window.combatLog.getDisplayTurn();
     
@@ -24180,7 +24400,7 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
     
         // Process fire orders if any
         allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
-            combatLog.logFireOrders(logEntry, true);
+            combatLog.logFireOrders(logEntry, true, ships);
         });
     
         // Show the LogActual div
@@ -24640,7 +24860,7 @@ window.declarations = {
 		newText += '<br>Friendly Fire enabled.'; 
     }
     if (gamedata.rules && 'allowMines' in gamedata.rules) {
-		newText += '<br>Allow Mines enabled.'; 
+		newText += '<br>Mines enabled.'; 
     }
     if (gamedata.rules && 'desperate' in gamedata.rules) {
         var desperateValue = gamedata.rules.desperate;
@@ -24762,7 +24982,7 @@ window.shipManager = {
                 $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_");
                 e.attr("id", "hexship_");
                 var img = new Image();
-                img.src = ship.imagePath;
+                img.src = window.AssetManager.getSmartImagePath(ship.imagePath);
                 shipManager.shipImages[ship.id] = {
                     orginal: img,
                     modified: null,
@@ -25264,6 +25484,8 @@ window.shipManager = {
             return;
         }
 
+        if (ship.destroyed) return true; // Early exit if server-side status is already set - DK 04/26
+
         if (ship.flight) {
             for (var i in ship.systems) {
                 var fighter = ship.systems[i];
@@ -25438,16 +25660,20 @@ window.shipManager = {
 
     //New getInitiativeOrder function to accommodate terrain units like asteroids.
     getIniativeOrder: function getIniativeOrder(ship) {
-        var previousInitiative = -100000; // same Ini move together now!
+        var previousInitiative = -100000;
         var order = 0;
 
-        // Filter out destroyed ships and those with shipSizeClass === 5 e.g. terrain
+        // Filter and SORT by initiative before calculating order - DK 04/26
         var validShips = gamedata.ships.filter(function (s) {
             return !shipManager.isDestroyed(s) && !gamedata.isTerrain(s.shipSizeClass, s.userid) && !s.mine && !(shipManager.getTurnDeployed(s) > gamedata.turn);
+        }).sort(function (a, b) {
+            if (a.iniative > b.iniative) return 1;
+            if (a.iniative < b.iniative) return -1;
+            return a.id - b.id; // Stability
         });
 
         for (var i in validShips) {
-            if (validShips[i].iniative > previousInitiative) { // new Ini higher than previous!
+            if (validShips[i].iniative > previousInitiative) {
                 order++;
                 previousInitiative = validShips[i].iniative;
             }
@@ -25864,7 +26090,11 @@ shipManager.movement = {
     },
 
     isMovementReady: function isMovementReady(ship) {
-        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship) || gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (shipManager.getTurnDeployed(ship) > gamedata.turn);
+        return shipManager.movement.getRemainingMovement(ship) == 0 ||
+            shipManager.isDestroyed(ship) ||
+            gamedata.isTerrain(ship.shipSizeClass, ship.userid) ||
+            (shipManager.getTurnDeployed(ship) > gamedata.turn) ||
+            (Object.keys(ship.attached).length !== 0 && !ship.detached);
     },
 
     checkHasUncommitted: function checkHasUncommitted(ship) {
@@ -25878,6 +26108,11 @@ shipManager.movement = {
     },
 
     hasDeletableMovements: function hasDeletableMovements(ship) {
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!        
+
+        var lastMove = ship.movement[ship.movement.length - 1];
+        if (lastMove && lastMove.type === "attached") return false; // Mirrored moves are not deletable manually
+
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
@@ -25887,7 +26122,7 @@ shipManager.movement = {
                     return true;
                 }
             } else {
-                if (!movement.preturn && !movement.forced && movement.type != "deploy") return true;
+                if (!movement.preturn && !movement.forced && movement.type != "deploy" && movement.type != "attached") return true;
             }
         }
 
@@ -25897,20 +26132,28 @@ shipManager.movement = {
 
     deleteMove: function deleteMove(ship) {
         var movement = ship.movement[ship.movement.length - 1];
+        if (movement.type == "attached") return; // Cannot delete mirrored moves
+
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn) {
             if (gamedata.gamephase == 3 && (movement.value != "combatpivot" || movement.type != "pivotleft" && movement.type != "pivotright")) return;
 
+            if (movement.type == "detach") {
+                ship.detached = false;
+            }
+
             // adjust the current turn delay if the new speed changes the turn delay
-            var oldspeed = shipManager.movement.getSpeed(ship);
+            //var oldspeed = shipManager.movement.getSpeed(ship);
             shipManager.movement.revertAutoThrust(ship);
             ship.movement.splice(ship.movement.length - 1, 1);
-            var speed = shipManager.movement.getSpeed(ship);
+            //var speed = shipManager.movement.getSpeed(ship);
             //shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
             ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
-            var shipwindow = $(".shipwindow_" + ship.id);
+            //var shipwindow = $(".shipwindow_" + ship.id);
             //shipWindowManager.cancelAssignThrust(ship);
             if (movement.type == "contract") shipManager.movement.amendContractValue(ship, -movement.value);//For Contraction, need to amend level.
         }
+
+
     },
 
 
@@ -25928,6 +26171,8 @@ shipManager.movement = {
                 var speed = shipManager.movement.getSpeed(ship);
                 //                            shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
                 ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+
+
                 return true;
             }
         }
@@ -25936,6 +26181,7 @@ shipManager.movement = {
 
     canJink: function canJink(ship, accel) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!          
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
         if (shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
@@ -26009,6 +26255,8 @@ shipManager.movement = {
 
     canRoll: function canRoll(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -26079,6 +26327,7 @@ shipManager.movement = {
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
+
     },
 
 
@@ -26109,6 +26358,7 @@ shipManager.movement = {
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
+
     },
 
 
@@ -26176,6 +26426,8 @@ shipManager.movement = {
 
     canMove: function canMove(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!       
+
         if (shipManager.isDestroyed(ship)) return false;
         return shipManager.movement.getRemainingMovement(ship) > 0;
     },
@@ -26207,6 +26459,8 @@ shipManager.movement = {
             forced: false,
             value: 0
         };
+
+
     },
 
     /*just move ahead using all remaining movement*/
@@ -26214,9 +26468,46 @@ shipManager.movement = {
         while (shipManager.movement.getRemainingMovement(ship) > 0) shipManager.movement.doMove(ship);
     },
 
+    canDetach: function canDetach(ship) {
+        if (gamedata.gamephase != 2) return false;        
+        if (Object.keys(ship.attached).length === 0) return false;
+        if (shipManager.movement.hasDeletableMovements(ship)) return false;
+        return true;
+    },
+
+    doDetach: function doDetach(ship) {
+        var lm = ship.movement[ship.movement.length - 1];
+        var hostShipId = Object.keys(ship.attached)[0];      
+        ship.detached = true; //Mark detached this movement.        
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: "detach",
+            position: lm.position,
+            xOffset: 0,
+            yOffset: 0,
+            facing: mathlib.addToHexFacing(lm.facing, 3), // Turn 180 degrees
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: false,
+            animationtics: 0,
+            requiredThrust: Array(null, null, null, null, null),
+            assignedThrust: Array(),
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: hostShipId
+        };
+    },
+
+
 
     canSlip: function canSlip(ship, right) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
         var name = right ? "slipright" : "slipleft";
@@ -26300,6 +26591,8 @@ shipManager.movement = {
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
     canRotate: function canRotate(ship) {
@@ -26336,7 +26629,7 @@ shipManager.movement = {
         }
     },
 
-    doRotate: function doRotate(ship) {
+    doRotate: function doRotate(ship, silent) {
         if (gamedata.turn > 0) {
             var name;
             var step = ship.movement[1].value;
@@ -26371,6 +26664,8 @@ shipManager.movement = {
                 forced: true,
                 value: 0
             };
+
+
         }
     },
 
@@ -26385,6 +26680,8 @@ shipManager.movement = {
 
     canPivot: function canPivot(ship, right) {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
         if (ship.osat && (!ship.flight)) return false;
         var name = right ? "pivotright" : "pivotleft";
@@ -26515,9 +26812,11 @@ shipManager.movement = {
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
-    doForcedPivot: function doForcedPivot(ship) {
+    doForcedPivot: function doForcedPivot(ship, silent) {
         var pivoting = shipManager.movement.isPivoting(ship);
         if (pivoting == "no") return;
 
@@ -26561,6 +26860,8 @@ shipManager.movement = {
             forced: true,
             value: 0
         };
+
+
     },
 
     isPivoting: function isPivoting(ship) {
@@ -26688,6 +26989,8 @@ shipManager.movement = {
 
     canContract: function canContract(ship, value) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         var canContract = false;
         var contraction = 0;
         for (var i in ship.systems) {
@@ -26834,6 +27137,7 @@ shipManager.movement = {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
         if (ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         /*cannot turn into pivot if unit is aligned...*/
         if (!shipManager.movement.isOutOfAlignment(ship)) return false;
@@ -26923,6 +27227,8 @@ shipManager.movement = {
             shipWindowManager.assignThrust(ship);
         }
 
+
+
     },
 
     hasPivoted: function hasPivoted(ship) {
@@ -26976,6 +27282,8 @@ shipManager.movement = {
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!   
+
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) {
             return false;
@@ -26991,14 +27299,20 @@ shipManager.movement = {
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
-            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy") return false;
+            if (movement.preturn == false &&
+                movement.forced == false &&
+                movement.type != "speedchange" &&
+                movement.type != "deploy" && 
+                movement.type != "sync" &&
+                movement.type != "attached" &&                  
+                movement.type != "detach") return false;
         }
 
         //gravitic ship with enough thrust can accelerate, no matter her alignment
         if (ship.gravitic) return true;
 
         //ship cannot accelerate if it's not aligned OR pivoting    
-        if (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") return false;
+        if ((shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") && !ship.detached) return false;
 
         return true;
     },
@@ -27121,6 +27435,8 @@ shipManager.movement = {
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
     getRemainingEngineThrust: function getRemainingEngineThrust(ship) {
@@ -27586,6 +27902,7 @@ shipManager.movement = {
 
     canTurn: function canTurn(ship, right) {
         if (ship.mine) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
@@ -27716,6 +28033,8 @@ shipManager.movement = {
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
 
@@ -28264,6 +28583,20 @@ shipManager.movement = {
         if (shipManager.movement.isPivotedPort(ship)) return false; //ship pivoted to Port is not pivoted to Starboard
         return true;
     },
+
+    getAttachedFacingOffset: function getAttachedFacingOffset(location) {
+        var locOffset = 0;
+        if (location == 1) locOffset = 3; // Forward section, pod faces Aft
+        else if (location == 2) locOffset = 0; // Aft section, pod faces Forward
+        else if (location == 3 || location == 32) locOffset = 1; // Port, pod faces Starboard-Forward
+        else if (location == 31) locOffset = 2; // Port-Forward, pod faces Starboard-Aft
+        else if (location == 4 || location == 42) locOffset = 5; // Starboard, pod faces Port-Forward
+        else if (location == 41) locOffset = 4; // Starboard-Forward, pod faces Port-Aft
+        return locOffset;
+    },
+
+
+
 
 };
 ;
@@ -30178,6 +30511,7 @@ window.UI = {
             UI.shipMovement.morejinkElement = $("#morejink", ui);
             UI.shipMovement.lessjinkElement = $("#lessjink", ui);
             UI.shipMovement.cancelElement = $("#cancel", ui);
+            UI.shipMovement.detachElement = $("#detach", ui);
 
             UI.shipMovement.halfphaseElement = $("#halfphase", ui);
 
@@ -30187,6 +30521,7 @@ window.UI = {
             UI.shipMovement.contractionvalueElement = UI.shipMovement.contractionElement.find(".contractionvalue");
 
             UI.shipMovement.cancelElement.on("click touchstart contextmenu", UI.shipMovement.cancelCallback);
+            UI.shipMovement.detachElement.on("click touchstart contextmenu", UI.shipMovement.detachCallback);
             UI.shipMovement.moveElement.on("click touchstart contextmenu", UI.shipMovement.moveCallback);
 
             UI.shipMovement.turnrightElement.on("click touchstart", UI.shipMovement.turnrightCallback);
@@ -30254,6 +30589,10 @@ window.UI = {
 
         cancelCallback: function cancelCallback(e) {
             UI.shipMovement.callbackHandler.cancelCallback(e);
+        },
+
+        detachCallback: function detachCallback(e) {
+            UI.shipMovement.callbackHandler.detachCallback(e);
         },
 
         morejinkCallback: function morejinkCallback(e) {
@@ -30393,10 +30732,10 @@ window.UI = {
             var shipY = ship.movement[ship.movement.length - 1].y;
 
             var pos = { x: 400, y: 400 };
-            //ui.css("top", pos.y +"px").css("left", pos.x +"px");
+
+            var s = 40;
 
             var move = UI.shipMovement.moveElement;
-            var s = 40;
 
             if (shipManager.movement.canMove(ship)) {
                 UI.shipMovement.drawUIElement(move, pos.x, pos.y, s * 1.3, dis * 1.4, angle, "img/move.png", "movecanvas", shipHeading);
@@ -30651,6 +30990,16 @@ window.UI = {
                 roll.hide();
                 emergencyroll.hide();
                 UI.shipMovement.rollActiveElement.hide();
+            }
+
+            var detach = UI.shipMovement.detachElement;
+            if (shipManager.movement.canDetach(ship)) {
+                //var detachOrientation = shipManager.getShipHeadingAngle(ship) - shipManager.getShipDoMAngle(ship);                
+                var relativeFacing = shipManager.getShipHeadingAngle(ship) - shipManager.getShipDoMAngle(ship);
+                var detachAngle = mathlib.addToDirection(relativeFacing, 180);
+                UI.shipMovement.drawUIElement(detach, pos.x, pos.y, s, dis * 1.4, detachAngle, "img/detach.png", "detachcanvas", relativeFacing);
+            } else {
+                detach.hide();
             }
 
             //JINKING
@@ -31141,7 +31490,8 @@ window.shipWindowManager = {
 	},
 
 	populateShipWindow: function populateShipWindow(ship, shipwindow) {
-		shipwindow.find(".icon img").attr("src", "./" + ship.imagePath);
+		// shipwindow.find(".icon img").attr("src", "./" + ship.imagePath);
+		shipwindow.find(".icon img").attr("src", window.AssetManager.getSmartImagePath(ship.imagePath));
 
 		if (gamedata.turn != 0) {
 			shipwindow.find(".topbar .value.name").html("");
@@ -31965,9 +32315,9 @@ window.shipWindowManager = {
 
 		systemwindow.addClass(system.name);
 		if (system.iconPath) {
-			systemwindow.find(".icon").css("background-image", "url(./img/systemicons/" + system.iconPath + ")");
+			systemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/" + system.iconPath) + ")");
 		} else {
-			systemwindow.find(".icon").css("background-image", "url(./img/systemicons/" + system.name + ".png)");
+			systemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/" + system.name + ".png") + ")");
 		}
 
 		systemwindow.addClass(system.name);
@@ -32063,7 +32413,7 @@ window.shipWindowManager = {
 
 		if (system.name == "thruster") {
 			systemwindow.data("direction", system.direction);
-			systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
+			systemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/thruster" + system.direction + ".png") + ")");
 		}
 
 		shipWindowManager.removeSystemClasses(systemwindow);
@@ -32247,7 +32597,7 @@ window.shipWindowManager = {
 			}
 		} else if (system.name == "thruster") {
 			systemwindow.data("direction", system.direction);
-			systemwindow.find(".icon").css("background-image", "url(./img/systemicons/thruster" + system.direction + ".png)");
+			systemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/thruster" + system.direction + ".png") + ")");
 
 			var channeled = shipManager.movement.getAmountChanneled(ship, system);
 			if (channeled > output) {
@@ -32964,7 +33314,8 @@ window.flightWindowManager = {
 	},
 
 	populateShipWindow: function populateShipWindow(ship, shipwindow) {
-		shipwindow.find(".icon img").attr("src", "./" + ship.imagePath);
+		// shipwindow.find(".icon img").attr("src", "./" + ship.imagePath);
+		shipwindow.find(".icon img").attr("src", window.AssetManager.getSmartImagePath(ship.imagePath));
 
 		if (gamedata.turn != 0) {
 			shipwindow.find(".topbar .value.name").html("");
@@ -35020,10 +35371,13 @@ var Ship = function Ship(json) {
 
     this.hexOffsets = json.hexOffsets || this.hexOffsets || null;
 
-    // Optimization #2: Server omits empty/default ship-level properties.
+    // Optimization: Server omits empty/default ship-level properties.
     if (this.EW === undefined || this.EW === null) this.EW = [];
     if (this.spawned === undefined) this.spawned = -1;
     if (this.skinDancing === undefined) this.skinDancing = false;
+    if (this.hasAttached === undefined || this.hasAttached === false) this.hasAttached = {};
+    if (this.attached === undefined || this.attached === false) this.attached = {};
+
     if (json.enhancementOptions === undefined && (window.gamedata && window.gamedata.status !== 'LOBBY')) {
         this.enhancementOptions = [];
     }
@@ -35413,6 +35767,7 @@ var ShipSystem = function ShipSystem(json, ship) {
 	if (this.damage === undefined) this.damage = [];
 	if (this.criticals === undefined) this.criticals = [];
 	if (this.critData === undefined) this.critData = [];
+	if (this.fireOrders === undefined) this.fireOrders = [];		
 	if (this.power === undefined) this.power = [];
 	if (this.specialAbilities === undefined) this.specialAbilities = [];
 	if (this.outputMod === undefined) this.outputMod = 0;
@@ -38792,14 +39147,28 @@ MineControllerDEW.prototype.constructor = MineControllerDEW;
 
 MineControllerDEW.prototype.initializationUpdate = function () {
 	var ship = this.ship;
-	/*var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-		this.range = 0;
-	}*/
+
+	if (gamedata.gamephase == -2 && !this.FCRefreshed){//Buying phase, need to set FC for DEW weapons in Front End only.
+		this.refreshFireControl();
+	}
 
 	this.refreshData();
 	return this
 }
+
+MineControllerDEW.prototype.refreshFireControl = function () { //refresh description to show correct values
+
+	var ship = this.ship;
+	for (var i in ship.systems) {
+		var weapon = ship.systems[i];
+		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
+			if (weapon.fireControl[0] !== null)  weapon.fireControl[0] = weapon.fireControl[0] + this.data["Accuracy"];
+			if (weapon.fireControl[1] !== null)  weapon.fireControl[1] = weapon.fireControl[1] + this.data["Accuracy"];
+			if (weapon.fireControl[2] !== null)  weapon.fireControl[2] = weapon.fireControl[2] + this.data["Accuracy"];								
+		}
+	}
+	this.FCRefreshed = true;
+};
 
 MineControllerDEW.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
 	if (this.currClass == '') {
@@ -39301,10 +39670,10 @@ FtrInterdictor.prototype.constructor = FtrInterdictor;
 
 
 var ThirdspaceShield = function ThirdspaceShield(json, ship) {
-	ShipSystem.call(this, json, ship);
+	Shield.call(this, json, ship);
 	this.defensiveType = "none";
 };
-ThirdspaceShield.prototype = Object.create(ShipSystem.prototype);
+ThirdspaceShield.prototype = Object.create(Shield.prototype);
 ThirdspaceShield.prototype.constructor = ThirdspaceShield;
 ThirdspaceShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
 	//this is made to be a shield just to display arc visually, no actual protection
@@ -47522,6 +47891,8 @@ NexusSandCaster.prototype.clearBoost = function () {
         }
     }
 };
+
+
 
 
 

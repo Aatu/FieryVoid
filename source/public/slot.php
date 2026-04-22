@@ -1,5 +1,6 @@
 <?php
-ob_start();
+// global.php handles output buffering and compression
+require_once 'global.php';
 /*
 header('Content-Type: application/json; charset=utf-8');
 

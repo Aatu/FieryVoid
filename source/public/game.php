@@ -47,7 +47,7 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 
     <!-- Preload critical bundles to parallelize their download with the large inline JSON payloads below -->
     <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>" as="script">
-    <?php $debug = isset($_GET['debug']); ?>
+    <?php $debug = (isset($_GET['debug']) || isset($_GET['DEBUG'])); ?>
     <?php if (!$debug): ?>
     <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/game.legacy.bundle.js'); ?>" as="script">
     <?php endif; ?>
@@ -59,6 +59,7 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
     <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
     <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+    <script src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
     <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
     <script defer src="client/lib/three.min.js"></script>
     <script defer src="client/lib/THREE.MeshLine.js"></script>
@@ -753,6 +754,10 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
         
         <div id="cancel" class="movement-icon" data-movement-type="Cancel Last Move">
             <canvas id="cancelcanvas" width="30" height="30"></canvas>
+        </div>
+        
+        <div id="detach" class="movement-icon" data-movement-type="Detach" style="filter: hue-rotate(200deg) scaleX(-1);">
+            <canvas id="detachcanvas" width="50" height="50"></canvas>
         </div>
         
     </div>

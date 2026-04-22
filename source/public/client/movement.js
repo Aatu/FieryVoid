@@ -68,7 +68,11 @@ shipManager.movement = {
     },
 
     isMovementReady: function isMovementReady(ship) {
-        return shipManager.movement.getRemainingMovement(ship) == 0 || shipManager.isDestroyed(ship) || gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (shipManager.getTurnDeployed(ship) > gamedata.turn);
+        return shipManager.movement.getRemainingMovement(ship) == 0 ||
+            shipManager.isDestroyed(ship) ||
+            gamedata.isTerrain(ship.shipSizeClass, ship.userid) ||
+            (shipManager.getTurnDeployed(ship) > gamedata.turn) ||
+            (Object.keys(ship.attached).length !== 0 && !ship.detached);
     },
 
     checkHasUncommitted: function checkHasUncommitted(ship) {
@@ -82,6 +86,11 @@ shipManager.movement = {
     },
 
     hasDeletableMovements: function hasDeletableMovements(ship) {
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!        
+
+        var lastMove = ship.movement[ship.movement.length - 1];
+        if (lastMove && lastMove.type === "attached") return false; // Mirrored moves are not deletable manually
+
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
@@ -91,7 +100,7 @@ shipManager.movement = {
                     return true;
                 }
             } else {
-                if (!movement.preturn && !movement.forced && movement.type != "deploy") return true;
+                if (!movement.preturn && !movement.forced && movement.type != "deploy" && movement.type != "attached") return true;
             }
         }
 
@@ -101,20 +110,28 @@ shipManager.movement = {
 
     deleteMove: function deleteMove(ship) {
         var movement = ship.movement[ship.movement.length - 1];
+        if (movement.type == "attached") return; // Cannot delete mirrored moves
+
         if (!movement.preturn && !movement.forced && movement.turn == gamedata.turn) {
             if (gamedata.gamephase == 3 && (movement.value != "combatpivot" || movement.type != "pivotleft" && movement.type != "pivotright")) return;
 
+            if (movement.type == "detach") {
+                ship.detached = false;
+            }
+
             // adjust the current turn delay if the new speed changes the turn delay
-            var oldspeed = shipManager.movement.getSpeed(ship);
+            //var oldspeed = shipManager.movement.getSpeed(ship);
             shipManager.movement.revertAutoThrust(ship);
             ship.movement.splice(ship.movement.length - 1, 1);
-            var speed = shipManager.movement.getSpeed(ship);
+            //var speed = shipManager.movement.getSpeed(ship);
             //shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
             ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
-            var shipwindow = $(".shipwindow_" + ship.id);
+            //var shipwindow = $(".shipwindow_" + ship.id);
             //shipWindowManager.cancelAssignThrust(ship);
             if (movement.type == "contract") shipManager.movement.amendContractValue(ship, -movement.value);//For Contraction, need to amend level.
         }
+
+
     },
 
 
@@ -132,6 +149,8 @@ shipManager.movement = {
                 var speed = shipManager.movement.getSpeed(ship);
                 //                            shipManager.movement.adjustTurnDelay(ship, oldspeed, speed);
                 ship.currentturndelay = shipManager.movement.calculateCurrentTurndelay(ship);
+
+
                 return true;
             }
         }
@@ -140,6 +159,7 @@ shipManager.movement = {
 
     canJink: function canJink(ship, accel) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!          
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
         if (shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
@@ -213,6 +233,8 @@ shipManager.movement = {
 
     canRoll: function canRoll(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -283,6 +305,7 @@ shipManager.movement = {
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
+
     },
 
 
@@ -313,6 +336,7 @@ shipManager.movement = {
         };
         shipWindowManager.assignThrust(ship);
         ship.rolling = true;
+
     },
 
 
@@ -380,6 +404,8 @@ shipManager.movement = {
 
     canMove: function canMove(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!       
+
         if (shipManager.isDestroyed(ship)) return false;
         return shipManager.movement.getRemainingMovement(ship) > 0;
     },
@@ -411,6 +437,8 @@ shipManager.movement = {
             forced: false,
             value: 0
         };
+
+
     },
 
     /*just move ahead using all remaining movement*/
@@ -418,9 +446,46 @@ shipManager.movement = {
         while (shipManager.movement.getRemainingMovement(ship) > 0) shipManager.movement.doMove(ship);
     },
 
+    canDetach: function canDetach(ship) {
+        if (gamedata.gamephase != 2) return false;        
+        if (Object.keys(ship.attached).length === 0) return false;
+        if (shipManager.movement.hasDeletableMovements(ship)) return false;
+        return true;
+    },
+
+    doDetach: function doDetach(ship) {
+        var lm = ship.movement[ship.movement.length - 1];
+        var hostShipId = Object.keys(ship.attached)[0];      
+        ship.detached = true; //Mark detached this movement.        
+        ship.movement[ship.movement.length] = {
+            id: -1,
+            type: "detach",
+            position: lm.position,
+            xOffset: 0,
+            yOffset: 0,
+            facing: mathlib.addToHexFacing(lm.facing, 3), // Turn 180 degrees
+            heading: lm.heading,
+            speed: lm.speed,
+            animating: false,
+            animated: false,
+            animationtics: 0,
+            requiredThrust: Array(null, null, null, null, null),
+            assignedThrust: Array(),
+            commit: true,
+            preturn: false,
+            at_initiative: shipManager.getIniativeOrder(ship),
+            turn: gamedata.turn,
+            forced: false,
+            value: hostShipId
+        };
+    },
+
+
 
     canSlip: function canSlip(ship, right) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
         var name = right ? "slipright" : "slipleft";
@@ -504,6 +569,8 @@ shipManager.movement = {
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
     canRotate: function canRotate(ship) {
@@ -540,7 +607,7 @@ shipManager.movement = {
         }
     },
 
-    doRotate: function doRotate(ship) {
+    doRotate: function doRotate(ship, silent) {
         if (gamedata.turn > 0) {
             var name;
             var step = ship.movement[1].value;
@@ -575,6 +642,8 @@ shipManager.movement = {
                 forced: true,
                 value: 0
             };
+
+
         }
     },
 
@@ -589,6 +658,8 @@ shipManager.movement = {
 
     canPivot: function canPivot(ship, right) {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
         if (ship.osat && (!ship.flight)) return false;
         var name = right ? "pivotright" : "pivotleft";
@@ -719,9 +790,11 @@ shipManager.movement = {
         if (!ship.flight) {
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
-    doForcedPivot: function doForcedPivot(ship) {
+    doForcedPivot: function doForcedPivot(ship, silent) {
         var pivoting = shipManager.movement.isPivoting(ship);
         if (pivoting == "no") return;
 
@@ -765,6 +838,8 @@ shipManager.movement = {
             forced: true,
             value: 0
         };
+
+
     },
 
     isPivoting: function isPivoting(ship) {
@@ -892,6 +967,8 @@ shipManager.movement = {
 
     canContract: function canContract(ship, value) {
         if (gamedata.gamephase != 2) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
+
         var canContract = false;
         var contraction = 0;
         for (var i in ship.systems) {
@@ -1038,6 +1115,7 @@ shipManager.movement = {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
         if (ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         /*cannot turn into pivot if unit is aligned...*/
         if (!shipManager.movement.isOutOfAlignment(ship)) return false;
@@ -1127,6 +1205,8 @@ shipManager.movement = {
             shipWindowManager.assignThrust(ship);
         }
 
+
+
     },
 
     hasPivoted: function hasPivoted(ship) {
@@ -1180,6 +1260,8 @@ shipManager.movement = {
         if (ship.osat || ship.base || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
             return false;
         }
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!   
+
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) {
             return false;
@@ -1195,14 +1277,20 @@ shipManager.movement = {
         for (var i in ship.movement) {
             var movement = ship.movement[i];
             if (movement.turn != gamedata.turn) continue;
-            if (movement.preturn == false && movement.forced == false && movement.type != "speedchange" && movement.type != "deploy") return false;
+            if (movement.preturn == false &&
+                movement.forced == false &&
+                movement.type != "speedchange" &&
+                movement.type != "deploy" && 
+                movement.type != "sync" &&
+                movement.type != "attached" &&                  
+                movement.type != "detach") return false;
         }
 
         //gravitic ship with enough thrust can accelerate, no matter her alignment
         if (ship.gravitic) return true;
 
         //ship cannot accelerate if it's not aligned OR pivoting    
-        if (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") return false;
+        if ((shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") && !ship.detached) return false;
 
         return true;
     },
@@ -1325,6 +1413,8 @@ shipManager.movement = {
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
     getRemainingEngineThrust: function getRemainingEngineThrust(ship) {
@@ -1790,6 +1880,7 @@ shipManager.movement = {
 
     canTurn: function canTurn(ship, right) {
         if (ship.mine) return false;
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
         if (ship.osat && (!ship.flight)) { //OSAT but not MicroSAT
@@ -1920,6 +2011,8 @@ shipManager.movement = {
             shipManager.movement.autoAssignThrust(ship);
             shipWindowManager.assignThrust(ship);
         }
+
+
     },
 
 
@@ -2468,5 +2561,19 @@ shipManager.movement = {
         if (shipManager.movement.isPivotedPort(ship)) return false; //ship pivoted to Port is not pivoted to Starboard
         return true;
     },
+
+    getAttachedFacingOffset: function getAttachedFacingOffset(location) {
+        var locOffset = 0;
+        if (location == 1) locOffset = 3; // Forward section, pod faces Aft
+        else if (location == 2) locOffset = 0; // Aft section, pod faces Forward
+        else if (location == 3 || location == 32) locOffset = 1; // Port, pod faces Starboard-Forward
+        else if (location == 31) locOffset = 2; // Port-Forward, pod faces Starboard-Aft
+        else if (location == 4 || location == 42) locOffset = 5; // Starboard, pod faces Port-Forward
+        else if (location == 41) locOffset = 4; // Starboard-Forward, pod faces Port-Aft
+        return locOffset;
+    },
+
+
+
 
 };

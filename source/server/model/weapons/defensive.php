@@ -33,6 +33,7 @@
 	    public $boostEfficiency = 0;
 	    public $maxBoostLevel = 1;
 		protected $canShootMines = true; //marker to let weapons that normally can't shoot MCVs to shoot mines.
+		public $onMine = false;
     
         public function getDefensiveType()
         {
@@ -94,7 +95,7 @@
         public function setSystemDataWindow($turn){
             //$this->data["Weapon type"] = "Particle";
             //$this->data["Damage type"] = "Standard";
-            if($this->getBoostLevel($turn) > 0){ //Boosted i.e. switched to Offeensive Mode this turn.
+            if($this->getBoostLevel($turn) > 0 || $this->onMine){ //Boosted i.e. switched to Offeensive Mode this turn.
             	$this->fireControl = array(6, null, null); //To allow Offensive firing.       	
 	            $this->intercept = 0; //If weapon is boosted for Offensive Mode, cannot intercept!            
             } 
@@ -104,9 +105,10 @@
             parent::setSystemDataWindow($turn);
         }
 
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $mine = false){
             parent::__construct(
                 $armour, $maxhealth, $powerReq, $startArc, $endArc, $this->output);
+			if($mine) $this->onMine = true;	
         }
         
         public function getDamage($fireOrder){        return Dice::d(10)+5;   }

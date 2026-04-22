@@ -261,6 +261,33 @@ window.ShipTooltip = function () {
             }
         }
 
+        if (ship.attached && Object.keys(ship.attached).length > 0 && !ship.detached) {
+            var targetId = Object.keys(ship.attached)[0];
+            var location = Object.values(ship.attached)[0];
+            var locationTip = '';
+            
+            if (location == 1){
+                locationTip = 'Front';
+            }else if (location == 2){
+                locationTip = 'Aft';                
+            }else if (location == 3 || location == 31 || location == 32){
+                locationTip = 'Port';             
+            }else if (location == 4 || location == 41 || location == 42){
+                locationTip = 'Starboard';   
+            }    
+
+            var targetShip = gamedata.getShip(targetId);
+            if (targetShip) {
+                toDisplay += '<span style="color:limegreen;">Attached to ' + targetShip.name + ' [' + locationTip + ']</span>; ';
+            }
+        }
+        
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            var keys = Object.keys(ship.hasAttached);
+            if (keys.length > 0) {
+                toDisplay += '<span style="color:orange;">Ship is being Boarded!</span>; ';
+            }
+        }
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
         } else if (ship.osat) {
@@ -296,7 +323,7 @@ window.ShipTooltip = function () {
                 if (!gamedata.isMyShip(ship)) {
                     this.addEntryElement('OEW: ' + ew.getOffensiveEW(this.selectedShip, ship), this.selectedShip !== ship && ship.flight !== true && this.selectedShip.flight !== true);
                 }
-            }    
+            }
 
         } else {
             //this.addEntryElement("Iniative Order: " + shipManager.getIniativeOrder(ship) + "    (D100 + " + ship.iniativebonus + ")");
@@ -358,8 +385,8 @@ window.ShipTooltip = function () {
                 this.addEntryElement('Detect Mines: ' + MDEW);
             }
 
-            var BDEW = ew.getEWByType('BDEW', ship) * 0.25; 
-            BDEW = parseFloat(BDEW.toFixed(2));                        
+            var BDEW = ew.getEWByType('BDEW', ship) * 0.25;
+            BDEW = parseFloat(BDEW.toFixed(2));
             if (shipManager.isElint(ship)) {
                 if (gamedata.isStealthPresent) this.addEntryElement('Detect Stealth: ' + ew.getEWByType('Detect Stealth', ship), ship.flight !== true);
                 this.addEntryElement('Blanket DEW: ' + BDEW, ship.flight !== true);

@@ -88,44 +88,114 @@ window.ReplayAnimationStrategy = function () {
     }
 
     function animateMovement(time) {
-        this.gamedata.ships.forEach(function (ship) {
+        var animatedShips = {}; // Track ships already processed in a group
 
-            // Filter out enemy stealth ships that are undetected —
-            // BUT always include ships that have fire orders this turn:
-            // a mine that fired must appear in movementAnimations so the
-            // weapon-fire animation phase can look up its position.
-            // This is also the fix for spectator view where getPlayerTeam()
-            // returns undefined and isDetected() always evaluates to false.
-            if (!gamedata.isMyorMyTeamShip(ship)) {
-                if (ship.trueStealth && !shipManager.isDetected(ship)) {
-                    if (!weaponManager.shipHasFiringOrder(ship)) { //Check it hasn't fired tho to prevent bugs from mines firing their opening shot etc.
-                        return; // Skip this ship
+        // Helper to check for detach order
+        var hasDetachOrder = function (ship) {
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (!icon) return false;
+            return icon.getMovementsReplay(this.turn).some(m => m.type === 'detach');
+        }.bind(this);
+
+        this.gamedata.ships.forEach(function (ship, index) {
+            if (animatedShips[ship.id]) return;
+
+            // Check if this ship is attached to someone else
+            var hostId = null;
+            if (ship.attached && Object.keys(ship.attached).length > 0) {
+                hostId = Object.keys(ship.attached)[0];
+            }
+
+            if (hostId) {
+                var host = this.gamedata.getShip(hostId);
+                if (host) {
+                    var hostIndex = this.gamedata.ships.indexOf(host);
+                    var detached = hasDetachOrder(ship);
+
+                    // Case: Pod detaches and moves BEFORE host -> Animate alone now
+                    if (detached && index < hostIndex) {
+                        // proceed with normal animation for this ship alone
+                    } else {
+                        // Case: Pod is attached, or detaches LATER -> Wait for host loop
+                        return;
                     }
                 }
             }
 
-            var icon = this.shipIconContainer.getByShip(ship);
+            // This ship is either independent, a host, or an early-detaching pod.
+            var group = [ship];
 
-            var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
-            setMovementAnimationDuration.call(this, animation);
+            // If this is a host, find all pods that should move with it now
+            this.gamedata.ships.forEach(function (otherShip, otherIndex) {
+                if (animatedShips[otherShip.id] || otherShip.id === ship.id) return;
 
-            if (animation.getLength() > 0) {
-                var cameraAnimation = new CameraPositionAnimation(animation.getStartPosition(), time, 0);
+                if (otherShip.attached && otherShip.attached[ship.id]) {
+                    var otherDetached = hasDetachOrder(otherShip);
+                    // If it doesn't detach, it ALWAYS moves with host.
+                    // If it detaches but moves AFTER host (or host index is same somehow), it moves with host.
+                    if (!otherDetached || otherIndex > index) {
+                        group.push(otherShip);
+                    }
+                }
+            });
+
+            var maxDuration = 0;
+            var groupAnimations = [];
+            var startPosition = null;
+
+            // First pass: create animations and find camera anchor
+            group.forEach(function (member) {
+                // Filter out undetected etc (original logic)
+                if (!gamedata.isMyorMyTeamShip(member)) {
+                    if (member.trueStealth && !shipManager.isDetected(member)) {
+                        if (!weaponManager.shipHasFiringOrder(member)) {
+                            animatedShips[member.id] = true;
+                            return;
+                        }
+                    }
+                }
+
+                var icon = this.shipIconContainer.getByShip(member);
+                var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
+                setMovementAnimationDuration.call(this, animation);
+
+                animation.cameraFollow = false; // Default off for group members
+
+                if (animation.getLength() > 0) {
+                    if (!startPosition || member.id === ship.id) { // Use "anchor" ship for camera if possible, otherwise first available
+                        startPosition = animation.getStartPosition();
+                        animation.cameraFollow = true; // This ship will move the camera
+                    }
+                    maxDuration = Math.max(maxDuration, animation.getDuration());
+                }
+
+                groupAnimations.push({ ship: member, animation: animation });
+                animatedShips[member.id] = true;
+            }, this);
+
+            // Add camera pan if needed
+            if (startPosition) {
+                var cameraAnimation = new CameraPositionAnimation(startPosition, time, 0);
                 this.animations.push(cameraAnimation);
                 time += cameraAnimation.getDuration();
             }
 
-            animation.setTime(time);
-            this.animations.push(animation);
-            this.movementAnimations[ship.id] = animation;
+            // Second pass: set the correct start time (after camera pan)
+            groupAnimations.forEach(function (entry) {
+                entry.animation.setTime(time);
+                this.animations.push(entry.animation);
+                this.movementAnimations[entry.ship.id] = entry.animation;
+            }, this);
 
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                time += animation.getDuration();
+                time += maxDuration;
             }
+
         }, this);
 
         return time;
     }
+
 
     function animateWeaponPreFire(time, logAnimation) {
         var shipList = [];

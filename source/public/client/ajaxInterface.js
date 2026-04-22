@@ -695,10 +695,12 @@ window.ajaxInterface = {
             newShip.systems = Array();
 
             if (ship.userid === gamedata.thisplayer) {
-                for (var a = ship.movement.length - 1; a >= 0; a--) {
-                    var move = ship.movement[a];
-                    if (move.turn == gamedata.turn) {
-                        newShip.movement[a] = move;
+                if (!(Object.keys(ship.attached).length !== 0 && !ship.detached)) {
+                    for (var a = ship.movement.length - 1; a >= 0; a--) {
+                        var move = ship.movement[a];
+                        if (move.turn == gamedata.turn) {
+                            newShip.movement[a] = move;
+                        }
                     }
                 }
 

@@ -1651,7 +1651,7 @@ window.gamedata = {
 					' faction shipshidden listempty" data-faction="' + faction +
 					'" data-custom="' + (isCustom ? "true" : "false") +
 					'" data-tier="' + tier +
-					'"><div class="factionname name"><span class="faction-display-name' +
+					'"><div class="factionname name"><span class="faction-toggle-icon">[+]</span><span class="faction-display-name' +
 					(isCustom ? ' custom-faction' : '') + '">' + faction +
 					'</span><span class="tooltip">' + powerRating +
 					'</span></div></div>');
@@ -2034,6 +2034,13 @@ window.gamedata = {
 
 		// Optimistic UI: Toggle immediately
 		factionElement.toggleClass("shipshidden");
+		
+		var icon = clickedElement.find('.faction-toggle-icon');
+		if (factionElement.hasClass("shipshidden")) {
+			icon.text('[+]');
+		} else {
+			icon.text('[-]');
+		}
 
 		if (isCurrentlyHidden && factionElement.hasClass("listempty")) {
 			window.ajaxInterface.getShipsForFaction(faction, function (factionShips) {

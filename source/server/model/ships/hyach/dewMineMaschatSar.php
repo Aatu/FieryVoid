@@ -12,6 +12,7 @@ class dewMineMaschatSar extends Mine{
 		$this->occurence = "common";
 		$this->variantOf = "Aval Sar DEW Mine";
         $this->isd = 2200;
+        $this->notes = 'Has Command Controller';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

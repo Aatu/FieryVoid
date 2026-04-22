@@ -117,7 +117,8 @@ window.flightWindowManager = {
 	},
 
 	populateShipWindow: function populateShipWindow(ship, shipwindow) {
-		shipwindow.find(".icon img").attr("src", "./" + ship.imagePath);
+		// shipwindow.find(".icon img").attr("src", "./" + ship.imagePath);
+		shipwindow.find(".icon img").attr("src", window.AssetManager.getSmartImagePath(ship.imagePath));
 
 		if (gamedata.turn != 0) {
 			shipwindow.find(".topbar .value.name").html("");

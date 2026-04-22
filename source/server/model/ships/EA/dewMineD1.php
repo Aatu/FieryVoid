@@ -33,7 +33,7 @@ class dewMineD1 extends Mine{
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 2));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
         $this->addPrimarySystem(new MineControllerDEW(0, 1, 0, 6, 8, false, array('Fighters'))); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range/output, $accuracy, ballistic, target types 
-        $this->addPrimarySystem(new InterceptorMkI(0, 1, 1, 0, 360));
+        $this->addPrimarySystem(new InterceptorMkI(0, 1, 1, 0, 360, true));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(2, 5));

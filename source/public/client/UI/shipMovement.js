@@ -64,6 +64,7 @@ window.UI = {
             UI.shipMovement.morejinkElement = $("#morejink", ui);
             UI.shipMovement.lessjinkElement = $("#lessjink", ui);
             UI.shipMovement.cancelElement = $("#cancel", ui);
+            UI.shipMovement.detachElement = $("#detach", ui);
 
             UI.shipMovement.halfphaseElement = $("#halfphase", ui);
 
@@ -73,6 +74,7 @@ window.UI = {
             UI.shipMovement.contractionvalueElement = UI.shipMovement.contractionElement.find(".contractionvalue");
 
             UI.shipMovement.cancelElement.on("click touchstart contextmenu", UI.shipMovement.cancelCallback);
+            UI.shipMovement.detachElement.on("click touchstart contextmenu", UI.shipMovement.detachCallback);
             UI.shipMovement.moveElement.on("click touchstart contextmenu", UI.shipMovement.moveCallback);
 
             UI.shipMovement.turnrightElement.on("click touchstart", UI.shipMovement.turnrightCallback);
@@ -140,6 +142,10 @@ window.UI = {
 
         cancelCallback: function cancelCallback(e) {
             UI.shipMovement.callbackHandler.cancelCallback(e);
+        },
+
+        detachCallback: function detachCallback(e) {
+            UI.shipMovement.callbackHandler.detachCallback(e);
         },
 
         morejinkCallback: function morejinkCallback(e) {
@@ -279,10 +285,10 @@ window.UI = {
             var shipY = ship.movement[ship.movement.length - 1].y;
 
             var pos = { x: 400, y: 400 };
-            //ui.css("top", pos.y +"px").css("left", pos.x +"px");
+
+            var s = 40;
 
             var move = UI.shipMovement.moveElement;
-            var s = 40;
 
             if (shipManager.movement.canMove(ship)) {
                 UI.shipMovement.drawUIElement(move, pos.x, pos.y, s * 1.3, dis * 1.4, angle, "img/move.png", "movecanvas", shipHeading);
@@ -537,6 +543,16 @@ window.UI = {
                 roll.hide();
                 emergencyroll.hide();
                 UI.shipMovement.rollActiveElement.hide();
+            }
+
+            var detach = UI.shipMovement.detachElement;
+            if (shipManager.movement.canDetach(ship)) {
+                //var detachOrientation = shipManager.getShipHeadingAngle(ship) - shipManager.getShipDoMAngle(ship);                
+                var relativeFacing = shipManager.getShipHeadingAngle(ship) - shipManager.getShipDoMAngle(ship);
+                var detachAngle = mathlib.addToDirection(relativeFacing, 180);
+                UI.shipMovement.drawUIElement(detach, pos.x, pos.y, s, dis * 1.4, detachAngle, "img/detach.png", "detachcanvas", relativeFacing);
+            } else {
+                detach.hide();
             }
 
             //JINKING

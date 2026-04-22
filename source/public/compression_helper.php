@@ -4,40 +4,34 @@
  * 
  * This script is registered as a shutdown function to automatically
  * apply Brotli or Gzip compression to the output buffer if supported.
- * 
- * Triggered via global.php
  */
 
 function fv_compress_output() {
-    // Only capture if buffering was started
     $content = ob_get_clean();
     if ($content === false) return;
-
-    // Apply Weak ETag for caching (Nginx often strips strong ETags when compression is active)
-    // NOTE: On this specific server, ETags are stripped by the proxy, but we keep the logic 
-    // for compatibility if the server config changes in the future.
+    
+    $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
     $etag = md5($content);
-    
-    header_remove('Pragma');
-    header_remove('Expires');
-    
+
+    // Apply Weak ETag for caching
     header("Etag: W/\"$etag\"");
     header("Cache-Control: private, must-revalidate");
+    header('X-Accel-Buffering: no'); 
 
+    // Handle 304 Not Modified
     $ifNoneMatch = $_SERVER['HTTP_IF_NONE_MATCH'] ?? '';
     if ($ifNoneMatch && (trim($ifNoneMatch) === "\"$etag\"" || trim($ifNoneMatch) === "W/\"$etag\"")) {
         header("HTTP/1.1 304 Not Modified");
         exit;
     }
 
-    // Check if we already sent a compression header or if it's too small to bother
+    // Check if we already sent a compression header or if content is too small
     $existingHeaders = headers_list();
     $alreadyCompressed = false;
     $isJson = false;
 
     foreach ($existingHeaders as $header) {
         if (stripos($header, 'Content-Encoding') !== false) $alreadyCompressed = true;
-        if (stripos($header, 'X-LiteSpeed-No-Gzip') !== false) $alreadyCompressed = true;
         if (stripos($header, 'application/json') !== false) $isJson = true;
     }
 
@@ -48,20 +42,18 @@ function fv_compress_output() {
         return;
     }
 
-    $acceptEncoding = $_SERVER['HTTP_ACCEPT_ENCODING'] ?? '';
-
     // BROTLI (Highest Priority)
     if (strpos($acceptEncoding, 'br') !== false && function_exists('brotli_compress')) {
-        header('X-Debug-Method: Brotli-Universal');
+        header('Content-Encoding: br');
+        header('Vary: Accept-Encoding');
+        
+        // Defensive headers for specific server setups
         header('X-LiteSpeed-No-Gzip: 1');
         header('X-LSCompress: 0');
-        
         if (function_exists('apache_setenv')) {
             apache_setenv('no-gzip', '1');
         }
         
-        header('Content-Encoding: br');
-        header('Vary: Accept-Encoding');
         $compressed = brotli_compress($content, 4); 
         header('Content-Length: ' . strlen($compressed));
         echo $compressed;

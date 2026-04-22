@@ -447,7 +447,7 @@ window.declarations = {
 		newText += '<br>Friendly Fire enabled.'; 
     }
     if (gamedata.rules && 'allowMines' in gamedata.rules) {
-		newText += '<br>Allow Mines enabled.'; 
+		newText += '<br>Mines enabled.'; 
     }
     if (gamedata.rules && 'desperate' in gamedata.rules) {
         var desperateValue = gamedata.rules.desperate;
