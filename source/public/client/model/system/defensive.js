@@ -73,9 +73,9 @@ EMShield.prototype.initializationUpdate = function () {
 	// Turns systems back on after Capacitor was double charged the previous turn
 	var ship = this.ship;
 	if (ship.faction == "Vorlon Empire") {
+		this.reactivated = true;		
 		if (!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)) {
 			shipManager.power.setOnline(ship, this);
-			this.reactivated = true;
 		}
 	}
 	return this;
