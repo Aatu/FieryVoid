@@ -16,6 +16,8 @@ class SalbezRiktchen extends BaseShip{
 		$this->unofficial = true;
 
         $this->fighters = array("heavy"=>12);
+		$this->customFighter = array("Ok-chn"=>12);
+        $this->notes = 'Ok-chn capable.';
 
 		$this->isd = 2128;
         
