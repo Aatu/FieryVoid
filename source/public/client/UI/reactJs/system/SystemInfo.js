@@ -113,7 +113,7 @@ class SystemInfo extends React.Component {
 
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
-                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && getEntry(key, system.data[key], 'data' + i)))}
+                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, system.data[key], 'data' + i)))}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&

@@ -238,14 +238,14 @@ const EBButton = styled(MainButton)`
     background-image: url("./img/ballisticTarget2.png");
     box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
     background-color: ${props => (props.$toggled ? "#1b533d" : "#0a3340")};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#3793c8")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
     border-right: none;    
 `;
 const FBButton = styled(MainButton)`
     background-image: url("./img/ballisticLaunch2.png");
     box-shadow: ${props => (props.$toggled ? "inset 0 0 15px 5px rgba(50, 205, 50, 0.4)" : "none")};
     background-color: ${props => (props.$toggled ? "#1b533d" : "#0a3340")};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#3793c8")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
     border-right: none;    
 `;
 const LoSButton = styled(MainButton)`
@@ -254,7 +254,7 @@ const LoSButton = styled(MainButton)`
         props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#3793c8")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
     border-right: none;
 `;
 const HexButton = styled(MainButton)`
@@ -263,7 +263,7 @@ const HexButton = styled(MainButton)`
         props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#3793c8")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
     border-right: none;
 `;
 
@@ -272,7 +272,7 @@ const BgButton = styled(MainButton)`
         props.$toggled
             ? "brightness(1.6) sepia(0.85) hue-rotate(60deg) saturate(4)"
             : "none"};
-    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#3793c8")};
+    border: 1px solid ${props => (props.$toggled ? "limegreen" : "#587e8d")};
     border-right: none;
     position: relative;
 
@@ -296,7 +296,7 @@ const SoundButton = styled(MainButton)`
         props.$toggled
             ? 'url("./img/soundOn.png")'
             : 'url("./img/soundOff.png")'};
-    border: 1px solid #3793c8;
+    border: 1px solid #587e8d;
     border-right: none;
 `;
 

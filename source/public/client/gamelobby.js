@@ -189,7 +189,7 @@ window.gamedata = {
 				powerRating = 'Tier 3; Custom faction';
 				break;
 			case 'Escalation Wars Civilian':
-				powerRating = 'Tier Other, Custom';
+				powerRating = 'Tier N/A, Custom';
 				break;
 			case 'Escalation Wars Chouka Raider':
 				powerRating = 'Tier 2; Not balanced, Custom faction';
@@ -578,6 +578,10 @@ window.gamedata = {
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
 
 		var totalEnhancementsValue = 0;
+		var totalBPCapacity = 0;
+		var totalBPUsage = 0;
+		var shipHangarProfiles = [];
+		var breachingPodsList = [];
 		/* messageOP - warning
 		var messageOP = '';
 		*/
@@ -682,36 +686,62 @@ window.gamedata = {
 			if (!lship.flight) {
 				totalShips++;
 
-				// Check if ship has converted Assault Shuttle Hangar Space to Fighters before calculating total hangar space
-				for (var enh in lship.enhancementOptions) {
-					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][0] === "HANG_F") {
-							hangarConversionsF += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
-						}
-					}
+				// Calculate Breaching Pod capacity for this ship - only if it has suitable hangar capacity
+				var hasBPCompatibleHangar = false;
+				var shipSlots = {
+					"heavy": lship.fighters["heavy"] || lship.fighters["normal"] || 0,
+					"medium": lship.fighters["medium"] || 0,
+					"assault shuttles": lship.fighters["assault shuttles"] || 0
+				};
+
+				if (shipSlots["heavy"] > 0 || shipSlots["medium"] > 0 || shipSlots["assault shuttles"] > 0) {
+					hasBPCompatibleHangar = true;
 				}
 
-				// Check if ship has converted Fighter Hangar Space to Assault Shuttles before calculating total hangar space
+				var shipBPLimit = 0;
+				if (hasBPCompatibleHangar) {
+					shipBPLimit = 1;
+					if (lship.Enormous || lship.base || lship.smallBase) {
+						shipBPLimit = 4;
+					} else if (lship.shipSizeClass >= 3) { // Capital ships
+						shipBPLimit = 2;
+					}
+					// Double for Assault units (hull type as requested)
+					if (lship.shipClass.toLowerCase().indexOf("assault") !== -1) {
+						shipBPLimit *= 2;
+					}
+					totalBPCapacity += shipBPLimit;
+				}
+
+				// Record ship profile for per-ship validation
+				var shipProfile = {
+					id: lship.id,
+					name: lship.shipClass,
+					bpLimitRemaining: shipBPLimit,
+					slots: shipSlots
+				};
+				shipHangarProfiles.push(shipProfile);
+
+				// Check if ship has converted Hangar Space (adjust ship-specific profile too)
 				for (var enh in lship.enhancementOptions) {
-					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
+					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option
+						var convNum = lship.enhancementOptions[enh][2];
+						if (lship.enhancementOptions[enh][0] === "HANG_F") {
+							hangarConversionsF += convNum;
+							shipProfile.slots["assault shuttles"] -= convNum;
+							shipProfile.slots["heavy"] += convNum;
+						}
 						if (lship.enhancementOptions[enh][0] === "HANG_AS") {
-							hangarConversionsAS += lship.enhancementOptions[enh][2]; //Record number of slots converted from Fighter to Assault Shuttles.
-							if (lship.customFighter && Object.keys(lship.customFighter).length > 0) {
-								var shipFighters = 0;
-								for (let g in lship.fighters) {
-									shipFighters += lship.fighters[g];
-								}
-								var customFighters = 0;
-								for (let h in lship.customFighter) {
-									customFighters += lship.customFighter[h];
-								}
-								if ((shipFighters - lship.enhancementOptions[enh][2]) <= customFighters) {
-									for (var i in lship.customFighter) {
-										lship.customFighter[i] = (shipFighters - lship.enhancementOptions[enh][2]);
-										break; //Let's just amend the first entry, should usually work...										
-									}
-								}
+							hangarConversionsAS += convNum;
+							// Deduct from heavy then medium
+							var toDeduct = convNum;
+							var taken = Math.min(toDeduct, shipProfile.slots["heavy"]);
+							shipProfile.slots["heavy"] -= taken;
+							toDeduct -= taken;
+							if (toDeduct > 0) {
+								shipProfile.slots["medium"] -= toDeduct;
 							}
+							shipProfile.slots["assault shuttles"] += convNum;
 						}
 					}
 				}
@@ -756,16 +786,20 @@ window.gamedata = {
 				}
 				//ship may actually require hangar, too! but this must be specified directly
 				if (lship.hangarRequired != '') { //classify based on explicit info from craft
-					var found = false;
-					for (var nh in totalFtrOther) {
-						if (totalFtrOther[nh][0] == lship.hangarRequired) {//this is small craft type we're looking for!
-							found = true;
-							totalFtrOther[nh][1] += 1 / lship.unitSize; //always 1 craft in this case!
+					if (lship.hangarRequired == 'Breaching Pods') {
+						totalBPUsage += 1 / lship.unitSize;
+					} else {
+						var found = false;
+						for (var nh in totalFtrOther) {
+							if (totalFtrOther[nh][0] == lship.hangarRequired) {//this is small craft type we're looking for!
+								found = true;
+								totalFtrOther[nh][1] += 1 / lship.unitSize; //always 1 craft in this case!
+							}
 						}
-					}
-					if (found != true) { //such craft wasn't encountered yet
-						totalFtrOther.push(new Array(lship.hangarRequired, 1 / lship.unitSize));
-						smallCraftUsed.push(lship.hangarRequired);
+						if (found != true) { //such craft wasn't encountered yet
+							totalFtrOther.push(new Array(lship.hangarRequired, 1 / lship.unitSize));
+							smallCraftUsed.push(lship.hangarRequired);
+						}
 					}
 				}
 			} else {//note presence of fighters
@@ -798,7 +832,13 @@ window.gamedata = {
 						specialFighters.push([specialFtrName, specialFtrAmt]);
 					}
 
-					if (smallCraftSize == "heavy") {
+					if (smallCraftSize == "Breaching Pods") {
+						var podsInFlight = lship.flightSize / lship.unitSize;
+						totalBPUsage += podsInFlight;
+						for (var p = 0; p < podsInFlight; p++) {
+							breachingPodsList.push({ id: lship.id });
+						}
+					} else if (smallCraftSize == "heavy") {
 						totalFtrH += lship.flightSize / lship.unitSize;
 					} else if (smallCraftSize == "medium") {
 						totalFtrM += lship.flightSize / lship.unitSize;
@@ -1089,6 +1129,38 @@ window.gamedata = {
 
 		//fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
+
+		// Per-Ship Breaching Pod Assignment and Deduction
+		var unassignedBPs = 0;
+		for (var bpIdx = 0; bpIdx < breachingPodsList.length; bpIdx++) {
+			var assigned = false;
+			for (var shIdx = 0; shIdx < shipHangarProfiles.length; shIdx++) {
+				var ship = shipHangarProfiles[shIdx];
+				if (ship.bpLimitRemaining > 0) {
+					// Check for suitable slot: AS > Heavy > Medium
+					if (ship.slots["assault shuttles"] > 0) {
+						ship.slots["assault shuttles"]--;
+						totalHangarAS--;
+						assigned = true;
+					} else if (ship.slots["heavy"] > 0) {
+						ship.slots["heavy"]--;
+						totalHangarH--;
+						assigned = true;
+					} else if (ship.slots["medium"] > 0) {
+						ship.slots["medium"]--;
+						totalHangarM--;
+						assigned = true;
+					}
+
+					if (assigned) {
+						ship.bpLimitRemaining--;
+						break;
+					}
+				}
+			}
+			if (!assigned) unassignedBPs++;
+		}
+
 		var hangarConversionNet = hangarConversionsF - hangarConversionsAS; //Positive is more fighter slots, negative if more AS.
 		var totalHangarAvailable = totalHangarH + totalHangarM + totalHangarL + (totalHangarXL / 2) + hangarConversionNet;
 		var minFtrRequired = Math.ceil(totalHangarAvailable / 2);
@@ -1308,8 +1380,27 @@ window.gamedata = {
 
 		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
 		totalHangarAS = totalHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
+
+		checkResult += "<br><b><u>Breaching Pods:</u></b><br>";
+		checkResult += " Total Breaching Pods: " + totalBPUsage;
+		checkResult += " (allowed up to " + totalBPCapacity + ")";
+		if (totalBPUsage > totalBPCapacity || unassignedBPs > 0) {
+			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+			if (unassignedBPs > 0) {
+				if (totalBPUsage > totalBPCapacity) {
+					checkResult += " (Not enough Breaching Pod Capacity)";
+				} else {
+					checkResult += " (Not enough hangar slots on ships with Breaching Pod capacity)";
+				}
+			}
+			problemFound = true;
+		} else {
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		}
+		checkResult += "<br>";
+
 		if (totalFtrAS > 0 || totalHangarAS > 0) { //do not show if there are no Assault Shuttles/hangars in this segment
-			checkResult += " Total Assault Shuttles / Breaching Pods: " + totalFtrAS;
+			checkResult += " Total Assault Shuttles: " + totalFtrAS;
 			checkResult += " (allowed up to " + totalHangarAS + ")";
 			if (totalFtrAS > totalHangarAS) { //Asssault Shuttle total is not within limits
 				checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
@@ -1607,6 +1698,7 @@ window.gamedata = {
 			else if (lowerPower.includes("major")) groupName = "Major Factions";
 			else if (lowerPower.includes("league")) groupName = "League of Non-Aligned Worlds";
 			else if (lowerPower.includes("ancients")) groupName = "Ancients";
+			else if (lowerPower.includes("other")) groupName = "Other Factions";
 			else if (isCustom) groupName = "Custom Factions";
 
 			const tierMatch = powerRating.match(/Tier\s*([123]|Ancients|Other)/i);
@@ -1899,7 +1991,7 @@ window.gamedata = {
 
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
-				var startClosed = (categoryIndex === 1 || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
+				var startClosed = ((categoryIndex === 1  && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
 				if (faction === "Terrain") {
 					startClosed = false;
 				}
@@ -2034,7 +2126,7 @@ window.gamedata = {
 
 		// Optimistic UI: Toggle immediately
 		factionElement.toggleClass("shipshidden");
-		
+
 		var icon = clickedElement.find('.faction-toggle-icon');
 		if (factionElement.hasClass("shipshidden")) {
 			icon.text('[+]');

@@ -8,7 +8,7 @@ class proxMineDefender extends Mine{
 		$this->faction = "Civilians";
         $this->phpclass = "proxMineDefender";
         $this->imagePath = "img/ships/civilianMine.png";
-        $this->shipClass = "Defender Class Proximity Mine";
+        $this->shipClass = "Defender Proximity Mine";
 		$this->occurence = "common";
 		//$this->variantOf = 'NONE';
         $this->isd = 2200;  

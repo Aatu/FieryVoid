@@ -120,6 +120,31 @@ const Divider = styled.span`
     opacity: 0.7;
 `;
 
+const EqualiseButton = styled.div`
+    width: 100%;
+    height: 24px;
+    background: #203348;
+    border-top: 1px solid #496791;
+    color: #deebff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 11px;
+    font-weight: bold;
+    user-select: none;
+    transition: background 0.2s;
+
+    &:hover {
+        background: #2c4766;
+        color: #ffffff;
+    }
+
+    &:active {
+        background: #1b3348;
+    }
+`;
+
 class ShieldGeneratorList extends Component {
     constructor(props) {
         super(props);
@@ -379,6 +404,13 @@ class ShieldGeneratorList extends Component {
         webglScene.customEvent('SystemDataChanged', { ship: this.props.ship, system: generator });
     }
 
+    handleEqualise(generator) {
+        if (!generator) return;
+        generator.doEqualise();
+        this.forceUpdate();
+        webglScene.customEvent('SystemDataChanged', { ship: this.props.ship, system: generator });
+    }
+
     componentDidMount() {
         const { generator, shields } = this.getGeneratorAndShields();
         const initialInputs = {};
@@ -479,6 +511,11 @@ class ShieldGeneratorList extends Component {
                     ))}
                     {shields.length === 0 && <Row>No Shields Found</Row>}
                 </ListContainer>
+                {generator && (
+                    <EqualiseButton onClick={() => this.handleEqualise(generator)}>
+                        Equalise Shields
+                    </EqualiseButton>
+                )}
             </Container>
         );
     }

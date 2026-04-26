@@ -1,4 +1,5 @@
 <?php
+$fv_start_timer = microtime(true);
 require_once 'global.php'; // ✅ Critical dependency
 session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 
@@ -15,7 +16,9 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 		$thisplayer = $_SESSION["user"];
 	}
 	
+	$t1 = microtime(true);
 	$serverdataJSON = Manager::getTacGamedataJSON($gameid, $thisplayer, null, 0, -1, true);
+    $time_getTacGamedataJSON = microtime(true) - $t1;
     $error = 'null';
     $serverdata = null;
 
@@ -75,7 +78,9 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
                 $shipClasses[] = $ship->phpclass;
             }
         }
+        $t2 = microtime(true);
         $staticShips = ShipLoader::getShipsByClass($shipClasses);
+        $time_getShipsByClass = microtime(true) - $t2;
 
         // Auto-discover dynamically spawnable ship blueprints from weapon system properties.
         // Any weapon with a $spawnableClasses array will have its listed classes preloaded here,
@@ -881,4 +886,17 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 </body>
 
 </html>
+<!-- 
+PHP Execution Diagnostics:
+Total Time: <?php echo isset($fv_start_timer) ? round((microtime(true) - $fv_start_timer)*1000, 2) : 0; ?> ms
+Manager::getTacGamedataJSON Time: <?php echo isset($time_getTacGamedataJSON) ? round($time_getTacGamedataJSON*1000, 2) : 0; ?> ms
+  |- getTacGamedata (DB Wrapper): <?php echo isset($GLOBALS['dbg_getTacGamedata']) ? round($GLOBALS['dbg_getTacGamedata']*1000, 2) : 0; ?> ms
+       |- getTacGame: <?php echo isset($GLOBALS['dbg_getTacGame']) ? round($GLOBALS['dbg_getTacGame']*1000, 2) : 0; ?> ms
+       |- getSlotsInGame: <?php echo isset($GLOBALS['dbg_getSlotsInGame']) ? round($GLOBALS['dbg_getSlotsInGame']*1000, 2) : 0; ?> ms
+       |- getTacShips: <?php echo isset($GLOBALS['dbg_getTacShips']) ? round($GLOBALS['dbg_getTacShips']*1000, 2) : 0; ?> ms
+       |- onConstructed: <?php echo isset($GLOBALS['dbg_onConstructed']) ? round($GLOBALS['dbg_onConstructed']*1000, 2) : 0; ?> ms
+  |- stripForJson: <?php echo isset($GLOBALS['dbg_stripForJson']) ? round($GLOBALS['dbg_stripForJson']*1000, 2) : 0; ?> ms
+  |- json_encode: <?php echo isset($GLOBALS['dbg_json_encode']) ? round($GLOBALS['dbg_json_encode']*1000, 2) : 0; ?> ms
+ShipLoader::getShipsByClass Time: <?php echo isset($time_getShipsByClass) ? round($time_getShipsByClass*1000, 2) : 0; ?> ms
+-->
 

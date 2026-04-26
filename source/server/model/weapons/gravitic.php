@@ -959,7 +959,7 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         $this->data["Special"] .= "<br>Only ONE Gravitic Shifter can be used on a ship per turn, any other attempts will automatically miss.";           
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
         $this->data["Special"] .= "<br>Can target allies without suffering double range penalty for no EW Lock.";
-        $this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
+        $this->data["Special"] .= "<br>No effect on Enormous units or Mines.";	        	        		
 		parent::setSystemDataWindow($turn);     
     }
 
@@ -981,37 +981,19 @@ class GraviticShifter extends Weapon implements SpecialAbility{
 
         if($target->gravitic || $target->factionAge >= 3){ 
             $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
-        }
-
-        /* //Removed since OEW lock on allies enabled - DK 17.1.26  
-        if($shooter->team == $target->team){ //Let's make penalty only for enemy units
-		    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
-		    $targetPos = $target->getHexPos();                       
-            $distance = mathlib::getDistanceHex($launchPos, $targetPos);
-
-            $rangePen = $this->calculateRangePenalty($distance);
-            $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
-        } 
-        */       
+        }      
 	}    
         
     public function fire($gamedata, $fireOrder){                   
         parent::fire($gamedata, $fireOrder); 
-		
-        if($fireOrder->firingMode == 1){
-            $direction = "clockwise";
-        }else{
-            $direction = "anti-clockwise";      
-        }
-
-        if($fireOrder->shotshit > 0){
-            $fireOrder->pubnotes = "<br>Ship has been forced to turn 60 degrees " . $direction . " by a Gravitic Shifter.";                       
-        }    
     }
 
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
         if ($ship->Enormous) return; //No effect on Enormous units
-        if ($ship instanceof Mine) return; //No point.
+        if ($ship instanceof Mine){
+            $fireOrder->pubnotes = "<br>Mines are not affected by Gravitic Shifters.";
+            return; //No point.                         
+        } 
 
 		$lastMove = $ship->getLastMovement();
         $newFacing = $lastMove->facing; //Initialise as current facing.
@@ -1020,16 +1002,23 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         if($fireOrder->firingMode == 1){
             $newFacing = MathLib::addToHexFacing($lastMove->facing , 1);
             $newHeading = MathLib::addToHexFacing($lastMove->heading , 1);
-            //$type = "turnRight";
         }else{
             $newFacing = MathLib::addToHexFacing($lastMove->facing , -1);
-            $newHeading = MathLib::addToHexFacing($lastMove->heading , -1);
-            //$type = "turnLeft";                        
+            $newHeading = MathLib::addToHexFacing($lastMove->heading , -1);                      
         }
 		
 		//Create new movement order for target.
         $shift = new MovementOrder(null, "prefire", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $newHeading, $newFacing, false, $gamedata->turn, $fireOrder->id, 0);
 
+        if($fireOrder->firingMode == 1){
+            $direction = "clockwise";
+        }else{
+            $direction = "anti-clockwise";      
+        }        
+
+        if($fireOrder->shotshit > 0){
+            $fireOrder->pubnotes = "<br>Ship has been forced to turn 60 degrees " . $direction . " by a Gravitic Shifter.";                       
+        }   
 		//Add shifted movement order to database
 		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);	
     }    
@@ -1105,7 +1094,7 @@ class GravityNet extends Weapon implements SpecialAbility{
         $this->data["Special"] .= "<br>Priorty (P) mode: Gravity Net hitting target will take priority over all other Gravity Nets.";
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives (Does NOT include allies).";        
         $this->data["Special"] .= "<br>Can target allies.";
-        $this->data["Special"] .= "<br>No effect on units bigger then firing ship.";	        	        		
+        $this->data["Special"] .= "<br>No effect on units bigger then firing ship, or Mines.";	        	        		
 		parent::setSystemDataWindow($turn);  
     }   
 
@@ -1123,17 +1112,6 @@ class GravityNet extends Weapon implements SpecialAbility{
                 if($target->gravitic || $target->factionAge >= 3){ 
                     $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
                 }
-
-                /* //Removed since OEW lock on allies enabled - DK 17.1.26  
-                if($shooter->team == $target->team){ //Let's make penalty only for enemy units
-                    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
-                    $targetPos = $target->getHexPos();                       
-                    $distance = mathlib::getDistanceHex($launchPos, $targetPos);
-
-                    $rangePen = $this->calculateRangePenalty($distance);
-                    $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
-                } 
-                */    
             }
         }
 	}    
@@ -1159,15 +1137,16 @@ class GravityNet extends Weapon implements SpecialAbility{
                 $shooterSize = $shooter->shipSizeClass; //only get ship size if not enormous, logic below accounts for enormous.
             }
 
-            if($shooter->Enormous || (!$target->Enormous && $shooterSize >= $targetSize)){ //Make sure target is equal to or smaller then shooter.      
+            if ($target instanceof Mine){
+                $fireOrder->pubnotes = "<br>Mines cannot be moved by Gravity Net.";
+            } else if($shooter->Enormous || (!$target->Enormous && $shooterSize >= $targetSize)){ //Make sure target is equal to or smaller then shooter.      
                 $primaryGravityNet = GravityNetHandler::getPrimaryGravNetPerTarget($target);
-                //Debug::log(json_encode($primaryGravityNet, true));
                 if($this == $primaryGravityNet){//check if THIS gravity net is the primary gravity net(Primary is defined as gravity net that hits a given target with largest move distance)
                     $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";
                     $this->doGravityNetMove($target, $fireOrder->id, $gamedata);
                 }
             }else{
-                $fireOrder->pubnotes = "<br>Target ship is larger then fireing ship and cannot be moved by Gravity Net.";
+                $fireOrder->pubnotes = "<br>Target ship is larger then firing ship and cannot be moved by Gravity Net.";
             }              
         }
     }  
@@ -1175,7 +1154,7 @@ class GravityNet extends Weapon implements SpecialAbility{
     private function doGravityNetMove($target, $graviticOrderID, $gamedata){
         $allFireOrders = $this->getFireOrders($gamedata->turn);
         $gravNetMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
-        $gravNetMovePos = null; //var to hold grav net move target hex.
+        //$gravNetMovePos = null; //var to hold grav net move target hex.
 
         foreach($allFireOrders as $fireOrderCheck){ //find the gravNetMoveHex order and then process. If it does not exist do not process.
             if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){

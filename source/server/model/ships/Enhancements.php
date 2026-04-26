@@ -961,7 +961,7 @@ class Enhancements{
 		  }
 		  $enhID = 'AMMO_X'; //HARM Missiles
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-			$ammoClass = new AmmoMissileZ();
+			$ammoClass = new AmmoMissileX();
 			$ammoSize = $ammoClass->size;
 			$actualCapacity = floor($magazineCapacity/$ammoSize);
 			$enhName = $ammoClass->enhancementDescription;

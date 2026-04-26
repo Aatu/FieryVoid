@@ -107,9 +107,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Breaching Pod Update</strong> - Breaching Pods now remain attached to enemy vessels after a successful attack, see Fiery Void FAQ for more details.</li>         
-        <li><strong>League-2 Mines</strong> - Mine units added for League-2 Factions; Cascor, Grome, Hurr, Hyach, Ipsha, Kor-Lyan and Torata.</li>                           
-        <li><strong>Fighters Missiles</strong> - Dealing 2+ damage to a fighter will destroy a missile in its Ammo Magazine, Dummy Missiles now available for purchase.</li> 
-        <li><strong>New Units</strong> - New custom units for House Valheru and the Corillani, thanks to Geoffrey!.</li>                  
+        <li><strong>A Few More Mines</strong> - Mine units added for the following factions; WotCR Abbai, WotCR Drazi, Balosians and Rogolons.</li>                           
+        <li><strong>Fighters Missiles</strong> - Dealing 2+ damage to a fighter will destroy a missile in its Ammo Magazine, Dummy Missiles now available for purchase.</li>                  
         <li><strong>Pivoting Gravtic Ships</strong> - Gravitic ships should now use the correct thrusters when turning or side-slipping.</li>  
         <li><strong>Stabilised Missiles</strong> - Missile systems on Bases and OSATs should now show their correct range values in system tooltips.</li>                                                                 
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
