@@ -55,7 +55,7 @@ class TacGamedata {
     
     public function getPlayerTeam() {
         foreach ($this->slots as $slot) {
-            if ($slot->userid == $this->forPlayer) return $slot->team;
+            if ($slot->playerid == $this->forPlayer) return $slot->team;
         }
     }
 
@@ -716,6 +716,8 @@ class TacGamedata {
                 $this->hideSystemFireOrders($ship);
             }
         }
+        
+        $this->hideStealthShipMovement(); //Send empty arrays if current player's team can't see the ship.
     }
 
     private function hideSystemFireOrders($ship){         
@@ -779,6 +781,47 @@ class TacGamedata {
 
             foreach ($toDelete as $i) {
                 unset($ship->movement[$i]);
+            }
+        }
+    }
+
+    private function hideStealthShipMovement() {
+        $playerTeam = $this->getPlayerTeam();
+
+        foreach ($this->ships as $ship) {
+            if ($ship->userid == $this->forPlayer || $ship->team == $playerTeam) {
+                continue;
+            }
+
+            if (!$ship->trueStealth) {
+                continue;
+            }
+
+            $isDetected = false;
+            foreach ($ship->systems as $system) {
+                if ($system instanceof Stealth || $system instanceof ShadingField || $system instanceof CloakingDevice) {
+                    if (isset($system->detectedNew) && is_array($system->detectedNew) && in_array($playerTeam, $system->detectedNew)) {
+                        $isDetected = true;
+                        break;
+                    }
+                    if (isset($system->detected) && $system->detected === true && (!isset($system->detectedNew) || empty($system->detectedNew))) {
+                        $isDetected = true;
+                        break;
+                    }
+                }
+                if ($system instanceof MineStealth) {
+                    if (isset($system->detected) && is_array($system->detected) && in_array($playerTeam, $system->detected)) {
+                        $isDetected = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!$isDetected) {
+                // Give it a dummy deploy movement completely off screen so the client doesn't crash reading position
+                $ship->movement = array(
+                    new MovementOrder(-1, "deploy", new OffsetCoordinate(-10000, -10000), 0, 0, 0, 0, 0, false, $this->turn, 0, 0)
+                );
             }
         }
     }

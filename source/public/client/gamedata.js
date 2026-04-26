@@ -355,7 +355,10 @@ window.gamedata = {
 
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
+                    if ((!gamedata.ships[ship].mine || gamedata.ships[ship].commandControl) &&
+                        !shipManager.isDestroyed(gamedata.ships[ship]) &&
+                        !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
+
                         var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                         if (deployTurn <= gamedata.turn) {   //Don't bother checking for ships that haven't deployed yet. 
                             myShips.push(gamedata.ships[ship]);
@@ -744,7 +747,10 @@ window.gamedata = {
 
             for (var ship in gamedata.ships) {
                 if (gamedata.ships[ship].userid == gamedata.thisplayer) {
-                    if (!shipManager.isDestroyed(gamedata.ships[ship]) && !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid)) {
+                    if ((!gamedata.ships[ship].mine || gamedata.ships[ship].commandControl) &&
+                        !gamedata.isTerrain(gamedata.ships[ship].shipSizeClass, gamedata.ships[ship].userid) &&
+                        !shipManager.isDestroyed(gamedata.ships[ship])) {
+
                         var deployTurn = shipManager.getTurnDeployed(gamedata.ships[ship]);
                         if (deployTurn <= gamedata.turn) {   //Don't bother checking for ships that haven't deployed yet. 
                             myShips.push(gamedata.ships[ship]);
@@ -1564,11 +1570,12 @@ getActiveShipName: function getActiveShipName() {
         var existingMineBtn = document.getElementById('mineDeployBtn');
         if (existingMineBtn) existingMineBtn.parentNode.removeChild(existingMineBtn);
 
-        if (gamedata.gamephase === -1) {
+        if (gamedata.gamephase === -1 && gamedata.turn == 1) {
             var playerHasMines = gamedata.ships.some(function (ship) {
                 return ship.mine &&
                     ship.userid == gamedata.thisplayer &&
                     !shipManager.isDestroyed(ship) &&
+                    ship.spawned == -1 &&
                     shipManager.getTurnDeployed(ship) <= gamedata.turn;
             });
 

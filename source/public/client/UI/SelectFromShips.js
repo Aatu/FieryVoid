@@ -103,6 +103,14 @@ window.SelectFromShips = function () {
         // ------------------------------------------------------------------
 
         this.ships.forEach(function (ship) {
+            var shipNameDisplay = ship.name;
+            if (ship.mine) {
+                var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+                if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+                    shipNameDisplay = "Mine";
+                }
+            }
+
             var deployedText = "";
             var deployTurn = shipManager.getTurnDeployed(ship);
             //if(shipManager.getTurnDeployed(ship) > gamedata.turn)  deployedText = '<span class="not-deployed">(Not Deployed)</span> ';
@@ -116,7 +124,7 @@ window.SelectFromShips = function () {
                     }
                 });
                 var name = jQuery(
-                    '<div class="name value button ' + getAllyClass(ship) + '">' + '(' + noOfFighters + ') ' + ship.name + deployedText + ' </div>'
+                    '<div class="name value button ' + getAllyClass(ship) + '">' + '(' + noOfFighters + ') ' + shipNameDisplay + deployedText + ' </div>'
                 )
                     .on('click', function () {
                         if (gamedata.gamephase === -1) {
@@ -142,7 +150,7 @@ window.SelectFromShips = function () {
                 this.element.append(name)
 
             } else {
-                var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + ship.name + deployedText + ' </div>')
+                var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + shipNameDisplay + deployedText + ' </div>')
                     .on('click', function () {
                         if (gamedata.gamephase === -1) {
                             if (this.phaseStrategy.selectedShip) {

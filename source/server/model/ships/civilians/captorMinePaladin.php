@@ -8,7 +8,7 @@ class captorMinePaladin extends Mine{
 		$this->faction = "Civilians";
         $this->phpclass = "captorMinePaladin";
         $this->imagePath = "img/ships/civilianMine.png";
-        $this->shipClass = "Paladin Class Captor Mine";
+        $this->shipClass = "Paladin Captor Mine";
 		$this->occurence = "common";
 		//$this->variantOf = 'NONE';
         $this->isd = 2200;

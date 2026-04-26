@@ -453,7 +453,9 @@ class Manager{
             }
     
             try {
+                $t_start_getTacGamedata = microtime(true);
                 $gdS = self::getTacGamedata($gameid, $userid, $turn, $phase, $activeship);
+                $GLOBALS['dbg_getTacGamedata'] = microtime(true) - $t_start_getTacGamedata;
     
                 if (!$gdS)
                     return "{}";
@@ -471,7 +473,9 @@ class Manager{
                 }
                 
                 //NEW VERSION FOR PHP 8 - Aug 2025
+                $t_start_strip = microtime(true);
                 $data = $gdS->stripForJson();
+                $GLOBALS['dbg_stripForJson'] = microtime(true) - $t_start_strip;
     
                 if ($timestamp > 0) {
                      $data->last_update = $timestamp;
@@ -479,7 +483,9 @@ class Manager{
     
                 unset($gdS); // Free the massive logic object memory BEFORE encoding
                 
+                $t_start_encode = microtime(true);
                 $json = json_encode($data, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR);
+                $GLOBALS['dbg_json_encode'] = microtime(true) - $t_start_encode;
                 
                 // Store in Cache
                 if ($timestamp > 0 && function_exists('apcu_store') && $json) {

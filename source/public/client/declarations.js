@@ -44,7 +44,7 @@ window.declarations = {
         dispShip.id = ship.id;
         dispShip.name = ship.name;
         dispShip.class = ship.shipClass;
-        dispShip.value = ship.pointCost;
+        dispShip.value = ship.pointCost || 0;
         dispShip.EW = new Array();
         //now all EW entries...either own or incoming!
         if (ship.flight || ship.jinkinglimit > 0){//for fighters (or jinking ships), show jinking in all circumstances
@@ -183,7 +183,7 @@ window.declarations = {
         dispShip.id = ship.id;
         dispShip.name = ship.name;
         dispShip.class = ship.shipClass;
-        dispShip.value = ship.pointCost;
+        dispShip.value = ship.pointCost || 0;
 	dispShip.flight = ship.flight;
         //now all fire entries...either own or incoming!
         if(declarations.GlobalDisplay=='Source'){ //by source - display fire dished out by self!  

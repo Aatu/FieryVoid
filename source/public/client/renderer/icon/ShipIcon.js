@@ -423,6 +423,8 @@ window.ShipIcon = function () {
             }
 
             saved.heading = movement.heading;
+            saved.type = movement.type;
+            saved.value = movement.value;
 
             saved.position = new hexagon.Offset(movement.position);
         } else if (!gamedata.replay) {
@@ -440,6 +442,7 @@ window.ShipIcon = function () {
             movesByHexAndTurn.push({
                 //id: movement.id,
                 type: movement.type, //use type for Replays, is really helpful for animations
+                value: movement.value, //host ship ID for attached/detach orders
                 turn: movement.turn,
                 facing: movement.facing,
                 heading: movement.heading,

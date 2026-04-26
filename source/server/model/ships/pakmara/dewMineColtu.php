@@ -48,7 +48,7 @@ class dewMineColtu extends Mine{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 3));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
-        $this->addPrimarySystem(new MineControllerDEW(0, 1, 0, 1, 0)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range/output, $accuracy 
+        $this->addPrimarySystem(new MineControllerDEW(0, 1, 0, 1, 0, false, array('Fighters'))); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range/output, $accuracy 
         $this->addPrimarySystem(new PakmaraPlasmaWeb(0, 1, 1, 0, 360));
         $this->addPrimarySystem(new PakmaraPlasmaWeb(0, 1, 1, 0, 360));        
         

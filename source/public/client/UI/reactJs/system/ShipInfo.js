@@ -67,6 +67,29 @@ class ShipInfo extends React.Component {
 			enhArray = ship.enhancementTooltip.split("<br>");
 		}
 
+		let attachedSummary = {};
+		if (!ship.flight && ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+			const attachedLabels = {
+				1: "Forward",
+				2: "Aft",
+				3: "Port",
+				31: "Port-Forward",
+				32: "Port-Aft",
+				4: "Starboard",
+				41: "Starboard-Forward",
+				42: "Starboard-Aft"
+			};
+			
+			for (let attachedId in ship.hasAttached) {
+				let locId = ship.hasAttached[attachedId];
+				let label = attachedLabels[locId] || "Unknown";
+				if (!attachedSummary[label]) {
+					attachedSummary[label] = 0;
+				}
+				attachedSummary[label]++;
+			}
+		}
+
 		let displayOffensiveBonus = ship.offensivebonus;
 		if (ship.flight && gamedata.areMinesPresent) {
 			displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
@@ -103,6 +126,12 @@ class ShipInfo extends React.Component {
 					Object.keys(hitChart).map(i => <Entry key={reactKey++}><Header>{i}: </Header>{hitChart[i]}</Entry>)
 				}
 				{Object.keys(hitChart).length > 0 && <Entry key={reactKey++}>&nbsp;</Entry>}
+
+				{Object.keys(attachedSummary).length > 0 && <Entry key={reactKey++}><Header>UNITS ATTACHED:</Header>&nbsp;</Entry>}
+				{Object.keys(attachedSummary).length > 0 &&
+					Object.keys(attachedSummary).map(label => <Entry key={reactKey++}><Header>{label}: </Header>{attachedSummary[label]}</Entry>)
+				}
+				{Object.keys(attachedSummary).length > 0 && <Entry key={reactKey++}>&nbsp;</Entry>}
 
 				{ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}><Header>ENHANCEMENTS:</Header>&nbsp;</Entry>}
 				{ship.enhancementTooltip != '' && isRevealed &&

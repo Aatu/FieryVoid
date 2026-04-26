@@ -3,7 +3,7 @@ body {
     width: 100%;
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
-    /* iOS velocity scrolling */
+    /* iOS velocity scrolling 587e8d*/
 }
 
 body *::-moz-selection {
@@ -180,7 +180,7 @@ body {
 }
 
 #phaseheader {
-    border: 1px solid #3793c8;
+    border: 1px solid #587e8d;
     border-radius: 8px;
     color: #deebff;
     background-color: #0a3340;
@@ -452,9 +452,9 @@ body {
     /*color: #e0e7ef;*/
     /* #deebff; */
     background-color: #04161C;
-    border-top: 1px solid #3793c8;
-    border-right: 1px solid #3793c8;
-    border-left: 1px solid #3793c8;
+    border-top: 1px solid #587e8d;
+    border-right: 1px solid #587e8d;
+    border-left: 1px solid #587e8d;
     position: fixed;
     bottom: 0px;
     z-index: 10;
@@ -481,9 +481,9 @@ body {
 .logUiEntry {
     position: absolute;
     top: -26px;
-    border-top: 1px solid #3793c8;
-    border-right: 1px solid #3793c8;
-    border-left: 1px solid #3793c8;
+    border-top: 1px solid #587e8d;
+    border-right: 1px solid #587e8d;
+    border-left: 1px solid #587e8d;
     border-radius: 5px 5px 0px 0px;
     -moz-border-radius: 5px 5px 0px 0px;
     -webkit-border-radius: 5px 5px 0px 0px;
@@ -701,9 +701,9 @@ body {
 #expandBotPanel {
     position: absolute;
     top: -26px;
-    border-top: 1px solid #3793c8;
-    border-right: 1px solid #3793c8;
-    border-left: 1px solid #3793c8;
+    border-top: 1px solid #587e8d;
+    border-right: 1px solid #587e8d;
+    border-left: 1px solid #587e8d;
     border-radius: 5px 5px 0px 0px;
     -moz-border-radius: 5px 5px 0px 0px;
     -webkit-border-radius: 5px 5px 0px 0px;
@@ -1002,7 +1002,7 @@ body {
 
 #iniGui {
     z-index: 10000;
-    border: 1px solid #3793c8;
+    border: 1px solid #587e8d;
     color: #deebffdc;
     background-color: #0a3340;
     margin-top: 45px;
@@ -1153,7 +1153,7 @@ body {
     /* Default open */
     width: 55px;
     height: 25px;
-    border: 1px solid #3793c8;
+    border: 1px solid #587e8d;
     color: #deebff;
     background-color: #0a3340;
     opacity: 0.8;
@@ -1387,7 +1387,7 @@ body {
     margin: 10px auto 0px;
     padding: 6px 10px;
     background: #3793c82a;
-    border: 1px solid #3793c8;
+    border: 1px solid #587e8d;
     border-radius: 5px;
     color: #deebff;
     font-family: arial, sans-serif;

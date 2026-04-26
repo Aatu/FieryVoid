@@ -43,13 +43,13 @@ class VorlonArtifact extends UnevenBaseFourSections{
 		$AAC = $this->createAdaptiveArmorController(8, 3, 3); //$AAtotal, $AApertype, $AApreallocated
 		$this->addPrimarySystem( $AAC );      		  		
       
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 500, 210, 330, 'L'));		
+		$this->addLeftSystem(new ThirdspaceShield(2, 1500, 500, 210, 330, 'L'));		
 
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 250, 330, 30, 'F'));		
+		$this->addFrontSystem(new ThirdspaceShield(2, 1500, 250, 330, 30, 'F'));		
        	
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 250, 150, 210, 'A'));                        
+		$this->addAftSystem(new ThirdspaceShield(2, 1500, 250, 150, 210, 'A'));                        
             	
-		$this->addPrimarySystem(new ThirdspaceShield(2, 1500, 500, 30, 150, 'R'));					                
+		$this->addRightSystem(new ThirdspaceShield(2, 1500, 500, 30, 150, 'R'));					                
 	                      
               			          
 		//structures

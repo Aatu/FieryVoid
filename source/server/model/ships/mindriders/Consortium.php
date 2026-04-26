@@ -53,7 +53,6 @@ class Consortium extends MindriderHCV{
 		$this->addPrimarySystem(new JumpEngine(7, 25, 8, 8)); 
         $this->addPrimarySystem(new MindriderHangar(0, 1, 0, 0)); 	//technical system only		                	
 		$this->addPrimarySystem(new ThoughtShieldGenerator(6, 15, 6, 15)); //$armor, $maxhealth, $power used, output
- 		$this->addPrimarySystem(new ThoughtShield(0, 30, 15, 120, 240, 'A'));            
         $this->addPrimarySystem(new TelekineticCutter(6, 0, 0, 0, 360));	   	       
         $this->addPrimarySystem(new TelekineticCutter(6, 0, 0, 0, 360));         
         $this->addPrimarySystem(new TelekineticCutter(6, 0, 0, 0, 360)); 
@@ -61,9 +60,7 @@ class Consortium extends MindriderHCV{
         
         $this->addFrontSystem(new MindriderThruster(6, 30, 0, 10, 1));       
         
-		$this->addFrontSystem(new ThoughtShield(0, 30, 15, 240, 360, 'FP'));	
-		$this->addFrontSystem(new ThoughtShield(0, 30, 15, 0, 120, 'FS')); 
-							
+		$this->addLeftSystem(new ThoughtShield(0, 30, 15, 240, 360, 'FP'));						
 		$this->addLeftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 240, 60);
 		$tPulsar->addTag("Trioptic Pulsar");
@@ -73,7 +70,7 @@ class Consortium extends MindriderHCV{
 		$this->addLeftSystem($tPulsar);		
         $this->addLeftSystem(new MindriderThruster(6, 30, 0, 10, 3));         			
 	
-	
+ 		$this->addAftSystem(new ThoughtShield(0, 30, 15, 120, 240, 'A'));  	
 		$this->addAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 90, 270);
 		$tPulsar->addTag("Trioptic Pulsar");
@@ -83,6 +80,7 @@ class Consortium extends MindriderHCV{
 		$this->addAftSystem($tPulsar);		             
         $this->addAftSystem(new MindriderThruster(6, 30, 0, 10, 2));                                                                       
                	
+		$this->addRightSystem(new ThoughtShield(0, 30, 15, 0, 120, 'FS')); 		
 		$this->addRightSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 300, 120);
 		$tPulsar->addTag("Trioptic Pulsar");
