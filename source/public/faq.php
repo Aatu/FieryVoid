@@ -496,6 +496,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click Move Forward - Move forward using all remaining movement.</li>
                 </ul>
             </li>
+            <br>
             <li><b>During Deployment Phase:</b>
                 <ul class="circle-list">
                     <li>Shift & Left-click - Instantly deploy a ship to a hex already occupied by other units (Note- long press on touchscreen).  
@@ -504,6 +505,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         Makes it slightly quicker to select units when you have fighters or mines as you selected ship.</li>
                 </ul>
             </li>
+            <br>            
             <li><b>During Initial Orders Phase:</b>
                 <ul class="circle-list">
                     <li>Right-clicking Electronic Warfare (EW) Add Button - Sets that EW type to the max available amount (Note- long press on touchscreen).</li>
