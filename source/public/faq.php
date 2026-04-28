@@ -473,7 +473,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3 id="useful" >Useful Controls</h3>
+        <h3 id="useful" >Hot Keys & Useful Controls</h3>
+        <li>Below are some useful controls to know to help get the best out of Fiery Void.  
+            Note - On touchscreens Right-Click functions are using duplcated by a long depress on your screen.</li>
         <ul>
             <li><b>W</b> - Show all Eelectronic Warfare (EW).</li>
             <li><b>X</b> - Show friendly EW.</li>
@@ -482,12 +484,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>E</b> - Show enemy ballistic fire.</li>
             <li><b>H</b> - Display hex numbers.</li>
             <li><b>R</b> - Toggle Ruler Tool.</li>            
-            <li>Set a ship’s reactor to overload in Initial Orders to self-destruct at the end of the turn.</li>
             <li><b>Right-click actions:</b>
                 <ul class="circle-list">
                     <li>Right-click Unit - Select it (if yours) and open controls.</li>
-                    <li>Right-click Weapon - Select all similar weapons (e.g., all fighter guns).</li>
-                    <li>Right-click Power Button - Toggle all similar systems.</li>
+                    <li>Right-click Weapon - Select all identical weapons (e.g., all fighter guns).</li>
+                    <li>Right-click Power Buttons - Toggle On/Off all identical systems.</li>
                     <li>Right-click Firing Mode - Change fire mode on all similar undeclared weapons.</li>
                     <li>Right-click Defensive Fire - Enable defensive fire on all similar undeclared weapons.</li>
                     <li>Right-click Cancel Move - Cancel all current moves for the unit.</li>
@@ -495,6 +496,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click Move Forward - Move forward using all remaining movement.</li>
                 </ul>
             </li>
+            <li><b>During Deployment Phase:</b>
+                <ul class="circle-list">
+                    <li>Shift & Left Click - Instantly deploy a ship to a hex already occupied by other units.  
+                        Must still be a valid deployment e.g. Fighters and Mines can stack with ships, but ships cannot be deployed with other ships.</li>
+                    <li>Double Left-Click - Instantly select a single unit in a hex (if there are multiple units in the hex you'll still need to select from list), when you already have a deployable unit as your selected ship.  
+                        Makes it slightly quicker to select units when you have fighters or mines as you selected ship.</li>
+                </ul>
+            </li>                        
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
