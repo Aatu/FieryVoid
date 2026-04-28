@@ -36,6 +36,8 @@ window.ShipTooltipMenu = function () {
             element.on('click', onClick.bind(this, shipTooltip, buttonData.action, false));
             if (buttonData.supportsMaxClick) {
                 element.on('contextmenu', onClick.bind(this, shipTooltip, buttonData.action, true));
+            } else {
+                element.on('contextmenu', suppressContextMenu);
             }
             element.on('mouseover', getMouseOver.call(this, menu, buttonData.info));
             element.on('mouseout', mouseOut.bind(this, menu));
@@ -67,6 +69,11 @@ window.ShipTooltipMenu = function () {
         event.preventDefault();
         event.stopPropagation();
         action.call(this, isMaxClick);
+    }
+
+    function suppressContextMenu(event) {
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     function mouseOut(menu) {
