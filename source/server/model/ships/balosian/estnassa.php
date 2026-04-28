@@ -36,8 +36,8 @@ class Estnassa extends HeavyCombatVessel{
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 60));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 180));
         $this->addFrontSystem(new IonCannon(4, 6, 4, 240, 0));
-        $this->addFrontSystem(new IonCannon(4, 6, 4, 0, 120));
         $this->addFrontSystem(new IonCannon(3, 6, 4, 300, 60));
+        $this->addFrontSystem(new IonCannon(4, 6, 4, 0, 120));
         
         $this->addAftSystem(new IonCannon(4, 6, 4, 120, 240));
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
@@ -53,24 +53,24 @@ class Estnassa extends HeavyCombatVessel{
 		$this->hitChart = array(
             0=> array(
                     6 => "Structure",
-		    9 => "Thruster",
-		    12 => "Scanner",
+		    		9 => "Thruster",
+		    		12 => "Scanner",
                     15 => "Engine",
                     17 => "Hangar",
                     19 => "Reactor",
                     20 => "C&C",
             ),
-            1=> array(
+           			1=> array(
                     3 => "Thruster",
                     7 => "Ion Cannon",
-		    9 => "Standard Particle Beam",
+		    		9 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),
             2=> array(
                     4 => "Thruster",
-			6 => "Ion Cannon",
-			8 => "Standard Particle Beam",
+					6 => "Ion Cannon",
+					8 => "Standard Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
             ),

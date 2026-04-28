@@ -7,7 +7,7 @@ class ColonialFreyaAM extends BaseShip{
 	$this->pointCost = 975;
 	$this->faction = "BSG Colonials";
         $this->phpclass = "ColonialFreyaAM";
-        $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
+        $this->imagePath = "img/ships/BSG/ColonialOdin.png";
         $this->shipClass = "Freya Missile Battlestar";
 			$this->occurence = "rare";
 			$this->variantOf = "Odin Battlestar";
