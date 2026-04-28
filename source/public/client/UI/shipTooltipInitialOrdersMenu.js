@@ -12,8 +12,8 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.buttons = [
         { className: "addCCEW", condition: [isSelf, notFlight, notMine], action: addCCEW, info: "Add CCEW (right-click: max)", supportsMaxClick: true },
         { className: "removeCCEW", condition: [isSelf, notFlight, notMine], action: removeCCEW, info: "Remove CCEW (right-click: clear)", supportsMaxClick: true },
-        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: addOEW, info: "Add OEW (right-click: max)", supportsMaxClick: true },
-        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getAddOEW('OEW'), info: "Add OEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getRemoveOEW('OEW'), info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
         { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection (right-click: max)", supportsMaxClick: true },
         { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
         { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
