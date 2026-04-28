@@ -128,11 +128,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 If the speed difference to target is greater than pod thrust rating it is simply unable to attach. 
                 If the target is moving faster, each point of speed difference is -10% chance to attach.  
                 Pods cannot attach to ships with Advanced Armor and certain factions like Llort have +1 to attach rolls.</li>
-            <li>There is a limit to how many pods can attached to enemy ships based on their size, 12 pods can attach to bases, 8 to Capital Ships, 4 to HCVs, 2 to Medium Ships and only 1 to LCVs and OSATS. 
-                If more than this number try to attach and/or deliver marines then extra attacks over these limits will automatically fail.</li>    
+            <li>There is a limit to how many pods can attached to enemy ships based on their size, 12 pods can attach to bases, 8 to Capital Ships, 4 to HCVs, 2 to Medium Ships and only 1 to LCVs and OSATS.   
+                If more than this number try to attach and/or deliver marines then extra attacks over these limits will automatically fail. 
+                In addition, if a Grappling Claw ship is already to a structure facing this will prevent any Breaching Pods from attaching to that location.</li>    
             <li>Breaching Pods will remain attached to a vessels facing structure block until they choose to Detach in the Movement Phase, or the vessel is destroyed 
                 (providing that the structure location the pod is attached to is NOT also destryed).  If the structure block a pod is attached to IS detroyed before the Pod detaches, then the Pod is automatically destroyed.  
-                While attached, Pods matach speed and heading with their host ship, and suffer -10 Initiative penalty.  When the Detach they will automatically face away from the host ship to which they were attached.</li>
+                While attached, Pods match speed and heading with their host ship, and suffer -10 Initiative penalty.  When they Detach Pods will automatically face away from the host ship to which they were attached.</li>
             <li>Units can shoot at attached pods, providing they are in arc of the structure location the pod is attached to, and will roll to hit them as normal. However any shot aimed at a pod will automatically hit the vessel it is attached to as well.</li>                 
             <br>               
             <li>After the attach roll, the Pod will attempt to deliver its marines by rolling on a d10 again on the following table, with a base chance of 50% to successfully board the vessel.  
@@ -226,7 +227,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                             If the attached unit’s weapons are capable of firing into other arcs or into a wider range, they can shoot at targets in those positions. 
                             The unit to which the ship is attached is not prevented from firing any weapons (except at the attached unit)</li> 
                         <li>If a Grappling Claw is destroyed, and it still had Marine units available, then these will be transferred to any surviving Grappling Claws on the ship.
-                            Marine Units held in Grappling Claw systems will count towards the total marines available for defence if an opponenet tries to capture the ship.</li>    
+                            Marine Units held in Grappling Claw systems will count towards the total marines available for defence if an opponenet tries to capture the ship.</li>
+                        <li>The automatic extra hit on the host ship does not apply to shots fired at attached Grappling Claw ships.</li>      
+                        <li>Grappling Claw ships do not automatically face away from their host ship when they detach.</li>                                                  
                     </ul>                                               
                 </li>
         </ul>
