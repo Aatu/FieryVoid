@@ -33,7 +33,10 @@ window.ShipTooltipMenu = function () {
         }, this).forEach(function (buttonData) {
             var element = jQuery(ShipTooltipMenu.buttonTemplate);
             element.addClass(buttonData.className);
-            element.on('click', onClick.bind(this, shipTooltip, buttonData.action));
+            element.on('click', onClick.bind(this, shipTooltip, buttonData.action, false));
+            if (buttonData.supportsMaxClick) {
+                element.on('contextmenu', onClick.bind(this, shipTooltip, buttonData.action, true));
+            }
             element.on('mouseover', getMouseOver.call(this, menu, buttonData.info));
             element.on('mouseout', mouseOut.bind(this, menu));
             jQuery(".action-buttons", menu).append(element);
@@ -60,9 +63,10 @@ window.ShipTooltipMenu = function () {
         this.extraButtons.push({ className: className, condition: condition, action: action, info: info });
     };
 
-    function onClick(shipTooltip, action, event) {
+    function onClick(shipTooltip, action, isMaxClick, event) {
+        event.preventDefault();
         event.stopPropagation();
-        action.call(this);
+        action.call(this, isMaxClick);
     }
 
     function mouseOut(menu) {
