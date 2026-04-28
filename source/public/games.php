@@ -107,7 +107,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Grappling Claws</strong> - Now remain attached to enemy vessels after a successful attack, similar to Breaching Pods. See Fiery Void FAQ for more details.</li>         
-        <li><strong>Gravitic Mines</strong> - These are now available to use with the new Taskkat variant, the Takatos.</li>                                            
+        <li><strong>Gravitic Mines</strong> - These are now available to use with the new Taskkat variant, the Takatos.</li>
+        <li><strong>Colonial Images</strong> - The BSG Colonials faction has received image updates courtesy of Lunara.</li>                                                     
         <li><strong>UI Improvements</strong> - Deploying ships and Electronic Warfare got new hot key / mouse button options to help streamline orders, see FAQ for details.</li>                 
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
