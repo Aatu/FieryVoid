@@ -10,26 +10,26 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipInitialOrdersMenu.buttons = [
-        { className: "addCCEW", condition: [isSelf, notFlight, notMine], action: addCCEW, info: "Add CCEW" },
-        { className: "removeCCEW", condition: [isSelf, notFlight, notMine], action: removeCCEW, info: "Remove CCEW" },
-        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: addOEW, info: "Add OEW" },
-        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
-        { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection" },
-        { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection" },
-        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
-        { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
-        //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
-        //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
-        //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
-        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" },
-        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" },
-        { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" },
-        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" },
-        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW" },
-        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "Remove BDEW" },
-        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: addDetectSEW, info: "Add Detect Stealth" },
-        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: removeDetectSEW, info: "Remove Detect Stealth" },
+        { className: "addCCEW", condition: [isSelf, notFlight, notMine], action: addCCEW, info: "Add CCEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeCCEW", condition: [isSelf, notFlight, notMine], action: removeCCEW, info: "Remove CCEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getAddOEW('OEW'), info: "Add OEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getRemoveOEW('OEW'), info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection (right-click: max)", supportsMaxClick: true },
+        { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
+        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
+        { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST (right-click: clear)", supportsMaxClick: true },
+        //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" },
+        //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
+        //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
+        //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
+        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW", supportsMaxClick: true },
+        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "Remove BDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: addDetectSEW, info: "Add Detect Stealth (right-click: max)", supportsMaxClick: true },
+        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: removeDetectSEW, info: "Remove Detect Stealth (right-click: clear)", supportsMaxClick: true },
         { className: "removeAllEW", condition: [isSelf, notFlight, notMine], action: removeAllEW, info: "Remove All EW" },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
@@ -88,110 +88,81 @@ window.ShipTooltipInitialOrdersMenu = function () {
         });
     }
 
-    function addCCEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "CCEW", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "CCEW");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
+    function addSelfEW(ewType, isMaxClick) {
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, null, ewType, this.turn);
+            var before = ew.getEWLeft(this.selectedShip);
+            if (!entry) {
+                ew.assignEW(this.selectedShip, ewType);
+            } else {
+                ew.assignEW(this.selectedShip, entry);
+            }
+            if (!isMaxClick) return;
+            if (ew.getEWLeft(this.selectedShip) >= before) return;
+        } while (ew.getEWLeft(this.selectedShip) > 0);
     }
 
-    function removeCCEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "CCEW", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
+    function removeSelfEW(ewType, isMaxClick) {
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, null, ewType, this.turn);
+            if (!entry) return;
+            ew.deassignEW(this.selectedShip, entry);
+        } while (isMaxClick);
     }
 
-    function addMDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Mines", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "Detect Mines");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
-    }
-
-    function removeMDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Mines", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
-    }    
-
-    function addBDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "BDEW", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "BDEW");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
-    }
-
-    function removeBDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "BDEW", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
-    }
-
-    function addDetectSEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Stealth", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "Detect Stealth");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
-    }
-
-    function removeDetectSEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Stealth", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
-    }
+    function addCCEW(isMaxClick) { addSelfEW.call(this, "CCEW", isMaxClick); }
+    function removeCCEW(isMaxClick) { removeSelfEW.call(this, "CCEW", isMaxClick); }
+    function addMDEW(isMaxClick) { addSelfEW.call(this, "Detect Mines", isMaxClick); }
+    function removeMDEW(isMaxClick) { removeSelfEW.call(this, "Detect Mines", isMaxClick); }
+    function addBDEW(isMaxClick) { addSelfEW.call(this, "BDEW", isMaxClick); }
+    function removeBDEW(isMaxClick) { removeSelfEW.call(this, "BDEW", isMaxClick); }
+    function addDetectSEW(isMaxClick) { addSelfEW.call(this, "Detect Stealth", isMaxClick); }
+    function removeDetectSEW(isMaxClick) { removeSelfEW.call(this, "Detect Stealth", isMaxClick); }
 
     function removeAllEW() {
         ew.removeEW(this.selectedShip);
     }
 
     function getAddOEW(type) {
-        return function () {
-            addOEW.call(this, type);
+        return function (isMaxClick) {
+            addOEW.call(this, type, isMaxClick);
         };
     }
 
-    function addOEW(type) {
-
+    function addOEW(type, isMaxClick) {
         if (!type) {
             type = "OEW";
         }
 
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
-
-        if (!entry) {
-            ew.AssignOEW(this.selectedShip, this.targetedShip, type);
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
+            var before = ew.getEWLeft(this.selectedShip);
+            if (!entry) {
+                ew.AssignOEW(this.selectedShip, this.targetedShip, type);
+            } else {
+                ew.assignEW(this.selectedShip, entry);
+            }
+            if (!isMaxClick) return;
+            if (ew.getEWLeft(this.selectedShip) >= before) return;
+        } while (ew.getEWLeft(this.selectedShip) > 0);
     }
 
     function getRemoveOEW(type) {
-        return function () {
-            removeOEW.call(this, type);
+        return function (isMaxClick) {
+            removeOEW.call(this, type, isMaxClick);
         };
     }
 
-    function removeOEW(type) {
-
+    function removeOEW(type, isMaxClick) {
         if (!type) {
             type = "OEW";
         }
 
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
+            if (!entry) return;
+            ew.deassignEW(this.selectedShip, entry);
+        } while (isMaxClick);
     }
 
     function isSelf() {

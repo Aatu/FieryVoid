@@ -1481,9 +1481,9 @@ class Manager{
     }        
     
     public static function insertSingleFiringOrder($gamedata, $fireOrder)
-    {          
-		self::$dbManager->submitSingleFireorder($gamedata->id, $fireOrder);
-		
+    {
+		return self::$dbManager->submitSingleFireorder($gamedata->id, $fireOrder);
+
     }
     
     public static function insertSingleShip($gamedata, $ship, $userid){          

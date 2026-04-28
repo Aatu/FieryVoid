@@ -977,3 +977,13 @@ var GrapplingClaw = function GrapplingClaw(json, ship) {
 GrapplingClaw.prototype = Object.create(Weapon.prototype);
 GrapplingClaw.prototype.constructor = GrapplingClaw;
 
+GrapplingClaw.prototype.initializationUpdate = function() {
+	if(this.hostShipId !== -1 && !this.hostShipDisplayed){
+        this.hostShipDisplayed = true;
+        var hostShip = gamedata.getShip(this.hostShipId);
+        this.data["Attached to"] = hostShip.name;
+    }
+
+
+	return this;
+};

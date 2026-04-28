@@ -103,14 +103,12 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — April 2026</h3>
+      <h3>Latest Updates — May 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Breaching Pod Update</strong> - Breaching Pods now remain attached to enemy vessels after a successful attack, see Fiery Void FAQ for more details.</li>         
-        <li><strong>A Few More Mines</strong> - Mine units added for the following factions; WotCR Abbai, WotCR Drazi, Balosians and Rogolons.</li>                           
-        <li><strong>Fighters Missiles</strong> - Dealing 2+ damage to a fighter will destroy a missile in its Ammo Magazine, Dummy Missiles now available for purchase.</li>                  
-        <li><strong>Pivoting Gravtic Ships</strong> - Gravitic ships should now use the correct thrusters when turning or side-slipping.</li>  
-        <li><strong>Stabilised Missiles</strong> - Missile systems on Bases and OSATs should now show their correct range values in system tooltips.</li>                                                                 
+        <li><strong>Grappling Claws</strong> - Now remain attached to enemy vessels after a successful attack, similar to Breaching Pods. See Fiery Void FAQ for more details.</li>         
+        <li><strong>Gravitic Mines</strong> - These are now available to use with the new Taskkat variant, the Takatos.</li>                                            
+        <li><strong>UI Improvements</strong> - Deploying ships and Electronic Warfare got new hot key / mouse button options to help streamline orders, see FAQ for details.</li>                 
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
@@ -141,7 +139,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       </div>
       <div class="create-col">
         <a class="btn btn-success create-game-btn" href="creategame.php">Create Game</a>
-        <button class="btn btn-secondary btn-fleet-test" onclick="gamedata.submitFleetTest()">Fleet Test</button>
+        <button class="btn btn-secondary btn-fleet-test" onclick="gamedata.submitFleetTest()">Fleet Builder</button>
         <button class="btn btn-secondary btn-ladder btn-view-ladder" data-show-calc="false">View Ladder</button>
         <button class="btn btn-secondary btn-recent-games" onclick="loadFireList()">Recent Games</button>
       </div>

@@ -10,7 +10,7 @@ class asteroidMNew  extends Terrain{
         $this->phpclass = "asteroidMNew";
         $this->imagePath = "img/ships/asteroidField2.png";
         $this->canvasSize = 200;
-        $this->shipClass = "Asteroid (Medium)";
+        $this->shipClass = "Asteroids (Medium)";
         $this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
         $this->notes = "Blocks line of sight";          

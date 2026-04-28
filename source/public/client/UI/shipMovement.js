@@ -113,6 +113,9 @@ window.UI = {
 
             jQuery('#shipMovementUI div').on('mousedown touchend touchmove', cancelEvent);
             jQuery('#shipMovementUI div').on('mouseup touchend touchmove', cancelEvent);
+            UI.shipMovement.uiElement[0].addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+            }, true);
 
             function cancelEvent(e) {
                 e.preventDefault();

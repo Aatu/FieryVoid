@@ -105,7 +105,7 @@ const ThrustUIContainer = styled.div`
 
 const ThrustTooltip = styled(Tooltip)`
     top: 125px;
-    min-width: 150px;
+    min-width: 180px;
     z-index: 10001;
 `
 
@@ -163,7 +163,7 @@ class ShipThrust extends React.Component {
         const { ship, position, rotation, totalRequired, remainginRequired, movement } = this.props;
 
         return (
-            <ThrustUIContainer onMouseOver={(e) => e.preventDefault()} id="thrustUIContainer" $left={`${position.x}px`} $top={`${position.y}px`}>
+            <ThrustUIContainer onMouseOver={(e) => e.preventDefault()} onContextMenu={(e) => e.preventDefault()} id="thrustUIContainer" $left={`${position.x}px`} $top={`${position.y}px`}>
                 <ThrusterSetContainer style={{ transform: `rotate(${Math.round(Math.abs(rotation))}deg)` }} $rotation={Math.round(Math.abs(rotation))}>
                     <ForwardThrusterContainer>
                         {

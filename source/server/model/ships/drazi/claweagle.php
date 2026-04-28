@@ -39,11 +39,11 @@ class Claweagle extends MediumShipLeftRight{
 		$this->addAftSystem(new Thruster(5, 14, 0, 7, 2));
 		
         $this->addLeftSystem(new Thruster(4, 11, 0, 4, 3));
-        $this->addLeftSystem(new GrapplingClaw(5, 0, 0, 300, 60, 8, false));
+        $this->addLeftSystem(new GrapplingClaw(5, 0, 0, 300, 60, 6, false));
         $this->addLeftSystem(new StdParticleBeam(4, 4, 1, 240, 60));
 		
         $this->addRightSystem(new Thruster(4, 11, 0, 4, 4));
-        $this->addRightSystem(new GrapplingClaw(5, 0, 0, 300, 60, 8, false));
+        $this->addRightSystem(new GrapplingClaw(5, 0, 0, 300, 60, 6, false));
         $this->addRightSystem(new StdParticleBeam(4, 4, 1, 300, 120));
 		
         $this->addPrimarySystem(new Structure( 5, 36));

@@ -353,6 +353,14 @@ body {
     -moz-border-radius: 7px;
     -webkit-border-radius: 7px;
     padding: 3px 15px 3px 15px;
+    min-width: 140px;
+    max-width: 280px;
+    max-height: 60vh;
+    overflow-y: auto;
+    overflow-wrap: anywhere;
+    word-wrap: break-word;
+    white-space: normal;
+    box-sizing: border-box;
 }
 
 .shipNameContainer .fire {

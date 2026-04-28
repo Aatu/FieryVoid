@@ -167,7 +167,17 @@ class MovementGamePhase implements Phase
 								if ($cnc) {
 									$cnc->addIndividualNote(new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$targetShip->id,$cnc->id,"Detached","Detached",$ship->id . "=>Detach"));
 									$cnc->saveIndividualNotes($dbManager);
-									
+
+                                    if(!$ship instanceof FighterFlight){ //Grapple ships, need to unset their $hostShipId
+                                        foreach($ship->systems as $claw){
+                                            if($claw->name == "GrapplingClaw"){
+										        $claw->hostShipId = -1;                                                
+                                                $clawNote = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$claw->id,"ClawDetached","ClawDetached",-2);											
+										        Manager::insertIndividualNote($clawNote);	                                            
+                                            }
+                                        }
+                                    }		
+
 									// Clear attachment in memory to prevent mirroring during this process call
 									// Clear on both the submitted ship and the gameData representation to ensure JSON response is correct
 									unset($ship->attached[$hostId]);
