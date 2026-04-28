@@ -1655,6 +1655,7 @@ spl_autoload_register(
 				'nexusrangedswarmtorpedo' => '/server/model/weapons/customNexus.php',
 				'nexusramlauncher' => '/server/model/weapons/customNexus.php',
 			//Nexus plasma weapons
+				'ltplasmacannonftr' => '/server/model/weapons/customNexus.php',
 				'nexusheavyenhplasma' => '/server/model/weapons/customNexus.php',
 				'nexusmedenhplasma' => '/server/model/weapons/customNexus.php',
 				'nexuslightenhplasma' => '/server/model/weapons/customNexus.php',
@@ -2023,6 +2024,7 @@ spl_autoload_register(
                 'salbeznavren' => '/server/model/ships/NexusSalbez_old/SalbezNavren.php',					
                 'salbeznaztek' => '/server/model/ships/NexusSalbez_old/SalbezNaztek.php',					
                 'salbeznaztekrefit' => '/server/model/ships/NexusSalbez_old/SalbezNaztekRefit.php',					
+                'salbezokchn' => '/server/model/ships/NexusSalbez/SalbezOkchn.php',					
                 'salbezpassengerliner' => '/server/model/ships/NexusSalbez/SalbezPassengerLiner.php',					
                 'salbezpassengerlinerrefit' => '/server/model/ships/NexusSalbez/SalbezPassengerLinerRefit.php',					
                 'salbezreshken' => '/server/model/ships/NexusSalbez/SalbezReshken.php',					
@@ -3116,6 +3118,9 @@ spl_autoload_register(
 				'apollowsf' => '/server/model/ships/customs/ApolloWSF.php',					
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				'explorerprototype' => '/server/model/ships/customs/ExplorerPrototype.php',
+				'shadowavioki' => '/server/model/ships/customs/shadowAvioki.php',	
+				'shadowgarundaam' => '/server/model/ships/customs/ShadowGarundaAM.php',	
+				'shadowmollantaam' => '/server/model/ships/customs/ShadowMollantaAM.php',	
 				
 															 
 															   
@@ -3852,6 +3857,7 @@ spl_autoload_register(
 						'vigilantgcam' => '/server/model/ships/GreatCrusadeOrieni/vigilantGCAM.php',	
 						'zealotbgc' => '/server/model/ships/GreatCrusadeOrieni/zealotBGC.php',	
 						'zealotgc' => '/server/model/ships/GreatCrusadeOrieni/zealotGC.php',	
+
 
 
 

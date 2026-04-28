@@ -15,6 +15,8 @@ class SalbezAvrtzRefit extends BaseShip{
         $this->limited = 10;
 
         $this->fighters = array("normal"=>12);
+		$this->customFighter = array("Ok-chn"=>12);
+        $this->notes = 'Ok-chn capable.';
 
         $this->Enormous = true;
 		$this->isd = 2122;
