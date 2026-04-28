@@ -7,7 +7,7 @@ class KobolValkyrie extends BaseShip{
         $this->pointCost = 900;
 		$this->faction = "12 Colonies of Kobol";
         $this->phpclass = "KobolValkyrie";
-        $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
+        $this->imagePath = "img/ships/BSG/ColonialOdin.png";
         $this->shipClass = "Valkyrie Battlestar (Alpha prototype)";
         $this->fighters = array("normal" => 12, "superheavy" => 2);
  //       $this->isd = 2238;

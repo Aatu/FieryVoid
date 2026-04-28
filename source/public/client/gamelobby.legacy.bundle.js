@@ -29498,6 +29498,11 @@ NexusSandCaster.prototype.clearBoost = function () {
     }
 };
 
+var LtPlasmaCannonFtr = function LtPlasmaCannonFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LtPlasmaCannonFtr.prototype = Object.create(Weapon.prototype);
+LtPlasmaCannonFtr.prototype.constructor = LtPlasmaCannonFtr;
 
 
 

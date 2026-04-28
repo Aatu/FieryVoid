@@ -22,6 +22,8 @@ class SalbezBezrakRefit extends SmallStarBaseFourSections{
 		$this->turndelaycost = 0;
 
 		$this->fighters = array("normal"=>12);
+		$this->customFighter = array("Ok-chn"=>12);
+        $this->notes = 'Ok-chn capable.';
 
 		$this->forwardDefense = 17;
 		$this->sideDefense = 17;
