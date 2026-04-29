@@ -2,15 +2,38 @@ import * as React from "react";
 import styled from "styled-components";
 import { Clickable } from "../styled";
 
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    margin-top: 1px;
+    width: 100%;
+    min-width: 160px;
+    opacity: 0.95;
+    background-color: rgba(32, 0, 32, 0.9);
+    border: 1px solid #b43131;
+`;
+
+const Header = styled.div`
+    padding: 3px;
+    background-color: #571616;
+    border: 1px solid #b43131;
+    border-bottom: 1px solid #b43131;
+    color: #f2f2f2;
+    text-align: center;
+    font-size: 11px;
+    margin-bottom: 2px;
+    opacity: 1 !important;
+    font-weight: bold;
+`;
+
 const SelectorContainer = styled.div`
     display: flex;
     flex-wrap: wrap;
     gap: 2px;
-    margin-right: 2px;
-    max-width: 210px; /* 6 buttons (32px w/border) + 5 gaps (2px) = 202px exact */
+    padding: 4px;
+    max-width: 210px;
 `;
 
-// Reuse Button style but add selected state
 const ModeButton = styled.div`
     display: flex;
     width: 30px;
@@ -18,11 +41,12 @@ const ModeButton = styled.div`
     background-image: url(${props => props.img});
     background-size: cover;
     align-items: center;
+    opacity: 1 !important;    
     justify-content: center;
     ${Clickable}
-    border: 1px solid ${props => props.selected ? 'yellow' : 'transparent'}; 
+    border: 1px solid ${props => props.selected ? '#ef4444' : 'transparent'};
     position: relative;
-    box-shadow: ${props => props.selected ? '0 0 5px #0cf' : 'none'};
+    box-shadow: ${props => props.selected ? '0 0 5px #b43131' : 'none'};
 
     -webkit-user-select: none;
     -webkit-touch-callout: none;
@@ -50,10 +74,8 @@ export default class FiringModeSelector extends React.Component {
     render() {
         const { ship, system } = this.props;
 
-        // Current firing mode index
         const currentModeIndex = parseInt(system.firingMode);
 
-        // Icon path logic
         let iconPath = '';
         if (system.iconPath) {
             iconPath = `./img/systemicons/${system.iconPath}`;
@@ -64,7 +86,6 @@ export default class FiringModeSelector extends React.Component {
         const modeList = [];
         for (const key in system.firingModes) {
             if (system.firingModes.hasOwnProperty(key)) {
-                // Ensure key is parsed as int if needed, usually keys are 1, 2, 3...
                 const modeIdx = parseInt(key);
                 const modeName = system.firingModes[key];
                 const isSelected = (modeIdx === currentModeIndex);
@@ -90,9 +111,12 @@ export default class FiringModeSelector extends React.Component {
         }
 
         return (
-            <SelectorContainer>
-                {modeList}
-            </SelectorContainer>
+            <Container>
+                <Header>Select Firing Mode</Header>
+                <SelectorContainer>
+                    {modeList}
+                </SelectorContainer>
+            </Container>
         );
     }
 }
