@@ -2469,10 +2469,28 @@ public function getAllEWExceptDEW($turn){
             }
 		}
 
+        // Prefer destroying weapons that need the longest to recharge:
+        //   tier 1: weapons that fired this turn (turnsloaded resets to 1 next turn)
+        //   tier 2: weapons recharging and not ready next turn either
+        if ($systems[0] instanceof Weapon) {
+            $firedThisTurn = array();
+            $rechargingSystems = array();
+            foreach ($systems as $sys) {
+                if ($sys->loadingtime <= 1) continue; //1-turn weapons always ready, ignore
+                if ($sys->firedOnTurn(TacGamedata::$currentTurn)) {
+                    $firedThisTurn[] = $sys;
+                } else if ($sys->turnsloaded < ($sys->loadingtime - 1)) {
+                    $rechargingSystems[] = $sys;
+                }
+            }
+            if (sizeof($firedThisTurn) > 0) $systems = $firedThisTurn;
+            else if (sizeof($rechargingSystems) > 0) $systems = $rechargingSystems;
+        }
+
         //now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
-	        
+
         return $system;
 
     } //end of function getHitSystemByTable
@@ -2636,11 +2654,29 @@ public function getAllEWExceptDEW($turn){
             }
 		}
 		
+		// Prefer destroying weapons that need the longest to recharge:
+		//   tier 1: weapons that fired this turn (turnsloaded resets to 1 next turn)
+		//   tier 2: weapons recharging and not ready next turn either
+		if ($systems[0] instanceof Weapon) {
+			$firedThisTurn = array();
+			$rechargingSystems = array();
+			foreach ($systems as $sys) {
+				if ($sys->loadingtime <= 1) continue; //1-turn weapons always ready, ignore
+				if ($sys->firedOnTurn(TacGamedata::$currentTurn)) {
+					$firedThisTurn[] = $sys;
+				} else if ($sys->turnsloaded < ($sys->loadingtime - 1)) {
+					$rechargingSystems[] = $sys;
+				}
+			}
+			if (sizeof($firedThisTurn) > 0) $systems = $firedThisTurn;
+			else if (sizeof($rechargingSystems) > 0) $systems = $rechargingSystems;
+		}
+
 		//now choose one of equal eligible systems (they're already known to be undestroyed)
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
 		return $system;
-		
+
 	} //end of function GetHitSystemByDice
 		
         
