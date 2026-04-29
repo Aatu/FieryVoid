@@ -512,9 +512,12 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.showShipTooltip = function (ships, payload, menu, hide, ballisticsMenu) {
 
         // Suppress hover tooltip while the SelectFromShips picker is open — they show overlapping info.
-        if (this.selectFromShips) {
+        // Click-driven tooltips (hide=false) must still appear; the picker routes ship clicks to onShipClicked,
+        // which needs the persistent targeting tooltip.
+        /*if (this.selectFromShips && hide) {
             return;
         }
+        */
 
         if (this.shipTooltip) {
             this.hideShipTooltip(this.shipTooltip)
@@ -766,7 +769,11 @@ window.PhaseStrategy = function () {
                     }
                 }
 
-                var locOffset = shipManager.movement.getAttachedFacingOffset(location);
+                // Prefer the precise entry-side offset recorded at attach time; fall back to
+                // the location-derived offset for in-progress games attached before this change.
+                var locOffset = (ship.hasAttachedFacing && ship.hasAttachedFacing[attachedId] !== undefined)
+                    ? ship.hasAttachedFacing[attachedId]
+                    : shipManager.movement.getAttachedFacingOffset(location);
                 var facingAdjustment = shipManager.movement.isRolled(ship) ? 3 : 0;
 
                 // 2. Clone parent movements for the CURRENT turn

@@ -85,6 +85,8 @@ class BaseShip {
     public $skinDancing = array();	//Holds target ids when there's a successful skin dance.
     public $hasAttached = array(); // Holds shooterid => location for attached boarding pods on this ship.
     public $attached = array(); // Holds targetid => location if this unit is attached to another unit.
+    public $hasAttachedFacing = array(); // shooterid => entry-side hex offset 0-5 (facing offset relative to host's facing direction)
+    public $attachedFacing = array(); // targetid  => entry-side hex offset 0-5 (facing offset relative to host's facing direction)
     protected $skinDancer = false; //Let';s ships of unusual size skin dance e.g. Toravlus capitals ships.   	
 
 	public $isCloaked = false;  //Used for deactivating Trek shields when the Trek cloak is activated
@@ -588,6 +590,8 @@ class BaseShip {
         if ($this->skinDancing) $strippedShip->skinDancing = $this->skinDancing;
         if (!empty($this->hasAttached)) $strippedShip->hasAttached = $this->hasAttached;
         if (!empty($this->attached)) $strippedShip->attached = $this->attached;
+        if (!empty($this->hasAttachedFacing)) $strippedShip->hasAttachedFacing = $this->hasAttachedFacing;
+        if (!empty($this->attachedFacing)) $strippedShip->attachedFacing = $this->attachedFacing;
         if ($this->spawned !== null && $this->spawned !== -1) $strippedShip->spawned = $this->spawned;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);

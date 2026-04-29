@@ -385,7 +385,11 @@
 					$lastmove = $parent->getLastMovement();
 					
 					$location = $ship->attached[$parent->id];
-					$locOffset = self::getAttachedFacingOffset($location);
+					// Prefer the precise entry-side offset recorded at attach time; fall back to
+					// the location-derived offset for in-progress games attached before this change.
+					$locOffset = isset($ship->attachedFacing[$parent->id])
+						? $ship->attachedFacing[$parent->id]
+						: self::getAttachedFacingOffset($location);
 					
 					// Breaching pods as FighterFlight units cannot roll themselves, 
 					// so we adjust their absolute facing by 180 degrees (+3) instead.
@@ -702,8 +706,21 @@
 			else if ($location == 31) $locOffset = 2; // Port-Forward, pod faces Starboard-Aft
 			else if (in_array($location, [4, 42])) $locOffset = 5; // Starboard, pod faces Port-Forward
 			else if ($location == 41) $locOffset = 4; // Starboard-Forward, pod faces Port-Aft
-			
+
 			return $locOffset;
+		}
+
+		// Returns the precise hex-side facing offset (0-5) for a ship attaching to a target,
+		// derived from their current geometric positions. Roll-invariant: offset is measured
+		// in the host's unrolled facing-frame so the (FighterFlight + rolled-host) +3 mirror
+		// at runtime continues to compose correctly.
+		public static function getAttachFacingOffsetFromBearing($target, $shooter) {
+			if (!$target || !$shooter) return null;
+			$tf = $target->getFacingAngle();
+			$compassHeading = mathlib::getCompassHeadingOfShip($target, $shooter);
+			$relativeBearing = mathlib::addToDirection($compassHeading, -$tf);
+			$entrySide = ((int) round($relativeBearing / 60.0)) % 6;
+			return ($entrySide + 3) % 6;
 		}
 
     

@@ -1008,7 +1008,7 @@ window.weaponManager = {
             if (speedDifference > 0) {//Check Speed difference
                 var speedChance = speedDifference;//Each point of speed difference equates to 5% chance to miss.
                 var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
-                if (target.Enormous) $newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
+                if (target.Enormous) newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
                 hitChance = Math.round(newHitchance * 5);//Convert to % value			
                 return hitChance;
             } else {
