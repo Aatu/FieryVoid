@@ -1794,7 +1794,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
     z-index: 20000;
     ${u=>Object.keys(u.position).reduce((l,f)=>l+`
 `+f+":"+u.position[f]+"px;","")}
-    max-width: 600px;
+    max-width: 500px;
     text-align: left;
     opacity: ${u=>u.opacity||.8};
     border: 1px solid #496791;
