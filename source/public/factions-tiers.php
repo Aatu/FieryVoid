@@ -360,9 +360,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>These weapons can be boosted with power to increase damage and intercept rating. This does cause them to have a cooldown period equal to boost level used. 
                 Additionally, if fired at maximum boost, the weapon can suffer critical damage.</li>
         <h5>Gravitic Shifter</h5>
-            <li>This weapon fires in the Pre-Firing phase of the game.  You can target an ally or an enemy to try and change their facing by 60 degrees clockwise or anti-clockwise (using appropriate firing mode). 
+            <li>This weapon fires in the Pre-Firing phase of the game.  You can target an ally or an enemy to try and change their facing by 60 degrees clockwise or anti-clockwise (using appropriate firing mode).
                 If the weapon hits then the target will be rotated before the Firing Phase occurs on that turn and therefore Gravitic Shifters can be used tactically to escape enemy firing arcs, or bring enemies into allied ships firing arcs. /section>
-                Note - Only ONE Gravitic Shifter can be used on a ship per turn, any other Shifter attempts will automatically miss.</li>                        
+                Note - Only ONE Gravitic Shifter can be used on a ship per turn, any other Shifter attempts will automatically miss.</li>
+        <h5>Gravitic Mine</h5>
+            <li>Ballistic weapon that targets a hex rather than a ship.  The target hex is hidden from the opponent and only revealed in the Pre-Firing phase, when the mine detonates. 
+                The mine cannot be intercepted and causes no collateral damage.</li>
+            <li>Any unit within 5 hexes of an active mine is pulled one hex toward the closest mine.  
+                Where two or more mines overlap and catch a target between their fields, the unit is instead 'sheared' for damage scaled by its size class and proximity to the nearest mine - ignoring armour, with the impact side determined by the furthest mine in range.  
+                Terrain, fixed Enormous bases, and other mines are unaffected.</li>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
@@ -407,11 +413,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Defensive system that can absorb in place of another system, which greatly increases resilience of Gaim systems. 
                 Bulkheads can protect systems on the same structure that it's mounted upon. Note that primary systems are not protected by bulkheads.</li>
             <li>The decision whether to use a bulkhead is made automatically, and will aim to prevent a systems destruction, 
-                or when the integrity of the structure block falls too low</li>    
-        <h5>Particle Concentrator</h5>
+                or when the integrity of the structure block falls too low</li>
+        <h5>Particle Concentrator</h5>                    
             <li>Multiple Concentrators firing from the same hex may combine into a more accurate and more powerful single shot. 
                 The hit chance for this shot will be an average of all the weapons concentrating (as individually their chances may differ).</li>
-        <h5>Packet Torpedo</h5>
+            <h5>Packet Torpedo</h5>
             <li>Ballistic weapon that has a range penalty, just like direct fire weapons - although only after the first 10 hexes of travel. 
                 In addition, the target of this weapon is not known to your opponent until impact.</li>
        <h5>Scattergun</h5>
