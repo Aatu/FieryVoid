@@ -183,6 +183,9 @@ class MovementGamePhase implements Phase
 									unset($ship->attached[$hostId]);
 									unset($activeShip->attached[$hostId]);
 									unset($targetShip->hasAttached[$ship->id]);
+									unset($ship->attachedFacing[$hostId]);
+									unset($activeShip->attachedFacing[$hostId]);
+									unset($targetShip->hasAttachedFacing[$ship->id]);
 								}
 							}
 						}
@@ -204,7 +207,11 @@ class MovementGamePhase implements Phase
 						// Skip if the attached ship is also submitting its own movement (e.g. detaching)
 						if (!isset($submittedShipIds[$attachedShip->id]) && !$dbManager->isMovementAlreadySubmitted($gameData->id, $attachedShip->id, $gameData->turn)) {
 							$attachedMoves = array();
-							$locOffset = Movement::getAttachedFacingOffset($location);
+							// Prefer the precise entry-side offset recorded at attach time; fall back to
+							// the location-derived offset for in-progress games attached before this change.
+							$locOffset = isset($attachedShip->attachedFacing[$activeShip->id])
+								? $attachedShip->attachedFacing[$activeShip->id]
+								: Movement::getAttachedFacingOffset($location);
 
 							// When the parent ship is rolled, breaching pods as FighterFlight 
 							// units cannot roll themselves, so we adjust their absolute 

@@ -7618,17 +7618,24 @@ class Marines extends Weapon implements SpecialAbility{
 		if (!isset($target->hasAttached[$shooter->id])) {
 			$target->hasAttached[$shooter->id] = $fireOrder->chosenLocation;
 			$shooter->attached[$target->id] = $fireOrder->chosenLocation;
-			if ($cnc) {
-				$cnc->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$target->id,$cnc->id,"Attached","Attached",$shooter->id . "=>" . $fireOrder->chosenLocation);
+			$facingOffset = Movement::getAttachFacingOffsetFromBearing($target, $shooter);
+			if ($facingOffset !== null) {
+				$target->hasAttachedFacing[$shooter->id] = $facingOffset;
+				$shooter->attachedFacing[$target->id] = $facingOffset;
 			}
-		}		
+			if ($cnc) {
+				$noteValue = $shooter->id . "=>" . $fireOrder->chosenLocation;
+				if ($facingOffset !== null) $noteValue .= ":" . $facingOffset;
+				$cnc->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$target->id,$cnc->id,"Attached","Attached",$noteValue);
+			}
+		}
 
-		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
+		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.
 
 
-				
+
 			switch($this->firingMode){
-								
+
 				case 1://Capture
 
 					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt to capture enemy ship next turn.";			
@@ -7996,11 +8003,18 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 			if (!isset($target->hasAttached[$shooter->id])) {
 				$target->hasAttached[$shooter->id] = $fireOrder->chosenLocation;
 				$shooter->attached[$target->id] = $fireOrder->chosenLocation;
-				if ($cnc) {
-					$cnc->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$target->id,$cnc->id,"Attached","Attached",$shooter->id . "=>" . $fireOrder->chosenLocation);
+				$facingOffset = Movement::getAttachFacingOffsetFromBearing($target, $shooter);
+				if ($facingOffset !== null) {
+					$target->hasAttachedFacing[$shooter->id] = $facingOffset;
+					$shooter->attachedFacing[$target->id] = $facingOffset;
 				}
-			}		
-		$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$shooter->id,$this->id,"ClawAttached","ClawAttached",$target->id);			
+				if ($cnc) {
+					$noteValue = $shooter->id . "=>" . $fireOrder->chosenLocation;
+					if ($facingOffset !== null) $noteValue .= ":" . $facingOffset;
+					$cnc->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$target->id,$cnc->id,"Attached","Attached",$noteValue);
+				}
+			}
+		$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$shooter->id,$this->id,"ClawAttached","ClawAttached",$target->id);
 
 		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
 

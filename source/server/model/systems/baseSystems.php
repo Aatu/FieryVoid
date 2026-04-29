@@ -2339,12 +2339,17 @@ class CnC extends ShipSystem implements SpecialAbility {
 					$parts = explode('=>', $currNote->notevalue);
 					if (count($parts) === 2) {
 						$shooterId = (int)$parts[0];
-						$location = (int)$parts[1];
+						// notevalue format: "shooterId=>location" (legacy) or "shooterId=>location:facing" (with entry-side hex offset)
+						$locParts = explode(':', $parts[1]);
+						$location = (int)$locParts[0];
+						$facing = isset($locParts[1]) ? (int)$locParts[1] : null;
 						$ship->hasAttached[$shooterId] = $location;
-						
+						if ($facing !== null) $ship->hasAttachedFacing[$shooterId] = $facing;
+
 						$boardingShip = $gamedata->getShipById($shooterId);
 						if ($boardingShip) {
 							$boardingShip->attached[$ship->id] = $location;
+							if ($facing !== null) $boardingShip->attachedFacing[$ship->id] = $facing;
 						}
 					}
 				} else if ($currNote->notekey === 'Detached') {
@@ -2352,10 +2357,12 @@ class CnC extends ShipSystem implements SpecialAbility {
 					if (count($parts) === 2) {
 						$shooterId = (int)$parts[0];
 						unset($ship->hasAttached[$shooterId]);
-						
+						unset($ship->hasAttachedFacing[$shooterId]);
+
 						$boardingShip = $gamedata->getShipById($shooterId);
 						if ($boardingShip) {
 							unset($boardingShip->attached[$ship->id]);
+							unset($boardingShip->attachedFacing[$ship->id]);
 						}
 					}
 				} else {
