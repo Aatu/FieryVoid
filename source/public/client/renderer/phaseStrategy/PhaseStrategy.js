@@ -511,6 +511,11 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.showShipTooltip = function (ships, payload, menu, hide, ballisticsMenu) {
 
+        // Suppress hover tooltip while the SelectFromShips picker is open — they show overlapping info.
+        if (this.selectFromShips) {
+            return;
+        }
+
         if (this.shipTooltip) {
             this.hideShipTooltip(this.shipTooltip)
         }

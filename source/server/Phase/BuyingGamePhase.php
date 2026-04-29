@@ -255,10 +255,10 @@ class BuyingGamePhase implements Phase
         while ($irregulars > 0) {
             $size = Dice::d(2, 1);  //Use a dice to decide a random size of asteroid!                    
             if($size == 1){
-                $currAsteroid = new asteroidTwoHex($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidTwoHex($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!               
             }else{
-                $currAsteroid = new asteroidThreeHex($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidThreeHex($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                            
             }
             $counter--;
@@ -269,13 +269,13 @@ class BuyingGamePhase implements Phase
         while ($counter > 0) {
             $size = Dice::d(3, 1);  //Use a dice to decide a random size of asteroid!
             if($size == 1){
-                $currAsteroid = new asteroidSNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidSNew($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                   
             }else if($size == 2){
-                $currAsteroid = new asteroidMNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidMNew($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                  
             }else{
-                $currAsteroid = new asteroidLNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidLNew($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                    
             }
             $counter--; //Reduce counter   

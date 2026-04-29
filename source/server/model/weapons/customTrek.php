@@ -3372,8 +3372,10 @@ class MicroJumpSystem extends Weapon implements SpecialAbility{
 		//Create new movement orders to $targetPos.
         $transverseJump = new MovementOrder(null, "prefire", new OffsetCoordinate($targetPos->q, $targetPos->r), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $distance, 0);
 
-		//Add Tranverse movement order to database
-		Manager::insertSingleMovement($gamedata->id, $ship->id, $transverseJump);		
+		//Add Tranverse movement order to database and in-memory movement array
+		//so subsequent prefire weapons see the updated position.
+		Manager::insertSingleMovement($gamedata->id, $ship->id, $transverseJump);
+		$ship->setMovement($transverseJump);		
 
 		/*
 		//No need to check for collision now, as there's no deviation and Warp Jump obeys Line of Sight at Targeting

@@ -854,8 +854,23 @@ window.webglScene = function () {
     webglScene.prototype.touchstart = function (event) {
         this.lastTouchMove = event;
         if (event.originalEvent.touches.length === 1) {
+            // Long-press = touchscreen equivalent of Shift+Click. Fires a synthetic click
+            // with shiftKey:true after LONG_PRESS_MS, cancelled by movement, lift, or pinch.
+            this.longPressFired = false;
+            clearTimeout(this.longPressTimer);
+            var t0 = event.originalEvent.touches[0];
+            this.longPressStartPos = { x: t0.pageX, y: t0.pageY };
+            var self = this;
+            this.longPressTimer = setTimeout(function () {
+                self.longPressTimer = null;
+                self.longPressFired = true;
+                if (navigator.vibrate) navigator.vibrate(30);
+                self.click(self.lastTouchMove, { shiftKey: true });
+            }, 500);
             this.mouseDown(event);
         } else if (event.originalEvent.touches.length === 2) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
             event.stopPropagation();
             event.preventDefault();
         }
@@ -866,6 +881,16 @@ window.webglScene = function () {
         event.preventDefault();
 
         this.lastTouchMove = event;
+
+        if (this.longPressTimer && this.longPressStartPos && event.originalEvent.touches.length === 1) {
+            var t = event.originalEvent.touches[0];
+            var dx = t.pageX - this.longPressStartPos.x;
+            var dy = t.pageY - this.longPressStartPos.y;
+            if (Math.hypot(dx, dy) > 10) {
+                clearTimeout(this.longPressTimer);
+                this.longPressTimer = null;
+            }
+        }
 
         if (event.originalEvent.touches.length === 1 && !this.lastPinchDistance) {
             if (window.gamedata.showLoS) {
@@ -897,6 +922,9 @@ window.webglScene = function () {
     webglScene.prototype.touchend = function (event) {
         event.stopPropagation();
         event.preventDefault();
+
+        clearTimeout(this.longPressTimer);
+        this.longPressTimer = null;
 
         if (event.originalEvent.touches.length === 0) {
             if (!this.lastPinchDistance) {
@@ -971,7 +999,8 @@ window.webglScene = function () {
         event.stopPropagation();
         event.preventDefault();
 
-        if (this.distanceDragged < this.draggingDistanceTreshold) this.click(event);
+        if (this.distanceDragged < this.draggingDistanceTreshold && !this.longPressFired) this.click(event);
+        this.longPressFired = false;
 
         if (this.dragging) this.dragging({ release: true });
 
@@ -1033,12 +1062,16 @@ window.webglScene = function () {
         this.dragging && this.dragging(payload);
     };
 
-    webglScene.prototype.click = function (event) {
+    webglScene.prototype.click = function (event, modifierOverride) {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos, true);
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
+        payload.ctrlKey = !!(modifierOverride && modifierOverride.ctrlKey) || !!event.ctrlKey;
+        payload.altKey = !!(modifierOverride && modifierOverride.altKey) || !!event.altKey;
+        payload.shiftKey = !!(modifierOverride && modifierOverride.shiftKey) || !!event.shiftKey;
+        payload.metaKey = !!(modifierOverride && modifierOverride.metaKey) || !!event.metaKey;
 
         //console.log(payload);        
         if (this.lastPositionClicked) {
@@ -4306,6 +4339,18 @@ window.BallisticIconContainer = function () {
 
 		ballistics.forEach(ballistic => {
 			if (ballistic.turn === gamedata.turn || !replayData) {
+				//Suppress Gravitic Mine icons/lines in live phase 3: the mine has already detonated in
+				//phase 5 PreFire, so it should not render as a pending ballistic. We must do this at the
+				//loop level (not just in createBallisticIcon) so existing icons left over from a Replay
+				//session aren't kept alive by updateBallisticIcon.
+				if (gamedata.gamephase === 3 && !replayData) {
+					const shooterIcon = iconContainer.getById(ballistic.shooterid);
+					if (shooterIcon) {
+						const weapon = shipManager.systems.getSystem(shooterIcon.ship, ballistic.weaponid);
+						const modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
+						if (modeName === 'Gravitic Mine' || modeName === 'Standard - GN' || modeName === 'Priority - GN') return;
+					}
+				}
 				createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
 				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
 			}
@@ -4541,7 +4586,8 @@ window.BallisticIconContainer = function () {
 				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
 				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },
 				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },
-				'Priorty - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
+				'Priority - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
+				'Gravitic Mine': { type: 'hexGreen', text: 'Gravitic Mine', color: '#008000' },
 			};
 
 			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)) {
@@ -4792,7 +4838,8 @@ window.BallisticIconContainer = function () {
 				'Shredder': 'blue',
 				'Defensive Plasma Web': 'green',
 				'Anti-Fighter Plasma Web': 'green',
-				'Transverse Jump': 'blue'
+				'Transverse Jump': 'blue',
+				'Gravitic Mine': 'green'
 			};
 
 			if (modeColorMap[modeName]) {
@@ -5420,24 +5467,30 @@ window.ReplayAnimationStrategy = function () {
             var isDetachingPodAfterHost = false;
 
             if (hostIdFromMoves) {
-                var host = this.gamedata.getShip(hostIdFromMoves);
-                if (host) {
-                    var hostIndex = this.gamedata.ships.indexOf(host);
-                    var detached = hasDetachOrder(ship);
+                var isAttachedAtStart = Object.keys(ship.attached || {}).length > 0;
+                if (!isAttachedAtStart) {
+                    // It attached mid-turn (e.g. Grappling Claw). Treat as independent ship for this turn.
+                    hostIdFromMoves = null;
+                } else {
+                    var host = this.gamedata.getShip(hostIdFromMoves);
+                    if (host) {
+                        var hostIndex = this.gamedata.ships.indexOf(host);
+                        var detached = hasDetachOrder(ship);
 
-                    if (!detached) {
-                        // Permanently attached this turn - fully handled by host's slot
-                        return;
-                    }
+                        if (!detached) {
+                            // Permanently attached this turn - fully handled by host's slot
+                            return;
+                        }
 
-                    if (index > hostIndex) {
-                        // Pod detaches and its initiative is AFTER the host.
-                        // The host's slot already created a SyncedIconAnimation for it.
-                        // Now we create its independent post-detach animation.
-                        isDetachingPodAfterHost = true;
+                        if (index > hostIndex) {
+                            // Pod detaches and its initiative is AFTER the host.
+                            // The host's slot already created a SyncedIconAnimation for it.
+                            // Now we create its independent post-detach animation.
+                            isDetachingPodAfterHost = true;
+                        }
+                        // If index < hostIndex: pod detaches but moves BEFORE host.
+                        // Falls through normally to animate all its moves independently.
                     }
-                    // If index < hostIndex: pod detaches but moves BEFORE host.
-                    // Falls through normally to animate all its moves independently.
                 }
             }
 
@@ -5452,8 +5505,11 @@ window.ReplayAnimationStrategy = function () {
 
                     var otherHostId = getHostIdFromMovements(otherShip);
                     if (otherHostId && otherHostId == ship.id) {
-                        var otherDetaches = hasDetachOrder(otherShip);
-                        podsToSync.push({ ship: otherShip, detaches: otherDetaches });
+                        var isOtherAttachedAtStart = Object.keys(otherShip.attached || {}).length > 0;
+                        if (isOtherAttachedAtStart) {
+                            var otherDetaches = hasDetachOrder(otherShip);
+                            podsToSync.push({ ship: otherShip, detaches: otherDetaches });
+                        }
                     }
                 });
             }
@@ -5554,8 +5610,111 @@ window.ReplayAnimationStrategy = function () {
             return 0;
         });
 
+        // Per-ship map of movement IDs already animated (to avoid duplicates across passes)
+        var handledMovementsByShip = {};
+
+        // Pass 1: Hex Targeted PreFire (always first, matching animateWeaponFire ordering)
+        var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
+        // Track which hex fire order IDs are handled in prefire so animateWeaponFire can skip them
+        var handledHexFireOrderIds = {};
+
         shipList.forEach(function (ship) {
-            var handledMovements = []; // Track movements animated in the incoming fire block
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+
+            // Accept "prefiring" type, or "ballistic" with preFires weapon (e.g. GraviticMine):
+            // the DB may not persist the type promotion from "ballistic" → "prefiring".
+            var hexes = firesForThisShip.filter(f => f.fireOrder?.type == "prefiring" || (f.fireOrder?.type == "ballistic" && f.weapon?.preFires));
+
+            if (hexes.length > 0) {
+                var hexAnim = new HexTargetedWeaponFireAnimation(
+                    time,
+                    this.movementAnimations,
+                    this.shipIconContainer,
+                    this.turn,
+                    this.emitterContainer,
+                    logAnimation,
+                    hexes
+                );
+
+                this.animations.push(hexAnim);
+
+                var hexAnimEndTime = time + hexAnim.getDuration();
+                var hexPreFireMoveTime = hexAnimEndTime;
+
+                // Hex-targeted preFire orders cause the shooting ship to teleport/move.
+                // If this ship has preFire movements, animate them after the hex animation.
+                var shooterIcon = this.shipIconContainer.getByShip(ship);
+                if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
+                    // Get the starting state for this ship (end of normal movement on this turn)
+                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
+                    if (!startBase) {
+                        startBase = shooterIcon.getLastMovementOnTurn(this.turn);
+                    }
+                    if (startBase) {
+                        var currentStartState = {
+                            position: new hexagon.Offset(startBase.position),
+                            facing: startBase.facing,
+                            heading: startBase.heading
+                        };
+
+                        if (!handledMovementsByShip[ship.id]) {
+                            handledMovementsByShip[ship.id] = [];
+                        }
+
+                        // Only animate preFire moves caused by THIS ship's own hex-targeted
+                        // weapons (e.g. self-displacement like Hyperspace Jump). Moves caused
+                        // by another ship's per-target effect — e.g. a GraviticMine pulling
+                        // its own launcher — have movement.value pointing to that effect's
+                        // fire order, which isn't in `hexes`. Let Pass 2 handle them so the
+                        // explosion against the moved ship plays before the move (matching
+                        // the behaviour seen for non-launcher pulled ships).
+                        var ownHexFireOrderIds = hexes.map(function (h) { return h.fireOrder ? h.fireOrder.id : null; });
+
+                        for (var i in shooterIcon.preFireMovements) {
+                            var movement = shooterIcon.preFireMovements[i];
+
+                            if (ownHexFireOrderIds.indexOf(movement.value) === -1) {
+                                continue;
+                            }
+
+                            var endState = {
+                                position: new hexagon.Offset(movement.position),
+                                facing: movement.facing,
+                                heading: movement.heading
+                            };
+
+                            var preFireMoveAnimation = new PreFireMovementAnimation(
+                                shooterIcon,
+                                currentStartState,
+                                endState,
+                                hexPreFireMoveTime,
+                                this.moveHexDuration * 1.5 // Short but visible
+                            );
+
+                            this.animations.push(preFireMoveAnimation);
+
+                            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                                hexPreFireMoveTime += preFireMoveAnimation.getDuration();
+                            }
+
+                            currentStartState = endState;
+                            handledMovementsByShip[ship.id].push(movement.id);
+                        }
+                    }
+                }
+
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    time = Math.max(hexAnimEndTime, hexPreFireMoveTime);
+                }
+            }
+
+        }, this);
+
+        // Pass 2: Incoming Direct PreFire (Standard Exchanges)
+        shipList.forEach(function (ship) {
+            var handledMovements = handledMovementsByShip[ship.id] || [];
             var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
                 ship,
                 this.shipIconContainer,
@@ -5592,6 +5751,11 @@ window.ReplayAnimationStrategy = function () {
                     for (var i in preFireMovements) {
                         var movement = preFireMovements[i]; // Look through movements identified as preFire
 
+                        // Skip movements already animated in the hex-targeted pass
+                        if (handledMovements.indexOf(movement.id) !== -1) {
+                            continue;
+                        }
+
                         // Try to find a matching fire order for this movement.id
                         var scheduled = false;
                         for (var k in fireOrders) {
@@ -5622,7 +5786,6 @@ window.ReplayAnimationStrategy = function () {
 
                                     currentStartState = endState;
                                     scheduled = true;
-                                    handledMovements.push(movement.id); // Mark as handled
                                     break;
                                 }
                             }
@@ -5636,83 +5799,6 @@ window.ReplayAnimationStrategy = function () {
 
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
                 time = Math.max(time + perShipAnimation.getDuration(), preFireMoveTime);
-            }
-
-            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
-            var firesForThisShip = allHexBallistics.filter(function (f) {
-                return f && (f.shooter === ship || f.shooter === ship.id);
-            });
-
-            var hexes = firesForThisShip.filter(f => f.fireOrder?.type == "prefiring");
-
-            if (hexes.length > 0) {
-                var hexAnim = new HexTargetedWeaponFireAnimation(
-                    time,
-                    this.movementAnimations,
-                    this.shipIconContainer,
-                    this.turn,
-                    this.emitterContainer,
-                    logAnimation,
-                    hexes
-                );
-
-                this.animations.push(hexAnim);
-
-                var hexAnimEndTime = time + hexAnim.getDuration();
-                var hexPreFireMoveTime = hexAnimEndTime;
-
-                // Hex-targeted preFire orders cause the shooting ship to teleport/move.
-                // If this ship has preFire movements, animate them after the hex animation.
-                var shooterIcon = this.shipIconContainer.getByShip(ship);
-                if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
-                    // Get the starting state for this ship (end of normal movement on this turn)
-                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
-                    if (!startBase) {
-                        startBase = shooterIcon.getLastMovementOnTurn(this.turn);
-                    }
-                    if (startBase) {
-                        var currentStartState = {
-                            position: new hexagon.Offset(startBase.position),
-                            facing: startBase.facing,
-                            heading: startBase.heading
-                        };
-
-                        // Animate all preFire movements for this ship
-                        for (var i in shooterIcon.preFireMovements) {
-                            var movement = shooterIcon.preFireMovements[i];
-
-                            if (handledMovements.indexOf(movement.id) !== -1) {
-                                continue;
-                            }
-
-                            var endState = {
-                                position: new hexagon.Offset(movement.position),
-                                facing: movement.facing,
-                                heading: movement.heading
-                            };
-
-                            var preFireMoveAnimation = new PreFireMovementAnimation(
-                                shooterIcon,
-                                currentStartState,
-                                endState,
-                                hexPreFireMoveTime,
-                                this.moveHexDuration * 1.5 // Short but visible
-                            );
-
-                            this.animations.push(preFireMoveAnimation);
-
-                            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                                hexPreFireMoveTime += preFireMoveAnimation.getDuration();
-                            }
-
-                            currentStartState = endState;
-                        }
-                    }
-                }
-
-                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                    time = Math.max(hexAnimEndTime, hexPreFireMoveTime);
-                }
             }
 
         }, this);
@@ -5741,7 +5827,8 @@ window.ReplayAnimationStrategy = function () {
                 return f && (f.shooter === ship || f.shooter === ship.id);
             });
 
-            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring");
+            // Exclude "prefiring" and preFires "ballistic" — those are handled in animateWeaponPreFire.
+            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring" && !(f.fireOrder?.type == "ballistic" && f.weapon?.preFires));
 
             if (normals.length > 0) {
                 var hexAnim = new HexTargetedWeaponFireAnimation(
@@ -7364,8 +7451,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         //Standardise color method and let noProjectile marker work here too - DK 01/25
         var color;
-        var hasParticle = true; //Extra variable for Bolt Effect, to remove particle if needed e.g. rammingAttack       	
-        if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
+        var hasParticle = true; //Extra variable for Bolt Effect, to remove particle if needed e.g. rammingAttack
+        if (weapon.noProjectile || incomingFire.fireOrder.damageclass == 'graviticShear' || incomingFire.fireOrder.damageclass == 'graviticPull') { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
             color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
             hasParticle = false;
         } else {
@@ -7376,6 +7463,63 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             );
         }
 
+        // GraviticMine pull/shear should show only an explosion (no projectile launch animation or sound).
+        if (incomingFire.fireOrder.damageclass === 'graviticPull' || incomingFire.fireOrder.damageclass === 'graviticShear') {
+            var pullTargetPos = getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired);
+            var pullDuration = 1000;
+            var glowExplosion = new Explosion(this.particleEmitterContainer, {
+                size: 50 * weapon.animationExplosionScale,
+                position: pullTargetPos,
+                type: "glow",
+                color: color,
+                time: startTime
+            });
+            var damageExplosion = null;
+            if (damage) {
+                damageExplosion = new Explosion(this.particleEmitterContainer, {
+                    size: 12 * damage + 12,
+                    position: pullTargetPos,
+                    type: ["gas", "pillar"][Math.round(Math.random() * 2)],
+                    time: startTime
+                });
+            }
+
+            if (hit && damagedNames && this.systemDestroyedEffect) {
+                this.systemDestroyedEffect.add(pullTargetPos, damagedNames, startTime);
+            }
+            if (hit && critNames && this.systemDestroyedEffect) {
+                this.systemDestroyedEffect.add(pullTargetPos, critNames, startTime, 'crit');
+            }
+
+            if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
+                TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
+            }
+            var playedPullSound = false;
+            var pullSoundVolume = 0.1;
+
+            return {
+                render: function (now, total, last, delta, zoom, back, paused) {
+                    if (total >= startTime && !playedPullSound && gamedata.playAudio && !paused && !back) {
+                        try {
+                            if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
+                                var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
+                                explosionSound.volume = pullSoundVolume;
+                                explosionSound.currentTime = 0;
+                                explosionSound.play().catch(function () { });
+                            }
+                            playedPullSound = true;
+                        } catch (e) {
+                            console.warn("GraviticMine explosion sound failed:", e);
+                        }
+                    }
+                },
+                getDuration: function () { return pullDuration; },
+                cleanUp: function () {
+                    glowExplosion.cleanUp();
+                    if (damageExplosion) damageExplosion.cleanUp();
+                }
+            };
+        }
 
         switch (animationType) {
             case "laser":
@@ -10938,6 +11082,11 @@ window.PhaseStrategy = function () {
 
     PhaseStrategy.prototype.showShipTooltip = function (ships, payload, menu, hide, ballisticsMenu) {
 
+        // Suppress hover tooltip while the SelectFromShips picker is open — they show overlapping info.
+        if (this.selectFromShips) {
+            return;
+        }
+
         if (this.shipTooltip) {
             this.hideShipTooltip(this.shipTooltip)
         }
@@ -11445,8 +11594,8 @@ window.DeploymentPhaseStrategy = function () {
 
         this.setPhaseHeader("DEPLOYMENT");
 
-        //Show commit button Deployment Phase if player has no ships, should never actually happen as server will skip Deployment Phases for these slots.
-        if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
+        //Show commit button Deployment Phase if player has no ships to deploy this turn, should never actually happen as server will skip Deployment Phases for these slots.
+        if (!shipManager.hasShipsToDeployThisTurn(gamedata.thisplayer)) {
             if (this.selectedShip) this.deselectShip(this.selectedShip);
             this.setPhaseHeader("PRE-TURN ORDERS");
             this.replayUI = new ReplayUI().activate();
@@ -11525,12 +11674,51 @@ window.DeploymentPhaseStrategy = function () {
         }
     };
 
+    DeploymentPhaseStrategy.prototype.onShipsClicked = function (ships, payload) {
+        // Shift+Click bypass: place directly without showing the SelectFromShips picker when:
+        //   - selected unit is a fighter/mine (drops onto stacked ships/mines/fighters), OR
+        //   - selected unit is a regular ship and every stacked unit in the hex is a mine/fighter.
+        if (payload && payload.shiftKey && this.selectedShip
+            && shipManager.getTurnDeployed(this.selectedShip) >= gamedata.turn
+            && validateDeploymentPosition(this.selectedShip, payload.hex, this.deploymentSprites)) {
+            var selIsFighterMine = this.selectedShip.mine || this.selectedShip.flight;
+            var allStackedFighterMine = ships.every(function (s) {
+                return s.id === this.selectedShip.id || s.mine || s.flight;
+            }, this);
+            if (selIsFighterMine || allStackedFighterMine) {
+                this.onHexClicked(payload);
+                return;
+            }
+        }
+
+        PhaseStrategy.prototype.onShipsClicked.call(this, ships, payload);
+    };
+
     DeploymentPhaseStrategy.prototype.onShipClicked = function (ship, payload) {//30 June 2024 - DK - Added for Ally targeting.
         if (shipManager.shouldBeHidden(ship)) return;  //Stealth equipped and undetected enemy, or not deployed yet - DK May 2025
 
         if (gamedata.showLoS) {
             this._startHexRuler = payload.hex;
             mathlib.clearLosSprite();
+        }
+
+        // Double-click on a friendly ship while a fighter/mine is selected: select that ship
+        // directly instead of letting the SelectFromShips "Deploy here" popup intercept the click.
+        var now = Date.now();
+        var isDoubleClick = this._lastShipClickId === ship.id
+            && (now - (this._lastShipClickTime || 0)) < 400;
+        this._lastShipClickId = ship.id;
+        this._lastShipClickTime = now;
+
+        if (isDoubleClick && this.gamedata.isMyShip(ship)) {
+            var depTurn = shipManager.getTurnDeployed(ship);
+            if (depTurn === gamedata.turn || (depTurn < gamedata.turn && ship.canPreOrder)) {
+                if (this.selectedShip && this.selectedShip.id !== ship.id) {
+                    this.deselectShip(this.selectedShip);
+                }
+                this.selectShip(ship, payload);
+                return;
+            }
         }
 
         // If we have a selected ship actively ready to deploy, and we click a valid DIFFERENT ship that is already placed on the map
@@ -11552,6 +11740,13 @@ window.DeploymentPhaseStrategy = function () {
                     var selectedPos = new hexagon.Offset(rawPos);
 
                     if (!selectedPos || selectedPos.q !== payload.hex.q || selectedPos.r !== payload.hex.r) {
+                        // Shift+Click: skip the "Deploy here" popup and place directly on this hex.
+                        // Allowed when the selected unit is a fighter/mine, or when the only thing in
+                        // the hex (other than terrain, already excluded above) is a fighter/mine.
+                        if (payload.shiftKey && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight)) {
+                            this.onHexClicked(payload);
+                            return;
+                        }
                         this.showSelectFromShips([ship], payload);
                         return;
                     } else {
@@ -13633,6 +13828,11 @@ window.ReplayPhaseStrategy = function () {
 
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {
+            //Refresh ballistic icons with replay flag so weapons suppressed in live phase 3
+            //(e.g. GraviticMine, see BallisticIconContainer createBallisticIcon) appear in the replay
+            //without needing the user to tab away and back.
+            this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(this.gamedata.turn, 'ballistic');
+            this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);
             this.changeAnimationStrategy(new ReplayAnimationStrategy(this.gamedata, this.shipIconContainer, webglScene.scene));
             this.replayUI.setTurn(this.replayTurn);
         } else {
@@ -14518,16 +14718,16 @@ window.ShipTooltip = function () {
             //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
             var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
             var speed = shipManager.movement.getSpeed(ship);
-            var baseTurnCost = ship.turncost;
+            var baseTurnCost = shipManager.movement.getTurnCost(ship);
             if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
             var turncost = Math.ceil(speed * baseTurnCost);
-            var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
+            var turnDelayCost = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
 
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
             toDisplay = ''; //display Agile status
             if (ship.agile) toDisplay = ', Agile';
-            this.addEntryElement('Turn Cost: ' + turncost + ' (' + ship.turncost + '); Turn Delay: ' + turnDelayCost + ' (' + ship.turndelaycost + ')' + toDisplay);
+            this.addEntryElement('Turn Cost: ' + turncost + ' (' + shipManager.movement.getTurnCost(ship) + '); Turn Delay: ' + turnDelayCost + ' (' + shipManager.movement.getTurnDelayCost(ship) + ')' + toDisplay);
 
             var thrustRemaining = Math.max(shipManager.movement.getRemainingEngineThrust(ship), 0);//EngineShorted can make this go negative.
 
@@ -14920,7 +15120,13 @@ window.ShipTooltipMenu = function () {
         }, this).forEach(function (buttonData) {
             var element = jQuery(ShipTooltipMenu.buttonTemplate);
             element.addClass(buttonData.className);
-            element.on('click', onClick.bind(this, shipTooltip, buttonData.action));
+            element.css({
+                'touch-action': 'manipulation',
+                '-webkit-touch-callout': 'none',
+                '-webkit-user-select': 'none',
+                'user-select': 'none'
+            });
+            bindButton.call(this, element, shipTooltip, buttonData.action, buttonData.supportsMaxClick);
             element.on('mouseover', getMouseOver.call(this, menu, buttonData.info));
             element.on('mouseout', mouseOut.bind(this, menu));
             jQuery(".action-buttons", menu).append(element);
@@ -14947,9 +15153,70 @@ window.ShipTooltipMenu = function () {
         this.extraButtons.push({ className: className, condition: condition, action: action, info: info });
     };
 
-    function onClick(shipTooltip, action, event) {
+    var LONG_PRESS_MS = 500;
+
+    function bindButton(element, shipTooltip, action, supportsMaxClick) {
+        var self = this;
+        var longPressTimer = null;
+        var suppressNextClick = false;
+
+        function clearLongPress() {
+            if (longPressTimer) {
+                clearTimeout(longPressTimer);
+                longPressTimer = null;
+            }
+        }
+
+        element.on('click', function (event) {
+            if (suppressNextClick) {
+                suppressNextClick = false;
+                event.preventDefault();
+                event.stopPropagation();
+                return;
+            }
+            onClick.call(self, shipTooltip, action, false, event);
+        });
+
+        if (!supportsMaxClick) {
+            element.on('contextmenu', suppressContextMenu);
+            return;
+        }
+
+        element.on('contextmenu', function (event) {
+            clearLongPress();
+            suppressNextClick = false;
+            onClick.call(self, shipTooltip, action, true, event);
+        });
+
+        element.on('touchstart', function () {
+            clearLongPress();
+            suppressNextClick = false;
+            longPressTimer = setTimeout(function () {
+                longPressTimer = null;
+                suppressNextClick = true;
+                action.call(self, true);
+            }, LONG_PRESS_MS);
+        });
+
+        element.on('touchend', function (event) {
+            clearLongPress();
+            if (suppressNextClick) {
+                event.preventDefault();
+            }
+        });
+
+        element.on('touchmove touchcancel', clearLongPress);
+    }
+
+    function onClick(shipTooltip, action, isMaxClick, event) {
+        event.preventDefault();
         event.stopPropagation();
-        action.call(this);
+        action.call(this, isMaxClick);
+    }
+
+    function suppressContextMenu(event) {
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     function mouseOut(menu) {
@@ -14984,26 +15251,26 @@ window.ShipTooltipInitialOrdersMenu = function () {
     ShipTooltipInitialOrdersMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipInitialOrdersMenu.buttons = [
-        { className: "addCCEW", condition: [isSelf, notFlight, notMine], action: addCCEW, info: "Add CCEW" },
-        { className: "removeCCEW", condition: [isSelf, notFlight, notMine], action: removeCCEW, info: "Remove CCEW" },
-        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: addOEW, info: "Add OEW" },
-        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
-        { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection" },
-        { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection" },
-        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
-        { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
-        //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" }, 
-        //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" }, 
-        //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" }, 
-        //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" }, 
-        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW" },
-        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW" },
-        { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW" },
-        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW" },
-        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW" },
-        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "Remove BDEW" },
-        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: addDetectSEW, info: "Add Detect Stealth" },
-        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: removeDetectSEW, info: "Remove Detect Stealth" },
+        { className: "addCCEW", condition: [isSelf, notFlight, notMine], action: addCCEW, info: "Add CCEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeCCEW", condition: [isSelf, notFlight, notMine], action: removeCCEW, info: "Remove CCEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getAddOEW('OEW'), info: "Add OEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeOEW", condition: [notSelf, isEnemyEW, sourceNotFlight], action: getRemoveOEW('OEW'), info: "Remove OEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addMDEW", condition: [isSelf, enemyMines], action: addMDEW, info: "Add Mine Detection (right-click: max)", supportsMaxClick: true },
+        { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
+        { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
+        { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST (right-click: clear)", supportsMaxClick: true },
+        //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" },
+        //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
+        //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
+        //{ className: "removeDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST" },
+        { className: "addSOEW", condition: [isFriendly, isElint, notFlight, notMine, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SOEW'), info: "Add SOEW", supportsMaxClick: true },
+        { className: "removeSOEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSOEW], action: getRemoveOEW('SOEW'), info: "Remove SOEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW], action: getAddOEW('SDEW'), info: "Add SDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeSDEW", condition: [isFriendly, isElint, notFlight, notSelf, isInElintDistance(30), doesNotHaveBDEW, hasSDEW], action: getRemoveOEW('SDEW'), info: "Remove SDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: addBDEW, info: "Add BDEW (right-click: max)", supportsMaxClick: true },
+        { className: "removeBDEW", condition: [isSelf, isElint, notFlight, doesNotHaveOtherElintEWThanBDEW], action: removeBDEW, info: "Remove BDEW (right-click: clear)", supportsMaxClick: true },
+        { className: "addDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: addDetectSEW, info: "Add Detect Stealth (right-click: max)", supportsMaxClick: true },
+        { className: "removeDetectSEW", condition: [isSelf, isElint, notFlight, doesNotHaveBDEW, enemyStealth], action: removeDetectSEW, info: "Remove Detect Stealth (right-click: clear)", supportsMaxClick: true },
         { className: "removeAllEW", condition: [isSelf, notFlight, notMine], action: removeAllEW, info: "Remove All EW" },
         { className: "targetWeapons", condition: [isEnemy, hasShipWeaponsSelected], action: targetWeapons, info: "Target selected weapons on ship" },
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
@@ -15062,110 +15329,81 @@ window.ShipTooltipInitialOrdersMenu = function () {
         });
     }
 
-    function addCCEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "CCEW", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "CCEW");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
+    function addSelfEW(ewType, isMaxClick) {
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, null, ewType, this.turn);
+            var before = ew.getEWLeft(this.selectedShip);
+            if (!entry) {
+                ew.assignEW(this.selectedShip, ewType);
+            } else {
+                ew.assignEW(this.selectedShip, entry);
+            }
+            if (!isMaxClick) return;
+            if (ew.getEWLeft(this.selectedShip) >= before) return;
+        } while (ew.getEWLeft(this.selectedShip) > 0);
     }
 
-    function removeCCEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "CCEW", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
+    function removeSelfEW(ewType, isMaxClick) {
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, null, ewType, this.turn);
+            if (!entry) return;
+            ew.deassignEW(this.selectedShip, entry);
+        } while (isMaxClick);
     }
 
-    function addMDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Mines", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "Detect Mines");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
-    }
-
-    function removeMDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Mines", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
-    }    
-
-    function addBDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "BDEW", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "BDEW");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
-    }
-
-    function removeBDEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "BDEW", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
-    }
-
-    function addDetectSEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Stealth", this.turn);
-
-        if (!entry) {
-            ew.assignEW(this.selectedShip, "Detect Stealth");
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
-    }
-
-    function removeDetectSEW() {
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, null, "Detect Stealth", this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
-    }
+    function addCCEW(isMaxClick) { addSelfEW.call(this, "CCEW", isMaxClick); }
+    function removeCCEW(isMaxClick) { removeSelfEW.call(this, "CCEW", isMaxClick); }
+    function addMDEW(isMaxClick) { addSelfEW.call(this, "Detect Mines", isMaxClick); }
+    function removeMDEW(isMaxClick) { removeSelfEW.call(this, "Detect Mines", isMaxClick); }
+    function addBDEW(isMaxClick) { addSelfEW.call(this, "BDEW", isMaxClick); }
+    function removeBDEW(isMaxClick) { removeSelfEW.call(this, "BDEW", isMaxClick); }
+    function addDetectSEW(isMaxClick) { addSelfEW.call(this, "Detect Stealth", isMaxClick); }
+    function removeDetectSEW(isMaxClick) { removeSelfEW.call(this, "Detect Stealth", isMaxClick); }
 
     function removeAllEW() {
         ew.removeEW(this.selectedShip);
     }
 
     function getAddOEW(type) {
-        return function () {
-            addOEW.call(this, type);
+        return function (isMaxClick) {
+            addOEW.call(this, type, isMaxClick);
         };
     }
 
-    function addOEW(type) {
-
+    function addOEW(type, isMaxClick) {
         if (!type) {
             type = "OEW";
         }
 
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
-
-        if (!entry) {
-            ew.AssignOEW(this.selectedShip, this.targetedShip, type);
-        } else {
-            ew.assignEW(this.selectedShip, entry);
-        }
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
+            var before = ew.getEWLeft(this.selectedShip);
+            if (!entry) {
+                ew.AssignOEW(this.selectedShip, this.targetedShip, type);
+            } else {
+                ew.assignEW(this.selectedShip, entry);
+            }
+            if (!isMaxClick) return;
+            if (ew.getEWLeft(this.selectedShip) >= before) return;
+        } while (ew.getEWLeft(this.selectedShip) > 0);
     }
 
     function getRemoveOEW(type) {
-        return function () {
-            removeOEW.call(this, type);
+        return function (isMaxClick) {
+            removeOEW.call(this, type, isMaxClick);
         };
     }
 
-    function removeOEW(type) {
-
+    function removeOEW(type, isMaxClick) {
         if (!type) {
             type = "OEW";
         }
 
-        var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
-        if (!entry) return;
-        ew.deassignEW(this.selectedShip, entry);
+        do {
+            var entry = ew.getEntryByTargetAndType(this.selectedShip, this.targetedShip, type, this.turn);
+            if (!entry) return;
+            ew.deassignEW(this.selectedShip, entry);
+        } while (isMaxClick);
     }
 
     function isSelf() {
@@ -17635,10 +17873,10 @@ getActiveShipName: function getActiveShipName() {
         if (gamedata.gamephase == 4) return "FINAL ORDERS";
 
         if (gamedata.gamephase == -1) {
-            if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
-                return "PRE-TURN ORDERS";
-            } else {
+            if (shipManager.hasShipsToDeployThisTurn(gamedata.thisplayer)) {
                 return "DEPLOYMENT";
+            } else {
+                return "PRE-TURN ORDERS";
             }
         }
 
@@ -21722,6 +21960,7 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
             var attachedWeaponHidden = false;
+            var clawBlindSpot = false;            
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
@@ -21762,7 +22001,13 @@ window.weaponManager = {
                                 attachedWeaponHidden = true; // Prevent pods and ships from firing weapons at each others.
                             }
                         }
+                        if (!weapon.isBoardingAction && weaponManager.isTargetInGrapplingClawBlindSpot(selectedShip, ship)) {
+                            clawBlindSpot = true;
+                        }                        
                     }
+                    
+
+
 
                     if (blockedLosHex.length > 0 && !loSBlocked) {
                         var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -21777,7 +22022,7 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (ship.Huge > 0 || attachedUnitHidden || attachedWeaponHidden) { //Cannot Target larger terrain or POds that are attached to non-facing sides
+                    if (ship.Huge > 0 || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
@@ -21932,6 +22177,7 @@ window.weaponManager = {
 
     isOnWeaponArc: function isOnWeaponArc(shooter, target, weapon) {
         if (weapon.splitArcs) return weaponManager.isOnWeaponArcMultiple(shooter, target, weapon);
+
         //console.log("is on arc");
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
@@ -21984,7 +22230,29 @@ window.weaponManager = {
         return false;
     },
 
-
+    isTargetInGrapplingClawBlindSpot: function isTargetInGrapplingClawBlindSpot(shooter, target) {
+        if (shooter.flight) return false;
+        if (!shooter.attached || Object.keys(shooter.attached).length === 0) return false;
+        
+        var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
+        var shooterFacing = shipManager.getShipHeadingAngle(shooter);
+        
+        for (var i in shooter.systems) {
+            var system = shooter.systems[i];
+            if (system.name === "GrapplingClaw" && !shipManager.systems.isDestroyed(shooter, system)) {
+                // If this claw is currently attached to something
+                if (system.hostShipId && system.hostShipId > 0) {
+                    var arcs = shipManager.systems.getArcs(shooter, system);
+                    var start = mathlib.addToDirection(arcs.start, shooterFacing);
+                    var end = mathlib.addToDirection(arcs.end, shooterFacing);
+                    if (mathlib.isInArc(targetCompassHeading, start, end)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    },
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
@@ -26119,17 +26387,14 @@ window.shipManager = {
     },
 
 
-    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
-    playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {
-        var hasDeployed = true;
-
+    //True if the player still has at least one ship scheduled to deploy THIS turn.
+    //Future-turn arrivals are excluded — they don't keep the Deployment phase active.
+    hasShipsToDeployThisTurn: function hasShipsToDeployThisTurn(playerid) {
         for (const ship of gamedata.ships) {
             if (ship.userid !== playerid) continue;
-
-            var deploys = shipManager.getTurnDeployed(ship);
-            if (deploys >= gamedata.turn) hasDeployed = false;
+            if (shipManager.getTurnDeployed(ship) === gamedata.turn) return true;
         }
-        return hasDeployed;
+        return false;
     },
 
     //Need abridged version of this to prevent false positive returns from main function when a system is offline e.g. cloaking devices
@@ -26193,6 +26458,47 @@ window.shipManager = {
 "use strict";
 
 shipManager.movement = {
+
+    getTurnCost: function (ship) {
+        var baseTurnCost = ship.turncost;
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var attachedShip = gamedata.getShip(attachedId);
+                if (attachedShip && !attachedShip.flight) {
+                    baseTurnCost += attachedShip.turncost;
+                }
+            }
+        }
+        return Math.round(baseTurnCost * 100) / 100;
+    },
+
+    getTurnDelayCost: function (ship) {
+        var baseTurnDelayCost = ship.turndelaycost;
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var attachedShip = gamedata.getShip(attachedId);
+                if (attachedShip && !attachedShip.flight) {
+                    baseTurnDelayCost += attachedShip.turndelaycost;
+                }
+            }
+        }
+        return Math.round(baseTurnDelayCost * 100) / 100;
+    },
+
+    isManeuverBlockedByAttachment: function (ship) {
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var attachedShip = gamedata.getShip(attachedId);
+                // Check if it's a ship (e.g. Grappling Claw attachment) and not a fighter/pod
+                if (attachedShip && !attachedShip.flight) {
+                    if (attachedShip.shipSizeClass > ship.shipSizeClass) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    },
 
     deploy: function deploy(ship, pos) {
 
@@ -26425,6 +26731,7 @@ shipManager.movement = {
 
     canRoll: function canRoll(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         if (ship.flight || ship.osat) return false;
@@ -26449,6 +26756,7 @@ shipManager.movement = {
 
     canEmergencyRoll: function canEmergencyRoll(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -26541,6 +26849,18 @@ shipManager.movement = {
             if (m.type == "isRolling") rolling = true;
             if (m.type == "roll" && m.commit) rolling = !rolling;
         }
+        if (!rolling && Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.agile && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "isRolling") rolling = true;
+                    if (hm.type == "roll" && hm.commit) rolling = !rolling;
+                }
+            }
+        }
         return rolling;
     },
 
@@ -26589,6 +26909,17 @@ shipManager.movement = {
             var m = ship.movement[i];
             if (m.turn != gamedata.turn) continue;
             if (m.type == "roll" || m.type == "isRolling") return true;
+        }
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "roll" || hm.type == "isRolling") return true;
+                }
+            }
         }
         return false;
     },
@@ -26639,7 +26970,7 @@ shipManager.movement = {
     },
 
     canDetach: function canDetach(ship) {
-        if (gamedata.gamephase != 2) return false;        
+        if (gamedata.gamephase != 2) return false;
         if (Object.keys(ship.attached).length === 0) return false;
         if (shipManager.movement.hasDeletableMovements(ship)) return false;
         return true;
@@ -26647,15 +26978,18 @@ shipManager.movement = {
 
     doDetach: function doDetach(ship) {
         var lm = ship.movement[ship.movement.length - 1];
-        var hostShipId = Object.keys(ship.attached)[0];      
-        ship.detached = true; //Mark detached this movement.        
+        var hostShipId = Object.keys(ship.attached)[0];
+        ship.detached = true; //Mark detached this movement.
+        var facing = lm.facing;
+        if(ship.flight) facing = mathlib.addToHexFacing(lm.facing, 3); //Pods always face away from host ship when they detach.    
+        
         ship.movement[ship.movement.length] = {
             id: -1,
             type: "detach",
             position: lm.position,
             xOffset: 0,
             yOffset: 0,
-            facing: mathlib.addToHexFacing(lm.facing, 3), // Turn 180 degrees
+            facing: facing, 
             heading: lm.heading,
             speed: lm.speed,
             animating: false,
@@ -26676,6 +27010,7 @@ shipManager.movement = {
 
     canSlip: function canSlip(ship, right) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
@@ -26850,6 +27185,7 @@ shipManager.movement = {
 
     canPivot: function canPivot(ship, right) {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -27060,6 +27396,24 @@ shipManager.movement = {
             if (movement.value === 'turnIntoPivot') pivoting = "no";
 
         }
+        if (pivoting === "no" && Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.agile && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.commit == false) continue;
+                    if (hm.type == "isPivotingLeft") pivoting = "left";
+                    if (hm.type == "isPivotingRight") pivoting = "right";
+                    if (hm.type == "pivotright" && pivoting == "no" && hm.preturn == false) pivoting = "right";
+                    if (hm.type == "pivotleft" && pivoting == "no" && hm.preturn == false) pivoting = "left";
+                    if (hm.type == "pivotright" && pivoting == "left" && hm.preturn == false) pivoting = "no";
+                    if (hm.type == "pivotleft" && pivoting == "right" && hm.preturn == false) pivoting = "no";
+                    if (hm.value === 'turnIntoPivot') pivoting = "no";
+                }
+            }
+        }
         return pivoting;
     },
 
@@ -27176,7 +27530,7 @@ shipManager.movement = {
 
         var remThrust = shipManager.movement.getRemainingEngineThrust(ship);
         var speed = shipManager.movement.getSpeed(ship);
-        var contractCostBase = Math.round(speed * ship.turncost); //turn cost should be 1.33
+        var contractCostBase = Math.round(speed * shipManager.movement.getTurnCost(ship)); //turn cost should be 1.33
         var contractCost = Math.max(2, contractCostBase); //Minimum of 2 thrust
 
         if (value == 1 && contractCost > remThrust) return false;//Not enough thrust to contract. 
@@ -27206,7 +27560,7 @@ shipManager.movement = {
 
         var remThrust = shipManager.movement.getRemainingEngineThrust(ship);
         var speed = shipManager.movement.getSpeed(ship);
-        var contractCostBase = Math.round(speed * ship.turncost); //turn cost should be 1.33
+        var contractCostBase = Math.round(speed * shipManager.movement.getTurnCost(ship)); //turn cost should be 1.33
         var contractCost = Math.max(2, contractCostBase);	//Minimum of 2 thrust        	
 
         var lastMovement = ship.movement[ship.movement.length - 1];
@@ -27307,6 +27661,7 @@ shipManager.movement = {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
         if (ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         /*cannot turn into pivot if unit is aligned...*/
@@ -27322,7 +27677,7 @@ shipManager.movement = {
 
         //is turning affordable in the first place?
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
@@ -27415,6 +27770,18 @@ shipManager.movement = {
                 right = true;
             }
         }
+        if (!left && !right && Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "pivotleft" && hm.preturn == false) left = true;
+                    if (hm.type == "pivotright" && hm.preturn == false) right = true;
+                }
+            }
+        }
         return { left: left, right: right };
     },
 
@@ -27445,6 +27812,18 @@ shipManager.movement = {
                 return true;
             }
         }
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "pivotleft" || hm.type == "pivotright") return true;
+                    if (hm.type == "isPivotingRight" || hm.type == "isPivotingLeft") return true;
+                }
+            }
+        }
         return false;
     },
 
@@ -27472,9 +27851,9 @@ shipManager.movement = {
             if (movement.preturn == false &&
                 movement.forced == false &&
                 movement.type != "speedchange" &&
-                movement.type != "deploy" && 
+                movement.type != "deploy" &&
                 movement.type != "sync" &&
-                movement.type != "attached" &&                  
+                movement.type != "attached" &&
                 movement.type != "detach") return false;
         }
 
@@ -27482,14 +27861,14 @@ shipManager.movement = {
         if (ship.gravitic) return true;
 
         //ship cannot accelerate if it's not aligned OR pivoting    
-        if ((shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") && !ship.detached) return false;
+        if (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") return false;
 
         return true;
     },
 
     adjustTurnDelay: function adjustTurnDelay(ship, oldspeed, newspeed) {
-        var oldturndelay = Math.ceil(oldspeed * ship.turndelaycost);
-        var newturndelay = Math.ceil(newspeed * ship.turndelaycost);
+        var oldturndelay = Math.ceil(oldspeed * shipManager.movement.getTurnDelayCost(ship));
+        var newturndelay = Math.ceil(newspeed * shipManager.movement.getTurnDelayCost(ship));
         var step = newturndelay - oldturndelay;
         var spentturndelay = newturndelay;
 
@@ -28072,6 +28451,7 @@ shipManager.movement = {
 
     canTurn: function canTurn(ship, right) {
         if (ship.mine) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
@@ -28105,7 +28485,7 @@ shipManager.movement = {
         }
 
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
@@ -28227,7 +28607,7 @@ shipManager.movement = {
         }
 
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         //if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
@@ -28368,7 +28748,7 @@ shipManager.movement = {
         var requiredThrust = Array(null, null, null, null, null);
 
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
 
@@ -28500,7 +28880,7 @@ shipManager.movement = {
         var didTurn = false;
         var turndelay = 0;
         if (setMoveNo >= 0) {
-            turndelay = Math.ceil(ship.movement[setMoveNo].speed * ship.turndelaycost); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+            turndelay = Math.ceil(ship.movement[setMoveNo].speed * shipManager.movement.getTurnDelayCost(ship)); //delay at current speed - at least as many moves are required for turn delay to be satisfied
         } else {//before unit started to move there was no delay for certain
             turndelay = 0;
         }
@@ -28550,7 +28930,7 @@ shipManager.movement = {
 
     calculateCurrentTurndelay: function calculateCurrentTurndelay(ship) {
         /* Marcin Sawicki, December 2019: this is having trouble when delay is reduced to 0 (by exactly satisfying or by slowing down to 0), and then acceleration happens
-        var turndelay = Math.ceil(ship.movement[ship.movement.length - 1].speed * ship.turndelaycost);
+        var turndelay = Math.ceil(ship.movement[ship.movement.length - 1].speed * shipManager.movement.getTurnDelayCost(ship));
         var last = null;
         var didTurn = false;
         if (gamedata.turn == 1) {
@@ -28571,7 +28951,7 @@ shipManager.movement = {
             last = movement;
         }
         if (turndelay < 0) turndelay = 0;
-        if (turndelay > 0 && ship.turndelaycost > 1) {
+        if (turndelay > 0 && shipManager.movement.getTurnDelayCost(ship) > 1) {
             if (!didTurn) {
                 turndelay = 0;
             }
@@ -28587,8 +28967,8 @@ shipManager.movement = {
     calculateTurndelay: function calculateTurndelay(ship, movement, speed) {
         // speed as a seperate parameter needed to allow for calculation with new speed.
         if (speed == 0) return 0;
-        if (ship.turndelaycost == 0) return 0;
-        var turndelay = Math.ceil(speed * ship.turndelaycost);
+        if (shipManager.movement.getTurnDelayCost(ship) == 0) return 0;
+        var turndelay = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         //if (turndelay < 1) turndelay = 1; //Marcin Sawicki: I think this just adds turn delay after accel when delay is satisfied exactly...
@@ -30730,6 +31110,9 @@ window.UI = {
 
             jQuery('#shipMovementUI div').on('mousedown touchend touchmove', cancelEvent);
             jQuery('#shipMovementUI div').on('mouseup touchend touchmove', cancelEvent);
+            UI.shipMovement.uiElement[0].addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+            }, true);
 
             function cancelEvent(e) {
                 e.preventDefault();
@@ -37044,8 +37427,37 @@ CnC.prototype.initializationUpdate = function () {
 	if (!this.data) this.data = {};
 	if (ship.factionAge > 2 || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
 		this.data["Marine Units"] = 'N/A';
+	} else if (gamedata.gamephase == -2) {
+		var structureTotal = 0;
+		for (var i in ship.systems) {
+			if (ship.systems[i].name === 'structure') structureTotal += ship.systems[i].maxhealth;
+		}
+		var multiplier = ship.shipSizeClass === 1 ? 1.2 : 1.1;
+		var marines = Math.floor(Math.ceil(structureTotal * multiplier) / 20);
+
+		if (ship.shipSizeClass !== -1) {
+			for (var i in ship.systems) {
+				if (ship.systems[i].name === 'GrapplingClaw') marines += (ship.systems[i].data["Ammunition"] || 0);
+			}
+		}
+
+		if (ship.base) {
+			var sections = {};
+			for (var i in ship.systems) {
+				if (ship.systems[i].name === 'structure') sections[ship.systems[i].location] = true;
+			}
+			marines += Object.keys(sections).length;
+		}
+
+		if (ship.shipClass && ship.shipClass.indexOf('Assault') !== -1) {
+			if (ship.shipSizeClass === 3) marines += 4;
+			else if (ship.shipSizeClass === 2) marines += 3;
+			else if (ship.shipSizeClass === 1) marines += 2;
+		}
+
+		this.data["Marine Units"] = Math.max(0, marines);
 	} else {
-		this.data["Marine Units"] = this.marines || 0; // Ensure marines is defined
+		this.data["Marine Units"] = this.marines || 0;
 	}
 	return this;
 };
@@ -42776,7 +43188,16 @@ var GrapplingClaw = function GrapplingClaw(json, ship) {
 GrapplingClaw.prototype = Object.create(Weapon.prototype);
 GrapplingClaw.prototype.constructor = GrapplingClaw;
 
-;
+GrapplingClaw.prototype.initializationUpdate = function() {
+	if(this.hostShipId !== -1 && !this.hostShipDisplayed){
+        this.hostShipDisplayed = true;
+        var hostShip = gamedata.getShip(this.hostShipId);
+        this.data["Attached to"] = hostShip.name;
+    }
+
+
+	return this;
+};;
 
 /* Source: client/model/weapon/supportWeapons.js */
 "use strict";
@@ -45677,7 +46098,13 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
 AntigravityBeam.prototype.checkFinished = function () {
     if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
     return false;
-};;
+};
+
+var GraviticMine = function GraviticMine(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+GraviticMine.prototype = Object.create(Gravitic.prototype);
+GraviticMine.prototype.constructor = GraviticMine;;
 
 /* Source: client/model/weapon/missile.js */
 "use strict";

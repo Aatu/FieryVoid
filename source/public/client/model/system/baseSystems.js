@@ -138,8 +138,37 @@ CnC.prototype.initializationUpdate = function () {
 	if (!this.data) this.data = {};
 	if (ship.factionAge > 2 || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
 		this.data["Marine Units"] = 'N/A';
+	} else if (gamedata.gamephase == -2) {
+		var structureTotal = 0;
+		for (var i in ship.systems) {
+			if (ship.systems[i].name === 'structure') structureTotal += ship.systems[i].maxhealth;
+		}
+		var multiplier = ship.shipSizeClass === 1 ? 1.2 : 1.1;
+		var marines = Math.floor(Math.ceil(structureTotal * multiplier) / 20);
+
+		if (ship.shipSizeClass !== -1) {
+			for (var i in ship.systems) {
+				if (ship.systems[i].name === 'GrapplingClaw') marines += (ship.systems[i].data["Ammunition"] || 0);
+			}
+		}
+
+		if (ship.base) {
+			var sections = {};
+			for (var i in ship.systems) {
+				if (ship.systems[i].name === 'structure') sections[ship.systems[i].location] = true;
+			}
+			marines += Object.keys(sections).length;
+		}
+
+		if (ship.shipClass && ship.shipClass.indexOf('Assault') !== -1) {
+			if (ship.shipSizeClass === 3) marines += 4;
+			else if (ship.shipSizeClass === 2) marines += 3;
+			else if (ship.shipSizeClass === 1) marines += 2;
+		}
+
+		this.data["Marine Units"] = Math.max(0, marines);
 	} else {
-		this.data["Marine Units"] = this.marines || 0; // Ensure marines is defined
+		this.data["Marine Units"] = this.marines || 0;
 	}
 	return this;
 };

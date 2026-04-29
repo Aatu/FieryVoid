@@ -9,14 +9,14 @@ const Container = styled.div`
     min-width: 160px;
     opacity: 0.95 !important;
     background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #496791;
+    border: 1px solid #587e8d;
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: #4967919a;
-    border: 1px solid #496791;
-    border-bottom: 1px solid #496791;    
+    background-color: #215a7a;
+    border: 1px solid #587e8d;
+    border-bottom: 1px solid #587e8d;    
     color: #deebff;
     text-align: center;
     font-size: 11px;
@@ -68,7 +68,7 @@ const ActionButton = styled.div`
     width: ${props => props.$narrow ? '18px' : '30px'};
     height: 18px;
     background: #203348;
-    border: 1px solid #496791;
+    border: 1px solid #587e8d;
     color: #deebff;
     cursor: pointer;
     display: flex;
@@ -81,7 +81,7 @@ const ActionButton = styled.div`
 
     &:hover {
         background: #496791;
-        border: 1px solid #5d82b6ff;        
+        border: 1px solid #587e8d;        
         color: #ffffff;
         opacity: 1;
     }
@@ -149,9 +149,9 @@ const ActionButton = styled.div`
     `}
 
     ${props => props.$active && props.$variant === 'info' && `
-        background: #2c4766;
+        background: #215a7a;
         color: white;
-        border: 1px solid #496791;
+        border: 1px solid #587e8d;
         opacity: 1;
 
         &:hover {
