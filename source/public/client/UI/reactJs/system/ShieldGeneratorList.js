@@ -10,14 +10,14 @@ const Container = styled.div`
     min-width: 250px;
     opacity: 0.95;
     background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #496791;
+    border: 1px solid #587e8d;
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: #496791;
-    border: 1px solid #496791;
-    border-bottom: 1px solid #496791;    
+    background-color: #215a7a;
+    border: 1px solid #587e8d;
+    border-bottom: 1px solid #587e8d;    
     color: #deebff;
     text-align: center;
     font-size: 12px;
