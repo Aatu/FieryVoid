@@ -255,8 +255,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         //Standardise color method and let noProjectile marker work here too - DK 01/25
         var color;
-        var hasParticle = true; //Extra variable for Bolt Effect, to remove particle if needed e.g. rammingAttack       	
-        if (weapon.noProjectile) { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
+        var hasParticle = true; //Extra variable for Bolt Effect, to remove particle if needed e.g. rammingAttack
+        if (weapon.noProjectile || incomingFire.fireOrder.damageclass == 'graviticShear' || incomingFire.fireOrder.damageclass == 'graviticPull') { //Some weapon like Spark Field shouldn't have projectiles - DK - 4 Jan 24
             color = new THREE.Color((0 / 255, 0 / 255, 0 / 255));
             hasParticle = false;
         } else {
@@ -267,6 +267,63 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             );
         }
 
+        // GraviticMine pull/shear should show only an explosion (no projectile launch animation or sound).
+        if (incomingFire.fireOrder.damageclass === 'graviticPull' || incomingFire.fireOrder.damageclass === 'graviticShear') {
+            var pullTargetPos = getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired);
+            var pullDuration = 1000;
+            var glowExplosion = new Explosion(this.particleEmitterContainer, {
+                size: 50 * weapon.animationExplosionScale,
+                position: pullTargetPos,
+                type: "glow",
+                color: color,
+                time: startTime
+            });
+            var damageExplosion = null;
+            if (damage) {
+                damageExplosion = new Explosion(this.particleEmitterContainer, {
+                    size: 12 * damage + 12,
+                    position: pullTargetPos,
+                    type: ["gas", "pillar"][Math.round(Math.random() * 2)],
+                    time: startTime
+                });
+            }
+
+            if (hit && damagedNames && this.systemDestroyedEffect) {
+                this.systemDestroyedEffect.add(pullTargetPos, damagedNames, startTime);
+            }
+            if (hit && critNames && this.systemDestroyedEffect) {
+                this.systemDestroyedEffect.add(pullTargetPos, critNames, startTime, 'crit');
+            }
+
+            if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
+                TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
+            }
+            var playedPullSound = false;
+            var pullSoundVolume = 0.1;
+
+            return {
+                render: function (now, total, last, delta, zoom, back, paused) {
+                    if (total >= startTime && !playedPullSound && gamedata.playAudio && !paused && !back) {
+                        try {
+                            if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
+                                var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
+                                explosionSound.volume = pullSoundVolume;
+                                explosionSound.currentTime = 0;
+                                explosionSound.play().catch(function () { });
+                            }
+                            playedPullSound = true;
+                        } catch (e) {
+                            console.warn("GraviticMine explosion sound failed:", e);
+                        }
+                    }
+                },
+                getDuration: function () { return pullDuration; },
+                cleanUp: function () {
+                    glowExplosion.cleanUp();
+                    if (damageExplosion) damageExplosion.cleanUp();
+                }
+            };
+        }
 
         switch (animationType) {
             case "laser":

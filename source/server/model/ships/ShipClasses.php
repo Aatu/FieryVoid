@@ -531,9 +531,33 @@ class BaseShip {
 		}		
 		
         //Add unused Marines from Grappling Claw to bolster defences.
-        foreach ($this->systems as $system){
-            if ($system instanceof GrapplingClaw)  $marines += $system->ammunition;
-        }
+        if($this->hasSpecialAbility("Attaches") && !$this instanceOf FighterFlight){
+            foreach ($this->systems as $system){
+                if ($system instanceof GrapplingClaw)  $marines += $system->ammunition;
+            }
+        }    
+
+		// Bonus marines for bases (1 per section)
+		if ($this->base) {
+			$sections = [];
+			foreach ($this->systems as $system) {
+				if ($system instanceof Structure) {
+					$sections[$system->location] = true;
+				}
+			}
+			$marines += count($sections);
+		}
+
+		// Bonus marines for Assault ships
+		if (strpos($this->shipClass, 'Assault') !== false) {
+			if ($this->shipSizeClass == 3) {
+				$marines += 4;
+			} elseif ($this->shipSizeClass == 2) {
+				$marines += 3;
+			} elseif ($this->shipSizeClass == 1) {
+				$marines += 2;
+			}
+		}
 
 		$totalMarines = max(0, $marines);
 		

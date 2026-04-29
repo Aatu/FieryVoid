@@ -337,16 +337,16 @@ window.ShipTooltip = function () {
             //this.addEntryElement('Current turn delay: ' + shipManager.movement.calculateCurrentTurndelay(ship));
             var currDelay = shipManager.movement.calculateCurrentTurndelay(ship)
             var speed = shipManager.movement.getSpeed(ship);
-            var baseTurnCost = ship.turncost;
+            var baseTurnCost = shipManager.movement.getTurnCost(ship);
             if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
             var turncost = Math.ceil(speed * baseTurnCost);
-            var turnDelayCost = Math.ceil(speed * ship.turndelaycost);
+            var turnDelayCost = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
 
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);
             toDisplay = ''; //display Agile status
             if (ship.agile) toDisplay = ', Agile';
-            this.addEntryElement('Turn Cost: ' + turncost + ' (' + ship.turncost + '); Turn Delay: ' + turnDelayCost + ' (' + ship.turndelaycost + ')' + toDisplay);
+            this.addEntryElement('Turn Cost: ' + turncost + ' (' + shipManager.movement.getTurnCost(ship) + '); Turn Delay: ' + turnDelayCost + ' (' + shipManager.movement.getTurnDelayCost(ship) + ')' + toDisplay);
 
             var thrustRemaining = Math.max(shipManager.movement.getRemainingEngineThrust(ship), 0);//EngineShorted can make this go negative.
 

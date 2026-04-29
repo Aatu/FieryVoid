@@ -125,24 +125,30 @@ window.ReplayAnimationStrategy = function () {
             var isDetachingPodAfterHost = false;
 
             if (hostIdFromMoves) {
-                var host = this.gamedata.getShip(hostIdFromMoves);
-                if (host) {
-                    var hostIndex = this.gamedata.ships.indexOf(host);
-                    var detached = hasDetachOrder(ship);
+                var isAttachedAtStart = Object.keys(ship.attached || {}).length > 0;
+                if (!isAttachedAtStart) {
+                    // It attached mid-turn (e.g. Grappling Claw). Treat as independent ship for this turn.
+                    hostIdFromMoves = null;
+                } else {
+                    var host = this.gamedata.getShip(hostIdFromMoves);
+                    if (host) {
+                        var hostIndex = this.gamedata.ships.indexOf(host);
+                        var detached = hasDetachOrder(ship);
 
-                    if (!detached) {
-                        // Permanently attached this turn - fully handled by host's slot
-                        return;
-                    }
+                        if (!detached) {
+                            // Permanently attached this turn - fully handled by host's slot
+                            return;
+                        }
 
-                    if (index > hostIndex) {
-                        // Pod detaches and its initiative is AFTER the host.
-                        // The host's slot already created a SyncedIconAnimation for it.
-                        // Now we create its independent post-detach animation.
-                        isDetachingPodAfterHost = true;
+                        if (index > hostIndex) {
+                            // Pod detaches and its initiative is AFTER the host.
+                            // The host's slot already created a SyncedIconAnimation for it.
+                            // Now we create its independent post-detach animation.
+                            isDetachingPodAfterHost = true;
+                        }
+                        // If index < hostIndex: pod detaches but moves BEFORE host.
+                        // Falls through normally to animate all its moves independently.
                     }
-                    // If index < hostIndex: pod detaches but moves BEFORE host.
-                    // Falls through normally to animate all its moves independently.
                 }
             }
 
@@ -157,8 +163,11 @@ window.ReplayAnimationStrategy = function () {
 
                     var otherHostId = getHostIdFromMovements(otherShip);
                     if (otherHostId && otherHostId == ship.id) {
-                        var otherDetaches = hasDetachOrder(otherShip);
-                        podsToSync.push({ ship: otherShip, detaches: otherDetaches });
+                        var isOtherAttachedAtStart = Object.keys(otherShip.attached || {}).length > 0;
+                        if (isOtherAttachedAtStart) {
+                            var otherDetaches = hasDetachOrder(otherShip);
+                            podsToSync.push({ ship: otherShip, detaches: otherDetaches });
+                        }
                     }
                 });
             }
@@ -259,8 +268,111 @@ window.ReplayAnimationStrategy = function () {
             return 0;
         });
 
+        // Per-ship map of movement IDs already animated (to avoid duplicates across passes)
+        var handledMovementsByShip = {};
+
+        // Pass 1: Hex Targeted PreFire (always first, matching animateWeaponFire ordering)
+        var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
+        // Track which hex fire order IDs are handled in prefire so animateWeaponFire can skip them
+        var handledHexFireOrderIds = {};
+
         shipList.forEach(function (ship) {
-            var handledMovements = []; // Track movements animated in the incoming fire block
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+
+            // Accept "prefiring" type, or "ballistic" with preFires weapon (e.g. GraviticMine):
+            // the DB may not persist the type promotion from "ballistic" → "prefiring".
+            var hexes = firesForThisShip.filter(f => f.fireOrder?.type == "prefiring" || (f.fireOrder?.type == "ballistic" && f.weapon?.preFires));
+
+            if (hexes.length > 0) {
+                var hexAnim = new HexTargetedWeaponFireAnimation(
+                    time,
+                    this.movementAnimations,
+                    this.shipIconContainer,
+                    this.turn,
+                    this.emitterContainer,
+                    logAnimation,
+                    hexes
+                );
+
+                this.animations.push(hexAnim);
+
+                var hexAnimEndTime = time + hexAnim.getDuration();
+                var hexPreFireMoveTime = hexAnimEndTime;
+
+                // Hex-targeted preFire orders cause the shooting ship to teleport/move.
+                // If this ship has preFire movements, animate them after the hex animation.
+                var shooterIcon = this.shipIconContainer.getByShip(ship);
+                if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
+                    // Get the starting state for this ship (end of normal movement on this turn)
+                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
+                    if (!startBase) {
+                        startBase = shooterIcon.getLastMovementOnTurn(this.turn);
+                    }
+                    if (startBase) {
+                        var currentStartState = {
+                            position: new hexagon.Offset(startBase.position),
+                            facing: startBase.facing,
+                            heading: startBase.heading
+                        };
+
+                        if (!handledMovementsByShip[ship.id]) {
+                            handledMovementsByShip[ship.id] = [];
+                        }
+
+                        // Only animate preFire moves caused by THIS ship's own hex-targeted
+                        // weapons (e.g. self-displacement like Hyperspace Jump). Moves caused
+                        // by another ship's per-target effect — e.g. a GraviticMine pulling
+                        // its own launcher — have movement.value pointing to that effect's
+                        // fire order, which isn't in `hexes`. Let Pass 2 handle them so the
+                        // explosion against the moved ship plays before the move (matching
+                        // the behaviour seen for non-launcher pulled ships).
+                        var ownHexFireOrderIds = hexes.map(function (h) { return h.fireOrder ? h.fireOrder.id : null; });
+
+                        for (var i in shooterIcon.preFireMovements) {
+                            var movement = shooterIcon.preFireMovements[i];
+
+                            if (ownHexFireOrderIds.indexOf(movement.value) === -1) {
+                                continue;
+                            }
+
+                            var endState = {
+                                position: new hexagon.Offset(movement.position),
+                                facing: movement.facing,
+                                heading: movement.heading
+                            };
+
+                            var preFireMoveAnimation = new PreFireMovementAnimation(
+                                shooterIcon,
+                                currentStartState,
+                                endState,
+                                hexPreFireMoveTime,
+                                this.moveHexDuration * 1.5 // Short but visible
+                            );
+
+                            this.animations.push(preFireMoveAnimation);
+
+                            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                                hexPreFireMoveTime += preFireMoveAnimation.getDuration();
+                            }
+
+                            currentStartState = endState;
+                            handledMovementsByShip[ship.id].push(movement.id);
+                        }
+                    }
+                }
+
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    time = Math.max(hexAnimEndTime, hexPreFireMoveTime);
+                }
+            }
+
+        }, this);
+
+        // Pass 2: Incoming Direct PreFire (Standard Exchanges)
+        shipList.forEach(function (ship) {
+            var handledMovements = handledMovementsByShip[ship.id] || [];
             var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
                 ship,
                 this.shipIconContainer,
@@ -297,6 +409,11 @@ window.ReplayAnimationStrategy = function () {
                     for (var i in preFireMovements) {
                         var movement = preFireMovements[i]; // Look through movements identified as preFire
 
+                        // Skip movements already animated in the hex-targeted pass
+                        if (handledMovements.indexOf(movement.id) !== -1) {
+                            continue;
+                        }
+
                         // Try to find a matching fire order for this movement.id
                         var scheduled = false;
                         for (var k in fireOrders) {
@@ -327,7 +444,6 @@ window.ReplayAnimationStrategy = function () {
 
                                     currentStartState = endState;
                                     scheduled = true;
-                                    handledMovements.push(movement.id); // Mark as handled
                                     break;
                                 }
                             }
@@ -341,83 +457,6 @@ window.ReplayAnimationStrategy = function () {
 
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
                 time = Math.max(time + perShipAnimation.getDuration(), preFireMoveTime);
-            }
-
-            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
-            var firesForThisShip = allHexBallistics.filter(function (f) {
-                return f && (f.shooter === ship || f.shooter === ship.id);
-            });
-
-            var hexes = firesForThisShip.filter(f => f.fireOrder?.type == "prefiring");
-
-            if (hexes.length > 0) {
-                var hexAnim = new HexTargetedWeaponFireAnimation(
-                    time,
-                    this.movementAnimations,
-                    this.shipIconContainer,
-                    this.turn,
-                    this.emitterContainer,
-                    logAnimation,
-                    hexes
-                );
-
-                this.animations.push(hexAnim);
-
-                var hexAnimEndTime = time + hexAnim.getDuration();
-                var hexPreFireMoveTime = hexAnimEndTime;
-
-                // Hex-targeted preFire orders cause the shooting ship to teleport/move.
-                // If this ship has preFire movements, animate them after the hex animation.
-                var shooterIcon = this.shipIconContainer.getByShip(ship);
-                if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
-                    // Get the starting state for this ship (end of normal movement on this turn)
-                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
-                    if (!startBase) {
-                        startBase = shooterIcon.getLastMovementOnTurn(this.turn);
-                    }
-                    if (startBase) {
-                        var currentStartState = {
-                            position: new hexagon.Offset(startBase.position),
-                            facing: startBase.facing,
-                            heading: startBase.heading
-                        };
-
-                        // Animate all preFire movements for this ship
-                        for (var i in shooterIcon.preFireMovements) {
-                            var movement = shooterIcon.preFireMovements[i];
-
-                            if (handledMovements.indexOf(movement.id) !== -1) {
-                                continue;
-                            }
-
-                            var endState = {
-                                position: new hexagon.Offset(movement.position),
-                                facing: movement.facing,
-                                heading: movement.heading
-                            };
-
-                            var preFireMoveAnimation = new PreFireMovementAnimation(
-                                shooterIcon,
-                                currentStartState,
-                                endState,
-                                hexPreFireMoveTime,
-                                this.moveHexDuration * 1.5 // Short but visible
-                            );
-
-                            this.animations.push(preFireMoveAnimation);
-
-                            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                                hexPreFireMoveTime += preFireMoveAnimation.getDuration();
-                            }
-
-                            currentStartState = endState;
-                        }
-                    }
-                }
-
-                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                    time = Math.max(hexAnimEndTime, hexPreFireMoveTime);
-                }
             }
 
         }, this);
@@ -446,7 +485,8 @@ window.ReplayAnimationStrategy = function () {
                 return f && (f.shooter === ship || f.shooter === ship.id);
             });
 
-            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring");
+            // Exclude "prefiring" and preFires "ballistic" — those are handled in animateWeaponPreFire.
+            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring" && !(f.fireOrder?.type == "ballistic" && f.weapon?.preFires));
 
             if (normals.length > 0) {
                 var hexAnim = new HexTargetedWeaponFireAnimation(

@@ -516,6 +516,7 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
             var attachedWeaponHidden = false;
+            var clawBlindSpot = false;            
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
@@ -556,7 +557,13 @@ window.weaponManager = {
                                 attachedWeaponHidden = true; // Prevent pods and ships from firing weapons at each others.
                             }
                         }
+                        if (!weapon.isBoardingAction && weaponManager.isTargetInGrapplingClawBlindSpot(selectedShip, ship)) {
+                            clawBlindSpot = true;
+                        }                        
                     }
+                    
+
+
 
                     if (blockedLosHex.length > 0 && !loSBlocked) {
                         var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -571,7 +578,7 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (ship.Huge > 0 || attachedUnitHidden || attachedWeaponHidden) { //Cannot Target larger terrain or POds that are attached to non-facing sides
+                    if (ship.Huge > 0 || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
@@ -726,6 +733,7 @@ window.weaponManager = {
 
     isOnWeaponArc: function isOnWeaponArc(shooter, target, weapon) {
         if (weapon.splitArcs) return weaponManager.isOnWeaponArcMultiple(shooter, target, weapon);
+
         //console.log("is on arc");
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
@@ -778,7 +786,29 @@ window.weaponManager = {
         return false;
     },
 
-
+    isTargetInGrapplingClawBlindSpot: function isTargetInGrapplingClawBlindSpot(shooter, target) {
+        if (shooter.flight) return false;
+        if (!shooter.attached || Object.keys(shooter.attached).length === 0) return false;
+        
+        var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
+        var shooterFacing = shipManager.getShipHeadingAngle(shooter);
+        
+        for (var i in shooter.systems) {
+            var system = shooter.systems[i];
+            if (system.name === "GrapplingClaw" && !shipManager.systems.isDestroyed(shooter, system)) {
+                // If this claw is currently attached to something
+                if (system.hostShipId && system.hostShipId > 0) {
+                    var arcs = shipManager.systems.getArcs(shooter, system);
+                    var start = mathlib.addToDirection(arcs.start, shooterFacing);
+                    var end = mathlib.addToDirection(arcs.end, shooterFacing);
+                    if (mathlib.isInArc(targetCompassHeading, start, end)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    },
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;

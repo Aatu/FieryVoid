@@ -235,6 +235,11 @@ window.ReplayPhaseStrategy = function () {
 
     function startReplayOrRequestGamedata() {
         if (this.replayTurn === this.gamedata.turn) {
+            //Refresh ballistic icons with replay flag so weapons suppressed in live phase 3
+            //(e.g. GraviticMine, see BallisticIconContainer createBallisticIcon) appear in the replay
+            //without needing the user to tab away and back.
+            this.allBallistics = weaponManager.getAllFireOrdersForAllShipsForTurn(this.gamedata.turn, 'ballistic');
+            this.ballisticIconContainer.consumeGamedata(this.gamedata, this.shipIconContainer, this.allBallistics);
             this.changeAnimationStrategy(new ReplayAnimationStrategy(this.gamedata, this.shipIconContainer, webglScene.scene));
             this.replayUI.setTurn(this.replayTurn);
         } else {

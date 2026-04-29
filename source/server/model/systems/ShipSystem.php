@@ -713,7 +713,7 @@ class ShipSystem {
 		$attackerHits = min($attackerHits, $currentMarines);
 		$defenderHits = min($defenderHits, count($attackers));
 
-		$newFireOrder->pubnotes .= "<br><b>Boarding Combat Summary: </b>" . count($attackers) . " attackers eliminated $attackerHits defenders. $currentMarines defenders eliminated $defenderHits attackers.";
+		$newFireOrder->pubnotes .= "<br><b>Boarding Combat Summary: </b>" . count($attackers) . " attackers eliminated $attackerHits defender(s). $currentMarines defenders eliminated $defenderHits attacker(s).";
 
 		// Eliminate defenders
 		for ($i = 0; $i < $attackerHits; $i++) {

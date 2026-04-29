@@ -1394,10 +1394,10 @@ getActiveShipName: function getActiveShipName() {
         if (gamedata.gamephase == 4) return "FINAL ORDERS";
 
         if (gamedata.gamephase == -1) {
-            if (shipManager.playerHasDeployedAllShips(gamedata.thisplayer)) {
-                return "PRE-TURN ORDERS";
-            } else {
+            if (shipManager.hasShipsToDeployThisTurn(gamedata.thisplayer)) {
                 return "DEPLOYMENT";
+            } else {
+                return "PRE-TURN ORDERS";
             }
         }
 
