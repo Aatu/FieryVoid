@@ -3036,26 +3036,42 @@ class Mine extends OSAT{
     }
 
 
+    //Mines: signature reduces effective defense (more visible = easier to hit).
+    //Negative signature improves it (subtracting a negative). Floored at 0.
+    public function getEffectiveForwardDefense(){
+        return max(0, $this->forwardDefense - $this->signature);
+    }
+
+    public function getEffectiveSideDefense(){
+        return max(0, $this->sideDefense - $this->signature);
+    }
+
     public function getLocations(){
+        $effFwd  = $this->getEffectiveForwardDefense();
+        $effSide = $this->getEffectiveSideDefense();
+
         $locs = array();
 
-        $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 0, "min" => 330, "max" => 30,  "profile" => $effFwd);
+        $locs[] = array("loc" => 0, "min" => 30,  "max" => 150, "profile" => $effSide);
+        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $effFwd);
+        $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $effSide);
 
         return $locs;
     }
 
     public function stripForJson() {
         $strippedShip = parent::stripForJson();
+        $strippedShip->forwardDefense = $this->getEffectiveForwardDefense();
+        $strippedShip->sideDefense    = $this->getEffectiveSideDefense();
+
         if($this->detectedSignature !== -1){
             $strippedShip->signature = $this->signature; //Need to send updated Signature values for DEW mine weapons.
             if ($this->commandControl) $strippedShip->commandControl = $this->commandControl; //If true front end needs to know for firing checks.
-            //$strippedShip->multiSettings = $this->multiSettings;            
-        } 
+            //$strippedShip->multiSettings = $this->multiSettings;
+        }
         return $strippedShip;
-    }    
+    }
 
 }
 
