@@ -131,7 +131,7 @@ window.combatLog = {
 
             // If there's more than one shot, append the per-shot breakdown
             if (shotIndex > 2) {
-                tooltipText += "\n" + tooltipTextParts.join("\n");
+                tooltipText += "\n• " + tooltipTextParts.join("\n• ");
             }
 
             tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '"';
