@@ -59,6 +59,8 @@ window.combatLog = {
         var lowC = 100000;
         var highC = -100000;
         var notes = "";
+        var totalInterceptPenalty = 0;
+        var totalInterceptorsCount = 0;
         
         for (var a in orders){            
 
@@ -90,6 +92,16 @@ window.combatLog = {
             }
 
             if (fire.pubnotes) notes += fire.pubnotes + " ";
+
+            if (fire.notes) {
+                var match = fire.notes.match(/Interception: (\d+) sources:(\d+)/);
+                if (match) {
+                    var interceptPenalty = parseInt(match[1], 10);
+                    var interceptorsCount = parseInt(match[2], 10);
+                    if (interceptPenalty > totalInterceptPenalty) totalInterceptPenalty = interceptPenalty;
+                    if (interceptorsCount > totalInterceptorsCount) totalInterceptorsCount = interceptorsCount;
+                }
+            }
                         
         }
 
@@ -97,22 +109,29 @@ window.combatLog = {
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";
+        
+        var tooltipAttr = "";
+        if (totalInterceptorsCount > 0) {
+            var wWord = totalInterceptorsCount === 1 ? "weapon" : "weapons";
+            tooltipAttr = ' title="' + totalInterceptorsCount + ' intercepting ' + wWord + ' applied a -' + totalInterceptPenalty + '% hit chance penalty" style="cursor: help; "';
+        } else {
+            tooltipAttr = ' title="No interception" style="cursor: help; "';
+        }
+
         var chancetext = "";
         if (lowC !== 100000) {
-            if (lowC == highC) chancetext = "Chance to hit: " + lowC + "%";
-            else chancetext = "Chance to hit: " + lowC + "% - " + highC + "%";
+            if (lowC == highC) chancetext = "<span" + tooltipAttr + ">Chance to hit: " + lowC + "%</span>";
+            else chancetext = "<span" + tooltipAttr + ">Chance to hit: " + lowC + "% - " + highC + "%</span>";
         }
 
         if (!target) chancetext = "";
 
         var intertext = "";
-        //if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";
-		//if (shotsintercepted > 0) intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
 		if (shotsintercepted > 0){
 			if(ordersC != shots){
-			 	intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
+			 	intertext = ', <span' + tooltipAttr + '>' + ordersCintercepted + '(' + shotsintercepted + ') intercepted</span>';
 			}else{
-				if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";				
+				intertext = ', <span' + tooltipAttr + '>' + shotsintercepted + ' intercepted</span>';				
 			}	
 		}
 		
