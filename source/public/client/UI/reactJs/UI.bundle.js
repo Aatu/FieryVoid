@@ -1397,22 +1397,22 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
 `;class _M extends Lt.Component{handleBoost(){this.canBoost()&&(shipManager.power.clickPlus(this.props.ship,this.props.system),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}handleDeBoost(){this.canDeBoost()&&(shipManager.power.clickMinus(this.props.ship,this.props.system),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}handleActivate(){this.canActivate()&&(this.props.system.doActivate(),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}handleDeactivate(){this.canDeactivate()&&(this.props.system.doDeactivate(),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}canBoost(){const{ship:l,system:f}=this.props;return f.boostable&&gamedata.gamephase===1&&shipManager.power.canBoost(l,f)}canDeBoost(){const{ship:l,system:f}=this.props;return gamedata.gamephase===1&&!!shipManager.power.getBoost(f)}canActivate(){return this.props.system.canActivate()}canDeactivate(){return this.props.system.canDeactivate()}render(){const{ship:l,system:f}=this.props,v=shipManager.power.getBoost(f),b=f.active;return C.jsxs(DM,{children:[C.jsx(MM,{children:"Power Capacitor"}),f.boostable&&C.jsxs(f1,{children:[C.jsx(d1,{children:"Open Petals"}),C.jsxs(p1,{children:[C.jsx(xv,{onClick:()=>this.handleDeBoost(),disabled:!this.canDeBoost(),$active:v===0,children:"OFF"}),C.jsx(xv,{onClick:()=>this.handleBoost(),disabled:!this.canBoost(),$active:v>0,$variant:"activate",children:"ON"})]})]}),C.jsxs(f1,{children:[C.jsx(d1,{children:"Double Recharge"}),C.jsxs(p1,{children:[C.jsx(xv,{onClick:()=>this.handleDeactivate(),disabled:!this.canDeactivate(),$active:!b,children:"OFF"}),C.jsx(xv,{onClick:()=>this.handleActivate(),disabled:!this.canActivate(),$active:b,$variant:"activate",children:"ON"})]})]})]})}}const OM=F.div`
     display: flex;
     flex-direction: column;
-    margin-top: 0px;
+    margin-top: 1px;
     width: 100%;
     min-width: 160px;
     opacity: 0.95 !important;
-    background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #496791;
+    background-color: ${u=>u.$isWeapon?"rgba(32, 0, 32, 0.9)":"rgba(16, 26, 38, 0.9)"};
+    border: 1px solid ${u=>u.$isWeapon?"#b43131":"#587e8d"};
 `,AM=F.div`
     padding: 3px;
-    background-color: #4967919a;
-    border: 1px solid #496791;
-    border-bottom: 1px solid #496791;    
-    color: #deebff;
+    background-color: ${u=>u.$isWeapon?"#571616":"#215a7a"};
+    border: 1px solid ${u=>u.$isWeapon?"#b43131":"#587e8d"};
+    border-bottom: 1px solid ${u=>u.$isWeapon?"#b43131":"#587e8d"};
+    color: ${u=>u.$isWeapon?"#f2f2f2":"#deebff"};
     text-align: center;
     font-size: 11px;
     margin-bottom: 2px;
-    opacity: 0.95 !important;     
+    opacity: 1 !important;
     font-weight: bold;
 `,jM=F.div`
     display: flex;
@@ -1464,18 +1464,38 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
         &:hover { background: #203348; color: #deebff; }
     `}
 
-    ${u=>(u.$active||u.$variant==="activate"&&u.$isWeapon)&&u.$variant==="activate"&&`
-        background: #1b5e20; 
+    ${u=>(u.$active||u.$variant==="activate"&&u.$isWeapon)&&u.$variant==="activate"&&!u.$isWeapon&&`
+        background: #1b5e20;
         color: white;
         border: 1px solid #4caf50;
         opacity: 1;
 
         &:hover {
-            background: #2e7d32; 
-            border: 1px solid #66bb6a;      
+            background: #2e7d32;
+            border: 1px solid #66bb6a;
             color: #ffffff;
             opacity: 1;
         }
+    `}
+
+    ${u=>u.$variant==="activate"&&u.$isWeapon&&`
+        background: #7a3b00e5;
+        color: #fff3e0;
+        border: 1px solid #ff9900b6;
+        opacity: 1;
+
+        &:hover {
+            background: #b35900;
+            border: 1px solid #ffb74d;
+            color: #ffffff;
+            opacity: 1;
+        }
+
+        ${u.$active?`
+            background: #b35900;
+            border: 1px solid #ffb74d;
+            box-shadow: 0 0 5px #ff9800;
+        `:""}
     `}
 
     ${u=>u.$active&&u.$variant==="deactivate"&&`
@@ -1491,7 +1511,7 @@ See https://styled-components.com/docs/faqs#why-am-i-getting-a-warning-about-sev
             opacity: 1;
         }
     `}
-`;class NM extends Lt.Component{handleActivate(){this.canActivate()&&(this.props.system.doActivate(),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}handleDeactivate(){this.canDeactivate()&&(this.props.system.doDeactivate(),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}canActivate(){return this.props.system.canActivate&&typeof this.props.system.canActivate=="function"&&this.props.system.canActivate()}canDeactivate(){return this.props.system.canDeactivate&&typeof this.props.system.canDeactivate=="function"&&this.props.system.canDeactivate()}render(){const{ship:l,system:f}=this.props,v=f.active||f.weapon&&weaponManager.hasFiringOrder(l,f),b=f.weapon?"Fire":"Activate",T=f.weapon?"Don't Fire":"Deactivate";return C.jsxs(OM,{children:[C.jsx(AM,{children:f.displayName}),C.jsx(jM,{children:C.jsxs(LM,{children:[C.jsx(h1,{onClick:()=>this.handleActivate(),disabled:!this.canActivate(),$active:v,$variant:"activate",$isWeapon:f.weapon,children:b}),!f.weapon&&C.jsx(h1,{onClick:()=>this.handleDeactivate(),disabled:!this.canDeactivate(),$active:!v,$variant:"deactivate",children:T})]})})]})}}const zM=F.div`
+`;class NM extends Lt.Component{handleActivate(){this.canActivate()&&(this.props.system.doActivate(),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}handleDeactivate(){this.canDeactivate()&&(this.props.system.doDeactivate(),this.forceUpdate(),webglScene.customEvent("SystemDataChanged",{ship:this.props.ship,system:this.props.system}))}canActivate(){return this.props.system.canActivate&&typeof this.props.system.canActivate=="function"&&this.props.system.canActivate()}canDeactivate(){return this.props.system.canDeactivate&&typeof this.props.system.canDeactivate=="function"&&this.props.system.canDeactivate()}render(){const{ship:l,system:f}=this.props,v=f.active||f.weapon&&weaponManager.hasFiringOrder(l,f),b=f.weapon?"Fire":"Activate",T=f.weapon?"Don't Fire":"Deactivate";return C.jsxs(OM,{$isWeapon:f.weapon,children:[C.jsx(AM,{$isWeapon:f.weapon,children:f.displayName}),C.jsx(jM,{children:C.jsxs(LM,{children:[C.jsx(h1,{onClick:()=>this.handleActivate(),disabled:!this.canActivate(),$active:v,$variant:"activate",$isWeapon:f.weapon,children:b}),!f.weapon&&C.jsx(h1,{onClick:()=>this.handleDeactivate(),disabled:!this.canDeactivate(),$active:!v,$variant:"deactivate",children:T})]})})]})}}const zM=F.div`
     display: flex;
     flex-direction: column;
     margin-top: 0px;
