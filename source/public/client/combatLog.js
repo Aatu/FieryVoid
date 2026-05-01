@@ -126,7 +126,7 @@ window.combatLog = {
         var tooltipAttr = "";
         if (totalInterceptorsCount > 0) {
             var wWord = totalInterceptorsCount === 1 ? "shot" : "shots";
-            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied -' + totalInterceptPenalty + '% hit penalty across all shots.';
+            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied -' + totalInterceptPenalty + '% total hit penalty.';
             var tooltipText = summaryText;
 
             // If there's more than one shot, append the per-shot breakdown
