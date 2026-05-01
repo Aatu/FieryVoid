@@ -66,7 +66,7 @@ window.SelectFromShips = function () {
     };
 
     function create() {
-        console.log("CREATE select form ships", this.ships)
+        //console.log("CREATE select form ships", this.ships)
         
         // --- INJECT CUSTOM "DEPLOY HERE" BUTTON DURING DEPLOYMENT PHASE ---
         if (gamedata.gamephase == -1 && this.phaseStrategy.selectedShip) {
