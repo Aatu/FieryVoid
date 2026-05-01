@@ -257,7 +257,7 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
     // Greedy clique fill: every accepted ship must be within 1 hex of every other.
     var accepted = [{ ship: firingShip, pos: firingShipPos }];
     var partners = [];
-    var needed = myOrder.firingMode - 1;
+    var needed = myOrder.firingMode;
     for (var c = 0; c < candidates.length && partners.length < needed; c++) {
         var cand = candidates[c];
         var fits = true;
@@ -271,11 +271,12 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
 
     var line;
     if (partners.length === 0) {
-        line = "No eligible partner weapons visible - will fire Single";
+        line = "No eligible partner weapons visible - will fire as single shot";
     } else {
         // Group partner weapons by ship so multiple PCs on the same ship show as "ShipName x2"
         var counts = {};
         var order = [];
+        var currentWeapons = partners.length+1; 
         partners.forEach(function(p) {
             if (counts[p.ship.name] === undefined) order.push(p.ship.name);
             counts[p.ship.name] = (counts[p.ship.name] || 0) + 1;
@@ -285,7 +286,8 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
         }).join(', ');
         var actualMode = partners.length + 1;
         if (actualMode < myOrder.firingMode) {
-            line = partners.length + " of " + needed + " partner weapons (" + names + ") - will downgrade to " + actualMode + "combined";
+            //line = currentWeapons + " of " + needed + " concentrators available [" + names + "] - will downgrade to " + actualMode + "combined";
+            line = currentWeapons + " of " + needed + " concentrators available - will downgrade to " + actualMode + "combined";            
         } else {
             line = "Will combine with: " + names;
         }
