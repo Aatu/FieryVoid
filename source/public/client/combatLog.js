@@ -126,7 +126,7 @@ window.combatLog = {
         var tooltipAttr = "";
         if (totalInterceptorsCount > 0) {
             var wWord = totalInterceptorsCount === 1 ? "shot" : "shots";
-            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied -' + totalInterceptPenalty + '% hit penalty across all shots';
+            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied -' + totalInterceptPenalty + '% hit penalty across all shots.';
             var tooltipText = summaryText;
 
             // If there's more than one shot, append the per-shot breakdown
@@ -136,7 +136,7 @@ window.combatLog = {
 
             tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '"';
         } else {
-            tooltipAttr = ' class="nointercept-tooltip" data-tooltip="No interception"';
+            tooltipAttr = '';
         }
 
         var chancetext = "";
@@ -150,9 +150,9 @@ window.combatLog = {
         var intertext = "";
         if (shotsintercepted > 0) {
             if (ordersC != shots) {
-                intertext = ', <span' + tooltipAttr + '>' + ordersCintercepted + '(' + shotsintercepted + ') intercepted</span>';
+                intertext = ', <span>' + ordersCintercepted + '(' + shotsintercepted + ') intercepted</span>';
             } else {
-                intertext = ', <span' + tooltipAttr + '>' + shotsintercepted + ' intercepted</span>';
+                intertext = ', <span>' + shotsintercepted + ' intercepted</span>';
             }
         }
 
