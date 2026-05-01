@@ -3599,10 +3599,11 @@ class ParticleConcentrator extends Raking{
 	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
-	
+
 	public $isCombined = false; //is being combined with other weapon
 	public $alreadyConsidered = false; //already considered - either being fired or combined
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
+	public $presetSubordinates = null; //pre-registered by a further weapon that yielded primary role to this (closest) weapon
 	
 	
 	    public function setSystemDataWindow($turn){
@@ -3648,58 +3649,110 @@ class ParticleConcentrator extends Raking{
 		$target = $gamedata->getShipById($fireOrder->targetid);
 
 		if (($fireOrder->firingMode > 1) && ($firingShip !== null) && ($target !== null)){
-			//B5W rule: combining ships must all be within 1 hex of each other and hit the same side of the target.
-			$primarySide = $target->getHitSection($firingShip, $gamedata->turn);
-			$shipsNearby = $gamedata->getShipsInDistance($firingShip, 1);
 
-			//Collect candidate orders matching target/mode/section, sorted by distance to target so the closest get priority.
-			//Note: the firing ship itself is intentionally included - multiple Concentrators on the same ship can combine.
-			//The alreadyConsidered flag prevents the primary weapon from matching itself.
-			$candidates = array();
-			foreach($shipsNearby as $otherShip) {
-				$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
-				foreach($allOrders as $subOrder) {
-					if ($subOrder->type !== 'normal') continue;
-					if ($subOrder->targetid != $fireOrder->targetid) continue;
-					if ($subOrder->firingMode != $fireOrder->firingMode) continue;
-					$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
-					if (!($subWeapon instanceof ParticleConcentrator)) continue;
-					if ($subWeapon->alreadyConsidered) continue;
-					$candidateSide = $target->getHitSection($otherShip, $gamedata->turn);
-					if ($candidateSide !== $primarySide) continue;
-					$candidates[] = array(
-						'order' => $subOrder,
-						'ship' => $otherShip,
-						'distToTarget' => $otherShip->getHexPos()->distanceTo($target->getHexPos()),
-					);
+			if ($this->presetSubordinates !== null) {
+				//Pre-designated primary: a further weapon that processed first yielded the primary role to us.
+				$subordinateOrders = $this->presetSubordinates;
+				$this->presetSubordinates = null;
+				$subordinateOrdersNo = count($subordinateOrders);
+				if ($subordinateOrdersNo < ($fireOrder->firingMode - 1)){
+					$fireOrder->firingMode = $subordinateOrdersNo + 1;
 				}
-			}
-			usort($candidates, function($a, $b) {
-				return $a['distToTarget'] - $b['distToTarget'];
-			});
+			} else {
+				//B5W rule: combining ships must all be within 1 hex of each other and hit the same side of the target.
+				$primarySide = $target->getHitSection($firingShip, $gamedata->turn);
+				$shipsNearby = $gamedata->getShipsInDistance($firingShip, 1);
 
-			//Greedy clique fill - each accepted ship must be within 1 hex of every already-accepted ship.
-			$acceptedShips = array($firingShip);
-			foreach($candidates as $cand){
-				if ($subordinateOrdersNo >= ($fireOrder->firingMode - 1)) break;
-				$candPos = $cand['ship']->getHexPos();
-				$fits = true;
-				foreach($acceptedShips as $acc){
-					if ($candPos->distanceTo($acc->getHexPos()) > 1){
-						$fits = false;
-						break;
+				//Collect candidate orders matching target/mode/section, sorted by distance to target so the closest get priority.
+				//Note: the firing ship itself is intentionally included - multiple Concentrators on the same ship can combine.
+				//The alreadyConsidered flag prevents the primary weapon from matching itself.
+				$candidates = array();
+				foreach($shipsNearby as $otherShip) {
+					$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
+					foreach($allOrders as $subOrder) {
+						if ($subOrder->type !== 'normal') continue;
+						if ($subOrder->targetid != $fireOrder->targetid) continue;
+						if ($subOrder->firingMode != $fireOrder->firingMode) continue;
+						$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
+						if (!($subWeapon instanceof ParticleConcentrator)) continue;
+						if ($subWeapon->alreadyConsidered) continue;
+						$candidateSide = $target->getHitSection($otherShip, $gamedata->turn);
+						if ($candidateSide !== $primarySide) continue;
+						$candidates[] = array(
+							'order' => $subOrder,
+							'ship' => $otherShip,
+							'distToTarget' => $otherShip->getHexPos()->distanceTo($target->getHexPos()),
+						);
 					}
 				}
-				if (!$fits) continue;
-				$acceptedShips[] = $cand['ship'];
-				$subordinateOrders[] = $cand['order'];
-				$subordinateOrdersNo++;
+				usort($candidates, function($a, $b) {
+					return $a['distToTarget'] - $b['distToTarget'];
+				});
+
+				//Greedy clique fill - each accepted ship must be within 1 hex of every already-accepted ship.
+				$acceptedShips = array($firingShip);
+				foreach($candidates as $cand){
+					if ($subordinateOrdersNo >= ($fireOrder->firingMode - 1)) break;
+					$candPos = $cand['ship']->getHexPos();
+					$fits = true;
+					foreach($acceptedShips as $acc){
+						if ($candPos->distanceTo($acc->getHexPos()) > 1){
+							$fits = false;
+							break;
+						}
+					}
+					if (!$fits) continue;
+					$acceptedShips[] = $cand['ship'];
+					$subordinateOrders[] = $cand['order'];
+					$subordinateOrdersNo++;
+				}
+
+				//If not enough weapons could be combined, downgrade firing mode to what was actually achievable.
+				if ($subordinateOrdersNo < ($fireOrder->firingMode - 1)){
+					$fireOrder->firingMode = $subordinateOrdersNo + 1;
+				}
+
+				//Yield to closest: if a selected subordinate is closer to the target than we are, promote it to primary.
+				//We become a subordinate, pre-register the list on the closer weapon, and return.
+				if ($subordinateOrdersNo > 0) {
+					$primaryDist = $firingShip->getHexPos()->distanceTo($target->getHexPos());
+					$closestDist = $primaryDist;
+					$closestIndex = null;
+					foreach ($subordinateOrders as $idx => $subOrder) {
+						$subShip = $gamedata->getShipById($subOrder->shooterid);
+						$d = $subShip->getHexPos()->distanceTo($target->getHexPos());
+						if ($d < $closestDist) { $closestDist = $d; $closestIndex = $idx; }
+					}
+					if ($closestIndex !== null) {
+						$truePrimaryOrder = $subordinateOrders[$closestIndex];
+						$truePrimaryShip  = $gamedata->getShipById($truePrimaryOrder->shooterid);
+						$truePrimaryWeapon = $truePrimaryShip->getSystemById($truePrimaryOrder->weaponid);
+						// Build subordinate list for the true primary: swap promoted slot with self's order.
+						$newSubList = $subordinateOrders;
+						$newSubList[$closestIndex] = $fireOrder;
+						$truePrimaryWeapon->presetSubordinates = array_values($newSubList);
+						// Lock all pre-registered subordinates (including self) so none claims primary.
+						foreach ($newSubList as $lockedOrder) {
+							$lockedShip   = $gamedata->getShipById($lockedOrder->shooterid);
+							$lockedWeapon = $lockedShip->getSystemById($lockedOrder->weaponid);
+							$lockedWeapon->isCombined = true;
+							$lockedWeapon->alreadyConsidered = true;
+							$lockedWeapon->doNotIntercept = true;
+						}
+						// Mark own fire order as technical subordinate.
+						$this->isCombined = true;
+						$fireOrder->chosenLocation = 0;
+						$fireOrder->needed = 0;
+						$fireOrder->shots = 0;
+						$fireOrder->notes = "Technical fire order - weapon combined into another shot. ";
+						$fireOrder->updated = true;
+						$this->changeFiringMode($fireOrder->firingMode);
+						return;
+					}
+				}
 			}
 
-			//If not enough weapons could be combined, downgrade firing mode to what was actually achievable.
-			if ($subordinateOrdersNo < ($fireOrder->firingMode - 1)){
-				$fireOrder->firingMode = $subordinateOrdersNo + 1;
-			}
+			$shipsWithPubnotes = array($firingShip->id);
 
 			//Mark subordinates as combined, capture nominal hit chance and distance, then null their fire orders.
 			foreach($subordinateOrders as $subOrder){
@@ -3708,7 +3761,12 @@ class ParticleConcentrator extends Raking{
 				$subWeapon->isCombined = true;
 				$subWeapon->alreadyConsidered = true;
 				$subWeapon->doNotIntercept = true;
-				$subOrder->pubnotes .= 'Combined into another shot. ';
+				
+				if (!in_array($otherShip->id, $shipsWithPubnotes)) {
+					$subOrder->pubnotes .= ' Shots were combined into a stronger attack.';
+					$shipsWithPubnotes[] = $otherShip->id;
+				}
+
 				$subOrder->firingMode = $fireOrder->firingMode;
 
 				$subWeapon->testRun = true;
@@ -3759,6 +3817,7 @@ class ParticleConcentrator extends Raking{
 				$fireOrder->notes .= 'At least one combining ship lacks lock-on; range penalty doubled. ';
 			}
 			$fireOrder->notes .= 'Combined shot from ' . $fireOrder->firingMode . ' Particle Concentrators (closest-range hit chance, averaged EW). ';
+			$fireOrder->pubnotes .= ' Shots were combined into a stronger attack.';
 		}
 	}//endof function calculateHitBase
 	
