@@ -39,9 +39,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
             var extraTime = 0;
 
+            //On balance let's not exclude Log entries for concrator type weapons, see the note these were combined is informative.
+            //var totalGroupShots = group.reduce(function (sum, entry) { return sum + entry.shots; }, 0);
+            //if (totalGroupShots > 0) {
             this.logAnimation.addLogEntryFire(group.map(function (entry) {
                 return entry.fireOrder;
             }), this.time + this.duration);
+            //}
 
             var durations = group.map(function (group) {
                 extraTime += Math.random() * 100 + 300;
