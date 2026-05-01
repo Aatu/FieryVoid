@@ -98,8 +98,8 @@ window.combatLog = {
                 if (match) {
                     var interceptPenalty = parseInt(match[1], 10);
                     var interceptorsCount = parseInt(match[2], 10);
-                    if (interceptPenalty > totalInterceptPenalty) totalInterceptPenalty = interceptPenalty;
-                    if (interceptorsCount > totalInterceptorsCount) totalInterceptorsCount = interceptorsCount;
+                    totalInterceptPenalty += interceptPenalty;
+                    totalInterceptorsCount += interceptorsCount;
                 }
             }
 
@@ -112,8 +112,8 @@ window.combatLog = {
 
         var tooltipAttr = "";
         if (totalInterceptorsCount > 0) {
-            var wWord = totalInterceptorsCount === 1 ? "weapon" : "weapons";
-            var tooltipText = totalInterceptorsCount + ' intercepting ' + wWord + ' applied a -' + totalInterceptPenalty + '% hit chance penalty';
+            var wWord = totalInterceptorsCount === 1 ? "shot" : "shots";
+            var tooltipText = totalInterceptorsCount + ' intercepting ' + wWord + ' applied -' + totalInterceptPenalty + '% hit chance penalty across all shots';
             tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '" title="' + tooltipText + '"';
         } else {
             tooltipAttr = ' class="intercept-tooltip" data-tooltip="No interception" title="No interception"';
