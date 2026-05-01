@@ -233,8 +233,19 @@ const getCriticals = (system) => {
 };
 
 const getEntry = (header, value, key) => {
-    if (value && value.replace) {
-        value = value.replace(/<br>/gm, "\n");
+    if (typeof value === 'string' && value.indexOf('<br>') !== -1) {
+        const parts = value.split('<br>');
+        return (
+            <Entry key={key}>
+                <Header>{header}: </Header>
+                {parts.map((part, i) => (
+                    <React.Fragment key={i}>
+                        {i > 0 && <br />}
+                        {part}
+                    </React.Fragment>
+                ))}
+            </Entry>
+        );
     }
 
     return (
