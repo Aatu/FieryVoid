@@ -116,6 +116,7 @@ export default class FiringModeSelector extends React.Component {
                 <SelectorContainer>
                     {modeList}
                 </SelectorContainer>
+                {this.props.children}
             </Container>
         );
     }
