@@ -84,15 +84,12 @@ window.combatLog = {
             weaponManager.getDamagesCausedBy(fire, damages, ships);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
-            //if (fire.shots > 0){ //otherwise shot is purely technical ... BUT show it too!
-                if (needed < lowC)
-                lowC = needed;
-                if (needed > highC)
-                highC = needed;
+            if (fire.shots > 0){ //ignore hit chance of purely technical fire orders
+                if (needed < lowC) lowC = needed;
+                if (needed > highC) highC = needed;
+            }
 
-                if (fire.pubnotes)
-                notes += fire.pubnotes + " ";
-            //}
+            if (fire.pubnotes) notes += fire.pubnotes + " ";
                         
         }
 
@@ -101,7 +98,10 @@ window.combatLog = {
 
         var counttext = count > 1 ? count + "x " : "";
         var chancetext = "";
-        if (lowC == highC) chancetext = "Chance to hit: " + lowC + "%";else chancetext = "Chance to hit: " + lowC + "% - " + highC + "%";
+        if (lowC !== 100000) {
+            if (lowC == highC) chancetext = "Chance to hit: " + lowC + "%";
+            else chancetext = "Chance to hit: " + lowC + "% - " + highC + "%";
+        }
 
         if (!target) chancetext = "";
 
