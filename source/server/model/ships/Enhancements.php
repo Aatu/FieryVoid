@@ -2402,6 +2402,7 @@ class Enhancements{
 
 						case 'MINE_SIGN': //Improved signature for mines
 							$strippedShip->signature = $ship->signature;
+							$strippedShip->detectedSignature = $ship->detectedSignature;							
 							break;								
 
 						case 'IPSH_EETH': //Ipsha Eethan Barony refit: +2 free thrust, +25% available power (round up), +0.1 turn delay, -5 Initiative, +4 critical roll modifier for Reactor and Engine
