@@ -160,6 +160,10 @@ PakmaraPlasmaWeb.prototype.initializationUpdate = function () {
 	return this;
 }	
 
+PakmaraPlasmaWeb.prototype.hasMaxBoost = function () {
+	return this.maxBoostLevel;
+};
+
 PakmaraPlasmaWeb.prototype.clearBoost = function () {
     for (var i in system.power) {
         var power = system.power[i];
