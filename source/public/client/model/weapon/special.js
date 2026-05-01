@@ -201,7 +201,6 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
     var targetPos = shipManager.getShipPosition(target);
     var primarySides = weaponManager.getShipHittingSide(firingShip, target);
 
-    // Strict same-side match: hit-section arrays must be identical (under-promises vs server).
     var sameSides = function(a, b) {
         if (!a || !b || a.length !== b.length) return false;
         for (var k = 0; k < a.length; k++) {
@@ -210,10 +209,12 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
         return true;
     };
 
+    // Firing ship included: multiple Concentrators on the same ship can combine.
+    // Primary weapon is skipped by object identity below.
     var candidates = [];
     for (var s in gamedata.ships) {
         var otherShip = gamedata.ships[s];
-        if (!otherShip || otherShip.id === firingShip.id) continue;
+        if (!otherShip) continue;
         if (otherShip.unavailable) continue;
         if (shipManager.isDestroyed && shipManager.isDestroyed(otherShip)) continue;
 
@@ -226,11 +227,14 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
         for (var sys in otherShip.systems) {
             var w = otherShip.systems[sys];
             if (!w || w.name !== "ParticleConcentrator") continue;
+            // System ids are per-ship integers, not global — use object identity to skip the primary.
+            if (w === this) continue;
             var matched = false;
             for (var f in w.fireOrders) {
                 var fo2 = w.fireOrders[f];
                 if (fo2.turn !== gamedata.turn) continue;
                 if (fo2.type !== 'normal') continue;
+                if (fo2.id === myOrder.id) continue;
                 if (fo2.targetid != myOrder.targetid) continue;
                 if (fo2.firingMode != myOrder.firingMode) continue;
                 matched = true;
@@ -239,10 +243,10 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
             if (!matched) continue;
             candidates.push({
                 ship: otherShip,
+                weapon: w,
                 pos: otherPos,
                 distToTarget: otherPos.distanceTo(targetPos),
             });
-            break;
         }
     }
 
@@ -250,7 +254,7 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
         return a.distToTarget - b.distToTarget;
     });
 
-    // Greedy clique fill: every accepted ship within 1 hex of every other.
+    // Greedy clique fill: every accepted ship must be within 1 hex of every other.
     var accepted = [{ ship: firingShip, pos: firingShipPos }];
     var partners = [];
     var needed = myOrder.firingMode - 1;
@@ -267,12 +271,21 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
 
     var line;
     if (partners.length === 0) {
-        line = "No eligible partners visible - will fire Single";
+        line = "No eligible partner weapons visible - will fire Single";
     } else {
-        var names = partners.map(function(p) { return p.ship.name; }).join(', ');
+        // Group partner weapons by ship so multiple PCs on the same ship show as "ShipName x2"
+        var counts = {};
+        var order = [];
+        partners.forEach(function(p) {
+            if (counts[p.ship.name] === undefined) order.push(p.ship.name);
+            counts[p.ship.name] = (counts[p.ship.name] || 0) + 1;
+        });
+        var names = order.map(function(n) {
+            return counts[n] > 1 ? (n + " (" + counts[n] + ")") : n + " (1)";
+        }).join(', ');
         var actualMode = partners.length + 1;
         if (actualMode < myOrder.firingMode) {
-            line = partners.length + " of " + needed + " partners (" + names + ") - will downgrade to " + actualMode + "combined";
+            line = partners.length + " of " + needed + " partner weapons (" + names + ") - will downgrade to " + actualMode + "combined";
         } else {
             line = "Will combine with: " + names;
         }

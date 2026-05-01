@@ -3606,13 +3606,13 @@ class ParticleConcentrator extends Raking{
 	
 	
 	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Particle Concentrator into one concentrated shot - for +2 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";
-		      $this->data["Special"] .= "<br>If You allocate multiple Particle Concentrators in higher mode of fire at the same target, they will be combined.";
-		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";
-		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship - all combining ships must be within 1 hex of each other and hit the same side of the target.";
-		      $this->data["Special"] .= "<br>Hit chance is averaged across combining ships using the closest ship's range; range penalty doubles if any combining ship lacks lock-on.";
-	    }	
+		      parent::setSystemDataWindow($turn);
+		      $this->data["Special"] = "Concentrators allocated in matching combined modes at the same target side automatically merge into one shot.";
+		      $this->data["Special"] .= "<br>Combining ships must all be within 1 hex of each other; multiple Concentrators on the same ship can combine.";
+		      $this->data["Special"] .= "<br>Each additional weapon adds +2 Fire Control and +1d10 damage (max +10 / +5d10).";
+		      $this->data["Special"] .= "<br>Hit chance averages across combining weapons at the closest ship's range; doubled range penalty if any ship lacks lock-on.";
+		      $this->data["Special"] .= "<br>If too few partners are eligible, the shot fires in the highest mode actually achievable.";
+	    }
 	
 		
 	
@@ -3653,9 +3653,10 @@ class ParticleConcentrator extends Raking{
 			$shipsNearby = $gamedata->getShipsInDistance($firingShip, 1);
 
 			//Collect candidate orders matching target/mode/section, sorted by distance to target so the closest get priority.
+			//Note: the firing ship itself is intentionally included - multiple Concentrators on the same ship can combine.
+			//The alreadyConsidered flag prevents the primary weapon from matching itself.
 			$candidates = array();
 			foreach($shipsNearby as $otherShip) {
-				if ($otherShip->id === $firingShip->id) continue;
 				$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
 				foreach($allOrders as $subOrder) {
 					if ($subOrder->type !== 'normal') continue;
