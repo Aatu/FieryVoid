@@ -3607,11 +3607,11 @@ class ParticleConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Particle Concentrator into one concentrated shot - for +2 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
-		      $this->data["Special"] .= "<br>If You allocate multiple Particle Concentrators in higher mode of fire at the same target, they will be combined."; 
-		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  
-		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship, but need to be on the same hex to combine."; //tabletop: within 1 hex  			  
-		      $this->data["Special"] .= "<br>Hit chance will be average of all weapons combining.";//tabletop: use average EW, best range, worst criticals and no lock-on if ANY weapon lacks lock-on
+		      $this->data["Special"] = "Can combine multiple Particle Concentrator into one concentrated shot - for +2 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";
+		      $this->data["Special"] .= "<br>If You allocate multiple Particle Concentrators in higher mode of fire at the same target, they will be combined.";
+		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";
+		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship - all combining ships must be within 1 hex of each other and hit the same side of the target.";
+		      $this->data["Special"] .= "<br>Hit chance is averaged across combining ships using the closest ship's range; range penalty doubles if any combining ship lacks lock-on.";
 	    }	
 	
 		
@@ -3626,14 +3626,13 @@ class ParticleConcentrator extends Raking{
 	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
 	public function calculateHitBase($gamedata, $fireOrder){
 		$this->alreadyConsidered = true;
-		$combinedChance = 0;
 		if ($this->testRun){ //calculate nominal, skipping concentration issues - for subordinate weapon to calculate average hit chance
 			parent::calculateHitBase($gamedata, $fireOrder);
 			return;
 		}
-		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
+		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon!
 			$notes = "technical fire order - weapon combined into another shot";
-			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
+			$fireOrder->chosenLocation = 0;
 			$fireOrder->needed = 0;
 			$fireOrder->shots = 0;
 			$fireOrder->notes = $notes;
@@ -3641,60 +3640,124 @@ class ParticleConcentrator extends Raking{
 			$this->changeFiringMode($fireOrder->firingMode);
 			return;
 		}
-		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
-			$firingShip = $gamedata->getShipById($fireOrder->shooterid);	
-			$srcPos = $firingShip->getCoPos();			
-			$shipsSameHex = $gamedata->getShipsInDistance($firingShip, 0);//all ships on the same hex can potentially combine!
-			$subordinateOrders = array();
-			$subordinateOrdersNo = 0;
-			foreach($shipsSameHex as $otherShip) {			
-				//look for firing orders from same hex at same target in same mode - and make sure it's same type of weapon
+
+		$subordinateData = array(); //per accepted subordinate: ['order','ship','nominalNeeded','dist']
+		$subordinateOrders = array();
+		$subordinateOrdersNo = 0;
+		$firingShip = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+
+		if (($fireOrder->firingMode > 1) && ($firingShip !== null) && ($target !== null)){
+			//B5W rule: combining ships must all be within 1 hex of each other and hit the same side of the target.
+			$primarySide = $target->getHitSection($firingShip, $gamedata->turn);
+			$shipsNearby = $gamedata->getShipsInDistance($firingShip, 1);
+
+			//Collect candidate orders matching target/mode/section, sorted by distance to target so the closest get priority.
+			$candidates = array();
+			foreach($shipsNearby as $otherShip) {
+				if ($otherShip->id === $firingShip->id) continue;
 				$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
 				foreach($allOrders as $subOrder) {
-					if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
-						//order data fits - is weapon another Particle Concentrator?...
-						$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
-						if ($subWeapon instanceof ParticleConcentrator){
-							if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
-								$subordinateOrdersNo++;
-								$subordinateOrders[] = $subOrder;
-							}
-						}
-					}
-					if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
+					if ($subOrder->type !== 'normal') continue;
+					if ($subOrder->targetid != $fireOrder->targetid) continue;
+					if ($subOrder->firingMode != $fireOrder->firingMode) continue;
+					$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
+					if (!($subWeapon instanceof ParticleConcentrator)) continue;
+					if ($subWeapon->alreadyConsidered) continue;
+					$candidateSide = $target->getHitSection($otherShip, $gamedata->turn);
+					if ($candidateSide !== $primarySide) continue;
+					$candidates[] = array(
+						'order' => $subOrder,
+						'ship' => $otherShip,
+						'distToTarget' => $otherShip->getHexPos()->distanceTo($target->getHexPos()),
+					);
 				}
-				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
 			}
-			//if not enough weapons to combine in desired mode - combine still, just in appropriately lesser mode
-			if ($subordinateOrdersNo < ($fireOrder->firingMode-1)){ 
-				$fireOrder->firingMode = $subordinateOrdersNo +1; //worst case it's single fire ;)
-			}			
-			//combining - set other combining weapons/fire orders to technical status! (and change their firing mode to the same as base weapon, also just in case ;)
+			usort($candidates, function($a, $b) {
+				return $a['distToTarget'] - $b['distToTarget'];
+			});
+
+			//Greedy clique fill - each accepted ship must be within 1 hex of every already-accepted ship.
+			$acceptedShips = array($firingShip);
+			foreach($candidates as $cand){
+				if ($subordinateOrdersNo >= ($fireOrder->firingMode - 1)) break;
+				$candPos = $cand['ship']->getHexPos();
+				$fits = true;
+				foreach($acceptedShips as $acc){
+					if ($candPos->distanceTo($acc->getHexPos()) > 1){
+						$fits = false;
+						break;
+					}
+				}
+				if (!$fits) continue;
+				$acceptedShips[] = $cand['ship'];
+				$subordinateOrders[] = $cand['order'];
+				$subordinateOrdersNo++;
+			}
+
+			//If not enough weapons could be combined, downgrade firing mode to what was actually achievable.
+			if ($subordinateOrdersNo < ($fireOrder->firingMode - 1)){
+				$fireOrder->firingMode = $subordinateOrdersNo + 1;
+			}
+
+			//Mark subordinates as combined, capture nominal hit chance and distance, then null their fire orders.
 			foreach($subordinateOrders as $subOrder){
-				$otherShip = $gamedata->getShipById($subOrder->shooterid);	
+				$otherShip = $gamedata->getShipById($subOrder->shooterid);
 				$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
 				$subWeapon->isCombined = true;
 				$subWeapon->alreadyConsidered = true;
 				$subWeapon->doNotIntercept = true;
 				$subOrder->pubnotes .= 'Combined into another shot. ';
 				$subOrder->firingMode = $fireOrder->firingMode;
-				
-				//get nominal hit chance...
+
 				$subWeapon->testRun = true;
 				$subWeapon->calculateHitBase($gamedata, $subOrder);
-				$combinedChance += $subOrder->needed;
-				//and now nullify  hit chance...
+				$nominalNeeded = $subOrder->needed;
 				$subWeapon->testRun = false;
-				$notes = "Technical fire order - weapon combined into another shot. ";
+
+				$subordinateData[] = array(
+					'ship' => $otherShip,
+					'nominalNeeded' => $nominalNeeded,
+					'dist' => $otherShip->getHexPos()->distanceTo($target->getHexPos()),
+				);
+
 				$subOrder->needed = 0;
-				$subOrder->notes = $notes;
+				$subOrder->notes = "Technical fire order - weapon combined into another shot. ";
 			}
 		}
+
 		parent::calculateHitBase($gamedata, $fireOrder);
-		if($fireOrder->firingMode > 1){ //for concentrated shot - hit chance is average of hit chances of all weapons
-			$combinedChance += $fireOrder->needed;
-			$fireOrder->needed = round($combinedChance/$fireOrder->firingMode);
-			$fireOrder->notes .= 'Modified as average of concentrating shots! ';
+
+		if ($fireOrder->firingMode > 1 && $target !== null){
+			//Normalize each ship's nominal hit chance to the closest combining ship's range,
+			//then average. If any combining ship lacks lock-on, double the range penalty.
+			$primaryDist = $firingShip->getHexPos()->distanceTo($target->getHexPos());
+			$closestDist = $primaryDist;
+			foreach($subordinateData as $sd){
+				if ($sd['dist'] < $closestDist) $closestDist = $sd['dist'];
+			}
+
+			$anyWithoutLockOn = ($firingShip->getOEW($target, $gamedata->turn) <= 0);
+			if (!$anyWithoutLockOn){
+				foreach($subordinateData as $sd){
+					if ($sd['ship']->getOEW($target, $gamedata->turn) <= 0){
+						$anyWithoutLockOn = true;
+						break;
+					}
+				}
+			}
+
+			$combinedChance = $fireOrder->needed + ($primaryDist - $closestDist) * $this->rangePenalty;
+			foreach($subordinateData as $sd){
+				$combinedChance += $sd['nominalNeeded'] + ($sd['dist'] - $closestDist) * $this->rangePenalty;
+			}
+			$fireOrder->needed = round($combinedChance / $fireOrder->firingMode);
+
+			if ($anyWithoutLockOn){
+				$fireOrder->needed -= $closestDist * $this->rangePenalty;
+				$fireOrder->notes .= 'At least one combining ship lacks lock-on; range penalty doubled. ';
+			}
+			$fireOrder->notes .= 'Combined shot from ' . $fireOrder->firingMode . ' Particle Concentrators (closest-range hit chance, averaged EW). ';
 		}
 	}//endof function calculateHitBase
 	

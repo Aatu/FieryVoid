@@ -413,11 +413,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Defensive system that can absorb in place of another system, which greatly increases resilience of Gaim systems. 
                 Bulkheads can protect systems on the same structure that it's mounted upon. Note that primary systems are not protected by bulkheads.</li>
             <li>The decision whether to use a bulkhead is made automatically, and will aim to prevent a systems destruction, 
-                or when the integrity of the structure block falls too low</li>
-        <h5>Particle Concentrator</h5>                    
-            <li>Multiple Concentrators firing from the same hex may combine into a more accurate and more powerful single shot. 
-                The hit chance for this shot will be an average of all the weapons concentrating (as individually their chances may differ).</li>
-            <h5>Packet Torpedo</h5>
+                or when the integrity of the structure block falls too low</li>    
+        <h5>Particle Concentrator</h5>
+            <li>Multiple Concentrators may combine into a single more accurate and more powerful shot. Each combining ship must be within 1 hex of every other combining ship, and all of them must be hitting the same side of the target.</li>
+            <li>To combine, allocate the Concentrators in the desired combined firing mode at the same target (the game will pick the eligible partners automatically). If not enough eligible Concentrators are allocated, the shot resolves in the highest mode actually achievable.</li>
+            <li>Hit chance is averaged across the combining weapons, but normalised to the range of the closest combining ship to the target. If any combining ship lacks lock-on against the target, the range penalty is doubled.</li>
+            <li>Damage is rolled once for the combined shot and increases by +1d10 per additional weapon, up to a maximum of 5 additional weapons (+5d10).</li>
+        <h5>Packet Torpedo</h5>
             <li>Ballistic weapon that has a range penalty, just like direct fire weapons - although only after the first 10 hexes of travel. 
                 In addition, the target of this weapon is not known to your opponent until impact.</li>
        <h5>Scattergun</h5>

@@ -179,6 +179,108 @@ var ParticleConcentrator = function(json, ship)
 ParticleConcentrator.prototype = Object.create( Weapon.prototype );
 ParticleConcentrator.prototype.constructor = ParticleConcentrator;
 
+ParticleConcentrator.prototype.initializationUpdate = function() {
+    delete this.data["Combine projection"];
+    if (gamedata.gamephase !== 3) return this;
+
+    var myOrder = null;
+    for (var i in this.fireOrders) {
+        var fo = this.fireOrders[i];
+        if (fo.turn !== gamedata.turn) continue;
+        if (fo.type !== 'normal') continue;
+        myOrder = fo;
+        break;
+    }
+    if (!myOrder || myOrder.firingMode <= 1) return this;
+
+    var firingShip = this.ship;
+    var target = gamedata.getShip(myOrder.targetid);
+    if (!target) return this;
+
+    var firingShipPos = shipManager.getShipPosition(firingShip);
+    var targetPos = shipManager.getShipPosition(target);
+    var primarySides = weaponManager.getShipHittingSide(firingShip, target);
+
+    // Strict same-side match: hit-section arrays must be identical (under-promises vs server).
+    var sameSides = function(a, b) {
+        if (!a || !b || a.length !== b.length) return false;
+        for (var k = 0; k < a.length; k++) {
+            if (a[k] !== b[k]) return false;
+        }
+        return true;
+    };
+
+    var candidates = [];
+    for (var s in gamedata.ships) {
+        var otherShip = gamedata.ships[s];
+        if (!otherShip || otherShip.id === firingShip.id) continue;
+        if (otherShip.unavailable) continue;
+        if (shipManager.isDestroyed && shipManager.isDestroyed(otherShip)) continue;
+
+        var otherPos = shipManager.getShipPosition(otherShip);
+        if (firingShipPos.distanceTo(otherPos) > 1) continue;
+
+        var otherSides = weaponManager.getShipHittingSide(otherShip, target);
+        if (!sameSides(primarySides, otherSides)) continue;
+
+        for (var sys in otherShip.systems) {
+            var w = otherShip.systems[sys];
+            if (!w || w.name !== "ParticleConcentrator") continue;
+            var matched = false;
+            for (var f in w.fireOrders) {
+                var fo2 = w.fireOrders[f];
+                if (fo2.turn !== gamedata.turn) continue;
+                if (fo2.type !== 'normal') continue;
+                if (fo2.targetid != myOrder.targetid) continue;
+                if (fo2.firingMode != myOrder.firingMode) continue;
+                matched = true;
+                break;
+            }
+            if (!matched) continue;
+            candidates.push({
+                ship: otherShip,
+                pos: otherPos,
+                distToTarget: otherPos.distanceTo(targetPos),
+            });
+            break;
+        }
+    }
+
+    candidates.sort(function(a, b) {
+        return a.distToTarget - b.distToTarget;
+    });
+
+    // Greedy clique fill: every accepted ship within 1 hex of every other.
+    var accepted = [{ ship: firingShip, pos: firingShipPos }];
+    var partners = [];
+    var needed = myOrder.firingMode - 1;
+    for (var c = 0; c < candidates.length && partners.length < needed; c++) {
+        var cand = candidates[c];
+        var fits = true;
+        for (var a = 0; a < accepted.length; a++) {
+            if (cand.pos.distanceTo(accepted[a].pos) > 1) { fits = false; break; }
+        }
+        if (!fits) continue;
+        accepted.push({ ship: cand.ship, pos: cand.pos });
+        partners.push(cand);
+    }
+
+    var line;
+    if (partners.length === 0) {
+        line = "No eligible partners visible - will fire Single";
+    } else {
+        var names = partners.map(function(p) { return p.ship.name; }).join(', ');
+        var actualMode = partners.length + 1;
+        if (actualMode < myOrder.firingMode) {
+            line = partners.length + " of " + needed + " partners (" + names + ") - will downgrade to " + actualMode + "combined";
+        } else {
+            line = "Will combine with: " + names;
+        }
+    }
+    this.data["Combine projection"] = line;
+    return this;
+};
+
 var VorlonDischargeGun = function VorlonDischargeGun(json, ship) {
     Weapon.call(this, json, ship);
 };
