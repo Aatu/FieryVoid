@@ -3608,10 +3608,10 @@ class ParticleConcentrator extends Raking{
 	
 	    public function setSystemDataWindow($turn){
 		      parent::setSystemDataWindow($turn);
-		      $this->data["Special"] = "Concentrators allocated in matching combined modes at the same target side automatically merge into one shot.";
+		      $this->data["Special"] = "Concentrators allocated in the same combined modes, at same section of the same target automatically merge into one shot.";
 		      $this->data["Special"] .= "<br>Combining ships must all be within 1 hex of each other; multiple Concentrators on the same ship can combine.";
 		      $this->data["Special"] .= "<br>Each additional weapon adds +2 Fire Control and +1d10 damage (max +10 / +5d10).";
-		      $this->data["Special"] .= "<br>Hit chance averages across combining weapons at the closest ship's range; doubled range penalty if any ship lacks lock-on.";
+		      $this->data["Special"] .= "<br>Combined shot fires from the closest ship's range; doubled range penalty if any ship lacks lock-on.";
 		      $this->data["Special"] .= "<br>If too few partners are eligible, the shot fires in the highest mode actually achievable.";
 	    }
 	

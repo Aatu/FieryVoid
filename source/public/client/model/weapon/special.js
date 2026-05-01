@@ -273,26 +273,28 @@ ParticleConcentrator.prototype.initializationUpdate = function() {
     if (partners.length === 0) {
         line = "No eligible partner weapons visible - will fire as single shot";
     } else {
-        // Group partner weapons by ship so multiple PCs on the same ship show as "ShipName x2"
+        // Group all participating Concentrators by ship; seed firing ship with its own primary PC.
         var counts = {};
         var order = [];
-        var currentWeapons = partners.length+1; 
+        var currentWeapons = partners.length+1;
+        counts[firingShip.name] = 1;
+        order.push(firingShip.name);
         partners.forEach(function(p) {
             if (counts[p.ship.name] === undefined) order.push(p.ship.name);
             counts[p.ship.name] = (counts[p.ship.name] || 0) + 1;
         });
         var names = order.map(function(n) {
-            return counts[n] > 1 ? (n + " (" + counts[n] + ")") : n + " (1)";
-        }).join(', ');
+            return counts[n] > 1 ? (n + " (" + counts[n] + "),") : n + " (1)";
+        }).join(',<br>');
         var actualMode = partners.length + 1;
         if (actualMode < myOrder.firingMode) {
             //line = currentWeapons + " of " + needed + " concentrators available [" + names + "] - will downgrade to " + actualMode + "combined";
-            line = currentWeapons + " of " + needed + " concentrators available - will downgrade to " + actualMode + "combined";            
+            line = currentWeapons + " of " + needed + " available:<br>" + names + "<br>- will downgrade to " + actualMode + "combined";
         } else {
-            line = "Will combine with: " + names;
+            line = "Will combine with: <br>" + names;
         }
     }
-    this.data["Combine projection"] = line;
+    this.data["Combination"] = line;
     return this;
 };
 
