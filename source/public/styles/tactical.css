@@ -1610,35 +1610,27 @@ body {
     pointer-events: none;
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.7);
 }
-/* Tooltip for touch long-press */
+
 .intercept-tooltip {
-    position: relative;
     cursor: help;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    /*border-bottom: 1px dotted #ccc;*/
-}
-.intercept-tooltip::after {
-    content: attr(data-tooltip);
-    display: none;
-    position: absolute;
-    bottom: 100%;
-    right: 0;
-    background: #0a3340;
-    border: 1px solid #587e8d;
-    color: #deebff;
-    padding: 4px 8px;
-    border-radius: 4px;
-    white-space: nowrap;
-    font-size: 11px;
-    z-index: 10000;
-    pointer-events: none;
-    margin-bottom: 2px;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.5);
-}
-.intercept-tooltip:hover::after,
-.intercept-tooltip:active::after {
-    display: block;
+    border-bottom: 1px dotted #7ba2ea;
 }
 
+.nointercept-tooltip {
+    cursor: help;
+}
+
+.custom-intercept-tooltip {
+    position: fixed;
+    z-index: 100000;
+    background: #0a3340d8;
+    border: 1px solid #587e8d;
+    color: #deebffd5;
+    padding: 6px 10px;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    font-size: 13px;
+    pointer-events: none;
+    line-height: 1.1;
+    box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+}

@@ -61,6 +61,8 @@ window.combatLog = {
         var notes = "";
         var totalInterceptPenalty = 0;
         var totalInterceptorsCount = 0;
+        var tooltipTextParts = [];
+        var shotIndex = 1;
 
         for (var a in orders) {
 
@@ -89,20 +91,31 @@ window.combatLog = {
             if (fire.shots > 0) { //ignore hit chance of purely technical fire orders
                 if (needed < lowC) lowC = needed;
                 if (needed > highC) highC = needed;
+
+                var interceptPenalty = 0;
+                var interceptorsCount = 0;
+
+                if (fire.notes) {
+                    var match = fire.notes.match(/Interception: (\d+) sources:(\d+)/);
+                    if (match) {
+                        interceptPenalty = parseInt(match[1], 10);
+                        interceptorsCount = parseInt(match[2], 10);
+                    }
+                }
+
+                totalInterceptPenalty += interceptPenalty;
+                totalInterceptorsCount += interceptorsCount;
+
+                if (interceptorsCount > 0) {
+                    var wWord = interceptorsCount === 1 ? "shot" : "shots";
+                    tooltipTextParts.push("Shot " + shotIndex + ": -" + interceptPenalty + "% (" + interceptorsCount + " intercepting " + wWord + ")");
+                } else {
+                    tooltipTextParts.push("Shot " + shotIndex + ": No interception");
+                }
+                shotIndex++;
             }
 
             if (fire.pubnotes) notes += fire.pubnotes + " ";
-
-            if (fire.notes) {
-                var match = fire.notes.match(/Interception: (\d+) sources:(\d+)/);
-                if (match) {
-                    var interceptPenalty = parseInt(match[1], 10);
-                    var interceptorsCount = parseInt(match[2], 10);
-                    totalInterceptPenalty += interceptPenalty;
-                    totalInterceptorsCount += interceptorsCount;
-                }
-            }
-
         }
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire">FIRE: </span><span>';
@@ -113,10 +126,17 @@ window.combatLog = {
         var tooltipAttr = "";
         if (totalInterceptorsCount > 0) {
             var wWord = totalInterceptorsCount === 1 ? "shot" : "shots";
-            var tooltipText = totalInterceptorsCount + ' intercepting ' + wWord + ' applied -' + totalInterceptPenalty + '% hit chance penalty across all shots';
-            tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '" title="' + tooltipText + '"';
+            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied -' + totalInterceptPenalty + '% hit penalty across all shots';
+            var tooltipText = summaryText;
+
+            // If there's more than one shot, append the per-shot breakdown
+            if (shotIndex > 2) {
+                tooltipText += "\n" + tooltipTextParts.join("\n");
+            }
+
+            tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '"';
         } else {
-            tooltipAttr = ' class="intercept-tooltip" data-tooltip="No interception" title="No interception"';
+            tooltipAttr = ' class="nointercept-tooltip" data-tooltip="No interception"';
         }
 
         var chancetext = "";
@@ -550,3 +570,22 @@ window.combatLog = {
     }
 
 };
+$(function () {
+    $(document).on('mouseenter touchstart', '.intercept-tooltip', function (e) {
+        var tooltip = $('#custom-intercept-tooltip');
+        if (!tooltip.length) {
+            tooltip = $('<div id="custom-intercept-tooltip" class="custom-intercept-tooltip"></div>').appendTo('body');
+        }
+        tooltip.text($(this).data('tooltip'));
+        var rect = this.getBoundingClientRect();
+        var topPos = rect.top - tooltip.outerHeight() - 5;
+        if (topPos < 0) topPos = rect.bottom + 5;
+        var leftPos = rect.left + rect.width / 2 - tooltip.outerWidth() / 2;
+        if (leftPos < 0) leftPos = 5;
+        if (leftPos + tooltip.outerWidth() > window.innerWidth) leftPos = window.innerWidth - tooltip.outerWidth() - 5;
+        tooltip.css({ top: topPos + 'px', left: leftPos + 'px' }).show();
+    }).on('mouseleave touchend touchmove', '.intercept-tooltip', function (e) {
+        $('#custom-intercept-tooltip').hide();
+    });
+});
+
