@@ -4,7 +4,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 480;
+        $this->pointCost = 450;
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenGratherinRefit";
         $this->imagePath = "img/ships/Nexus/polarenGratherin.png";
@@ -28,7 +28,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
+        $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(2, 3));
         $this->addFrontSystem(new StunBeam(2, 6, 5, 300, 60));
@@ -40,11 +40,13 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
         $this->addLeftSystem(new Thruster(4, 12, 0, 4, 3));
         $this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
+		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 
         $this->addRightSystem(new NexusHeavyMaser(3, 7, 4, 0, 120));
         $this->addRightSystem(new Maser(2, 6, 3, 300, 120));
         $this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
         $this->addRightSystem(new Maser(2, 6, 3, 60, 240));
+		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 32));
@@ -56,7 +58,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         				8 => "Structure",
 						9 => "1:Stun Beam",
         				11 => "2:Thruster",
-						12 => "1: Sand Caster",
+						12 => "1:Sand Caster",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",
@@ -65,15 +67,17 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         		),
         		3=> array(
         				5 => "Thruster",
-        				7 => "Light Rad Cannon",
-        				10 => "Maser",
+        				7 => "Heavy Maser",
+        				9 => "Maser",
+						10 => "Light Blast Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
         				5 => "Thruster",
-        				7 => "Light Rad Cannon",
-        				10 => "Maser",
+        				7 => "Heavy Maser",
+        				9 => "Maser",
+						10 => "Light Blast Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),

@@ -8,7 +8,7 @@ class PolarenGrantir extends MediumShipLeftRight{
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenGrantir";
         $this->imagePath = "img/ships/Nexus/polarenNorevet.png";
-        $this->shipClass = "Grantir Police Frigate";
+        $this->shipClass = "Grantir Security Frigate";
 			$this->variantOf = "Norevet Heavy Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -37,19 +37,19 @@ class PolarenGrantir extends MediumShipLeftRight{
 		$this->addFrontSystem(new NexusSandCaster(1, 4, 2, 0, 360));
         
 		$this->addLeftSystem(new StunBeam(2, 6, 5, 240, 360));
-		$this->addLeftSystem(new NexusLightMaser(2, 4, 2, 180, 360));
-		$this->addLeftSystem(new NexusLightMaser(2, 4, 2, 180, 360));
+		$this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
+		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 60));
         $this->addLeftSystem(new Thruster(2, 10, 0, 4, 3));
 	    
 		$this->addRightSystem(new StunBeam(2, 6, 5, 0, 120));
-		$this->addRightSystem(new NexusLightMaser(2, 4, 2, 0, 180));
-		$this->addRightSystem(new NexusLightMaser(2, 4, 2, 0, 180));
+		$this->addRightSystem(new Maser(2, 6, 3, 0, 180));
+		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 300, 180));
         $this->addRightSystem(new Thruster(2, 10, 0, 4, 4));
         
         $this->addPrimarySystem(new Structure(3, 33));
 
-	//d20 hit chart
-	$this->hitChart = array(
+		//d20 hit chart
+		$this->hitChart = array(
 		
 		0=> array(
 			9 => "Structure",
@@ -63,24 +63,26 @@ class PolarenGrantir extends MediumShipLeftRight{
 		),
 
 		3=> array(
-			5 => "Thruster",
-			7 => "Stun Beam",
-			9 => "Light Maser",
+			4 => "Thruster",
+			6 => "Stun Beam",
+			8  => "Maser",
+			10 => "Light Blast Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		4=> array(
-			5 => "Thruster",
-			7 => "Stun Beam",
-			9 => "Light Maser",
+			4 => "Thruster",
+			6 => "Stun Beam",
+			8  => "Maser",
+			10 => "Light Blast Cannon",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 	);
 
-        
-        }
     }
+
+}
 ?>
