@@ -3124,8 +3124,10 @@ spl_autoload_register(
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				'explorerprototype' => '/server/model/ships/customs/ExplorerPrototype.php',
 				'shadowavioki' => '/server/model/ships/customs/shadowAvioki.php',	
+				'shadowdestroyerhunter' => '/server/model/ships/customs/shadowDestroyerHunter.php',
 				'shadowgarundaam' => '/server/model/ships/customs/ShadowGarundaAM.php',	
 				'shadowmollantaam' => '/server/model/ships/customs/ShadowMollantaAM.php',	
+				'shadownollita' => '/server/model/ships/customs/ShadowNollita.php',	
 				
 															 
 															   
