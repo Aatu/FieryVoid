@@ -7174,6 +7174,7 @@ class MineControllerDEW extends ShipSystem{
 					break;
 				}
 			}		
+			if($mine->multiSettings) $this->multiTargetEnabled = true; //Some mines have this pre-set
 
 			if ($this->multiTargetEnabled) {
 				//Reset to nested shape; per-weapon ranges populated from compound notekeys "<weaponId>;<shipType>".
