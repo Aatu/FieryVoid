@@ -1545,7 +1545,6 @@ class EWLightPlasmaMine extends MissileFB
         public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
         public $damageType = "Flash"; 
         
-        
         public $fireControl = array(-5, 1, 2); // fighters, <mediums, <capitals 
         
         public $trailColor = array(75, 230, 90);
@@ -1588,6 +1587,14 @@ class EWLightPlasmaMine extends MissileFB
     }//endof class EWNuclearTorpedo
 
 
+
+    class EWRangedNuclearTorpedo extends EWNuclearTorpedo{
+
+        public $name = "EWRangedNuclearTorpedo";
+        public $displayName = "Ranged Nuclear Torpedo";
+        public $range = 60;
+
+    }//endof class EWRangedNuclearTorpedo
 
 
 class EWPulseTorpedo extends Pulse{

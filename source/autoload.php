@@ -1301,6 +1301,7 @@ spl_autoload_register(
 				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
 				'ewpulsetorpedo' => '/server/model/weapons/customEscalation.php',
 				'ewnucleartorpedo' => '/server/model/weapons/customEscalation.php',
+				'ewrangednucleartorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
                 'tractingrodhandler' => '/server/model/weapons/customEscalation.php',

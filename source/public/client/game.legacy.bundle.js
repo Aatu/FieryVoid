@@ -48813,6 +48813,12 @@ var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
 EWNuclearTorpedo.prototype = Object.create(Weapon.prototype);
 EWNuclearTorpedo.prototype.constructor =  EWNuclearTorpedo;
 
+var EWRangedNuclearTorpedo = function  EWRangedNuclearTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedNuclearTorpedo.prototype = Object.create(Weapon.prototype);
+EWRangedNuclearTorpedo.prototype.constructor =  EWRangedNuclearTorpedo;
+
 var EWLaserBolt = function  EWLaserBolt(json, ship) {
     Weapon.call(this, json, ship);
 };
