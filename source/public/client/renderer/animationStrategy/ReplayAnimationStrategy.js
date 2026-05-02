@@ -46,7 +46,14 @@ window.ReplayAnimationStrategy = function () {
         this.emitterContainer.cleanUp();
 
         this.gamedata.ships.forEach(function (ship) {
-            this.shipIconContainer.getByShip(ship).show();
+            // Guard: gamedata is a singleton mutated in place by parseServerData,
+            // so by the time deactivate runs the ship list may include new units
+            // (e.g. flights/mines launched in a Pre-Turn Orders phase the local
+            // player skipped) whose icons haven't been built yet.
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (icon) {
+                icon.show();
+            }
         }, this);
 
         return this;
