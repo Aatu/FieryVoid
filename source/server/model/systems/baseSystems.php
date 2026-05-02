@@ -7036,7 +7036,7 @@ class MineControllerDEW extends ShipSystem{
 	private $accuracy = 0;
 	public $ballisticWeapon = false; //To mark if mine has ballistic weapons
     public $validTargets = null; // null means all targets are valid
-    public $multiTargetEnabled = false; //Set true by MINE_MULTI enhancement; switches allocatedRanges to per-weapon nested storage.
+    public $multiTargetEnabled = false; //Mirrors $mine->multiSettings (Flexible Targeting); switches allocatedRanges to per-weapon nested storage.
     public $mineWeapons = array(); //Precomputed list of weapons {id, name, displayName, indexInGroup, label} for client UI; populated in stripForJson.
 
     function __construct($armour, $maxhealth, $powerReq, $range, $accuracy, $ballistic = false, $validTargets = null){
@@ -7053,15 +7053,7 @@ class MineControllerDEW extends ShipSystem{
     }				
 
     public function setSystemDataWindow($turn){
-            //Detect MINE_MULTI here directly — don't depend on whether onIndividualNotesLoaded has run yet.
             $mine = $this->getUnit();
-            $multi = false;
-            if ($mine && is_array($mine->enhancementOptions)) {
-                foreach ($mine->enhancementOptions as $enhancement) {
-                    if ($enhancement[0] == 'MINE_MULTI' && $enhancement[2] > 0) { $multi = true; break; }
-                }
-            }
-            $this->multiTargetEnabled = $multi;
 
             //Wipe stale per-shipType / per-weapon range keys so a mode flip never leaves both kinds in the dict.
             foreach (array_keys($this->data) as $k) {
@@ -7070,7 +7062,7 @@ class MineControllerDEW extends ShipSystem{
 
             $this->data["Max Range"] = $this->rangeSetting;
             $this->data["Accuracy"] = $this->accuracy;
-            if ($multi) {
+            if ($mine->multiSettings) {
                 $weaponLabels = $this->buildWeaponLabelMap();
                 foreach ($this->allocatedRanges as $weaponId => $perType) {
                     if (!is_array($perType)) continue;
@@ -7088,7 +7080,7 @@ class MineControllerDEW extends ShipSystem{
 			$this->data["Special"] = "<br>Used to set ranges for DEW Mine's weapon against different types of enemy. ";
 			$this->data["Special"] .= "<br>Ranges are set on turn that the Mine deploys, and these cannot then be changed.";
 			$this->data["Special"] .= "<br>All attacks by DEW mines assume an EW lock, except against Jammer-equipped ships.";
-			if ($multi) {
+			if ($mine->multiSettings) {
 				$this->data["Special"] .= "<br>Multiple Targets enhancement: each weapon has its own per-target-type range.";
 			}
 	}
@@ -7174,7 +7166,6 @@ class MineControllerDEW extends ShipSystem{
     public function onIndividualNotesLoaded($gamedata)
     {
 			$mine = $this->getUnit();
-
 			// Detect MINE_MULTI before parsing notes so we know which storage shape to populate.
 			$this->multiTargetEnabled = false;
 			foreach ($mine->enhancementOptions as $enhancement) {
@@ -7182,7 +7173,7 @@ class MineControllerDEW extends ShipSystem{
 					$this->multiTargetEnabled = true;
 					break;
 				}
-			}
+			}		
 
 			if ($this->multiTargetEnabled) {
 				//Reset to nested shape; per-weapon ranges populated from compound notekeys "<weaponId>;<shipType>".
@@ -7510,13 +7501,7 @@ class MineControllerDEW extends ShipSystem{
         $strippedSystem = parent::stripForJson();
         //Defensive re-detect (covers serialization paths where setSystemDataWindow hasn't run yet).
         $mine = $this->getUnit();
-        $multi = false;
-        if ($mine && is_array($mine->enhancementOptions)) {
-            foreach ($mine->enhancementOptions as $enhancement) {
-                if ($enhancement[0] == 'MINE_MULTI' && $enhancement[2] > 0) { $multi = true; break; }
-            }
-        }
-        $this->multiTargetEnabled = $multi;
+        $this->multiTargetEnabled = ($mine && !empty($mine->multiSettings));
         $strippedSystem->allocatedRanges = $this->allocatedRanges;
         $strippedSystem->rangeSetting = $this->rangeSetting;
         $strippedSystem->validTargets = $this->validTargets;

@@ -2125,6 +2125,10 @@ class Enhancements{
 						if($strongestSystem != null){ //Reactor actually exists to be enhanced! although it has to ;)
 							$strongestSystem->output -= $enhCount;
 						}						
+						break;
+						
+					case 'MINE_MULTI': //Flexible Targeting for Mines
+						$ship->multiSettings = true;
 						break;						
 
 					case 'SHAD_DIFF': //Increased Diffuser Capability: +1 Output for each Diffuser

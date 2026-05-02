@@ -3016,7 +3016,7 @@ class Mine extends OSAT{
     public $canPreOrder = true;//Needed to set ranges for spawned Mines in Pre-Turn phase.
     protected $variableDamage = 0; //Amount by which mine set damage can vary, looked for in Enhancements
     protected $commandControl = false;
-    //public $multiSettings = false;
+    public $multiSettings = false;
 
 
     public function isDisabled(){
