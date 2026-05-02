@@ -48471,6 +48471,10 @@ var NexusSandCaster = function  NexusSandCaster(json, ship) {
 NexusSandCaster.prototype = Object.create(Weapon.prototype);
 NexusSandCaster.prototype.constructor =  NexusSandCaster;
 
+NexusSandCaster.prototype.hasMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
 NexusSandCaster.prototype.initializationUpdate = function () {
     if(this.firingMode == 2){
         const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
