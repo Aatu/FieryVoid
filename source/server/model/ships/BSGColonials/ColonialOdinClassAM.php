@@ -7,7 +7,7 @@ class ColonialOdinClassAM extends BaseShip{
 	$this->pointCost = 925;
 	$this->faction = "BSG Colonials";
         $this->phpclass = "ColonialOdinClassAM";
-        $this->imagePath = "img/ships/BSG/ColonialOdin2.png";
+        $this->imagePath = "img/ships/BSG/ColonialOdin.png";
         $this->shipClass = "Odin Battlestar";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 160; //img has 160px per side

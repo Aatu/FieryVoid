@@ -671,3 +671,9 @@ AntigravityBeam.prototype.checkFinished = function () {
     if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
     return false;
 };
+
+var GraviticMine = function GraviticMine(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+GraviticMine.prototype = Object.create(Gravitic.prototype);
+GraviticMine.prototype.constructor = GraviticMine;

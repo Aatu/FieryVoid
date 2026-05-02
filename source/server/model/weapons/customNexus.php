@@ -9212,6 +9212,44 @@ class NexusSandCaster extends Weapon implements DefensiveSystem{
 	}// endof NexusLightDefenseGun
 
 
+
+/*fighter-mounted variant*/
+class LtPlasmaCannonFtr extends LinkedWeapon{
+		public $name = "LtPlasmaCannonFtr";
+		public $displayName = "Light Plasma Cannon";
+		public $iconPath = "lightPlasma.png";
+		public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
+
+        public $intercept = 0; //no interception for this weapon!
+        public $loadingtime = 3;
+        public $shots = 1;
+        public $defaultShots = 1;
+        public $rangePenalty = 1;
+        public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
+        public $rangeDamagePenalty = 0.5; //-1/2 hexes!
+		public $priority = 5;
+
+    	public $damageType = "Standard"; 
+    	public $weaponClass = "Plasma"; 
+
+        function __construct($startArc, $endArc, $shots = 1){
+            $this->shots = $shots;
+            $this->defaultShots = $shots;
+            
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+        public function getDamage($fireOrder){        return Dice::d(10,2)+2;   }
+        public function setMinDamage(){     $this->minDamage = 4 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 22 ;      }
+		
+    } //endof LtPlasmaCannonFtr
+
+
+
+
+
+
 /*fighter-mounted variant*/
 class MedPlasmaCannonFtr extends LinkedWeapon{
 	/*dedicated anti-ship weapon for mines*/

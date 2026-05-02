@@ -179,8 +179,23 @@ window.webglScene = function () {
     webglScene.prototype.touchstart = function (event) {
         this.lastTouchMove = event;
         if (event.originalEvent.touches.length === 1) {
+            // Long-press = touchscreen equivalent of Shift+Click. Fires a synthetic click
+            // with shiftKey:true after LONG_PRESS_MS, cancelled by movement, lift, or pinch.
+            this.longPressFired = false;
+            clearTimeout(this.longPressTimer);
+            var t0 = event.originalEvent.touches[0];
+            this.longPressStartPos = { x: t0.pageX, y: t0.pageY };
+            var self = this;
+            this.longPressTimer = setTimeout(function () {
+                self.longPressTimer = null;
+                self.longPressFired = true;
+                if (navigator.vibrate) navigator.vibrate(30);
+                self.click(self.lastTouchMove, { shiftKey: true });
+            }, 500);
             this.mouseDown(event);
         } else if (event.originalEvent.touches.length === 2) {
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = null;
             event.stopPropagation();
             event.preventDefault();
         }
@@ -191,6 +206,16 @@ window.webglScene = function () {
         event.preventDefault();
 
         this.lastTouchMove = event;
+
+        if (this.longPressTimer && this.longPressStartPos && event.originalEvent.touches.length === 1) {
+            var t = event.originalEvent.touches[0];
+            var dx = t.pageX - this.longPressStartPos.x;
+            var dy = t.pageY - this.longPressStartPos.y;
+            if (Math.hypot(dx, dy) > 10) {
+                clearTimeout(this.longPressTimer);
+                this.longPressTimer = null;
+            }
+        }
 
         if (event.originalEvent.touches.length === 1 && !this.lastPinchDistance) {
             if (window.gamedata.showLoS) {
@@ -222,6 +247,9 @@ window.webglScene = function () {
     webglScene.prototype.touchend = function (event) {
         event.stopPropagation();
         event.preventDefault();
+
+        clearTimeout(this.longPressTimer);
+        this.longPressTimer = null;
 
         if (event.originalEvent.touches.length === 0) {
             if (!this.lastPinchDistance) {
@@ -296,7 +324,8 @@ window.webglScene = function () {
         event.stopPropagation();
         event.preventDefault();
 
-        if (this.distanceDragged < this.draggingDistanceTreshold) this.click(event);
+        if (this.distanceDragged < this.draggingDistanceTreshold && !this.longPressFired) this.click(event);
+        this.longPressFired = false;
 
         if (this.dragging) this.dragging({ release: true });
 
@@ -358,12 +387,16 @@ window.webglScene = function () {
         this.dragging && this.dragging(payload);
     };
 
-    webglScene.prototype.click = function (event) {
+    webglScene.prototype.click = function (event, modifierOverride) {
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos, true);
         var payload = getPositionObject.call(this, pos, gamePos, hexPos);
         payload.button = event.button;
+        payload.ctrlKey = !!(modifierOverride && modifierOverride.ctrlKey) || !!event.ctrlKey;
+        payload.altKey = !!(modifierOverride && modifierOverride.altKey) || !!event.altKey;
+        payload.shiftKey = !!(modifierOverride && modifierOverride.shiftKey) || !!event.shiftKey;
+        payload.metaKey = !!(modifierOverride && modifierOverride.metaKey) || !!event.metaKey;
 
         //console.log(payload);        
         if (this.lastPositionClicked) {

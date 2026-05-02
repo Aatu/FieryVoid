@@ -494,11 +494,9 @@ window.weaponManager = {
         var skinDanceBlocked = null;
         // Attached pod logic
         var attachedUnitHidden = false;
-        if (selectedShip.hasAttached && Object.keys(selectedShip.hasAttached).length > 0) {
-            var keys = Object.keys(selectedShip.hasAttached);
-            if (keys.includes(ship.id.toString())) {
-                attachedUnitHidden = true; // Parent cannot target the attached pod
-            }
+        // Host targeting Pod restriction
+        if (selectedShip.hasAttached && selectedShip.hasAttached[ship.id] !== undefined) {
+            attachedUnitHidden = true; // Parent cannot target the attached pod
         }
         if (ship.attached && Object.keys(ship.attached).length > 0) {
             var hostId = Object.keys(ship.attached)[0];
@@ -517,6 +515,8 @@ window.weaponManager = {
 
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
+            var attachedWeaponHidden = false;
+            var clawBlindSpot = false;            
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
@@ -549,6 +549,21 @@ window.weaponManager = {
                             if (!selectedShip.skinDancing[ship.id] && (targetBearing < 60 || targetBearing > 300) && !sharedSkinDancing) skinDanceBlocked = 'Shooter';
                         }
                     }
+                    //New check to prevent attached ship from firing at it's host UNLESS it's a boarding weapon.    
+                    //If selected ship is a flight, it cannot fire ANY non-boarding weapons at ANY target while attached.
+                    if (selectedShip.attached && Object.keys(selectedShip.attached).length > 0) {
+                        if (selectedShip.flight || selectedShip.attached[ship.id] !== undefined) {
+                            if (!weapon.isBoardingAction) {
+                                attachedWeaponHidden = true; // Prevent pods and ships from firing weapons at each others.
+                            }
+                        }
+                        if (!weapon.isBoardingAction && weaponManager.isTargetInGrapplingClawBlindSpot(selectedShip, ship)) {
+                            clawBlindSpot = true;
+                        }                        
+                    }
+                    
+
+
 
                     if (blockedLosHex.length > 0 && !loSBlocked) {
                         var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -563,7 +578,7 @@ window.weaponManager = {
                     value = weapon.firingModes[value];
                     var keys = Object.keys(weapon.firingModes);
 
-                    if (ship.Huge > 0 | attachedUnitHidden) { //Cannot Target larger terrain or POds that are attached to non-facing sides
+                    if (ship.Huge > 0 || attachedUnitHidden || attachedWeaponHidden || clawBlindSpot) { //Cannot Target larger terrain or POds that are attached to non-facing sides
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Cannot Target</span></div>').appendTo(f);
                     } else if (loSBlocked) {
                         // LOS is blocked - only display the blocked message
@@ -718,6 +733,7 @@ window.weaponManager = {
 
     isOnWeaponArc: function isOnWeaponArc(shooter, target, weapon) {
         if (weapon.splitArcs) return weaponManager.isOnWeaponArcMultiple(shooter, target, weapon);
+
         //console.log("is on arc");
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
@@ -770,7 +786,29 @@ window.weaponManager = {
         return false;
     },
 
-
+    isTargetInGrapplingClawBlindSpot: function isTargetInGrapplingClawBlindSpot(shooter, target) {
+        if (shooter.flight) return false;
+        if (!shooter.attached || Object.keys(shooter.attached).length === 0) return false;
+        
+        var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
+        var shooterFacing = shipManager.getShipHeadingAngle(shooter);
+        
+        for (var i in shooter.systems) {
+            var system = shooter.systems[i];
+            if (system.name === "GrapplingClaw" && !shipManager.systems.isDestroyed(shooter, system)) {
+                // If this claw is currently attached to something
+                if (system.hostShipId && system.hostShipId > 0) {
+                    var arcs = shipManager.systems.getArcs(shooter, system);
+                    var start = mathlib.addToDirection(arcs.start, shooterFacing);
+                    var end = mathlib.addToDirection(arcs.end, shooterFacing);
+                    if (mathlib.isInArc(targetCompassHeading, start, end)) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    },
 
     calculateRangePenalty: function calculateRangePenalty(distance, weapon) {
         var rangePenalty = 0;
@@ -938,7 +976,7 @@ window.weaponManager = {
 
     //calculate hit chance for Boarding Action - different procedure
     calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon) {
-        if (target.flight || target.userid == -5) return 0;//Cannot board fighters or terrain, null FC stops this but showing 0% is more informative for players!
+        if (target.flight || target.shipSizeClass == 5 || target.mine) return 0;//Cannot board fighters,  terrain, or mines!
         if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit         
         var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
         if (jinking > 0) return 0;
@@ -970,7 +1008,7 @@ window.weaponManager = {
             if (speedDifference > 0) {//Check Speed difference
                 var speedChance = speedDifference;//Each point of speed difference equates to 5% chance to miss.
                 var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
-                if (target.Enormous) $newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
+                if (target.Enormous) newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
                 hitChance = Math.round(newHitchance * 5);//Convert to % value			
                 return hitChance;
             } else {
@@ -1681,13 +1719,28 @@ window.weaponManager = {
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
-            if (weapon.isBoardingAction && weapon.firingMode == 2 && !system){
-                if(gamedata.rules.desperate === undefined || (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)){
+
+            // Attachment firing restriction: Flights attached to anything, or non-flights targeting their host.
+            if (selectedShip.attached && Object.keys(selectedShip.attached).length > 0) {
+                if (selectedShip.flight || selectedShip.attached[ship.id] !== undefined) {
+                    if (!weapon.isBoardingAction) {
+                        continue;
+                    }
+                }
+            }
+
+            // Host targeting Pod restriction
+            if (selectedShip.hasAttached && selectedShip.hasAttached[ship.id] !== undefined) {
+                continue; // Parent cannot target the attached pod
+            }
+
+            if (weapon.isBoardingAction && weapon.firingMode == 2 && !system) {
+                if (gamedata.rules.desperate === undefined || (gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
                     var html = "You cannot choose to Wreak Havoc unless Desperate scenario rules are in effect.";
-                    confirm.warning(html);  
-                    return;                  
-                }                
-            }    
+                    confirm.warning(html);
+                    return;
+                }
+            }
             //Only need to check first weapon
             if (blockedLosHex && blockedLosHex.length > 0 && !loSBlocked) {
                 var sPosShooter = weaponManager.getFiringHex(selectedShip, weapon);
@@ -1931,6 +1984,13 @@ window.weaponManager = {
         var splitTargeted = [];
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
+
+            // Attachment firing restriction: Flights attached to anything cannot target hexes with non-boarding weapons.
+            if (selectedShip.flight && selectedShip.attached && Object.keys(selectedShip.attached).length > 0) {
+                if (!weapon.isBoardingAction) {
+                    continue;
+                }
+            }
 
             if (hidden && weapon.name !== 'TransverseDrive' && weapon.name !== 'MicroJumpSystem') {
                 var html = "You cannot fire weapons on a turn when you are stealthed.";

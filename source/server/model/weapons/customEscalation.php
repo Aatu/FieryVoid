@@ -1782,8 +1782,10 @@ class EWGraviticTractingRod extends Weapon implements SpecialAbility {
                 //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
                 $gravNetMove = new MovementOrder(null, "prefire", new OffsetCoordinate($xpos, $ypos), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $graviticOrderID, 0);
 
-                //Add shifted movement order to database
-                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);				
+                //Add shifted movement order to database and in-memory movement array
+                //so subsequent prefire weapons see the updated position.
+                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);
+                $target->setMovement($gravNetMove);				
                 break;
             }
         }         

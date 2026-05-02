@@ -34,7 +34,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#differences">DIFFERENCES FROM BABYLON 5 WARS</a></li>                        
         <li><a href="#mechanics">ADVANCED MECHANICS</a>
            <ul class="sub-list">
-                <li><a href="#boarding">Boarding Actions & Marines</a></li>
+                <li><a href="#boarding">Boarding Actions</a></li>
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
@@ -73,7 +73,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul style="margin-top: 10px;">
             <li>Alot has been automated in Fiery Void compared to B5 Wars, such as dice rolling, and players have a little less control over certain minutiae, but overall the game is more streamlined.</li>
             <li>By default the game is played in a fixed, rectangular map. It does not enforce anything about the boundaries — it’s up to the players to ensure ships leaving the map behave as disengaged.</li>
-            <li>Fiery Void does not enforce fleet design rules. Fleet requirement rules can be checked using the Check button during Fleet Selection.</li>
+            <li>Fiery Void does not enforce standard fleet design rules. Fleet requirement rules can however still be checked using the 'Check Fleet' button during Fleet Selection.</li>
             <li>The game mechanics are based on d100 rolls (instead of d20), so most values are displayed as percentages (e.g., 1 point on a d20 equates to 5%).</li>
             <li>There are no separate Power and Electronic Warfare (EW) phase. These are combined into a single Initial Orders phase, along with ballistic firing, which happens after the Initiative roll.</li>
         </ul>
@@ -115,19 +115,25 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h2 id="mechanics">INFO ON ADVANCED MECHANICS</h2>
 
-        <h3 id="boarding" style="margin-top: 15px;">Boarding Actions & Marines</h3>
+        <h3 id="boarding" style="margin-top: 15px;">Boarding Actions</h3>
         <ul>
-            <li>Many factions have access to Breaching Pods, which come equipped with marines that can undertake boarding actions.</li>
+            <li>Many factions have access to Breaching Pods and Grappling Claws, which come equipped with marines that can undertake boarding actions.  
+                During Fleet Selection, one pod can be purchased for every medium ship or HCV with hangar capacity for medium fighters, heavy fighter or assault shuttles, 
+                two for every capital ship with these hangars, and four for enormous units or bases.  Assault ships (i.e., those vessels containing ‘Assault’ in their name) can carry double these allowances
+                providing they have the hangar space to permit it.</li>
             <br>              
-            <li>During the Firing Phase, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Capture Ship, Sabotage and Rescue).</li>
+            <li>in battle, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Capture Ship, Sabotage and Rescue) during the Firing Phase.</li>
             <li>Pods will initially roll to attach on a d10 in the same way that normal weapons roll to hit enemies, 
                 but the calculation is very different and success is automatic if they are moving faster than the target ship and the speed difference between the two units is not higher than pod's thrust rating. 
                 If the speed difference to target is greater than pod thrust rating it is simply unable to attach. 
                 If the target is moving faster, each point of speed difference is -10% chance to attach.  
                 Pods cannot attach to ships with Advanced Armor and certain factions like Llort have +1 to attach rolls.</li>
+            <li>There is a limit to how many pods can attached to enemy ships based on their size, 12 pods can attach to bases, 8 to Capital Ships, 4 to HCVs, 2 to Medium Ships and only 1 to LCVs and OSATS.   
+                If more than this number try to attach and/or deliver marines then extra attacks over these limits will automatically fail. 
+                In addition, if a Grappling Claw ship is already to a structure facing this will prevent any Breaching Pods from attaching to that location.</li>    
             <li>Breaching Pods will remain attached to a vessels facing structure block until they choose to Detach in the Movement Phase, or the vessel is destroyed 
                 (providing that the structure location the pod is attached to is NOT also destryed).  If the structure block a pod is attached to IS detroyed before the Pod detaches, then the Pod is automatically destroyed.  
-                While attached, Pods matach speed and heading with their host ship, and suffer -10 Initiative penalty.  When the Detach they will automatically face away from the host ship to which they were attached.</li>
+                While attached, Pods match speed and heading with their host ship, and suffer -10 Initiative penalty.  When they Detach Pods will automatically face away from the host ship to which they were attached.</li>
             <li>Units can shoot at attached pods, providing they are in arc of the structure location the pod is attached to, and will roll to hit them as normal. However any shot aimed at a pod will automatically hit the vessel it is attached to as well.</li>                 
             <br>               
             <li>After the attach roll, the Pod will attempt to deliver its marines by rolling on a d10 again on the following table, with a base chance of 50% to successfully board the vessel.  
@@ -206,8 +212,26 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     </li>                      
                 </ul>
             </li>
-            <br>   
-            <li>Note - Ships euipped with Grappling Claws use the same rules to attach and deliver Marines as described above, however they do not currently attach to the enemy vessel in the same way as Breaching Pods.</li>
+            <br> 
+            <p><strong>GRAPPLING CLAWS:</strong></p>              
+            <li>Some ships are equipped with Grappling Claws, which largely use the same rules to attach and deliver Marines as described above, however there are a few notable differences outlined below:
+                    <ul class="circle-list">
+                        <li>The attaching unit cannot perform any maneuvers, but the host ship may do so, if it is of the same size or larger than the attached ship. 
+                            The host ship's turn costs and turn delays are increased to the sum of both units’ values (e.g., a ship with a 1/3 turn cost attached to one with a 2/3 turn cost would produce a total turn cost of around 1). 
+                            The target unit moves the conglomerate group when its turn arrives in the initiative sequence, and it may maneuver normally.</li>
+                        <li>No more than one ships can use grappling claws to attach to a medium ship or heavy combat vessel (shipSizesClasses 1 and 2). 
+                            Two grapple units can attach to a capital ship, but both must be on opposite ends. One unit can attach to each section of an enormous base. </li>
+                        <li>If the structure the attached ship has grappled is destroyed during the battle (or if the host ship itself is destroyed), the claw‐equipped vessel is broken free and any claws that are still attached are destroyed. 
+                            The destruction of either ship will not affect the other.</li>
+                        <li>Once the attacking ship has attached itself to the target, all fire by weapons through the claw’s firing arcs is blocked by the target’s hull (they cannot fire at the target unit for safety reasons). 
+                            If the attached unit’s weapons are capable of firing into other arcs or into a wider range, they can shoot at targets in those positions. 
+                            The unit to which the ship is attached is not prevented from firing any weapons (except at the attached unit)</li> 
+                        <li>If a Grappling Claw is destroyed, and it still had Marine units available, then these will be transferred to any surviving Grappling Claws on the ship.
+                            Marine Units held in Grappling Claw systems will count towards the total marines available for defence if an opponenet tries to capture the ship.</li>
+                        <li>The automatic extra hit on the host ship does not apply to shots fired at attached Grappling Claw ships.</li>      
+                        <li>Grappling Claw ships do not automatically face away from their host ship when they detach.</li>                                                  
+                    </ul>                                               
+                </li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -452,7 +476,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
-        <h3 id="useful" >Useful Controls</h3>
+        <h3 id="useful" >Hot Keys & Useful Controls</h3>
+        <li>Below are some useful controls to know to help get the best out of Fiery Void.  
+            Note - On touchscreens Right-Click functions are using duplcated by a long depress on your screen.</li>
         <ul>
             <li><b>W</b> - Show all Eelectronic Warfare (EW).</li>
             <li><b>X</b> - Show friendly EW.</li>
@@ -461,12 +487,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>E</b> - Show enemy ballistic fire.</li>
             <li><b>H</b> - Display hex numbers.</li>
             <li><b>R</b> - Toggle Ruler Tool.</li>            
-            <li>Set a ship’s reactor to overload in Initial Orders to self-destruct at the end of the turn.</li>
             <li><b>Right-click actions:</b>
                 <ul class="circle-list">
                     <li>Right-click Unit - Select it (if yours) and open controls.</li>
-                    <li>Right-click Weapon - Select all similar weapons (e.g., all fighter guns).</li>
-                    <li>Right-click Power Button - Toggle all similar systems.</li>
+                    <li>Right-click Weapon - Select all identical weapons (e.g., all fighter guns).</li>
+                    <li>Right-click Power Buttons - Toggle On/Off all identical systems.</li>
                     <li>Right-click Firing Mode - Change fire mode on all similar undeclared weapons.</li>
                     <li>Right-click Defensive Fire - Enable defensive fire on all similar undeclared weapons.</li>
                     <li>Right-click Cancel Move - Cancel all current moves for the unit.</li>
@@ -474,6 +499,22 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click Move Forward - Move forward using all remaining movement.</li>
                 </ul>
             </li>
+            <br>
+            <li><b>During Deployment Phase:</b>
+                <ul class="circle-list">
+                    <li>Shift & Left-click - Instantly deploy a ship to a hex already occupied by other units (Note- long press on touchscreen).  
+                        Must still be a valid deployment e.g. Fighters and Mines can stack with ships, but ships cannot be deployed with other ships.</li>
+                    <li>Double Left-click - Instantly select a single unit in a hex (if there are multiple units in the hex you'll still need to select from list), when you already have a deployable unit as your selected ship.  
+                        Makes it slightly quicker to select units when you have fighters or mines as you selected ship.</li>
+                </ul>
+            </li>
+            <br>            
+            <li><b>During Initial Orders Phase:</b>
+                <ul class="circle-list">
+                    <li>Right-clicking Electronic Warfare (EW) Add Button - Sets that EW type to the max available amount (Note- long press on touchscreen).</li>
+                    <li>Right-clicking Electronic Warfare (EW) Remove Button - Sets that EW type to zero (Note- long press on touchscreen).</li>                    
+                </ul>
+            </li>                                      
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

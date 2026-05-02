@@ -90,9 +90,18 @@ class BuyingGamePhase implements Phase
             $center = $teamCenters[$teamId] ?? new OffsetCoordinate(0,0);
             $facing = $teamHeadings[$teamId] ?? 0;
             
-            $count = 0;
+            $shipCount = 0;
+            $mineCount = 0;
             foreach ($ships as $ship) {
-                $count++;
+                $isMine = ($ship instanceof Mine);
+                
+                if ($isMine) {
+                    $mineCount++;
+                    $count = $mineCount;
+                } else {
+                    $shipCount++;
+                    $count = $shipCount;
+                }
                 
                 // Formations: Vertical Line relative to team center
                 // Simple pattern: 0, 1, -1, 2, -2... along the vertical axis
@@ -103,7 +112,9 @@ class BuyingGamePhase implements Phase
                 }
                 
                 // Apply offset to Y axis (q, r+offset) for standard vertical stack
-                $deployPos = new OffsetCoordinate($center->q, $center->r + $offsetStep);
+                // Mines are placed 2 hexes further behind on the x-axis
+                $mineOffset = $isMine ? (($facing === 0) ? -2 : 2) : 0;
+                $deployPos = new OffsetCoordinate($center->q + $mineOffset, $center->r + $offsetStep);
 
                 $move = new MovementOrder(-1, "start", $deployPos, 0, 0, 5, $facing, $facing, true, 1, 0, 0);
                 $ship->movement = array($move);
@@ -244,10 +255,10 @@ class BuyingGamePhase implements Phase
         while ($irregulars > 0) {
             $size = Dice::d(2, 1);  //Use a dice to decide a random size of asteroid!                    
             if($size == 1){
-                $currAsteroid = new asteroidTwoHex($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidTwoHex($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!               
             }else{
-                $currAsteroid = new asteroidThreeHex($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidThreeHex($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                            
             }
             $counter--;
@@ -258,13 +269,13 @@ class BuyingGamePhase implements Phase
         while ($counter > 0) {
             $size = Dice::d(3, 1);  //Use a dice to decide a random size of asteroid!
             if($size == 1){
-                $currAsteroid = new asteroidSNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidSNew($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                   
             }else if($size == 2){
-                $currAsteroid = new asteroidMNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidMNew($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, only terrain should use that!                  
             }else{
-                $currAsteroid = new asteroidLNew($gameData->id, -5, "Asteroid #" . $counter . "", $slot);
+                $currAsteroid = new asteroidLNew($gameData->id, -5, "Asteroids #" . $counter . "", $slot);
                 $dbManager->submitShip($gameData->id, $currAsteroid, -5); //Save them with a nominal userid of -5, nonly terrain should use that!                    
             }
             $counter--; //Reduce counter   

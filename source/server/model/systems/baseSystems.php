@@ -2278,14 +2278,27 @@ class CnC extends ShipSystem implements SpecialAbility {
 									$fighter->damage[] = $damageEntry;
 								}
 							}
-						} /*else { //We don't need ship logic, only FighterFlight units attached atm.
-							$boardingStruct = $boardingShip->getStructureSystem(0);
-							if ($boardingStruct && !$boardingStruct->isDestroyed()) {
-								$damageEntry = new DamageEntry(-1, $boardingShip->id, -1, $gamedata->turn, $boardingStruct->id, $boardingStruct->getRemainingHealth(), 0, 0, -1, true, false, "Target structure destroyed", "Standard", -1, -1);
-								$damageEntry->updated = true;
-								$boardingStruct->damage[] = $damageEntry;
+						} else {
+							// It's a ship attached via Grappling Claw. Destroy the claw(s) holding this connection.
+							foreach ($boardingShip->systems as $system) {
+								if ($system instanceof GrapplingClaw && !$system->isDestroyed()) {
+									// We need to check if THIS specific claw was attached to THIS host ship.
+									if (isset($system->hostShipId) && $system->hostShipId == $ship->id) {
+										$damageEntry = new DamageEntry(-1, $boardingShip->id, -1, $gamedata->turn, $system->id, $system->getRemainingHealth(), 0, 0, -1, true, false, "Target structure destroyed", "Standard", -1, -1);
+										$damageEntry->updated = true;
+										$system->damage[] = $damageEntry;
+										$system->exchangeMarines($boardingShip, $gamedata); //Move any spare Marines to another Claw on the same ship if available
+									}
+									if($system->name == "GrapplingClaw"){ //Either way, create note to reset the claw's own 
+										$system->hostShipId = -1;
+										$clawNote = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$boardingShip->id,$system->id,"ClawDetached","ClawDetached",-1);											
+										Manager::insertIndividualNote($clawNote);										
+									}								
+								}
 							}
-						}*/
+							// Detach the ship
+							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,"Detached","Detached",$shooterId . "=>Detach");
+						}
 					} else if ($ship->isDestroyed()) {
 						// Parent ship destroyed but not the structure, detach!
 						$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$ship->id,$this->id,"Detached","Detached",$shooterId . "=>Detach");
@@ -2326,12 +2339,17 @@ class CnC extends ShipSystem implements SpecialAbility {
 					$parts = explode('=>', $currNote->notevalue);
 					if (count($parts) === 2) {
 						$shooterId = (int)$parts[0];
-						$location = (int)$parts[1];
+						// notevalue format: "shooterId=>location" (legacy) or "shooterId=>location:facing" (with entry-side hex offset)
+						$locParts = explode(':', $parts[1]);
+						$location = (int)$locParts[0];
+						$facing = isset($locParts[1]) ? (int)$locParts[1] : null;
 						$ship->hasAttached[$shooterId] = $location;
-						
+						if ($facing !== null) $ship->hasAttachedFacing[$shooterId] = $facing;
+
 						$boardingShip = $gamedata->getShipById($shooterId);
 						if ($boardingShip) {
 							$boardingShip->attached[$ship->id] = $location;
+							if ($facing !== null) $boardingShip->attachedFacing[$ship->id] = $facing;
 						}
 					}
 				} else if ($currNote->notekey === 'Detached') {
@@ -2339,10 +2357,12 @@ class CnC extends ShipSystem implements SpecialAbility {
 					if (count($parts) === 2) {
 						$shooterId = (int)$parts[0];
 						unset($ship->hasAttached[$shooterId]);
-						
+						unset($ship->hasAttachedFacing[$shooterId]);
+
 						$boardingShip = $gamedata->getShipById($shooterId);
 						if ($boardingShip) {
 							unset($boardingShip->attached[$ship->id]);
+							unset($boardingShip->attachedFacing[$ship->id]);
 						}
 					}
 				} else {

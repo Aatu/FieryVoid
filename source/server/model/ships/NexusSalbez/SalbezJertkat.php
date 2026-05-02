@@ -15,8 +15,10 @@ class SalbezJertkat extends BaseShip{
 //        $this->limited = 33;
 
         $this->fighters = array("normal"=>6);
+		$this->customFighter = array("Ok-chn"=>6);
         $this->notes = 'Only 4 in service through 2124.';
-        $this->notes .= 'Common availability thereafter.';
+        $this->notes .= '<br>Common availability thereafter.';
+        $this->notes .= '<br>Ok-chn capable.';
 
 		$this->isd = 2113;
         

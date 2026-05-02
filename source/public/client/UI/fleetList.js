@@ -73,6 +73,8 @@ window.fleetListManager = {
 
             if (ship.userid == slot.playerid && ship.slot == slot.slot) {
                 if (ship.mine) {
+                    if (ship.spawned != -1) continue; // Exclude spawned mines
+
                     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
                     var shipClass = ship.shipClass;
                     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
@@ -130,13 +132,13 @@ window.fleetListManager = {
                     break;
             }
 
-            var baseValue = ship.pointCost;
+            var baseValue = ship.pointCost || 0;
             if (ship.flight === true) {
                 // Flights have cost calculated per 6 fighters
-                baseValue = ship.pointCost * (ship.flightSize / 6);
+                baseValue = (ship.pointCost || 0) * (ship.flightSize / 6);
             }
-            baseValue = Math.round(baseValue + ship.pointCostEnh + ship.pointCostEnh2);
-            var currValue = Math.round(baseValue * ship.combatValue / 100);
+            baseValue = Math.round(baseValue + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0));
+            var currValue = Math.round(baseValue * (ship.combatValue !== undefined ? ship.combatValue : 100) / 100);
 
             totalBaseValue += baseValue;
             totalCurrValue += currValue;
@@ -170,8 +172,8 @@ window.fleetListManager = {
                 var mine = mines[m];
                 var mCount = mine.bulkBuy || 1;
                 bulkBuy += mCount;
-                var mBaseValue = Math.round((mine.pointCost + mine.pointCostEnh + mine.pointCostEnh2) * mCount);
-                var mCurrValue = Math.round(mBaseValue * mine.combatValue / 100);
+                var mBaseValue = Math.round(((mine.pointCost || 0) + (mine.pointCostEnh || 0) + (mine.pointCostEnh2 || 0)) * mCount);
+                var mCurrValue = Math.round(mBaseValue * (mine.combatValue !== undefined ? mine.combatValue : 100) / 100);
                 combinedBaseValue += mBaseValue;
                 combinedCurrValue += mCurrValue;
             }
@@ -186,13 +188,13 @@ window.fleetListManager = {
             for (var mC in mineGroups) {
                 for (var mm in mineGroups[mC]) {
                     var mmCount = mineGroups[mC][mm].bulkBuy || 1;
-                    rawTotalMineCost += Math.round((mineGroups[mC][mm].pointCost + mineGroups[mC][mm].pointCostEnh + mineGroups[mC][mm].pointCostEnh2) * mmCount);
+                    rawTotalMineCost += Math.round(((mineGroups[mC][mm].pointCost || 0) + (mineGroups[mC][mm].pointCostEnh || 0) + (mineGroups[mC][mm].pointCostEnh2 || 0)) * mmCount);
                 }
             }
 
-            var GroupProportion = combinedBaseValue / rawTotalMineCost;
+            var GroupProportion = (rawTotalMineCost > 0) ? (combinedBaseValue / rawTotalMineCost) : 0;
             var finalGroupBaseValue = Math.round((combinedBaseValue + (100 * GroupProportion)) * surchargeMultiplier);
-            var finalGroupCurrValue = Math.round(finalGroupBaseValue * firstMine.combatValue / 100);
+            var finalGroupCurrValue = Math.round(finalGroupBaseValue * (firstMine.combatValue !== undefined ? firstMine.combatValue : 100) / 100);
 
             totalBaseValue += finalGroupBaseValue;
             totalCurrValue += finalGroupCurrValue;

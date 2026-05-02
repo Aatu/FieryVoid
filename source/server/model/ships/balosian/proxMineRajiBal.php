@@ -1,21 +1,21 @@
 <?php
-class captorWotcrAbbaiB extends Mine{
+class proxMineRajiBal extends Mine{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 12;
-		$this->faction = "Abbai Matriarchate (WotCR)";
-        $this->phpclass = "captorWotcrAbbaiB";
-        $this->imagePath = "img/ships/AbbaiWotcrMine.png";
-        $this->shipClass = "Bisitif-B Captor Mine";
+		$this->pointCost = 8;
+		$this->faction = "Balosian Underdwellers";
+        $this->phpclass = "proxMineRajiBal";
+        $this->imagePath = "img/ships/balosianMine.png";
+        $this->shipClass = "Raji Proximity Mine";
 		$this->occurence = "common";
-		$this->variantOf = 'NONE';
-        $this->isd = 1935;
+		//$this->variantOf = 'NONE';
+        $this->isd = 2200;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        $this->signature = 5;      
+        $this->signature = 1;        
         
         $this->turncost = 0;
         $this->turndelaycost = 0;
@@ -23,17 +23,16 @@ class captorWotcrAbbaiB extends Mine{
         $this->rollcost = 0;
         $this->pivotcost = 0;	
         $this->iniativebonus = -200; 
-
-        $this->mineType = 'Captor';         
-        $this->spawned = true;
+        $this->mineType = 'Proximity';
+        $this->variableDamage = 14; //Can          
        		    	    	    	    
-        //Block all enhancements for Terrain units when bought
+        //Block all enhancements for Mine units when bought
 		Enhancements::nonstandardEnhancementSet($this, 'Mines');	 
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 2));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
-        $this->addPrimarySystem(new CaptorMine(0, 1, 1, 0, 360, 7, 2, 0, 0, 12)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $accuracy, $diceType, $dice, $damageBonus 
+        $this->addPrimarySystem(new ProximityMine(0, 1, 1, 0, 360, 1, 1, 0, 16)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range, $diceType, $dice, $damageBonus 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(0, 1));

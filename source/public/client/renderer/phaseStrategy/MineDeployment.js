@@ -209,6 +209,8 @@ window.MineDeployment = (function () {
             return ship.mine &&
                 ship.userid == gamedata.thisplayer &&
                 !shipManager.isDestroyed(ship) &&
+                gamedata.turn == 1 &&
+                ship.spawned == -1 &&
                 shipManager.getTurnDeployed(ship) <= gamedata.turn;
         }).sort(function (a, b) {
             // Prefer mines without a deploy move (not yet placed)
@@ -338,7 +340,7 @@ window.MineDeployment = (function () {
         for (var pIdx = 0; pIdx < plusBtns.length; pIdx++) {
             plusBtns[pIdx].addEventListener('click', function (e) {
                 var cName = e.target.getAttribute('data-class');
-                if (groups[cName].current < groups[cName].max && _getTotalCurrent() < validHexes.length) {
+                if (groups[cName].current < groups[cName].max) {
                     groups[cName].current++;
                     _updateDisplay(cName);
                 }
@@ -349,9 +351,7 @@ window.MineDeployment = (function () {
         for (var maxIdx = 0; maxIdx < maxBtns.length; maxIdx++) {
             maxBtns[maxIdx].addEventListener('click', function (e) {
                 var cName = e.target.getAttribute('data-class');
-                var currentTotalExceptThis = _getTotalCurrent() - groups[cName].current;
-                var maxAllowed = Math.min(groups[cName].max, validHexes.length - currentTotalExceptThis);
-                groups[cName].current = Math.max(0, maxAllowed);
+                groups[cName].current = groups[cName].max;
                 _updateDisplay(cName);
             });
         }
@@ -368,12 +368,6 @@ window.MineDeployment = (function () {
 
                 // Clamp to the max available for this type
                 if (val > groups[cName].max) val = groups[cName].max;
-
-                // Clamp to the remaining valid hexes (excluding this type's old contribution)
-                var currentTotalExceptThis = _getTotalCurrent() - groups[cName].current;
-                var maxAllowed = validHexes.length - currentTotalExceptThis;
-
-                if (val > maxAllowed) val = Math.max(0, maxAllowed);
 
                 groups[cName].current = val;
                 _updateDisplay(cName); // Restores properly formatted/clamped value
@@ -393,7 +387,7 @@ window.MineDeployment = (function () {
 
                 if (e.deltaY < 0) {
                     // Scroll up = plus
-                    if (groups[cName].current < groups[cName].max && _getTotalCurrent() < validHexes.length) {
+                    if (groups[cName].current < groups[cName].max) {
                         groups[cName].current++;
                         _updateDisplay(cName);
                     }
@@ -414,9 +408,7 @@ window.MineDeployment = (function () {
         document.getElementById('mineDeployAll').addEventListener('click', function () {
             for (var i = 0; i < classNames.length; i++) {
                 var cName = classNames[i];
-                var currentTotalExceptThis = _getTotalCurrent() - groups[cName].current;
-                var maxAllowed = Math.min(groups[cName].max, validHexes.length - currentTotalExceptThis);
-                groups[cName].current = Math.max(0, maxAllowed);
+                groups[cName].current = groups[cName].max;
             }
 
             _closeDialog();

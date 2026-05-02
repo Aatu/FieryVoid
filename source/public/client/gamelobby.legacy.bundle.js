@@ -191,7 +191,7 @@ window.gamedata = {
 				powerRating = 'Tier 3; Custom faction';
 				break;
 			case 'Escalation Wars Civilian':
-				powerRating = 'Tier Other, Custom';
+				powerRating = 'Tier N/A, Custom';
 				break;
 			case 'Escalation Wars Chouka Raider':
 				powerRating = 'Tier 2; Not balanced, Custom faction';
@@ -580,6 +580,10 @@ window.gamedata = {
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
 
 		var totalEnhancementsValue = 0;
+		var totalBPCapacity = 0;
+		var totalBPUsage = 0;
+		var shipHangarProfiles = [];
+		var breachingPodsList = [];
 		/* messageOP - warning
 		var messageOP = '';
 		*/
@@ -684,36 +688,62 @@ window.gamedata = {
 			if (!lship.flight) {
 				totalShips++;
 
-				// Check if ship has converted Assault Shuttle Hangar Space to Fighters before calculating total hangar space
-				for (var enh in lship.enhancementOptions) {
-					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
-						if (lship.enhancementOptions[enh][0] === "HANG_F") {
-							hangarConversionsF += lship.enhancementOptions[enh][2]; //Record number of slots converted from Assault Shuttle to Fighters.
-						}
-					}
+				// Calculate Breaching Pod capacity for this ship - only if it has suitable hangar capacity
+				var hasBPCompatibleHangar = false;
+				var shipSlots = {
+					"heavy": lship.fighters["heavy"] || lship.fighters["normal"] || 0,
+					"medium": lship.fighters["medium"] || 0,
+					"assault shuttles": lship.fighters["assault shuttles"] || 0
+				};
+
+				if (shipSlots["heavy"] > 0 || shipSlots["medium"] > 0 || shipSlots["assault shuttles"] > 0) {
+					hasBPCompatibleHangar = true;
 				}
 
-				// Check if ship has converted Fighter Hangar Space to Assault Shuttles before calculating total hangar space
+				var shipBPLimit = 0;
+				if (hasBPCompatibleHangar) {
+					shipBPLimit = 1;
+					if (lship.Enormous || lship.base || lship.smallBase) {
+						shipBPLimit = 4;
+					} else if (lship.shipSizeClass >= 3) { // Capital ships
+						shipBPLimit = 2;
+					}
+					// Double for Assault units (hull type as requested)
+					if (lship.shipClass.toLowerCase().indexOf("assault") !== -1) {
+						shipBPLimit *= 2;
+					}
+					totalBPCapacity += shipBPLimit;
+				}
+
+				// Record ship profile for per-ship validation
+				var shipProfile = {
+					id: lship.id,
+					name: lship.shipClass,
+					bpLimitRemaining: shipBPLimit,
+					slots: shipSlots
+				};
+				shipHangarProfiles.push(shipProfile);
+
+				// Check if ship has converted Hangar Space (adjust ship-specific profile too)
 				for (var enh in lship.enhancementOptions) {
-					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option, ignore others.
+					if (lship.enhancementOptions[enh][6]) { // Hangar conversion is an option
+						var convNum = lship.enhancementOptions[enh][2];
+						if (lship.enhancementOptions[enh][0] === "HANG_F") {
+							hangarConversionsF += convNum;
+							shipProfile.slots["assault shuttles"] -= convNum;
+							shipProfile.slots["heavy"] += convNum;
+						}
 						if (lship.enhancementOptions[enh][0] === "HANG_AS") {
-							hangarConversionsAS += lship.enhancementOptions[enh][2]; //Record number of slots converted from Fighter to Assault Shuttles.
-							if (lship.customFighter && Object.keys(lship.customFighter).length > 0) {
-								var shipFighters = 0;
-								for (let g in lship.fighters) {
-									shipFighters += lship.fighters[g];
-								}
-								var customFighters = 0;
-								for (let h in lship.customFighter) {
-									customFighters += lship.customFighter[h];
-								}
-								if ((shipFighters - lship.enhancementOptions[enh][2]) <= customFighters) {
-									for (var i in lship.customFighter) {
-										lship.customFighter[i] = (shipFighters - lship.enhancementOptions[enh][2]);
-										break; //Let's just amend the first entry, should usually work...										
-									}
-								}
+							hangarConversionsAS += convNum;
+							// Deduct from heavy then medium
+							var toDeduct = convNum;
+							var taken = Math.min(toDeduct, shipProfile.slots["heavy"]);
+							shipProfile.slots["heavy"] -= taken;
+							toDeduct -= taken;
+							if (toDeduct > 0) {
+								shipProfile.slots["medium"] -= toDeduct;
 							}
+							shipProfile.slots["assault shuttles"] += convNum;
 						}
 					}
 				}
@@ -758,16 +788,20 @@ window.gamedata = {
 				}
 				//ship may actually require hangar, too! but this must be specified directly
 				if (lship.hangarRequired != '') { //classify based on explicit info from craft
-					var found = false;
-					for (var nh in totalFtrOther) {
-						if (totalFtrOther[nh][0] == lship.hangarRequired) {//this is small craft type we're looking for!
-							found = true;
-							totalFtrOther[nh][1] += 1 / lship.unitSize; //always 1 craft in this case!
+					if (lship.hangarRequired == 'Breaching Pods') {
+						totalBPUsage += 1 / lship.unitSize;
+					} else {
+						var found = false;
+						for (var nh in totalFtrOther) {
+							if (totalFtrOther[nh][0] == lship.hangarRequired) {//this is small craft type we're looking for!
+								found = true;
+								totalFtrOther[nh][1] += 1 / lship.unitSize; //always 1 craft in this case!
+							}
 						}
-					}
-					if (found != true) { //such craft wasn't encountered yet
-						totalFtrOther.push(new Array(lship.hangarRequired, 1 / lship.unitSize));
-						smallCraftUsed.push(lship.hangarRequired);
+						if (found != true) { //such craft wasn't encountered yet
+							totalFtrOther.push(new Array(lship.hangarRequired, 1 / lship.unitSize));
+							smallCraftUsed.push(lship.hangarRequired);
+						}
 					}
 				}
 			} else {//note presence of fighters
@@ -800,7 +834,13 @@ window.gamedata = {
 						specialFighters.push([specialFtrName, specialFtrAmt]);
 					}
 
-					if (smallCraftSize == "heavy") {
+					if (smallCraftSize == "Breaching Pods") {
+						var podsInFlight = lship.flightSize / lship.unitSize;
+						totalBPUsage += podsInFlight;
+						for (var p = 0; p < podsInFlight; p++) {
+							breachingPodsList.push({ id: lship.id });
+						}
+					} else if (smallCraftSize == "heavy") {
 						totalFtrH += lship.flightSize / lship.unitSize;
 					} else if (smallCraftSize == "medium") {
 						totalFtrM += lship.flightSize / lship.unitSize;
@@ -1091,6 +1131,38 @@ window.gamedata = {
 
 		//fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
+
+		// Per-Ship Breaching Pod Assignment and Deduction
+		var unassignedBPs = 0;
+		for (var bpIdx = 0; bpIdx < breachingPodsList.length; bpIdx++) {
+			var assigned = false;
+			for (var shIdx = 0; shIdx < shipHangarProfiles.length; shIdx++) {
+				var ship = shipHangarProfiles[shIdx];
+				if (ship.bpLimitRemaining > 0) {
+					// Check for suitable slot: AS > Heavy > Medium
+					if (ship.slots["assault shuttles"] > 0) {
+						ship.slots["assault shuttles"]--;
+						totalHangarAS--;
+						assigned = true;
+					} else if (ship.slots["heavy"] > 0) {
+						ship.slots["heavy"]--;
+						totalHangarH--;
+						assigned = true;
+					} else if (ship.slots["medium"] > 0) {
+						ship.slots["medium"]--;
+						totalHangarM--;
+						assigned = true;
+					}
+
+					if (assigned) {
+						ship.bpLimitRemaining--;
+						break;
+					}
+				}
+			}
+			if (!assigned) unassignedBPs++;
+		}
+
 		var hangarConversionNet = hangarConversionsF - hangarConversionsAS; //Positive is more fighter slots, negative if more AS.
 		var totalHangarAvailable = totalHangarH + totalHangarM + totalHangarL + (totalHangarXL / 2) + hangarConversionNet;
 		var minFtrRequired = Math.ceil(totalHangarAvailable / 2);
@@ -1310,8 +1382,27 @@ window.gamedata = {
 
 		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
 		totalHangarAS = totalHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
+
+		checkResult += "<br><b><u>Breaching Pods:</u></b><br>";
+		checkResult += " Total Breaching Pods: " + totalBPUsage;
+		checkResult += " (allowed up to " + totalBPCapacity + ")";
+		if (totalBPUsage > totalBPCapacity || unassignedBPs > 0) {
+			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+			if (unassignedBPs > 0) {
+				if (totalBPUsage > totalBPCapacity) {
+					checkResult += " (Not enough Breaching Pod Capacity)";
+				} else {
+					checkResult += " (Not enough hangar slots on ships with Breaching Pod capacity)";
+				}
+			}
+			problemFound = true;
+		} else {
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		}
+		checkResult += "<br>";
+
 		if (totalFtrAS > 0 || totalHangarAS > 0) { //do not show if there are no Assault Shuttles/hangars in this segment
-			checkResult += " Total Assault Shuttles / Breaching Pods: " + totalFtrAS;
+			checkResult += " Total Assault Shuttles: " + totalFtrAS;
 			checkResult += " (allowed up to " + totalHangarAS + ")";
 			if (totalFtrAS > totalHangarAS) { //Asssault Shuttle total is not within limits
 				checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
@@ -1609,6 +1700,7 @@ window.gamedata = {
 			else if (lowerPower.includes("major")) groupName = "Major Factions";
 			else if (lowerPower.includes("league")) groupName = "League of Non-Aligned Worlds";
 			else if (lowerPower.includes("ancients")) groupName = "Ancients";
+			else if (lowerPower.includes("other")) groupName = "Other Factions";
 			else if (isCustom) groupName = "Custom Factions";
 
 			const tierMatch = powerRating.match(/Tier\s*([123]|Ancients|Other)/i);
@@ -1901,7 +1993,7 @@ window.gamedata = {
 
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
-				var startClosed = (categoryIndex === 1 || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
+				var startClosed = ((categoryIndex === 1  && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
 				if (faction === "Terrain") {
 					startClosed = false;
 				}
@@ -2036,7 +2128,7 @@ window.gamedata = {
 
 		// Optimistic UI: Toggle immediately
 		factionElement.toggleClass("shipshidden");
-		
+
 		var icon = clickedElement.find('.faction-toggle-icon');
 		if (factionElement.hasClass("shipshidden")) {
 			icon.text('[+]');
@@ -7469,17 +7561,14 @@ window.shipManager = {
     },
 
 
-    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
-    playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {
-        var hasDeployed = true;
-
+    //True if the player still has at least one ship scheduled to deploy THIS turn.
+    //Future-turn arrivals are excluded — they don't keep the Deployment phase active.
+    hasShipsToDeployThisTurn: function hasShipsToDeployThisTurn(playerid) {
         for (const ship of gamedata.ships) {
             if (ship.userid !== playerid) continue;
-
-            var deploys = shipManager.getTurnDeployed(ship);
-            if (deploys >= gamedata.turn) hasDeployed = false;
+            if (shipManager.getTurnDeployed(ship) === gamedata.turn) return true;
         }
-        return hasDeployed;
+        return false;
     },
 
     //Need abridged version of this to prevent false positive returns from main function when a system is offline e.g. cloaking devices
@@ -9455,6 +9544,47 @@ shipManager.power = {
 
 shipManager.movement = {
 
+    getTurnCost: function (ship) {
+        var baseTurnCost = ship.turncost;
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var attachedShip = gamedata.getShip(attachedId);
+                if (attachedShip && !attachedShip.flight) {
+                    baseTurnCost += attachedShip.turncost;
+                }
+            }
+        }
+        return Math.round(baseTurnCost * 100) / 100;
+    },
+
+    getTurnDelayCost: function (ship) {
+        var baseTurnDelayCost = ship.turndelaycost;
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var attachedShip = gamedata.getShip(attachedId);
+                if (attachedShip && !attachedShip.flight) {
+                    baseTurnDelayCost += attachedShip.turndelaycost;
+                }
+            }
+        }
+        return Math.round(baseTurnDelayCost * 100) / 100;
+    },
+
+    isManeuverBlockedByAttachment: function (ship) {
+        if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
+            for (var attachedId in ship.hasAttached) {
+                var attachedShip = gamedata.getShip(attachedId);
+                // Check if it's a ship (e.g. Grappling Claw attachment) and not a fighter/pod
+                if (attachedShip && !attachedShip.flight) {
+                    if (attachedShip.shipSizeClass > ship.shipSizeClass) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    },
+
     deploy: function deploy(ship, pos) {
 
         if (!ship.deploymove) {
@@ -9686,6 +9816,7 @@ shipManager.movement = {
 
     canRoll: function canRoll(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         if (ship.flight || ship.osat) return false;
@@ -9710,6 +9841,7 @@ shipManager.movement = {
 
     canEmergencyRoll: function canEmergencyRoll(ship) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (ship.flight || ship.osat) return false;
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -9802,6 +9934,18 @@ shipManager.movement = {
             if (m.type == "isRolling") rolling = true;
             if (m.type == "roll" && m.commit) rolling = !rolling;
         }
+        if (!rolling && Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.agile && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "isRolling") rolling = true;
+                    if (hm.type == "roll" && hm.commit) rolling = !rolling;
+                }
+            }
+        }
         return rolling;
     },
 
@@ -9850,6 +9994,17 @@ shipManager.movement = {
             var m = ship.movement[i];
             if (m.turn != gamedata.turn) continue;
             if (m.type == "roll" || m.type == "isRolling") return true;
+        }
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "roll" || hm.type == "isRolling") return true;
+                }
+            }
         }
         return false;
     },
@@ -9900,7 +10055,7 @@ shipManager.movement = {
     },
 
     canDetach: function canDetach(ship) {
-        if (gamedata.gamephase != 2) return false;        
+        if (gamedata.gamephase != 2) return false;
         if (Object.keys(ship.attached).length === 0) return false;
         if (shipManager.movement.hasDeletableMovements(ship)) return false;
         return true;
@@ -9908,15 +10063,18 @@ shipManager.movement = {
 
     doDetach: function doDetach(ship) {
         var lm = ship.movement[ship.movement.length - 1];
-        var hostShipId = Object.keys(ship.attached)[0];      
-        ship.detached = true; //Mark detached this movement.        
+        var hostShipId = Object.keys(ship.attached)[0];
+        ship.detached = true; //Mark detached this movement.
+        var facing = lm.facing;
+        if(ship.flight) facing = mathlib.addToHexFacing(lm.facing, 3); //Pods always face away from host ship when they detach.    
+        
         ship.movement[ship.movement.length] = {
             id: -1,
             type: "detach",
             position: lm.position,
             xOffset: 0,
             yOffset: 0,
-            facing: mathlib.addToHexFacing(lm.facing, 3), // Turn 180 degrees
+            facing: facing, 
             heading: lm.heading,
             speed: lm.speed,
             animating: false,
@@ -9937,6 +10095,7 @@ shipManager.movement = {
 
     canSlip: function canSlip(ship, right) {
         if (gamedata.gamephase != 2) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
@@ -10111,6 +10270,7 @@ shipManager.movement = {
 
     canPivot: function canPivot(ship, right) {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -10321,6 +10481,24 @@ shipManager.movement = {
             if (movement.value === 'turnIntoPivot') pivoting = "no";
 
         }
+        if (pivoting === "no" && Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.agile && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.commit == false) continue;
+                    if (hm.type == "isPivotingLeft") pivoting = "left";
+                    if (hm.type == "isPivotingRight") pivoting = "right";
+                    if (hm.type == "pivotright" && pivoting == "no" && hm.preturn == false) pivoting = "right";
+                    if (hm.type == "pivotleft" && pivoting == "no" && hm.preturn == false) pivoting = "left";
+                    if (hm.type == "pivotright" && pivoting == "left" && hm.preturn == false) pivoting = "no";
+                    if (hm.type == "pivotleft" && pivoting == "right" && hm.preturn == false) pivoting = "no";
+                    if (hm.value === 'turnIntoPivot') pivoting = "no";
+                }
+            }
+        }
         return pivoting;
     },
 
@@ -10437,7 +10615,7 @@ shipManager.movement = {
 
         var remThrust = shipManager.movement.getRemainingEngineThrust(ship);
         var speed = shipManager.movement.getSpeed(ship);
-        var contractCostBase = Math.round(speed * ship.turncost); //turn cost should be 1.33
+        var contractCostBase = Math.round(speed * shipManager.movement.getTurnCost(ship)); //turn cost should be 1.33
         var contractCost = Math.max(2, contractCostBase); //Minimum of 2 thrust
 
         if (value == 1 && contractCost > remThrust) return false;//Not enough thrust to contract. 
@@ -10467,7 +10645,7 @@ shipManager.movement = {
 
         var remThrust = shipManager.movement.getRemainingEngineThrust(ship);
         var speed = shipManager.movement.getSpeed(ship);
-        var contractCostBase = Math.round(speed * ship.turncost); //turn cost should be 1.33
+        var contractCostBase = Math.round(speed * shipManager.movement.getTurnCost(ship)); //turn cost should be 1.33
         var contractCost = Math.max(2, contractCostBase);	//Minimum of 2 thrust        	
 
         var lastMovement = ship.movement[ship.movement.length - 1];
@@ -10568,6 +10746,7 @@ shipManager.movement = {
         if (gamedata.gamephase != 2) return false;
         //if (ship.agile) returnVal = false; //agile ship should be able to turn into pivot all right...
         if (ship.flight) return false; //Every turn is a turn into pivot for fighters/shuttles, no need for extra movement type.
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
 
         /*cannot turn into pivot if unit is aligned...*/
@@ -10583,7 +10762,7 @@ shipManager.movement = {
 
         //is turning affordable in the first place?
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
@@ -10676,6 +10855,18 @@ shipManager.movement = {
                 right = true;
             }
         }
+        if (!left && !right && Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "pivotleft" && hm.preturn == false) left = true;
+                    if (hm.type == "pivotright" && hm.preturn == false) right = true;
+                }
+            }
+        }
         return { left: left, right: right };
     },
 
@@ -10706,6 +10897,18 @@ shipManager.movement = {
                 return true;
             }
         }
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) {
+            var hostId = parseInt(Object.keys(ship.attached)[0]);
+            var hostShip = gamedata.getShip(hostId);
+            if (hostShip && !hostShip.flight) {
+                for (var j in hostShip.movement) {
+                    var hm = hostShip.movement[j];
+                    if (hm.turn != gamedata.turn) continue;
+                    if (hm.type == "pivotleft" || hm.type == "pivotright") return true;
+                    if (hm.type == "isPivotingRight" || hm.type == "isPivotingLeft") return true;
+                }
+            }
+        }
         return false;
     },
 
@@ -10733,9 +10936,9 @@ shipManager.movement = {
             if (movement.preturn == false &&
                 movement.forced == false &&
                 movement.type != "speedchange" &&
-                movement.type != "deploy" && 
+                movement.type != "deploy" &&
                 movement.type != "sync" &&
-                movement.type != "attached" &&                  
+                movement.type != "attached" &&
                 movement.type != "detach") return false;
         }
 
@@ -10743,14 +10946,14 @@ shipManager.movement = {
         if (ship.gravitic) return true;
 
         //ship cannot accelerate if it's not aligned OR pivoting    
-        if ((shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") && !ship.detached) return false;
+        if (shipManager.movement.isOutOfAlignment(ship) || shipManager.movement.isPivoting(ship) != "no") return false;
 
         return true;
     },
 
     adjustTurnDelay: function adjustTurnDelay(ship, oldspeed, newspeed) {
-        var oldturndelay = Math.ceil(oldspeed * ship.turndelaycost);
-        var newturndelay = Math.ceil(newspeed * ship.turndelaycost);
+        var oldturndelay = Math.ceil(oldspeed * shipManager.movement.getTurnDelayCost(ship));
+        var newturndelay = Math.ceil(newspeed * shipManager.movement.getTurnDelayCost(ship));
         var step = newturndelay - oldturndelay;
         var spentturndelay = newturndelay;
 
@@ -11333,6 +11536,7 @@ shipManager.movement = {
 
     canTurn: function canTurn(ship, right) {
         if (ship.mine) return false;
+        if (shipManager.movement.isManeuverBlockedByAttachment(ship)) return false;
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!         
         if (gamedata.gamephase == -1 && ship.deploymove) return true;
         if (gamedata.gamephase != 2) return false;
@@ -11366,7 +11570,7 @@ shipManager.movement = {
         }
 
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
@@ -11488,7 +11692,7 @@ shipManager.movement = {
         }
 
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         //if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
@@ -11629,7 +11833,7 @@ shipManager.movement = {
         var requiredThrust = Array(null, null, null, null, null);
 
         var speed = shipManager.movement.getSpeed(ship);
-        var baseTurnCost = ship.turncost;
+        var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
 
@@ -11761,7 +11965,7 @@ shipManager.movement = {
         var didTurn = false;
         var turndelay = 0;
         if (setMoveNo >= 0) {
-            turndelay = Math.ceil(ship.movement[setMoveNo].speed * ship.turndelaycost); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+            turndelay = Math.ceil(ship.movement[setMoveNo].speed * shipManager.movement.getTurnDelayCost(ship)); //delay at current speed - at least as many moves are required for turn delay to be satisfied
         } else {//before unit started to move there was no delay for certain
             turndelay = 0;
         }
@@ -11811,7 +12015,7 @@ shipManager.movement = {
 
     calculateCurrentTurndelay: function calculateCurrentTurndelay(ship) {
         /* Marcin Sawicki, December 2019: this is having trouble when delay is reduced to 0 (by exactly satisfying or by slowing down to 0), and then acceleration happens
-        var turndelay = Math.ceil(ship.movement[ship.movement.length - 1].speed * ship.turndelaycost);
+        var turndelay = Math.ceil(ship.movement[ship.movement.length - 1].speed * shipManager.movement.getTurnDelayCost(ship));
         var last = null;
         var didTurn = false;
         if (gamedata.turn == 1) {
@@ -11832,7 +12036,7 @@ shipManager.movement = {
             last = movement;
         }
         if (turndelay < 0) turndelay = 0;
-        if (turndelay > 0 && ship.turndelaycost > 1) {
+        if (turndelay > 0 && shipManager.movement.getTurnDelayCost(ship) > 1) {
             if (!didTurn) {
                 turndelay = 0;
             }
@@ -11848,8 +12052,8 @@ shipManager.movement = {
     calculateTurndelay: function calculateTurndelay(ship, movement, speed) {
         // speed as a seperate parameter needed to allow for calculation with new speed.
         if (speed == 0) return 0;
-        if (ship.turndelaycost == 0) return 0;
-        var turndelay = Math.ceil(speed * ship.turndelaycost);
+        if (shipManager.movement.getTurnDelayCost(ship) == 0) return 0;
+        var turndelay = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
         //if (turndelay < 1) turndelay = 1; //Marcin Sawicki: I think this just adds turn delay after accel when delay is satisfied exactly...
@@ -16102,6 +16306,8 @@ window.fleetListManager = {
 
             if (ship.userid == slot.playerid && ship.slot == slot.slot) {
                 if (ship.mine) {
+                    if (ship.spawned != -1) continue; // Exclude spawned mines
+
                     var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
                     var shipClass = ship.shipClass;
                     if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
@@ -16159,13 +16365,13 @@ window.fleetListManager = {
                     break;
             }
 
-            var baseValue = ship.pointCost;
+            var baseValue = ship.pointCost || 0;
             if (ship.flight === true) {
                 // Flights have cost calculated per 6 fighters
-                baseValue = ship.pointCost * (ship.flightSize / 6);
+                baseValue = (ship.pointCost || 0) * (ship.flightSize / 6);
             }
-            baseValue = Math.round(baseValue + ship.pointCostEnh + ship.pointCostEnh2);
-            var currValue = Math.round(baseValue * ship.combatValue / 100);
+            baseValue = Math.round(baseValue + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0));
+            var currValue = Math.round(baseValue * (ship.combatValue !== undefined ? ship.combatValue : 100) / 100);
 
             totalBaseValue += baseValue;
             totalCurrValue += currValue;
@@ -16199,8 +16405,8 @@ window.fleetListManager = {
                 var mine = mines[m];
                 var mCount = mine.bulkBuy || 1;
                 bulkBuy += mCount;
-                var mBaseValue = Math.round((mine.pointCost + mine.pointCostEnh + mine.pointCostEnh2) * mCount);
-                var mCurrValue = Math.round(mBaseValue * mine.combatValue / 100);
+                var mBaseValue = Math.round(((mine.pointCost || 0) + (mine.pointCostEnh || 0) + (mine.pointCostEnh2 || 0)) * mCount);
+                var mCurrValue = Math.round(mBaseValue * (mine.combatValue !== undefined ? mine.combatValue : 100) / 100);
                 combinedBaseValue += mBaseValue;
                 combinedCurrValue += mCurrValue;
             }
@@ -16215,13 +16421,13 @@ window.fleetListManager = {
             for (var mC in mineGroups) {
                 for (var mm in mineGroups[mC]) {
                     var mmCount = mineGroups[mC][mm].bulkBuy || 1;
-                    rawTotalMineCost += Math.round((mineGroups[mC][mm].pointCost + mineGroups[mC][mm].pointCostEnh + mineGroups[mC][mm].pointCostEnh2) * mmCount);
+                    rawTotalMineCost += Math.round(((mineGroups[mC][mm].pointCost || 0) + (mineGroups[mC][mm].pointCostEnh || 0) + (mineGroups[mC][mm].pointCostEnh2 || 0)) * mmCount);
                 }
             }
 
-            var GroupProportion = combinedBaseValue / rawTotalMineCost;
+            var GroupProportion = (rawTotalMineCost > 0) ? (combinedBaseValue / rawTotalMineCost) : 0;
             var finalGroupBaseValue = Math.round((combinedBaseValue + (100 * GroupProportion)) * surchargeMultiplier);
-            var finalGroupCurrValue = Math.round(finalGroupBaseValue * firstMine.combatValue / 100);
+            var finalGroupCurrValue = Math.round(finalGroupBaseValue * (firstMine.combatValue !== undefined ? firstMine.combatValue : 100) / 100);
 
             totalBaseValue += finalGroupBaseValue;
             totalCurrValue += finalGroupCurrValue;
@@ -18384,8 +18590,37 @@ CnC.prototype.initializationUpdate = function () {
 	if (!this.data) this.data = {};
 	if (ship.factionAge > 2 || gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
 		this.data["Marine Units"] = 'N/A';
+	} else if (gamedata.gamephase == -2) {
+		var structureTotal = 0;
+		for (var i in ship.systems) {
+			if (ship.systems[i].name === 'structure') structureTotal += ship.systems[i].maxhealth;
+		}
+		var multiplier = ship.shipSizeClass === 1 ? 1.2 : 1.1;
+		var marines = Math.floor(Math.ceil(structureTotal * multiplier) / 20);
+
+		if (ship.shipSizeClass !== -1) {
+			for (var i in ship.systems) {
+				if (ship.systems[i].name === 'GrapplingClaw') marines += (ship.systems[i].data["Ammunition"] || 0);
+			}
+		}
+
+		if (ship.base) {
+			var sections = {};
+			for (var i in ship.systems) {
+				if (ship.systems[i].name === 'structure') sections[ship.systems[i].location] = true;
+			}
+			marines += Object.keys(sections).length;
+		}
+
+		if (ship.shipClass && ship.shipClass.indexOf('Assault') !== -1) {
+			if (ship.shipSizeClass === 3) marines += 4;
+			else if (ship.shipSizeClass === 2) marines += 3;
+			else if (ship.shipSizeClass === 1) marines += 2;
+		}
+
+		this.data["Marine Units"] = Math.max(0, marines);
 	} else {
-		this.data["Marine Units"] = this.marines || 0; // Ensure marines is defined
+		this.data["Marine Units"] = this.marines || 0;
 	}
 	return this;
 };
@@ -20926,9 +21161,9 @@ EMShield.prototype.initializationUpdate = function () {
 	// Turns systems back on after Capacitor was double charged the previous turn
 	var ship = this.ship;
 	if (ship.faction == "Vorlon Empire") {
+		this.reactivated = true;		
 		if (!this.reactivated && gamedata.gamephase === 1 && shipManager.power.isOffline(ship, this)) {
 			shipManager.power.setOnline(ship, this);
-			this.reactivated = true;
 		}
 	}
 	return this;
@@ -24116,7 +24351,16 @@ var GrapplingClaw = function GrapplingClaw(json, ship) {
 GrapplingClaw.prototype = Object.create(Weapon.prototype);
 GrapplingClaw.prototype.constructor = GrapplingClaw;
 
-;
+GrapplingClaw.prototype.initializationUpdate = function() {
+	if(this.hostShipId !== -1 && !this.hostShipDisplayed){
+        this.hostShipDisplayed = true;
+        var hostShip = gamedata.getShip(this.hostShipId);
+        this.data["Attached to"] = hostShip.name;
+    }
+
+
+	return this;
+};;
 
 /* Source: client/model/weapon/supportWeapons.js */
 "use strict";
@@ -27017,7 +27261,13 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
 AntigravityBeam.prototype.checkFinished = function () {
     if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
     return false;
-};;
+};
+
+var GraviticMine = function GraviticMine(json, ship) {
+    Gravitic.call(this, json, ship);
+};
+GraviticMine.prototype = Object.create(Gravitic.prototype);
+GraviticMine.prototype.constructor = GraviticMine;;
 
 /* Source: client/model/weapon/missile.js */
 "use strict";
@@ -29404,6 +29654,11 @@ NexusSandCaster.prototype.clearBoost = function () {
     }
 };
 
+var LtPlasmaCannonFtr = function LtPlasmaCannonFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+LtPlasmaCannonFtr.prototype = Object.create(Weapon.prototype);
+LtPlasmaCannonFtr.prototype.constructor = LtPlasmaCannonFtr;
 
 
 

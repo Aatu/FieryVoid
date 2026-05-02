@@ -47,7 +47,7 @@ class dewMineMaschatSar extends Mine{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 2));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
-        $this->addPrimarySystem(new MineControllerDEW(0, 1, 0, 5, 0)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range/output, $accuracy 
+        $this->addPrimarySystem(new MineControllerDEW(0, 1, 0, 5, 0, false, null)); //$armour, $maxhealth, $powerReq, $startArc, $endArc, $range/output, $accuracy, ballistic, validtargets 
         $this->addPrimarySystem(new Interdictor(0, 1, 1, 0, 360));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

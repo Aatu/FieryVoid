@@ -803,7 +803,8 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 		public $baseRating = 0; //Will be set when contructed.		
 		public $changeThisTurn = 0;	//When shields moved around, change it tracked here to be made into Damage Entry.	
 		public $currentHealth = 0; //Value for front-end when moving shield power around.
-		public $side = '';//Required for prioritising a shield using Generator Presets.		
+		public $side = '';//Required for prioritising a shield using Generator Presets.	
+		protected $survivesStructureDestruction = true;				
 	    
 	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
@@ -832,8 +833,9 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots within its arc.";
 			$this->data["Special"] .= "<br>Absorbs up to its maximum capacity before allowing damage to ship.";		
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
-	        $this->data["Special"] .= "<br>The Shield's Generator will regenerate Shields up to their Base Rating at the end of each turn, any excess will be allocate to another shield where possible.";			
+	        $this->data["Special"] .= "<br>Shield Generator will regenerate Shields up to their Base Rating at the end of each turn, any excess will be allocate to another shield where possible.";			
 			$this->data["Special"] .= "<br>Has a +3 Armor against attacks by Fighters.";	
+			$this->data["Special"] .= "<br>Cannot be destroyed.";			
  			$this->data["Base Rating"] = $this->baseRating; 									
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
@@ -1016,6 +1018,17 @@ class ThirdspaceShield extends Shield implements DefensiveSystem { //defensive v
 	 		  
 	}//endof onIndividualNotesLoaded
 
+	public function criticalPhaseEffects($ship, $gamedata)
+    { 
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.	    
+		
+		if($this->survivesStructureDestruction){ //Should always be true
+			foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
+					$damage->destroyed = false;
+			}
+		}
+    } //endof function criticalPhaseEffects	
+
 		
 	public function stripForJson() {
 	    $strippedSystem = parent::stripForJson();
@@ -1048,7 +1061,8 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 		public $currentHealth = 0; //Value for front-end when moving shield power around.
 		public $side = '';//Required for prioritising a shield using Generator Presets.
 		public $baseRating = 0; //Will be set when contructed.
-		public $defenceMod = 0;	//To allow shield to be reinfored and act as an EM shield as well.	
+		public $defenceMod = 0;	//To allow shield to be reinfored and act as an EM shield as well.
+		protected $survivesStructureDestruction = true;	
 	    
 	    function __construct($armor, $startHealth, $rating, $startArc, $endArc, $side = 'F'){ //parameters: $armor, $startHealth, $Rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 			$this->iconPath = 'ThirdspaceShield' . $side . '.png';
@@ -1088,8 +1102,8 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			$this->data["Special"] = "Defensive system which absorbs damage from incoming shots within its arc.";
 			$this->data["Special"] .= "<br>Can absorb up to its maximum capacity before allowing damage to ship.";		
 			$this->data["Special"] .= "<br>Shield system's structure represents damage capacity, if it is reduced to zero system will cease to function.";
-			$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
 			$this->data["Special"] .= "<br>Cannot be flown under, and does not reduce the damage dealt or hit chance of enemy weapons.";
+			$this->data["Special"] .= "<br>Cannot be destroyed.";			
 			$this->currentHealth = $this->getRemainingCapacity();//override on-icon display default
 			$this->outputDisplay = $this->currentHealth;//override on-icon display default					
 		}	
@@ -1206,7 +1220,12 @@ class ThoughtShield extends Shield implements DefensiveSystem {
 			
 			parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
 	
-			if($this->isDestroyed()) return; //destroyed shield does not work...shouldn't happen.
+			//if($this->isDestroyed()) return; //destroyed shield does not work...shouldn't happen.
+			if($this->survivesStructureDestruction){ //Should always be true
+				foreach ($this->damage as $damage ) if(($damage->turn == $gamedata->turn) && ($damage->destroyed)){ 
+						$damage->destroyed = false;
+				}
+			}			
 
 				$baseRegen = $this->baseRating;
 				$generator = $ship->getSystemByName("ThoughtShieldGenerator");

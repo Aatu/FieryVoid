@@ -10,6 +10,7 @@ import HyachSpecialistsList from "./HyachSpecialistsList";
 import ShieldGeneratorList from "./ShieldGeneratorList";
 import PowerCapacitor from "./PowerCapacitor";
 import SystemActivation from "./SystemActivation";
+import SystemPowerSettings from "./SystemPowerSettings";
 import MineSettingsList from "./MineSettingsList";
 import ProximityMineSettingsList from "./ProximityMineSettingsList";
 
@@ -532,12 +533,7 @@ class SystemInfoButtons extends React.Component {
 
 		return (
 			<Container>
-				{canOnline(ship, system) && <Button title="Power on (RMB = All systems selected)" onClick={this.online.bind(this)} onContextMenu={this.allOnline.bind(this)} img="./img/on.png"></Button>}
-				{canOffline(ship, system) && <Button title="Power off (RMB = All systems selected)" onClick={this.offline.bind(this)} onContextMenu={this.allOffline.bind(this)} img="./img/off.png"></Button>}
-				{canOverload(ship, system) && <Button title="Overload" onClick={this.overload.bind(this)} img="./img/overload.png"></Button>}
-				{canStopOverload(ship, system) && <Button title="Stop overload" onClick={this.stopOverload.bind(this)} img="./img/overloading.png"></Button>}
-				{canDeBoost(ship, system) && <Button title="Remove boost" onClick={this.deboost.bind(this)} img="./img/minussquare.png"></Button>}
-				{canBoost(ship, system) && <Button title="Boost" onClick={this.boost.bind(this)} img="./img/plussquare.png"></Button>}
+				{canSystemPowerSettings(ship, system) && <SystemPowerSettings ship={ship} system={system} />}
 				{canAddShots(ship, system) && <Button title="More shots" onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
 				{canReduceShots(ship, system) && <Button title="Less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
 				{canRemoveFireOrderMulti(ship, system) && <Button title="Remove last fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
@@ -773,6 +769,12 @@ const canPowerCapacitor = (ship, system) => {
 	return false;
 }
 
+export const canSystemPowerSettings = (ship, system) => {
+	return canOffline(ship, system) || canOnline(ship, system) ||
+		canOverload(ship, system) || canStopOverload(ship, system) ||
+		(system.boostable && (canBoost(ship, system) || canDeBoost(ship, system)));
+};
+
 export const canSystemActivation = (ship, system) => {
 	if (canPowerCapacitor(ship, system)) return false;//power capacitor is handled by its own component
 
@@ -792,6 +794,7 @@ export const hasStyledMenu = (ship, system) => {
 		(canThoughtShield(ship, system) || canThoughtShieldGen(ship, system)) ||
 		canSelfRepairList(ship, system) ||
 		canPowerCapacitor(ship, system) ||
+		canSystemPowerSettings(ship, system) ||
 		canSystemActivation(ship, system);
 };
 

@@ -88,64 +88,99 @@ window.ReplayAnimationStrategy = function () {
     }
 
     function animateMovement(time) {
-        var animatedShips = {}; // Track ships already processed in a group
+        var animatedShips = {}; // Track ships already fully processed
 
-        // Helper to check for detach order
+        // Helper: get host ID from this ship's raw movement orders
+        var self = this;
+        var getShipMovementsThisTurn = function (ship) {
+            if (!ship.movement) return [];
+            return ship.movement.filter(function (m) { return m.turn === self.turn; });
+        };
+
+        var getHostIdFromMovements = function (ship) {
+            var moves = getShipMovementsThisTurn(ship);
+            for (var i = 0; i < moves.length; i++) {
+                if (moves[i].type === 'attached' || moves[i].type === 'detach') {
+                    return moves[i].value;
+                }
+            }
+            return null;
+        };
+
+        // Helper: check for detach order
         var hasDetachOrder = function (ship) {
-            var icon = this.shipIconContainer.getByShip(ship);
-            if (!icon) return false;
-            return icon.getMovementsReplay(this.turn).some(m => m.type === 'detach');
-        }.bind(this);
+            return getShipMovementsThisTurn(ship).some(function (m) { return m.type === 'detach'; });
+        };
+
+        // Helper: get the detach move object (raw)
+        var getDetachMove = function (ship) {
+            return getShipMovementsThisTurn(ship).find(function (m) { return m.type === 'detach'; });
+        };
 
         this.gamedata.ships.forEach(function (ship, index) {
             if (animatedShips[ship.id]) return;
 
-            // Check if this ship is attached to someone else
-            var hostId = null;
-            if (ship.attached && Object.keys(ship.attached).length > 0) {
-                hostId = Object.keys(ship.attached)[0];
-            }
+            // Detect attachment from movement orders (ship.attached is cleared by server after detach)
+            var hostIdFromMoves = getHostIdFromMovements(ship);
+            var isDetachingPodAfterHost = false;
 
-            if (hostId) {
-                var host = this.gamedata.getShip(hostId);
-                if (host) {
-                    var hostIndex = this.gamedata.ships.indexOf(host);
-                    var detached = hasDetachOrder(ship);
+            if (hostIdFromMoves) {
+                var isAttachedAtStart = Object.keys(ship.attached || {}).length > 0;
+                if (!isAttachedAtStart) {
+                    // It attached mid-turn (e.g. Grappling Claw). Treat as independent ship for this turn.
+                    hostIdFromMoves = null;
+                } else {
+                    var host = this.gamedata.getShip(hostIdFromMoves);
+                    if (host) {
+                        var hostIndex = this.gamedata.ships.indexOf(host);
+                        var detached = hasDetachOrder(ship);
 
-                    // Case: Pod detaches and moves BEFORE host -> Animate alone now
-                    if (detached && index < hostIndex) {
-                        // proceed with normal animation for this ship alone
-                    } else {
-                        // Case: Pod is attached, or detaches LATER -> Wait for host loop
-                        return;
+                        if (!detached) {
+                            // Permanently attached this turn - fully handled by host's slot
+                            return;
+                        }
+
+                        if (index > hostIndex) {
+                            // Pod detaches and its initiative is AFTER the host.
+                            // The host's slot already created a SyncedIconAnimation for it.
+                            // Now we create its independent post-detach animation.
+                            isDetachingPodAfterHost = true;
+                        }
+                        // If index < hostIndex: pod detaches but moves BEFORE host.
+                        // Falls through normally to animate all its moves independently.
                     }
                 }
             }
 
-            // This ship is either independent, a host, or an early-detaching pod.
+            // Build the group: the ship itself, plus any pods to sync
             var group = [ship];
+            var podsToSync = [];
 
-            // If this is a host, find all pods that should move with it now
-            this.gamedata.ships.forEach(function (otherShip, otherIndex) {
-                if (animatedShips[otherShip.id] || otherShip.id === ship.id) return;
+            if (!isDetachingPodAfterHost) {
+                // Find pods attached to this ship via their movement orders
+                this.gamedata.ships.forEach(function (otherShip) {
+                    if (animatedShips[otherShip.id] || otherShip.id === ship.id) return;
 
-                if (otherShip.attached && otherShip.attached[ship.id]) {
-                    var otherDetached = hasDetachOrder(otherShip);
-                    // If it doesn't detach, it ALWAYS moves with host.
-                    // If it detaches but moves AFTER host (or host index is same somehow), it moves with host.
-                    if (!otherDetached || otherIndex > index) {
-                        group.push(otherShip);
+                    var otherHostId = getHostIdFromMovements(otherShip);
+                    if (otherHostId && otherHostId == ship.id) {
+                        var isOtherAttachedAtStart = Object.keys(otherShip.attached || {}).length > 0;
+                        if (isOtherAttachedAtStart) {
+                            var otherDetaches = hasDetachOrder(otherShip);
+                            podsToSync.push({ ship: otherShip, detaches: otherDetaches });
+                        }
                     }
-                }
-            });
+                });
+            }
+
 
             var maxDuration = 0;
             var groupAnimations = [];
             var startPosition = null;
+            var hostAnimation = null;
 
-            // First pass: create animations and find camera anchor
+            // First pass: create movement animations for the group
             group.forEach(function (member) {
-                // Filter out undetected etc (original logic)
+                // Filter out undetected stealth ships
                 if (!gamedata.isMyorMyTeamShip(member)) {
                     if (member.trueStealth && !shipManager.isDetected(member)) {
                         if (!weaponManager.shipHasFiringOrder(member)) {
@@ -156,15 +191,20 @@ window.ReplayAnimationStrategy = function () {
                 }
 
                 var icon = this.shipIconContainer.getByShip(member);
-                var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer);
+                var detachMove = isDetachingPodAfterHost ? getDetachMove(member) : null;
+                var animation = new ShipMovementAnimation(icon, this.turn, this.shipIconContainer, detachMove);
                 setMovementAnimationDuration.call(this, animation);
 
-                animation.cameraFollow = false; // Default off for group members
+                animation.cameraFollow = false;
+
+                if (member.id === ship.id) {
+                    hostAnimation = animation;
+                }
 
                 if (animation.getLength() > 0) {
-                    if (!startPosition || member.id === ship.id) { // Use "anchor" ship for camera if possible, otherwise first available
+                    if (!startPosition || member.id === ship.id) {
                         startPosition = animation.getStartPosition();
-                        animation.cameraFollow = true; // This ship will move the camera
+                        animation.cameraFollow = true;
                     }
                     maxDuration = Math.max(maxDuration, animation.getDuration());
                 }
@@ -172,6 +212,25 @@ window.ReplayAnimationStrategy = function () {
                 groupAnimations.push({ ship: member, animation: animation });
                 animatedShips[member.id] = true;
             }, this);
+
+            // Create synced animations for attached pods
+            if (hostAnimation && podsToSync.length > 0) {
+                podsToSync.forEach(function (entry) {
+                    var podIcon = this.shipIconContainer.getByShip(entry.ship);
+                    var detachMove = entry.detaches ? getDetachMove(entry.ship) : null;
+                    var syncedAnim = new SyncedIconAnimation(podIcon, hostAnimation, detachMove);
+
+                    groupAnimations.push({ ship: entry.ship, animation: syncedAnim });
+
+                    if (entry.detaches) {
+                        // Pod will get its own independent animation at its own initiative slot
+                        podIcon.hasPriorSyncedAnimation = true;
+                    } else {
+                        // Permanently attached - no independent animation needed
+                        animatedShips[entry.ship.id] = true;
+                    }
+                }, this);
+            }
 
             // Add camera pan if needed
             if (startPosition) {
@@ -209,8 +268,111 @@ window.ReplayAnimationStrategy = function () {
             return 0;
         });
 
+        // Per-ship map of movement IDs already animated (to avoid duplicates across passes)
+        var handledMovementsByShip = {};
+
+        // Pass 1: Hex Targeted PreFire (always first, matching animateWeaponFire ordering)
+        var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
+        // Track which hex fire order IDs are handled in prefire so animateWeaponFire can skip them
+        var handledHexFireOrderIds = {};
+
         shipList.forEach(function (ship) {
-            var handledMovements = []; // Track movements animated in the incoming fire block
+            var firesForThisShip = allHexBallistics.filter(function (f) {
+                return f && (f.shooter === ship || f.shooter === ship.id);
+            });
+
+            // Accept "prefiring" type, or "ballistic" with preFires weapon (e.g. GraviticMine):
+            // the DB may not persist the type promotion from "ballistic" → "prefiring".
+            var hexes = firesForThisShip.filter(f => f.fireOrder?.type == "prefiring" || (f.fireOrder?.type == "ballistic" && f.weapon?.preFires));
+
+            if (hexes.length > 0) {
+                var hexAnim = new HexTargetedWeaponFireAnimation(
+                    time,
+                    this.movementAnimations,
+                    this.shipIconContainer,
+                    this.turn,
+                    this.emitterContainer,
+                    logAnimation,
+                    hexes
+                );
+
+                this.animations.push(hexAnim);
+
+                var hexAnimEndTime = time + hexAnim.getDuration();
+                var hexPreFireMoveTime = hexAnimEndTime;
+
+                // Hex-targeted preFire orders cause the shooting ship to teleport/move.
+                // If this ship has preFire movements, animate them after the hex animation.
+                var shooterIcon = this.shipIconContainer.getByShip(ship);
+                if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
+                    // Get the starting state for this ship (end of normal movement on this turn)
+                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
+                    if (!startBase) {
+                        startBase = shooterIcon.getLastMovementOnTurn(this.turn);
+                    }
+                    if (startBase) {
+                        var currentStartState = {
+                            position: new hexagon.Offset(startBase.position),
+                            facing: startBase.facing,
+                            heading: startBase.heading
+                        };
+
+                        if (!handledMovementsByShip[ship.id]) {
+                            handledMovementsByShip[ship.id] = [];
+                        }
+
+                        // Only animate preFire moves caused by THIS ship's own hex-targeted
+                        // weapons (e.g. self-displacement like Hyperspace Jump). Moves caused
+                        // by another ship's per-target effect — e.g. a GraviticMine pulling
+                        // its own launcher — have movement.value pointing to that effect's
+                        // fire order, which isn't in `hexes`. Let Pass 2 handle them so the
+                        // explosion against the moved ship plays before the move (matching
+                        // the behaviour seen for non-launcher pulled ships).
+                        var ownHexFireOrderIds = hexes.map(function (h) { return h.fireOrder ? h.fireOrder.id : null; });
+
+                        for (var i in shooterIcon.preFireMovements) {
+                            var movement = shooterIcon.preFireMovements[i];
+
+                            if (ownHexFireOrderIds.indexOf(movement.value) === -1) {
+                                continue;
+                            }
+
+                            var endState = {
+                                position: new hexagon.Offset(movement.position),
+                                facing: movement.facing,
+                                heading: movement.heading
+                            };
+
+                            var preFireMoveAnimation = new PreFireMovementAnimation(
+                                shooterIcon,
+                                currentStartState,
+                                endState,
+                                hexPreFireMoveTime,
+                                this.moveHexDuration * 1.5 // Short but visible
+                            );
+
+                            this.animations.push(preFireMoveAnimation);
+
+                            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                                hexPreFireMoveTime += preFireMoveAnimation.getDuration();
+                            }
+
+                            currentStartState = endState;
+                            handledMovementsByShip[ship.id].push(movement.id);
+                        }
+                    }
+                }
+
+                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
+                    time = Math.max(hexAnimEndTime, hexPreFireMoveTime);
+                }
+            }
+
+        }, this);
+
+        // Pass 2: Incoming Direct PreFire (Standard Exchanges)
+        shipList.forEach(function (ship) {
+            var handledMovements = handledMovementsByShip[ship.id] || [];
             var perShipAnimation = new AllWeaponFireAgainstShipAnimation(
                 ship,
                 this.shipIconContainer,
@@ -247,6 +409,11 @@ window.ReplayAnimationStrategy = function () {
                     for (var i in preFireMovements) {
                         var movement = preFireMovements[i]; // Look through movements identified as preFire
 
+                        // Skip movements already animated in the hex-targeted pass
+                        if (handledMovements.indexOf(movement.id) !== -1) {
+                            continue;
+                        }
+
                         // Try to find a matching fire order for this movement.id
                         var scheduled = false;
                         for (var k in fireOrders) {
@@ -277,7 +444,6 @@ window.ReplayAnimationStrategy = function () {
 
                                     currentStartState = endState;
                                     scheduled = true;
-                                    handledMovements.push(movement.id); // Mark as handled
                                     break;
                                 }
                             }
@@ -291,83 +457,6 @@ window.ReplayAnimationStrategy = function () {
 
             if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
                 time = Math.max(time + perShipAnimation.getDuration(), preFireMoveTime);
-            }
-
-            var allHexBallistics = weaponManager.getAllHexTargetedBallistics();
-            var firesForThisShip = allHexBallistics.filter(function (f) {
-                return f && (f.shooter === ship || f.shooter === ship.id);
-            });
-
-            var hexes = firesForThisShip.filter(f => f.fireOrder?.type == "prefiring");
-
-            if (hexes.length > 0) {
-                var hexAnim = new HexTargetedWeaponFireAnimation(
-                    time,
-                    this.movementAnimations,
-                    this.shipIconContainer,
-                    this.turn,
-                    this.emitterContainer,
-                    logAnimation,
-                    hexes
-                );
-
-                this.animations.push(hexAnim);
-
-                var hexAnimEndTime = time + hexAnim.getDuration();
-                var hexPreFireMoveTime = hexAnimEndTime;
-
-                // Hex-targeted preFire orders cause the shooting ship to teleport/move.
-                // If this ship has preFire movements, animate them after the hex animation.
-                var shooterIcon = this.shipIconContainer.getByShip(ship);
-                if (shooterIcon && shooterIcon.preFireMovements && shooterIcon.preFireMovements.length > 0) {
-                    // Get the starting state for this ship (end of normal movement on this turn)
-                    var startBase = shooterIcon.getEndMovementOnTurn(this.turn);
-                    if (!startBase) {
-                        startBase = shooterIcon.getLastMovementOnTurn(this.turn);
-                    }
-                    if (startBase) {
-                        var currentStartState = {
-                            position: new hexagon.Offset(startBase.position),
-                            facing: startBase.facing,
-                            heading: startBase.heading
-                        };
-
-                        // Animate all preFire movements for this ship
-                        for (var i in shooterIcon.preFireMovements) {
-                            var movement = shooterIcon.preFireMovements[i];
-
-                            if (handledMovements.indexOf(movement.id) !== -1) {
-                                continue;
-                            }
-
-                            var endState = {
-                                position: new hexagon.Offset(movement.position),
-                                facing: movement.facing,
-                                heading: movement.heading
-                            };
-
-                            var preFireMoveAnimation = new PreFireMovementAnimation(
-                                shooterIcon,
-                                currentStartState,
-                                endState,
-                                hexPreFireMoveTime,
-                                this.moveHexDuration * 1.5 // Short but visible
-                            );
-
-                            this.animations.push(preFireMoveAnimation);
-
-                            if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                                hexPreFireMoveTime += preFireMoveAnimation.getDuration();
-                            }
-
-                            currentStartState = endState;
-                        }
-                    }
-                }
-
-                if (this.type === ReplayAnimationStrategy.type.INFORMATIVE) {
-                    time = Math.max(hexAnimEndTime, hexPreFireMoveTime);
-                }
             }
 
         }, this);
@@ -396,7 +485,8 @@ window.ReplayAnimationStrategy = function () {
                 return f && (f.shooter === ship || f.shooter === ship.id);
             });
 
-            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring");
+            // Exclude "prefiring" and preFires "ballistic" — those are handled in animateWeaponPreFire.
+            var normals = firesForThisShip.filter(f => f.fireOrder?.type !== "prefiring" && !(f.fireOrder?.type == "ballistic" && f.weapon?.preFires));
 
             if (normals.length > 0) {
                 var hexAnim = new HexTargetedWeaponFireAnimation(
@@ -679,6 +769,65 @@ window.ReplayAnimationStrategy = function () {
         return time;
     }
     */
+
+    function SyncedIconAnimation(shipIcon, hostAnimation, detachMove) {
+        Animation.call(this);
+        this.shipIcon = shipIcon;
+        this.hostAnimation = hostAnimation;
+        this.detachMove = detachMove;
+
+        // Calculate detach timing as a fraction of host's curve length
+        if (detachMove) {
+            var hostLengthToDetach = 0;
+            var found = false;
+            for (var i = 0; i < this.hostAnimation.hexAnimations.length; i++) {
+                var hexAnim = this.hostAnimation.hexAnimations[i];
+                hostLengthToDetach += hexAnim.length;
+                if (hexAnim.move.position.equals(detachMove.position)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (this.hostAnimation.totalCurveLength > 0 && found) {
+                this.detachFraction = hostLengthToDetach / this.hostAnimation.totalCurveLength;
+            } else {
+                this.detachFraction = 1; // Can't find detach point, sync for entire duration
+            }
+        } else {
+            this.detachFraction = 1; // Permanently synced
+        }
+
+        this.duration = this.hostAnimation.getDuration();
+        this.time = 0;
+    }
+
+    SyncedIconAnimation.prototype = Object.create(Animation.prototype);
+
+    SyncedIconAnimation.prototype.getDuration = function () {
+        return this.duration;
+    };
+
+    SyncedIconAnimation.prototype.setTime = function (time) {
+        this.time = time;
+    };
+
+    SyncedIconAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        // For detaching pods, clamp the query time to the detach point
+        // so the pod stays at the separation position after detach
+        var queryTime = total;
+        if (this.detachMove) {
+            var detachTime = this.time + this.hostAnimation.duration * this.detachFraction;
+            queryTime = Math.min(total, detachTime);
+        }
+
+        // Compute position using the same math as the host animation
+        // (no render-order dependency)
+        var hostPosAndFacing = this.hostAnimation.getPositionAndFacingAtTime(queryTime);
+        this.shipIcon.setPosition(hostPosAndFacing.position);
+        this.shipIcon.setFacing(-hostPosAndFacing.facing);
+    };
+
+    SyncedIconAnimation.prototype.cleanUp = function (scene) {};
 
     return ReplayAnimationStrategy;
 }();

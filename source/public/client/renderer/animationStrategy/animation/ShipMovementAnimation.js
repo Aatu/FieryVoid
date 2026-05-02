@@ -2,10 +2,12 @@
 
 window.ShipMovementAnimation = function () {
 
-    function ShipMovementAnimation(shipIcon, turn, shipIconContainer) {
+    function ShipMovementAnimation(shipIcon, turn, shipIconContainer, detachMoveToSkipUntil) {
         this.shipIcon = shipIcon;
         this.turn = turn;
         this.shipIconContainer = shipIconContainer;
+        this.detachMoveToSkipUntil = detachMoveToSkipUntil || null;
+        this.hasPriorSyncedAnimation = shipIcon.hasPriorSyncedAnimation || false;
         this.hexAnimations = buildCurves.call(this, this.shipIcon, this.turn);
         this.totalCurveLength = calculateTotalCurveLength(this.hexAnimations);
         this.duration = 5000;
@@ -50,6 +52,10 @@ window.ShipMovementAnimation = function () {
     };
 
     ShipMovementAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+
+        if (this.hasPriorSyncedAnimation && total < this.time) {
+            return;
+        }
 
         var positionAndFacing = this.getPositionAndFacingAtTime(total);
 
@@ -177,6 +183,21 @@ window.ShipMovementAnimation = function () {
     */
     function buildCurves(shipIcon, turn) {
         var moves = shipIcon.getMovementsReplay(turn);
+
+        // If detachMoveToSkipUntil is provided, only animate from the detach point onward
+        if (this.detachMoveToSkipUntil) {
+            var detachIndex = -1;
+            var targetPos = this.detachMoveToSkipUntil.position;
+            for (var di = 0; di < moves.length; di++) {
+                if (moves[di].position.q === targetPos.q && moves[di].position.r === targetPos.r) {
+                    detachIndex = di;
+                    break;
+                }
+            }
+            if (detachIndex >= 0) {
+                moves = moves.slice(detachIndex);
+            }
+        }
 
         // Filter out moves that don't actually change anything
         moves = moves.filter(function (move, i, arr) {

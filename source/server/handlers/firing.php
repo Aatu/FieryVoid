@@ -1041,7 +1041,7 @@ public static function firePreFiringWeapons($gamedata){
         $target = $gamedata->getShipById($fire->targetid);
 
         // If the target is an attached pod, weapon fires against it normally, but we also spawn a duplicate automatic hit against the host ship
-        if ($target && !empty($target->attached)) {
+        if ($target && !empty($target->attached) && $target instanceof FighterFlight) {
             $hostShipId = key($target->attached);
             $hostShip = $gamedata->getShipById($hostShipId);
             if ($hostShip && !$hostShip->isDestroyed() && $hostShip->userid !== -5) {

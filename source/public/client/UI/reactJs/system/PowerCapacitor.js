@@ -4,7 +4,7 @@ import styled from 'styled-components';
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 5px;
+    margin-top: 0px;
     width: 100%;
     min-width: 180px;
     opacity: 0.95;

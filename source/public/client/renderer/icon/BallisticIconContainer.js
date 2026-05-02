@@ -28,6 +28,18 @@ window.BallisticIconContainer = function () {
 
 		ballistics.forEach(ballistic => {
 			if (ballistic.turn === gamedata.turn || !replayData) {
+				//Suppress Gravitic Mine icons/lines in live phase 3: the mine has already detonated in
+				//phase 5 PreFire, so it should not render as a pending ballistic. We must do this at the
+				//loop level (not just in createBallisticIcon) so existing icons left over from a Replay
+				//session aren't kept alive by updateBallisticIcon.
+				if (gamedata.gamephase === 3 && !replayData) {
+					const shooterIcon = iconContainer.getById(ballistic.shooterid);
+					if (shooterIcon) {
+						const weapon = shipManager.systems.getSystem(shooterIcon.ship, ballistic.weaponid);
+						const modeName = weapon?.firingModes?.[ballistic.firingMode] || null;
+						if (modeName === 'Gravitic Mine' || modeName === 'Standard - GN' || modeName === 'Priority - GN') return;
+					}
+				}
 				createOrUpdateBallistic.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
 				createOrUpdateBallisticLines.call(this, ballistic, iconContainer, gamedata.turn, !!replayData);
 			}
@@ -263,7 +275,8 @@ window.BallisticIconContainer = function () {
 				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
 				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },
 				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },
-				'Priorty - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
+				'Priority - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
+				'Gravitic Mine': { type: 'hexGreen', text: 'Gravitic Mine', color: '#008000' },
 			};
 
 			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)) {
@@ -514,7 +527,8 @@ window.BallisticIconContainer = function () {
 				'Shredder': 'blue',
 				'Defensive Plasma Web': 'green',
 				'Anti-Fighter Plasma Web': 'green',
-				'Transverse Jump': 'blue'
+				'Transverse Jump': 'blue',
+				'Gravitic Mine': 'green'
 			};
 
 			if (modeColorMap[modeName]) {

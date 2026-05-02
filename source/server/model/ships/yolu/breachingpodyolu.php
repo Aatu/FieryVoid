@@ -21,7 +21,7 @@ class breachingpodyolu extends FighterFlight{
 		$this->iniativebonus = 9*5;
 
         $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
-		$this->hangarRequired = 'assault shuttles'; //for fleet check
+        $this->hangarRequired = 'Breaching Pods'; //for fleet check   
 		$this->unitSize = 1; 
 
 		$this->notes = "Bonus to delivery roll for marines.";

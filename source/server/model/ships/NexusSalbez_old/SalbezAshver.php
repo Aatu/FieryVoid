@@ -35,18 +35,20 @@ class SalbezAshver extends BaseShipNoAft{
 
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
+        $this->addFrontSystem(new MediumPlasma(4, 5, 3, 300, 60));
 		$this->addFrontSystem(new NexusBoltTorpedo(2, 5, 2, 300, 60));
-		$this->addFrontSystem(new NexusBoltTorpedo(2, 5, 2, 300, 60));
+		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 270, 90));
         
 		$this->addLeftSystem(new Thruster(3, 14, 0, 5, 3));
-		$this->addLeftSystem(new NexusLightMagGun(3, 7, 6, 240, 360));
+		$this->addLeftSystem(new HeavyPlasma(3, 8, 5, 240, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 240, 60));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 120, 300));
 
 		$this->addRightSystem(new Thruster(3, 14, 0, 5, 4));
-		$this->addRightSystem(new NexusLightMagGun(3, 7, 6, 0, 120));
+		$this->addRightSystem(new HeavyPlasma(3, 8, 5, 0, 120));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 300, 120));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
@@ -69,21 +71,23 @@ class SalbezAshver extends BaseShipNoAft{
                     20 => "C&C",
             ),
             1=> array(
-                    6 => "Thruster",
+                    4 => "Thruster",
+					6 => "Medium Plasma Cannon", 
 					8 => "Bolt Torpedo",
+					10 => "Light Particle Beam",
 					18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     5 => "Thruster",
-					7 => "Light Mag Gun",
+					7 => "Heavy Plasma Cannon",
 					10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
                     5 => "Thruster",
-					7 => "Light Mag Gun",
+					7 => "Heavy Plasma Cannon",
 					10 => "Light Particle Beam",
                     18 => "Structure",
                     20 => "Primary",

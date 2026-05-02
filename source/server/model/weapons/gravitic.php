@@ -959,7 +959,7 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         $this->data["Special"] .= "<br>Only ONE Gravitic Shifter can be used on a ship per turn, any other attempts will automatically miss.";           
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives.";        
         $this->data["Special"] .= "<br>Can target allies without suffering double range penalty for no EW Lock.";
-        $this->data["Special"] .= "<br>No effect on Enormous units.";	        	        		
+        $this->data["Special"] .= "<br>No effect on Enormous units or Mines.";	        	        		
 		parent::setSystemDataWindow($turn);     
     }
 
@@ -981,37 +981,19 @@ class GraviticShifter extends Weapon implements SpecialAbility{
 
         if($target->gravitic || $target->factionAge >= 3){ 
             $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
-        }
-
-        /* //Removed since OEW lock on allies enabled - DK 17.1.26  
-        if($shooter->team == $target->team){ //Let's make penalty only for enemy units
-		    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
-		    $targetPos = $target->getHexPos();                       
-            $distance = mathlib::getDistanceHex($launchPos, $targetPos);
-
-            $rangePen = $this->calculateRangePenalty($distance);
-            $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
-        } 
-        */       
+        }      
 	}    
         
     public function fire($gamedata, $fireOrder){                   
         parent::fire($gamedata, $fireOrder); 
-		
-        if($fireOrder->firingMode == 1){
-            $direction = "clockwise";
-        }else{
-            $direction = "anti-clockwise";      
-        }
-
-        if($fireOrder->shotshit > 0){
-            $fireOrder->pubnotes = "<br>Ship has been forced to turn 60 degrees " . $direction . " by a Gravitic Shifter.";                       
-        }    
     }
 
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
         if ($ship->Enormous) return; //No effect on Enormous units
-        if ($ship instanceof Mine) return; //No point.
+        if ($ship instanceof Mine){
+            $fireOrder->pubnotes = "<br>Mines are not affected by Gravitic Shifters.";
+            return; //No point.                         
+        } 
 
 		$lastMove = $ship->getLastMovement();
         $newFacing = $lastMove->facing; //Initialise as current facing.
@@ -1020,18 +1002,27 @@ class GraviticShifter extends Weapon implements SpecialAbility{
         if($fireOrder->firingMode == 1){
             $newFacing = MathLib::addToHexFacing($lastMove->facing , 1);
             $newHeading = MathLib::addToHexFacing($lastMove->heading , 1);
-            //$type = "turnRight";
         }else{
             $newFacing = MathLib::addToHexFacing($lastMove->facing , -1);
-            $newHeading = MathLib::addToHexFacing($lastMove->heading , -1);
-            //$type = "turnLeft";                        
+            $newHeading = MathLib::addToHexFacing($lastMove->heading , -1);                      
         }
 		
 		//Create new movement order for target.
         $shift = new MovementOrder(null, "prefire", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $newHeading, $newFacing, false, $gamedata->turn, $fireOrder->id, 0);
 
-		//Add shifted movement order to database
-		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);	
+        if($fireOrder->firingMode == 1){
+            $direction = "clockwise";
+        }else{
+            $direction = "anti-clockwise";      
+        }        
+
+        if($fireOrder->shotshit > 0){
+            $fireOrder->pubnotes = "<br>Ship has been forced to turn 60 degrees " . $direction . " by a Gravitic Shifter.";                       
+        }   
+		//Add shifted movement order to database and in-memory movement array
+		//so subsequent prefire weapons see the updated heading/facing.
+		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);
+		$ship->setMovement($shift);	
     }    
 
 	public function getDamage($fireOrder){       return 0;   } //no actual damage
@@ -1074,7 +1065,7 @@ class GravityNet extends Weapon implements SpecialAbility{
 
     public $firingModes = array(
 		1 => "Standard - GN",
-        2 => "Priorty - GN"
+        2 => "Priority - GN"
 	);
 	    
     protected $possibleCriticals = array(14 => "ReducedRange");
@@ -1105,7 +1096,7 @@ class GravityNet extends Weapon implements SpecialAbility{
         $this->data["Special"] .= "<br>Priorty (P) mode: Gravity Net hitting target will take priority over all other Gravity Nets.";
         $this->data["Special"] .= "<br>Has -15% chance to hit Ancient enemy units, or those with Gravitic drives (Does NOT include allies).";        
         $this->data["Special"] .= "<br>Can target allies.";
-        $this->data["Special"] .= "<br>No effect on units bigger then firing ship.";	        	        		
+        $this->data["Special"] .= "<br>No effect on units bigger then firing ship, or Mines.";	        	        		
 		parent::setSystemDataWindow($turn);  
     }   
 
@@ -1123,17 +1114,6 @@ class GravityNet extends Weapon implements SpecialAbility{
                 if($target->gravitic || $target->factionAge >= 3){ 
                     $fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
                 }
-
-                /* //Removed since OEW lock on allies enabled - DK 17.1.26  
-                if($shooter->team == $target->team){ //Let's make penalty only for enemy units
-                    $launchPos = $this->getFiringHex($gamedata, $fireOrder); 
-                    $targetPos = $target->getHexPos();                       
-                    $distance = mathlib::getDistanceHex($launchPos, $targetPos);
-
-                    $rangePen = $this->calculateRangePenalty($distance);
-                    $fireOrder->needed += $rangePen *5; //refund range penalty for friendly units since OEW lock on allies not possible.            
-                } 
-                */    
             }
         }
 	}    
@@ -1159,15 +1139,16 @@ class GravityNet extends Weapon implements SpecialAbility{
                 $shooterSize = $shooter->shipSizeClass; //only get ship size if not enormous, logic below accounts for enormous.
             }
 
-            if($shooter->Enormous || (!$target->Enormous && $shooterSize >= $targetSize)){ //Make sure target is equal to or smaller then shooter.      
+            if ($target instanceof Mine){
+                $fireOrder->pubnotes = "<br>Mines cannot be moved by Gravity Net.";
+            } else if($shooter->Enormous || (!$target->Enormous && $shooterSize >= $targetSize)){ //Make sure target is equal to or smaller then shooter.      
                 $primaryGravityNet = GravityNetHandler::getPrimaryGravNetPerTarget($target);
-                //Debug::log(json_encode($primaryGravityNet, true));
                 if($this == $primaryGravityNet){//check if THIS gravity net is the primary gravity net(Primary is defined as gravity net that hits a given target with largest move distance)
                     $fireOrder->pubnotes = "<br>Ship has been forced to move by a Gravity Net.";
                     $this->doGravityNetMove($target, $fireOrder->id, $gamedata);
                 }
             }else{
-                $fireOrder->pubnotes = "<br>Target ship is larger then fireing ship and cannot be moved by Gravity Net.";
+                $fireOrder->pubnotes = "<br>Target ship is larger then firing ship and cannot be moved by Gravity Net.";
             }              
         }
     }  
@@ -1175,7 +1156,7 @@ class GravityNet extends Weapon implements SpecialAbility{
     private function doGravityNetMove($target, $graviticOrderID, $gamedata){
         $allFireOrders = $this->getFireOrders($gamedata->turn);
         $gravNetMovePosOrder = null; //var to hold grav net move position order, ie the hexTarget order.
-        $gravNetMovePos = null; //var to hold grav net move target hex.
+        //$gravNetMovePos = null; //var to hold grav net move target hex.
 
         foreach($allFireOrders as $fireOrderCheck){ //find the gravNetMoveHex order and then process. If it does not exist do not process.
             if ($fireOrderCheck->damageclass == 'gravNetMoveHex'){
@@ -1190,8 +1171,10 @@ class GravityNet extends Weapon implements SpecialAbility{
                 //$id, $type, OffsetCoordinate $position, $xOffset, $yOffset, $speed, $heading, $facing, $pre, $turn, $value, $at_initiative)
                 $gravNetMove = new MovementOrder(null, "prefire", new OffsetCoordinate($xpos, $ypos), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $graviticOrderID, 0);
 
-                //Add shifted movement order to database
-                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);				
+                //Add shifted movement order to database and in-memory movement array
+                //so subsequent prefire weapons see the updated position.
+                Manager::insertSingleMovement($gamedata->id, $target->id, $gravNetMove);
+                $target->setMovement($gravNetMove);				
                 break;
             }
         }         
@@ -1698,5 +1681,522 @@ class AntigravityBeam extends Gravitic{
 		
 }//end of class AntigravityBeam
 
+
+
+class GraviticMine extends Weapon{
+	public $name = "GraviticMine";
+	public $displayName = "Gravitic Mine";
+	public $iconPath = "graviticMine.png";
+	
+	public $damageType = "Flash"; //But no collateral damage
+    protected $noCollateral = true;
+    //public $noPrimaryHits = true; //To replicate flash with no collateral 
+	public $weaponClass = "Gravitic";
+	public $hextarget = true;
+	public $hidetarget = true;
+	public $revealAfterPreFire = true; //Mine detonates at end of phase 5; reveal target to opponents from phase 3 onward.
+	public $ballistic = true;
+	public $uninterceptable = true;
+	public $doNotIntercept = true; //just in case
+	public $priority = 1;
+	public $range = 40;
+	public $loadingtime = 2;
+	public $animation = "ball";
+    public $animationColor = array(250, 251, 196);
+	public $animationExplosionScale = 1;
+	public $firingModes = array(
+		1 => "Gravitic Mine"
+	);
+		
+	protected static $alreadyGravMined = array(); //list of IDs of units already affected in this firing phase - to avoid multiplying effects on overlap
+	
+		
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
+		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
+		$this->data["Special"] = "Targets a hex and affects all units within 2 hexes of that location.";      
+		$this->data["Special"] .= "";
+	}	
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	{
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+		if ( $maxhealth == 0 ) $maxhealth = 6;
+		if ( $powerReq == 0 ) $powerReq = 6;
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		GraviticMineHandler::register($this);
+	}
+
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		//Debug::log("GraviticMine calculateHitBase called: id={$fireOrder->id} type={$fireOrder->type} target={$fireOrder->targetid} turn={$fireOrder->turn} dc=" . ($fireOrder->damageclass ?? 'null'));
+		$fireOrder->needed = 100; //always true
+		$fireOrder->updated = true;
+	}
+
+    public function fire($gamedata, $fireOrder)
+    {
+        //Debug::log("GraviticMine fire called: id={$fireOrder->id} type={$fireOrder->type} target={$fireOrder->targetid} turn={$fireOrder->turn} dc=" . ($fireOrder->damageclass ?? 'null'));
+        if ($fireOrder->damageclass === 'graviticShear') {
+            //Debug::log("GraviticMine fire: shear branch, chosenLoc=" . ($fireOrder->chosenLocation ?? 'null') . " x={$fireOrder->x} y={$fireOrder->y}");
+            parent::fire($gamedata, $fireOrder);
+            //Debug::log("GraviticMine fire: after parent::fire shots={$fireOrder->shots} shotshit={$fireOrder->shotshit} rolled={$fireOrder->rolled}");
+            return;
+        }
+        // Per-target pull marker: created by applyMovement(), already persisted with rolled=1.
+        // Animation/log only — no damage rolls, no parent::fire().
+        if ($fireOrder->damageclass === 'graviticPull') {
+            return;
+        }
+
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+
+        $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+        $posLaunch = $movement->position;//at moment of launch!!!
+
+        //sometimes player does manage to target ship after all..
+        if ($fireOrder->targetid != -1) {
+            $targetship = $gamedata->getShipById($fireOrder->targetid);
+            //insert correct target coordinates: last turns' target position
+            $movement = $targetship->getLastTurnMovement($fireOrder->turn);
+            $fireOrder->x = $movement->position->q;
+            $fireOrder->y = $movement->position->r;
+            $fireOrder->targetid = -1; //correct the error
+        }
+
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled; //...and hit, regardless of value rolled
+		//$fireOrder->pubnotes .= "Gravitic Mine distorts space around its position. ";
+		$fireOrder->shotshit++;
+
+        $fireOrder->rolled = max(1, $fireOrder->rolled);//Marks that fire order has been handled, just in case it wasn't marked yet!
+    } //endof function fire
+
+
+    public function beforePreFiringOrderResolution($gamedata){
+        if ($this->isDestroyed($gamedata->turn)) return;
+        if ($this->isOfflineOnTurn($gamedata->turn)) return;
+
+        $thisMine = $this->getUnit();
+        if ($thisMine === null) return;
+        if ($thisMine->getTurnDeployed($gamedata) > $gamedata->turn) return;
+
+        // Promote this weapon's current-turn ballistic launch orders to "prefiring"
+        // so the mine detonates in the same phase as shear damage rather than
+        // waiting for the regular Firing phase. Rationale:
+        //   - Mines aren't in-flight projectiles, so there is no intercept window
+        //     to preserve by deferring them to Firing.
+        //   - Shearing is resolved here in PreFiring; keeping mine detonations in
+        //     Firing desynchronises the two effects in replay/logs.
+        // We only rewrite the fire-order type. The weapon's $ballistic flag is
+        // left alone so fire-order creation, hex-target deploy, and UI continue
+        // to treat GraviticMine as ballistic up to the moment of resolution.
+        // This runs before the $resolvedTurn guard below so every GraviticMine
+        // instance promotes its own orders, not just the first one.
+        foreach ($this->fireOrders as $fo) {
+            if ((int)$fo->turn !== (int)$gamedata->turn) continue;
+            if ($fo->type === "ballistic") {
+                $fo->type = "prefiring";
+                $fo->updated = true;
+            }
+        }
+
+        // Cross-mine resolution runs exactly once per turn, on the first mine that gets here.
+        if (GraviticMineHandler::$resolvedTurn === $gamedata->turn) return;
+        GraviticMineHandler::$resolvedTurn = $gamedata->turn;
+
+        // Build the active-mine list once.
+        $activeMines = array();
+        $seenFireOrderIds = array();
+        foreach (GraviticMineHandler::getAllMines() as $mineWeapon) {
+            $mineUnit = $mineWeapon->getUnit();
+            if ($mineUnit === null) continue;
+            if ($mineUnit->isDestroyed()) continue;
+            if ($mineUnit->getTurnDeployed($gamedata) > $gamedata->turn) continue;
+            if ($mineWeapon->isDestroyed($gamedata->turn)) continue;
+            if ($mineWeapon->isOfflineOnTurn($gamedata->turn)) continue;
+
+            foreach ($mineWeapon->fireOrders as $fo) {
+                if (isset($fo->damageclass) && $fo->damageclass === 'graviticShear') continue;
+                if ((int)$fo->turn !== (int)$gamedata->turn) continue; // only this turn's shots count
+                if (!isset($fo->x) || !isset($fo->y)) continue;
+
+                // The same fire order can appear on multiple weapon instances; use its DB id
+                // as the dedup key so two weapons firing at the same hex both count (different ids),
+                // but the same shot visible through two weapons does not (same id).
+                if (isset($seenFireOrderIds[$fo->id])) continue;
+                $seenFireOrderIds[$fo->id] = true;
+
+                $minePos = new OffsetCoordinate((int)$fo->x, (int)$fo->y);
+                //Debug::log("  active mine: carrier={$mineUnit->id} orderId={$fo->id} firePos=({$minePos->q},{$minePos->r})");
+
+                $activeMines[] = array(
+                    'weapon' => $mineWeapon,
+                    'unit'   => $mineUnit,
+                    'pos'    => $minePos,
+                );
+            }
+        }
+        if (empty($activeMines)) {
+            //Debug::log("GraviticMine beforePreFiring: no active mines found, skipping");
+            return;
+        }
+        //Debug::log("GraviticMine beforePreFiring: " . count($activeMines) . " active mine(s)");
+
+        foreach ($gamedata->ships as $unit) {
+            if ($this->isImmuneTarget($unit, $gamedata)) continue;
+
+            $unitPos = $unit->getHexPos();
+            if (!($unitPos instanceof OffsetCoordinate)) continue;
+            //Debug::log("GraviticMine: checking unit id={$unit->id} name={$unit->name} pos=({$unitPos->q},{$unitPos->r})");
+
+            // Find this unit's mines within 5 hexes.
+            $minesInRange = array();
+            foreach ($activeMines as $entry) {
+                $dist = $entry['pos']->distanceTo($unitPos);
+                //Debug::log("  vs mine id={$entry['unit']->id} pos=({$entry['pos']->q},{$entry['pos']->r}) dist={$dist}");
+                if ($dist <= 5) {
+                    $entry['distance'] = $dist;
+                    $minesInRange[] = $entry;
+                }
+            }
+            if (empty($minesInRange)) {
+                //Debug::log("  no mines in range, skipping");
+                continue;
+            }
+
+            // Sort ascending by distance so [0] is the closest.
+            usort($minesInRange, function($a, $b) { return $a['distance'] <=> $b['distance']; });
+
+            // Shearing eligibility: 2+ mines AND target lies in their zone.
+            if (count($minesInRange) >= 2) {
+                $minePositions = array();
+                foreach ($minesInRange as $m) $minePositions[] = $m['pos'];
+                $inZone = $this->isUnitInShearingZone($unitPos, $minePositions);
+                //Debug::log("  shearing check: {$unit->name} with " . count($minesInRange) . " mines in range -> inZone=" . ($inZone ? 'YES' : 'NO'));
+                if ($inZone) {
+                    if (!isset(GraviticMineHandler::$alreadyShearedTargetIds[$unit->id])) {
+                        //Debug::log("  -> applying shearing");
+                        $this->applyShearing($unit, $unitPos, $minesInRange, $gamedata);
+                    } else {
+                        //Debug::log("  -> already sheared this turn, skipping");
+                    }
+                    continue;
+                }
+            }
+
+            // Otherwise: pull toward closest mine (1 mine OR 2+ that don't form a zone).
+            if (isset(GraviticMineHandler::$alreadyMovedTargetIds[$unit->id])) continue;
+
+            $closestDist = $minesInRange[0]['distance'];
+            $tied = array();
+            foreach ($minesInRange as $m) {
+                if ($m['distance'] === $closestDist) $tied[] = $m;
+            }
+            $chosenMine = $tied[array_rand($tied)];
+            //Debug::log("  pulling toward mine id={$chosenMine['unit']->id} pos=({$chosenMine['pos']->q},{$chosenMine['pos']->r}) dist={$chosenMine['distance']}");
+
+            $newHex = $this->pickMoveHex($unitPos, $chosenMine['pos'], $gamedata);
+            if ($newHex === null) {
+                //Debug::log("  pickMoveHex returned null (no valid candidates), no movement");
+                continue;
+            }
+            //Debug::log("  moving unit to ({$newHex->q},{$newHex->r})");
+
+            $this->applyMovement($unit, $newHex, $gamedata);
+        }
+    }
+
+
+    private function isImmuneTarget($unit, $gamedata){
+        if ($unit instanceof Terrain) return true;
+        if ($unit instanceof Mine) return true;        
+        if ($unit->base && $unit->Enormous) return true; // fixed bases throw off the field     
+        if ($unit->isDestroyed()) return true;
+        if ($unit->getTurnDeployed($gamedata) > $gamedata->turn) return true;
+        if (isset($unit->shipSizeClass) && (int)$unit->shipSizeClass === 5) return true; // Terrain catch-all
+        return false;
+    }
+
+    private function isImmovableHex(OffsetCoordinate $hex, $gamedata){
+        $here = $gamedata->getShipsInDistance($hex, 0);
+        foreach ($here as $ship) {
+            if ($ship instanceof Terrain) return true;
+            if (!empty($ship->Enormous)) return true;
+        }
+        return false;
+    }
+
+    private function getShearingFactor($unit){
+        if ($unit instanceof Mine) return 0;
+        if ($unit instanceof FighterFlight) return 1;
+        if ($unit instanceof OSAT) return 1;
+        if ($unit->Enormous) return 6;
+        if ($unit->hangarRequired = 'LCVs') return 2;         
+        if (!isset($unit->shipSizeClass)) return 0;
+        switch ((int)$unit->shipSizeClass) {
+            case 0: return 2; // Light combat vessels
+            case 1: return 3; // Medium ships (incl. LCV)
+            case 2: return 4; // Heavy combat vessels
+            case 3: return 5; // Capital ships
+            default: return 0;
+        }
+    }
+
+    private function pickMoveHex(OffsetCoordinate $unitPos, OffsetCoordinate $minePos, $gamedata){
+        $currDist = $unitPos->distanceTo($minePos);
+        //Debug::log("  pickMoveHex: unit=({$unitPos->q},{$unitPos->r}) mine=({$minePos->q},{$minePos->r}) currDist={$currDist}");
+        if ($currDist <= 0) {
+            //Debug::log("  pickMoveHex: unit is on the mine hex, no movement");
+            return null;
+        }
+
+        $candidates = array();
+        foreach (Mathlib::getNeighbouringHexes($unitPos, 1) as $n) {
+            $hex = new OffsetCoordinate((int)$n['q'], (int)$n['r']);
+            $newDist = $hex->distanceTo($minePos);
+            $blocked = $this->isImmovableHex($hex, $gamedata);
+            //Debug::log("    neighbour ({$hex->q},{$hex->r}) distToMine={$newDist} blocked=" . ($blocked ? 'yes' : 'no'));
+            if ($newDist >= $currDist) continue;
+            if ($blocked) continue;
+            $candidates[] = $hex;
+        }
+        if (empty($candidates)) return null;
+        return $candidates[array_rand($candidates)];
+    }
+
+    private function applyMovement($unit, OffsetCoordinate $newHex, $gamedata){
+        $lastMove = $unit->getLastMovement();
+        if ($lastMove === null) return;
+
+        // Create a per-target "graviticPull" fire order so the moved unit appears in
+        // its own incomingFire stream (replay animation matches movement.value to a
+        // fire order targeting the moved ship; the original hex-target order has
+        // targetid=-1 and would never match). Persist it now to grab a real DB id;
+        // addToDB=false afterwards prevents PreFiringGamePhase from inserting a duplicate.
+        $shooterShipId = $this->getUnit()->id;
+        $pullOrder = new FireOrder(
+            -1, "prefiring", $shooterShipId, $unit->id,
+            $this->id, -1, $gamedata->turn, 1,
+            100, 1, 1, 1, 0,
+            $newHex->q, $newHex->r, 'graviticPull', 1001
+        );
+        $pullOrder->pubnotes = "<br>{$unit->name} is moved towards a nearby Gravitic Mine.";
+        $pullOrder->addToDB = true;
+        $newId = Manager::insertSingleFiringOrder($gamedata, $pullOrder);
+        if ($newId) {
+            $pullOrder->id = (int)$newId;
+        }
+        $pullOrder->addToDB = false;
+        $this->fireOrders[] = $pullOrder;
+
+        // Preserve heading/facing/speed; mark as a forced prefire shift, mirroring GravityNet.
+        // The 11th arg ($value) carries the pull fire order's id so ReplayAnimationStrategy
+        // can pair this movement with that order and animate the pull after the mine fires.
+        $forced = new MovementOrder(null, "prefire", $newHex, 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, $pullOrder->id, 0);
+        Manager::insertSingleMovement($gamedata->id, $unit->id, $forced);
+        $unit->setMovement($forced);
+        GraviticMineHandler::$alreadyMovedTargetIds[$unit->id] = true;
+    }
+
+    private function applyShearing($unit, OffsetCoordinate $unitPos, array $minesInRange, $gamedata){
+        $factor = $this->getShearingFactor($unit);
+        //Debug::log("  applyShearing: unit={$unit->name} shearingFactor={$factor}");
+        if ($factor <= 0) {
+            //Debug::log("  applyShearing: factor=0, no damage (immune/unknown class)");
+            // Tagged anyway so the once-per-turn guard holds even for mines/zero-factor units.
+            GraviticMineHandler::$alreadyShearedTargetIds[$unit->id] = true;
+            return;
+        }
+
+        $nearestDist = $minesInRange[0]['distance'];
+        $damage = ((int)$nearestDist + 1) * $factor;
+        //Debug::log("  applyShearing: nearestDist={$nearestDist} factor={$factor} damage={$damage}");
+
+        // Furthest mine within 5 hexes determines the impact side; randomise on tie.
+        $furthestDist = $minesInRange[count($minesInRange) - 1]['distance'];
+        $tiedFurthest = array();
+        foreach ($minesInRange as $m) {
+            if ($m['distance'] === $furthestDist) $tiedFurthest[] = $m;
+        }
+        $furthestMine = $tiedFurthest[array_rand($tiedFurthest)];
+        $sourceHex = $furthestMine['pos'];
+
+        $lastMove = $unit->getLastMovement();
+        $facing = ($lastMove !== null) ? $lastMove->getFacingAngle() : 0;
+        $relBearing = $this->computeRelativeBearing($unitPos, $sourceHex, $unit, $facing);
+        $hitLocation = $this->getHitLocation($relBearing, $unit);
+
+        // Stash precomputed damage/source for fire() / getDamage() to read.
+        GraviticMineHandler::$shearDamageByTargetId[$unit->id]    = $damage;
+        GraviticMineHandler::$shearSourceHexByTargetId[$unit->id] = $sourceHex;
+
+        // Append to $this->fireOrders (mirroring AoE proximity mine pattern) so
+        // preparePreFiring's second loop sees the order on the weapon it is
+        // currently iterating — avoids any cross-instance visibility issues.
+        $shooterShipId = $this->getUnit()->id;
+        $shearOrder = new FireOrder(
+            -1, "prefiring", $shooterShipId, $unit->id,
+            $this->id, -1, $gamedata->turn, 1,
+            100, 0, 1, 0, 0,
+            $sourceHex->q, $sourceHex->r, 'graviticShear', 1000
+        );
+        $shearOrder->chosenLocation = $hitLocation;
+        $shearOrder->pubnotes = " Sheared by conflicting Gravitic Mines.";
+        $shearOrder->addToDB = true;
+        $this->fireOrders[] = $shearOrder;
+
+        GraviticMineHandler::$alreadyShearedTargetIds[$unit->id] = true;
+    }
+
+    private function computeRelativeBearing(OffsetCoordinate $unitPos, OffsetCoordinate $sourceHex, $unit, $facing){
+        $oPos = Mathlib::hexCoToPixel($unitPos);
+        $tPos = Mathlib::hexCoToPixel($sourceHex);
+        $compassHeading = Mathlib::getCompassHeadingOfPoint($oPos, $tPos);
+        $relativeBearing = Mathlib::addToDirection($compassHeading, -$facing);
+        if (Movement::isRolled($unit)) {
+            if ($relativeBearing != 0) $relativeBearing = 360 - $relativeBearing;
+        }
+        return round($relativeBearing);
+    }
+
+    private function getHitLocation($relativeBearing, $target){
+        if (!method_exists($target, 'getLocations')) return 0;
+        foreach ($target->getLocations() as $location) {
+            $min = $location["min"];
+            $max = $location["max"];
+            if ($min < $max && $relativeBearing >= $min && $relativeBearing < $max) return $location["loc"];
+            if ($min > $max && ($relativeBearing >= $min || $relativeBearing < $max)) return $location["loc"];
+        }
+        return 0;
+    }
+
+    private function isUnitInShearingZone(OffsetCoordinate $unitPos, array $minePositions){
+        $count = count($minePositions);
+        if ($count < 2) return false;
+
+        $unitPx = Mathlib::hexCoToPixel($unitPos);
+        $minePx = array();
+        foreach ($minePositions as $p) $minePx[] = Mathlib::hexCoToPixel($p);
+
+        //Debug::log("    isUnitInShearingZone: unitHex=({$unitPos->q},{$unitPos->r}) unitPx=({$unitPx['x']},{$unitPx['y']})");
+        //foreach ($minePositions as $i => $p) {
+        //    Debug::log("      mine[$i] hex=({$p->q},{$p->r}) px=({$minePx[$i]['x']},{$minePx[$i]['y']})");
+        //}
+
+        if ($count === 2) {
+            // Line touches the unit's hex iff perpendicular distance ≤ ½ hex-width
+            // (Mathlib::hexCoToPixel uses unit hex-width = sqrt(3), so half-width = sqrt(3)/2).
+            $tolerance = sqrt(3) / 2;
+            $dist = $this->pointToSegmentDistance($unitPx, $minePx[0], $minePx[1]);
+            //Debug::log("    2-mine check: segDist={$dist} tolerance={$tolerance} inZone=" . ($dist <= $tolerance ? 'YES' : 'NO'));
+            return $dist <= $tolerance;
+        }
+
+        // 3+ mines: convex hull point-in-polygon.
+        $hull = $this->convexHull($minePx);
+        $inside = $this->pointInPolygon($unitPx, $hull);
+        //Debug::log("    3+-mine check: hullSize=" . count($hull) . " inside=" . ($inside ? 'YES' : 'NO'));
+        return $inside;
+    }
+
+    private function pointToSegmentDistance($p, $a, $b){
+        $abx = $b['x'] - $a['x'];
+        $aby = $b['y'] - $a['y'];
+        $lenSq = $abx * $abx + $aby * $aby;
+        if ($lenSq <= 1e-9) {
+            return sqrt(($p['x'] - $a['x']) ** 2 + ($p['y'] - $a['y']) ** 2);
+        }
+        $t = (($p['x'] - $a['x']) * $abx + ($p['y'] - $a['y']) * $aby) / $lenSq;
+        $t = max(0, min(1, $t));
+        $cx = $a['x'] + $t * $abx;
+        $cy = $a['y'] + $t * $aby;
+        return sqrt(($p['x'] - $cx) ** 2 + ($p['y'] - $cy) ** 2);
+    }
+
+    private function convexHull(array $points){
+        $n = count($points);
+        if ($n < 3) return $points;
+        usort($points, function($a, $b) {
+            if ($a['x'] !== $b['x']) return $a['x'] <=> $b['x'];
+            return $a['y'] <=> $b['y'];
+        });
+        $cross = function($O, $A, $B) {
+            return ($A['x'] - $O['x']) * ($B['y'] - $O['y']) - ($A['y'] - $O['y']) * ($B['x'] - $O['x']);
+        };
+        $lower = array();
+        foreach ($points as $p) {
+            while (count($lower) >= 2 && $cross($lower[count($lower) - 2], $lower[count($lower) - 1], $p) <= 0) {
+                array_pop($lower);
+            }
+            $lower[] = $p;
+        }
+        $upper = array();
+        foreach (array_reverse($points) as $p) {
+            while (count($upper) >= 2 && $cross($upper[count($upper) - 2], $upper[count($upper) - 1], $p) <= 0) {
+                array_pop($upper);
+            }
+            $upper[] = $p;
+        }
+        array_pop($lower);
+        array_pop($upper);
+        return array_merge($lower, $upper);
+    }
+
+    private function pointInPolygon($p, array $polygon){
+        $n = count($polygon);
+        if ($n < 3) return false;
+        $inside = false;
+        for ($i = 0, $j = $n - 1; $i < $n; $j = $i++) {
+            $xi = $polygon[$i]['x']; $yi = $polygon[$i]['y'];
+            $xj = $polygon[$j]['x']; $yj = $polygon[$j]['y'];
+            $denom = ($yj - $yi);
+            if ($denom == 0) $denom = 1e-9;
+            $intersect = (($yi > $p['y']) !== ($yj > $p['y'])) &&
+                         ($p['x'] < ($xj - $xi) * ($p['y'] - $yi) / $denom + $xi);
+            if ($intersect) $inside = !$inside;
+        }
+        return $inside;
+    }
+
+    public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
+        if ($fireOrder->damageclass === 'graviticShear') return 0; // Shearing ignores armor (Molecular Slicer pattern).
+        return parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
+    }
+
+
+        public function getDamage($fireOrder){
+            if ($fireOrder->damageclass === 'graviticShear') {
+                $dmg = GraviticMineHandler::$shearDamageByTargetId[$fireOrder->targetid] ?? 0;
+                //Debug::log("GraviticMine getDamage: shear order target={$fireOrder->targetid} returning dmg={$dmg} (registry keys: " . implode(',', array_keys(GraviticMineHandler::$shearDamageByTargetId)) . ")");
+                return $dmg;
+            }
+            return 0; /*no actual damage, just various effects*/
+        }
+        public function setMinDamage(){     $this->minDamage = 0 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+}//endof class GraviticMine
+
+
+class GraviticMineHandler {
+    private static $mines = array();
+
+    // Per-turn guards / data carried across the beforePreFiringOrderResolution → fire pipeline.
+    public static $resolvedTurn = -1;
+    public static $alreadyMovedTargetIds = array();
+    public static $alreadyShearedTargetIds = array();
+    public static $shearDamageByTargetId = array();
+    public static $shearSourceHexByTargetId = array();
+
+    public static function register($weapon){
+        self::$mines[] = $weapon;
+    }
+
+    public static function getAllMines(){
+        return self::$mines;
+    }
+}
 
 ?>

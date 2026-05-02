@@ -8,7 +8,7 @@ class asteroidThreeHex  extends Terrain{
 		$this->faction = "Terrain";       
 		$this->factionAge = 1;        
         $this->phpclass = "asteroidThreeHex";
-        $this->imagePath = "img/ships/AsteroidThreeHex.png";
+        $this->imagePath = "img/ships/AsteroidThreeHex2.png";
         $this->canvasSize = 512;
         $this->shipClass = "Asteroid (Triangular)";
         $this->Enormous = true; 

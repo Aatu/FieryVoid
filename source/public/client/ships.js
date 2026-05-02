@@ -1018,17 +1018,14 @@ window.shipManager = {
     },
 
 
-    //True or false function, e.g. for possible use in Deployment Phase to show commit button in case needed.
-    playerHasDeployedAllShips: function playerHasDeployedAllShips(playerid) {
-        var hasDeployed = true;
-
+    //True if the player still has at least one ship scheduled to deploy THIS turn.
+    //Future-turn arrivals are excluded — they don't keep the Deployment phase active.
+    hasShipsToDeployThisTurn: function hasShipsToDeployThisTurn(playerid) {
         for (const ship of gamedata.ships) {
             if (ship.userid !== playerid) continue;
-
-            var deploys = shipManager.getTurnDeployed(ship);
-            if (deploys >= gamedata.turn) hasDeployed = false;
+            if (shipManager.getTurnDeployed(ship) === gamedata.turn) return true;
         }
-        return hasDeployed;
+        return false;
     },
 
     //Need abridged version of this to prevent false positive returns from main function when a system is offline e.g. cloaking devices

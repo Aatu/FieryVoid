@@ -33,11 +33,10 @@ class SalbezCreisver extends MediumShip{
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));        
         $this->addPrimarySystem(new Hangar(2, 2));
         
-		$this->addFrontSystem(new NexusLightMagGun(3, 7, 6, 240, 360));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));
-		$this->addFrontSystem(new NexusLightMagGun(3, 7, 6, 0, 120));
+		$this->addFrontSystem(new NexusLightMagGun(3, 7, 6, 300, 60));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	    

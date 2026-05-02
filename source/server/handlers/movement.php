@@ -48,10 +48,10 @@
         }
 
      
-        public static function isPivoting($ship, $turn){
+        public static function isPivoting($ship, $turn, $gamedata = null){
 			if ($ship->agile || $ship instanceof FighterFlight)
 				return 0;
-				
+
             $pivoting = 0; // 0: false, 1: left, 2:right
             foreach ($ship->movement as $move){
                 if ($move->turn != $turn || $turn == null)
@@ -59,10 +59,10 @@
 
                 if ($move->type == "isPivotingLeft")
                     $pivoting = 1;
-                    
+
                 if ($move->type == "isPivotingRight")
                     $pivoting = 2;
-                
+
 
                 if ($move->type == "pivotright" && !$move->preturn){
                     if ($pivoting == 1){
@@ -71,7 +71,7 @@
                         $pivoting = 2;
                     }
                 }
-                
+
                 if ($move->type == "pivotleft" && !$move->preturn){
                     if ($pivoting == 2){
                         $pivoting = 0;
@@ -82,23 +82,42 @@
 
                 if ($move->value == "turnIntoPivot" && !$move->preturn){
   				   $pivoting = 0;
-				}                 
+				}
             }
-            
+
+            // If attached via Grappling Claw and not pivoting itself, inherit host's pivot state
+            if ($pivoting === 0 && $gamedata !== null && !empty($ship->attached)) {
+                $hostId = key($ship->attached);
+                $hostShip = $gamedata->getShipById($hostId);
+                if ($hostShip && !($hostShip instanceof FighterFlight)) {
+                    $pivoting = self::isPivoting($hostShip, $turn);
+                }
+            }
+
             return $pivoting;
         }
         
-        public static function hasPivoted($ship, $turn){
+        public static function hasPivoted($ship, $turn, $gamedata = null){
             foreach ($ship->movement as $move){
                 if ($move->turn != $turn)
                     continue;
 
                 if ($move->type == "pivotleft" || $move->type == "pivotright" )
                     return true;
-                
+
                 if ($move->type == "isPivotingRight" || $move->type == "isPivotingLeft" )
                     return true;
             }
+
+            // If attached via Grappling Claw, inherit pivot penalty from host ship
+            if ($gamedata !== null && !empty($ship->attached)) {
+                $hostId = key($ship->attached);
+                $hostShip = $gamedata->getShipById($hostId);
+                if ($hostShip && !($hostShip instanceof FighterFlight)) {
+                    if (self::hasPivoted($hostShip, $turn)) return true;
+                }
+            }
+
             return false;
         }
 
@@ -112,7 +131,7 @@
             return false;
         }
         
-        public static function hasRolled($ship, $turn){
+        public static function hasRolled($ship, $turn, $gamedata = null){
             foreach ($ship->movement as $move){
                 if ($move->turn != $turn)
                     continue;
@@ -121,27 +140,45 @@
                     return true;
             }
 
+            // If attached via Grappling Claw, inherit roll penalty from host ship
+            if ($gamedata !== null && !empty($ship->attached)) {
+                $hostId = key($ship->attached);
+                $hostShip = $gamedata->getShipById($hostId);
+                if ($hostShip && !($hostShip instanceof FighterFlight)) {
+                    if (self::hasRolled($hostShip, $turn)) return true;
+                }
+            }
+
             return false;
         }
         
-        public static function isRolling($ship, $turn){
+        public static function isRolling($ship, $turn, $gamedata = null){
 			if ($ship->agile || $ship instanceof FighterFlight)
 				return false;
-				
+
             $rolling = false;
             foreach ($ship->movement as $move){
                 if ($move->turn != $turn || $turn == null)
                     continue;
-                    
+
                 if ($move->type == "isRolling")
                     $rolling = true;
-                
+
                 if ($move->type == "roll"){
                     $rolling = !$rolling;
                 }
-                
+
             }
-            
+
+            // If attached via Grappling Claw, inherit rolling penalty from host ship
+            if (!$rolling && $gamedata !== null && !empty($ship->attached)) {
+                $hostId = key($ship->attached);
+                $hostShip = $gamedata->getShipById($hostId);
+                if ($hostShip && !($hostShip instanceof FighterFlight)) {
+                    $rolling = self::isRolling($hostShip, $turn);
+                }
+            }
+
             return $rolling;
         }
         		
@@ -348,7 +385,11 @@
 					$lastmove = $parent->getLastMovement();
 					
 					$location = $ship->attached[$parent->id];
-					$locOffset = self::getAttachedFacingOffset($location);
+					// Prefer the precise entry-side offset recorded at attach time; fall back to
+					// the location-derived offset for in-progress games attached before this change.
+					$locOffset = isset($ship->attachedFacing[$parent->id])
+						? $ship->attachedFacing[$parent->id]
+						: self::getAttachedFacingOffset($location);
 					
 					// Breaching pods as FighterFlight units cannot roll themselves, 
 					// so we adjust their absolute facing by 180 degrees (+3) instead.
@@ -665,8 +706,21 @@
 			else if ($location == 31) $locOffset = 2; // Port-Forward, pod faces Starboard-Aft
 			else if (in_array($location, [4, 42])) $locOffset = 5; // Starboard, pod faces Port-Forward
 			else if ($location == 41) $locOffset = 4; // Starboard-Forward, pod faces Port-Aft
-			
+
 			return $locOffset;
+		}
+
+		// Returns the precise hex-side facing offset (0-5) for a ship attaching to a target,
+		// derived from their current geometric positions. Roll-invariant: offset is measured
+		// in the host's unrolled facing-frame so the (FighterFlight + rolled-host) +3 mirror
+		// at runtime continues to compose correctly.
+		public static function getAttachFacingOffsetFromBearing($target, $shooter) {
+			if (!$target || !$shooter) return null;
+			$tf = $target->getFacingAngle();
+			$compassHeading = mathlib::getCompassHeadingOfShip($target, $shooter);
+			$relativeBearing = mathlib::addToDirection($compassHeading, -$tf);
+			$entrySide = ((int) round($relativeBearing / 60.0)) % 6;
+			return ($entrySide + 3) % 6;
 		}
 
     

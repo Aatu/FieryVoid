@@ -85,6 +85,8 @@ class BaseShip {
     public $skinDancing = array();	//Holds target ids when there's a successful skin dance.
     public $hasAttached = array(); // Holds shooterid => location for attached boarding pods on this ship.
     public $attached = array(); // Holds targetid => location if this unit is attached to another unit.
+    public $hasAttachedFacing = array(); // shooterid => entry-side hex offset 0-5 (facing offset relative to host's facing direction)
+    public $attachedFacing = array(); // targetid  => entry-side hex offset 0-5 (facing offset relative to host's facing direction)
     protected $skinDancer = false; //Let';s ships of unusual size skin dance e.g. Toravlus capitals ships.   	
 
 	public $isCloaked = false;  //Used for deactivating Trek shields when the Trek cloak is activated
@@ -531,9 +533,33 @@ class BaseShip {
 		}		
 		
         //Add unused Marines from Grappling Claw to bolster defences.
-        foreach ($this->systems as $system){
-            if ($system instanceof GrapplingClaw)  $marines += $system->ammunition;
-        }
+        if($this->hasSpecialAbility("Attaches") && !$this instanceOf FighterFlight){
+            foreach ($this->systems as $system){
+                if ($system instanceof GrapplingClaw)  $marines += $system->ammunition;
+            }
+        }    
+
+		// Bonus marines for bases (1 per section)
+		if ($this->base) {
+			$sections = [];
+			foreach ($this->systems as $system) {
+				if ($system instanceof Structure) {
+					$sections[$system->location] = true;
+				}
+			}
+			$marines += count($sections);
+		}
+
+		// Bonus marines for Assault ships
+		if (strpos($this->shipClass, 'Assault') !== false) {
+			if ($this->shipSizeClass == 3) {
+				$marines += 4;
+			} elseif ($this->shipSizeClass == 2) {
+				$marines += 3;
+			} elseif ($this->shipSizeClass == 1) {
+				$marines += 2;
+			}
+		}
 
 		$totalMarines = max(0, $marines);
 		
@@ -564,6 +590,8 @@ class BaseShip {
         if ($this->skinDancing) $strippedShip->skinDancing = $this->skinDancing;
         if (!empty($this->hasAttached)) $strippedShip->hasAttached = $this->hasAttached;
         if (!empty($this->attached)) $strippedShip->attached = $this->attached;
+        if (!empty($this->hasAttachedFacing)) $strippedShip->hasAttachedFacing = $this->hasAttachedFacing;
+        if (!empty($this->attachedFacing)) $strippedShip->attachedFacing = $this->attachedFacing;
         if ($this->spawned !== null && $this->spawned !== -1) $strippedShip->spawned = $this->spawned;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
@@ -2987,10 +3015,8 @@ class Mine extends OSAT{
         $strippedShip = parent::stripForJson();
         if($this->detectedSignature !== -1){
             $strippedShip->signature = $this->signature; //Need to send updated Signature values for DEW mine weapons.
-            //$strippedShip->commandControl = $this->commandControl; //Need to send updated Signature values for DEW mine weapons.
-            //$strippedShip->multiSettings = $this->multiSettings; //Need to send updated Signature values for DEW mine weapons.
-            //$strippedShip->detectedSignature = $this->detectedSignature; //Need to send updated Signature values for DEW mine weapons.            
-            //$strippedShip->activated = $this->activated; //Need to send updated activated values for DEW mine weapons.            
+            if ($this->commandControl) $strippedShip->commandControl = $this->commandControl; //If true front end needs to know for firing checks.
+            //$strippedShip->multiSettings = $this->multiSettings;            
         } 
         return $strippedShip;
     }    

@@ -167,12 +167,25 @@ class MovementGamePhase implements Phase
 								if ($cnc) {
 									$cnc->addIndividualNote(new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$targetShip->id,$cnc->id,"Detached","Detached",$ship->id . "=>Detach"));
 									$cnc->saveIndividualNotes($dbManager);
-									
+
+                                    if(!$ship instanceof FighterFlight){ //Grapple ships, need to unset their $hostShipId
+                                        foreach($ship->systems as $claw){
+                                            if($claw->name == "GrapplingClaw"){
+										        $claw->hostShipId = -1;                                                
+                                                $clawNote = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$claw->id,"ClawDetached","ClawDetached",-2);											
+										        Manager::insertIndividualNote($clawNote);	                                            
+                                            }
+                                        }
+                                    }		
+
 									// Clear attachment in memory to prevent mirroring during this process call
 									// Clear on both the submitted ship and the gameData representation to ensure JSON response is correct
 									unset($ship->attached[$hostId]);
 									unset($activeShip->attached[$hostId]);
 									unset($targetShip->hasAttached[$ship->id]);
+									unset($ship->attachedFacing[$hostId]);
+									unset($activeShip->attachedFacing[$hostId]);
+									unset($targetShip->hasAttachedFacing[$ship->id]);
 								}
 							}
 						}
@@ -194,7 +207,11 @@ class MovementGamePhase implements Phase
 						// Skip if the attached ship is also submitting its own movement (e.g. detaching)
 						if (!isset($submittedShipIds[$attachedShip->id]) && !$dbManager->isMovementAlreadySubmitted($gameData->id, $attachedShip->id, $gameData->turn)) {
 							$attachedMoves = array();
-							$locOffset = Movement::getAttachedFacingOffset($location);
+							// Prefer the precise entry-side offset recorded at attach time; fall back to
+							// the location-derived offset for in-progress games attached before this change.
+							$locOffset = isset($attachedShip->attachedFacing[$activeShip->id])
+								? $attachedShip->attachedFacing[$activeShip->id]
+								: Movement::getAttachedFacingOffset($location);
 
 							// When the parent ship is rolled, breaching pods as FighterFlight 
 							// units cannot roll themselves, so we adjust their absolute 
