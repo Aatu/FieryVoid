@@ -265,6 +265,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
               If you choose not to manually target a unit, the mine will still attack using it's default targeting logic.</li>
         </ul>      
       </li> 
+        <li><strong>Flexible Targeting</strong>
+        <ul class="circle-list">
+            <li>Effect: Allows you to apply different range settings for different weapons during Deployment.</li>
+            <li>Points Cost: 25%</li>
+            <li>Limit: 1</li>
+            <li>Notes: Only available to DEW mines which have more than one weapon.</li>
+        </ul>      
+      </li>       
       <li><strong>Identify Friend or Foe (IFF) System</strong>
         <ul class="circle-list">
             <li>Effect: Prevent mines from attacking friendly units</li>
