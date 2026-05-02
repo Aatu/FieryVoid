@@ -1713,10 +1713,10 @@ class GraviticMine extends Weapon{
 		
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);  
-		//some effects should originally work for current turn, but it won't work with FV handling of ballistics. Moving everything to next turn.
-		//it's Ion (not EM) weapon with no special remarks regarding advanced races and system - so works normally on AdvArmor/Ancients etc
-		$this->data["Special"] = "Targets a hex and affects all units within 2 hexes of that location.";      
-		$this->data["Special"] .= "";
+		$this->data["Special"] = "Ballistic weapon that targets a hex.";      
+		$this->data["Special"] .= "<br>In Prefiring Phase, units within 5 hexes are pulled one hex toward the closest mine.";
+		$this->data["Special"] .= "<br>If caught between overlapping mines, the units are instead sheared for damage scaled by ship size and proximity, ignoring armour.";
+		$this->data["Special"] .= "<br>Terrain, fixed Enormous bases, and other mines are unaffected.";
 	}	
 	
 	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
