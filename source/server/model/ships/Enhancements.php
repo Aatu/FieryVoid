@@ -99,8 +99,9 @@ class Enhancements{
 			}	
 			
 			if($unit->mineType && $unit->mineType == 'DEW'){
-				$unit->enhancementOptionsEnabled[] = 'MINE_ARM';									
-			}	
+				$unit->enhancementOptionsEnabled[] = 'MINE_ARM';
+				$unit->enhancementOptionsEnabled[] = 'MINE_MULTI';
+			}
 			
 			if($unit->getVariableDamage() > 0){
 				$unit->enhancementOptionsEnabled[] = 'MINE_DMG';				
@@ -531,15 +532,31 @@ class Enhancements{
 			$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
 		}	  	  
 
-		//Improve Signature rating of Mines		
+		//Improve Signature rating of Mines
 		$enhID = 'MINE_SIGN';
 		if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 			$enhName = 'Improved Signature';
-			$enhLimit = 5; 
-			$enhPrice = max(4, $ship->signature + 2); //New sign (+1) +1.	Minimum 4pts.	  
-			$enhPriceStep = 1; 
+			$enhLimit = 5;
+			$enhPrice = max(4, $ship->signature + 2); //New sign (+1) +1.	Minimum 4pts.
+			$enhPriceStep = 1;
 			$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
-		}		
+		}
+
+		//Multiple Targets - independent ranges per weapon for DEW mines with 2+ weapons
+		$enhID = 'MINE_MULTI';
+		if(in_array($enhID, $ship->enhancementOptionsEnabled)){
+			$weaponCount = 0;
+			foreach ($ship->systems as $system) {
+				if ($system instanceof Weapon && $system->name !== 'RammingAttack') $weaponCount++;
+			}
+			if ($weaponCount >= 2) {
+				$enhName = 'Flexible Targeting';
+				$enhLimit = 1;
+				$enhPrice = ceil($ship->pointCost * 0.25);
+				$enhPriceStep = 0;
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+			}
+		}
 
 	  //Poor Crew (official but modified): -5 Initiative, -1 Engine, -1 Sensors, -1 Reactor power, +1 Profile, +2 to critical results, -1 to hit all weapons
 	  //cost: -15% of ship cost (second time: -10%)
