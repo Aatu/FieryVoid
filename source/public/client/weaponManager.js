@@ -2289,6 +2289,20 @@ window.weaponManager = {
         return false;
     },
 
+    getCalledShotInfo: function getCalledShotInfo(ship, system) {
+        var fire = weaponManager.getFiringOrder(ship, system);
+        if (!fire || fire.calledid == null || fire.calledid == -1) return null;
+        var targetShip = gamedata.getShip(fire.targetid);
+        if (!targetShip) return null;
+        var targetSystem = shipManager.systems.getSystem(targetShip, fire.calledid);
+        if (!targetSystem) return null;
+        return {
+            targetShip: targetShip,
+            targetSystem: targetSystem,
+            calledId: fire.calledid
+        };
+    },
+
 
     getAllFireOrders: function getAllFireOrders(ship) {
         var fires = new Array();

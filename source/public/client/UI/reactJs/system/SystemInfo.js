@@ -137,6 +137,10 @@ class SystemInfo extends React.Component {
                     gamedata.selectedSystems.length > 0 && selectedShip) &&
                     getCalledShot(ship, selectedShip, system)}
 
+                {gamedata.isMyShip(ship) && !isUnrevealedMine && system.weapon &&
+                    weaponManager.hasFiringOrder(ship, system) &&
+                    getCalledShotDisplay(ship, system)}
+
             </SystemInfoTooltip>
         )
     }
@@ -167,6 +171,19 @@ const getCalledShot = (ship, selectedShip, system) => {
             <Entry key="cannotTarget">Cannot Target</Entry>
         )
     }
+}
+
+const getCalledShotDisplay = (ship, system) => {
+    var calledInfo = weaponManager.getCalledShotInfo(ship, system);
+    if (!calledInfo) return null;
+
+    return [
+        <Divider key="calledShotDivider" />,
+        <InfoHeader key="calledShotHeader">Called Shot</InfoHeader>,
+        <Entry key="calledShotTarget">
+            <Header>Target: </Header>{calledInfo.targetSystem.displayName} on {calledInfo.targetShip.name}
+        </Entry>
+    ];
 }
 
 const getCriticals = (system) => {
