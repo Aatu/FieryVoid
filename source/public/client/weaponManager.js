@@ -516,7 +516,7 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
             var attachedWeaponHidden = false;
-            var clawBlindSpot = false;            
+            var clawBlindSpot = false;
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
@@ -559,9 +559,9 @@ window.weaponManager = {
                         }
                         if (!weapon.isBoardingAction && weaponManager.isTargetInGrapplingClawBlindSpot(selectedShip, ship)) {
                             clawBlindSpot = true;
-                        }                        
+                        }
                     }
-                    
+
 
 
 
@@ -646,6 +646,29 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var shooterSystem = gamedata.selectedSystems[i];
             if (shooterSystem.weapon && shooterSystem.canTargetAllExtSections && (system.location != 0 || system.location == 0 && system.isPrimaryTargetable)) return true;
+        }
+
+        // If target is an attached ship (e.g. breaching pod), use the attachment location directly
+        // instead of compass heading, which defaults to Front for same-hex speed-0 ships.
+        if (shooter.attached && Object.keys(shooter.attached).length > 0) {
+            var hostId = Object.keys(shooter.attached)[0];
+            var attachedLocation = parseInt(shooter.attached[hostId]);
+            if (!isNaN(attachedLocation) && attachedLocation !== 0) {
+                // Only allow called shots against systems on the section the target is attached to
+                if (system.location === attachedLocation) {
+                    // Check if this section is eligible for called shots
+                    for (var j = 0; j < target.outerSections.length; j++) {
+                        if (target.outerSections[j].loc === attachedLocation && target.outerSections[j].call === true) {
+                            return true;
+                        }
+                    }
+                }
+                // Also check primary-targetable systems (location 0) that overlap the attached section
+                if (system.location === 0 && system.isPrimaryTargetable) {
+                    return true;
+                }
+                return false; // System is not on the attached section
+            }
         }
 
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
@@ -789,10 +812,10 @@ window.weaponManager = {
     isTargetInGrapplingClawBlindSpot: function isTargetInGrapplingClawBlindSpot(shooter, target) {
         if (shooter.flight) return false;
         if (!shooter.attached || Object.keys(shooter.attached).length === 0) return false;
-        
+
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
-        
+
         for (var i in shooter.systems) {
             var system = shooter.systems[i];
             if (system.name === "GrapplingClaw" && !shipManager.systems.isDestroyed(shooter, system)) {
