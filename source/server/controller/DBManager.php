@@ -1813,7 +1813,7 @@ class DBManager
 
                 //To mark Fleet Test games as Fleet Test in lobby
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
-                    $nm = '<span style="color:gold; font-weight:bold; padding-right: 0px; text-align: center">Fleet Builder</span>'; 
+                    $nm = '<span style="color:#DEEBFF; font-weight:bold; padding-right: 0px; text-align: center">Fleet Builder</span>'; 
                     $fleetTest = true;                    
                 }    
 
