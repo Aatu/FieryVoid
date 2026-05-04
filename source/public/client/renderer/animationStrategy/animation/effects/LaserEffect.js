@@ -37,18 +37,43 @@ window.LaserEffect = function () {
             y: Math.random() * 0.01 * offsetVelocityFactor - 0.005 * offsetVelocityFactor
         };
 
+        // Cache laser texture once per session (previously re-loaded per shot).
+        if (!LaserEffect.cachedTexture) {
+            LaserEffect.cachedTexture = new THREE.TextureLoader().load("img/effect/laser19.png");
+            LaserEffect.cachedTexture.colorSpace = THREE.SRGBColorSpace;
+        }
+
+        const haloIntensity = 1.0;
+        const coreIntensity = 1.0;
+        const haloOpacity = 1.0;
+        const coreOpacity = 0.5; //Maybe change to 0.1
+
         // --- Laser meshes ---
-        const beamWidth = Math.ceil(this.size * 0.2);
-        const haloWidth = Math.ceil(this.size * 0.3);
+        // Thin beam body; round end-caps are added separately so the beam has
+        // a stadium/capsule silhouette rather than a long oblong rectangle.
+        const beamWidth = Math.max(2, Math.ceil(this.size * 0.15));
+        const haloWidth = Math.max(3, Math.ceil(this.size * 0.1));
         this.lasers = [
-            createLaser.call(this, this.color, 0.8, haloWidth),
-            createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, beamWidth)
+            createLaser.call(this, this.color, haloOpacity, haloWidth, haloIntensity),
+            createLaser.call(this, new THREE.Color(1, 1, 1), coreOpacity, beamWidth, coreIntensity)
         ];
 
         this.lasers.forEach(laser => {
             laser.multiplyOpacity(0);
             this.scene.add(laser.mesh);
         });
+
+        // --- Round end-caps (one per layer, per end) ---
+        this.startCaps = [
+            createCap(this.color, haloOpacity, haloWidth, haloIntensity),
+            createCap(new THREE.Color(1, 1, 1), coreOpacity, beamWidth, coreIntensity)
+        ];
+        this.endCaps = [
+            createCap(this.color, haloOpacity, haloWidth, haloIntensity),
+            createCap(new THREE.Color(1, 1, 1), coreOpacity, beamWidth, coreIntensity)
+        ];
+        this.startCaps.forEach(cap => this.scene.add(cap));
+        this.endCaps.forEach(cap => this.scene.add(cap));
 
         // --- Particle emitter ---
         this.particleEmitter = new ParticleEmitterContainer(scene, 200);
@@ -95,6 +120,8 @@ window.LaserEffect = function () {
 
     LaserEffect.prototype.cleanUp = function () {
         this.lasers.forEach(laser => this.scene.remove(laser.mesh));
+        this.startCaps.forEach(cap => this.scene.remove(cap));
+        this.endCaps.forEach(cap => this.scene.remove(cap));
         this.particleEmitter.cleanUp();
     };
 
@@ -166,23 +193,70 @@ window.LaserEffect = function () {
             laser.multiplyOpacity(opacity);
             laser.setStartAndEnd(startAndEnd.start, startAndEnd.end);
         });
+
+        this.startCaps.forEach(cap => {
+            cap.position.x = startAndEnd.start.x;
+            cap.position.y = startAndEnd.start.y;
+            cap.material.opacity = cap.userData.baseOpacity * opacity;
+        });
+        this.endCaps.forEach(cap => {
+            cap.position.x = startAndEnd.end.x;
+            cap.position.y = startAndEnd.end.y;
+            cap.material.opacity = cap.userData.baseOpacity * opacity;
+        });
     };
 
     LaserEffect.prototype.getDuration = function () {
         return this.duration + this.fadeOutSpeed;
     };
 
-    function createLaser(color, opacity, width) {
+    function createLaser(color, opacity, width, intensity) {
         const startAndEnd = getStartAndEnd.call(this);
-
-        const tex = new THREE.TextureLoader().load("img/effect/laser19.png");
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.colorSpace = THREE.SRGBColorSpace;
-
         return new LineSprite(startAndEnd.start, startAndEnd.end, width, 201, color, opacity, {
             blending: THREE.AdditiveBlending,
-            texture: tex
+            texture: LaserEffect.cachedTexture,
+            intensity: intensity || 1.0
         });
+    }
+
+    // Programmatic radial-gradient texture for the round end-caps. Cached on
+    // the LaserEffect function object so all shots share one upload.
+    function getCapTexture() {
+        if (!LaserEffect.cachedCapTexture) {
+            const px = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = px;
+            canvas.height = px;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2);
+            grad.addColorStop(0.0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0.6)');
+            grad.addColorStop(1.0, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, px, px);
+            LaserEffect.cachedCapTexture = new THREE.CanvasTexture(canvas);
+            LaserEffect.cachedCapTexture.colorSpace = THREE.SRGBColorSpace;
+        }
+        return LaserEffect.cachedCapTexture;
+    }
+
+    function createCap(color, baseOpacity, size, intensity) {
+        const matColor = (intensity && intensity !== 1.0)
+            ? new THREE.Color().copy(color).multiplyScalar(intensity)
+            : color;
+        const material = new THREE.MeshBasicMaterial({
+            color: matColor,
+            transparent: true,
+            opacity: 0,
+            map: getCapTexture(),
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+        mesh.scale.set(size, size, 1);
+        mesh.position.z = 201;
+        mesh.userData = { baseOpacity: baseOpacity };
+        return mesh;
     }
 
     function getStartAndEnd(offsetVelocity) {
