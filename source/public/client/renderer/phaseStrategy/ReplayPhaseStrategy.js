@@ -190,8 +190,10 @@ window.ReplayPhaseStrategy = function () {
 
             if (animContainer instanceof ShipDestroyedAnimation || animContainer instanceof ShipJumpAnimation) {
                 animContainer.explosionTriggered = value;
+                animContainer.soundTriggered = value; // 🔊 Fix: Reset sound flag too!
                 continue;
             }
+
             // --- 2. Handle AllWeaponFireAgainstShipAnimation containers ---
             const isAllWeaponFire =
                 animContainer?.movementAnimations &&
@@ -200,20 +202,20 @@ window.ReplayPhaseStrategy = function () {
                 animContainer?.logAnimation &&
                 !animContainer?.emitters;
 
-            // --- 3. Handle ShipDestroyedAnimation containers ---
-            /*const isShipDestruction =
-                animContainer instanceof ShipDestroyedAnimation ||
-                (
-                    animContainer?.shipIcon &&
-                    animContainer?.fadeoutTime &&
-                    typeof animContainer?.explosionTriggered === "boolean" &&
-                    !animContainer?.emitters
-                );*/
-
             if (isAllWeaponFire) {
                 for (const effect of animContainer.animations) {
                     if (effect instanceof LaserEffect) {
                         effect.playedSound = value;
+                    }
+
+                    // Handle anonymous Gravitic Mine pull effects if they expose the flag
+                    if (effect.playedPullSound !== undefined) {
+                        effect.playedPullSound = value;
+                    }
+
+                    // Handle anonymous mine explosion effects
+                    if (effect.playedImpactSound !== undefined) {
+                        effect.playedImpactSound = value;
                     }
                 }
             }

@@ -96,7 +96,7 @@ window.MissileEffect = function () {
             this.emitterContainer.render(now, total, last, delta, zoom, back, paused);
         }
 
-        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time) {
+        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time && !paused && !back) {
             try {
                 const launchSound = MissileEffect.cachedLaunchAudio.cloneNode(true);
                 launchSound.volume = this.soundVolume;
@@ -108,7 +108,7 @@ window.MissileEffect = function () {
             }
         }
 
-        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50) {
+        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50 && !paused && !back) {
             try {
                 const impactSound = MissileEffect.cachedImpactAudio.cloneNode(true);
                 impactSound.volume = this.soundVolume;
