@@ -110,7 +110,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
         <li><strong>Polaren Revisions</strong> - Geoffrey has made some major revisions based on recent playtests of the newest Nexus faction.</li>    
         <li><strong>Particle Concentrator</strong> - Can now combine with Concentrators on ships within 1 hex of each other.</li>       
         <li><strong>Flexible Targeting</strong> - DEW Mines with multiple weapons can now purchase this Enhancement to give a unique range setting to each weapon during Deployment.</li>                     
-        <li><strong>Gravitic Mines</strong> - These are now available for Brakiri players to use with the new Taskkat variant, the Takatos.</li>                                                                  
+        <li><strong>Gravitic Mines</strong> - These are now available for Brakiri players to use with the new Tashkat variant, the Takatos.</li>                                                                  
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

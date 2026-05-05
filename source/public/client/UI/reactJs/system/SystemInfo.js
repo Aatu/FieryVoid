@@ -181,7 +181,7 @@ const getCalledShotDisplay = (ship, system) => {
         <Divider key="calledShotDivider" />,
         <InfoHeader key="calledShotHeader">Called Shot</InfoHeader>,
         <Entry key="calledShotTarget">
-            <Header>Target: </Header>{calledInfo.targetSystem.displayName} on {calledInfo.targetShip.name}
+            <Header>Target: </Header>{calledInfo.targetSystem.displayName} (Id: {calledInfo.targetSystem.id}) on {calledInfo.targetShip.name}
         </Entry>
     ];
 }
