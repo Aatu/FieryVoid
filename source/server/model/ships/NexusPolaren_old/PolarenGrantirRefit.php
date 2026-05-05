@@ -8,7 +8,7 @@ class PolarenGrantirRefit extends MediumShipLeftRight{
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenGrantirRefit";
         $this->imagePath = "img/ships/Nexus/polarenNorevet.png";
-        $this->shipClass = "Grantir Police Frigate (refit)";
+        $this->shipClass = "Grantir Security Frigate (refit)";
 			$this->variantOf = "Norevet Heavy Frigate";
 			$this->occurence = "common";
 		$this->unofficial = true;
@@ -30,55 +30,59 @@ class PolarenGrantirRefit extends MediumShipLeftRight{
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 9, 3, 5));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
+        $this->addPrimarySystem(new Scanner(4, 9, 3, 6));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
         $this->addAftSystem(new Thruster(2, 8, 0, 4, 1));
-        $this->addAftSystem(new Thruster(2, 13, 0, 8, 2));        
+        $this->addAftSystem(new Thruster(2, 13, 0, 10, 2));        
 		$this->addFrontSystem(new NexusSandCaster(1, 4, 2, 0, 360));
         
 		$this->addLeftSystem(new StunBeam(2, 6, 5, 240, 360));
 		$this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
-        $this->addLeftSystem(new Thruster(2, 10, 0, 4, 3));
+		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 60));
+        $this->addLeftSystem(new Thruster(2, 10, 0, 5, 3));
 	    
 		$this->addRightSystem(new StunBeam(2, 6, 5, 0, 120));
 		$this->addRightSystem(new Maser(2, 6, 3, 0, 180));
-        $this->addRightSystem(new Thruster(2, 10, 0, 4, 4));
+		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 300, 180));
+        $this->addRightSystem(new Thruster(2, 10, 0, 5, 4));
         
         $this->addPrimarySystem(new Structure(3, 33));
 
-	//d20 hit chart
-	$this->hitChart = array(
+		//d20 hit chart
+		$this->hitChart = array(
 		
-		0=> array(
-			9 => "Structure",
-			11 => "2:Thruster",
-			12 => "1:Sand Caster",
-			14 => "Scanner",
-			16 => "Engine",
-			17 => "Hangar",
-			19 => "Reactor",
-			20 => "C&C",
-		),
+			0=> array(
+				9 => "Structure",
+				11 => "2:Thruster",
+				12 => "1:Sand Caster",
+				14 => "Scanner",
+				16 => "Engine",
+				17 => "Hangar",
+				19 => "Reactor",
+				20 => "C&C",
+			),
 
-		3=> array(
-			5 => "Thruster",
-			7 => "Stun Beam",
-			9 => "Maser",
-			17 => "Structure",
-			20 => "Primary",
-		),
+			3=> array(
+				4 => "Thruster",
+				6 => "Stun Beam",
+				8  => "Maser",
+				10 => "Light Blast Cannon",
+				17 => "Structure",
+				20 => "Primary",
+			),
 
-		4=> array(
-			5 => "Thruster",
-			7 => "Stun Beam",
-			9 => "Maser",
-			17 => "Structure",
-			20 => "Primary",
-		),
+			4=> array(
+				4 => "Thruster",
+				6 => "Stun Beam",
+				8  => "Maser",
+				10 => "Light Blast Cannon",
+				17 => "Structure",
+				20 => "Primary",
+			),
 
-	);
-
+		);
         
-        }
     }
+
+}
 ?>

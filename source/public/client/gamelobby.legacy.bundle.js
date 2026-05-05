@@ -29634,6 +29634,10 @@ var NexusSandCaster = function  NexusSandCaster(json, ship) {
 NexusSandCaster.prototype = Object.create(Weapon.prototype);
 NexusSandCaster.prototype.constructor =  NexusSandCaster;
 
+NexusSandCaster.prototype.hasMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
 NexusSandCaster.prototype.initializationUpdate = function () {
     if(this.firingMode == 2){
         const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
@@ -30062,6 +30066,12 @@ var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
 };
 EWNuclearTorpedo.prototype = Object.create(Weapon.prototype);
 EWNuclearTorpedo.prototype.constructor =  EWNuclearTorpedo;
+
+var EWRangedNuclearTorpedo = function  EWRangedNuclearTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedNuclearTorpedo.prototype = Object.create(Weapon.prototype);
+EWRangedNuclearTorpedo.prototype.constructor =  EWRangedNuclearTorpedo;
 
 var EWLaserBolt = function  EWLaserBolt(json, ship) {
     Weapon.call(this, json, ship);
