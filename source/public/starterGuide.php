@@ -354,7 +354,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="hitchances">Chance to Hit:</h4>
     <ul>    
       <li>Now hover the mouse over a target ship.  Below the ship info display, the % chance to hit for each weapon will be listed (you may need to drag the starmap up to see it, depending on the target's location).</li> 
-      <li>This is the actual percentage to hit, taking into account the target’s defensive EW, your offensive EW, your weapon's fire control bonus vs that type of target, and the range penalty.  The only factor not included is any defensive fire from the enemy ship.</li> 
+      <li>This is the actual percentage to hit, taking into account the target’s defensive EW, your offensive EW, your weapon's fire control bonus vs that type of target, and the range penalty. 
+        You can view the detailed breakdown of the hit chance by hovering over it in the Targeting Tooltip. The only factor not included is any defensive fire from the enemy ship.</li> 
       <li>If any weapons have a negative chance to hit, this will be displayed as “- XX%”. If any selected weapons do not have the target in arc, do not have line of sight, or are out of range their % chance to hit will display a message instead e.g. 'Not in arc'.  These weapons will not be able to target this enemy.</li>
     </ul>
 
@@ -373,7 +374,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
    <h4 id="defensivefire">Defensive Fire:</h4>
     <ul>    
-      <li>Any weapons with an intercept rating, a recharge rate of 1 turn, have not been assigned to fire offensively, will automatically fire defensively against incoming enemy fire on their fire arcs.</li>  
+      <li>Any weapons with an intercept rating, a recharge rate of 1 turn, have not been assigned to fire offensively, will automatically fire defensively against incoming enemy fire on their fire arcs.
+         You can see what has been applied in the Comabt Log by hovering over the 'Chance to Hit' when it has a dotted underline.
+      </li>  
       <li>Note that lasers and some other weapons are not interceptable.  Particle (including pulse weapons) and plasma weapons are interceptable, as are most others.</li>      
     </ul>
 

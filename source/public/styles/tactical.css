@@ -1655,6 +1655,10 @@ body {
     border-bottom: 1px dotted green;
 }
 
+.negHitchange.hit-chance-tooltip {
+    border-bottom-color: rgba(255, 0, 0, 0.548);
+}
+
 .custom-hit-chance-tooltip {
     position: fixed;
     z-index: 100000;
