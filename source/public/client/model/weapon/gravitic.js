@@ -221,7 +221,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -379,7 +379,7 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Grav Beams are raking, can never called shot.
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -574,7 +574,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -640,7 +640,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {

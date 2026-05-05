@@ -157,7 +157,7 @@ const getCalledShot = (ship, selectedShip, system) => {
                         if (system.id != null && !weaponManager.canWeaponCall(weapon)) {
                             return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header>: Cannot Called Shot</Entry>);
                         } else {
-                            return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header> - Approx:  {weaponManager.calculateHitChange(selectedShip, ship, weapon, system.id)}%</Entry>);
+                            return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header> - Approx:  {weaponManager.calculateHitChange(selectedShip, ship, weapon, system.id).hitChance}%</Entry>);
                         }
                     } else {
                         return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header>: Not in Range</Entry>);

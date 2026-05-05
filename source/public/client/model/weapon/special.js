@@ -347,7 +347,7 @@ VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, s
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking weapons not eligible for Called Shots
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -603,7 +603,7 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
             calledid = system.id;
         }        
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -938,7 +938,7 @@ ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, sy
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         //if(chance < 1) continue;
 
         var fire = {
