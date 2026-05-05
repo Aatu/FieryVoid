@@ -109,7 +109,7 @@ PointPulsar.prototype.doMultipleFireOrders = function (shooter, target, system) 
             calledid = system.id;
         }        
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {

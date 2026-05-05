@@ -413,8 +413,8 @@ MineStealth.prototype.constructor = MineStealth;
 
 MineStealth.prototype.initializationUpdate = function () {
 	var ship = this.ship;
-	this.data["Mine Signature"] = ship.signature;
-	if(ship.mineType && ship.mineType == 'DEW') this.data["Detected Signature"] = ship.detectedSignature;	
+	this.data["Current Signature"] = ship.signature;
+	if(ship.mineType && ship.mineType == 'DEW' && ship.signature !== ship.detectedSignature) this.data["Activated Signature"] = ship.detectedSignature;	
 	return this
 }
 
@@ -2467,7 +2467,7 @@ MineControllerDEW.prototype.refreshFireControl = function () { //refresh descrip
 
 MineControllerDEW.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
 	if (this.currClass == '') {
-		var classes = Object.keys(this.allocatedRanges); //Allocated is always the same for HC, so can serve same purpose as availableAA did.
+		var classes = Object.keys(this.getCurrAllocations() || {});
 		if (classes.length > 0) {
 			this.currClass = classes[0];
 		}
@@ -2475,25 +2475,34 @@ MineControllerDEW.prototype.getCurrClass = function () { //get current FC class 
 	return this.currClass;
 };
 
-MineControllerDEW.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+// Returns the {shipType: range} object the UI is currently editing.
+// In single-target mode this IS this.allocatedRanges. In multi mode it is allocatedRanges[currWeaponId].
+MineControllerDEW.prototype.getCurrAllocations = function () {
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var wid = this.getCurrWeaponId();
+		if (wid == null) return null;
+		return this.allocatedRanges[wid];
+	}
+	return this.allocatedRanges;
+};
+
+MineControllerDEW.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
 	var ship = this.ship;
 	var spawned = Number(ship.spawned);
 	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
-	//console.log("Mine: " + ship.name + " (id: " + ship.id + ") | spawned: " + ship.spawned + " | turn: " + gamedata.turn + " | deploymentTurn: " + deploymentTurn);
 
 	if (gamedata.turn !== deploymentTurn) {
-		//console.log("  BLOCKED: Not deployment turn");
 		return false;
 	}
 	this.getCurrClass();
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	//how many are allocated?
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
-	//how many are allowed?
-	var allowed = this.rangeSetting;
-	if (allocated >= allowed) return false; //full allowance for this FC type filled	
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
+	if (allocated >= this.rangeSetting) return false; //full allowance for this FC type filled
 
 	return true;
 };
@@ -2503,44 +2512,48 @@ MineControllerDEW.prototype.canDecrease = function () { //can decrease if someth
 	var spawned = Number(ship.spawned);
 	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
 	if (gamedata.turn !== deploymentTurn) return false;
-	this.getCurrClass(); //Should be getCurrClass or similar? The method in aoe.js is getCurrClass
+	this.getCurrClass();
 	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 	if (allocated > 0) return true;
 	return false;
 };
 
 MineControllerDEW.prototype.doIncrease = function () { //increase BFCP usage
 	this.getCurrClass();
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
-
-	if (allocated < this.rangeSetting) { //else use regular pool 
-		this.allocatedRanges[this.currClass] = allocated + 1;
-
+	if (allocated < this.rangeSetting) {
+		alloc[this.currClass] = allocated + 1;
 	}
-	this.mineSet = true; //user changed something, assume they are content.	
+	this.mineSet = true;
 	this.refreshData();
 };
 
 MineControllerDEW.prototype.doDecrease = function () { //decrease BFCP usage
 	this.getCurrClass();
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
-	//Decrease could be in current turn, or from previous turn allocation.
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
+
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 
 	if (allocated > 0) {
-		this.allocatedRanges[this.currClass] = allocated - 1;
+		alloc[this.currClass] = allocated - 1;
 	}
-	this.mineSet = true; //user changed something, assume they are content.	
+	this.mineSet = true;
 	this.refreshData();
 };
 
 MineControllerDEW.prototype.refreshData = function () { //refresh description to show correct values
-	var classes = Object.keys(this.allocatedRanges);
+	if (!this.data) this.data = {};
 	var entryName = '';
 	var currType = '';
 	var range = null;
@@ -2552,36 +2565,59 @@ MineControllerDEW.prototype.refreshData = function () { //refresh description to
 		}
 	}
 
+	//Wipe stale per-shipType / per-weapon range keys so a mode flip never leaves both kinds in the dict.
+	var dataKeys = Object.keys(this.data);
+	for (var dk = 0; dk < dataKeys.length; dk++) {
+		if (dataKeys[dk].indexOf(' - ') === 0) delete this.data[dataKeys[dk]];
+	}
+
 	for (var i in ship.systems) {
 		var weapon = ship.systems[i];
 		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
 			weapon.data["Fire control (fighter/med/cap)"] = weapon.translateFCtoD100txt(weapon.fireControl);
-			weapon.range = this.rangeSetting;				
+			weapon.range = this.rangeSetting;
 		}
 	}
 
 	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
 	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-		//hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;
 	} else {
 		this.data["Max Range"] = this.rangeSetting;
-
-
-
 	}
 
-	for (var i = 0; i < classes.length; i++) {
-		currType = classes[i];
-		if (this.validTargets && !this.validTargets.includes(currType)) continue;
-		range = this.allocatedRanges[currType];
-		if (range == null) range = this.rangeSetting;
-		if (hiddenDisplay == '?') range = hiddenDisplay;
-		//entry should exist, just change it to show current values
-		entryName = ' - ' + currType;
-		this.data[entryName + " range"] = range;
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var labels = this.buildWeaponLabels();
+		var weaponIds = Object.keys(this.allocatedRanges);
+		for (var w = 0; w < weaponIds.length; w++) {
+			var wid = weaponIds[w];
+			var perType = this.allocatedRanges[wid];
+			if (!perType || typeof perType !== 'object') continue;
+			var label = labels[wid] || ('weapon ' + wid);
+			var typeKeys = Object.keys(perType);
+			for (var t = 0; t < typeKeys.length; t++) {
+				currType = typeKeys[t];
+				if (this.validTargets && !this.validTargets.includes(currType)) continue;
+				range = perType[currType];
+				if (range == null) range = this.rangeSetting;
+				if (hiddenDisplay == '?') range = hiddenDisplay;
+				this.data[' - ' + label + ' ' + currType + ' range'] = range;
+			}
+		}
+	} else {
+		this.ensureFlatAllocatedShape();
+		var classes = Object.keys(this.allocatedRanges);
+		for (var i = 0; i < classes.length; i++) {
+			currType = classes[i];
+			if (this.validTargets && !this.validTargets.includes(currType)) continue;
+			range = this.allocatedRanges[currType];
+			if (range == null) range = this.rangeSetting;
+			if (hiddenDisplay == '?') range = hiddenDisplay;
+			entryName = ' - ' + currType;
+			this.data[entryName + " range"] = range;
+		}
 	}
-
 };
 
 MineControllerDEW.prototype.canPropagate = function () { //can propagate if set to >0
@@ -2599,35 +2635,186 @@ MineControllerDEW.prototype.getRangeAllocated = function (rangeIndex) { //return
 };
 
 MineControllerDEW.prototype.setCurrShipType = function (shipType) { //sets indicated FC type as current (or sets empty as current)
-	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
-	var classes = Object.keys(this.allocatedRanges);
-	var currType = '';
+	this.currClass = '';
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return;
+	var classes = Object.keys(alloc);
 	for (var i = 0; i < classes.length; i++) {
-		currType = classes[i];
-		if (currType == shipType) { //exists!
-			this.currClass = currType;
-			return; //no need to loop further
+		if (classes[i] == shipType) {
+			this.currClass = classes[i];
+			return;
 		}
 	}
 };
 
-MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable
+	if (gamedata.gamephase != -1) return true;
 
-	if (gamedata.gamephase == -1) {
-		this.individualNotesTransfer = {};
-		//every point is denoted as single entry with damage class name
+	this.individualNotesTransfer = {};
+
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var weaponIds = Object.keys(this.allocatedRanges);
+		for (var w = 0; w < weaponIds.length; w++) {
+			var wid = weaponIds[w];
+			var perType = this.allocatedRanges[wid];
+			if (!perType || typeof perType !== 'object') continue;
+			var typeKeys = Object.keys(perType);
+			for (var t = 0; t < typeKeys.length; t++) {
+				var currType = typeKeys[t];
+				if (this.validTargets && !this.validTargets.includes(currType)) continue;
+				var val = perType[currType];
+				if (val == null) val = this.rangeSetting;
+				//Compound notekey "<weaponId>;<shipType>" - server splits on ';' in doIndividualNotesTransfer.
+				this.individualNotesTransfer[wid + ';' + currType] = val;
+			}
+		}
+	} else {
 		var shipCategories = Object.keys(this.allocatedRanges);
 		var rangeValues = Object.values(this.allocatedRanges);
-
 		for (var i = 0; i < shipCategories.length; i++) {
 			var currType = shipCategories[i];
 			if (this.validTargets && !this.validTargets.includes(currType)) continue;
-
-			if (rangeValues[i] == null) rangeValues[i] = this.rangeSetting; //Set to max range if nothing set by player.
-
-			// Initialize the array for the current spec
+			if (rangeValues[i] == null) rangeValues[i] = this.rangeSetting;
 			this.individualNotesTransfer[currType] = rangeValues[i];
 		}
 	}
 	return true;
+};
+
+// === MINE_MULTI: Multiple Targets enhancement helpers ===
+
+MineControllerDEW.prototype.hasMultiTarget = function () {
+	if (this.multiTargetEnabled) return true; //server-supplied flag (preferred)
+	var ship = this.ship;
+	if (!ship || !ship.enhancementOptions) return false;
+	for (var i = 0; i < ship.enhancementOptions.length; i++) {
+		var enh = ship.enhancementOptions[i];
+		if (enh && enh[0] === 'MINE_MULTI' && Number(enh[2]) > 0) return true;
+	}
+	return false;
+};
+
+MineControllerDEW.prototype.getMineWeapons = function () {
+	var ship = this.ship;
+	if (!ship || !ship.systems) return [];
+	var totals = {};
+	for (var i = 0; i < ship.systems.length; i++) {
+		var sys = ship.systems[i];
+		if (sys instanceof Weapon && sys.name !== 'RammingAttack') {
+			var d = sys.displayName || sys.name;
+			totals[d] = (totals[d] || 0) + 1;
+		}
+	}
+	var counts = {};
+	var out = [];
+	for (var i = 0; i < ship.systems.length; i++) {
+		var sys = ship.systems[i];
+		if (sys instanceof Weapon && sys.name !== 'RammingAttack') {
+			var d = sys.displayName || sys.name;
+			counts[d] = (counts[d] || 0) + 1;
+			var label = (totals[d] > 1) ? (d + ' ' + counts[d]) : d;
+			out.push({ id: sys.id, name: sys.name, displayName: d, indexInGroup: counts[d], label: label });
+		}
+	}
+	return out;
+};
+
+MineControllerDEW.prototype.buildWeaponLabels = function () {
+	var labels = {};
+	var weapons = this.getMineWeapons();
+	for (var i = 0; i < weapons.length; i++) {
+		labels[weapons[i].id] = weapons[i].label;
+	}
+	return labels;
+};
+
+MineControllerDEW.prototype.getCurrWeaponId = function () {
+	if (this.currWeaponId != null) {
+		var weapons = this.getMineWeapons();
+		for (var i = 0; i < weapons.length; i++) {
+			if (String(weapons[i].id) === String(this.currWeaponId)) return this.currWeaponId;
+		}
+		this.currWeaponId = null;
+	}
+	var firstWeapons = this.getMineWeapons();
+	if (firstWeapons.length === 0) return null;
+	this.currWeaponId = firstWeapons[0].id;
+	return this.currWeaponId;
+};
+
+MineControllerDEW.prototype.setCurrWeaponId = function (id) {
+	this.currWeaponId = id;
+	this.currClass = ''; //force getCurrClass to re-resolve against the new weapon's allocations
+};
+
+//Detect whether allocatedRanges is currently in nested per-weapon form.
+MineControllerDEW.prototype.isNestedAllocatedShape = function () {
+	var keys = Object.keys(this.allocatedRanges || {});
+	if (keys.length === 0) return false;
+	var firstVal = this.allocatedRanges[keys[0]];
+	return (firstVal != null && typeof firstVal === 'object');
+};
+
+//Inverse of ensureMultiAllocatedShape — used in the lobby when the user toggles MINE_MULTI off
+//after having opened the settings (which mutated to nested). Collapses to flat using the first
+//weapon's values, or all-null if no entries.
+MineControllerDEW.prototype.ensureFlatAllocatedShape = function () {
+	if (this.hasMultiTarget()) return;
+	if (!this.isNestedAllocatedShape()) return;
+	var weaponKeys = Object.keys(this.allocatedRanges);
+	var defaults = { 'Capitals-HCVs': null, 'LCVs-MCVs': null, 'Fighters': null };
+	if (weaponKeys.length > 0) {
+		var first = this.allocatedRanges[weaponKeys[0]];
+		if (first && typeof first === 'object') {
+			if (first['Capitals-HCVs'] !== undefined) defaults['Capitals-HCVs'] = first['Capitals-HCVs'];
+			if (first['LCVs-MCVs'] !== undefined) defaults['LCVs-MCVs'] = first['LCVs-MCVs'];
+			if (first['Fighters'] !== undefined) defaults['Fighters'] = first['Fighters'];
+		}
+	}
+	this.allocatedRanges = defaults;
+};
+
+// When MINE_MULTI is active but allocatedRanges is still flat (e.g. just-bought, never deployed),
+// convert to nested {weaponId: {shipType: range}} shape using current flat values as defaults.
+MineControllerDEW.prototype.ensureMultiAllocatedShape = function () {
+	if (!this.hasMultiTarget()) return;
+	var weapons = this.getMineWeapons();
+	if (weapons.length === 0) return;
+
+	//Detect flat shape: keys are shipType strings, values are not objects.
+	var keys = Object.keys(this.allocatedRanges || {});
+	var isFlat = false;
+	if (keys.length === 0) {
+		isFlat = true;
+	} else {
+		var firstVal = this.allocatedRanges[keys[0]];
+		if (firstVal == null || typeof firstVal !== 'object') isFlat = true;
+	}
+
+	if (!isFlat) {
+		//Already nested - but make sure every weapon has an entry.
+		for (var i = 0; i < weapons.length; i++) {
+			if (!this.allocatedRanges[weapons[i].id]) {
+				this.allocatedRanges[weapons[i].id] = { 'Capitals-HCVs': null, 'LCVs-MCVs': null, 'Fighters': null };
+			}
+		}
+		return;
+	}
+
+	//Convert flat to nested. Use existing flat values as the per-weapon defaults.
+	var flatDefaults = {
+		'Capitals-HCVs': (this.allocatedRanges && this.allocatedRanges['Capitals-HCVs'] != null) ? this.allocatedRanges['Capitals-HCVs'] : null,
+		'LCVs-MCVs': (this.allocatedRanges && this.allocatedRanges['LCVs-MCVs'] != null) ? this.allocatedRanges['LCVs-MCVs'] : null,
+		'Fighters': (this.allocatedRanges && this.allocatedRanges['Fighters'] != null) ? this.allocatedRanges['Fighters'] : null
+	};
+	var nested = {};
+	for (var i = 0; i < weapons.length; i++) {
+		nested[weapons[i].id] = {
+			'Capitals-HCVs': flatDefaults['Capitals-HCVs'],
+			'LCVs-MCVs': flatDefaults['LCVs-MCVs'],
+			'Fighters': flatDefaults['Fighters']
+		};
+	}
+	this.allocatedRanges = nested;
 };

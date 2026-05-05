@@ -39,9 +39,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
             var extraTime = 0;
 
+            //On balance let's not exclude Log entries for concrator type weapons, see the note these were combined is informative.
+            //var totalGroupShots = group.reduce(function (sum, entry) { return sum + entry.shots; }, 0);
+            //if (totalGroupShots > 0) {
             this.logAnimation.addLogEntryFire(group.map(function (entry) {
                 return entry.fireOrder;
             }), this.time + this.duration);
+            //}
 
             var durations = group.map(function (group) {
                 extraTime += Math.random() * 100 + 300;
@@ -327,7 +331,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         switch (animationType) {
             case "laser":
-                return new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
+                var _laser = new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
                     size: 100 * weapon.animationExplosionScale,
                     //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
@@ -338,6 +342,22 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     critNames: critNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
+                var _laserSparks = hit ? new ImpactSparksEffect(this.scene, {
+                    position: getShipPositionAtTime.call(this, this.shipIcon, startTime),
+                    color: color,
+                    time: startTime
+                }) : null;
+                return {
+                    render: function (now, total, last, delta, zoom, back, paused) {
+                        _laser.render(now, total, last, delta, zoom, back, paused);
+                        if (_laserSparks) _laserSparks.render(now, total, last, delta, zoom, back, paused);
+                    },
+                    getDuration: function () { return _laser.getDuration(); },
+                    cleanUp: function () {
+                        _laser.cleanUp();
+                        if (_laserSparks) _laserSparks.cleanUp();
+                    }
+                };
             case "ball":
                 if (weapon.name === "ProximityMine") {
                     var targetPos = getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired);

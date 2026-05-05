@@ -11,7 +11,26 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
   <title>Fiery Void - About the Game</title>
   <link href="styles/base.css" rel="stylesheet" type="text/css">
   <link href="styles/lobby.css" rel="stylesheet" type="text/css">
-  <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">    
+  <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
+  <style>
+    .faq-panel {
+      font-size: 16px;
+      line-height: 1.6;
+    }
+    .faq-panel p {
+      margin-bottom: 15px;
+    }
+    .faq-panel ul {
+      margin-bottom: 20px;
+    }
+    .faq-panel h3 {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      padding-bottom: 5px;
+    }
+    .faq-panel li {
+      margin-bottom: 8px;
+    }
+  </style>
 </head>
 <body style="background: url('./img/maps/24.PurpleArch.jpg') no-repeat center center fixed; background-size: cover;">
 
@@ -37,6 +56,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#ship-control-sheet">Ship Tooltip & Ship Control Sheets (SCS)</a></li>
         <li><a href="#deployment">Deployment</a></li>
         <li><a href="#game-turn">The Game Turn</a></li>
+        <li><a href="#preturn-phase">Pre-Turn Orders</a></li>
         <li><a href="#initial-orders">Phase 1: Initial Orders</a>
             <ul class="sub-list">
                 <li><a href="#ew">Electronic Warfare</a></li>
@@ -77,7 +97,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
 
     <h3 id="joining-starting-game">JOINING A GAME</h3>
-    <p>From the main page, look under ‘Join Games’ for a game to join.  Click on the game, and then click on ‘Take Slot' to pick an available slot. Check the Game Description to see if the creator of a game has placed any restrictions on the game (i.e. ‘tournament rules’, ‘no Minabri’ etc).</p>
+    <p>From the main page, look under ‘Join Games’ for a game to join.  Click on the game, and then click on ‘Take Slot' to pick an available slot. Check the Game Description to see if the creator of a game has placed any restrictions on the game (i.e. ‘tournament rules’, ‘no Minbari’ etc).</p>
     <p>Once you have joined a game and picked a slot, you may select your fleet.  Skip the next section and go directly to the Selecting Your Fleet section below.</p>
     <p>If there are no games listed in the Join Games section, you may wish to create your own game (see next section).</p>    
     <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -97,7 +117,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>More advanced game settings:</p>
         <ul>
             <li>If you want a larger map, try clicking 'Base Assault' or unchecking 'Set Map Boundaries'.  This will give more room to maneuver, but will give ships/races with long range weapons a relative advantage.</li>            
-            <li>You may click on the 'Add Sot' button, to add another player slot to either Team.  This can be used to add more players to the game, or to simply create a reinforcement slot for yourself when part of you fleet is arriving later in the game.</li>
+            <li>You may click on the 'Add Slot' button, to add another player slot to either Team.  This can be used to add more players to the game, or to simply create a reinforcement slot for yourself when part of your fleet is arriving later in the game.</li>
         </ul>       
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -134,7 +154,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>Note: it is very unlikely that you will get exactly to the maximum point value allowed, but you should be able to get within 100 points of it. You can also use enhancements for specific ships to use up any remaining points and thus maximise your fleet’s strength.</p>
 
     <p>Once you are satisfied with your fleet, click 'Ready' in the bottom right of the screen, and confirm you wish to commit your fleet. 
-      When all slots in a game have readied up, the game should begin. If you doesn't loaded automatically after all players have readied, simply return to the main page and click on the relevant game name in the ‘Your Active Games’ list to get started.</p>
+      When all slots in a game have readied up, the game should begin. If it doesn't load automatically after all players have readied, simply return to the main page and click on the relevant game name in the ‘Your Active Games’ list to get started.</p>
 
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -147,8 +167,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <ul>
         <li><strong>Ship name:</strong> The name that the player assigned to the ship during list building.</li>
         <li><strong>Defense Rating (Front-Aft/Sides):</strong> The % chance for shots to hit that ship, before other adjustments. If the ship has any Defensive EW assigned, the “current” number will be less than the “base” number by 5% per point of EW.</li>
-        <li><strong>Turn Cost / Turn Delay:</strong> Value that is multiplied by a ship's current speed to know how much Thrust is required to turn the ship by one hexagon side, and how many hexes it'll have to before it can turn again.</li>
-        <li><strong>Initiative Order:</strong> The initiative order of this ship on this turn. Initiative is rolled on d100 + any adjustments for ship type etc, with lower initiative causing ships to move earlier.</li>
+        <li><strong>Turn Cost / Turn Delay:</strong> Value that is multiplied by a ship's current speed to know how much Thrust is required to turn the ship by one hexagon side, and how many hexes it'll have to move before it can turn again.</li>
+        <li><strong>Initiative Order:</strong> The initiative order of this ship on this turn. Initiative is rolled on 1d100 + any adjustments for ship type etc, with lower initiative causing ships to move earlier.</li>
         <li><strong>Speed (Acceleration rating):</strong> Current number of hexes that the ship will move during Movement Phase, unless it accelerates or decelerates. In brackets is the thrust cost to increase or decrease Speed by 1. If the ship has any carry-over turn delay from a previous turn, this will also be listed.</li>
     </ul> 
 
@@ -165,7 +185,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>Opening the SCS is necessary to adjust power settings in the Initial Orders phase, and to fire weapons in the Fire Orders phase.</p>
 
-    <p>Right-clicking on a fighter flight will simialrly bring up a schematic of the flight, showing the information for each fighter (structure remaining / total structure; whether the fighter was destroyed or disengaged from damage).</p>
+    <p>Right-clicking on a fighter flight will similarly bring up a schematic of the flight, showing the information for each fighter (structure remaining / total structure; whether the fighter was destroyed or disengaged from damage).</p>
 
     <p>Hovering the mouse over the weapon(s) of a fighter brings up the detailed weapon information.</p>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -176,22 +196,23 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>After starting a game, you will enter the Deployment Phase. To deploy a ship, select it by left-clicking on it (a circle will indicate that it has been selected) and place it in your deployment zone by left-clicking on a hex inside that zone.</p>
 
-    <p>You may then change the ship's starting speed (betwen 0 and 10) by clicking on the + or – beside the “5” forward green arrow. You may also start in a direction other than pointed at the enemy if you like, by clicking on the curved green arrows.</p>
+    <p>You may then change the ship's starting speed (between 0 and 10) by clicking on the + or – beside the “5” forward green arrow. You may also start in a direction other than pointed at the enemy if you like, by clicking on the curved green arrows.</p>
 
     <p>Fighter flights must be deployed on the map. Fiery Void does not allow ships to actually carry fighters in their hangars.</p>
 
     <p>Once your ships are all deployed to your satisfaction, click the ‘Ready’ green tick at the top of the screen. The title bar at the top should change from ‘Deployment’ to ‘Waiting for turn’.</p>
 
     <p>Once all players have deployed, the game's first turn will start. The left-hand bar will show the ships' initiative order, and the title bar will change to “Initial Orders”.</p>
-    <p><strong>Note</strong> - If a slot has been set to deploy later in the game it will not participate in the usual Turn 1 deployment at all, but will generate it's own deployment phase on the appropriate turn.</p>
+    <p><strong>Note</strong> - If a slot has been set to deploy later in the game it will not participate in the usual Turn 1 deployment at all, but will generate its own deployment phase on the appropriate turn.</p>
     
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
     <h3 id="game-turn">THE GAME TURN</h3>
-    <p>Each game turn consists of three phases:</p>
+    <p>Each game turn consists of the following phases:</p>
 
     <ul>
+    <li><b>Pre-Turn Orders</b>: Factions make decisions at the very start of the current turn (only triggers if there are relevant decisions).</li>
     <li><b>Initial Orders</b>: Adjust power, assign EW, fire ballistic weapons,</li>
     <li><b>Movement</b>: Move ships e.g. accel/decel, move, slide, turn, pivot and/or roll,</li>
     <li><b>Pre-Firing Orders</b>: Some special weapons fire before others, triggering this phase.</li>    
@@ -204,7 +225,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
 
-    <h3 id="initial-orders">PHASE 1: INITIAL ORDERS</h3>
+    <h3 id="preturn-phase">PRE-TURN ORDERS</h3> 
+
+    <p>Certain factions may have special rules or abilities that require decisions to be made at the very start of the current turn, prior to Initial Orders.
+      If one of your ships or factions has a system or ability like this, you will automatically be presented with the opportunity to make these decisions during the Pre-Turn Orders phase.
+      This phase only triggers if there are relevant decisions to be made; otherwise, the turn begins directly with Initial Orders.</p>
+    
+    <a class="back-to-top" href="#top">↩ Back to Top</a>    
+
+    <h3 id="initial-orders" style="margin-top: 25px">PHASE 1: INITIAL ORDERS</h3>
     <p>For each ship, you may assign your sensor rating to various Electronic Warfare (EW) functions.</p>
 
     <p>If you wish to fire any Ballistic weapons (Missiles, Torpedoes or Energy Mines) you must fire these in the Initial Orders phase!</p>
@@ -213,8 +242,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>Once you are finished with Initial Orders for all ships, click the green checkmark in the title bar and confirm in the popup box. The title will show “Waiting for turn”. After all players have committed, the game proceeds to the Movement Phase starting with the first initiative ship.</p>
     
     <h4 id="ew">Electronic Warfare (EW):</h4>
-    <!--<p>Select (left-click) a ship. The ship's EW assignments will be displayed in it's tooltip or in a box at the right of its SCS.</p>-->
-    <p>Select (left-click) a ship. The ship's EW assignments will be displayed in it's tooltip or in a box at the right of its SCS.</p>
+    <p>Select (left-click) a ship. The ship's EW assignments will be displayed in its tooltip or in a box at the right of its SCS.</p>
 
     <p>When you have one of your ships selected, you will see <b>Defensive EW</b> (DEW) and <b>Close Combat EW</b> (CCEW). DEW makes your ship harder to hit (by everything except fighters), while CCEW gives you a bonus to hit any fighters that come within 10 hexes. Selecting an enemy ship will show the <b>Offensive EW</b> buttons and allow you to lock onto them.</p>
 
@@ -251,12 +279,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <p>If you have a negative power rating (from a Reactor critical hit for example, or from a ship with a built-in power deficit e.g. a White Star) then you will not be able to commit your Initial Orders until this is addressed by turning systems off until your reactor rating is 0 or more.</p>
 
-    <p><b>Note:</b> Fighter flights cannot adjust power or EW unless they have ballistic weapons so they have nothing to do in this phase unless they have ballistic weapons equipped..</p>
+    <p><b>Note:</b> Fighter flights cannot adjust power or EW, so they have nothing to do in this phase unless they have ballistic weapons equipped.</p>
     <p>Power Tips:</p>
     <ul>
       <li>Prefer turning off weapons with a recharge rate of 1 for flexibility.</li>
       <li>Turn off rear-facing weapons before frontal ones if needed.</li>
-      <li>By common convetion, Jump Engines should only be powered down when they are more than 50% damaged, except in Desperate scenarios.</li>
+      <li>By common convention, Jump Engines should only be powered down when they are more than 50% damaged, except in desperate scenarios.</li>
     </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -277,7 +305,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     </ul>
 
     <p>Click on the red cancel move icon behind your ship to retract your maneuvers one at a time or, if you want a complete do-over, right-click the cancel icon to undo your entire move.</p>
-    <p>Once you have commit all the necessary movement orders, a green checkmark will appear in the title bar at the top of your screen. If you are satisfied with your movement, click the checkmark to confirm your movement orders and confirm in the pop up box. The title bar will display “Waiting for turn” and the next ship in the initiative order will be allowed to take its move.</p>
+    <p>Once you have committed all the necessary movement orders, a green checkmark will appear in the title bar at the top of your screen. If you are satisfied with your movement, click the checkmark to confirm your movement orders and confirm in the pop up box. The title bar will display “Waiting for turn” and the next ship in the initiative order will be allowed to take its move.</p>
     
     <h3 id="maneuvers">Maneuvers:</h3>
 
@@ -347,14 +375,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h4 id="selectingweapons">Selecting Weapons to Fire:</h4>
     <ul>    
-      <li>Pull up details for one of your ships of fighter flights SCS with right-click as usual.  Hovering over an weapon in the SCS will display its firing arc around the ship, including its maximum effective range.  This allows you to easily select which weapons to fire at particular targets.</li> 
+      <li>Pull up details for one of your ships or fighter flight's SCS with right-click as usual.  Hovering over a weapon in the SCS will display its firing arc around the ship, including its maximum effective range.  This allows you to easily select which weapons to fire at particular targets.</li> 
       <li>Click one or more weapons once each – the icons will be highlighted blue.  Alternatively, right-click on a weapon and all active weapons of that name will be selected.</li> 
     </ul>
 
     <h4 id="hitchances">Chance to Hit:</h4>
     <ul>    
       <li>Now hover the mouse over a target ship.  Below the ship info display, the % chance to hit for each weapon will be listed (you may need to drag the starmap up to see it, depending on the target's location).</li> 
-      <li>This is the actual percentage to hit, taking into account the target’s defensive EW, your offensive EW, your weapon's fire control bonus vs that type of target, and the range penalty.  The only factor not included is any defensive fire from the enemy ship.</li> 
+      <li>This is the actual percentage to hit, taking into account the target’s defensive EW, your offensive EW, your weapon's fire control bonus vs that type of target, and the range penalty. 
+        You can view the detailed breakdown of the hit chance by hovering over it in the Targeting Tooltip. The only factor not included is any defensive fire from the enemy ship.</li> 
       <li>If any weapons have a negative chance to hit, this will be displayed as “- XX%”. If any selected weapons do not have the target in arc, do not have line of sight, or are out of range their % chance to hit will display a message instead e.g. 'Not in arc'.  These weapons will not be able to target this enemy.</li>
     </ul>
 
@@ -362,25 +391,27 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <ul>    
       <li>If you're happy with your hit chances, left-click on the target reticle in the enemy ship's tooltip.  All of your selected weapon icons will turn orange to indicate that they are now assigned to fire.</li>  
       <li>The % chance to hit will no longer be displayed after this, (except for Ballistic or Split Targeted weapons).</li>
-      <li>Repeat these three steps by for each weapon you want to fire on this turn, targeting the same or different enemy ships.</li>        
+      <li>Repeat these three steps for each weapon you want to fire on this turn, targeting the same or different enemy ships.</li>        
     </ul>
 
    <h4 id="firingmode">Firing Modes:</h4> 
     <ul>    
-      <li>Some weapons have alternate fire modes (e.g. a Battle Laser can fire in either Raking or Piercing mode).  Where this is the case, left-clicking on the weapon icon will show a letters at the top right of the weapon.</li>  
+      <li>Some weapons have alternate fire modes (e.g. a Battle Laser can fire in either Raking or Piercing mode).  Where this is the case, left-clicking on the weapon icon will show letters at the top right of the weapon.</li>  
       <li>Click on the right-most letter to cycle through the alternate modes.</li>      
     </ul>
 
    <h4 id="defensivefire">Defensive Fire:</h4>
     <ul>    
-      <li>Any weapons with an intercept rating, a recharge rate of 1 turn, have not been assigned to fire offensively, will automatically fire defensively against incoming enemy fire on their fire arcs.</li>  
+      <li>Any weapons with an intercept rating, a recharge rate of 1 turn, have not been assigned to fire offensively, will automatically fire defensively against incoming enemy fire on their fire arcs.
+         You can see what has been applied in the Combat Log by hovering over the 'Chance to Hit' when it has a dotted underline.
+      </li>  
       <li>Note that lasers and some other weapons are not interceptable.  Particle (including pulse weapons) and plasma weapons are interceptable, as are most others.</li>      
     </ul>
 
    <h4 id="combatpivots">Combat Pivots:</h4>
     <ul>    
       <li>Fighter flights with unused Thrust may make a Combat Pivot during the Fire Orders phase, in order to bring their weapons to bear (often on other fighters which have moved later in the initiative order).</li>  
-      <li>Click the crossed curved green arrows in the direction you wish to pivot, each pivot during combat typically costs two points of thurst instead of the usual one point.  Once you are oriented correctly, proceed to assign Fire Orders in the normal fashion.</li>      
+      <li>Click the crossed curved green arrows in the direction you wish to pivot; each pivot during combat typically costs two points of thrust instead of the usual one point.  Once you are oriented correctly, proceed to assign Fire Orders in the normal fashion.</li>      
     </ul>
 
     <p>If you do not wish to fire any weapons (e.g. all targets are out of range / arc of all of your ships), you may skip this step by just clicking on the green check at the top of the screen  (the game will not progress unless you do this).</p>

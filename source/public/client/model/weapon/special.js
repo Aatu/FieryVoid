@@ -179,6 +179,125 @@ var ParticleConcentrator = function(json, ship)
 ParticleConcentrator.prototype = Object.create( Weapon.prototype );
 ParticleConcentrator.prototype.constructor = ParticleConcentrator;
 
+ParticleConcentrator.prototype.initializationUpdate = function() {
+    delete this.data["Combine projection"];
+    if (gamedata.gamephase !== 3) return this;
+
+    var myOrder = null;
+    for (var i in this.fireOrders) {
+        var fo = this.fireOrders[i];
+        if (fo.turn !== gamedata.turn) continue;
+        if (fo.type !== 'normal') continue;
+        myOrder = fo;
+        break;
+    }
+    if (!myOrder || myOrder.firingMode <= 1) return this;
+
+    var firingShip = this.ship;
+    var target = gamedata.getShip(myOrder.targetid);
+    if (!target) return this;
+
+    var firingShipPos = shipManager.getShipPosition(firingShip);
+    var targetPos = shipManager.getShipPosition(target);
+    var primarySides = weaponManager.getShipHittingSide(firingShip, target);
+
+    var sameSides = function(a, b) {
+        if (!a || !b || a.length !== b.length) return false;
+        for (var k = 0; k < a.length; k++) {
+            if (a[k] !== b[k]) return false;
+        }
+        return true;
+    };
+
+    // Firing ship included: multiple Concentrators on the same ship can combine.
+    // Primary weapon is skipped by object identity below.
+    var candidates = [];
+    for (var s in gamedata.ships) {
+        var otherShip = gamedata.ships[s];
+        if (!otherShip) continue;
+        if (otherShip.unavailable) continue;
+        if (shipManager.isDestroyed && shipManager.isDestroyed(otherShip)) continue;
+
+        var otherPos = shipManager.getShipPosition(otherShip);
+        if (firingShipPos.distanceTo(otherPos) > 1) continue;
+
+        var otherSides = weaponManager.getShipHittingSide(otherShip, target);
+        if (!sameSides(primarySides, otherSides)) continue;
+
+        for (var sys in otherShip.systems) {
+            var w = otherShip.systems[sys];
+            if (!w || w.name !== "ParticleConcentrator") continue;
+            // System ids are per-ship integers, not global — use object identity to skip the primary.
+            if (w === this) continue;
+            var matched = false;
+            for (var f in w.fireOrders) {
+                var fo2 = w.fireOrders[f];
+                if (fo2.turn !== gamedata.turn) continue;
+                if (fo2.type !== 'normal') continue;
+                if (fo2.id === myOrder.id) continue;
+                if (fo2.targetid != myOrder.targetid) continue;
+                if (fo2.firingMode != myOrder.firingMode) continue;
+                matched = true;
+                break;
+            }
+            if (!matched) continue;
+            candidates.push({
+                ship: otherShip,
+                weapon: w,
+                pos: otherPos,
+                distToTarget: otherPos.distanceTo(targetPos),
+            });
+        }
+    }
+
+    candidates.sort(function(a, b) {
+        return a.distToTarget - b.distToTarget;
+    });
+
+    // Greedy clique fill: every accepted ship must be within 1 hex of every other.
+    var accepted = [{ ship: firingShip, pos: firingShipPos }];
+    var partners = [];
+    var needed = myOrder.firingMode;
+    for (var c = 0; c < candidates.length && partners.length < needed; c++) {
+        var cand = candidates[c];
+        var fits = true;
+        for (var a = 0; a < accepted.length; a++) {
+            if (cand.pos.distanceTo(accepted[a].pos) > 1) { fits = false; break; }
+        }
+        if (!fits) continue;
+        accepted.push({ ship: cand.ship, pos: cand.pos });
+        partners.push(cand);
+    }
+
+    var line;
+    if (partners.length === 0) {
+        line = "No eligible partner weapons visible - will fire as single shot";
+    } else {
+        // Group all participating Concentrators by ship; seed firing ship with its own primary PC.
+        var counts = {};
+        var order = [];
+        var currentWeapons = partners.length+1;
+        counts[firingShip.name] = 1;
+        order.push(firingShip.name);
+        partners.forEach(function(p) {
+            if (counts[p.ship.name] === undefined) order.push(p.ship.name);
+            counts[p.ship.name] = (counts[p.ship.name] || 0) + 1;
+        });
+        var names = order.map(function(n) {
+            return counts[n] > 1 ? (n + " (" + counts[n] + "),") : n + " (1)";
+        }).join(',<br>');
+        var actualMode = partners.length + 1;
+        if (actualMode < myOrder.firingMode) {
+            //line = currentWeapons + " of " + needed + " concentrators available [" + names + "] - will downgrade to " + actualMode + "combined";
+            line = currentWeapons + " of " + needed + " available:<br>" + names + "<br>- will downgrade to " + actualMode + "combined";
+        } else {
+            line = "Will combine with: <br>" + names;
+        }
+    }
+    this.data["Combination"] = line;
+    return this;
+};
+
 var VorlonDischargeGun = function VorlonDischargeGun(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -228,7 +347,7 @@ VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, s
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking weapons not eligible for Called Shots
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -484,7 +603,7 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
             calledid = system.id;
         }        
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -819,7 +938,7 @@ ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, sy
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         //if(chance < 1) continue;
 
         var fire = {

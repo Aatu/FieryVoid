@@ -4,24 +4,24 @@ import styled from 'styled-components';
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 0px;
+    margin-top: 1px;
     width: 100%;
     min-width: 160px;
     opacity: 0.95 !important;
-    background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #496791;
+    background-color: ${props => props.$isWeapon ? 'rgba(32, 0, 32, 0.9)' : 'rgba(16, 26, 38, 0.9)'};
+    border: 1px solid ${props => props.$isWeapon ? '#b43131' : '#587e8d'};
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: #4967919a;
-    border: 1px solid #496791;
-    border-bottom: 1px solid #496791;    
-    color: #deebff;
+    background-color: ${props => props.$isWeapon ? '#571616' : '#215a7a'};
+    border: 1px solid ${props => props.$isWeapon ? '#b43131' : '#587e8d'};
+    border-bottom: 1px solid ${props => props.$isWeapon ? '#b43131' : '#587e8d'};
+    color: ${props => props.$isWeapon ? '#f2f2f2' : '#deebff'};
     text-align: center;
     font-size: 11px;
     margin-bottom: 2px;
-    opacity: 0.95 !important;     
+    opacity: 1 !important;
     font-weight: bold;
 `;
 
@@ -81,18 +81,38 @@ const ActionButton = styled.div`
         &:hover { background: #203348; color: #deebff; }
     `}
 
-    ${props => (props.$active || (props.$variant === 'activate' && props.$isWeapon)) && props.$variant === 'activate' && `
-        background: #1b5e20; 
+    ${props => (props.$active || (props.$variant === 'activate' && props.$isWeapon)) && props.$variant === 'activate' && !props.$isWeapon && `
+        background: #1b5e20;
         color: white;
         border: 1px solid #4caf50;
         opacity: 1;
 
         &:hover {
-            background: #2e7d32; 
-            border: 1px solid #66bb6a;      
+            background: #2e7d32;
+            border: 1px solid #66bb6a;
             color: #ffffff;
             opacity: 1;
         }
+    `}
+
+    ${props => props.$variant === 'activate' && props.$isWeapon && `
+        background: #7a3b00e5;
+        color: #fff3e0;
+        border: 1px solid #ff9900b6;
+        opacity: 1;
+
+        &:hover {
+            background: #b35900;
+            border: 1px solid #ffb74d;
+            color: #ffffff;
+            opacity: 1;
+        }
+
+        ${props.$active ? `
+            background: #b35900;
+            border: 1px solid #ffb74d;
+            box-shadow: 0 0 5px #ff9800;
+        ` : ''}
     `}
 
     ${props => props.$active && props.$variant === 'deactivate' && `
@@ -147,8 +167,8 @@ class SystemActivation extends Component {
         const deactivateLabel = system.weapon ? "Don't Fire" : "Deactivate";
 
         return (
-            <Container>
-                <Header>{system.displayName}</Header>
+            <Container $isWeapon={system.weapon}>
+                <Header $isWeapon={system.weapon}>{system.displayName}</Header>
                 <Row>
                     <Controls>
                         <ActionButton onClick={() => this.handleActivate()} disabled={!this.canActivate()} $active={isActive} $variant="activate" $isWeapon={system.weapon}>{activateLabel}</ActionButton>

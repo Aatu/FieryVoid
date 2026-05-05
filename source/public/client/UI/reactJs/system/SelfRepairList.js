@@ -5,7 +5,7 @@ import { Clickable } from "../styled";
 const Container = styled.div`
     display: flex;
     flex-direction: column;
-    margin-top: 5px;
+    margin-top: 1px;
     width: 100%;
     min-width: 200px;
     vertical-align: center;

@@ -132,7 +132,13 @@ class ShipSystem {
             }
         }
 		//Don't send empty arrays in JSON payload
-        if (!empty($this->criticals)) $strippedSystem->criticals = $this->criticals;
+        if (!empty($this->criticals)) {
+            $strippedSystem->criticals = array_map(function($crit) {
+                $c = clone $crit;
+                if ($c->param === null || $c->param === '') unset($c->param);
+                return $c;
+            }, $this->criticals);
+        }
         if (!empty($this->critData)) $strippedSystem->critData = $this->critData;
         if (!empty($this->power)) $strippedSystem->power = $this->power;
         if (!empty($this->specialAbilities)) $strippedSystem->specialAbilities = $this->specialAbilities;

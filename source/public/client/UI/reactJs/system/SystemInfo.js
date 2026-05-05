@@ -137,6 +137,10 @@ class SystemInfo extends React.Component {
                     gamedata.selectedSystems.length > 0 && selectedShip) &&
                     getCalledShot(ship, selectedShip, system)}
 
+                {gamedata.isMyShip(ship) && !isUnrevealedMine && system.weapon &&
+                    weaponManager.hasFiringOrder(ship, system) &&
+                    getCalledShotDisplay(ship, system)}
+
             </SystemInfoTooltip>
         )
     }
@@ -153,7 +157,7 @@ const getCalledShot = (ship, selectedShip, system) => {
                         if (system.id != null && !weaponManager.canWeaponCall(weapon)) {
                             return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header>: Cannot Called Shot</Entry>);
                         } else {
-                            return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header> - Approx:  {weaponManager.calculateHitChange(selectedShip, ship, weapon, system.id)}%</Entry>);
+                            return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header> - Approx:  {weaponManager.calculateHitChange(selectedShip, ship, weapon, system.id).hitChance}%</Entry>);
                         }
                     } else {
                         return (<Entry key={`called-${i}`}><Header>{weapon.displayName}</Header>: Not in Range</Entry>);
@@ -167,6 +171,19 @@ const getCalledShot = (ship, selectedShip, system) => {
             <Entry key="cannotTarget">Cannot Target</Entry>
         )
     }
+}
+
+const getCalledShotDisplay = (ship, system) => {
+    var calledInfo = weaponManager.getCalledShotInfo(ship, system);
+    if (!calledInfo) return null;
+
+    return [
+        <Divider key="calledShotDivider" />,
+        <InfoHeader key="calledShotHeader">Called Shot</InfoHeader>,
+        <Entry key="calledShotTarget">
+            <Header>Target: </Header>{calledInfo.targetSystem.displayName} on {calledInfo.targetShip.name}
+        </Entry>
+    ];
 }
 
 const getCriticals = (system) => {
@@ -233,8 +250,19 @@ const getCriticals = (system) => {
 };
 
 const getEntry = (header, value, key) => {
-    if (value && value.replace) {
-        value = value.replace(/<br>/gm, "\n");
+    if (typeof value === 'string' && value.indexOf('<br>') !== -1) {
+        const parts = value.split('<br>');
+        return (
+            <Entry key={key}>
+                <Header>{header}: </Header>
+                {parts.map((part, i) => (
+                    <React.Fragment key={i}>
+                        {i > 0 && <br />}
+                        {part}
+                    </React.Fragment>
+                ))}
+            </Entry>
+        );
     }
 
     return (

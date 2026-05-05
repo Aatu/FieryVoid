@@ -29,7 +29,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h3 id="creating-account" style="margin-top: 25px">TABLE OF CONTENTS</h3>
 
-    <ul class = index-list>
+    <ul class="index-list">
         <li><a href="#missiles">Missiles</a>
            <ul class="sub-list">
                 <li><a href="#shipbornemissiles">Shipborne Missiles</a></li>
@@ -63,17 +63,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h3 id="missiles" style="margin-top: 20px;">Missiles</h3>
     <p>Many factions in Fiery Void use missiles, and when you purchase a missile-carrying ship in Fleet Selection you will have the chance to purchase any missile ammo that faction has available. 
-    Ships will generally come preloaded with basic ammo for their respective launchers, so any missiles types you buy at Fleet Selection will be in additiona to these. 
-    Note -  while amount of any given missile You can buy is limited by magazine size, total amount of missiles is not. 
+    Ships will generally come preloaded with basic ammo for their respective launchers, so any missiles types you buy at Fleet Selection will be in addition to these. 
+    Note -  while the amount of any given missile you can buy is limited by magazine size, total amount of missiles is not. 
     This means your ammo magazine may show more missiles available than it can actually hold but you cannot actually launch more missiles than magazine total. 
-    Essentially, the extra missiles purchased provide you with extra variety, but not actual extra missiles in your magazine!.</p>
+    Essentially, the extra missiles purchased provide you with extra variety, but not actual extra missiles in your magazine!</p>
 
     <p>Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo. 
     This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). 
     You are therefore encouraged to observe the total number of missiles a fighter can have, but if you do not (whether by omission or intentionally) - you will get an extra missile variety, but no extra missiles. 
-    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons) and will lose a missile they are caerrying if they take 2 or more damage from a single shot.</p>
+    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons) and will lose a missile they are carrying if they take 2 or more damage from a single shot.</p>
 
-    <p>Missiles do not use firing ships OEW and their built-in guidance package is usually combined into weapons' Fire control, rather than being kept separate.  Fighter missiles do benefit from the fighter's offensive bonus.</p>
+    <p>Missiles do not use firing ship\'s OEW and their built-in guidance package is usually combined into weapons' Fire control, rather than being kept separate.  Fighter missiles do benefit from the fighter's offensive bonus.</p>
     <p>Ammo listings usually mention ISD year for when that missile type becomes available (if two dates the first refers to Kor-Lyan only). This is not enforced by Fiery Void so players will need to do this themselves.</p>
     <p style="margin-bottom: 0px;">The table below summarises the base stats for different missile types.  Note - These stats can be modified by the type of launcher as well e.g. a L-Rack Missile Launcher would add +10 to the listed ranges below.</p>
     
@@ -112,7 +112,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
     <h3 id="shells" style="margin-top: 20px;">Grome Shells</h3>
-    <p>The Grome are unique in that they have access to a several types of shell for their railguns.  These can be purchased along with a ship in the same way as missiles in Fleet Selection.
+    <p>The Grome are unique in that they have access to several types of shell for their railguns.  These can be purchased along with a ship in the same way as missiles in Fleet Selection.
       Whilst the amount of damage dealt will change depending on the size of railgun (Light, Medium or Heavy), the bonus effect provided by a shell will always be the same.
     </p>
     <ul>  
@@ -125,7 +125,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 
     <h3 id="enhancements">Unit Enhancements</h3>
-    <p>Unit enhancements are general quite pricy, although not always.  For pickup battles - they're very much optional, and best to check with opponent that they are ok to use if it's not stated in game description. 
+    <p>Unit enhancements are generally quite pricy, although not always.  For pickup battles - they're very much optional, and best to check with opponent that they are ok to use if it's not stated in game description. 
     Their main purpose is often to be an option in a scenario, a campaign tool where they can represent units accumulating experience, or a way of spending a few last points when making your fleet.</p>
     <p>Some enhancements represent regular unit options rather than actual enhancements to the ship. Fighter Navigators for example, or Markab Religious Fervor. 
     Additionally, not all enhancements improve the performance of units, some like Poor Crew actually make it worse but reduce the price of the unit in compensation for this.</p>    
@@ -201,8 +201,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h4 id="fighterenhancements" style="margin-top: 15px;">Fighter Enhancements:</h4>
 
+    <p><strong>Note</strong> - All costs listed below are on per fighter basis e.g. you pay for each fighter in the flight.</p>
     <ul>
-      <p><strong>Note</strong> - All costs listed below are on per fighter basis e.g. you pay for each fighters in the flight.</p>
       <li><strong>Expert Motivator</strong>
         <ul class="circle-list">
             <li>Effect: -2 modifier to flight's dropout rolls</li>
@@ -241,7 +241,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
       <li><strong>Elite Pilot</strong>
         <ul class="circle-list">
-            <li>Effect: Pivot cost is reduced by one thrust. Initiative +5. Offensive Bonuns +1. Profile -1</li>
+            <li>Effect: Pivot cost is reduced by one thrust. Initiative +5. Offensive Bonus +1. Profile -1</li>
             <li>Points Cost: -10% of craft price (rounded up)</li>
             <li>Limit: 1</li>
             <li>Notes: Custom Star Wars faction only.</li>            
@@ -253,8 +253,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h4 id="mineEnhancements" style="margin-top: 15px;">Mine Enhancements:</h4>
 
+    <p><strong>Note</strong> - All costs listed below are on per mine basis e.g. you pay for each mine individually.</p>
     <ul>
-      <p><strong>Note</strong> - All costs listed below are on per mine basis e.g. you pay for each fighters in the flight.</p>
       
         <li><strong>Command Controller</strong>
         <ul class="circle-list">
@@ -265,6 +265,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
               If you choose not to manually target a unit, the mine will still attack using it's default targeting logic.</li>
         </ul>      
       </li> 
+        <li><strong>Flexible Targeting</strong>
+        <ul class="circle-list">
+            <li>Effect: Allows you to apply different range settings for different weapons during Deployment.</li>
+            <li>Points Cost: 25%</li>
+            <li>Limit: 1</li>
+            <li>Notes: Only available to DEW mines which have more than one weapon.</li>
+        </ul>      
+      </li>       
       <li><strong>Identify Friend or Foe (IFF) System</strong>
         <ul class="circle-list">
             <li>Effect: Prevent mines from attacking friendly units</li>
@@ -410,7 +418,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <li><strong>Uncontrolled Fighter</strong>
             <ul class="circle-list">
-                <li>Effect: -2 Offensive Bonuns, -15 Initiative</li>
+                <li>Effect: -2 Offensive Bonus, -15 Initiative</li>
                 <li>Points Cost: 0</li>
                 <li>Limit: 1</li>
                 <li>Notes: Not an actual enhancement - used to denote fighter does not have corresponding 'Launched Fighter' enhancement on a Shadow ship.</li>            

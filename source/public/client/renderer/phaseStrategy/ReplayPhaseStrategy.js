@@ -38,6 +38,11 @@ window.ReplayPhaseStrategy = function () {
 
         startReplayOrRequestGamedata.call(this);
 
+        // Previous phase strategy's deactivate() hid every ballistic launch/target sprite.
+        // For in-turn replays, consumeGamedata above re-uses the existing icons via
+        // updateBallisticIcon and so never re-shows them — re-show them explicitly here.
+        this.ballisticIconContainer.show();
+
         activatePause.call(this);
 
         this.setPhaseHeader(false);

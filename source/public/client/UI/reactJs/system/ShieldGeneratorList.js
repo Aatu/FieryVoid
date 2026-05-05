@@ -10,14 +10,14 @@ const Container = styled.div`
     min-width: 250px;
     opacity: 0.95;
     background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #496791;
+    border: 1px solid #587e8d;
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: #496791;
-    border: 1px solid #496791;
-    border-bottom: 1px solid #496791;    
+    background-color: #215a7a;
+    border: 1px solid #587e8d;
+    border-bottom: 1px solid #587e8d;    
     color: #deebff;
     text-align: center;
     font-size: 12px;
@@ -181,14 +181,14 @@ class ShieldGeneratorList extends Component {
         // 270 (P): 247.5 - 292.5
         // 315 (FP): 292.5 - 337.5
 
-        if (mid >= 337.5 || mid < 22.5) prefix = 'F';
-        else if (mid >= 22.5 && mid < 67.5) prefix = 'FS';
-        else if (mid >= 67.5 && mid < 112.5) prefix = 'S';
-        else if (mid >= 112.5 && mid < 157.5) prefix = 'AS';
-        else if (mid >= 157.5 && mid < 202.5) prefix = 'A';
-        else if (mid >= 202.5 && mid < 247.5) prefix = 'AP';
-        else if (mid >= 247.5 && mid < 292.5) prefix = 'P';
-        else if (mid >= 292.5 && mid < 337.5) prefix = 'FP';
+        if (mid >= 337.5 || mid < 22.5) prefix = 'Front';
+        else if (mid >= 22.5 && mid < 67.5) prefix = 'Front Starboard';
+        else if (mid >= 67.5 && mid < 112.5) prefix = 'Starboard';
+        else if (mid >= 112.5 && mid < 157.5) prefix = 'Aft Starboard';
+        else if (mid >= 157.5 && mid < 202.5) prefix = 'Aft';
+        else if (mid >= 202.5 && mid < 247.5) prefix = 'Aft Port';
+        else if (mid >= 247.5 && mid < 292.5) prefix = 'Port';
+        else if (mid >= 292.5 && mid < 337.5) prefix = 'Front Port';
 
         if (prefix) {
             return `${prefix} - ${shield.displayName}`;
@@ -200,16 +200,16 @@ class ShieldGeneratorList extends Component {
         // Extract prefix from label or recalculate
         const label = this.getShieldLabel(shield).split(' - ')[0];
 
-        // User requested order: Front, Port, Starboard, Aft
+        // User requested order: Front, Port, Front Port, Starboard, Front Starboard, Aft Port, Aft Starboard, Aft
         const priorities = {
-            'F': 1,
-            'FP': 2, // Front-Port
-            'P': 3,  // Port
-            'AP': 4, // Aft-Port
-            'FS': 5, // Front-Starboard
-            'S': 6,  // Starboard
-            'AS': 7, // Aft-Starboard
-            'A': 8   // Aft
+            'Front': 1,
+            'Port': 2,
+            'Front Port': 3,
+            'Starboard': 4,
+            'Front Starboard': 5,
+            'Aft Port': 6,
+            'Aft Starboard': 7,
+            'Aft': 8
         };
 
         return priorities[label] || 99;
@@ -262,60 +262,30 @@ class ShieldGeneratorList extends Component {
     }
 
     handleIncrease(shield, amount) {
-        // Logic to increase by amount
-        // The BaseSystem logic handles constraints, we just need to call it repeatedly or check capacity
-
-        // Check if we can increase at all
         if (!shield.canIncrease()) return;
-
-        // Optimization: Use the bulk methods if available and amount matches
-        if (amount === 25 && shield.doIncrease25) {
-            shield.doIncrease25();
-        } else if (amount === 10 && shield.doIncrease10) {
-            shield.doIncrease10();
-        } else if (amount === 5 && shield.doIncrease5) {
-            shield.doIncrease5();
-        } else {
-            // Fallback or smaller amounts
-            // We need to be careful not to trigger infinite loops or lag if 25 is clicked but only 1 capacity available
-            // The doIncrease method checks capacity internally
-            let remaining = amount;
-            for (let i = 0; i < remaining; i++) {
-                if (shield.canIncrease()) {
-                    shield.doIncrease();
-                } else {
-                    break;
-                }
-            }
-        }
-
-        this.forceUpdate();
-        webglScene.customEvent('SystemDataChanged', { ship: this.props.ship, system: shield });
-
-        // Update input field to match new value
-        this.updateInputState(shield);
+        shield.doIncrease(amount);
+        this.afterShieldChange(shield);
     }
 
     handleDecrease(shield, amount) {
         if (!shield.canDecrease()) return;
+        shield.doDecrease(amount);
+        this.afterShieldChange(shield);
+    }
 
-        if (amount === 25 && shield.doDecrease25) {
-            shield.doDecrease25();
-        } else if (amount === 10 && shield.doDecrease10) {
-            shield.doDecrease10();
-        } else if (amount === 5 && shield.doDecrease5) {
-            shield.doDecrease5();
-        } else {
-            let remaining = amount;
-            for (let i = 0; i < remaining; i++) {
-                if (shield.canDecrease()) {
-                    shield.doDecrease();
-                } else {
-                    break;
-                }
-            }
-        }
+    handleMin(shield) {
+        if (!shield.canDecrease()) return;
+        shield.doMin();
+        this.afterShieldChange(shield);
+    }
 
+    handleMax(shield) {
+        if (!shield.canIncrease()) return;
+        shield.doMax();
+        this.afterShieldChange(shield);
+    }
+
+    afterShieldChange(shield) {
         this.forceUpdate();
         webglScene.customEvent('SystemDataChanged', { ship: this.props.ship, system: shield });
         this.updateInputState(shield);
@@ -475,7 +445,7 @@ class ShieldGeneratorList extends Component {
                     {systemName === 'ThirdspaceShield' ? 'Thirdspace Shields' : 'Thought Shields'}
                 </Header>
                 <div style={{ padding: '5px', textAlign: 'center', fontSize: '11px', color: '#deebff', borderBottom: '1px solid #496791' }}>
-                    Unallocated Energy: {generator.storedCapacity}
+                    Unallocated Shield Energy: {generator.storedCapacity}
                 </div>
                 {systemName === 'ThirdspaceShield' && (
                     <div style={{ padding: '5px', textAlign: 'center', fontSize: '11px', color: '#deebff', borderBottom: '1px solid #496791', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
@@ -489,6 +459,7 @@ class ShieldGeneratorList extends Component {
                         <Row key={shield.id} onMouseEnter={() => this.handleMouseEnter(shield)} onMouseLeave={() => this.handleMouseLeave(shield)}>
                             <Name>{this.getShieldLabel(shield)}</Name>
                             <Controls>
+                                <ActionButton onClick={() => this.handleMin(shield)} disabled={!shield.canDecrease()} title="Drop shield to 0">Min</ActionButton>
                                 <ActionButton className="small" onClick={() => this.handleDecrease(shield, 25)} disabled={!shield.canDecrease()}>-25</ActionButton>
                                 <ActionButton className="small" onClick={() => this.handleDecrease(shield, 10)} disabled={!shield.canDecrease()}>-10</ActionButton>
                                 <ActionButton className="small" onClick={() => this.handleDecrease(shield, 5)} disabled={!shield.canDecrease()}>-5</ActionButton>
@@ -506,6 +477,7 @@ class ShieldGeneratorList extends Component {
                                 <ActionButton className="small" onClick={() => this.handleIncrease(shield, 5)} disabled={!shield.canIncrease()}>+5</ActionButton>
                                 <ActionButton className="small" onClick={() => this.handleIncrease(shield, 10)} disabled={!shield.canIncrease()}>+10</ActionButton>
                                 <ActionButton className="small" onClick={() => this.handleIncrease(shield, 25)} disabled={!shield.canIncrease()}>+25</ActionButton>
+                                <ActionButton onClick={() => this.handleMax(shield)} disabled={!shield.canIncrease()} title="Raise shield to maximum">Max</ActionButton>
                             </Controls>
                         </Row>
                     ))}

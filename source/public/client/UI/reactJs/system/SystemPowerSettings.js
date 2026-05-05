@@ -8,20 +8,20 @@ const Container = styled.div`
     width: 100%;
     min-width: 160px;
     opacity: 0.95 !important;
-    background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #587e8d;
+    background-color: rgba(24, 20, 6, 0.9);
+    border: 1px solid #8d7e40;
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: #215a7a;
-    border: 1px solid #587e8d;
-    border-bottom: 1px solid #587e8d;    
-    color: #deebff;
+    background-color: #7a6220;
+    border: 1px solid #8d7e40;
+    border-bottom: 1px solid #8d7e40;
+    color: #fff8d6;
     text-align: center;
     font-size: 11px;
     margin-bottom: 2px;
-    opacity: 0.95 !important;     
+    opacity: 0.95 !important;
     font-weight: bold;
 `;
 
@@ -29,18 +29,18 @@ const Row = styled.div`
     display: flex;
     align-items: center;
     padding: 1px 1px;
-    border-bottom: 1px solid #496791;
+    border-bottom: 1px solid #917940;
     font-size: 11px;
-    color: #deebff;
+    color: #fff8d6;
     justify-content: space-between;
-    min-width: 120px;    
+    min-width: 120px;
 
     &:last-child {
         border-bottom: none;
     }
 
     &:hover {
-        background-color: rgba(73, 103, 145, 0.2);
+        background-color: rgba(145, 121, 64, 0.08);
     }
 `;
 
@@ -67,9 +67,9 @@ const Value = styled.div`
 const ActionButton = styled.div`
     width: ${props => props.$narrow ? '18px' : '30px'};
     height: 18px;
-    background: #203348;
-    border: 1px solid #587e8d;
-    color: #deebff;
+    background: #3d2e107c;
+    border: 1px solid #8d7e40be;
+    color: #e0e7ef;
     cursor: pointer;
     display: flex;
     justify-content: center;
@@ -80,8 +80,8 @@ const ActionButton = styled.div`
     user-select: none;
 
     &:hover {
-        background: #496791;
-        border: 1px solid #587e8d;        
+        background: #917940;
+        border: 1px solid #8d7e40;
         color: #ffffff;
         opacity: 1;
     }
@@ -89,7 +89,7 @@ const ActionButton = styled.div`
     ${props => props.disabled && `
         opacity: 0.3;
         cursor: not-allowed;
-        &:hover { background: #203348; color: #deebff; }
+        &:hover { background: #3d2e10; color: #fff8d6; }
     `}
 
     ${props => props.$active && props.$variant === 'activate' && `
@@ -149,14 +149,14 @@ const ActionButton = styled.div`
     `}
 
     ${props => props.$active && props.$variant === 'info' && `
-        background: #215a7a;
+        background: #7a6220;
         color: white;
-        border: 1px solid #587e8d;
+        border: 1px solid #8d7e40;
         opacity: 1;
 
         &:hover {
-            background: #36577a;
-            border: 1px solid #6db5ed;
+            background: #7a5720;
+            border: 1px solid #edcf6d;
             color: #ffffff;
             opacity: 1;
         }

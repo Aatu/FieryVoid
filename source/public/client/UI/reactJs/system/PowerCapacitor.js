@@ -9,14 +9,14 @@ const Container = styled.div`
     min-width: 180px;
     opacity: 0.95;
     background-color: rgba(16, 26, 38, 0.9);
-    border: 1px solid #496791;
+    border: 1px solid #587e8d;
 `;
 
 const Header = styled.div`
     padding: 3px;
-    background-color: #496791;
-    border: 1px solid #496791;
-    border-bottom: 1px solid #496791;    
+    background-color: #215a7a;
+    border: 1px solid #587e8d;
+    border-bottom: 1px solid #587e8d;    
     color: #deebff;
     text-align: center;
     font-size: 12px;
@@ -85,11 +85,25 @@ const ActionButton = styled.div`
         &:hover { background: #203348; color: #deebff; }
     `}
 
-    ${props => props.$active && `
-        background:  #806c00; 
+    ${props => props.$active && props.$variant !== 'activate' && `
+        background: #806c00;
         color: white;
         border: 1px solid #e6c300;
         opacity: 1;
+    `}
+
+    ${props => props.$active && props.$variant === 'activate' && `
+        background: #1b5e20;
+        color: white;
+        border: 1px solid #4caf50;
+        opacity: 1;
+
+        &:hover {
+            background: #2e7d32;
+            border: 1px solid #66bb6a;
+            color: #ffffff;
+            opacity: 1;
+        }
     `}
 `;
 
@@ -159,7 +173,7 @@ class PowerCapacitor extends Component {
                         <Label>Open Petals</Label>
                         <Controls>
                             <ActionButton onClick={() => this.handleDeBoost()} disabled={!this.canDeBoost()} $active={boostLevel === 0}>OFF</ActionButton>
-                            <ActionButton onClick={() => this.handleBoost()} disabled={!this.canBoost()} $active={boostLevel > 0}>ON</ActionButton>
+                            <ActionButton onClick={() => this.handleBoost()} disabled={!this.canBoost()} $active={boostLevel > 0} $variant="activate">ON</ActionButton>
                         </Controls>
                     </Row>
                 }
@@ -167,7 +181,7 @@ class PowerCapacitor extends Component {
                     <Label>Double Recharge</Label>
                     <Controls>
                         <ActionButton onClick={() => this.handleDeactivate()} disabled={!this.canDeactivate()} $active={!isActive}>OFF</ActionButton>
-                        <ActionButton onClick={() => this.handleActivate()} disabled={!this.canActivate()} $active={isActive}>ON</ActionButton>
+                        <ActionButton onClick={() => this.handleActivate()} disabled={!this.canActivate()} $active={isActive} $variant="activate">ON</ActionButton>
                     </Controls>
                 </Row>
             </Container>
