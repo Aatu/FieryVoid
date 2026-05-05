@@ -8149,17 +8149,19 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 						if($cnc){
 								if($this->eliteMarines){//Are Marines Elite?
 									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}else{//Not Elite Marines					
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+								}else{//Not Elite Marines
 									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}							    		
-			            }				
-				
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+								}
+			            }
+
 					break;
 
 				case 2://Sabotage
@@ -8168,50 +8170,56 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 							$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
 							$system->criticals[] =  $crit;
-							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-						}else{//Not Elite Marines			
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+						}else{//Not Elite Marines
 							$crit = new Sabotage(-1, $ship->id, $system->id, 'Sabotage', $gamedata->turn+1); //Takes effect next turn.
+							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
 							$system->criticals[] =  $crit;
-							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-						}	
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+						}
 					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
-						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
+						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";
 							if($cnc){
 									if($this->eliteMarines){//Are Marines Elite?
 										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
 										$cnc->criticals[] =  $crit;
-										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
-									}else{//Not Elite Marines					
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+									}else{//Not Elite Marines
 										$crit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
+										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
 										$cnc->criticals[] =  $crit;
-										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-									}							    		
-				            }				
-					}	
-					
-					break;				
-				
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+									}
+				            }
+					}
+
+					break;
+
 				case 3://Rescue
 
-					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt their rescue mission next turn.";			
+					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt their rescue mission next turn.";
 						if($cnc){
 								if($this->eliteMarines){//Are Marines Elite?
 									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
 									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note marines have boarded this turn
-								}else{//Not Elite Marines					
+								}else{//Not Elite Marines
 									$crit = new RescueMission(-1, $ship->id, $cnc->id, 'RescueMission', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}							    		
-			            }	
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+								}
+			            }
 				
 					break;			
 				
