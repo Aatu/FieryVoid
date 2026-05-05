@@ -3006,20 +3006,34 @@ class DBManager
 
         $id = false;
         try {
+            // Step 1: Check if the username exists
             if ($stmt = $this->connection->prepare(
-                "SELECT id, accesslevel FROM player where username = ? and password = password(?)")) {
+                "SELECT id FROM player WHERE username = ?")) {
+
+                $stmt->bind_param('s', $username);
+                $stmt->execute();
+                $stmt->bind_result($id);
+                $stmt->fetch();
+                $stmt->close();
+            }
+
+            if (!$id)
+                return 'USER_NOT_FOUND';
+
+            // Step 2: Verify the password
+            $id = false;
+            if ($stmt = $this->connection->prepare(
+                "SELECT id, accesslevel FROM player WHERE username = ? AND password = password(?)")) {
 
                 $stmt->bind_param('ss', $username, $password);
                 $stmt->execute();
                 $stmt->bind_result($id, $access);
                 $stmt->fetch();
-
-                /* close statement */
                 $stmt->close();
             }
 
             if (!$id)
-                return false;
+                return 'WRONG_PASSWORD';
 
         } catch (Exception $e) {
             throw $e;
