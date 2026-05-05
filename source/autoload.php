@@ -1301,6 +1301,7 @@ spl_autoload_register(
 				'ewplasmamine' => '/server/model/weapons/customEscalation.php',
 				'ewpulsetorpedo' => '/server/model/weapons/customEscalation.php',
 				'ewnucleartorpedo' => '/server/model/weapons/customEscalation.php',
+				'ewrangednucleartorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW gravitic weapons
 				'ewgravitictractingrod' => '/server/model/weapons/customEscalation.php',
                 'tractingrodhandler' => '/server/model/weapons/customEscalation.php',
@@ -1958,13 +1959,14 @@ spl_autoload_register(
 
 
 				//Nexus ships - Polaren
-                'polarenakrynev' => '/server/model/ships/NexusPolaren_old/PolarenAkrynev.php',					
+//                'polarenakrynev' => '/server/model/ships/NexusPolaren_old/PolarenAkrynev.php',					
                 'polarenarimet' => '/server/model/ships/NexusPolaren_old/PolarenArimet.php',					
                 'polarenarimetassault' => '/server/model/ships/NexusPolaren_old/PolarenArimetAssault.php',					
                 'polarenarimetescort' => '/server/model/ships/NexusPolaren_old/PolarenArimetEscort.php',					
                 'polarenarimetmaser' => '/server/model/ships/NexusPolaren_old/PolarenArimetMaser.php',					
                 'polarencolonyjumpship' => '/server/model/ships/NexusPolaren_old/PolarenColonyJumpship.php',					
                 'polarencolonyjumpshiprefit' => '/server/model/ships/NexusPolaren_old/PolarenColonyJumpshipRefit.php',					
+                'polarencryven' => '/server/model/ships/NexusPolaren_old/PolarenCryven.php',					
                 'polarendrinev' => '/server/model/ships/NexusPolaren_old/PolarenDrinev.php',					
                 'polarenfyron' => '/server/model/ships/NexusPolaren_old/PolarenFyron.php',					
                 'polarengrantir' => '/server/model/ships/NexusPolaren_old/PolarenGrantir.php',					
@@ -1980,7 +1982,7 @@ spl_autoload_register(
                 'polarenoranet' => '/server/model/ships/NexusPolaren_old/PolarenOranet.php',					
                 'polarenoranetrefit' => '/server/model/ships/NexusPolaren_old/PolarenOranetRefit.php',					
                 'polarenovrymor' => '/server/model/ships/NexusPolaren_old/PolarenOvrymor.php',					
-                'polarenpermion' => '/server/model/ships/NexusPolaren_old/PolarenPermion.php',					
+//                'polarenpermion' => '/server/model/ships/NexusPolaren_old/PolarenPermion.php',					
                 'polarenprevnoran' => '/server/model/ships/NexusPolaren_old/PolarenPrevnoran.php',					
                 'polarenprevnoranrefit' => '/server/model/ships/NexusPolaren_old/PolarenPrevnoranRefit.php',					
                 'polarenremava' => '/server/model/ships/NexusPolaren_old/PolarenRemava.php',					
@@ -3007,6 +3009,7 @@ spl_autoload_register(
 
 				//Kor-Lyan
 				'axor' => '/server/model/ships/korlyan/Axor.php',
+				'cancar' => '/server/model/ships/korlyan/Cancar.php',
 				'cokra' => '/server/model/ships/korlyan/Cokra.php',
 				'fenja' => '/server/model/ships/korlyan/Fenja.php',
 				//'kalavaram' => '/server/model/ships/korlyan/KalavarAM.php', //OBSELETE	
@@ -3122,8 +3125,10 @@ spl_autoload_register(
 				'prototype' => '/server/model/ships/customs/Prototype.php',
 				'explorerprototype' => '/server/model/ships/customs/ExplorerPrototype.php',
 				'shadowavioki' => '/server/model/ships/customs/shadowAvioki.php',	
+				'shadowdestroyerhunter' => '/server/model/ships/customs/shadowDestroyerHunter.php',
 				'shadowgarundaam' => '/server/model/ships/customs/ShadowGarundaAM.php',	
 				'shadowmollantaam' => '/server/model/ships/customs/ShadowMollantaAM.php',	
+				'shadownollita' => '/server/model/ships/customs/ShadowNollita.php',	
 				
 															 
 															   

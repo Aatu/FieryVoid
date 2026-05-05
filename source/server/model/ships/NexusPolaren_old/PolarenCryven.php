@@ -1,20 +1,20 @@
 <?php
-class PolarenDrinev extends MediumShip{
+class PolarenCryven extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 250;
+        $this->pointCost = 290;
         $this->faction = "Nexus Polaren Confederacy (early)";
-        $this->phpclass = "PolarenDrinev";
+        $this->phpclass = "PolarenCryven";
         $this->imagePath = "img/ships/Nexus/polarenFyron.png";
-        $this->shipClass = "Drinev Escort Frigate";
+        $this->shipClass = "Cryven Assault Frigate";
 			$this->variantOf = "Fyron Escort Frigate";
-			$this->occurence = "common";
+			$this->occurence = "uncommon";
 		$this->unofficial = true;
         $this->canvasSize = 110;
         $this->agile = true;
-	    $this->isd = 1730;
+	    $this->isd = 2009;
 
 	    $this->notes = 'Atmospheric capable';
         
@@ -27,26 +27,29 @@ class PolarenDrinev extends MediumShip{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 60;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
          
-        $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
+        $this->addPrimarySystem(new Reactor(3, 12, 0, 3));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 9, 3, 5));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
+        $this->addPrimarySystem(new Scanner(4, 9, 3, 6));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 5, 4));        
 		$this->addPrimarySystem(new NexusSandCaster(1, 4, 2, 0, 360));
         
-		$this->addFrontSystem(new StunBeam(2, 6, 5, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 6, false));
 		$this->addFrontSystem(new LtBlastCannon(2, 4, 1, 240, 120));
-		$this->addFrontSystem(new StunBeam(2, 6, 5, 300, 60));
+		$this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 6, false));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 2));
 	    
 		$this->addAftSystem(new Maser(2, 6, 3, 120, 360));
 		$this->addAftSystem(new Maser(2, 6, 3, 0, 240));
-        $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
+        $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
 		$this->addAftSystem(new Hangar(1, 1));
 		$this->addAftSystem(new Bulkhead(0, 2));
         
@@ -65,9 +68,9 @@ class PolarenDrinev extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			7 => "Light Blast Cannon",
-			10 => "Stun Beam",
+			5 => "Thruster",
+			6 => "Light Blast Cannon",
+			9 => "Grappling Claw",
 			17 => "Structure",
 			20 => "Primary",
 		),

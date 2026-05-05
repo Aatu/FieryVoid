@@ -28,24 +28,24 @@ class PolarenFyron extends MediumShip{
          
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 9, 3, 5));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
+        $this->addPrimarySystem(new Scanner(4, 9, 3, 6));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 5, 4));        
 		$this->addPrimarySystem(new NexusSandCaster(1, 4, 2, 0, 360));
         
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 180, 60));
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 240, 120));
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 240, 120));
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 300, 180));
+		$this->addFrontSystem(new Maser(2, 6, 3, 270, 90));
+		$this->addFrontSystem(new LtBlastCannon(2, 4, 1, 240, 120));
+		$this->addFrontSystem(new NexusSandCaster(1, 4, 2, 270, 90));
+		$this->addFrontSystem(new Maser(2, 6, 3, 270, 90));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 2));
 	    
-		$this->addAftSystem(new NexusLightMaser(2, 4, 2, 120, 360));
-		$this->addAftSystem(new NexusLightMaser(2, 4, 2, 0, 240));
-        $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
-        $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
+		$this->addAftSystem(new Maser(2, 6, 3, 120, 360));
+		$this->addAftSystem(new Maser(2, 6, 3, 0, 240));
+        $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
+        $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
 		$this->addAftSystem(new Hangar(1, 1));
 		$this->addAftSystem(new Bulkhead(0, 2));
         
@@ -64,15 +64,17 @@ class PolarenFyron extends MediumShip{
 		),
 
 		1=> array(
-			6 => "Thruster",
-			10 => "Light Maser",
+			5 => "Thruster",
+			6 => "Light Blast Cannon",
+			9 => "Maser",
+			10 => "Sand Caster",
 			17 => "Structure",
 			20 => "Primary",
 		),
 
 		2=> array(
 			6 => "Thruster",
-			8 => "Light Maser",
+			8 => "Maser",
 			9 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",

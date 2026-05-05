@@ -4,7 +4,7 @@ class PolarenGratherin extends HeavyCombatVesselLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 450;
+        $this->pointCost = 430;
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenGratherin";
         $this->imagePath = "img/ships/Nexus/polarenGratherin.png";
@@ -34,15 +34,17 @@ class PolarenGratherin extends HeavyCombatVesselLeftRight{
         $this->addAftSystem(new Thruster(3, 12, 0, 6, 1));
         $this->addAftSystem(new Thruster(3, 15, 0, 8, 2));
 
-        $this->addLeftSystem(new NexusLightRadCannon(3, 6, 4, 240, 360));
+        $this->addLeftSystem(new RadCannon(3, 8, 6, 240, 360));
         $this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
         $this->addLeftSystem(new Thruster(4, 12, 0, 4, 3));
-        $this->addLeftSystem(new NexusLightMaser(2, 4, 2, 120, 300));
+        $this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
+		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 
-        $this->addRightSystem(new NexusLightRadCannon(3, 6, 4, 0, 120));
+        $this->addRightSystem(new RadCannon(3, 8, 6, 0, 120));
         $this->addRightSystem(new Maser(2, 6, 3, 300, 120));
         $this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
-        $this->addRightSystem(new NexusLightMaser(2, 4, 2, 60, 240));
+        $this->addRightSystem(new Maser(2, 6, 3, 60, 240));
+		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 32));
@@ -54,7 +56,7 @@ class PolarenGratherin extends HeavyCombatVesselLeftRight{
         				8 => "Structure",
 						9 => "1:Stun Beam",
         				11 => "2:Thruster",
-						12 => "1: Sand Caster",
+						12 => "1:Sand Caster",
         				14 => "Scanner",
         				16 => "Engine",
         				17 => "Hangar",
@@ -62,18 +64,18 @@ class PolarenGratherin extends HeavyCombatVesselLeftRight{
         				20 => "C&C",
         		),
         		3=> array(
-        				5 => "Thruster",
-        				7 => "Light Rad Cannon",
-        				9 => "Maser",
-						10 => "Light Maser",
+        				4 => "Thruster",
+        				6 => "Rad Cannon",
+        				8 => "Maser",
+						10 => "Light Blast Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
-        				5 => "Thruster",
-        				7 => "Light Rad Cannon",
-        				9 => "Maser",
-						10 => "Light Maser",
+        				4 => "Thruster",
+        				6 => "Rad Cannon",
+        				8 => "Maser",
+						10 => "Light Blast Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),

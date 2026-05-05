@@ -44,16 +44,16 @@ class PolarenArimetEscort extends LCV{
 		$this->addPrimarySystem(new Bulkhead(0, 1));
 		$this->addPrimarySystem(new Bulkhead(0, 1));
 
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 180, 60));
+		$this->addFrontSystem(new LtBlastCannon(1, 4, 1, 180, 60));
 		$this->addFrontSystem(new NexusSandCaster(2, 4, 2, 270, 90));
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 300, 180));
+		$this->addFrontSystem(new NexusSandCaster(2, 4, 2, 300, 180));
     
         $this->addPrimarySystem(new Structure(4, 36));
 	    
         $this->hitChart = array(
         		0=> array( 
         				10 => "Structure",
-        				12 => "1:Sand Caster",
+        				13 => "1:Sand Caster",
         				15 => "1:Light Maser",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -61,7 +61,7 @@ class PolarenArimetEscort extends LCV{
         		),
         		1=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				12 => "1:Sand Caster",
+        				13 => "1:Sand Caster",
         				15 => "1:Light Maser",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -69,7 +69,7 @@ class PolarenArimetEscort extends LCV{
         		),
         		2=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				12 => "1:Sand Caster",
+        				13 => "1:Sand Caster",
         				15 => "1:Light Maser",
 						17 => "0:Engine",
         				19 => "0:Reactor",

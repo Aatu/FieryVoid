@@ -43,18 +43,22 @@ class PolarenLymadaRefit extends BaseShipNoAft{
 		$this->addFrontSystem(new DockingCollar(2, 10));
 		$this->addFrontSystem(new DockingCollar(2, 10));
 		$this->addFrontSystem(new DockingCollar(2, 10));
+		$this->addFrontSystem(new Maser(2, 6, 3, 240, 60));
+		$this->addFrontSystem(new Maser(2, 6, 3, 300, 120));
         
 		$this->addLeftSystem(new Thruster(2, 15, 0, 4, 3));
 		$this->addLeftSystem(new NexusHeavyMaser(3, 7, 4, 240, 360));
 		$this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
 		$this->addLeftSystem(new NexusSandCaster(1, 4, 2, 180, 360));
 		$this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
+		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 		
 		$this->addRightSystem(new Thruster(2, 15, 0, 4, 4));
 		$this->addRightSystem(new NexusHeavyMaser(3, 7, 4, 0, 120));
 		$this->addRightSystem(new Maser(2, 6, 3, 300, 120));
 		$this->addRightSystem(new NexusSandCaster(1, 4, 2, 0, 180));
 		$this->addRightSystem(new Maser(2, 6, 3, 60, 240));
+		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 36));
@@ -74,15 +78,17 @@ class PolarenLymadaRefit extends BaseShipNoAft{
                     20 => "C&C",
             ),
             1=> array(
-                    5 => "Thruster",
-					10 => "Docking Collar",
+                    4 => "Thruster",
+					6 => "Maser",
+					12 => "Docking Collar",
 					18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
                     5 => "Thruster",
 					7 => "Heavy Maser",
-					10 => "Maser",
+					9 => "Maser",
+					10 => "Light Blast Cannon",
 					11 => "Sand Caster",
                     18 => "Structure",
                     20 => "Primary",
@@ -90,7 +96,8 @@ class PolarenLymadaRefit extends BaseShipNoAft{
             4=> array(
                     5 => "Thruster",
 					7 => "Heavy Maser",
-					10 => "Maser",
+					9 => "Maser",
+					10 => "Light Blast Cannon",
 					11 => "Sand Caster",
                     18 => "Structure",
                     20 => "Primary",

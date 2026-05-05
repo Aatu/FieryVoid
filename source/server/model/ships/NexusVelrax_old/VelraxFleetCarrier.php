@@ -7,7 +7,7 @@ class VelraxFleetCarrier extends BaseShip{
 	$this->pointCost = 560;
 	$this->faction = "Nexus Velrax Republic (early)";
         $this->phpclass = "VelraxFleetCarrier";
-        $this->imagePath = "img/ships/Nexus/velraxNaresh.png";
+        $this->imagePath = "img/ships/Nexus/velraxNaresh2.png";
         $this->shipClass = "Naresh Fleet Carrier";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 170; //img has 200px per side
