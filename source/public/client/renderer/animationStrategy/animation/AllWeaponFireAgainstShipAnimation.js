@@ -302,12 +302,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
                 TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
             }
-            var playedPullSound = false;
+
             var pullSoundVolume = 0.1;
 
             return {
+                playedPullSound: false,
                 render: function (now, total, last, delta, zoom, back, paused) {
-                    if (total >= startTime && !playedPullSound && gamedata.playAudio && !paused && !back) {
+                    if (total >= startTime && !this.playedPullSound && gamedata.playAudio && !paused && !back) {
                         try {
                             if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
                                 var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
@@ -315,7 +316,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                 explosionSound.currentTime = 0;
                                 explosionSound.play().catch(function () { });
                             }
-                            playedPullSound = true;
+                            this.playedPullSound = true;
                         } catch (e) {
                             console.warn("GraviticMine explosion sound failed:", e);
                         }
@@ -377,16 +378,16 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                         this.systemDestroyedEffect.add(targetPos, critNames, startTime + 500, 'crit');
                     }
 
-                    var playedImpactSound = false;
                     var soundVolume = 0.1;
                     if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
                         TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
                     }
 
                     return {
+                        playedImpactSound: false,
                         render: function(now, total, last, delta, zoom, back, paused) {
                             explosion.render(now, total, last, delta, zoom, back, paused);
-                            if (total >= startTime && !playedImpactSound && gamedata.playAudio && !paused && !back) {
+                            if (total >= startTime && !this.playedImpactSound && gamedata.playAudio && !paused && !back) {
                                 try {
                                     if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
                                         var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
@@ -394,7 +395,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                         explosionSound.currentTime = 0;
                                         explosionSound.play().catch(function() {});
                                     }
-                                    playedImpactSound = true;
+                                    this.playedImpactSound = true;
                                 } catch (e) {
                                     console.warn("Mine explosion sound failed:", e);
                                 }

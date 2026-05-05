@@ -129,7 +129,7 @@ window.LaserEffect = function () {
         this.particleEmitter.render(now, total, last, delta, zoom);
 
         // --- Play sound exactly when the laser starts ---
-        if (gamedata.playAudio && !this.playedSound && total >= this.time) {
+        if (gamedata.playAudio && !this.playedSound && total >= this.time && !document.hidden) {
             try {
                 this.laserSound = LaserEffect.cachedAudio.cloneNode(true);
                 this.laserSound.volume = this.soundVolume;
