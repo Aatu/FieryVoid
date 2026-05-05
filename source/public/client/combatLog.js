@@ -126,7 +126,7 @@ window.combatLog = {
         var tooltipAttr = "";
         if (totalInterceptorsCount > 0) {
             var wWord = totalInterceptorsCount === 1 ? "shot" : "shots";
-            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied a -' + totalInterceptPenalty + '% total hit penalty.';
+            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied a -' + totalInterceptPenalty + '% hit penalty.';
             var tooltipText = summaryText;
 
             // If there's more than one shot, append the per-shot breakdown
@@ -576,7 +576,13 @@ $(function () {
         if (!tooltip.length) {
             tooltip = $('<div id="custom-intercept-tooltip" class="custom-intercept-tooltip"></div>').appendTo('body');
         }
-        tooltip.text($(this).data('tooltip'));
+        var raw = String($(this).data('tooltip') || '');
+        var lines = raw.split('\n');
+        var $header = $('<div class="hctt-header"></div>').text(lines[0] || '');
+        tooltip.empty().append($header);
+        for (var i = 1; i < lines.length; i++) {
+            tooltip.append($('<div class="hctt-row"></div>').text(lines[i]));
+        }
         var rect = this.getBoundingClientRect();
         var topPos = rect.top - tooltip.outerHeight() - 5;
         if (topPos < 0) topPos = rect.bottom + 5;
