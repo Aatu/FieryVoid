@@ -28,7 +28,7 @@ class PolarenWyrithRefit extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
+        $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
         $this->addPrimarySystem(new Hangar(2, 3));
         $this->addPrimarySystem(new NexusPolarenLCVController(5, 10, 5, 1));
@@ -37,14 +37,14 @@ class PolarenWyrithRefit extends HeavyCombatVesselLeftRight{
         $this->addAftSystem(new Thruster(3, 15, 0, 8, 2));
 
         $this->addLeftSystem(new DockingCollar(2, 10));
-//        $this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
         $this->addLeftSystem(new Thruster(4, 12, 0, 4, 3));
         $this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
+		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 
         $this->addRightSystem(new DockingCollar(2, 10));
-//        $this->addRightSystem(new Maser(2, 6, 3, 300, 120));
         $this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
         $this->addRightSystem(new Maser(2, 6, 3, 0, 180));
+		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(3, 32));
@@ -67,6 +67,7 @@ class PolarenWyrithRefit extends HeavyCombatVesselLeftRight{
         				5 => "Thruster",
         				8 => "Docking Collar",
 						10 => "Maser",
+						11 => "Light Blast Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),
@@ -74,6 +75,7 @@ class PolarenWyrithRefit extends HeavyCombatVesselLeftRight{
         				5 => "Thruster",
         				8 => "Docking Collar",
 						10 => "Maser",
+						11 => "Light Blast Cannon",
         				18 => "Structure",
         				20 => "Primary",
         		),

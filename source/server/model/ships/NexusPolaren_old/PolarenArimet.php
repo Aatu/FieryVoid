@@ -35,13 +35,13 @@ class PolarenArimet extends LCV{
 		$this->addPrimarySystem(new Reactor(3, 10, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
-    	$sensors = new Scanner(3, 10, 2, 4);
+    	$sensors = new Scanner(3, 10, 3, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
 
 		$this->addFrontSystem(new Maser(2, 6, 3, 300, 60));
-		$this->addFrontSystem(new NexusLightMaser(1, 4, 2, 240, 120));
+		$this->addFrontSystem(new LtBlastCannon(1, 4, 1, 240, 120));
 		$this->addFrontSystem(new Maser(2, 6, 3, 300, 60));
     
         $this->addPrimarySystem(new Structure(4, 36));
@@ -49,7 +49,7 @@ class PolarenArimet extends LCV{
         $this->hitChart = array(
         		0=> array( 
         				10 => "Structure",
-        				12 => "1:Light Maser",
+        				12 => "1:Light Blast Cannon",
         				15 => "1:Maser",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -57,7 +57,7 @@ class PolarenArimet extends LCV{
         		),
         		1=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				12 => "1:Light Maser",
+        				12 => "1:Light Blast Cannon",
         				15 => "1:Maser",
 						17 => "0:Engine",
         				19 => "0:Reactor",
@@ -65,7 +65,7 @@ class PolarenArimet extends LCV{
         		),
         		2=> array( //redirect to PRIMARY
         				10 => "Structure",
-        				12 => "1:Light Maser",
+        				12 => "1:Light Blast Cannon",
         				15 => "1:Maser",
 						17 => "0:Engine",
         				19 => "0:Reactor",

@@ -41,7 +41,7 @@ class CraytanTironFtr extends FighterFlight{
 			$torpedoLauncher = new NexusFighterTorpedoLauncher(1, 330, 30);
             $torpedoLauncher->firingModes = array( 1 => "LPT" );
             $torpedoLauncher->iconPath = "EWLightPlasmaMine.png";
-           $torpedoLauncher->displayName = "Light Plasma Torpedo"; //needed
+            $torpedoLauncher->displayName = "Light Plasma Torpedo"; //needed
             $torpedoLauncher->missileArray = array(1 => new NexusLtPlasmaTorpedo(330, 30));            	
             $fighter->addFrontSystem($torpedoLauncher);
 			

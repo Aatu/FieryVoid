@@ -9,12 +9,13 @@ class PolarenColonyJumpship extends BaseShip{
         $this->phpclass = "PolarenColonyJumpship";
         $this->imagePath = "img/ships/Nexus/polarenColonyJumpship2.png";
 			$this->canvasSize = 190; //img has 200px per side
-        $this->shipClass = "Colony Jumpship";
+        $this->shipClass = "Mathevin Colony Jumpship";
 		$this->limited = 10;
 		$this->unofficial = true;
+        $this->Enormous = true;
 		$this->isd = 2033;
          
-        $this->fighters = array("assault shuttles"=>4); //2 breaching pods    
+        $this->fighters = array("assault shuttles"=>4); //4 breaching pods    
 		
         $this->forwardDefense = 17;
         $this->sideDefense = 19;
@@ -35,25 +36,26 @@ class PolarenColonyJumpship extends BaseShip{
 
         $this->addFrontSystem(new Thruster(2, 20, 0, 4, 1));
         $this->addFrontSystem(new Thruster(2, 20, 0, 4, 1));
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 240, 60));
-		$this->addFrontSystem(new NexusLightRadCannon(3, 6, 4, 240, 360));
-		$this->addFrontSystem(new NexusLightRadCannon(3, 6, 4, 0, 120));
-		$this->addFrontSystem(new NexusLightMaser(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new LtBlastCannon(2, 4, 1, 240, 60));
+		$this->addFrontSystem(new RadCannon(3, 8, 6, 240, 360));
+		$this->addFrontSystem(new RadCannon(3, 8, 6, 0, 120));
+		$this->addFrontSystem(new LtBlastCannon(2, 4, 1, 300, 120));
 
         $this->addAftSystem(new Engine(3, 30, 0, 16, 5));
 		$this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
 		$this->addAftSystem(new Thruster(2, 24, 0, 6, 2));
 		$this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
-		$this->addAftSystem(new NexusLightMaser(2, 4, 2, 120, 300));
-		$this->addAftSystem(new NexusLightRadCannon(3, 6, 4, 180, 300));
-		$this->addAftSystem(new NexusLightRadCannon(3, 6, 4, 60, 180));
-		$this->addAftSystem(new NexusLightMaser(2, 4, 2, 60, 240));
+		$this->addAftSystem(new LtBlastCannon(2, 4, 1, 120, 300));
+		$this->addAftSystem(new RadCannon(3, 8, 6, 180, 300));
+		$this->addAftSystem(new RadCannon(3, 8, 6, 60, 180));
+		$this->addAftSystem(new LtBlastCannon(2, 4, 1, 60, 240));
 		$this->addAftSystem(new CargoBay(2, 35));
 		$this->addAftSystem(new CargoBay(2, 35));
         
 		$this->addLeftSystem(new Thruster(2, 20, 0, 8, 3));
 		$this->addLeftSystem(new Maser(1, 6, 3, 180, 360));
 		$this->addLeftSystem(new Maser(1, 6, 3, 180, 360));
+		$this->addLeftSystem(new NexusSandCaster(1, 4, 2, 180, 360));
 		$this->addLeftSystem(new NexusSandCaster(1, 4, 2, 180, 360));
 		$this->addLeftSystem(new DockingCollar(2, 10));
 		$this->addLeftSystem(new DockingCollar(2, 10));
@@ -63,16 +65,17 @@ class PolarenColonyJumpship extends BaseShip{
 		$this->addRightSystem(new Maser(1, 6, 3, 0, 180));
 		$this->addRightSystem(new Maser(1, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusSandCaster(1, 4, 2, 0, 180));
+		$this->addRightSystem(new NexusSandCaster(1, 4, 2, 0, 180));
 		$this->addRightSystem(new DockingCollar(2, 10));
 		$this->addRightSystem(new DockingCollar(2, 10));
 		$this->addRightSystem(new DockingCollar(2, 10));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 6, 54));
-        $this->addAftSystem(new Structure( 3, 48));
-        $this->addLeftSystem(new Structure( 3, 60));
-        $this->addRightSystem(new Structure( 3, 60));
-        $this->addPrimarySystem(new Structure( 3, 54));
+        $this->addFrontSystem(new Structure( 6, 82));
+        $this->addAftSystem(new Structure( 3, 72));
+        $this->addLeftSystem(new Structure( 3, 90));
+        $this->addRightSystem(new Structure( 3, 90));
+        $this->addPrimarySystem(new Structure( 3, 82));
 		
         $this->hitChart = array(
             0=> array(
@@ -85,8 +88,8 @@ class PolarenColonyJumpship extends BaseShip{
             ),
             1=> array(
                     6 => "Thruster",
-					8 => "Light Rad Cannon",
-					10 => "Light Maser",
+					8 => "Rad Cannon",
+					10 => "Light Blast Cannon",
 					18 => "Structure",
                     20 => "Primary",
             ),
@@ -94,22 +97,22 @@ class PolarenColonyJumpship extends BaseShip{
                     5 => "Thruster",
                     8 => "Cargo Bay",
 					10 => "Engine",
-                    11 => "Light Maser",
-                    12 => "Light Rad Cannon",
+                    11 => "Light Blast Cannon",
+                    12 => "Rad Cannon",
                     18 => "Structure",
                     20 => "Primary",
             ),
             3=> array(
-                    5 => "Thruster",
-					7 => "Maser",
+                    4 => "Thruster",
+					6 => "Maser",
 					8 => "Sand Caster",
 					11 => "Docking Collar",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
-                    5 => "Thruster",
-					7 => "Maser",
+                    4 => "Thruster",
+					6 => "Maser",
 					8 => "Sand Caster",
 					11 => "Docking Collar",
                     18 => "Structure",

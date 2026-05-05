@@ -55,8 +55,8 @@ class KobolMinerva extends BaseShip{
 		$this->addFrontSystem(new Railgun(3, 9, 6, 330, 90));
 		$this->addFrontSystem(new HeavyRailGun(3, 12, 9, 300, 30));
 		$this->addFrontSystem(new HeavyRailGun(3, 12, 9, 330, 60));
-		$this->addFrontSystem(new FlakArray(4, 10, 3, 210, 30));
-		$this->addFrontSystem(new FlakArray(4, 10, 3, 330, 150));
+		$this->addFrontSystem(new OrieniFlakArray(4, 6, 3, 210, 30));
+		$this->addFrontSystem(new OrieniFlakArray(4, 6, 3, 330, 150));
 
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
@@ -64,8 +64,8 @@ class KobolMinerva extends BaseShip{
         $this->addAftSystem(new Thruster(3, 9, 0, 3, 2));
 		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new Bulkhead(0, 4));
-		$this->addAftSystem(new FlakArray(4, 10, 3, 150, 330));
-		$this->addAftSystem(new FlakArray(4, 10, 3, 30, 210));
+		$this->addAftSystem(new OrieniFlakArray(4, 6, 3, 150, 330));
+		$this->addAftSystem(new OrieniFlakArray(4, 6, 3, 30, 210));
 		$this->addAftSystem(new MedBlastCannon(3, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(3, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(3, 5, 2, 60, 300));
@@ -76,10 +76,10 @@ class KobolMinerva extends BaseShip{
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
-		$this->addLeftSystem(new FlakArray(3, 10, 3, 210, 330));
-		$this->addLeftSystem(new FlakArray(3, 10, 3, 210, 330));
-		$this->addLeftSystem(new FlakArray(3, 10, 3, 210, 330));
-		$this->addLeftSystem(new FlakArray(3, 10, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
 		$this->addLeftSystem(new HvyBlastCannon(3, 6, 4, 210, 360));
 		$this->addLeftSystem(new Hangar(4, 14));
 
@@ -88,10 +88,10 @@ class KobolMinerva extends BaseShip{
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
-		$this->addRightSystem(new FlakArray(3, 10, 3, 30, 150));
-		$this->addRightSystem(new FlakArray(3, 10, 3, 30, 150));
-		$this->addRightSystem(new FlakArray(3, 10, 3, 30, 150));
-		$this->addRightSystem(new FlakArray(3, 10, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
 		$this->addRightSystem(new HvyBlastCannon(3, 6, 4, 0, 150));
 		$this->addRightSystem(new Hangar(4, 14));
         
