@@ -11,7 +11,7 @@ class Terillon extends MediumShip{
         $this->shipClass = "Terillon Patrol Frigate";
 		$this->isd = 2230;
         $this->agile = true;
-		$this->canvasSize = 100;        
+		$this->canvasSize = 80;        
         
         $this->forwardDefense = 13;
         $this->sideDefense = 11;
