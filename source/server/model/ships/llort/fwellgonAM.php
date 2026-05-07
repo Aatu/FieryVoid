@@ -10,6 +10,7 @@ class fwellgonAM extends HeavyCombatVessel{
         $this->imagePath = "img/ships/LlortGovall.png";
         $this->shipClass = "Fwellgon Raiding Scout";
         $this->limited = 33; 
+		$this->canvasSize = 180;           
  
         $this->isd = 2227;
         

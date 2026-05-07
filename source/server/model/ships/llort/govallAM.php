@@ -12,6 +12,7 @@ class govallAM extends HeavyCombatVessel{
  
         $this->limited = 33; 
         $this->isd = 2241;
+		$this->canvasSize = 180;   		
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
