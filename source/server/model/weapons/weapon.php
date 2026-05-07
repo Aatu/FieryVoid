@@ -175,6 +175,7 @@ class Weapon extends ShipSystem
     protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 25 => array("ReducedRange", "ReducedDamage"));
 
     protected $firedDefensivelyAlready = 0; //marker used for weapons capable of firing multiple defensive shots, but suffering backlash once
+    protected $incomingPosCache = array(); //memoized launch/source pixel pos per fire order (for getIncomingBearing/getIncomingPos)
 	protected $autoHit = false;//To show 100% hit chance in front end, Need to pass in strpForJson			        
     protected $autoHitArray = array(); //Need to pass in strpForJson    
 	protected $shootsStraight = true; //Denotes for Front End to use Line Arcs, not circles. Need to pass in strpForJson
@@ -1050,16 +1051,57 @@ public function getStartLoading()
     public function getFiringHex($gamedata, $fireOrder){
         $shooter = $gamedata->getShipById($fireOrder->shooterid);
 		$pos = $shooter->getHexPos();
-		$launchPos = null;		
-		
+		$launchPos = null;
+
         if ($this->ballistic) {
             $movement = $shooter->getLastTurnMovement($fireOrder->turn);
             $launchPos = $movement->position;
         } else {
             $launchPos = $pos;
         }
-       return $launchPos; 
+       return $launchPos;
 	}//endof getFiringHex
+
+    /*
+     * Relative bearing of an incoming shot from $observer's perspective.
+     * Replaces the repeated `if ($weapon->ballistic) getBearingOnPos(launchPos) else getBearingOnUnit(shooter)` pattern.
+     * $sourceOverride (pixel coords) lets callers force a synthetic source - used by Piercing 3rd-part to model
+     * the exit slug coming from the target's interior, not the original shooter.
+     * Non-ballistic path keeps getBearingOnUnit($shooter) so the same-hex initiative tiebreak still applies.
+     */
+    public function getIncomingBearing($observer, $fireOrder, $gamedata, $sourceOverride = null)
+    {
+        if ($sourceOverride !== null) {
+            return $observer->getBearingOnPos($sourceOverride);
+        }
+        if ($this->ballistic) {
+            $launchPos = $this->getIncomingPos($fireOrder, $gamedata);
+            return $observer->getBearingOnPos($launchPos);
+        }
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        return $observer->getBearingOnUnit($shooter);
+    }
+
+    /*
+     * Pixel-space source position of an incoming shot. Memoized per fire order.
+     * Ballistic: launch hex from getFiringHex (polymorphic - covers BallisticMineLauncher, ProximityLaser etc).
+     * Non-ballistic: shooter's current hex position in pixel coords.
+     */
+    public function getIncomingPos($fireOrder, $gamedata, $sourceOverride = null)
+    {
+        if ($sourceOverride !== null) return $sourceOverride;
+        $key = spl_object_id($fireOrder);
+        if (!isset($this->incomingPosCache[$key])) {
+            if ($this->ballistic) {
+                $launchHex = $this->getFiringHex($gamedata, $fireOrder);
+                $this->incomingPosCache[$key] = mathlib::hexCoToPixel($launchHex);
+            } else {
+                $shooter = $gamedata->getShipById($fireOrder->shooterid);
+                $this->incomingPosCache[$key] = $shooter->getCoPos();
+            }
+        }
+        return $this->incomingPosCache[$key];
+    }
 
     /*Marcin Sawicki: is there a chance that defender has choice of target section? */
     public function isTargetAmbiguous($gamedata, $fireOrder)
@@ -1927,11 +1969,7 @@ public function getStartLoading()
             }
             
             //find out opposite section...
-            if($this->ballistic){ //firing position is explicitly declared
-				$relativeBearing = $target->getBearingOnPos($launchPos);
-			}else{ //check from shooter...
-                $relativeBearing = $target->getBearingOnUnit($shooter);
-			}
+            $relativeBearing = $this->getIncomingBearing($target, $fireOrder, $gamedata);
             
             //Rules update: piercing shots on HCVs coming from the side should split into 2 parts, not 3.
             //Check for HCV / HCVLeftRight and modify outLocation to match facingLocation if angle is from the side.
