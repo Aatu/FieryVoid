@@ -85,6 +85,8 @@ class BaseShip {
     public $skinDancing = array();	//Holds target ids when there's a successful skin dance.
     public $hasAttached = array(); // Holds shooterid => location for attached boarding pods on this ship.
     public $attached = array(); // Holds targetid => location if this unit is attached to another unit.
+    public $hasAttachedFacing = array(); // shooterid => entry-side hex offset 0-5 (facing offset relative to host's facing direction)
+    public $attachedFacing = array(); // targetid  => entry-side hex offset 0-5 (facing offset relative to host's facing direction)
     protected $skinDancer = false; //Let';s ships of unusual size skin dance e.g. Toravlus capitals ships.   	
 
 	public $isCloaked = false;  //Used for deactivating Trek shields when the Trek cloak is activated
@@ -588,6 +590,8 @@ class BaseShip {
         if ($this->skinDancing) $strippedShip->skinDancing = $this->skinDancing;
         if (!empty($this->hasAttached)) $strippedShip->hasAttached = $this->hasAttached;
         if (!empty($this->attached)) $strippedShip->attached = $this->attached;
+        if (!empty($this->hasAttachedFacing)) $strippedShip->hasAttachedFacing = $this->hasAttachedFacing;
+        if (!empty($this->attachedFacing)) $strippedShip->attachedFacing = $this->attachedFacing;
         if ($this->spawned !== null && $this->spawned !== -1) $strippedShip->spawned = $this->spawned;
         
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
@@ -2465,10 +2469,28 @@ public function getAllEWExceptDEW($turn){
             }
 		}
 
+        // Prefer destroying weapons that need the longest to recharge:
+        //   tier 1: weapons that fired this turn (turnsloaded resets to 1 next turn)
+        //   tier 2: weapons recharging and not ready next turn either
+        if ($systems[0] instanceof Weapon) {
+            $firedThisTurn = array();
+            $rechargingSystems = array();
+            foreach ($systems as $sys) {
+                if ($sys->loadingtime <= 1) continue; //1-turn weapons always ready, ignore
+                if ($sys->firedOnTurn(TacGamedata::$currentTurn)) {
+                    $firedThisTurn[] = $sys;
+                } else if ($sys->turnsloaded < ($sys->loadingtime - 1)) {
+                    $rechargingSystems[] = $sys;
+                }
+            }
+            if (sizeof($firedThisTurn) > 0) $systems = $firedThisTurn;
+            else if (sizeof($rechargingSystems) > 0) $systems = $rechargingSystems;
+        }
+
         //now choose one of equal eligible systems (they're already known to be undestroyed... well, they may be destroyed, but then they're to be returned anyway)
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
-	        
+
         return $system;
 
     } //end of function getHitSystemByTable
@@ -2632,11 +2654,29 @@ public function getAllEWExceptDEW($turn){
             }
 		}
 		
+		// Prefer destroying weapons that need the longest to recharge:
+		//   tier 1: weapons that fired this turn (turnsloaded resets to 1 next turn)
+		//   tier 2: weapons recharging and not ready next turn either
+		if ($systems[0] instanceof Weapon) {
+			$firedThisTurn = array();
+			$rechargingSystems = array();
+			foreach ($systems as $sys) {
+				if ($sys->loadingtime <= 1) continue; //1-turn weapons always ready, ignore
+				if ($sys->firedOnTurn(TacGamedata::$currentTurn)) {
+					$firedThisTurn[] = $sys;
+				} else if ($sys->turnsloaded < ($sys->loadingtime - 1)) {
+					$rechargingSystems[] = $sys;
+				}
+			}
+			if (sizeof($firedThisTurn) > 0) $systems = $firedThisTurn;
+			else if (sizeof($rechargingSystems) > 0) $systems = $rechargingSystems;
+		}
+
 		//now choose one of equal eligible systems (they're already known to be undestroyed)
         $roll = Dice::d(sizeof($systems));
         $system = $systems[$roll-1];
 		return $system;
-		
+
 	} //end of function GetHitSystemByDice
 		
         
@@ -2976,7 +3016,7 @@ class Mine extends OSAT{
     public $canPreOrder = true;//Needed to set ranges for spawned Mines in Pre-Turn phase.
     protected $variableDamage = 0; //Amount by which mine set damage can vary, looked for in Enhancements
     protected $commandControl = false;
-    //public $multiSettings = false;
+    public $multiSettings = false;
 
 
     public function isDisabled(){
@@ -2996,26 +3036,42 @@ class Mine extends OSAT{
     }
 
 
+    //Mines: signature reduces effective defense (more visible = easier to hit).
+    //Negative signature improves it (subtracting a negative). Floored at 0.
+    public function getEffectiveForwardDefense(){
+        return max(0, $this->forwardDefense - $this->signature);
+    }
+
+    public function getEffectiveSideDefense(){
+        return max(0, $this->sideDefense - $this->signature);
+    }
+
     public function getLocations(){
+        $effFwd  = $this->getEffectiveForwardDefense();
+        $effSide = $this->getEffectiveSideDefense();
+
         $locs = array();
 
-        $locs[] = array("loc" => 0, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 0, "min" => 30, "max" => 150, "profile" => $this->sideDefense);
-        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
-        $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 0, "min" => 330, "max" => 30,  "profile" => $effFwd);
+        $locs[] = array("loc" => 0, "min" => 30,  "max" => 150, "profile" => $effSide);
+        $locs[] = array("loc" => 0, "min" => 150, "max" => 210, "profile" => $effFwd);
+        $locs[] = array("loc" => 0, "min" => 210, "max" => 330, "profile" => $effSide);
 
         return $locs;
     }
 
     public function stripForJson() {
         $strippedShip = parent::stripForJson();
+        $strippedShip->forwardDefense = $this->getEffectiveForwardDefense();
+        $strippedShip->sideDefense    = $this->getEffectiveSideDefense();
+
         if($this->detectedSignature !== -1){
             $strippedShip->signature = $this->signature; //Need to send updated Signature values for DEW mine weapons.
             if ($this->commandControl) $strippedShip->commandControl = $this->commandControl; //If true front end needs to know for firing checks.
-            //$strippedShip->multiSettings = $this->multiSettings;            
-        } 
+            //$strippedShip->multiSettings = $this->multiSettings;
+        }
         return $strippedShip;
-    }    
+    }
 
 }
 

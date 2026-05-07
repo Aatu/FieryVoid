@@ -349,251 +349,58 @@ ThirdspaceShield.prototype.initializationUpdate = function () {
 	return this;
 };
 
-ThirdspaceShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
-	//Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
-
+ThirdspaceShield.prototype.getGenerator = function () {
 	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
-
 	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
+		if (ship.systems[i] instanceof ThirdspaceShieldGenerator) {
+			return ship.systems[i];
 		}
 	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
-
-	return true;
+	return null;
 };
 
-ThirdspaceShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
-	//Check if it is at 0 health / not destroyed etc
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth <= 0) return false; //Shield cannot be reduced more.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
-
-	return true;
+ThirdspaceShield.prototype.canIncrease = function () {
+	if (this.ship.flight) return false; //Fighters can't increase or decrease shields
+	if (this.currentHealth >= this.maxhealth) return false; //Shield at maximum output.
+	return !!this.getGenerator(); //No generator, can't move shields around.
 };
 
-
-ThirdspaceShield.prototype.doIncrease = function () { //	
-	//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth; //
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 1) {
-		this.currentHealth += 1;
-		generator.storedCapacity -= 1;
-	}
-
+ThirdspaceShield.prototype.canDecrease = function () {
+	if (this.ship.flight) return false;
+	if (this.currentHealth <= 0) return false;
+	return !!this.getGenerator();
 };
 
-ThirdspaceShield.prototype.doIncrease5 = function () { //	
-	//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
+ThirdspaceShield.prototype.doIncrease = function (amount) {
+	var generator = this.getGenerator();
+	if (!generator) return;
 
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
+	var increment = Math.min(amount || 1, this.maxhealth - this.currentHealth);
+	if (increment <= 0) return;
 
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 5) {
-		this.currentHealth += 5;
-		generator.storedCapacity -= 5;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+	this.currentHealth += increment;
+	generator.storedCapacity -= increment;
+	this.outputDisplay = this.currentHealth;
 };
 
-ThirdspaceShield.prototype.doIncrease10 = function () { //	
-	//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
+ThirdspaceShield.prototype.doDecrease = function (amount) {
+	var generator = this.getGenerator();
+	if (!generator) return;
 
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
+	var decrement = Math.min(amount || 1, this.currentHealth);
+	if (decrement <= 0) return;
 
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 10) {
-		this.currentHealth += 10;
-		generator.storedCapacity -= 10;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+	this.currentHealth -= decrement;
+	generator.storedCapacity += decrement;
+	this.outputDisplay = this.currentHealth === 0 ? '-' : this.currentHealth;
 };
 
-ThirdspaceShield.prototype.doIncrease25 = function () { //	
-	//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 25) {
-		this.currentHealth += 25;
-		generator.storedCapacity -= 25;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+ThirdspaceShield.prototype.doMin = function () {
+	this.doDecrease(this.currentHealth);
 };
 
-ThirdspaceShield.prototype.doDecrease = function () {
-	//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 1) {
-		this.currentHealth -= 1;
-		generator.storedCapacity += 1;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease5 = function () {
-	//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 5) {
-		this.currentHealth -= 5;
-		generator.storedCapacity += 5;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease10 = function () {
-	//Reduce this.maxhealth by 10 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 10) {
-		this.currentHealth -= 10;
-		generator.storedCapacity += 10;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease25 = function () {
-	//Reduce this.maxhealth by 25 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 25) {
-		this.currentHealth -= 25;
-		generator.storedCapacity += 25;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
+ThirdspaceShield.prototype.doMax = function () {
+	this.doIncrease(this.maxhealth - this.currentHealth);
 };
 
 ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
@@ -664,45 +471,4 @@ ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, we
 	});
 
 	return defenceMod; // Return the calculated defenceMod
-};
-
-ThoughtShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
-	//Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
-
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThoughtShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
-
-	return true;
-};
-
-ThoughtShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
-	//Check if it is at 0 health / not destroyed etc
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth <= 0) return false; //Shield cannot be reduced more.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThoughtShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
-
-	return true;
 };

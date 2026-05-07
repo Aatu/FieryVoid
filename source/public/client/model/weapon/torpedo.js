@@ -36,7 +36,7 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 		var calledid = -1; //Ballistic Topredo CANNOT make called shots.
 
 	    var damageClass = this.data["Weapon type"].toLowerCase();
-	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
 
 	    var fire = {
 	        id: fireid,

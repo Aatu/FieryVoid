@@ -42,7 +42,9 @@ const System = styled.div`
     height: 32px;
     margin: ${props => props.$scs ? '3px 0' : '2px'};
    border: ${props => {
-        if (props.$firing) {
+        if (props.$firing && props.$calledShot) {
+            return '2px solid #ff3366'; // Called shot - magenta border
+        } else if (props.$firing) {
             return '1px solid #eb5c15';
         } else if (props.$highlight === 'Yellow') {
             return '1px solid #e1b000'; // Some systems get a different border
@@ -54,7 +56,7 @@ const System = styled.div`
             return '1px solid #496791';
         }
     }};
-    background-color:  ${props => {
+     background-color:  ${props => {
         if (props.$selected) {
             return '#4e6c91';
         } else if (props.$firing) {
@@ -70,6 +72,8 @@ const System = styled.div`
     box-shadow: ${props => {
         if (props.$selected) {
             return '0px 0px 15px #0099ff';
+        } else if (props.$firing && props.$calledShot) {
+            return '0px 0px 12px #ff3366'; // Called shot glow
         } else if (props.$firing) {
             return 'box-shadow: 0px 0px 15px #eb5c15';
         } else {
@@ -340,6 +344,7 @@ class SystemIcon extends React.Component {
                 $loadedAlternate={isLoadedAlternate(system)} //alternate mode ready while primary is not
                 $selected={isSelected(system)}
                 $firing={isFiring(ship, system)}
+                $calledShot={isCalledShot(ship, system)}
                 $boosted={isBoosted(ship, system)}
             >
                 <SystemText>{getText(ship, system)}</SystemText>
@@ -350,6 +355,11 @@ class SystemIcon extends React.Component {
 }
 
 const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system);
+
+const isCalledShot = (ship, system) => {
+    if (!system.weapon || !weaponManager.hasFiringOrder(ship, system)) return false;
+    return weaponManager.getCalledShotInfo(ship, system) !== null;
+};
 
 const isLoading = (system) => system.weapon && !weaponManager.isLoaded(system);
 
@@ -396,6 +406,12 @@ const getText = (ship, system) => {
         if (firing && system.canChangeShots) {
             const fire = weaponManager.getFiringOrder(ship, system);
             return fire.shots + "/" + system.shots;
+        } else if (firing) {
+            // Show crosshair symbol for called shots
+            var calledInfo = weaponManager.getCalledShotInfo(ship, system);
+            if (calledInfo) {
+                return "\u2295"; // ⊕ crosshair symbol
+            }
         } else if (!firing) {
             let load = weaponManager.getWeaponCurrentLoading(system);
             let loadingtime = system.loadingtime;

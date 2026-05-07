@@ -29,7 +29,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h3 id="contents" style="margin-top: 25px">TABLE OF CONTENTS</h3>
 
-    <ul class = index-list>
+    <ul class="index-list">
         <li><a href="#general">GENERAL NOTES</a> </li>
         <li><a href="#differences">DIFFERENCES FROM BABYLON 5 WARS</a></li>                        
         <li><a href="#mechanics">ADVANCED MECHANICS</a>
@@ -71,7 +71,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h2 id="differences">DIFFERENCES FROM BABYLON 5 WARS</h2>
         <ul style="margin-top: 10px;">
-            <li>Alot has been automated in Fiery Void compared to B5 Wars, such as dice rolling, and players have a little less control over certain minutiae, but overall the game is more streamlined.</li>
+            <li>A lot has been automated in Fiery Void compared to B5 Wars, such as dice rolling, and players have a little less control over certain minutiae, but overall the game is more streamlined.</li>
             <li>By default the game is played in a fixed, rectangular map. It does not enforce anything about the boundaries — it’s up to the players to ensure ships leaving the map behave as disengaged.</li>
             <li>Fiery Void does not enforce standard fleet design rules. Fleet requirement rules can however still be checked using the 'Check Fleet' button during Fleet Selection.</li>
             <li>The game mechanics are based on d100 rolls (instead of d20), so most values are displayed as percentages (e.g., 1 point on a d20 equates to 5%).</li>
@@ -122,21 +122,22 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 two for every capital ship with these hangars, and four for enormous units or bases.  Assault ships (i.e., those vessels containing ‘Assault’ in their name) can carry double these allowances
                 providing they have the hangar space to permit it.</li>
             <br>              
-            <li>in battle, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Capture Ship, Sabotage and Rescue) during the Firing Phase.</li>
+            <li>In battle, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Capture Ship, Sabotage and Rescue) during the Firing Phase.</li>
             <li>Pods will initially roll to attach on a d10 in the same way that normal weapons roll to hit enemies, 
                 but the calculation is very different and success is automatic if they are moving faster than the target ship and the speed difference between the two units is not higher than pod's thrust rating. 
                 If the speed difference to target is greater than pod thrust rating it is simply unable to attach. 
                 If the target is moving faster, each point of speed difference is -10% chance to attach.  
                 Pods cannot attach to ships with Advanced Armor and certain factions like Llort have +1 to attach rolls.</li>
-            <li>There is a limit to how many pods can attached to enemy ships based on their size, 12 pods can attach to bases, 8 to Capital Ships, 4 to HCVs, 2 to Medium Ships and only 1 to LCVs and OSATS. 
-                If more than this number try to attach and/or deliver marines then extra attacks over these limits will automatically fail.</li>    
-            <li>Breaching Pods will remain attached to a vessels facing structure block until they choose to Detach in the Movement Phase, or the vessel is destroyed 
-                (providing that the structure location the pod is attached to is NOT also destryed).  If the structure block a pod is attached to IS detroyed before the Pod detaches, then the Pod is automatically destroyed.  
-                While attached, Pods matach speed and heading with their host ship, and suffer -10 Initiative penalty.  When the Detach they will automatically face away from the host ship to which they were attached.</li>
+            <li>There is a limit to how many pods can attach to enemy ships based on their size, 12 pods can attach to bases, 8 to Capital Ships, 4 to HCVs, 2 to Medium Ships and only 1 to LCVs and OSATS.   
+                If more than this number try to attach and/or deliver marines then extra attacks over these limits will automatically fail. 
+                In addition, if a Grappling Claw ship is already attached to a structure facing this will prevent any Breaching Pods from attaching to that location.</li>    
+            <li>Breaching Pods will remain attached to a vessel's facing structure block until they choose to Detach in the Movement Phase, or the vessel is destroyed 
+                (providing that the structure location the pod is attached to is NOT also destroyed).  If the structure block a pod is attached to IS destroyed before the Pod detaches, then the Pod is automatically destroyed.  
+                While attached, Pods match speed and heading with their host ship, and suffer -10 Initiative penalty.  When they Detach Pods will automatically face away from the host ship to which they were attached.</li>
             <li>Units can shoot at attached pods, providing they are in arc of the structure location the pod is attached to, and will roll to hit them as normal. However any shot aimed at a pod will automatically hit the vessel it is attached to as well.</li>                 
             <br>               
             <li>After the attach roll, the Pod will attempt to deliver its marines by rolling on a d10 again on the following table, with a base chance of 50% to successfully board the vessel.  
-                Depedning on the roll, unsuccessful marines may be lost in the attempt or return safely their pod.</li>                           
+                Depending on the roll, unsuccessful marines may be lost in the attempt or return safely to their pod.</li>                           
             <li><strong>DELIVERY TABLE (D10):</strong>
                 <ul class="circle-list">
                     <li>1-5 - Marines successfully delivered.</li>
@@ -165,12 +166,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <ul class="circle-list">
                     <li><strong>CAPTURE: </strong>Marines will fight the defending marine contingents directly (defenders are shown in CnC tooltip!).  
                     This has been simplified from Tabletop, and now only involves two dice rolls per attacker, one to see if marines eliminate a defender (50% base chance) and a second to see if marines are eliminated (25% base chance).  
-                    If the attacking marines manage to defeat all defenders, the enemy ship is immediately be disabled for the remainder of the battle so long as there is still at least one attacking marine unit on board.
+                    If the attacking marines manage to defeat all defenders, the enemy ship is immediately disabled for the remainder of the battle so long as there is still at least one attacking marine unit on board.
                     After a successful capture, one marine unit will remain on the ship and the remainder will return to attached Breaching Pods if available
                     </li>
                     <br>                     
                     <li><strong>SABOTAGE: </strong>Using this firing mode, Marines can attempt to damage a specific system on an enemy ships (by making a called shot against it using the usual rules) 
-                    or, if Desperate Rules are in effect, Wreak Havoc on the enemy ship (e.g. inflict minor damage to a Primary system or penatlies to ship's EW/Initiative/Thrust/Defence Profile) by targeting the ship itself, and not a specific system.   
+                    or, if Desperate Rules are in effect, Wreak Havoc on the enemy ship (e.g. inflict minor damage to a Primary system or penalties to ship's EW/Initiative/Thrust/Defence Profile) by targeting the ship itself, and not a specific system.   
                     In both cases, Marines will roll on a d10 the following tables to see how successful their mission has been:</li>
                     <li>Note - Marines which target a specific system and are successful in destroying it will then move to a Wreak Havoc mission providing they have not been eliminated.</li>                    
 
@@ -196,7 +197,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         </ul>
                     </li>   
                     <li>NOTE - Marines which are successful in destroying their target system will return to an attached Breaching Pod if one is available, 
-                        otherwise they will swtich to a Wreak Havoc mission on the enemy vessel.</li>
+                        otherwise they will switch to a Wreak Havoc mission on the enemy vessel.</li>
                     <br>                    
                     <li><strong>RESCUE: </strong>For scenarios only, Marines will attach their pod and attempt to board as normal.  
                     Then, from the following turn, the Combat Log will update players on the progress of their Rescue mission each turn.</li>
@@ -212,7 +213,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <br> 
-            <p><strong>GRAPPLING CLAWS:</strong></p>              
+            <li><strong>GRAPPLING CLAWS:</strong></li>              
             <li>Some ships are equipped with Grappling Claws, which largely use the same rules to attach and deliver Marines as described above, however there are a few notable differences outlined below:
                     <ul class="circle-list">
                         <li>The attaching unit cannot perform any maneuvers, but the host ship may do so, if it is of the same size or larger than the attached ship. 
@@ -226,7 +227,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                             If the attached unit’s weapons are capable of firing into other arcs or into a wider range, they can shoot at targets in those positions. 
                             The unit to which the ship is attached is not prevented from firing any weapons (except at the attached unit)</li> 
                         <li>If a Grappling Claw is destroyed, and it still had Marine units available, then these will be transferred to any surviving Grappling Claws on the ship.
-                            Marine Units held in Grappling Claw systems will count towards the total marines available for defence if an opponenet tries to capture the ship.</li>    
+                            Marine Units held in Grappling Claw systems will count towards the total marines available for defence if an opponent tries to capture the ship.</li>
+                        <li>The automatic extra hit on the host ship does not apply to shots fired at attached Grappling Claw ships.</li>      
+                        <li>Grappling Claw ships do not automatically face away from their host ship when they detach.</li>                                                  
                     </ul>                                               
                 </li>
         </ul>
@@ -234,10 +237,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3  id="called">Called Shots</h3>
         <ul>
-            <li>Called Shots are possible in Fiery Void, providing the weapon selected is able to do s. For example ballistic weapons cannot do so, witht he exception of the Kor-Lyans Limpet Bore Torpedo.</li>  
+            <li>Called Shots are possible in Fiery Void, providing the weapon selected is able to do so. For example ballistic weapons cannot do so, with the exception of the Kor-Lyans Limpet Bore Torpedo.</li>  
             <li>To make a called shot, select the weapon you want to fire then bring up the enemies SCS by right-clicking on their ship. Find the system you wish to target and click on it.  
-            Providing all the other conditions are met e.g. system can be targetd by called shots, is in arc of the firing ship etc.  
-            This system will now be targeted and your weapon icon will highlight orange as usual to indicated it's locked in.</li>
+            Providing all the other conditions are met e.g. system can be targeted by called shots, is in arc of the firing ship etc.  
+            This system will now be targeted and your weapon icon will highlight orange as usual to indicate it's locked in.</li>
             <li>Called Shots are usually made with a -40% chance to hit for most weapons, although some have bonuses towards this like the Dilgar's Point Pulsar.</li>            
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -300,24 +303,24 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="mines" >Mines & Minesweeping</h3>
         <ul>
-            <li>There are three types of mines in Fiery Void, Captor, Direct Enrgy Weapons (DEW) and Proximity.  These are described in more detail below.</li>
+            <li>There are three types of mines in Fiery Void, Captor, Direct Energy Weapons (DEW) and Proximity.  These are described in more detail below.</li>
             <li>Buying & Deploying Mines:
                 <ul class="circle-list">
-                    <li>In game where the 'Mines Allowed' option has been enable in Create Game screen you can purchase mines in Fleet Selection from your Facion's list.</li>
+                    <li>In game where the 'Mines Allowed' option has been enabled in Create Game screen you can purchase mines in Fleet Selection from your Facion's list.</li>
                     <li>Unlike ships, mines can be bought in batches and when you click 'Add to Fleet' you will be able to choose the number of mines of that type you wish to buy, 
                         along with any Enhancements you wish to include (see in <a style="font-size: 14px;" href="./ammo-options-enhancements.php" target="_blank" rel="noopener noreferrer">Ammo, Options & Enhancements</a> for more details on Mine Enhancements).</li>
                     <li>There is a 100 point premium for taking any mines at all, plus an additional +10% to the unit cost of all mines per type of mine taken after the first (e.g. from the three type Captor, DEW and Proximity).</li>  
                     <li>Once the game starts you can choose to place mines individually or use the 'Deploy Minefield' button to place any number of mines randomly within a selected area.  
-                        You can deploy mines anywhere within the map, so long as it's not withint 10 hexes of an enemy deployment zone.</li>                                                          
+                        You can deploy mines anywhere within the map, so long as it's not within 10 hexes of an enemy deployment zone.</li>                                                          
                 </ul>
             </li>              
             <li>Once deployed, mines will initially be stealthed and won't become visible to enemies until they attack, or are detected.  
-                On the turn that they are deployed or spawned you will have the opportunity to tailored their ranges for 
+                On the turn that they are deployed or spawned you will have the opportunity to tailor their ranges for 
                 Captials/HCVs, MCV/LCVs, Fighters from 0 up to their maximum range. 
                 You do this by clicking on the mine weapons system icon during Deployment/Pre-Turn Orders phase.  
                 Once set these ranges will apply for the rest of the game, and if you choose not to set the ranges they will default to their maximum range.  
                 You can set the ranges of all mines of the same type using the propagate buttons in the Mine Settings menu.</li>
-            <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase, an EW option that will only appear if the opponenet has mines in the game.  
+            <li>You can detect mines by applying EW points to 'Detect Mines' in the Initial Orders phase, an EW option that will only appear if the opponent has mines in the game.  
                 Fighters and Shuttles can do this also, converting their Offensive Bonus (OB) in to 'Detect Mines' EW points, at a cost of 10 OB per point of 'Detect Mines' EW 
                 (Note - any OB used in this way will not be available for firing later in the turn).
                 The detection calculation depends on a number of factors e.g.
@@ -362,7 +365,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </li> 
             <li>Direct Energy Weapon (DEW) Mines:
                 <ul class="circle-list">
-                    <li>These mines come equipped with weapons and will fire these autoamtically at the first viable target it enoucnters during the movement phase, 
+                    <li>These mines come equipped with weapons and will fire these automatically at the first viable target it encounters during the movement phase, 
                         these attacks are then resolved normally during the Firing Phase.</li>
                     <li>DEW mines become detected once they fire, and they must normally fire all their weapons at the same target.  
                         AS they have no EW of their own, they don't not benefit from having a weapon lock, but do get an accuracy bonus to their shot.</li>
@@ -377,7 +380,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
         <li>This tool helps players measure distance between any two hexes on the game map, and also indicates whether line of sight is blocked or not between the two hexes chosen.</li>
         <li>To use the tool, just activate it by pressing 'R' key, or clicking on the 'eye' button on the right-hand side of the screen. 
-            ONce activated, left click on the hex from where you would like it to start measuring from, then move the mouse around the map to check distance and line of sight to other hexes.  
+            Once activated, left click on the hex from where you would like it to start measuring from, then move the mouse around the map to check distance and line of sight to other hexes.  
             Right-clicking with the mouse will reset the start hex.</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -385,7 +388,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <h3 id="savedfleets" >Saved Fleets</h3>
         <ul>
             <li><b>Saving a Fleet:</b> While in Fleet Selection you can save any fleet that you are making for later.  Simply select your fleet as normal and when you're happy with your force click the 'Save Fleet' button and confirm your choice.
-             Your saved fleet will then become available in this and future sessions (providing you have sufficient points avaialble) via the 'Load a Saved Fleet' dropdown button.</li>
+             Your saved fleet will then become available in this and future sessions (providing you have sufficient points available) via the 'Load a Saved Fleet' dropdown button.</li>
             <li><b>Sharing Fleets and Loading with ID:</b> Each saved fleet in Fiery Void has a unique ID, providing the fleet is marked as 'Shared' (and you can set this when you save a fleet or toggle it with the padlock symbol) you can give this ID to another player. 
             They can then load the saved fleet by entering the fleet ID in the 'Load fleet by #ID' field and pressing Enter key.</li>
         </ul>
@@ -397,7 +400,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Skin dancing refers to a maneuver wherein a unit flies only meters above the surface of a large unit or base. It is a very dangerous maneuver only performed by the most agile
                 of ships.</li>
             <li>Any unit that is able to Skin Dance will automatically attempt to do so when it ends its movement on the same hex as an Enormous Unit 
-                (not a Terrain unit though, where it will suffer the normal collision rules covered in the 'Terrain' section).  In order to be eligible to Skin Dance a unit must meet the following critieria:</li>
+                (not a Terrain unit though, where it will suffer the normal collision rules covered in the 'Terrain' section).  In order to be eligible to Skin Dance a unit must meet the following criteria:</li>
                 <ul class="circle-list">
                     <li>Must be a Medium Ship or smaller, and must be classified as agile (fighters and shuttles are considered agile for this purpose).  There are some rare execptions to this rule e.g. Torvalus capital ships.</li>
                     <li>Skin Dancing unit cannot be stationary, and the Enormous Unit cannot be moving at more than Speed 5.  
@@ -416,13 +419,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <li>If the roll fails by 5 or less (i.e., the modified roll is a 16, 17, 18, 19, or 20), the dance is aborted with no ill effects, and there is no chance of a ram.  
-                If the roll result is 21 or higher, skin-dancing ships smashes into the hull of the Enormous unit. 
+                If the roll result is 21 or higher, skin-dancing ship smashes into the hull of the Enormous unit. 
                 For fighters, one fighter at random crashes into the hull as above while the others break away. 
                 The survivors cannot fire (even defensively) or guide weapons on that turn as they are too busy pulling out of the maneuver.</li>
             <li>If skin dancing is successful, the unit cannot be fired upon by enemy units unless they also skin dance over the same target, 
                 the exception being ballistic weapons that were launched at the skin dancing ship earlier in the turn.  
                 The vessel you are skimming over also cannot fire at you, and cannot fire defensively against your weapons, because you’re inside its weapon’s tracking zones.</li>
-            <li>Finally, any of your forward firing weapons (those that can legally fire into the row of hexes directly ahead of your ship) automatically roll the best result on their hit dice e.g. they will roll a 1 on a d100 meaning they automatically hit in almsot all cases.  
+            <li>Finally, any of your forward firing weapons (those that can legally fire into the row of hexes directly ahead of your ship) automatically roll the best result on their hit dice e.g. they will roll a 1 on a d100 meaning they automatically hit in almost all cases.  
                 In fact, your weapons may not fire at any other target (except other skin dancers, against whom they use the normal firing procedures) unless they can fire outside the 120° forward area ahead of the ship. 
                 If this is the case, they can choose another eligible target if desired. That unit may use intercept fire or other defensive devices normally.</li>
             <li>Fighters cannot guide missiles or other ballistic weapons towards a target (even the unit being skin danced over) even if they have a navigator. 
@@ -455,7 +458,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <li>Stealth fighters cannot become fully invisible, they only benefit from jammer/no-lock effects.</li>
-            <li>Note - These rules only cover the Stealth function for younger Bablyon 5 races, such as the Hyach.  
+            <li>Note - These rules only cover the Stealth function for younger Babylon 5 races, such as the Hyach.  
                 For details of other factions' stealth mechanics, such as the Torvalus, see individual faction notes in <a href="https://fieryvoid.eu/factions-tiers.php" target="_blank" rel="noopener noreferrer">Fiery Void: Factions & Tiers</a></li>            
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
@@ -474,10 +477,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
         <h3 id="useful" >Hot Keys & Useful Controls</h3>
-        <li>Below are some useful controls to know to help get the best out of Fiery Void.  
-            Note - On touchscreens Right-Click functions are using duplcated by a long depress on your screen.</li>
+        <p>Below are some useful controls to know to help get the best out of Fiery Void.  
+            Note - On touchscreens Right-Click functions are using duplicated by a long depress on your screen.</li>
         <ul>
-            <li><b>W</b> - Show all Eelectronic Warfare (EW).</li>
+            <li><b>W</b> - Show all Electronic Warfare (EW).</li>
             <li><b>X</b> - Show friendly EW.</li>
             <li><b>Y</b> - Show enemy EW.</li>
             <li><b>F</b> - Show friendly ballistic fire.</li>
@@ -496,6 +499,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click Move Forward - Move forward using all remaining movement.</li>
                 </ul>
             </li>
+            <br>
             <li><b>During Deployment Phase:</b>
                 <ul class="circle-list">
                     <li>Shift & Left-click - Instantly deploy a ship to a hex already occupied by other units (Note- long press on touchscreen).  
@@ -504,6 +508,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         Makes it slightly quicker to select units when you have fighters or mines as you selected ship.</li>
                 </ul>
             </li>
+            <br>            
             <li><b>During Initial Orders Phase:</b>
                 <ul class="circle-list">
                     <li>Right-clicking Electronic Warfare (EW) Add Button - Sets that EW type to the max available amount (Note- long press on touchscreen).</li>
@@ -517,7 +522,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
             <p>This project is a non-commercial, fan-made adaptation inspired by Babylon 5 Wars, originally published by Agents of Gaming under license from Warner Bros. 
                 This website, its content, and the associated game are not affiliated with, authorized by, endorsed by, or connected in any way to Warner Bros., Agents of Gaming, or any other rights holders. 
-                ‘Babylon 5’ and all related names, logos, and material are trademarks and/or copyrighted properties of their respective owners..</p>
+                ‘Babylon 5’ and all related names, logos, and material are trademarks and/or copyrighted properties of their respective owners.</p>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>        
 

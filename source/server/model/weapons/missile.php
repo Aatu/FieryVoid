@@ -52,7 +52,24 @@ class MissileLauncher extends Weapon{
     public function stripForJson() {
         $strippedSystem = parent::stripForJson();
 
-        $strippedSystem->missileArray = $this->missileArray;
+        // Ammo objects in missileArray are data containers without a ship unit reference,
+        // so they can't use the full stripForJson() chain. Strip public properties directly,
+        // skipping empty arrays to reduce JSON payload.
+        $strippedSystem->missileArray = array_map(
+            function($missile) {
+                $stripped = new stdClass();
+                $reflect = new ReflectionObject($missile);
+                foreach ($reflect->getProperties(ReflectionProperty::IS_PUBLIC) as $prop) {
+                    $key = $prop->getName();
+                    $value = $missile->$key;
+                    if (is_array($value) && empty($value)) continue;
+                    if ($value === '') continue;
+                    $stripped->$key = $value;
+                }
+                return $stripped;
+            },
+            $this->missileArray
+        );
         return $strippedSystem;
     }
     

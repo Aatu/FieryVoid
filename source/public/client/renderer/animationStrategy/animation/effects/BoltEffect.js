@@ -94,7 +94,7 @@ window.BoltEffect = function () {
         }    
 
         // Launch sound
-        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time) {
+        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time && !paused && !back) {
             try {
                 const launchSound = BoltEffect.cachedLaunchAudio.cloneNode(true);
                 launchSound.volume = this.soundVolume;
@@ -107,7 +107,7 @@ window.BoltEffect = function () {
         }
 
         // Impact sound
-        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50) {
+        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50 && !paused && !back) {
             try {
                 const impactSound = BoltEffect.cachedImpactAudio.cloneNode(true);
                 impactSound.volume = this.soundVolume;

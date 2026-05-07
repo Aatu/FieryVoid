@@ -992,8 +992,8 @@ class DBManager
                 continue;            
 
             $c = $this->connection;
-            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $c->real_escape_string($fire->type) . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
-                . $fire->firingMode . ", " . $fire->needed . ", " . $fire->rolled . ", $gameid, '" . $c->real_escape_string($fire->notes) . "', " . $fire->shotshit . ", " . $fire->shots . ", '" . $c->real_escape_string($fire->pubnotes) . "', 0, '" . $c->real_escape_string($fire->x) . "', '" . $c->real_escape_string($fire->y) . "', '" . $c->real_escape_string($fire->damageclass) . "', '" . $c->real_escape_string($fire->resolutionOrder) . "')";
+            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $c->real_escape_string($fire->type ?? '') . "', " . $fire->shooterid . ", " . $fire->targetid . ", " . $fire->weaponid . ", " . $fire->calledid . ", " . $fire->turn . ", "
+                . $fire->firingMode . ", " . $fire->needed . ", " . $fire->rolled . ", $gameid, '" . $c->real_escape_string($fire->notes ?? '') . "', " . $fire->shotshit . ", " . $fire->shots . ", '" . $c->real_escape_string($fire->pubnotes ?? '') . "', 0, '" . $c->real_escape_string($fire->x ?? '') . "', '" . $c->real_escape_string($fire->y ?? '') . "', '" . $c->real_escape_string($fire->damageclass ?? '') . "', '" . $c->real_escape_string($fire->resolutionOrder ?? '') . "')";
 
             $this->update($sql);
         }
@@ -1813,7 +1813,7 @@ class DBManager
 
                 //To mark Fleet Test games as Fleet Test in lobby
                 if (isset($rulesObj['fleetTest']) && $rulesObj['fleetTest'] == 1) {
-                    $nm = '<span style="color:gold; font-weight:bold; padding-right: 0px; text-align: center">Fleet Test</span>'; 
+                    $nm = '<span style="color:#DEEBFF; font-weight:bold; padding-right: 0px; text-align: center">Fleet Builder</span>'; 
                     $fleetTest = true;                    
                 }    
 
@@ -2832,8 +2832,8 @@ class DBManager
     public function submitSingleFireorder($gameid, $fireOrder)
     {
             $c = $this->connection;
-            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $c->real_escape_string($fireOrder->type) . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
-                . $fireOrder->firingMode . ", " . $fireOrder->needed . ", " . $fireOrder->rolled . ", $gameid, '" . $c->real_escape_string($fireOrder->notes) . "', " . $fireOrder->shotshit . ", " . $fireOrder->shots . ", '" . $c->real_escape_string($fireOrder->pubnotes) . "', 0, '" . $c->real_escape_string($fireOrder->x) . "', '" . $c->real_escape_string($fireOrder->y) . "', '" . $c->real_escape_string($fireOrder->damageclass) . "', '" . $c->real_escape_string($fireOrder->resolutionOrder) . "')";
+            $sql = "INSERT INTO `tac_fireorder` VALUES (null, '" . $c->real_escape_string($fireOrder->type ?? '') . "', " . $fireOrder->shooterid . ", " . $fireOrder->targetid . ", " . $fireOrder->weaponid . ", " . $fireOrder->calledid . ", " . $fireOrder->turn . ", "
+                . $fireOrder->firingMode . ", " . $fireOrder->needed . ", " . $fireOrder->rolled . ", $gameid, '" . $c->real_escape_string($fireOrder->notes ?? '') . "', " . $fireOrder->shotshit . ", " . $fireOrder->shots . ", '" . $c->real_escape_string($fireOrder->pubnotes ?? '') . "', 0, '" . $c->real_escape_string($fireOrder->x ?? '') . "', '" . $c->real_escape_string($fireOrder->y ?? '') . "', '" . $c->real_escape_string($fireOrder->damageclass ?? '') . "', '" . $c->real_escape_string($fireOrder->resolutionOrder ?? '') . "')";
 
             $this->update($sql);
 
@@ -3006,20 +3006,34 @@ class DBManager
 
         $id = false;
         try {
+            // Step 1: Check if the username exists
             if ($stmt = $this->connection->prepare(
-                "SELECT id, accesslevel FROM player where username = ? and password = password(?)")) {
+                "SELECT id FROM player WHERE username = ?")) {
+
+                $stmt->bind_param('s', $username);
+                $stmt->execute();
+                $stmt->bind_result($id);
+                $stmt->fetch();
+                $stmt->close();
+            }
+
+            if (!$id)
+                return 'USER_NOT_FOUND';
+
+            // Step 2: Verify the password
+            $id = false;
+            if ($stmt = $this->connection->prepare(
+                "SELECT id, accesslevel FROM player WHERE username = ? AND password = password(?)")) {
 
                 $stmt->bind_param('ss', $username, $password);
                 $stmt->execute();
                 $stmt->bind_result($id, $access);
                 $stmt->fetch();
-
-                /* close statement */
                 $stmt->close();
             }
 
             if (!$id)
-                return false;
+                return 'WRONG_PASSWORD';
 
         } catch (Exception $e) {
             throw $e;

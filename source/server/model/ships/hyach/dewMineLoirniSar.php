@@ -4,7 +4,7 @@ class dewMineLoirniSar extends Mine{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 96;
+		$this->pointCost = 120;
 	    $this->faction = "Hyach Gerontocracy";
         $this->phpclass = "dewMineLoirniSar";
         $this->imagePath = "img/ships/hyachMine.png";
@@ -12,6 +12,8 @@ class dewMineLoirniSar extends Mine{
 		$this->occurence = "common";
 		$this->variantOf = "Aval Sar DEW Mine";
         $this->isd = 2200;
+        $this->notes = '<br>Has Flexible Targeting';
+        $this->multiSettings = true;                
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
@@ -27,7 +29,13 @@ class dewMineLoirniSar extends Mine{
         $this->mineType = 'DEW';     
        		    	    	    	    
         //Block all enhancements for Mine units when bought
-		Enhancements::nonstandardEnhancementSet($this, 'Mines');             
+		Enhancements::nonstandardEnhancementSet($this, 'Mines');	
+		
+		// Remove MINE_MULTI from enabled array because it's added by the 'Mines' set, but this unit already has one.
+		$mmIndex = array_search('MINE_MULTI', $this->enhancementOptionsEnabled);
+		if ($mmIndex !== false) {
+			unset($this->enhancementOptionsEnabled[$mmIndex]);
+		}        
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 4));

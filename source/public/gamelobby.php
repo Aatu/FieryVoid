@@ -445,7 +445,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
             ?>
             <div class="">
                 <!--<span class="panelheader">GAME NAME: </span>-->
-                <span class="panelsubheader game-name"> <?php print($isFleetTest ? '<span class="fleet-test-text">Fleet Test</span>' : $gamelobbydata->name); ?></span>
+                <span class="panelsubheader game-name"> <?php print($isFleetTest ? '<span class="fleet-test-text">Fleet Builder</span>' : $gamelobbydata->name); ?></span>
             </div>
 
     <div class="lobby-split-container">

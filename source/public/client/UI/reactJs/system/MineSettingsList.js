@@ -16,13 +16,55 @@ const Header = styled.div`
     padding: 3px;
     background-color: #180606;
     border: 1px solid #b43131;
-    border-bottom: 1px solid #b43131;    
+    border-bottom: 1px solid #b43131;
     color: #f2f2f2;
     text-align: center;
     font-size: 12px;
     margin-bottom: 2px;
-    opacity: 1 !important;     
+    opacity: 1 !important;
     font-weight: bold;
+`;
+
+const HeaderRow = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 3px;
+    background-color: #180606;
+    border: 1px solid #b43131;
+    color: #f2f2f2;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 2px;
+`;
+
+const HeaderArrow = styled.div`
+    width: 20px;
+    height: 18px;
+    background: #683333;
+    border: 1px solid #641b1b;
+    color: #f2f2f2;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    user-select: none;
+
+    &:hover {
+        background: #854242;
+    }
+
+    ${props => props.disabled && `
+        opacity: 0.3;
+        cursor: not-allowed;
+        &:hover { background: #683333; }
+    `}
+`;
+
+const HeaderLabel = styled.div`
+    flex: 1;
+    text-align: center;
+    padding: 0 6px;
 `;
 
 const ListContainer = styled.div`
@@ -140,52 +182,67 @@ class MineSettingsList extends Component {
         const shipManager = window.shipManager;
         const webglScene = window.webglScene;
 
-        console.log("Propagating Mine settings for:", className);
+        const isMulti = system.hasMultiTarget && system.hasMultiTarget();
+        const sourceWeaponId = isMulti ? system.getCurrWeaponId() : null;
+        const sourceWeapons = isMulti ? system.getMineWeapons() : [];
+        const sourceWeapon = isMulti ? sourceWeapons.find(w => String(w.id) === String(sourceWeaponId)) : null;
+        if (isMulti && !sourceWeapon) return;
 
         system.setCurrShipType(className);
         const systemMaxRange = system.range || system.rangeSetting;
-        const allocated = (system.allocatedRanges[className] === null) ? systemMaxRange : system.allocatedRanges[className];
+        const sourceAlloc = isMulti ? system.allocatedRanges[sourceWeaponId] : system.allocatedRanges;
+        if (!sourceAlloc) return;
+        const targetValue = (sourceAlloc[className] === null || sourceAlloc[className] === undefined) ? systemMaxRange : sourceAlloc[className];
 
         var allOwnMines = [];
         for (var i in gamedata.ships) {
             var otherUnit = gamedata.ships[i];
             if (otherUnit.userid != ship.userid) continue;
             if (shipManager.isDestroyed(otherUnit)) continue;
+            if (otherUnit.shipClass != ship.shipClass) continue;
 
             for (var iSys = 0; iSys < otherUnit.systems.length; iSys++) {
                 var ctrl = otherUnit.systems[iSys];
-                if (otherUnit.shipClass == ship.shipClass && ctrl.name === system.name) {
-                    allOwnMines.push(ctrl);
-                }
+                if (ctrl.name !== system.name) continue;
+
+                //Only propagate between mines of matching enhancement state — never cross the boundary.
+                var ctrlMulti = !!(ctrl.hasMultiTarget && ctrl.hasMultiTarget());
+                if (ctrlMulti !== isMulti) continue;
+
+                allOwnMines.push({ unit: otherUnit, ctrl: ctrl });
             }
         }
 
-        console.log("Found Mine Weapons of same type:", allOwnMines.length);
-
         for (var c = 0; c < allOwnMines.length; c++) {
-            var ctrl = allOwnMines[c];
+            var entry = allOwnMines[c];
+            var ctrl = entry.ctrl;
+
+            if (isMulti) {
+                //Match weapon by (displayName, indexInGroup); set that weapon as current then adjust.
+                ctrl.ensureMultiAllocatedShape && ctrl.ensureMultiAllocatedShape();
+                var ctrlWeapons = ctrl.getMineWeapons();
+                var match = ctrlWeapons.find(w => w.displayName === sourceWeapon.displayName && w.indexInGroup === sourceWeapon.indexInGroup);
+                if (!match) continue;
+                ctrl.setCurrWeaponId(match.id);
+            }
+
             ctrl.setCurrShipType(className);
 
             let safety = 0;
-            // Get target value from our reference system
-            const targetValue = (system.allocatedRanges[className] === null) ? systemMaxRange : system.allocatedRanges[className];
+            const getCtrlAlloc = () => isMulti ? ctrl.allocatedRanges[ctrl.getCurrWeaponId()] : ctrl.allocatedRanges;
+            const getCtrlMax = () => ctrl.range || ctrl.rangeSetting;
+            const readCurr = () => {
+                const alloc = getCtrlAlloc();
+                if (!alloc) return getCtrlMax();
+                const v = alloc[className];
+                return (v === null || v === undefined) ? getCtrlMax() : v;
+            };
 
-            const getCtrlRange = (c) => c.range || c.rangeSetting;
-
-            while (
-                ((ctrl.allocatedRanges[className] === null ? getCtrlRange(ctrl) : ctrl.allocatedRanges[className]) < targetValue)
-                && ctrl.canIncrease()
-                && safety < 100
-            ) {
+            while (readCurr() < targetValue && ctrl.canIncrease() && safety < 100) {
                 ctrl.doIncrease();
                 safety++;
             }
-
-            while (
-                ((ctrl.allocatedRanges[className] === null ? getCtrlRange(ctrl) : ctrl.allocatedRanges[className]) > targetValue)
-                && ctrl.canDecrease()
-                && safety < 100
-            ) {
+            while (readCurr() > targetValue && ctrl.canDecrease() && safety < 100) {
                 ctrl.doDecrease();
                 safety++;
             }
@@ -193,6 +250,19 @@ class MineSettingsList extends Component {
         }
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+    }
+
+    cycleWeapon(direction) {
+        const { system } = this.props;
+        if (!system.hasMultiTarget || !system.hasMultiTarget()) return;
+        const weapons = system.getMineWeapons();
+        if (weapons.length === 0) return;
+        const currId = system.getCurrWeaponId();
+        let idx = weapons.findIndex(w => String(w.id) === String(currId));
+        if (idx < 0) idx = 0;
+        const nextIdx = (idx + direction + weapons.length) % weapons.length;
+        system.setCurrWeaponId(weapons[nextIdx].id);
+        this.forceUpdate();
     }
 
     render() {
@@ -204,14 +274,32 @@ class MineSettingsList extends Component {
 
         if (!system.range) return null;
 
-        const allocatedRangesMap = system.allocatedRanges || {};
-        const shipTypes = Object.keys(allocatedRangesMap);
+        const isMulti = system.hasMultiTarget && system.hasMultiTarget();
+        let weapons = [];
+        let currWeaponId = null;
+        let currWeapon = null;
+        let activeAlloc = system.allocatedRanges || {};
+
+        if (isMulti) {
+            system.ensureMultiAllocatedShape && system.ensureMultiAllocatedShape();
+            weapons = system.getMineWeapons();
+            currWeaponId = system.getCurrWeaponId();
+            currWeapon = weapons.find(w => String(w.id) === String(currWeaponId)) || weapons[0] || null;
+            activeAlloc = (currWeaponId != null && system.allocatedRanges[currWeaponId]) ? system.allocatedRanges[currWeaponId] : {};
+        } else {
+            //Defensive: if a previous render with the enhancement on left allocatedRanges nested,
+            //collapse it back to flat so we render Cap/Med/Ftr rows, not weapon-id rows.
+            system.ensureFlatAllocatedShape && system.ensureFlatAllocatedShape();
+            activeAlloc = system.allocatedRanges || {};
+        }
+
+        const shipTypes = Object.keys(activeAlloc);
         const allowedTargets = system.validTargets || shipTypes;
 
         const getVisibleValue = (type) => {
             if (!allowedTargets.includes(type)) return 'N/A';
-            const val = allocatedRangesMap[type];
-            return val === null ? system.range : val;
+            const val = activeAlloc[type];
+            return (val === null || val === undefined) ? system.range : val;
         };
 
         const canIncrease = (type) => {
@@ -228,14 +316,30 @@ class MineSettingsList extends Component {
 
         const canPropagate = (type) => {
             if (!allowedTargets.includes(type)) return false;
-            return true; // Can always propagate current setting
+            return true;
         };
+
+        const headerNode = isMulti && weapons.length > 0
+            ? (
+                <HeaderRow>
+                    <HeaderArrow
+                        onClick={() => this.cycleWeapon(-1)}
+                        disabled={weapons.length < 2}
+                        title="Previous weapon"
+                    >&lt;</HeaderArrow>
+                    <HeaderLabel>{currWeapon ? currWeapon.label : ''}</HeaderLabel>
+                    <HeaderArrow
+                        onClick={() => this.cycleWeapon(1)}
+                        disabled={weapons.length < 2}
+                        title="Next weapon"
+                    >&gt;</HeaderArrow>
+                </HeaderRow>
+            )
+            : <Header>Set Mine Range</Header>;
 
         return (
             <Container>
-                <Header>
-                    Set Mine Range
-                </Header>
+                {headerNode}
                 <ListContainer ref={this.listRef}>
                     {shipTypes.map(type => (
                         <Row key={type}>
@@ -261,7 +365,7 @@ class MineSettingsList extends Component {
                                     +
                                 </ActionButton>
                                 <ActionButton
-                                    title="Propagate to all mines of same type"
+                                    title={isMulti ? "Propagate this weapon's settings to same-class mines with Multiple Targets" : "Propagate to all mines of same type"}
                                     onClick={() => this.handlePropagate(type)}
                                     disabled={!canPropagate(type)}
                                     style={{ marginLeft: '5px' }}

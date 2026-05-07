@@ -51,7 +51,7 @@ TwinArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -131,7 +131,7 @@ QuadArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -211,7 +211,7 @@ HeavyArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -303,7 +303,7 @@ QuadParticleBeam.prototype.doMultipleFireOrders = function (shooter, target, sys
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -539,7 +539,7 @@ ParticleRepeater.prototype.doMultipleFireOrders = function (shooter, target, sys
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -859,7 +859,7 @@ TelekineticCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
