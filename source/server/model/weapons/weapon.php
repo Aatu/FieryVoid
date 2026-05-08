@@ -2012,8 +2012,23 @@ public function getStartLoading()
             //second part: PRIMARY Structure
             $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, 0);
             $this->doDamage($target, $shooter, $system, $damagePRIMARY, $fireOrder, $launchPos, $gamedata, false, 0);
-            //last part: opposite Structure
-            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $outLocation);
+            //last part: opposite Structure - exit slug appears to come from inside the target,
+            //so synthesize a source position by reflecting the incoming source through target centre.
+            //Used only for getHitSystem's in-arc system filtering (so exit-side systems are preferred).
+            //NOT passed to doDamage: per-system armor is flat, Bulkheads/Diffusers are location-keyed
+            //(filtered by $outLocation already), and a rear-arc external shield (ThirdspaceShield/
+            //ThoughtShield) would falsely register as in-arc to the synthetic source - shields are not
+            //meant to block internal damage escaping outward.
+            $exitSourceOverride = null;
+            $incomingPos = $this->getIncomingPos($fireOrder, $gamedata);
+            $targetCenter = $target->getCoPos();
+            if ($incomingPos['x'] != $targetCenter['x'] || $incomingPos['y'] != $targetCenter['y']) {
+                $exitSourceOverride = array(
+                    'x' => 2 * $targetCenter['x'] - $incomingPos['x'],
+                    'y' => 2 * $targetCenter['y'] - $incomingPos['y']
+                );
+            }
+            $system = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $outLocation, $exitSourceOverride);
             $this->doDamage($target, $shooter, $system, $damageOut, $fireOrder, $launchPos, $gamedata, false, $outLocation);
         } elseif (($this->damageType == 'Raking') && (!($target instanceof FighterFlight))) { //Raking hit... but not at fighters - that's effectively Standard shot!
             //split into rakes; armor will not need to be penetrated twice!
