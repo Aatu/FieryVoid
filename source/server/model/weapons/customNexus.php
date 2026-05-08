@@ -5433,7 +5433,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $loadingtime = 2;
 
         public $rangePenalty = 0.5;
-        public $fireControl = array(-4, 1, 2); // fighters, <mediums, <capitals
+        public $fireControl = array(-4, 2, 3); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser";
@@ -5474,9 +5474,9 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
 		$system->forceCriticalRoll = true;
 	} //endof function onDamagedSystem
 
-        public function getDamage($fireOrder){ return Dice::d(10, 3)+3;   }
-        public function setMinDamage(){     $this->minDamage = 6 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 33 ;      }  
+        public function getDamage($fireOrder){ return Dice::d(10, 4)+4;   }
+        public function setMinDamage(){     $this->minDamage = 8 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 44 ;      }  
 		
     }  //endof NexusHeavyMaser
 	

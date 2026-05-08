@@ -7,7 +7,7 @@ class SorithianSylusCutter extends LCV{
         $this->pointCost = 100;
         $this->faction = "Small Races";
         $this->phpclass = "SorithianSylusCutter";
-        $this->imagePath = "img/ships/BALightGunboat.png";
+        $this->imagePath = "img/ships/SorinthianSylusCutter.png";
         $this->shipClass = "Sorithian Sylus Cutter";
         $this->occurence = "common";
         $this->isd = 2207;

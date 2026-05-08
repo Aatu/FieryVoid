@@ -3730,6 +3730,7 @@ spl_autoload_register(
                 'dewminetraska' => '/server/model/ships/korlyan/dewMineTraska.php', 
                 'dewminetalivos' => '/server/model/ships/korlyan/dewMineTalivos.php',                                                                                  
 
+
                 //Torata Mines - 7
                 'proxmine11' => '/server/model/ships/torata/proxMine11.php', 
                 'captormine21' => '/server/model/ships/torata/captorMine21.php',
