@@ -1022,9 +1022,11 @@ window.confirm = {
         }
 
         var pointCost = ship.pointCost;
-        if (ship.maxFlightSize == 3) { //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-            //but for 3-strong flight cost is still set for 6-strong flight...
-            pointCost = pointCost / 2;
+        if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+            //design pointCost is set for a 6-strong flight (cost-per-craft * 6).
+            //For any fixed sub-six flight (e.g. 3-strong Breaching Pods, 2-strong BPs), scale down to actual flight size.
+            //maxFlightSize 1 is single superheavy with its own pointCost; 6+ already matches the stored cost.
+            pointCost = pointCost * ship.maxFlightSize / 6;
         }
 
 
@@ -1184,10 +1186,10 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-            //special treatment for flight size 3 - as it's less than default 6...
-            if (ship.maxFlightSize == 3) {
-                selectAmountItem.html("3");
-            } else {//default 
+            //for any fixed sub-six flight size, start at that size; otherwise default to 6
+            if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+                selectAmountItem.html(ship.maxFlightSize);
+            } else {//default
                 selectAmountItem.html("6");
             }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
