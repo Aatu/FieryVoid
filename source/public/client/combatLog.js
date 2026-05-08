@@ -122,7 +122,7 @@ window.combatLog = {
                     var needed = parseInt(rollMatch[2], 10);
                     var rollText = "Shot " + (rollsTooltipTextParts.length + 1) + ": " + rolled;
                     if (rolled <= needed) {
-                        rollText = "<span style='color: lime; font-weight: bold;'>" + rollText + "</span>";
+                        rollText = "<span style='color: limegreen; font-weight: bold;'>" + rollText + "</span>";
                     }
                     rollsTooltipTextParts.push(rollText);
                 }
@@ -131,7 +131,14 @@ window.combatLog = {
             if (fire.pubnotes) notes += fire.pubnotes + " ";
         }
 
-        var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire">FIRE: </span><span>';
+        var fireColor = "";
+        if (gamedata.isMyShip(ship)) {
+            fireColor = "color:limegreen;";
+        } else if (gamedata.isMyorMyTeamShip(ship)) {
+            fireColor = "color:#33adff;";
+        }
+
+        var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";
