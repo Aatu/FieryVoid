@@ -1292,7 +1292,11 @@ window.shipWindowManager = {
 
 			field.html(rem + "/" + output);
 		} else if (system.name == "reactor") {
-			field.html(shipManager.power.getReactorPower(ship, system));
+            var power = shipManager.power.getReactorPower(ship, system);
+            if (gamedata.gamephase > 1 && power < 0) {
+                power = 0;
+            }
+			field.html(power);
 		} else if (system.output > 0) {
 			field.html(output);
 		}
