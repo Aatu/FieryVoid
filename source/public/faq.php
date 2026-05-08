@@ -337,7 +337,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
             <li>To shoot at mines, in addition to the usual modifiers there are some unique modifiers.                
                 <ul class="circle-list">
-                    <li>All mines have a basic profile of 60 minus their signature value,</li>                    
+                    <li>All mines have a basic profile of 60 (minus their signature value * 5).  So a mine with Signature 3 would have a basic profile of 45,</li>                    
                     <li>The firing ship's 'Detect Mines' EW for that turn is added to any inherent Minesweeper Bonus it has and acts as a 'General Lock On'.</li>
                     <li>If your 'General Lock On' score is greater than the Distance and Signature of the mine added together, this is added to your hit chance.  
                         E.g. If you have 10 EW allocated to mine detection and you spot a mine with a Signature of 1 at range 3, the minimum detection needed is 4 EW. Therefore, the
