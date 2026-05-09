@@ -28,6 +28,9 @@ class PolarenArimetAssault extends LCV{
         $this->rollcost = 1;
         $this->pivotcost = 1;
         $this->iniativebonus = 14*5;
+
+   		$this->enhancementOptionsEnabled[] = 'ELT_MRN'; //To enable Elite Marines enhancement
+		$this->enhancementOptionsEnabled[] = 'EXT_MRN'; //To enable extra Marines enhancement
  
 		$this->addFrontSystem(new InvulnerableThruster(99, 99, 0, 99, 1)); //unhitable and with unlimited thrust allowance
 		$this->addAftSystem(new InvulnerableThruster(99, 99, 0, 99, 3)); //unhitable and with unlimited thrust allowance
@@ -37,7 +40,7 @@ class PolarenArimetAssault extends LCV{
 		$this->addPrimarySystem(new Reactor(3, 10, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
-    	$sensors = new Scanner(3, 10, 2, 4);
+    	$sensors = new Scanner(3, 10, 3, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));

@@ -15,7 +15,13 @@ import MineSettingsList from "./MineSettingsList";
 import ProximityMineSettingsList from "./ProximityMineSettingsList";
 
 const Container = styled.div`
-    display:flex;
+    display: flex;
+    flex-direction: column;
+    width: fit-content;
+`;
+
+const ButtonRow = styled.div`
+    display: flex;
     flex-wrap: wrap;
 `;
 
@@ -534,17 +540,29 @@ class SystemInfoButtons extends React.Component {
 		return (
 			<Container>
 				{canSystemPowerSettings(ship, system) && <SystemPowerSettings ship={ship} system={system} />}
-				{canAddShots(ship, system) && <Button title="More shots" onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
-				{canReduceShots(ship, system) && <Button title="Less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
-				{canRemoveFireOrderMulti(ship, system) && <Button title="Remove last fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
-				{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
+				<ButtonRow>
+					{canAddShots(ship, system) && <Button title="More shots" onClick={this.addShots.bind(this)} img="./img/plussquare.png"></Button>}
+					{canReduceShots(ship, system) && <Button title="Less shots" onClick={this.reduceShots.bind(this)} img="./img/minussquare.png"></Button>}
+					{canRemoveFireOrderMulti(ship, system) && <Button title="Remove last fire order" onClick={this.removeFireOrderMulti.bind(this)} img="./img/unfiringSmall.png"></Button>}
+					{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
+				</ButtonRow>
 
-				{canChangeFiringMode(ship, system) && <FiringModeSelector ship={ship} system={system} />}
-				{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
-				{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
-
-				{canSelectAllWeapons(ship, system) && <Button title="Select all weapons of this type" onClick={this.selectAllWeapons.bind(this)} img="./img/selectAllWeapons.png" $blend="screen"></Button>}
-				{canSelectAllWeapons(ship, system) && <Button title="Deselect all weapons of this type" onClick={this.deselectAllWeapons.bind(this)} img="./img/deselectAllWeapons.png" $blend="screen"></Button>}
+				{canChangeFiringMode(ship, system) && (
+					<FiringModeSelector ship={ship} system={system}>
+						{(canSelfIntercept(ship, system) || canRemIntercept(ship, system)) && (
+							<ButtonRow>
+								{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
+								{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
+							</ButtonRow>
+						)}
+					</FiringModeSelector>
+				)}
+				<ButtonRow>
+					{!canChangeFiringMode(ship, system) && canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
+					{!canChangeFiringMode(ship, system) && canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
+					{canSelectAllWeapons(ship, system) && <Button title="Select all weapons of this type" onClick={this.selectAllWeapons.bind(this)} img="./img/selectAllWeapons.png" $blend="screen"></Button>}
+					{canSelectAllWeapons(ship, system) && <Button title="Deselect all weapons of this type" onClick={this.deselectAllWeapons.bind(this)} img="./img/deselectAllWeapons.png" $blend="screen"></Button>}
+				</ButtonRow>
 
 				{canSystemActivation(ship, system) && <SystemActivation ship={ship} system={system} />}
 
@@ -795,7 +813,8 @@ export const hasStyledMenu = (ship, system) => {
 		canSelfRepairList(ship, system) ||
 		canPowerCapacitor(ship, system) ||
 		canSystemPowerSettings(ship, system) ||
-		canSystemActivation(ship, system);
+		canSystemActivation(ship, system) ||
+		canChangeFiringMode(ship, system);
 };
 
 

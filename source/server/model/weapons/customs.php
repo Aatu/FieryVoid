@@ -3584,7 +3584,7 @@ class HvyGraviticBolt extends Gravitic
 
     class LightParticleGun extends StdParticleBeam{
         public $name = "LightParticleGun";
-        public $displayName = "Light Particle gun";
+        public $displayName = "Light Particle Gun";
         public $iconPath = "lightParticleBeamShip.png";
 
         public $priority = 3;

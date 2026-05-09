@@ -201,6 +201,12 @@ var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
 EWNuclearTorpedo.prototype = Object.create(Weapon.prototype);
 EWNuclearTorpedo.prototype.constructor =  EWNuclearTorpedo;
 
+var EWRangedNuclearTorpedo = function  EWRangedNuclearTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedNuclearTorpedo.prototype = Object.create(Weapon.prototype);
+EWRangedNuclearTorpedo.prototype.constructor =  EWRangedNuclearTorpedo;
+
 var EWLaserBolt = function  EWLaserBolt(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -307,7 +313,7 @@ EWGraviticTractingRod.prototype.doMultipleFireOrders = function (shooter, target
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {

@@ -355,7 +355,7 @@ class Manager{
         }
         catch(exception $e) {
             Debug::error($e);
-            return null;
+            return false;
         }
         
     }

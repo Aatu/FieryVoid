@@ -7029,13 +7029,15 @@ class MineControllerDEW extends ShipSystem{
 	public $isPrimaryTargetable = false;        
     public $canOffline = true;
 	public $currClass = '';//for front end.       
-    public $allocatedRanges = array('Capitals-HCVs' => null, 'LCVs-MCVs' => null, 'Fighters' => null); //Ranges allocated for given ship type 
-    public $setRanges = array(); //Ranges allocated for given ship type     
+    public $allocatedRanges = array('Capitals-HCVs' => null, 'LCVs-MCVs' => null, 'Fighters' => null); //Ranges allocated for given ship type. When multiTargetEnabled, becomes nested {weaponId: {shipType: range}}.
+    public $setRanges = array(); //Ranges allocated for given ship type
     public $mineSet = false; //For front end, to confirm mine ranges have been manually set.
 	public $rangeSetting = 0;
 	private $accuracy = 0;
 	public $ballisticWeapon = false; //To mark if mine has ballistic weapons
     public $validTargets = null; // null means all targets are valid
+    public $multiTargetEnabled = false; //Mirrors $mine->multiSettings (Flexible Targeting); switches allocatedRanges to per-weapon nested storage.
+    public $mineWeapons = array(); //Precomputed list of weapons {id, name, displayName, indexInGroup, label} for client UI; populated in stripForJson.
 
     function __construct($armour, $maxhealth, $powerReq, $range, $accuracy, $ballistic = false, $validTargets = null){
 	//maxhealth and power reqirement are fixed; left option to override with hand-written values
@@ -7051,27 +7053,82 @@ class MineControllerDEW extends ShipSystem{
     }				
 
     public function setSystemDataWindow($turn){
+            $mine = $this->getUnit();
+
+            //Wipe stale per-shipType / per-weapon range keys so a mode flip never leaves both kinds in the dict.
+            foreach (array_keys($this->data) as $k) {
+                if (strncmp($k, ' - ', 3) === 0) unset($this->data[$k]);
+            }
+
             $this->data["Max Range"] = $this->rangeSetting;
-            $this->data["Accuracy"] = $this->accuracy;			
-            foreach($this->allocatedRanges as $shipType=>$range){
-                $this->data[' - '.$shipType.' range'] =  $range;
-            }         
-			$this->data["Special"] = "<br>Used to set ranges for DEW Mine's weapon against different types of enemy. ";	
-			$this->data["Special"] .= "<br>Ranges are set on turn that the Mine deploys, and these cannot then be changed.";					            
-			$this->data["Special"] .= "<br>All attacks by DEW mines assume an EW lock, except against Jammer-equipped ships.";											
-	}	
+            $this->data["Accuracy"] = $this->accuracy;
+            if ($mine->multiSettings) {
+                $weaponLabels = $this->buildWeaponLabelMap();
+                foreach ($this->allocatedRanges as $weaponId => $perType) {
+                    if (!is_array($perType)) continue;
+                    $label = isset($weaponLabels[$weaponId]) ? $weaponLabels[$weaponId] : ('weapon '.$weaponId);
+                    foreach ($perType as $shipType => $range) {
+                        $this->data[' - '.$label.' '.$shipType.' range'] = $range;
+                    }
+                }
+            } else {
+                foreach($this->allocatedRanges as $shipType=>$range){
+                    if (is_array($range)) continue; //defensive: ignore any nested entries left from a prior multi state
+                    $this->data[' - '.$shipType.' range'] =  $range;
+                }
+            }
+			$this->data["Special"] = "<br>Used to set ranges for DEW Mine's weapon against different types of enemy. ";
+			$this->data["Special"] .= "<br>Ranges are set on turn that the Mine deploys, and these cannot then be changed.";
+			$this->data["Special"] .= "<br>All attacks by DEW mines assume an EW lock, except against Jammer-equipped ships.";
+			if ($mine->multiSettings) {
+				$this->data["Special"] .= "<br>Multiple Targets enhancement: each weapon has its own per-target-type range.";
+			}
+	}
+
+	private function buildWeaponLabelMap(){
+		$mine = $this->getUnit();
+		if (!$mine) return array();
+		$labels = array();
+		$displayCounts = array();
+		$displayTotals = array();
+		foreach ($mine->systems as $sys) {
+			if ($sys instanceof Weapon && $sys->name !== 'RammingAttack') {
+				$d = $sys->displayName ?: $sys->name;
+				$displayTotals[$d] = (isset($displayTotals[$d]) ? $displayTotals[$d] : 0) + 1;
+			}
+		}
+		foreach ($mine->systems as $sys) {
+			if ($sys instanceof Weapon && $sys->name !== 'RammingAttack') {
+				$d = $sys->displayName ?: $sys->name;
+				$displayCounts[$d] = (isset($displayCounts[$d]) ? $displayCounts[$d] : 0) + 1;
+				$labels[$sys->id] = ($displayTotals[$d] > 1) ? ($d.' '.$displayCounts[$d]) : $d;
+			}
+		}
+		return $labels;
+	}
 
 
 	public function doIndividualNotesTransfer(){
-	    // Data received in variable individualNotesTransfer, further functions will look for it in currchangedSpec
-	    if (is_array($this->individualNotesTransfer)) {            
-	        foreach ($this->individualNotesTransfer as $shipType => $rangeValue) {                
-	            $this->setRanges[$shipType] = $rangeValue; //Temporarily fill values to generate notes.
-              
+	    // Data received in variable individualNotesTransfer, further functions will look for it in setRanges.
+	    // Flat keys like 'Capitals-HCVs' mean single shared settings.
+	    // Compound keys like '<weaponId>;<shipType>' (sent when MINE_MULTI is active) populate nested setRanges.
+	    if (is_array($this->individualNotesTransfer)) {
+	        $this->setRanges = array();
+	        foreach ($this->individualNotesTransfer as $key => $rangeValue) {
+	            if (strpos((string)$key, ';') !== false) {
+	                list($weaponId, $shipType) = explode(';', $key, 2);
+	                $weaponId = (int)$weaponId;
+	                if (!isset($this->setRanges[$weaponId]) || !is_array($this->setRanges[$weaponId])) {
+	                    $this->setRanges[$weaponId] = array();
+	                }
+	                $this->setRanges[$weaponId][$shipType] = $rangeValue;
+	            } else {
+	                $this->setRanges[$key] = $rangeValue;
+	            }
 	        }
-	    }                                	   
+	    }
 	    $this->individualNotesTransfer = array(); // Empty, just in case
-	}	    
+	}
 
     public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
 		$mine = $this->getUnit();           
@@ -7079,16 +7136,22 @@ class MineControllerDEW extends ShipSystem{
 						
 				case -1: //Deployment/Pre-Turn phase
 					//data returned as allocatedBFCP table, with one value passed per BFCP point in each FCType e.g. 'Fighter' mean +1 in allocatedBFCP['Fighter']
-					if($mine->userid == $gameData->forPlayer){ //only own mines, otherwise bad things may happen!																
-						foreach ($this->setRanges as $shipType => $rangeValue) { //Will always be three keys.
- 												
-							$notekey = $shipType;
+					if($mine->userid == $gameData->forPlayer){ //only own mines, otherwise bad things may happen!
+						foreach ($this->setRanges as $key => $value) {
 							$noteHuman = 'Mine Range set';
-							$notevalue = $rangeValue;
-							$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$mine->id,$this->id,$notekey,$noteHuman,$notevalue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue         
-						}			
-					}								
-				break;	
+							if (is_array($value)) {
+								//Nested: $key is weaponId, $value is {shipType => range}. Emit compound notekey "<weaponId>;<shipType>".
+								foreach ($value as $shipType => $rangeValue) {
+									$notekey = $key.';'.$shipType;
+									$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$mine->id,$this->id,$notekey,$noteHuman,$rangeValue);
+								}
+							} else {
+								$notekey = $key;
+								$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$mine->id,$this->id,$notekey,$noteHuman,$value);
+							}
+						}
+					}
+				break;
 				
 				case 1: //Need to add some method for ballistic DEW mines to fire here if they have been activated (e.g. already fired once).
 	
@@ -7101,15 +7164,41 @@ class MineControllerDEW extends ShipSystem{
 	
 
     public function onIndividualNotesLoaded($gamedata)
-    {      
-            //Otherwise, what were the points set this turn at end of Initial Orders.
-            foreach ($this->individualNotes as $currNote) {	    	
-                $shipType = $currNote->notekey;
-                $rangeValue = $currNote->notevalue;
-                $this->allocatedRanges[$shipType] = $rangeValue;
-            }
+    {
+			$mine = $this->getUnit();
+			// Detect MINE_MULTI before parsing notes so we know which storage shape to populate.
+			$this->multiTargetEnabled = false;
+			foreach ($mine->enhancementOptions as $enhancement) {
+				if ($enhancement[0] == 'MINE_MULTI' && $enhancement[2] > 0) {
+					$this->multiTargetEnabled = true;
+					break;
+				}
+			}		
+			if($mine->multiSettings) $this->multiTargetEnabled = true; //Some mines have this pre-set
 
-			$mine = $this->getUnit();		
+			if ($this->multiTargetEnabled) {
+				//Reset to nested shape; per-weapon ranges populated from compound notekeys "<weaponId>;<shipType>".
+				$this->allocatedRanges = array();
+				foreach ($this->individualNotes as $currNote) {
+					$key = $currNote->notekey;
+					$rangeValue = $currNote->notevalue;
+					if (strpos($key, ';') !== false) {
+						list($weaponId, $shipType) = explode(';', $key, 2);
+						$weaponId = (int)$weaponId;
+						if (!isset($this->allocatedRanges[$weaponId]) || !is_array($this->allocatedRanges[$weaponId])) {
+							$this->allocatedRanges[$weaponId] = array('Capitals-HCVs' => null, 'LCVs-MCVs' => null, 'Fighters' => null);
+						}
+						$this->allocatedRanges[$weaponId][$shipType] = $rangeValue;
+					}
+				}
+			} else {
+				//Flat shape: notekey is shipType.
+				foreach ($this->individualNotes as $currNote) {
+					$shipType = $currNote->notekey;
+					$rangeValue = $currNote->notevalue;
+					$this->allocatedRanges[$shipType] = $rangeValue;
+				}
+			}
 
 			// Determine total IMPR_RANG enhancement count and apply to rangeSetting ONCE
 			$rangeEnhancement = 0;
@@ -7120,7 +7209,7 @@ class MineControllerDEW extends ShipSystem{
 			}
 			$this->rangeSetting += $rangeEnhancement;
 
-			foreach($mine->systems as $weapon){		
+			foreach($mine->systems as $weapon){
 				if($weapon instanceof Weapon  && $weapon->name !== "RammingAttack"){
 					if($weapon->fireControl[0] !== null) $weapon->fireControl[0] = $weapon->fireControl[0] + $this->accuracy;
 					if($weapon->fireControl[1] !== null) $weapon->fireControl[1] = $weapon->fireControl[1] + $this->accuracy;
@@ -7134,24 +7223,37 @@ class MineControllerDEW extends ShipSystem{
 						}
 					}
 
-					$weapon->range = $this->rangeSetting;				
-					foreach($weapon->rangeArray as $mode => $val) {
-						$weapon->rangeArray[$mode] = $this->rangeSetting;
+					if ($this->multiTargetEnabled && isset($this->allocatedRanges[$weapon->id]) && is_array($this->allocatedRanges[$weapon->id])) {
+						//Per-weapon max-of-three (nulls treated as 0); clamp to global rangeSetting ceiling.
+						$weaponMax = 0;
+						foreach ($this->allocatedRanges[$weapon->id] as $val) {
+							if ($val !== null && $val > $weaponMax) $weaponMax = (int)$val;
+						}
+						$weaponMax = min($weaponMax, $this->rangeSetting);
+						$weapon->range = $weaponMax;
+						foreach($weapon->rangeArray as $mode => $val) {
+							$weapon->rangeArray[$mode] = $weaponMax;
+						}
+					} else {
+						$weapon->range = $this->rangeSetting;
+						foreach($weapon->rangeArray as $mode => $val) {
+							$weapon->rangeArray[$mode] = $this->rangeSetting;
+						}
 					}
 					$weapon->isTargetable = false;
 					$weapon->boostable = false;
-						
+
 					if(!$mine->getCommandControl()){
-						$weapon->autoFireOnly = true;	
-						$weapon->canOffLine = false;					
-					}							
+						$weapon->autoFireOnly = true;
+						$weapon->canOffLine = false;
+					}
 				}
-			}	
-                      
+			}
+
             //and immediately delete notes themselves, they're no longer needed (this will not touch the database, just memory!)
             $this->individualNotes = array();
-        
-            
+
+
     }//endof onIndividualNotesLoaded
 
 
@@ -7208,11 +7310,44 @@ class MineControllerDEW extends ShipSystem{
 		$mineTarget = $this->checkForValidTargets($relevantUnits, $mine, $minePosition, $gamedata);	        	
 
 		if ($mineTarget !== null) { // Check if we found a valid target
-			//Loop through mine's weapon and create fire orders against target.		
-			foreach($mine->systems as $weapon){		
+
+			//Per-weapon range gate (MINE_MULTI): compute target shipType and the closest distance it reached this turn.
+			$targetShipType = 'Capitals-HCVs';
+			$targetMinDistance = PHP_INT_MAX;
+			if ($this->multiTargetEnabled) {
+				$tFCIndex = $mineTarget->getFireControlIndex();
+				if ($tFCIndex == 0) $targetShipType = 'Fighters';
+				else if ($tFCIndex == 1) $targetShipType = 'LCVs-MCVs';
+
+				$startMove = $mineTarget->getLastTurnMovement($gamedata->turn);
+				if ($startMove != null) {
+					$d = mathlib::getDistanceHex($minePosition, $startMove->position);
+					if ($d < $targetMinDistance) $targetMinDistance = $d;
+				}
+				if ($gamedata->phase != 1) {
+					foreach ($mineTarget->movement as $tMove) {
+						if ($tMove->turn == $gamedata->turn && ($tMove->type == 'move' || $tMove->type == 'slipleft' || $tMove->type == 'slipright')) {
+							$d = mathlib::getDistanceHex($minePosition, $tMove->position);
+							if ($d < $targetMinDistance) $targetMinDistance = $d;
+						}
+					}
+				}
+				$jammerValue = $mineTarget->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $mineTarget));
+			}
+
+			//Loop through mine's weapon and create fire orders against target.
+			foreach($mine->systems as $weapon){
 				if($weapon instanceof Weapon && $weapon->name !== "RammingAttack"){
 					if($weapon->isDestroyed($gamedata->turn)) return;//Is destroyed (shouldn't happen)
- 					
+
+					if ($this->multiTargetEnabled) {
+						if (!isset($this->allocatedRanges[$weapon->id]) || !is_array($this->allocatedRanges[$weapon->id])) continue;
+						$weaponRange = isset($this->allocatedRanges[$weapon->id][$targetShipType]) ? $this->allocatedRanges[$weapon->id][$targetShipType] : null;
+						if ($weaponRange === null || $weaponRange <= 0) continue; //Player chose this weapon doesn't engage this target type.
+						$effectiveWeaponRange = (isset($jammerValue) && $jammerValue > 0) ? floor($weaponRange / 2) : $weaponRange;
+						if ($targetMinDistance > $effectiveWeaponRange) continue; //Target never within this weapon's range.
+					}
+
 					if($weapon->getTurnsloaded() >= $weapon->getNormalLoad() && !$weapon->firedOnTurn($gamedata->turn)){ //is Loaded.  Accelerator weapons should only fire when fully loaded too.
 
 						if($mine->getCommandControl()){  
@@ -7318,28 +7453,40 @@ class MineControllerDEW extends ShipSystem{
 
 
 	private function checkTargetConditions($minePosition, $targetPostion, $gamedata, $mine, $target){
-		
-		$distance =	mathlib::getDistanceHex($minePosition, $targetPostion);//Compare starting positions.						
+
+		$distance =	mathlib::getDistanceHex($minePosition, $targetPostion);//Compare starting positions.
         $effectiveRange = $this->rangeSetting; //Start with max range.
 
         $shipType = 'Capitals-HCVs'; //Default as Captials.
         $FCIndex = $target->getFireControlIndex(); //Get FC array index of potential target.
         if($FCIndex == 0){ //Fighters
-            $shipType = 'Fighters';          
+            $shipType = 'Fighters';
         }else if($FCIndex == 1){ //LCV or MCV
-            $shipType = 'LCVs-MCVs';                    
+            $shipType = 'LCVs-MCVs';
         }
-     
-        if($this->allocatedRanges[$shipType] !== null){
-			$effectiveRange = $this->allocatedRanges[$shipType]; //Find and set appropriate range for this type of target.
-		}else{
-			return false; //Null mean weapon can't target this ship type.
-		} 
 
-        //take into account jammer effects.                    
+        if ($this->multiTargetEnabled) {
+            //Mine wakes up if ANY weapon can reach this shipType. Use max across all weapons.
+            $maxRange = 0;
+            foreach ($this->allocatedRanges as $weaponId => $perType) {
+                if (!is_array($perType)) continue;
+                if (!isset($perType[$shipType]) || $perType[$shipType] === null) continue;
+                if ($perType[$shipType] > $maxRange) $maxRange = (int)$perType[$shipType];
+            }
+            if ($maxRange <= 0) return false; //No weapon assigned to this target type.
+            $effectiveRange = $maxRange;
+        } else {
+            if($this->allocatedRanges[$shipType] !== null){
+                $effectiveRange = $this->allocatedRanges[$shipType]; //Find and set appropriate range for this type of target.
+            }else{
+                return false; //Null mean weapon can't target this ship type.
+            }
+        }
+
+        //take into account jammer effects.
 		$jammerValue = $target->getSpecialAbilityValue("Jammer", array("shooter" => $mine, "target" => $target));
 		if($jammerValue > 0) $effectiveRange = floor($effectiveRange / 2);
-    		
+
 	    if ($distance > $effectiveRange) return false; //Not within range, skip LoS check and return false.
 
         $loSBlocked = false;
@@ -7352,10 +7499,15 @@ class MineControllerDEW extends ShipSystem{
 	}	
 
     public function stripForJson() {
-        $strippedSystem = parent::stripForJson();    
+        $strippedSystem = parent::stripForJson();
+        //Defensive re-detect (covers serialization paths where setSystemDataWindow hasn't run yet).
+        $mine = $this->getUnit();
+        $this->multiTargetEnabled = ($mine && !empty($mine->multiSettings));
         $strippedSystem->allocatedRanges = $this->allocatedRanges;
-        $strippedSystem->rangeSetting = $this->rangeSetting;		 			                             
+        $strippedSystem->rangeSetting = $this->rangeSetting;
         $strippedSystem->validTargets = $this->validTargets;
+        $strippedSystem->multiTargetEnabled = $this->multiTargetEnabled;
+        $strippedSystem->data = $this->data;
         return $strippedSystem;
     }
 	    

@@ -61,10 +61,10 @@ class KobolMercury extends BaseShip{
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
 		$this->addFrontSystem(new MedBlastCannon(4, 5, 2, 240, 120));
-		$this->addFrontSystem(new FlakArray(4, 10, 3, 210, 30));
-		$this->addFrontSystem(new FlakArray(4, 10, 3, 210, 30));
-		$this->addFrontSystem(new FlakArray(4, 10, 3, 330, 150));
-		$this->addFrontSystem(new FlakArray(4, 10, 3, 330, 150));
+		$this->addFrontSystem(new OrieniFlakArray(4, 6, 3, 210, 30));
+		$this->addFrontSystem(new OrieniFlakArray(4, 6, 3, 210, 30));
+		$this->addFrontSystem(new OrieniFlakArray(4, 6, 3, 330, 150));
+		$this->addFrontSystem(new OrieniFlakArray(4, 6, 3, 330, 150));
 
         $this->addAftSystem(new Thruster(5, 9, 0, 3, 2));
         $this->addAftSystem(new Thruster(5, 9, 0, 3, 2));
@@ -80,20 +80,20 @@ class KobolMercury extends BaseShip{
 		$this->addAftSystem(new Bulkhead(0, 4));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
 		$this->addAftSystem(new MedBlastCannon(4, 5, 2, 60, 300));
-		$this->addAftSystem(new FlakArray(4, 10, 3, 150, 330));
-		$this->addAftSystem(new FlakArray(4, 10, 3, 150, 330));
-		$this->addAftSystem(new FlakArray(4, 10, 3, 30, 210));
-		$this->addAftSystem(new FlakArray(4, 10, 3, 30, 210));
+		$this->addAftSystem(new OrieniFlakArray(4, 6, 3, 150, 330));
+		$this->addAftSystem(new OrieniFlakArray(4, 6, 3, 150, 330));
+		$this->addAftSystem(new OrieniFlakArray(4, 6, 3, 30, 210));
+		$this->addAftSystem(new OrieniFlakArray(4, 6, 3, 30, 210));
 
         $this->addLeftSystem(new Thruster(6, 12, 0, 5, 3));
         $this->addLeftSystem(new Thruster(6, 12, 0, 5, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
-		$this->addLeftSystem(new FlakArray(4, 10, 3, 210, 330));
-		$this->addLeftSystem(new FlakArray(4, 10, 3, 210, 330));
-		$this->addLeftSystem(new FlakArray(4, 10, 3, 210, 330));
-		$this->addLeftSystem(new FlakArray(4, 10, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
+		$this->addLeftSystem(new OrieniFlakArray(4, 6, 3, 210, 330));
 		$this->addLeftSystem(new HvyBlastCannon(5, 6, 4, 210, 360));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 360));
 		$this->addLeftSystem(new MedBlastCannon(4, 5, 2, 210, 360));
@@ -108,10 +108,10 @@ class KobolMercury extends BaseShip{
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
-		$this->addRightSystem(new FlakArray(4, 10, 3, 30, 150));
-		$this->addRightSystem(new FlakArray(4, 10, 3, 30, 150));
-		$this->addRightSystem(new FlakArray(4, 10, 3, 30, 150));
-		$this->addRightSystem(new FlakArray(4, 10, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
+		$this->addRightSystem(new OrieniFlakArray(4, 6, 3, 30, 150));
 		$this->addRightSystem(new HvyBlastCannon(5, 6, 4, 0, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 0, 150));
 		$this->addRightSystem(new MedBlastCannon(4, 5, 2, 0, 150));

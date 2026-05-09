@@ -328,11 +328,11 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 				}	
 
 				//Check valid shot?
-				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
 				if (chance < 1) continue;
 
 				for (var k = 0; k < shotsToFire; k++) {
-					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
 					fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 					weapon.resolveFireOrder(damagePerShot, shooter, target, fireid, calledid, chance);
 				}
@@ -791,7 +791,7 @@ MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
 			calledid = system.id;
 		}
 
-		var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+		var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
 		if (chance < 1) continue;
 
 		var fire = {

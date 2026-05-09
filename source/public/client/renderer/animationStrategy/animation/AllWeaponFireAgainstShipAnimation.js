@@ -39,9 +39,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
             var extraTime = 0;
 
+            //On balance let's not exclude Log entries for concrator type weapons, see the note these were combined is informative.
+            //var totalGroupShots = group.reduce(function (sum, entry) { return sum + entry.shots; }, 0);
+            //if (totalGroupShots > 0) {
             this.logAnimation.addLogEntryFire(group.map(function (entry) {
                 return entry.fireOrder;
             }), this.time + this.duration);
+            //}
 
             var durations = group.map(function (group) {
                 extraTime += Math.random() * 100 + 300;
@@ -298,12 +302,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
                 TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
             }
-            var playedPullSound = false;
+
             var pullSoundVolume = 0.1;
 
             return {
+                playedPullSound: false,
                 render: function (now, total, last, delta, zoom, back, paused) {
-                    if (total >= startTime && !playedPullSound && gamedata.playAudio && !paused && !back) {
+                    if (total >= startTime && !this.playedPullSound && gamedata.playAudio && !paused && !back) {
                         try {
                             if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
                                 var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
@@ -311,7 +316,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                 explosionSound.currentTime = 0;
                                 explosionSound.play().catch(function () { });
                             }
-                            playedPullSound = true;
+                            this.playedPullSound = true;
                         } catch (e) {
                             console.warn("GraviticMine explosion sound failed:", e);
                         }
@@ -327,7 +332,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         switch (animationType) {
             case "laser":
-                return new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
+                var _laser = new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
                     size: 100 * weapon.animationExplosionScale,
                     //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
@@ -338,6 +343,22 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     critNames: critNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
+                var _laserSparks = hit ? new ImpactSparksEffect(this.scene, {
+                    position: getShipPositionAtTime.call(this, this.shipIcon, startTime),
+                    color: color,
+                    time: startTime
+                }) : null;
+                return {
+                    render: function (now, total, last, delta, zoom, back, paused) {
+                        _laser.render(now, total, last, delta, zoom, back, paused);
+                        if (_laserSparks) _laserSparks.render(now, total, last, delta, zoom, back, paused);
+                    },
+                    getDuration: function () { return _laser.getDuration(); },
+                    cleanUp: function () {
+                        _laser.cleanUp();
+                        if (_laserSparks) _laserSparks.cleanUp();
+                    }
+                };
             case "ball":
                 if (weapon.name === "ProximityMine") {
                     var targetPos = getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired);
@@ -357,16 +378,16 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                         this.systemDestroyedEffect.add(targetPos, critNames, startTime + 500, 'crit');
                     }
 
-                    var playedImpactSound = false;
                     var soundVolume = 0.1;
                     if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
                         TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
                     }
 
                     return {
+                        playedImpactSound: false,
                         render: function(now, total, last, delta, zoom, back, paused) {
                             explosion.render(now, total, last, delta, zoom, back, paused);
-                            if (total >= startTime && !playedImpactSound && gamedata.playAudio && !paused && !back) {
+                            if (total >= startTime && !this.playedImpactSound && gamedata.playAudio && !paused && !back) {
                                 try {
                                     if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
                                         var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
@@ -374,7 +395,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                         explosionSound.currentTime = 0;
                                         explosionSound.play().catch(function() {});
                                     }
-                                    playedImpactSound = true;
+                                    this.playedImpactSound = true;
                                 } catch (e) {
                                     console.warn("Mine explosion sound failed:", e);
                                 }

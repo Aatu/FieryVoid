@@ -117,3 +117,27 @@ body.login-background {
     width: 100%;
     max-width: 250px;
 }
+
+.login-error {
+    margin-top: 10px;
+    margin-right: 25px;
+    padding: 8px 14px;
+    background: rgba(220, 53, 69, 0.15);
+    border: 1px solid rgba(220, 53, 69, 0.5);
+    border-radius: 4px;
+    color: #f5a0a8;
+    font-size: 0.95em;
+    text-align: right;
+    animation: login-error-slide-in 0.3s ease-out;
+}
+
+@keyframes login-error-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

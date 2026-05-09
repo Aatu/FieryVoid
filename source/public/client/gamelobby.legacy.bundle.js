@@ -18865,8 +18865,8 @@ MineStealth.prototype.constructor = MineStealth;
 
 MineStealth.prototype.initializationUpdate = function () {
 	var ship = this.ship;
-	this.data["Mine Signature"] = ship.signature;
-	if(ship.mineType && ship.mineType == 'DEW') this.data["Detected Signature"] = ship.detectedSignature;	
+	this.data["Current Signature"] = ship.signature;
+	if(ship.mineType && ship.mineType == 'DEW' && ship.signature !== ship.detectedSignature) this.data["Activated Signature"] = ship.detectedSignature;	
 	return this
 }
 
@@ -20919,7 +20919,7 @@ MineControllerDEW.prototype.refreshFireControl = function () { //refresh descrip
 
 MineControllerDEW.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
 	if (this.currClass == '') {
-		var classes = Object.keys(this.allocatedRanges); //Allocated is always the same for HC, so can serve same purpose as availableAA did.
+		var classes = Object.keys(this.getCurrAllocations() || {});
 		if (classes.length > 0) {
 			this.currClass = classes[0];
 		}
@@ -20927,25 +20927,34 @@ MineControllerDEW.prototype.getCurrClass = function () { //get current FC class 
 	return this.currClass;
 };
 
-MineControllerDEW.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+// Returns the {shipType: range} object the UI is currently editing.
+// In single-target mode this IS this.allocatedRanges. In multi mode it is allocatedRanges[currWeaponId].
+MineControllerDEW.prototype.getCurrAllocations = function () {
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var wid = this.getCurrWeaponId();
+		if (wid == null) return null;
+		return this.allocatedRanges[wid];
+	}
+	return this.allocatedRanges;
+};
+
+MineControllerDEW.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
 	var ship = this.ship;
 	var spawned = Number(ship.spawned);
 	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
-	//console.log("Mine: " + ship.name + " (id: " + ship.id + ") | spawned: " + ship.spawned + " | turn: " + gamedata.turn + " | deploymentTurn: " + deploymentTurn);
 
 	if (gamedata.turn !== deploymentTurn) {
-		//console.log("  BLOCKED: Not deployment turn");
 		return false;
 	}
 	this.getCurrClass();
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	//how many are allocated?
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
-	//how many are allowed?
-	var allowed = this.rangeSetting;
-	if (allocated >= allowed) return false; //full allowance for this FC type filled	
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
+	if (allocated >= this.rangeSetting) return false; //full allowance for this FC type filled
 
 	return true;
 };
@@ -20955,44 +20964,48 @@ MineControllerDEW.prototype.canDecrease = function () { //can decrease if someth
 	var spawned = Number(ship.spawned);
 	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
 	if (gamedata.turn !== deploymentTurn) return false;
-	this.getCurrClass(); //Should be getCurrClass or similar? The method in aoe.js is getCurrClass
+	this.getCurrClass();
 	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 	if (allocated > 0) return true;
 	return false;
 };
 
 MineControllerDEW.prototype.doIncrease = function () { //increase BFCP usage
 	this.getCurrClass();
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
-
-	if (allocated < this.rangeSetting) { //else use regular pool 
-		this.allocatedRanges[this.currClass] = allocated + 1;
-
+	if (allocated < this.rangeSetting) {
+		alloc[this.currClass] = allocated + 1;
 	}
-	this.mineSet = true; //user changed something, assume they are content.	
+	this.mineSet = true;
 	this.refreshData();
 };
 
 MineControllerDEW.prototype.doDecrease = function () { //decrease BFCP usage
 	this.getCurrClass();
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
-	//Decrease could be in current turn, or from previous turn allocation.
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
+
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 
 	if (allocated > 0) {
-		this.allocatedRanges[this.currClass] = allocated - 1;
+		alloc[this.currClass] = allocated - 1;
 	}
-	this.mineSet = true; //user changed something, assume they are content.	
+	this.mineSet = true;
 	this.refreshData();
 };
 
 MineControllerDEW.prototype.refreshData = function () { //refresh description to show correct values
-	var classes = Object.keys(this.allocatedRanges);
+	if (!this.data) this.data = {};
 	var entryName = '';
 	var currType = '';
 	var range = null;
@@ -21004,36 +21017,59 @@ MineControllerDEW.prototype.refreshData = function () { //refresh description to
 		}
 	}
 
+	//Wipe stale per-shipType / per-weapon range keys so a mode flip never leaves both kinds in the dict.
+	var dataKeys = Object.keys(this.data);
+	for (var dk = 0; dk < dataKeys.length; dk++) {
+		if (dataKeys[dk].indexOf(' - ') === 0) delete this.data[dataKeys[dk]];
+	}
+
 	for (var i in ship.systems) {
 		var weapon = ship.systems[i];
 		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
 			weapon.data["Fire control (fighter/med/cap)"] = weapon.translateFCtoD100txt(weapon.fireControl);
-			weapon.range = this.rangeSetting;				
+			weapon.range = this.rangeSetting;
 		}
 	}
 
 	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
 	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-		//hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;
 	} else {
 		this.data["Max Range"] = this.rangeSetting;
-
-
-
 	}
 
-	for (var i = 0; i < classes.length; i++) {
-		currType = classes[i];
-		if (this.validTargets && !this.validTargets.includes(currType)) continue;
-		range = this.allocatedRanges[currType];
-		if (range == null) range = this.rangeSetting;
-		if (hiddenDisplay == '?') range = hiddenDisplay;
-		//entry should exist, just change it to show current values
-		entryName = ' - ' + currType;
-		this.data[entryName + " range"] = range;
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var labels = this.buildWeaponLabels();
+		var weaponIds = Object.keys(this.allocatedRanges);
+		for (var w = 0; w < weaponIds.length; w++) {
+			var wid = weaponIds[w];
+			var perType = this.allocatedRanges[wid];
+			if (!perType || typeof perType !== 'object') continue;
+			var label = labels[wid] || ('weapon ' + wid);
+			var typeKeys = Object.keys(perType);
+			for (var t = 0; t < typeKeys.length; t++) {
+				currType = typeKeys[t];
+				if (this.validTargets && !this.validTargets.includes(currType)) continue;
+				range = perType[currType];
+				if (range == null) range = this.rangeSetting;
+				if (hiddenDisplay == '?') range = hiddenDisplay;
+				this.data[' - ' + label + ' ' + currType + ' range'] = range;
+			}
+		}
+	} else {
+		this.ensureFlatAllocatedShape();
+		var classes = Object.keys(this.allocatedRanges);
+		for (var i = 0; i < classes.length; i++) {
+			currType = classes[i];
+			if (this.validTargets && !this.validTargets.includes(currType)) continue;
+			range = this.allocatedRanges[currType];
+			if (range == null) range = this.rangeSetting;
+			if (hiddenDisplay == '?') range = hiddenDisplay;
+			entryName = ' - ' + currType;
+			this.data[entryName + " range"] = range;
+		}
 	}
-
 };
 
 MineControllerDEW.prototype.canPropagate = function () { //can propagate if set to >0
@@ -21051,37 +21087,188 @@ MineControllerDEW.prototype.getRangeAllocated = function (rangeIndex) { //return
 };
 
 MineControllerDEW.prototype.setCurrShipType = function (shipType) { //sets indicated FC type as current (or sets empty as current)
-	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
-	var classes = Object.keys(this.allocatedRanges);
-	var currType = '';
+	this.currClass = '';
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return;
+	var classes = Object.keys(alloc);
 	for (var i = 0; i < classes.length; i++) {
-		currType = classes[i];
-		if (currType == shipType) { //exists!
-			this.currClass = currType;
-			return; //no need to loop further
+		if (classes[i] == shipType) {
+			this.currClass = classes[i];
+			return;
 		}
 	}
 };
 
-MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable
+	if (gamedata.gamephase != -1) return true;
 
-	if (gamedata.gamephase == -1) {
-		this.individualNotesTransfer = {};
-		//every point is denoted as single entry with damage class name
+	this.individualNotesTransfer = {};
+
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var weaponIds = Object.keys(this.allocatedRanges);
+		for (var w = 0; w < weaponIds.length; w++) {
+			var wid = weaponIds[w];
+			var perType = this.allocatedRanges[wid];
+			if (!perType || typeof perType !== 'object') continue;
+			var typeKeys = Object.keys(perType);
+			for (var t = 0; t < typeKeys.length; t++) {
+				var currType = typeKeys[t];
+				if (this.validTargets && !this.validTargets.includes(currType)) continue;
+				var val = perType[currType];
+				if (val == null) val = this.rangeSetting;
+				//Compound notekey "<weaponId>;<shipType>" - server splits on ';' in doIndividualNotesTransfer.
+				this.individualNotesTransfer[wid + ';' + currType] = val;
+			}
+		}
+	} else {
 		var shipCategories = Object.keys(this.allocatedRanges);
 		var rangeValues = Object.values(this.allocatedRanges);
-
 		for (var i = 0; i < shipCategories.length; i++) {
 			var currType = shipCategories[i];
 			if (this.validTargets && !this.validTargets.includes(currType)) continue;
-
-			if (rangeValues[i] == null) rangeValues[i] = this.rangeSetting; //Set to max range if nothing set by player.
-
-			// Initialize the array for the current spec
+			if (rangeValues[i] == null) rangeValues[i] = this.rangeSetting;
 			this.individualNotesTransfer[currType] = rangeValues[i];
 		}
 	}
 	return true;
+};
+
+// === MINE_MULTI: Multiple Targets enhancement helpers ===
+
+MineControllerDEW.prototype.hasMultiTarget = function () {
+	if (this.multiTargetEnabled) return true; //server-supplied flag (preferred)
+	var ship = this.ship;
+	if (!ship || !ship.enhancementOptions) return false;
+	for (var i = 0; i < ship.enhancementOptions.length; i++) {
+		var enh = ship.enhancementOptions[i];
+		if (enh && enh[0] === 'MINE_MULTI' && Number(enh[2]) > 0) return true;
+	}
+	return false;
+};
+
+MineControllerDEW.prototype.getMineWeapons = function () {
+	var ship = this.ship;
+	if (!ship || !ship.systems) return [];
+	var totals = {};
+	for (var i = 0; i < ship.systems.length; i++) {
+		var sys = ship.systems[i];
+		if (sys instanceof Weapon && sys.name !== 'RammingAttack') {
+			var d = sys.displayName || sys.name;
+			totals[d] = (totals[d] || 0) + 1;
+		}
+	}
+	var counts = {};
+	var out = [];
+	for (var i = 0; i < ship.systems.length; i++) {
+		var sys = ship.systems[i];
+		if (sys instanceof Weapon && sys.name !== 'RammingAttack') {
+			var d = sys.displayName || sys.name;
+			counts[d] = (counts[d] || 0) + 1;
+			var label = (totals[d] > 1) ? (d + ' ' + counts[d]) : d;
+			out.push({ id: sys.id, name: sys.name, displayName: d, indexInGroup: counts[d], label: label });
+		}
+	}
+	return out;
+};
+
+MineControllerDEW.prototype.buildWeaponLabels = function () {
+	var labels = {};
+	var weapons = this.getMineWeapons();
+	for (var i = 0; i < weapons.length; i++) {
+		labels[weapons[i].id] = weapons[i].label;
+	}
+	return labels;
+};
+
+MineControllerDEW.prototype.getCurrWeaponId = function () {
+	if (this.currWeaponId != null) {
+		var weapons = this.getMineWeapons();
+		for (var i = 0; i < weapons.length; i++) {
+			if (String(weapons[i].id) === String(this.currWeaponId)) return this.currWeaponId;
+		}
+		this.currWeaponId = null;
+	}
+	var firstWeapons = this.getMineWeapons();
+	if (firstWeapons.length === 0) return null;
+	this.currWeaponId = firstWeapons[0].id;
+	return this.currWeaponId;
+};
+
+MineControllerDEW.prototype.setCurrWeaponId = function (id) {
+	this.currWeaponId = id;
+	this.currClass = ''; //force getCurrClass to re-resolve against the new weapon's allocations
+};
+
+//Detect whether allocatedRanges is currently in nested per-weapon form.
+MineControllerDEW.prototype.isNestedAllocatedShape = function () {
+	var keys = Object.keys(this.allocatedRanges || {});
+	if (keys.length === 0) return false;
+	var firstVal = this.allocatedRanges[keys[0]];
+	return (firstVal != null && typeof firstVal === 'object');
+};
+
+//Inverse of ensureMultiAllocatedShape — used in the lobby when the user toggles MINE_MULTI off
+//after having opened the settings (which mutated to nested). Collapses to flat using the first
+//weapon's values, or all-null if no entries.
+MineControllerDEW.prototype.ensureFlatAllocatedShape = function () {
+	if (this.hasMultiTarget()) return;
+	if (!this.isNestedAllocatedShape()) return;
+	var weaponKeys = Object.keys(this.allocatedRanges);
+	var defaults = { 'Capitals-HCVs': null, 'LCVs-MCVs': null, 'Fighters': null };
+	if (weaponKeys.length > 0) {
+		var first = this.allocatedRanges[weaponKeys[0]];
+		if (first && typeof first === 'object') {
+			if (first['Capitals-HCVs'] !== undefined) defaults['Capitals-HCVs'] = first['Capitals-HCVs'];
+			if (first['LCVs-MCVs'] !== undefined) defaults['LCVs-MCVs'] = first['LCVs-MCVs'];
+			if (first['Fighters'] !== undefined) defaults['Fighters'] = first['Fighters'];
+		}
+	}
+	this.allocatedRanges = defaults;
+};
+
+// When MINE_MULTI is active but allocatedRanges is still flat (e.g. just-bought, never deployed),
+// convert to nested {weaponId: {shipType: range}} shape using current flat values as defaults.
+MineControllerDEW.prototype.ensureMultiAllocatedShape = function () {
+	if (!this.hasMultiTarget()) return;
+	var weapons = this.getMineWeapons();
+	if (weapons.length === 0) return;
+
+	//Detect flat shape: keys are shipType strings, values are not objects.
+	var keys = Object.keys(this.allocatedRanges || {});
+	var isFlat = false;
+	if (keys.length === 0) {
+		isFlat = true;
+	} else {
+		var firstVal = this.allocatedRanges[keys[0]];
+		if (firstVal == null || typeof firstVal !== 'object') isFlat = true;
+	}
+
+	if (!isFlat) {
+		//Already nested - but make sure every weapon has an entry.
+		for (var i = 0; i < weapons.length; i++) {
+			if (!this.allocatedRanges[weapons[i].id]) {
+				this.allocatedRanges[weapons[i].id] = { 'Capitals-HCVs': null, 'LCVs-MCVs': null, 'Fighters': null };
+			}
+		}
+		return;
+	}
+
+	//Convert flat to nested. Use existing flat values as the per-weapon defaults.
+	var flatDefaults = {
+		'Capitals-HCVs': (this.allocatedRanges && this.allocatedRanges['Capitals-HCVs'] != null) ? this.allocatedRanges['Capitals-HCVs'] : null,
+		'LCVs-MCVs': (this.allocatedRanges && this.allocatedRanges['LCVs-MCVs'] != null) ? this.allocatedRanges['LCVs-MCVs'] : null,
+		'Fighters': (this.allocatedRanges && this.allocatedRanges['Fighters'] != null) ? this.allocatedRanges['Fighters'] : null
+	};
+	var nested = {};
+	for (var i = 0; i < weapons.length; i++) {
+		nested[weapons[i].id] = {
+			'Capitals-HCVs': flatDefaults['Capitals-HCVs'],
+			'LCVs-MCVs': flatDefaults['LCVs-MCVs'],
+			'Fighters': flatDefaults['Fighters']
+		};
+	}
+	this.allocatedRanges = nested;
 };
 ;
 
@@ -21437,251 +21624,58 @@ ThirdspaceShield.prototype.initializationUpdate = function () {
 	return this;
 };
 
-ThirdspaceShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
-	//Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
-
+ThirdspaceShield.prototype.getGenerator = function () {
 	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
-
 	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
+		if (ship.systems[i] instanceof ThirdspaceShieldGenerator) {
+			return ship.systems[i];
 		}
 	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
-
-	return true;
+	return null;
 };
 
-ThirdspaceShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
-	//Check if it is at 0 health / not destroyed etc
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth <= 0) return false; //Shield cannot be reduced more.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
-
-	return true;
+ThirdspaceShield.prototype.canIncrease = function () {
+	if (this.ship.flight) return false; //Fighters can't increase or decrease shields
+	if (this.currentHealth >= this.maxhealth) return false; //Shield at maximum output.
+	return !!this.getGenerator(); //No generator, can't move shields around.
 };
 
-
-ThirdspaceShield.prototype.doIncrease = function () { //	
-	//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth; //
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 1) {
-		this.currentHealth += 1;
-		generator.storedCapacity -= 1;
-	}
-
+ThirdspaceShield.prototype.canDecrease = function () {
+	if (this.ship.flight) return false;
+	if (this.currentHealth <= 0) return false;
+	return !!this.getGenerator();
 };
 
-ThirdspaceShield.prototype.doIncrease5 = function () { //	
-	//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
+ThirdspaceShield.prototype.doIncrease = function (amount) {
+	var generator = this.getGenerator();
+	if (!generator) return;
 
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
+	var increment = Math.min(amount || 1, this.maxhealth - this.currentHealth);
+	if (increment <= 0) return;
 
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 5) {
-		this.currentHealth += 5;
-		generator.storedCapacity -= 5;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+	this.currentHealth += increment;
+	generator.storedCapacity -= increment;
+	this.outputDisplay = this.currentHealth;
 };
 
-ThirdspaceShield.prototype.doIncrease10 = function () { //	
-	//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
+ThirdspaceShield.prototype.doDecrease = function (amount) {
+	var generator = this.getGenerator();
+	if (!generator) return;
 
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
+	var decrement = Math.min(amount || 1, this.currentHealth);
+	if (decrement <= 0) return;
 
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 10) {
-		this.currentHealth += 10;
-		generator.storedCapacity -= 10;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+	this.currentHealth -= decrement;
+	generator.storedCapacity += decrement;
+	this.outputDisplay = this.currentHealth === 0 ? '-' : this.currentHealth;
 };
 
-ThirdspaceShield.prototype.doIncrease25 = function () { //	
-	//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 25) {
-		this.currentHealth += 25;
-		generator.storedCapacity -= 25;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+ThirdspaceShield.prototype.doMin = function () {
+	this.doDecrease(this.currentHealth);
 };
 
-ThirdspaceShield.prototype.doDecrease = function () {
-	//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 1) {
-		this.currentHealth -= 1;
-		generator.storedCapacity += 1;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease5 = function () {
-	//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 5) {
-		this.currentHealth -= 5;
-		generator.storedCapacity += 5;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease10 = function () {
-	//Reduce this.maxhealth by 10 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 10) {
-		this.currentHealth -= 10;
-		generator.storedCapacity += 10;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease25 = function () {
-	//Reduce this.maxhealth by 25 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 25) {
-		this.currentHealth -= 25;
-		generator.storedCapacity += 25;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
+ThirdspaceShield.prototype.doMax = function () {
+	this.doIncrease(this.maxhealth - this.currentHealth);
 };
 
 ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
@@ -21752,47 +21746,6 @@ ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, we
 	});
 
 	return defenceMod; // Return the calculated defenceMod
-};
-
-ThoughtShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
-	//Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
-
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThoughtShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
-
-	return true;
-};
-
-ThoughtShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
-	//Check if it is at 0 health / not destroyed etc
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth <= 0) return false; //Shield cannot be reduced more.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThoughtShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
-
-	return true;
 };
 ;
 
@@ -22191,7 +22144,7 @@ TwinArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -22271,7 +22224,7 @@ QuadArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -22351,7 +22304,7 @@ HeavyArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -22443,7 +22396,7 @@ QuadParticleBeam.prototype.doMultipleFireOrders = function (shooter, target, sys
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -22679,7 +22632,7 @@ ParticleRepeater.prototype.doMultipleFireOrders = function (shooter, target, sys
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -22999,7 +22952,7 @@ TelekineticCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -23359,6 +23312,10 @@ PakmaraPlasmaWeb.prototype.initializationUpdate = function () {
 	return this;
 }	
 
+PakmaraPlasmaWeb.prototype.hasMaxBoost = function () {
+	return this.maxBoostLevel;
+};
+
 PakmaraPlasmaWeb.prototype.clearBoost = function () {
     for (var i in system.power) {
         var power = system.power[i];
@@ -23553,6 +23510,125 @@ var ParticleConcentrator = function(json, ship)
 ParticleConcentrator.prototype = Object.create( Weapon.prototype );
 ParticleConcentrator.prototype.constructor = ParticleConcentrator;
 
+ParticleConcentrator.prototype.initializationUpdate = function() {
+    delete this.data["Combine projection"];
+    if (gamedata.gamephase !== 3) return this;
+
+    var myOrder = null;
+    for (var i in this.fireOrders) {
+        var fo = this.fireOrders[i];
+        if (fo.turn !== gamedata.turn) continue;
+        if (fo.type !== 'normal') continue;
+        myOrder = fo;
+        break;
+    }
+    if (!myOrder || myOrder.firingMode <= 1) return this;
+
+    var firingShip = this.ship;
+    var target = gamedata.getShip(myOrder.targetid);
+    if (!target) return this;
+
+    var firingShipPos = shipManager.getShipPosition(firingShip);
+    var targetPos = shipManager.getShipPosition(target);
+    var primarySides = weaponManager.getShipHittingSide(firingShip, target);
+
+    var sameSides = function(a, b) {
+        if (!a || !b || a.length !== b.length) return false;
+        for (var k = 0; k < a.length; k++) {
+            if (a[k] !== b[k]) return false;
+        }
+        return true;
+    };
+
+    // Firing ship included: multiple Concentrators on the same ship can combine.
+    // Primary weapon is skipped by object identity below.
+    var candidates = [];
+    for (var s in gamedata.ships) {
+        var otherShip = gamedata.ships[s];
+        if (!otherShip) continue;
+        if (otherShip.unavailable) continue;
+        if (shipManager.isDestroyed && shipManager.isDestroyed(otherShip)) continue;
+
+        var otherPos = shipManager.getShipPosition(otherShip);
+        if (firingShipPos.distanceTo(otherPos) > 1) continue;
+
+        var otherSides = weaponManager.getShipHittingSide(otherShip, target);
+        if (!sameSides(primarySides, otherSides)) continue;
+
+        for (var sys in otherShip.systems) {
+            var w = otherShip.systems[sys];
+            if (!w || w.name !== "ParticleConcentrator") continue;
+            // System ids are per-ship integers, not global — use object identity to skip the primary.
+            if (w === this) continue;
+            var matched = false;
+            for (var f in w.fireOrders) {
+                var fo2 = w.fireOrders[f];
+                if (fo2.turn !== gamedata.turn) continue;
+                if (fo2.type !== 'normal') continue;
+                if (fo2.id === myOrder.id) continue;
+                if (fo2.targetid != myOrder.targetid) continue;
+                if (fo2.firingMode != myOrder.firingMode) continue;
+                matched = true;
+                break;
+            }
+            if (!matched) continue;
+            candidates.push({
+                ship: otherShip,
+                weapon: w,
+                pos: otherPos,
+                distToTarget: otherPos.distanceTo(targetPos),
+            });
+        }
+    }
+
+    candidates.sort(function(a, b) {
+        return a.distToTarget - b.distToTarget;
+    });
+
+    // Greedy clique fill: every accepted ship must be within 1 hex of every other.
+    var accepted = [{ ship: firingShip, pos: firingShipPos }];
+    var partners = [];
+    var needed = myOrder.firingMode;
+    for (var c = 0; c < candidates.length && partners.length < needed; c++) {
+        var cand = candidates[c];
+        var fits = true;
+        for (var a = 0; a < accepted.length; a++) {
+            if (cand.pos.distanceTo(accepted[a].pos) > 1) { fits = false; break; }
+        }
+        if (!fits) continue;
+        accepted.push({ ship: cand.ship, pos: cand.pos });
+        partners.push(cand);
+    }
+
+    var line;
+    if (partners.length === 0) {
+        line = "No eligible partner weapons visible - will fire as single shot";
+    } else {
+        // Group all participating Concentrators by ship; seed firing ship with its own primary PC.
+        var counts = {};
+        var order = [];
+        var currentWeapons = partners.length+1;
+        counts[firingShip.name] = 1;
+        order.push(firingShip.name);
+        partners.forEach(function(p) {
+            if (counts[p.ship.name] === undefined) order.push(p.ship.name);
+            counts[p.ship.name] = (counts[p.ship.name] || 0) + 1;
+        });
+        var names = order.map(function(n) {
+            return counts[n] > 1 ? (n + " (" + counts[n] + "),") : n + " (1)";
+        }).join(',<br>');
+        var actualMode = partners.length + 1;
+        if (actualMode < myOrder.firingMode) {
+            //line = currentWeapons + " of " + needed + " concentrators available [" + names + "] - will downgrade to " + actualMode + "combined";
+            line = currentWeapons + " of " + needed + " available:<br>" + names + "<br>- will downgrade to " + actualMode + "combined";
+        } else {
+            line = "Will combine with: <br>" + names;
+        }
+    }
+    this.data["Combination"] = line;
+    return this;
+};
+
 var VorlonDischargeGun = function VorlonDischargeGun(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -23602,7 +23678,7 @@ VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, s
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking weapons not eligible for Called Shots
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -23858,7 +23934,7 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
             calledid = system.id;
         }        
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -24193,7 +24269,7 @@ ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, sy
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         //if(chance < 1) continue;
 
         var fire = {
@@ -24804,7 +24880,7 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 		var calledid = -1; //Ballistic Topredo CANNOT make called shots.
 
 	    var damageClass = this.data["Weapon type"].toLowerCase();
-	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
 
 	    var fire = {
 	        id: fireid,
@@ -25080,7 +25156,7 @@ PointPulsar.prototype.doMultipleFireOrders = function (shooter, target, system) 
             calledid = system.id;
         }        
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -25986,11 +26062,11 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 				}	
 
 				//Check valid shot?
-				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
 				if (chance < 1) continue;
 
 				for (var k = 0; k < shotsToFire; k++) {
-					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
 					fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 					weapon.resolveFireOrder(damagePerShot, shooter, target, fireid, calledid, chance);
 				}
@@ -26449,7 +26525,7 @@ MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
 			calledid = system.id;
 		}
 
-		var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+		var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
 		if (chance < 1) continue;
 
 		var fire = {
@@ -26812,7 +26888,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -26970,7 +27046,7 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Grav Beams are raking, can never called shot.
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -27165,7 +27241,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -27231,7 +27307,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -29634,6 +29710,10 @@ var NexusSandCaster = function  NexusSandCaster(json, ship) {
 NexusSandCaster.prototype = Object.create(Weapon.prototype);
 NexusSandCaster.prototype.constructor =  NexusSandCaster;
 
+NexusSandCaster.prototype.hasMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
 NexusSandCaster.prototype.initializationUpdate = function () {
     if(this.firingMode == 2){
         const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
@@ -30063,6 +30143,12 @@ var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
 EWNuclearTorpedo.prototype = Object.create(Weapon.prototype);
 EWNuclearTorpedo.prototype.constructor =  EWNuclearTorpedo;
 
+var EWRangedNuclearTorpedo = function  EWRangedNuclearTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedNuclearTorpedo.prototype = Object.create(Weapon.prototype);
+EWRangedNuclearTorpedo.prototype.constructor =  EWRangedNuclearTorpedo;
+
 var EWLaserBolt = function  EWLaserBolt(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -30169,7 +30255,7 @@ EWGraviticTractingRod.prototype.doMultipleFireOrders = function (shooter, target
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {

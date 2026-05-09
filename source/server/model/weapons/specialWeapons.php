@@ -3599,20 +3599,21 @@ class ParticleConcentrator extends Raking{
 	    public $damageType = "Raking"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
 	    public $weaponClass = "Particle"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
 
-	
+
 	public $isCombined = false; //is being combined with other weapon
 	public $alreadyConsidered = false; //already considered - either being fired or combined
 	public $testRun = false;//testRun = true means hit chance is calculated nominal skipping concentration issues - for subordinate weapon to calculate average hit chance
+	public $presetSubordinates = null; //pre-registered by a further weapon that yielded primary role to this (closest) weapon
 	
 	
 	    public function setSystemDataWindow($turn){
-		      parent::setSystemDataWindow($turn);  
-		      $this->data["Special"] = "Can combine multiple Particle Concentrator into one concentrated shot - for +2 Fire Control and +1d10 damage per additional weapon (up to 5 additional weapon can be added).";  
-		      $this->data["Special"] .= "<br>If You allocate multiple Particle Concentrators in higher mode of fire at the same target, they will be combined."; 
-		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in highest actually possible mode instead.";  
-		      $this->data["Special"] .= "<br>Concentrators do not need to be on the same ship, but need to be on the same hex to combine."; //tabletop: within 1 hex  			  
-		      $this->data["Special"] .= "<br>Hit chance will be average of all weapons combining.";//tabletop: use average EW, best range, worst criticals and no lock-on if ANY weapon lacks lock-on
-	    }	
+		      parent::setSystemDataWindow($turn);
+		      $this->data["Special"] = "Concentrators allocated in the same combined modes, at same section of the same target automatically merge into one shot.";
+		      $this->data["Special"] .= "<br>Combining ships must all be within 1 hex of each other; multiple Concentrators on the same ship can combine.";
+		      $this->data["Special"] .= "<br>Each additional weapon adds +2 Fire Control and +1d10 damage (max +10 / +5d10).";
+		      $this->data["Special"] .= "<br>Combined shot fires from the closest ship's range; doubled range penalty if any ship lacks lock-on.";
+		      $this->data["Special"] .= "<br>If too few partners are eligible, the shot fires in the highest mode actually achievable.";
+	    }
 	
 		
 	
@@ -3626,14 +3627,13 @@ class ParticleConcentrator extends Raking{
 	//if already combining - do not fire at all (eg. set hit chance at 0, make self completely uninterceptable and number of shots at 0)
 	public function calculateHitBase($gamedata, $fireOrder){
 		$this->alreadyConsidered = true;
-		$combinedChance = 0;
 		if ($this->testRun){ //calculate nominal, skipping concentration issues - for subordinate weapon to calculate average hit chance
 			parent::calculateHitBase($gamedata, $fireOrder);
 			return;
 		}
-		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon! 
+		if ($this->isCombined){  //this weapon is being used as subordinate combination weapon!
 			$notes = "technical fire order - weapon combined into another shot";
-			$fireOrder->chosenLocation = 0; //tylko techniczne i tak
+			$fireOrder->chosenLocation = 0;
 			$fireOrder->needed = 0;
 			$fireOrder->shots = 0;
 			$fireOrder->notes = $notes;
@@ -3641,60 +3641,183 @@ class ParticleConcentrator extends Raking{
 			$this->changeFiringMode($fireOrder->firingMode);
 			return;
 		}
-		if ($fireOrder->firingMode > 1){ //for single fire there's nothing special
-			$firingShip = $gamedata->getShipById($fireOrder->shooterid);	
-			$srcPos = $firingShip->getCoPos();			
-			$shipsSameHex = $gamedata->getShipsInDistance($firingShip, 0);//all ships on the same hex can potentially combine!
-			$subordinateOrders = array();
-			$subordinateOrdersNo = 0;
-			foreach($shipsSameHex as $otherShip) {			
-				//look for firing orders from same hex at same target in same mode - and make sure it's same type of weapon
-				$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
-				foreach($allOrders as $subOrder) {
-					if (($subOrder->type == 'normal') && ($subOrder->targetid == $fireOrder->targetid) && ($subOrder->calledid == $fireOrder->calledid) && ($subOrder->firingMode == $fireOrder->firingMode) ){ 
-						//order data fits - is weapon another Particle Concentrator?...
+
+		$subordinateData = array(); //per accepted subordinate: ['order','ship','nominalNeeded','dist']
+		$subordinateOrders = array();
+		$subordinateOrdersNo = 0;
+		$firingShip = $gamedata->getShipById($fireOrder->shooterid);
+		$target = $gamedata->getShipById($fireOrder->targetid);
+
+		if (($fireOrder->firingMode > 1) && ($firingShip !== null) && ($target !== null)){
+
+			if ($this->presetSubordinates !== null) {
+				//Pre-designated primary: a further weapon that processed first yielded the primary role to us.
+				$subordinateOrders = $this->presetSubordinates;
+				$this->presetSubordinates = null;
+				$subordinateOrdersNo = count($subordinateOrders);
+				if ($subordinateOrdersNo < ($fireOrder->firingMode - 1)){
+					$fireOrder->firingMode = $subordinateOrdersNo + 1;
+				}
+			} else {
+				//B5W rule: combining ships must all be within 1 hex of each other and hit the same side of the target.
+				$primarySide = $target->getHitSection($firingShip, $gamedata->turn);
+				$shipsNearby = $gamedata->getShipsInDistance($firingShip, 1);
+
+				//Collect candidate orders matching target/mode/section, sorted by distance to target so the closest get priority.
+				//Note: the firing ship itself is intentionally included - multiple Concentrators on the same ship can combine.
+				//The alreadyConsidered flag prevents the primary weapon from matching itself.
+				$candidates = array();
+				foreach($shipsNearby as $otherShip) {
+					$allOrders = $otherShip->getAllFireOrders($gamedata->turn);
+					foreach($allOrders as $subOrder) {
+						if ($subOrder->type !== 'normal') continue;
+						if ($subOrder->targetid != $fireOrder->targetid) continue;
+						if ($subOrder->firingMode != $fireOrder->firingMode) continue;
 						$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
-						if ($subWeapon instanceof ParticleConcentrator){
-							if (!$subWeapon->alreadyConsidered){ //ok, can be combined then!
-								$subordinateOrdersNo++;
-								$subordinateOrders[] = $subOrder;
-							}
+						if (!($subWeapon instanceof ParticleConcentrator)) continue;
+						if ($subWeapon->alreadyConsidered) continue;
+						$candidateSide = $target->getHitSection($otherShip, $gamedata->turn);
+						if ($candidateSide !== $primarySide) continue;
+						$candidates[] = array(
+							'order' => $subOrder,
+							'ship' => $otherShip,
+							'distToTarget' => $otherShip->getHexPos()->distanceTo($target->getHexPos()),
+						);
+					}
+				}
+				usort($candidates, function($a, $b) {
+					return $a['distToTarget'] - $b['distToTarget'];
+				});
+
+				//Greedy clique fill - each accepted ship must be within 1 hex of every already-accepted ship.
+				$acceptedShips = array($firingShip);
+				foreach($candidates as $cand){
+					if ($subordinateOrdersNo >= ($fireOrder->firingMode - 1)) break;
+					$candPos = $cand['ship']->getHexPos();
+					$fits = true;
+					foreach($acceptedShips as $acc){
+						if ($candPos->distanceTo($acc->getHexPos()) > 1){
+							$fits = false;
+							break;
 						}
 					}
-					if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
+					if (!$fits) continue;
+					$acceptedShips[] = $cand['ship'];
+					$subordinateOrders[] = $cand['order'];
+					$subordinateOrdersNo++;
 				}
-				if ($subordinateOrdersNo>=($fireOrder->firingMode-1)) break;//enough subordinate weapons found! - exit loop
+
+				//If not enough weapons could be combined, downgrade firing mode to what was actually achievable.
+				if ($subordinateOrdersNo < ($fireOrder->firingMode - 1)){
+					$fireOrder->firingMode = $subordinateOrdersNo + 1;
+				}
+
+				//Yield to closest: if a selected subordinate is closer to the target than we are, promote it to primary.
+				//We become a subordinate, pre-register the list on the closer weapon, and return.
+				if ($subordinateOrdersNo > 0) {
+					$primaryDist = $firingShip->getHexPos()->distanceTo($target->getHexPos());
+					$closestDist = $primaryDist;
+					$closestIndex = null;
+					foreach ($subordinateOrders as $idx => $subOrder) {
+						$subShip = $gamedata->getShipById($subOrder->shooterid);
+						$d = $subShip->getHexPos()->distanceTo($target->getHexPos());
+						if ($d < $closestDist) { $closestDist = $d; $closestIndex = $idx; }
+					}
+					if ($closestIndex !== null) {
+						$truePrimaryOrder = $subordinateOrders[$closestIndex];
+						$truePrimaryShip  = $gamedata->getShipById($truePrimaryOrder->shooterid);
+						$truePrimaryWeapon = $truePrimaryShip->getSystemById($truePrimaryOrder->weaponid);
+						// Build subordinate list for the true primary: swap promoted slot with self's order.
+						$newSubList = $subordinateOrders;
+						$newSubList[$closestIndex] = $fireOrder;
+						$truePrimaryWeapon->presetSubordinates = array_values($newSubList);
+						// Lock all pre-registered subordinates (including self) so none claims primary.
+						foreach ($newSubList as $lockedOrder) {
+							$lockedShip   = $gamedata->getShipById($lockedOrder->shooterid);
+							$lockedWeapon = $lockedShip->getSystemById($lockedOrder->weaponid);
+							$lockedWeapon->isCombined = true;
+							$lockedWeapon->alreadyConsidered = true;
+							$lockedWeapon->doNotIntercept = true;
+						}
+						// Mark own fire order as technical subordinate.
+						$this->isCombined = true;
+						$fireOrder->chosenLocation = 0;
+						$fireOrder->needed = 0;
+						$fireOrder->shots = 0;
+						$fireOrder->notes = "Technical fire order - weapon combined into another shot. ";
+						$fireOrder->updated = true;
+						$this->changeFiringMode($fireOrder->firingMode);
+						return;
+					}
+				}
 			}
-			//if not enough weapons to combine in desired mode - combine still, just in appropriately lesser mode
-			if ($subordinateOrdersNo < ($fireOrder->firingMode-1)){ 
-				$fireOrder->firingMode = $subordinateOrdersNo +1; //worst case it's single fire ;)
-			}			
-			//combining - set other combining weapons/fire orders to technical status! (and change their firing mode to the same as base weapon, also just in case ;)
+
+			$shipsWithPubnotes = array($firingShip->id);
+
+			//Mark subordinates as combined, capture nominal hit chance and distance, then null their fire orders.
 			foreach($subordinateOrders as $subOrder){
-				$otherShip = $gamedata->getShipById($subOrder->shooterid);	
+				$otherShip = $gamedata->getShipById($subOrder->shooterid);
 				$subWeapon = $otherShip->getSystemById($subOrder->weaponid);
 				$subWeapon->isCombined = true;
 				$subWeapon->alreadyConsidered = true;
 				$subWeapon->doNotIntercept = true;
-				$subOrder->pubnotes .= 'Combined into another shot. ';
-				$subOrder->firingMode = $fireOrder->firingMode;
 				
-				//get nominal hit chance...
+				if (!in_array($otherShip->id, $shipsWithPubnotes)) {
+					$subOrder->pubnotes .= ' Shots were combined into a stronger attack.';
+					$shipsWithPubnotes[] = $otherShip->id;
+				}
+
+				$subOrder->firingMode = $fireOrder->firingMode;
+
 				$subWeapon->testRun = true;
 				$subWeapon->calculateHitBase($gamedata, $subOrder);
-				$combinedChance += $subOrder->needed;
-				//and now nullify  hit chance...
+				$nominalNeeded = $subOrder->needed;
 				$subWeapon->testRun = false;
-				$notes = "Technical fire order - weapon combined into another shot. ";
+
+				$subordinateData[] = array(
+					'ship' => $otherShip,
+					'nominalNeeded' => $nominalNeeded,
+					'dist' => $otherShip->getHexPos()->distanceTo($target->getHexPos()),
+				);
+
 				$subOrder->needed = 0;
-				$subOrder->notes = $notes;
+				$subOrder->notes = "Technical fire order - weapon combined into another shot. ";
 			}
 		}
+
 		parent::calculateHitBase($gamedata, $fireOrder);
-		if($fireOrder->firingMode > 1){ //for concentrated shot - hit chance is average of hit chances of all weapons
-			$combinedChance += $fireOrder->needed;
-			$fireOrder->needed = round($combinedChance/$fireOrder->firingMode);
-			$fireOrder->notes .= 'Modified as average of concentrating shots! ';
+
+		if ($fireOrder->firingMode > 1 && $target !== null){
+			//Normalize each ship's nominal hit chance to the closest combining ship's range,
+			//then average. If any combining ship lacks lock-on, double the range penalty.
+			$primaryDist = $firingShip->getHexPos()->distanceTo($target->getHexPos());
+			$closestDist = $primaryDist;
+			foreach($subordinateData as $sd){
+				if ($sd['dist'] < $closestDist) $closestDist = $sd['dist'];
+			}
+
+			$anyWithoutLockOn = ($firingShip->getOEW($target, $gamedata->turn) <= 0);
+			if (!$anyWithoutLockOn){
+				foreach($subordinateData as $sd){
+					if ($sd['ship']->getOEW($target, $gamedata->turn) <= 0){
+						$anyWithoutLockOn = true;
+						break;
+					}
+				}
+			}
+
+			$combinedChance = $fireOrder->needed + ($primaryDist - $closestDist) * $this->rangePenalty;
+			foreach($subordinateData as $sd){
+				$combinedChance += $sd['nominalNeeded'] + ($sd['dist'] - $closestDist) * $this->rangePenalty;
+			}
+			$fireOrder->needed = round($combinedChance / $fireOrder->firingMode);
+
+			if ($anyWithoutLockOn){
+				$fireOrder->needed -= $closestDist * $this->rangePenalty;
+				$fireOrder->notes .= 'At least one combining ship lacks lock-on; range penalty doubled. ';
+			}
+			$fireOrder->notes .= 'Combined shot from ' . $fireOrder->firingMode . ' Particle Concentrators (closest-range hit chance, averaged EW). ';
+			$fireOrder->pubnotes .= ' Shots were combined into a stronger attack.';
 		}
 	}//endof function calculateHitBase
 	
@@ -8015,6 +8138,7 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 				}
 			}
 		$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$shooter->id,$this->id,"ClawAttached","ClawAttached",$target->id);
+		$this->hostShipId = $target->id;
 
 		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
 
@@ -8026,17 +8150,19 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 						if($cnc){
 								if($this->eliteMarines){//Are Marines Elite?
 									$crit = new CaptureShipElite(-1, $ship->id, $cnc->id, 'CaptureShipElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}else{//Not Elite Marines					
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+								}else{//Not Elite Marines
 									$crit = new CaptureShip(-1, $ship->id, $cnc->id, 'CaptureShip', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}							    		
-			            }				
-				
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+								}
+			            }
+
 					break;
 
 				case 2://Sabotage
@@ -8045,50 +8171,56 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 							$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt to sabotage " . $system->displayName ." system next turn.";
 						if($this->eliteMarines){//Are Marines Elite?
 							$crit = new SabotageElite(-1, $ship->id, $system->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
 							$system->criticals[] =  $crit;
-							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-						}else{//Not Elite Marines			
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+						}else{//Not Elite Marines
 							$crit = new Sabotage(-1, $ship->id, $system->id, 'Sabotage', $gamedata->turn+1); //Takes effect next turn.
+							$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 							$crit->updated = true;
 							$system->criticals[] =  $crit;
-							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-						}	
+							Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+						}
 					}else{ //Has targeted ship generally, not a specific system.  Apply crit to CnC.
-						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";								
+						$fireOrder->pubnotes .= "<br>Roll(Mod): $deliveryRoll($rollMod) - A marine unit will attempt sabotage operations on enemy ship next turn.";
 							if($cnc){
 									if($this->eliteMarines){//Are Marines Elite?
 										$crit = new SabotageElite(-1, $ship->id, $cnc->id, 'SabotageElite', $gamedata->turn+1); //Takes effect next turn.
+										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
 										$cnc->criticals[] =  $crit;
-										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.							
-									}else{//Not Elite Marines					
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+									}else{//Not Elite Marines
 										$crit = new Sabotage(-1, $ship->id, $cnc->id, 'Sabotage', $gamedata->turn+1);  //Takes effect next turn.
+										$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 										$crit->updated = true;
 										$cnc->criticals[] =  $crit;
-										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-									}							    		
-				            }				
-					}	
-					
-					break;				
-				
+										Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+									}
+				            }
+					}
+
+					break;
+
 				case 3://Rescue
 
-					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt their rescue mission next turn.";			
+					$fireOrder->pubnotes .= "<br>Rolled: $deliveryRoll - A marine unit will attempt their rescue mission next turn.";
 						if($cnc){
 								if($this->eliteMarines){//Are Marines Elite?
 									$crit = new RescueMissionElite(-1, $ship->id, $cnc->id, 'RescueMissionElite', $gamedata->turn+1); //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
 									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note marines have boarded this turn
-								}else{//Not Elite Marines					
+								}else{//Not Elite Marines
 									$crit = new RescueMission(-1, $ship->id, $cnc->id, 'RescueMission', $gamedata->turn+1);  //Takes effect next turn.
+									$crit->param = array('id' => $shooter->id, 'userid' => $shooter->userid, 'team' => $shooter->team);
 									$crit->updated = true;
 									$cnc->criticals[] =  $crit;
-									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.	
-								}							    		
-			            }	
+									Marines::recordBoarding($fireOrder->targetid);//Add id entry to static variable to note pod attached this turn.
+								}
+			            }
 				
 					break;			
 				

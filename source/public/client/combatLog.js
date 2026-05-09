@@ -19,24 +19,24 @@ window.combatLog = {
         // In that case, the toUpperCase goes wrong.
         // Make certain the name is a string.
         if (typeof ship.name == 'string' || ship.name instanceof String) {
-            if(jumped){
+            if (jumped) {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #cc8500; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
-            }else{
+            } else {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> IS DESTROYED</span>';
-            }    
+            }
         } else {
-            if(jumped){
+            if (jumped) {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #cc8500; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
             } else {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span> IS DESTROYED</span>';
-            }    
+            }
         }
 
         var element = $(html).appendTo("#log");  //Changed to append - DK
 
         $("#log").scrollTop($("#log")[0].scrollHeight);
         return element;
-        
+
     },
 
     logFireOrders: function logFireOrders(orders, printedLog = false, ships = null) {
@@ -50,96 +50,136 @@ window.combatLog = {
         var shots = 0;
         var shotshit = 0;
         var shotsintercepted = 0;
-		/*let's count orders as well!*/
-		var ordersC = 0;
+        /*let's count orders as well!*/
+        var ordersC = 0;
         var ordersChit = 0;
         var ordersCintercepted = 0;
-		
+
         var damages = Array();
         var lowC = 100000;
         var highC = -100000;
         var notes = "";
-        
-        for (var a in orders){            
+        var totalInterceptPenalty = 0;
+        var totalInterceptorsCount = 0;
+        var tooltipTextParts = [];
+        var shotIndex = 1;
+
+        for (var a in orders) {
 
             count++;
             var fire = orders[a];
 
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-		
-		
+
+
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-            if(modeIteration != weapon.firingMode){
-                while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
-                weapon.changeFiringMode();
+            if (modeIteration != weapon.firingMode) {
+                while (modeIteration != weapon.firingMode) { //will loop until correct mode is found
+                    weapon.changeFiringMode();
                 }
             }
-		    
+
             shots += fire.shots;
             shotshit += fire.shotshit;
             shotsintercepted += fire.intercepted;
             if (fire.shots > 0) ordersC += 1;
-			if (fire.shotshit>0) ordersChit += 1;
-			if (fire.intercepted>0) ordersCintercepted += 1;
+            if (fire.shotshit > 0) ordersChit += 1;
+            if (fire.intercepted > 0) ordersCintercepted += 1;
             weaponManager.getDamagesCausedBy(fire, damages, ships);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
-            //if (fire.shots > 0){ //otherwise shot is purely technical ... BUT show it too!
-                if (needed < lowC)
-                lowC = needed;
-                if (needed > highC)
-                highC = needed;
+            if (fire.shots > 0) { //ignore hit chance of purely technical fire orders
+                if (needed < lowC) lowC = needed;
+                if (needed > highC) highC = needed;
 
-                if (fire.pubnotes)
-                notes += fire.pubnotes + " ";
-            //}
-                        
+                var interceptPenalty = 0;
+                var interceptorsCount = 0;
+
+                if (fire.notes) {
+                    var match = fire.notes.match(/Interception: (\d+) sources:(\d+)/);
+                    if (match) {
+                        interceptPenalty = parseInt(match[1], 10);
+                        interceptorsCount = parseInt(match[2], 10);
+                    }
+                }
+
+                totalInterceptPenalty += interceptPenalty;
+                totalInterceptorsCount += interceptorsCount;
+
+                if (interceptorsCount > 0) {
+                    var wWord = interceptorsCount === 1 ? "shot" : "shots";
+                    tooltipTextParts.push("Shot " + shotIndex + ": -" + interceptPenalty + "% (" + interceptorsCount + " intercepting " + wWord + ")");
+                } else {
+                    tooltipTextParts.push("Shot " + shotIndex + ": No interception");
+                }
+                shotIndex++;
+            }
+
+            if (fire.pubnotes) notes += fire.pubnotes + " ";
         }
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";
+
+        var tooltipAttr = "";
+        if (totalInterceptorsCount > 0) {
+            var wWord = totalInterceptorsCount === 1 ? "shot" : "shots";
+            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied a -' + totalInterceptPenalty + '% hit penalty.';
+            var tooltipText = summaryText;
+
+            // If there's more than one shot, append the per-shot breakdown
+            if (shotIndex > 2) {
+                tooltipText += "\n• " + tooltipTextParts.join("\n• ");
+            }
+
+            tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '"';
+        } else {
+            tooltipAttr = '';
+        }
+
         var chancetext = "";
-        if (lowC == highC) chancetext = "Chance to hit: " + lowC + "%";else chancetext = "Chance to hit: " + lowC + "% - " + highC + "%";
+        if (lowC !== 100000) {
+            if (lowC == highC) chancetext = "<span" + tooltipAttr + ">Chance to hit: " + lowC + "%</span>";
+            else chancetext = "<span" + tooltipAttr + ">Chance to hit: " + lowC + "% - " + highC + "%</span>";
+        }
 
         if (!target) chancetext = "";
 
         var intertext = "";
-        //if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";
-		//if (shotsintercepted > 0) intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
-		if (shotsintercepted > 0){
-			if(ordersC != shots){
-			 	intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
-			}else{
-				if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";				
-			}	
-		}
-		
+        if (shotsintercepted > 0) {
+            if (ordersC != shots) {
+                intertext = ', <span>' + ordersCintercepted + '(' + shotsintercepted + ') intercepted</span>';
+            } else {
+                intertext = ', <span>' + shotsintercepted + ' intercepted</span>';
+            }
+        }
+
         var targettext = "";
         if (target) targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" >' + target.name + '</span>';
 
         var shottext = "";
         //if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
-		//if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
-		if (target){
-			if(ordersC != shots){
-			    shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
-			}else{
-			    shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';				
-			}	
-		}
-		
+        //if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
+        if (target) {
+            if (ordersC != shots) {
+                shottext = ', ' + ordersChit + '(' + shotshit + ')/' + ordersC + '(' + shots + ') shots hit' + intertext + '.';
+            } else {
+                shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
+            }
+        }
+
         var notestext = "";
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
 
         var shortText = false;
-        if(weaponManager.doShortLogText(fire)) shortText = true;
+        if (weaponManager.doShortLogText(fire)) shortText = true;
 
         //Some orders don't need the full log text, e.g. Reactor overload, hyperspace jump.    
-        if(shortText){
+        if (shortText) {
             html += notestext;
-        }else{
+        } else {
             if (mathlib.arrayIsEmpty(weapon.missileArray)) {
                 html += ' firing ' + counttext + weapon.displayName + ' (' + weapon.firingModes[weapon.firingMode] + ') ' + targettext + '. ' + chancetext + shottext + notestext;
             } else {
@@ -162,16 +202,16 @@ window.combatLog = {
                 var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.                
                 var damagehtml = "";
                 for (var a in damages[i].damages) {
-                   
+
                     var d = damages[i].damages[a];
                     var damageDone = d.damage - d.armour;
                     var damageStopped = d.armour;
-					/*healing is up, so negative values are just fine
+                    /*healing is up, so negative values are just fine
                     if (damageDone < 0) {
                         damageStopped = d.damage;
                         damageDone = 0;
                     }
-					*/
+                    */
                     /*if (d.damage-d.armour<=0) continue;*/
 
                     totaldam += damageDone; //d.damage-d.armour;
@@ -180,15 +220,15 @@ window.combatLog = {
                     var comma = ",";
 
                     //New section to create critical entries when damage is done but system no destroyed.
-                    var firstCrit = "";                    
+                    var firstCrit = "";
                     var hasCrit = shipManager.criticals.sufferedCritThisTurn(system, d.turn);
 
-                    if(hasCrit && damageDone > 0){
+                    if (hasCrit && damageDone > 0) {
                         if (criticalshtml.length == 0) {
                             firstCrit = " System criticals: ";
                             comma = "";
                         }
-                        if(!system.ship) continue; //Means it's a fighter, just ignore.
+                        if (!system.ship) continue; //Means it's a fighter, just ignore.
                         if (!combatLog.critsShown[system.ship.id]?.includes(system.id)) {
                             criticalshtml += firstCrit + '<span class="critical">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
                         }
@@ -198,8 +238,8 @@ window.combatLog = {
                         }
                         if (!combatLog.critsShown[system.ship.id].includes(system.id)) {
                             combatLog.critsShown[system.ship.id].push(system.id);
-                        }                     
-                    }  
+                        }
+                    }
 
 
                     if (!d.destroyed) {
@@ -213,36 +253,36 @@ window.combatLog = {
                         comma = "";
                     }
 
-                    damagehtml += firstDam + '<span class="damage">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';                   
-                    
+                    damagehtml += firstDam + '<span class="damage">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
+
                 }
 
                 //if (totaldam > 0){ //display fire orders that did no damage, too! - MS
                 //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';
 
-                if(fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
+                if (fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
 
                 html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
 
                 if (criticalshtml.length > 1) {
-                    html += '<li>' + criticalshtml + '</li>';                                       
+                    html += '<li>' + criticalshtml + '</li>';
                 }
-                
+
                 if (damagehtml.length > 1) {
-                    html += '<li>' + damagehtml + '</li>';                                     
+                    html += '<li>' + damagehtml + '</li>';
                 }
                 //}
             }
 
             html += "</ul>";
         }
-		
-		
-        if(printedLog){ //Different method of listing depending on whether player is watching a Replay animation or just browsing the printed log :)
-            var targetDiv = document.getElementById("LogActual"); 
+
+
+        if (printedLog) { //Different method of listing depending on whether player is watching a Replay animation or just browsing the printed log :)
+            var targetDiv = document.getElementById("LogActual");
             targetDiv.style.display = "block";
             targetDiv.innerHTML += html;
-        }else{
+        } else {
             var element = $(html).appendTo("#log");
             $("#log").scrollTop($("#log")[0].scrollHeight);
             return element;
@@ -320,7 +360,7 @@ window.combatLog = {
         $(html).prependTo("#log");
     },
     */
-    
+
     logMoves: function logMoves(ship) {
 
         var e = $('.logentry.' + ship.id + ' .move.t' + gamedata.turn);
@@ -341,50 +381,50 @@ window.combatLog = {
     },
 
     getDisplayTurn: function getDisplayTurn() {
-        if(this.displayedTurn === null){
+        if (this.displayedTurn === null) {
             return gamedata.turn;
-        }else{
-            return this.displayedTurn; 
-        } 
-    },    
+        } else {
+            return this.displayedTurn;
+        }
+    },
 
     showPrevious: function showPrevious() {
-        if(this.displayedTurn === null) this.displayedTurn = gamedata.turn;
+        if (this.displayedTurn === null) this.displayedTurn = gamedata.turn;
         var turn = this.displayedTurn - 1;
         if (turn < 1) return;
         this.displayedTurn = turn;
 
-        if(this.displayedTurn < gamedata.turn){
+        if (this.displayedTurn < gamedata.turn) {
             document.getElementById('nextTurnButton').style.display = 'inline-block'; // Display next button when relevant.
             document.getElementById('currentTurnButton').style.display = 'inline-block'; // Display next button when relevant.
         }
 
         combatLog.fetchAndShowCombatLog();
-    },    
+    },
 
     showNext: function showNext() {
-        if(this.displayedTurn === null) this.displayedTurn = gamedata.turn;
-        var turn = this.displayedTurn+1; //Get the turn we want.
+        if (this.displayedTurn === null) this.displayedTurn = gamedata.turn;
+        var turn = this.displayedTurn + 1; //Get the turn we want.
         this.displayedTurn = turn; //Set new displayedTurn for further requests.
-        
-        if(this.displayedTurn >= gamedata.turn){
+
+        if (this.displayedTurn >= gamedata.turn) {
             document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
             document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.            
             document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.
             return; //Can't go forward past current turn. 
-        } 
+        }
         combatLog.fetchAndShowCombatLog();
     },
 
     showCurrent: function showCurrent() {
         this.displayedTurn = gamedata.turn;
-        
+
         document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
         document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.
         document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.        
         document.getElementById('LogActual').innerHTML = '';  //Reset Combat Log text          
-        return; 
-    },    
+        return;
+    },
 
     /*
     fetchAndShowCombatLog: function fetchAndShowCombatLog() {
@@ -420,85 +460,85 @@ window.combatLog = {
     },
     */
 
-//New version using ajaxWithRetry()
-fetchAndShowCombatLog: function fetchAndShowCombatLog() {
-    var turn = this.displayedTurn;
+    //New version using ajaxWithRetry()
+    fetchAndShowCombatLog: function fetchAndShowCombatLog() {
+        var turn = this.displayedTurn;
 
-    // Check if this turn's data is already cached
-    if (combatLog.logCache[turn]) {
-        combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
-        return;
-    }
+        // Check if this turn's data is already cached
+        if (combatLog.logCache[turn]) {
+            combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
+            return;
+        }
 
-    ajaxInterface.ajaxWithRetry({
-        type: 'GET',
-        url: 'replay.php',
-        dataType: 'json',
-        data: {
-            turn: turn,
-            gameid: gamedata.gameid,
-            time: new Date().getTime() // prevent browser caching
-        },
-        success: function (data) {
-            var allFireOrders = combatLog.groupByShipAndWeapon(
-                weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)
-            );
+        ajaxInterface.ajaxWithRetry({
+            type: 'GET',
+            url: 'replay.php',
+            dataType: 'json',
+            data: {
+                turn: turn,
+                gameid: gamedata.gameid,
+                time: new Date().getTime() // prevent browser caching
+            },
+            success: function (data) {
+                var allFireOrders = combatLog.groupByShipAndWeapon(
+                    weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)
+                );
 
-            // Store in cache
-            combatLog.logCache[turn] = {allFireOrders: allFireOrders, ships: data.ships};
+                // Store in cache
+                combatLog.logCache[turn] = { allFireOrders: allFireOrders, ships: data.ships };
 
-            combatLog.showLog(allFireOrders, data.ships);
-        }.bind(this),
-        error: ajaxInterface.errorAjax
-    });
-},    
+                combatLog.showLog(allFireOrders, data.ships);
+            }.bind(this),
+            error: ajaxInterface.errorAjax
+        });
+    },
 
     groupByShipAndWeapon: function groupByShipAndWeapon(incomingFire) {
         const grouped = {};
-    
+
         incomingFire.forEach(function (fire) {
             if (fire.type === "intercept" || fire.type === "selfIntercept") return;
-    
+
             const ship = gamedata.getShip(fire.shooterid);
             const weapon = shipManager.systems.getSystem(ship, fire.weaponid);
             const key = `${fire.shooterid}-${weapon.constructor.name}-${fire.firingMode}-${fire.targetid}`;
-    
+
             grouped[key] = grouped[key] || [];
             grouped[key].push(fire);
         });
-    
+
         const groupedKeys = Object.keys(grouped);
-    
+
         groupedKeys.sort(function (a, b) {
             const obj1 = grouped[a][0];
-            const obj2 = grouped[b][0]; 
-    
+            const obj2 = grouped[b][0];
+
             const s1 = gamedata.getShip(obj1.shooterid);
             const s2 = gamedata.getShip(obj2.shooterid);
             const w1 = shipManager.systems.getSystem(s1, obj1.weaponid);
             const w2 = shipManager.systems.getSystem(s2, obj2.weaponid);
-/*    
-            // Sort by resolution order first
-            if (obj1.resolutionOrder !== obj2.resolutionOrder) {
-                return obj1.resolutionOrder - obj2.resolutionOrder;
-            }
-    
-            // Fighters after ships
-            if (s1.flight !== s2.flight) {
-                return s1.flight ? 1 : -1;
-            }
-*/    
+            /*    
+                        // Sort by resolution order first
+                        if (obj1.resolutionOrder !== obj2.resolutionOrder) {
+                            return obj1.resolutionOrder - obj2.resolutionOrder;
+                        }
+                
+                        // Fighters after ships
+                        if (s1.flight !== s2.flight) {
+                            return s1.flight ? 1 : -1;
+                        }
+            */
             // Weapon priority
             if (w1.priority !== w2.priority) {
                 return w1.priority - w2.priority;
             }
-    
+
             // Fallback: shooter ID and fire order ID
             let val = s1.id - s2.id;
             if (val === 0) val = obj1.id - obj2.id;
             return val;
         });
-    
+
         return groupedKeys.map(function (key) {
             return grouped[key];
         });
@@ -507,26 +547,51 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
     showLog: function showLog(allFireOrders, ships = null) {
         // Get the current turn from the combat log system
         var currentTurn = window.combatLog.getDisplayTurn();
-    
+
         // Start building the log HTML
         var html = '<br><span class = "combatTurn";>Turn ' + currentTurn + ':</span><br>';
-    
+
         // Check if the allFireOrders array is empty
         if (allFireOrders.length === 0) {
             html += '<span class = "noCombatLog";><br>No fire orders were made this turn!</span>';
         }
-    
+
         // Update the content of LogActual with the current turn and optional message
         document.getElementById('LogActual').innerHTML = html;
-    
+
         // Process fire orders if any
         allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
             combatLog.logFireOrders(logEntry, true, ships);
         });
-    
+
         // Show the LogActual div
         document.getElementById('LogActual').style.display = 'block'; // Set to 'block' or 'inline-block' depending on your layout
         combatLog.critsShown = {}; //Empty crti tracker for next print.
     }
 
 };
+$(function () {
+    $(document).on('mouseenter touchstart', '.intercept-tooltip', function (e) {
+        var tooltip = $('#custom-intercept-tooltip');
+        if (!tooltip.length) {
+            tooltip = $('<div id="custom-intercept-tooltip" class="custom-intercept-tooltip"></div>').appendTo('body');
+        }
+        var raw = String($(this).data('tooltip') || '');
+        var lines = raw.split('\n');
+        var $header = $('<div class="hctt-header"></div>').text(lines[0] || '');
+        tooltip.empty().append($header);
+        for (var i = 1; i < lines.length; i++) {
+            tooltip.append($('<div class="hctt-row"></div>').text(lines[i]));
+        }
+        var rect = this.getBoundingClientRect();
+        var topPos = rect.top - tooltip.outerHeight() - 5;
+        if (topPos < 0) topPos = rect.bottom + 5;
+        var leftPos = rect.left + rect.width / 2 - tooltip.outerWidth() / 2;
+        if (leftPos < 0) leftPos = 5;
+        if (leftPos + tooltip.outerWidth() > window.innerWidth) leftPos = window.innerWidth - tooltip.outerWidth() - 5;
+        tooltip.css({ top: topPos + 'px', left: leftPos + 'px' }).show();
+    }).on('mouseleave touchend touchmove', '.intercept-tooltip', function (e) {
+        $('#custom-intercept-tooltip').hide();
+    });
+});
+

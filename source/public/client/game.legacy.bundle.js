@@ -5266,18 +5266,24 @@ window.AnimationStrategy = function () {
     }
 
     function updateDeltaTime(paused) {
-        var now = new Date().getTime();
+        var now = Date.now();
 
         if (!this.lastAnimationTime) {
             this.lastAnimationTime = now;
             this.currentDeltaTime = 0;
+            return;
         }
 
-        if (!paused) {
-            this.currentDeltaTime = now - this.lastAnimationTime;
-        }
-
+        var delta = now - this.lastAnimationTime;
         this.lastAnimationTime = now;
+
+        // If paused, hidden, or a massive time jump occurred (e.g. tab sleep), zero the delta
+        // to prevent animations "catching up" all at once (and blasting overlapping audio).
+        if (paused || document.hidden || delta > 1000) {
+            this.currentDeltaTime = 0;
+        } else {
+            this.currentDeltaTime = delta;
+        }
     }
 
     return AnimationStrategy;
@@ -5388,7 +5394,14 @@ window.ReplayAnimationStrategy = function () {
         this.emitterContainer.cleanUp();
 
         this.gamedata.ships.forEach(function (ship) {
-            this.shipIconContainer.getByShip(ship).show();
+            // Guard: gamedata is a singleton mutated in place by parseServerData,
+            // so by the time deactivate runs the ship list may include new units
+            // (e.g. flights/mines launched in a Pre-Turn Orders phase the local
+            // player skipped) whose icons haven't been built yet.
+            var icon = this.shipIconContainer.getByShip(ship);
+            if (icon) {
+                icon.show();
+            }
         }, this);
 
         return this;
@@ -6154,19 +6167,23 @@ window.ReplayAnimationStrategy = function () {
     };
 
     SyncedIconAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
-        // For detaching pods, clamp the query time to the detach point
-        // so the pod stays at the separation position after detach
-        var queryTime = total;
-        if (this.detachMove) {
-            var detachTime = this.time + this.hostAnimation.duration * this.detachFraction;
-            queryTime = Math.min(total, detachTime);
-        }
-
         // Compute position using the same math as the host animation
         // (no render-order dependency)
-        var hostPosAndFacing = this.hostAnimation.getPositionAndFacingAtTime(queryTime);
+        var hostPosAndFacing = this.getPositionAndFacingAtTime(total);
         this.shipIcon.setPosition(hostPosAndFacing.position);
         this.shipIcon.setFacing(-hostPosAndFacing.facing);
+    };
+
+    SyncedIconAnimation.prototype.getPositionAndFacingAtTime = function (time) {
+        // For detaching pods, clamp the query time to the detach point
+        // so the pod stays at the separation position after detach
+        var queryTime = time;
+        if (this.detachMove) {
+            var detachTime = this.time + this.hostAnimation.duration * this.detachFraction;
+            queryTime = Math.min(time, detachTime);
+        }
+
+        return this.hostAnimation.getPositionAndFacingAtTime(queryTime);
     };
 
     SyncedIconAnimation.prototype.cleanUp = function (scene) {};
@@ -7053,7 +7070,7 @@ window.ShipJumpAnimation = function () {
     ShipJumpAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
 
         // --- 🔊 Play sound once when jump starts ---
-        if (!this.explosionTriggered && total >= this.time && gamedata.playAudio) {
+        if (!this.explosionTriggered && total >= this.time && gamedata.playAudio && !paused && !back) {
             this.sound.currentTime = 0;
             this.sound.play().catch(() => {});
             this.explosionTriggered = true;
@@ -7235,9 +7252,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
             var extraTime = 0;
 
+            //On balance let's not exclude Log entries for concrator type weapons, see the note these were combined is informative.
+            //var totalGroupShots = group.reduce(function (sum, entry) { return sum + entry.shots; }, 0);
+            //if (totalGroupShots > 0) {
             this.logAnimation.addLogEntryFire(group.map(function (entry) {
                 return entry.fireOrder;
             }), this.time + this.duration);
+            //}
 
             var durations = group.map(function (group) {
                 extraTime += Math.random() * 100 + 300;
@@ -7494,12 +7515,13 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
                 TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
             }
-            var playedPullSound = false;
+
             var pullSoundVolume = 0.1;
 
             return {
+                playedPullSound: false,
                 render: function (now, total, last, delta, zoom, back, paused) {
-                    if (total >= startTime && !playedPullSound && gamedata.playAudio && !paused && !back) {
+                    if (total >= startTime && !this.playedPullSound && gamedata.playAudio && !paused && !back) {
                         try {
                             if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
                                 var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
@@ -7507,7 +7529,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                 explosionSound.currentTime = 0;
                                 explosionSound.play().catch(function () { });
                             }
-                            playedPullSound = true;
+                            this.playedPullSound = true;
                         } catch (e) {
                             console.warn("GraviticMine explosion sound failed:", e);
                         }
@@ -7523,7 +7545,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
 
         switch (animationType) {
             case "laser":
-                return new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
+                var _laser = new LaserEffect(weapon, weaponOrigin, this.shipIconContainer.getByShip(incomingFire.shooter), getShipPositionAtTime.call(this, this.shipIcon, startLocationTime), this.scene, {
                     size: 100 * weapon.animationExplosionScale,
                     //                    color: new THREE.Color(animationColor[0] / 255, animationColor[1] / 255, animationColor[2] / 255),
                     color: color,
@@ -7534,6 +7556,22 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                     critNames: critNames,
                     systemDestroyedEffect: this.systemDestroyedEffect
                 });
+                var _laserSparks = hit ? new ImpactSparksEffect(this.scene, {
+                    position: getShipPositionAtTime.call(this, this.shipIcon, startTime),
+                    color: color,
+                    time: startTime
+                }) : null;
+                return {
+                    render: function (now, total, last, delta, zoom, back, paused) {
+                        _laser.render(now, total, last, delta, zoom, back, paused);
+                        if (_laserSparks) _laserSparks.render(now, total, last, delta, zoom, back, paused);
+                    },
+                    getDuration: function () { return _laser.getDuration(); },
+                    cleanUp: function () {
+                        _laser.cleanUp();
+                        if (_laserSparks) _laserSparks.cleanUp();
+                    }
+                };
             case "ball":
                 if (weapon.name === "ProximityMine") {
                     var targetPos = getShotTargetVariance(getShipPositionAtTime.call(this, this.shipIcon, startTime), incomingFire, shotsFired);
@@ -7553,16 +7591,16 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                         this.systemDestroyedEffect.add(targetPos, critNames, startTime + 500, 'crit');
                     }
 
-                    var playedImpactSound = false;
                     var soundVolume = 0.1;
                     if (typeof TorpedoEffect !== 'undefined' && !TorpedoEffect.cachedExplosionAudio) {
                         TorpedoEffect.cachedExplosionAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
                     }
 
                     return {
+                        playedImpactSound: false,
                         render: function(now, total, last, delta, zoom, back, paused) {
                             explosion.render(now, total, last, delta, zoom, back, paused);
-                            if (total >= startTime && !playedImpactSound && gamedata.playAudio && !paused && !back) {
+                            if (total >= startTime && !this.playedImpactSound && gamedata.playAudio && !paused && !back) {
                                 try {
                                     if (typeof TorpedoEffect !== 'undefined' && TorpedoEffect.cachedExplosionAudio) {
                                         var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
@@ -7570,7 +7608,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                         explosionSound.currentTime = 0;
                                         explosionSound.play().catch(function() {});
                                     }
-                                    playedImpactSound = true;
+                                    this.playedImpactSound = true;
                                 } catch (e) {
                                     console.warn("Mine explosion sound failed:", e);
                                 }
@@ -9066,18 +9104,43 @@ window.LaserEffect = function () {
             y: Math.random() * 0.01 * offsetVelocityFactor - 0.005 * offsetVelocityFactor
         };
 
+        // Cache laser texture once per session (previously re-loaded per shot).
+        if (!LaserEffect.cachedTexture) {
+            LaserEffect.cachedTexture = new THREE.TextureLoader().load("img/effect/laser19.png");
+            LaserEffect.cachedTexture.colorSpace = THREE.SRGBColorSpace;
+        }
+
+        const haloIntensity = 1.0;
+        const coreIntensity = 1.0;
+        const haloOpacity = 1.0;
+        const coreOpacity = 0.5; //Maybe change to 0.1
+
         // --- Laser meshes ---
-        const beamWidth = Math.ceil(this.size * 0.2);
-        const haloWidth = Math.ceil(this.size * 0.3);
+        // Thin beam body; round end-caps are added separately so the beam has
+        // a stadium/capsule silhouette rather than a long oblong rectangle.
+        const beamWidth = Math.max(2, Math.ceil(this.size * 0.15));
+        const haloWidth = Math.max(3, Math.ceil(this.size * 0.1));
         this.lasers = [
-            createLaser.call(this, this.color, 0.8, haloWidth),
-            createLaser.call(this, new THREE.Color(1, 1, 1), 0.6, beamWidth)
+            createLaser.call(this, this.color, haloOpacity, haloWidth, haloIntensity),
+            createLaser.call(this, new THREE.Color(1, 1, 1), coreOpacity, beamWidth, coreIntensity)
         ];
 
         this.lasers.forEach(laser => {
             laser.multiplyOpacity(0);
             this.scene.add(laser.mesh);
         });
+
+        // --- Round end-caps (one per layer, per end) ---
+        this.startCaps = [
+            createCap(this.color, haloOpacity, haloWidth, haloIntensity),
+            createCap(new THREE.Color(1, 1, 1), coreOpacity, beamWidth, coreIntensity)
+        ];
+        this.endCaps = [
+            createCap(this.color, haloOpacity, haloWidth, haloIntensity),
+            createCap(new THREE.Color(1, 1, 1), coreOpacity, beamWidth, coreIntensity)
+        ];
+        this.startCaps.forEach(cap => this.scene.add(cap));
+        this.endCaps.forEach(cap => this.scene.add(cap));
 
         // --- Particle emitter ---
         this.particleEmitter = new ParticleEmitterContainer(scene, 200);
@@ -9124,6 +9187,8 @@ window.LaserEffect = function () {
 
     LaserEffect.prototype.cleanUp = function () {
         this.lasers.forEach(laser => this.scene.remove(laser.mesh));
+        this.startCaps.forEach(cap => this.scene.remove(cap));
+        this.endCaps.forEach(cap => this.scene.remove(cap));
         this.particleEmitter.cleanUp();
     };
 
@@ -9131,7 +9196,7 @@ window.LaserEffect = function () {
         this.particleEmitter.render(now, total, last, delta, zoom);
 
         // --- Play sound exactly when the laser starts ---
-        if (gamedata.playAudio && !this.playedSound && total >= this.time) {
+        if (gamedata.playAudio && !this.playedSound && total >= this.time && !document.hidden) {
             try {
                 this.laserSound = LaserEffect.cachedAudio.cloneNode(true);
                 this.laserSound.volume = this.soundVolume;
@@ -9195,23 +9260,70 @@ window.LaserEffect = function () {
             laser.multiplyOpacity(opacity);
             laser.setStartAndEnd(startAndEnd.start, startAndEnd.end);
         });
+
+        this.startCaps.forEach(cap => {
+            cap.position.x = startAndEnd.start.x;
+            cap.position.y = startAndEnd.start.y;
+            cap.material.opacity = cap.userData.baseOpacity * opacity;
+        });
+        this.endCaps.forEach(cap => {
+            cap.position.x = startAndEnd.end.x;
+            cap.position.y = startAndEnd.end.y;
+            cap.material.opacity = cap.userData.baseOpacity * opacity;
+        });
     };
 
     LaserEffect.prototype.getDuration = function () {
         return this.duration + this.fadeOutSpeed;
     };
 
-    function createLaser(color, opacity, width) {
+    function createLaser(color, opacity, width, intensity) {
         const startAndEnd = getStartAndEnd.call(this);
-
-        const tex = new THREE.TextureLoader().load("img/effect/laser19.png");
-        tex.colorSpace = THREE.SRGBColorSpace;
-        tex.colorSpace = THREE.SRGBColorSpace;
-
         return new LineSprite(startAndEnd.start, startAndEnd.end, width, 201, color, opacity, {
             blending: THREE.AdditiveBlending,
-            texture: tex
+            texture: LaserEffect.cachedTexture,
+            intensity: intensity || 1.0
         });
+    }
+
+    // Programmatic radial-gradient texture for the round end-caps. Cached on
+    // the LaserEffect function object so all shots share one upload.
+    function getCapTexture() {
+        if (!LaserEffect.cachedCapTexture) {
+            const px = 64;
+            const canvas = document.createElement('canvas');
+            canvas.width = px;
+            canvas.height = px;
+            const ctx = canvas.getContext('2d');
+            const grad = ctx.createRadialGradient(px / 2, px / 2, 0, px / 2, px / 2, px / 2);
+            grad.addColorStop(0.0, 'rgba(255,255,255,1)');
+            grad.addColorStop(0.5, 'rgba(255,255,255,0.6)');
+            grad.addColorStop(1.0, 'rgba(255,255,255,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, px, px);
+            LaserEffect.cachedCapTexture = new THREE.CanvasTexture(canvas);
+            LaserEffect.cachedCapTexture.colorSpace = THREE.SRGBColorSpace;
+        }
+        return LaserEffect.cachedCapTexture;
+    }
+
+    function createCap(color, baseOpacity, size, intensity) {
+        const matColor = (intensity && intensity !== 1.0)
+            ? new THREE.Color().copy(color).multiplyScalar(intensity)
+            : color;
+        const material = new THREE.MeshBasicMaterial({
+            color: matColor,
+            transparent: true,
+            opacity: 0,
+            map: getCapTexture(),
+            blending: THREE.AdditiveBlending,
+            depthWrite: false
+        });
+        const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), material);
+        mesh.scale.set(size, size, 1);
+        mesh.position.z = 201;
+        mesh.userData = { baseOpacity: baseOpacity };
+        return mesh;
     }
 
     function getStartAndEnd(offsetVelocity) {
@@ -9502,7 +9614,7 @@ window.BoltEffect = function () {
         }    
 
         // Launch sound
-        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time) {
+        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time && !paused && !back) {
             try {
                 const launchSound = BoltEffect.cachedLaunchAudio.cloneNode(true);
                 launchSound.volume = this.soundVolume;
@@ -9515,7 +9627,7 @@ window.BoltEffect = function () {
         }
 
         // Impact sound
-        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50) {
+        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50 && !paused && !back) {
             try {
                 const impactSound = BoltEffect.cachedImpactAudio.cloneNode(true);
                 impactSound.volume = this.soundVolume;
@@ -9636,8 +9748,13 @@ window.BoltEffect = function () {
 /* Source: client/renderer/animationStrategy/animation/effects/MissileEffect.js */
 "use strict";
 
+// Missile-with-trail effect. Previously a byte-equivalent copy of BoltEffect;
+// now adds a smoke/gas trail dropped along the projectile's path. All trail
+// particles are pre-spawned with explicit activation times so timeline
+// scrubbing in the replay shows them at the correct positions.
+
 window.MissileEffect = function () {
-    function BoltEffect(emitterContainer, args) {
+    function MissileEffect(emitterContainer, args) {
         ParticleAnimation.call(this, emitterContainer);
         args = args || {};
 
@@ -9665,19 +9782,16 @@ window.MissileEffect = function () {
         this.hasParticle = args.hasParticle;
 
         // ---------------- AUDIO ----------------
-        //this.noSound = args.noSound || !gamedata?.playAudio;
         this.soundVolume = args.soundVolume ?? 0.1;
         this.playedLaunchSound = false;
         this.playedImpactSound = false;
 
-        if (!BoltEffect.cachedLaunchAudio) {
-            BoltEffect.cachedLaunchAudio = new Audio("client/renderer/animationStrategy/animation/sound/TorpedoAudio.mp3");
+        if (!MissileEffect.cachedLaunchAudio) {
+            MissileEffect.cachedLaunchAudio = new Audio("client/renderer/animationStrategy/animation/sound/TorpedoAudio.mp3");
         }
-        if (!BoltEffect.cachedImpactAudio) {
-            BoltEffect.cachedImpactAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
+        if (!MissileEffect.cachedImpactAudio) {
+            MissileEffect.cachedImpactAudio = new Audio("client/renderer/animationStrategy/animation/sound/ExplosionAudio.mp3");
         }
-
-        //if (this.hit) this.duration -= 25;
 
         if (this.hit) {
             this.duration -= 25;
@@ -9700,63 +9814,62 @@ window.MissileEffect = function () {
             }
         }
 
-        createBoltParticle.call(this, this.size, this.color, this.origin);
+        // Missile head — same pattern as BoltEffect.
+        createMissileHead.call(this, this.size, this.color, this.origin);
         if (this.hasParticle) {
-            createBoltParticle.call(
+            createMissileHead.call(
                 this,
                 this.size / 2,
                 { r: 1, g: 1, b: 1 },
                 mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true)
             );
-            
         }
+
+        spawnTrail.call(this);
 
         if (args.systemDestroyedEffect) {
             args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + this.duration);
-            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + this.duration, 'crit');             
+            args.systemDestroyedEffect.add(this.target, args.critNames, this.time + this.duration, 'crit');
         }
     }
 
-    BoltEffect.prototype = Object.create(ParticleAnimation.prototype);
+    MissileEffect.prototype = Object.create(ParticleAnimation.prototype);
 
-    BoltEffect.prototype.getDuration = function () {
+    MissileEffect.prototype.getDuration = function () {
         return this.duration + this.fadeOutSpeed;
     };
 
-    // ---------------- AUDIO IN RENDER ----------------
-    BoltEffect.prototype.render = function (now, total, last, delta, zoom, back, paused) {
-        if (this.emitterContainer && this.emitterContainer.render) {    
+    MissileEffect.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        if (this.emitterContainer && this.emitterContainer.render) {
             this.emitterContainer.render(now, total, last, delta, zoom, back, paused);
-        }    
+        }
 
-        // Launch sound
-        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time) {
+        if (gamedata.playAudio && !this.playedLaunchSound && total >= this.time && !paused && !back) {
             try {
-                const launchSound = BoltEffect.cachedLaunchAudio.cloneNode(true);
+                const launchSound = MissileEffect.cachedLaunchAudio.cloneNode(true);
                 launchSound.volume = this.soundVolume;
                 launchSound.currentTime = 0;
-                launchSound.play().catch(() => {});
+                launchSound.play().catch(() => { });
                 this.playedLaunchSound = true;
             } catch (e) {
-                console.warn("Bolt launch sound failed:", e);
+                console.warn("Missile launch sound failed:", e);
             }
         }
 
-        // Impact sound
-        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50) {
+        if (gamedata.playAudio && this.hit && !this.playedImpactSound && total >= this.time + this.duration - 50 && !paused && !back) {
             try {
-                const impactSound = BoltEffect.cachedImpactAudio.cloneNode(true);
+                const impactSound = MissileEffect.cachedImpactAudio.cloneNode(true);
                 impactSound.volume = this.soundVolume;
                 impactSound.currentTime = 0;
-                impactSound.play().catch(() => {});
+                impactSound.play().catch(() => { });
                 this.playedImpactSound = true;
             } catch (e) {
-                console.warn("Bolt impact sound failed:", e);
+                console.warn("Missile impact sound failed:", e);
             }
         }
     };
 
-    function createBoltParticle(size, color, position) {
+    function createMissileHead(size, color, position) {
         var particle = this.emitterContainer.getParticle(this);
         particle
             .setSize(size)
@@ -9771,95 +9884,46 @@ window.MissileEffect = function () {
             .setAngle(this.angle);
     }
 
-    return BoltEffect;
-}();
+    function spawnTrail() {
+        var scale = 0.5; //Maybe change
+        var trailColor = new THREE.Color(
+            Math.min(1, this.color.r * scale),
+            Math.min(1, this.color.g * scale),
+            Math.min(1, this.color.b * scale)
+        );
 
-/* Old version without audio
-"use strict";
+        var trailInterval = 30;                  // ms between drops
+        var trailFadeIn = 25;
+        var trailFadeOut = 500;
+        var trailSize = Math.max(6, this.size / 4);
 
-window.BoltEffect = function () {
-    function BoltEffect(emitterContainer, args) {
-        ParticleAnimation.call(this, emitterContainer);
-
-        if (!args) {
-            args = {};
-        }
-
-        this.scene = args.scene;
-        this.time = args.time || 0;
-        this.hit = args.hit || false;
-        this.speed = args.speed || 1.6;
-        this.color = args.color || new THREE.Color(0, 0, 0);
-        this.origin = args.origin;
-        this.target = {
-            x: args.target.x,
-            y: args.target.y
-        };
-        this.damage = args.damage || 0;
-
-        this.size = args.size || 100;
-        this.angle = -mathlib.getCompassHeadingOfPoint(this.origin, this.target);
-
-        var distance = mathlib.distance(this.origin, this.target);
-        if (!this.hit) {
-            //var missFactor = distance / 1500;
-            //this.angle = mathlib.addToDirection(this.angle, Math.random() * missFactor - missFactor/2);
-            distance += Math.random() * 100 + 50;
-        }
-        this.speedVector = mathlib.getPointInDirection(this.speed, -this.angle, 0, 0, true);
-
-        this.duration = distance / this.speed;
-
-        this.fadeInSpeed = 25;
-        this.fadeOutSpeed = this.hit ? 0 : 1000;
-
-        this.hasParticle = args.hasParticle; //Some weapons you don't want to show a particle e.g. ramming.
-
-        if (this.hit) {
-            this.duration -= 25;
-
-            new Explosion(this.emitterContainer, {
-                size: this.size / 4,
-                position: this.target,
-                type: "glow",
-                color: args.color,
-                time: this.time + this.duration
-            });
-
-            if (this.damage) {
-                new Explosion(this.emitterContainer, {
-                    size: 12 * this.damage + 12,
-                    position: this.target,
-                    type: ["gas", "pillar"][Math.round(Math.random() * 2)],
-                    time: this.time + this.duration
-                });
-            }
-        }
-
-        createBoltParticle.call(this, this.size, this.color, this.origin);
-        if(this.hasParticle) createBoltParticle.call(this, this.size / 2, { r: 1, g: 1, b: 1 }, mathlib.getPointInDirection(this.size / 4.5, -this.angle, this.origin.x, this.origin.y, true));
-        
-        if (args.systemDestroyedEffect) {
-            args.systemDestroyedEffect.add(this.target, args.damagedNames, this.time + this.duration)
+        var t = this.time;
+        var endTime = this.time + this.duration;
+        while (t <= endTime) {
+            var elapsed = t - this.time;
+            var pos = {
+                x: this.origin.x + this.speedVector.x * elapsed,
+                y: this.origin.y + this.speedVector.y * elapsed
+            };
+            var particle = this.emitterContainer.getParticle(this);
+            particle
+                .setSize(trailSize)
+                .setFadeIn(t, trailFadeIn)
+                .setFadeOut(t + trailFadeIn, trailFadeOut)
+                .setOpacity(0.6)
+                .setActivationTime(t)
+                .setVelocity({ x: 0, y: 0 })
+                .setPosition(pos)
+                .setTexture(BaseParticle.prototype.texture.gas)
+                .setColor(trailColor)
+                .setAngle(Math.random() * 360);
+            t += trailInterval;
         }
     }
 
-    BoltEffect.prototype = Object.create(ParticleAnimation.prototype);
-
-    BoltEffect.prototype.getDuration = function () {
-        return this.duration + this.fadeOutSpeed;
-    };
-
-
-    function createBoltParticle(size, color, position) {
-
-        var particle = this.emitterContainer.getParticle(this);
-        particle.setSize(size).setFadeIn(this.time, this.fadeInSpeed).setFadeOut(this.time + this.duration, this.fadeOutSpeed).setOpacity(1.0).setActivationTime(this.time).setVelocity(this.speedVector).setPosition(position).setTexture(BaseParticle.prototype.texture.bolt).setColor(color).setAngle(this.angle);
-    }
-
-    return BoltEffect;
+    return MissileEffect;
 }();
-*/;
+;
 
 /* Source: client/renderer/animationStrategy/animation/effects/TorpedoEffect.js */
 "use strict";
@@ -10567,6 +10631,66 @@ setTimeout(() => {
 
     return ShipJumpPoint;
 }();;
+
+/* Source: client/renderer/animationStrategy/animation/effects/ImpactSparksEffect.js */
+"use strict";
+
+window.ImpactSparksEffect = (function () {
+
+    function ImpactSparksEffect(scene, args) {
+        args = args || {};
+        this.position = args.position || { x: 0, y: 0 };
+        this.time = args.time || 0;
+        this.color = args.color || new THREE.Color(1, 1, 1);
+        this.emitterContainer = new ParticleEmitterContainer(scene, 30);
+        this.spawnSparks();
+    }
+
+    ImpactSparksEffect.prototype.spawnSparks = function () {
+        var scale = 1.0; //Maybe change
+        var sparkColor = new THREE.Color(
+            Math.min(1, this.color.r * scale),
+            Math.min(1, this.color.g * scale),
+            Math.min(1, this.color.b * scale)
+        );
+
+        var amount = Math.floor(Math.random() * 8) + 8; // 8-15 particles
+        var t = this.time;
+
+        while (amount--) {
+            var particle = this.emitterContainer.getParticle(this);
+            var angle = Math.random() * 360;
+            var speed = Math.random() * 0.045 + 0.045;  // ~0.045-0.09 game units/ms
+            var velocity = mathlib.getPointInDirection(speed, -angle, 0, 0, true);
+            var size = Math.random() * 10 + 10;          // 10-20
+            var fadeOutDelay = Math.random() * 100;       // stagger fade start
+            var duration = Math.random() * 150 + 250;    // 250-400ms
+
+            particle
+                .setSize(size)
+                .setOpacity(Math.random() * 0.4 + 0.6)
+                .setFadeIn(t, 20)
+                .setFadeOut(t + fadeOutDelay, duration)
+                .setColor(sparkColor)
+                .setPosition({ x: this.position.x, y: this.position.y })
+                .setVelocity(velocity)
+                .setAngle(angle)
+                .setTexture(BaseParticle.prototype.texture.bolt)
+                .setActivationTime(t);
+        }
+    };
+
+    ImpactSparksEffect.prototype.render = function (now, total, last, delta, zoom, back, paused) {
+        this.emitterContainer.render(now, total, last, delta, zoom, back, paused);
+    };
+
+    ImpactSparksEffect.prototype.cleanUp = function () {
+        this.emitterContainer.cleanUp();
+    };
+
+    return ImpactSparksEffect;
+})();
+;
 
 /* Source: client/renderer/phaseStrategy/PhaseStrategy.js */
 'use strict';
@@ -13638,6 +13762,11 @@ window.ReplayPhaseStrategy = function () {
 
         startReplayOrRequestGamedata.call(this);
 
+        // Previous phase strategy's deactivate() hid every ballistic launch/target sprite.
+        // For in-turn replays, consumeGamedata above re-uses the existing icons via
+        // updateBallisticIcon and so never re-shows them — re-show them explicitly here.
+        this.ballisticIconContainer.show();
+
         activatePause.call(this);
 
         this.setPhaseHeader(false);
@@ -13785,8 +13914,10 @@ window.ReplayPhaseStrategy = function () {
 
             if (animContainer instanceof ShipDestroyedAnimation || animContainer instanceof ShipJumpAnimation) {
                 animContainer.explosionTriggered = value;
+                animContainer.soundTriggered = value; // 🔊 Fix: Reset sound flag too!
                 continue;
             }
+
             // --- 2. Handle AllWeaponFireAgainstShipAnimation containers ---
             const isAllWeaponFire =
                 animContainer?.movementAnimations &&
@@ -13795,20 +13926,20 @@ window.ReplayPhaseStrategy = function () {
                 animContainer?.logAnimation &&
                 !animContainer?.emitters;
 
-            // --- 3. Handle ShipDestroyedAnimation containers ---
-            /*const isShipDestruction =
-                animContainer instanceof ShipDestroyedAnimation ||
-                (
-                    animContainer?.shipIcon &&
-                    animContainer?.fadeoutTime &&
-                    typeof animContainer?.explosionTriggered === "boolean" &&
-                    !animContainer?.emitters
-                );*/
-
             if (isAllWeaponFire) {
                 for (const effect of animContainer.animations) {
                     if (effect instanceof LaserEffect) {
                         effect.playedSound = value;
+                    }
+
+                    // Handle anonymous Gravitic Mine pull effects if they expose the flag
+                    if (effect.playedPullSound !== undefined) {
+                        effect.playedPullSound = value;
+                    }
+
+                    // Handle anonymous mine explosion effects
+                    if (effect.playedImpactSound !== undefined) {
+                        effect.playedImpactSound = value;
                     }
                 }
             }
@@ -14943,7 +15074,7 @@ window.SelectFromShips = function () {
     };
 
     function create() {
-        console.log("CREATE select form ships", this.ships)
+        //console.log("CREATE select form ships", this.ships)
         
         // --- INJECT CUSTOM "DEPLOY HERE" BUTTON DURING DEPLOYMENT PHASE ---
         if (gamedata.gamephase == -1 && this.phaseStrategy.selectedShip) {
@@ -21896,6 +22027,13 @@ window.weaponManager = {
         var f = $(".targeting", e);
         f.html("");
 
+        // Delegate the hit-chance hover tooltip on f rather than document, because
+        // the parent ShipTooltip element calls stopPropagation() on mouseover/out
+        // and would otherwise eat the bubbled event before it reaches document.
+        f.off('.hitchance')
+         .on('mouseenter.hitchance touchstart.hitchance', '.hit-chance-tooltip', _showHitChanceTooltip)
+         .on('mouseleave.hitchance touchend.hitchance touchmove.hitchance', '.hit-chance-tooltip', _hideHitChanceTooltip);
+
         if (gamedata.selectedSystems.length === 0) {
             return;
         }
@@ -21967,7 +22105,7 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
             var attachedWeaponHidden = false;
-            var clawBlindSpot = false;            
+            var clawBlindSpot = false;
 
             if (weaponManager.isOnWeaponArc(selectedShip, ship, weapon)) {
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
@@ -22010,9 +22148,9 @@ window.weaponManager = {
                         }
                         if (!weapon.isBoardingAction && weaponManager.isTargetInGrapplingClawBlindSpot(selectedShip, ship)) {
                             clawBlindSpot = true;
-                        }                        
+                        }
                     }
-                    
+
 
 
 
@@ -22045,19 +22183,31 @@ window.weaponManager = {
                         if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
                             $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotCalled"> Cannot Called Shot</span></div>').appendTo(f);
                         } else {
-                            var hitChance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
-                            if (hitChance <= 0) {
-                                if (keys.length > 1) {
-                                    $('<div><span class="weapon">' + weapon.displayName + ': <span class="firingMode"> (' + value + ')</span> - <span class="negHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
-                                } else {
-                                    $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="negHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
+                            var result = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
+                            var hitChance = result.hitChance;
+
+                            // Build hover-tooltip text from breakdown (or breakdownReason for early-returns).
+                            var tooltipText = '';
+                            if (result.breakdownReason) {
+                                tooltipText = result.breakdownReason;
+                            } else if (result.modifiers && result.modifiers.length > 0) {
+                                var lines = ['Hit chance: ' + hitChance + '%'];
+                                for (var mi = 0; mi < result.modifiers.length; mi++) {
+                                    var m = result.modifiers[mi];
+                                    var pct = Math.round(m.value * 5 * 10) / 10; //one-decimal %, trailing .0 dropped by toString
+                                    var sign = (pct >= 0 && m.key !== 'base') ? '+' : ''; //base is the starting value, not a modifier
+                                    lines.push('• ' + m.label + ': ' + sign + pct + '%');
                                 }
+                                tooltipText = lines.join('\n');
+                            }
+                            var chanceClass = (hitChance <= 0 ? 'negHitchange' : 'posHitchange');
+                            if (tooltipText) chanceClass += ' hit-chance-tooltip';
+                            var dataAttr = tooltipText ? ' data-tooltip="' + tooltipText + '"' : '';
+
+                            if (keys.length > 1) {
+                                $('<div><span class="weapon">' + weapon.displayName + ': <span class="firingMode"> (' + value + ')</span> - <span class="' + chanceClass + '"' + dataAttr + '>Approx: ' + hitChance + '%</span></div>').appendTo(f);
                             } else {
-                                if (keys.length > 1) {
-                                    $('<div><span class="weapon">' + weapon.displayName + ': <span class="firingMode"> (' + value + ')</span> - <span class="posHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
-                                } else {
-                                    $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="posHitchange">Approx: ' + hitChance + '%</span></div>').appendTo(f);
-                                }
+                                $('<div><span class="weapon">' + weapon.displayName + ': </span><span class="' + chanceClass + '"' + dataAttr + '>Approx: ' + hitChance + '%</span></div>').appendTo(f);
                             }
                         }
                     }
@@ -22097,6 +22247,29 @@ window.weaponManager = {
         for (var i in gamedata.selectedSystems) {
             var shooterSystem = gamedata.selectedSystems[i];
             if (shooterSystem.weapon && shooterSystem.canTargetAllExtSections && (system.location != 0 || system.location == 0 && system.isPrimaryTargetable)) return true;
+        }
+
+        // If target is an attached ship (e.g. breaching pod), use the attachment location directly
+        // instead of compass heading, which defaults to Front for same-hex speed-0 ships.
+        if (shooter.attached && Object.keys(shooter.attached).length > 0) {
+            var hostId = Object.keys(shooter.attached)[0];
+            var attachedLocation = parseInt(shooter.attached[hostId]);
+            if (!isNaN(attachedLocation) && attachedLocation !== 0) {
+                // Only allow called shots against systems on the section the target is attached to
+                if (system.location === attachedLocation) {
+                    // Check if this section is eligible for called shots
+                    for (var j = 0; j < target.outerSections.length; j++) {
+                        if (target.outerSections[j].loc === attachedLocation && target.outerSections[j].call === true) {
+                            return true;
+                        }
+                    }
+                }
+                // Also check primary-targetable systems (location 0) that overlap the attached section
+                if (system.location === 0 && system.isPrimaryTargetable) {
+                    return true;
+                }
+                return false; // System is not on the attached section
+            }
         }
 
         var shooterCompassHeading = mathlib.getCompassHeadingOfShip(target, shooter);
@@ -22240,10 +22413,10 @@ window.weaponManager = {
     isTargetInGrapplingClawBlindSpot: function isTargetInGrapplingClawBlindSpot(shooter, target) {
         if (shooter.flight) return false;
         if (!shooter.attached || Object.keys(shooter.attached).length === 0) return false;
-        
+
         var targetCompassHeading = mathlib.getCompassHeadingOfShip(shooter, target);
         var shooterFacing = shipManager.getShipHeadingAngle(shooter);
-        
+
         for (var i in shooter.systems) {
             var system = shooter.systems[i];
             if (system.name === "GrapplingClaw" && !shipManager.systems.isDestroyed(shooter, system)) {
@@ -22277,7 +22450,7 @@ window.weaponManager = {
         var shooter = gamedata.getShip(ball.shooterid);
         var weapon = shipManager.systems.getSystem(shooter, ball.weaponid);
         var target = gamedata.getShip(ball.targetid);
-        return weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+        return weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
     },//endof calculataBallisticHitChange
 
     getInterception: function getInterception(ball) {
@@ -22486,37 +22659,430 @@ window.weaponManager = {
         return sPosLaunch;
     },
 
-    calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
+    /* ============================================================
+       calculateHitChange and its helpers (refactored DK 2026)
+       Behavior preserved exactly; modifier accumulation broken out
+       so the targeting tooltip can show a per-modifier breakdown.
+       The pre-refactor monolithic version is preserved at the bottom
+       of this block, commented out for reference.
+       ============================================================ */
 
-        if (weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
-        /*
-        // Attached pod logic
-        if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit
-        if (shooter.hasAttached && Object.keys(shooter.hasAttached).length > 0) {
-            var keys = Object.keys(shooter.hasAttached);
-            if (keys.includes(target.id.toString())) {
-                return 0; // Parent cannot target the attached pod
+    // Mirrors calculateBaseHitChange but returns each component separately.
+    computeBaseDefenceBreakdown: function computeBaseDefenceBreakdown(shooter, target, weapon, base) {
+        var jink = 0;
+        var dew = 0;
+        var bdew = 0;
+        var sdew = 0;
+
+        if ((target.flight || target.jinkinglimit > 0) && shooter) {
+            if (!shooter.flight) {
+                jink = shipManager.movement.getJinking(target);
+            } else {
+                if (shooter) {
+                    var sPosHex = shipManager.getShipPosition(shooter);
+                    var tPosHex = shipManager.getShipPosition(target);
+                    if ((weapon.ballistic) || (!sPosHex.equals(tPosHex)) || (shipManager.movement.getJinking(shooter) > 0)) {
+                        jink = shipManager.movement.getJinking(target);
+                    }
+                }
+            }
+            if (weapon && weapon.ignoreJinking) {
+                jink = 0;
             }
         }
-        if (target.attached && Object.keys(target.attached).length > 0) {
-            var hostId = Object.keys(target.attached)[0];
-            var podLocation = parseInt(target.attached[hostId]);
-            if (!isNaN(podLocation) && podLocation !== 0) {
-                var hostShip = gamedata.getShip(hostId);
-                if (hostShip) {
-                    var hittableSides = weaponManager.getShipHittingSide(shooter, hostShip);
-                    if (!hittableSides.includes(podLocation)) {
-                        return 0; // Pod is attached to a side not facing the shooter
+
+        if (!target.flight) {
+            dew = ew.getDefensiveEW(target);
+        }
+
+        sdew = ew.getSupportedDEW(target);
+        bdew = ew.getSupportedBDEW(target);
+
+        if (shooter && shooter.flight && !weapon.ballistic) {
+            dew = 0;
+            bdew = 0;
+            sdew = 0;
+        }
+
+        if (shooter && (target.factionAge < 3) && (shipManager.hasSpecialAbility(shooter, "AdvancedSensors"))) {
+            bdew = 0;
+            sdew = 0;
+        }
+
+        if (weapon && weapon.ignoreAllEW) {
+            dew = 0;
+            bdew = 0;
+            sdew = 0;
+        }
+
+        var halfphase = 0;
+        if (shooter && weapon) {
+            if (shipManager.movement.isHalfPhased(target)) {
+                halfphase = 4;
+                if (weapon && weapon.ballistic) halfphase = 8;
+            }
+            if (shooter && shipManager.movement.isHalfPhased(shooter)) halfphase = 10;
+        }
+
+        return {
+            base: base,
+            dew: dew,
+            sdew: sdew,
+            bdew: bdew,
+            jinking: jink,
+            halfPhase: halfphase,
+            total: base - dew - jink - bdew - sdew - halfphase
+        };
+    },
+
+    // Returns shooter's offensive EW: { oew, soew }. Handles fighter offensive bonus path.
+    computeOEW: function computeOEW(shooter, target, weapon, sPosTarget) {
+        var oew = 0;
+        var soew = 0;
+
+        if (weapon.useOEW) {
+            oew = ew.getTargetingEW(shooter, target);
+            soew = ew.getSupportedOEW(shooter, target);
+            var dist = ew.getDistruptionEW(shooter);
+            oew -= dist;
+            if (oew < 1) soew = 0;
+            if (oew < 0) oew = 0;
+        }
+
+        if (shooter.flight === true) {
+            var firstFighter = shooter.systems[1];
+            var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
+            var mdew = ew.getDetectMEW(shooter);
+            oew = shooter.offensivebonus - OBcrit - (mdew * 2);
+
+            if (weapon.ballistic) {
+                var shooterLoSBlocked = false;
+                var blockedLosHex = gamedata.blockedHexes;
+                if (blockedLosHex && blockedLosHex.length > 0) {
+                    var shooterPos = shipManager.getShipPosition(shooter);
+                    shooterLoSBlocked = mathlib.isLoSBlocked(shooterPos, sPosTarget, blockedLosHex);
+                }
+                if ((!shooter.hasNavigator &&
+                    !weaponManager.isOnWeaponArc(shooter, target, weapon)) ||
+                    shooterLoSBlocked ||
+                    Object.values(shooter.skinDancing).includes(true) ||
+                    Object.values(shooter.skinDancing).includes("Failed")) {
+                    oew = 0;
+                }
+            }
+            oew = Math.max(0, oew);
+            if (oew == 0) soew = 0;
+        }
+
+        return { oew: oew, soew: soew };
+    },
+
+    // Computes jammer + no-lock penalties as a combined pair.
+    // Returns { jammermod, noLockMod, soewSuppressed, oewSuppressed }.
+    // Caller applies suppression to the OEW result it already holds.
+    computeJammerNoLock: function computeJammerNoLock(shooter, target, weapon, oew, distance, rangePenalty) {
+        var noLockPenalty = 0;
+        var noLockMod = 0;
+        var jammermod = 0;
+        var soewSuppressed = false;
+        var oewSuppressed = false;
+
+        if (oew < 0.5) {
+            noLockPenalty = 1;
+        } else if (oew < 1) {
+            noLockPenalty = 0.5;
+        }
+
+        if (shooter.mine) noLockPenalty = 0; //mines assume lock; jammer may still apply
+
+        jammermod = ew.getJammerValueFromTo(shooter, target);
+
+        if (jammermod > 0) {
+            soewSuppressed = true; //jammer negates SOEW
+        }
+
+        if (weapon.ignoreAllEW) {
+            noLockPenalty = 0;
+            jammermod = 0;
+            oewSuppressed = true;
+            soewSuppressed = true;
+        }
+
+        if (!weapon.noLockPenalty) {
+            jammermod = 0;
+            noLockPenalty = 0;
+        }
+
+        if ((jammermod > 0) || (noLockPenalty > 0)) {
+            if (weapon.doubleRangeIfNoLock) { //e.g. Antimatter
+                var modifiedDistance = distance * (1 + noLockPenalty);
+                noLockMod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
+                modifiedDistance = distance * (1 + jammermod);
+                jammermod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
+            } else {
+                noLockMod = rangePenalty * noLockPenalty;
+                jammermod = jammermod * rangePenalty;
+            }
+            jammermod = jammermod - noLockMod; //noLock cannot be overcome by sensors
+            if (jammermod < 0) jammermod = 0;
+        }
+
+        //jammer and jinking do not stack
+        if (target.flight) {
+            var jinking = shipManager.movement.getJinking(target);
+            if (jinking > jammermod) {
+                jammermod = 0;
+            } else {
+                jammermod = jammermod - jinking;
+            }
+        }
+
+        return { jammermod: jammermod, noLockMod: noLockMod, soewSuppressed: soewSuppressed, oewSuppressed: oewSuppressed };
+    },
+
+    // Returns weapon fire-control value, including HyachComputer bonus and ballistic LoS-blocked logic.
+    computeFireControl: function computeFireControl(shooter, target, weapon, sPosTarget) {
+        var firecontrol = weaponManager.getFireControl(target, weapon);
+        if (target.mine && weapon.canShootMines) weapon.fireControl[1] = -4; //preserved as-is from old code; mutates next-call FC
+
+        if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) {
+            var computer = shipManager.systems.getSystemByName(shooter, "hyachComputer");
+            var FCIndex = weaponManager.getFireControlIndex(target);
+            var bonusfirecontrol = computer.getFCAllocated(FCIndex);
+            firecontrol += bonusfirecontrol;
+        }
+
+        if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
+            if (!(firecontrol <= 0)) {
+                var blockedLosHex = gamedata.blockedHexes;
+                var shooterPos2 = shipManager.getShipPosition(shooter);
+                var loSBlocked = mathlib.isLoSBlocked(shooterPos2, sPosTarget, blockedLosHex);
+                if (loSBlocked) {
+                    if (weapon instanceof AmmoMissileRackS) {
+                        if (weapon.hasOwnProperty('basicFC') && Array.isArray(weapon.basicFC) && weapon.basicFC.length > 0) {
+                            firecontrol -= weapon.basicFC[weaponManager.getFireControlIndex(target)];
+                        }
+                    } else {
+                        firecontrol = 0;
                     }
                 }
             }
         }
-        */
-        /*//If skin-dancing shots which have a front arc automatically hit.
-        if (gamedata.gamephase == 3 && !weapon.ballistic && shooter.skinDancing[target.id] === true) {
-            var inFrontArc = mathlib.isInArc(0, weapon.startArc, weapon.endArc);
-            if (inFrontArc) return 100; //Skindancing ships auto-hit targets directly in front of them.           
-        }*/
+
+        return firecontrol;
+    },
+
+    // Returns the rest of the per-shot modifiers, broken into:
+    //   defensiveSystems  (positive - subtracted from goal)
+    //   calledShot        (signed - added to goal when calledid > 0)
+    //   otherTotal        (signed sum of otherDetail entries)
+    //   otherDetail       ([{label, value}, ...] for future tooltip expansion)
+    computeShotModifiers: function computeShotModifiers(shooter, target, weapon, calledid, distance) {
+        var defensiveSystems = target.getHitChangeMod(shooter, weapon);
+        var calledShot = 0;
+        var otherDetail = [];
+
+        if (target.mine) {
+            var mdew = ew.getDetectMEW(shooter);
+            var mineBonusActual = Math.max(0, (mdew + shooter.minesweeperbonus) - distance - target.signature);
+            if (mineBonusActual !== 0) otherDetail.push({ label: 'Mine Detection', value: mineBonusActual });
+        }
+
+        if (weapon.specialHitChanceCalculation) {
+            var specialMod = weapon.calculateSpecialHitChanceMod(shooter, target, calledid);
+            if (specialMod !== 0) otherDetail.push({ label: 'Weapon Special', value: specialMod });
+        }
+
+        if (shooter.flight === true) {
+            if (!weapon.ignoreJinking) {
+                var shooterJink = shipManager.movement.getJinking(shooter);
+                if (shooterJink !== 0) otherDetail.push({ label: 'Shooter Jinking', value: -shooterJink });
+            }
+            if (shipManager.movement.hasCombatPivoted(shooter) && (!shooter.ignoreManoeuvreMods)) {
+                otherDetail.push({ label: 'Combat Pivot', value: -1 });
+            }
+        } else {
+            var rolling = (shooter.agile === true)
+                ? shipManager.movement.hasRolled(shooter)
+                : shipManager.movement.isRolling(shooter);
+            if (rolling && !shooter.ignoreManoeuvreMods) {
+                otherDetail.push({ label: 'Rolling', value: -3 });
+            }
+            if (shipManager.movement.hasPivotedForShooting(shooter) && !shooter.ignoreManoeuvreMods) {
+                otherDetail.push({ label: 'Pivot for Shooting', value: -3 });
+            }
+            if (shooter.osat && shipManager.movement.hasTurned(shooter)) {
+                otherDetail.push({ label: 'OSAT Turn', value: -1 });
+            }
+            if (shooter.toHitBonus !== 0) {
+                otherDetail.push({ label: 'Crew Quality', value: shooter.toHitBonus });
+            }
+            if (!shooter.osat) {
+                var cnC = shipManager.systems.getSystemByName(shooter, "cnC");
+                var penaltyToHit = -shipManager.criticals.hasCritical(cnC, "PenaltyToHit");
+                var tmpHitReduction = -shipManager.criticals.hasCritical(cnC, "tmphitreduction");
+                var shadowPilotPain = -shipManager.criticals.hasCritical(cnC, "ShadowPilotPain");
+                if (penaltyToHit !== 0) otherDetail.push({ label: 'C&C: Penalty to Hit', value: penaltyToHit });
+                if (tmpHitReduction !== 0) otherDetail.push({ label: 'C&C: Temp Hit Reduction', value: tmpHitReduction });
+                if (shadowPilotPain !== 0) otherDetail.push({ label: 'Shadow Pilot Pain', value: shadowPilotPain });
+            }
+        }
+
+        if (calledid > 0) {
+            calledShot = weapon.calledShotMod;
+            if (target.base) calledShot += weapon.calledShotMod; //double penalty vs bases
+            var calledSystem = shipManager.systems.getSystem(target, calledid);
+            if (calledSystem && calledSystem.calledShotBonus != null) calledShot += calledSystem.calledShotBonus;
+        }
+
+        var ammo = weapon.getAmmo(null);
+        if (ammo && ammo.hitChanceMod !== 0) {
+            otherDetail.push({ label: 'Ammo', value: ammo.hitChanceMod });
+        }
+
+        var otherTotal = otherDetail.reduce(function (s, d) { return s + d.value; }, 0);
+        return {
+            defensiveSystems: defensiveSystems,
+            calledShot: calledShot,
+            otherTotal: otherTotal,
+            otherDetail: otherDetail
+        };
+    },
+
+    // New calculateHitChange. Returns:
+    //   {
+    //     hitChance: int,           // same number the old function returned
+    //     autoHit: bool,
+    //     isOutOfRange: bool,
+    //     breakdownReason: string|null,  // set on early-return cases (Auto-hit, Out of range, etc.)
+    //     modifiers: [{key,label,value}, ...],  // non-zero, ordered for tooltip
+    //     _otherDetail: [{label,value}, ...]    // sub-breakdown of the 'Other' line
+    //   }
+    // Invariant: Math.round(sum(modifiers[*].value) / 20 * 100) === hitChance
+    calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
+        function makeResult(hitChance, opts) {
+            opts = opts || {};
+            return {
+                hitChance: hitChance,
+                autoHit: !!opts.autoHit,
+                isOutOfRange: !!opts.isOutOfRange,
+                breakdownReason: opts.breakdownReason || null,
+                modifiers: [],
+                _otherDetail: []
+            };
+        }
+
+        if (weapon.autoHit) return makeResult(100, { autoHit: true, breakdownReason: 'Auto-hit' });
+
+        if (weapon.isRammingAttack) {
+            return makeResult(weaponManager.calculateRamChance(shooter, target, weapon, calledid), { breakdownReason: 'Ramming attack' });
+        }
+        if (weapon.isBoardingAction) {
+            return makeResult(weaponManager.calculateBoardingAction(shooter, target, weapon), { breakdownReason: 'Boarding action' });
+        }
+
+        //Sustained-overload weapons auto-hit/auto-miss based on previous turn target
+        if (shipManager.power.isOverloading(shooter, weapon)) {
+            if (weapon.sustainedTarget && Object.keys(weapon.sustainedTarget).length > 0) {
+                if (weapon.firingMode !== 1) return makeResult(0, { breakdownReason: 'Sustained: wrong firing mode' });
+                if (!weapon.sustainedTarget.hasOwnProperty(target.id)) {
+                    return makeResult(0, { breakdownReason: 'Sustained: wrong target' });
+                } else if (weapon.sustainedTarget[target.id] === 1) {
+                    return makeResult(100, { autoHit: true, breakdownReason: 'Sustained: auto-hit' });
+                }
+            }
+        }
+
+        //Mass-driver-style weapons that require enormous immobile target
+        if (weapon.targetsImmobile) {
+            var ownSpeed = shipManager.movement.getSpeed(shooter);
+            var targetSpeed = shipManager.movement.getSpeed(target);
+            if (!target.Enormous || ownSpeed > 0 || targetSpeed > 0) return makeResult(0, { breakdownReason: 'Target not immobile' });
+        }
+
+        //Geometry: defence value + distance + sPosTarget (used by helpers for ballistics)
+        var defence = 0;
+        var distance = 0;
+        var sPosTarget = null;
+        if (weapon.ballistic) {
+            var sPosLaunch = weaponManager.getFiringHex(shooter, weapon);
+            sPosTarget = shipManager.getShipPosition(target);
+            defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
+            distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2);
+        } else {
+            defence = weaponManager.getShipDefenceValue(shooter, target);
+            distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
+        }
+
+        var maxDistance = Math.max(weapon.range, weapon.distanceRange);
+        if ((maxDistance > 0) && (maxDistance < distance)) {
+            return makeResult(0, { isOutOfRange: true, breakdownReason: 'Out of range' });
+        }
+
+        //Compute components via helpers
+        var baseBreakdown = weaponManager.computeBaseDefenceBreakdown(shooter, target, weapon, defence);
+        var ewLock = weaponManager.computeOEW(shooter, target, weapon, sPosTarget);
+        var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
+        var jammer = weaponManager.computeJammerNoLock(shooter, target, weapon, ewLock.oew, distance, rangePenalty);
+        if (jammer.oewSuppressed) { ewLock.oew = 0; ewLock.soew = 0; }
+        else if (jammer.soewSuppressed) ewLock.soew = 0;
+        var fireControl = weaponManager.computeFireControl(shooter, target, weapon, sPosTarget);
+        var shotMods = weaponManager.computeShotModifiers(shooter, target, weapon, calledid, distance);
+
+        //Goal: identical to old formula (baseDef - jammermod - noLockMod - rangePenalty + oew + soew + firecontrol + mod)
+        //where mod = -defensiveSystems + calledShot + otherTotal
+        var goal = baseBreakdown.total
+                 - jammer.jammermod - jammer.noLockMod
+                 - rangePenalty
+                 + ewLock.oew + ewLock.soew + fireControl
+                 - shotMods.defensiveSystems
+                 + shotMods.calledShot
+                 + shotMods.otherTotal;
+        var hitChance = Math.round(goal / 20 * 100);
+
+        //Build modifier list (zeros omitted)
+        var modifiers = [];
+        function pushIfNonZero(key, label, value) {
+            if (value !== 0) modifiers.push({ key: key, label: label, value: value });
+        }
+        pushIfNonZero('base',             'Base Defense',      baseBreakdown.base);
+        pushIfNonZero('fireControl',      'Fire Control',      fireControl);     
+        pushIfNonZero('oew',              'OEW',               ewLock.oew);
+        pushIfNonZero('soew',             'Supported OEW',     ewLock.soew);           
+        pushIfNonZero('dew',              'DEW',               -baseBreakdown.dew);
+        pushIfNonZero('sdew',             'SDEW',              -baseBreakdown.sdew);
+        pushIfNonZero('bdew',             'BDEW',              -baseBreakdown.bdew);
+        pushIfNonZero('targetJinking',    'Target Jinking',    -baseBreakdown.jinking);
+        pushIfNonZero('halfPhase',        'Half-Phase',        -baseBreakdown.halfPhase);
+        pushIfNonZero('range',            'Range',             -rangePenalty);
+        pushIfNonZero('jammerNoLock',     'No Lock',            -(jammer.jammermod + jammer.noLockMod));
+        pushIfNonZero('defensiveSystems', 'Defensive Systems', -shotMods.defensiveSystems);
+        if (calledid > 0) pushIfNonZero('calledShot', 'Called Shot', shotMods.calledShot);
+        pushIfNonZero('other',            'Other',             shotMods.otherTotal);
+
+        //Dev-mode invariant: breakdown sum must reproduce hitChance
+        var sumCheck = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
+        if (Math.round(sumCheck / 20 * 100) !== hitChance) {
+            console.warn('calculateHitChange breakdown sum mismatch', { sumCheck: sumCheck, hitChance: hitChance, goal: goal });
+        }
+
+        return {
+            hitChance: hitChance,
+            autoHit: false,
+            isOutOfRange: false,
+            breakdownReason: null,
+            modifiers: modifiers,
+            _otherDetail: shotMods.otherDetail
+        };
+    },
+
+    /* ------------------------------------------------------------
+       OLD calculateHitChange — kept for reference. Do not call.
+       Replaced by the helper-based version above. Behavior preserved.
+       ------------------------------------------------------------
+    calculateHitChange: function calculateHitChange(shooter, target, weapon, calledid) {
+
+        if (weapon.autoHit) return 100; //Some weapons always hit, let's just show 100% chance to prevent confusion at firing. DK - 12 Apr 2024
 
         if (weapon.isRammingAttack) {
             return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
@@ -22525,22 +23091,20 @@ window.weaponManager = {
             return weaponManager.calculateBoardingAction(shooter, target, weapon);
         }
 
-        //New check for sustained weapons, to see if they will auto-hit/auto-miss targets from previous turn.  If conditions not true, normal routine. 
+        //New check for sustained weapons, to see if they will auto-hit/auto-miss targets from previous turn.  If conditions not true, normal routine.
         if (shipManager.power.isOverloading(shooter, weapon)) {
-            if (weapon.sustainedTarget && Object.keys(weapon.sustainedTarget).length > 0) { // We only care if an overload weapon fired last turn and therefore has a targetId stored in sustainedTarget.
-                // Now check it's Firing Mode 1, not a different target, and wasn't a miss.
-                if (weapon.firingMode !== 1) return 0; // Wrong firing mode selected for a sustained shot.
-
+            if (weapon.sustainedTarget && Object.keys(weapon.sustainedTarget).length > 0) {
+                if (weapon.firingMode !== 1) return 0;
                 if (!weapon.sustainedTarget.hasOwnProperty(target.id)) {
-                    return 0; // Auto miss - Wrong target
+                    return 0;
                 } else if (weapon.sustainedTarget[target.id] === 1) {
-                    return 100; // Auto-hit!
+                    return 100;
                 }
             }
         }
 
         //Weapons like Mass Drivers have special criteria for targets and shooter speed etc.
-        if (weapon.targetsImmobile) { //Target must be enormous unit and shooter at Speed 0.
+        if (weapon.targetsImmobile) {
             var ownSpeed = shipManager.movement.getSpeed(shooter);
             var targetSpeed = shipManager.movement.getSpeed(target);
             if (!target.Enormous || ownSpeed > 0 || targetSpeed > 0) return 0;
@@ -22550,7 +23114,6 @@ window.weaponManager = {
         var distance = 0;
         if (weapon.ballistic) {
             var sPosLaunch = weaponManager.getFiringHex(shooter, weapon);
-            //		var sPosLaunch = shipManager.movement.getPositionAtStartOfTurn(shooter, gamedata.turn); //OLD METHOD of getting pos.		    
             var sPosTarget = shipManager.getShipPosition(target);
             defence = weaponManager.getShipDefenceValuePos(sPosLaunch, target);
             distance = sPosLaunch.distanceTo(sPosTarget).toFixed(2);
@@ -22558,37 +23121,26 @@ window.weaponManager = {
             defence = weaponManager.getShipDefenceValue(shooter, target);
             distance = mathlib.getDistanceBetweenShipsInHex(shooter, target).toFixed(2);
         }
-        //var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon); //moved lower
 
-        //console.log("dis: " + dis + " disInHex: " + disInHex + " rangePenalty: " + rangePenalty);
-
-        //check whether target moved out of range - then set to 0!
         var maxDistance = Math.max(weapon.range, weapon.distanceRange);
-        if ((maxDistance > 0) && (maxDistance < distance)) { //range is limited and shorter than current distance to target
+        if ((maxDistance > 0) && (maxDistance < distance)) {
             return 0;
         }
 
         var baseDef = weaponManager.calculateBaseHitChange(target, defence, shooter, weapon);
 
-        //The correct defence profiles are now passed from the server side - DK 5/5/2025
-        //if(!target.flight) baseDef += shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(target, "cnC"), "ProfileIncreased");		
-
         var soew = 0;
         var dist = 0;
         var oew = 0;
-        var mdew = 0; //Mine detection EWc1
+        var mdew = 0;
 
         if (weapon.useOEW) {
             oew = ew.getTargetingEW(shooter, target);
             soew = ew.getSupportedOEW(shooter, target);
             dist = ew.getDistruptionEW(shooter);
             oew -= dist;
-            if (oew < 1) { //1 point requires to get a lock on target
-                soew = 0;//no lock-on negates SOEW!
-            }
-            if (oew < 0) {
-                oew = 0;//OEW cannot be negative
-            }
+            if (oew < 1) soew = 0;
+            if (oew < 0) oew = 0;
         } else {
             oew = 0;
             soew = 0;
@@ -22604,29 +23156,23 @@ window.weaponManager = {
 
         mod -= target.getHitChangeMod(shooter, weapon);
 
-        if (weapon.specialHitChanceCalculation) { //Does the weapon itself have any special mods?
+        if (weapon.specialHitChanceCalculation) {
             mod += weapon.calculateSpecialHitChanceMod(shooter, target, calledid);
         }
 
         if (shooter.flight === true) {
-            //oew = shooter.offensivebonus;
-
-            //Abbai critical...
-            //var firstFighter = shipManager.systems.getSystem(shooter, 1); //should be the same as below...
             var firstFighter = shooter.systems[1];
             var OBcrit = shipManager.criticals.hasCritical(firstFighter, "tmpsensordown");
-            mdew = ew.getDetectMEW(shooter); //-1 OB for each point fo Mine Detect
-            oew = shooter.offensivebonus - OBcrit - (mdew * 2); //Every point of mdew costs 2 OB
+            mdew = ew.getDetectMEW(shooter);
+            oew = shooter.offensivebonus - OBcrit - (mdew * 2);
 
-            if (weapon.ballistic) { //for ballistics, if there is no Navigator, use OB only if target is in weapon arc!
+            if (weapon.ballistic) {
                 var shooterLoSBlocked = false;
-                //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS 
-                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                                    
-                if (blockedLosHex && blockedLosHex.length > 0) { //If so, are they blocking this shot? 
+                var blockedLosHex = gamedata.blockedHexes;
+                if (blockedLosHex && blockedLosHex.length > 0) {
                     var shooterPos = shipManager.getShipPosition(shooter);
                     shooterLoSBlocked = mathlib.isLoSBlocked(shooterPos, sPosTarget, blockedLosHex);
                 }
-                // If no navigator and out of arc, or if LoS is blocked, set oew to 0
                 if ((!shooter.hasNavigator &&
                     !weaponManager.isOnWeaponArc(shooter, target, weapon)) ||
                     shooterLoSBlocked ||
@@ -22635,7 +23181,7 @@ window.weaponManager = {
                     oew = 0;
                 }
             }
-            oew = Math.max(0, oew); //OBCrit cannot bring Offensive Bonus below 0
+            oew = Math.max(0, oew);
             if (oew == 0) soew = 0;
 
             if (!weapon.ignoreJinking) {
@@ -22646,40 +23192,35 @@ window.weaponManager = {
         } else {
             if (shooter.agile === true) {
                 if (shipManager.movement.hasRolled(shooter)) {
-                    //		console.log("is rolling -3");
                     if (!shooter.ignoreManoeuvreMods) mod -= 3;
                 }
             } else {
                 if (shipManager.movement.isRolling(shooter)) {
-                    //		console.log("is rolling -3");
                     if (!shooter.ignoreManoeuvreMods) mod -= 3;
                 }
             }
 
             if (shipManager.movement.hasPivotedForShooting(shooter)) {
-                //		console.log("pivoting");
                 if (!shooter.ignoreManoeuvreMods) mod -= 3;
             }
 
             if (shooter.osat && shipManager.movement.hasTurned(shooter)) {
-                //		console.log("osat turn -1");
                 mod -= 1;
             }
 
-            if (shooter.toHitBonus != 0) { //Some ships have bonuses or minuses to hit on all weapons e.g. Elite Crew, Poor Crew and Markab Fervor 
+            if (shooter.toHitBonus != 0) {
                 mod += shooter.toHitBonus;
             }
 
             if (!shooter.osat) {
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "PenaltyToHit");
-                mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "tmphitreduction");   //GTS for chaff missile
+                mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "tmphitreduction");
                 mod -= shipManager.criticals.hasCritical(shipManager.systems.getSystemByName(shooter, "cnC"), "ShadowPilotPain");
             }
         }
         if (calledid > 0) {
             mod += weapon.calledShotMod;
-            if (target.base) mod += weapon.calledShotMod; //double penalty vs bases!
-            //Add bonus to hit Aegis SensorPod?
+            if (target.base) mod += weapon.calledShotMod;
             var calledSystem = shipManager.systems.getSystem(target, calledid);
             if (calledSystem.calledShotBonus != null) mod += calledSystem.calledShotBonus;
         }
@@ -22687,51 +23228,21 @@ window.weaponManager = {
         var ammo = weapon.getAmmo(null);
         if (ammo) mod += ammo.hitChanceMod;
 
-        /*replac ed by lock penalty to allow half lock...
-        if (oew < 1 && !shooter.flight) {
-            rangePenalty = rangePenalty * 2;
-        } else*/
         var noLockPenalty = 0;
         var noLockMod = 0;
         if (oew < 0.5) {
             noLockPenalty = 1;
-        } else if (oew < 1) { //OEW beteen 0.5 and 1 is achievable for targets of Distortion EW
+        } else if (oew < 1) {
             noLockPenalty = 0.5;
         }
 
-        if (shooter.mine) noLockPenalty = 0; //A lock-on is assumed for Mines, but Jammer may still apply below.       
+        if (shooter.mine) noLockPenalty = 0;
 
-        //noLockMod =  rangePenalty * noLockPenalty; //moved lower   
         var jammermod = 0;
-        //if (shooter.faction != target.faction){ //moved to getJammerValueFromTo!
-
-        jammermod = ew.getJammerValueFromTo(shooter, target); //accounts for both jammer and stealth!
-        /* replaced by code above
-        var jammer = shipManager.systems.getSystemByName(target, "jammer");
-        var stealth = shipManager.systems.getSystemByName(target, "stealth");
-        if (jammer && !shipManager.power.isOffline(target, jammer)) jammermod = rangePenalty * shipManager.systems.getOutput(target, jammer);		
-        if (stealth && mathlib.getDistanceBetweenShipsInHex(shooter, target) > 5) jammermod = rangePenalty;
-        */
+        jammermod = ew.getJammerValueFromTo(shooter, target);
         if (jammermod > 0) {
-            soew = 0;//jammer negates SOEW
+            soew = 0;
         }
-        /* moved lower
-        jammermod = jammermod * rangePenalty; //actual reduction
-	
-        jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
-        if (jammermod < 0) jammermod = 0; //cannot reduce below 0
-        */
-
-        /*already taken care of by ew.getJammerValueFromTo
-           if (jammermod > 0){	 //else Improved Sensors do nothing
-            //Improved/Advanced Sensors bonus; hasSpecialAbility isn't working correctly on fighter, ability is not propagated beyond system level - possibly needs correction
-            if (shipManager.hasSpecialAbility(shooter, "AdvancedSensors") || shipManager.systems.getSystemByName(shooter, "fighteradvsensors")){
-                jammermod = 0; //Advanced Sensors negate Jammer
-            } else if (shipManager.hasSpecialAbility(shooter, "ImprovedSensors") || shipManager.systems.getSystemByName(shooter, "fighterimprsensors")){
-                jammermod = jammermod / 2; //Improved Sensors halve Jammer effect
-            }
-           }
-           */
 
         if (weapon.ignoreAllEW) {
             noLockPenalty = 0;
@@ -22742,22 +23253,20 @@ window.weaponManager = {
 
         var rangePenalty = weaponManager.calculateRangePenalty(distance, weapon);
         if (!weapon.noLockPenalty) { jammermod = 0; noLockPenalty = 0; }
-        /*and now nolock and jammer mods...*/
         if ((jammermod > 0) || (noLockPenalty > 0)) {
-            if (weapon.doubleRangeIfNoLock) {//multiply range - eg. Antimatter!
+            if (weapon.doubleRangeIfNoLock) {
                 var modifiedDistance = distance * (1 + noLockPenalty);
                 noLockMod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
                 modifiedDistance = distance * (1 + jammermod);
                 jammermod = weaponManager.calculateRangePenalty(modifiedDistance, weapon) - rangePenalty;
-            } else { //multiply penalty - standard!
+            } else {
                 noLockMod = rangePenalty * noLockPenalty;
-                jammermod = jammermod * rangePenalty; //change multiplier into actual reduction
+                jammermod = jammermod * rangePenalty;
             }
-            jammermod = jammermod - noLockMod; //noLock does the same thing as Jammer, but cannot be overcame by sensors
-            if (jammermod < 0) jammermod = 0; //cannot reduce below 0
+            jammermod = jammermod - noLockMod;
+            if (jammermod < 0) jammermod = 0;
         }
 
-        //jammer and jinking do not stack
         if (target.flight) {
             var jinking = shipManager.movement.getJinking(target);
             if (jinking > jammermod) {
@@ -22767,36 +23276,31 @@ window.weaponManager = {
             }
         }
 
-
         var firecontrol = weaponManager.getFireControl(target, weapon);
-        if (target.mine && weapon.canShootMines) weapon.fireControl[1] = -4; //Can shoot at mines, but at a penalty.        
+        if (target.mine && weapon.canShootMines) weapon.fireControl[1] = -4;
 
-        if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) { //To check for any bonuses from Hyach Coputer BFCP.
+        if (shipManager.hasSpecialAbility(shooter, "HyachComputer")) {
             var bonusfirecontrol = 0;
             var computer = shipManager.systems.getSystemByName(shooter, "hyachComputer");
-            var FCIndex = weaponManager.getFireControlIndex(target); //Find out FC category of the target (0, 1 or 2)
-            bonusfirecontrol = computer.getFCAllocated(FCIndex);  //Use FCIndex to check if Computer has any BFCP allocated to that FC category.
-            firecontrol += bonusfirecontrol; //Add to firecontrol.					
+            var FCIndex = weaponManager.getFireControlIndex(target);
+            bonusfirecontrol = computer.getFCAllocated(FCIndex);
+            firecontrol += bonusfirecontrol;
         }
 
-        // Check Line of Sight for Ballistic weapons after launch (Fighters checked separately above)
         if (weapon.ballistic && (!shooter.flight) && !weapon.ignoresLoS) {
-            if (!(firecontrol <= 0)) { // No point checking for LoS if FC is 0 or lower
+            if (!(firecontrol <= 0)) {
                 var loSBlocked = false;
-                //var blockedLosHex = weaponManager.getBlockedHexes(); //Check if there are any hexes that block LoS
-                var blockedLosHex = gamedata.blockedHexes; //Are there any blocked hexes, no point checking if no.                    
+                var blockedLosHex = gamedata.blockedHexes;
                 var shooterPos2 = shipManager.getShipPosition(shooter);
-                loSBlocked = mathlib.isLoSBlocked(shooterPos2, sPosTarget, blockedLosHex); // Defaults to false (LoS NOT blocked)
+                loSBlocked = mathlib.isLoSBlocked(shooterPos2, sPosTarget, blockedLosHex);
 
-                if (loSBlocked) { // Line of Sight is blocked!
+                if (loSBlocked) {
                     if (weapon instanceof AmmoMissileRackS) {
-                        // Only zero LAUNCHER FC on AmmoMissileLaunchers; missiles have their own guidance (bonus)
                         if (weapon.hasOwnProperty('basicFC') && Array.isArray(weapon.basicFC) && weapon.basicFC.length > 0) {
                             firecontrol -= weapon.basicFC[weaponManager.getFireControlIndex(target)];
                         }
                     } else {
-                        // Everything else (e.g., torpedoes) just has its FC zeroed
-                        firecontrol = 0; // Null weapon firecontrol when no Line of Sight
+                        firecontrol = 0;
                     }
                 }
             }
@@ -22806,6 +23310,7 @@ window.weaponManager = {
         var hitChance = Math.round(goal / 20 * 100);
         return hitChance;
     },
+    ------------------------------------------------------------ */
 
 
     getFireControl: function getFireControl(target, weapon) {
@@ -23314,7 +23819,7 @@ window.weaponManager = {
                             }
 
                             var damageClass = weapon.data["Weapon type"].toLowerCase();
-                            var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
+                            var chance = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid).hitChance;
 
                             if ((chance < 1) && (!weapon.ballistic)) {//now ballistics can be launched when hit chance is 0 or less - important for Packet Torpedo!
                                 //debug && console.log("Can't fire, change < 0");
@@ -23738,6 +24243,20 @@ window.weaponManager = {
         }
 
         return false;
+    },
+
+    getCalledShotInfo: function getCalledShotInfo(ship, system) {
+        var fire = weaponManager.getFiringOrder(ship, system);
+        if (!fire || fire.calledid == null || fire.calledid == -1) return null;
+        var targetShip = gamedata.getShip(fire.targetid);
+        if (!targetShip) return null;
+        var targetSystem = shipManager.systems.getSystem(targetShip, fire.calledid);
+        if (!targetSystem) return null;
+        return {
+            targetShip: targetShip,
+            targetSystem: targetSystem,
+            calledId: fire.calledid
+        };
     },
 
 
@@ -24251,6 +24770,34 @@ window.weaponManager = {
 
 
 };
+
+// Hover tooltip for hit-chance breakdown in targetingShipTooltip.
+// Bound locally on the .targeting div by targetingShipTooltip itself, because
+// the parent ShipTooltip element calls stopPropagation() on mouseover/out,
+// which would prevent any document-level delegation from firing.
+function _showHitChanceTooltip(e) {
+    var tooltip = $('#custom-hit-chance-tooltip');
+    if (!tooltip.length) {
+        tooltip = $('<div id="custom-hit-chance-tooltip" class="custom-hit-chance-tooltip"></div>').appendTo('body');
+    }
+    var raw = String($(this).data('tooltip') || '');
+    var lines = raw.split('\n');
+    var $header = $('<div class="hctt-header"></div>').text(lines[0] || '');
+    tooltip.empty().append($header);
+    for (var i = 1; i < lines.length; i++) {
+        tooltip.append($('<div class="hctt-row"></div>').text(lines[i]));
+    }
+    var rect = this.getBoundingClientRect();
+    var topPos = rect.top - tooltip.outerHeight() - 5;
+    if (topPos < 0) topPos = rect.bottom + 5;
+    var leftPos = rect.left + rect.width / 2 - tooltip.outerWidth() / 2;
+    if (leftPos < 0) leftPos = 5;
+    if (leftPos + tooltip.outerWidth() > window.innerWidth) leftPos = window.innerWidth - tooltip.outerWidth() - 5;
+    tooltip.css({ top: topPos + 'px', left: leftPos + 'px' }).show();
+}
+function _hideHitChanceTooltip() {
+    $('#custom-hit-chance-tooltip').hide();
+}
 ;
 
 /* Source: client/damage.js */
@@ -24343,24 +24890,24 @@ window.combatLog = {
         // In that case, the toUpperCase goes wrong.
         // Make certain the name is a string.
         if (typeof ship.name == 'string' || ship.name instanceof String) {
-            if(jumped){
+            if (jumped) {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #cc8500; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
-            }else{
+            } else {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> IS DESTROYED</span>';
-            }    
+            }
         } else {
-            if(jumped){
+            if (jumped) {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name.toUpperCase() + '</span> <span style="color: #cc8500; font-weight: bold;">HAS JUMPED TO HYPERSPACE</span></span>';
             } else {
                 html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span> IS DESTROYED</span>';
-            }    
+            }
         }
 
         var element = $(html).appendTo("#log");  //Changed to append - DK
 
         $("#log").scrollTop($("#log")[0].scrollHeight);
         return element;
-        
+
     },
 
     logFireOrders: function logFireOrders(orders, printedLog = false, ships = null) {
@@ -24374,96 +24921,136 @@ window.combatLog = {
         var shots = 0;
         var shotshit = 0;
         var shotsintercepted = 0;
-		/*let's count orders as well!*/
-		var ordersC = 0;
+        /*let's count orders as well!*/
+        var ordersC = 0;
         var ordersChit = 0;
         var ordersCintercepted = 0;
-		
+
         var damages = Array();
         var lowC = 100000;
         var highC = -100000;
         var notes = "";
-        
-        for (var a in orders){            
+        var totalInterceptPenalty = 0;
+        var totalInterceptorsCount = 0;
+        var tooltipTextParts = [];
+        var shotIndex = 1;
+
+        for (var a in orders) {
 
             count++;
             var fire = orders[a];
 
             var weapon = shipManager.systems.getSystem(ship, fire.weaponid);
-		
-		
+
+
             var modeIteration = fire.firingMode; //change weapons data to reflect mode actually used
-            if(modeIteration != weapon.firingMode){
-                while(modeIteration != weapon.firingMode){ //will loop until correct mode is found
-                weapon.changeFiringMode();
+            if (modeIteration != weapon.firingMode) {
+                while (modeIteration != weapon.firingMode) { //will loop until correct mode is found
+                    weapon.changeFiringMode();
                 }
             }
-		    
+
             shots += fire.shots;
             shotshit += fire.shotshit;
             shotsintercepted += fire.intercepted;
             if (fire.shots > 0) ordersC += 1;
-			if (fire.shotshit>0) ordersChit += 1;
-			if (fire.intercepted>0) ordersCintercepted += 1;
+            if (fire.shotshit > 0) ordersChit += 1;
+            if (fire.intercepted > 0) ordersCintercepted += 1;
             weaponManager.getDamagesCausedBy(fire, damages, ships);
             var needed = fire.needed;
             //if (needed < 0) needed = 0; //I skip this - if intercepted below 0, let's show it.
-            //if (fire.shots > 0){ //otherwise shot is purely technical ... BUT show it too!
-                if (needed < lowC)
-                lowC = needed;
-                if (needed > highC)
-                highC = needed;
+            if (fire.shots > 0) { //ignore hit chance of purely technical fire orders
+                if (needed < lowC) lowC = needed;
+                if (needed > highC) highC = needed;
 
-                if (fire.pubnotes)
-                notes += fire.pubnotes + " ";
-            //}
-                        
+                var interceptPenalty = 0;
+                var interceptorsCount = 0;
+
+                if (fire.notes) {
+                    var match = fire.notes.match(/Interception: (\d+) sources:(\d+)/);
+                    if (match) {
+                        interceptPenalty = parseInt(match[1], 10);
+                        interceptorsCount = parseInt(match[2], 10);
+                    }
+                }
+
+                totalInterceptPenalty += interceptPenalty;
+                totalInterceptorsCount += interceptorsCount;
+
+                if (interceptorsCount > 0) {
+                    var wWord = interceptorsCount === 1 ? "shot" : "shots";
+                    tooltipTextParts.push("Shot " + shotIndex + ": -" + interceptPenalty + "% (" + interceptorsCount + " intercepting " + wWord + ")");
+                } else {
+                    tooltipTextParts.push("Shot " + shotIndex + ": No interception");
+                }
+                shotIndex++;
+            }
+
+            if (fire.pubnotes) notes += fire.pubnotes + " ";
         }
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";
+
+        var tooltipAttr = "";
+        if (totalInterceptorsCount > 0) {
+            var wWord = totalInterceptorsCount === 1 ? "shot" : "shots";
+            var summaryText = 'Interception: ' + totalInterceptorsCount + " " + wWord + ' applied a -' + totalInterceptPenalty + '% hit penalty.';
+            var tooltipText = summaryText;
+
+            // If there's more than one shot, append the per-shot breakdown
+            if (shotIndex > 2) {
+                tooltipText += "\n• " + tooltipTextParts.join("\n• ");
+            }
+
+            tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '"';
+        } else {
+            tooltipAttr = '';
+        }
+
         var chancetext = "";
-        if (lowC == highC) chancetext = "Chance to hit: " + lowC + "%";else chancetext = "Chance to hit: " + lowC + "% - " + highC + "%";
+        if (lowC !== 100000) {
+            if (lowC == highC) chancetext = "<span" + tooltipAttr + ">Chance to hit: " + lowC + "%</span>";
+            else chancetext = "<span" + tooltipAttr + ">Chance to hit: " + lowC + "% - " + highC + "%</span>";
+        }
 
         if (!target) chancetext = "";
 
         var intertext = "";
-        //if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";
-		//if (shotsintercepted > 0) intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
-		if (shotsintercepted > 0){
-			if(ordersC != shots){
-			 	intertext = ", " + ordersCintercepted + '(' + shotsintercepted + ") intercepted";
-			}else{
-				if (shotsintercepted > 0) intertext = ", " + shotsintercepted + " intercepted";				
-			}	
-		}
-		
+        if (shotsintercepted > 0) {
+            if (ordersC != shots) {
+                intertext = ', <span>' + ordersCintercepted + '(' + shotsintercepted + ') intercepted</span>';
+            } else {
+                intertext = ', <span>' + shotsintercepted + ' intercepted</span>';
+            }
+        }
+
         var targettext = "";
         if (target) targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" >' + target.name + '</span>';
 
         var shottext = "";
         //if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
-		//if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
-		if (target){
-			if(ordersC != shots){
-			    shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
-			}else{
-			    shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';				
-			}	
-		}
-		
+        //if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
+        if (target) {
+            if (ordersC != shots) {
+                shottext = ', ' + ordersChit + '(' + shotshit + ')/' + ordersC + '(' + shots + ') shots hit' + intertext + '.';
+            } else {
+                shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
+            }
+        }
+
         var notestext = "";
         if (notes) notestext = '<span class="pubotes">' + notes + '</span>';
 
         var shortText = false;
-        if(weaponManager.doShortLogText(fire)) shortText = true;
+        if (weaponManager.doShortLogText(fire)) shortText = true;
 
         //Some orders don't need the full log text, e.g. Reactor overload, hyperspace jump.    
-        if(shortText){
+        if (shortText) {
             html += notestext;
-        }else{
+        } else {
             if (mathlib.arrayIsEmpty(weapon.missileArray)) {
                 html += ' firing ' + counttext + weapon.displayName + ' (' + weapon.firingModes[weapon.firingMode] + ') ' + targettext + '. ' + chancetext + shottext + notestext;
             } else {
@@ -24486,16 +25073,16 @@ window.combatLog = {
                 var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.                
                 var damagehtml = "";
                 for (var a in damages[i].damages) {
-                   
+
                     var d = damages[i].damages[a];
                     var damageDone = d.damage - d.armour;
                     var damageStopped = d.armour;
-					/*healing is up, so negative values are just fine
+                    /*healing is up, so negative values are just fine
                     if (damageDone < 0) {
                         damageStopped = d.damage;
                         damageDone = 0;
                     }
-					*/
+                    */
                     /*if (d.damage-d.armour<=0) continue;*/
 
                     totaldam += damageDone; //d.damage-d.armour;
@@ -24504,15 +25091,15 @@ window.combatLog = {
                     var comma = ",";
 
                     //New section to create critical entries when damage is done but system no destroyed.
-                    var firstCrit = "";                    
+                    var firstCrit = "";
                     var hasCrit = shipManager.criticals.sufferedCritThisTurn(system, d.turn);
 
-                    if(hasCrit && damageDone > 0){
+                    if (hasCrit && damageDone > 0) {
                         if (criticalshtml.length == 0) {
                             firstCrit = " System criticals: ";
                             comma = "";
                         }
-                        if(!system.ship) continue; //Means it's a fighter, just ignore.
+                        if (!system.ship) continue; //Means it's a fighter, just ignore.
                         if (!combatLog.critsShown[system.ship.id]?.includes(system.id)) {
                             criticalshtml += firstCrit + '<span class="critical">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
                         }
@@ -24522,8 +25109,8 @@ window.combatLog = {
                         }
                         if (!combatLog.critsShown[system.ship.id].includes(system.id)) {
                             combatLog.critsShown[system.ship.id].push(system.id);
-                        }                     
-                    }  
+                        }
+                    }
 
 
                     if (!d.destroyed) {
@@ -24537,36 +25124,36 @@ window.combatLog = {
                         comma = "";
                     }
 
-                    damagehtml += firstDam + '<span class="damage">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';                   
-                    
+                    damagehtml += firstDam + '<span class="damage">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
+
                 }
 
                 //if (totaldam > 0){ //display fire orders that did no damage, too! - MS
                 //          html += '<li><span class="shiplink victim" data-id="'+ship.id+'" >' + victim.name + '</span> damaged for ' + totaldam + '(+ ' + armour + ' armour). '+ damagehtml+'</li>';
 
-                if(fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
+                if (fire.damageclass == "HyperspaceJump") continue; //Do not show damage to Primary Structure when jumping to Hyperspace. 
 
                 html += '<li><span class="shiplink victim" data-id="' + ship.id + '" >' + victim.name + '</span> damaged for ' + totaldam + ' (total armour mitigation: ' + armour + ').</li>';
 
                 if (criticalshtml.length > 1) {
-                    html += '<li>' + criticalshtml + '</li>';                                       
+                    html += '<li>' + criticalshtml + '</li>';
                 }
-                
+
                 if (damagehtml.length > 1) {
-                    html += '<li>' + damagehtml + '</li>';                                     
+                    html += '<li>' + damagehtml + '</li>';
                 }
                 //}
             }
 
             html += "</ul>";
         }
-		
-		
-        if(printedLog){ //Different method of listing depending on whether player is watching a Replay animation or just browsing the printed log :)
-            var targetDiv = document.getElementById("LogActual"); 
+
+
+        if (printedLog) { //Different method of listing depending on whether player is watching a Replay animation or just browsing the printed log :)
+            var targetDiv = document.getElementById("LogActual");
             targetDiv.style.display = "block";
             targetDiv.innerHTML += html;
-        }else{
+        } else {
             var element = $(html).appendTo("#log");
             $("#log").scrollTop($("#log")[0].scrollHeight);
             return element;
@@ -24644,7 +25231,7 @@ window.combatLog = {
         $(html).prependTo("#log");
     },
     */
-    
+
     logMoves: function logMoves(ship) {
 
         var e = $('.logentry.' + ship.id + ' .move.t' + gamedata.turn);
@@ -24665,50 +25252,50 @@ window.combatLog = {
     },
 
     getDisplayTurn: function getDisplayTurn() {
-        if(this.displayedTurn === null){
+        if (this.displayedTurn === null) {
             return gamedata.turn;
-        }else{
-            return this.displayedTurn; 
-        } 
-    },    
+        } else {
+            return this.displayedTurn;
+        }
+    },
 
     showPrevious: function showPrevious() {
-        if(this.displayedTurn === null) this.displayedTurn = gamedata.turn;
+        if (this.displayedTurn === null) this.displayedTurn = gamedata.turn;
         var turn = this.displayedTurn - 1;
         if (turn < 1) return;
         this.displayedTurn = turn;
 
-        if(this.displayedTurn < gamedata.turn){
+        if (this.displayedTurn < gamedata.turn) {
             document.getElementById('nextTurnButton').style.display = 'inline-block'; // Display next button when relevant.
             document.getElementById('currentTurnButton').style.display = 'inline-block'; // Display next button when relevant.
         }
 
         combatLog.fetchAndShowCombatLog();
-    },    
+    },
 
     showNext: function showNext() {
-        if(this.displayedTurn === null) this.displayedTurn = gamedata.turn;
-        var turn = this.displayedTurn+1; //Get the turn we want.
+        if (this.displayedTurn === null) this.displayedTurn = gamedata.turn;
+        var turn = this.displayedTurn + 1; //Get the turn we want.
         this.displayedTurn = turn; //Set new displayedTurn for further requests.
-        
-        if(this.displayedTurn >= gamedata.turn){
+
+        if (this.displayedTurn >= gamedata.turn) {
             document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
             document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.            
             document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.
             return; //Can't go forward past current turn. 
-        } 
+        }
         combatLog.fetchAndShowCombatLog();
     },
 
     showCurrent: function showCurrent() {
         this.displayedTurn = gamedata.turn;
-        
+
         document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
         document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.
         document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.        
         document.getElementById('LogActual').innerHTML = '';  //Reset Combat Log text          
-        return; 
-    },    
+        return;
+    },
 
     /*
     fetchAndShowCombatLog: function fetchAndShowCombatLog() {
@@ -24744,85 +25331,85 @@ window.combatLog = {
     },
     */
 
-//New version using ajaxWithRetry()
-fetchAndShowCombatLog: function fetchAndShowCombatLog() {
-    var turn = this.displayedTurn;
+    //New version using ajaxWithRetry()
+    fetchAndShowCombatLog: function fetchAndShowCombatLog() {
+        var turn = this.displayedTurn;
 
-    // Check if this turn's data is already cached
-    if (combatLog.logCache[turn]) {
-        combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
-        return;
-    }
+        // Check if this turn's data is already cached
+        if (combatLog.logCache[turn]) {
+            combatLog.showLog(combatLog.logCache[turn].allFireOrders, combatLog.logCache[turn].ships);
+            return;
+        }
 
-    ajaxInterface.ajaxWithRetry({
-        type: 'GET',
-        url: 'replay.php',
-        dataType: 'json',
-        data: {
-            turn: turn,
-            gameid: gamedata.gameid,
-            time: new Date().getTime() // prevent browser caching
-        },
-        success: function (data) {
-            var allFireOrders = combatLog.groupByShipAndWeapon(
-                weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)
-            );
+        ajaxInterface.ajaxWithRetry({
+            type: 'GET',
+            url: 'replay.php',
+            dataType: 'json',
+            data: {
+                turn: turn,
+                gameid: gamedata.gameid,
+                time: new Date().getTime() // prevent browser caching
+            },
+            success: function (data) {
+                var allFireOrders = combatLog.groupByShipAndWeapon(
+                    weaponManager.getAllFireOrdersForLogPrint(data.ships, data.turn)
+                );
 
-            // Store in cache
-            combatLog.logCache[turn] = {allFireOrders: allFireOrders, ships: data.ships};
+                // Store in cache
+                combatLog.logCache[turn] = { allFireOrders: allFireOrders, ships: data.ships };
 
-            combatLog.showLog(allFireOrders, data.ships);
-        }.bind(this),
-        error: ajaxInterface.errorAjax
-    });
-},    
+                combatLog.showLog(allFireOrders, data.ships);
+            }.bind(this),
+            error: ajaxInterface.errorAjax
+        });
+    },
 
     groupByShipAndWeapon: function groupByShipAndWeapon(incomingFire) {
         const grouped = {};
-    
+
         incomingFire.forEach(function (fire) {
             if (fire.type === "intercept" || fire.type === "selfIntercept") return;
-    
+
             const ship = gamedata.getShip(fire.shooterid);
             const weapon = shipManager.systems.getSystem(ship, fire.weaponid);
             const key = `${fire.shooterid}-${weapon.constructor.name}-${fire.firingMode}-${fire.targetid}`;
-    
+
             grouped[key] = grouped[key] || [];
             grouped[key].push(fire);
         });
-    
+
         const groupedKeys = Object.keys(grouped);
-    
+
         groupedKeys.sort(function (a, b) {
             const obj1 = grouped[a][0];
-            const obj2 = grouped[b][0]; 
-    
+            const obj2 = grouped[b][0];
+
             const s1 = gamedata.getShip(obj1.shooterid);
             const s2 = gamedata.getShip(obj2.shooterid);
             const w1 = shipManager.systems.getSystem(s1, obj1.weaponid);
             const w2 = shipManager.systems.getSystem(s2, obj2.weaponid);
-/*    
-            // Sort by resolution order first
-            if (obj1.resolutionOrder !== obj2.resolutionOrder) {
-                return obj1.resolutionOrder - obj2.resolutionOrder;
-            }
-    
-            // Fighters after ships
-            if (s1.flight !== s2.flight) {
-                return s1.flight ? 1 : -1;
-            }
-*/    
+            /*    
+                        // Sort by resolution order first
+                        if (obj1.resolutionOrder !== obj2.resolutionOrder) {
+                            return obj1.resolutionOrder - obj2.resolutionOrder;
+                        }
+                
+                        // Fighters after ships
+                        if (s1.flight !== s2.flight) {
+                            return s1.flight ? 1 : -1;
+                        }
+            */
             // Weapon priority
             if (w1.priority !== w2.priority) {
                 return w1.priority - w2.priority;
             }
-    
+
             // Fallback: shooter ID and fire order ID
             let val = s1.id - s2.id;
             if (val === 0) val = obj1.id - obj2.id;
             return val;
         });
-    
+
         return groupedKeys.map(function (key) {
             return grouped[key];
         });
@@ -24831,29 +25418,55 @@ fetchAndShowCombatLog: function fetchAndShowCombatLog() {
     showLog: function showLog(allFireOrders, ships = null) {
         // Get the current turn from the combat log system
         var currentTurn = window.combatLog.getDisplayTurn();
-    
+
         // Start building the log HTML
         var html = '<br><span class = "combatTurn";>Turn ' + currentTurn + ':</span><br>';
-    
+
         // Check if the allFireOrders array is empty
         if (allFireOrders.length === 0) {
             html += '<span class = "noCombatLog";><br>No fire orders were made this turn!</span>';
         }
-    
+
         // Update the content of LogActual with the current turn and optional message
         document.getElementById('LogActual').innerHTML = html;
-    
+
         // Process fire orders if any
         allFireOrders.forEach(function (logEntry) { // allFireOrders is an array of other arrays
             combatLog.logFireOrders(logEntry, true, ships);
         });
-    
+
         // Show the LogActual div
         document.getElementById('LogActual').style.display = 'block'; // Set to 'block' or 'inline-block' depending on your layout
         combatLog.critsShown = {}; //Empty crti tracker for next print.
     }
 
-};;
+};
+$(function () {
+    $(document).on('mouseenter touchstart', '.intercept-tooltip', function (e) {
+        var tooltip = $('#custom-intercept-tooltip');
+        if (!tooltip.length) {
+            tooltip = $('<div id="custom-intercept-tooltip" class="custom-intercept-tooltip"></div>').appendTo('body');
+        }
+        var raw = String($(this).data('tooltip') || '');
+        var lines = raw.split('\n');
+        var $header = $('<div class="hctt-header"></div>').text(lines[0] || '');
+        tooltip.empty().append($header);
+        for (var i = 1; i < lines.length; i++) {
+            tooltip.append($('<div class="hctt-row"></div>').text(lines[i]));
+        }
+        var rect = this.getBoundingClientRect();
+        var topPos = rect.top - tooltip.outerHeight() - 5;
+        if (topPos < 0) topPos = rect.bottom + 5;
+        var leftPos = rect.left + rect.width / 2 - tooltip.outerWidth() / 2;
+        if (leftPos < 0) leftPos = 5;
+        if (leftPos + tooltip.outerWidth() > window.innerWidth) leftPos = window.innerWidth - tooltip.outerWidth() - 5;
+        tooltip.css({ top: topPos + 'px', left: leftPos + 'px' }).show();
+    }).on('mouseleave touchend touchmove', '.intercept-tooltip', function (e) {
+        $('#custom-intercept-tooltip').hide();
+    });
+});
+
+;
 
 /* Source: client/declarations.js */
 "use strict";
@@ -25105,7 +25718,7 @@ window.declarations = {
 				weapon.changeFiringMode();
 				}
 			    }
-		      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid);
+		      var toHit = weaponManager.calculateHitChange(ship, targetUnit, weapon, order.calledid).hitChance;
 		      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 		      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 		    }			  
@@ -25171,7 +25784,7 @@ window.declarations = {
 					weapon.changeFiringMode();
 					}
 				    }
-			      var toHit = weaponManager.calculateHitChange(srcShip, ship, weapon, order.calledid);
+			      var toHit = weaponManager.calculateHitChange(srcShip, ship, weapon, order.calledid).hitChance;
 			      if (toHit < dispFireEntry.chanceMin) dispFireEntry.chanceMin = toHit;
 			      if (toHit > dispFireEntry.chanceMax) dispFireEntry.chanceMax = toHit;
 			  }
@@ -37709,8 +38322,8 @@ MineStealth.prototype.constructor = MineStealth;
 
 MineStealth.prototype.initializationUpdate = function () {
 	var ship = this.ship;
-	this.data["Mine Signature"] = ship.signature;
-	if(ship.mineType && ship.mineType == 'DEW') this.data["Detected Signature"] = ship.detectedSignature;	
+	this.data["Current Signature"] = ship.signature;
+	if(ship.mineType && ship.mineType == 'DEW' && ship.signature !== ship.detectedSignature) this.data["Activated Signature"] = ship.detectedSignature;	
 	return this
 }
 
@@ -39763,7 +40376,7 @@ MineControllerDEW.prototype.refreshFireControl = function () { //refresh descrip
 
 MineControllerDEW.prototype.getCurrClass = function () { //get current FC class for display; if none, find first!
 	if (this.currClass == '') {
-		var classes = Object.keys(this.allocatedRanges); //Allocated is always the same for HC, so can serve same purpose as availableAA did.
+		var classes = Object.keys(this.getCurrAllocations() || {});
 		if (classes.length > 0) {
 			this.currClass = classes[0];
 		}
@@ -39771,25 +40384,34 @@ MineControllerDEW.prototype.getCurrClass = function () { //get current FC class 
 	return this.currClass;
 };
 
-MineControllerDEW.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available 
+// Returns the {shipType: range} object the UI is currently editing.
+// In single-target mode this IS this.allocatedRanges. In multi mode it is allocatedRanges[currWeaponId].
+MineControllerDEW.prototype.getCurrAllocations = function () {
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var wid = this.getCurrWeaponId();
+		if (wid == null) return null;
+		return this.allocatedRanges[wid];
+	}
+	return this.allocatedRanges;
+};
+
+MineControllerDEW.prototype.canIncrease = function () { //check if can increase rating for current class; can do if preallocated points are unused or allocated points are less than available
 	//always needs to check that allocated are less than maximum and allocated total is less than total maximum
 	var ship = this.ship;
 	var spawned = Number(ship.spawned);
 	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
-	//console.log("Mine: " + ship.name + " (id: " + ship.id + ") | spawned: " + ship.spawned + " | turn: " + gamedata.turn + " | deploymentTurn: " + deploymentTurn);
 
 	if (gamedata.turn !== deploymentTurn) {
-		//console.log("  BLOCKED: Not deployment turn");
 		return false;
 	}
 	this.getCurrClass();
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	//how many are allocated?
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
-	//how many are allowed?
-	var allowed = this.rangeSetting;
-	if (allocated >= allowed) return false; //full allowance for this FC type filled	
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
+	if (allocated >= this.rangeSetting) return false; //full allowance for this FC type filled
 
 	return true;
 };
@@ -39799,44 +40421,48 @@ MineControllerDEW.prototype.canDecrease = function () { //can decrease if someth
 	var spawned = Number(ship.spawned);
 	var deploymentTurn = (spawned === -1) ? 1 : spawned + 1;
 	if (gamedata.turn !== deploymentTurn) return false;
-	this.getCurrClass(); //Should be getCurrClass or similar? The method in aoe.js is getCurrClass
+	this.getCurrClass();
 	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 	if (allocated > 0) return true;
 	return false;
 };
 
 MineControllerDEW.prototype.doIncrease = function () { //increase BFCP usage
 	this.getCurrClass();
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
 
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover! Should never happen.
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
-
-	if (allocated < this.rangeSetting) { //else use regular pool 
-		this.allocatedRanges[this.currClass] = allocated + 1;
-
+	if (allocated < this.rangeSetting) {
+		alloc[this.currClass] = allocated + 1;
 	}
-	this.mineSet = true; //user changed something, assume they are content.	
+	this.mineSet = true;
 	this.refreshData();
 };
 
 MineControllerDEW.prototype.doDecrease = function () { //decrease BFCP usage
 	this.getCurrClass();
-	if (this.currClass == '') return false; //this would mean there are no FC classes whatsover!
-	//Decrease could be in current turn, or from previous turn allocation.
-	var allocated = (this.allocatedRanges[this.currClass] === null) ? this.rangeSetting : this.allocatedRanges[this.currClass];
+	if (this.currClass == '') return false;
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return false;
+
+	var allocated = (alloc[this.currClass] === null) ? this.rangeSetting : alloc[this.currClass];
 
 	if (allocated > 0) {
-		this.allocatedRanges[this.currClass] = allocated - 1;
+		alloc[this.currClass] = allocated - 1;
 	}
-	this.mineSet = true; //user changed something, assume they are content.	
+	this.mineSet = true;
 	this.refreshData();
 };
 
 MineControllerDEW.prototype.refreshData = function () { //refresh description to show correct values
-	var classes = Object.keys(this.allocatedRanges);
+	if (!this.data) this.data = {};
 	var entryName = '';
 	var currType = '';
 	var range = null;
@@ -39848,36 +40474,59 @@ MineControllerDEW.prototype.refreshData = function () { //refresh description to
 		}
 	}
 
+	//Wipe stale per-shipType / per-weapon range keys so a mode flip never leaves both kinds in the dict.
+	var dataKeys = Object.keys(this.data);
+	for (var dk = 0; dk < dataKeys.length; dk++) {
+		if (dataKeys[dk].indexOf(' - ') === 0) delete this.data[dataKeys[dk]];
+	}
+
 	for (var i in ship.systems) {
 		var weapon = ship.systems[i];
 		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
 			weapon.data["Fire control (fighter/med/cap)"] = weapon.translateFCtoD100txt(weapon.fireControl);
-			weapon.range = this.rangeSetting;				
+			weapon.range = this.rangeSetting;
 		}
 	}
 
 	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
 	if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-		//hiddenDisplay = "?";
 		this.data["Max Range"] = hiddenDisplay;
 	} else {
 		this.data["Max Range"] = this.rangeSetting;
-
-
-
 	}
 
-	for (var i = 0; i < classes.length; i++) {
-		currType = classes[i];
-		if (this.validTargets && !this.validTargets.includes(currType)) continue;
-		range = this.allocatedRanges[currType];
-		if (range == null) range = this.rangeSetting;
-		if (hiddenDisplay == '?') range = hiddenDisplay;
-		//entry should exist, just change it to show current values
-		entryName = ' - ' + currType;
-		this.data[entryName + " range"] = range;
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var labels = this.buildWeaponLabels();
+		var weaponIds = Object.keys(this.allocatedRanges);
+		for (var w = 0; w < weaponIds.length; w++) {
+			var wid = weaponIds[w];
+			var perType = this.allocatedRanges[wid];
+			if (!perType || typeof perType !== 'object') continue;
+			var label = labels[wid] || ('weapon ' + wid);
+			var typeKeys = Object.keys(perType);
+			for (var t = 0; t < typeKeys.length; t++) {
+				currType = typeKeys[t];
+				if (this.validTargets && !this.validTargets.includes(currType)) continue;
+				range = perType[currType];
+				if (range == null) range = this.rangeSetting;
+				if (hiddenDisplay == '?') range = hiddenDisplay;
+				this.data[' - ' + label + ' ' + currType + ' range'] = range;
+			}
+		}
+	} else {
+		this.ensureFlatAllocatedShape();
+		var classes = Object.keys(this.allocatedRanges);
+		for (var i = 0; i < classes.length; i++) {
+			currType = classes[i];
+			if (this.validTargets && !this.validTargets.includes(currType)) continue;
+			range = this.allocatedRanges[currType];
+			if (range == null) range = this.rangeSetting;
+			if (hiddenDisplay == '?') range = hiddenDisplay;
+			entryName = ' - ' + currType;
+			this.data[entryName + " range"] = range;
+		}
 	}
-
 };
 
 MineControllerDEW.prototype.canPropagate = function () { //can propagate if set to >0
@@ -39895,37 +40544,188 @@ MineControllerDEW.prototype.getRangeAllocated = function (rangeIndex) { //return
 };
 
 MineControllerDEW.prototype.setCurrShipType = function (shipType) { //sets indicated FC type as current (or sets empty as current)
-	this.currClass = ''; //will do if desired type does not exist here, which is rare but possible
-	var classes = Object.keys(this.allocatedRanges);
-	var currType = '';
+	this.currClass = '';
+	var alloc = this.getCurrAllocations();
+	if (!alloc) return;
+	var classes = Object.keys(alloc);
 	for (var i = 0; i < classes.length; i++) {
-		currType = classes[i];
-		if (currType == shipType) { //exists!
-			this.currClass = currType;
-			return; //no need to loop further
+		if (classes[i] == shipType) {
+			this.currClass = classes[i];
+			return;
 		}
 	}
 };
 
-MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
+MineControllerDEW.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable
+	if (gamedata.gamephase != -1) return true;
 
-	if (gamedata.gamephase == -1) {
-		this.individualNotesTransfer = {};
-		//every point is denoted as single entry with damage class name
+	this.individualNotesTransfer = {};
+
+	if (this.hasMultiTarget()) {
+		this.ensureMultiAllocatedShape();
+		var weaponIds = Object.keys(this.allocatedRanges);
+		for (var w = 0; w < weaponIds.length; w++) {
+			var wid = weaponIds[w];
+			var perType = this.allocatedRanges[wid];
+			if (!perType || typeof perType !== 'object') continue;
+			var typeKeys = Object.keys(perType);
+			for (var t = 0; t < typeKeys.length; t++) {
+				var currType = typeKeys[t];
+				if (this.validTargets && !this.validTargets.includes(currType)) continue;
+				var val = perType[currType];
+				if (val == null) val = this.rangeSetting;
+				//Compound notekey "<weaponId>;<shipType>" - server splits on ';' in doIndividualNotesTransfer.
+				this.individualNotesTransfer[wid + ';' + currType] = val;
+			}
+		}
+	} else {
 		var shipCategories = Object.keys(this.allocatedRanges);
 		var rangeValues = Object.values(this.allocatedRanges);
-
 		for (var i = 0; i < shipCategories.length; i++) {
 			var currType = shipCategories[i];
 			if (this.validTargets && !this.validTargets.includes(currType)) continue;
-
-			if (rangeValues[i] == null) rangeValues[i] = this.rangeSetting; //Set to max range if nothing set by player.
-
-			// Initialize the array for the current spec
+			if (rangeValues[i] == null) rangeValues[i] = this.rangeSetting;
 			this.individualNotesTransfer[currType] = rangeValues[i];
 		}
 	}
 	return true;
+};
+
+// === MINE_MULTI: Multiple Targets enhancement helpers ===
+
+MineControllerDEW.prototype.hasMultiTarget = function () {
+	if (this.multiTargetEnabled) return true; //server-supplied flag (preferred)
+	var ship = this.ship;
+	if (!ship || !ship.enhancementOptions) return false;
+	for (var i = 0; i < ship.enhancementOptions.length; i++) {
+		var enh = ship.enhancementOptions[i];
+		if (enh && enh[0] === 'MINE_MULTI' && Number(enh[2]) > 0) return true;
+	}
+	return false;
+};
+
+MineControllerDEW.prototype.getMineWeapons = function () {
+	var ship = this.ship;
+	if (!ship || !ship.systems) return [];
+	var totals = {};
+	for (var i = 0; i < ship.systems.length; i++) {
+		var sys = ship.systems[i];
+		if (sys instanceof Weapon && sys.name !== 'RammingAttack') {
+			var d = sys.displayName || sys.name;
+			totals[d] = (totals[d] || 0) + 1;
+		}
+	}
+	var counts = {};
+	var out = [];
+	for (var i = 0; i < ship.systems.length; i++) {
+		var sys = ship.systems[i];
+		if (sys instanceof Weapon && sys.name !== 'RammingAttack') {
+			var d = sys.displayName || sys.name;
+			counts[d] = (counts[d] || 0) + 1;
+			var label = (totals[d] > 1) ? (d + ' ' + counts[d]) : d;
+			out.push({ id: sys.id, name: sys.name, displayName: d, indexInGroup: counts[d], label: label });
+		}
+	}
+	return out;
+};
+
+MineControllerDEW.prototype.buildWeaponLabels = function () {
+	var labels = {};
+	var weapons = this.getMineWeapons();
+	for (var i = 0; i < weapons.length; i++) {
+		labels[weapons[i].id] = weapons[i].label;
+	}
+	return labels;
+};
+
+MineControllerDEW.prototype.getCurrWeaponId = function () {
+	if (this.currWeaponId != null) {
+		var weapons = this.getMineWeapons();
+		for (var i = 0; i < weapons.length; i++) {
+			if (String(weapons[i].id) === String(this.currWeaponId)) return this.currWeaponId;
+		}
+		this.currWeaponId = null;
+	}
+	var firstWeapons = this.getMineWeapons();
+	if (firstWeapons.length === 0) return null;
+	this.currWeaponId = firstWeapons[0].id;
+	return this.currWeaponId;
+};
+
+MineControllerDEW.prototype.setCurrWeaponId = function (id) {
+	this.currWeaponId = id;
+	this.currClass = ''; //force getCurrClass to re-resolve against the new weapon's allocations
+};
+
+//Detect whether allocatedRanges is currently in nested per-weapon form.
+MineControllerDEW.prototype.isNestedAllocatedShape = function () {
+	var keys = Object.keys(this.allocatedRanges || {});
+	if (keys.length === 0) return false;
+	var firstVal = this.allocatedRanges[keys[0]];
+	return (firstVal != null && typeof firstVal === 'object');
+};
+
+//Inverse of ensureMultiAllocatedShape — used in the lobby when the user toggles MINE_MULTI off
+//after having opened the settings (which mutated to nested). Collapses to flat using the first
+//weapon's values, or all-null if no entries.
+MineControllerDEW.prototype.ensureFlatAllocatedShape = function () {
+	if (this.hasMultiTarget()) return;
+	if (!this.isNestedAllocatedShape()) return;
+	var weaponKeys = Object.keys(this.allocatedRanges);
+	var defaults = { 'Capitals-HCVs': null, 'LCVs-MCVs': null, 'Fighters': null };
+	if (weaponKeys.length > 0) {
+		var first = this.allocatedRanges[weaponKeys[0]];
+		if (first && typeof first === 'object') {
+			if (first['Capitals-HCVs'] !== undefined) defaults['Capitals-HCVs'] = first['Capitals-HCVs'];
+			if (first['LCVs-MCVs'] !== undefined) defaults['LCVs-MCVs'] = first['LCVs-MCVs'];
+			if (first['Fighters'] !== undefined) defaults['Fighters'] = first['Fighters'];
+		}
+	}
+	this.allocatedRanges = defaults;
+};
+
+// When MINE_MULTI is active but allocatedRanges is still flat (e.g. just-bought, never deployed),
+// convert to nested {weaponId: {shipType: range}} shape using current flat values as defaults.
+MineControllerDEW.prototype.ensureMultiAllocatedShape = function () {
+	if (!this.hasMultiTarget()) return;
+	var weapons = this.getMineWeapons();
+	if (weapons.length === 0) return;
+
+	//Detect flat shape: keys are shipType strings, values are not objects.
+	var keys = Object.keys(this.allocatedRanges || {});
+	var isFlat = false;
+	if (keys.length === 0) {
+		isFlat = true;
+	} else {
+		var firstVal = this.allocatedRanges[keys[0]];
+		if (firstVal == null || typeof firstVal !== 'object') isFlat = true;
+	}
+
+	if (!isFlat) {
+		//Already nested - but make sure every weapon has an entry.
+		for (var i = 0; i < weapons.length; i++) {
+			if (!this.allocatedRanges[weapons[i].id]) {
+				this.allocatedRanges[weapons[i].id] = { 'Capitals-HCVs': null, 'LCVs-MCVs': null, 'Fighters': null };
+			}
+		}
+		return;
+	}
+
+	//Convert flat to nested. Use existing flat values as the per-weapon defaults.
+	var flatDefaults = {
+		'Capitals-HCVs': (this.allocatedRanges && this.allocatedRanges['Capitals-HCVs'] != null) ? this.allocatedRanges['Capitals-HCVs'] : null,
+		'LCVs-MCVs': (this.allocatedRanges && this.allocatedRanges['LCVs-MCVs'] != null) ? this.allocatedRanges['LCVs-MCVs'] : null,
+		'Fighters': (this.allocatedRanges && this.allocatedRanges['Fighters'] != null) ? this.allocatedRanges['Fighters'] : null
+	};
+	var nested = {};
+	for (var i = 0; i < weapons.length; i++) {
+		nested[weapons[i].id] = {
+			'Capitals-HCVs': flatDefaults['Capitals-HCVs'],
+			'LCVs-MCVs': flatDefaults['LCVs-MCVs'],
+			'Fighters': flatDefaults['Fighters']
+		};
+	}
+	this.allocatedRanges = nested;
 };
 ;
 
@@ -40281,251 +41081,58 @@ ThirdspaceShield.prototype.initializationUpdate = function () {
 	return this;
 };
 
-ThirdspaceShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
-	//Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
-
+ThirdspaceShield.prototype.getGenerator = function () {
 	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
-
 	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
+		if (ship.systems[i] instanceof ThirdspaceShieldGenerator) {
+			return ship.systems[i];
 		}
 	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
-
-	return true;
+	return null;
 };
 
-ThirdspaceShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
-	//Check if it is at 0 health / not destroyed etc
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth <= 0) return false; //Shield cannot be reduced more.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
-
-	return true;
+ThirdspaceShield.prototype.canIncrease = function () {
+	if (this.ship.flight) return false; //Fighters can't increase or decrease shields
+	if (this.currentHealth >= this.maxhealth) return false; //Shield at maximum output.
+	return !!this.getGenerator(); //No generator, can't move shields around.
 };
 
-
-ThirdspaceShield.prototype.doIncrease = function () { //	
-	//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth; //
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 1) {
-		this.currentHealth += 1;
-		generator.storedCapacity -= 1;
-	}
-
+ThirdspaceShield.prototype.canDecrease = function () {
+	if (this.ship.flight) return false;
+	if (this.currentHealth <= 0) return false;
+	return !!this.getGenerator();
 };
 
-ThirdspaceShield.prototype.doIncrease5 = function () { //	
-	//Increase this.maxhealth by 5 (or lower if less available) + decrease Shield Generator by same amount.
+ThirdspaceShield.prototype.doIncrease = function (amount) {
+	var generator = this.getGenerator();
+	if (!generator) return;
 
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
+	var increment = Math.min(amount || 1, this.maxhealth - this.currentHealth);
+	if (increment <= 0) return;
 
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 5) {
-		this.currentHealth += 5;
-		generator.storedCapacity -= 5;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+	this.currentHealth += increment;
+	generator.storedCapacity -= increment;
+	this.outputDisplay = this.currentHealth;
 };
 
-ThirdspaceShield.prototype.doIncrease10 = function () { //	
-	//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
+ThirdspaceShield.prototype.doDecrease = function (amount) {
+	var generator = this.getGenerator();
+	if (!generator) return;
 
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
+	var decrement = Math.min(amount || 1, this.currentHealth);
+	if (decrement <= 0) return;
 
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 10) {
-		this.currentHealth += 10;
-		generator.storedCapacity -= 10;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+	this.currentHealth -= decrement;
+	generator.storedCapacity += decrement;
+	this.outputDisplay = this.currentHealth === 0 ? '-' : this.currentHealth;
 };
 
-ThirdspaceShield.prototype.doIncrease25 = function () { //	
-	//Increase this.maxhealth by 10 (or lower if less available) + decrease Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	var shieldHeadroom = this.maxhealth - shieldHealth;//How much room for increase does shield have?
-
-	if (shieldHeadroom >= 25) {
-		this.currentHealth += 25;
-		generator.storedCapacity -= 25;
-	} else { //Just increase by how much you can!
-		this.currentHealth += shieldHeadroom;
-		generator.storedCapacity -= shieldHeadroom;
-	}
-
+ThirdspaceShield.prototype.doMin = function () {
+	this.doDecrease(this.currentHealth);
 };
 
-ThirdspaceShield.prototype.doDecrease = function () {
-	//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 1) {
-		this.currentHealth -= 1;
-		generator.storedCapacity += 1;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease5 = function () {
-	//Reduce this.maxhealth by 5 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 5) {
-		this.currentHealth -= 5;
-		generator.storedCapacity += 5;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease10 = function () {
-	//Reduce this.maxhealth by 10 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 10) {
-		this.currentHealth -= 10;
-		generator.storedCapacity += 10;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
-};
-
-ThirdspaceShield.prototype.doDecrease25 = function () {
-	//Reduce this.maxhealth by 25 (or lower if less available) + increase Shield Generator by same amount.
-
-	var ship = this.ship;
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThirdspaceShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	var shieldHealth = this.currentHealth;
-	if (shieldHealth >= 25) {
-		this.currentHealth -= 25;
-		generator.storedCapacity += 25;
-	} else {
-		var shieldIncrement = Math.max(0, shieldHealth);
-		this.currentHealth -= shieldIncrement;
-		generator.storedCapacity += shieldIncrement;
-	}
-
-	if (this.shieldHealth == 0) {
-		this.outputDisplay = '-'; //'0' is not shown!							
-	}
-
+ThirdspaceShield.prototype.doMax = function () {
+	this.doIncrease(this.maxhealth - this.currentHealth);
 };
 
 ThirdspaceShield.prototype.doIndividualNotesTransfer = function () { //prepare individualNotesTransfer variable - if relevant for this particular system
@@ -40596,47 +41203,6 @@ ThoughtShield.prototype.getDefensiveHitChangeMod = function (target, shooter, we
 	});
 
 	return defenceMod; // Return the calculated defenceMod
-};
-
-ThoughtShield.prototype.canIncrease = function () { //Can increase if not at max / destroyed.
-	//Check if it is at maxHealth / not destroyed etc / Is there spare capacity in Generator?	
-
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth >= this.maxhealth) return false; //Shield is at maximum output.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThoughtShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!
-
-	return true;
-};
-
-ThoughtShield.prototype.canDecrease = function () { //can decrease if not at zero / destroyed.
-	//Check if it is at 0 health / not destroyed etc
-	var ship = this.ship;
-
-	if (ship.flight) return false;//Fighters can't increase or decrease shields
-	if (this.currentHealth <= 0) return false; //Shield cannot be reduced more.
-
-	for (var i in ship.systems) {
-		var system = ship.systems[i];
-
-		if (system instanceof ThoughtShieldGenerator) {
-			var generator = system; //Find generator
-		}
-	}
-
-	if (!generator) return false; //This Thirdspace ship has no generator, can't move shields around!	
-
-	return true;
 };
 ;
 
@@ -41035,7 +41601,7 @@ TwinArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -41115,7 +41681,7 @@ QuadArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -41195,7 +41761,7 @@ HeavyArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -41287,7 +41853,7 @@ QuadParticleBeam.prototype.doMultipleFireOrders = function (shooter, target, sys
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -41523,7 +42089,7 @@ ParticleRepeater.prototype.doMultipleFireOrders = function (shooter, target, sys
             calledid = system.id;
         }
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -41843,7 +42409,7 @@ TelekineticCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -42203,6 +42769,10 @@ PakmaraPlasmaWeb.prototype.initializationUpdate = function () {
 	return this;
 }	
 
+PakmaraPlasmaWeb.prototype.hasMaxBoost = function () {
+	return this.maxBoostLevel;
+};
+
 PakmaraPlasmaWeb.prototype.clearBoost = function () {
     for (var i in system.power) {
         var power = system.power[i];
@@ -42397,6 +42967,125 @@ var ParticleConcentrator = function(json, ship)
 ParticleConcentrator.prototype = Object.create( Weapon.prototype );
 ParticleConcentrator.prototype.constructor = ParticleConcentrator;
 
+ParticleConcentrator.prototype.initializationUpdate = function() {
+    delete this.data["Combine projection"];
+    if (gamedata.gamephase !== 3) return this;
+
+    var myOrder = null;
+    for (var i in this.fireOrders) {
+        var fo = this.fireOrders[i];
+        if (fo.turn !== gamedata.turn) continue;
+        if (fo.type !== 'normal') continue;
+        myOrder = fo;
+        break;
+    }
+    if (!myOrder || myOrder.firingMode <= 1) return this;
+
+    var firingShip = this.ship;
+    var target = gamedata.getShip(myOrder.targetid);
+    if (!target) return this;
+
+    var firingShipPos = shipManager.getShipPosition(firingShip);
+    var targetPos = shipManager.getShipPosition(target);
+    var primarySides = weaponManager.getShipHittingSide(firingShip, target);
+
+    var sameSides = function(a, b) {
+        if (!a || !b || a.length !== b.length) return false;
+        for (var k = 0; k < a.length; k++) {
+            if (a[k] !== b[k]) return false;
+        }
+        return true;
+    };
+
+    // Firing ship included: multiple Concentrators on the same ship can combine.
+    // Primary weapon is skipped by object identity below.
+    var candidates = [];
+    for (var s in gamedata.ships) {
+        var otherShip = gamedata.ships[s];
+        if (!otherShip) continue;
+        if (otherShip.unavailable) continue;
+        if (shipManager.isDestroyed && shipManager.isDestroyed(otherShip)) continue;
+
+        var otherPos = shipManager.getShipPosition(otherShip);
+        if (firingShipPos.distanceTo(otherPos) > 1) continue;
+
+        var otherSides = weaponManager.getShipHittingSide(otherShip, target);
+        if (!sameSides(primarySides, otherSides)) continue;
+
+        for (var sys in otherShip.systems) {
+            var w = otherShip.systems[sys];
+            if (!w || w.name !== "ParticleConcentrator") continue;
+            // System ids are per-ship integers, not global — use object identity to skip the primary.
+            if (w === this) continue;
+            var matched = false;
+            for (var f in w.fireOrders) {
+                var fo2 = w.fireOrders[f];
+                if (fo2.turn !== gamedata.turn) continue;
+                if (fo2.type !== 'normal') continue;
+                if (fo2.id === myOrder.id) continue;
+                if (fo2.targetid != myOrder.targetid) continue;
+                if (fo2.firingMode != myOrder.firingMode) continue;
+                matched = true;
+                break;
+            }
+            if (!matched) continue;
+            candidates.push({
+                ship: otherShip,
+                weapon: w,
+                pos: otherPos,
+                distToTarget: otherPos.distanceTo(targetPos),
+            });
+        }
+    }
+
+    candidates.sort(function(a, b) {
+        return a.distToTarget - b.distToTarget;
+    });
+
+    // Greedy clique fill: every accepted ship must be within 1 hex of every other.
+    var accepted = [{ ship: firingShip, pos: firingShipPos }];
+    var partners = [];
+    var needed = myOrder.firingMode;
+    for (var c = 0; c < candidates.length && partners.length < needed; c++) {
+        var cand = candidates[c];
+        var fits = true;
+        for (var a = 0; a < accepted.length; a++) {
+            if (cand.pos.distanceTo(accepted[a].pos) > 1) { fits = false; break; }
+        }
+        if (!fits) continue;
+        accepted.push({ ship: cand.ship, pos: cand.pos });
+        partners.push(cand);
+    }
+
+    var line;
+    if (partners.length === 0) {
+        line = "No eligible partner weapons visible - will fire as single shot";
+    } else {
+        // Group all participating Concentrators by ship; seed firing ship with its own primary PC.
+        var counts = {};
+        var order = [];
+        var currentWeapons = partners.length+1;
+        counts[firingShip.name] = 1;
+        order.push(firingShip.name);
+        partners.forEach(function(p) {
+            if (counts[p.ship.name] === undefined) order.push(p.ship.name);
+            counts[p.ship.name] = (counts[p.ship.name] || 0) + 1;
+        });
+        var names = order.map(function(n) {
+            return counts[n] > 1 ? (n + " (" + counts[n] + "),") : n + " (1)";
+        }).join(',<br>');
+        var actualMode = partners.length + 1;
+        if (actualMode < myOrder.firingMode) {
+            //line = currentWeapons + " of " + needed + " concentrators available [" + names + "] - will downgrade to " + actualMode + "combined";
+            line = currentWeapons + " of " + needed + " available:<br>" + names + "<br>- will downgrade to " + actualMode + "combined";
+        } else {
+            line = "Will combine with: <br>" + names;
+        }
+    }
+    this.data["Combination"] = line;
+    return this;
+};
+
 var VorlonDischargeGun = function VorlonDischargeGun(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -42446,7 +43135,7 @@ VorlonDischargeGun.prototype.doMultipleFireOrders = function (shooter, target, s
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking weapons not eligible for Called Shots
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -42702,7 +43391,7 @@ PsionicConcentrator.prototype.doMultipleFireOrders = function (shooter, target, 
             calledid = system.id;
         }        
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -43037,7 +43726,7 @@ ProximityLaserNew.prototype.doMultipleFireOrders = function (shooter, target, sy
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         //if(chance < 1) continue;
 
         var fire = {
@@ -43648,7 +44337,7 @@ BallisticTorpedo.prototype.doMultipleFireOrders = function (shooter, target, sys
 		var calledid = -1; //Ballistic Topredo CANNOT make called shots.
 
 	    var damageClass = this.data["Weapon type"].toLowerCase();
-	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+	    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
 
 	    var fire = {
 	        id: fireid,
@@ -43924,7 +44613,7 @@ PointPulsar.prototype.doMultipleFireOrders = function (shooter, target, system) 
             calledid = system.id;
         }        
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {
@@ -44830,11 +45519,11 @@ MolecularSlicerBeamL.prototype.doMultipleFireOrders = function (shooter, target,
 				}	
 
 				//Check valid shot?
-				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+				chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
 				if (chance < 1) continue;
 
 				for (var k = 0; k < shotsToFire; k++) {
-					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid);
+					chance = window.weaponManager.calculateHitChange(shooter, target, weapon, calledid).hitChance;
 					fireid = shooter.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
 					weapon.resolveFireOrder(damagePerShot, shooter, target, fireid, calledid, chance);
 				}
@@ -45293,7 +45982,7 @@ MultiphasedCutter.prototype.doMultipleFireOrders = function (shooter, target, sy
 			calledid = system.id;
 		}
 
-		var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+		var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
 		if (chance < 1) continue;
 
 		var fire = {
@@ -45656,7 +46345,7 @@ GravityNet.prototype.doMultipleFireOrders = function (shooter, target, system) {
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -45814,7 +46503,7 @@ GraviticLance.prototype.doMultipleFireOrders = function (shooter, target, system
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Grav Beams are raking, can never called shot.
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -46009,7 +46698,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -46075,7 +46764,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //Raking, cannot called shot.       
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if (chance < 1) continue;
 
         var fire = {
@@ -48478,6 +49167,10 @@ var NexusSandCaster = function  NexusSandCaster(json, ship) {
 NexusSandCaster.prototype = Object.create(Weapon.prototype);
 NexusSandCaster.prototype.constructor =  NexusSandCaster;
 
+NexusSandCaster.prototype.hasMaxBoost = function () {
+    return this.maxBoostLevel;
+};
+
 NexusSandCaster.prototype.initializationUpdate = function () {
     if(this.firingMode == 2){
         const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
@@ -48816,6 +49509,12 @@ var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
 EWNuclearTorpedo.prototype = Object.create(Weapon.prototype);
 EWNuclearTorpedo.prototype.constructor =  EWNuclearTorpedo;
 
+var EWRangedNuclearTorpedo = function  EWRangedNuclearTorpedo(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWRangedNuclearTorpedo.prototype = Object.create(Weapon.prototype);
+EWRangedNuclearTorpedo.prototype.constructor =  EWRangedNuclearTorpedo;
+
 var EWLaserBolt = function  EWLaserBolt(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -48922,7 +49621,7 @@ EWGraviticTractingRod.prototype.doMultipleFireOrders = function (shooter, target
         var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
         var calledid = -1; //No called shots.     
 
-        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid);
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
         if(chance < 1) continue;
 
         var fire = {

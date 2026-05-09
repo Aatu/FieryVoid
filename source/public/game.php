@@ -219,7 +219,8 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
     <script defer src="client/renderer/animationStrategy/animation/effects/BlinkEffect.js"></script>    
     <script defer src="client/renderer/animationStrategy/animation/effects/ShipExplosion.js"></script>
     <script defer src="client/renderer/animationStrategy/animation/effects/SystemDestroyedEffect.js"></script>
-    <script defer src="client/renderer/animationStrategy/animation/effects/ShipJumpPoint.js"></script>  
+    <script defer src="client/renderer/animationStrategy/animation/effects/ShipJumpPoint.js"></script>
+    <script defer src="client/renderer/animationStrategy/animation/effects/ImpactSparksEffect.js"></script>
 
     <script defer src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>

@@ -112,18 +112,24 @@ window.AnimationStrategy = function () {
     }
 
     function updateDeltaTime(paused) {
-        var now = new Date().getTime();
+        var now = Date.now();
 
         if (!this.lastAnimationTime) {
             this.lastAnimationTime = now;
             this.currentDeltaTime = 0;
+            return;
         }
 
-        if (!paused) {
-            this.currentDeltaTime = now - this.lastAnimationTime;
-        }
-
+        var delta = now - this.lastAnimationTime;
         this.lastAnimationTime = now;
+
+        // If paused, hidden, or a massive time jump occurred (e.g. tab sleep), zero the delta
+        // to prevent animations "catching up" all at once (and blasting overlapping audio).
+        if (paused || document.hidden || delta > 1000) {
+            this.currentDeltaTime = 0;
+        } else {
+            this.currentDeltaTime = delta;
+        }
     }
 
     return AnimationStrategy;
