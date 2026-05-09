@@ -2904,6 +2904,21 @@ window.gamedata = {
 			} else { }
 		}
 
+		if (ship.flight) {
+			lobbyEnhancements.setEnhancementsFighter(ship);
+		} else {
+			lobbyEnhancements.setEnhancementsShip(ship);
+		}
+
+		// Systems were replaced with fresh baseShip clones, so the old window DOM
+		// references stale objects. Destroy it and null the reference so that
+		// onShipContextMenu will lazily recreate it with the correct (new) ship.id
+		// that updateFleet assigns.
+		if (ship.shipStatusWindow) {
+			ship.shipStatusWindow.remove();
+			ship.shipStatusWindow = null;
+		}
+
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 		//gamedata.populateFleetDropdown();		
