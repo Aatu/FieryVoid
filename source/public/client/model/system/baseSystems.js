@@ -224,9 +224,79 @@ MagGraviticThruster.prototype.constructor = MagGraviticThruster;
 
 var Hangar = function (json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.pendingLaunchOrders = [];   //queued launch dialog selections; consumed at submit
+	this.refreshHangarTooltip();
 }
 Hangar.prototype = Object.create(ShipSystem.prototype);
 Hangar.prototype.constructor = Hangar;
+
+// Submit-time hook called from ajaxInterface for every system. The base class
+// version resets individualNotesTransfer to "" — which would wipe any launch
+// orders the dialog set directly. Build the payload from pendingLaunchOrders
+// here instead so it survives until serialisation.
+Hangar.prototype.doIndividualNotesTransfer = function () {
+	if (Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0) {
+		this.individualNotesTransfer = JSON.stringify(this.pendingLaunchOrders);
+		this.pendingLaunchOrders = [];   //consumed: revising requires reopening the dialog
+	} else {
+		this.individualNotesTransfer = "";
+	}
+};
+
+// "Carrying" and "Stored Craft" lines are recomputed from the live $hangarUsage
+// (sent via stripForJson) rather than read from the static blueprint, because
+// data[] isn't transmitted on the live gamedata payload — only the static
+// blueprint contains the baked-in (empty) version. Without this, the tooltip
+// would always say "0 / N boxes" no matter how many craft are actually stored.
+Hangar.prototype.refreshHangarTooltip = function () {
+	if (!this.data) this.data = {};
+	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
+
+	var totalStored = 0;
+	for (var i = 0; i < this.hangarUsage.length; i++) {
+		totalStored += parseInt(this.hangarUsage[i].flightSize || 1, 10);
+	}
+
+	// Effective capacity = maxhealth - damage that got past armour, clamped >= 0.
+	// Damage is needed in the line to make hangar damage visible — without it,
+	// "Carrying: 8 / 14" never changes when boxes are destroyed but no craft
+	// has been evicted (because the destroyed boxes were empty slots).
+	var netDamage = 0;
+	if (Array.isArray(this.damage)) {
+		for (var i = 0; i < this.damage.length; i++) {
+			var d = this.damage[i];
+			netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
+		}
+	}
+	var effectiveCapacity = Math.max(0, this.maxhealth - netDamage);
+
+	if (netDamage > 0) {
+		this.data["Carrying"] = totalStored + " / " + effectiveCapacity + " boxes (" + netDamage + " destroyed)";
+	} else {
+		this.data["Carrying"] = totalStored + " / " + this.maxhealth + " boxes";
+	}
+
+	if (this.hangarUsage.length === 0) {
+		delete this.data["Stored Craft"];
+		return;
+	}
+
+	var byClass = {};
+	for (var i = 0; i < this.hangarUsage.length; i++) {
+		var entry = this.hangarUsage[i];
+		var key = (entry.phpclass && entry.phpclass !== "")
+			? entry.phpclass
+			: ("(" + (entry.hangarType || "unknown") + " slot)");
+		var displayName = entry.name || key;
+		if (!byClass[key]) byClass[key] = { name: displayName, count: 0 };
+		byClass[key].count += parseInt(entry.flightSize || 1, 10);
+	}
+	var lines = [];
+	for (var k in byClass) {
+		lines.push(byClass[k].count + "x " + byClass[k].name);
+	}
+	this.data["Stored Craft"] = lines.join("<br>");
+};
 
 var MindriderHangar = function MindriderHangar(json, ship) {
 	ShipSystem.call(this, json, ship);

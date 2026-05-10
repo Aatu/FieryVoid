@@ -1493,8 +1493,12 @@ class Manager{
 		return $id;
     } 
     
-    public static function insertSingleEnhancement($gameData, $id, $enhID, $enhNo, $enhName){          
+    public static function insertSingleEnhancement($gameData, $id, $enhID, $enhNo, $enhName){
 		self::$dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
+    }
+
+    public static function insertSingleFlightSize($gameid, $shipid, $flightSize){
+		self::$dbManager->submitFlightSize($gameid, $shipid, $flightSize);
     }       
                  
 

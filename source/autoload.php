@@ -3545,6 +3545,10 @@ spl_autoload_register(
 				'claweagle' => '/server/model/ships/drazi/claweagle.php',										
 				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',
 
+                //HANGER OPERATIONS CLASSES
+                'hangarops' => '/server/model/systems/HangarOps.php',
+                'shuttle' => '/server/model/ships/Shuttle.php',
+                'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
                 
                 //MINES
 				'minestealth' => '/server/model/systems/baseSystems.php',

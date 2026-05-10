@@ -940,12 +940,28 @@ class BaseShip {
 
     //Used in FireGamePhase->process to generate extra notes for Hyach Specialists, but could have other applications - DK - 27.12.25
 	public function generateAdditionalNotes($gameData, $dbManager) {
-        
-        if($gameData->phase == 3){        
+
+        if($gameData->phase == 3){
             $specialists = $this->getSystemByName("HyachSpecialists");
-            if ($specialists){ //Does ship have Specialists system?            
+            if ($specialists){ //Does ship have Specialists system?
                 $specialists->generateIndividualNotes($gameData, $dbManager); //Generate notes for Specialists system
-                $this->saveIndividualNotes($dbManager); //Save ship notes. 
+                $this->saveIndividualNotes($dbManager); //Save ship notes.
+            }
+
+            //Hangar Operations: persist any launch orders the player queued via
+            //the launch dialog. doIndividualNotesTransfer (called during ship
+            //reconstruction earlier in this request) stashed the payload into
+            //each Hangar's $pendingLaunchTransfer; here we let it write the
+            //hangarLaunchOrder note now that $gameData is hydrated.
+            $hasHangar = false;
+            foreach ($this->systems as $sys) {
+                if ($sys instanceof Hangar) {
+                    $sys->generateIndividualNotes($gameData, $dbManager);
+                    $hasHangar = true;
+                }
+            }
+            if ($hasHangar) {
+                $this->saveIndividualNotes($dbManager);
             }
         }
     }                

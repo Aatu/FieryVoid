@@ -1839,6 +1839,108 @@ window.confirm = {
         var a = e.appendTo("body");
         a.fadeIn(250);
         $(".multiConfirmInput", e).first().focus();
+    },
+
+    // === Hangar Operations Stage 4: launch fighters/shuttles dialog ===
+    //
+    // Builds a per-hangar list of stored craft with size selectors and on
+    // confirm pushes the picks into each hangar's pendingLaunchOrders array.
+    // The Hangar's client-side doIndividualNotesTransfer (in baseSystems.js)
+    // serialises pendingLaunchOrders into individualNotesTransfer right
+    // before the gamedata POST — server's Hangar::doIndividualNotesTransfer
+    // then persists them as hangarLaunchOrder notes for end-of-turn resolution.
+    // Setting individualNotesTransfer DIRECTLY here would be wiped by the base
+    // ShipSystem.doIndividualNotesTransfer at submit time.
+    hangarLaunch: function hangarLaunch(ship) {
+        var hangars = [];
+        for (var k in ship.systems) {
+            var sys = ship.systems[k];
+            if (!sys || sys.name !== 'hangar') continue;
+            if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
+            hangars.push(sys);
+        }
+        if (hangars.length === 0) return;
+
+        // Reuse askForMultipleValues styling (multi-value-confirm) so the rows
+        // are positioned by the existing CSS instead of fighting it.
+        var e = $('<div class="confirm error multi-value-confirm hangarLaunch"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">Launch fighters/shuttles from ' + ship.name + '</div>').prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+
+        hangars.forEach(function (hangar, hidx) {
+            var output = parseInt(hangar.output || 0, 10);
+            var used = parseInt(hangar.launchedThisTurn || 0, 10) + parseInt(hangar.landedThisTurn || 0, 10);
+            var budget = Math.max(0, output - used);
+
+            // Hangar header row (no input — just labels)
+            var headerRow = $('<div class="multi-value-row"></div>');
+            $('<span class="multi-value-label"><span class="multi-value-name">Hangar ' + (hidx + 1) + '</span> <span class="multi-value-max">(launch budget: ' + budget + ' / ' + output + ')</span></span>').appendTo(headerRow);
+            container.append(headerRow);
+
+            // Group stored craft by phpclass for the selector
+            var byClass = {};
+            hangar.hangarUsage.forEach(function (entry) {
+                var key = entry.phpclass || 'unknown';
+                if (!byClass[key]) byClass[key] = { name: entry.name || key, count: 0 };
+                byClass[key].count += parseInt(entry.flightSize || 1, 10);
+            });
+
+            Object.keys(byClass).forEach(function (cls) {
+                var info = byClass[cls];
+                var maxByRules = launchSizeMaxFor(cls);     // 1-6 default; SHF/BPod/Shuttle handled
+                var max = Math.min(info.count, maxByRules, budget);
+
+                var row = $('<div class="multi-value-row"></div>');
+                $('<span class="multi-value-label"><span class="multi-value-name">' + info.count + 'x ' + info.name + '</span> <span class="multi-value-max">(max launch: ' + max + ')</span></span>').appendTo(row);
+                var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
+                $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="0" min="0" max="' + max + '">').appendTo(inputWrapper);
+
+                row.data('hangar', hangar);
+                row.data('phpclass', cls);
+                container.append(row);
+            });
+        });
+
+        $(".confirmok", e).on("click", function () {
+            // Aggregate selections per hangar
+            var byHangar = new Map();
+            container.find('.multi-value-row').each(function () {
+                var $row = $(this);
+                var hangar = $row.data('hangar');
+                var cls = $row.data('phpclass');
+                if (!hangar) return;     // header rows have no data
+                var size = parseInt($('.launchSize', this).val() || 0, 10);
+                if (size <= 0) return;
+                if (!byHangar.has(hangar)) byHangar.set(hangar, []);
+                byHangar.get(hangar).push({ phpclass: cls, size: size });
+            });
+
+            byHangar.forEach(function (orders, hangar) {
+                hangar.pendingLaunchOrders = orders;
+            });
+
+            $(".confirm").remove();
+        });
+
+        $(".confirmcancel", e).on("click", function () {
+            $(".confirm").remove();
+        });
+
+        e.appendTo("body").fadeIn(250);
+
+        // Per-class flight size caps per B5W §10.1.2:
+        //   Shuttles 1-6, Super-Heavy Fighters 1-3, Breaching Pods 1-2,
+        //   everything else: full flight (capped at 6 by default; partial
+        //   is allowed when fewer than 6 remain stored).
+        function launchSizeMaxFor(phpclass) {
+            var lower = (phpclass || '').toLowerCase();
+            if (lower === 'shuttle' || lower === 'minesweepingshuttle') return 6;
+            if (lower.indexOf('shuttle') !== -1) return 6;
+            if (lower.indexOf('breachingpod') !== -1 || lower.indexOf('breaching') !== -1) return 2;
+            // Heuristic for super-heavy: phpclass usually contains 'SHF'/'SuperHeavy'.
+            if (lower.indexOf('superheavy') !== -1 || lower.indexOf('shf') !== -1) return 3;
+            return 6;
+        }
     }
 
 };

@@ -11,11 +11,12 @@ window.ShipTooltipFireMenu = function () {
     ShipTooltipFireMenu.prototype = Object.create(ShipTooltipMenu.prototype);
 
     ShipTooltipFireMenu.buttons = [
-		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" },	
+		{ className: "targetWeapons", condition: [isEnemy, hasWeaponsSelected], action: targetWeapons, info: "Target selected weapons" },
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
-        { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.	
-        { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }        
-        //{ className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.	
+        { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
+        { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
+        { className: "launchFighters", condition: [isMine, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch fighters/shuttles from hangar (Stage 4 — gated to safeGameID)" }
+        //{ className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
         //{ className: "removeMultiOrder", condition: [hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
 	];
 
@@ -79,6 +80,51 @@ window.ShipTooltipFireMenu = function () {
         return gamedata.selectedSystems.some(system => {
             return system.canTargetAllies === true || system.canTargetAll === true ||  (gamedata.rules && gamedata.rules.friendlyFire  === 1);
         });
+    }
+
+    // === Hangar Operations Stage 4: launch button conditions + action ===
+
+    function isMine() {
+        return gamedata.isMyShip(this.targetedShip);
+    }
+
+    function isLaunchEnabledGame() {
+        // Mirrors HangarOps::isFlowEnabled — gated to safeGameID 3730 + local
+        // dev games (id <= 0). Stage 9 removes this gate.
+        var SAFE_GAME_ID = 3730;
+        var gid = parseInt(gamedata.gameid || 0, 10);
+        return gid <= 0 || gid >= SAFE_GAME_ID;
+    }
+
+    function hasLaunchableHangar() {
+        var ship = this.targetedShip;
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var sys = ship.systems[i];
+            if (!sys || sys.name !== 'hangar') continue;
+            if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
+            var output = parseInt(sys.output || 0, 10);
+            var used = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
+            if (used >= output) continue;
+            return true;
+        }
+        return false;
+    }
+
+    function carrierNotPivotingOrRolling() {
+        var ship = this.targetedShip;
+        if (!ship) return false;
+        if (shipManager && shipManager.movement) {
+            if (shipManager.movement.isRolling(ship)) return false;
+            if (shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== "no") return false;
+        }
+        return true;
+    }
+
+    function openHangarLaunch() {
+        if (window.confirm && typeof window.confirm.hangarLaunch === 'function') {
+            window.confirm.hangarLaunch(this.targetedShip);
+        }
     }
 
     return ShipTooltipFireMenu;
