@@ -399,10 +399,10 @@ window.shipWindowManager = {
 					var capitalizedType = i.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 					if (i == "normal") {
 						//skip description of kind of fighters
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " fighters");
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " Fighters");
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " fighters");
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
 					} else {
 						//something other than fighters
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType);
