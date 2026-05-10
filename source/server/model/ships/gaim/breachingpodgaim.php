@@ -20,7 +20,7 @@ class breachingpodgaim extends FighterFlight{
         $this->turncost = 0.33;
 		$this->turndelay = 0;
 
-        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.         
+        $this->maxFlightSize = 2;//this is an unusual type of 'fighter', limit flight size.         
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->hangarRequired = 'Breaching Pods'; //for fleet check   
 		

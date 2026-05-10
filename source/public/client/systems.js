@@ -549,7 +549,7 @@ shipManager.systems = {
             for (const crit of cnCCrits) {
                 if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite",
                     "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
-                    return 'Red';
+                    return 'Orange';
                 }
             }
         }
@@ -568,8 +568,13 @@ shipManager.systems = {
         }
 
         // Check for overloading systems
-        if (shipManager.power.isOverloading(ship, system)) {
+        if (shipManager.power.isOverloading(ship, system)){
             return 'Yellow';
+        }else if(system.name == "PlasmaBattery"){
+            //if(system.output > 0 && gamedata.gamephase > 1){
+            if(system.output > 0){            
+                return 'Yellow';
+            }                
         }
 
         // No highlight if none of the conditions are met

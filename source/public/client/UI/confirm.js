@@ -64,6 +64,64 @@ window.confirm = {
         }
     },
 
+    getMaxAmmoFit: function (ship, currentEnhID) {
+        var baseShip = gamedata.getShipByType($(".confirmok").data("shipclass") || ship.phpclass);
+        if (!baseShip) baseShip = ship;
+
+        var ammoMag = null;
+        if (baseShip && baseShip.flight) {
+            var firstFighterKey = Object.keys(baseShip.systems)[0];
+            if (firstFighterKey && baseShip.systems[firstFighterKey].systems) {
+                for (var i in baseShip.systems[firstFighterKey].systems) {
+                    if (baseShip.systems[firstFighterKey].systems[i].name == "ammoMagazine") { ammoMag = baseShip.systems[firstFighterKey].systems[i]; break; }
+                }
+            }
+        } else if (baseShip) {
+            for (var i in baseShip.systems) {
+                if (baseShip.systems[i].name == "ammoMagazine") { ammoMag = baseShip.systems[i]; break; }
+            }
+        }
+
+        if (!ammoMag || typeof ammoMag.capacity === 'undefined') return 9999;
+
+        var capacity = ammoMag.capacity;
+        var currentUsed = ammoMag.remainingAmmo || 0;
+
+        var basicSpace = 0;
+        if (ammoMag.ammoCountArray && ammoMag.ammoSizeArray) {
+            var keys = Object.keys(ammoMag.ammoCountArray);
+            if (keys.length > 0) {
+                var basicMode = keys[0];
+                var count = ammoMag.ammoCountArray[basicMode] || 0;
+                var size = ammoMag.ammoSizeArray[basicMode] || 1;
+                basicSpace = count * size;
+            }
+        }
+
+        //var totalAvailable = (capacity - currentUsed) + basicSpace;
+
+        var totalExtraRequested = 0;
+        var _enhNo = 0;
+        var _target = $(".selectAmount.shpenh" + _enhNo);
+        while (typeof _target.data("enhPrice") != 'undefined') {
+            var _noTaken = _target.data("count");
+            var _enhID = _target.data("enhID");
+
+            if (_enhID !== currentEnhID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
+                var slots = 1;
+                if (_enhID == 'AMMO_K' || _enhID == 'AMMO_M') slots = 2;
+                totalExtraRequested += _noTaken * slots;
+            }
+            _enhNo++;
+            _target = $(".selectAmount.shpenh" + _enhNo);
+        }
+
+        var addedSlots = 1;
+        if (currentEnhID == 'AMMO_K' || currentEnhID == 'AMMO_M') addedSlots = 2;
+
+        return Math.floor((capacity - totalExtraRequested) / addedSlots);
+    },
+
     //    arrayIsEmpty: function(array){
     //        for(var i in array){
     //            return false;
@@ -260,6 +318,16 @@ window.confirm = {
         var enhLimit = target.data("max");
         var enhPrice = target.data("enhPrice");
         var enhPriceStep = target.data("enhPriceStep");
+        var enhID = target.data("enhID");
+
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (maxFit <= noTaken) {
+                return;
+            }
+        }
 
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
@@ -334,6 +402,14 @@ window.confirm = {
         // Enforce min/max
         if (value < min) value = min;
         if (value > max) value = max;
+
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
 
         // Update the displayed and stored value
         $(this).text(value);
@@ -705,6 +781,14 @@ window.confirm = {
         if (value < min) value = min;
         if (value > max) value = max;
 
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
+
         // Update displayed value
         $(this).text(value);
         $(this).data('value', value);
@@ -826,7 +910,7 @@ window.confirm = {
             selectAmountItem.addClass("shpenh" + i);
             selectAmountItem.data('enhID', enhID);
             selectAmountItem.data('count', enhCount);
-            
+
             var initialEnhCost = 0;
             for (let eCount = 0; eCount < enhCount; eCount++) {
                 initialEnhCost += enhPrice + (eCount * enhPriceStep);
@@ -836,7 +920,7 @@ window.confirm = {
                 selectAmountItem.data('enhOptionCost', initialEnhCost);
                 selectAmountItem.data('enhIsOption', true);
             }
-            
+
             selectAmountItem.data('min', 0);
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
@@ -1022,9 +1106,11 @@ window.confirm = {
         }
 
         var pointCost = ship.pointCost;
-        if (ship.maxFlightSize == 3) { //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-            //but for 3-strong flight cost is still set for 6-strong flight...
-            pointCost = pointCost / 2;
+        if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+            //design pointCost is set for a 6-strong flight (cost-per-craft * 6).
+            //For any fixed sub-six flight (e.g. 3-strong Breaching Pods, 2-strong BPs), scale down to actual flight size.
+            //maxFlightSize 1 is single superheavy with its own pointCost; 6+ already matches the stored cost.
+            pointCost = pointCost * ship.maxFlightSize / 6;
         }
 
 
@@ -1184,10 +1270,10 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-            //special treatment for flight size 3 - as it's less than default 6...
-            if (ship.maxFlightSize == 3) {
-                selectAmountItem.html("3");
-            } else {//default 
+            //for any fixed sub-six flight size, start at that size; otherwise default to 6
+            if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+                selectAmountItem.html(ship.maxFlightSize);
+            } else {//default
                 selectAmountItem.html("6");
             }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));

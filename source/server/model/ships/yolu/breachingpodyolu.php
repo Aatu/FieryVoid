@@ -20,7 +20,7 @@ class breachingpodyolu extends FighterFlight{
 		$this->turncost = 0.33;
 		$this->iniativebonus = 9*5;
 
-        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
+        $this->maxFlightSize = 2;//this is an unusual type of 'fighter', limit flight size.      
         $this->hangarRequired = 'Breaching Pods'; //for fleet check   
 		$this->unitSize = 1; 
 

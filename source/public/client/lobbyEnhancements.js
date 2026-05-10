@@ -13,6 +13,7 @@ window.lobbyEnhancements = {
 			}
 		}
 		var totalRounds = 0; //Counter to check and update total round used in magazine (where it matters).	
+		var totalRoundsInt = 0;
 
 		for (let entry of ship.enhancementOptions) {
 			// ID, readableName, numberTaken, limit, price, priceStep
@@ -323,11 +324,11 @@ window.lobbyEnhancements = {
 									if(system.fireControl[1] !== null) system.fireControl[1] += 1;
 									if(system.fireControl[2] !== null) system.fireControl[2] += 1;
 								}																	
-							}*/	
+							}*/
 							ship.notes += "<br>Improved Accuracy";
 						}
 						ship.mineAccEnh = true;
-						break;						
+						break;
 
 					case 'MINE_ARM':
 						if (!ship.mineArmEnh) {
@@ -339,27 +340,27 @@ window.lobbyEnhancements = {
 							ship.notes += "<br>Improved Armour";
 						}
 						ship.mineArmEnh = true;
-						break;	
+						break;
 
 					case 'MINE_DMG':
-					if (!ship.mineDmgEnh) {
-						for (let system of ship.systems) {
-							if (system.name === "ProximityMine" || system.name === "CaptorMine") {
-								system.minDamage += enhCount;
-								system.maxDamage += enhCount;
-								if (system.data && system.data["Damage"] !== undefined) {
-									if (system.minDamage === system.maxDamage) {
-										system.data["Damage"] = system.maxDamage;
-									} else {
-										system.data["Damage"] = system.minDamage + "-" + system.maxDamage;
+						if (!ship.mineDmgEnh) {
+							for (let system of ship.systems) {
+								if (system.name === "ProximityMine" || system.name === "CaptorMine") {
+									system.minDamage += enhCount;
+									system.maxDamage += enhCount;
+									if (system.data && system.data["Damage"] !== undefined) {
+										if (system.minDamage === system.maxDamage) {
+											system.data["Damage"] = system.maxDamage;
+										} else {
+											system.data["Damage"] = system.minDamage + "-" + system.maxDamage;
+										}
 									}
 								}
 							}
+							ship.notes += "<br>Improved Damage";
 						}
-						ship.notes += "<br>Improved Damage";
-					}
-					ship.mineDmgEnh = true;
-					break;							
+						ship.mineDmgEnh = true;
+						break;
 
 					case 'MINE_RANG':
 						if (!ship.mineRangEnh) {
@@ -379,12 +380,12 @@ window.lobbyEnhancements = {
 							ship.notes += "<br>Improved Range";
 						}
 						ship.mineRangEnh = true;
-						break;						
+						break;
 
 					case 'MINE_SIGN':
 						if (!ship.mineSignEnh) {
 							ship.signature += enhCount;
-							if(ship.mineType == 'DEW') ship.detectedSignature += enhCount;
+							if (ship.mineType == 'DEW') ship.detectedSignature += enhCount;
 						}
 						ship.mineSignEnh = true;
 						break;
@@ -602,6 +603,7 @@ window.lobbyEnhancements = {
 							if (!ship.ammoAEnh) {
 								ammoMagazine.data["Special"] += "<br>- Antifighter Missile: " + enhCount;
 								totalRounds += enhCount;
+								totalRoundsInt += enhCount;
 							}
 							ship.ammoAEnh = true;
 							break;
@@ -634,6 +636,7 @@ window.lobbyEnhancements = {
 							if (!ship.ammoCEnh) {
 								ammoMagazine.data["Special"] += "<br>- Chaff Missile: " + enhCount;
 								totalRounds += enhCount;
+								totalRoundsInt += enhCount;
 							}
 							ship.ammoCEnh = true;
 							break;
@@ -684,6 +687,14 @@ window.lobbyEnhancements = {
 								totalRounds += enhCount;
 							}
 							ship.ammoXEnh = true;
+							break;
+
+						case 'AMMO_Z': //Antimine Missile						
+							if (!ship.ammoZEnh) {
+								ammoMagazine.data["Special"] += "<br>- Antimine Missile: " + enhCount;
+								totalRounds += enhCount;
+							}
+							ship.ammoZEnh = true;
 							break;
 
 						case 'MINE_BLB': //Ballistic Launcher Basic Mine						
@@ -901,7 +912,70 @@ window.lobbyEnhancements = {
 					var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
 
 					// Update the number before the `/` (e.g., add new ammo)
-					if ((extractedValueBefore + totalRounds) < extractedValueAfter) extractedValueBefore += totalRounds;
+					var excess = (extractedValueBefore + totalRounds) - extractedValueAfter;
+					if (excess > 0) {
+						extractedValueBefore = extractedValueAfter;
+						var remainingExcess = excess;
+
+						// Try to deduct from Interceptor first if applicable
+						if (totalRoundsInt > 0 && ammoMagazine.ammoCountArray && ammoMagazine.ammoCountArray['Interceptor']) {
+							var startingInt = ammoMagazine.ammoCountArray['Interceptor'];
+							var intSize = ammoMagazine.ammoSizeArray && ammoMagazine.ammoSizeArray['Interceptor'] ? ammoMagazine.ammoSizeArray['Interceptor'] : 1;
+
+							var currentIntMatch = specialText.match(/- Interceptor Missile: (\d+)/);
+							if (currentIntMatch) {
+								var currentInt = parseInt(currentIntMatch[1], 10);
+								var minInt = Math.floor(startingInt / 4); //Deduct from this pool until 25% remain.
+								var availableDeduct = currentInt - minInt;
+
+								if (availableDeduct > 0) {
+									var maxIntDeductFromEnh = Math.ceil(totalRoundsInt / intSize);
+									var deductCount = Math.min(Math.min(Math.ceil(remainingExcess / intSize), availableDeduct), maxIntDeductFromEnh);
+									currentInt -= deductCount;
+									remainingExcess -= deductCount * intSize;
+									specialText = specialText.replace(/- Interceptor Missile: \d+/, "- Interceptor Missile: " + currentInt);
+								}
+							}
+						}
+
+						// Deduct from basic ammo
+						if (remainingExcess > 0) {
+							var basicMatch = specialText.match(/- ([^:]+): (\d+)(?: \(size: (\d+)\))?/);
+							if (basicMatch) {
+								var basicName = basicMatch[1];
+								// Ensure we don't accidentally match Interceptor as "Basic" if it's the only one left
+								if (basicName !== "Interceptor Missile") {
+									var basicCount = parseInt(basicMatch[2], 10);
+									var basicSize = basicMatch[3] ? parseInt(basicMatch[3], 10) : 1;
+									var deductCount = Math.ceil(remainingExcess / basicSize);
+									var actualDeduct = Math.min(basicCount, deductCount);
+									var newBasicCount = basicCount - actualDeduct;
+
+									remainingExcess -= actualDeduct * basicSize;
+									specialText = specialText.replace(new RegExp("- " + basicName + ": \\d+"), "- " + basicName + ": " + newBasicCount);
+								}
+							}
+						}
+
+						// Deduct any remainder from Interceptor (if basic ran out)
+						if (remainingExcess > 0) {
+							var currentIntMatch = specialText.match(/- Interceptor Missile: (\d+)/);
+							if (currentIntMatch) {
+								var currentInt = parseInt(currentIntMatch[1], 10);
+								if (currentInt > 0) {
+									var intSize = 1; // User confirmed intSize is 1
+									var deductCount = Math.ceil(remainingExcess / intSize);
+									var actualDeduct = Math.min(currentInt, deductCount);
+									var newIntCount = currentInt - actualDeduct;
+
+									remainingExcess -= actualDeduct * intSize;
+									specialText = specialText.replace(/- Interceptor Missile: \d+/, "- Interceptor Missile: " + newIntCount);
+								}
+							}
+						}
+					} else {
+						extractedValueBefore += totalRounds;
+					}
 
 					// Replace the old value with the new total
 					specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);
@@ -1170,6 +1244,20 @@ window.lobbyEnhancements = {
 						flight.fdEnh = true;
 						break;
 
+					case 'AMMO_DUM': //Dummy Fighter Missile
+						if (!flight.fdumEnh) {
+							flight.systems.forEach(ftr => {
+								ftr.systems.forEach(sys => {
+									if (sys.name == "ammoMagazine") {
+										sys.data["Special"] += "<br>- Dummy Missile: " + enhCount;
+										totalRounds += enhCount;
+									}
+								});
+							});
+						}
+						flight.fdumEnh = true;
+						break;
+
 				}//end of swtich function
 			}
 		}//end of loop through fighter enhancement options.
@@ -1187,7 +1275,22 @@ window.lobbyEnhancements = {
 							var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
 
 							// Update the number before the `/` (e.g., add new ammo)
-							if ((extractedValueBefore + totalRounds) < extractedValueAfter) extractedValueBefore += totalRounds;
+							var excess = (extractedValueBefore + totalRounds) - extractedValueAfter;
+							if (excess > 0) {
+								extractedValueBefore = extractedValueAfter;
+								// Deduct from basic ammo
+								var basicMatch = specialText.match(/- ([^:]+): (\d+)(?: \(size: (\d+)\))?/);
+								if (basicMatch) {
+									var basicName = basicMatch[1];
+									var basicCount = parseInt(basicMatch[2], 10);
+									var basicSize = basicMatch[3] ? parseInt(basicMatch[3], 10) : 1;
+									var deductCount = Math.ceil(excess / basicSize);
+									var newBasicCount = Math.max(0, basicCount - deductCount);
+									specialText = specialText.replace(new RegExp("- " + basicName + ": \\d+"), "- " + basicName + ": " + newBasicCount);
+								}
+							} else {
+								extractedValueBefore += totalRounds;
+							}
 
 							// Replace the old value with the new total
 							specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);

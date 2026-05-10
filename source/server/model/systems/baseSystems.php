@@ -7543,6 +7543,7 @@ class AmmoMagazine extends ShipSystem {
 	
 	private $interceptorUsed = 0;//Communication variable.	
 	private $ammoAlreadyUsed = array();
+	public $startingAmmo = null;
 		
     
     function __construct($capacity){ //magazine capacity
@@ -7579,6 +7580,7 @@ class AmmoMagazine extends ShipSystem {
 		$strippedSystem->ammoCountArray = $this->ammoCountArray;
 		$strippedSystem->ammoSizeArray = $this->ammoSizeArray;
 		$strippedSystem->output = $this->output;	
+		$strippedSystem->capacity = $this->capacity;
 		return $strippedSystem;
 	} 
 	
@@ -7599,6 +7601,78 @@ class AmmoMagazine extends ShipSystem {
 			$this->ammoCountArray[$ammoClass->modeName] += $ammoCount;			
 		}
 	    $this->ammoSizeArray[$ammoClass->modeName] = $ammoClass->size;		
+
+        $addedSize = $ammoCount * $ammoClass->size;
+        $excess = ($this->remainingAmmo + $addedSize) - $this->capacity;
+        
+        if ($excess > 0 && !empty($this->ammoArray)) {
+            if (!isset($this->startingAmmo)) {
+                $this->startingAmmo = $this->ammoCountArray;
+            }
+			
+            // 1. Deduct from Interceptor first if applicable
+            $isAntiFighterOrChaff = ($ammoClass->modeName === 'Antifighter' || $ammoClass->modeName === 'Chaff');
+            if ($isAntiFighterOrChaff && isset($this->ammoCountArray['Interceptor']) && isset($this->startingAmmo['Interceptor'])) {
+                $interceptorStart = $this->startingAmmo['Interceptor'];
+                $interceptorCurrent = $this->ammoCountArray['Interceptor'];
+                $interceptorMin = floor($interceptorStart / 4); //Deduct from this pool until 25% remain.
+                
+                $availableDeduct = $interceptorCurrent - $interceptorMin;
+                if ($availableDeduct > 0) {
+                    $intSize = $this->ammoSizeArray['Interceptor'];
+                    $neededDeductCount = ceil($excess / $intSize);
+                    $deductCount = min($neededDeductCount, $availableDeduct);
+                    
+                    $this->ammoCountArray['Interceptor'] -= $deductCount;
+                    $this->remainingAmmo -= $deductCount * $intSize;
+                    $excess = ($this->remainingAmmo + $addedSize) - $this->capacity;
+                }
+            }
+			
+            // 2. Deduct from Basic if there's still excess
+            if ($excess > 0 && $this->ammoArray[0]->modeName !== $ammoClass->modeName) {
+                $basicMode = $this->ammoArray[0]->modeName;
+                $basicSize = $this->ammoSizeArray[$basicMode];
+                if ($basicSize > 0) {
+                    $deductCount = ceil($excess / $basicSize);
+                    $deductCount = min($deductCount, $this->ammoCountArray[$basicMode]);
+                    $this->ammoCountArray[$basicMode] -= $deductCount;
+                    $this->remainingAmmo -= $deductCount * $basicSize;
+                    
+                    // Recalculate excess after deduction
+                    $excess = ($this->remainingAmmo + $addedSize) - $this->capacity;
+                }
+            }
+			
+            // 3. Deduct any remainder from Interceptor (if basic ran out)
+            if ($excess > 0 && isset($this->ammoCountArray['Interceptor']) && $ammoClass->modeName !== 'Interceptor') {
+                $intCurrent = $this->ammoCountArray['Interceptor'];
+                if ($intCurrent > 0) {
+                    $intSize = isset($this->ammoSizeArray['Interceptor']) ? $this->ammoSizeArray['Interceptor'] : 1;
+                    if ($intSize > 0) {
+                        $deductCount = ceil($excess / $intSize);
+                        $deductCount = min($deductCount, $intCurrent);
+                        
+                        $this->ammoCountArray['Interceptor'] -= $deductCount;
+                        $this->remainingAmmo -= $deductCount * $intSize;
+                        
+                        // Recalculate excess after deduction
+                        $excess = ($this->remainingAmmo + $addedSize) - $this->capacity;
+                    }
+                }
+            }
+        }
+        
+        if ($excess > 0) {
+            $fitCount = floor(($this->capacity - $this->remainingAmmo) / $ammoClass->size);
+            if ($fitCount < 0) $fitCount = 0;
+            $ammoCount = $fitCount;
+            // Also adjust the array count since we had already added the un-capped $ammoCount
+            // We need to decrease the array count by the difference
+            $diff = ($addedSize / $ammoClass->size) - $ammoCount;
+            $this->ammoCountArray[$ammoClass->modeName] -= $diff;
+        }
+
 	    $this->remainingAmmo += $ammoCount * $ammoClass->size;
 	    $this->remainingAmmo = min($this->remainingAmmo, $this->capacity);
 		if(!$keyExists) $this->ammoUsedTotal[$ammoClass->modeName] = 0;

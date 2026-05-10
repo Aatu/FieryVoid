@@ -431,13 +431,7 @@ class Firing
 
 
 
-        if ($firingweapon->ballistic) {
- 			$pos = $firingweapon->getFiringHex($gd, $fire); //Added Mar '24 - To enable intercept for BallisticMineLauncher
-            $relativeBearing = $interceptingShip->getBearingOnPos($pos);
-        } else {
-            $pos = $shooter->getCoPos(); //current hex of firing unit
-            $relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
-        }
+        $relativeBearing = $firingweapon->getIncomingBearing($interceptingShip, $fire, $gd);
 
         //New arc check that checks split arcs like Heavy Slicer as well = DK Dec 2025
         if (!mathlib::isInAnyArc(

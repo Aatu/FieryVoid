@@ -773,7 +773,7 @@ window.ShipIcon = function () {
         this.BDEWSprite = null;
     };
 
-    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null) {
+    ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null, lineWidth = 3) {
 
         //Check if we already have a sprite for this system, if so, remove it.
         if (this.shipHexagonSpritesMap.has(system)) {
@@ -851,6 +851,76 @@ window.ShipIcon = function () {
 
         var hexagon = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), hexMaterial);
         hexagon.position.set(0, 0, -1);
+
+        var borderShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) borderShape.moveTo(x, y);
+            else borderShape.lineTo(x, y);
+        }
+        borderShape.closePath();
+
+        var holePath = new THREE.Path();
+        var innerDis = dis - lineWidth;
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = innerDis * Math.cos(angle);
+            let y = innerDis * Math.sin(angle);
+            if (i === 0) holePath.moveTo(x, y);
+            else holePath.lineTo(x, y);
+        }
+        holePath.closePath();
+        borderShape.holes.push(holePath);
+
+        var borderMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            opacity: 1,
+            transparent: true,
+            side: THREE.DoubleSide,
+            clippingPlanes: hexMaterial.clippingPlanes,
+            clipIntersection: hexMaterial.clipIntersection
+        });
+
+        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
+        hexagon.add(border);
+
+        // Add sheared edge borders for clipped arcs
+        if (!is360Arc) {
+            // Edge for Plane 1
+            var plane1_inner = new THREE.Plane().setFromNormalAndCoplanarPoint(
+                normal1.clone().negate(),
+                shooterWorldPos.clone().add(normal1.clone().multiplyScalar(lineWidth))
+            );
+            var edge1Material = new THREE.MeshBasicMaterial({
+                color: color,
+                opacity: 1,
+                transparent: true,
+                side: THREE.DoubleSide,
+                clippingPlanes: isSmallArc ? [plane1, plane1_inner, plane2] : [plane1, plane1_inner],
+                clipIntersection: false
+            });
+            var edge1 = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), edge1Material);
+            hexagon.add(edge1);
+
+            // Edge for Plane 2
+            var plane2_inner = new THREE.Plane().setFromNormalAndCoplanarPoint(
+                normal2.clone().negate(),
+                shooterWorldPos.clone().add(normal2.clone().multiplyScalar(lineWidth))
+            );
+            var edge2Material = new THREE.MeshBasicMaterial({
+                color: color,
+                opacity: 1,
+                transparent: true,
+                side: THREE.DoubleSide,
+                clippingPlanes: isSmallArc ? [plane2, plane2_inner, plane1] : [plane2, plane2_inner],
+                clipIntersection: false
+            });
+            var edge2 = new THREE.Mesh(new THREE.ShapeGeometry(hexShape), edge2Material);
+            hexagon.add(edge2);
+        }
+
         this.mesh.add(hexagon);
         this.shipHexagonSpritesMap.set(system, hexagon);
         /*
