@@ -402,7 +402,7 @@ window.shipWindowManager = {
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " fighters");
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " fighters");
 					} else {
 						//something other than fighters
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType);
@@ -1028,7 +1028,7 @@ window.shipWindowManager = {
 		systemwindow.find(".mode").on("click", shipWindowManager.onModeClicked);
 	},
 
-	
+
 	removeSystemClasses: function removeSystemClasses(systemwindow) {
 		var classes = Array("destroyed", "loading", "selected", "firing", "duofiring", "critical", "canoffline", "offline", "canboost", "boosted", "canoverload", "overload", "forcedoffline", "modes", "ballistic", "selfIntercept");
 
@@ -1293,10 +1293,10 @@ window.shipWindowManager = {
 
 			field.html(rem + "/" + output);
 		} else if (system.name == "reactor") {
-            var power = shipManager.power.getReactorPower(ship, system);
-            if (gamedata.gamephase > 1 && power < 0) {
-                power = 0;
-            }
+			var power = shipManager.power.getReactorPower(ship, system);
+			if (gamedata.gamephase > 1 && power < 0) {
+				power = 0;
+			}
 			field.html(power);
 		} else if (system.output > 0) {
 			field.html(output);
