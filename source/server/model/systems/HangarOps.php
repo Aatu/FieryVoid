@@ -54,18 +54,27 @@ class HangarOps {
 		$totalDeclared = 0;
 		if (is_array($ship->fighters)) {
 			foreach ($ship->fighters as $category => $declaredCount){
-				$totalDeclared += (int)$declaredCount;
+				$count = (int)$declaredCount;
+				$totalDeclared += $count;
 				$shuttleClass = self::shuttlePhpclassForCategory($category);
 				if ($shuttleClass === null) continue;   //not a shuttle category
-				for ($i = 0; $i < (int)$declaredCount; $i++){
+				
+				$shuttleName = self::shuttleDisplayNameFor($shuttleClass);
+
+				while ($count > 0){
 					$hangar = self::pickHangarForShuttle($hangars, 1);
 					if (!$hangar) break;
+					
+					$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
+					$take = min($count, $free);
+					
 					$hangar->hangarUsage[] = array(
 						'phpclass'    => $shuttleClass,
-						'name'        => self::shuttleDisplayNameFor($shuttleClass),
-						'flightSize'  => 1,
+						'name'        => $shuttleName,
+						'flightSize'  => $take,
 						'hangarType'  => $category,
 					);
+					$count -= $take;
 				}
 			}
 		}
@@ -80,15 +89,23 @@ class HangarOps {
 				? 'MinesweepingShuttle'
 				: 'Shuttle';
 			$leftoverCategory = ($leftoverClass === 'MinesweepingShuttle') ? 'minesweeping shuttles' : 'shuttles';
-			for ($i = 0; $i < $leftover; $i++){
+			$leftoverName = self::shuttleDisplayNameFor($leftoverClass);
+
+			$count = $leftover;
+			while ($count > 0){
 				$hangar = self::pickHangarForShuttle($hangars, 1);
 				if (!$hangar) break;
+
+				$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
+				$take = min($count, $free);
+
 				$hangar->hangarUsage[] = array(
 					'phpclass'    => $leftoverClass,
-					'name'        => self::shuttleDisplayNameFor($leftoverClass),
-					'flightSize'  => 1,
+					'name'        => $leftoverName,
+					'flightSize'  => $take,
 					'hangarType'  => $leftoverCategory,
 				);
+				$count -= $take;
 			}
 		}
 	}
@@ -254,8 +271,9 @@ class HangarOps {
 	 */
 	public static function evictionPriorityFor($entry){
 		$phpclass = $entry['phpclass'] ?? '';
-		if ($phpclass === 'Shuttle' || $phpclass === 'MinesweepingShuttle') return 0;
-		if (stripos($phpclass, 'shuttle') !== false) return 1;
+		if ($phpclass === 'Shuttle') return 0;
+		if ($phpclass === 'MinesweepingShuttle') return 1;
+		if (stripos($phpclass, 'shuttle') !== false) return 2;
 		return 10;
 	}
 
@@ -306,6 +324,40 @@ class HangarOps {
 		$heading  = (int)$lastMove->heading;
 		$facing   = ($lastMove->facing + (int)$hangar->direction) % 6;
 		$speed    = (int)$lastMove->speed;
+
+		//Resurrect path: if the launched stash entry matches a previously docked
+		//flight (carries dockedFlightId AND the launch size matches the entry's
+		//flightSize), reuse that flight instead of cloning a fresh one. This
+		//preserves ship identity across dock/launch cycles and avoids the DB
+		//growing a new row on every relaunch. Falls through to the new-spawn
+		//path when no dockedFlightId entry matches the requested phpclass+size.
+		$resurrectedFlight = self::resurrectDockedFlight($hangar, $phpclass, $launchSize, $gamedata);
+		if ($resurrectedFlight) {
+			$resurrectedFlight->removed = false;
+			$resurrectedFlight->removedTurn = null;
+			//Mark spawned so replay treats this turn as the (re-)appearance.
+			$resurrectedFlight->spawned = $gamedata->turn;
+
+			$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
+			Manager::insertSingleMovement($gamedata->id, $resurrectedFlight->id, $deployMove);
+
+			$hangar->launchedThisTurn += $launchSize;
+
+			$note = new IndividualNote(
+				-1,
+				$gamedata->id,
+				$gamedata->turn,
+				$gamedata->phase,
+				$carrier->id,
+				$hangar->id,
+				'hangarLaunchEvent',
+				'Hangar relaunched docked flight',
+				$resurrectedFlight->id . ':' . $phpclass . ':' . $launchSize . ':resurrected'
+			);
+			Manager::insertIndividualNote($note);
+
+			return $resurrectedFlight->id;
+		}
 
 		//Build the new flight. Constructor populates 1 fighter by default;
 		//bump flightSize and re-populate so we get the requested size. The
@@ -370,6 +422,36 @@ class HangarOps {
 		Manager::insertIndividualNote($note);
 
 		return $shipid;
+	}
+
+	/* Look for a hangarUsage entry matching $phpclass with a dockedFlightId
+	 * AND flightSize equal to $launchSize. If found, removes the entry from
+	 * hangarUsage and returns the existing flight ship object. Returns null
+	 * if no such entry exists (caller falls through to the new-spawn path).
+	 *
+	 * Constraint: only resurrects when launchSize matches the docked entry's
+	 * flightSize exactly. Splitting a docked flight on relaunch is deferred
+	 * to Stage 9 polish — for now a partial relaunch creates a fresh flight
+	 * and leaves the original docked.
+	 */
+	public static function resurrectDockedFlight($hangar, $phpclass, $launchSize, $gamedata){
+		if (empty($hangar->hangarUsage)) return null;
+		foreach ($hangar->hangarUsage as $idx => $entry){
+			if (($entry['phpclass'] ?? '') !== $phpclass) continue;
+			$flightId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
+			if ($flightId <= 0) continue;
+			$entrySize = (int)($entry['flightSize'] ?? 0);
+			if ($entrySize !== $launchSize) continue;
+
+			$flight = $gamedata->getShipById($flightId);
+			if (!$flight) continue;
+
+			//Drop the entry; rebuild keys so json_encode keeps array form.
+			array_splice($hangar->hangarUsage, $idx, 1);
+			$hangar->hangarUsage = array_values($hangar->hangarUsage);
+			return $flight;
+		}
+		return null;
 	}
 
 	/* Decrement $hangarUsage by $count craft of $phpclass. Records of the
@@ -491,4 +573,208 @@ class HangarOps {
 
 		return true;
 	}
+
+	/* === Stage 5: dock flow ============================================== */
+
+	/* Returns true if $flight can dock $count craft into $hangar on $carrier
+	 * RIGHT NOW. Per B5W §10.1.3: same hex, same heading, carrier speed within
+	 * the flight's thrust window, hangar healthy, hangar has compatible free
+	 * boxes, output budget has headroom, and carrier didn't pivot/roll.
+	 */
+	public static function canShipReceive($hangar, $carrier, $flight, $count, $gamedata, &$reason = null){
+		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
+		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
+		if ($hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
+		if ($carrier->isDestroyed() || $carrier->removed) { $reason = 'carrier not in play'; return false; }
+
+		$count = (int)$count;
+		if ($count <= 0) { $reason = 'invalid count'; return false; }
+
+		//Carrier may not land on a turn it pivoted or rolled
+		if (Movement::isPivoting($carrier, $gamedata->turn, $gamedata) || Movement::isRolling($carrier, $gamedata->turn, $gamedata)) {
+			$reason = 'carrier pivoting/rolling'; return false;
+		}
+
+		$carrierMove = $carrier->getLastMovement();
+		$flightMove  = $flight->getLastMovement();
+		if (!$carrierMove || !$flightMove) { $reason = 'movement missing'; return false; }
+
+		//Same hex
+		$carrierPos = $carrierMove->position;
+		$flightPos  = $flightMove->position;
+		if (!isset($carrierPos->q) || !isset($flightPos->q)
+			|| $carrierPos->q != $flightPos->q || $carrierPos->r != $flightPos->r) {
+			$reason = 'not in same hex'; return false;
+		}
+
+		//Same heading
+		if ((int)$carrierMove->heading !== (int)$flightMove->heading) {
+			$reason = 'heading mismatch'; return false;
+		}
+
+		//Speed gap must be within flight thrust budget. Fighters can decelerate
+		//up to their freethrust to match a slower carrier, or accelerate up to
+		//freethrust to match a faster one. Per the rules dive: |delta| <= thrust.
+		$thrust = (int)($flight->freethrust ?? 0);
+		$delta = abs((int)$carrierMove->speed - (int)$flightMove->speed);
+		if ($delta > $thrust) {
+			$reason = 'speed delta exceeds flight thrust'; return false;
+		}
+
+		//Hangar must have a compatible category with $count free boxes
+		$category = self::categoryFor($flight, $carrier);
+		$free = self::freeBoxesByCategory($hangar, $category);
+		if ($free < $count) { $reason = 'hangar full'; return false; }
+
+		//Shared launch+land budget vs hangar output
+		$used = (int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn;
+		if ($used + $count > (int)$hangar->output) { $reason = 'land rate exceeded'; return false; }
+
+		return true;
+	}
+
+	/* Free boxes in $hangar that can hold $category. A 'fighters' (universal)
+	 * hangar accepts any category. Other hangars only accept their declared
+	 * type, with shuttles allowed everywhere per §10.1.
+	 */
+	public static function freeBoxesByCategory($hangar, $category){
+		if (!self::hangarAcceptsCategory($hangar, $category)) return 0;
+		$max = (int)$hangar->getRemainingHealth();
+		return max(0, $max - self::usageCountFor($hangar));
+	}
+
+	public static function hangarAcceptsCategory($hangar, $category){
+		if ($hangar->hangarType === 'fighters') return true;       //universal
+		if ($hangar->hangarType === $category) return true;        //exact match
+		//Shuttles can use any fighter box per B5W §10.1
+		if ($category === 'shuttles' || $category === 'minesweeping shuttles') return true;
+		return false;
+	}
+
+	/* Pick hangars on $carrier that can receive $flight, in fill order. The
+	 * search prefers exact-category matches first, then universal hangars.
+	 * Returns a list of [hangar, freeBoxes] pairs.
+	 */
+	public static function eligibleHangarsForLanding($carrier, $flight, $gamedata){
+		$out = array();
+		$hangars = self::collectHangars($carrier);
+		if (empty($hangars)) return $out;
+		$category = self::categoryFor($flight, $carrier);
+
+		//Exact match first
+		foreach ($hangars as $h){
+			if ($h->hangarType !== $category) continue;
+			if ($h->isDestroyed()) continue;
+			$free = self::freeBoxesByCategory($h, $category);
+			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
+			$capacity = min($free, $budget);
+			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
+		}
+		//Then universal
+		foreach ($hangars as $h){
+			if ($h->hangarType === $category) continue;            //already considered above
+			if ($h->hangarType !== 'fighters' && !self::hangarAcceptsCategory($h, $category)) continue;
+			if ($h->isDestroyed()) continue;
+			$free = self::freeBoxesByCategory($h, $category);
+			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
+			$capacity = min($free, $budget);
+			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
+		}
+		return $out;
+	}
+
+	/* Materialise $count craft from $flight into $hangar's storage.
+	 * Returns the actual number docked (may be capped by hangar capacity, but
+	 * caller is expected to validate first).
+	 *
+	 * Mutates: $hangar->hangarUsage (appends entries), $hangar->landedThisTurn,
+	 * $flight->removed, $flight->removedTurn.
+	 *
+	 * Side effects: writes 'hangarDockEvent' replay note for history.
+	 *
+	 * NOTE: an entire flight is currently treated as a single hangar entry
+	 * (one record with flightSize=$count). If a future stage needs to merge
+	 * the docked flight back into existing per-craft records this can split.
+	 */
+	public static function performLand($hangar, $carrier, $flight, $count, $gamedata){
+		if (!$flight instanceof FighterFlight) return 0;
+		$count = max(1, (int)$count);
+
+		$category = self::categoryFor($flight, $carrier);
+		$entry = array(
+			'phpclass'    => $flight->phpclass,
+			'name'        => $flight->name,
+			'flightSize'  => $count,
+			'hangarType'  => $category,
+			'dockedFlightId' => $flight->id,        //links record back to flight; consumed on load to re-apply $removed
+			'dockedTurn'     => $gamedata->turn,
+		);
+		$hangar->hangarUsage[] = $entry;
+		$hangar->landedThisTurn += $count;
+
+		//Flag the flight removed-from-board. $removedTurn lets replay show the
+		//flight up to and including this turn before it disappears.
+		$flight->removed = true;
+		$flight->removedTurn = $gamedata->turn;
+
+		//Replay note tied to the receiving hangar.
+		$note = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$carrier->id,
+			$hangar->id,
+			'hangarDockEvent',
+			'Hangar received flight',
+			$flight->id . ':' . $flight->phpclass . ':' . $count
+		);
+		Manager::insertIndividualNote($note);
+
+		return $count;
+	}
+
+	/* End-of-turn: walks $hangar->pendingDockOrders, validates each, and lands
+	 * eligible flights. Failed entries are dropped with a 'hangarDockEvent'
+	 * note recording the reason — players see this in replay.
+	 *
+	 * Pending orders are pre-attached to a single hangar; cross-hangar splits
+	 * are encoded as separate orders on each receiving hangar by the client.
+	 */
+	public static function processDockOrders($hangar, $carrier, $gamedata){
+		if (empty($hangar->pendingDockOrder)) return;
+		if (!self::isFlowEnabled($gamedata->id)) {
+			$hangar->pendingDockOrder = null;
+			return;
+		}
+
+		foreach ($hangar->pendingDockOrder as $entry) {
+			$flightId = isset($entry['flightId']) ? (int)$entry['flightId'] : 0;
+			$count    = isset($entry['count'])    ? (int)$entry['count']    : 0;
+			//$gamedata->ships is numerically-indexed when loaded from DB; only
+			//newly-spawned ships (Manager::insertSingleShip) are keyed by id.
+			//Always go through getShipById for correctness.
+			$flight   = ($flightId > 0) ? $gamedata->getShipById($flightId) : null;
+			$reason   = null;
+			if (!$flight || !self::canShipReceive($hangar, $carrier, $flight, $count, $gamedata, $reason)) {
+				$failNote = new IndividualNote(
+					-1,
+					$gamedata->id,
+					$gamedata->turn,
+					$gamedata->phase,
+					$carrier->id,
+					$hangar->id,
+					'hangarDockEvent',
+					'Hangar dock failed',
+					'fail:' . $flightId . ':' . $count . ':' . ($reason ?? 'unknown')
+				);
+				Manager::insertIndividualNote($failNote);
+				continue;
+			}
+			self::performLand($hangar, $carrier, $flight, $count, $gamedata);
+		}
+
+		$hangar->pendingDockOrder = null;
+	}
+
 }

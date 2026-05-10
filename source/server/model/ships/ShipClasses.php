@@ -34,7 +34,9 @@ class BaseShip {
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
 	public $combatValue = 100; //current combat value, as percentage of original
-    public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning    
+    public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
+    public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
+    public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
@@ -593,7 +595,11 @@ class BaseShip {
         if (!empty($this->hasAttachedFacing)) $strippedShip->hasAttachedFacing = $this->hasAttachedFacing;
         if (!empty($this->attachedFacing)) $strippedShip->attachedFacing = $this->attachedFacing;
         if ($this->spawned !== null && $this->spawned !== -1) $strippedShip->spawned = $this->spawned;
-        
+        if ($this->removed) {
+            $strippedShip->removed = true;
+            if ($this->removedTurn !== null) $strippedShip->removedTurn = $this->removedTurn;
+        }
+
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
         //With changes to how we cache ships, we sadly have to re-do this each time. DK - Dec 2025
@@ -1921,10 +1927,20 @@ public function getAllEWExceptDEW($turn){
             if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                 return true;
             }
-																									   
+
         }
 
         return false;
+    }
+
+    /* Returns true when the unit is still in play (not destroyed, not removed-by-docking).
+     * Hangar Ops Stage 5: docked flights have $removed=true but $isDestroyed()=false so they
+     * stay in gamedata for replay; callers that mean "is this ship on the board" should use
+     * isOnBoard() rather than chaining !isDestroyed() everywhere.
+     */
+    public function isOnBoard($turn = false){
+        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return false;
+        return !$this->isDestroyed($turn);
     }
 
 

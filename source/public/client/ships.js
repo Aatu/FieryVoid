@@ -555,6 +555,13 @@ window.shipManager = {
 
         if (ship.destroyed) return true; // Early exit if server-side status is already set - DK 04/26
 
+        // Hangar Ops Stage 5: a docked flight has $removed=true; treat as
+        // destroyed for filtering purposes (icon hide, target list exclusion,
+        // hex-occupancy). The destruction explosion is keyed off
+        // damageManager.getTurnDestroyed (turn-of-damage record), which we
+        // never write for docked flights — so no explosion fires.
+        if (ship.removed) return true;
+
         if (ship.flight) {
             for (var i in ship.systems) {
                 var fighter = ship.systems[i];

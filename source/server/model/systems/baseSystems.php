@@ -2963,7 +2963,9 @@ class Hangar extends ShipSystem{
 	public $usagePopulated = false;       //idempotency guard — first hangar on a ship runs initial population once
 	private $lastSavedUsage = null;       //serialized snapshot of last persisted hangarUsage (avoids duplicate notes)
 	public $pendingLaunchOrder = null;    //decoded latest hangarLaunchOrder for this turn (set by onIndividualNotesLoaded)
+	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
 	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
+	private $pendingDockTransfer = null;  //dock payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
 
     function __construct($armour, $maxhealth, $output = null, $hangarType = 'fighters', $direction = 0, $spawnableClasses = array()){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the usual combat craft capacity)
@@ -3004,13 +3006,34 @@ class Hangar extends ShipSystem{
 				//Latest order wins (notes are pre-sorted by id ASC above)
 				$decoded = json_decode($note->notevalue, true);
 				if (is_array($decoded)) $this->pendingLaunchOrder = $decoded;
+			} else if ($note->notekey === 'hangarDockOrder' && $note->turn == $gamedata->turn){
+				//Latest dock order wins (notes are pre-sorted by id ASC above)
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)) $this->pendingDockOrder = $decoded;
 			}
 		}
 		$this->individualNotes = array();
 
+		//Re-apply $removed flag to any flights stored in THIS hangar (via
+		//dockedFlightId markers). Walking only $this->hangarUsage avoids
+		//duplicating work — every hangar on the ship runs this for its own
+		//entries, so the union covers every docked flight on the carrier.
+		//$gamedata->ships is numerically-indexed when loaded from DB; only
+		//getShipById() is reliable for looking up by ship id.
+		$ship = $this->getUnit();
+		if ($ship && is_array($this->hangarUsage)) {
+			foreach ($this->hangarUsage as $entry) {
+				$flightId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
+				if ($flightId <= 0) continue;
+				$flight = $gamedata->getShipById($flightId);
+				if (!$flight) continue;
+				$flight->removed = true;
+				if (isset($entry['dockedTurn'])) $flight->removedTurn = (int)$entry['dockedTurn'];
+			}
+		}
+
 		if ($this->usagePopulated) return;
 
-		$ship = $this->getUnit();
 		if (!$ship) return;
 
 		//First hangar on a multi-hangar ship runs the initial population for all hangars
@@ -3048,6 +3071,22 @@ class Hangar extends ShipSystem{
 			$this->pendingLaunchTransfer = null;   //consumed
 		}
 
+		//Same pattern for dock orders (Stage 5).
+		if ($this->pendingDockTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			$this->individualNotes[] = new IndividualNote(
+				-1,
+				$gamedata->id,
+				$gamedata->turn,
+				$gamedata->phase,
+				$ship->id,
+				$this->id,
+				'hangarDockOrder',
+				'Hangar dock order',
+				json_encode($this->pendingDockTransfer)
+			);
+			$this->pendingDockTransfer = null;     //consumed
+		}
+
 		//Persist hangarUsage snapshot, but only if it has actually changed
 		//since the last saved snapshot. Stage 4+ docking/launching mutate
 		//$hangarUsage and rely on this to snapshot it.
@@ -3079,7 +3118,14 @@ class Hangar extends ShipSystem{
 		//   gracefully below.
 		HangarOps::onHangarCriticalPhase($this);
 
-		//2. Process queued launch orders (Post-Turn Actions Step). Only runs
+		//2. Process queued dock orders BEFORE launches: a flight that just
+		//   docked frees up no boxes (they're consuming, not vacating) but
+		//   docking-then-launching from the same hangar in one turn must
+		//   respect the shared output budget — landedThisTurn increments
+		//   first so the launch path sees the correct used budget.
+		HangarOps::processDockOrders($this, $ship, $gamedata);
+
+		//3. Process queued launch orders (Post-Turn Actions Step). Only runs
 		//   in the Fire Phase advance — Criticals::setCriticals() is only
 		//   called there, and pendingLaunchOrders are filtered to the current
 		//   turn so old orders don't re-fire.
@@ -3105,18 +3151,40 @@ class Hangar extends ShipSystem{
 		$payload = json_decode($raw, true);
 		if (!is_array($payload) || empty($payload)) return;
 
-		//Sanitise: keep only well-formed {phpclass, size} entries
-		$clean = array();
-		foreach ($payload as $order) {
+		//Two accepted shapes:
+		//  legacy (Stage 4): a list of {phpclass, size}        → all launches
+		//  current (Stage 5): {"launches": [...], "docks": [...]}
+		$launches = array();
+		$docks    = array();
+		if (isset($payload['launches']) || isset($payload['docks'])) {
+			$launches = is_array($payload['launches'] ?? null) ? $payload['launches'] : array();
+			$docks    = is_array($payload['docks']    ?? null) ? $payload['docks']    : array();
+		} else {
+			//assume legacy launch-only payload
+			$launches = $payload;
+		}
+
+		//Sanitise launches: keep only well-formed {phpclass, size} entries
+		$cleanLaunches = array();
+		foreach ($launches as $order) {
 			if (!is_array($order)) continue;
 			$phpclass = isset($order['phpclass']) ? (string)$order['phpclass'] : '';
 			$size     = isset($order['size'])     ? (int)$order['size']        : 0;
 			if ($phpclass === '' || $size <= 0) continue;
-			$clean[] = array('phpclass' => $phpclass, 'size' => $size);
+			$cleanLaunches[] = array('phpclass' => $phpclass, 'size' => $size);
 		}
-		if (empty($clean)) return;
+		if (!empty($cleanLaunches)) $this->pendingLaunchTransfer = $cleanLaunches;
 
-		$this->pendingLaunchTransfer = $clean;
+		//Sanitise docks: {flightId, count}
+		$cleanDocks = array();
+		foreach ($docks as $order) {
+			if (!is_array($order)) continue;
+			$flightId = isset($order['flightId']) ? (int)$order['flightId'] : 0;
+			$count    = isset($order['count'])    ? (int)$order['count']    : 0;
+			if ($flightId <= 0 || $count <= 0) continue;
+			$cleanDocks[] = array('flightId' => $flightId, 'count' => $count);
+		}
+		if (!empty($cleanDocks)) $this->pendingDockTransfer = $cleanDocks;
 	}
 
 	public function stripForJson(){
@@ -3135,7 +3203,7 @@ class Hangar extends ShipSystem{
 		$this->data["Launch Rate"] = $this->output;
 
 		$totalStored = HangarOps::usageCountFor($this);
-		$this->data["Carrying"] = $totalStored . " / " . $this->maxhealth . " boxes";
+		$this->data["Carrying"] = $totalStored . " / " . $this->maxhealth . " slots";
 
 		if (!empty($this->hangarUsage)){
 			$byClass = array();
@@ -3147,7 +3215,7 @@ class Hangar extends ShipSystem{
 			}
 			$lines = array();
 			foreach ($byClass as $info){
-				$lines[] = $info['count'] . "x " . $info['name'];
+				$lines[] = $info['count'] . " x " . $info['name'];
 			}
 			$this->data["Stored Craft"] = implode('<br>', $lines);
 		}

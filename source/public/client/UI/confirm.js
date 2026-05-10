@@ -1870,6 +1870,15 @@ window.confirm = {
         hangars.forEach(function (hangar, hidx) {
             var output = parseInt(hangar.output || 0, 10);
             var used = parseInt(hangar.launchedThisTurn || 0, 10) + parseInt(hangar.landedThisTurn || 0, 10);
+            // Subtract anything already queued in this submit cycle so the
+            // launch dialog can't allocate over the shared output budget when
+            // the player has also queued a dock on the same hangar (Stage 5).
+            if (Array.isArray(hangar.pendingLaunchOrders)) {
+                hangar.pendingLaunchOrders.forEach(function (o) { used += parseInt(o.size || 0, 10); });
+            }
+            if (Array.isArray(hangar.pendingDockOrders)) {
+                hangar.pendingDockOrders.forEach(function (o) { used += parseInt(o.count || 0, 10); });
+            }
             var budget = Math.max(0, output - used);
 
             // Hangar header row (no input — just labels)
@@ -1940,6 +1949,137 @@ window.confirm = {
             // Heuristic for super-heavy: phpclass usually contains 'SHF'/'SuperHeavy'.
             if (lower.indexOf('superheavy') !== -1 || lower.indexOf('shf') !== -1) return 3;
             return 6;
+        }
+    },
+
+    // === Hangar Operations Stage 5: dock fighters dialog ===
+    //
+    // Flow:
+    //   1. Enumerate eligible carriers via findEligibleCarriersForDock(flight).
+    //   2. If multiple → show carrier picker. Single → skip to step 3.
+    //   3. Show per-hangar splitter (or auto-split if exactly one hangar fits the flight).
+    //   4. On confirm, push {flightId, count} entries into each receiving hangar's
+    //      pendingDockOrders array; Hangar.doIndividualNotesTransfer flushes them
+    //      into the {launches, docks} payload at submit time.
+    hangarDock: function hangarDock(flight) {
+        if (!flight || !flight.flight) return;
+        if (typeof window.findEligibleCarriersForDock !== 'function') return;
+
+        var carriers = window.findEligibleCarriersForDock(flight);
+        if (carriers.length === 0) return;
+
+        var flightCount = countActiveCraftInFlight(flight);
+        if (flightCount <= 0) return;
+
+        // Single carrier → straight to hangar splitter
+        if (carriers.length === 1) {
+            openHangarSplitter(carriers[0], flight, flightCount);
+            return;
+        }
+
+        // Multiple carriers → picker first
+        var pickerEl = $('<div class="confirm error multi-value-confirm hangarDock"><div class="ui"><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">Dock ' + flight.name + ' — choose a carrier</div>').prependTo(pickerEl);
+        var pickerContainer = $('<div class="multi-value-container"></div>').insertAfter(pickerEl.find('.multi-value-header'));
+
+        carriers.forEach(function (c) {
+            var row = $('<div class="multi-value-row" style="cursor: pointer;"></div>');
+            $('<span class="multi-value-label"><span class="multi-value-name">' + c.ship.name + '</span> <span class="multi-value-max">(free: ' + c.totalCapacity + ' boxes across ' + c.hangars.length + ' hangar' + (c.hangars.length === 1 ? '' : 's') + ')</span></span>').appendTo(row);
+            row.on('click', function () {
+                pickerEl.remove();
+                openHangarSplitter(c, flight, flightCount);
+            });
+            pickerContainer.append(row);
+        });
+
+        $(".confirmcancel", pickerEl).on("click", function () { pickerEl.remove(); });
+        pickerEl.appendTo("body").fadeIn(250);
+
+        // ---- helpers (closure) ----------------------------------------
+
+        function openHangarSplitter(carrier, flight, totalToDock) {
+            var hangars = carrier.hangars;
+
+            // Auto-fit case: single hangar with capacity >= flight → straight confirm.
+            // (Edge case: capacity could be smaller than flight — fall through to splitter.)
+            if (hangars.length === 1 && hangars[0].capacity >= totalToDock) {
+                showSimpleConfirm(carrier, flight, hangars[0], totalToDock);
+                return;
+            }
+
+            // Splitter dialog
+            var e = $('<div class="confirm error multi-value-confirm hangarDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+            $('<div class="multi-value-header">Dock ' + flight.name + ' (' + totalToDock + ' craft) into ' + carrier.ship.name + '</div>').prependTo(e);
+            var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+
+            $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Allocate craft per hangar. Any unallocated craft remain in space.</span></div>').appendTo(container);
+
+            hangars.forEach(function (h, idx) {
+                var maxThis = Math.min(h.capacity, totalToDock);
+                var row = $('<div class="multi-value-row"></div>');
+                $('<span class="multi-value-label"><span class="multi-value-name">Hangar ' + (idx + 1) + '</span> <span class="multi-value-max">(free: ' + h.capacity + ', max: ' + maxThis + ')</span></span>').appendTo(row);
+                var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
+                $('<input type="number" class="multiConfirmInput multi-value-input main-input dockCount" value="' + maxThis + '" min="0" max="' + maxThis + '">').appendTo(inputWrapper);
+                row.data('hangar', h.hangar);
+                row.data('capacity', h.capacity);
+                container.append(row);
+            });
+
+            $(".confirmok", e).on("click", function () {
+                var allocated = 0;
+                var orders = [];   //{hangar, count}
+                container.find('.multi-value-row').each(function () {
+                    var $row = $(this);
+                    var hangar = $row.data('hangar');
+                    if (!hangar) return;            //instructions row
+                    var count = parseInt($('.dockCount', this).val() || 0, 10);
+                    if (count <= 0) return;
+                    var cap = parseInt($row.data('capacity') || 0, 10);
+                    if (count > cap) count = cap;
+                    if (allocated + count > totalToDock) count = totalToDock - allocated;
+                    if (count <= 0) return;
+                    allocated += count;
+                    orders.push({ hangar: hangar, count: count });
+                });
+
+                if (allocated <= 0) {
+                    e.remove();
+                    return;
+                }
+
+                applyDockOrders(flight, orders);
+                e.remove();
+            });
+            $(".confirmcancel", e).on("click", function () { e.remove(); });
+
+            e.appendTo("body").fadeIn(250);
+        }
+
+        function showSimpleConfirm(carrier, flight, hangarWrap, count) {
+            var e = $('<div class="confirm error"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+            $('<div class="confirm-message">Dock ' + flight.name + ' (' + count + ' craft) into ' + carrier.ship.name + '?</div>').prependTo(e);
+            $(".confirmok", e).on("click", function () {
+                applyDockOrders(flight, [{ hangar: hangarWrap.hangar, count: count }]);
+                e.remove();
+            });
+            $(".confirmcancel", e).on("click", function () { e.remove(); });
+            e.appendTo("body").fadeIn(250);
+        }
+
+        function applyDockOrders(flight, orders) {
+            orders.forEach(function (o) {
+                if (!Array.isArray(o.hangar.pendingDockOrders)) o.hangar.pendingDockOrders = [];
+                o.hangar.pendingDockOrders.push({ flightId: parseInt(flight.id, 10), count: parseInt(o.count, 10) });
+            });
+        }
+
+        function countActiveCraftInFlight(flight) {
+            if (!Array.isArray(flight.systems)) return 0;
+            var n = 0;
+            flight.systems.forEach(function (ftr) {
+                if (!shipManager.systems.isDestroyed(flight, ftr)) n++;
+            });
+            return n;
         }
     }
 

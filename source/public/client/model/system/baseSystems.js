@@ -225,6 +225,7 @@ MagGraviticThruster.prototype.constructor = MagGraviticThruster;
 var Hangar = function (json, ship) {
 	ShipSystem.call(this, json, ship);
 	this.pendingLaunchOrders = [];   //queued launch dialog selections; consumed at submit
+	this.pendingDockOrders = [];     //queued dock dialog selections; consumed at submit
 	this.refreshHangarTooltip();
 }
 Hangar.prototype = Object.create(ShipSystem.prototype);
@@ -233,14 +234,24 @@ Hangar.prototype.constructor = Hangar;
 // Submit-time hook called from ajaxInterface for every system. The base class
 // version resets individualNotesTransfer to "" — which would wipe any launch
 // orders the dialog set directly. Build the payload from pendingLaunchOrders
-// here instead so it survives until serialisation.
+// + pendingDockOrders here instead so it survives until serialisation.
+//
+// Payload shape (Stage 5+): {launches: [{phpclass, size}], docks: [{flightId, count}]}.
+// Either array may be empty / omitted; the server-side Hangar::doIndividualNotesTransfer
+// also accepts the legacy Stage 4 launches-only list shape for safety.
 Hangar.prototype.doIndividualNotesTransfer = function () {
-	if (Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0) {
-		this.individualNotesTransfer = JSON.stringify(this.pendingLaunchOrders);
-		this.pendingLaunchOrders = [];   //consumed: revising requires reopening the dialog
-	} else {
+	var hasLaunch = Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0;
+	var hasDock = Array.isArray(this.pendingDockOrders) && this.pendingDockOrders.length > 0;
+	if (!hasLaunch && !hasDock) {
 		this.individualNotesTransfer = "";
+		return;
 	}
+	var payload = {};
+	if (hasLaunch) payload.launches = this.pendingLaunchOrders;
+	if (hasDock)   payload.docks    = this.pendingDockOrders;
+	this.individualNotesTransfer = JSON.stringify(payload);
+	this.pendingLaunchOrders = [];   //consumed: revising requires reopening the dialog
+	this.pendingDockOrders = [];
 };
 
 // "Carrying" and "Stored Craft" lines are recomputed from the live $hangarUsage
@@ -271,9 +282,9 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	var effectiveCapacity = Math.max(0, this.maxhealth - netDamage);
 
 	if (netDamage > 0) {
-		this.data["Carrying"] = totalStored + " / " + effectiveCapacity + " boxes (" + netDamage + " destroyed)";
+		this.data["Carrying"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
 	} else {
-		this.data["Carrying"] = totalStored + " / " + this.maxhealth + " boxes";
+		this.data["Carrying"] = totalStored + " / " + this.maxhealth + " slots";
 	}
 
 	if (this.hangarUsage.length === 0) {
@@ -293,9 +304,11 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	}
 	var lines = [];
 	for (var k in byClass) {
-		lines.push(byClass[k].count + "x " + byClass[k].name);
+		var plural = '';
+		if(byClass[k].count > 1) plural = "s";
+		lines.push(byClass[k].count + " " + byClass[k].name + plural) ;
 	}
-	this.data["Stored Craft"] = lines.join("<br>");
+	this.data["Stored Craft"] = "<br>" + lines.join("<br>");
 };
 
 var MindriderHangar = function MindriderHangar(json, ship) {

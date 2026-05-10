@@ -15,7 +15,8 @@ window.ShipTooltipFireMenu = function () {
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target selected weapons on hexagon" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
         { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
-        { className: "launchFighters", condition: [isMine, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch fighters/shuttles from hangar (Stage 4 — gated to safeGameID)" }
+        { className: "launchFighters", condition: [isMine, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch fighters/shuttles (Stage 4)" },
+        { className: "dockFlight", condition: [isMine, isFighterFlight, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar (Stage 5)" }
         //{ className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
         //{ className: "removeMultiOrder", condition: [hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
 	];
@@ -127,5 +128,137 @@ window.ShipTooltipFireMenu = function () {
         }
     }
 
+    // === Hangar Operations Stage 5: dock button conditions + action ===
+
+    function isFighterFlight() {
+        var ship = this.targetedShip;
+        return !!(ship && ship.flight);
+    }
+
+    // Looks for at least one friendly carrier in the same hex with a hangar
+    // that can receive (some of) this flight. Doesn't enumerate exact splits;
+    // the dialog does the precise math.
+    function hasEligibleCarrierInHex() {
+        var flight = this.targetedShip;
+        if (!flight || !flight.flight) return false;
+        var carriers = findEligibleCarriersForDock(flight);
+        return carriers.length > 0;
+    }
+
+    function openHangarDock() {
+        if (window.confirm && typeof window.confirm.hangarDock === 'function') {
+            window.confirm.hangarDock(this.targetedShip);
+        }
+    }
+
     return ShipTooltipFireMenu;
 }();
+
+// Shared helper used by both the tooltip menu (for the eligibility gate) and
+// the confirm dialog (for the carrier picker). Returns an array of:
+//   { ship, hangars: [{hangar, capacity}, ...], totalCapacity }
+// for every friendly carrier in the same hex as $flight that can receive at
+// least one craft. Capacity is min(free boxes, output budget) per hangar.
+window.findEligibleCarriersForDock = function (flight) {
+    var out = [];
+    if (!flight || !flight.flight) return out;
+    if (shipManager.isDestroyed(flight)) return out;
+
+    var flightMove = shipManager.movement.getLastCommitedMove(flight);
+    if (!flightMove) return out;
+    var fPos = flightMove.position;
+    var fHeading = parseInt(flightMove.heading, 10);
+    var fSpeed = parseInt(flightMove.speed, 10);
+
+    // Per-fighter thrust budget — best available approximation of B5W "thrust"
+    // for the speed-delta check. flight.freethrust is set in ship file
+    // constructors and serialized via stripForJson on FighterFlight.
+    var thrust = parseInt(flight.freethrust || 0, 10);
+
+    var category = categoryForFlight(flight);
+
+    for (var key in gamedata.ships) {
+        var ship = gamedata.ships[key];
+        if (!ship || ship.id === flight.id) continue;
+        if (shipManager.isDestroyed(ship)) continue;
+        if (!gamedata.isMyorMyTeamShip(ship)) continue;
+        if (ship.flight) continue;                       //flights can't carry flights
+        if (!Array.isArray(ship.systems)) continue;
+
+        var sMove = shipManager.movement.getLastCommitedMove(ship);
+        if (!sMove) continue;
+        if (!fPos || !sMove.position) continue;
+        if (sMove.position.q !== fPos.q || sMove.position.r !== fPos.r) continue;
+        if (parseInt(sMove.heading, 10) !== fHeading) continue;
+        if (Math.abs(parseInt(sMove.speed, 10) - fSpeed) > thrust) continue;
+        if (shipManager.movement.isRolling(ship)) continue;
+        if (shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== "no") continue;
+
+        var hangarsOnShip = collectReceivingHangars(ship, category);
+        if (hangarsOnShip.length === 0) continue;
+
+        var total = 0;
+        hangarsOnShip.forEach(function (h) { total += h.capacity; });
+        if (total <= 0) continue;
+        out.push({ ship: ship, hangars: hangarsOnShip, totalCapacity: total });
+    }
+
+    return out;
+
+    function categoryForFlight(f) {
+        // Fall back to 'fighters' if flight doesn't declare a hangarRequired.
+        var req = (f.hangarRequired && f.hangarRequired !== '') ? f.hangarRequired : 'fighters';
+        return req;
+    }
+
+    function collectReceivingHangars(ship, category) {
+        var hangars = [];
+        ship.systems.forEach(function (sys) {
+            if (!sys || sys.name !== 'hangar') return;
+            if (shipManager.systems.isDestroyed(ship, sys)) return;
+
+            var accepts = (sys.hangarType === 'fighters')          //universal
+                || (sys.hangarType === category)                   //exact match
+                || (category === 'shuttles' || category === 'minesweeping shuttles');
+            if (!accepts) return;
+
+            // Effective free boxes: maxhealth - net damage - usage.
+            var netDamage = 0;
+            if (Array.isArray(sys.damage)) {
+                sys.damage.forEach(function (d) {
+                    netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
+                });
+            }
+            var effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+            var used = 0;
+            if (Array.isArray(sys.hangarUsage)) {
+                sys.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
+            }
+            var free = Math.max(0, effective - used);
+
+            var output = parseInt(sys.output || 0, 10);
+            var spent = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
+            var budget = Math.max(0, output - spent);
+
+            // Subtract anything already queued in this submit cycle so the
+            // dock dialog can't allocate over the shared output budget when
+            // the player has also queued launches/docks on the same hangar.
+            if (Array.isArray(sys.pendingDockOrders)) {
+                sys.pendingDockOrders.forEach(function (o) {
+                    var n = parseInt(o.count || 0, 10);
+                    free   = Math.max(0, free - n);
+                    budget = Math.max(0, budget - n);
+                });
+            }
+            if (Array.isArray(sys.pendingLaunchOrders)) {
+                sys.pendingLaunchOrders.forEach(function (o) {
+                    budget = Math.max(0, budget - parseInt(o.size || 0, 10));
+                });
+            }
+
+            var capacity = Math.min(free, budget);
+            if (capacity > 0) hangars.push({ hangar: sys, capacity: capacity });
+        });
+        return hangars;
+    }
+};
