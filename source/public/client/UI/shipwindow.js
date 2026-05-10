@@ -396,15 +396,16 @@ window.shipWindowManager = {
 			if (ship.fighters.length != 0) {
 				for (var i in ship.fighters) {
 					var amount = ship.fighters[i];
+					var capitalizedType = i.charAt(0).toUpperCase() + i.slice(1);
 					if (i == "normal") {
 						//skip description of kind of fighters
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " fighters");
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + i + " fighters");
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
 					} else {
 						//something other than fighters
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + i);
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType);
 					}
 				}
 			}
