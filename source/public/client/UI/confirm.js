@@ -171,44 +171,40 @@ window.confirm = {
     },
 
     getTotalCost: function getTotalCost() {
-
         if ($(".confirm #bulkQuantity").length > 0) {
             return confirm.getTotalCostBulk();
         }
 
-        var flightSize = $(".fighterAmount").html();
-        if (!flightSize) {
-            flightSize = 1;
-        }
-
+        var flightSize = parseInt($(".fighterAmount").html()) || 1;
         var fighterCost = $(".fighterAmount").data("pV");
         if (!fighterCost) {
-            var span = $(".totalUnitCostAmount").data("value");
-            fighterCost = span;
+            fighterCost = $(".totalUnitCostAmount").data("value") || 0;
         }
 
-        var missileType = $(".selectText").data("firingMode");
-        var initialMissileAmount = $(".selectAmount." + missileType).data("initialValue");  //Sometime when editing this will already have an amount build into fighter cost.      
-        var missileAmount = $(".selectAmount." + missileType).data("value");
-        var launchers = $(".selectAmount." + missileType).data("launchers");
-        var missileCost = $(".selectAmount." + missileType).data("cost");
-        var initialMissilesCost = (initialMissileAmount * missileCost * flightSize) * launchers || 0; //Work out what we have to deduct during Edit.        
+        var totalMissileCost = 0;
+        // Sometime when editing this will already have an amount build into fighter cost.
+        // But since we start calculation from pristine base cost (naked), we only add cost of ALL selected missiles.
+        // If a missile is "built-in" and free, its cost is 0 anyway.
+        // If it's built-in and NOT free, but included in base cost, it should have been in pristineBaseCost.
 
-        if (!missileAmount) {
-            missileAmount = 0;
-        }
-        if (!missileCost) {
-            missileCost = 0;
-        }
-        if (!launchers) {
-            launchers = 0;
-        }
+        // Iterate over all missile/ammo options
+        $(".confirm .selectAmount").each(function () {
+            var $amt = $(this);
+            var firingMode = $amt.data("firingMode");
 
-        //	console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
+            // Check if it's a missile option (has firingMode and NOT an enhancement)
+            if (typeof firingMode !== 'undefined' && !$amt.hasClass("shpenh0") && !/shpenh\d+/.test($amt.attr('class'))) {
+                var amount = $amt.data("value") || 0;
+                var cost = $amt.data("cost") || 0;
+                var launchers = $amt.data("launchers") || 0;
 
-        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost) - initialMissilesCost;
+                totalMissileCost += (amount * cost * flightSize * launchers);
+            }
+        });
 
-        //add enhancement cost	   
+        var totalCost = (flightSize * fighterCost) + totalMissileCost;
+
+        // Add enhancement cost	   
         var enhCost = 0;
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
@@ -1019,7 +1015,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
@@ -1240,7 +1236,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
