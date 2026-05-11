@@ -1991,7 +1991,7 @@ window.gamedata = {
 
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
-				var startClosed = ((categoryIndex === 1  && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
+				var startClosed = ((categoryIndex === 1 && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
 				if (faction === "Terrain") {
 					startClosed = false;
 				}
@@ -2629,9 +2629,32 @@ window.gamedata = {
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
-		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],
+		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [];
 
-			$(".confirm").remove();
+		// Copy ammo counts
+		if (newShip.flight && copiedShip.flight) {
+			for (var i in newShip.systems) {
+				if (copiedShip.systems[i]) {
+					var fighter = newShip.systems[i];
+					var copiedFighter = copiedShip.systems[i];
+					for (var j in fighter.systems) {
+						if (copiedFighter.systems[j]) {
+							var weapon = fighter.systems[j];
+							var copiedWeapon = copiedFighter.systems[j];
+							if (weapon.missileArray && copiedWeapon.missileArray) {
+								for (var k in weapon.missileArray) {
+									if (copiedWeapon.missileArray[k]) {
+										weapon.missileArray[k].amount = copiedWeapon.missileArray[k].amount;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		$(".confirm").remove();
 
 		window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
 	},

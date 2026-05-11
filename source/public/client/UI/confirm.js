@@ -64,7 +64,7 @@ window.confirm = {
         }
     },
 
-    getMaxAmmoFit: function (ship, currentEnhID) {
+    getMaxAmmoFit: function (ship, currentID) {
         var baseShip = gamedata.getShipByType($(".confirmok").data("shipclass") || ship.phpclass);
         if (!baseShip) baseShip = ship;
 
@@ -85,29 +85,17 @@ window.confirm = {
         if (!ammoMag || typeof ammoMag.capacity === 'undefined') return 9999;
 
         var capacity = ammoMag.capacity;
-        var currentUsed = ammoMag.remainingAmmo || 0;
-
-        var basicSpace = 0;
-        if (ammoMag.ammoCountArray && ammoMag.ammoSizeArray) {
-            var keys = Object.keys(ammoMag.ammoCountArray);
-            if (keys.length > 0) {
-                var basicMode = keys[0];
-                var count = ammoMag.ammoCountArray[basicMode] || 0;
-                var size = ammoMag.ammoSizeArray[basicMode] || 1;
-                basicSpace = count * size;
-            }
-        }
-
-        //var totalAvailable = (capacity - currentUsed) + basicSpace;
 
         var totalExtraRequested = 0;
+
+        // Sum up other enhancements
         var _enhNo = 0;
         var _target = $(".selectAmount.shpenh" + _enhNo);
         while (typeof _target.data("enhPrice") != 'undefined') {
             var _noTaken = _target.data("count");
             var _enhID = _target.data("enhID");
 
-            if (_enhID !== currentEnhID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
+            if (_enhID !== currentID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
                 var slots = 1;
                 if (_enhID == 'AMMO_K' || _enhID == 'AMMO_M') slots = 2;
                 totalExtraRequested += _noTaken * slots;
@@ -117,7 +105,7 @@ window.confirm = {
         }
 
         var addedSlots = 1;
-        if (currentEnhID == 'AMMO_K' || currentEnhID == 'AMMO_M') addedSlots = 2;
+        if (currentID == 'AMMO_K' || currentID == 'AMMO_M') addedSlots = 2;
 
         return Math.floor((capacity - totalExtraRequested) / addedSlots);
     },
@@ -142,6 +130,11 @@ window.confirm = {
         var inc = 1;
 
         if (value + inc <= maxVal) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+            if (maxFit < inc) return;
+
             var newValue = value + inc;
 
             target.data("value", newValue);
@@ -171,44 +164,40 @@ window.confirm = {
     },
 
     getTotalCost: function getTotalCost() {
-
         if ($(".confirm #bulkQuantity").length > 0) {
             return confirm.getTotalCostBulk();
         }
 
-        var flightSize = $(".fighterAmount").html();
-        if (!flightSize) {
-            flightSize = 1;
-        }
-
+        var flightSize = parseInt($(".fighterAmount").html()) || 1;
         var fighterCost = $(".fighterAmount").data("pV");
         if (!fighterCost) {
-            var span = $(".totalUnitCostAmount").data("value");
-            fighterCost = span;
+            fighterCost = $(".totalUnitCostAmount").data("value") || 0;
         }
 
-        var missileType = $(".selectText").data("firingMode");
-        var initialMissileAmount = $(".selectAmount." + missileType).data("initialValue");  //Sometime when editing this will already have an amount build into fighter cost.      
-        var missileAmount = $(".selectAmount." + missileType).data("value");
-        var launchers = $(".selectAmount." + missileType).data("launchers");
-        var missileCost = $(".selectAmount." + missileType).data("cost");
-        var initialMissilesCost = (initialMissileAmount * missileCost * flightSize) * launchers || 0; //Work out what we have to deduct during Edit.        
+        var totalMissileCost = 0;
+        // Sometime when editing this will already have an amount build into fighter cost.
+        // But since we start calculation from pristine base cost (naked), we only add cost of ALL selected missiles.
+        // If a missile is "built-in" and free, its cost is 0 anyway.
+        // If it's built-in and NOT free, but included in base cost, it should have been in pristineBaseCost.
 
-        if (!missileAmount) {
-            missileAmount = 0;
-        }
-        if (!missileCost) {
-            missileCost = 0;
-        }
-        if (!launchers) {
-            launchers = 0;
-        }
+        // Iterate over all missile/ammo options
+        $(".confirm .selectAmount").each(function () {
+            var $amt = $(this);
+            var firingMode = $amt.data("firingMode");
 
-        //	console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
+            // Check if it's a missile option (has firingMode and NOT an enhancement)
+            if (typeof firingMode !== 'undefined' && !$amt.hasClass("shpenh0") && !/shpenh\d+/.test($amt.attr('class'))) {
+                var amount = $amt.data("value") || 0;
+                var cost = $amt.data("cost") || 0;
+                var launchers = $amt.data("launchers") || 0;
 
-        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost) - initialMissilesCost;
+                totalMissileCost += (amount * cost * flightSize * launchers);
+            }
+        });
 
-        //add enhancement cost	   
+        var totalCost = (flightSize * fighterCost) + totalMissileCost;
+
+        // Add enhancement cost	   
         var enhCost = 0;
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
@@ -464,6 +453,14 @@ window.confirm = {
         if (value < min) value = min;
         if (value > max) value = max;
 
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
+
         // Update the value and trigger the input change handler
         $(this).text(value);
         $(this).data('value', value);
@@ -517,6 +514,12 @@ window.confirm = {
         // clamp
         if (current < min) current = min;
         if (current > max) current = max;
+
+        var missileType = $amt.data("firingMode");
+        var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+        if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+        var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+        if (current > maxFit) current = Math.max(0, maxFit);
 
         // write both text & data
         $amt
@@ -1019,7 +1022,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
@@ -1240,7 +1243,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
@@ -1475,7 +1478,7 @@ window.confirm = {
         confirm.getTotalCost();
         a.fadeIn(250);
     },
-
+    /*
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {
         var currentText = $(this).text();
@@ -1539,7 +1542,7 @@ window.confirm = {
 
         confirm.getTotalCost();
     },
-
+    */
 
     showSaveFleet: function showSaveFleet(callback) {
         var e = $(this.whtml);

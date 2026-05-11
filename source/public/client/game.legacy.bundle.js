@@ -6167,19 +6167,23 @@ window.ReplayAnimationStrategy = function () {
     };
 
     SyncedIconAnimation.prototype.render = function (now, total, last, delta, zoom, back, paused) {
-        // For detaching pods, clamp the query time to the detach point
-        // so the pod stays at the separation position after detach
-        var queryTime = total;
-        if (this.detachMove) {
-            var detachTime = this.time + this.hostAnimation.duration * this.detachFraction;
-            queryTime = Math.min(total, detachTime);
-        }
-
         // Compute position using the same math as the host animation
         // (no render-order dependency)
-        var hostPosAndFacing = this.hostAnimation.getPositionAndFacingAtTime(queryTime);
+        var hostPosAndFacing = this.getPositionAndFacingAtTime(total);
         this.shipIcon.setPosition(hostPosAndFacing.position);
         this.shipIcon.setFacing(-hostPosAndFacing.facing);
+    };
+
+    SyncedIconAnimation.prototype.getPositionAndFacingAtTime = function (time) {
+        // For detaching pods, clamp the query time to the detach point
+        // so the pod stays at the separation position after detach
+        var queryTime = time;
+        if (this.detachMove) {
+            var detachTime = this.time + this.hostAnimation.duration * this.detachFraction;
+            queryTime = Math.min(time, detachTime);
+        }
+
+        return this.hostAnimation.getPositionAndFacingAtTime(queryTime);
     };
 
     SyncedIconAnimation.prototype.cleanUp = function (scene) {};
