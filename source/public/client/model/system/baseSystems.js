@@ -523,6 +523,10 @@ ConnectionStrut.prototype.constructor = ConnectionStrut;
 
 var AdaptiveArmorController = function AdaptiveArmorController(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.availableAA = Object.assign({}, this.availableAA);
+	this.allocatedAA = Object.assign({}, this.allocatedAA);
+	this.currchangedAA = Object.assign({}, this.currchangedAA);
+	this.data = Object.assign({}, this.data);
 };
 AdaptiveArmorController.prototype = Object.create(ShipSystem.prototype);
 AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
@@ -740,6 +744,8 @@ AdaptiveArmorController.prototype.canIncreaseAnything = function () { //returns 
 
 var HyachComputer = function HyachComputer(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.allocatedBFCP = Object.assign({}, this.allocatedBFCP);
+	this.data = Object.assign({}, this.data);
 };
 HyachComputer.prototype = Object.create(ShipSystem.prototype);
 HyachComputer.prototype.constructor = HyachComputer;
@@ -895,6 +901,13 @@ HyachComputer.prototype.canIncreaseAnything = function () { //returns true if an
 
 var HyachSpecialists = function HyachSpecialists(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.availableSpec = Object.assign({}, this.availableSpec);
+	this.currSelectedSpec = Object.assign({}, this.currSelectedSpec);
+	this.currAllocatedSpec = Object.assign({}, this.currAllocatedSpec);
+	this.specAllocatedCount = Object.assign({}, this.specAllocatedCount);
+	this.specIncreased = Object.assign({}, this.specIncreased);
+	this.specDecreased = Object.assign({}, this.specDecreased);
+	this.data = Object.assign({}, this.data);
 };
 HyachSpecialists.prototype = Object.create(ShipSystem.prototype);
 HyachSpecialists.prototype.constructor = HyachSpecialists;
