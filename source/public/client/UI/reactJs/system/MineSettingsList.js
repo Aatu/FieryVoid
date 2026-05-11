@@ -182,14 +182,14 @@ class MineSettingsList extends Component {
         const shipManager = window.shipManager;
         const webglScene = window.webglScene;
 
-        const isMulti = system.hasMultiTarget && system.hasMultiTarget();
+        const isMulti = !!(system.hasMultiTarget && system.hasMultiTarget());
         const sourceWeaponId = isMulti ? system.getCurrWeaponId() : null;
         const sourceWeapons = isMulti ? system.getMineWeapons() : [];
         const sourceWeapon = isMulti ? sourceWeapons.find(w => String(w.id) === String(sourceWeaponId)) : null;
         if (isMulti && !sourceWeapon) return;
 
         system.setCurrShipType(className);
-        const systemMaxRange = system.range || system.rangeSetting;
+        const systemMaxRange = system.rangeSetting || system.range;
         const sourceAlloc = isMulti ? system.allocatedRanges[sourceWeaponId] : system.allocatedRanges;
         if (!sourceAlloc) return;
         const targetValue = (sourceAlloc[className] === null || sourceAlloc[className] === undefined) ? systemMaxRange : sourceAlloc[className];
@@ -199,10 +199,17 @@ class MineSettingsList extends Component {
             var otherUnit = gamedata.ships[i];
             if (otherUnit.userid != ship.userid) continue;
             if (shipManager.isDestroyed(otherUnit)) continue;
-            if (otherUnit.shipClass != ship.shipClass) continue;
 
-            for (var iSys = 0; iSys < otherUnit.systems.length; iSys++) {
+            //Match by phpclass (primary) or shipClass (fallback)
+            if (otherUnit.phpclass && ship.phpclass) {
+                if (otherUnit.phpclass != ship.phpclass) continue;
+            } else {
+                if (otherUnit.shipClass != ship.shipClass) continue;
+            }
+
+            for (var iSys in otherUnit.systems) {
                 var ctrl = otherUnit.systems[iSys];
+                if (!ctrl) continue;
                 if (ctrl.name !== system.name) continue;
 
                 //Only propagate between mines of matching enhancement state — never cross the boundary.
@@ -274,7 +281,7 @@ class MineSettingsList extends Component {
 
         if (!system.range) return null;
 
-        const isMulti = system.hasMultiTarget && system.hasMultiTarget();
+        const isMulti = !!(system.hasMultiTarget && system.hasMultiTarget());
         let weapons = [];
         let currWeaponId = null;
         let currWeapon = null;

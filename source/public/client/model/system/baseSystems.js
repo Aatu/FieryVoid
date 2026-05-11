@@ -321,29 +321,29 @@ Stealth.prototype.isDetectedStealth = function (ship) {
 	}
 
 	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
-        var enemyTeams = [];
-        for (var i in gamedata.slots) {
-            var slot = gamedata.slots[i];
-            if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
-                enemyTeams.push(slot.team);
-            }
-        }
+		var enemyTeams = [];
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
+				enemyTeams.push(slot.team);
+			}
+		}
 
-        var allOthersDetected = (enemyTeams.length > 0);
-        for (var j = 0; j < enemyTeams.length; j++) {
-            var teamId = enemyTeams[j];
-            if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
-                allOthersDetected = false;
-                break;
-            }
-        }
+		var allOthersDetected = (enemyTeams.length > 0);
+		for (var j = 0; j < enemyTeams.length; j++) {
+			var teamId = enemyTeams[j];
+			if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
+				allOthersDetected = false;
+				break;
+			}
+		}
 
-        if (allOthersDetected) return true;
-	}	
+		if (allOthersDetected) return true;
+	}
 
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.
 	//if (shipManager.power.isOffline(ship, this)) return true;
-	if (weaponManager.shipHasFiringOrder(ship)) return true;	 
+	if (weaponManager.shipHasFiringOrder(ship)) return true;
 
 	/*
 	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
@@ -414,7 +414,7 @@ MineStealth.prototype.constructor = MineStealth;
 MineStealth.prototype.initializationUpdate = function () {
 	var ship = this.ship;
 	this.data["Current Signature"] = ship.signature;
-	if(ship.mineType && ship.mineType == 'DEW' && ship.signature !== ship.detectedSignature) this.data["Activated Signature"] = ship.detectedSignature;	
+	if (ship.mineType && ship.mineType == 'DEW' && ship.signature !== ship.detectedSignature) this.data["Activated Signature"] = ship.detectedSignature;
 	return this
 }
 
@@ -424,28 +424,28 @@ MineStealth.prototype.isDetectedMine = function (ship) {
 	if (Array.isArray(this.detected)) {
 		if (this.detected.includes(myTeam)) return true;
 	} //else if (this.detected === true) {
-		//return true; //Already detected (legacy/fallback).
+	//return true; //Already detected (legacy/fallback).
 	//}
 	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
-        var enemyTeams = [];
-        for (var i in gamedata.slots) {
-            var slot = gamedata.slots[i];
-            if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
-                enemyTeams.push(slot.team);
-            }
-        }
+		var enemyTeams = [];
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
+				enemyTeams.push(slot.team);
+			}
+		}
 
-        var allOthersDetected = (enemyTeams.length > 0);
-        for (var j = 0; j < enemyTeams.length; j++) {
-            var teamId = enemyTeams[j];
-            if (!Array.isArray(this.detected) || this.detected.indexOf(teamId) === -1) {
-                allOthersDetected = false;
-                break;
-            }
-        }
+		var allOthersDetected = (enemyTeams.length > 0);
+		for (var j = 0; j < enemyTeams.length; j++) {
+			var teamId = enemyTeams[j];
+			if (!Array.isArray(this.detected) || this.detected.indexOf(teamId) === -1) {
+				allOthersDetected = false;
+				break;
+			}
+		}
 
-        if (allOthersDetected) return true;
-	}	
+		if (allOthersDetected) return true;
+	}
 
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
 	if (shipManager.power.isOffline(ship, this)) return true;
@@ -1490,6 +1490,7 @@ EnergyDiffuser.prototype.constructor = EnergyDiffuser;
 
 var SelfRepair = function SelfRepair(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.data = Object.assign({}, this.data);
 };
 SelfRepair.prototype = Object.create(ShipSystem.prototype);
 SelfRepair.prototype.constructor = SelfRepair;
@@ -1655,6 +1656,7 @@ Bulkhead.prototype.constructor = Bulkhead;
 
 var PowerCapacitor = function PowerCapacitor(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.data = Object.assign({}, this.data);
 };
 PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
 PowerCapacitor.prototype.constructor = PowerCapacitor;
@@ -1818,6 +1820,7 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
 
 var ThirdspaceShieldGenerator = function ThirdspaceShieldGenerator(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.data = Object.assign({}, this.data);
 };
 ThirdspaceShieldGenerator.prototype = Object.create(ShipSystem.prototype);
 ThirdspaceShieldGenerator.prototype.constructor = ThirdspaceShieldGenerator;
@@ -2262,30 +2265,30 @@ ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
 	if (this.detected === true) return true; // Fallback support for boolean legacy saves
-	var myTeam = gamedata.getPlayerTeam();	
+	var myTeam = gamedata.getPlayerTeam();
 	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(myTeam)) return true; // Already detected by our team.
-	
+
 	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
-        var enemyTeams = [];
-        for (var i in gamedata.slots) {
-            var slot = gamedata.slots[i];
-            if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
-                enemyTeams.push(slot.team);
-            }
-        }
+		var enemyTeams = [];
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
+				enemyTeams.push(slot.team);
+			}
+		}
 
-        var allOthersDetected = (enemyTeams.length > 0);
-        for (var j = 0; j < enemyTeams.length; j++) {
-            var teamId = enemyTeams[j];
-            if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
-                allOthersDetected = false;
-                break;
-            }
-        }
+		var allOthersDetected = (enemyTeams.length > 0);
+		for (var j = 0; j < enemyTeams.length; j++) {
+			var teamId = enemyTeams[j];
+			if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
+				allOthersDetected = false;
+				break;
+			}
+		}
 
-        if (allOthersDetected) return true;
-	}	
-	
+		if (allOthersDetected) return true;
+	}
+
 	if (shipManager.systems.isDestroyed(ship, this)) return true;
 	if (shipManager.power.isOffline(ship, this)) return true;
 
@@ -2449,6 +2452,8 @@ FtrPetals.prototype.doIndividualNotesTransfer = function () {
 
 var MineControllerDEW = function MineControllerDEW(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.allocatedRanges = Object.assign({}, this.allocatedRanges);
+	this.data = Object.assign({}, this.data);
 };
 MineControllerDEW.prototype = Object.create(ShipSystem.prototype);
 MineControllerDEW.prototype.constructor = MineControllerDEW;
@@ -2456,7 +2461,7 @@ MineControllerDEW.prototype.constructor = MineControllerDEW;
 MineControllerDEW.prototype.initializationUpdate = function () {
 	var ship = this.ship;
 
-	if (gamedata.gamephase == -2 && !this.FCRefreshed){//Buying phase, need to set FC for DEW weapons in Front End only.
+	if (gamedata.gamephase == -2 && !this.FCRefreshed) {//Buying phase, need to set FC for DEW weapons in Front End only.
 		this.refreshFireControl();
 	}
 
@@ -2470,9 +2475,9 @@ MineControllerDEW.prototype.refreshFireControl = function () { //refresh descrip
 	for (var i in ship.systems) {
 		var weapon = ship.systems[i];
 		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
-			if (weapon.fireControl[0] !== null)  weapon.fireControl[0] = weapon.fireControl[0] + this.data["Accuracy"];
-			if (weapon.fireControl[1] !== null)  weapon.fireControl[1] = weapon.fireControl[1] + this.data["Accuracy"];
-			if (weapon.fireControl[2] !== null)  weapon.fireControl[2] = weapon.fireControl[2] + this.data["Accuracy"];								
+			if (weapon.fireControl[0] !== null) weapon.fireControl[0] = weapon.fireControl[0] + this.data["Accuracy"];
+			if (weapon.fireControl[1] !== null) weapon.fireControl[1] = weapon.fireControl[1] + this.data["Accuracy"];
+			if (weapon.fireControl[2] !== null) weapon.fireControl[2] = weapon.fireControl[2] + this.data["Accuracy"];
 		}
 	}
 	this.FCRefreshed = true;

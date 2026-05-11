@@ -22,6 +22,10 @@ LightEnergyMine.prototype.constructor = LightEnergyMine;
 
 var CaptorMine = function CaptorMine(json, ship) {
 	Aoe.call(this, json, ship);
+	this.allocatedRanges = Object.assign({}, this.allocatedRanges);
+	this.data = Object.assign({}, this.data);
+	this.currClass = '';
+	if (this.rangeSetting === undefined) this.rangeSetting = this.range;
 };
 CaptorMine.prototype = Object.create(Aoe.prototype);
 CaptorMine.prototype.constructor = CaptorMine;
@@ -93,8 +97,6 @@ CaptorMine.prototype.doIncrease = function () { //increase BFCP usage
 
 	if (allocated < this.range) { //else use regular pool 
 		this.allocatedRanges[this.currClass] = allocated + 1;
-
-		//this.BFCPtotal_used++;
 	}
 	this.mineSet = true; //user changed something, assume they are content.	
 	this.refreshData();
@@ -107,7 +109,6 @@ CaptorMine.prototype.doDecrease = function () { //decrease BFCP usage
 
 	if (allocated > 0) {
 		this.allocatedRanges[this.currClass] = allocated - 1;
-		//this.BFCPtotal_used--;
 	}
 	this.mineSet = true; //user changed something, assume they are content.	
 	this.refreshData();
@@ -120,23 +121,23 @@ CaptorMine.prototype.refreshData = function () { //refresh description to show c
 	var range = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
-	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
+	if (gamedata.gamephase !== -2) if (!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 
-    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-    //if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-    //    //hiddenDisplay = "?";
+	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	//if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+	//    //hiddenDisplay = "?";
 	//	this.data["Max Range"] = hiddenDisplay;		
-    //}else{
+	//}else{
 	//	this.data["Max Range"] = this.range;			
 	//}
 
-	this.data["Fire control (fighter/med/cap)"] = this.fireControl[0]*5 + '/' + this.fireControl[1]*5 + '/' + this.fireControl[2]*5;
+	this.data["Fire control (fighter/med/cap)"] = this.fireControl[0] * 5 + '/' + this.fireControl[1] * 5 + '/' + this.fireControl[2] * 5;
 
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
 		range = this.allocatedRanges[currType];
-		if(range == null) range = this.range;
-		if(hiddenDisplay == '?') range = hiddenDisplay;
+		if (range == null) range = this.range;
+		if (hiddenDisplay == '?') range = hiddenDisplay;
 		//entry should exist, just change it to show current values
 		entryName = ' - ' + currType;
 		this.data[entryName + " range"] = range;
@@ -197,6 +198,10 @@ CaptorMine.prototype.doIndividualNotesTransfer = function () { //prepare individ
 
 var ProximityMine = function ProximityMine(json, ship) {
 	Aoe.call(this, json, ship);
+	this.allocatedShipTypes = Object.assign({}, this.allocatedShipTypes);
+	this.data = Object.assign({}, this.data);
+	this.currClass = '';
+	if (this.rangeSetting === undefined) this.rangeSetting = this.range;
 };
 ProximityMine.prototype = Object.create(Aoe.prototype);
 ProximityMine.prototype.constructor = ProximityMine;
@@ -291,24 +296,25 @@ ProximityMine.prototype.refreshData = function () { //refresh description to sho
 	var attack = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
-	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
-	
-    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-    //if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+	if (gamedata.gamephase !== -2) if (!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
+
+	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	//if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
 	//	this.data["Max Range"] = hiddenDisplay;		
-    //}else{
+	//}else{
 	//	this.data["Max Range"] = this.range;		
 	//}
-	
+
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
 		attack = this.allocatedShipTypes[currType];
-		if(hiddenDisplay == '?'){ attack = hiddenDisplay;
-		}else if(attack == true){ 
+		if (hiddenDisplay == '?') {
+			attack = hiddenDisplay;
+		} else if (attack == true) {
 			attack = "Yes";
-		}else{
-			attack = "No";			
-		}	
+		} else {
+			attack = "No";
+		}
 		//entry should exist, just change it to show current values
 		//entryName = ' - ' + currType;
 		this.data[" - Attack " + currType] = attack;
