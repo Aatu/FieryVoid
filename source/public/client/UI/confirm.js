@@ -64,7 +64,7 @@ window.confirm = {
         }
     },
 
-    getMaxAmmoFit: function (ship, currentEnhID) {
+    getMaxAmmoFit: function (ship, currentID) {
         var baseShip = gamedata.getShipByType($(".confirmok").data("shipclass") || ship.phpclass);
         if (!baseShip) baseShip = ship;
 
@@ -85,29 +85,17 @@ window.confirm = {
         if (!ammoMag || typeof ammoMag.capacity === 'undefined') return 9999;
 
         var capacity = ammoMag.capacity;
-        var currentUsed = ammoMag.remainingAmmo || 0;
-
-        var basicSpace = 0;
-        if (ammoMag.ammoCountArray && ammoMag.ammoSizeArray) {
-            var keys = Object.keys(ammoMag.ammoCountArray);
-            if (keys.length > 0) {
-                var basicMode = keys[0];
-                var count = ammoMag.ammoCountArray[basicMode] || 0;
-                var size = ammoMag.ammoSizeArray[basicMode] || 1;
-                basicSpace = count * size;
-            }
-        }
-
-        //var totalAvailable = (capacity - currentUsed) + basicSpace;
 
         var totalExtraRequested = 0;
+
+        // Sum up other enhancements
         var _enhNo = 0;
         var _target = $(".selectAmount.shpenh" + _enhNo);
         while (typeof _target.data("enhPrice") != 'undefined') {
             var _noTaken = _target.data("count");
             var _enhID = _target.data("enhID");
 
-            if (_enhID !== currentEnhID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
+            if (_enhID !== currentID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
                 var slots = 1;
                 if (_enhID == 'AMMO_K' || _enhID == 'AMMO_M') slots = 2;
                 totalExtraRequested += _noTaken * slots;
@@ -117,7 +105,7 @@ window.confirm = {
         }
 
         var addedSlots = 1;
-        if (currentEnhID == 'AMMO_K' || currentEnhID == 'AMMO_M') addedSlots = 2;
+        if (currentID == 'AMMO_K' || currentID == 'AMMO_M') addedSlots = 2;
 
         return Math.floor((capacity - totalExtraRequested) / addedSlots);
     },
@@ -142,6 +130,11 @@ window.confirm = {
         var inc = 1;
 
         if (value + inc <= maxVal) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+            if (maxFit < inc) return;
+
             var newValue = value + inc;
 
             target.data("value", newValue);
@@ -460,6 +453,14 @@ window.confirm = {
         if (value < min) value = min;
         if (value > max) value = max;
 
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
+
         // Update the value and trigger the input change handler
         $(this).text(value);
         $(this).data('value', value);
@@ -513,6 +514,12 @@ window.confirm = {
         // clamp
         if (current < min) current = min;
         if (current > max) current = max;
+
+        var missileType = $amt.data("firingMode");
+        var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+        if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+        var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+        if (current > maxFit) current = Math.max(0, maxFit);
 
         // write both text & data
         $amt
@@ -1471,7 +1478,7 @@ window.confirm = {
         confirm.getTotalCost();
         a.fadeIn(250);
     },
-
+    /*
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {
         var currentText = $(this).text();
@@ -1535,7 +1542,7 @@ window.confirm = {
 
         confirm.getTotalCost();
     },
-
+    */
 
     showSaveFleet: function showSaveFleet(callback) {
         var e = $(this.whtml);
