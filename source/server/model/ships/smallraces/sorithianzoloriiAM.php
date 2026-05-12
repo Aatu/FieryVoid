@@ -8,7 +8,7 @@ class SorithianZolorIIAM extends FighterFlight{
         $this->faction = "Small Races";
         $this->phpclass = "SorithianZolorIIAM";
         $this->shipClass = "Sorithian Zolor II Fighters";
-        $this->imagePath = "img/ships/BAStarFox.png"; 
+        $this->imagePath = "img/ships/SorinthianZolorFighter.png"; 
 
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
@@ -32,8 +32,8 @@ class SorithianZolorIIAM extends FighterFlight{
             $armour = array(1, 0, 1, 1);
             $fighter = new Fighter("SorithianZolorII", $armour, 7, $this->id);
             $fighter->displayName = "Zolor II";
-            $fighter->imagePath = "img/ships/BAStarFox.png";
-            $fighter->iconPath = "img/ships/BAStarFox_large.png";
+            $fighter->imagePath = "img/ships/SorinthianZolorFighter.png";
+            $fighter->iconPath = "img/ships/SorinthianZolorFighter_large.png";
 
             //ammo magazine itself (AND its missile options)
             $ammoMagazine = new AmmoMagazine(4); //pass magazine capacity - actual number of rounds, NOT number of salvoes

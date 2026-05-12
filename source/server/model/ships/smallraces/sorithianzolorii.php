@@ -8,7 +8,7 @@ class SorithianZolorII extends FighterFlight{
         $this->faction = "Small Races";
         $this->phpclass = "SorithianZolorII";
         $this->shipClass = "Sorithian Zolor II Fighters";
-        $this->imagePath = "img/ships/BAStarFox.png";
+        $this->imagePath = "img/ships/SorinthianZolorFighter.png";
 	    $this->variantOf = 'NONE';    //Replaced with Ammo version  
 
         $this->forwardDefense = 7;
@@ -33,8 +33,8 @@ class SorithianZolorII extends FighterFlight{
             $armour = array(1, 0, 1, 1);
             $fighter = new Fighter("SorithianZolorII", $armour, 7, $this->id);
             $fighter->displayName = "Zolor II";
-            $fighter->imagePath = "img/ships/BAStarFox.png";
-            $fighter->iconPath = "img/ships/BAStarFox_large.png";
+            $fighter->imagePath = "img/ships/SorinthianZolorFighter.png";
+            $fighter->iconPath = "img/ships/SorinthianZolorFighter_large.png";
 
             $missileRack = new FighterMissileRack(4, 330, 30);
             $missileRack->firingModes = array(
