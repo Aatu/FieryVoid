@@ -1008,7 +1008,10 @@ public static function firePreFiringWeapons($gamedata){
         //Check if any ships have activate jump engines and do this after all other fire (in case they or their jump engine got destroyed)
         foreach ($gamedata->ships as $ship) {   
             
-            $jumpList = $ship->getSystemsByName('Jump Engine'); //Won't return if Jump engine destroyed.     
+            $jumpList = $ship->getSystemsByName('Jump Engine'); //Won't return if Jump engine destroyed.
+            if ($ship->faction === 'Shadow Association') { //PhasingDrive extends JumpEngine but has a different display name; only Shadow Association ships have one.
+                $jumpList = array_merge($jumpList, $ship->getSystemsByName('Phasing Drive'));
+            }
             foreach($jumpList as $jumpEngine){
                 //is it overloading?...
                 if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for entering hyperspace!				
