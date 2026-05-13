@@ -8,7 +8,7 @@ class SorithianZolorI extends FighterFlight{
         $this->faction = "Small Races";
         $this->phpclass = "SorithianZolorI";
         $this->shipClass = "Sorithian Zolor I Fighters";
-        $this->imagePath = "img/ships/BAStarFox.png";
+        $this->imagePath = "img/ships/SorinthianZolorFighter.png";
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
         $this->freethrust = 12;
@@ -31,8 +31,8 @@ class SorithianZolorI extends FighterFlight{
             $armour = array(1, 0, 1, 1);
             $fighter = new Fighter("SorithianZolorI", $armour, 7, $this->id);
             $fighter->displayName = "Zolor I";
-            $fighter->imagePath = "img/ships/BAStarFox.png";
-            $fighter->iconPath = "img/ships/BAStarFox_large.png";
+            $fighter->imagePath = "img/ships/SorinthianZolorFighter.png";
+            $fighter->iconPath = "img/ships/SorinthianZolorFighter_large.png";
 
             $frontGun = new LightParticleBeam(330, 30, 1, 2);
             $frontGun->displayName = "Ultralight Particle Beam";

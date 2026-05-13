@@ -106,10 +106,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — May 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Firing Info</strong> - Intercept and Hit Chance tooltips available in Comabt Log and Targeting Tooltips respectively.  Called Shot info available at Firing.</li>          
+        <li><strong>Comabt Log Improvements</strong> - Intercept modfiers and Dice Rolls can now be seen via hover tooltips in Combat Log.</li>          
+        <li><strong>Hit Chance Tooltips</strong> - Hit Chance tooltips available in Targeting Tooltip respectively.</li>   
+        <li><strong>Ammo Magazine Capacity</strong> - Ammo magazines will no longer more ammo than their maximum capacity.        
         <li><strong>Polaren Revisions</strong> - Geoffrey has made some major revisions based on recent playtests of the newest Nexus faction.</li>    
         <li><strong>Particle Concentrator</strong> - Can now combine with Concentrators on ships within 1 hex of each other.</li>       
-        <li><strong>Flexible Targeting</strong> - DEW Mines with multiple weapons can now purchase this Enhancement to give a unique range setting to each weapon during Deployment.</li>                     
         <li><strong>Gravitic Mines</strong> - These are now available for Brakiri players to use with the new Tashkat variant, the Takatos.</li>                                                                  
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
