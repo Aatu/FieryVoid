@@ -2015,14 +2015,15 @@ window.confirm = {
     //
     // Flow:
     //   1. Enumerate eligible carriers via findEligibleCarriersForDock(flight).
-    //   2. If this flight already has queued orders on some carrier, skip the
-    //      picker and jump straight to that carrier's splitter (re-edit/cancel).
-    //   3. Otherwise: single carrier → splitter; multiple → carrier picker → splitter.
-    //   4. The splitter is ALWAYS shown (no auto-confirm shortcut) so the player
-    //      keeps per-hangar visibility and can cancel an order by zeroing inputs.
-    //   5. On confirm, replaceDockOrdersForFlight rewrites the flight's entries
-    //      across every hangar shown; Hangar.doIndividualNotesTransfer flushes
-    //      the updated pendingDockOrders into the {launches, docks} payload.
+    //   2. Open a unified splitter showing every hangar across every eligible
+    //      carrier as its own row ("Ship – Hangar N" label). No carrier picker.
+    //   3. Player allocates counts freely; any unallocated craft remain in space.
+    //      Each input is capped at that hangar's available space so a flight
+    //      larger than a single hangar cannot overflow it.
+    //   4. Pre-fills from queued orders on re-edit; OK with all zeros cancels.
+    //   5. replaceDockOrdersForFlight rewrites every hangar in the map so an
+    //      explicit zero clears a prior queued entry; Hangar.doIndividualNotesTransfer
+    //      flushes updated pendingDockOrders into the {launches, docks} payload.
     hangarDock: function hangarDock(flight) {
         if (!flight || !flight.flight) return;
         if (typeof window.findEligibleCarriersForDock !== 'function') return;
@@ -2033,157 +2034,90 @@ window.confirm = {
         var flightCount = countActiveCraftInFlight(flight);
         if (flightCount <= 0) return;
 
-        // Re-edit / cancel path: if this flight already has queued dock orders
-        // on any eligible carrier (set by a previous OK earlier in this Firing
-        // Phase, or hydrated from server state), skip the carrier picker and
-        // jump straight to the splitter for the carrier that holds those
-        // orders. The splitter pre-fills from the queued counts; OK with all
-        // zeros effectively cancels.
-        var existingCarrier = findCarrierWithQueuedDocks(flight, carriers);
-        if (existingCarrier) {
-            openHangarSplitter(existingCarrier, flight, flightCount);
-            return;
-        }
-
-        // Single carrier → straight to hangar splitter
-        if (carriers.length === 1) {
-            openHangarSplitter(carriers[0], flight, flightCount);
-            return;
-        }
-
-        // Multiple carriers → picker first
-        var pickerEl = $('<div class="confirm error multi-value-confirm hangarDock"><div class="ui"><div class="confirmcancel"></div></div></div>');
-        $('<div class="multi-value-header">Dock ' + flight.name + ' — choose a carrier</div>').prependTo(pickerEl);
-        var pickerContainer = $('<div class="multi-value-container"></div>').insertAfter(pickerEl.find('.multi-value-header'));
-
+        // Build a flat list of all hangars across all eligible carriers.
+        // Each entry carries the row label, the hangar object, its free
+        // capacity (reclaimable for re-edit), and the pre-fill amount.
+        var allRows = [];
         carriers.forEach(function (c) {
-            var row = $('<div class="multi-value-row" style="cursor: pointer;"></div>');
-            $('<span class="multi-value-label"><span class="multi-value-name">' + c.ship.name + '</span> <span class="multi-value-max">(free: ' + c.totalCapacity + ' boxes across ' + c.hangars.length + ' hangar' + (c.hangars.length === 1 ? '' : 's') + ')</span></span>').appendTo(row);
-            row.on('click', function () {
-                pickerEl.remove();
-                openHangarSplitter(c, flight, flightCount);
-            });
-            pickerContainer.append(row);
-        });
-
-        $(".confirmcancel", pickerEl).on("click", function () { pickerEl.remove(); });
-        pickerEl.appendTo("body").fadeIn(250);
-
-        // ---- helpers (closure) ----------------------------------------
-
-        function openHangarSplitter(carrier, flight, totalToDock) {
-            var hangars = carrier.hangars;
-
-            // Pre-fill amounts from any existing queued dock orders for THIS
-            // flight on each of the carrier's hangars. Note: hangars[i].capacity
-            // already subtracts pendingDockOrders (see collectReceivingHangars),
-            // so we add the pre-fill back when sizing the input's max.
-            var preByHangar = new Map();
-            hangars.forEach(function (h) {
-                var pre = 0;
+            var multiHangar = c.hangars.length > 1;
+            c.hangars.forEach(function (h, idx) {
+                var preset = 0;
                 if (Array.isArray(h.hangar.pendingDockOrders)) {
                     h.hangar.pendingDockOrders.forEach(function (o) {
                         if (parseInt(o.flightId, 10) === parseInt(flight.id, 10)) {
-                            pre += parseInt(o.count || 0, 10);
+                            preset += parseInt(o.count || 0, 10);
                         }
                     });
                 }
-                preByHangar.set(h, pre);
+                var label = multiHangar
+                    ? c.ship.name + ' – Hangar ' + (idx + 1)
+                    : c.ship.name;
+                allRows.push({ hangar: h.hangar, capacity: h.capacity, preset: preset, label: label });
             });
+        });
 
-            // (Single-hangar / single-carrier auto-confirm shortcut was removed
-            //  per UX feedback: every Dock click now opens the splitter so the
-            //  player can freely amend or cancel a queued order with full
-            //  per-hangar visibility, no matter how many hangars are involved.)
+        var headerText = carriers.length === 1
+            ? 'Dock ' + flight.name + ' (' + flightCount + ' craft) into ' + carriers[0].ship.name
+            : 'Dock ' + flight.name + ' (' + flightCount + ' craft) — allocate across carriers';
 
-            // Splitter dialog
-            var e = $('<div class="confirm error multi-value-confirm hangarDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
-            $('<div class="multi-value-header">Dock ' + flight.name + ' (' + totalToDock + ' craft) into ' + carrier.ship.name + '</div>').prependTo(e);
-            var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+        var e = $('<div class="confirm error multi-value-confirm hangarDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">' + headerText + '</div>').prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-            $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Allocate craft per hangar. Any unallocated craft remain in space. Set all to 0 to cancel docking.</span></div>').appendTo(container);
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Allocate craft per hangar. Any unallocated craft remain in space. Set all to 0 to cancel docking.</span></div>').appendTo(container);
 
-            hangars.forEach(function (h, idx) {
-                var preset = preByHangar.get(h) || 0;
-                // h.capacity already excludes THIS flight's own pending queue
-                // (collectReceivingHangars treats it as reclaimable for re-edit),
-                // so it represents the boxes/budget actually free if this input
-                // is set to 0. That's what we show for "free:".
-                var freeBoxes = h.capacity;
-                // Absolute cap for this input: physical free + the reclaimable
-                // preset, then clamped to the flight size.
-                var maxThis = Math.min(freeBoxes + preset, totalToDock);
-                // Start at 0 for new docks (no fighter actually docked yet) and
-                // at the queued count for re-edits.
-                var startVal = preset;
-                var row = $('<div class="multi-value-row"></div>');
-                $('<span class="multi-value-label"><span class="multi-value-name">Hangar ' + (idx + 1) + '</span> <span class="multi-value-max">(free: ' + freeBoxes + ', max: ' + maxThis + ')</span></span>').appendTo(row);
-                var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
-                $('<input type="number" class="multiConfirmInput multi-value-input main-input dockCount" value="' + startVal + '" min="0" max="' + maxThis + '">').appendTo(inputWrapper);
-                row.data('hangar', h.hangar);
-                row.data('capacity', maxThis);
-                container.append(row);
+        allRows.forEach(function (r) {
+            // capacity already excludes this flight's own queued orders so it
+            // represents the truly free space if this input is set to 0.
+            var freeBoxes = r.capacity;
+            // Physical cap: free boxes + reclaimable preset, clamped to flight size.
+            var maxThis = Math.min(freeBoxes + r.preset, flightCount);
+            var row = $('<div class="multi-value-row"></div>');
+            $('<span class="multi-value-label"><span class="multi-value-name">' + r.label + '</span> <span class="multi-value-max">(free: ' + freeBoxes + ', max: ' + maxThis + ')</span></span>').appendTo(row);
+            var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
+            $('<input type="number" class="multiConfirmInput multi-value-input main-input dockCount" value="' + r.preset + '" min="0" max="' + maxThis + '">').appendTo(inputWrapper);
+            row.data('rowData', r);
+            row.data('capacity', maxThis);
+            container.append(row);
+        });
+
+        $(".confirmok", e).on("click", function () {
+            var allocated = 0;
+            // Initialise every hangar to 0 so an explicit empty input clears
+            // any prior queued entry for this flight (cancel path).
+            var newOrdersByHangar = new Map();
+            allRows.forEach(function (r) { newOrdersByHangar.set(r.hangar, 0); });
+            container.find('.multi-value-row').each(function () {
+                var $row = $(this);
+                var r = $row.data('rowData');
+                if (!r) return;                     // instructions row
+                var count = parseInt($('.dockCount', this).val() || 0, 10);
+                var cap = parseInt($row.data('capacity') || 0, 10);
+                if (count > cap) count = cap;
+                if (allocated + count > flightCount) count = flightCount - allocated;
+                if (count < 0) count = 0;
+                allocated += count;
+                newOrdersByHangar.set(r.hangar, count);
             });
+            replaceDockOrdersForFlight(flight, newOrdersByHangar);
+            e.remove();
+        });
+        $(".confirmcancel", e).on("click", function () { e.remove(); });
+        e.appendTo("body").fadeIn(250);
 
-            $(".confirmok", e).on("click", function () {
-                var allocated = 0;
-                // Always rewrite each visible hangar's pending entry for this
-                // flight — including hangars whose value is 0 (cancel path).
-                var newOrdersByHangar = new Map();
-                hangars.forEach(function (h) { newOrdersByHangar.set(h.hangar, 0); });
-                container.find('.multi-value-row').each(function () {
-                    var $row = $(this);
-                    var hangar = $row.data('hangar');
-                    if (!hangar) return;            //instructions row
-                    var count = parseInt($('.dockCount', this).val() || 0, 10);
-                    var cap = parseInt($row.data('capacity') || 0, 10);
-                    if (count > cap) count = cap;
-                    if (allocated + count > totalToDock) count = totalToDock - allocated;
-                    if (count < 0) count = 0;
-                    allocated += count;
-                    newOrdersByHangar.set(hangar, count);
-                });
-
-                replaceDockOrdersForFlight(flight, newOrdersByHangar);
-                e.remove();
-            });
-            $(".confirmcancel", e).on("click", function () { e.remove(); });
-
-            e.appendTo("body").fadeIn(250);
-        }
-
-        // Atomically rewrite this flight's dock allocation across the carrier's
-        // hangars. Touches EVERY hangar in the map (even those receiving 0) so
-        // "set to 0" actually clears the prior queue.
+        // Atomically rewrite this flight's dock allocation across all hangars in
+        // the map. Touches EVERY hangar (even those receiving 0) so "set to 0"
+        // clears the prior queue entry rather than leaving a stale order.
         function replaceDockOrdersForFlight(flight, newOrdersByHangar) {
             var flightId = parseInt(flight.id, 10);
             newOrdersByHangar.forEach(function (count, hangar) {
                 if (!Array.isArray(hangar.pendingDockOrders)) hangar.pendingDockOrders = [];
-                // Drop any prior entry for this flight, then append the new one if > 0.
                 hangar.pendingDockOrders = hangar.pendingDockOrders.filter(function (o) {
                     return parseInt(o.flightId, 10) !== flightId;
                 });
                 if (count > 0) hangar.pendingDockOrders.push({ flightId: flightId, count: parseInt(count, 10) });
                 hangar.pendingDockOrdersDirty = true;
             });
-        }
-
-        // Returns the carrier wrapper whose hangars already hold a queued dock
-        // order for $flight, or null if none. The dialog uses this to skip the
-        // carrier picker when re-editing an existing order.
-        function findCarrierWithQueuedDocks(flight, carriers) {
-            var flightId = parseInt(flight.id, 10);
-            for (var i = 0; i < carriers.length; i++) {
-                var c = carriers[i];
-                for (var j = 0; j < c.hangars.length; j++) {
-                    var h = c.hangars[j].hangar;
-                    if (!Array.isArray(h.pendingDockOrders)) continue;
-                    for (var k = 0; k < h.pendingDockOrders.length; k++) {
-                        if (parseInt(h.pendingDockOrders[k].flightId, 10) === flightId) return c;
-                    }
-                }
-            }
-            return null;
         }
 
         function countActiveCraftInFlight(flight) {
