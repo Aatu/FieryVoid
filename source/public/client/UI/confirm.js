@@ -2035,8 +2035,8 @@ window.confirm = {
         if (flightCount <= 0) return;
 
         // Build a flat list of all hangars across all eligible carriers.
-        // Each entry carries the row label, the hangar object, its free
-        // capacity (reclaimable for re-edit), and the pre-fill amount.
+        // hardCap = physical per-hangar limit (free boxes + reclaimable preset),
+        // independent of what other rows contain.
         var allRows = [];
         carriers.forEach(function (c) {
             var multiHangar = c.hangars.length > 1;
@@ -2052,7 +2052,13 @@ window.confirm = {
                 var label = multiHangar
                     ? c.ship.name + ' – Hangar ' + (idx + 1)
                     : c.ship.name;
-                allRows.push({ hangar: h.hangar, capacity: h.capacity, preset: preset, label: label });
+                allRows.push({
+                    hangar:   h.hangar,
+                    capacity: h.capacity,       // free boxes (reclaimable for re-edit)
+                    preset:   preset,
+                    hardCap:  h.capacity + preset, // absolute physical limit for this hangar
+                    label:    label
+                });
             });
         });
 
@@ -2064,22 +2070,49 @@ window.confirm = {
         $('<div class="multi-value-header">' + headerText + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Allocate craft per hangar. Any unallocated craft remain in space. Set all to 0 to cancel docking.</span></div>').appendTo(container);
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Allocate craft to dock per hangar.</span></div>').appendTo(container);
+
+        // Live cross-row total: updates each input's max so the sum can never exceed flightCount.
+        // Built as a single span so the flex row treats it as one child (avoiding space-between split).
+        var initialTotal = allRows.reduce(function (s, r) { return s + r.preset; }, 0);
+        var $allocRow = $('<div class="multi-value-row" style="font-weight:bold;padding-bottom:4px;"><span>Allocating: <span class="dock-alloc-count">' + initialTotal + '</span> / ' + flightCount + ' craft</span></div>');
+        var $allocLabel = $allocRow.find('.dock-alloc-count');
+        container.append($allocRow);
 
         allRows.forEach(function (r) {
-            // capacity already excludes this flight's own queued orders so it
-            // represents the truly free space if this input is set to 0.
             var freeBoxes = r.capacity;
-            // Physical cap: free boxes + reclaimable preset, clamped to flight size.
-            var maxThis = Math.min(freeBoxes + r.preset, flightCount);
+            // Initial max: physical cap clamped to flight size (other rows may tighten it live).
+            var maxThis = Math.min(r.hardCap, flightCount);
             var row = $('<div class="multi-value-row"></div>');
             $('<span class="multi-value-label"><span class="multi-value-name">' + r.label + '</span> <span class="multi-value-max">(free: ' + freeBoxes + ', max: ' + maxThis + ')</span></span>').appendTo(row);
             var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
             $('<input type="number" class="multiConfirmInput multi-value-input main-input dockCount" value="' + r.preset + '" min="0" max="' + maxThis + '">').appendTo(inputWrapper);
             row.data('rowData', r);
-            row.data('capacity', maxThis);
             container.append(row);
         });
+
+        // Recomputes the running total and tightens/relaxes each input's max so
+        // the aggregate across all rows can never exceed flightCount.
+        function updateDockCaps() {
+            var total = 0;
+            container.find('.multi-value-row').each(function () {
+                var r = $(this).data('rowData');
+                if (!r) return;
+                total += Math.max(0, parseInt($('.dockCount', this).val() || 0, 10));
+            });
+            $allocLabel.text(total);
+            $allocLabel.css('color', total > flightCount ? '#ff6666' : '');
+            container.find('.multi-value-row').each(function () {
+                var $row = $(this);
+                var r = $row.data('rowData');
+                if (!r) return;
+                var myVal = Math.max(0, parseInt($('.dockCount', $row).val() || 0, 10));
+                var remaining = flightCount - (total - myVal);   // budget available to this row
+                $('.dockCount', $row).attr('max', Math.max(0, Math.min(r.hardCap, remaining)));
+            });
+        }
+        container.on('input change', '.dockCount', updateDockCaps);
+        updateDockCaps();   // seed label and caps from pre-filled presets
 
         $(".confirmok", e).on("click", function () {
             var allocated = 0;
@@ -2090,15 +2123,19 @@ window.confirm = {
             container.find('.multi-value-row').each(function () {
                 var $row = $(this);
                 var r = $row.data('rowData');
-                if (!r) return;                     // instructions row
+                if (!r) return;                     // instructions / total rows
                 var count = parseInt($('.dockCount', this).val() || 0, 10);
-                var cap = parseInt($row.data('capacity') || 0, 10);
-                if (count > cap) count = cap;
+                if (count > parseInt($('.dockCount', this).attr('max') || 0, 10))
+                    count = parseInt($('.dockCount', this).attr('max') || 0, 10);
                 if (allocated + count > flightCount) count = flightCount - allocated;
                 if (count < 0) count = 0;
                 allocated += count;
                 newOrdersByHangar.set(r.hangar, count);
             });
+            if (allocated > flightCount) {
+                alert('Total allocated (' + allocated + ') exceeds flight size (' + flightCount + '). Reduce the count and try again.');
+                return;
+            }
             replaceDockOrdersForFlight(flight, newOrdersByHangar);
             e.remove();
         });
