@@ -224,8 +224,19 @@ MagGraviticThruster.prototype.constructor = MagGraviticThruster;
 
 var Hangar = function (json, ship) {
 	ShipSystem.call(this, json, ship);
-	this.pendingLaunchOrders = [];   //queued launch dialog selections; consumed at submit
-	this.pendingDockOrders = [];     //queued dock dialog selections; consumed at submit
+	//Hydrate from any already-submitted orders for this turn so the dialogs
+	//can pre-fill (and the player can amend/cancel via the same dialog).
+	//pendingLaunchOrder/pendingDockOrder come from Hangar::stripForJson on the
+	//server (set by onIndividualNotesLoaded from the latest hangarLaunchOrder/
+	//hangarDockOrder note for the current turn).
+	this.pendingLaunchOrders = Array.isArray(this.pendingLaunchOrder) ? this.pendingLaunchOrder.slice() : [];
+	this.pendingDockOrders   = Array.isArray(this.pendingDockOrder)   ? this.pendingDockOrder.slice()   : [];
+	//Dirty flags distinguish "the dialog has touched this since hydration"
+	//from "nothing to send". When a dialog OK leaves the list empty (a
+	//"cancel everything" action), we still need to ship an explicit empty
+	//payload so the server can replace any prior order from this Firing Phase.
+	this.pendingLaunchOrdersDirty = false;
+	this.pendingDockOrdersDirty   = false;
 	this.refreshHangarTooltip();
 }
 Hangar.prototype = Object.create(ShipSystem.prototype);
@@ -240,18 +251,26 @@ Hangar.prototype.constructor = Hangar;
 // Either array may be empty / omitted; the server-side Hangar::doIndividualNotesTransfer
 // also accepts the legacy Stage 4 launches-only list shape for safety.
 Hangar.prototype.doIndividualNotesTransfer = function () {
-	var hasLaunch = Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0;
-	var hasDock = Array.isArray(this.pendingDockOrders) && this.pendingDockOrders.length > 0;
+	// Send IF either side is non-empty OR the dialog explicitly touched it.
+	// The dirty flag lets a "clear all orders" pass through — without it, the
+	// server would keep replaying the prior turn's launch/dock note.
+	var launchDirty = !!this.pendingLaunchOrdersDirty;
+	var dockDirty   = !!this.pendingDockOrdersDirty;
+	var hasLaunch = launchDirty || (Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0);
+	var hasDock   = dockDirty   || (Array.isArray(this.pendingDockOrders)   && this.pendingDockOrders.length > 0);
 	if (!hasLaunch && !hasDock) {
 		this.individualNotesTransfer = "";
 		return;
 	}
 	var payload = {};
-	if (hasLaunch) payload.launches = this.pendingLaunchOrders;
-	if (hasDock)   payload.docks    = this.pendingDockOrders;
+	if (hasLaunch) payload.launches = Array.isArray(this.pendingLaunchOrders) ? this.pendingLaunchOrders : [];
+	if (hasDock)   payload.docks    = Array.isArray(this.pendingDockOrders)   ? this.pendingDockOrders   : [];
 	this.individualNotesTransfer = JSON.stringify(payload);
-	this.pendingLaunchOrders = [];   //consumed: revising requires reopening the dialog
+	// Reset state — the next gamedata reload will re-hydrate from the server.
+	this.pendingLaunchOrders = [];
 	this.pendingDockOrders = [];
+	this.pendingLaunchOrdersDirty = false;
+	this.pendingDockOrdersDirty = false;
 };
 
 // "Carrying" and "Stored Craft" lines are recomputed from the live $hangarUsage
@@ -298,7 +317,7 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		var key = (entry.phpclass && entry.phpclass !== "")
 			? entry.phpclass
 			: ("(" + (entry.hangarType || "unknown") + " slot)");
-		var displayName = entry.name || key;
+		var displayName = entry.shipClass || key;
 		if (!byClass[key]) byClass[key] = { name: displayName, count: 0 };
 		byClass[key].count += parseInt(entry.flightSize || 1, 10);
 	}
@@ -306,7 +325,7 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	for (var k in byClass) {
 		var plural = '';
 		if(byClass[k].count > 1) plural = "s";
-		lines.push(byClass[k].count + " " + byClass[k].name + plural) ;
+		lines.push(byClass[k].count + " " + byClass[k].name) ;
 	}
 	this.data["Stored Craft"] = "<br>" + lines.join("<br>");
 };

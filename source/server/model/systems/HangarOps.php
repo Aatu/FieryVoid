@@ -195,17 +195,59 @@ class HangarOps {
 		return $n;
 	}
 
-	/* Maps a FighterFlight to the carrier's $fighters category that should hold it.
-	 * Order: explicit hangarRequired -> 'normal' -> 'fighters' -> first key.
+	/* Narrows a Hangar's hangarType from its ship's $fighters declaration when
+	 * the Hangar is still using the universal default ('fighters' / 'normal' /
+	 * legacy 0). Only runs when the ship declares EXACTLY ONE size-specific
+	 * fighter category — multi-size carriers (Cylon Basestar etc.) need
+	 * explicit per-Hangar hangarType in the ship file because we can't tell
+	 * which Hangar belongs to which size bay from here.
+	 *
+	 * Without this, ships like Var'Nic (declared $fighters = ['medium'=>6] but
+	 * no explicit Hangar hangarType) keep the universal default and accept any
+	 * size of fighter through hangarAcceptsCategory's 'fighters' shortcut.
 	 */
-	public static function categoryFor($flight, $carrier){
-		if (!is_array($carrier->fighters) || empty($carrier->fighters)) return 'fighters';
-		if (isset($carrier->fighters[$flight->hangarRequired])) return $flight->hangarRequired;
-		foreach (array('normal', 'fighters') as $generic){
-			if (isset($carrier->fighters[$generic])) return $generic;
+	public static function inferHangarType($hangar, $ship){
+		$hType = strtolower(trim((string)$hangar->hangarType));
+		//Only narrow universal slots. Anything specific (medium, heavy, shuttles,
+		//assault shuttles, BPods, custom 'Raiders', etc.) was an intentional
+		//ship-file choice and stays.
+		if ($hType !== '' && $hType !== 'fighters' && $hType !== 'normal') return;
+
+		if (!isset($ship->fighters) || !is_array($ship->fighters) || empty($ship->fighters)) return;
+
+		$sizes = array('heavy', 'medium', 'light', 'ultralight');
+		$declared = array();
+		foreach ($ship->fighters as $cat => $count){
+			$catLower = strtolower(trim((string)$cat));
+			if (in_array($catLower, $sizes, true)) $declared[] = $catLower;
 		}
-		$keys = array_keys($carrier->fighters);
-		return $keys[0];
+		if (count($declared) !== 1) return;     //ambiguous — leave universal
+
+		$hangar->hangarType = $declared[0];
+	}
+
+	/* Returns the size category a flight physically requires, independent of
+	 * which carrier it's docking into. Mirrors the classification used in
+	 * checkChoices() (gamelobby.js): explicit $hangarRequired wins; generic
+	 * 'fighters'/'normal' falls back to jinkinglimit-based sizing.
+	 *
+	 * Returned values are the canonical hangarType strings:
+	 *   'heavy' | 'medium' | 'light' | 'ultralight'
+	 *   'shuttles' | 'minesweeping shuttles' | 'assault shuttles' | 'Breaching Pods'
+	 *   'superheavy' | <custom>
+	 */
+	public static function trueSizeOf($flight){
+		$req = isset($flight->hangarRequired) ? $flight->hangarRequired : 'fighters';
+		$reqLower = strtolower(trim((string)$req));
+		if ($reqLower === '' || $reqLower === 'fighters' || $reqLower === 'normal') {
+			$jink = (int)($flight->jinkinglimit ?? 0);
+			if ($jink >= 99) return 'ultralight';
+			if ($jink >= 10) return 'light';
+			if ($jink >= 8)  return 'medium';
+			if ($jink >= 6)  return 'heavy';
+			return 'medium';                   //safe-ish default for unclassifiable
+		}
+		return $req;                           //preserve casing for 'Breaching Pods', 'Raiders', etc.
 	}
 
 	/* Total declared hangar capacity by category for a ship. */
@@ -621,8 +663,10 @@ class HangarOps {
 			$reason = 'speed delta exceeds flight thrust'; return false;
 		}
 
-		//Hangar must have a compatible category with $count free boxes
-		$category = self::categoryFor($flight, $carrier);
+		//Hangar must have a compatible category with $count free boxes.
+		//Use the flight's TRUE size (not carrier-mapped category) so a heavy
+		//flight is rejected when the carrier only has medium slots, etc.
+		$category = self::trueSizeOf($flight);
 		$free = self::freeBoxesByCategory($hangar, $category);
 		if ($free < $count) { $reason = 'hangar full'; return false; }
 
@@ -644,10 +688,38 @@ class HangarOps {
 	}
 
 	public static function hangarAcceptsCategory($hangar, $category){
-		if ($hangar->hangarType === 'fighters') return true;       //universal
-		if ($hangar->hangarType === $category) return true;        //exact match
-		//Shuttles can use any fighter box per B5W §10.1
-		if ($category === 'shuttles' || $category === 'minesweeping shuttles') return true;
+		$hType = strtolower(trim((string)$hangar->hangarType));
+		$cat   = strtolower(trim((string)$category));
+		if ($hType === '' || $cat === '') return false;
+
+		//Universal fighter slot accepts anything (any size, plus shuttles).
+		if ($hType === 'fighters' || $hType === 'normal') return true;
+
+		//Exact match (medium-medium, 'Breaching Pods'-'Breaching Pods', 'Raiders'-'Raiders', …)
+		if ($hType === $cat) return true;
+
+		//Combat-fighter size hierarchy: a slot accepts its declared size or smaller.
+		//Mirrors checkChoices() in gamelobby.js, where heavy hangars also count
+		//toward medium/light/ultralight capacity, medium hangars toward light/ultralight,
+		//etc. — i.e. larger slots are strictly more permissive than smaller ones.
+		static $sizeRank = array(
+			'ultralight' => 1,
+			'light'      => 2,
+			'medium'     => 3,
+			'heavy'      => 4,
+		);
+		if (isset($sizeRank[$hType]) && isset($sizeRank[$cat])) {
+			return $sizeRank[$cat] <= $sizeRank[$hType];
+		}
+
+		//Shuttles & minesweeping shuttles can use any combat-fighter slot per B5W §10.1.
+		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles') && isset($sizeRank[$hType])) {
+			return true;
+		}
+
+		//Assault shuttle slots also hold breaching pods (per checkChoices BP-compat list).
+		if ($hType === 'assault shuttles' && $cat === 'breaching pods') return true;
+
 		return false;
 	}
 
@@ -659,7 +731,9 @@ class HangarOps {
 		$out = array();
 		$hangars = self::collectHangars($carrier);
 		if (empty($hangars)) return $out;
-		$category = self::categoryFor($flight, $carrier);
+		//Match against the flight's TRUE size so size hierarchy is honoured
+		//regardless of how the carrier's $fighters declaration looks.
+		$category = self::trueSizeOf($flight);
 
 		//Exact match first
 		foreach ($hangars as $h){
@@ -670,10 +744,11 @@ class HangarOps {
 			$capacity = min($free, $budget);
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
 		}
-		//Then universal
+		//Then any hangar that accepts the category via the size hierarchy
+		//(larger fighter slots, universal slots, shuttle-compatible slots).
 		foreach ($hangars as $h){
 			if ($h->hangarType === $category) continue;            //already considered above
-			if ($h->hangarType !== 'fighters' && !self::hangarAcceptsCategory($h, $category)) continue;
+			if (!self::hangarAcceptsCategory($h, $category)) continue;
 			if ($h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category);
 			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
@@ -716,7 +791,10 @@ class HangarOps {
 
 		$partial = ($count < $activeCount);
 
-		$category = self::categoryFor($flight, $carrier);
+		//Bucket the entry under the flight's TRUE size, not the carrier-mapped
+		//category — this keeps the hangarUsage record accurate even when the
+		//flight is docked in a larger slot via size hierarchy.
+		$category = self::trueSizeOf($flight);
 		$entry = array(
 			'phpclass'    => $flight->phpclass,
 			'name'        => $flight->name,

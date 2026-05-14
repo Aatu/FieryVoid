@@ -205,22 +205,31 @@ window.findEligibleCarriersForDock = function (flight) {
 
     return out;
 
+    // Mirrors HangarOps::trueSizeOf (PHP): an explicit hangarRequired wins;
+    // generic 'fighters'/'normal' falls back to jinkinglimit-based classification
+    // (the same buckets checkChoices() in gamelobby.js uses for fleet validation).
     function categoryForFlight(f) {
-        // Fall back to 'fighters' if flight doesn't declare a hangarRequired.
-        var req = (f.hangarRequired && f.hangarRequired !== '') ? f.hangarRequired : 'fighters';
+        var req = String(f.hangarRequired || '').trim();
+        var lower = req.toLowerCase();
+        if (lower === '' || lower === 'fighters' || lower === 'normal') {
+            var jink = parseInt(f.jinkinglimit || 0, 10);
+            if (jink >= 99) return 'ultralight';
+            if (jink >= 10) return 'light';
+            if (jink >= 8)  return 'medium';
+            if (jink >= 6)  return 'heavy';
+            return 'medium';
+        }
         return req;
     }
 
     function collectReceivingHangars(ship, category) {
         var hangars = [];
+        var flightId = parseInt(flight.id, 10);
         ship.systems.forEach(function (sys) {
             if (!sys || sys.name !== 'hangar') return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
 
-            var accepts = (sys.hangarType === 'fighters')          //universal
-                || (sys.hangarType === category)                   //exact match
-                || (category === 'shuttles' || category === 'minesweeping shuttles');
-            if (!accepts) return;
+            if (!hangarAcceptsCategory(sys.hangarType, category)) return;
 
             // Effective free boxes: maxhealth - net damage - usage.
             var netDamage = 0;
@@ -240,11 +249,14 @@ window.findEligibleCarriersForDock = function (flight) {
             var spent = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
             var budget = Math.max(0, output - spent);
 
-            // Subtract anything already queued in this submit cycle so the
-            // dock dialog can't allocate over the shared output budget when
-            // the player has also queued launches/docks on the same hangar.
+            // Subtract queued allocations from OTHER flights/launches on this
+            // hangar (shared output budget + physical free boxes). Skip this
+            // flight's OWN dock orders so re-editing/cancelling sees the full
+            // capacity it had before queuing — the dialog re-applies the
+            // queued amount as a pre-fill on the splitter input instead.
             if (Array.isArray(sys.pendingDockOrders)) {
                 sys.pendingDockOrders.forEach(function (o) {
+                    if (parseInt(o.flightId, 10) === flightId) return;   //own queue is reclaimable
                     var n = parseInt(o.count || 0, 10);
                     free   = Math.max(0, free - n);
                     budget = Math.max(0, budget - n);
@@ -260,5 +272,22 @@ window.findEligibleCarriersForDock = function (flight) {
             if (capacity > 0) hangars.push({ hangar: sys, capacity: capacity });
         });
         return hangars;
+    }
+
+    // Mirrors HangarOps::hangarAcceptsCategory (PHP) — combat-fighter size
+    // hierarchy plus shuttle/BP compatibility. Keep in sync with the server
+    // helper so the eligibility gate matches end-of-turn validation.
+    function hangarAcceptsCategory(hangarType, category) {
+        var hType = String(hangarType || '').toLowerCase().trim();
+        var cat   = String(category   || '').toLowerCase().trim();
+        if (hType === '' || cat === '') return false;
+        if (hType === 'fighters' || hType === 'normal') return true;
+        if (hType === cat) return true;
+
+        var rank = { ultralight: 1, light: 2, medium: 3, heavy: 4 };
+        if (rank[hType] && rank[cat]) return rank[cat] <= rank[hType];
+        if ((cat === 'shuttles' || cat === 'minesweeping shuttles') && rank[hType]) return true;
+        if (hType === 'assault shuttles' && cat === 'breaching pods') return true;
+        return false;
     }
 };

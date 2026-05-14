@@ -2972,6 +2972,14 @@ class Hangar extends ShipSystem{
 			//$output = floor($maxhealth/6)*6;
 			$output = 6;
 		}
+		//Legacy ship files (eg. torata) pass a literal 0 as the 4th positional
+		//arg, expecting it to be a no-op carried over from the pre-HangarOps
+		//constructor signature. Coerce non-string/empty values back to the
+		//universal default — inferHangarType (called on load) will then
+		//narrow it from the ship's $fighters declaration when possible.
+		if (!is_string($hangarType) || trim($hangarType) === '') {
+			$hangarType = 'fighters';
+		}
 		$this->hangarType = $hangarType;
 		$this->direction = (int)$direction;
 		//Always include shuttle classes — every hangar can launch shuttles per
@@ -3031,6 +3039,12 @@ class Hangar extends ShipSystem{
 				if (isset($entry['dockedTurn'])) $flight->removedTurn = (int)$entry['dockedTurn'];
 			}
 		}
+
+		//Narrow universal-default hangarType from the ship's $fighters
+		//declaration (eg. Var'Nic's lone medium bay). Runs every load so a
+		//ship-file change picks up without DB migration; idempotent because
+		//inferHangarType only acts on universal/empty types.
+		if ($ship) HangarOps::inferHangarType($this, $ship);
 
 		if ($this->usagePopulated) return;
 
@@ -3156,12 +3170,21 @@ class Hangar extends ShipSystem{
 		//  current (Stage 5): {"launches": [...], "docks": [...]}
 		$launches = array();
 		$docks    = array();
-		if (isset($payload['launches']) || isset($payload['docks'])) {
+		//Whether the client EXPLICITLY sent a launches/docks key — distinguishes
+		//"untouched" (no key) from "intentionally cleared" (key present, empty).
+		//The empty-array case must still create a note so onIndividualNotesLoaded
+		//can replace any prior order from earlier in the same Firing Phase.
+		$hasLaunchKey = false;
+		$hasDockKey   = false;
+		if (array_key_exists('launches', $payload) || array_key_exists('docks', $payload)) {
+			$hasLaunchKey = array_key_exists('launches', $payload);
+			$hasDockKey   = array_key_exists('docks',    $payload);
 			$launches = is_array($payload['launches'] ?? null) ? $payload['launches'] : array();
 			$docks    = is_array($payload['docks']    ?? null) ? $payload['docks']    : array();
 		} else {
 			//assume legacy launch-only payload
 			$launches = $payload;
+			$hasLaunchKey = true;
 		}
 
 		//Sanitise launches: keep only well-formed {phpclass, size} entries
@@ -3173,7 +3196,7 @@ class Hangar extends ShipSystem{
 			if ($phpclass === '' || $size <= 0) continue;
 			$cleanLaunches[] = array('phpclass' => $phpclass, 'size' => $size);
 		}
-		if (!empty($cleanLaunches)) $this->pendingLaunchTransfer = $cleanLaunches;
+		if ($hasLaunchKey) $this->pendingLaunchTransfer = $cleanLaunches;
 
 		//Sanitise docks: {flightId, count}
 		$cleanDocks = array();
@@ -3184,7 +3207,7 @@ class Hangar extends ShipSystem{
 			if ($flightId <= 0 || $count <= 0) continue;
 			$cleanDocks[] = array('flightId' => $flightId, 'count' => $count);
 		}
-		if (!empty($cleanDocks)) $this->pendingDockTransfer = $cleanDocks;
+		if ($hasDockKey) $this->pendingDockTransfer = $cleanDocks;
 	}
 
 	public function stripForJson(){
@@ -3194,6 +3217,11 @@ class Hangar extends ShipSystem{
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
+		//Send last-submitted pending orders so the client can pre-fill the
+		//launch/dock dialogs after a page reload (re-edit a queued order
+		//mid-Firing-Phase, or cancel a queued dock).
+		if ($this->pendingLaunchOrder !== null) $strippedSystem->pendingLaunchOrder = $this->pendingLaunchOrder;
+		if ($this->pendingDockOrder !== null)   $strippedSystem->pendingDockOrder   = $this->pendingDockOrder;
 		return $strippedSystem;
 	}
 
@@ -3204,7 +3232,7 @@ class Hangar extends ShipSystem{
 
 		$totalStored = HangarOps::usageCountFor($this);
 		$this->data["Carrying"] = $totalStored . " / " . $this->maxhealth . " slots";
-
+		/*		
 		if (!empty($this->hangarUsage)){
 			$byClass = array();
 			foreach ($this->hangarUsage as $entry){
@@ -3219,6 +3247,7 @@ class Hangar extends ShipSystem{
 			}
 			$this->data["Stored Craft"] = implode('<br>', $lines);
 		}
+		*/	
 	}
 }
 
