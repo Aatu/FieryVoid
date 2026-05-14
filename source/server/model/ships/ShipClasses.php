@@ -206,11 +206,13 @@ class BaseShip {
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
 				//additional: ShadowPilotPain						
 			    $mod += -5*($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
+				$mod += -20*($CnC->hasCritical("HangarOperations", $gamedata->turn));
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
 			    if ($firstFighter){
-			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);				    
+			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);
+					$mod += -50* $firstFighter->hasCritical("LaunchedThisTurn", $gamedata->turn);
 			    }
 		    }
             if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.            

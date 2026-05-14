@@ -398,6 +398,7 @@ class HangarOps {
 			);
 			Manager::insertIndividualNote($note);
 
+			self::applyLaunchCrits($resurrectedFlight, $carrier, $gamedata);
 			return $resurrectedFlight->id;
 		}
 
@@ -463,7 +464,42 @@ class HangarOps {
 		);
 		Manager::insertIndividualNote($note);
 
+		self::applyLaunchCrits($flight, $carrier, $gamedata);
 		return $shipid;
+	}
+
+	/* Apply initiative-penalty criticals after a successful launch:
+	 * - LaunchedThisTurn (-50 ini) on the new flight's first fighter
+	 * - HangarOperations (-20 ini) on the carrier's CnC (via shared helper)
+	 */
+	private static function applyLaunchCrits($flight, $carrier, $gamedata){
+		if ($flight instanceof FighterFlight) {
+			$firstFighter = $flight->getSampleFighter();
+			if ($firstFighter) {
+				$crit = new LaunchedThisTurn(-1, $flight->id, $firstFighter->id, 'LaunchedThisTurn', $gamedata->turn, $gamedata->turn + 1);
+				$crit->updated = true;
+				$firstFighter->criticals[] = $crit;
+			}
+		}
+		self::applyHangarOperationsCrit($carrier, $gamedata);
+	}
+
+	/* Apply HangarOperations (-20 ini) to the carrier's CnC. Idempotent within
+	 * a single turn: launching multiple flights AND/OR docking craft on the
+	 * same turn produces exactly one critical, so the carrier eats -20, not
+	 * -40+, regardless of how many launch/dock orders resolved.
+	 */
+	private static function applyHangarOperationsCrit($carrier, $gamedata){
+		$cnc = $carrier->getSystemByName('CnC');
+		if (!$cnc) return;
+		foreach ($cnc->criticals as $c) {
+			if ($c->phpclass === 'HangarOperations' && $c->turn === $gamedata->turn) {
+				return; //already applied this turn
+			}
+		}
+		$crit = new HangarOperations(-1, $carrier->id, $cnc->id, 'HangarOperations', $gamedata->turn, $gamedata->turn + 1);
+		$crit->updated = true;
+		$cnc->criticals[] = $crit;
 	}
 
 	/* Look for a hangarUsage entry matching $phpclass with a dockedFlightId
@@ -832,6 +868,8 @@ class HangarOps {
 			$flight->id . ':' . $flight->phpclass . ':' . $count . ($partial ? ':partial' : '')
 		);
 		Manager::insertIndividualNote($note);
+
+		self::applyHangarOperationsCrit($carrier, $gamedata);
 
 		return $count;
 	}

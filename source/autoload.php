@@ -409,6 +409,7 @@ spl_autoload_register(
                 'halosearly' => '/server/model/ships/brakiri/halosEarly.php',
                 'haltona' => '/server/model/ships/brakiri/haltona.php',
                 'hangar' => '/server/model/systems/baseSystems.php',
+                'hangaroperations' => '/server/model/cricialClasses.php',
                 'hastan' => '/server/model/ships/yolu/hastan.php',
                 'haven' => '/server/model/ships/centauri/haven.php',
                 'hawk' => '/server/model/ships/raiders/hawk.php',
@@ -534,6 +535,7 @@ spl_autoload_register(
                 'lasercutter' => '/server/model/weapons/lasers.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
                 //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used
+                'launchedthisturn' => '/server/model/cricialClasses.php',
                 'leevan' => '/server/model/ships/centauri_old/leevan.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',

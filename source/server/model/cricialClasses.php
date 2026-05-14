@@ -602,9 +602,25 @@ class IncreasedRecharge1 extends Critical{
 class MissileLost extends Critical{
     //This one requires quite a bit of work within the weapon class to work properly, see Transverse Drive for an example.
     public $description = "A missile was lost to damage";
-	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+	public $repairPriority = 0;//Can't repair.'
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class HangarOperations extends Critical{
+    public $description = "-20 Initiative";
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+class LaunchedThisTurn extends Critical{
+    public $description = "-50 Initiative";
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
 }
 
