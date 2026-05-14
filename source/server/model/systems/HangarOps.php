@@ -684,21 +684,37 @@ class HangarOps {
 	}
 
 	/* Materialise $count craft from $flight into $hangar's storage.
-	 * Returns the actual number docked (may be capped by hangar capacity, but
-	 * caller is expected to validate first).
+	 * Returns the actual number docked (capped at the flight's current active
+	 * craft count). Caller should validate via canShipReceive first.
 	 *
-	 * Mutates: $hangar->hangarUsage (appends entries), $hangar->landedThisTurn,
-	 * $flight->removed, $flight->removedTurn.
+	 * Two paths:
+	 *  - Full dock ($count >= active craft): the flight ship is flagged
+	 *    $removed/$removedTurn so it vanishes from board/target lists, and
+	 *    the stash record carries $dockedFlightId so a future relaunch can
+	 *    resurrect the same ship id (preserving damage state across the
+	 *    dock cycle).
+	 *  - Partial dock ($count < active craft): N individual Fighters are
+	 *    flagged DisengagedFighter so they leave the flight, the remainder
+	 *    continues in space, and the stash record is NOT linked to a flight
+	 *    id (relaunch from this record spawns a fresh flight). Re-using
+	 *    DisengagedFighter avoids new client-side critical classes; the
+	 *    hangarDockEvent note distinguishes the actual fate in replay.
 	 *
-	 * Side effects: writes 'hangarDockEvent' replay note for history.
-	 *
-	 * NOTE: an entire flight is currently treated as a single hangar entry
-	 * (one record with flightSize=$count). If a future stage needs to merge
-	 * the docked flight back into existing per-craft records this can split.
+	 * Mutates: $hangar->hangarUsage (appends entry), $hangar->landedThisTurn,
+	 * and either $flight->removed/$flight->removedTurn (full) or per-fighter
+	 * criticals (partial).
 	 */
 	public static function performLand($hangar, $carrier, $flight, $count, $gamedata){
 		if (!$flight instanceof FighterFlight) return 0;
 		$count = max(1, (int)$count);
+
+		//Clamp to whatever craft are still active in this flight (other dock
+		//orders processed earlier this turn may have already disengaged some).
+		$activeCount = $flight->countActiveCraft($gamedata->turn);
+		if ($activeCount <= 0) return 0;
+		if ($count > $activeCount) $count = $activeCount;
+
+		$partial = ($count < $activeCount);
 
 		$category = self::categoryFor($flight, $carrier);
 		$entry = array(
@@ -706,16 +722,24 @@ class HangarOps {
 			'name'        => $flight->name,
 			'flightSize'  => $count,
 			'hangarType'  => $category,
-			'dockedFlightId' => $flight->id,        //links record back to flight; consumed on load to re-apply $removed
-			'dockedTurn'     => $gamedata->turn,
+			'dockedTurn'  => $gamedata->turn,
 		);
+		if (!$partial) {
+			//Only full docks link the stash record to the source flight; partial
+			//docks intentionally drop the link so a relaunch spawns fresh.
+			$entry['dockedFlightId'] = $flight->id;
+		}
 		$hangar->hangarUsage[] = $entry;
 		$hangar->landedThisTurn += $count;
 
-		//Flag the flight removed-from-board. $removedTurn lets replay show the
-		//flight up to and including this turn before it disappears.
-		$flight->removed = true;
-		$flight->removedTurn = $gamedata->turn;
+		if ($partial) {
+			self::disengageFightersForDock($flight, $count, $gamedata);
+		} else {
+			//Flag the flight removed-from-board. $removedTurn lets replay show
+			//the flight up to and including this turn before it disappears.
+			$flight->removed = true;
+			$flight->removedTurn = $gamedata->turn;
+		}
 
 		//Replay note tied to the receiving hangar.
 		$note = new IndividualNote(
@@ -726,12 +750,30 @@ class HangarOps {
 			$carrier->id,
 			$hangar->id,
 			'hangarDockEvent',
-			'Hangar received flight',
-			$flight->id . ':' . $flight->phpclass . ':' . $count
+			$partial ? 'Hangar partial dock' : 'Hangar received flight',
+			$flight->id . ':' . $flight->phpclass . ':' . $count . ($partial ? ':partial' : '')
 		);
 		Manager::insertIndividualNote($note);
 
 		return $count;
+	}
+
+	/* Apply DisengagedFighter critical to $count active Fighter subsystems of
+	 * $flight, in fighter-id order. The crit is flagged updated so it persists
+	 * via getUpdatedCriticals/submitCriticals at the end of FireGamePhase.
+	 */
+	private static function disengageFightersForDock($flight, $count, $gamedata){
+		$applied = 0;
+		foreach ($flight->systems as $fighter) {
+			if ($applied >= $count) break;
+			if (!($fighter instanceof Fighter)) continue;
+			if ($fighter->isDestroyed($gamedata->turn)) continue;   //already disengaged or destroyed
+			$crit = new DisengagedFighter(-1, $flight->id, $fighter->id, "DisengagedFighter", $gamedata->turn);
+			$crit->updated = true;
+			$fighter->criticals[] = $crit;
+			$applied++;
+		}
+		return $applied;
 	}
 
 	/* End-of-turn: walks $hangar->pendingDockOrders, validates each, and lands

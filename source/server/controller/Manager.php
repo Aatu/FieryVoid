@@ -1177,19 +1177,19 @@ class Manager{
 
 
     private static function changeTurn($gamedata){
-    
+
         $gamedata->setTurn( $gamedata->turn+1 );
-        
+
         /* //Old method which only create Deployment Phases on Turn 1.
         if ($gamedata->turn === 1)
         {
-            $gamedata->setPhase(-1); 
+            $gamedata->setPhase(-1);
         }else{
-            $gamedata->setPhase(1); 
+            $gamedata->setPhase(1);
         }
         */
-        //Now we always try and make a Deployment Phase, but slots will be set to skip it in FireGamePhase if they are not are scheduled to deploy.        
-        $gamedata->setPhase(-1); 
+        //Now we always try and make a Deployment Phase, but slots will be set to skip it in FireGamePhase if they are not are scheduled to deploy.
+        $gamedata->setPhase(-1);
 
         $gamedata->setActiveship(-1);
 
@@ -1199,16 +1199,27 @@ class Manager{
         else{
             $gamedata->status = "ACTIVE";
         }
-            
-        self::generateIniative($gamedata);
+
         self::$dbManager->updateGamedata($gamedata);
 
        // if ($gamedata->turn > 1){
          //   self::checkRegen($gamedata);
-        //}   
-               
+        //}
+
+        //Reload AFTER updateGamedata so the freshly-bumped turn/phase are
+        //visible, and AFTER FireGamePhase has finished (which is the caller).
+        //FireGamePhase advance operates on its own local $servergamedata, so
+        //any ship spawned mid-phase (mines via missile.php, launched fighter
+        //flights via Hangar::criticalPhaseEffects, etc.) is absent from the
+        //outer $gamedata->ships. Reloading here ensures those spawned ships
+        //get an iniative entry written for the new turn — otherwise they
+        //load with the default "N/A" iniative next turn and the
+        //SimultaneousMovementRule can't match them to any category, leaving
+        //them visible in OOB but unselectable in the Movement Phase.
         $servergamedata = self::$dbManager->getTacGamedata($gamedata->forPlayer, $gamedata->id);
-        
+
+        self::generateIniative($servergamedata);
+
         foreach ($servergamedata->ships as $key=>$ship){
             $movement = Movement::setPreturnMovementStatusForShip($ship, $servergamedata->turn, $servergamedata);
             self::$dbManager->submitMovement($servergamedata->id, $ship->id, $servergamedata->turn, $movement, true);
