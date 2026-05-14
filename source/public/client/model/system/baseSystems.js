@@ -317,7 +317,7 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		var key = (entry.phpclass && entry.phpclass !== "")
 			? entry.phpclass
 			: ("(" + (entry.hangarType || "unknown") + " slot)");
-		var displayName = entry.shipClass || key;
+		var displayName = entry.displayName || key;
 		if (!byClass[key]) byClass[key] = { name: displayName, count: 0 };
 		byClass[key].count += parseInt(entry.flightSize || 1, 10);
 	}
