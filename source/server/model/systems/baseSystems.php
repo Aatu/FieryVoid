@@ -2966,6 +2966,7 @@ class Hangar extends ShipSystem{
 	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
 	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
 	private $pendingDockTransfer = null;  //dock payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
+	public $pendingDeployStartTransfer = null; //Stage 7: deployment-phase dock payload; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt docked flights from movement validation BEFORE notes are generated.
 
     function __construct($armour, $maxhealth, $output = null, $hangarType = 'fighters', $direction = 0, $spawnableClasses = array()){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the usual combat craft capacity)
@@ -3101,6 +3102,36 @@ class Hangar extends ShipSystem{
 			$this->pendingDockTransfer = null;     //consumed
 		}
 
+		//Stage 7: deployment-phase dock. Unlike launch/dock orders (resolved at
+		//end-of-turn via criticalPhaseEffects in Fire Phase), deploy-start docks
+		//are resolved RIGHT NOW: this hook fires during DeploymentGamePhase::process,
+		//which is the only chance to mutate $hangarUsage before the snapshot is
+		//written below. HangarOps::processDeployStartTransfer validates each
+		//entry, applies the dock (appends to $hangarUsage, marks flight $removed),
+		//writes a hangarDeployStartEvent audit note, and clears the transfer.
+		//
+		//IMPORTANT: $this is the POST-side Hangar (rebuilt from the client's
+		//submission) and has an empty $hangarUsage by default — system objects
+		//are reconstructed from POST data without their persisted individual
+		//notes. Seed from the DB-loaded counterpart hangar so pre-existing
+		//entries (auto-filled shuttles, prior docks) survive the snapshot write
+		//below; otherwise a Stage 7 dock would replace the whole hangar with
+		//just the newly-docked flight.
+		if ($this->pendingDeployStartTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			$dbShip = $gamedata->getShipById($ship->id);
+			if ($dbShip && is_array($dbShip->systems)) {
+				foreach ($dbShip->systems as $dbSys) {
+					if (!($dbSys instanceof Hangar)) continue;
+					if ((int)$dbSys->id !== (int)$this->id) continue;
+					if (is_array($dbSys->hangarUsage)) {
+						$this->hangarUsage = $dbSys->hangarUsage;
+					}
+					break;
+				}
+			}
+			HangarOps::processDeployStartTransfer($this, $ship, $gamedata);
+		}
+
 		//Persist hangarUsage snapshot, but only if it has actually changed
 		//since the last saved snapshot. Stage 4+ docking/launching mutate
 		//$hangarUsage and rely on this to snapshot it.
@@ -3165,22 +3196,27 @@ class Hangar extends ShipSystem{
 		$payload = json_decode($raw, true);
 		if (!is_array($payload) || empty($payload)) return;
 
-		//Two accepted shapes:
-		//  legacy (Stage 4): a list of {phpclass, size}        → all launches
-		//  current (Stage 5): {"launches": [...], "docks": [...]}
-		$launches = array();
-		$docks    = array();
-		//Whether the client EXPLICITLY sent a launches/docks key — distinguishes
+		//Three accepted shapes:
+		//  legacy (Stage 4): a list of {phpclass, size}                    → all launches
+		//  Stage 5:          {"launches": [...], "docks": [...]}
+		//  Stage 7:          + {"deployStarts": [{"flightId": X}, ...]}    → deployment-phase dock orders
+		$launches     = array();
+		$docks        = array();
+		$deployStarts = array();
+		//Whether the client EXPLICITLY sent a launches/docks/deployStarts key — distinguishes
 		//"untouched" (no key) from "intentionally cleared" (key present, empty).
 		//The empty-array case must still create a note so onIndividualNotesLoaded
-		//can replace any prior order from earlier in the same Firing Phase.
-		$hasLaunchKey = false;
-		$hasDockKey   = false;
-		if (array_key_exists('launches', $payload) || array_key_exists('docks', $payload)) {
-			$hasLaunchKey = array_key_exists('launches', $payload);
-			$hasDockKey   = array_key_exists('docks',    $payload);
-			$launches = is_array($payload['launches'] ?? null) ? $payload['launches'] : array();
-			$docks    = is_array($payload['docks']    ?? null) ? $payload['docks']    : array();
+		//can replace any prior order from earlier in the same phase.
+		$hasLaunchKey      = false;
+		$hasDockKey        = false;
+		$hasDeployStartKey = false;
+		if (array_key_exists('launches', $payload) || array_key_exists('docks', $payload) || array_key_exists('deployStarts', $payload)) {
+			$hasLaunchKey      = array_key_exists('launches',     $payload);
+			$hasDockKey        = array_key_exists('docks',        $payload);
+			$hasDeployStartKey = array_key_exists('deployStarts', $payload);
+			$launches     = is_array($payload['launches']     ?? null) ? $payload['launches']     : array();
+			$docks        = is_array($payload['docks']        ?? null) ? $payload['docks']        : array();
+			$deployStarts = is_array($payload['deployStarts'] ?? null) ? $payload['deployStarts'] : array();
 		} else {
 			//assume legacy launch-only payload
 			$launches = $payload;
@@ -3208,6 +3244,16 @@ class Hangar extends ShipSystem{
 			$cleanDocks[] = array('flightId' => $flightId, 'count' => $count);
 		}
 		if ($hasDockKey) $this->pendingDockTransfer = $cleanDocks;
+
+		//Stage 7: sanitise deployStarts: {flightId}
+		$cleanDeployStarts = array();
+		foreach ($deployStarts as $order) {
+			if (!is_array($order)) continue;
+			$flightId = isset($order['flightId']) ? (int)$order['flightId'] : 0;
+			if ($flightId <= 0) continue;
+			$cleanDeployStarts[] = array('flightId' => $flightId);
+		}
+		if ($hasDeployStartKey) $this->pendingDeployStartTransfer = $cleanDeployStarts;
 	}
 
 	public function stripForJson(){

@@ -91,13 +91,47 @@ window.SelectFromShips = function () {
             if (!isBlocked && (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r)) {
                 var selectedName = this.phaseStrategy.selectedShip.name;
                 var deployButton = jQuery(
-                    '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
+                    //'<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
+                    '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + '</div>'                    
                 ).on('click', function () {
                     this.phaseStrategy.onHexClicked(this.payload);
                     this.destroy();
                 }.bind(this));
-                
+
                 this.element.append(deployButton);
+            }
+
+            // Stage 7 (Hangar Ops): if the player has a flight selected and the
+            // clicked ship(s) include a friendly carrier with a hangar that fits
+            // the flight, add a DOCK button per such carrier. Issue 6: this
+            // path AUTO-DOCKS into the first compatible hangar — opening the
+            // multi-flight dialog instead would hide the flight (it filters by
+            // same-hex), so the user wouldn't see anything to confirm.
+            if (this.phaseStrategy.selectedShip.flight && window.DeploymentDock) {
+                this.ships.forEach(function (s) {
+                    if (!s || s.flight) return;
+                    if (!gamedata.isMyShip(s)) return;
+                    if (!window.DeploymentDock.shipHasOpenableDockDialog(s)) return;
+                    //Only show DOCK when this specific flight can actually fit.
+                    var eligible = window.DeploymentDock.eligibleHangarsForFlight(s, this.phaseStrategy.selectedShip);
+                    if (eligible.length === 0) return;
+
+                    var flight = this.phaseStrategy.selectedShip;
+                    var dockButton = jQuery(
+                        '<div class="name-value-button-ally">DOCK ' + flight.name.toUpperCase() + ' IN ' + s.name.toUpperCase() + '</div>'
+                    ).on('click', function () {
+                        //Auto-dock into the first compatible hangar, then
+                        //refresh the UI so the flight icon hides and the
+                        //commit gate updates.
+                        if (window.DeploymentDock.autoQueueDockOnCarrier(s, flight)) {
+                            if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                                window.refreshDeploymentUIForDeployStart();
+                            }
+                        }
+                        this.destroy();
+                    }.bind(this));
+                    this.element.append(dockButton);
+                }, this);
             }
         }
         // ------------------------------------------------------------------

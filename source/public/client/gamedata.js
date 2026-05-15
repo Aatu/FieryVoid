@@ -143,6 +143,10 @@ window.gamedata = {
             var ship = gamedata.ships[i];
 
             if (shipManager.getTurnDeployed(ship) > gamedata.turn) continue;
+            //Stage 7 (Hangar Ops): skip flights queued for deployment-phase dock —
+            //they're going into a hangar, not onto the map, so auto-selecting them
+            //in deployment would be misleading.
+            if (ship.pendingDeployDock) continue;
 
             if (gamedata.isMyShip(ship) && !ship.mine) {
                 return ship;

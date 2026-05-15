@@ -231,12 +231,18 @@ var Hangar = function (json, ship) {
 	//hangarDockOrder note for the current turn).
 	this.pendingLaunchOrders = Array.isArray(this.pendingLaunchOrder) ? this.pendingLaunchOrder.slice() : [];
 	this.pendingDockOrders   = Array.isArray(this.pendingDockOrder)   ? this.pendingDockOrder.slice()   : [];
+	//Stage 7: deploy-start orders are one-shot (resolved immediately on commit
+	//rather than queued like Firing-Phase orders), so there's no server-side
+	//pendingDeployStartOrder to hydrate from — we just track them client-side
+	//for the current Deployment Phase session.
+	this.pendingDeployStartOrders = [];
 	//Dirty flags distinguish "the dialog has touched this since hydration"
 	//from "nothing to send". When a dialog OK leaves the list empty (a
 	//"cancel everything" action), we still need to ship an explicit empty
 	//payload so the server can replace any prior order from this Firing Phase.
-	this.pendingLaunchOrdersDirty = false;
-	this.pendingDockOrdersDirty   = false;
+	this.pendingLaunchOrdersDirty      = false;
+	this.pendingDockOrdersDirty        = false;
+	this.pendingDeployStartOrdersDirty = false;
 	this.refreshHangarTooltip();
 }
 Hangar.prototype = Object.create(ShipSystem.prototype);
@@ -248,29 +254,35 @@ Hangar.prototype.constructor = Hangar;
 // + pendingDockOrders here instead so it survives until serialisation.
 //
 // Payload shape (Stage 5+): {launches: [{phpclass, size}], docks: [{flightId, count}]}.
-// Either array may be empty / omitted; the server-side Hangar::doIndividualNotesTransfer
+// Stage 7 adds: {deployStarts: [{flightId}]}.
+// Any key may be empty / omitted; the server-side Hangar::doIndividualNotesTransfer
 // also accepts the legacy Stage 4 launches-only list shape for safety.
 Hangar.prototype.doIndividualNotesTransfer = function () {
-	// Send IF either side is non-empty OR the dialog explicitly touched it.
+	// Send IF any of the three is non-empty OR the dialog explicitly touched it.
 	// The dirty flag lets a "clear all orders" pass through — without it, the
 	// server would keep replaying the prior turn's launch/dock note.
-	var launchDirty = !!this.pendingLaunchOrdersDirty;
-	var dockDirty   = !!this.pendingDockOrdersDirty;
-	var hasLaunch = launchDirty || (Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0);
-	var hasDock   = dockDirty   || (Array.isArray(this.pendingDockOrders)   && this.pendingDockOrders.length > 0);
-	if (!hasLaunch && !hasDock) {
+	var launchDirty      = !!this.pendingLaunchOrdersDirty;
+	var dockDirty        = !!this.pendingDockOrdersDirty;
+	var deployStartDirty = !!this.pendingDeployStartOrdersDirty;
+	var hasLaunch       = launchDirty      || (Array.isArray(this.pendingLaunchOrders)      && this.pendingLaunchOrders.length      > 0);
+	var hasDock         = dockDirty        || (Array.isArray(this.pendingDockOrders)        && this.pendingDockOrders.length        > 0);
+	var hasDeployStart  = deployStartDirty || (Array.isArray(this.pendingDeployStartOrders) && this.pendingDeployStartOrders.length > 0);
+	if (!hasLaunch && !hasDock && !hasDeployStart) {
 		this.individualNotesTransfer = "";
 		return;
 	}
 	var payload = {};
-	if (hasLaunch) payload.launches = Array.isArray(this.pendingLaunchOrders) ? this.pendingLaunchOrders : [];
-	if (hasDock)   payload.docks    = Array.isArray(this.pendingDockOrders)   ? this.pendingDockOrders   : [];
+	if (hasLaunch)      payload.launches     = Array.isArray(this.pendingLaunchOrders)      ? this.pendingLaunchOrders      : [];
+	if (hasDock)        payload.docks        = Array.isArray(this.pendingDockOrders)        ? this.pendingDockOrders        : [];
+	if (hasDeployStart) payload.deployStarts = Array.isArray(this.pendingDeployStartOrders) ? this.pendingDeployStartOrders : [];
 	this.individualNotesTransfer = JSON.stringify(payload);
 	// Reset state — the next gamedata reload will re-hydrate from the server.
 	this.pendingLaunchOrders = [];
 	this.pendingDockOrders = [];
+	this.pendingDeployStartOrders = [];
 	this.pendingLaunchOrdersDirty = false;
 	this.pendingDockOrdersDirty = false;
+	this.pendingDeployStartOrdersDirty = false;
 };
 
 // "Carrying" and "Stored Craft" lines are recomputed from the live $hangarUsage
@@ -282,9 +294,29 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
+	// Stage 7: include flights queued by the deployment-phase dock dialog so
+	// the player sees the projected post-commit state in the tooltip. The
+	// queued entries are not yet persisted server-side; they materialise into
+	// $hangarUsage on the next reload after commit.
+	var displayEntries = this.hangarUsage.slice();
+	if (Array.isArray(this.pendingDeployStartOrders) && this.pendingDeployStartOrders.length > 0) {
+		for (var q = 0; q < this.pendingDeployStartOrders.length; q++) {
+			var order = this.pendingDeployStartOrders[q];
+			var flight = order && order.flightId != null ? gamedata.getShip(order.flightId) : null;
+			if (!flight) continue;
+			displayEntries.push({
+				phpclass:   flight.phpclass,
+				name:       flight.name,
+				flightSize: parseInt(flight.flightSize || 1, 10),
+				hangarType: this.hangarType,
+				_pending:   true            //local flag so we can mark "(queued)" in the line
+			});
+		}
+	}
+
 	var totalStored = 0;
-	for (var i = 0; i < this.hangarUsage.length; i++) {
-		totalStored += parseInt(this.hangarUsage[i].flightSize || 1, 10);
+	for (var i = 0; i < displayEntries.length; i++) {
+		totalStored += parseInt(displayEntries[i].flightSize || 1, 10);
 	}
 
 	// Effective capacity = maxhealth - damage that got past armour, clamped >= 0.
@@ -306,26 +338,35 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		this.data["Carrying"] = totalStored + " / " + this.maxhealth + " slots";
 	}
 
-	if (this.hangarUsage.length === 0) {
+	if (displayEntries.length === 0) {
 		delete this.data["Stored Craft"];
 		return;
 	}
 
+	// Group docked craft for display. Prefer entry.name (the friendly flight
+	// name like "Aurora-1" or "Shuttle"), falling back to phpclass, then to
+	// a generic slot tag. Bucket by phpclass + pending-flag so launches of the
+	// same fighter type aggregate into one line, but queued docks (pre-commit)
+	// stay visually separated from already-stored craft.
 	var byClass = {};
-	for (var i = 0; i < this.hangarUsage.length; i++) {
-		var entry = this.hangarUsage[i];
-		var key = (entry.phpclass && entry.phpclass !== "")
+	for (var i = 0; i < displayEntries.length; i++) {
+		var entry = displayEntries[i];
+		var phpKey = (entry.phpclass && entry.phpclass !== "")
 			? entry.phpclass
 			: ("(" + (entry.hangarType || "unknown") + " slot)");
-		var displayName = entry.displayName || key;
-		if (!byClass[key]) byClass[key] = { name: displayName, count: 0 };
-		byClass[key].count += parseInt(entry.flightSize || 1, 10);
+		var pendingMarker = entry._pending ? '|pending' : '';
+		var bucketKey = phpKey + pendingMarker;
+		var displayName = entry.displayName
+			|| (entry.name && entry.name !== "" ? entry.name : phpKey);
+		if (!byClass[bucketKey]) {
+			byClass[bucketKey] = { name: displayName, count: 0, pending: !!entry._pending };
+		}
+		byClass[bucketKey].count += parseInt(entry.flightSize || 1, 10);
 	}
 	var lines = [];
 	for (var k in byClass) {
-		var plural = '';
-		if(byClass[k].count > 1) plural = "s";
-		lines.push(byClass[k].count + " " + byClass[k].name) ;
+		var suffix = byClass[k].pending ? ' (queued)' : '';
+		lines.push(byClass[k].count + " x " + byClass[k].name + suffix);
 	}
 	this.data["Stored Craft"] = "<br>" + lines.join("<br>");
 };

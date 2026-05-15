@@ -2165,6 +2165,181 @@ window.confirm = {
             });
             return n;
         }
+    },
+
+    // === Hangar Operations Stage 7: deployment-phase dock dialog ===
+    //
+    // Flow (called from DeploymentPhaseStrategy when player clicks a friendly
+    // hangar ship while flights are pending deployment):
+    //   1. Enumerate same-slot fighter flights that are deploying THIS turn
+    //      and haven't been placed/docked yet.
+    //   2. Show one row per flight with a checkbox + the hangar it would land in.
+    //   3. OK: for each checked flight, queue a pendingDeployStartOrders entry
+    //      on the chosen hangar AND set flight.pendingDeployDock so the client
+    //      validator skips its missing position. Unchecked flights with a
+    //      pre-existing pendingDeployDock get UN-docked atomically.
+    //
+    // On the next dialog open, currently-queued flights show pre-checked so
+    // the player can amend or cancel without re-opening.
+    hangarDeployDock: function hangarDeployDock(carrier) {
+        if (!carrier) return;
+        if (!window.DeploymentDock || typeof window.DeploymentDock.findPendingFlightsForCarrier !== 'function') return;
+        if (typeof window.DeploymentDock.eligibleHangarsForFlight !== 'function') return;
+
+        var pending = window.DeploymentDock.findPendingFlightsForCarrier(carrier);
+
+        // Pre-check flights already queued to THIS carrier (re-edit case).
+        // Build a map: flightId → existing {hangar} so OK can detect "uncheck = cancel".
+        var preCheckedByFlight = new Map();
+        if (Array.isArray(carrier.systems)) {
+            carrier.systems.forEach(function (sys) {
+                if (!sys || sys.name !== 'hangar') return;
+                if (!Array.isArray(sys.pendingDeployStartOrders)) return;
+                sys.pendingDeployStartOrders.forEach(function (o) {
+                    preCheckedByFlight.set(parseInt(o.flightId, 10), { hangar: sys });
+                });
+            });
+        }
+
+        // Anything queued here counts as eligible (it WAS eligible at queue time;
+        // ensure it appears in the re-edit list even if no fresh hangar capacity
+        // remains, since the existing reservation IS its capacity).
+        var pendingIds = new Set(pending.map(function (f) { return parseInt(f.id, 10); }));
+        preCheckedByFlight.forEach(function (_v, flightId) {
+            if (pendingIds.has(flightId)) return;
+            var f = gamedata.getShip(flightId);
+            if (f) pending.push(f);
+        });
+
+        // Stage 7 / Issue 7: open the dialog even when there's nothing actionable,
+        // so the player sees "No Hangar Operations available" rather than the
+        // tooltip silently dropping the click. The empty-state branch below
+        // renders that message and only the Cancel button.
+        var e = $('<div class="confirm error multi-value-confirm hangarDeployDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">Dock flights into ' + carrier.name + '</div>').prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+
+        if (pending.length === 0) {
+            $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">No Hangar Operations available.</span></div>').appendTo(container);
+            //Hide OK — there's nothing to commit. Cancel just closes.
+            $('.confirmok', e).hide();
+            $(".confirmcancel", e).on("click", function () { e.remove(); });
+            e.appendTo("body").fadeIn(250);
+            return;
+        }
+
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Check flights to dock into a hangar bay instead of placing on the map.</span></div>').appendTo(container);
+
+        // Build rows. Track per-flight {row, flight, hangarSelect (or fixed hangar)}.
+        var rowData = [];
+        pending.forEach(function (flight) {
+            var preExisting = preCheckedByFlight.get(parseInt(flight.id, 10));
+            var eligibleHangars = window.DeploymentDock.eligibleHangarsForFlight(carrier, flight);
+
+            // If a queued allocation exists, the queued hangar must remain selectable
+            // even if other rows pre-checked above re-counted capacity. Ensure it
+            // shows up at the top of the list.
+            if (preExisting && preExisting.hangar) {
+                var alreadyListed = eligibleHangars.some(function (h) { return h.hangar === preExisting.hangar; });
+                if (!alreadyListed) {
+                    eligibleHangars.unshift({ hangar: preExisting.hangar, capacity: parseInt(flight.flightSize || 1, 10) });
+                }
+            }
+
+            if (eligibleHangars.length === 0) return;     //no hangar can hold this flight — skip the row
+
+            var size = parseInt(flight.flightSize || 1, 10);
+            var label = flight.name + ' (' + size + ' x ' + flight.shipClass + ')';
+            var row = $('<div class="multi-value-row"></div>');
+            var $check = $('<input type="checkbox" class="deployDockCheck" style="margin-right:8px;">');
+            if (preExisting) $check.prop('checked', true);
+            var $labelSpan = $('<span class="multi-value-label"><span class="multi-value-name"></span></span>');
+            $labelSpan.find('.multi-value-name').text(label);
+            $check.appendTo(row);
+            $labelSpan.appendTo(row);
+
+            // Hangar dropdown (or single static label when only one option).
+            var $hangarPick;
+            if (eligibleHangars.length === 1) {
+                var only = eligibleHangars[0];
+                var hangarName = hangarLabelFor(carrier, only.hangar);
+                row.append($('<span class="multi-value-max"> → ' + hangarName + '</span>'));
+                $hangarPick = null;
+                row.data('chosenHangar', only.hangar);
+            } else {
+                $hangarPick = $('<select class="multi-value-input deployDockHangar"></select>');
+                eligibleHangars.forEach(function (h, i) {
+                    var opt = $('<option></option>').attr('value', i).text(hangarLabelFor(carrier, h.hangar));
+                    if (preExisting && preExisting.hangar === h.hangar) opt.prop('selected', true);
+                    $hangarPick.append(opt);
+                });
+                row.append($('<span class="multi-value-max"> → </span>'));
+                row.append($hangarPick);
+            }
+
+            row.data('flight', flight);
+            row.data('eligibleHangars', eligibleHangars);
+            container.append(row);
+            rowData.push(row);
+        });
+
+        if (rowData.length === 0) {
+            e.remove();
+            return;
+        }
+
+        $(".confirmok", e).on("click", function () {
+            // For each row: if checked, queue (or re-route) the dock; if unchecked,
+            // un-queue via DeploymentDock.unqueueDeployStartDock so the flight
+            // gets its deploy position snapped to the carrier's current hex
+            // (Issue 8). Routing through DeploymentDock keeps queue mutation
+            // and re-deploy logic in one place.
+            rowData.forEach(function ($row) {
+                var flight = $row.data('flight');
+                if (!$row.find('.deployDockCheck').is(':checked')) {
+                    if (flight.pendingDeployDock) {
+                        window.DeploymentDock.unqueueDeployStartDock(flight);
+                    }
+                    return;
+                }
+                var hangar = $row.data('chosenHangar');
+                if (!hangar) {
+                    var idx = parseInt($row.find('.deployDockHangar').val() || 0, 10);
+                    var eligible = $row.data('eligibleHangars');
+                    hangar = eligible[idx].hangar;
+                }
+                //Clear any prior queue (different hangar or different carrier)
+                //before re-queueing on the chosen hangar.
+                if (flight.pendingDeployDock) {
+                    window.DeploymentDock.unqueueDeployStartDock(flight);
+                }
+                queueDeployStartOrder(hangar, flight, carrier);
+            });
+
+            e.remove();
+            if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                window.refreshDeploymentUIForDeployStart();
+            }
+        });
+        $(".confirmcancel", e).on("click", function () { e.remove(); });
+        e.appendTo("body").fadeIn(250);
+
+        function hangarLabelFor(carrier, hangar) {
+            // If the carrier has more than one hangar, disambiguate by order.
+            var hangars = carrier.systems.filter(function (s) { return s && s.name === 'hangar'; });
+            if (hangars.length <= 1) return 'Hangar';
+            var idx = hangars.indexOf(hangar);
+            return 'Hangar ' + (idx + 1);
+        }
+
+        function queueDeployStartOrder(hangar, flight, carrier) {
+            if (!Array.isArray(hangar.pendingDeployStartOrders)) hangar.pendingDeployStartOrders = [];
+            hangar.pendingDeployStartOrders.push({ flightId: parseInt(flight.id, 10) });
+            hangar.pendingDeployStartOrdersDirty = true;
+            // Mark the flight so the client validator skips its missing position
+            // and the deployment list reflects "this is going to a hangar."
+            flight.pendingDeployDock = { carrierId: parseInt(carrier.id, 10), hangarId: parseInt(hangar.id, 10) };
+        }
     }
 
 };

@@ -874,6 +874,146 @@ class HangarOps {
 		return $count;
 	}
 
+	/* === Stage 7: deployment-phase dock ================================== */
+
+	/* Resolve queued deployment-phase dock orders for a hangar.
+	 *
+	 * Unlike Fire-Phase docks (resolved at end-of-turn via criticalPhaseEffects),
+	 * deploy-start docks are resolved immediately during DeploymentGamePhase::process
+	 * — generateIndividualNotes invokes this so the resulting $hangarUsage
+	 * mutation is included in the same hangarUsage snapshot the loop is about
+	 * to write. The flight ship row is committed in the same request, so by
+	 * the next request load the docked flight will be hidden via the existing
+	 * dockedFlightId → $removed restoration in Hangar::onIndividualNotesLoaded.
+	 *
+	 * Failed entries are silently dropped with a hangarDeployStartEvent fail note.
+	 */
+	public static function processDeployStartTransfer($hangar, $carrier, $gamedata){
+		if (empty($hangar->pendingDeployStartTransfer)) {
+			$hangar->pendingDeployStartTransfer = null;
+			return;
+		}
+
+		foreach ($hangar->pendingDeployStartTransfer as $entry) {
+			$flightId = isset($entry['flightId']) ? (int)$entry['flightId'] : 0;
+			$flight   = ($flightId > 0) ? $gamedata->getShipById($flightId) : null;
+			$reason   = null;
+			if (!$flight || !self::canDeployStartDock($hangar, $carrier, $flight, $gamedata, $reason)) {
+				$failNote = new IndividualNote(
+					-1,
+					$gamedata->id,
+					$gamedata->turn,
+					$gamedata->phase,
+					$carrier->id,
+					$hangar->id,
+					'hangarDeployStartEvent',
+					'Hangar deploy-start dock failed',
+					'fail:' . $flightId . ':' . ($reason ?? 'unknown')
+				);
+				Manager::insertIndividualNote($failNote);
+				continue;
+			}
+			self::performDeployStartDock($hangar, $carrier, $flight, $gamedata);
+		}
+
+		$hangar->pendingDeployStartTransfer = null;   //consumed
+	}
+
+	/* Returns true if $flight can be docked into $hangar on $carrier during
+	 * Deployment Phase. Lighter rules than canShipReceive (no same-hex/heading
+	 * check — flight isn't placed yet, carrier may or may not be):
+	 *   - Both ships belong to the same player slot
+	 *   - Flight is a FighterFlight that isn't already removed/destroyed
+	 *   - Flight is deploying THIS turn (not a previously-deployed flight)
+	 *   - Carrier hangar isn't destroyed and has compatible free boxes for the
+	 *     flight's full size
+	 */
+	public static function canDeployStartDock($hangar, $carrier, $flight, $gamedata, &$reason = null){
+		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
+		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
+		if ($hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
+		if ($carrier->isDestroyed() || $carrier->removed) { $reason = 'carrier not in play'; return false; }
+
+		if ((int)$flight->slot !== (int)$carrier->slot) { $reason = 'slot mismatch'; return false; }
+		if ((int)$flight->userid !== (int)$carrier->userid) { $reason = 'owner mismatch'; return false; }
+
+		if ($flight->getTurnDeployed($gamedata) != $gamedata->turn) {
+			$reason = 'flight not deploying this turn'; return false;
+		}
+
+		//Whole flight goes into the hangar — partial deploy-dock isn't a thing
+		//(the player hasn't placed any of the flight yet).
+		$size = (int)$flight->flightSize;
+		if ($size <= 0) { $reason = 'flight has no craft'; return false; }
+
+		$category = self::trueSizeOf($flight);
+		$free = self::freeBoxesByCategory($hangar, $category);
+		if ($free < $size) { $reason = 'hangar full'; return false; }
+
+		return true;
+	}
+
+	/* Move $flight from "deploying to map" into $hangar's storage.
+	 * Mirrors performLand's full-dock branch — stash entry carries
+	 * dockedFlightId so a later launch (Stage 4) can resurrect this ship row.
+	 *
+	 * Mutates: $hangar->hangarUsage, $flight->removed/$flight->removedTurn.
+	 * Writes a hangarDeployStartEvent note for replay/audit.
+	 */
+	public static function performDeployStartDock($hangar, $carrier, $flight, $gamedata){
+		$count = (int)$flight->flightSize;
+		$category = self::trueSizeOf($flight);
+
+		$hangar->hangarUsage[] = array(
+			'phpclass'       => $flight->phpclass,
+			'name'           => $flight->name,
+			'flightSize'     => $count,
+			'hangarType'     => $category,
+			'dockedTurn'     => $gamedata->turn,
+			'dockedFlightId' => $flight->id,
+		);
+
+		//Flag removed-from-board. Loaders re-apply this via dockedFlightId, but
+		//setting it here keeps the current request's downstream consumers (e.g.
+		//the movement-insertion loop in DeploymentGamePhase) aware that the
+		//flight isn't on the board.
+		$flight->removed = true;
+		$flight->removedTurn = $gamedata->turn;
+
+		$note = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$carrier->id,
+			$hangar->id,
+			'hangarDeployStartEvent',
+			'Hangar received flight (deployment)',
+			$flight->id . ':' . $flight->phpclass . ':' . $count
+		);
+		Manager::insertIndividualNote($note);
+	}
+
+	/* Collect flight IDs queued for deployment-phase dock across every hangar
+	 * on every ship in $ships. Used by DeploymentGamePhase::validateDeployment
+	 * to exempt docked flights from the "must have a deploy MovementOrder"
+	 * check — they don't get placed on the board.
+	 */
+	public static function collectQueuedDeployStartFlightIds(array $ships){
+		$ids = array();
+		foreach ($ships as $ship) {
+			if (!isset($ship->systems) || !is_array($ship->systems)) continue;
+			foreach ($ship->systems as $sys) {
+				if (!($sys instanceof Hangar)) continue;
+				if (empty($sys->pendingDeployStartTransfer)) continue;
+				foreach ($sys->pendingDeployStartTransfer as $entry) {
+					if (isset($entry['flightId'])) $ids[(int)$entry['flightId']] = true;
+				}
+			}
+		}
+		return $ids;
+	}
+
 	/* Apply DisengagedFighter critical to $count active Fighter subsystems of
 	 * $flight, in fighter-id order. The crit is flagged updated so it persists
 	 * via getUpdatedCriticals/submitCriticals at the end of FireGamePhase.

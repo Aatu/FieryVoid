@@ -810,6 +810,11 @@ window.shipManager = {
             var ship2 = gamedata.ships[i];
 
             if (shipManager.isDestroyed(ship2)) continue;
+            //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock is
+            //logically inside a carrier's hangar, not on the board. Skip it for
+            //hex occupancy so the carrier can move back to the original dock
+            //hex without the (invisible) flight blocking placement.
+            if (ship2.pendingDeployDock) continue;
 
             //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
             // NO LONGER REQUIRED - Overridden by explicit isBlocked rules in Deployment Phase.
@@ -1001,6 +1006,10 @@ window.shipManager = {
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
         if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
         if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
+        //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock isn't on the
+        //board — its icon should be hidden until either the dock is cancelled or the
+        //next reload (which sets ship.removed via the persisted hangarUsage snapshot).
+        if (ship.pendingDeployDock) return true;
         return false;
     },
 
