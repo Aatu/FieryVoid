@@ -365,7 +365,7 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	}
 	var lines = [];
 	for (var k in byClass) {
-		var suffix = byClass[k].pending ? ' (queued)' : '';
+		var suffix = byClass[k].pending ? ' (Deploying)' : '';
 		lines.push(byClass[k].count + " x " + byClass[k].name + suffix);
 	}
 	this.data["Stored Craft"] = "<br>" + lines.join("<br>");
