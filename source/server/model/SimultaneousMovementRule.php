@@ -75,6 +75,7 @@ class SimultaneousMovementRule implements JsonSerializable {
 
             if ($this->hasShipsAtIniative($gameData, $category)) {
                 $ships = array_filter($gameData->ships, function($ship) use ($iniative, $category) {
+                    //isDestroyed() also covers Hangar Ops $removed flights — see BaseShip::isDestroyed
                     return $ship->iniative == $category && !$ship->isDestroyed();
                 });
 
@@ -107,11 +108,12 @@ class SimultaneousMovementRule implements JsonSerializable {
     }
 
 private function hasShipsAtIniative(TacGamedata $gameData, $iniative) {
+    //isDestroyed() also covers Hangar Ops $removed flights — see BaseShip::isDestroyed
     return count(array_filter($gameData->ships, function($ship) use ($iniative, $gameData) {
-        return $ship->iniative == $iniative 
-            && !$ship->isDestroyed() 
+        return $ship->iniative == $iniative
+            && !$ship->isDestroyed()
             && !$ship->isTerrain()
-            && !$ship->mine 
+            && !$ship->mine
             && $ship->getTurnDeployed($gameData) <= $gameData->turn;
     })) > 0;
 }

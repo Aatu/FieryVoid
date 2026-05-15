@@ -460,6 +460,13 @@ class FighterFlight extends BaseShip
 
     public function isDestroyed($turn = false)
     {
+        //Hangar Ops Stage 7: a docked flight is "removed" — treat it as
+        //destroyed for filtering purposes (target lists, fleet iteration,
+        //weapon scans like PulsarMine, etc.) so the broad isDestroyed
+        //call surface transparently skips docked flights. See
+        //BaseShip::isDestroyed for the full rationale.
+        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return true;
+
         foreach ($this->systems as $system) {
             if (!$system->isDestroyed($turn) && !$system->isDisengaged($turn)) {
                 return false;

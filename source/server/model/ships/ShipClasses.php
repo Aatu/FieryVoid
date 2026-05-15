@@ -1920,6 +1920,17 @@ public function getAllEWExceptDEW($turn){
 
 
     public function isDestroyed($turn = false){
+        //Hangar Ops Stage 7: a docked flight has $removed=true; treat as
+        //destroyed for filtering purposes so the 379+ isDestroyed callsites
+        //(target lists, fleet iteration, hex occupancy, weapon scans like
+        //PulsarMine, etc.) transparently skip docked flights without each
+        //needing a !$removed check. Destruction explosions are gated on
+        //damageManager::getTurnDestroyed (turn-of-damage record), not on
+        //isDestroyed(), so no false explosions fire for docked flights.
+        //Mirrors the client-side shipManager.isDestroyed which has done the
+        //same since Stage 5; the server was the outlier.
+        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return true;
+
         foreach($this->systems as $system){
 			/*18.02.2023: now dying Reactor will destroy PRIMARY Structure as well, so no point in checking directly for Reactor destruction (this avoids infinite loops, too)
             if ($system instanceof Reactor && $system->isDestroyed($turn)){
@@ -1936,12 +1947,11 @@ public function getAllEWExceptDEW($turn){
     }
 
     /* Returns true when the unit is still in play (not destroyed, not removed-by-docking).
-     * Hangar Ops Stage 5: docked flights have $removed=true but $isDestroyed()=false so they
-     * stay in gamedata for replay; callers that mean "is this ship on the board" should use
-     * isOnBoard() rather than chaining !isDestroyed() everywhere.
+     * Stage 5 alias retained for self-documenting call sites; isDestroyed() now folds in the
+     * $removed check (Stage 7), so this is just `!isDestroyed($turn)` — kept as a positive
+     * predicate for readability where "is this ship on the board?" is the question being asked.
      */
     public function isOnBoard($turn = false){
-        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return false;
         return !$this->isDestroyed($turn);
     }
 
@@ -3189,6 +3199,11 @@ class StarBase extends BaseShip{
 
 
     public function isDestroyed($turn = false){
+        //Hangar Ops Stage 7: see BaseShip::isDestroyed for rationale — bases
+        //don't dock, so this branch is essentially dead, but stays consistent
+        //with the parent contract in case a future base-class carrier appears.
+        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return true;
+
         foreach($this->systems as $system){
             if ($system instanceof Reactor && $system->location == 0 &&  $system->isDestroyed($turn)){
                 return true;

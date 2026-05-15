@@ -2968,7 +2968,7 @@ class Hangar extends ShipSystem{
 	private $pendingDockTransfer = null;  //dock payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
 	public $pendingDeployStartTransfer = null; //Stage 7: deployment-phase dock payload; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt docked flights from movement validation BEFORE notes are generated.
 
-    function __construct($armour, $maxhealth, $output = null, $hangarType = 'fighters', $direction = 0, $spawnableClasses = array()){
+    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters',  $spawnableClasses = array()){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the usual combat craft capacity)
 			//$output = floor($maxhealth/6)*6;
 			$output = 6;

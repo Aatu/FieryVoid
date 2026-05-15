@@ -1864,9 +1864,9 @@ window.confirm = {
         }
         if (hangars.length === 0) return;
 
-        // Reuse askForMultipleValues styling (multi-value-confirm) so the rows
-        // are positioned by the existing CSS instead of fighting it.
-        var e = $('<div class="confirm error multi-value-confirm hangarLaunch"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        // Reuse askForMultipleValues row/input styling (multi-value-confirm)
+        // and layer hangar-confirm on top for the steel/cyan hangar theme.
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarLaunch"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
         $('<div class="multi-value-header">Launch fighters/shuttles from ' + ship.name + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
@@ -2066,7 +2066,7 @@ window.confirm = {
             ? 'Dock ' + flight.name + ' (' + flightCount + ' craft) into ' + carriers[0].ship.name
             : 'Dock ' + flight.name + ' (' + flightCount + ' craft) — allocate across carriers';
 
-        var e = $('<div class="confirm error multi-value-confirm hangarDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
         $('<div class="multi-value-header">' + headerText + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
@@ -2194,7 +2194,7 @@ window.confirm = {
         if (!flight || !Array.isArray(carriers) || carriers.length === 0) return;
         if (!window.DeploymentDock || typeof window.DeploymentDock.autoQueueDockOnCarrier !== 'function') return;
 
-        var e = $('<div class="confirm error multi-value-confirm hangarDeployCarrierPicker"><div class="ui"><div class="confirmcancel"></div></div></div>');
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarDeployCarrierPicker"><div class="ui"><div class="confirmcancel"></div></div></div>');
         $('<div class="multi-value-header">Dock ' + flight.name + ' — choose carrier</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
         $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Pick which carrier the flight should dock into.</span></div>').appendTo(container);
@@ -2261,7 +2261,7 @@ window.confirm = {
         // so the player sees "No Hangar Operations available" rather than the
         // tooltip silently dropping the click. The empty-state branch below
         // renders that message and only the Cancel button.
-        var e = $('<div class="confirm error multi-value-confirm hangarDeployDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarDeployDock"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
         $('<div class="multi-value-header">Dock flights into ' + carrier.name + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
@@ -2275,6 +2275,45 @@ window.confirm = {
         }
 
         $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Check flights to dock into a hangar bay instead of placing on the map.</span></div>').appendTo(container);
+
+        //Live per-hangar capacity readout. Recomputed on every checkbox/dropdown
+        //change so the player sees overflow before pressing OK. Without this the
+        //independent per-row eligibility checks at dialog open let the player
+        //queue multiple flights that each individually fit but together exceed
+        //the hangar — the server then silently dropped the overflow with a fail
+        //note, leaving the player confused about why fewer fighters docked.
+        var $capacityHeader = $('<div class="multi-value-row hangarCapacityHeader" style="font-style:italic;"></div>');
+        container.append($capacityHeader);
+
+        //Base free per hangar (treats reservations from flights NOT in the
+        //dialog as committed; reservations from flights IN the dialog are
+        //reclaimable since the dialog will replace them on OK).
+        var rowFlightIds = new Set(pending.map(function (f) { return parseInt(f.id, 10); }));
+        var baseFreeByHangar = new Map();
+        carrier.systems.forEach(function (sys) {
+            if (!sys || sys.name !== 'hangar') return;
+            if (shipManager.systems.isDestroyed(carrier, sys)) return;
+            var netDamage = 0;
+            if (Array.isArray(sys.damage)) {
+                sys.damage.forEach(function (d) {
+                    netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
+                });
+            }
+            var effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+            var committed = 0;
+            if (Array.isArray(sys.hangarUsage)) {
+                sys.hangarUsage.forEach(function (entry) { committed += parseInt(entry.flightSize || 1, 10); });
+            }
+            if (Array.isArray(sys.pendingDeployStartOrders)) {
+                sys.pendingDeployStartOrders.forEach(function (o) {
+                    var fid = parseInt(o.flightId, 10);
+                    if (rowFlightIds.has(fid)) return;     //in dialog → reclaimable, don't double-count
+                    var f = gamedata.getShip(fid);
+                    if (f) committed += parseInt(f.flightSize || 1, 10);
+                });
+            }
+            baseFreeByHangar.set(sys.id, Math.max(0, effective - committed));
+        });
 
         // Build rows. Track per-flight {row, flight, hangarSelect (or fixed hangar)}.
         var rowData = [];
@@ -2325,6 +2364,9 @@ window.confirm = {
 
             row.data('flight', flight);
             row.data('eligibleHangars', eligibleHangars);
+            //Recompute aggregate usage whenever this row's check or destination changes.
+            $check.on('change', recomputeCapacity);
+            if ($hangarPick) $hangarPick.on('change', recomputeCapacity);
             container.append(row);
             rowData.push(row);
         });
@@ -2334,7 +2376,25 @@ window.confirm = {
             return;
         }
 
+        recomputeCapacity();      //seed the header with the pre-checked state on open
+
         $(".confirmok", e).on("click", function () {
+            //Issue 1: aggregate the user's selections per hangar and reject if
+            //any hangar would be overfilled. Without this guard each row's
+            //independent eligibility check at open time lets the player check
+            //more flights than will fit (e.g. three 6-fighter flights into a
+            //single 12-box hangar); the server silently drops the overflow.
+            var perHangar = computePerHangarUsage();
+            var overflow = [];
+            perHangar.forEach(function (used, hangarId) {
+                var avail = baseFreeByHangar.get(hangarId) || 0;
+                if (used > avail) overflow.push(hangarLabelByIdFor(carrier, hangarId) + ' (' + used + '/' + avail + ')');
+            });
+            if (overflow.length > 0) {
+                alert('Cannot dock: capacity exceeded in ' + overflow.join(', ') + '. Uncheck flights or pick a different hangar.');
+                return;
+            }
+
             // For each row: if checked, queue (or re-route) the dock; if unchecked,
             // un-queue via DeploymentDock.unqueueDeployStartDock so the flight
             // gets its deploy position snapped to the carrier's current hex
@@ -2373,6 +2433,44 @@ window.confirm = {
                 window.selectShipInDeploymentPhase(carrier);
             }
         });
+
+        function computePerHangarUsage() {
+            var perHangar = new Map();
+            rowData.forEach(function ($row) {
+                if (!$row.find('.deployDockCheck').is(':checked')) return;
+                var flight = $row.data('flight');
+                var hangar = $row.data('chosenHangar');
+                if (!hangar) {
+                    var idx = parseInt($row.find('.deployDockHangar').val() || 0, 10);
+                    var eligible = $row.data('eligibleHangars');
+                    if (!eligible || !eligible[idx]) return;
+                    hangar = eligible[idx].hangar;
+                }
+                var size = parseInt(flight.flightSize || 1, 10);
+                perHangar.set(hangar.id, (perHangar.get(hangar.id) || 0) + size);
+            });
+            return perHangar;
+        }
+
+        function recomputeCapacity() {
+            var perHangar = computePerHangarUsage();
+            var parts = [];
+            var anyOverflow = false;
+            //Walk hangars in declared order so the readout matches the dropdown labels.
+            carrier.systems.forEach(function (sys) {
+                if (!sys || sys.name !== 'hangar') return;
+                if (!baseFreeByHangar.has(sys.id)) return;
+                var avail = baseFreeByHangar.get(sys.id);
+                var used = perHangar.get(sys.id) || 0;
+                var color = (used > avail) ? '#ff5050' : (used > 0 ? '#ffff80' : '#bdbdbd');
+                if (used > avail) anyOverflow = true;
+                parts.push('<span style="color:' + color + ';">' + hangarLabelFor(carrier, sys) + ': ' + used + '/' + avail + '</span>');
+            });
+            $capacityHeader.html('Hangar capacity: ' + (parts.length ? parts.join(' &middot; ') : '<span style="color:#bdbdbd;">none</span>'));
+            //Visual cue on OK button when overflowing — leave it clickable so the
+            //alert above can explain WHICH hangar is over (clearer than greying it out).
+            $('.confirmok', e).css('opacity', anyOverflow ? 0.6 : 1);
+        }
         $(".confirmcancel", e).on("click", function () { e.remove(); });
         e.appendTo("body").fadeIn(250);
 
@@ -2382,6 +2480,14 @@ window.confirm = {
             if (hangars.length <= 1) return 'Hangar';
             var idx = hangars.indexOf(hangar);
             return 'Hangar ' + (idx + 1);
+        }
+
+        function hangarLabelByIdFor(carrier, hangarId) {
+            for (var i = 0; i < carrier.systems.length; i++) {
+                var sys = carrier.systems[i];
+                if (sys && sys.name === 'hangar' && sys.id === hangarId) return hangarLabelFor(carrier, sys);
+            }
+            return 'Hangar';
         }
 
         function queueDeployStartOrder(hangar, flight, carrier) {

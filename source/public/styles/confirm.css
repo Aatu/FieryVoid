@@ -405,3 +405,48 @@
     opacity: 0.8;
     /*margin-left: 5px;*/
 }
+
+/* === Hangar Operations dialogs ============================================
+   Steel/cyan theme for the four hangar confirm windows (Launch / Dock /
+   DeployDock / DeployCarrierPicker). Layered on top of .multi-value-confirm
+   so row/input layout is inherited; only the colour palette differs.
+   Selector specificity (0,3,0) beats the base (0,2,0) so these always win. */
+.confirm.multi-value-confirm.hangar-confirm {
+    background: #001218;
+    border: 3px solid #1f6f8b;
+    box-shadow: 0 0 8px rgba(88, 199, 230, 0.35);
+    color: #C9F0FF;
+    min-width: 500px;    
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-header {
+    color: #58c7e6;
+    text-shadow: 0 0 5px rgba(88, 199, 230, 0.5);
+    border-bottom: 1px solid rgba(31, 111, 139, 0.6);
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-row:hover {
+    background: rgba(88, 199, 230, 0.08);
+    border-color: #1f6f8b;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-label,
+.confirm.multi-value-confirm.hangar-confirm .multi-value-name,
+.confirm.multi-value-confirm.hangar-confirm .multi-value-max {
+    color: #C9F0FF;
+    margin-right: 10px;       
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input {
+    background: #03161f;
+    border: 1px solid #1f6f8b;
+    color: #ffffff;
+    min-width: 100px; 
+    margin-left: 10px;     
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input:focus {
+    border-color: #58c7e6;
+    box-shadow: 0 0 10px rgba(88, 199, 230, 0.6);
+    background: #000;
+}
