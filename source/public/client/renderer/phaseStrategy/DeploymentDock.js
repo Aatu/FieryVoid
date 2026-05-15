@@ -369,6 +369,24 @@ window.DeploymentDock = (function () {
 //      icons stay stale until the next gamedata refresh).
 //   3. Refresh each touched hangar's tooltip so the "Carrying" / "Stored Craft"
 //      lines show the queued flights right away.
+// Switch the currently-selected ship in the active phase strategy. Used after
+// a successful dock so the player isn't left holding a now-invisible flight as
+// the selectedShip — instead, focus moves to the carrier so the next action
+// (move it, dock more flights, end deployment) reads naturally.
+window.selectShipInDeploymentPhase = function (ship) {
+    if (!ship) return;
+    try {
+        var ps = window.webglScene && window.webglScene.phaseDirector
+            ? window.webglScene.phaseDirector.phaseStrategy
+            : null;
+        if (ps && typeof ps.setSelectedShip === 'function') {
+            //setSelectedShip already calls deselectShip on the prior selectedShip
+            //via the base PhaseStrategy implementation.
+            ps.setSelectedShip(ship);
+        }
+    } catch (e) { /* fail-soft */ }
+};
+
 window.refreshDeploymentUIForDeployStart = function () {
     //Step 1: re-evaluate commit-button readiness via the existing global helper.
     if (typeof window.validateAllDeploymentGlobal === 'function'

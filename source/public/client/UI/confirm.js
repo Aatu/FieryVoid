@@ -2181,6 +2181,52 @@ window.confirm = {
     //
     // On the next dialog open, currently-queued flights show pre-checked so
     // the player can amend or cancel without re-opening.
+    // Issue 6: when the player clicks "DOCK flight" in the SelectFromShips
+    // picker and there's more than one eligible carrier in the hex, this
+    // sub-picker dialog lets them choose which carrier to dock with. Mirrors
+    // the Firing-Phase carrier picker (SelectFromShips uses for that) but does
+    // not allow splitting the flight — the player picks ONE carrier and the
+    // whole flight goes into that carrier's first compatible hangar.
+    //
+    // $carriers is an array of {ship, hangars:[{hangar, capacity}, ...]} as
+    // produced by SelectFromShips' eligible-carrier collector.
+    hangarDeployDockCarrierPicker: function hangarDeployDockCarrierPicker(flight, carriers) {
+        if (!flight || !Array.isArray(carriers) || carriers.length === 0) return;
+        if (!window.DeploymentDock || typeof window.DeploymentDock.autoQueueDockOnCarrier !== 'function') return;
+
+        var e = $('<div class="confirm error multi-value-confirm hangarDeployCarrierPicker"><div class="ui"><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">Dock ' + flight.name + ' — choose carrier</div>').prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Pick which carrier the flight should dock into.</span></div>').appendTo(container);
+
+        carriers.forEach(function (entry) {
+            var carrier = entry.ship;
+            //Sum free boxes across the carrier's eligible hangars for the readout.
+            var totalCapacity = 0;
+            entry.hangars.forEach(function (h) { totalCapacity += parseInt(h.capacity || 0, 10); });
+            var size = parseInt(flight.flightSize || 1, 10);
+
+            var row = $('<div class="multi-value-row"></div>');
+            var btn = $('<div class="name-value-button-ally" style="flex:1;">DOCK IN ' + carrier.name.toUpperCase() + ' (' + size + '/' + totalCapacity + ' boxes)</div>');
+            btn.on('click', function () {
+                if (window.DeploymentDock.autoQueueDockOnCarrier(carrier, flight)) {
+                    e.remove();
+                    if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                        window.refreshDeploymentUIForDeployStart();
+                    }
+                    if (typeof window.selectShipInDeploymentPhase === 'function') {
+                        window.selectShipInDeploymentPhase(carrier);
+                    }
+                }
+            });
+            row.append(btn);
+            container.append(row);
+        });
+
+        $(".confirmcancel", e).on("click", function () { e.remove(); });
+        e.appendTo("body").fadeIn(250);
+    },
+
     hangarDeployDock: function hangarDeployDock(carrier) {
         if (!carrier) return;
         if (!window.DeploymentDock || typeof window.DeploymentDock.findPendingFlightsForCarrier !== 'function') return;
@@ -2319,6 +2365,12 @@ window.confirm = {
             e.remove();
             if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
                 window.refreshDeploymentUIForDeployStart();
+            }
+            //Issue 2: after the dock commits, the selected flight may now be
+            //invisible/inside the hangar — switch focus to the carrier so the
+            //player can immediately move it or dock more flights.
+            if (typeof window.selectShipInDeploymentPhase === 'function') {
+                window.selectShipInDeploymentPhase(carrier);
             }
         });
         $(".confirmcancel", e).on("click", function () { e.remove(); });

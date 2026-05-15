@@ -102,36 +102,54 @@ window.SelectFromShips = function () {
             }
 
             // Stage 7 (Hangar Ops): if the player has a flight selected and the
-            // clicked ship(s) include a friendly carrier with a hangar that fits
-            // the flight, add a DOCK button per such carrier. Issue 6: this
-            // path AUTO-DOCKS into the first compatible hangar — opening the
-            // multi-flight dialog instead would hide the flight (it filters by
-            // same-hex), so the user wouldn't see anything to confirm.
+            // clicked ship(s) include friendly carriers with hangars that fit
+            // the flight, expose a single DOCK button. If exactly one carrier
+            // is eligible, clicking it auto-docks into that carrier's first
+            // compatible hangar. If multiple carriers are eligible (Issue 6),
+            // clicking opens a sub-picker dialog so the player picks which
+            // carrier — mirrors the Firing-Phase Dock flow, minus splitting.
             if (this.phaseStrategy.selectedShip.flight && window.DeploymentDock) {
+                var flight = this.phaseStrategy.selectedShip;
+                var eligibleCarriers = [];
                 this.ships.forEach(function (s) {
                     if (!s || s.flight) return;
                     if (!gamedata.isMyShip(s)) return;
                     if (!window.DeploymentDock.shipHasOpenableDockDialog(s)) return;
-                    //Only show DOCK when this specific flight can actually fit.
-                    var eligible = window.DeploymentDock.eligibleHangarsForFlight(s, this.phaseStrategy.selectedShip);
+                    var eligible = window.DeploymentDock.eligibleHangarsForFlight(s, flight);
                     if (eligible.length === 0) return;
+                    eligibleCarriers.push({ ship: s, hangars: eligible });
+                });
 
-                    var flight = this.phaseStrategy.selectedShip;
-                    var dockButton = jQuery(
-                        '<div class="name-value-button-ally">DOCK ' + flight.name.toUpperCase() + ' IN ' + s.name.toUpperCase() + '</div>'
-                    ).on('click', function () {
-                        //Auto-dock into the first compatible hangar, then
-                        //refresh the UI so the flight icon hides and the
-                        //commit gate updates.
-                        if (window.DeploymentDock.autoQueueDockOnCarrier(s, flight)) {
-                            if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
-                                window.refreshDeploymentUIForDeployStart();
+                if (eligibleCarriers.length > 0) {
+                    var label;
+                    if (eligibleCarriers.length === 1) {
+                        label = 'DOCK ' + flight.name.toUpperCase() + ' IN ' + eligibleCarriers[0].ship.name.toUpperCase();
+                    } else {
+                        label = 'DOCK ' + flight.name.toUpperCase() + ' (' + eligibleCarriers.length + ' CARRIERS AVAILABLE)';
+                    }
+                    var dockButton = jQuery('<div class="name-value-button-ally">' + label + '</div>')
+                        .on('click', function () {
+                            if (eligibleCarriers.length === 1) {
+                                var carrier = eligibleCarriers[0].ship;
+                                if (window.DeploymentDock.autoQueueDockOnCarrier(carrier, flight)) {
+                                    if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                                        window.refreshDeploymentUIForDeployStart();
+                                    }
+                                    //Issue 2: hand selection over to the carrier
+                                    //so the now-invisible flight isn't lingering
+                                    //as the selectedShip.
+                                    if (typeof window.selectShipInDeploymentPhase === 'function') {
+                                        window.selectShipInDeploymentPhase(carrier);
+                                    }
+                                }
+                            } else if (window.confirm
+                                && typeof window.confirm.hangarDeployDockCarrierPicker === 'function') {
+                                window.confirm.hangarDeployDockCarrierPicker(flight, eligibleCarriers);
                             }
-                        }
-                        this.destroy();
-                    }.bind(this));
+                            this.destroy();
+                        }.bind(this));
                     this.element.append(dockButton);
-                }, this);
+                }
             }
         }
         // ------------------------------------------------------------------
