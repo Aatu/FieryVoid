@@ -259,7 +259,7 @@ window.DeploymentPhaseStrategy = function () {
                         window.confirm.hangarDeployDock(ship);
                     }
                 },
-                "Dock pending flight in hangar"
+                "Deploy Flights in Hangar"
             );
         }
 
