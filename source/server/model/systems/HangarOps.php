@@ -274,8 +274,14 @@ class HangarOps {
 	 * in stored order. For partial-flight evictions (e.g. damage=2 from a
 	 * stored 6-fighter flight), the record's $flightSize is reduced rather
 	 * than the whole record dropped.
+	 *
+	 * When $gamedata is passed and an evicted entry has dockedFlightId, the
+	 * same number of active Fighter subsystems are disengaged in the source
+	 * flight so its rendered combat value drops to match. Without this sync
+	 * the source flight stays at 100% even though its stored craft were
+	 * destroyed by hangar damage.
 	 */
-	public static function evictCraftFromHangar($hangar, $count){
+	public static function evictCraftFromHangar($hangar, $count, $gamedata = null){
 		if ($count <= 0 || empty($hangar->hangarUsage)) return 0;
 
 		$indexed = array();
@@ -294,8 +300,15 @@ class HangarOps {
 		foreach ($indexed as $row){
 			if ($evicted >= $count) break;
 			$idx = $row['idx'];
-			$available = (int)($hangar->hangarUsage[$idx]['flightSize'] ?? 1);
+			$entry = $hangar->hangarUsage[$idx];
+			$available = (int)($entry['flightSize'] ?? 1);
 			$take = min($available, $count - $evicted);
+			if ($gamedata !== null && isset($entry['dockedFlightId']) && $take > 0) {
+				$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
+				if ($flight instanceof FighterFlight) {
+					self::disengageFighters($flight, $take, $gamedata);
+				}
+			}
 			$hangar->hangarUsage[$idx]['flightSize'] = $available - $take;
 			$evicted += $take;
 		}
@@ -322,13 +335,30 @@ class HangarOps {
 	/* End-of-turn hook for a single Hangar — drop stored craft to fit
 	 * remaining capacity, and reset per-turn launch/land counters.
 	 * Called from Hangar::criticalPhaseEffects.
+	 *
+	 * $ship/$gamedata are optional for backwards compatibility but should
+	 * be passed whenever available so eviction of dockedFlightId stash
+	 * records can also disengage the matching number of fighters in the
+	 * source flight (otherwise the source flight stays at full combatValue
+	 * even after losing craft to hangar damage).
 	 */
-	public static function onHangarCriticalPhase($hangar){
+	public static function onHangarCriticalPhase($hangar, $ship = null, $gamedata = null){
 		//Reset shared launch+land budget for next turn
 		$hangar->launchedThisTurn = 0;
 		$hangar->landedThisTurn = 0;
 
 		if ($hangar->isDestroyed()){
+			//Total hangar loss: any dockedFlightId-linked craft also die.
+			//Disengage every fighter in their source flights before clearing.
+			if ($gamedata !== null && !empty($hangar->hangarUsage)) {
+				foreach ($hangar->hangarUsage as $entry) {
+					if (!isset($entry['dockedFlightId'])) continue;
+					$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
+					if ($flight instanceof FighterFlight) {
+						self::disengageFighters($flight, PHP_INT_MAX, $gamedata);
+					}
+				}
+			}
 			$hangar->hangarUsage = array();
 			return 0;
 		}
@@ -337,7 +367,7 @@ class HangarOps {
 		$stored = self::usageCountFor($hangar);
 		if ($stored <= $remaining) return 0;
 
-		return self::evictCraftFromHangar($hangar, $stored - $remaining);
+		return self::evictCraftFromHangar($hangar, $stored - $remaining, $gamedata);
 	}
 
 	/* === Stage 4: launch flow ============================================ */
@@ -406,7 +436,15 @@ class HangarOps {
 		//bump flightSize and re-populate so we get the requested size. The
 		//autoid sequence is deterministic (1, 2, ...) so the same call at
 		//load time will reproduce the same ids.
-		$flightName = self::flightNameFor($phpclass, $carrier);
+		//
+		//If this launch is splitting off from a dockedFlightId-linked stash
+		//entry (resurrect rejected on size mismatch), name the new flight
+		//after the source with a " - Split" suffix so the player can trace
+		//where the detachment came from. Falls back to the generic name
+		//(phpclass / shipClass) for launches from anonymous orphans or
+		//auto-filled shuttle stash.
+		$flightName = self::splitFlightNameFor($hangar, $phpclass)
+			?? self::flightNameFor($phpclass, $carrier);
 		$flight = new $phpclass($gamedata->id, $carrier->userid, $flightName, $carrier->slot);
 		$flight->team = $carrier->team;
 		if ($launchSize > $flight->flightSize) {
@@ -445,6 +483,15 @@ class HangarOps {
 			}
 		}
 		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+		//Sync source flights for any dockedFlightId-linked stash entries we're
+		//about to consume. The launch is a partial / cross-record split (the
+		//exact-size resurrect path didn't match), so the source flight loses
+		//its identity — disengage all its active fighters so its rendered
+		//combat-value contribution drops to zero, and strip dockedFlightId
+		//from any partially-consumed records so a future relaunch spawns
+		//fresh rather than resurrecting a now-empty ship row.
+		self::syncSourceFlightsOnLaunch($hangar, $phpclass, $launchSize, $gamedata);
 
 		//Update hangar bookkeeping
 		self::removeFromHangarUsage($hangar, $phpclass, $launchSize);
@@ -532,6 +579,37 @@ class HangarOps {
 		return null;
 	}
 
+	/* When a new-spawn launch consumes part of a dockedFlightId-linked stash
+	 * entry (the exact-size resurrect path didn't match), disengage exactly
+	 * $take active fighters in the source flight so its rendered combat
+	 * value drops proportionally. The dockedFlightId link is preserved so
+	 * the source flight stays $removed across reload (Hangar::onIndividualNotesLoaded
+	 * re-applies that flag by walking hangarUsage entries with dockedFlightId)
+	 * and a future exact-size relaunch can still resurrect it.
+	 *
+	 * Iteration order mirrors removeFromHangarUsage so we touch the same
+	 * entries it's about to reduce. If a launch spans multiple entries we
+	 * disengage proportionally in each source flight.
+	 */
+	private static function syncSourceFlightsOnLaunch($hangar, $phpclass, $count, $gamedata){
+		if ($count <= 0 || empty($hangar->hangarUsage)) return;
+		$remaining = $count;
+		foreach ($hangar->hangarUsage as $idx => $entry){
+			if ($remaining <= 0) break;
+			if (($entry['phpclass'] ?? '') !== $phpclass) continue;
+			$available = (int)($entry['flightSize'] ?? 1);
+			$take = min($available, $remaining);
+			if (isset($entry['dockedFlightId']) && $take > 0){
+				$flightId = (int)$entry['dockedFlightId'];
+				$flight = $gamedata->getShipById($flightId);
+				if ($flight instanceof FighterFlight){
+					self::disengageFighters($flight, $take, $gamedata);
+				}
+			}
+			$remaining -= $take;
+		}
+	}
+
 	/* Decrement $hangarUsage by $count craft of $phpclass. Records of the
 	 * matching phpclass are reduced (or removed when reaching zero) in stored
 	 * order. Caller is responsible for first verifying enough are stored.
@@ -553,6 +631,29 @@ class HangarOps {
 		return $removed;
 	}
 
+	/* If $hangar holds a dockedFlightId-linked stash entry matching $phpclass,
+	 * return that source flight's name with a " - Split" suffix so the new
+	 * flight is clearly a detachment of the original. Returns null when no
+	 * df-linked entry of this phpclass exists (auto-filled shuttles, anonymous
+	 * orphans, etc.) — caller should fall back to the generic flightNameFor.
+	 *
+	 * Picks the first df-linked entry of matching phpclass; if multiple docked
+	 * flights of the same type exist on one hangar they'll all share the same
+	 * detachment label, which is a minor cosmetic ambiguity but unlikely in
+	 * practice (a carrier almost never docks two distinct same-class flights).
+	 */
+	public static function splitFlightNameFor($hangar, $phpclass){
+		if (empty($hangar->hangarUsage)) return null;
+		foreach ($hangar->hangarUsage as $entry) {
+			if (($entry['phpclass'] ?? '') !== $phpclass) continue;
+			if (!isset($entry['dockedFlightId'])) continue;
+			$base = isset($entry['name']) ? (string)$entry['name'] : '';
+			if ($base === '') return null;
+			return $base . ' - Split';
+		}
+		return null;
+	}
+
 	/* Generates a name for a launched flight, e.g. "Aurora Flight 1".
 	 * Counts existing same-phpclass ships from the same slot to pick the suffix.
 	 */
@@ -570,13 +671,13 @@ class HangarOps {
 		return $base;
 	}
 
-	/* Stage 4 gate: launch flow is only enabled for the test playground game
-	 * (TacGamedata::$safeGameID = 3730) and local dev games (id <= 0).
-	 * Stage 9 removes this gate.
+	/* Hangar Operations is now generally available — the safeGameID gate
+	 * (Stages 4–7) was lifted in Stage 9. Kept as a stub so existing call
+	 * sites need no rewrite; future re-gating (e.g. a per-feature flag in
+	 * varconfig.php) can be plumbed back through here.
 	 */
 	public static function isFlowEnabled($gameid){
-		$gameid = (int)$gameid;
-		return $gameid <= 0 || $gameid >= TacGamedata::$safeGameID;
+		return true;
 	}
 
 	/* Resolve queued launch orders for a hangar at end of turn.
@@ -847,7 +948,7 @@ class HangarOps {
 		$hangar->landedThisTurn += $count;
 
 		if ($partial) {
-			self::disengageFightersForDock($flight, $count, $gamedata);
+			self::disengageFighters($flight, $count, $gamedata);
 		} else {
 			//Flag the flight removed-from-board. $removedTurn lets replay show
 			//the flight up to and including this turn before it disappears.
@@ -1017,8 +1118,12 @@ class HangarOps {
 	/* Apply DisengagedFighter critical to $count active Fighter subsystems of
 	 * $flight, in fighter-id order. The crit is flagged updated so it persists
 	 * via getUpdatedCriticals/submitCriticals at the end of FireGamePhase.
+	 *
+	 * Used by performLand-partial (dock disengages N) and by syncSourceFlightsOnLaunch
+	 * (partial launch from a dockedFlightId stash disengages the source flight
+	 * entirely — pass PHP_INT_MAX to walk every active fighter).
 	 */
-	private static function disengageFightersForDock($flight, $count, $gamedata){
+	private static function disengageFighters($flight, $count, $gamedata){
 		$applied = 0;
 		foreach ($flight->systems as $fighter) {
 			if ($applied >= $count) break;

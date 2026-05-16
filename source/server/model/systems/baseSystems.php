@@ -3160,8 +3160,10 @@ class Hangar extends ShipSystem{
 		//1. Apply damage eviction first (per B5W rules: boxes destroyed before
 		//   Post-Turn Actions). This may also reduce stored craft a launch
 		//   order was relying on — if so, the launch's canLaunch() check fails
-		//   gracefully below.
-		HangarOps::onHangarCriticalPhase($this);
+		//   gracefully below. Pass $ship/$gamedata so eviction of dockedFlightId
+		//   stash records can also disengage the corresponding fighters in the
+		//   source flight, keeping its rendered combat value in sync.
+		HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
 
 		//2. Process queued dock orders BEFORE launches: a flight that just
 		//   docked frees up no boxes (they're consuming, not vacating) but

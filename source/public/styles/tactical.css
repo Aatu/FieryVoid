@@ -766,6 +766,11 @@ body {
     color: #cc8500;
 }
 
+.fleetlistentry .docked {
+    font-style: normal;
+    color: #00b8e6;
+}
+
 .fleetheader .headername {
     font-weight: bold;
     color: #deebff;

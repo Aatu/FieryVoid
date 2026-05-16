@@ -90,11 +90,10 @@ window.ShipTooltipFireMenu = function () {
     }
 
     function isLaunchEnabledGame() {
-        // Mirrors HangarOps::isFlowEnabled — gated to safeGameID 3730 + local
-        // dev games (id <= 0). Stage 9 removes this gate.
-        var SAFE_GAME_ID = 3730;
-        var gid = parseInt(gamedata.gameid || 0, 10);
-        return gid <= 0 || gid >= SAFE_GAME_ID;
+        // Mirrors HangarOps::isFlowEnabled. The safeGameID gate was removed
+        // in Stage 9 — kept as a hook so a future per-game feature flag
+        // (e.g. in gamedata) can re-gate without touching the call sites.
+        return true;
     }
 
     function hasLaunchableHangar() {

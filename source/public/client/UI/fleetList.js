@@ -2,6 +2,43 @@
 
 jQuery(function () { });
 
+//Stage 9: look up the per-flight pointCost of a stored craft's phpclass from
+//window.staticShips so the carrier's fleet-list line can include the value
+//of anonymous stash records (orphaned partial-launch records and the like).
+//Returns 0 when the class isn't preloaded (e.g. a ship file forgot to add it
+//to $spawnableClasses) so we degrade silently instead of crashing the row.
+function pointCostForPhpclass(phpclass) {
+    if (!phpclass || !window.staticShips) return 0;
+    for (var faction in window.staticShips) {
+        var bp = window.staticShips[faction] && window.staticShips[faction][phpclass];
+        if (bp) return parseInt(bp.pointCost || 0, 10);
+    }
+    return 0;
+}
+
+//Stage 9: sum the pointCost of every anonymous hangarUsage entry on $ship.
+//dockedFlightId entries are skipped — those craft are represented by their
+//own (removed=true) flight ship row in the fleet list, so counting them
+//here would double-credit. Shuttles auto-fill carriers and have pointCost=0,
+//so they contribute nothing.
+function dockedCraftStashValue(ship) {
+    if (!Array.isArray(ship.systems)) return 0;
+    var total = 0;
+    for (var s = 0; s < ship.systems.length; s++) {
+        var sys = ship.systems[s];
+        if (!sys || !Array.isArray(sys.hangarUsage)) continue;
+        for (var u = 0; u < sys.hangarUsage.length; u++) {
+            var entry = sys.hangarUsage[u];
+            if (!entry || entry.dockedFlightId) continue;
+            var per = pointCostForPhpclass(entry.phpclass);
+            if (per <= 0) continue;
+            var size = parseInt(entry.flightSize || 1, 10);
+            total += per * size / 6;
+        }
+    }
+    return Math.round(total);
+}
+
 window.fleetListManager = {
 
     initialized: false,
@@ -71,6 +108,12 @@ window.fleetListManager = {
             var ship = gamedata.ships[i];
             if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 
+            //Hangar Ops Stage 9: a docked flight whose fighters were all
+            //disengaged (e.g. partial relaunch consumed its identity) carries
+            //combatValue 0 and adds no information — skip it. Normal docked
+            //flights (combatValue > 0) still render as "Docked" rows.
+            if (ship.removed && ship.flight && (ship.combatValue === 0)) continue;
+
             if (ship.userid == slot.playerid && ship.slot == slot.slot) {
                 if (ship.mine) {
                     if (ship.spawned != -1) continue; // Exclude spawned mines
@@ -139,6 +182,19 @@ window.fleetListManager = {
             }
             baseValue = Math.round(baseValue + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0));
             var currValue = Math.round(baseValue * (ship.combatValue !== undefined ? ship.combatValue : 100) / 100);
+
+            //Stage 9: carriers carry the point cost of any anonymous docked
+            //craft (auto-filled shuttles are 0-cost; orphaned fighter records
+            //from partial relaunches contribute). dockedFlightId records are
+            //shown as separate "Docked" rows, so we deliberately skip them.
+            //We add the same value to both baseValue and currValue — stash
+            //craft take no damage in storage; hangar damage that evicts them
+            //is reflected by the entry no longer being in hangarUsage.
+            var stashValue = dockedCraftStashValue(ship);
+            if (stashValue > 0) {
+                baseValue += stashValue;
+                currValue += stashValue;
+            }
 
             totalBaseValue += baseValue;
             totalCurrValue += currValue;
@@ -330,7 +386,11 @@ window.fleetListManager = {
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
-                if (shipManager.hasJumpedNotDestroyed(ship)) {
+                if (ship.removed) {
+                    //Docked flight: same isDestroyed=true filtering, but not actually destroyed.
+                    $("#" + ship.id).addClass("docked");
+                    $("#" + ship.id + " .initiative").html("Docked");
+                } else if (shipManager.hasJumpedNotDestroyed(ship)) {
                     $("#" + ship.id).addClass("jumped");
                     $("#" + ship.id + " .initiative").html("Jumped");
                 } else {
