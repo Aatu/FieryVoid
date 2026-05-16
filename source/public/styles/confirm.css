@@ -431,10 +431,41 @@
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-label,
-.confirm.multi-value-confirm.hangar-confirm .multi-value-name,
 .confirm.multi-value-confirm.hangar-confirm .multi-value-max {
     color: #C9F0FF;
     margin-right: 10px;       
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-name {
+    color: #C9F0FF;
+    margin-right: 10px;
+    font-weight: normal;
+}
+
+/* Hangar header rows (Main / Front / Aft / Port / Stbd Hangar). Brighter
+   cyan + slight letter-spacing to read as a section divider above the
+   craft rows it owns. */
+.confirm.multi-value-confirm.hangar-confirm .hangar-section-name {
+    color: #58c7e6;
+    margin-right: 10px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 4px rgba(88, 199, 230, 0.35);
+}
+
+/* Stored-craft rows (eg. "6x Aurora"). Softer than the hangar header so
+   the visual hierarchy reads section → contents. */
+.confirm.multi-value-confirm.hangar-confirm .hangar-craft-name {
+    color: #C9F0FF;
+    margin-right: 10px;
+    font-weight: normal;
+}
+
+/* Indent craft rows only in the Launch dialog, where they sit under a
+   per-hangar section header. The Dock and DeployDock dialogs list rows
+   flat (one carrier-hangar or one flight per row) and don't need it. */
+.confirm.multi-value-confirm.hangar-confirm.hangarLaunch .hangar-craft-name {
+    margin-left: 18px;
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-input {

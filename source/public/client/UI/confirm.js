@@ -1884,6 +1884,27 @@ window.confirm = {
             carrierFacing = parseInt(ship.movement[ship.movement.length - 1].facing || 0, 10);
         }
 
+        // Stage 8: header labels use the hangar's ship location instead of a
+        // bare index. Location codes mirror addPrimary/Front/Aft/Left/Right
+        // (0/1/2/3/4) plus the SixSidedShip subsections (31/32 = port subs,
+        // 41/42 = stbd subs). If a location has more than one hangar, suffix
+        // with a 1-based counter so they remain distinguishable.
+        var locationPrefixFor = function (loc) {
+            var l = parseInt(loc, 10);
+            if (l === 0) return 'Main';
+            if (l === 1) return 'Front';
+            if (l === 2) return 'Aft';
+            if (l === 3 || l === 31 || l === 32) return 'Port';
+            if (l === 4 || l === 41 || l === 42) return 'Stbd';
+            return 'Hangar';
+        };
+        var prefixCounts = {};
+        hangars.forEach(function (h) {
+            var p = locationPrefixFor(h.location);
+            prefixCounts[p] = (prefixCounts[p] || 0) + 1;
+        });
+        var prefixSeen = {};
+
         hangars.forEach(function (hangar, hidx) {
             var output = parseInt(hangar.output || 0, 10);
             var used = parseInt(hangar.launchedThisTurn || 0, 10) + parseInt(hangar.landedThisTurn || 0, 10);
@@ -1907,8 +1928,13 @@ window.confirm = {
 
             // Hangar header row (no input — just labels). The "remaining" span is updated
             // live by updateBudgetLabel as the user changes inputs in this hangar's rows.
+            var prefix = locationPrefixFor(hangar.location);
+            prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
+            var hangarLabel = prefixCounts[prefix] > 1
+                ? (prefix + ' Hangar ' + prefixSeen[prefix])
+                : (prefix + ' Hangar');
             var headerRow = $('<div class="multi-value-row"></div>');
-            var label = $('<span class="multi-value-label"><span class="multi-value-name">Hangar ' + (hidx + 1) + '</span> <span class="multi-value-max">(launch budget: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
+            var label = $('<span class="multi-value-label"><span class="hangar-section-name">' + hangarLabel + '</span> <span class="multi-value-max">(launch budget: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
             label.appendTo(headerRow);
             budgetLabels.set(hangar, label.find('.launch-budget-remaining'));
             container.append(headerRow);
@@ -1938,7 +1964,7 @@ window.confirm = {
                 var preset = Math.min(parseInt(preByClass[cls] || 0, 10), max);
 
                 var row = $('<div class="multi-value-row"></div>');
-                $('<span class="multi-value-label"><span class="multi-value-name">' + info.count + 'x ' + info.name + '</span> <span class="multi-value-max">(max launch: ' + max + ')</span></span>').appendTo(row);
+                $('<span class="multi-value-label"><span class="hangar-craft-name">' + info.count + 'x ' + info.name + '</span> <span class="multi-value-max">(max launch: ' + max + ')</span></span>').appendTo(row);
                 var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
                 var $input = $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="' + preset + '" min="0" max="' + max + '">').appendTo(inputWrapper);
 
@@ -2056,9 +2082,29 @@ window.confirm = {
         // Build a flat list of all hangars across all eligible carriers.
         // hardCap = physical per-hangar limit (free boxes + reclaimable preset),
         // independent of what other rows contain.
+        //
+        // Stage 8: hangar labels mirror the launch dialog — use the hangar's
+        // ship location (Main/Front/Aft/Port/Stbd) instead of a bare index.
+        // Disambiguation counter is per-carrier so a ship with two port
+        // hangars reads "Port Hangar 1 / Port Hangar 2".
+        var locationPrefixFor = function (loc) {
+            var l = parseInt(loc, 10);
+            if (l === 0) return 'Main';
+            if (l === 1) return 'Front';
+            if (l === 2) return 'Aft';
+            if (l === 3 || l === 31 || l === 32) return 'Port';
+            if (l === 4 || l === 41 || l === 42) return 'Stbd';
+            return 'Hangar';
+        };
         var allRows = [];
         carriers.forEach(function (c) {
             var multiHangar = c.hangars.length > 1;
+            var prefixCounts = {};
+            c.hangars.forEach(function (h) {
+                var p = locationPrefixFor(h.hangar.location);
+                prefixCounts[p] = (prefixCounts[p] || 0) + 1;
+            });
+            var prefixSeen = {};
             c.hangars.forEach(function (h, idx) {
                 var preset = 0;
                 if (Array.isArray(h.hangar.pendingDockOrders)) {
@@ -2068,8 +2114,13 @@ window.confirm = {
                         }
                     });
                 }
+                var prefix = locationPrefixFor(h.hangar.location);
+                prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
+                var hangarName = prefixCounts[prefix] > 1
+                    ? (prefix + ' Hangar ' + prefixSeen[prefix])
+                    : (prefix + ' Hangar');
                 var label = multiHangar
-                    ? c.ship.name + ' – Hangar ' + (idx + 1)
+                    ? c.ship.name + ' – ' + hangarName
                     : c.ship.name;
                 allRows.push({
                     hangar:   h.hangar,
@@ -2103,7 +2154,7 @@ window.confirm = {
             // Initial max: physical cap clamped to flight size (other rows may tighten it live).
             var maxThis = Math.min(r.hardCap, flightCount);
             var row = $('<div class="multi-value-row"></div>');
-            $('<span class="multi-value-label"><span class="multi-value-name">' + r.label + '</span> <span class="multi-value-max">(free: ' + freeBoxes + ', max: ' + maxThis + ')</span></span>').appendTo(row);
+            $('<span class="multi-value-label"><span class="hangar-section-name">' + r.label + '</span> <span class="multi-value-max">(free: ' + freeBoxes + ', max: ' + maxThis + ')</span></span>').appendTo(row);
             var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
             $('<input type="number" class="multiConfirmInput multi-value-input main-input dockCount" value="' + r.preset + '" min="0" max="' + maxThis + '">').appendTo(inputWrapper);
             row.data('rowData', r);
@@ -2357,8 +2408,8 @@ window.confirm = {
             var row = $('<div class="multi-value-row"></div>');
             var $check = $('<input type="checkbox" class="deployDockCheck" style="margin-right:8px;">');
             if (preExisting) $check.prop('checked', true);
-            var $labelSpan = $('<span class="multi-value-label"><span class="multi-value-name"></span></span>');
-            $labelSpan.find('.multi-value-name').text(label);
+            var $labelSpan = $('<span class="multi-value-label"><span class="hangar-craft-name"></span></span>');
+            $labelSpan.find('.hangar-craft-name').text(label);
             $check.appendTo(row);
             $labelSpan.appendTo(row);
 
@@ -2494,11 +2545,33 @@ window.confirm = {
         e.appendTo("body").fadeIn(250);
 
         function hangarLabelFor(carrier, hangar) {
-            // If the carrier has more than one hangar, disambiguate by order.
-            var hangars = carrier.systems.filter(function (s) { return s && s.name === 'hangar'; });
-            if (hangars.length <= 1) return 'Hangar';
-            var idx = hangars.indexOf(hangar);
-            return 'Hangar ' + (idx + 1);
+            //Stage 8: ship-location prefixes (Main/Front/Aft/Port/Stbd) with
+            //per-prefix disambiguation when a carrier has multiple hangars on
+            //the same location.
+            var prefix = (function (loc) {
+                var l = parseInt(loc, 10);
+                if (l === 0) return 'Main';
+                if (l === 1) return 'Front';
+                if (l === 2) return 'Aft';
+                if (l === 3 || l === 31 || l === 32) return 'Port';
+                if (l === 4 || l === 41 || l === 42) return 'Stbd';
+                return 'Hangar';
+            })(hangar.location);
+            var siblings = carrier.systems.filter(function (s) {
+                if (!s || s.name !== 'hangar') return false;
+                var sl = parseInt(s.location, 10);
+                var hl = parseInt(hangar.location, 10);
+                // Group SixSidedShip sub-locations (31/32, 41/42) under the same prefix.
+                var groupOf = function (l) {
+                    if (l === 31 || l === 32) return 3;
+                    if (l === 41 || l === 42) return 4;
+                    return l;
+                };
+                return groupOf(sl) === groupOf(hl);
+            });
+            if (siblings.length <= 1) return prefix + ' Hangar';
+            var idx = siblings.indexOf(hangar);
+            return prefix + ' Hangar ' + (idx + 1);
         }
 
         function hangarLabelByIdFor(carrier, hangarId) {
