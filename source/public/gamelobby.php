@@ -987,6 +987,7 @@ $optionsUsed = '';
         <div class="fighter">
             <div class="destroyedtext"><span>DESTROYED</span></div>
             <div class="disengagedtext"><span>DISENGAGED</span></div>
+            <div class="dockedtext"><span>DOCKED</span></div>
             <div class="systemcontainer">
                 <div class="icon">
                     <table class="fightersystemcontainer 1"><tr></tr></table>

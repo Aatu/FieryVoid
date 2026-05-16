@@ -603,7 +603,7 @@ class HangarOps {
 				$flightId = (int)$entry['dockedFlightId'];
 				$flight = $gamedata->getShipById($flightId);
 				if ($flight instanceof FighterFlight){
-					self::disengageFighters($flight, $take, $gamedata);
+					self::dockFighters($flight, $take, $gamedata);
 				}
 			}
 			$remaining -= $take;
@@ -948,7 +948,7 @@ class HangarOps {
 		$hangar->landedThisTurn += $count;
 
 		if ($partial) {
-			self::disengageFighters($flight, $count, $gamedata);
+			self::dockFighters($flight, $count, $gamedata);
 		} else {
 			//Flag the flight removed-from-board. $removedTurn lets replay show
 			//the flight up to and including this turn before it disappears.
@@ -1115,26 +1115,44 @@ class HangarOps {
 		return $ids;
 	}
 
-	/* Apply DisengagedFighter critical to $count active Fighter subsystems of
-	 * $flight, in fighter-id order. The crit is flagged updated so it persists
-	 * via getUpdatedCriticals/submitCriticals at the end of FireGamePhase.
-	 *
-	 * Used by performLand-partial (dock disengages N) and by syncSourceFlightsOnLaunch
-	 * (partial launch from a dockedFlightId stash disengages the source flight
-	 * entirely — pass PHP_INT_MAX to walk every active fighter).
+	/* Apply $critClass critical to $count active Fighter subsystems of
+	 * $flight, in fighter-id order. The crit is flagged updated so it
+	 * persists via getUpdatedCriticals/submitCriticals at the end of
+	 * FireGamePhase. Shared between the dock / launch-split / hangar-loss
+	 * paths; the thin wrappers below pick the right crit class.
 	 */
-	private static function disengageFighters($flight, $count, $gamedata){
+	private static function applyFighterStateCritical($flight, $count, $critClass, $gamedata){
 		$applied = 0;
 		foreach ($flight->systems as $fighter) {
 			if ($applied >= $count) break;
 			if (!($fighter instanceof Fighter)) continue;
-			if ($fighter->isDestroyed($gamedata->turn)) continue;   //already disengaged or destroyed
-			$crit = new DisengagedFighter(-1, $flight->id, $fighter->id, "DisengagedFighter", $gamedata->turn);
+			if ($fighter->isDestroyed($gamedata->turn)) continue;   //already disengaged/docked/destroyed
+			$crit = new $critClass(-1, $flight->id, $fighter->id, $critClass, $gamedata->turn);
 			$crit->updated = true;
 			$fighter->criticals[] = $crit;
 			$applied++;
 		}
 		return $applied;
+	}
+
+	/* Dock $count active fighters in $flight (intentionally entering a
+	 * hangar — partial-dock keeps the rest in space; partial-launch leaves
+	 * these behind as the dock-side stash). Renders as cyan "DOCKED" in
+	 * the flight window and is distinguishable from combat disengagement
+	 * in the replay audit trail.
+	 */
+	private static function dockFighters($flight, $count, $gamedata){
+		return self::applyFighterStateCritical($flight, $count, 'DockedFighter', $gamedata);
+	}
+
+	/* Disengage $count active fighters in $flight (combat disengagement,
+	 * or — currently — fighters killed by hangar damage when the carrier
+	 * is hit). Renders as green "DISENGAGED" in the flight window. Hangar-
+	 * damage callers may eventually want real destruction instead, but
+	 * disengagement preserves the existing replay shape.
+	 */
+	private static function disengageFighters($flight, $count, $gamedata){
+		return self::applyFighterStateCritical($flight, $count, 'DisengagedFighter', $gamedata);
 	}
 
 	/* End-of-turn: walks $hangar->pendingDockOrders, validates each, and lands

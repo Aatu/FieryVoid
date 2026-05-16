@@ -373,9 +373,20 @@ window.fleetListManager = {
 
         if (shipManager.shouldBeHidden(ship)) { //Enemy, stealth equipped and undetected, or not deployed yet.
             return; //Do not scroll to Stealthed ships
-        } else {
-            window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
         }
+
+        //Hangar Ops Stage 9.1: a docked flight isn't on the board, so a
+        //scroll-to-ship event has nothing to find. Open its status window
+        //directly instead so the player can inspect the docked fighters
+        //(DOCKED label in cyan over the faded icons).
+        if (ship.removed && ship.flight) {
+            if (typeof flightWindowManager !== 'undefined' && flightWindowManager.open) {
+                flightWindowManager.open(ship);
+            }
+            return;
+        }
+
+        window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
     },
 
     updateFleetList: function updateFleetList() {
@@ -383,14 +394,20 @@ window.fleetListManager = {
             var ship = gamedata.ships[i];
             var name = ship.name;
             if (shipManager.isDestroyed(ship)) {
+                if (ship.removed) {
+                    //Docked flight: same isDestroyed=true filtering, but not
+                    //actually destroyed. Keep .clickable so the player can
+                    //open the flight window (doScrollToShip routes removed
+                    //flights to flightWindowManager.open directly since
+                    //they're not on the board).
+                    $("#" + ship.id).addClass("docked");
+                    $("#" + ship.id + " .initiative").html("Docked");
+                    continue;
+                }
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");
-                if (ship.removed) {
-                    //Docked flight: same isDestroyed=true filtering, but not actually destroyed.
-                    $("#" + ship.id).addClass("docked");
-                    $("#" + ship.id + " .initiative").html("Docked");
-                } else if (shipManager.hasJumpedNotDestroyed(ship)) {
+                if (shipManager.hasJumpedNotDestroyed(ship)) {
                     $("#" + ship.id).addClass("jumped");
                     $("#" + ship.id + " .initiative").html("Jumped");
                 } else {

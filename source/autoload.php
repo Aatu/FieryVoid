@@ -250,7 +250,8 @@ spl_autoload_register(
                 'devout2007' => '/server/model/ships/orieni/devout2007.php',
                 'dice' => '/server/lib/dice.php',
                 'disengagedfighter' => '/server/model/cricialClasses.php',
-				'dockingcollar' => '/server/model/systems/baseSystems.php',				
+                'dockedfighter' => '/server/model/cricialClasses.php',                
+				'dockingcollar' => '/server/model/systems/baseSystems.php',
                 'dorono' => '/server/model/ships/hurr/dorono.php',
                 'doublev' => '/server/model/ships/raiders/doubleV.php', //TO BE DELETED LATER
 //                'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php', //Deleted old version

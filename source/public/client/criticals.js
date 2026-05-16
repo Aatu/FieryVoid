@@ -114,6 +114,13 @@ window.shipManager.criticals = {
 
     isDisengagedFighter: function (fighter) {
         return Boolean(shipManager.criticals.hasCritical(fighter, "DisengagedFighter"));
+    },
+
+    //Hangar Ops Stage 9.1: parallel to isDisengagedFighter for fighters that
+    //left the flight by entering a hangar (partial dock or partial-launch
+    //split). The flight window renders these with a cyan DOCKED label.
+    isDockedFighter: function (fighter) {
+        return Boolean(shipManager.criticals.hasCritical(fighter, "DockedFighter"));
     }
 
 };

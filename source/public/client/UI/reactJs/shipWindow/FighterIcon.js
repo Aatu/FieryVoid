@@ -3,26 +3,64 @@ import styled from "styled-components"
 import SystemIcon from "../system/SystemIcon"
 
 
+/* Outer card frame: holds the border + dimensions but does NOT apply the
+ * destroyed fade. The fade is applied on the inner FadedContent so the
+ * OverlayLabel (a sibling of FadedContent) stays crisp.
+ */
 const FighterIconContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
+    position: relative;
     width: 114px;
-    height: 150px; 
-    background-image:url(${props => props.$img});
+    height: 150px;
     background-color: black;
-    background-size: 80%;
-    background-position: center;
-    background-repeat: no-repeat;
-    border: 1px solid #496791;
+    border: 1px solid ${props => props.$docked ? '#00b8e6' : '#496791'};
     box-sizing: border-box;
     margin: 5px;
-    filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
-    opacity: ${props => props.$destroyed ? '0.5' : '1'};
 
     -webkit-user-select: none;
     -webkit-touch-callout: none;
     user-select: none;
+`;
+
+/* Faded inner layer: background icon + flex column of system rows +
+ * healthbar. opacity/filter live here so the overlay label can sit
+ * outside this subtree and render at full opacity.
+ */
+const FadedContent = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 100%;
+    height: 100%;
+    background-image: url(${props => props.$img});
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
+    opacity: ${props => props.$destroyed ? '0.5' : '1'};
+`;
+
+/* Hangar Ops Stage 9.1: overlay label rendered above the faded icon when
+ * a fighter has left the flight (docked / disengaged / destroyed). The
+ * color encodes the state — cyan for DOCKED matches the fleet-list
+ * "Docked" row, green for DISENGAGED matches the legacy convention, red
+ * for DESTROYED. Sibling of FadedContent so the parent's opacity doesn't
+ * cascade in; border matches $color.
+ */
+const OverlayLabel = styled.div`
+    position: absolute;
+    top: 55px;
+    left: 9px;
+    width: 96px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 5px 0;
+    background-color: black;
+    color: ${props => props.$color};
+    border: 1px solid ${props => props.$color};
+    z-index: 2;
+    pointer-events: none;
+    opacity: 0.8;
 `;
 
 const Container = styled.div`
@@ -70,7 +108,7 @@ const HealthBar = styled.div`
         left: 0;
         bottom: 0;
         z-index: 0;
-        background-color: ${props => props.$criticals ? '#ed6738' : '#427231'};
+        background-color: ${props => props.$docked ? '#00b8e6' : (props.$criticals ? '#ed6738' : '#427231')};
         border: 1px solid black;
     }
 `;
@@ -183,22 +221,28 @@ class FighterIcon extends React.Component {
         const { ship, fighter } = this.props;
 
         const destroyed = shipManager.systems.isDestroyed(ship, fighter);
-        const disengaged = shipManager.criticals.isDisengagedFighter(fighter);
-        /* old version - weapons and notWeapons
-                return (
-                    <FighterIconContainer destroyed={destroyed} img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut}>
-                        <Container>{toIcons(ship, fighter, getWeapons(fighter), destroyed)}</Container>
-                        <ContainerSystems>{toIcons(ship, fighter, getNotWeapons(fighter), destroyed)}</ContainerSystems>
-                        <HealthBar health={getStructureLeft(ship, fighter)} criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
-                    </FighterIconContainer>
-                );
-        */
-        //new version - fwd and aft systems (unit creator decides the layout)
+        const docked = shipManager.criticals.isDockedFighter(fighter);
+        const disengaged = !docked && shipManager.criticals.isDisengagedFighter(fighter);
+
+        //State-label precedence: DOCKED > DISENGAGED > DESTROYED. Each is a
+        //"fighter not in the fight" condition; DOCKED takes priority because
+        //it implies the others are derivative (a docked fighter is also flagged
+        //destroyed server-side so destroyed=true alone isn't enough info).
+        let overlay = null;
+        if (destroyed) {
+            if (docked)          overlay = <OverlayLabel $color="#00b8e6">DOCKED</OverlayLabel>;
+            else if (disengaged) overlay = <OverlayLabel $color="#4bea1b">DISENGAGED</OverlayLabel>;
+            else                 overlay = <OverlayLabel $color="#ff5252">DESTROYED</OverlayLabel>;
+        }
+
         return (
-            <FighterIconContainer $destroyed={destroyed} $img={fighter.iconPath} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
-                <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
-                <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
-                <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
+            <FighterIconContainer $docked={docked} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
+                <FadedContent $destroyed={destroyed} $img={fighter.iconPath}>
+                    <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
+                    <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
+                    <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)} $docked={docked}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
+                </FadedContent>
+                {overlay}
             </FighterIconContainer>
         );
     }

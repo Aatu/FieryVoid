@@ -112,11 +112,24 @@
             if ($this->hasCritical("DisengagedFighter", $turn))
 				return true;
         }
-			
+
+        /* Hangar Ops Stage 9.1: parallel to isDisengaged but for fighters
+         * that left the flight by entering a hangar (partial dock or
+         * partial-launch split). Same "permanent until relaunch" lifetime
+         * but distinct so the flight window can render DOCKED separately
+         * from DISENGAGED, and the replay audit trail isn't ambiguous.
+         */
+        public function isDocked($turn){
+            if ($this->hasCritical("DockedFighter", $turn))
+				return true;
+        }
+
         public function isDestroyed($turn = false){
             if ($this->isDisengaged($turn))
                 return true;
-            
+            if ($this->isDocked($turn))
+                return true;
+
             return parent::isDestroyed();
         }
 		
