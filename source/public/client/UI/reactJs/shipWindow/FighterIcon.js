@@ -40,11 +40,12 @@ const FadedContent = styled.div`
 `;
 
 /* Hangar Ops Stage 9.1: overlay label rendered above the faded icon when
- * a fighter has left the flight (docked / disengaged / destroyed). The
- * color encodes the state — cyan for DOCKED matches the fleet-list
- * "Docked" row, green for DISENGAGED matches the legacy convention, red
- * for DESTROYED. Sibling of FadedContent so the parent's opacity doesn't
- * cascade in; border matches $color.
+ * a fighter has left the flight. Color encodes the state — cyan DOCKED
+ * (matches the fleet-list "Docked" row), orange DROPOUT (the B5W dropout
+ * mechanic, internally a DisengagedFighter critical applied when a
+ * damaged fighter fails its dropout roll), red DESTROYED. Sibling of
+ * FadedContent so the parent's opacity doesn't cascade in; border
+ * matches $color.
  */
 const OverlayLabel = styled.div`
     position: absolute;
@@ -60,7 +61,7 @@ const OverlayLabel = styled.div`
     border: 1px solid ${props => props.$color};
     z-index: 2;
     pointer-events: none;
-    opacity: 0.8;
+    opacity: 0.7;
 `;
 
 const Container = styled.div`
@@ -222,16 +223,19 @@ class FighterIcon extends React.Component {
 
         const destroyed = shipManager.systems.isDestroyed(ship, fighter);
         const docked = shipManager.criticals.isDockedFighter(fighter);
-        const disengaged = !docked && shipManager.criticals.isDisengagedFighter(fighter);
+        //DisengagedFighter is the B5W dropout mechanic — applied when a
+        //damaged fighter fails its dropout roll (fighter.php::testCritical).
+        //Render it as DROPOUT so the label matches the rulebook term.
+        const droppedOut = !docked && shipManager.criticals.isDisengagedFighter(fighter);
 
-        //State-label precedence: DOCKED > DISENGAGED > DESTROYED. Each is a
+        //State-label precedence: DOCKED > DROPOUT > DESTROYED. Each is a
         //"fighter not in the fight" condition; DOCKED takes priority because
         //it implies the others are derivative (a docked fighter is also flagged
         //destroyed server-side so destroyed=true alone isn't enough info).
         let overlay = null;
         if (destroyed) {
             if (docked)          overlay = <OverlayLabel $color="#00b8e6">DOCKED</OverlayLabel>;
-            else if (disengaged) overlay = <OverlayLabel $color="#4bea1b">DISENGAGED</OverlayLabel>;
+            else if (droppedOut) overlay = <OverlayLabel $color="#ff8c00">DROPOUT</OverlayLabel>;
             else                 overlay = <OverlayLabel $color="#ff5252">DESTROYED</OverlayLabel>;
         }
 
