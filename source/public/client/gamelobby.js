@@ -686,15 +686,19 @@ window.gamedata = {
 			if (!lship.flight) {
 				totalShips++;
 
-				// Calculate Breaching Pod capacity for this ship - only if it has suitable hangar capacity
+				// Calculate Breaching Pod capacity for this ship - only if it has suitable hangar capacity.
+				// Dedicated "Breaching Pods" slots in ship.fighters (e.g. Decurion's 4 side-bay pod racks)
+				// are guaranteed BP capacity, additive to the size-based limit, and BPs prefer them first.
 				var hasBPCompatibleHangar = false;
+				var shipBPDedicated = lship.fighters["Breaching Pods"] || 0;
 				var shipSlots = {
 					"heavy": lship.fighters["heavy"] || lship.fighters["normal"] || 0,
 					"medium": lship.fighters["medium"] || 0,
-					"assault shuttles": lship.fighters["assault shuttles"] || 0
+					"assault shuttles": lship.fighters["assault shuttles"] || 0,
+					"breaching pods": shipBPDedicated
 				};
 
-				if (shipSlots["heavy"] > 0 || shipSlots["medium"] > 0 || shipSlots["assault shuttles"] > 0) {
+				if (shipSlots["heavy"] > 0 || shipSlots["medium"] > 0 || shipSlots["assault shuttles"] > 0 || shipSlots["breaching pods"] > 0) {
 					hasBPCompatibleHangar = true;
 				}
 
@@ -710,7 +714,7 @@ window.gamedata = {
 					if (lship.shipClass.toLowerCase().indexOf("assault") !== -1) {
 						shipBPLimit *= 2;
 					}
-					totalBPCapacity += shipBPLimit;
+					totalBPCapacity += shipBPLimit + shipBPDedicated;
 				}
 
 				// Record ship profile for per-ship validation
@@ -757,7 +761,7 @@ window.gamedata = {
 				}
 
 
-				//check hangar space available...	
+				//check hangar space available...
 				for (var h in lship.fighters) {
 					var amount = lship.fighters[h];
 					if (h == "normal" || h == "heavy") {
@@ -770,6 +774,12 @@ window.gamedata = {
 						totalHangarXL += amount;
 					} else if (h == "assault shuttles") {
 						totalHangarAS += amount;
+					} else if (h == "Breaching Pods") {
+						//Dedicated BP slots are folded into totalBPCapacity above
+						//(plus per-ship shipSlots["breaching pods"] for assignment).
+						//Don't add them to totalHangarOther / smallCraftUsed — that
+						//would re-render them as a separate "Breaching Pods: X (allowed up to Y)"
+						//small-craft row alongside the main BP report.
 					} else { //something other than fighters
 						var found = false;
 						for (var nh in totalHangarOther) {
@@ -1130,31 +1140,46 @@ window.gamedata = {
 		//fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
 
-		// Per-Ship Breaching Pod Assignment and Deduction
+		// Per-Ship Breaching Pod Assignment and Deduction.
+		// Pass 1: fill dedicated "Breaching Pods" hangar slots first — these
+		// are guaranteed BP capacity and don't consume the ship's size-based
+		// BP cap (e.g. Decurion's 4 side-bay pod racks).
+		// Pass 2: overflow into AS/Heavy/Medium slots, capped by the ship's
+		// size-based bpLimitRemaining (1/2/4 with x2 for Assault hulls).
 		var unassignedBPs = 0;
 		for (var bpIdx = 0; bpIdx < breachingPodsList.length; bpIdx++) {
 			var assigned = false;
 			for (var shIdx = 0; shIdx < shipHangarProfiles.length; shIdx++) {
 				var ship = shipHangarProfiles[shIdx];
-				if (ship.bpLimitRemaining > 0) {
-					// Check for suitable slot: AS > Heavy > Medium
-					if (ship.slots["assault shuttles"] > 0) {
-						ship.slots["assault shuttles"]--;
-						totalHangarAS--;
-						assigned = true;
-					} else if (ship.slots["heavy"] > 0) {
-						ship.slots["heavy"]--;
-						totalHangarH--;
-						assigned = true;
-					} else if (ship.slots["medium"] > 0) {
-						ship.slots["medium"]--;
-						totalHangarM--;
-						assigned = true;
-					}
+				if (ship.slots["breaching pods"] > 0) {
+					ship.slots["breaching pods"]--;
+					assigned = true;
+					break;
+				}
+			}
+			if (!assigned) {
+				for (var shIdx = 0; shIdx < shipHangarProfiles.length; shIdx++) {
+					var ship = shipHangarProfiles[shIdx];
+					if (ship.bpLimitRemaining > 0) {
+						// Check for suitable slot: AS > Heavy > Medium
+						if (ship.slots["assault shuttles"] > 0) {
+							ship.slots["assault shuttles"]--;
+							totalHangarAS--;
+							assigned = true;
+						} else if (ship.slots["heavy"] > 0) {
+							ship.slots["heavy"]--;
+							totalHangarH--;
+							assigned = true;
+						} else if (ship.slots["medium"] > 0) {
+							ship.slots["medium"]--;
+							totalHangarM--;
+							assigned = true;
+						}
 
-					if (assigned) {
-						ship.bpLimitRemaining--;
-						break;
+						if (assigned) {
+							ship.bpLimitRemaining--;
+							break;
+						}
 					}
 				}
 			}
@@ -1381,7 +1406,7 @@ window.gamedata = {
 		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
 		totalHangarAS = totalHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
 
-		checkResult += "<br><b><u>Breaching Pods:</u></b><br>";
+		checkResult += "<br><b><u>Assault Shuttles & Breaching Pods:</u></b><br>";
 		checkResult += " Total Breaching Pods: " + totalBPUsage;
 		checkResult += " (allowed up to " + totalBPCapacity + ")";
 		if (totalBPUsage > totalBPCapacity || unassignedBPs > 0) {

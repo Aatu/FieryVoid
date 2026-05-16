@@ -400,6 +400,42 @@ shipManager.systems = {
         return armour;
     },
 
+    //Total declared hangar slots on a ship (sum of maxhealth across Hangar systems).
+    //Includes Hangars but not other system types.
+    getTotalHangarCapacity: function getTotalHangarCapacity(ship) {
+        var total = 0;
+        if (!ship || !ship.systems) return 0;
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (system && system.name == "hangar") total += parseInt(system.maxhealth, 10) || 0;
+        }
+        return total;
+    },
+
+    //Mirrors HangarOps::populateInitialHangarUsage step 3: any hangar capacity
+    //that isn't accounted for by entries in ship.fighters auto-fills with
+    //Shuttles (or MinesweepingShuttles when minesweeperbonus > 0).
+    //Returns {count, type, key} where:
+    //  type — display string ("Shuttles" / "Minesweeping Shuttles")
+    //  key  — matching ship.fighters key ("shuttles" / "minesweeping shuttles")
+    //  count — leftover slot count (>= 0)
+    getDefaultShuttles: function getDefaultShuttles(ship) {
+        var capacity = shipManager.systems.getTotalHangarCapacity(ship);
+        if (capacity <= 0) return { count: 0, type: "Shuttles", key: "shuttles" };
+        var declared = 0;
+        if (ship.fighters) {
+            for (var k in ship.fighters) declared += parseInt(ship.fighters[k], 10) || 0;
+        }
+        var leftover = capacity - declared;
+        if (leftover < 0) leftover = 0;
+        var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
+        return {
+            count: leftover,
+            type: minesweeper ? "Minesweeping Shuttles" : "Shuttles",
+            key: minesweeper ? "minesweeping shuttles" : "shuttles"
+        };
+    },
+
     getThrusters: function getThrusters(ship, direction) {
         var list = Array();
         for (var i in ship.systems) {
