@@ -1934,7 +1934,7 @@ window.confirm = {
                 ? (prefix + ' Hangar ' + prefixSeen[prefix])
                 : (prefix + ' Hangar');
             var headerRow = $('<div class="multi-value-row"></div>');
-            var label = $('<span class="multi-value-label"><span class="hangar-section-name">' + hangarLabel + '</span> <span class="multi-value-max">(Launch budget: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
+            var label = $('<span class="multi-value-label"><span class="hangar-section-name">' + hangarLabel + '</span> <span class="multi-value-max">(Hangar Capacity: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
             label.appendTo(headerRow);
             budgetLabels.set(hangar, label.find('.launch-budget-remaining'));
             container.append(headerRow);

@@ -343,7 +343,7 @@
 .confirm.multi-value-confirm .multi-value-container {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 15px;
 }
 
