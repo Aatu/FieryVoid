@@ -469,6 +469,62 @@
     margin-left: 18px;
 }
 
+/* Hangar capacity readout in the Deployment Dock dialog. Each per-hangar
+   pill is its own inline element so the parent flex-wrap container can
+   break onto multiple lines when the carrier has many hangars — the
+   single-line "A: x/y &middot; B: x/y &middot; C: x/y" got squashed
+   unreadably on wide multi-hangar carriers. */
+.confirm.multi-value-confirm.hangar-confirm .hangarCapacityHeader {
+    /* Override the row's space-between justification — we want the
+       label hugging the left edge and the pills flowing after it. */
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    column-gap: 10px;
+    row-gap: 4px;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .hangar-capacity-label {
+    color: #C9F0FF;
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pills {
+    display: inline-flex;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 4px;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pill {
+    white-space: nowrap;
+}
+
+/* Deployment Dock dialog checkboxes were rendering a few px above the
+   row's text baseline. Flex centering handles overall alignment, but the
+   checkbox's intrinsic box has top padding that the browser ignores in
+   `align-items: center` for replaced elements. Nudge it down to sit on
+   the same optical line as the label text. The `margin-left: auto`
+   pushes the checkbox (and the label after it) to the right edge of
+   the row so the checkbox + flight-name pair sits adjacent to the
+   hangar dropdown instead of being separated by a wide gap. */
+.confirm.multi-value-confirm.hangar-confirm .deployDockCheck {
+    align-self: center;
+    vertical-align: middle;
+    margin: 0 8px 0 auto;
+    transform: translateY(1px);
+}
+
+/* Deployment Dock rows: keep the flight-name label tight against its
+   checkbox by dropping the base `flex: 1` (which would otherwise stretch
+   the label across the row and split the pair). The checkbox's
+   `margin-left: auto` above is what pushes the whole pair to the right. */
+.confirm.multi-value-confirm.hangar-confirm.hangarDeployDock .multi-value-row .multi-value-label {
+    flex: 0 0 auto;
+    text-align: right;
+    margin-right: 10px;
+}
+
 .confirm.multi-value-confirm.hangar-confirm .multi-value-input {
     background: #03161f;
     border: 1px solid #1f6f8b;

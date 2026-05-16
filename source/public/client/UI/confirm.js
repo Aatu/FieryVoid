@@ -2140,7 +2140,7 @@ window.confirm = {
         $('<div class="multi-value-header">' + headerText + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Allocate craft to dock per hangar.</span></div>').appendTo(container);
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Allocate craft to dock per hangar.</span></div>').appendTo(container);
 
         // Live cross-row total: updates each input's max so the sum can never exceed flightCount.
         // Built as a single span so the flex row treats it as one child (avoiding space-between split).
@@ -2267,7 +2267,7 @@ window.confirm = {
         var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarDeployCarrierPicker"><div class="ui"><div class="confirmcancel"></div></div></div>');
         $('<div class="multi-value-header">Dock ' + flight.name + ' — choose carrier</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Pick which carrier the flight should dock into.</span></div>').appendTo(container);
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Pick which carrier the flight should dock into.</span></div>').appendTo(container);
 
         carriers.forEach(function (entry) {
             var carrier = entry.ship;
@@ -2336,7 +2336,7 @@ window.confirm = {
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
         if (pending.length === 0) {
-            $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">No Hangar Operations available.</span></div>').appendTo(container);
+            $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">No Hangar Operations available.</span></div>').appendTo(container);
             //Hide OK — there's nothing to commit. Cancel just closes.
             $('.confirmok', e).hide();
             $(".confirmcancel", e).on("click", function () { e.remove(); });
@@ -2344,7 +2344,7 @@ window.confirm = {
             return;
         }
 
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:italic;">Check flights to dock into a hangar bay instead of placing on the map.</span></div>').appendTo(container);
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Check flights to dock into a hangar bay instead of placing on the map.</span></div>').appendTo(container);
 
         //Live per-hangar capacity readout. Recomputed on every checkbox/dropdown
         //change so the player sees overflow before pressing OK. Without this the
@@ -2352,7 +2352,7 @@ window.confirm = {
         //queue multiple flights that each individually fit but together exceed
         //the hangar — the server then silently dropped the overflow with a fail
         //note, leaving the player confused about why fewer fighters docked.
-        var $capacityHeader = $('<div class="multi-value-row hangarCapacityHeader" style="font-style:italic;"></div>');
+        var $capacityHeader = $('<div class="multi-value-row hangarCapacityHeader" style="font-style:normal;"></div>');
         container.append($capacityHeader);
 
         //Base free per hangar (treats reservations from flights NOT in the
@@ -2406,7 +2406,8 @@ window.confirm = {
             var size = parseInt(flight.flightSize || 1, 10);
             var label = flight.name + ' (' + size + ' x ' + flight.shipClass + ')';
             var row = $('<div class="multi-value-row"></div>');
-            var $check = $('<input type="checkbox" class="deployDockCheck" style="margin-right:8px;">');
+            //margin/vertical-align handled by .deployDockCheck CSS in confirm.css
+            var $check = $('<input type="checkbox" class="deployDockCheck">');
             if (preExisting) $check.prop('checked', true);
             var $labelSpan = $('<span class="multi-value-label"><span class="hangar-craft-name"></span></span>');
             $labelSpan.find('.hangar-craft-name').text(label);
@@ -2524,9 +2525,13 @@ window.confirm = {
 
         function recomputeCapacity() {
             var perHangar = computePerHangarUsage();
-            var parts = [];
             var anyOverflow = false;
             //Walk hangars in declared order so the readout matches the dropdown labels.
+            //Build each pill as its own element so the row can flex-wrap onto
+            //multiple lines when many hangars are listed — the previous single-
+            //line "A: x/y &middot; B: x/y &middot; C: x/y" string couldn't break
+            //and got squashed on multi-hangar carriers.
+            var $pillContainer = $('<span class="hangar-capacity-pills"></span>');
             carrier.systems.forEach(function (sys) {
                 if (!sys || sys.name !== 'hangar') return;
                 if (!baseFreeByHangar.has(sys.id)) return;
@@ -2534,9 +2539,16 @@ window.confirm = {
                 var used = perHangar.get(sys.id) || 0;
                 var color = (used > avail) ? '#ff5050' : (used > 0 ? '#ffff80' : '#bdbdbd');
                 if (used > avail) anyOverflow = true;
-                parts.push('<span style="color:' + color + ';">' + hangarLabelFor(carrier, sys) + ': ' + used + '/' + avail + '</span>');
+                $('<span class="hangar-capacity-pill" style="color:' + color + ';"></span>')
+                    .text(hangarLabelFor(carrier, sys) + ': ' + used + '/' + avail)
+                    .appendTo($pillContainer);
             });
-            $capacityHeader.html('Hangar capacity: ' + (parts.length ? parts.join(' &middot; ') : '<span style="color:#bdbdbd;">none</span>'));
+            if ($pillContainer.children().length === 0) {
+                $pillContainer.append('<span style="color:#bdbdbd;">none</span>');
+            }
+            $capacityHeader.empty()
+                .append('<span class="hangar-capacity-label">Hangar capacity:</span>')
+                .append($pillContainer);
             //Visual cue on OK button when overflowing — leave it clickable so the
             //alert above can explain WHICH hangar is over (clearer than greying it out).
             $('.confirmok', e).css('opacity', anyOverflow ? 0.6 : 1);

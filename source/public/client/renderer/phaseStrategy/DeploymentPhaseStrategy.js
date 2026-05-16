@@ -249,7 +249,10 @@ window.DeploymentPhaseStrategy = function () {
         if (window.DeploymentDock && window.DeploymentDock.shipHasOpenableDockDialog(ship)) {
             //Reuse the firing-phase Dock button styling (dockFlight class →
             //img/dockFlight.png) so the icon is consistent across phases.
-            menu.addButton("dockFlight",
+            //addLeadingButton places it to the LEFT of "Open ship details",
+            //matching the Firing Phase tooltip order (action icons first,
+            //info icon last).
+            menu.addLeadingButton("dockFlight",
                 function () { return window.DeploymentDock.shipHasOpenableDockDialog(ship); },
                 function () {
                     if (window.confirm && typeof window.confirm.hangarDeployDock === 'function') {
