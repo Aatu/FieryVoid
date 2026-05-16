@@ -1025,7 +1025,8 @@ class HangarOps {
 	 * check — flight isn't placed yet, carrier may or may not be):
 	 *   - Both ships belong to the same player slot
 	 *   - Flight is a FighterFlight that isn't already removed/destroyed
-	 *   - Flight is deploying THIS turn (not a previously-deployed flight)
+	 *   - Flight AND carrier are both deploying THIS turn — a reinforcement
+	 *     flight cannot dock into a previously-deployed carrier
 	 *   - Carrier hangar isn't destroyed and has compatible free boxes for the
 	 *     flight's full size
 	 */
@@ -1040,6 +1041,12 @@ class HangarOps {
 
 		if ($flight->getTurnDeployed($gamedata) != $gamedata->turn) {
 			$reason = 'flight not deploying this turn'; return false;
+		}
+		//Carrier must ALSO be deploying this turn — fighters arriving on
+		//turn N can only dock into ships also arriving on turn N. Previously
+		//-deployed carriers are off-limits to late reinforcements.
+		if ($carrier->getTurnDeployed($gamedata) != $gamedata->turn) {
+			$reason = 'carrier not deploying this turn'; return false;
 		}
 
 		//Whole flight goes into the hangar — partial deploy-dock isn't a thing

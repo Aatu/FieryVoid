@@ -19,16 +19,19 @@
 window.DeploymentDock = (function () {
 
     // True if $ship is one of MY carriers (has at least one hangar) during
-    // Deployment Phase. Stage 7 deliberately surfaces the dock button on every
-    // friendly carrier so the player can also UN-DOCK previously-queued flights
-    // even when no eligible same-hex flight exists. The dialog itself shows a
-    // "no operations available" message when there's nothing to queue or
-    // cancel.
+    // Deployment Phase AND the carrier itself is deploying THIS turn —
+    // fighters arriving on turn N can only dock into ships also arriving on
+    // turn N, so a previously-deployed carrier can never accept deploy-start
+    // docks. (Stage 7 originally surfaced the dock button on every friendly
+    // carrier to support cancelling previously-queued flights, but under the
+    // new same-turn-only rule no legitimate queue can exist on a previously-
+    // deployed carrier — those carriers are excluded entirely.)
     function shipHasOpenableDockDialog(ship) {
         if (!ship || !Array.isArray(ship.systems)) return false;
         if (!gamedata.isMyShip(ship)) return false;
         if (ship.flight) return false;                                   //flights can't carry flights
         if (gamedata.isTerrain && gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return false;
+        if (shipManager.getTurnDeployed(ship) !== gamedata.turn) return false;
 
         var hangars = collectAllHangars(ship);
         return hangars.length > 0;

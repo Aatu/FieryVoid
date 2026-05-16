@@ -205,15 +205,6 @@ window.DeploymentPhaseStrategy = function () {
         if (this.gamedata.isMyShip(ship) && ((shipManager.getTurnDeployed(ship) == gamedata.turn)
             || (shipManager.getTurnDeployed(ship) < gamedata.turn) && ship.canPreOrder)) { //Own ship and deploys this turn, just select it. Means that late-deployers can't deploy on ships with canPreOrder (unless they click very edge of hex), but that's rare.
             this.selectShip(ship, payload);
-        } else if (this.gamedata.isMyShip(ship) && window.DeploymentDock
-                && window.DeploymentDock.shipHasOpenableDockDialog(ship)) {
-            //Stage 7 (Hangar Ops): for the reinforcement case the carrier was
-            //placed on an earlier turn (depTurn < gamedata.turn, no canPreOrder),
-            //so the normal selectShip path above doesn't fire — but the player
-            //still needs a way to dock the reinforcement flight into its hangar.
-            //Open the tooltip menu so the "Dock pending flight here" button is
-            //reachable, without re-selecting the ship (it's not "deploying").
-            this.selectShip(ship, payload);
         } else { //Neither of the above is true, allow to deploy.  Even on hexes occupied by ships that deployed earlier in game.
             this.onHexClicked(payload);
         }
@@ -595,7 +586,8 @@ window.DeploymentPhaseStrategy = function () {
     //
     // Eligibility rules (deployment-phase docking, looser than Stage 5 land):
     //   - Same player slot (carrier and flight owned by the same player)
-    //   - Flight is deploying THIS turn (not a future-turn reinforcement)
+    //   - Flight AND carrier are both deploying THIS turn — a reinforcement
+    //     flight cannot dock into a previously-deployed carrier
     //   - Flight hasn't been placed on the map yet (no commit movement)
     //   - Flight isn't already destroyed/removed
     //   - Carrier has at least one hangar that accepts the flight's category
@@ -609,6 +601,9 @@ window.DeploymentPhaseStrategy = function () {
             if (!ship || !ship.systems) return false;
             if (!gamedata.isMyShip(ship)) return false;
             if (ship.flight || ship.mine) return false;
+            //Carrier must be deploying THIS turn — fighters arriving on
+            //turn N can only dock into ships also arriving on turn N.
+            if (shipManager.getTurnDeployed(ship) !== gamedata.turn) return false;
 
             // Carrier must have at least one undestroyed hangar with free boxes
             // OR an existing queued deploy-start order (so the dialog can be
