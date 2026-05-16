@@ -1875,6 +1875,15 @@ window.confirm = {
         var hangarBudgets = new Map();
         var budgetLabels  = new Map();         //hangar → jQuery .launch-budget span
 
+        // Stage 8: resulting fighter facing = (carrier facing + hangar direction) % 6.
+        // Carrier facing is locked in Firing Phase, so the last movement order's
+        // facing is authoritative. Ships always have at least one movement entry
+        // (deploy) so the array-length guard is belt-and-braces.
+        var carrierFacing = 0;
+        if (Array.isArray(ship.movement) && ship.movement.length > 0) {
+            carrierFacing = parseInt(ship.movement[ship.movement.length - 1].facing || 0, 10);
+        }
+
         hangars.forEach(function (hangar, hidx) {
             var output = parseInt(hangar.output || 0, 10);
             var used = parseInt(hangar.launchedThisTurn || 0, 10) + parseInt(hangar.landedThisTurn || 0, 10);
@@ -1886,10 +1895,20 @@ window.confirm = {
             var budget = Math.max(0, output - used);
             hangarBudgets.set(hangar, budget);
 
+            // Stage 8: show resulting launch facing per hangar. Suppress for
+            // direction 0 (matches carrier) to keep the legacy forward-launch
+            // header uncluttered.
+            var hangarDir = parseInt(hangar.direction || 0, 10);
+            var facingSuffix = '';
+            if (hangarDir !== 0) {
+                var resultFacing = (((carrierFacing + hangarDir) % 6) + 6) % 6;
+                facingSuffix = ' <span class="multi-value-max">(launches at: ' + mathlib.hexFacingToAngle(resultFacing) + '°)</span>';
+            }
+
             // Hangar header row (no input — just labels). The "remaining" span is updated
             // live by updateBudgetLabel as the user changes inputs in this hangar's rows.
             var headerRow = $('<div class="multi-value-row"></div>');
-            var label = $('<span class="multi-value-label"><span class="multi-value-name">Hangar ' + (hidx + 1) + '</span> <span class="multi-value-max">(launch budget: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span></span>');
+            var label = $('<span class="multi-value-label"><span class="multi-value-name">Hangar ' + (hidx + 1) + '</span> <span class="multi-value-max">(launch budget: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
             label.appendTo(headerRow);
             budgetLabels.set(hangar, label.find('.launch-budget-remaining'));
             container.append(headerRow);
