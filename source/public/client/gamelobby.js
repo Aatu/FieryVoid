@@ -578,7 +578,8 @@ window.gamedata = {
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
 
 		var totalEnhancementsValue = 0;
-		var totalBPCapacity = 0;
+		var totalBPSizeCap = 0;     //sum of per-ship size-based BP caps (1/2/4 with x2 for Assault hulls)
+		var totalBPDedicated = 0;   //sum of dedicated "Breaching Pods" slots declared in ship.fighters
 		var totalBPUsage = 0;
 		var shipHangarProfiles = [];
 		var breachingPodsList = [];
@@ -714,14 +715,17 @@ window.gamedata = {
 					if (lship.shipClass.toLowerCase().indexOf("assault") !== -1) {
 						shipBPLimit *= 2;
 					}
-					totalBPCapacity += shipBPLimit + shipBPDedicated;
+					totalBPSizeCap += shipBPLimit;
+					totalBPDedicated += shipBPDedicated;
 				}
 
 				// Record ship profile for per-ship validation
 				var shipProfile = {
 					id: lship.id,
 					name: lship.shipClass,
-					bpLimitRemaining: shipBPLimit,
+					bpLimit: shipBPLimit,           //original size-based cap (immutable)
+					bpDedicated: shipBPDedicated,   //original dedicated BP slot count (immutable)
+					bpLimitRemaining: shipBPLimit,  //decremented as BPs are assigned
 					slots: shipSlots
 				};
 				shipHangarProfiles.push(shipProfile);
@@ -1140,6 +1144,13 @@ window.gamedata = {
 		//fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
 
+		// Snapshot fleet-wide hangar totals before the BP assignment loop
+		// mutates them — needed below to compute the effective BP cap, which
+		// must exclude AS/H/M slots already claimed by non-BP small craft.
+		var preBPHangarAS = totalHangarAS;
+		var preBPHangarH = totalHangarH;
+		var preBPHangarM = totalHangarM;
+
 		// Per-Ship Breaching Pod Assignment and Deduction.
 		// Pass 1: fill dedicated "Breaching Pods" hangar slots first — these
 		// are guaranteed BP capacity and don't consume the ship's size-based
@@ -1404,9 +1415,37 @@ window.gamedata = {
 		checkResult += "<br>";
 
 		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
-		totalHangarAS = totalHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
+		//Reset totalHangarAS to the pre-BP-loop value (then apply hangar conversions). The BP
+		//assignment loop decrements totalHangarAS when BPs overflow into AS slots, which would
+		//otherwise make the AS report show a spurious failure: e.g. Decurion + 24 AS + 6 BPs
+		//would report "Total Assault Shuttles: 24 (allowed up to 22) FAILURE" alongside the
+		//real "Total Breaching Pods: 6 (allowed up to 4) FAILURE". The AS hangar capacity
+		//for AS units doesn't actually shrink because the player overcommitted BPs — the BP
+		//report is the right place to surface that failure.
+		totalHangarAS = preBPHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
 
-		checkResult += "<br><b><u>Assault Shuttles & Breaching Pods:</u></b><br>";
+		// Effective BP capacity = guaranteed dedicated slots + size-based overflow
+		// capped by AS/H/M slots not already claimed by non-BP small craft.
+		// Without this clamp the report would show 8 BPs allowed on a Decurion
+		// (4 size-cap + 4 dedicated) even after all 24 AS slots are filled with
+		// Assault Shuttles — or 2 BPs allowed on a Primus (12 normal/Heavy slots,
+		// 2 BP size-cap) after all 12 slots are filled with fighters of any size.
+		//
+		// AS slots only accept AS units (per hangarAcceptsCategory), so AS demand
+		// is the only competition for the AS pool. The Heavy+Medium pool is
+		// shared across all fighter sizes via the size hierarchy: smaller
+		// fighters spill up into larger slots when their own slots fill, so the
+		// pool demand must include the spillover from Light and Ultralight too.
+		var freeASForBP = Math.max(0, preBPHangarAS - hangarConversionNet - totalFtrAS);
+		var hmPoolCapacity = preBPHangarH + preBPHangarM + hangarConversionNet;
+		var lightOverflow = Math.max(0, totalFtrL - totalHangarL);
+		var xlOverflow = Math.max(0, totalFtrXL - totalHangarXL) / 2;
+		var hmPoolDemand = totalFtrH + totalFtrM + lightOverflow + xlOverflow;
+		var freeHMForBP = Math.max(0, hmPoolCapacity - hmPoolDemand);
+		var freeOverflowSlots = freeASForBP + freeHMForBP;
+		var totalBPCapacity = totalBPDedicated + Math.min(totalBPSizeCap, freeOverflowSlots);
+
+		checkResult += "<br><b><u>Assault Shuttles & Breaching Pods:</u></b><br><br>";
 		checkResult += " Total Breaching Pods: " + totalBPUsage;
 		checkResult += " (allowed up to " + totalBPCapacity + ")";
 		if (totalBPUsage > totalBPCapacity || unassignedBPs > 0) {
