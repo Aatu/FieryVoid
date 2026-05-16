@@ -12,7 +12,7 @@ const FighterIconContainer = styled.div`
     width: 114px;
     height: 150px;
     background-color: black;
-    border: 1px solid ${props => props.$docked ? '#00b8e6' : '#496791'};
+    border: 1px solid #496791;
     box-sizing: border-box;
     margin: 5px;
 
