@@ -20,7 +20,7 @@ class breachingPodMinbari  extends FighterFlight{
 		$this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
 
-        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size. 		
+        $this->maxFlightSize = 2;//this is an unusual type of 'fighter', limit flight size. 		
 		$this->hangarRequired = 'shuttles'; //for fleet check
         $this->iniativebonus = 10*5;
         

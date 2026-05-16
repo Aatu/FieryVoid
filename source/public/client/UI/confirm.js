@@ -64,6 +64,52 @@ window.confirm = {
         }
     },
 
+    getMaxAmmoFit: function (ship, currentID) {
+        var baseShip = gamedata.getShipByType($(".confirmok").data("shipclass") || ship.phpclass);
+        if (!baseShip) baseShip = ship;
+
+        var ammoMag = null;
+        if (baseShip && baseShip.flight) {
+            var firstFighterKey = Object.keys(baseShip.systems)[0];
+            if (firstFighterKey && baseShip.systems[firstFighterKey].systems) {
+                for (var i in baseShip.systems[firstFighterKey].systems) {
+                    if (baseShip.systems[firstFighterKey].systems[i].name == "ammoMagazine") { ammoMag = baseShip.systems[firstFighterKey].systems[i]; break; }
+                }
+            }
+        } else if (baseShip) {
+            for (var i in baseShip.systems) {
+                if (baseShip.systems[i].name == "ammoMagazine") { ammoMag = baseShip.systems[i]; break; }
+            }
+        }
+
+        if (!ammoMag || typeof ammoMag.capacity === 'undefined') return 9999;
+
+        var capacity = ammoMag.capacity;
+
+        var totalExtraRequested = 0;
+
+        // Sum up other enhancements
+        var _enhNo = 0;
+        var _target = $(".selectAmount.shpenh" + _enhNo);
+        while (typeof _target.data("enhPrice") != 'undefined') {
+            var _noTaken = _target.data("count");
+            var _enhID = _target.data("enhID");
+
+            if (_enhID !== currentID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
+                var slots = 1;
+                if (_enhID == 'AMMO_K' || _enhID == 'AMMO_M') slots = 2;
+                totalExtraRequested += _noTaken * slots;
+            }
+            _enhNo++;
+            _target = $(".selectAmount.shpenh" + _enhNo);
+        }
+
+        var addedSlots = 1;
+        if (currentID == 'AMMO_K' || currentID == 'AMMO_M') addedSlots = 2;
+
+        return Math.floor((capacity - totalExtraRequested) / addedSlots);
+    },
+
     //    arrayIsEmpty: function(array){
     //        for(var i in array){
     //            return false;
@@ -84,6 +130,11 @@ window.confirm = {
         var inc = 1;
 
         if (value + inc <= maxVal) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+            if (maxFit < inc) return;
+
             var newValue = value + inc;
 
             target.data("value", newValue);
@@ -113,44 +164,40 @@ window.confirm = {
     },
 
     getTotalCost: function getTotalCost() {
-
         if ($(".confirm #bulkQuantity").length > 0) {
             return confirm.getTotalCostBulk();
         }
 
-        var flightSize = $(".fighterAmount").html();
-        if (!flightSize) {
-            flightSize = 1;
-        }
-
+        var flightSize = parseInt($(".fighterAmount").html()) || 1;
         var fighterCost = $(".fighterAmount").data("pV");
         if (!fighterCost) {
-            var span = $(".totalUnitCostAmount").data("value");
-            fighterCost = span;
+            fighterCost = $(".totalUnitCostAmount").data("value") || 0;
         }
 
-        var missileType = $(".selectText").data("firingMode");
-        var initialMissileAmount = $(".selectAmount." + missileType).data("initialValue");  //Sometime when editing this will already have an amount build into fighter cost.      
-        var missileAmount = $(".selectAmount." + missileType).data("value");
-        var launchers = $(".selectAmount." + missileType).data("launchers");
-        var missileCost = $(".selectAmount." + missileType).data("cost");
-        var initialMissilesCost = (initialMissileAmount * missileCost * flightSize) * launchers || 0; //Work out what we have to deduct during Edit.        
+        var totalMissileCost = 0;
+        // Sometime when editing this will already have an amount build into fighter cost.
+        // But since we start calculation from pristine base cost (naked), we only add cost of ALL selected missiles.
+        // If a missile is "built-in" and free, its cost is 0 anyway.
+        // If it's built-in and NOT free, but included in base cost, it should have been in pristineBaseCost.
 
-        if (!missileAmount) {
-            missileAmount = 0;
-        }
-        if (!missileCost) {
-            missileCost = 0;
-        }
-        if (!launchers) {
-            launchers = 0;
-        }
+        // Iterate over all missile/ammo options
+        $(".confirm .selectAmount").each(function () {
+            var $amt = $(this);
+            var firingMode = $amt.data("firingMode");
 
-        //	console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
+            // Check if it's a missile option (has firingMode and NOT an enhancement)
+            if (typeof firingMode !== 'undefined' && !$amt.hasClass("shpenh0") && !/shpenh\d+/.test($amt.attr('class'))) {
+                var amount = $amt.data("value") || 0;
+                var cost = $amt.data("cost") || 0;
+                var launchers = $amt.data("launchers") || 0;
 
-        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost) - initialMissilesCost;
+                totalMissileCost += (amount * cost * flightSize * launchers);
+            }
+        });
 
-        //add enhancement cost	   
+        var totalCost = (flightSize * fighterCost) + totalMissileCost;
+
+        // Add enhancement cost	   
         var enhCost = 0;
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
@@ -260,6 +307,16 @@ window.confirm = {
         var enhLimit = target.data("max");
         var enhPrice = target.data("enhPrice");
         var enhPriceStep = target.data("enhPriceStep");
+        var enhID = target.data("enhID");
+
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (maxFit <= noTaken) {
+                return;
+            }
+        }
 
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
@@ -335,6 +392,14 @@ window.confirm = {
         if (value < min) value = min;
         if (value > max) value = max;
 
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
+
         // Update the displayed and stored value
         $(this).text(value);
         $(this).data('value', value);
@@ -387,6 +452,14 @@ window.confirm = {
         // Enforce min/max
         if (value < min) value = min;
         if (value > max) value = max;
+
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
 
         // Update the value and trigger the input change handler
         $(this).text(value);
@@ -441,6 +514,12 @@ window.confirm = {
         // clamp
         if (current < min) current = min;
         if (current > max) current = max;
+
+        var missileType = $amt.data("firingMode");
+        var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+        if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+        var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+        if (current > maxFit) current = Math.max(0, maxFit);
 
         // write both text & data
         $amt
@@ -705,6 +784,14 @@ window.confirm = {
         if (value < min) value = min;
         if (value > max) value = max;
 
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
+
         // Update displayed value
         $(this).text(value);
         $(this).data('value', value);
@@ -826,7 +913,7 @@ window.confirm = {
             selectAmountItem.addClass("shpenh" + i);
             selectAmountItem.data('enhID', enhID);
             selectAmountItem.data('count', enhCount);
-            
+
             var initialEnhCost = 0;
             for (let eCount = 0; eCount < enhCount; eCount++) {
                 initialEnhCost += enhPrice + (eCount * enhPriceStep);
@@ -836,7 +923,7 @@ window.confirm = {
                 selectAmountItem.data('enhOptionCost', initialEnhCost);
                 selectAmountItem.data('enhIsOption', true);
             }
-            
+
             selectAmountItem.data('min', 0);
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
@@ -935,7 +1022,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
@@ -1022,9 +1109,11 @@ window.confirm = {
         }
 
         var pointCost = ship.pointCost;
-        if (ship.maxFlightSize == 3) { //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-            //but for 3-strong flight cost is still set for 6-strong flight...
-            pointCost = pointCost / 2;
+        if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+            //design pointCost is set for a 6-strong flight (cost-per-craft * 6).
+            //For any fixed sub-six flight (e.g. 3-strong Breaching Pods, 2-strong BPs), scale down to actual flight size.
+            //maxFlightSize 1 is single superheavy with its own pointCost; 6+ already matches the stored cost.
+            pointCost = pointCost * ship.maxFlightSize / 6;
         }
 
 
@@ -1154,7 +1243,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
@@ -1184,10 +1273,10 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-            //special treatment for flight size 3 - as it's less than default 6...
-            if (ship.maxFlightSize == 3) {
-                selectAmountItem.html("3");
-            } else {//default 
+            //for any fixed sub-six flight size, start at that size; otherwise default to 6
+            if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+                selectAmountItem.html(ship.maxFlightSize);
+            } else {//default
                 selectAmountItem.html("6");
             }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
@@ -1389,7 +1478,7 @@ window.confirm = {
         confirm.getTotalCost();
         a.fadeIn(250);
     },
-
+    /*
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {
         var currentText = $(this).text();
@@ -1453,7 +1542,7 @@ window.confirm = {
 
         confirm.getTotalCost();
     },
-
+    */
 
     showSaveFleet: function showSaveFleet(callback) {
         var e = $(this.whtml);

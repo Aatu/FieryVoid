@@ -1074,8 +1074,8 @@ class BaseShip {
 
 		
 		if ($system instanceof Structure){
-			$this->structures[$loc] = $system->id;	
-		}else if(($system->startArc ==0)&&($system->endArc ==0)){ //20.01.2025 - add arc equal to section arc, if not set explicitly
+			$this->structures[$loc] = $system->id;
+		}else if(($system->startArc ==0)&&($system->endArc ==0) && !($system instanceof Bulkhead)){ //20.01.2025 - add arc equal to section arc, if not set explicitly. Bulkheads protect by location only - giving them a section arc makes the arc gate in getSystemProtectingFromDamage falsely filter them out for shots from outside that arc.
 			//if arc is not set - copy from location!
 			if($loc==0){ //PRIMARY
 				$system->startArc = 0;
@@ -1520,7 +1520,7 @@ class BaseShip {
 			$listOfPotentialSystems = $systemhit->systems;
 		}else{ //all systems of a ship
 			$listOfPotentialSystems = $this->systems;
-		}		
+		}
 
 		$shots = 1;
 		if($weapon && $weapon->isLinked) $shots = $weapon->shots;
@@ -2289,27 +2289,29 @@ public function getAllEWExceptDEW($turn){
     }
 
 
-    public function getHitSystem($shooter, $fireOrder, $weapon, $gamedata, $location = null){
-        /*if something has to choose system by firing position, use getHitSystemPos instead*/           
+    public function getHitSystem($shooter, $fireOrder, $weapon, $gamedata, $location = null, $sourceOverride = null){
+        /*if something has to choose system by firing position, use getHitSystemPos instead*/
+        /*$sourceOverride (pixel coords) forces a synthetic source for in-arc system filtering - used by Piercing 3rd-part*/
         if (isset($this->hitChart[0])){
-            $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location);             
+            $system = $this->getHitSystemByTable($shooter, $fireOrder, $weapon, $location, $sourceOverride);
         }
-        else {        	
-            $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location);            
-        }          
+        else {
+            $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location, $sourceOverride);
+        }
         return $system;
     }
 
 
 
-    public function getHitSystemByTable($shooter, $fire, $weapon, $location){
+    public function getHitSystemByTable($shooter, $fire, $weapon, $location, $sourceOverride = null){
         /*DOES NOT take care of overkill!!! returns section structure if no system can be hit, whether that section is still alive or not*/
+        /*$sourceOverride (pixel coords) forces synthetic source - used by Piercing 3rd-part to filter exit-side systems*/
         $system = null;
         $name = false;
         //$location_different = false; //target system may be on different location?
         //$location_different_array = array(); //array(location,system) if so indicated
         $systems = array();
- 
+
         if ($fire->calledid != -1){
             $system = $this->getSystemById($fire->calledid);
         }
@@ -2317,17 +2319,19 @@ public function getAllEWExceptDEW($turn){
         if ($system != null && !$system->isDestroyed()) return $system; //if destroted, allocate s if it wasn't called
         if ($location === null) {
             $location = $this->getHitSectionChoice($shooter, $fire, $weapon);
-        }	
+        }
 		//15.09.2023 - moved bearing calculation here, as it will be needed earlier than previously
 		$bearing = 0;
 		//this will ignore non-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
-		if($weapon->ballistic){
+		if($sourceOverride !== null){ //synthetic source - Piercing 3rd-part exit slug
+			$bearing = $this->getBearingOnPos($sourceOverride);
+		}else if($weapon->ballistic){
 			$movement = $shooter->getLastTurnMovement($fire->turn);
             $pos = mathlib::hexCoToPixel($movement->position);
 			$bearing = $this->getBearingOnPos($pos);
 		}else{
-			$bearing = $this->getBearingOnUnit($shooter);	
-		}		
+			$bearing = $this->getBearingOnUnit($shooter);
+		}
         $hitChart = $this->hitChart[$location];             
         $rngTotal = 20; //standard hit chart has 20 possible locations
         if($weapon->damageType == 'Flash'){ //Flash - change hit chart! - only undestroyed systems
@@ -2402,7 +2406,7 @@ public function getAllEWExceptDEW($turn){
  
         if($name == 'Primary'){ //redirect to PRIMARY!
             if($weapon->noPrimaryHits) return $this->getStructureSystem($location); //If weapon treats Primary as facing Structure - DK 13.01.26
-            return $this->getHitSystemByTable($shooter, $fire, $weapon, 0);
+            return $this->getHitSystemByTable($shooter, $fire, $weapon, 0, $sourceOverride);
         }
         $systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
         if(sizeof($systems)==0){ //if empty, damage is done to Structure
@@ -2496,8 +2500,9 @@ public function getAllEWExceptDEW($turn){
     } //end of function getHitSystemByTable
 
 
-    public function getHitSystemByDice( $shooter, $fire, $weapon, $location){
+    public function getHitSystemByDice( $shooter, $fire, $weapon, $location, $sourceOverride = null){
         /*same as by table, but prepare table out of available systems...*/
+        /*$sourceOverride (pixel coords) forces synthetic source - used by Piercing 3rd-part to filter exit-side systems*/
         $system = null;
         $name = false;
         //$location_different = false; //target system may be on different location?
@@ -2513,17 +2518,19 @@ public function getAllEWExceptDEW($turn){
         if ($location === null) {
             $location = $this->getHitSectionChoice($shooter, $fire, $weapon);
         }
-		
+
 		//15.09.2023 - moved bearing calculation here, as it will be needed
 		$bearing = 0;
 		//this will ignore non-standard direction of impact - like with Flash collateral damage. This information is simply not available here, and IMO not important enough to rewrite entire chain if calls to pass
-		if($weapon->ballistic){
+		if($sourceOverride !== null){ //synthetic source - Piercing 3rd-part exit slug
+			$bearing = $this->getBearingOnPos($sourceOverride);
+		}else if($weapon->ballistic){
 			$movement = $shooter->getLastTurnMovement($fire->turn);
             $pos = mathlib::hexCoToPixel($movement->position);
 			$bearing = $this->getBearingOnPos($pos);
 		}else{
-			$bearing = $this->getBearingOnUnit($shooter);	
-		}	
+			$bearing = $this->getBearingOnUnit($shooter);
+		}
           
 		$hitChart = array(); //$hitChart will contain system names, as usual!
 		//use only non-destroyed systems on section hit
@@ -2600,7 +2607,7 @@ public function getAllEWExceptDEW($turn){
 		
 		if($name == 'Primary'){ //redirect to PRIMARY!
             if($weapon->noPrimaryHits) return $this->getStructureSystem($location); //If weapon treats Primary as facing Structure - DK 13.01.26
-			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0);
+			return $this->getHitSystemByDice($shooter, $fire, $weapon, 0, $sourceOverride);
 		}
 		$systems = $this->getSystemsByNameLoc($name, $location, $bearing, false); //do NOT accept destroyed systems!
 		if(sizeof($systems)==0){ //if empty, just return Structure - whether destroyed or not

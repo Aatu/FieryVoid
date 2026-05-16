@@ -647,13 +647,7 @@ class GromeFlakCannon extends Weapon{
 			$targetBearing = $interceptingShip->getBearingOnUnit($target);
 			if (!mathlib::isInArc($targetBearing, $this->startArc, $this->endArc)) return false;
 			//check on source - launch hex for ballistics, current position for direct fire
-			if ($firingWeapon->ballistic){
-				$movement = $shooter->getLastTurnMovement($fireOrder->turn);
-				$pos = mathlib::hexCoToPixel($movement->position); //launch hex
-				$sourceBearing = $interceptingShip->getBearingOnPos($pos);				
-			}else{ //direct fire
-				$sourceBearing = $interceptingShip->getBearingOnUnit($shooter);
-			}
+			$sourceBearing = $firingWeapon->getIncomingBearing($interceptingShip, $fireOrder, $gamedata);
 			if (!mathlib::isInArc($sourceBearing, $this->startArc, $this->endArc)) return false;
 						
 			return true;

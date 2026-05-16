@@ -844,7 +844,7 @@ window.gamedata = {
                 }
                 //confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 confirm.confirm(
-                    html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
+                    html + "<br>Are you sure you wish to COMMIT YOUR FIRING ORDERS?",
                     gamedata.doCommit,
                     function () {
                         UI.shipMovement.show(); //To show combat pivot UI again on Cancel

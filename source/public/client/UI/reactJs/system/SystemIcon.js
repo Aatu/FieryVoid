@@ -440,7 +440,11 @@ const getText = (ship, system) => {
     } else if (system.outputType === "thrust") {
         return shipManager.movement.getRemainingEngineThrust(ship);
     } else if (system.outputType === "power") {
-        return shipManager.power.getReactorPower(ship, system)
+        let power = shipManager.power.getReactorPower(ship, system);
+        if (gamedata.gamephase > 1 && power < 0) {
+            return 0;
+        }
+        return power;
     } else {
         return shipManager.systems.getOutput(ship, system);
     }

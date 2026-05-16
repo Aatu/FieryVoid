@@ -474,8 +474,9 @@ class FighterFlight extends BaseShip
     }
 
 
-    public function getHitSystem($shooter, $fire, $weapon, $gamedata, $location = null)
+    public function getHitSystem($shooter, $fire, $weapon, $gamedata, $location = null, $sourceOverride = null)
     {
+        //$sourceOverride is unused for fighter flights (no directional armor by section), accepted for parent signature parity
         $skipStandard = false;
         $systems = array();
         if ($fire->calledid != -1) {

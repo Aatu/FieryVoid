@@ -8138,6 +8138,7 @@ class GrapplingClaw extends Weapon implements SpecialAbility{
 				}
 			}
 		$this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gamedata->turn,$gamedata->phase,$shooter->id,$this->id,"ClawAttached","ClawAttached",$target->id);
+		$this->hostShipId = $target->id;
 
 		if($deliveryRoll <= 5){ //successful delivery, continue with applying critical effects.						
 

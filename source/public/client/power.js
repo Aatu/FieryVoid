@@ -9,18 +9,18 @@ shipManager.power = {
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
-			if(ship.flight){
+			if (ship.flight) {
 				for (var i in ship.systems) {
 					var fighter = ship.systems[i]; //The fighter		
 					for (var j in fighter.systems) {
-						shipManager.power.copyLastTurnPower(ship, fighter.systems[j]);					
+						shipManager.power.copyLastTurnPower(ship, fighter.systems[j]);
 					}
-				}		
-			}else{
+				}
+			} else {
 				for (var a in ship.systems) {
 					shipManager.power.copyLastTurnPower(ship, ship.systems[a]);
 				}
-			}	
+			}
 		}
 	},
 
@@ -30,17 +30,16 @@ shipManager.power = {
 		//if system WAS forcibly shut down last turn but is NOT forced to shut down any longer - it should get back online without player input!
 		var wasShutDown = false;
 		var isShutDown = false;
-		if ( (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) || (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) )
-		{
+		if ((shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) || (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns"))) {
 			isShutDown = true;
-		}else{
-			if ( (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn", gamedata.turn - 1)) 
-				|| (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineForTurns", gamedata.turn - 1)) 
+		} else {
+			if ((shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn", gamedata.turn - 1))
+				|| (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineForTurns", gamedata.turn - 1))
 			) {
 				wasShutDown = true;
 			}
 		}
-		
+
 		//copy last turn power 
 		var powers = Array();
 		for (var i in system.power) {
@@ -50,11 +49,11 @@ shipManager.power = {
 				newPower.turn = gamedata.turn;
 				powers.push(newPower);
 			}
-		}		
+		}
 
 		system.power = system.power.concat(powers);
-		
-		if (wasShutDown && (!isShutDown)){ //was forced to shut down, but is no longer - power up!
+
+		if (wasShutDown && (!isShutDown)) { //was forced to shut down, but is no longer - power up!
 			shipManager.power.setOnline(ship, system, true); //do skip message to player - if system cannot be powered up, it won't be powered up and that's it
 		}
 	},
@@ -140,9 +139,9 @@ shipManager.power = {
 		if (system.boostable && !boost) {
 			//if(system.name == "scanner" || system.name == "elintScanner"){
 			if (system.isScanner()) {
-				if ( (ship.base) //02.12.2024, Marcin Sawicki - bases can boost any sonsors, not just strongest
-				     || (system.id == shipManager.power.getHighestSensorsId(ship))  
-				   ){
+				if ((ship.base) //02.12.2024, Marcin Sawicki - bases can boost any sonsors, not just strongest
+					|| (system.id == shipManager.power.getHighestSensorsId(ship))
+				) {
 					// You can only boost the highest sensor rating
 					// if multiple sensors are present on one ship
 					systemwindow.addClass("canboost");
@@ -150,7 +149,7 @@ shipManager.power = {
 			} else {
 				systemwindow.addClass("canboost");
 			}
-		} else if (boost) {		
+		} else if (boost) {
 			systemwindow.addClass("boosted");
 		}
 
@@ -189,7 +188,7 @@ shipManager.power = {
 
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
-			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
@@ -198,8 +197,8 @@ shipManager.power = {
 
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			if (!ship.checkShieldGenerator()) {
 				shipNames[counter] = ship.name;
@@ -220,15 +219,15 @@ shipManager.power = {
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
-			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 			if (ship.mine) continue;
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
 				shipNames[counter] = ship.name;
@@ -241,74 +240,74 @@ shipManager.power = {
 
 	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
 	getCapacitorShipsNegativePower: function getCapacitorShipsNegativePower() {
-			var shipNames = new Array();
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;	
-				if (ship.mine) continue;										
-				if (ship.unavailable) continue;
-				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;
-				var deployTurn = shipManager.getTurnDeployed(ship);
-				if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.							
-				if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
-				if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
-				if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
-					shipNames[counter] = ship.name;
-					counter++;
-				}
+		var shipNames = new Array();
+		var counter = 0;
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+			if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (ship.mine) continue;
+			if (ship.unavailable) continue;
+			if (ship.flight) continue;
+			if (ship.userid != gamedata.thisplayer) continue;
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.							
+			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
+			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
+				shipNames[counter] = ship.name;
+				counter++;
 			}
-			return shipNames;
-		},	//endof getCapacitorShipsNegativePower
-		
+		}
+		return shipNames;
+	},	//endof getCapacitorShipsNegativePower
+
 
 	//like getShipsNegativePower BUT only looks for PlasmaBattery-equipped ships
 	getPlasmaBatteryShipsNegativePower: function getPlasmaBatteryShipsNegativePower() {
-			var batteryShips = new Array();
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-					if(ship.faction !== "Pak'ma'ra Confederacy") continue;
-		            if (ship.unavailable) continue;
-		            if (ship.flight) continue;
-		            if (ship.userid != gamedata.thisplayer) continue;
-					var deployTurn = shipManager.getTurnDeployed(ship);
-					if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.					
-		            if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
-		            if (shipManager.isDestroyed(ship)) continue;
+		var batteryShips = new Array();
+		var counter = 0;
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+			if (ship.faction !== "Pak'ma'ra Confederacy") continue;
+			if (ship.unavailable) continue;
+			if (ship.flight) continue;
+			if (ship.userid != gamedata.thisplayer) continue;
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.					
+			if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
+			if (shipManager.isDestroyed(ship)) continue;
 
-				var batteryPowerAvailable = 0;
-				//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
-	                for (var i = 0; i < ship.systems.length; i++) {
-	                	var currBattery = ship.systems[i];
-	              	    if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))){ //only Plasma Batteries which are not destroyed are of interest 
-						batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
-					}
-				}	
-	                          
-				var batteryPowerRequired = 0;
-				//Calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
-				for (var i = 0; i < ship.systems.length; i++) {
-	                var currWeb = ship.systems[i];
-	 				if(currWeb.name == "PakmaraPlasmaWeb"){ //only Plasma Webs  are of interest 
-	 					for (var k = 0; k < currWeb.fireOrders.length; k++) {
-	                    var currFireOrder = currWeb.fireOrders[k];
-	                        if ((currFireOrder.firingMode == "2") && (shipManager.power.getBoost(currWeb) == 0)) {
-		                        batteryPowerRequired += 1;
-		                    }
-						}       	
-					}	
+			var batteryPowerAvailable = 0;
+			//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
+			for (var i = 0; i < ship.systems.length; i++) {
+				var currBattery = ship.systems[i];
+				if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))) { //only Plasma Batteries which are not destroyed are of interest 
+					batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);
 				}
-	            
-	            if (batteryPowerAvailable < batteryPowerRequired) {
-	                batteryShips[counter] = ship.name;
-	                counter++;
-	            }
 			}
+
+			var batteryPowerRequired = 0;
+			//Calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
+			for (var i = 0; i < ship.systems.length; i++) {
+				var currWeb = ship.systems[i];
+				if (currWeb.name == "PakmaraPlasmaWeb") { //only Plasma Webs  are of interest 
+					for (var k = 0; k < currWeb.fireOrders.length; k++) {
+						var currFireOrder = currWeb.fireOrders[k];
+						if ((currFireOrder.firingMode == "2") && (shipManager.power.getBoost(currWeb) == 0)) {
+							batteryPowerRequired += 1;
+						}
+					}
+				}
+			}
+
+			if (batteryPowerAvailable < batteryPowerRequired) {
+				batteryShips[counter] = ship.name;
+				counter++;
+			}
+		}
 		return batteryShips;
 	},	//endof getPlasmaBatteryShipsNegativePower
-	
+
 
 	getPowerNeedForSection: function getPowerNeedForSection(ship, loc) {
 		var power = 0;
@@ -379,43 +378,36 @@ shipManager.power = {
 
 		for (var s in ship.systems) {
 			var system = ship.systems[s];
-			
-			/* Dual/Duo weapons no longer present
-			if (system.parentId > 0) {
-				// This is a subsystem of a dual/duo weapon. Ignore
-				continue;
+
+			/*temporary power down critical - may happen on C&C*/
+			if (system.displayName == "C&C") { //no point checking other systems
+				output -= shipManager.criticals.hasCritical(system, "tmppowerdown"); //Power output reduced
 			}
-			*/
-			
-			/*temporary power down critical - may happen on C&C*/	
-			if(system.displayName=="C&C"){ //no point checking other systems
-               			output -= shipManager.criticals.hasCritical(system, "tmppowerdown"); //Power output reduced
-			}
-                        
+
 			/*standard: add power for every system powered off
 			  fixed: subtract power for every system powered on (instead!)
 			*/
-			if ( (!system.destroyed)   ){ //destroyed system gets no power either way
-				if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
+			if ((!system.destroyed)) { //destroyed system gets no power either way
+				if (fixedPower == true) { //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
 					output -= system.powerReq;
-				}					
-				var isOff = shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn) ;
+				}
+				var isOff = shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
 
-				if (isOff == true){
+				if (isOff == true) {
 					output += system.powerReq; //power off => base power is available after all; ignore boosts, if any
 				} else {
-					for (var i in system.power){
+					for (var i in system.power) {
 						var power = system.power[i];
 						if (power.turn != gamedata.turn) continue;
 						//types: 1:offline 2:boost, 3:overload
 						if (power.type == 1) isOff = true; //should not happen as it was accounted for earlier
-						if (power.type == 2){
+						if (power.type == 2) {
 							var currBoost = shipManager.power.countBoostPowerUsed(ship, system);
 							output -= currBoost;
 						}
 						if (power.type == 3) output -= system.powerReq;
 					}
-				}				
+				}
 			}
 		}
 
@@ -427,33 +419,33 @@ shipManager.power = {
 
 		if (shipManager.systems.isReactorDestroyed(ship) || shipManager.criticals.hasCritical(reactor, "ForcedOfflineOneTurn")) return true;
 
-		
+
 		var power = shipManager.power.getReactorPower(ship, reactor);
 
-		if (power >= 0){
-			return false;	
+		if (power >= 0) {
+			return false;
 		}
-		
+
 		/* if all power-using systems are offline and still power <0, then it's powerless and that's it!
 		if (this.countPossiblePower(ship) + power > 0) {
 			return false;			
 		}
 		*/
-		
+
 		/*check if all power-using systems are offline - if not, then it's not powerless*/
 		for (var i in ship.systems) {
 			var system = ship.systems[i];
 			if (system.powerReq > 0) {
 				//system is neither destroyed nor offline
-				if ( (!shipManager.systems.isDestroyed(ship, system)) && (!shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn)) )	{
+				if ((!shipManager.systems.isDestroyed(ship, system)) && (!shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn))) {
 					return false;
 				}
 			}
 			//and no system except Reactor may be boosted, too
-			if (system.name != 'reactor'){
-				if (shipManager.power.getBoost(system) > 0){
+			if (system.name != 'reactor') {
+				if (shipManager.power.getBoost(system) > 0) {
 					return false;
-				}					
+				}
 			}
 		}
 
@@ -470,16 +462,16 @@ shipManager.power = {
 		}
 		//console.log(ship.name + " possible power: " + power);
 		return power;
-	
-	},
-	
 
-	
-	isOfflineOnTurn: function(ship, system, turn){		
-		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+	},
+
+
+
+	isOfflineOnTurn: function (ship, system, turn) {
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) {
 			return true;
 		}
-		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn",turn)){
+		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn", turn)) {
 			return true;
 		}
 
@@ -489,7 +481,7 @@ shipManager.power = {
 		}
 		*/
 
-		for (var i in system.power){
+		for (var i in system.power) {
 			var power = system.power[i];
 			if (power.turn != turn) continue;
 			if (power.type == 1) return true;
@@ -499,18 +491,18 @@ shipManager.power = {
 	},
 
 
-	isOffline: function(ship, system){
+	isOffline: function (ship, system) {
 		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
 	},
 
 	setOnline: function setOnline(ship, system, skipMessage = false) {
 		if (ship.faction === "Vorlon Empire" && !ship.flight && (system instanceof Weapon || system instanceof Shield)) {
-             var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
-             if (capacitor && capacitor.active) {
-                 if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");
-                 return;
-             }
-        }
+			var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
+			if (capacitor && capacitor.active) {
+				if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");
+				return;
+			}
+		}
 
 		if (system.name == "graviticShield") {
 			if (ship.checkShieldGenerator()) {
@@ -571,20 +563,20 @@ shipManager.power = {
 		return boost;
 	},
 
-	
-	isBoosted: function(ship, system){
+
+	isBoosted: function (ship, system) {
 
 		let turnToCheck = gamedata.turn;
 
 		//In later Deployment phases Boost won't show until after phase 1, so we look at previous turn.
 		if (gamedata.gamephase === -1 && gamedata.turn > 1) {
-			if(shipManager.getTurnDeployed(ship) !== gamedata.turn){
+			if (shipManager.getTurnDeployed(ship) !== gamedata.turn) {
 				turnToCheck = gamedata.turn - 1;
 				return (shipManager.power.getBoostOnTurn(system, turnToCheck) > 0);
-			}					
-		}	
-		
-		return (shipManager.power.getBoost(system)!==0); //is boosted if boost > 0
+			}
+		}
+
+		return (shipManager.power.getBoost(system) !== 0); //is boosted if boost > 0
 	},
 
 	countTotalEffectiveEW: function countTotalEffectiveEW(ship) {
@@ -592,7 +584,7 @@ shipManager.power = {
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			var sys = ship.systems[i];
-			
+
 			if (sys.isScanner()) {
 				var online = true;
 				for (var j in sys.power) {
@@ -656,7 +648,7 @@ shipManager.power = {
 	},
 
 	countBoostPowerUsed: function countBoostPowerUsed(ship, system) {
-		var boost = shipManager.power.getBoost(system);2;
+		var boost = shipManager.power.getBoost(system); 2;
 
 		if (boost == 0 || shipManager.systems.isDestroyed(ship, system)) return 0;
 
@@ -686,7 +678,7 @@ shipManager.power = {
 
 	canBoost: function canBoost(ship, system) {
 
-		if(shipManager.power.isOffline(ship, system)) return false;
+		if (shipManager.power.isOffline(ship, system)) return false;
 		return true;
 		/* no longer needed, I'm leaving the code in case in the future ideas change again
 		//can always boost reactor (to overload)!
@@ -706,7 +698,7 @@ shipManager.power = {
 	},
 
 	canDeboost: function canDeboost(ship, system) {
-		if(shipManager.power.isOffline(ship, system)) return false;
+		if (shipManager.power.isOffline(ship, system)) return false;
 		return true;
 	},
 
@@ -729,42 +721,42 @@ shipManager.power = {
 				return;
 			}
 		}
-				
+
 	},
 
 
 	checkBoostValid: function checkBoostValid(ship, system) {
-	    var validBoost = true;
+		var validBoost = true;
 
-	    if (ship.faction === "Pak'ma'ra Confederacy" && system instanceof Scanner) {
-	        var batteryPowerAvailable = 0;
-	        var scannerStrength = shipManager.systems.getOutput(ship, system);
-	        var reactorSurplus = shipManager.power.getReactorPower(ship, system);
+		if (ship.faction === "Pak'ma'ra Confederacy" && system instanceof Scanner) {
+			var batteryPowerAvailable = 0;
+			var scannerStrength = shipManager.systems.getOutput(ship, system);
+			var reactorSurplus = shipManager.power.getReactorPower(ship, system);
 
-	        // Calculate total Plasma Battery power available
-	        ship.systems.forEach(currBattery => {
-	            if (currBattery.name === "PlasmaBattery" && !shipManager.systems.isDestroyed(ship, currBattery)) {
-	                batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);
-	            }
-	        });
+			// Calculate total Plasma Battery power available
+			ship.systems.forEach(currBattery => {
+				if (currBattery.name === "PlasmaBattery" && !shipManager.systems.isDestroyed(ship, currBattery)) {
+					batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);
+				}
+			});
 
-	        var effectiveReactorPower = reactorSurplus - batteryPowerAvailable;
-	        var powerNeeded = scannerStrength + 1;
+			var effectiveReactorPower = reactorSurplus - batteryPowerAvailable;
+			var powerNeeded = scannerStrength + 1;
 
-	        // Validate boost power
-	        if (batteryPowerAvailable > 0 && effectiveReactorPower < powerNeeded) {
-	            confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
-	            validBoost = false;
-	        }
-	    }
+			// Validate boost power
+			if (batteryPowerAvailable > 0 && effectiveReactorPower < powerNeeded) {
+				confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
+				validBoost = false;
+			}
+		}
 
-	    return validBoost;
+		return validBoost;
 	},
-	
+
 
 	setBoost: function setBoost(ship, system) {
 		if (!shipManager.power.canBoost(ship, system)) {
-			window.confirm.error("You do not have sufficient energy to boost this system.", function () {});
+			window.confirm.error("You do not have sufficient energy to boost this system.", function () { });
 			return;
 		}
 
@@ -828,7 +820,7 @@ shipManager.power = {
 
 	isOverloading: function isOverloading(ship, system) {
 
-		if(shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) return false;
+		if (shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) return false;
 
 		if (system.alwaysoverloading) {
 			return true;
@@ -849,7 +841,7 @@ shipManager.power = {
 	clickPlus: function clickPlus(ship, system) {
 
 		//if (gamedata.gamephase !== 1) return;
-		
+
 		let isBoostPhase = false;
 		/*
 		// Check if boostOtherPhases is defined as an array
@@ -865,7 +857,7 @@ shipManager.power = {
 			isBoostPhase = true;
 		}
 		// Stop here if not a boostable phase
-		if (!isBoostPhase) return;	
+		if (!isBoostPhase) return;
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
@@ -883,13 +875,13 @@ shipManager.power = {
 		}
 
 		//New function to check for things like Pak'ma'ra power boosting exceptions - DK 10/24
-		if(!shipManager.power.checkBoostValid(ship, system)) return;	
-				
+		if (!shipManager.power.checkBoostValid(ship, system)) return;
+
 		shipManager.power.setBoost(ship, system);
 		system.onBoostIncrease(); //To apply conditions/effects when a system is actually boosted.		
 		shipWindowManager.setDataForSystem(ship, system);
-		if(!ship.flight)shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	clickMinus: function clickMinus(ship, system) {
@@ -909,10 +901,10 @@ shipManager.power = {
 
 		if (gamedata.gamephase === 1) {
 			isBoostPhase = true;
-		}		
+		}
 		// Stop here if not a boostable phase
-		if (!isBoostPhase) return;		
-		
+		if (!isBoostPhase) return;
+
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 
 		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
@@ -922,15 +914,15 @@ shipManager.power = {
 		}
 		*/
 		shipManager.power.unsetBoost(ship, system);
-		system.onBoostDecrease();		
+		system.onBoostDecrease();
 		shipWindowManager.setDataForSystem(ship, system);
-		if(!ship.flight)shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	offlineAll: function offlineAll(ship, system) {
 		var array = [];
-        /* Cleaned 19.8.25 - DK
+		/* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
@@ -939,7 +931,7 @@ shipManager.power = {
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
 				//if (system.weapon) { //make this work for non-weapons too
-					array.push(ship.systems[i]);
+				array.push(ship.systems[i]);
 				//}
 			}
 		}
@@ -960,7 +952,7 @@ shipManager.power = {
 			shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		}
 
-        webglScene.customEvent('SystemDataChanged', { ship: ship });
+		webglScene.customEvent('SystemDataChanged', { ship: ship });
 	},
 
 	onOfflineClicked: function onOfflineClicked(ship, system) {
@@ -977,7 +969,7 @@ shipManager.power = {
 			system = shipManager.systems.getSystem(ship, system.parentId);
 		}
 
-		if(system.active) return; //Prevent powering off systems that were activated in Pre-Turn orders e.g. Shading Field
+		if (system.active) return; //Prevent powering off systems that were activated in Pre-Turn orders e.g. Shading Field
 
 		if (gamedata.gamephase != 1) return;
 
@@ -1000,8 +992,8 @@ shipManager.power = {
 			system.onTurnOff(ship);
 		}
 
-		if(system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
-			shipManager.power.stopOverloading(ship, system); 
+		if (system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
+			shipManager.power.stopOverloading(ship, system);
 		}
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
@@ -1011,38 +1003,38 @@ shipManager.power = {
 		}
 
 		//Add new warning for when people ignore tooltip and try to deactivate Jump Drive before they should - DK 10/24
-        if (system instanceof JumpEngine) {
+		if (system instanceof JumpEngine) {
 			var healthThreshold = system.maxhealth / 2;
 			var currHealth = shipManager.systems.getRemainingHealth(system);
-            var html = '';
+			var html = '';
 			//Check Jump Drive is over 50% health, and Desperate Rules do not apply to player team or both teams		
-			if(currHealth > healthThreshold){
+			if (currHealth > healthThreshold) {
 				// No warning for ships if desperate rules apply
-				if (gamedata.rules.desperate === undefined || 
+				if (gamedata.rules.desperate === undefined ||
 					(gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
-	                	html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
-	                	html += "<br>";
-						confirm.warning(html);
-				}		
-	         }         
+					html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
+					html += "<br>";
+					confirm.warning(html);
+				}
+			}
 		}
 
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	onlineAll: function onlineAll(ship, system) {
 		var array = [];
 
-        /* Cleaned 19.8.25 - DK
+		/* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
-		*/	
+		*/
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
 				//if (system.weapon) { //make this work for non-weapons too
-					array.push(ship.systems[i]);
+				array.push(ship.systems[i]);
 				//}
 			}
 		}
@@ -1057,8 +1049,8 @@ shipManager.power = {
 				shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 			}
 		}
-		
-        webglScene.customEvent('SystemDataChanged', { ship: ship });
+
+		webglScene.customEvent('SystemDataChanged', { ship: ship });
 	},
 
 	onOnlineClicked: function onOnlineClicked(ship, system) {
@@ -1083,7 +1075,7 @@ shipManager.power = {
 		}
 
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	onOverloadClicked: function onOverloadClicked(ship, system) {
@@ -1100,7 +1092,7 @@ shipManager.power = {
 		shipManager.power.setOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	onStopOverloadClicked: function onStopOverloadClicked(ship, system) {
@@ -1113,12 +1105,12 @@ shipManager.power = {
 
 		if (shipManager.power.isOffline(ship, system)) return;
 
-		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
+		if (system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
 
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 
 };

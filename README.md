@@ -42,7 +42,7 @@ Password: fieryvoid (or possibly just leave blank)
 Database: B5CGM
 
 3. Setup Client-Side Development (Yarn)
-Since FieryVoid bundles legacy code, you'll need to install the Node dependencies locally so things recompile when you make edits:
+Since FieryVoid bundles legacy code, you'll need to install the Node dependencies locally so things recompile when you make edits by running these commands in project root folder:
 
 
 # First time setup

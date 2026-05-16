@@ -440,17 +440,38 @@ window.weaponManager = {
         }
     },
 
+    // Build hover-tooltip text from a calculateHitChange result.
+    // Returns '' when there is nothing to show.
+    buildHitChanceTooltipText: function buildHitChanceTooltipText(result) {
+        if (!result) return '';
+        if (result.breakdownReason) return result.breakdownReason;
+        if (!result.modifiers || result.modifiers.length === 0) return '';
+        var lines = ['Hit chance: ' + result.hitChance + '%'];
+        for (var i = 0; i < result.modifiers.length; i++) {
+            var m = result.modifiers[i];
+            var pct = Math.round(m.value * 5 * 10) / 10; //one-decimal %, trailing .0 dropped by toString
+            var sign = (pct >= 0 && m.key !== 'base') ? '+' : ''; //base is the starting value, not a modifier
+            lines.push('• ' + m.label + ': ' + sign + pct + '%');
+        }
+        return lines.join('\n');
+    },
+
+    // Attach the hit-chance hover-tooltip delegated handlers to a container.
+    // We bind locally rather than on document because the parent ShipTooltip
+    // element calls stopPropagation() on mouseover/out, which would otherwise
+    // eat the bubbled event before it reaches document.
+    attachHitChanceTooltipDelegation: function attachHitChanceTooltipDelegation($el) {
+        $el.off('.hitchance')
+           .on('mouseenter.hitchance touchstart.hitchance', '.hit-chance-tooltip', _showHitChanceTooltip)
+           .on('mouseleave.hitchance touchend.hitchance touchmove.hitchance', '.hit-chance-tooltip', _hideHitChanceTooltip);
+    },
+
     targetingShipTooltip: function targetingShipTooltip(selectedShip, ship, e, calledid) {
         //e.find(".shipname").html(ship.name);
         var f = $(".targeting", e);
         f.html("");
 
-        // Delegate the hit-chance hover tooltip on f rather than document, because
-        // the parent ShipTooltip element calls stopPropagation() on mouseover/out
-        // and would otherwise eat the bubbled event before it reaches document.
-        f.off('.hitchance')
-         .on('mouseenter.hitchance touchstart.hitchance', '.hit-chance-tooltip', _showHitChanceTooltip)
-         .on('mouseleave.hitchance touchend.hitchance touchmove.hitchance', '.hit-chance-tooltip', _hideHitChanceTooltip);
+        weaponManager.attachHitChanceTooltipDelegation(f);
 
         if (gamedata.selectedSystems.length === 0) {
             return;
@@ -604,20 +625,7 @@ window.weaponManager = {
                             var result = weaponManager.calculateHitChange(selectedShip, ship, weapon, calledid);
                             var hitChance = result.hitChance;
 
-                            // Build hover-tooltip text from breakdown (or breakdownReason for early-returns).
-                            var tooltipText = '';
-                            if (result.breakdownReason) {
-                                tooltipText = result.breakdownReason;
-                            } else if (result.modifiers && result.modifiers.length > 0) {
-                                var lines = ['Hit chance: ' + hitChance + '%'];
-                                for (var mi = 0; mi < result.modifiers.length; mi++) {
-                                    var m = result.modifiers[mi];
-                                    var pct = Math.round(m.value * 5 * 10) / 10; //one-decimal %, trailing .0 dropped by toString
-                                    var sign = (pct >= 0 && m.key !== 'base') ? '+' : ''; //base is the starting value, not a modifier
-                                    lines.push('• ' + m.label + ': ' + sign + pct + '%');
-                                }
-                                tooltipText = lines.join('\n');
-                            }
+                            var tooltipText = weaponManager.buildHitChanceTooltipText(result);
                             var chanceClass = (hitChance <= 0 ? 'negHitchange' : 'posHitchange');
                             if (tooltipText) chanceClass += ' hit-chance-tooltip';
                             var dataAttr = tooltipText ? ' data-tooltip="' + tooltipText + '"' : '';
@@ -961,6 +969,75 @@ window.weaponManager = {
 
     /*calculate hit chance for ramming attack - different procedure*/
     /*also, it would be a bit different (simplified) from B5Wars original*/
+    /* Refactored DK 2026: returns same shape as calculateHitChange so the
+       targeting tooltip can show a per-modifier breakdown. */
+    calculateRamChance: function calculateRamChance(shooter, target, weapon, calledid) {
+        function makeResult(hitChance, opts) {
+            opts = opts || {};
+            return {
+                hitChance: hitChance,
+                autoHit: !!opts.autoHit,
+                isOutOfRange: false,
+                breakdownReason: opts.breakdownReason || null,
+                modifiers: opts.modifiers || [],
+                _otherDetail: []
+            };
+        }
+
+        if (calledid > 0) return makeResult(0, { breakdownReason: 'Ramming: cannot called shot' });
+        if ((!shooter.flight) && (target.flight)) return makeResult(0, { breakdownReason: 'Ramming: ship cannot ram a fighter' });
+
+        var shooterHalfphased = shipManager.movement.isHalfPhased(shooter);
+        var targetHalfphased = shipManager.movement.isHalfPhased(target);
+        if (shooterHalfphased != targetHalfphased) return makeResult(0, { breakdownReason: 'Ramming: half-phase mismatch' });
+
+        var modifiers = [];
+        function pushIfNonZero(key, label, value) {
+            if (value !== 0) modifiers.push({ key: key, label: label, value: value });
+        }
+
+        pushIfNonZero('base', 'Base Chance', 8); //40%
+        if (target.Enormous)  pushIfNonZero('targetEnormous',  'Target Enormous',  6);
+        if (shooter.Enormous) pushIfNonZero('shooterEnormous', 'Shooter Enormous', 6);
+
+        if (!shooter.flight && (target.shipSizeClass >= 3) && (shooter.shipSizeClass < 3)) {
+            pushIfNonZero('targetCapital', 'Target Capital',  2);
+        }
+        if ((shooter.shipSizeClass >= 3) && (target.shipSizeClass < 3)) {
+            pushIfNonZero('subCapTarget',  'Sub-Capital Target', -2);
+        }
+        if (shooter.flight && !target.flight) {
+            pushIfNonZero('fighterVsShip', 'Fighter vs Ship', 4);
+        }
+
+        var targetSpeed = Math.abs(shipManager.movement.getSpeed(target));
+        var speedMod;
+        switch (targetSpeed) {
+            case 0: speedMod =  5; break;
+            case 1: speedMod =  3; break;
+            case 2:
+            case 3: speedMod =  2; break;
+            case 4:
+            case 5: speedMod =  1; break;
+            default: speedMod = -Math.ceil((targetSpeed - 5) / 5);
+        }
+        pushIfNonZero('targetSpeed',     'Target Speed',     speedMod);
+        pushIfNonZero('shooterJinking',  'Shooter Jinking', -shipManager.movement.getJinking(shooter));
+        pushIfNonZero('targetJinking',   'Target Jinking',  -shipManager.movement.getJinking(target));
+        pushIfNonZero('fireControl',     'Fire Control',     weaponManager.getFireControl(target, weapon));
+
+        var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));
+        pushIfNonZero('range',           'Range',           -(weapon.rangePenalty * ownSpeed));
+
+        var sum = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
+        var hitChance = Math.round(sum * 5); //d20 -> d100
+        return makeResult(hitChance, { modifiers: modifiers });
+    }, //endof calculateRamChance
+
+    /* ------------------------------------------------------------
+       OLD calculateRamChance — kept for reference. Do not call.
+       Replaced by the breakdown-returning version above. Behavior preserved.
+       ------------------------------------------------------------
     calculateRamChance: function (shooter, target, weapon, calledid) {
         if (calledid > 0) return 0;//can't call ramming attack!
         if ((!shooter.flight) && (target.flight)) return 0;//ship has no chance to ram a fighter!
@@ -1014,12 +1091,80 @@ window.weaponManager = {
         hitChance = Math.round(hitChance * 5); //convert d20->d100
         return hitChance;
     }, //endof calculateRamChance
+    ------------------------------------------------------------ */
 
 
     //calculate hit chance for Boarding Action - different procedure
+    /* Refactored DK 2026: returns same shape as calculateHitChange so the
+       targeting tooltip can show a per-modifier breakdown. */
+    calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon) {
+        function makeResult(hitChance, opts) {
+            opts = opts || {};
+            return {
+                hitChance: hitChance,
+                autoHit: !!opts.autoHit,
+                isOutOfRange: false,
+                breakdownReason: opts.breakdownReason || null,
+                modifiers: opts.modifiers || [],
+                _otherDetail: []
+            };
+        }
+
+        if (target.flight)              return makeResult(0, { breakdownReason: 'Boarding: cannot board fighter' });
+        if (target.shipSizeClass == 5)  return makeResult(0, { breakdownReason: 'Boarding: cannot board terrain' });
+        if (target.mine)                return makeResult(0, { breakdownReason: 'Boarding: cannot board mine' });
+        if (target.attached[shooter.id] !== undefined) {
+            return makeResult(100, { autoHit: true, breakdownReason: 'Boarding: attached to target' });
+        }
+        if (shipManager.movement.getJinking(shooter) > 0) {
+            return makeResult(0, { breakdownReason: 'Boarding: cannot jink and attach' });
+        }
+
+        var modifiers = [];
+        function pushIfNonZero(key, label, value) {
+            if (value !== 0) modifiers.push({ key: key, label: label, value: value });
+        }
+
+        pushIfNonZero('base',        'Base Chance',  20); //100%
+        pushIfNonZero('fireControl', 'Fire Control', weaponManager.getFireControl(target, weapon));
+
+        var targetSpeed = Math.abs(shipManager.movement.getSpeed(target));
+        var ownSpeed    = Math.abs(shipManager.movement.getSpeed(shooter));
+        var speedDifference = Math.abs(targetSpeed - ownSpeed);
+        var freeThrust = shooter.freethrust;
+
+        if (shooter.flight) { //Breaching Pods
+            if (speedDifference > freeThrust) {
+                return makeResult(0, { breakdownReason: 'Boarding: insufficient thrust to match speed' });
+            }
+            if (targetSpeed > ownSpeed) {
+                //Each point of speed difference equates to 10% chance to miss.
+                pushIfNonZero('speedDifference', 'Speed Difference', -(speedDifference * 2));
+            }
+        } else { //Grapple Ships
+            if (target.iniative > shooter.iniative) {
+                return makeResult(0, { breakdownReason: 'Boarding: target won initiative' });
+            }
+            if (speedDifference > 0) {
+                //Each point of speed difference equates to 5% chance to miss.
+                pushIfNonZero('speedDifference', 'Speed Difference', -speedDifference);
+                //Cannot attach to Enormous without auto-ramming; partial bonus offered.
+                if (target.Enormous) pushIfNonZero('targetEnormous', 'Target Enormous', 2);
+            }
+        }
+
+        var sum = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
+        var hitChance = Math.round(sum * 5); //d20 -> d100
+        return makeResult(hitChance, { modifiers: modifiers });
+    }, //endof calculateBoardingAction
+
+    /* ------------------------------------------------------------
+       OLD calculateBoardingAction — kept for reference. Do not call.
+       Replaced by the breakdown-returning version above. Behavior preserved.
+       ------------------------------------------------------------
     calculateBoardingAction: function calculateBoardingAction(shooter, target, weapon) {
         if (target.flight || target.shipSizeClass == 5 || target.mine) return 0;//Cannot board fighters,  terrain, or mines!
-        if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit         
+        if (target.attached[shooter.id] !== undefined) return 100; // Pod attacking parent gets 100% chance to hit
         var jinking = shipManager.movement.getJinking(shooter); //Raider pods can jink, but can't attach at same time.
         if (jinking > 0) return 0;
 
@@ -1030,36 +1175,37 @@ window.weaponManager = {
 
         var targetSpeed = Math.abs(shipManager.movement.getSpeed(target)); //I think speed cannot be negative, but just in case ;)
         var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));
-        var speedDifference = Math.abs(targetSpeed - ownSpeed); //keep it a positive number. 		
+        var speedDifference = Math.abs(targetSpeed - ownSpeed); //keep it a positive number.
         var freeThrust = shooter.freethrust;
 
-        if (shooter.flight) {	//Breaching Pods.	
-            if (speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.		
+        if (shooter.flight) {	//Breaching Pods.
+            if (speedDifference > freeThrust) return 0;//Not enough thrust to compensate for speed difference, automatic miss.
 
             if (targetSpeed > ownSpeed) {//Target is moving faster, what are chances to attach?
                 var speedChance = speedDifference * 2;//Each point of speed differnece equates to 10% chance to miss.
                 var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
-                hitChance = Math.round(newHitchance * 5);//Convert to % value			
+                hitChance = Math.round(newHitchance * 5);//Convert to % value
                 return hitChance;
             } else {
-                hitChance = Math.round(hitChance * 5);	//Convert to % value				
+                hitChance = Math.round(hitChance * 5);	//Convert to % value
                 return hitChance;
             }
         } else { //Grapple Ships
-            if (target.iniative > shooter.iniative) return 0;//Cannot grapple ships which rolled equal or higher initiative than you.		
+            if (target.iniative > shooter.iniative) return 0;//Cannot grapple ships which rolled equal or higher initiative than you.
             if (speedDifference > 0) {//Check Speed difference
                 var speedChance = speedDifference;//Each point of speed difference equates to 5% chance to miss.
                 var newHitchance = hitChance - speedChance;//Take current hitChance, and remove speed difference penalty.
                 if (target.Enormous) newHitchance += 2;//You can't attach to Enormous Units without auto-ramming, but at least you get a bonus :)
-                hitChance = Math.round(newHitchance * 5);//Convert to % value			
+                hitChance = Math.round(newHitchance * 5);//Convert to % value
                 return hitChance;
             } else {
-                hitChance = Math.round(hitChance * 5);	//Convert to % value				
+                hitChance = Math.round(hitChance * 5);	//Convert to % value
                 return hitChance;
             }
         }
 
     }, //endof calculateBoardingAction
+    ------------------------------------------------------------ */
 
 
     getFiringHex: function getFiringHex(shooter, weapon) {
@@ -1393,10 +1539,10 @@ window.weaponManager = {
         if (weapon.autoHit) return makeResult(100, { autoHit: true, breakdownReason: 'Auto-hit' });
 
         if (weapon.isRammingAttack) {
-            return makeResult(weaponManager.calculateRamChance(shooter, target, weapon, calledid), { breakdownReason: 'Ramming attack' });
+            return weaponManager.calculateRamChance(shooter, target, weapon, calledid);
         }
         if (weapon.isBoardingAction) {
-            return makeResult(weaponManager.calculateBoardingAction(shooter, target, weapon), { breakdownReason: 'Boarding action' });
+            return weaponManager.calculateBoardingAction(shooter, target, weapon);
         }
 
         //Sustained-overload weapons auto-hit/auto-miss based on previous turn target

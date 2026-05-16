@@ -62,6 +62,7 @@ window.combatLog = {
         var totalInterceptPenalty = 0;
         var totalInterceptorsCount = 0;
         var tooltipTextParts = [];
+        var rollsTooltipTextParts = [];
         var shotIndex = 1;
 
         for (var a in orders) {
@@ -113,12 +114,31 @@ window.combatLog = {
                     tooltipTextParts.push("Shot " + shotIndex + ": No interception");
                 }
                 shotIndex++;
+
+                var rollRegex = /rolled: (\d+), needed: (\d+)/g;
+                var rollMatch;
+                while ((rollMatch = rollRegex.exec(fire.notes)) !== null) {
+                    var rolled = parseInt(rollMatch[1], 10);
+                    var needed = parseInt(rollMatch[2], 10);
+                    var rollText = "Shot " + (rollsTooltipTextParts.length + 1) + ": " + rolled;
+                    if (rolled <= needed) {
+                        rollText = "<span style='color: limegreen; font-weight: bold;'>" + rollText + "</span>";
+                    }
+                    rollsTooltipTextParts.push(rollText);
+                }
             }
 
             if (fire.pubnotes) notes += fire.pubnotes + " ";
         }
 
-        var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire">FIRE: </span><span>';
+        var fireColor = "";
+        if (gamedata.isMyShip(ship)) {
+            fireColor = "color:limegreen;";
+        } else if (gamedata.isMyorMyTeamShip(ship)) {
+            fireColor = "color:#33adff;";
+        }
+
+        var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
 
         var counttext = count > 1 ? count + "x " : "";
@@ -131,12 +151,19 @@ window.combatLog = {
 
             // If there's more than one shot, append the per-shot breakdown
             if (shotIndex > 2) {
-                tooltipText += "\n• " + tooltipTextParts.join("\n• ");
+                tooltipText += "\n" + tooltipTextParts.join("\n");
             }
 
             tooltipAttr = ' class="intercept-tooltip" data-tooltip="' + tooltipText + '"';
         } else {
             tooltipAttr = '';
+        }
+
+        var rollsTooltipAttr = "";
+        if (rollsTooltipTextParts.length > 0) {
+            var rollsTooltipText = "Dice Rolls";
+            rollsTooltipText += "\n" + rollsTooltipTextParts.join("\n");
+            rollsTooltipAttr = ' class="intercept-tooltip" data-tooltip="' + rollsTooltipText + '"';
         }
 
         var chancetext = "";
@@ -163,10 +190,17 @@ window.combatLog = {
         //if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
         //if (target) shottext = ', ' + ordersChit + '(' +shotshit + ')/' + ordersC + '(' +shots + ') shots hit' + intertext + '.';
         if (target) {
+            var shotContent = "";
             if (ordersC != shots) {
-                shottext = ', ' + ordersChit + '(' + shotshit + ')/' + ordersC + '(' + shots + ') shots hit' + intertext + '.';
+                shotContent = ordersChit + '(' + shotshit + ')/' + ordersC + '(' + shots + ') shots hit';
             } else {
-                shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
+                shotContent = shotshit + '/' + shots + ' shots hit';
+            }
+
+            if (rollsTooltipAttr !== "") {
+                shottext = ', <span' + rollsTooltipAttr + '>' + shotContent + '</span>' + intertext + '.';
+            } else {
+                shottext = ', ' + shotContent + intertext + '.';
             }
         }
 
@@ -581,7 +615,7 @@ $(function () {
         var $header = $('<div class="hctt-header"></div>').text(lines[0] || '');
         tooltip.empty().append($header);
         for (var i = 1; i < lines.length; i++) {
-            tooltip.append($('<div class="hctt-row"></div>').text(lines[i]));
+            tooltip.append($('<div class="hctt-row"></div>').html(lines[i]));
         }
         var rect = this.getBoundingClientRect();
         var topPos = rect.top - tooltip.outerHeight() - 5;

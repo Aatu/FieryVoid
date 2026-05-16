@@ -11,7 +11,8 @@ class govallEarlyAM extends HeavyCombatVessel{
         $this->shipClass = "Govall Bombardment Destroyer (Early)";
         
 		$this->variantOf = "Govall Bombardment Destroyer";
-		$this->occurence = "common";        
+		$this->occurence = "common";       
+		$this->canvasSize = 180;   		 
  
         $this->limited = 33; 
         $this->isd = 2230;

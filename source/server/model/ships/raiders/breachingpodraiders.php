@@ -18,7 +18,7 @@ class breachingpodraiders extends FighterFlight{
 		$this->jinkinglimit = 4;
 		$this->turncost = 0.33;	
 
-        $this->maxFlightSize = 3;//this is an unusual type of 'fighter', limit flight size.      
+        $this->maxFlightSize = 2;//this is an unusual type of 'fighter', limit flight size.      
         $this->hangarRequired = 'Breaching Pods'; //for fleet check   
 		$this->unitSize = 1; 
 

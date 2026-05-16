@@ -9,6 +9,7 @@ class Allovan extends HeavyCombatVessel{
         $this->phpclass = "Allovan";
         $this->imagePath = "img/ships/LlortAllovan.png";
         $this->shipClass = "Allovan Attack Frigate";
+		$this->canvasSize = 180;           
  
         $this->isd = 2233;
         
