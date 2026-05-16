@@ -416,7 +416,8 @@
     border: 3px solid #1f6f8b;
     box-shadow: 0 0 8px rgba(88, 199, 230, 0.35);
     color: #C9F0FF;
-    min-width: 500px;    
+    min-width: 500px;   
+    min-height: 120px;       
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-header {
@@ -457,7 +458,7 @@
    the visual hierarchy reads section → contents. */
 .confirm.multi-value-confirm.hangar-confirm .hangar-craft-name {
     color: #C9F0FF;
-    margin-right: 10px;
+    margin-right: 0px;
     font-weight: normal;
 }
 
@@ -472,8 +473,8 @@
     background: #03161f;
     border: 1px solid #1f6f8b;
     color: #ffffff;
-    min-width: 100px; 
-    margin-left: 10px;     
+    min-width: 130px; 
+    margin-left: 0px;     
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-input:focus {
