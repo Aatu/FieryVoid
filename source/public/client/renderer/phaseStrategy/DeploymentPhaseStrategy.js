@@ -243,7 +243,7 @@ window.DeploymentPhaseStrategy = function () {
             //addLeadingButton places it to the LEFT of "Open ship details",
             //matching the Firing Phase tooltip order (action icons first,
             //info icon last).
-            menu.addLeadingButton("dockFlight",
+            menu.addLeadingButton("recoverFlights",
                 function () { return window.DeploymentDock.shipHasOpenableDockDialog(ship); },
                 function () {
                     if (window.confirm && typeof window.confirm.hangarDeployDock === 'function') {
