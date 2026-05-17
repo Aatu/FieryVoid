@@ -446,3 +446,45 @@ window.refreshDeploymentUIForDeployStart = function () {
         //fail-soft: tooltip refresh is cosmetic
     }
 };
+
+// Stage 10.2: sibling helper for the Firing-Phase dialogs (hangarLaunch,
+// hangarDock, hangarRecover). Same shape as refreshDeploymentUIForDeployStart
+// but skips the deployment-specific commit-gate re-check and the
+// consumeGamedata nudge (flight icons don't hide/unhide on queued firing
+// orders — orders only resolve at end of turn). Keeps the systemInfo
+// unmount so an open hangar tooltip re-mounts on next hover with the
+// projected pendingDockOrders / pendingLaunchOrders from refreshHangarTooltip.
+window.refreshFiringHangarTooltips = function () {
+    //Step 1: unmount any currently-open systemInfo so the next hover
+    //re-mounts with the live (now-projected) system.data. Mirrors the
+    //hideSystemInfo step in refreshDeploymentUIForDeployStart.
+    try {
+        var ps = window.webglScene && window.webglScene.phaseDirector
+            ? window.webglScene.phaseDirector.phaseStrategy
+            : null;
+        if (ps && typeof ps.hideSystemInfo === 'function') {
+            ps.hideSystemInfo(true);
+        }
+    } catch (e) {
+        //fail-soft: an inactive renderer shouldn't break the dialog flow
+    }
+
+    //Step 2: walk every hangar in the game and refresh its tooltip data.
+    //Sledgehammer-but-cheap: each refresh is just a couple of array walks
+    //over already-in-memory state. Refreshing all ships keeps the helper
+    //phase-agnostic and avoids the dialogs having to enumerate which
+    //carriers they touched.
+    try {
+        for (var key in gamedata.ships) {
+            var s = gamedata.ships[key];
+            if (!s || !Array.isArray(s.systems)) continue;
+            s.systems.forEach(function (sys) {
+                if (sys && sys.name === 'hangar' && typeof sys.refreshHangarTooltip === 'function') {
+                    sys.refreshHangarTooltip();
+                }
+            });
+        }
+    } catch (e) {
+        //fail-soft: tooltip refresh is cosmetic
+    }
+};

@@ -290,15 +290,23 @@ Hangar.prototype.doIndividualNotesTransfer = function () {
 // data[] isn't transmitted on the live gamedata payload — only the static
 // blueprint contains the baked-in (empty) version. Without this, the tooltip
 // would always say "0 / N boxes" no matter how many craft are actually stored.
+//
+// Stage 10.2 extends the projection to cover Firing-Phase queued orders too:
+//   - pendingDeployStartOrders (Stage 7, deployment): additive, "(Deploying)"
+//   - pendingDockOrders (Stage 5, firing-phase dock):  additive, "(Recovering)"
+//   - pendingLaunchOrders (Stage 4, firing-phase launch): SUBTRACTIVE — these
+//     consume stored craft, so they shrink "Carrying" and render as a separate
+//     "(Launching)" line beneath the stored-craft listing.
 Hangar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
-	// Stage 7: include flights queued by the deployment-phase dock dialog so
-	// the player sees the projected post-commit state in the tooltip. The
-	// queued entries are not yet persisted server-side; they materialise into
-	// $hangarUsage on the next reload after commit.
+	// Additive projections: queued dock orders + queued deploy-start orders
+	// both bring craft INTO the hangar. The committed $hangarUsage list is
+	// the baseline; the two pending arrays each contribute extra entries
+	// flagged with a `_pending` variant that drives the suffix at render time.
 	var displayEntries = this.hangarUsage.slice();
+
 	if (Array.isArray(this.pendingDeployStartOrders) && this.pendingDeployStartOrders.length > 0) {
 		for (var q = 0; q < this.pendingDeployStartOrders.length; q++) {
 			var order = this.pendingDeployStartOrders[q];
@@ -309,7 +317,28 @@ Hangar.prototype.refreshHangarTooltip = function () {
 				name:       flight.name,
 				flightSize: parseInt(flight.flightSize || 1, 10),
 				hangarType: this.hangarType,
-				_pending:   true            //local flag so we can mark "(queued)" in the line
+				_pending:   'deploying'
+			});
+		}
+	}
+
+	// Firing-phase dock projection (Stage 10.2). pendingDockOrders is
+	// {flightId, count} per row where count may be < the source flight's
+	// full size (partial dock). Display label / phpclass come from the
+	// source flight so the player sees which flight is incoming.
+	if (Array.isArray(this.pendingDockOrders) && this.pendingDockOrders.length > 0) {
+		for (var d = 0; d < this.pendingDockOrders.length; d++) {
+			var dockOrder = this.pendingDockOrders[d];
+			var dockFlight = dockOrder && dockOrder.flightId != null ? gamedata.getShip(dockOrder.flightId) : null;
+			if (!dockFlight) continue;
+			var dockCount = parseInt(dockOrder.count || 0, 10);
+			if (dockCount <= 0) continue;
+			displayEntries.push({
+				phpclass:   dockFlight.phpclass,
+				name:       dockFlight.name,
+				flightSize: dockCount,
+				hangarType: this.hangarType,
+				_pending:   'recovering'
 			});
 		}
 	}
@@ -319,15 +348,49 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		totalStored += parseInt(displayEntries[i].flightSize || 1, 10);
 	}
 
+	// Subtractive projection: queued launches take craft OUT of the hangar.
+	// Subtract from totalStored so "Carrying" reflects projected post-resolve
+	// state; collect per-phpclass entries so we can render a separate
+	// "(Launching)" line per class beneath the stored-craft listing. Showing
+	// launches in a separate line (rather than decrementing the matching
+	// stored-craft line) keeps the math obvious: stored count is what's
+	// CURRENTLY in the hangar, launching count is what's about to leave,
+	// Carrying is the post-resolve delta. Trying to fold launches into the
+	// per-class stored line is ambiguous: "3 x Aurora" with "3 x Aurora
+	// (Launching)" beneath is clearer than "0 x Aurora" + "3 x Aurora (out)".
+	var launchByClass = {};
+	if (Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0) {
+		for (var L = 0; L < this.pendingLaunchOrders.length; L++) {
+			var launchOrder = this.pendingLaunchOrders[L];
+			if (!launchOrder) continue;
+			var launchSize = parseInt(launchOrder.size || 0, 10);
+			if (launchSize <= 0) continue;
+			totalStored = Math.max(0, totalStored - launchSize);
+
+			var lphpclass = launchOrder.phpclass || 'unknown';
+			//Look up the launching craft's friendly name from a matching
+			//stash entry so the line reads "6 x Aurora", not "6 x starfuryEA".
+			var launchDisplayName = lphpclass;
+			for (var s = 0; s < this.hangarUsage.length; s++) {
+				if (this.hangarUsage[s] && this.hangarUsage[s].phpclass === lphpclass) {
+					launchDisplayName = this.hangarUsage[s].name || lphpclass;
+					break;
+				}
+			}
+			if (!launchByClass[lphpclass]) launchByClass[lphpclass] = { name: launchDisplayName, count: 0 };
+			launchByClass[lphpclass].count += launchSize;
+		}
+	}
+
 	// Effective capacity = maxhealth - damage that got past armour, clamped >= 0.
 	// Damage is needed in the line to make hangar damage visible — without it,
 	// "Carrying: 8 / 14" never changes when boxes are destroyed but no craft
 	// has been evicted (because the destroyed boxes were empty slots).
 	var netDamage = 0;
 	if (Array.isArray(this.damage)) {
-		for (var i = 0; i < this.damage.length; i++) {
-			var d = this.damage[i];
-			netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
+		for (var di = 0; di < this.damage.length; di++) {
+			var dmg = this.damage[di];
+			netDamage += Math.max(0, parseInt(dmg.damage || 0, 10) - parseInt(dmg.armour || 0, 10));
 		}
 	}
 	var effectiveCapacity = Math.max(0, this.maxhealth - netDamage);
@@ -338,35 +401,59 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		this.data["Carrying"] = totalStored + " / " + this.maxhealth + " slots";
 	}
 
-	if (displayEntries.length === 0) {
+	var hasLaunches = false;
+	for (var lkc in launchByClass) { hasLaunches = true; break; }
+	if (displayEntries.length === 0 && !hasLaunches) {
 		delete this.data["Stored Craft"];
 		return;
 	}
 
-	// Group docked craft for display. Prefer entry.name (the friendly flight
-	// name like "Aurora-1" or "Shuttle"), falling back to phpclass, then to
-	// a generic slot tag. Bucket by phpclass + pending-flag so launches of the
-	// same fighter type aggregate into one line, but queued docks (pre-commit)
-	// stay visually separated from already-stored craft.
+	// Group docked / queued craft for display. Prefer entry.name (the friendly
+	// flight name like "Aurora-1" or "Shuttle"), falling back to phpclass.
+	// Bucket by phpclass + _pending variant so launches/docks of the same
+	// fighter type aggregate per category but stay visually separated from
+	// already-stored craft. _pending values: undefined (committed),
+	// 'deploying' (Stage 7), 'recovering' (Stage 10.2).
 	var byClass = {};
-	for (var i = 0; i < displayEntries.length; i++) {
-		var entry = displayEntries[i];
+	for (var ei = 0; ei < displayEntries.length; ei++) {
+		var entry = displayEntries[ei];
 		var phpKey = (entry.phpclass && entry.phpclass !== "")
 			? entry.phpclass
 			: ("(" + (entry.hangarType || "unknown") + " slot)");
-		var pendingMarker = entry._pending ? '|pending' : '';
+		var pendingMarker = entry._pending ? ('|' + entry._pending) : '';
 		var bucketKey = phpKey + pendingMarker;
-		var displayName = entry.displayName
+		var entryDisplayName = entry.displayName
 			|| (entry.name && entry.name !== "" ? entry.name : phpKey);
 		if (!byClass[bucketKey]) {
-			byClass[bucketKey] = { name: displayName, count: 0, pending: !!entry._pending };
+			byClass[bucketKey] = { name: entryDisplayName, count: 0, pending: entry._pending || null };
 		}
 		byClass[bucketKey].count += parseInt(entry.flightSize || 1, 10);
 	}
+
+	// Launches consume committed stash — subtract the launching count from
+	// the matching committed bucket (phpclass key, no pending marker) so the
+	// stored-craft line only counts what's STAYING. Without this the player
+	// sees both "2 x Shuttle" and "2 x Shuttle (Launching)" simultaneously
+	// and the math reads as 4 shuttles total. Committed-only because the
+	// launch dialog reads $hangarUsage (committed stash) — you can't launch
+	// a fighter that hasn't arrived yet via a pending dock order, so the
+	// deploying/recovering buckets are never the source of a launch.
+	for (var lkc in launchByClass) {
+		if (byClass[lkc]) {
+			byClass[lkc].count = Math.max(0, byClass[lkc].count - launchByClass[lkc].count);
+		}
+	}
+
 	var lines = [];
 	for (var k in byClass) {
-		var suffix = byClass[k].pending ? ' (Deploying)' : '';
+		if (byClass[k].count <= 0) continue;     //fully launched-out → suppress, "(Launching)" line below carries the info
+		var suffix = '';
+		if (byClass[k].pending === 'deploying')  suffix = ' (Deploying)';
+		else if (byClass[k].pending === 'recovering') suffix = ' (Recovering)';
 		lines.push(byClass[k].count + " x " + byClass[k].name + suffix);
+	}
+	for (var lk in launchByClass) {
+		lines.push(launchByClass[lk].count + " x " + launchByClass[lk].name + ' (Launching)');
 	}
 	this.data["Stored Craft"] = "<br>" + lines.join("<br>");
 };

@@ -2032,6 +2032,13 @@ window.confirm = {
                 hangar.pendingLaunchOrdersDirty = true;
             });
 
+            //Stage 10.2: project newly-queued launches into every hangar
+            //tooltip so the player sees the post-resolve "Carrying" total
+            //and a "(Launching)" line for the outgoing craft.
+            if (typeof window.refreshFiringHangarTooltips === 'function') {
+                window.refreshFiringHangarTooltips();
+            }
+
             $(".confirm").remove();
         });
 
@@ -2207,6 +2214,13 @@ window.confirm = {
                 return;
             }
             replaceDockOrdersForFlight(flight, newOrdersByHangar);
+            //Stage 10.2: project the new dock allocation into every hangar
+            //tooltip so the player sees a "(Recovering)" line for the
+            //incoming craft and the projected "Carrying" total updates
+            //immediately rather than waiting for the next gamedata reload.
+            if (typeof window.refreshFiringHangarTooltips === 'function') {
+                window.refreshFiringHangarTooltips();
+            }
             e.remove();
         });
         $(".confirmcancel", e).on("click", function () { e.remove(); });
@@ -2505,6 +2519,13 @@ window.confirm = {
                 hangar.pendingDockOrders.push({ flightId: parseInt(flight.id, 10), count: count });
                 hangar.pendingDockOrdersDirty = true;
             });
+
+            //Stage 10.2: project bulk-recover orders into every hangar tooltip
+            //so the carrier's hangar systemInfo shows "(Recovering)" lines and
+            //the projected "Carrying" total immediately on dialog close.
+            if (typeof window.refreshFiringHangarTooltips === 'function') {
+                window.refreshFiringHangarTooltips();
+            }
 
             e.remove();
         });
