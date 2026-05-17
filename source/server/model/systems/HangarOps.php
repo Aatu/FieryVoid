@@ -484,17 +484,18 @@ class HangarOps {
 		}
 		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
 
-		//Sync source flights for any dockedFlightId-linked stash entries we're
-		//about to consume. The launch is a partial / cross-record split (the
-		//exact-size resurrect path didn't match), so the source flight loses
-		//its identity — disengage all its active fighters so its rendered
-		//combat-value contribution drops to zero, and strip dockedFlightId
-		//from any partially-consumed records so a future relaunch spawns
-		//fresh rather than resurrecting a now-empty ship row.
-		self::syncSourceFlightsOnLaunch($hangar, $phpclass, $launchSize, $gamedata);
+		//Stage 10.5: walk the stash entries this launch consumes; for every
+		//dockedFlightId-linked entry, transfer the Fighter-level damage and
+		//crits from the OLD fragment's priority-selected fighters onto the
+		//freshly-spawned launched flight, then either fully destroy the OLD
+		//fragment (full extract) or spawn a NEW fragment carrying the
+		//remaining fighters' state (partial extract). Anonymous orphan /
+		//auto-shuttle entries are simply consumed — they never had damage
+		//history to transfer. Replaces the legacy syncSourceFlightsOnLaunch
+		//+ removeFromHangarUsage pair which marked source fighters
+		//DockedFighter and left ghost rows on a subsequent relaunch.
+		self::consumeStashesForLaunch($hangar, $phpclass, $launchSize, $flight, $carrier, $gamedata);
 
-		//Update hangar bookkeeping
-		self::removeFromHangarUsage($hangar, $phpclass, $launchSize);
 		$hangar->launchedThisTurn += $launchSize;
 
 		//Replay note tied to the hangar so we can render the launch in history.
@@ -1237,7 +1238,14 @@ class HangarOps {
 		if ($count <= 0 || !is_string($phpclass) || $phpclass === '') return null;
 		if (!class_exists($phpclass)) return null;
 
-		$fragmentName = $sourceFlight->name . ' - Detachment';
+		//Dedup the suffix so chained partial-extracts (Stage 10.5) don't end
+		//up as "Sentinel-1 - Detachment - Detachment". Single suffix is enough
+		//to tell the player a fragment is a partial; further splits inherit
+		//the same name.
+		$fragmentName = $sourceFlight->name;
+		if (strpos($fragmentName, ' - Detachment') === false) {
+			$fragmentName .= ' - Detachment';
+		}
 		$fragment = new $phpclass($gamedata->id, $sourceFlight->userid, $fragmentName, $sourceFlight->slot);
 		$fragment->team = $sourceFlight->team;
 
@@ -1276,7 +1284,7 @@ class HangarOps {
 
 		//Initialize per-system data so weapons aren't uncharged on relaunch
 		//(mirrors performLaunch's new-spawn path). The damage state will be
-		//layered on by copyFighterStateToFragment below; setInitialSystemData
+		//layered on by copyFighterStateToTarget below; setInitialSystemData
 		//doesn't write damage records.
 		SystemData::initSystemData($gamedata->turn, $gamedata->id);
 		foreach ($fragment->systems as $craft) {
@@ -1310,7 +1318,7 @@ class HangarOps {
 		}
 		$copies = min(count($chosenFighters), count($fragmentFighters));
 		for ($i = 0; $i < $copies; $i++) {
-			self::copyFighterStateToFragment($chosenFighters[$i], $fragmentFighters[$i], $fragment, $gamedata);
+			self::copyFighterStateToTarget($chosenFighters[$i], $fragmentFighters[$i], $fragment, $gamedata);
 		}
 
 		//Mark removed so the fragment is hidden from board / target lists.
@@ -1326,25 +1334,33 @@ class HangarOps {
 	}
 
 	/* Copy a source fighter's damage history and damage-related criticals
-	 * onto a fragment fighter (newly-spawned, no prior history). State
+	 * onto a target fighter (newly-spawned, no prior history). State
 	 * markers used by the dock pipeline itself — DockedFighter,
 	 * DisengagedFighter, LaunchedThisTurn — are intentionally NOT copied:
-	 * the fragment is born "clean" of those flight-control crits and its
-	 * $removed flag handles its hidden-from-play state.
+	 * the target is born "clean" of those flight-control crits and its
+	 * parent's $removed flag (or own life status) handles in-play state.
 	 *
-	 * Stage 10.4. Damage entries are created with $updated=true so they
-	 * persist via FireGamePhase::advance's submitDamages call; crits with
-	 * $newCrit=true so submitCriticals inserts them even though their turn
-	 * matches the current turn.
+	 * Used by:
+	 *   - spawnFragmentFlight (Stage 10.4) — copying from source-flight
+	 *     fighters to the dock-time fragment's fighters.
+	 *   - consumeStashesForLaunch (Stage 10.5) — copying from an old
+	 *     fragment's fighters to the freshly-spawned launched flight's
+	 *     fighters (and to the new mini-fragment's fighters for partial
+	 *     extracts).
+	 *
+	 * Damage entries are created with $updated=true so they persist via
+	 * FireGamePhase::advance's submitDamages call; crits with $newCrit=true
+	 * so submitCriticals inserts them even though their turn matches the
+	 * current turn.
 	 */
-	private static function copyFighterStateToFragment($sourceFighter, $fragmentFighter, $fragment, $gamedata){
+	private static function copyFighterStateToTarget($sourceFighter, $targetFighter, $targetFlight, $gamedata){
 		foreach ($sourceFighter->damage as $src) {
 			$newDmg = new DamageEntry(
 				-1,
-				$fragment->id,
+				$targetFlight->id,
 				$src->gameid,
 				$src->turn,
-				$fragmentFighter->id,
+				$targetFighter->id,
 				$src->damage,
 				$src->armour,
 				$src->shields,
@@ -1357,7 +1373,7 @@ class HangarOps {
 				$src->weaponid
 			);
 			$newDmg->updated = true;
-			$fragmentFighter->damage[] = $newDmg;
+			$targetFighter->damage[] = $newDmg;
 		}
 
 		static $skipPhpclasses = array(
@@ -1371,15 +1387,190 @@ class HangarOps {
 			if (!class_exists($critClass)) continue;
 			$newCrit = new $critClass(
 				-1,
-				$fragment->id,
-				$fragmentFighter->id,
+				$targetFlight->id,
+				$targetFighter->id,
 				$critClass,
 				(int)$crit->turn,
 				(int)$crit->turnend
 			);
 			$newCrit->updated = true;
 			$newCrit->newCrit = true;       //force DB insert
-			$fragmentFighter->criticals[] = $newCrit;
+			$targetFighter->criticals[] = $newCrit;
+		}
+	}
+
+	/* === Stage 10.5: partial-launch-from-fragment damage transfer ======== */
+
+	/* Replaces the legacy syncSourceFlightsOnLaunch + removeFromHangarUsage
+	 * pair for performLaunch's new-spawn path. Walks every stash entry the
+	 * launch consumes; for dockedFlightId-linked entries, transfers Fighter-
+	 * level damage and crits from the OLD fragment's priority-selected
+	 * fighters onto the newly-spawned launched flight, then either fully
+	 * destroys the OLD fragment (full extract) or spawns a NEW fragment
+	 * carrying the remaining fighters' state (partial extract).
+	 *
+	 * Before Stage 10.5, the legacy path just marked source fighters
+	 * DockedFighter and reduced the stash flightSize — partial-launch
+	 * lost the launched fighters' damage AND left ghost DOCKED rows in
+	 * the fragment for the next relaunch's flight window.
+	 *
+	 * For non-fragment stash entries (anonymous orphans, auto-shuttles),
+	 * just consume the count — those entries never had damage history to
+	 * transfer, so the launched flight's corresponding fighter slots stay
+	 * fresh-spawned.
+	 *
+	 * Mutates $hangar->hangarUsage in place. Caller increments
+	 * $hangar->launchedThisTurn afterwards.
+	 */
+	private static function consumeStashesForLaunch($hangar, $phpclass, $launchCount, $launchedFlight, $carrier, $gamedata){
+		if ($launchCount <= 0 || empty($hangar->hangarUsage)) return;
+
+		//Collect launched flight's Fighter subsystems in order — copy targets.
+		$launchedFighters = array();
+		foreach ($launchedFlight->systems as $f) {
+			if ($f instanceof Fighter) $launchedFighters[] = $f;
+		}
+		$cursor = 0;
+
+		$remaining = $launchCount;
+		$newEntries = array();
+
+		foreach ($hangar->hangarUsage as $entry) {
+			if ($remaining <= 0 || ($entry['phpclass'] ?? '') !== $phpclass) {
+				$newEntries[] = $entry;
+				continue;
+			}
+
+			$entrySize = (int)($entry['flightSize'] ?? 1);
+			$take = min($entrySize, $remaining);
+			$remaining -= $take;
+
+			if (isset($entry['dockedFlightId']) && $take > 0) {
+				$fragmentId = (int)$entry['dockedFlightId'];
+				$fragment = $gamedata->getShipById($fragmentId);
+				if ($fragment instanceof FighterFlight) {
+					//Priority-select $take fighters from fragment (most-damaged
+					//first, back-of-array tiebreak) — same order Stage 10.3
+					//uses for dock selection.
+					$chosen = self::selectFightersForExtraction($fragment, $take, $gamedata);
+
+					//Transfer damage/crits onto the next slice of launched
+					//flight fighters. Pairing is by ORDER — chosen[i] maps to
+					//launchedFighters[cursor + i].
+					for ($i = 0; $i < count($chosen); $i++) {
+						if (!isset($launchedFighters[$cursor])) break;
+						self::copyFighterStateToTarget($chosen[$i], $launchedFighters[$cursor], $launchedFlight, $gamedata);
+						$cursor++;
+					}
+
+					if ($take < $entrySize) {
+						//Partial extract: the remaining (entrySize - take)
+						//fighters keep their state via a brand-new fragment.
+						$chosenIds = array();
+						foreach ($chosen as $f) $chosenIds[$f->id] = true;
+						$remainingFighters = array();
+						foreach ($fragment->systems as $f) {
+							if (!($f instanceof Fighter)) continue;
+							if ($f->isDestroyed($gamedata->turn)) continue;
+							if (isset($chosenIds[$f->id])) continue;
+							$remainingFighters[] = $f;
+						}
+						$newFragment = self::spawnFragmentFlight($fragment, $remainingFighters, $carrier, $hangar, $gamedata);
+						self::destroyAllFighters($fragment, $gamedata);
+
+						$newEntry = $entry;
+						$newEntry['flightSize'] = $entrySize - $take;
+						if ($newFragment) {
+							$newEntry['dockedFlightId'] = $newFragment->id;
+							$newEntry['name']           = $newFragment->name;
+						}
+						$newEntries[] = $newEntry;
+					} else {
+						//Full extract: OLD fragment fully destroyed, stash
+						//entry consumed (omitted from $newEntries).
+						self::destroyAllFighters($fragment, $gamedata);
+					}
+				} else {
+					//Fragment ship missing (shouldn't happen) — fall back to
+					//the legacy reduce/drop behaviour so the launch isn't
+					//completely stuck.
+					$cursor += $take;
+					if ($take < $entrySize) {
+						$newEntry = $entry;
+						$newEntry['flightSize'] = $entrySize - $take;
+						$newEntries[] = $newEntry;
+					}
+				}
+			} else if ($take > 0) {
+				//Anonymous orphan or auto-filled shuttle — no damage state
+				//to transfer. Just consume the count; the launched flight's
+				//corresponding fighter slots stay fresh.
+				$cursor += $take;
+				if ($take < $entrySize) {
+					$newEntry = $entry;
+					$newEntry['flightSize'] = $entrySize - $take;
+					$newEntries[] = $newEntry;
+				}
+			} else {
+				$newEntries[] = $entry;
+			}
+		}
+
+		$hangar->hangarUsage = $newEntries;
+	}
+
+	/* Priority-ordered fighter pick WITHOUT applying any crit (Stage 10.3
+	 * priority: most damage first, back-of-array tiebreak). Used by
+	 * consumeStashesForLaunch when extracting fighters from an OLD
+	 * fragment — the OLD fragment's selected fighters are NOT crit'd
+	 * directly; instead they're either fully destroyed (via
+	 * destroyAllFighters) or their state is copied to a new fragment.
+	 */
+	private static function selectFightersForExtraction($flight, $count, $gamedata){
+		if ($count <= 0) return array();
+
+		$candidates = array();
+		foreach ($flight->systems as $idx => $fighter) {
+			if (!($fighter instanceof Fighter)) continue;
+			if ($fighter->isDestroyed($gamedata->turn)) continue;
+			$candidates[] = array(
+				'fighter' => $fighter,
+				'idx'     => $idx,
+				'damage'  => (int)$fighter->getTotalDamage(),
+			);
+		}
+
+		usort($candidates, function($a, $b){
+			if ($a['damage'] !== $b['damage']) return $b['damage'] - $a['damage'];   //damage DESC
+			return $b['idx'] - $a['idx'];                                            //index DESC
+		});
+
+		$chosen = array();
+		foreach ($candidates as $c) {
+			if (count($chosen) >= $count) break;
+			$chosen[] = $c['fighter'];
+		}
+		return $chosen;
+	}
+
+	/* Apply DisengagedFighter to every active fighter on $flight. Used by
+	 * consumeStashesForLaunch on the OLD fragment after its state has been
+	 * transferred elsewhere — once a fragment has been split-or-extracted,
+	 * its ship row is effectively dead. FighterFlight::isDestroyed folds
+	 * in fighter-disengage state, so the OLD fragment becomes hidden from
+	 * the board, target lists, and (per Stage 9 polish) the fleet list.
+	 *
+	 * Crits are flagged updated + newCrit so submitCriticals inserts them
+	 * even on the current turn.
+	 */
+	private static function destroyAllFighters($flight, $gamedata){
+		foreach ($flight->systems as $f) {
+			if (!($f instanceof Fighter)) continue;
+			if ($f->isDestroyed($gamedata->turn)) continue;
+			$crit = new DisengagedFighter(-1, $flight->id, $f->id, 'DisengagedFighter', $gamedata->turn);
+			$crit->updated = true;
+			$crit->newCrit = true;
+			$f->criticals[] = $crit;
 		}
 	}
 
