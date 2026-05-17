@@ -939,22 +939,35 @@ class HangarOps {
 			'hangarType'  => $category,
 			'dockedTurn'  => $gamedata->turn,
 		);
-		if (!$partial) {
-			//Only full docks link the stash record to the source flight; partial
-			//docks intentionally drop the link so a relaunch spawns fresh.
-			$entry['dockedFlightId'] = $flight->id;
-		}
-		$hangar->hangarUsage[] = $entry;
-		$hangar->landedThisTurn += $count;
 
 		if ($partial) {
-			self::dockFighters($flight, $count, $gamedata);
+			//Stage 10.3: priority-ordered dockFighters returns the actual
+			//Fighter objects chosen (most-damaged first, back-of-array tiebreak).
+			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
+
+			//Stage 10.4: spawn a fragment FighterFlight holding the chosen
+			//fighters' damage and crit state, link the stash entry to it via
+			//dockedFlightId. Relaunch goes through the existing
+			//resurrectDockedFlight path which brings the fragment back with
+			//all its preserved state. Pre-10.4 partial docks dropped damage
+			//state entirely on relaunch — fresh fighters spawned undamaged.
+			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $hangar, $gamedata);
+			if ($fragment) {
+				$entry['dockedFlightId'] = $fragment->id;
+				$entry['name']           = $fragment->name;     //"$sourceName - Detachment"
+			}
 		} else {
-			//Flag the flight removed-from-board. $removedTurn lets replay show
-			//the flight up to and including this turn before it disappears.
+			//Full dock: the source flight IS the docked unit. Stash entry
+			//links to its existing ship row directly; resurrectDockedFlight
+			//brings it back as-is with all damage/crits already on its
+			//system rows.
+			$entry['dockedFlightId'] = $flight->id;
 			$flight->removed = true;
 			$flight->removedTurn = $gamedata->turn;
 		}
+
+		$hangar->hangarUsage[] = $entry;
+		$hangar->landedThisTurn += $count;
 
 		//Replay note tied to the receiving hangar.
 		$note = new IndividualNote(
@@ -1123,23 +1136,56 @@ class HangarOps {
 	}
 
 	/* Apply $critClass critical to $count active Fighter subsystems of
-	 * $flight, in fighter-id order. The crit is flagged updated so it
-	 * persists via getUpdatedCriticals/submitCriticals at the end of
-	 * FireGamePhase. Shared between the dock / launch-split / hangar-loss
-	 * paths; the thin wrappers below pick the right crit class.
+	 * $flight. The crit is flagged updated so it persists via
+	 * getUpdatedCriticals/submitCriticals at the end of FireGamePhase.
+	 * Shared between the dock / launch-split / hangar-loss paths; the thin
+	 * wrappers below pick the right crit class.
+	 *
+	 * Stage 10.3 priority order:
+	 *   1. Most damage first (getTotalDamage DESC) — players save hurt
+	 *      craft preferentially when partial-docking. The same priority is
+	 *      applied to the hangar-damage disengage path so worst-off craft
+	 *      die first (which matches the "they were already battered"
+	 *      reading of stash eviction; if the rules-lawyer view is "random
+	 *      losses," swap to shuffle here without touching callers).
+	 *   2. Back-of-array tiebreak (highest array index first) so the
+	 *      visual front of the flight stays intact for continuing combat
+	 *      operations when only some craft can dock.
+	 *
+	 * Returns the list of chosen Fighter objects (ordered by application).
+	 * Stage 10.4 uses the returned list to copy the same fighters' damage
+	 * and crit history onto a freshly-spawned fragment FighterFlight so
+	 * partial-dock damage persists through the dock/relaunch cycle.
 	 */
 	private static function applyFighterStateCritical($flight, $count, $critClass, $gamedata){
-		$applied = 0;
-		foreach ($flight->systems as $fighter) {
-			if ($applied >= $count) break;
+		if ($count <= 0) return array();
+
+		$candidates = array();
+		foreach ($flight->systems as $idx => $fighter) {
 			if (!($fighter instanceof Fighter)) continue;
 			if ($fighter->isDestroyed($gamedata->turn)) continue;   //already disengaged/docked/destroyed
+			$candidates[] = array(
+				'fighter' => $fighter,
+				'idx'     => $idx,
+				'damage'  => (int)$fighter->getTotalDamage(),
+			);
+		}
+
+		usort($candidates, function($a, $b){
+			if ($a['damage'] !== $b['damage']) return $b['damage'] - $a['damage'];   //damage DESC
+			return $b['idx'] - $a['idx'];                                            //index DESC
+		});
+
+		$chosen = array();
+		foreach ($candidates as $c) {
+			if (count($chosen) >= $count) break;
+			$fighter = $c['fighter'];
 			$crit = new $critClass(-1, $flight->id, $fighter->id, $critClass, $gamedata->turn);
 			$crit->updated = true;
 			$fighter->criticals[] = $crit;
-			$applied++;
+			$chosen[] = $fighter;
 		}
-		return $applied;
+		return $chosen;
 	}
 
 	/* Dock $count active fighters in $flight (intentionally entering a
@@ -1147,6 +1193,8 @@ class HangarOps {
 	 * these behind as the dock-side stash). Renders as cyan "DOCKED" in
 	 * the flight window and is distinguishable from combat disengagement
 	 * in the replay audit trail.
+	 *
+	 * Returns the list of chosen Fighter objects (Stage 10.3 priority order).
 	 */
 	private static function dockFighters($flight, $count, $gamedata){
 		return self::applyFighterStateCritical($flight, $count, 'DockedFighter', $gamedata);
@@ -1157,9 +1205,182 @@ class HangarOps {
 	 * is hit). Renders as green "DISENGAGED" in the flight window. Hangar-
 	 * damage callers may eventually want real destruction instead, but
 	 * disengagement preserves the existing replay shape.
+	 *
+	 * Returns the list of chosen Fighter objects (Stage 10.3 priority order).
 	 */
 	private static function disengageFighters($flight, $count, $gamedata){
 		return self::applyFighterStateCritical($flight, $count, 'DisengagedFighter', $gamedata);
+	}
+
+	/* === Stage 10.4: partial-dock damage preservation =================== */
+
+	/* Spawn a fragment FighterFlight at partial-dock time so the docked
+	 * fighters' damage and crit history can be preserved across the dock /
+	 * relaunch cycle via the existing dockedFlightId resurrect mechanism.
+	 *
+	 * Before Stage 10.4, partial-dock stash entries had no dockedFlightId so
+	 * relaunch fell through to the new-spawn path, producing a fresh flight
+	 * with no damage history — a 3-of-6 partial dock of a battered Sentinel
+	 * flight relaunched as pristine Sentinels. With this helper, partial-dock
+	 * stash entries link to a fragment that holds the chosen fighters'
+	 * state, and resurrectDockedFlight treats them identically to full-dock
+	 * stash entries.
+	 *
+	 * The fragment is born $removed=true at the dock turn so it never appears
+	 * on the board between spawn and relaunch (or game end). resurrectDockedFlight
+	 * clears $removed and inserts a fresh deploy MovementOrder when the
+	 * player relaunches at the matching exact size.
+	 */
+	private static function spawnFragmentFlight($sourceFlight, $chosenFighters, $carrier, $hangar, $gamedata){
+		$phpclass = $sourceFlight->phpclass;
+		$count = count($chosenFighters);
+		if ($count <= 0 || !is_string($phpclass) || $phpclass === '') return null;
+		if (!class_exists($phpclass)) return null;
+
+		$fragmentName = $sourceFlight->name . ' - Detachment';
+		$fragment = new $phpclass($gamedata->id, $sourceFlight->userid, $fragmentName, $sourceFlight->slot);
+		$fragment->team = $sourceFlight->team;
+
+		//Constructor populates the default flightSize (typically 1). Bump to
+		//$count and re-populate so the fragment has exactly the right number
+		//of Fighter subsystems. Mirrors performLaunch's new-spawn pattern.
+		if ($count > $fragment->flightSize) {
+			$fragment->flightSize = $count;
+			if (method_exists($fragment, 'populate')) {
+				$fragment->populate();
+			}
+		}
+
+		//Persist ship row and capture the new id.
+		$shipid = Manager::insertSingleShip($gamedata, $fragment, $sourceFlight->userid);
+		$fragment->id = $shipid;
+		$fragment->spawned = $gamedata->turn;
+
+		//Persist flight size so getFlightSize() repopulates correctly on reload.
+		Manager::insertSingleFlightSize($gamedata->id, $shipid, $fragment->flightSize);
+
+		//Insert a deploy MovementOrder at the carrier's current hex so any
+		//consumer that reads the fragment's position between dock and
+		//relaunch (replay scrub, getTurnDeployed checks) gets a sensible
+		//answer. The fragment is $removed so it never renders on the board;
+		//the movement entry is purely for ship-state consistency.
+		$lastMove = $carrier->getLastMovement();
+		if ($lastMove) {
+			$deployMove = new MovementOrder(
+				null, "deploy", $lastMove->position, 0, 0,
+				(int)$lastMove->speed, (int)$lastMove->heading, (int)$lastMove->facing,
+				false, $gamedata->turn, 0, 0
+			);
+			Manager::insertSingleMovement($gamedata->id, $shipid, $deployMove);
+		}
+
+		//Initialize per-system data so weapons aren't uncharged on relaunch
+		//(mirrors performLaunch's new-spawn path). The damage state will be
+		//layered on by copyFighterStateToFragment below; setInitialSystemData
+		//doesn't write damage records.
+		SystemData::initSystemData($gamedata->turn, $gamedata->id);
+		foreach ($fragment->systems as $craft) {
+			$craft->setInitialSystemData($fragment);
+			if (!isset($craft->systems) || !is_array($craft->systems)) continue;
+			foreach ($craft->systems as $sys) {
+				$sys->setInitialSystemData($fragment);
+				if ($sys instanceof Weapon) {
+					$load = $sys->getStartLoading();
+					if ($load) {
+						$load->loading = $sys->loadingtime;
+						SystemData::addDataForSystem($sys->id, 0, $shipid, $load->toJSON());
+					}
+				}
+			}
+		}
+		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+		//Copy damage and crits from each chosen source fighter onto the
+		//corresponding fragment fighter. Pairing is BY ORDER: chosenFighters[i]
+		//→ fragmentFighters[i]. Both flights are constructed from the same
+		//phpclass so the structures are identical (same fighter count, same
+		//subsystem layout per fighter, same id-by-index assignment within
+		//FighterFlight->systems). System ids within a Fighter are not
+		//set explicitly — Fighter-level damage is what matters for dropout
+		//rolls and for the player's "this fighter is hurt" view, and that's
+		//all we preserve.
+		$fragmentFighters = array();
+		foreach ($fragment->systems as $f) {
+			if ($f instanceof Fighter) $fragmentFighters[] = $f;
+		}
+		$copies = min(count($chosenFighters), count($fragmentFighters));
+		for ($i = 0; $i < $copies; $i++) {
+			self::copyFighterStateToFragment($chosenFighters[$i], $fragmentFighters[$i], $fragment, $gamedata);
+		}
+
+		//Mark removed so the fragment is hidden from board / target lists.
+		//The dockedFlightId stash entry's resurrectDockedFlight clears these
+		//flags on relaunch. Hangar::onIndividualNotesLoaded also re-applies
+		//$removed at load time by walking hangarUsage entries with
+		//dockedFlightId, so the state survives reload between dock and
+		//relaunch.
+		$fragment->removed = true;
+		$fragment->removedTurn = $gamedata->turn;
+
+		return $fragment;
+	}
+
+	/* Copy a source fighter's damage history and damage-related criticals
+	 * onto a fragment fighter (newly-spawned, no prior history). State
+	 * markers used by the dock pipeline itself — DockedFighter,
+	 * DisengagedFighter, LaunchedThisTurn — are intentionally NOT copied:
+	 * the fragment is born "clean" of those flight-control crits and its
+	 * $removed flag handles its hidden-from-play state.
+	 *
+	 * Stage 10.4. Damage entries are created with $updated=true so they
+	 * persist via FireGamePhase::advance's submitDamages call; crits with
+	 * $newCrit=true so submitCriticals inserts them even though their turn
+	 * matches the current turn.
+	 */
+	private static function copyFighterStateToFragment($sourceFighter, $fragmentFighter, $fragment, $gamedata){
+		foreach ($sourceFighter->damage as $src) {
+			$newDmg = new DamageEntry(
+				-1,
+				$fragment->id,
+				$src->gameid,
+				$src->turn,
+				$fragmentFighter->id,
+				$src->damage,
+				$src->armour,
+				$src->shields,
+				$src->fireorderid,
+				$src->destroyed,
+				$src->undestroyed,
+				$src->pubnotes,
+				$src->damageclass,
+				$src->shooterid,
+				$src->weaponid
+			);
+			$newDmg->updated = true;
+			$fragmentFighter->damage[] = $newDmg;
+		}
+
+		static $skipPhpclasses = array(
+			'DisengagedFighter' => true,    //combat-disengage state marker, source-only
+			'DockedFighter'     => true,    //dock state marker, source-only
+			'LaunchedThisTurn'  => true,    //initiative penalty, turn-specific event
+		);
+		foreach ($sourceFighter->criticals as $crit) {
+			if (isset($skipPhpclasses[$crit->phpclass])) continue;
+			$critClass = $crit->phpclass;
+			if (!class_exists($critClass)) continue;
+			$newCrit = new $critClass(
+				-1,
+				$fragment->id,
+				$fragmentFighter->id,
+				$critClass,
+				(int)$crit->turn,
+				(int)$crit->turnend
+			);
+			$newCrit->updated = true;
+			$newCrit->newCrit = true;       //force DB insert
+			$fragmentFighter->criticals[] = $newCrit;
+		}
 	}
 
 	/* End-of-turn: walks $hangar->pendingDockOrders, validates each, and lands
