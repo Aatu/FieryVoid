@@ -396,9 +396,9 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	var effectiveCapacity = Math.max(0, this.maxhealth - netDamage);
 
 	if (netDamage > 0) {
-		this.data["Carrying"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
+		this.data["Capacity"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
 	} else {
-		this.data["Carrying"] = totalStored + " / " + this.maxhealth + " slots";
+		this.data["Capacity"] = totalStored + " / " + this.maxhealth + " slots";
 	}
 
 	var hasLaunches = false;

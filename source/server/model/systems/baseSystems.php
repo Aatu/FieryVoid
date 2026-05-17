@@ -3273,13 +3273,15 @@ class Hangar extends ShipSystem{
 		return $strippedSystem;
 	}
 
-	public function setSystemDataWindow($turn){
+	public function setSystemDataWindow($turn){		
 		parent::setSystemDataWindow($turn);
+        $this->data["Special"] = "System responsible for launching and carrying docked fighter craft.";	
+        $this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";		
 		$this->data["Type"] = ucwords($this->hangarType);
 		$this->data["Launch Rate"] = $this->output;
 
 		$totalStored = HangarOps::usageCountFor($this);
-		$this->data["Carrying"] = $totalStored . " / " . $this->maxhealth . " slots";
+		$this->data["Capacity"] = $totalStored . " / " . $this->maxhealth . " slots";
 		/*		
 		if (!empty($this->hangarUsage)){
 			$byClass = array();
