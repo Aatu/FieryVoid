@@ -321,15 +321,22 @@ class HangarOps {
 		return $evicted;
 	}
 
-	/* Lower priority value = drop first. Stage 3 uses a coarse classifier;
-	 * a future polish pass can switch to per-craft pointCost lookups.
+	/* Lower priority value = drop first.
+	 * Order: empty slots (0), shuttles (10), MinesweepingShuttle (20),
+	 * fighters at 1000 + pointCost so cheapest fighters evict before expensive ones.
 	 */
 	public static function evictionPriorityFor($entry){
 		$phpclass = $entry['phpclass'] ?? '';
-		if ($phpclass === 'Shuttle') return 0;
-		if ($phpclass === 'MinesweepingShuttle') return 1;
-		if (stripos($phpclass, 'shuttle') !== false) return 2;
-		return 10;
+		if ($phpclass === '') return 0;
+		if ($phpclass === 'MinesweepingShuttle') return 20;
+		if (stripos($phpclass, 'shuttle') !== false) return 10;
+		if (class_exists($phpclass)) {
+			try {
+				$probe = new $phpclass(0, 0, '', 0);
+				return 1000 + (int)($probe->pointCost ?? 0);
+			} catch (Exception $e) {}
+		}
+		return 1000;
 	}
 
 	/* End-of-turn hook for a single Hangar — drop stored craft to fit
