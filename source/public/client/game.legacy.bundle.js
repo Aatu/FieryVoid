@@ -16122,13 +16122,21 @@ window.ShipMovementCallbacks = function () {
 	
     ShipMovementCallbacks.prototype.accelCallback = function (e) {
         e.stopPropagation();
-        shipManager.movement.changeSpeed(this.ship, true);
+        if (event.which == 3 && gamedata.gamephase == -1 && this.ship.deploymove) { // r-click during deployment: set to max speed
+            this.ship.deploymove.speed = 10;
+        } else {
+            shipManager.movement.changeSpeed(this.ship, true);
+        }
         this.updateCallback({ ship: this.ship });
     };
 
     ShipMovementCallbacks.prototype.deaccCallback = function (e) {
         e.stopPropagation();
-        shipManager.movement.changeSpeed(this.ship, false);
+        if (event.which == 3 && gamedata.gamephase == -1 && this.ship.deploymove) { // r-click during deployment: set to min speed
+            this.ship.deploymove.speed = 0;
+        } else {
+            shipManager.movement.changeSpeed(this.ship, false);
+        }
         this.updateCallback({ ship: this.ship });
     };
 
@@ -27855,7 +27863,9 @@ shipManager.movement = {
 
     /*just move ahead using all remaining movement*/
     doMoveFully: function doMoveFully(ship) {
-        while (shipManager.movement.getRemainingMovement(ship) > 0) shipManager.movement.doMove(ship);
+        while (shipManager.movement.getRemainingMovement(ship) > 0) {
+            if (shipManager.movement.doMove(ship) === false) break; // break only on explicit false (prevents infinite loop when canMove() returns false)
+        }
     },
 
     canDetach: function canDetach(ship) {
@@ -31977,8 +31987,8 @@ window.UI = {
             UI.shipMovement.rollActiveElement.on("click touchstart", UI.shipMovement.rollCallback);
             UI.shipMovement.emergencyrollElement.on("click touchstart", UI.shipMovement.emergencyrollCallback);
 
-            UI.shipMovement.accElement.on("click touchstart", UI.shipMovement.accelCallback);
-            UI.shipMovement.deaccElement.on("click touchstart", UI.shipMovement.deaccCallback);
+            UI.shipMovement.accElement.on("click touchstart contextmenu", UI.shipMovement.accelCallback);
+            UI.shipMovement.deaccElement.on("click touchstart contextmenu", UI.shipMovement.deaccCallback);
 
             UI.shipMovement.morejinkElement.on("click touchstart", UI.shipMovement.morejinkCallback);
             UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);
