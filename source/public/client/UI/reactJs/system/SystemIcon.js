@@ -177,6 +177,28 @@ class SystemIcon extends React.Component {
             }
         }
 
+        // Hangar Ops: clicking own hangar icon opens phase-appropriate dialog
+        // (deployment → hangarDeployDock, firing → hangarLaunch). Fall through
+        // to the SystemClicked menu when no dialog is applicable so the player
+        // still gets the info popup for empty/queued hangars.
+        if (gamedata.isMyShip(ship) && system.name === 'hangar') {
+            if (gamedata.gamephase === -1
+                && window.DeploymentDock
+                && typeof window.DeploymentDock.shipHasOpenableDockDialog === 'function'
+                && window.DeploymentDock.shipHasOpenableDockDialog(ship)
+                && window.confirm && typeof window.confirm.hangarDeployDock === 'function') {
+                window.confirm.hangarDeployDock(ship);
+                return;
+            }
+            if (gamedata.gamephase === 3
+                && !shipManager.movement.isRolling(ship)
+                && !(shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== 'no')
+                && window.confirm && typeof window.confirm.hangarLaunch === 'function') {
+                window.confirm.hangarLaunch(ship);
+                return;
+            }
+        }
+
         if (gamedata.isMyShip(ship)) {
             webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.currentTarget, showMenu: true });
         } else {
