@@ -123,11 +123,12 @@ window.SelectFromShips = function () {
                 if (eligibleCarriers.length > 0) {
                     var label;
                     if (eligibleCarriers.length === 1) {
-                        label = 'DOCK ' + flight.name.toUpperCase() + ' IN ' + eligibleCarriers[0].ship.name.toUpperCase();
+                        //label = 'DOCK ' + flight.name.toUpperCase() + ' IN ' + eligibleCarriers[0].ship.name.toUpperCase();
+                        label = 'DOCK ' + flight.name.toUpperCase();                        
                     } else {
                         label = 'DOCK ' + flight.name.toUpperCase() + ' (' + eligibleCarriers.length + ' CARRIERS AVAILABLE)';
                     }
-                    var dockButton = jQuery('<div class="name-value-button-ally">' + label + '</div>')
+                    var dockButton = jQuery('<div class="name-value-button-dock">' + label + '</div>')
                         .on('click', function () {
                             if (eligibleCarriers.length === 1) {
                                 var carrier = eligibleCarriers[0].ship;
