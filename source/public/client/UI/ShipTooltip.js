@@ -289,6 +289,15 @@ window.ShipTooltip = function () {
             }
         }
         if (ship.flight === true) {
+            var firstFighter = shipManager.systems.getSystem(ship, 1);
+            if (firstFighter && shipManager.criticals.hasCritical(firstFighter, "LaunchedThisTurn")) {
+                toDisplay += '<span style="color:orange;">Just Launched</span>; ';
+            }
+        }
+        if (shipManager.criticals.hasCriticalInAnySystem(ship, "HangarOperations")) {
+            toDisplay += '<span style="color:orange;">Hangar Operations</span>; ';
+        }
+        if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
         } else if (ship.osat) {
             if (shipManager.movement.hasTurned(ship)) rollPivotModifier -= 5;
