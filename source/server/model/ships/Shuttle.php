@@ -36,15 +36,15 @@ class Shuttle extends FighterFlight
         $this->imagePath = "img/ships/LlortLeteerum.png";  //placeholder; faction subclasses can override
 
         $this->forwardDefense = 8;
-        $this->sideDefense = 9;
-        $this->freethrust = 4;
+        $this->sideDefense = 10;
+        $this->freethrust = 3;
         $this->offensivebonus = 0;
         $this->jinkinglimit = 0;
         $this->pivotcost = 2;                     //shuttles pivot slowly
         $this->turncost = 0.33;
 
         $this->hangarRequired = 'shuttles';       //matches "shuttles" key in carrier $fighters
-        $this->iniativebonus = 5 * 5;             //slow
+        $this->iniativebonus = 9 * 5;             //slow
     }
 
     public function populate()
@@ -55,7 +55,7 @@ class Shuttle extends FighterFlight
 
         for ($i = 0; $i < $toAdd; $i++) {
             $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter($this->phpclass, $armour, 8, $this->id);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
             $fighter->displayName = $this->shipClass;
             $fighter->imagePath = $this->imagePath;
             $fighter->iconPath = $this->imagePath;
@@ -80,6 +80,6 @@ class MinesweepingShuttle extends Shuttle
         $this->phpclass = "MinesweepingShuttle";
         $this->shipClass = "Minesweeping Shuttle";
         $this->hangarRequired = 'minesweeping shuttles';
-        $this->minesweeperbonus = 2;
+        $this->offensivebonus = 0;
     }
 }
