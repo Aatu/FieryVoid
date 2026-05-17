@@ -1243,8 +1243,8 @@ class HangarOps {
 		//to tell the player a fragment is a partial; further splits inherit
 		//the same name.
 		$fragmentName = $sourceFlight->name;
-		if (strpos($fragmentName, ' - Detachment') === false) {
-			$fragmentName .= ' - Detachment';
+		if (strpos($fragmentName, ' - Split') === false) {
+			$fragmentName .= ' - Split';
 		}
 		$fragment = new $phpclass($gamedata->id, $sourceFlight->userid, $fragmentName, $sourceFlight->slot);
 		$fragment->team = $sourceFlight->team;
