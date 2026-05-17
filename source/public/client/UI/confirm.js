@@ -2339,7 +2339,7 @@ window.confirm = {
             return;
         }
 
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Check flights to dock into a hangar bay at end of turn. Full-flight only — use the flight tooltip\'s Enter Hangar button to split a flight across hangars.</span></div>').appendTo(container);
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Check flights to dock into a hangar bay at end of turn.</span></div>').appendTo(container);
 
         // Live per-hangar capacity readout. Mirrors hangarDeployDock's pill
         // strip; baseFree counts OTHER flights' queued orders as committed and

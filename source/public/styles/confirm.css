@@ -515,11 +515,14 @@
     transform: translateY(1px);
 }
 
-/* Deployment Dock rows: keep the flight-name label tight against its
-   checkbox by dropping the base `flex: 1` (which would otherwise stretch
-   the label across the row and split the pair). The checkbox's
-   `margin-left: auto` above is what pushes the whole pair to the right. */
-.confirm.multi-value-confirm.hangar-confirm.hangarDeployDock .multi-value-row .multi-value-label {
+/* Deployment Dock and Firing-Phase Recover rows: keep the flight-name
+   label tight against its checkbox by dropping the base `flex: 1`
+   (which would otherwise stretch the label across the row and split
+   the pair). The checkbox's `margin-left: auto` above is what pushes
+   the whole pair to the right. Both dialogs use the same checkbox row
+   pattern so they share the rule. */
+.confirm.multi-value-confirm.hangar-confirm.hangarDeployDock .multi-value-row .multi-value-label,
+.confirm.multi-value-confirm.hangar-confirm.hangarRecover .multi-value-row .multi-value-label {
     flex: 0 0 auto;
     text-align: right;
     margin-right: 10px;
