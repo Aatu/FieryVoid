@@ -33,7 +33,7 @@ class Shuttle extends FighterFlight
         $this->faction = "Generic";
         $this->phpclass = "Shuttle";
         $this->shipClass = "Shuttle";
-        $this->imagePath = "img/ships/LlortLeteerum.png";  //placeholder; faction subclasses can override
+        $this->imagePath = "img/ships/shuttle.png";  //placeholder; faction subclasses can override
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
@@ -57,8 +57,8 @@ class Shuttle extends FighterFlight
             $armour = array(1, 1, 1, 1);
             $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
             $fighter->displayName = $this->shipClass;
-            $fighter->imagePath = $this->imagePath;
-            $fighter->iconPath = $this->imagePath;
+			$fighter->imagePath = "img/ships/shuttle.png";
+			$fighter->iconPath = "img/ships/shuttle_large.png";
 
             $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
 
