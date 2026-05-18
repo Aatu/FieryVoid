@@ -799,6 +799,30 @@ window.gamedata = {
 						}
 					}
 				}
+
+				//Default shuttle slots auto-populate any leftover hangar capacity
+				//(see HangarOps::populateInitialHangarUsage step 3 on the server).
+				//Surface them as 'shuttles' capacity so armed-shuttle variants
+				//(ArmedFlyer for Minbari, future ArmedShuttleEA, etc.) — which set
+				//hangarRequired='shuttles' — can be bought against this pool. We
+				//deliberately don't push to smallCraftUsed: the report row only
+				//appears when the player actually buys armed shuttles, so empty
+				//rows don't clutter ships that just have leftover default shuttles.
+				var defaultShuttles = shipManager.systems.getDefaultShuttles(lship);
+				if (defaultShuttles.count > 0 && defaultShuttles.key !== "minesweeping shuttles") {
+					var defaultKey = defaultShuttles.key;
+					var foundDefault = false;
+					for (var nh in totalHangarOther) {
+						if (totalHangarOther[nh][0] == defaultKey) {
+							foundDefault = true;
+							totalHangarOther[nh][1] += defaultShuttles.count;
+						}
+					}
+					if (!foundDefault) {
+						totalHangarOther.push(new Array(defaultKey, defaultShuttles.count));
+					}
+				}
+
 				//ship may actually require hangar, too! but this must be specified directly
 				if (lship.hangarRequired != '') { //classify based on explicit info from craft
 					if (lship.hangarRequired == 'Breaching Pods') {
@@ -1395,7 +1419,10 @@ window.gamedata = {
 					totalHangarCurr = totalHangarOther[nh][1];
 				}
 			}
-			checkResult += " - " + scSize + ": " + totalFtrCurr;
+			//Title-case the slot key for display ("shuttles" → "Shuttles", "minesweeping
+			//shuttles" → "Minesweeping Shuttles"). Mirrors the pattern used in shipwindow.js.
+			var scLabel = scSize.split(' ').map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+			checkResult += " - " + scLabel + ": " + totalFtrCurr;
 			if (scSize != 'Fighter Squadrons') { //standard
 				checkResult += " (allowed up to " + totalHangarCurr + ")";
 			} else { //Fighter Squadrons get treated as fighters - eg. half are required

@@ -3552,6 +3552,7 @@ spl_autoload_register(
                 'hangarops' => '/server/model/systems/HangarOps.php',
                 'shuttle' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
+                'flyer' => '/server/model/ships/Shuttle.php',                
                 
                 //MINES
 				'minestealth' => '/server/model/systems/baseSystems.php',

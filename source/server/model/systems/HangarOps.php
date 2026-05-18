@@ -56,9 +56,9 @@ class HangarOps {
 			foreach ($ship->fighters as $category => $declaredCount){
 				$count = (int)$declaredCount;
 				$totalDeclared += $count;
-				$shuttleClass = self::shuttlePhpclassForCategory($category);
+				$shuttleClass = self::shuttlePhpclassForCategory($category, $ship);
 				if ($shuttleClass === null) continue;   //not a shuttle category
-				
+
 				$shuttleName = self::shuttleDisplayNameFor($shuttleClass);
 
 				while ($count > 0){
@@ -79,15 +79,16 @@ class HangarOps {
 			}
 		}
 
-		//Step 3: leftover capacity → fill with shuttles. Use MinesweepingShuttle
-		//if the carrier has any minesweeper bonus declared.
+		//Step 3: leftover capacity → fill with shuttles. Minesweeper carriers get
+		//MinesweepingShuttle (faction-agnostic for now); everyone else gets the
+		//faction-appropriate shuttle subclass (Flyer for Minbari, Shuttle otherwise).
 		$totalCapacity = 0;
 		foreach ($hangars as $h) $totalCapacity += (int)$h->maxhealth;
 		$leftover = $totalCapacity - $totalDeclared;
 		if ($leftover > 0){
 			$leftoverClass = (isset($ship->minesweeperbonus) && $ship->minesweeperbonus > 0)
 				? 'MinesweepingShuttle'
-				: 'Shuttle';
+				: self::factionShuttleClass($ship);
 			$leftoverCategory = ($leftoverClass === 'MinesweepingShuttle') ? 'minesweeping shuttles' : 'shuttles';
 			$leftoverName = self::shuttleDisplayNameFor($leftoverClass);
 
@@ -113,16 +114,42 @@ class HangarOps {
 	/* Maps a $ship->fighters category key to a shuttle phpclass, or null
 	 * if the category isn't a shuttle slot (i.e. it's a fighter category
 	 * that auto-deploys instead of staying in hangar).
+	 *
+	 * Passing $ship lets the 'shuttles' category resolve to a faction-specific
+	 * subclass (e.g. Flyer for Minbari) via factionShuttleClass(). Omitting
+	 * $ship — or passing one with no faction match — yields the generic
+	 * 'Shuttle' class. 'minesweeping shuttles' is faction-agnostic for now.
 	 */
-	public static function shuttlePhpclassForCategory($category){
+	public static function shuttlePhpclassForCategory($category, $ship = null){
 		$normalized = strtolower(trim((string)$category));
 		switch ($normalized) {
 			case 'shuttles':
-				return 'Shuttle';
+				return self::factionShuttleClass($ship);
 			case 'minesweeping shuttles':
 				return 'MinesweepingShuttle';
 			default:
 				return null;
+		}
+	}
+
+	/* Resolves the right shuttle phpclass for a carrier based on faction:
+	 *   - Minbari Federation / Minbari Protectorate → 'Flyer'
+	 *   - everything else (or no faction info)      → 'Shuttle'
+	 *
+	 * Used by both shuttlePhpclassForCategory (for explicit 'shuttles' slots)
+	 * and by populateInitialHangarUsage's leftover-capacity step. Minesweeping
+	 * shuttles bypass this and stay 'MinesweepingShuttle' regardless of faction.
+	 *
+	 * Extend the switch as more faction-specific shuttle classes are added.
+	 */
+	public static function factionShuttleClass($ship){
+		if (!$ship || !isset($ship->faction)) return 'Shuttle';
+		switch ($ship->faction) {
+			case 'Minbari Federation':
+			case 'Minbari Protectorate':
+				return 'Flyer';
+			default:
+				return 'Shuttle';
 		}
 	}
 
@@ -131,6 +158,8 @@ class HangarOps {
 		switch ($phpclass) {
 			case 'MinesweepingShuttle':
 				return 'Minesweeping Shuttle';
+			case 'Flyer':
+				return 'Flyer';
 			case 'Shuttle':
 			default:
 				return 'Shuttle';
@@ -322,14 +351,16 @@ class HangarOps {
 	}
 
 	/* Lower priority value = drop first.
-	 * Order: empty slots (0), shuttles (10), MinesweepingShuttle (20),
-	 * fighters at 1000 + pointCost so cheapest fighters evict before expensive ones.
+	 * Order: empty slots (0), shuttles + faction shuttle variants (10),
+	 * MinesweepingShuttle (20), fighters at 1000 + pointCost so cheapest
+	 * fighters evict before expensive ones.
 	 */
 	public static function evictionPriorityFor($entry){
 		$phpclass = $entry['phpclass'] ?? '';
 		if ($phpclass === '') return 0;
 		if ($phpclass === 'MinesweepingShuttle') return 20;
 		if (stripos($phpclass, 'shuttle') !== false) return 10;
+		if ($phpclass === 'Flyer') return 10;
 		if (class_exists($phpclass)) {
 			try {
 				$probe = new $phpclass(0, 0, '', 0);

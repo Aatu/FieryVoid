@@ -413,15 +413,20 @@ shipManager.systems = {
     },
 
     //Mirrors HangarOps::populateInitialHangarUsage step 3: any hangar capacity
-    //that isn't accounted for by entries in ship.fighters auto-fills with
-    //Shuttles (or MinesweepingShuttles when minesweeperbonus > 0).
+    //that isn't accounted for by entries in ship.fighters auto-fills with the
+    //faction-appropriate default shuttle (or MinesweepingShuttles when
+    //minesweeperbonus > 0). The hangar SLOT key stays "shuttles" regardless
+    //of faction — Flyers / Shuttles / armed variants all compete for the
+    //same pool in checkChoices.
     //Returns {count, type, key} where:
-    //  type — display string ("Shuttles" / "Minesweeping Shuttles")
-    //  key  — matching ship.fighters key ("shuttles" / "minesweeping shuttles")
+    //  type — display string ("Shuttles" / "Flyers" / "Minesweeping Shuttles")
+    //  key  — matching ship.fighters slot key ("shuttles" / "minesweeping shuttles")
     //  count — leftover slot count (>= 0)
     getDefaultShuttles: function getDefaultShuttles(ship) {
+        if (shipManager.systems.getTotalHangarCapacity(ship) <= 0) {
+            return { count: 0, type: "Shuttles", key: "shuttles" };
+        }
         var capacity = shipManager.systems.getTotalHangarCapacity(ship);
-        if (capacity <= 0) return { count: 0, type: "Shuttles", key: "shuttles" };
         var declared = 0;
         if (ship.fighters) {
             for (var k in ship.fighters) declared += parseInt(ship.fighters[k], 10) || 0;
@@ -429,11 +434,30 @@ shipManager.systems = {
         var leftover = capacity - declared;
         if (leftover < 0) leftover = 0;
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
+        if (minesweeper) {
+            return { count: leftover, type: "Minesweeping Shuttles", key: "minesweeping shuttles" };
+        }
         return {
             count: leftover,
-            type: minesweeper ? "Minesweeping Shuttles" : "Shuttles",
-            key: minesweeper ? "minesweeping shuttles" : "shuttles"
+            type: shipManager.systems.factionDefaultShuttleLabel(ship),
+            key: "shuttles"
         };
+    },
+
+    //Display label for a ship's auto-populated default shuttle. Mirrors
+    //HangarOps::factionShuttleClass on the server — extend this switch in
+    //lockstep whenever a faction-specific default shuttle subclass is added
+    //(e.g. Flyer for Minbari). Plural form, used in the ship-info window
+    //and in the gamelobby fleet check report.
+    factionDefaultShuttleLabel: function factionDefaultShuttleLabel(ship) {
+        var faction = ship && ship.faction ? String(ship.faction) : "";
+        switch (faction) {
+            case "Minbari Federation":
+            case "Minbari Protectorate":
+                return "Flyers";
+            default:
+                return "Shuttles";
+        }
     },
 
     getThrusters: function getThrusters(ship, direction) {
