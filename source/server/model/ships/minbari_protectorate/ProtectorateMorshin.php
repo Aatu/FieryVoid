@@ -11,7 +11,7 @@ class ProtectorateMorshin extends HeavyCombatVessel{
         $this->shipClass = "Morshin Carrier";
         $this->gravitic = true;
         $this->limited = 33;
-        $this->fighters = array("normal"=>48, "shuttles"=>2);
+        $this->fighters = array("normal"=>48);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         $this->turncost = 0.75;
