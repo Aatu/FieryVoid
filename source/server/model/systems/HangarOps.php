@@ -136,12 +136,14 @@ class HangarOps {
 	 * Maps a ship faction → phpclass of its non-minesweeping default shuttle.
 	 * Anything not listed falls through to the generic 'Shuttle' class.
 	 *
-	 * Consumed by factionShuttleClass() (per-ship lookup) and by
-	 * allShuttleClasses() (used in Hangar::__construct to preload the
-	 * client-side blueprints — without that, launching a Flyer leaves the
-	 * client with no static blueprint for it and ship.flight / ship.hitChart
-	 * come through undefined). Extend this map when adding a new faction
-	 * default shuttle subclass; no other server-side wiring is required.
+	 * Consumed by:
+	 *   - factionShuttleClass($ship)        — per-ship lookup at populate time
+	 *   - shuttleClassForFactionName($name) — by-faction lookup at blueprint
+	 *     preload time (game.php), so we only preload Flyer when a Minbari
+	 *     carrier is actually present in the current game, not every game.
+	 *
+	 * Extend this map when adding a new faction default shuttle subclass;
+	 * no other server-side wiring is required.
 	 */
 	private static $factionShuttleMap = array(
 		'Minbari Federation'   => 'Flyer',
@@ -159,16 +161,14 @@ class HangarOps {
 		return 'Shuttle';
 	}
 
-	/* Returns every phpclass that auto-populated hangars might launch,
-	 * across all factions. Used by Hangar::__construct to seed its
-	 * $spawnableClasses so game.php preloads each blueprint into
-	 * window.staticShips. Generic Shuttle / MinesweepingShuttle plus every
-	 * value in $factionShuttleMap.
-	 */
-	public static function allShuttleClasses(){
-		$classes = array('Shuttle', 'MinesweepingShuttle');
-		foreach (self::$factionShuttleMap as $cls) $classes[] = $cls;
-		return array_values(array_unique($classes));
+	/* Faction-name variant of factionShuttleClass, for callers that don't have
+	 * a ship instance (e.g. the blueprint preload pass in game.php).
+	 * Returns null when the faction has no specific class — the generic 'Shuttle'
+	 * is always part of Hangar's preload defaults, so a null return means
+	 * "nothing extra needed beyond the generic". */
+	public static function shuttleClassForFactionName($faction){
+		if (!is_string($faction) || $faction === '') return null;
+		return isset(self::$factionShuttleMap[$faction]) ? self::$factionShuttleMap[$faction] : null;
 	}
 
 	/* Display name for a shuttle phpclass — used in hangar tooltip aggregation. */

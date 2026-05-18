@@ -85,7 +85,13 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
         // Auto-discover dynamically spawnable ship blueprints from weapon system properties.
         // Any weapon with a $spawnableClasses array will have its listed classes preloaded here,
         // so the frontend has their full blueprint when a mine/unit is spawned mid-game.
+        //
+        // Hangar Ops: faction-specific default shuttles (e.g. Flyer for Minbari) live on
+        // HangarOps::$factionShuttleMap rather than on every Hangar's $spawnableClasses,
+        // so each game only preloads the shuttle classes of factions actually present
+        // (and carrying a Hangar) — not all ~80 factions in the codebase.
         $spawnableClasses = [];
+        $factionsWithHangars = [];
         foreach ($staticShips as $faction => $shipBlueprints) {
             foreach ($shipBlueprints as $blueprint) {
                 foreach ($blueprint->systems as $system) {
@@ -94,8 +100,15 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
                             $spawnableClasses[] = $cls;
                         }
                     }
+                    if ($system instanceof Hangar) {
+                        $factionsWithHangars[$faction] = true;
+                    }
                 }
             }
+        }
+        foreach (array_keys($factionsWithHangars) as $faction) {
+            $factionShuttle = HangarOps::shuttleClassForFactionName($faction);
+            if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
         }
         if (!empty($spawnableClasses)) {
             $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));

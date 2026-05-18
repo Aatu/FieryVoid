@@ -2983,12 +2983,14 @@ class Hangar extends ShipSystem{
 		}
 		$this->hangarType = $hangarType;
 		$this->direction = (int)$direction;
-		//Always include shuttle classes — every hangar can launch shuttles per
-		//B5W §10.1. Sourced from HangarOps::allShuttleClasses so adding a new
-		//faction default shuttle (e.g. Flyer) automatically reaches the
-		//client-side staticShips preload. Per-ship overrides can extend this
-		//list with specific fighter classes the carrier is configured to launch.
-		$defaults = HangarOps::allShuttleClasses();
+		//Always include the generic shuttle classes — every hangar can launch
+		//shuttles per B5W §10.1, and these are faction-agnostic. Faction-specific
+		//default shuttles (e.g. Flyer for Minbari) are NOT baked into every
+		//Hangar's spawnableClasses; they would force the client-side blueprint
+		//preload to load every faction's shuttle regardless of who's in the
+		//current game. Instead, game.php appends them via HangarOps::shuttleClassForFactionName
+		//only for factions actually present (and carrying a Hangar) in this game.
+		$defaults = array('Shuttle', 'MinesweepingShuttle');
 		$extras = is_array($spawnableClasses) ? $spawnableClasses : array();
 		$this->spawnableClasses = array_values(array_unique(array_merge($defaults, $extras)));
         parent::__construct($armour, $maxhealth, 0, $output );
