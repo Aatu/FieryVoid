@@ -20,7 +20,7 @@ class Troligan extends BaseShip{
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
         $this->isd = 2166;
-        $this->fighters = array("shuttles"=>2);
+        //$this->fighters = array("shuttles"=>2);
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(7, 23, 0, 0));
