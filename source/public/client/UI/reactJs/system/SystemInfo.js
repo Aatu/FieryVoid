@@ -85,7 +85,11 @@ class SystemInfo extends React.Component {
 
         let displayOffensiveBonus = ship.offensivebonus;
         if (ship.flight && gamedata.areMinesPresent) {
-            displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
+			if(ship.phpclass == "MinesweepingShuttle"){
+				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
+			}else{
+				displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
+			}	
         }
 
         var systemDisplayName = system.displayName;

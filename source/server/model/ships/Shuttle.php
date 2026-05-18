@@ -80,6 +80,6 @@ class MinesweepingShuttle extends Shuttle
         $this->phpclass = "MinesweepingShuttle";
         $this->shipClass = "Minesweeping Shuttle";
         $this->hangarRequired = 'minesweeping shuttles';
-        $this->offensivebonus = 0;
+        $this->offensivebonus = 4;
     }
 }

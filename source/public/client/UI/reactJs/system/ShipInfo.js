@@ -92,7 +92,11 @@ class ShipInfo extends React.Component {
 
 		let displayOffensiveBonus = ship.offensivebonus;
 		if (ship.flight && gamedata.areMinesPresent) {
-			displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
+			if(ship.phpclass == "MinesweepingShuttle"){
+				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
+			}else{
+				displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
+			}	
 		}
 
 		var reactKey = 0; //needed for react so each line has unique key!
