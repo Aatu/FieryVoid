@@ -2494,6 +2494,16 @@ window.confirm = {
                 return;
             }
 
+            //Stage 10.6.2: aggregate customFighter cap across checked flights.
+            //Per-row eligibility already requires each flight's full count to
+            //fit individually, but multiple same-named flights can still
+            //collectively exceed the carrier's cap.
+            var customOverflow = checkCustomFighterAggregate(carrier, rowData);
+            if (customOverflow.length > 0) {
+                alert('Cannot recover: customFighter cap exceeded — ' + customOverflow.join(', ') + '. Uncheck flights.');
+                return;
+            }
+
             rowData.forEach(function ($row) {
                 var flight = $row.data('flight');
                 if (!flight) return;
@@ -2547,6 +2557,55 @@ window.confirm = {
                 per.set(hangar.id, (per.get(hangar.id) || 0) + count);
             });
             return per;
+        }
+
+        //Stage 10.6.2: aggregate customFighter demand across the checked rows.
+        //Pending dock orders that the dialog is about to REWRITE (rows about
+        //to be re-queued) are treated as reclaimable — they get stripped via
+        //stripFlightFromCarrier before the new push. Other pending orders on
+        //THIS carrier (not in the dialog) stay committed.
+        function checkCustomFighterAggregate(carrier, rows) {
+            var demand = new Map();
+            var inDialog = new Set();
+            rows.forEach(function ($row) {
+                var f = $row.data('flight');
+                if (f) inDialog.add(parseInt(f.id, 10));
+                if (!$row.find('.deployDockCheck').is(':checked')) return;
+                if (!f) return;
+                var name = String(f.customFtrName || '');
+                if (!name) return;
+                var count = parseInt($row.data('flightSize') || 0, 10);
+                demand.set(name, (demand.get(name) || 0) + count);
+            });
+            if (demand.size === 0) return [];
+
+            var overflows = [];
+            demand.forEach(function (count, name) {
+                var declared = (carrier.customFighter && carrier.customFighter[name])
+                    ? parseInt(carrier.customFighter[name], 10) : 0;
+                var committed = 0;
+                carrier.systems.forEach(function (sys) {
+                    if (!sys || sys.name !== 'hangar') return;
+                    if (Array.isArray(sys.hangarUsage)) {
+                        sys.hangarUsage.forEach(function (entry) {
+                            if (entry.customFtrName !== name) return;
+                            committed += parseInt(entry.flightSize || 1, 10);
+                        });
+                    }
+                    if (Array.isArray(sys.pendingDockOrders)) {
+                        sys.pendingDockOrders.forEach(function (o) {
+                            if (inDialog.has(parseInt(o.flightId, 10))) return;     //reclaimable
+                            var f2 = gamedata.getShip(o.flightId);
+                            if (!f2 || String(f2.customFtrName || '') !== name) return;
+                            committed += parseInt(o.count || 0, 10);
+                        });
+                    }
+                });
+                if (committed + count > declared) {
+                    overflows.push(name + ' ' + (committed + count) + '/' + declared);
+                }
+            });
+            return overflows;
         }
 
         function recomputeCapacity() {
@@ -2866,6 +2925,17 @@ window.confirm = {
                 return;
             }
 
+            //Stage 10.6.2: aggregate customFighter cap across all checked rows.
+            //Per-row eligibilityHangars already clamps against the cap at open
+            //time, but a player checking multiple same-named flights can still
+            //collectively exceed it. Server would silently drop the overflow
+            //with a fail note; warn the player explicitly instead.
+            var customOverflow = checkCustomFighterAggregate(carrier, rowData);
+            if (customOverflow.length > 0) {
+                alert('Cannot dock: customFighter cap exceeded — ' + customOverflow.join(', ') + '. Uncheck flights.');
+                return;
+            }
+
             // For each row: if checked, queue (or re-route) the dock; if unchecked,
             // un-queue via DeploymentDock.unqueueDeployStartDock so the flight
             // gets its deploy position snapped to the carrier's current hex
@@ -2921,6 +2991,45 @@ window.confirm = {
                 perHangar.set(hangar.id, (perHangar.get(hangar.id) || 0) + size);
             });
             return perHangar;
+        }
+
+        //Stage 10.6.2: aggregate customFighter demand across checked rows by
+        //customFtrName and compare against the carrier's per-name cap. Returns
+        //a list of overflow descriptions like ["Thunderbolt 18/12"] or [].
+        //Pending deploy-start orders for OTHER carriers don't affect this
+        //carrier's cap; orders queued elsewhere on THIS carrier (from prior
+        //unchecked rows) are treated as reclaimable (will be un-queued).
+        function checkCustomFighterAggregate(carrier, rows) {
+            var demand = new Map();      //customFtrName → fighters being docked here
+            rows.forEach(function ($row) {
+                if (!$row.find('.deployDockCheck').is(':checked')) return;
+                var flight = $row.data('flight');
+                var name = String(flight.customFtrName || '');
+                if (!name) return;
+                var size = parseInt(flight.flightSize || 1, 10);
+                demand.set(name, (demand.get(name) || 0) + size);
+            });
+            if (demand.size === 0) return [];
+
+            var overflows = [];
+            demand.forEach(function (count, name) {
+                var declared = (carrier.customFighter && carrier.customFighter[name])
+                    ? parseInt(carrier.customFighter[name], 10) : 0;
+                //Existing usage from committed dock entries (other turns).
+                var committed = 0;
+                carrier.systems.forEach(function (sys) {
+                    if (!sys || sys.name !== 'hangar') return;
+                    if (!Array.isArray(sys.hangarUsage)) return;
+                    sys.hangarUsage.forEach(function (e) {
+                        if (e.customFtrName !== name) return;
+                        committed += parseInt(e.flightSize || 1, 10);
+                    });
+                });
+                if (committed + count > declared) {
+                    overflows.push(name + ' ' + (committed + count) + '/' + declared);
+                }
+            });
+            return overflows;
         }
 
         function recomputeCapacity() {

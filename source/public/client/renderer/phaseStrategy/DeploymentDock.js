@@ -146,13 +146,13 @@ window.DeploymentDock = (function () {
     }
 
     // Returns the first hangar in $hangars that accepts $flight's size, or
-    // null if none fit.
-    function firstFittingHangar(hangars, flight) {
+    // null if none fit. $carrier passed so universal hangars use ship.$fighters.
+    function firstFittingHangar(hangars, flight, carrier) {
         var cat = categoryForFlight(flight);
         var size = parseInt(flight.flightSize, 10) || 1;
         for (var i = 0; i < hangars.length; i++) {
             var h = hangars[i];
-            if (!hangarAcceptsCategory(h.hangar.hangarType, cat)) continue;
+            if (!hangarAcceptsCategory(h.hangar.hangarType, cat, carrier)) continue;
             if (h.free >= size) return h.hangar;
         }
         return null;
@@ -177,16 +177,58 @@ window.DeploymentDock = (function () {
     }
 
     // Mirrors HangarOps::hangarAcceptsCategory (PHP). See shipTooltipFireMenu.js.
-    function hangarAcceptsCategory(hangarType, category) {
+    // Universal 'fighters'/'normal' slots derive permissions from ship.$fighters
+    // when ship is provided (handles multi-category carriers like Decurion).
+    function hangarAcceptsCategory(hangarType, category, ship) {
         var hType = String(hangarType || '').toLowerCase().trim();
         var cat   = String(category   || '').toLowerCase().trim();
         if (hType === '' || cat === '') return false;
-        if (hType === 'fighters' || hType === 'normal') return true;
-        if (hType === cat) return true;
         var rank = { ultralight: 1, light: 2, medium: 3, heavy: 4 };
+
+        if (hType === cat) return true;
         if (rank[hType] && rank[cat]) return rank[cat] <= rank[hType];
         if ((cat === 'shuttles' || cat === 'minesweeping shuttles') && rank[hType]) return true;
-        if (hType === 'assault shuttles' && cat === 'breaching pods') return true;
+
+        //Breaching Pods: AS slot or ANY combat fighter slot.
+        if (cat === 'breaching pods') {
+            if (hType === 'assault shuttles') return true;
+            if (rank[hType]) return true;
+        }
+
+        if (hType === 'fighters' || hType === 'normal') {
+            if (cat === 'shuttles' || cat === 'minesweeping shuttles') return true;
+            if (!ship || !ship.fighters) {
+                if (rank[cat]) return true;
+                return false;
+            }
+            var declared = {};
+            for (var k in ship.fighters) {
+                if (Object.prototype.hasOwnProperty.call(ship.fighters, k)) {
+                    declared[String(k).toLowerCase()] = ship.fighters[k];
+                }
+            }
+            if (rank[cat]) {
+                if (declared['normal']) return true;
+                var sizes = ['heavy', 'medium', 'light', 'ultralight'];
+                for (var i = 0; i < sizes.length; i++) {
+                    if (!declared[sizes[i]]) continue;
+                    if (rank[cat] <= rank[sizes[i]]) return true;
+                }
+                return false;
+            }
+            if (cat === 'assault shuttles') return !!declared['assault shuttles'];
+            if (cat === 'breaching pods') {
+                if (declared['breaching pods']) return true;
+                if (declared['assault shuttles']) return true;
+                if (declared['normal']) return true;
+                if (declared['heavy']) return true;
+                if (declared['medium']) return true;
+                if (declared['light']) return true;
+                if (declared['ultralight']) return true;
+                return false;
+            }
+            return false;
+        }
         return false;
     }
 
@@ -197,7 +239,7 @@ window.DeploymentDock = (function () {
         if (!flight || !carrier) return false;
         if (flight.pendingDeployDock) return false;          //already queued somewhere
         var hangars = collectUsableHangars(carrier);
-        var hangar = firstFittingHangar(hangars, flight);
+        var hangar = firstFittingHangar(hangars, flight, carrier);
         if (!hangar) return false;
 
         if (!Array.isArray(hangar.pendingDeployStartOrders)) hangar.pendingDeployStartOrders = [];
@@ -312,11 +354,19 @@ window.DeploymentDock = (function () {
         var size = parseInt(flight.flightSize, 10) || 1;
         var flightId = parseInt(flight.id, 10);
 
+        // Stage 10.6.2: per-ship customFighter cap. Deploy-dock is always a
+        // whole-flight commit, so cap < size → flight isn't dockable here.
+        var customName = String(flight.customFtrName || '');
+        if (customName !== '') {
+            var cap = customFighterRemainingFor(carrier, customName, flightId);
+            if (cap < size) return [];
+        }
+
         var out = [];
         carrier.systems.forEach(function (sys) {
             if (!sys || sys.name !== 'hangar') return;
             if (shipManager.systems.isDestroyed(carrier, sys)) return;
-            if (!hangarAcceptsCategory(sys.hangarType, category)) return;
+            if (!hangarAcceptsCategory(sys.hangarType, category, carrier)) return;
 
             //Compute free boxes — but reclaim THIS flight's own queued entry
             //so re-edit doesn't think the hangar is full.
@@ -346,6 +396,37 @@ window.DeploymentDock = (function () {
             if (free >= size) out.push({ hangar: sys, capacity: free });
         });
         return out;
+    }
+
+    // Mirrors HangarOps::customFighterRemaining (PHP). Per-CARRIER count of
+    // remaining custom-named slots. Same shape as the shipTooltipFireMenu
+    // helpers — duplicated so DeploymentDock has no load-order dependency on
+    // shipTooltipFireMenu (game.php-only).
+    //
+    // Deployment-phase uses pendingDeployStartOrders instead of pendingDockOrders.
+    function customFighterRemainingFor(carrier, name, ownFlightId) {
+        if (!name) return Infinity;
+        if (!carrier.customFighter || !carrier.customFighter[name]) return 0;
+        var declared = parseInt(carrier.customFighter[name], 10);
+        var used = 0;
+        carrier.systems.forEach(function (sys) {
+            if (!sys || sys.name !== 'hangar') return;
+            if (Array.isArray(sys.hangarUsage)) {
+                sys.hangarUsage.forEach(function (e) {
+                    if (e.customFtrName !== name) return;
+                    used += parseInt(e.flightSize || 1, 10);
+                });
+            }
+            if (Array.isArray(sys.pendingDeployStartOrders)) {
+                sys.pendingDeployStartOrders.forEach(function (o) {
+                    if (parseInt(o.flightId, 10) === ownFlightId) return;
+                    var f = gamedata.getShip(o.flightId);
+                    if (!f || String(f.customFtrName || '') !== name) return;
+                    used += parseInt(f.flightSize || 1, 10);
+                });
+            }
+        });
+        return Math.max(0, declared - used);
     }
 
     return {

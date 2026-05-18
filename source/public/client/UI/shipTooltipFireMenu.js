@@ -249,7 +249,7 @@ window.findEligibleCarriersForDock = function (flight) {
             if (!sys || sys.name !== 'hangar') return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
 
-            if (!hangarAcceptsCategory(sys.hangarType, category)) return;
+            if (!hangarAcceptsCategory(sys.hangarType, category, ship)) return;
 
             // Effective free boxes: maxhealth - net damage - usage.
             var netDamage = 0;
@@ -291,24 +291,123 @@ window.findEligibleCarriersForDock = function (flight) {
             var capacity = Math.min(free, budget);
             if (capacity > 0) hangars.push({ hangar: sys, capacity: capacity });
         });
+
+        // Stage 10.6.2: clamp aggregate capacity to the carrier's remaining
+        // customFighter cap for this flight's customFtrName. Cap is shared
+        // across all hangars on the carrier — walk in order and truncate each
+        // entry until the running total hits the cap.
+        var customName = String(flight.customFtrName || '');
+        if (customName !== '') {
+            var cap = customFighterRemainingFor(ship, customName, flightId);
+            if (cap <= 0) return [];
+            var running = 0;
+            var clamped = [];
+            for (var i = 0; i < hangars.length; i++) {
+                if (running >= cap) break;
+                var take = Math.min(hangars[i].capacity, cap - running);
+                if (take <= 0) continue;
+                clamped.push({ hangar: hangars[i].hangar, capacity: take });
+                running += take;
+            }
+            return clamped;
+        }
         return hangars;
+    }
+
+    // Mirrors HangarOps::customFighterRemaining (PHP). Per-CARRIER count of
+    // remaining custom-named slots (e.g. Thunderbolt, Rutarian). Returns
+    // Infinity when $name === '' (no gate); 0 when the carrier doesn't
+    // declare $customFighter[name]; declared - used otherwise. Pending dock
+    // orders from OTHER flights count against the cap; THIS flight's own
+    // pending orders are reclaimable (mirrors physical-capacity reclaim).
+    function customFighterRemainingFor(carrier, name, ownFlightId) {
+        if (!name) return Infinity;
+        if (!carrier.customFighter || !carrier.customFighter[name]) return 0;
+        var declared = parseInt(carrier.customFighter[name], 10);
+        var used = 0;
+        carrier.systems.forEach(function (sys) {
+            if (!sys || sys.name !== 'hangar') return;
+            if (Array.isArray(sys.hangarUsage)) {
+                sys.hangarUsage.forEach(function (e) {
+                    if (e.customFtrName !== name) return;
+                    used += parseInt(e.flightSize || 1, 10);
+                });
+            }
+            if (Array.isArray(sys.pendingDockOrders)) {
+                sys.pendingDockOrders.forEach(function (o) {
+                    if (parseInt(o.flightId, 10) === ownFlightId) return;
+                    var f = gamedata.getShip(o.flightId);
+                    if (!f || String(f.customFtrName || '') !== name) return;
+                    used += parseInt(o.count || 0, 10);
+                });
+            }
+        });
+        return Math.max(0, declared - used);
     }
 
     // Mirrors HangarOps::hangarAcceptsCategory (PHP) — combat-fighter size
     // hierarchy plus shuttle/BP compatibility. Keep in sync with the server
-    // helper so the eligibility gate matches end-of-turn validation.
-    function hangarAcceptsCategory(hangarType, category) {
+    // helper so the eligibility gate matches end-of-turn validation. Universal
+    // 'fighters'/'normal' slots derive their permissions from the ship's
+    // $fighters declaration when ship is provided (handles multi-category
+    // ships like Decurion / Falenna).
+    function hangarAcceptsCategory(hangarType, category, ship) {
         var hType = String(hangarType || '').toLowerCase().trim();
         var cat   = String(category   || '').toLowerCase().trim();
         if (hType === '' || cat === '') return false;
-        if (hType === 'fighters' || hType === 'normal') return true;
-        if (hType === cat) return true;
-
         var rank = { ultralight: 1, light: 2, medium: 3, heavy: 4 };
+
+        if (hType === cat) return true;
         if (rank[hType] && rank[cat]) return rank[cat] <= rank[hType];
         if ((cat === 'shuttles' || cat === 'minesweeping shuttles') && rank[hType]) return true;
-        if (hType === 'assault shuttles' && cat === 'breaching pods') return true;
+
+        //Breaching Pods: dedicated BP slot (exact-match above), Assault Shuttle
+        //slot, or ANY combat fighter slot (heavy/medium/light/ultralight).
+        if (cat === 'breaching pods') {
+            if (hType === 'assault shuttles') return true;
+            if (rank[hType]) return true;
+        }
+
+        if (hType === 'fighters' || hType === 'normal') {
+            if (cat === 'shuttles' || cat === 'minesweeping shuttles') return true;
+            if (!ship || !ship.fighters) {
+                if (rank[cat]) return true;
+                return false;
+            }
+            var declared = lowerKeys(ship.fighters);
+            if (rank[cat]) {
+                if (declared['normal']) return true;
+                var sizes = ['heavy', 'medium', 'light', 'ultralight'];
+                for (var i = 0; i < sizes.length; i++) {
+                    if (!declared[sizes[i]]) continue;
+                    if (rank[cat] <= rank[sizes[i]]) return true;
+                }
+                return false;
+            }
+            if (cat === 'assault shuttles') return !!declared['assault shuttles'];
+            if (cat === 'breaching pods') {
+                if (declared['breaching pods']) return true;
+                if (declared['assault shuttles']) return true;
+                if (declared['normal']) return true;
+                if (declared['heavy']) return true;
+                if (declared['medium']) return true;
+                if (declared['light']) return true;
+                if (declared['ultralight']) return true;
+                return false;
+            }
+            return false;
+        }
         return false;
+    }
+
+    function lowerKeys(obj) {
+        var out = {};
+        for (var k in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                out[String(k).toLowerCase()] = obj[k];
+            }
+        }
+        return out;
     }
 };
 
@@ -373,10 +472,19 @@ window.findEligibleFlightsForDocking = function (carrier) {
         var size = countActiveInFlight(flight);
         if (size <= 0) return hangars;
 
+        // Stage 10.6.2: bulk recover only ever docks a FULL flight into a
+        // single hangar — if the carrier's customFighter cap can't hold the
+        // whole flight, the flight isn't eligible at all.
+        var customName = String(flight.customFtrName || '');
+        if (customName !== '') {
+            var cap = customFighterRemainingForRecover(ship, customName, flightId);
+            if (cap < size) return hangars;
+        }
+
         ship.systems.forEach(function (sys) {
             if (!sys || sys.name !== 'hangar') return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
-            if (!hangarAcceptsCategoryRecover(sys.hangarType, category)) return;
+            if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
             var netDamage = 0;
             if (Array.isArray(sys.damage)) {
@@ -419,6 +527,34 @@ window.findEligibleFlightsForDocking = function (carrier) {
         return hangars;
     }
 
+    // Same shape as the per-flight Dock helper of the same name — duplicated
+    // here because the two closures don't share scope and we want each
+    // file's helper to be self-contained for readability.
+    function customFighterRemainingForRecover(carrier, name, ownFlightId) {
+        if (!name) return Infinity;
+        if (!carrier.customFighter || !carrier.customFighter[name]) return 0;
+        var declared = parseInt(carrier.customFighter[name], 10);
+        var used = 0;
+        carrier.systems.forEach(function (sys) {
+            if (!sys || sys.name !== 'hangar') return;
+            if (Array.isArray(sys.hangarUsage)) {
+                sys.hangarUsage.forEach(function (e) {
+                    if (e.customFtrName !== name) return;
+                    used += parseInt(e.flightSize || 1, 10);
+                });
+            }
+            if (Array.isArray(sys.pendingDockOrders)) {
+                sys.pendingDockOrders.forEach(function (o) {
+                    if (parseInt(o.flightId, 10) === ownFlightId) return;
+                    var f = gamedata.getShip(o.flightId);
+                    if (!f || String(f.customFtrName || '') !== name) return;
+                    used += parseInt(o.count || 0, 10);
+                });
+            }
+        });
+        return Math.max(0, declared - used);
+    }
+
     function countActiveInFlight(flight) {
         if (!Array.isArray(flight.systems)) return 0;
         var n = 0;
@@ -442,16 +578,60 @@ window.findEligibleFlightsForDocking = function (carrier) {
         return req;
     }
 
-    function hangarAcceptsCategoryRecover(hangarType, category) {
+    function hangarAcceptsCategoryRecover(hangarType, category, ship) {
         var hType = String(hangarType || '').toLowerCase().trim();
         var cat   = String(category   || '').toLowerCase().trim();
         if (hType === '' || cat === '') return false;
-        if (hType === 'fighters' || hType === 'normal') return true;
-        if (hType === cat) return true;
         var rank = { ultralight: 1, light: 2, medium: 3, heavy: 4 };
+
+        if (hType === cat) return true;
         if (rank[hType] && rank[cat]) return rank[cat] <= rank[hType];
         if ((cat === 'shuttles' || cat === 'minesweeping shuttles') && rank[hType]) return true;
-        if (hType === 'assault shuttles' && cat === 'breaching pods') return true;
+
+        if (cat === 'breaching pods') {
+            if (hType === 'assault shuttles') return true;
+            if (rank[hType]) return true;
+        }
+
+        if (hType === 'fighters' || hType === 'normal') {
+            if (cat === 'shuttles' || cat === 'minesweeping shuttles') return true;
+            if (!ship || !ship.fighters) {
+                if (rank[cat]) return true;
+                return false;
+            }
+            var declared = lowerKeysR(ship.fighters);
+            if (rank[cat]) {
+                if (declared['normal']) return true;
+                var sizes = ['heavy', 'medium', 'light', 'ultralight'];
+                for (var i = 0; i < sizes.length; i++) {
+                    if (!declared[sizes[i]]) continue;
+                    if (rank[cat] <= rank[sizes[i]]) return true;
+                }
+                return false;
+            }
+            if (cat === 'assault shuttles') return !!declared['assault shuttles'];
+            if (cat === 'breaching pods') {
+                if (declared['breaching pods']) return true;
+                if (declared['assault shuttles']) return true;
+                if (declared['normal']) return true;
+                if (declared['heavy']) return true;
+                if (declared['medium']) return true;
+                if (declared['light']) return true;
+                if (declared['ultralight']) return true;
+                return false;
+            }
+            return false;
+        }
         return false;
+    }
+
+    function lowerKeysR(obj) {
+        var out = {};
+        for (var k in obj) {
+            if (Object.prototype.hasOwnProperty.call(obj, k)) {
+                out[String(k).toLowerCase()] = obj[k];
+            }
+        }
+        return out;
     }
 };

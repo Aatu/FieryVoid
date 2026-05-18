@@ -811,34 +811,52 @@ class HangarOps {
 		//Hangar must have a compatible category with $count free boxes.
 		//Use the flight's TRUE size (not carrier-mapped category) so a heavy
 		//flight is rejected when the carrier only has medium slots, etc.
+		//Pass $carrier so universal hangars derive their permissions from
+		//the ship's $fighters declaration (Decurion-style multi-category).
 		$category = self::trueSizeOf($flight);
-		$free = self::freeBoxesByCategory($hangar, $category);
+		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
 		if ($free < $count) { $reason = 'hangar full'; return false; }
 
 		//Shared launch+land budget vs hangar output
 		$used = (int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn;
 		if ($used + $count > (int)$hangar->output) { $reason = 'land rate exceeded'; return false; }
 
+		//Stage 10.6.2: per-ship customFighter cap. Thunderbolt-named flights
+		//can only dock into carriers that declare $customFighter['Thunderbolt']
+		//(and only up to that cap). Non-custom flights get PHP_INT_MAX so the
+		//gate is a no-op for them.
+		$customName = isset($flight->customFtrName) ? (string)$flight->customFtrName : '';
+		if ($customName !== '') {
+			$remaining = self::customFighterRemaining($carrier, $customName);
+			if ($remaining < $count) { $reason = 'customFighter cap exceeded'; return false; }
+		}
+
 		return true;
 	}
 
 	/* Free boxes in $hangar that can hold $category. A 'fighters' (universal)
-	 * hangar accepts any category. Other hangars only accept their declared
-	 * type, with shuttles allowed everywhere per §10.1.
+	 * hangar derives its permissions from the carrier $ship's $fighters
+	 * declaration when provided (so multi-category ships like Decurion / Falenna
+	 * apply the right gate). Other hangars only accept their declared type, with
+	 * shuttles allowed everywhere per §10.1 and BPs in AS / medium+ per rules.
 	 */
-	public static function freeBoxesByCategory($hangar, $category){
-		if (!self::hangarAcceptsCategory($hangar, $category)) return 0;
+	public static function freeBoxesByCategory($hangar, $category, $ship = null){
+		if (!self::hangarAcceptsCategory($hangar, $category, $ship)) return 0;
 		$max = (int)$hangar->getRemainingHealth();
 		return max(0, $max - self::usageCountFor($hangar));
 	}
 
-	public static function hangarAcceptsCategory($hangar, $category){
+	public static function hangarAcceptsCategory($hangar, $category, $ship = null){
 		$hType = strtolower(trim((string)$hangar->hangarType));
 		$cat   = strtolower(trim((string)$category));
 		if ($hType === '' || $cat === '') return false;
 
-		//Universal fighter slot accepts anything (any size, plus shuttles).
-		if ($hType === 'fighters' || $hType === 'normal') return true;
+		static $sizeRank = array(
+			'ultralight' => 1,
+			'light'      => 2,
+			'medium'     => 3,
+			'heavy'      => 4,
+		);
 
 		//Exact match (medium-medium, 'Breaching Pods'-'Breaching Pods', 'Raiders'-'Raiders', …)
 		if ($hType === $cat) return true;
@@ -847,12 +865,6 @@ class HangarOps {
 		//Mirrors checkChoices() in gamelobby.js, where heavy hangars also count
 		//toward medium/light/ultralight capacity, medium hangars toward light/ultralight,
 		//etc. — i.e. larger slots are strictly more permissive than smaller ones.
-		static $sizeRank = array(
-			'ultralight' => 1,
-			'light'      => 2,
-			'medium'     => 3,
-			'heavy'      => 4,
-		);
 		if (isset($sizeRank[$hType]) && isset($sizeRank[$cat])) {
 			return $sizeRank[$cat] <= $sizeRank[$hType];
 		}
@@ -862,10 +874,103 @@ class HangarOps {
 			return true;
 		}
 
-		//Assault shuttle slots also hold breaching pods (per checkChoices BP-compat list).
-		if ($hType === 'assault shuttles' && $cat === 'breaching pods') return true;
+		//Breaching Pods (per rules): docked in dedicated BP slot, OR Assault
+		//Shuttle slot, OR ANY combat fighter slot (heavy/medium/light/ultralight).
+		if ($cat === 'breaching pods') {
+			if ($hType === 'assault shuttles') return true;
+			if (isset($sizeRank[$hType])) return true;
+		}
+
+		//Universal fighter slot: when ship context is available, derive the
+		//slot's permissions from the ship's $fighters declaration (since
+		//inferHangarType can't always narrow multi-category ships like Decurion
+		//(AS+BP) or Falenna (heavy+AS)). Without ship context, fall back to
+		//the conservative "combat fighters + shuttles only" set.
+		if ($hType === 'fighters' || $hType === 'normal') {
+			if ($cat === 'shuttles' || $cat === 'minesweeping shuttles') return true;
+
+			if (!$ship || !is_array($ship->fighters)) {
+				//No ship context: combat fighters allowed, AS/BPs/custom rejected.
+				if (isset($sizeRank[$cat])) return true;
+				return false;
+			}
+
+			$declared = array_change_key_case($ship->fighters, CASE_LOWER);
+
+			if (isset($sizeRank[$cat])) {
+				//Combat fighter: ship must declare some combat-fighter capacity
+				//(heavy/medium/light/ultralight/normal). Apply size hierarchy so
+				//a medium fighter is OK if the ship has heavy or normal slots.
+				if (!empty($declared['normal'])) return true;
+				foreach (array('heavy', 'medium', 'light', 'ultralight') as $size) {
+					if (empty($declared[$size])) continue;
+					if ($sizeRank[$cat] <= $sizeRank[$size]) return true;
+				}
+				return false;
+			}
+
+			if ($cat === 'assault shuttles') {
+				return !empty($declared['assault shuttles']);
+			}
+
+			if ($cat === 'breaching pods') {
+				//Already handled above for typed slots; this is the universal
+				//case. BP allowed if ship declares BP, AS, or ANY combat fighter
+				//capacity (heavy/medium/light/ultralight/normal).
+				if (!empty($declared['breaching pods'])) return true;
+				if (!empty($declared['assault shuttles'])) return true;
+				if (!empty($declared['normal'])) return true;
+				if (!empty($declared['heavy'])) return true;
+				if (!empty($declared['medium'])) return true;
+				if (!empty($declared['light'])) return true;
+				if (!empty($declared['ultralight'])) return true;
+				return false;
+			}
+
+			//Other custom names need explicit exact-match (typed hangar) or a
+			//customFighter declaration (gated separately by Stage 10.6.2).
+			return false;
+		}
 
 		return false;
+	}
+
+	/* Stage 10.6.2: per-ship customFighter cap remaining for $name on $carrier.
+	 *
+	 * A flight with $customFtrName != '' (e.g. Thunderbolt, Rutarian, Ok-chn)
+	 * must dock into a carrier whose $customFighter[$name] declaration covers
+	 * the count being docked. The cap is shared across all hangars on the
+	 * carrier — Omega's 24 Thunderbolt cap applies to ALL its hangars, not
+	 * 24 per hangar.
+	 *
+	 * Returns:
+	 *  - PHP_INT_MAX if $name === '' (no gate to enforce — non-custom flight).
+	 *  - 0 if the carrier doesn't declare $customFighter[$name].
+	 *  - declared - stored otherwise, where "stored" is the sum of $flightSize
+	 *    across every hangarUsage entry on every hangar of $carrier whose
+	 *    stamped $customFtrName matches $name.
+	 *
+	 * The fleet-builder check (gamelobby.js checkChoices) is FLEET-WIDE — it
+	 * sums $customFighter across all carriers vs total $customFtrName flights.
+	 * This helper is per-CARRIER and enforced at dock time so individual ships
+	 * don't accept flights they aren't equipped for.
+	 */
+	public static function customFighterRemaining($carrier, $name){
+		if ($name === '' || $name === null) return PHP_INT_MAX;
+		if (!is_array($carrier->customFighter) || empty($carrier->customFighter)) return 0;
+		if (!isset($carrier->customFighter[$name])) return 0;
+		$declared = (int)$carrier->customFighter[$name];
+
+		$used = 0;
+		foreach (self::collectHangars($carrier) as $h){
+			if (!is_array($h->hangarUsage)) continue;
+			foreach ($h->hangarUsage as $entry){
+				if (!isset($entry['customFtrName'])) continue;
+				if ($entry['customFtrName'] !== $name) continue;
+				$used += (int)($entry['flightSize'] ?? 1);
+			}
+		}
+		return max(0, $declared - $used);
 	}
 
 	/* Pick hangars on $carrier that can receive $flight, in fill order. The
@@ -884,7 +989,7 @@ class HangarOps {
 		foreach ($hangars as $h){
 			if ($h->hangarType !== $category) continue;
 			if ($h->isDestroyed()) continue;
-			$free = self::freeBoxesByCategory($h, $category);
+			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
 			$capacity = min($free, $budget);
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
@@ -893,13 +998,35 @@ class HangarOps {
 		//(larger fighter slots, universal slots, shuttle-compatible slots).
 		foreach ($hangars as $h){
 			if ($h->hangarType === $category) continue;            //already considered above
-			if (!self::hangarAcceptsCategory($h, $category)) continue;
+			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
 			if ($h->isDestroyed()) continue;
-			$free = self::freeBoxesByCategory($h, $category);
+			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
 			$capacity = min($free, $budget);
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
 		}
+
+		//Stage 10.6.2: clamp aggregate capacity to the carrier's remaining
+		//customFighter cap for this flight's name. The cap is shared across
+		//hangars, so walk in fill order and truncate each entry's capacity
+		//until the running total hits the cap; drop entries beyond it.
+		$customName = isset($flight->customFtrName) ? (string)$flight->customFtrName : '';
+		if ($customName !== '') {
+			$cap = self::customFighterRemaining($carrier, $customName);
+			if ($cap <= 0) return array();
+			$running = 0;
+			$clamped = array();
+			foreach ($out as $entry) {
+				if ($running >= $cap) break;
+				$take = min((int)$entry['capacity'], $cap - $running);
+				if ($take <= 0) continue;
+				$entry['capacity'] = $take;
+				$clamped[] = $entry;
+				$running += $take;
+			}
+			return $clamped;
+		}
+
 		return $out;
 	}
 
@@ -947,6 +1074,13 @@ class HangarOps {
 			'hangarType'  => $category,
 			'dockedTurn'  => $gamedata->turn,
 		);
+		//Stage 10.6.2: stamp the customFtrName (if any) so per-ship cap accounting
+		//via customFighterRemaining() can find this entry without re-instantiating
+		//the phpclass. Auto-filled shuttles and non-custom flights have '' and
+		//are silently ignored by the cap helper.
+		if (!empty($flight->customFtrName)) {
+			$entry['customFtrName'] = $flight->customFtrName;
+		}
 
 		if ($partial) {
 			//Stage 10.3: priority-ordered dockFighters returns the actual
@@ -1076,8 +1210,15 @@ class HangarOps {
 		if ($size <= 0) { $reason = 'flight has no craft'; return false; }
 
 		$category = self::trueSizeOf($flight);
-		$free = self::freeBoxesByCategory($hangar, $category);
+		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
 		if ($free < $size) { $reason = 'hangar full'; return false; }
+
+		//Stage 10.6.2: per-ship customFighter cap.
+		$customName = isset($flight->customFtrName) ? (string)$flight->customFtrName : '';
+		if ($customName !== '') {
+			$remaining = self::customFighterRemaining($carrier, $customName);
+			if ($remaining < $size) { $reason = 'customFighter cap exceeded'; return false; }
+		}
 
 		return true;
 	}
@@ -1093,7 +1234,7 @@ class HangarOps {
 		$count = (int)$flight->flightSize;
 		$category = self::trueSizeOf($flight);
 
-		$hangar->hangarUsage[] = array(
+		$entry = array(
 			'phpclass'       => $flight->phpclass,
 			'name'           => $flight->name,
 			'flightSize'     => $count,
@@ -1101,6 +1242,11 @@ class HangarOps {
 			'dockedTurn'     => $gamedata->turn,
 			'dockedFlightId' => $flight->id,
 		);
+		//Stage 10.6.2: stamp customFtrName for per-ship cap accounting.
+		if (!empty($flight->customFtrName)) {
+			$entry['customFtrName'] = $flight->customFtrName;
+		}
+		$hangar->hangarUsage[] = $entry;
 
 		//Flag removed-from-board. Loaders re-apply this via dockedFlightId, but
 		//setting it here keeps the current request's downstream consumers (e.g.
