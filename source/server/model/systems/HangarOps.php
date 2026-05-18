@@ -132,25 +132,43 @@ class HangarOps {
 		}
 	}
 
-	/* Resolves the right shuttle phpclass for a carrier based on faction:
-	 *   - Minbari Federation / Minbari Protectorate → 'Flyer'
-	 *   - everything else (or no faction info)      → 'Shuttle'
+	/* Single source of truth for faction-specific default shuttle classes.
+	 * Maps a ship faction → phpclass of its non-minesweeping default shuttle.
+	 * Anything not listed falls through to the generic 'Shuttle' class.
 	 *
+	 * Consumed by factionShuttleClass() (per-ship lookup) and by
+	 * allShuttleClasses() (used in Hangar::__construct to preload the
+	 * client-side blueprints — without that, launching a Flyer leaves the
+	 * client with no static blueprint for it and ship.flight / ship.hitChart
+	 * come through undefined). Extend this map when adding a new faction
+	 * default shuttle subclass; no other server-side wiring is required.
+	 */
+	private static $factionShuttleMap = array(
+		'Minbari Federation'   => 'Flyer',
+		'Minbari Protectorate' => 'Flyer',
+	);
+
+	/* Resolves the right shuttle phpclass for a carrier based on faction.
 	 * Used by both shuttlePhpclassForCategory (for explicit 'shuttles' slots)
 	 * and by populateInitialHangarUsage's leftover-capacity step. Minesweeping
 	 * shuttles bypass this and stay 'MinesweepingShuttle' regardless of faction.
-	 *
-	 * Extend the switch as more faction-specific shuttle classes are added.
 	 */
 	public static function factionShuttleClass($ship){
 		if (!$ship || !isset($ship->faction)) return 'Shuttle';
-		switch ($ship->faction) {
-			case 'Minbari Federation':
-			case 'Minbari Protectorate':
-				return 'Flyer';
-			default:
-				return 'Shuttle';
-		}
+		if (isset(self::$factionShuttleMap[$ship->faction])) return self::$factionShuttleMap[$ship->faction];
+		return 'Shuttle';
+	}
+
+	/* Returns every phpclass that auto-populated hangars might launch,
+	 * across all factions. Used by Hangar::__construct to seed its
+	 * $spawnableClasses so game.php preloads each blueprint into
+	 * window.staticShips. Generic Shuttle / MinesweepingShuttle plus every
+	 * value in $factionShuttleMap.
+	 */
+	public static function allShuttleClasses(){
+		$classes = array('Shuttle', 'MinesweepingShuttle');
+		foreach (self::$factionShuttleMap as $cls) $classes[] = $cls;
+		return array_values(array_unique($classes));
 	}
 
 	/* Display name for a shuttle phpclass — used in hangar tooltip aggregation. */

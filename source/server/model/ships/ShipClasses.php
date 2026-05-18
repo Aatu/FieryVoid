@@ -1238,7 +1238,7 @@ class BaseShip {
 			if(!$this->isCombatUnit) $this->notes .= '<br>Non-combatant!';
 			//required hangar
 			if($this->hangarRequired!='') { 
-				$this->notes .= '<br>Requires hangar space: ' . $this->hangarRequired;			
+                $this->notes .= '<br>Requires hangar space: ' . ucfirst(strtolower($this->hangarRequired));		
 				if($this->unitSize!=1) $this->notes .= ' (' . $this->unitSize . ' per slot)';
 			}
 			//Agile status
