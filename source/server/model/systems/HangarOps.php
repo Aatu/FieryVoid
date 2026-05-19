@@ -90,7 +90,23 @@ class HangarOps {
 		//fleet-check purposes.
 		$totalCapacity = 0;
 		foreach ($hangars as $h) $totalCapacity += (int)$h->maxhealth;
-		$leftover = $totalCapacity - $totalDeclared;
+
+		//Account for HANG_BP enhancement before computing leftover. Enhancements::setEnhancementsShip
+		//mutates $ship->fighters["Breaching Pods"] but runs AFTER onIndividualNotesLoaded at game
+		//load (TacGamedata::onConstructed fires after ship/note hydration), so we read the
+		//enhancement count directly here. Without this, leftover hangar capacity would auto-fill
+		//with shuttles instead of leaving the converted slots open for bought Breaching Pods.
+		$hangBpExtraDeclared = 0;
+		if (isset($ship->enhancementOptions) && is_array($ship->enhancementOptions)) {
+			foreach ($ship->enhancementOptions as $opt) {
+				if (($opt[0] ?? '') === 'HANG_BP' && (int)($opt[2] ?? 0) > 0) {
+					$hangBpExtraDeclared = (int)$opt[2];
+					break;
+				}
+			}
+		}
+
+		$leftover = $totalCapacity - $totalDeclared - $hangBpExtraDeclared;
 		if ($leftover > 0){
 			$baseClass = (isset($ship->minesweeperbonus) && $ship->minesweeperbonus > 0)
 				? 'MinesweepingShuttle'
