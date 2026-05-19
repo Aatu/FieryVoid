@@ -1504,7 +1504,7 @@ window.gamedata = {
 		var freeOverflowSlots = freeASForBP + freeHMForBP;
 		var totalBPCapacity = totalBPDedicated + Math.min(totalBPSizeCap, freeOverflowSlots);
 
-		checkResult += "<br><b><u>Assault Shuttles & Breaching Pods:</u></b><br><br>";
+		checkResult += "<br><b><u>Breaching Pods & Shuttles:</u></b><br><br>";
 		checkResult += " Total Breaching Pods: " + totalBPUsage;
 		checkResult += " (allowed up to " + totalBPCapacity + ")";
 		if (totalBPUsage > totalBPCapacity || unassignedBPs > 0) {
