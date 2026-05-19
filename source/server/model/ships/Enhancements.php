@@ -46,7 +46,9 @@ class Enhancements{
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
 		$unit->enhancementOptionsDisabled[] = 'HANG_F';
-		$unit->enhancementOptionsDisabled[] = 'HANG_AS';					 
+		$unit->enhancementOptionsDisabled[] = 'HANG_AS';
+		$unit->enhancementOptionsDisabled[] = 'HANG_BP';
+		$unit->enhancementOptionsDisabled[] = 'HANG_MSW';
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -240,16 +242,55 @@ class Enhancements{
 	  //To convert Fighter hangar slots to Assault Shuttle Slots
 	  $keysToCheck = ["normal", "heavy", "medium"]; //Light and Ultralight cannot be converted.
 	  $matchingKeys = array_intersect_key($ship->fighters, array_flip($keysToCheck)); // Find matching keys
-	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys 
-	  if ($totalCount > 0) { 	  
+	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys
+	  if ($totalCount > 0) {
 	    $enhID = 'HANG_AS';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = 'Fighter to Assault Shuttle slot';
 				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
-				$enhPrice = 5; //Flat 5 pts per slot converted	  
+				$enhPrice = 5; //Flat 5 pts per slot converted
 				$enhPriceStep = 0; //flat rate
-				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		}
+	  }
+
+	  //Shuttle-slot conversions — default shuttles auto-populate leftover
+	  //hangar capacity (HangarOps::populateInitialHangarUsage step 3), so the
+	  //available pool is derived from HangarOps::getDefaultShuttles rather
+	  //than an explicit 'shuttles' key in $ship->fighters.
+	  $defaultShuttles = HangarOps::getDefaultShuttles($ship);
+	  if ($defaultShuttles['count'] > 0) {
+
+	    //To convert default Shuttle (or Minesweeping Shuttle) slots to Breaching Pod slots.
+	    //Works on both regular-shuttle and minesweeper-bonus carriers — adding to
+	    //"Breaching Pods" steals from whichever default pool the leftover capacity is
+	    //feeding (Shuttles or MinesweepingShuttles).
+	    $enhID = 'HANG_BP';
+		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = ($defaultShuttles['key'] === 'minesweeping shuttles')
+					? 'Shuttle to Breaching Pod slot' //Can add a specific minesweeping shuttle reference, but brevity is better in Confirm window for now.
+					: 'Shuttle slot to Breaching Pod slot';
+				$enhLimit = $defaultShuttles['count']; //leftover hangar capacity = default shuttle pool
+				$enhPrice = 10; //Flat 10 pts per slot converted
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		}
+
+	    //To convert default Shuttle units to Minesweeping Shuttle units — only meaningful
+	    //when the default pool is regular shuttles; minesweeper-bonus carriers already
+	    //auto-populate Minesweeping Shuttles via HangarOps step 3.
+	    if ($defaultShuttles['key'] === 'shuttles') {
+	      $enhID = 'HANG_MSW';
+		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Shuttle to Minesweeping Shuttle';
+				$enhLimit = $defaultShuttles['count'];
+				//Per B5W: 10pts or 20% of MinesweepingShuttle cost, whichever is higher.
+				//MinesweepingShuttle auto-populates with pointCost=0, so floor of 10 currently wins.
+				$enhPrice = 10;
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+	    }
 	  }
 
 	  $enhID = 'IFF_SYS';
@@ -1861,11 +1902,26 @@ class Enhancements{
 						}
 						break;	
 
-					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
-						break;	
+					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.
+						break;
 
-					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
-						break;	
+					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.
+						break;
+
+					case 'HANG_BP'://Convert default Shuttle slots to Breaching Pod slots
+						//Default shuttles auto-populate leftover hangar capacity, so adding
+						//to "Breaching Pods" implicitly steals from that leftover pool —
+						//no explicit "shuttles" decrement needed.
+						$ship->fighters["Breaching Pods"] = ($ship->fighters["Breaching Pods"] ?? 0) + $enhCount;
+						break;
+
+					case 'HANG_MSW'://Convert default Shuttle units to Minesweeping Shuttle units
+						//Does NOT change $ship->fighters — minesweeping shuttles still
+						//count as default shuttle capacity for fleet-check purposes.
+						//Instead, HangarOps::populateInitialHangarUsage reads HANG_MSW
+						//count directly and splits leftover-capacity auto-population
+						//between MinesweepingShuttle and regular Shuttle records.
+						break;
 												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.
 						//Mark true

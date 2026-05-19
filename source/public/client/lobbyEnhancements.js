@@ -129,18 +129,32 @@ window.lobbyEnhancements = {
 						ship.gunsightEnh = true;
 						break;
 
-					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.
 						if (!ship.hangFEnh) {
 							ship.notes += "<br>Fighter Conversion (" + enhCount + ")";
 						}
 						ship.hangFEnh = true;
 						break;
 
-					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.
 						if (!ship.hangASEnh) {
 							ship.notes += "<br>Shuttle Conversion (" + enhCount + ")";
 						}
 						ship.hangASEnh = true;
+						break;
+
+					case 'HANG_BP'://Default Shuttle slot to Breaching Pod slot
+						if (!ship.hangBPEnh) {
+							ship.notes += "<br>Breaching Pod Conversion (" + enhCount + ")";
+						}
+						ship.hangBPEnh = true;
+						break;
+
+					case 'HANG_MSW'://Default Shuttle unit to Minesweeping Shuttle
+						if (!ship.hangMswEnh) {
+							ship.notes += "<br>Minesweeping Shuttle Conversion (" + enhCount + ")";
+						}
+						ship.hangMswEnh = true;
 						break;
 
 
@@ -1323,12 +1337,20 @@ window.lobbyEnhancements = {
 					ship.exMrnEnhShip = false;
 					break;
 
-				case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+				case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.
 					ship.hangFEnh = false;
 					break;
 
-				case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+				case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.
 					ship.hangASEnh = false;
+					break;
+
+				case 'HANG_BP'://Default Shuttle slot to Breaching Pod slot
+					ship.hangBPEnh = false;
+					break;
+
+				case 'HANG_MSW'://Default Shuttle unit to Minesweeping Shuttle
+					ship.hangMswEnh = false;
 					break;
 
 				case 'IFF_SYS':

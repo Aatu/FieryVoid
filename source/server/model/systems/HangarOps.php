@@ -82,17 +82,55 @@ class HangarOps {
 		//Step 3: leftover capacity → fill with shuttles. Minesweeper carriers get
 		//MinesweepingShuttle (faction-agnostic for now); everyone else gets the
 		//faction-appropriate shuttle subclass (Flyer for Minbari, Shuttle otherwise).
+		//
+		//Carriers with HANG_MSW enhancement: re-type that many of the auto-populated
+		//default shuttles to MinesweepingShuttle (gated server-side to non-minesweeper
+		//carriers, where it would otherwise be a no-op). Default shuttle CAPACITY is
+		//unchanged — MinesweepingShuttle still counts as a default shuttle for
+		//fleet-check purposes.
 		$totalCapacity = 0;
 		foreach ($hangars as $h) $totalCapacity += (int)$h->maxhealth;
 		$leftover = $totalCapacity - $totalDeclared;
 		if ($leftover > 0){
-			$leftoverClass = (isset($ship->minesweeperbonus) && $ship->minesweeperbonus > 0)
+			$baseClass = (isset($ship->minesweeperbonus) && $ship->minesweeperbonus > 0)
 				? 'MinesweepingShuttle'
 				: self::factionShuttleClass($ship);
-			$leftoverCategory = ($leftoverClass === 'MinesweepingShuttle') ? 'minesweeping shuttles' : 'shuttles';
-			$leftoverName = self::shuttleDisplayNameFor($leftoverClass);
+			$baseCategory = ($baseClass === 'MinesweepingShuttle') ? 'minesweeping shuttles' : 'shuttles';
+			$baseName = self::shuttleDisplayNameFor($baseClass);
 
-			$count = $leftover;
+			//HANG_MSW retype count — only meaningful when the carrier's default pool
+			//is NOT already MinesweepingShuttle. Capped at the leftover total.
+			$hangMswRetype = 0;
+			if ($baseClass !== 'MinesweepingShuttle' && isset($ship->enhancementOptions) && is_array($ship->enhancementOptions)) {
+				foreach ($ship->enhancementOptions as $opt) {
+					if (($opt[0] ?? '') === 'HANG_MSW' && (int)($opt[2] ?? 0) > 0) {
+						$hangMswRetype = min((int)$opt[2], $leftover);
+						break;
+					}
+				}
+			}
+
+			//Place MinesweepingShuttle records first (one per box, so flightSize=1)
+			$mswRemaining = $hangMswRetype;
+			while ($mswRemaining > 0){
+				$hangar = self::pickHangarForShuttle($hangars, 1);
+				if (!$hangar) break;
+				$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
+				$take = min($mswRemaining, $free);
+				$hangar->hangarUsage[] = array(
+					'phpclass'    => 'MinesweepingShuttle',
+					'name'        => self::shuttleDisplayNameFor('MinesweepingShuttle'),
+					'flightSize'  => $take,
+					'hangarType'  => 'minesweeping shuttles',
+				);
+				$mswRemaining -= $take;
+			}
+
+			$leftoverClass = $baseClass;
+			$leftoverCategory = $baseCategory;
+			$leftoverName = $baseName;
+
+			$count = $leftover - $hangMswRetype;
 			while ($count > 0){
 				$hangar = self::pickHangarForShuttle($hangars, 1);
 				if (!$hangar) break;
@@ -301,6 +339,35 @@ class HangarOps {
 	public static function capacityByCategory($ship){
 		if (!is_array($ship->fighters)) return array();
 		return $ship->fighters;
+	}
+
+	/* Server-side mirror of getDefaultShuttles() in client systems.js. Default
+	 * shuttles aren't usually declared in $ship->fighters — they auto-fill any
+	 * hangar capacity not claimed by other categories (see populateInitialHangarUsage
+	 * step 3). Returns the leftover count, the matching $ship->fighters slot key
+	 * ('shuttles' or 'minesweeping shuttles' when the carrier has minesweeperbonus),
+	 * and a display label. Used by Enhancements to gate Shuttle-slot conversions
+	 * on the actual auto-populated pool.
+	 */
+	public static function getDefaultShuttles($ship){
+		$capacity = 0;
+		foreach (self::collectHangars($ship) as $h) {
+			$capacity += (int)$h->maxhealth;
+		}
+		if ($capacity <= 0) {
+			return array('count' => 0, 'type' => 'Shuttles', 'key' => 'shuttles');
+		}
+		$declared = 0;
+		if (isset($ship->fighters) && is_array($ship->fighters)) {
+			foreach ($ship->fighters as $count) $declared += (int)$count;
+		}
+		$leftover = $capacity - $declared;
+		if ($leftover < 0) $leftover = 0;
+		$minesweeper = !empty($ship->minesweeperbonus) && (int)$ship->minesweeperbonus > 0;
+		if ($minesweeper) {
+			return array('count' => $leftover, 'type' => 'Minesweeping Shuttles', 'key' => 'minesweeping shuttles');
+		}
+		return array('count' => $leftover, 'type' => 'Shuttles', 'key' => 'shuttles');
 	}
 
 	/* Currently-used boxes by category across all hangars on $ship. */

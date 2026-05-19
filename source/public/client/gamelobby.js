@@ -687,6 +687,33 @@ window.gamedata = {
 			if (!lship.flight) {
 				totalShips++;
 
+				// Apply HANG_BP slot conversion to lship.fighters so every downstream
+				// consumer in this loop (BP totals, hangar tallies, getDefaultShuttles)
+				// sees the post-conversion shape. Mirrors the server-side mutation in
+				// Enhancements::setEnhancementsShip.
+				//
+				// HANG_MSW is deliberately NOT applied here — minesweeping shuttles
+				// still count as default shuttle capacity for fleet-check purposes;
+				// only the auto-populated *type* changes at game-load (HangarOps step 3).
+				//
+				// Snapshot the original on first encounter so subsequent fleet-check
+				// passes restore-then-reapply (otherwise enhCount changes would stack).
+				if (!lship._originalFighters) {
+					lship._originalFighters = JSON.parse(JSON.stringify(lship.fighters || {}));
+				} else {
+					lship.fighters = JSON.parse(JSON.stringify(lship._originalFighters));
+				}
+				if (lship.enhancementOptions) {
+					for (var preEnh in lship.enhancementOptions) {
+						var preEnhID = lship.enhancementOptions[preEnh][0];
+						var preConvNum = lship.enhancementOptions[preEnh][2] || 0;
+						if (preConvNum <= 0) continue;
+						if (preEnhID === "HANG_BP") {
+							lship.fighters["Breaching Pods"] = (lship.fighters["Breaching Pods"] || 0) + preConvNum;
+						}
+					}
+				}
+
 				// Calculate Breaching Pod capacity for this ship - only if it has suitable hangar capacity.
 				// Dedicated "Breaching Pods" slots in ship.fighters (e.g. Decurion's 4 side-bay pod racks)
 				// are guaranteed BP capacity, additive to the size-based limit, and BPs prefer them first.
@@ -751,6 +778,10 @@ window.gamedata = {
 							}
 							shipProfile.slots["assault shuttles"] += convNum;
 						}
+						//HANG_BP/HANG_MSW have already been baked into lship.fighters
+						//up-front (see _originalFighters snapshot block above), so
+						//shipBPDedicated / shipSlots / totalBPDedicated already include
+						//the conversion. Nothing further to do here.
 					}
 				}
 
