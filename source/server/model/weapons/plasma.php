@@ -407,7 +407,6 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
     public $name = "RogolonLtPlasmaGun";
     public $displayName = "Light Plasma Gun";
     public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared	
-    public $intercept = 2; //actually this weapon probably SHOULD have interception after all! Disagree! :) DK
     public $loadingtime = 1;
     public $shots = 2;
     public $defaultShots = 2;
@@ -827,16 +826,7 @@ class DualPlasmaCannon extends Plasma{
         public $displayName = "Dual Plasma Cannon";
 	    public $iconPath = "dualplasmacannon.png";
 	
-	/*
-	public $animationArray = array(1=>'trail', 2=>'trail');
-        public $animationColor = array(75, 250, 90);
-        public $animationWidthArray = array(1=>6, 2=>4);
-        public $animationExplosionScale = 0.30;
-    	public $projectilespeed = 14;	
-    	public $trailColor = array(75, 250, 90);
-    	public $trailLength = 18;
-   	  */
-	
+
 	//actual weapons data
     	public $rangeDamagePenalty = 0.5;
    		public $priorityArray = array(1=>7, 2=>5);
@@ -908,15 +898,7 @@ class MegaPlasma extends Plasma{
     	public $name = "MegaPlasma";
         public $displayName = "Mega Plasma Cannon";
 		public $iconPath = "MegaPlasma.png";
-	/*
-        public $animation = "trail";
-        public $animationColor = array(75, 250, 90);
-    	public $trailColor = array(75, 250, 90);
-    	public $projectilespeed = 17;
-        public $animationWidth = 6;
-    	public $animationExplosionScale = 0.35;
-    	public $trailLength = 24;
-    	    	*/
+
     	public $rangeDamagePenalty = 0.5;
 	        
         public $loadingtime = 4;
@@ -944,11 +926,7 @@ class PlasmaProjector extends Raking{
 	public $iconPath = "PlasmaProjector.png";
 	public $animation = "laser";
     public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma...
-	/*
-	public $animationColor = array(75, 250, 90);
-    public $animationWidth = 4;
-    public $animationWidth2 = 0.2;
-    */
+
 	public $priority = 6;
 
 	public $rangeDamagePenalty = 0.25;
@@ -992,10 +970,6 @@ class PlasmaBlast extends Weapon{
         //public $trailColor = array(192,192,192);
         public $animationExplosionScale = 0.5;
         public $animationExplosionType = "AoE";
-        //public $explosionColor = array(235,235,235);
-        //public $projectilespeed = 12;
-        //public $animationWidth = 10;
-        //public $trailLength = 10;
 
         public $ballistic = false;
         public $hextarget = false; //for technical reasons this proved hard to do
@@ -1116,15 +1090,7 @@ class Fuser extends Plasma{
 	public $name = "Fuser";
     public $displayName = "Fuser";
 	public $iconPath = "Fuser.png";    
-/*  
-	  public $animation = "trail";
-    public $animationColor = array(255, 105, 0);
-	public $trailColor = array(255, 140, 60);
-	public $projectilespeed = 15;
-    public $animationWidth = 6;
-	public $animationExplosionScale = 0.80;
-	public $trailLength = 30;
-  */
+
     public $priority = 2;
     public $rangeDamagePenalty = 1;
 		        
@@ -1159,15 +1125,7 @@ class RangedFuser extends Plasma{
 	public $name = "RangedFuser";
     public $displayName = "Ranged Fuser";
 	public $iconPath = "RangedFuser.png";     
-    /*
-    public $animation = "trail";
-    public $animationColor = array(255, 105, 0);
-	public $trailColor = array(255, 140, 60);
-	public $projectilespeed = 15;
-    public $animationWidth = 6;
-	public $animationExplosionScale = 0.70;
-	public $trailLength = 30;
-    */
+
     public $priority = 2;
     public $rangeDamagePenalty = 0.25;
 		        
@@ -1510,19 +1468,18 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 		
 	public function fire($gamedata, $fireOrder){
 		if($fireOrder->firingMode == 1) return; //Don't animate Defensive fire, it clogs up Replay
-//Debug::log("fireOrder->type1 " . $fireOrder->type);
-//Debug::log("fireOrder->damageclass1 " . $fireOrder->damageclass);
+
 		if($fireOrder->type == 'ballistic' && $fireOrder->damageclass == 'PersistentEffectPlasma') {
 			$fireOrder->notes = 'PersistentEffect';
-//Debug::log("fireOrder->notes1 " . $fireOrder->notes);
+
 	        $fireOrder->updated = true;				
 			return; //Don't resolve ballistic 'cloud' fireOrders.
 		}
-//Debug::log("fireOrder->notes2 " . $fireOrder->notes);			
+		
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 
 		$this->changeFiringMode($fireOrder->firingMode);		
-//Debug::log("fireOrder->firingMode " . $fireOrder->firingMode);										
+									
 		switch($this->firingMode){
 			case 1:	
 				$rolled = Dice::d(100);
@@ -1541,8 +1498,7 @@ class PakmaraPlasmaWeb extends Weapon implements DefensiveSystem{
 				
 				if($fireOrder->type == 'prefiring'){ //Plasma cloud attack, shouldn't draw power.
 					$fireOrder->pubnotes .= "<br>Plasma cloud(s) damages fighters that pass through.";//just information for player.				
-//Debug::log("fireOrder->type2 " . $fireOrder->type);
-//Debug::log("fireOrder->damageclass2 " . $fireOrder->damageclass);				
+		
 					//deal damage!  Will be to a particular flight, not genuinely AoE!
 					$targetFlight = $gamedata->getShipById($fireOrder->targetid);						
 					$this->AOEdamage($targetFlight, $shooter, $fireOrder, $gamedata);	
