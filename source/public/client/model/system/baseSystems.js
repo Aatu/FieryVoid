@@ -224,6 +224,19 @@ MagGraviticThruster.prototype.constructor = MagGraviticThruster;
 
 var Hangar = function (json, ship) {
 	ShipSystem.call(this, json, ship);
+	//SystemFactory.createSystemFromJson uses Object.assign (shallow), and the
+	//server's stripForJson doesn't transmit `data` (it's computed client-side
+	//via refreshHangarTooltip below). Result: every Hangar instance built from
+	//the same static blueprint shares ONE `data` object reference. Without
+	//this clone, refreshHangarTooltip's writes to this.data["Capacity"] /
+	//this.data["Stored Craft"] mutate the shared object, so the last carrier
+	//to refresh overwrites every prior Whitestar's tooltip. Same fix the ship
+	//constructor already applies at the ship level (model/ship.js:11-13).
+	if (this.data && typeof this.data === 'object') {
+		this.data = JSON.parse(JSON.stringify(this.data));
+	} else {
+		this.data = {};
+	}
 	//Hydrate from any already-submitted orders for this turn so the dialogs
 	//can pre-fill (and the player can amend/cancel via the same dialog).
 	//pendingLaunchOrder/pendingDockOrder come from Hangar::stripForJson on the
