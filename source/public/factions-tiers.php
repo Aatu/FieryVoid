@@ -279,7 +279,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 <li>Orieni long-range weapon of choice, and probably their most outstanding feature. They're essentially large missiles with a degree of control, using fighter rules and attacking by ramming enemies.</li>
             <li> Hunter-Killers are controlled by Control Nodes on Orieni ships. If there is insufficient control HKs can operate autonomously, which this limits their performance by applying a significant Initiative penalty.
             This loss of control is exercised proportionally - e.g. if there are 12 HKs on map and only 6 can be fully controlled, then all 12 receive half the penalties., but no other penalties. 
-            In addition, HKs suffer Initiative penalties during the first 2 turns of the game (but start deployed like any other fighter).    
+            In addition, HKs must deploy in hangars at the start of the game.    
             </li>
             <li>When attempting to ram enemies, Hunter-Killers receive a penalty to their hit chance based on their own speed (the faster they are moving, the worse this). 
             Note - As ramming attacks happen before other firing, HKs that achieved ramming distance cannot be shot down before they attempt to ram.

@@ -3801,10 +3801,12 @@ class HkControlNode extends ShipSystem{
 		$howPartial = HkControlNode::getUncontrolledMod($playerID,$gamedata);
 		$iniModifier = HkControlNode::$fullIniPenalty*$howPartial;
 		    
+		/* //No long required as Hangars Operations now exist
 		if($gamedata->turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
 			$iniModifier+=HkControlNode::$fullIniPenalty;
 		}		
-		
+		*/
+
 		$iniModifier = floor($iniModifier);
 		return $iniModifier;
 	}//endof function getIniMod

@@ -902,6 +902,59 @@ window.gamedata = {
                 window.confirm.error(specialistsError, function () { });
                 return false;
             }
+
+            //Flights flagged $deploysInHangar (e.g. Orieni HKs) MUST start docked
+            //IF the owning fleet still has any hangar that can hold them. If no
+            //carrier in this turn's deployment has a fitting slot, we let it pass
+            //rather than bricking a poorly-built fleet. The trait is rare, so
+            //gather candidate flights first and skip the carrier scan entirely
+            //if none of mine have it pending.
+            var hangarDeployCandidates = [];
+            for (var fk in gamedata.ships) {
+                var flight = gamedata.ships[fk];
+                if (!flight || !flight.flight) continue;
+                if (!flight.deploysInHangar) continue;
+                if (flight.pendingDeployDock) continue;
+                if (!gamedata.isMyShip(flight)) continue;
+                if (shipManager.getTurnDeployed(flight) != gamedata.turn) continue;
+                hangarDeployCandidates.push(flight);
+            }
+
+            if (hangarDeployCandidates.length > 0
+                && window.DeploymentDock
+                && typeof window.DeploymentDock.eligibleHangarsForFlight === 'function') {
+
+                var myDeployingCarriers = [];
+                for (var ck in gamedata.ships) {
+                    var carrier = gamedata.ships[ck];
+                    if (!carrier || !gamedata.isMyShip(carrier)) continue;
+                    if (carrier.flight) continue;
+                    if (shipManager.getTurnDeployed(carrier) != gamedata.turn) continue;
+                    myDeployingCarriers.push(carrier);
+                }
+
+                var mustDockNames = [];
+                for (var hi = 0; hi < hangarDeployCandidates.length; hi++) {
+                    var hdFlight = hangarDeployCandidates[hi];
+                    for (var ci = 0; ci < myDeployingCarriers.length; ci++) {
+                        if (window.DeploymentDock.eligibleHangarsForFlight(myDeployingCarriers[ci], hdFlight).length > 0) {
+                            mustDockNames.push(hdFlight.name);
+                            break;
+                        }
+                    }
+                }
+
+                if (mustDockNames.length > 0) {
+                    var hangarDeployError = "The following flights must be deployed inside a Hangar:<br>";
+                    for (var mi = 0; mi < mustDockNames.length; mi++) {
+                        hangarDeployError += '<span class="ship-name">- ' + mustDockNames[mi] + '</span><br>';
+                    }
+                    hangarDeployError += "<br>Dock them into a carrier's hangar before committing yor orders.";
+                    window.confirm.error(hangarDeployError, function () { });
+                    return false;
+                }
+            }
+
             ajaxInterface.submitGamedata();
 
             //INITIAL ORDERS    
