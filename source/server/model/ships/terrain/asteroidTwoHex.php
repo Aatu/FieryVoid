@@ -53,6 +53,12 @@ class asteroidTwoHex  extends Terrain{
                 2=> array(
                         20 => "Primary",
                 ),
+                3=> array(
+                        20 => "Primary",
+                ),
+                4=> array(
+                        20 => "Primary",
+                ),                
         );
     }
 }
