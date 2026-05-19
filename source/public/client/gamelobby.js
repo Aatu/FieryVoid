@@ -576,6 +576,8 @@ window.gamedata = {
 		var hangarConversionsAS = 0; //How many converted hangar slots TO Assault Shuttle slots.		
 		var totalFtrOther = new Array();//total other small craft
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
+		var totalShuttleCapacity = 0; //sum of default shuttle/flyer pool capacity across the fleet (excludes minesweeping shuttles)
+		var defaultShuttleKeyList = []; //distinct lship.fighters keys used by default shuttle pools (e.g. "shuttles", "minbari flyers")
 
 		var totalEnhancementsValue = 0;
 		var totalBPSizeCap = 0;     //sum of per-ship size-based BP caps (1/2/4 with x2 for Assault hulls)
@@ -851,6 +853,10 @@ window.gamedata = {
 					}
 					if (!foundDefault) {
 						totalHangarOther.push(new Array(defaultKey, defaultShuttles.count));
+					}
+					totalShuttleCapacity += defaultShuttles.count;
+					if (defaultShuttleKeyList.indexOf(defaultKey) === -1) {
+						defaultShuttleKeyList.push(defaultKey);
 					}
 				}
 
@@ -1438,6 +1444,9 @@ window.gamedata = {
 		//list each small craft size used separately!
 		for (var sc in smallCraftUsedUnique) {
 			var scSize = smallCraftUsedUnique[sc];
+			//Default shuttle pools ("shuttles", "minbari flyers", etc.) are reported once
+			//in the Breaching Pods & Shuttles section below — skip here to avoid duplication.
+			if (defaultShuttleKeyList.indexOf(scSize) !== -1) continue;
 			totalFtrCurr = 0;
 			totalHangarCurr = 0;
 			for (var nh in totalFtrOther) {
@@ -1522,17 +1531,34 @@ window.gamedata = {
 		}
 		checkResult += "<br>";
 
-		if (totalFtrAS > 0 || totalHangarAS > 0) { //do not show if there are no Assault Shuttles/hangars in this segment
-			checkResult += " Total Assault Shuttles: " + totalFtrAS;
-			checkResult += " (allowed up to " + totalHangarAS + ")";
-			if (totalFtrAS > totalHangarAS) { //Asssault Shuttle total is not within limits
-				checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
-				problemFound = true;
-			} else {
-				checkResult += " <span style='color: #33cc33;'>OK</span>";
-			}
-			checkResult += "<br>";
+		checkResult += " Total Assault Shuttles: " + totalFtrAS;
+		checkResult += " (allowed up to " + totalHangarAS + ")";
+		if (totalFtrAS > totalHangarAS) { //Asssault Shuttle total is not within limits
+			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+			problemFound = true;
+		} else {
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
 		}
+		checkResult += "<br>";
+
+		//Default shuttle pool — leftover hangar capacity that auto-fills with shuttles/flyers.
+		//Always displayed (even when no armed shuttle variants are bought) so the player can
+		//see the pool that armed-shuttle units (ArmedFlyer, future ArmedShuttleEA, etc.) draw from.
+		var totalShuttleUsage = 0;
+		for (var nh in totalFtrOther) {
+			if (defaultShuttleKeyList.indexOf(totalFtrOther[nh][0]) !== -1) {
+				totalShuttleUsage += totalFtrOther[nh][1];
+			}
+		}
+		checkResult += " Shuttles: " + totalShuttleUsage;
+		checkResult += " (allowed up to " + totalShuttleCapacity + ")";
+		if (totalShuttleUsage > totalShuttleCapacity) {
+			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+			problemFound = true;
+		} else {
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		}
+		checkResult += "<br>";
 
 		if (warningFound) {
 			checkResult = "<u>CAUTION: Unchecked or non-canon elements found - check text below details.</u>" + warningText + "<br><br>" + checkResult;
