@@ -762,10 +762,10 @@
     cursor: pointer;
     user-select: none;
     box-sizing: border-box;
-min-width: 90px;
-width: 140px;
-height: 27px;    
-margin-left: 5px;
+    min-width: 90px;
+    width: 140px;
+    height: 27px;    
+    margin-left: 5px;
 }
 
 .readybutton-top:hover {

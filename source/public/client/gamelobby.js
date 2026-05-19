@@ -1544,19 +1544,39 @@ window.gamedata = {
 		//Default shuttle pool — leftover hangar capacity that auto-fills with shuttles/flyers.
 		//Always displayed (even when no armed shuttle variants are bought) so the player can
 		//see the pool that armed-shuttle units (ArmedFlyer, future ArmedShuttleEA, etc.) draw from.
+		//Rules clarification: armed-shuttle variants (hangarRequired='shuttles') may also use
+		//any spare *fighter* slot (H/M/L/XL) — but NOT Assault Shuttle or Breaching Pod slots.
+		//So shuttle overflow past the default pool spills into unused fighter capacity.
 		var totalShuttleUsage = 0;
 		for (var nh in totalFtrOther) {
 			if (defaultShuttleKeyList.indexOf(totalFtrOther[nh][0]) !== -1) {
 				totalShuttleUsage += totalFtrOther[nh][1];
 			}
 		}
+		// Spare fighter slots available for shuttle overflow. Mirrors the BP free-pool maths:
+		//  - HM pool: subtract any BP overflow that already consumed HM slots (BPs prefer AS,
+		//    then HM, per the BP capacity calc above).
+		//  - L / XL pools: simple capacity − usage; smaller-fighter spillover already accounted
+		//    for in hmPoolDemand so leftover L/XL slots really are free.
+		var bpOverflowDemand = Math.max(0, totalBPUsage - totalBPDedicated);
+		var bpHMUsed = Math.min(Math.max(0, bpOverflowDemand - freeASForBP), freeHMForBP);
+		var spareHMForShuttle = Math.max(0, freeHMForBP - bpHMUsed);
+		var spareLForShuttle = Math.max(0, totalHangarL - totalFtrL);
+		var spareXLForShuttle = Math.max(0, totalHangarXL - totalFtrXL);
+		var spareFighterSlotsForShuttle = spareHMForShuttle + spareLForShuttle + spareXLForShuttle;
+		var shuttleOverflow = Math.max(0, totalShuttleUsage - totalShuttleCapacity);
+
 		checkResult += " Shuttles: " + totalShuttleUsage;
 		checkResult += " (allowed up to " + totalShuttleCapacity + ")";
-		if (totalShuttleUsage > totalShuttleCapacity) {
+		if (shuttleOverflow === 0) {
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		} else if (shuttleOverflow <= spareFighterSlotsForShuttle) {
+			checkResult += " (+" + shuttleOverflow + " fighter slot" + (shuttleOverflow === 1 ? "" : "s") + " used)";
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		} else {
+			checkResult += " (needs " + shuttleOverflow + " fighter slot" + (shuttleOverflow === 1 ? "" : "s") + ", " + spareFighterSlotsForShuttle + " spare)";
 			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
 			problemFound = true;
-		} else {
-			checkResult += " <span style='color: #33cc33;'>OK</span>";
 		}
 		checkResult += "<br>";
 
