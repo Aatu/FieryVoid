@@ -506,6 +506,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         Must still be a valid deployment e.g. Fighters and Mines can stack with ships, but ships cannot be deployed with other ships.</li>
                     <li>Double Left-click - Instantly select a single unit in a hex (if there are multiple units in the hex you'll still need to select from list), when you already have a deployable unit as your selected ship.  
                         Makes it slightly quicker to select units when you have fighters or mines as you selected ship.</li>
+                    <li>Right-click on + and - Movement Icons -  Will set the speed of the ship to maximum (Speed 10) or the minimum (Speed 0) in a single click.</li>                        
                 </ul>
             </li>
             <br>            
