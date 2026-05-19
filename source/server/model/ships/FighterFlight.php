@@ -45,7 +45,8 @@ class FighterFlight extends BaseShip
 	//custom StarWars fighters are carried on squadron basis - allowing different squadron sizes for diffeerent craft
 	
 	public $customFtrName = ""; //to be filled if fighter has special hangar requirements - see Balvarix/Rutarian for usage
-		
+	public $deploysInHangar = false; //Some fighters like HK's MUST deploy in Hangars
+    public $minesweeper = false;		
 
 
     public $canvasSize = 200;

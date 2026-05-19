@@ -110,6 +110,7 @@ class MinesweepingShuttle extends Shuttle
         $this->shipClass = "Minesweeping Shuttle";
         $this->hangarRequired = 'minesweeping shuttles';
         $this->offensivebonus = 4;
+        $this->minesweeper = true;
     }
 }
 

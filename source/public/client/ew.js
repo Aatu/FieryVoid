@@ -7,7 +7,7 @@ window.ew = {
         if (shipManager.isAdrift(ship)) return 0;
 
         if (ship.flight){
-			if(ship.phpclass == "MinesweepingShuttle"){
+			if(ship.minesweeper){
                 return Math.floor(ship.offensivebonus);                 
             }else{
                 return Math.floor(ship.offensivebonus / 2); //Normal Fighters can assign OB to mine detection and get half (round down) the equivalent in mine detection EW
