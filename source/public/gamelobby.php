@@ -785,6 +785,10 @@ $optionsUsed = '';
                     <!-- populated dynamically -->
                 </div>
             </div>
+
+            <?php if(!$isFleetTest): ?>
+            <span class="readybutton readybutton-top">READY</span>
+            <?php endif; ?>
         </div>
 
 
