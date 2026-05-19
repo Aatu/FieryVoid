@@ -1902,10 +1902,38 @@ class Enhancements{
 						}
 						break;	
 
-					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.
+					case 'HANG_F'://Hangar Conversion of AS slot to (Heavy) Fighter slot.
+						//Mirror of gamelobby.js shipProfile.slots tracking. Mutating
+						//$ship->fighters lets universal-slot hangarAcceptsCategory
+						//and downstream consumers see the post-conversion shape;
+						//addShipEnhancementsForJSON emits the array to the client.
+						//"normal" is a legacy alias for "heavy" — preserve whichever
+						//key the ship file declared (gamelobby.js does the same via
+						//lship.fighters["heavy"] || lship.fighters["normal"]).
+						$ship->fighters["assault shuttles"] = max(0, ($ship->fighters["assault shuttles"] ?? 0) - $enhCount);
+						$heavyKey = isset($ship->fighters["heavy"]) ? "heavy"
+								  : (isset($ship->fighters["normal"]) ? "normal" : "heavy");
+						$ship->fighters[$heavyKey] = ($ship->fighters[$heavyKey] ?? 0) + $enhCount;
 						break;
 
-					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.
+					case 'HANG_AS'://Hangar Conversion of (Heavy/Medium) Fighter slot to Assault Shuttle slot.
+						//Deduct from heavy/normal first, then medium for the
+						//remainder — same order as gamelobby.js shipProfile.slots
+						//tracking. "normal" is a legacy alias for "heavy" (see the
+						//$keysToCheck list in HANG_AS registration above).
+						$toDeduct = $enhCount;
+						foreach (array("heavy", "normal") as $heavyKey) {
+							if ($toDeduct <= 0) break;
+							$avail = ($ship->fighters[$heavyKey] ?? 0);
+							if ($avail <= 0) continue;
+							$taken = min($toDeduct, $avail);
+							$ship->fighters[$heavyKey] = $avail - $taken;
+							$toDeduct -= $taken;
+						}
+						if ($toDeduct > 0) {
+							$ship->fighters["medium"] = max(0, ($ship->fighters["medium"] ?? 0) - $toDeduct);
+						}
+						$ship->fighters["assault shuttles"] = ($ship->fighters["assault shuttles"] ?? 0) + $enhCount;
 						break;
 
 					case 'HANG_BP'://Convert default Shuttle slots to Breaching Pod slots
@@ -2497,8 +2525,19 @@ class Enhancements{
 						case 'SLUGGISH': //Sluggish: Initiative  modified
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							break;
-					
-					}					
+
+						case 'HANG_F':  //AS slot → Heavy fighter slot
+						case 'HANG_AS': //Heavy/Medium fighter slot → AS slot
+						case 'HANG_BP': //Default shuttle slot → Breaching Pod slot
+							//stripForJson omits $ship->fighters (client normally pulls
+							//it from window.staticShips), so universal-hangar
+							//hangarAcceptsCategory checks on the client would miss
+							//these conversions. Emit the post-enhancement array so
+							//the client sees the same shape the server uses.
+							$strippedShip->fighters = $ship->fighters;
+							break;
+
+					}
 				}
 		    }
 			return $strippedShip;
