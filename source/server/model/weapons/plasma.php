@@ -326,16 +326,8 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 	public $name = "pairedPlasmaBlaster";
 	public $displayName = "Plasma Blaster"; //it's not 'paired' in any way, except being usually mounted twin linked - like most fighter weapons...
     public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
-	/*
-	public $animation = "trail";
-	public $animationColor = array(75, 250, 90);
-	public $trailColor = array(75, 250, 90);
-	public $projectilespeed = 12;
-	public $animationWidth = 2;
-	public $trailLength = 10;
-	public $animationExplosionScale = 0.1;
-*/
-	public $intercept = 0;//Changed June 2024 nothing in TT rules to say this can intercept. DK
+
+	public $intercept = 2; //Default intercept for 2 paired fighter weapons
 	public $priority = 4; //eqivalent of d6+3, on account of armor piercing properties of Plasma
 
 	public $loadingtime = 1;
@@ -357,9 +349,11 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 		
 		if($nrOfShots === 1){
 			$this->iconPath = "pairedPlasmaBlaster1.png";
+			$this->intercept = 1;
 		}
 		if($nrOfShots >2){//no special icon for more than 3 linked weapons
 			$this->iconPath = "pairedPlasmaBlaster3.png";
+			$this->intercept = $nrOfShots;
 		}
 		
 		parent::__construct(0, 1, 0, $startArc, $endArc);
@@ -383,25 +377,14 @@ class PairedPlasmaBlaster extends LinkedWeapon{
 
 
 class PlasmaGun extends Plasma{
-        public $name = "plasmaGun";
-        public $displayName = "Plasma Gun";
-	/*
-        public $animation = "trail";
-        public $animationColor = array(75, 250, 90);
-        public $trailColor = array(75, 250, 90);
-        public $projectilespeed = 11;
-        public $animationWidth = 4;
-        public $trailLength = 12;
-        public $animationExplosionScale = 0.25;
-        */
+    public $name = "plasmaGun";
+    public $displayName = "Plasma Gun";
 	public $rangeDamagePenalty = 1;
-                
-        public $loadingtime = 2;
-        public $exlusive = true;
+    public $loadingtime = 2;
+    public $exlusive = true;
 	public $priority = 5;
-            
-        public $rangePenalty = 1.5; //-3/2 hexes
-        public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
+    public $rangePenalty = 1.5; //-3/2 hexes
+    public $fireControl = array(-6, 4, 4); // fighters, <=mediums, <=capitals 
 
 
         function __construct($startArc, $endArc, $shots = 1){
@@ -421,29 +404,19 @@ class PlasmaGun extends Plasma{
 
 class RogolonLtPlasmaGun extends LinkedWeapon{
 	/*weapon of Rogolon fighters - very nasty!*/
-        public $name = "RogolonLtPlasmaGun";
-        public $displayName = "Light Plasma Gun";
-    public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
-	/*
-        public $animation = "trail";
-        public $animationColor = array(75, 250, 90);
-        public $trailColor = array(75, 250, 90);
-        public $projectilespeed = 11;
-        public $animationWidth = 4;
-        public $trailLength = 12;
-        public $animationExplosionScale = 0.25;
-*/
-	
-//        public $intercept = 2; //actually this weapon probably SHOULD have interception after all! Disagree! :) DK
-        public $loadingtime = 1;
-        public $shots = 2;
-        public $defaultShots = 2;
-        public $rangePenalty = 2;
-        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
-        public $rangeDamagePenalty = 1;
-		public $damageBonus = 5;
-		public $priority = 5;
-		public $intercept = 0;//Changed June 2024 nothing in TT rules to say this can intercept. DK		
+    public $name = "RogolonLtPlasmaGun";
+    public $displayName = "Light Plasma Gun";
+    public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared	
+    public $intercept = 2; //actually this weapon probably SHOULD have interception after all! Disagree! :) DK
+    public $loadingtime = 1;
+    public $shots = 2;
+    public $defaultShots = 2;
+    public $rangePenalty = 2;
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+    public $rangeDamagePenalty = 1;
+	public $damageBonus = 5;
+	public $priority = 5;
+	public $intercept = 2; //Default intercept for 2 paired fighter weapons	
 
     	public $damageType = "Standard"; 
     	public $weaponClass = "Plasma"; 
@@ -456,10 +429,12 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 	    
         if($nrOfShots === 1){
 			$this->iconPath = "lightPlasma.png";
+			$this->intercept = 1;
 		}
 		if($nrOfShots >= 2){
 			$this->iconPath = "lightPlasmalinked.png";
-							}    
+			$this->intercept = $nrOfShots;
+		}    
            
             parent::__construct(0, 1, 0, $startArc, $endArc);
         }      
@@ -484,33 +459,24 @@ class RogolonLtPlasmaGun extends LinkedWeapon{
 
 class RogolonLtPlasmaCannon extends LinkedWeapon{
 	/*dedicated anti-ship weapon of advanced Rogolon fighters - very nasty! (and custom, thankfully)*/
-        public $name = "RogolonLtPlasmaCannon";
-        public $displayName = "Light Plasma Cannon";
+    public $name = "RogolonLtPlasmaCannon";
+    public $displayName = "Light Plasma Cannon";
 	public $iconPath = "mediumPlasma.png";
     public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
-	/*
-        public $animation = "trail";
-        public $animationColor = array(75, 250, 90);
-        public $trailColor = array(75, 250, 90);
-        public $projectilespeed = 10;
-        public $animationWidth = 4;
-        public $trailLength = 13;
-        public $animationExplosionScale = 0.23;
-*/
 
-        public $intercept = 0; //no interception for this weapon!
-        public $loadingtime = 2;
-        public $shots = 1;
-        public $defaultShots = 1;
-        public $rangePenalty = 1;
-        public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
-        public $rangeDamagePenalty = 0.5; //-1/2 hexes!
-		public $priority = 6;
+    public $intercept = 0; //no interception for this weapon!
+    public $loadingtime = 2;
+    public $shots = 1;
+    public $defaultShots = 1;
+    public $rangePenalty = 1;
+    public $fireControl = array(-5, 0, 0); // fighters, <mediums, <capitals
+    public $rangeDamagePenalty = 0.5; //-1/2 hexes!
+	public $priority = 6;
 
-    	public $damageType = "Standard"; 
-    	public $weaponClass = "Plasma"; 
+    public $damageType = "Standard"; 
+    public $weaponClass = "Plasma"; 
 
-        function __construct($startArc, $endArc, $shots = 1){
+    function __construct($startArc, $endArc, $shots = 1){
             $this->shots = $shots;
             $this->defaultShots = $shots;
             
@@ -541,17 +507,8 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 		public $displayName = "Light Plasma Accelerator";
 		public $iconPath = "LightPlasmaAccelerator.png";
     public $animationColor = array(75, 250, 90); //...it's not inheriting from Plasma, so needs to have proper color declared
-	/*
-		public $animation = "trail";
-		public $trailColor = array(75, 250, 90);
-		public $animationColor = array(75, 250, 90);
-		public $projectilespeed = 12;
-		public $animationExplosionScalearray = array(1=>0.10, 2=>0.20);
-		public $animationWidtharray = array(1=>2, 2=>3);
-		public $trailLengtharray = array(1=>10, 2=>15);
-        */
 	
-        public $intercept = 0;
+        public $intercept = 2;
 		public $priority = 5;
         public $priorityArray = array(1=>5, 2=>6); //even standard shot can deal high damage due to being Plasma; charged shot is devastating
         
@@ -572,7 +529,7 @@ class LightPlasmaAccelerator extends LinkedWeapon{
 		function __construct($startArc, $endArc, $nrOfShots = 2){
 			$this->defaultShots = $nrOfShots;
 			$this->shots = $nrOfShots;
-			//$this->intercept = $nrOfShots;
+			$this->intercept = $nrOfShots;
 			parent::__construct(0, 1, 0, $startArc, $endArc);
 		}	
 
@@ -640,14 +597,7 @@ class HeavyPlasmaBolter extends Plasma{
 	public $name = "heavyPlasmaBolter";
 	public $displayName = "Heavy Plasma Bolter";
 	public $iconPath = "HeavyPlasmaBolter.png";
-	/*
-	public $animation = "trail";
-	public $animationColor = array(75, 250, 90);
-	public $animationExplosionScale = 0.5;
-	public $projectilespeed = 12;
-	public $animationWidth = 4;
-	public $trailLength = 4;
-	*/
+
 	public $priority = 6;
 	
 	public $rangeDamagePenalty = 0;
@@ -703,14 +653,7 @@ class MediumPlasmaBolter extends Plasma{
 	public $name = "mediumPlasmaBolter";
 	public $displayName = "Medium Plasma Bolter";
 	public $iconPath = "MediumPlasmaBolter.png";
-	/*
-	public $animation = "trail";
-	public $animationColor = array(75, 250, 90);
-	public $animationExplosionScale = 0.4;
-	public $projectilespeed = 14;
-	public $animationWidth = 2;
-	public $trailLength = 2;
-	*/
+
 	public $priority = 6;
 	
 	public $rangeDamagePenalty = 0;
@@ -764,14 +707,7 @@ class LightPlasmaBolter extends Plasma{
 	public $name = "lightPlasmaBolter";
 	public $displayName = "Light Plasma Bolter";
 	public $iconPath = "LightPlasmaBolter.png";
-	/*
-	public $animation = "trail";
-	public $animationColor = array(75, 250, 90);
-	public $animationExplosionScale = 0.3;
-	public $projectilespeed = 16;
-	public $animationWidth = 1;
-	public $trailLength = 1;
-	*/
+
 	public $priority = 5;
 	
 	public $rangeDamagePenalty = 0;
@@ -826,15 +762,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 	public $displayName = "Light Plasma Bolter";
 	public $iconPath = "LightPlasmaBolterFighter.png";
     public $animationColor = array(75, 250, 90); //needed as this doesn't inherit from Plasma...
-/*
-    public $animation = "trail";
-    public $animationColor = array(75, 250, 90);
-    public $trailColor = array(75, 250, 90);
-    public $projectilespeed = 11;
-    public $animationWidth = 4;
-    public $trailLength = 12;
-    public $animationExplosionScale = 0.25;
-*/	
+
   	public $intercept = 0; //actually this weapon probably SHOULD have interception after all! I don't think so, no other plasma fighter weapon does!
 	public $loadingtime = 1;
 	public $shots = 2;
@@ -853,7 +781,7 @@ class LightPlasmaBolterFighter extends LinkedWeapon{
 		function __construct($startArc, $endArc, $nrOfShots = 2){
 			$this->defaultShots = $nrOfShots;
 			$this->shots = $nrOfShots;
-            //$this->intercept = $nrOfShots;
+            $this->intercept = $nrOfShots;
 
 			parent::__construct(0, 1, 0, $startArc, $endArc);
 		}	
