@@ -269,7 +269,7 @@ class Enhancements{
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = ($defaultShuttles['key'] === 'minesweeping shuttles')
 					? 'Shuttle to Breaching Pod slot' //Can add a specific minesweeping shuttle reference, but brevity is better in Confirm window for now.
-					: 'Shuttle slot to Breaching Pod slot';
+					: 'Shuttle to Breaching Pod slot';
 				$enhLimit = $defaultShuttles['count']; //leftover hangar capacity = default shuttle pool
 				$enhPrice = 10; //Flat 10 pts per slot converted
 				$enhPriceStep = 0; //flat rate
