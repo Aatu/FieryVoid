@@ -15,9 +15,9 @@ window.ShipTooltipFireMenu = function () {
         { className: "targetWeaponsHex", condition: [hasHexWeaponsSelected], action: targetHexagon, info: "Target Hex" },
         { className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, FFWeaponSelected, notSelf], action: targetWeapons, info: "Target Support Weapons" },//30 June 2024 - DK - Added for Ally targeting.
         { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
-        { className: "launchFighters", condition: [isMine, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch Fighters" },
-        { className: "recoverFlights", condition: [isMine, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Recover Flights" },
-        { className: "dockFlight", condition: [isMine, isFighterFlight, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" }
+        { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch Fighters" },
+        { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Recover Flights" },
+        { className: "dockFlight", condition: [isMine, isFiringPhase, isFighterFlight, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" }
         //{ className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
         //{ className: "removeMultiOrder", condition: [hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
 	];
@@ -88,6 +88,12 @@ window.ShipTooltipFireMenu = function () {
 
     function isMine() {
         return gamedata.isMyShip(this.targetedShip);
+    }
+
+    // Hangar Operations are a Firing-Phase action only. Pre-Firing (gamephase 5)
+    // shares much of the fire-menu plumbing, so gate explicitly on gamephase 3.
+    function isFiringPhase() {
+        return gamedata.gamephase == 3;
     }
 
     function isLaunchEnabledGame() {
