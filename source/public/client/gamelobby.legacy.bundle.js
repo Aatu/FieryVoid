@@ -1993,7 +1993,7 @@ window.gamedata = {
 
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
-				var startClosed = ((categoryIndex === 1  && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
+				var startClosed = ((categoryIndex === 1 && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
 				if (faction === "Terrain") {
 					startClosed = false;
 				}
@@ -2631,9 +2631,32 @@ window.gamedata = {
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
-		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],
+		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [];
 
-			$(".confirm").remove();
+		// Copy ammo counts
+		if (newShip.flight && copiedShip.flight) {
+			for (var i in newShip.systems) {
+				if (copiedShip.systems[i]) {
+					var fighter = newShip.systems[i];
+					var copiedFighter = copiedShip.systems[i];
+					for (var j in fighter.systems) {
+						if (copiedFighter.systems[j]) {
+							var weapon = fighter.systems[j];
+							var copiedWeapon = copiedFighter.systems[j];
+							if (weapon.missileArray && copiedWeapon.missileArray) {
+								for (var k in weapon.missileArray) {
+									if (copiedWeapon.missileArray[k]) {
+										weapon.missileArray[k].amount = copiedWeapon.missileArray[k].amount;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		$(".confirm").remove();
 
 		window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
 	},
@@ -2906,8 +2929,28 @@ window.gamedata = {
 			} else { }
 		}
 
+		if (ship.flight) {
+			lobbyEnhancements.setEnhancementsFighter(ship);
+		} else {
+			lobbyEnhancements.setEnhancementsShip(ship);
+		}
+
+		// Systems were replaced with fresh baseShip clones, so the old window DOM
+		// references stale objects. Destroy it and null the reference so that
+		// it can be recreated correctly with the new ship.id that updateFleet assigns.
+		var wasVisible = false;
+		if (ship.shipStatusWindow) {
+			wasVisible = ship.shipStatusWindow.is(":visible");
+			ship.shipStatusWindow.remove();
+			ship.shipStatusWindow = null;
+		}
+
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
+
+		if (wasVisible) {
+			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
+		}
 		//gamedata.populateFleetDropdown();		
 	},
 
@@ -4952,6 +4995,7 @@ window.lobbyEnhancements = {
 			}
 		}
 		var totalRounds = 0; //Counter to check and update total round used in magazine (where it matters).	
+		var totalRoundsInt = 0;
 
 		for (let entry of ship.enhancementOptions) {
 			// ID, readableName, numberTaken, limit, price, priceStep
@@ -5262,11 +5306,11 @@ window.lobbyEnhancements = {
 									if(system.fireControl[1] !== null) system.fireControl[1] += 1;
 									if(system.fireControl[2] !== null) system.fireControl[2] += 1;
 								}																	
-							}*/	
+							}*/
 							ship.notes += "<br>Improved Accuracy";
 						}
 						ship.mineAccEnh = true;
-						break;						
+						break;
 
 					case 'MINE_ARM':
 						if (!ship.mineArmEnh) {
@@ -5278,27 +5322,27 @@ window.lobbyEnhancements = {
 							ship.notes += "<br>Improved Armour";
 						}
 						ship.mineArmEnh = true;
-						break;	
+						break;
 
 					case 'MINE_DMG':
-					if (!ship.mineDmgEnh) {
-						for (let system of ship.systems) {
-							if (system.name === "ProximityMine" || system.name === "CaptorMine") {
-								system.minDamage += enhCount;
-								system.maxDamage += enhCount;
-								if (system.data && system.data["Damage"] !== undefined) {
-									if (system.minDamage === system.maxDamage) {
-										system.data["Damage"] = system.maxDamage;
-									} else {
-										system.data["Damage"] = system.minDamage + "-" + system.maxDamage;
+						if (!ship.mineDmgEnh) {
+							for (let system of ship.systems) {
+								if (system.name === "ProximityMine" || system.name === "CaptorMine") {
+									system.minDamage += enhCount;
+									system.maxDamage += enhCount;
+									if (system.data && system.data["Damage"] !== undefined) {
+										if (system.minDamage === system.maxDamage) {
+											system.data["Damage"] = system.maxDamage;
+										} else {
+											system.data["Damage"] = system.minDamage + "-" + system.maxDamage;
+										}
 									}
 								}
 							}
+							ship.notes += "<br>Improved Damage";
 						}
-						ship.notes += "<br>Improved Damage";
-					}
-					ship.mineDmgEnh = true;
-					break;							
+						ship.mineDmgEnh = true;
+						break;
 
 					case 'MINE_RANG':
 						if (!ship.mineRangEnh) {
@@ -5318,12 +5362,12 @@ window.lobbyEnhancements = {
 							ship.notes += "<br>Improved Range";
 						}
 						ship.mineRangEnh = true;
-						break;						
+						break;
 
 					case 'MINE_SIGN':
 						if (!ship.mineSignEnh) {
 							ship.signature += enhCount;
-							if(ship.mineType == 'DEW') ship.detectedSignature += enhCount;
+							if (ship.mineType == 'DEW') ship.detectedSignature += enhCount;
 						}
 						ship.mineSignEnh = true;
 						break;
@@ -5541,6 +5585,7 @@ window.lobbyEnhancements = {
 							if (!ship.ammoAEnh) {
 								ammoMagazine.data["Special"] += "<br>- Antifighter Missile: " + enhCount;
 								totalRounds += enhCount;
+								totalRoundsInt += enhCount;
 							}
 							ship.ammoAEnh = true;
 							break;
@@ -5573,6 +5618,7 @@ window.lobbyEnhancements = {
 							if (!ship.ammoCEnh) {
 								ammoMagazine.data["Special"] += "<br>- Chaff Missile: " + enhCount;
 								totalRounds += enhCount;
+								totalRoundsInt += enhCount;
 							}
 							ship.ammoCEnh = true;
 							break;
@@ -5623,6 +5669,14 @@ window.lobbyEnhancements = {
 								totalRounds += enhCount;
 							}
 							ship.ammoXEnh = true;
+							break;
+
+						case 'AMMO_Z': //Antimine Missile						
+							if (!ship.ammoZEnh) {
+								ammoMagazine.data["Special"] += "<br>- Antimine Missile: " + enhCount;
+								totalRounds += enhCount;
+							}
+							ship.ammoZEnh = true;
 							break;
 
 						case 'MINE_BLB': //Ballistic Launcher Basic Mine						
@@ -5840,7 +5894,70 @@ window.lobbyEnhancements = {
 					var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
 
 					// Update the number before the `/` (e.g., add new ammo)
-					if ((extractedValueBefore + totalRounds) < extractedValueAfter) extractedValueBefore += totalRounds;
+					var excess = (extractedValueBefore + totalRounds) - extractedValueAfter;
+					if (excess > 0) {
+						extractedValueBefore = extractedValueAfter;
+						var remainingExcess = excess;
+
+						// Try to deduct from Interceptor first if applicable
+						if (totalRoundsInt > 0 && ammoMagazine.ammoCountArray && ammoMagazine.ammoCountArray['Interceptor']) {
+							var startingInt = ammoMagazine.ammoCountArray['Interceptor'];
+							var intSize = ammoMagazine.ammoSizeArray && ammoMagazine.ammoSizeArray['Interceptor'] ? ammoMagazine.ammoSizeArray['Interceptor'] : 1;
+
+							var currentIntMatch = specialText.match(/- Interceptor Missile: (\d+)/);
+							if (currentIntMatch) {
+								var currentInt = parseInt(currentIntMatch[1], 10);
+								var minInt = Math.floor(startingInt / 4); //Deduct from this pool until 25% remain.
+								var availableDeduct = currentInt - minInt;
+
+								if (availableDeduct > 0) {
+									var maxIntDeductFromEnh = Math.ceil(totalRoundsInt / intSize);
+									var deductCount = Math.min(Math.min(Math.ceil(remainingExcess / intSize), availableDeduct), maxIntDeductFromEnh);
+									currentInt -= deductCount;
+									remainingExcess -= deductCount * intSize;
+									specialText = specialText.replace(/- Interceptor Missile: \d+/, "- Interceptor Missile: " + currentInt);
+								}
+							}
+						}
+
+						// Deduct from basic ammo
+						if (remainingExcess > 0) {
+							var basicMatch = specialText.match(/- ([^:]+): (\d+)(?: \(size: (\d+)\))?/);
+							if (basicMatch) {
+								var basicName = basicMatch[1];
+								// Ensure we don't accidentally match Interceptor as "Basic" if it's the only one left
+								if (basicName !== "Interceptor Missile") {
+									var basicCount = parseInt(basicMatch[2], 10);
+									var basicSize = basicMatch[3] ? parseInt(basicMatch[3], 10) : 1;
+									var deductCount = Math.ceil(remainingExcess / basicSize);
+									var actualDeduct = Math.min(basicCount, deductCount);
+									var newBasicCount = basicCount - actualDeduct;
+
+									remainingExcess -= actualDeduct * basicSize;
+									specialText = specialText.replace(new RegExp("- " + basicName + ": \\d+"), "- " + basicName + ": " + newBasicCount);
+								}
+							}
+						}
+
+						// Deduct any remainder from Interceptor (if basic ran out)
+						if (remainingExcess > 0) {
+							var currentIntMatch = specialText.match(/- Interceptor Missile: (\d+)/);
+							if (currentIntMatch) {
+								var currentInt = parseInt(currentIntMatch[1], 10);
+								if (currentInt > 0) {
+									var intSize = 1; // User confirmed intSize is 1
+									var deductCount = Math.ceil(remainingExcess / intSize);
+									var actualDeduct = Math.min(currentInt, deductCount);
+									var newIntCount = currentInt - actualDeduct;
+
+									remainingExcess -= actualDeduct * intSize;
+									specialText = specialText.replace(/- Interceptor Missile: \d+/, "- Interceptor Missile: " + newIntCount);
+								}
+							}
+						}
+					} else {
+						extractedValueBefore += totalRounds;
+					}
 
 					// Replace the old value with the new total
 					specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);
@@ -6109,6 +6226,20 @@ window.lobbyEnhancements = {
 						flight.fdEnh = true;
 						break;
 
+					case 'AMMO_DUM': //Dummy Fighter Missile
+						if (!flight.fdumEnh) {
+							flight.systems.forEach(ftr => {
+								ftr.systems.forEach(sys => {
+									if (sys.name == "ammoMagazine") {
+										sys.data["Special"] += "<br>- Dummy Missile: " + enhCount;
+										totalRounds += enhCount;
+									}
+								});
+							});
+						}
+						flight.fdumEnh = true;
+						break;
+
 				}//end of swtich function
 			}
 		}//end of loop through fighter enhancement options.
@@ -6126,7 +6257,22 @@ window.lobbyEnhancements = {
 							var extractedValueAfter = parseInt(match[2], 10); // Number after `/`
 
 							// Update the number before the `/` (e.g., add new ammo)
-							if ((extractedValueBefore + totalRounds) < extractedValueAfter) extractedValueBefore += totalRounds;
+							var excess = (extractedValueBefore + totalRounds) - extractedValueAfter;
+							if (excess > 0) {
+								extractedValueBefore = extractedValueAfter;
+								// Deduct from basic ammo
+								var basicMatch = specialText.match(/- ([^:]+): (\d+)(?: \(size: (\d+)\))?/);
+								if (basicMatch) {
+									var basicName = basicMatch[1];
+									var basicCount = parseInt(basicMatch[2], 10);
+									var basicSize = basicMatch[3] ? parseInt(basicMatch[3], 10) : 1;
+									var deductCount = Math.ceil(excess / basicSize);
+									var newBasicCount = Math.max(0, basicCount - deductCount);
+									specialText = specialText.replace(new RegExp("- " + basicName + ": \\d+"), "- " + basicName + ": " + newBasicCount);
+								}
+							} else {
+								extractedValueBefore += totalRounds;
+							}
 
 							// Replace the old value with the new total
 							specialText = specialText.replace(/(Total rounds: )\d+/, `$1${extractedValueBefore}`);
@@ -8369,7 +8515,7 @@ shipManager.systems = {
             for (const crit of cnCCrits) {
                 if (["Sabotage", "SabotageElite", "CaptureShip", "CaptureShipElite",
                     "RescueMission", "RescueMissionElite", "DefenderLost"].includes(crit.phpclass)) {
-                    return 'Red';
+                    return 'Orange';
                 }
             }
         }
@@ -8388,8 +8534,13 @@ shipManager.systems = {
         }
 
         // Check for overloading systems
-        if (shipManager.power.isOverloading(ship, system)) {
+        if (shipManager.power.isOverloading(ship, system)){
             return 'Yellow';
+        }else if(system.name == "PlasmaBattery"){
+            //if(system.output > 0 && gamedata.gamephase > 1){
+            if(system.output > 0){            
+                return 'Yellow';
+            }                
         }
 
         // No highlight if none of the conditions are met
@@ -8424,18 +8575,18 @@ shipManager.power = {
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
-			if(ship.flight){
+			if (ship.flight) {
 				for (var i in ship.systems) {
 					var fighter = ship.systems[i]; //The fighter		
 					for (var j in fighter.systems) {
-						shipManager.power.copyLastTurnPower(ship, fighter.systems[j]);					
+						shipManager.power.copyLastTurnPower(ship, fighter.systems[j]);
 					}
-				}		
-			}else{
+				}
+			} else {
 				for (var a in ship.systems) {
 					shipManager.power.copyLastTurnPower(ship, ship.systems[a]);
 				}
-			}	
+			}
 		}
 	},
 
@@ -8445,17 +8596,16 @@ shipManager.power = {
 		//if system WAS forcibly shut down last turn but is NOT forced to shut down any longer - it should get back online without player input!
 		var wasShutDown = false;
 		var isShutDown = false;
-		if ( (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) || (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) )
-		{
+		if ((shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) || (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns"))) {
 			isShutDown = true;
-		}else{
-			if ( (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn", gamedata.turn - 1)) 
-				|| (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineForTurns", gamedata.turn - 1)) 
+		} else {
+			if ((shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn", gamedata.turn - 1))
+				|| (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineForTurns", gamedata.turn - 1))
 			) {
 				wasShutDown = true;
 			}
 		}
-		
+
 		//copy last turn power 
 		var powers = Array();
 		for (var i in system.power) {
@@ -8465,11 +8615,11 @@ shipManager.power = {
 				newPower.turn = gamedata.turn;
 				powers.push(newPower);
 			}
-		}		
+		}
 
 		system.power = system.power.concat(powers);
-		
-		if (wasShutDown && (!isShutDown)){ //was forced to shut down, but is no longer - power up!
+
+		if (wasShutDown && (!isShutDown)) { //was forced to shut down, but is no longer - power up!
 			shipManager.power.setOnline(ship, system, true); //do skip message to player - if system cannot be powered up, it won't be powered up and that's it
 		}
 	},
@@ -8555,9 +8705,9 @@ shipManager.power = {
 		if (system.boostable && !boost) {
 			//if(system.name == "scanner" || system.name == "elintScanner"){
 			if (system.isScanner()) {
-				if ( (ship.base) //02.12.2024, Marcin Sawicki - bases can boost any sonsors, not just strongest
-				     || (system.id == shipManager.power.getHighestSensorsId(ship))  
-				   ){
+				if ((ship.base) //02.12.2024, Marcin Sawicki - bases can boost any sonsors, not just strongest
+					|| (system.id == shipManager.power.getHighestSensorsId(ship))
+				) {
 					// You can only boost the highest sensor rating
 					// if multiple sensors are present on one ship
 					systemwindow.addClass("canboost");
@@ -8565,7 +8715,7 @@ shipManager.power = {
 			} else {
 				systemwindow.addClass("canboost");
 			}
-		} else if (boost) {		
+		} else if (boost) {
 			systemwindow.addClass("boosted");
 		}
 
@@ -8604,7 +8754,7 @@ shipManager.power = {
 
 		for (var i in gamedata.ships) {
 			var ship = gamedata.ships[i];
-			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
@@ -8613,8 +8763,8 @@ shipManager.power = {
 
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			if (!ship.checkShieldGenerator()) {
 				shipNames[counter] = ship.name;
@@ -8635,15 +8785,15 @@ shipManager.power = {
 			if (ship.unavailable) continue;
 
 			if (ship.flight) continue;
-			if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 			if (ship.mine) continue;
 
 			if (ship.userid != gamedata.thisplayer) continue;
 
 			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
 
-            var deployTurn = shipManager.getTurnDeployed(ship);
-            if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
 			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
 				shipNames[counter] = ship.name;
@@ -8656,74 +8806,74 @@ shipManager.power = {
 
 	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
 	getCapacitorShipsNegativePower: function getCapacitorShipsNegativePower() {
-			var shipNames = new Array();
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-				if(gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;	
-				if (ship.mine) continue;										
-				if (ship.unavailable) continue;
-				if (ship.flight) continue;
-				if (ship.userid != gamedata.thisplayer) continue;
-				var deployTurn = shipManager.getTurnDeployed(ship);
-				if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.							
-				if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
-				if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
-				if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
-					shipNames[counter] = ship.name;
-					counter++;
-				}
+		var shipNames = new Array();
+		var counter = 0;
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+			if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
+			if (ship.mine) continue;
+			if (ship.unavailable) continue;
+			if (ship.flight) continue;
+			if (ship.userid != gamedata.thisplayer) continue;
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.							
+			if (!(shipManager.systems.getSystemByName(ship, "powerCapacitor"))) continue;
+			if (shipManager.isDestroyed(ship) || shipManager.power.isPowerless(ship)) continue;
+			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
+				shipNames[counter] = ship.name;
+				counter++;
 			}
-			return shipNames;
-		},	//endof getCapacitorShipsNegativePower
-		
+		}
+		return shipNames;
+	},	//endof getCapacitorShipsNegativePower
+
 
 	//like getShipsNegativePower BUT only looks for PlasmaBattery-equipped ships
 	getPlasmaBatteryShipsNegativePower: function getPlasmaBatteryShipsNegativePower() {
-			var batteryShips = new Array();
-			var counter = 0;
-			for (var i in gamedata.ships) {
-				var ship = gamedata.ships[i];
-					if(ship.faction !== "Pak'ma'ra Confederacy") continue;
-		            if (ship.unavailable) continue;
-		            if (ship.flight) continue;
-		            if (ship.userid != gamedata.thisplayer) continue;
-					var deployTurn = shipManager.getTurnDeployed(ship);
-					if(deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.					
-		            if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
-		            if (shipManager.isDestroyed(ship)) continue;
+		var batteryShips = new Array();
+		var counter = 0;
+		for (var i in gamedata.ships) {
+			var ship = gamedata.ships[i];
+			if (ship.faction !== "Pak'ma'ra Confederacy") continue;
+			if (ship.unavailable) continue;
+			if (ship.flight) continue;
+			if (ship.userid != gamedata.thisplayer) continue;
+			var deployTurn = shipManager.getTurnDeployed(ship);
+			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.					
+			if (!(shipManager.systems.getSystemByName(ship, "PlasmaBattery"))) continue;
+			if (shipManager.isDestroyed(ship)) continue;
 
-				var batteryPowerAvailable = 0;
-				//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
-	                for (var i = 0; i < ship.systems.length; i++) {
-	                	var currBattery = ship.systems[i];
-	              	    if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))){ //only Plasma Batteries which are not destroyed are of interest 
-						batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);                                                              
-					}
-				}	
-	                          
-				var batteryPowerRequired = 0;
-				//Calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
-				for (var i = 0; i < ship.systems.length; i++) {
-	                var currWeb = ship.systems[i];
-	 				if(currWeb.name == "PakmaraPlasmaWeb"){ //only Plasma Webs  are of interest 
-	 					for (var k = 0; k < currWeb.fireOrders.length; k++) {
-	                    var currFireOrder = currWeb.fireOrders[k];
-	                        if ((currFireOrder.firingMode == "2") && (shipManager.power.getBoost(currWeb) == 0)) {
-		                        batteryPowerRequired += 1;
-		                    }
-						}       	
-					}	
+			var batteryPowerAvailable = 0;
+			//Calculate battery power available (find all batteries that are not destroyed, sum up their contents)
+			for (var i = 0; i < ship.systems.length; i++) {
+				var currBattery = ship.systems[i];
+				if (currBattery.name == "PlasmaBattery" && !(shipManager.systems.isDestroyed(ship, currBattery))) { //only Plasma Batteries which are not destroyed are of interest 
+					batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);
 				}
-	            
-	            if (batteryPowerAvailable < batteryPowerRequired) {
-	                batteryShips[counter] = ship.name;
-	                counter++;
-	            }
 			}
+
+			var batteryPowerRequired = 0;
+			//Calculate battery power required (find all Plasma Webs that are firing offensively without being boosted)			
+			for (var i = 0; i < ship.systems.length; i++) {
+				var currWeb = ship.systems[i];
+				if (currWeb.name == "PakmaraPlasmaWeb") { //only Plasma Webs  are of interest 
+					for (var k = 0; k < currWeb.fireOrders.length; k++) {
+						var currFireOrder = currWeb.fireOrders[k];
+						if ((currFireOrder.firingMode == "2") && (shipManager.power.getBoost(currWeb) == 0)) {
+							batteryPowerRequired += 1;
+						}
+					}
+				}
+			}
+
+			if (batteryPowerAvailable < batteryPowerRequired) {
+				batteryShips[counter] = ship.name;
+				counter++;
+			}
+		}
 		return batteryShips;
 	},	//endof getPlasmaBatteryShipsNegativePower
-	
+
 
 	getPowerNeedForSection: function getPowerNeedForSection(ship, loc) {
 		var power = 0;
@@ -8794,43 +8944,36 @@ shipManager.power = {
 
 		for (var s in ship.systems) {
 			var system = ship.systems[s];
-			
-			/* Dual/Duo weapons no longer present
-			if (system.parentId > 0) {
-				// This is a subsystem of a dual/duo weapon. Ignore
-				continue;
+
+			/*temporary power down critical - may happen on C&C*/
+			if (system.displayName == "C&C") { //no point checking other systems
+				output -= shipManager.criticals.hasCritical(system, "tmppowerdown"); //Power output reduced
 			}
-			*/
-			
-			/*temporary power down critical - may happen on C&C*/	
-			if(system.displayName=="C&C"){ //no point checking other systems
-               			output -= shipManager.criticals.hasCritical(system, "tmppowerdown"); //Power output reduced
-			}
-                        
+
 			/*standard: add power for every system powered off
 			  fixed: subtract power for every system powered on (instead!)
 			*/
-			if ( (!system.destroyed)   ){ //destroyed system gets no power either way
-				if (fixedPower==true){ //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
+			if ((!system.destroyed)) { //destroyed system gets no power either way
+				if (fixedPower == true) { //for Mag-Grav reactor: all systems draw power, unless off or destroyed (accounted for in a moment)
 					output -= system.powerReq;
-				}					
-				var isOff = shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn) ;
+				}
+				var isOff = shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
 
-				if (isOff == true){
+				if (isOff == true) {
 					output += system.powerReq; //power off => base power is available after all; ignore boosts, if any
 				} else {
-					for (var i in system.power){
+					for (var i in system.power) {
 						var power = system.power[i];
 						if (power.turn != gamedata.turn) continue;
 						//types: 1:offline 2:boost, 3:overload
 						if (power.type == 1) isOff = true; //should not happen as it was accounted for earlier
-						if (power.type == 2){
+						if (power.type == 2) {
 							var currBoost = shipManager.power.countBoostPowerUsed(ship, system);
 							output -= currBoost;
 						}
 						if (power.type == 3) output -= system.powerReq;
 					}
-				}				
+				}
 			}
 		}
 
@@ -8842,33 +8985,33 @@ shipManager.power = {
 
 		if (shipManager.systems.isReactorDestroyed(ship) || shipManager.criticals.hasCritical(reactor, "ForcedOfflineOneTurn")) return true;
 
-		
+
 		var power = shipManager.power.getReactorPower(ship, reactor);
 
-		if (power >= 0){
-			return false;	
+		if (power >= 0) {
+			return false;
 		}
-		
+
 		/* if all power-using systems are offline and still power <0, then it's powerless and that's it!
 		if (this.countPossiblePower(ship) + power > 0) {
 			return false;			
 		}
 		*/
-		
+
 		/*check if all power-using systems are offline - if not, then it's not powerless*/
 		for (var i in ship.systems) {
 			var system = ship.systems[i];
 			if (system.powerReq > 0) {
 				//system is neither destroyed nor offline
-				if ( (!shipManager.systems.isDestroyed(ship, system)) && (!shipManager.power.isOfflineOnTurn(ship,system,gamedata.turn)) )	{
+				if ((!shipManager.systems.isDestroyed(ship, system)) && (!shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn))) {
 					return false;
 				}
 			}
 			//and no system except Reactor may be boosted, too
-			if (system.name != 'reactor'){
-				if (shipManager.power.getBoost(system) > 0){
+			if (system.name != 'reactor') {
+				if (shipManager.power.getBoost(system) > 0) {
 					return false;
-				}					
+				}
 			}
 		}
 
@@ -8885,16 +9028,16 @@ shipManager.power = {
 		}
 		//console.log(ship.name + " possible power: " + power);
 		return power;
-	
-	},
-	
 
-	
-	isOfflineOnTurn: function(ship, system, turn){		
-		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")){
+	},
+
+
+
+	isOfflineOnTurn: function (ship, system, turn) {
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")) {
 			return true;
 		}
-		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn",turn)){
+		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineOneTurn", turn)) {
 			return true;
 		}
 
@@ -8904,7 +9047,7 @@ shipManager.power = {
 		}
 		*/
 
-		for (var i in system.power){
+		for (var i in system.power) {
 			var power = system.power[i];
 			if (power.turn != turn) continue;
 			if (power.type == 1) return true;
@@ -8914,18 +9057,18 @@ shipManager.power = {
 	},
 
 
-	isOffline: function(ship, system){
+	isOffline: function (ship, system) {
 		return shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn);
 	},
 
 	setOnline: function setOnline(ship, system, skipMessage = false) {
 		if (ship.faction === "Vorlon Empire" && !ship.flight && (system instanceof Weapon || system instanceof Shield)) {
-             var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
-             if (capacitor && capacitor.active) {
-                 if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");
-                 return;
-             }
-        }
+			var capacitor = shipManager.systems.getSystemByName(ship, "powerCapacitor");
+			if (capacitor && capacitor.active) {
+				if (!skipMessage) window.confirm.warning("You cannot activate " + system.displayName + " while Power Capacitor is doubling power generation.");
+				return;
+			}
+		}
 
 		if (system.name == "graviticShield") {
 			if (ship.checkShieldGenerator()) {
@@ -8986,20 +9129,20 @@ shipManager.power = {
 		return boost;
 	},
 
-	
-	isBoosted: function(ship, system){
+
+	isBoosted: function (ship, system) {
 
 		let turnToCheck = gamedata.turn;
 
 		//In later Deployment phases Boost won't show until after phase 1, so we look at previous turn.
 		if (gamedata.gamephase === -1 && gamedata.turn > 1) {
-			if(shipManager.getTurnDeployed(ship) !== gamedata.turn){
+			if (shipManager.getTurnDeployed(ship) !== gamedata.turn) {
 				turnToCheck = gamedata.turn - 1;
 				return (shipManager.power.getBoostOnTurn(system, turnToCheck) > 0);
-			}					
-		}	
-		
-		return (shipManager.power.getBoost(system)!==0); //is boosted if boost > 0
+			}
+		}
+
+		return (shipManager.power.getBoost(system) !== 0); //is boosted if boost > 0
 	},
 
 	countTotalEffectiveEW: function countTotalEffectiveEW(ship) {
@@ -9007,7 +9150,7 @@ shipManager.power = {
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			var sys = ship.systems[i];
-			
+
 			if (sys.isScanner()) {
 				var online = true;
 				for (var j in sys.power) {
@@ -9071,7 +9214,7 @@ shipManager.power = {
 	},
 
 	countBoostPowerUsed: function countBoostPowerUsed(ship, system) {
-		var boost = shipManager.power.getBoost(system);2;
+		var boost = shipManager.power.getBoost(system); 2;
 
 		if (boost == 0 || shipManager.systems.isDestroyed(ship, system)) return 0;
 
@@ -9101,7 +9244,7 @@ shipManager.power = {
 
 	canBoost: function canBoost(ship, system) {
 
-		if(shipManager.power.isOffline(ship, system)) return false;
+		if (shipManager.power.isOffline(ship, system)) return false;
 		return true;
 		/* no longer needed, I'm leaving the code in case in the future ideas change again
 		//can always boost reactor (to overload)!
@@ -9121,7 +9264,7 @@ shipManager.power = {
 	},
 
 	canDeboost: function canDeboost(ship, system) {
-		if(shipManager.power.isOffline(ship, system)) return false;
+		if (shipManager.power.isOffline(ship, system)) return false;
 		return true;
 	},
 
@@ -9144,42 +9287,42 @@ shipManager.power = {
 				return;
 			}
 		}
-				
+
 	},
 
 
 	checkBoostValid: function checkBoostValid(ship, system) {
-	    var validBoost = true;
+		var validBoost = true;
 
-	    if (ship.faction === "Pak'ma'ra Confederacy" && system instanceof Scanner) {
-	        var batteryPowerAvailable = 0;
-	        var scannerStrength = shipManager.systems.getOutput(ship, system);
-	        var reactorSurplus = shipManager.power.getReactorPower(ship, system);
+		if (ship.faction === "Pak'ma'ra Confederacy" && system instanceof Scanner) {
+			var batteryPowerAvailable = 0;
+			var scannerStrength = shipManager.systems.getOutput(ship, system);
+			var reactorSurplus = shipManager.power.getReactorPower(ship, system);
 
-	        // Calculate total Plasma Battery power available
-	        ship.systems.forEach(currBattery => {
-	            if (currBattery.name === "PlasmaBattery" && !shipManager.systems.isDestroyed(ship, currBattery)) {
-	                batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);
-	            }
-	        });
+			// Calculate total Plasma Battery power available
+			ship.systems.forEach(currBattery => {
+				if (currBattery.name === "PlasmaBattery" && !shipManager.systems.isDestroyed(ship, currBattery)) {
+					batteryPowerAvailable += shipManager.systems.getOutput(ship, currBattery);
+				}
+			});
 
-	        var effectiveReactorPower = reactorSurplus - batteryPowerAvailable;
-	        var powerNeeded = scannerStrength + 1;
+			var effectiveReactorPower = reactorSurplus - batteryPowerAvailable;
+			var powerNeeded = scannerStrength + 1;
 
-	        // Validate boost power
-	        if (batteryPowerAvailable > 0 && effectiveReactorPower < powerNeeded) {
-	            confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
-	            validBoost = false;
-	        }
-	    }
+			// Validate boost power
+			if (batteryPowerAvailable > 0 && effectiveReactorPower < powerNeeded) {
+				confirm.error("Power from Plasma Batteries cannot be used to boost sensors.");
+				validBoost = false;
+			}
+		}
 
-	    return validBoost;
+		return validBoost;
 	},
-	
+
 
 	setBoost: function setBoost(ship, system) {
 		if (!shipManager.power.canBoost(ship, system)) {
-			window.confirm.error("You do not have sufficient energy to boost this system.", function () {});
+			window.confirm.error("You do not have sufficient energy to boost this system.", function () { });
 			return;
 		}
 
@@ -9243,7 +9386,7 @@ shipManager.power = {
 
 	isOverloading: function isOverloading(ship, system) {
 
-		if(shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) return false;
+		if (shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) return false;
 
 		if (system.alwaysoverloading) {
 			return true;
@@ -9264,7 +9407,7 @@ shipManager.power = {
 	clickPlus: function clickPlus(ship, system) {
 
 		//if (gamedata.gamephase !== 1) return;
-		
+
 		let isBoostPhase = false;
 		/*
 		// Check if boostOtherPhases is defined as an array
@@ -9280,7 +9423,7 @@ shipManager.power = {
 			isBoostPhase = true;
 		}
 		// Stop here if not a boostable phase
-		if (!isBoostPhase) return;	
+		if (!isBoostPhase) return;
 
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
@@ -9298,13 +9441,13 @@ shipManager.power = {
 		}
 
 		//New function to check for things like Pak'ma'ra power boosting exceptions - DK 10/24
-		if(!shipManager.power.checkBoostValid(ship, system)) return;	
-				
+		if (!shipManager.power.checkBoostValid(ship, system)) return;
+
 		shipManager.power.setBoost(ship, system);
 		system.onBoostIncrease(); //To apply conditions/effects when a system is actually boosted.		
 		shipWindowManager.setDataForSystem(ship, system);
-		if(!ship.flight)shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	clickMinus: function clickMinus(ship, system) {
@@ -9324,10 +9467,10 @@ shipManager.power = {
 
 		if (gamedata.gamephase === 1) {
 			isBoostPhase = true;
-		}		
+		}
 		// Stop here if not a boostable phase
-		if (!isBoostPhase) return;		
-		
+		if (!isBoostPhase) return;
+
 		//if (system.name=="scanner" &&  ew.getUsedEW(ship) > 0){
 
 		/*no longer needed - EW allocation is checked before commit, so You can't attain illegal effects by boosting/deboosting with EW set
@@ -9337,15 +9480,15 @@ shipManager.power = {
 		}
 		*/
 		shipManager.power.unsetBoost(ship, system);
-		system.onBoostDecrease();		
+		system.onBoostDecrease();
 		shipWindowManager.setDataForSystem(ship, system);
-		if(!ship.flight)shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	offlineAll: function offlineAll(ship, system) {
 		var array = [];
-        /* Cleaned 19.8.25 - DK
+		/* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
@@ -9354,7 +9497,7 @@ shipManager.power = {
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
 				//if (system.weapon) { //make this work for non-weapons too
-					array.push(ship.systems[i]);
+				array.push(ship.systems[i]);
 				//}
 			}
 		}
@@ -9375,7 +9518,7 @@ shipManager.power = {
 			shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		}
 
-        webglScene.customEvent('SystemDataChanged', { ship: ship });
+		webglScene.customEvent('SystemDataChanged', { ship: ship });
 	},
 
 	onOfflineClicked: function onOfflineClicked(ship, system) {
@@ -9392,7 +9535,7 @@ shipManager.power = {
 			system = shipManager.systems.getSystem(ship, system.parentId);
 		}
 
-		if(system.active) return; //Prevent powering off systems that were activated in Pre-Turn orders e.g. Shading Field
+		if (system.active) return; //Prevent powering off systems that were activated in Pre-Turn orders e.g. Shading Field
 
 		if (gamedata.gamephase != 1) return;
 
@@ -9415,8 +9558,8 @@ shipManager.power = {
 			system.onTurnOff(ship);
 		}
 
-		if(system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
-			shipManager.power.stopOverloading(ship, system); 
+		if (system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
+			shipManager.power.stopOverloading(ship, system);
 		}
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
@@ -9426,38 +9569,38 @@ shipManager.power = {
 		}
 
 		//Add new warning for when people ignore tooltip and try to deactivate Jump Drive before they should - DK 10/24
-        if (system instanceof JumpEngine) {
+		if (system instanceof JumpEngine) {
 			var healthThreshold = system.maxhealth / 2;
 			var currHealth = shipManager.systems.getRemainingHealth(system);
-            var html = '';
+			var html = '';
 			//Check Jump Drive is over 50% health, and Desperate Rules do not apply to player team or both teams		
-			if(currHealth > healthThreshold){
+			if (currHealth > healthThreshold) {
 				// No warning for ships if desperate rules apply
-				if (gamedata.rules.desperate === undefined || 
+				if (gamedata.rules.desperate === undefined ||
 					(gamedata.rules.desperate !== ship.team && gamedata.rules.desperate !== -1)) {
-	                	html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
-	                	html += "<br>";
-						confirm.warning(html);
-				}		
-	         }         
+					html += "WARNING - Jump Drive should only be deactivated after it’s taken 50% damage or more.";
+					html += "<br>";
+					confirm.warning(html);
+				}
+			}
 		}
 
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	onlineAll: function onlineAll(ship, system) {
 		var array = [];
 
-        /* Cleaned 19.8.25 - DK
+		/* Cleaned 19.8.25 - DK
 		if (system.duoWeapon || system.dualWeapon) {
 			return;
 		}
-		*/	
+		*/
 
 		for (var i = 0; i < ship.systems.length; i++) {
 			if (system.displayName === ship.systems[i].displayName) {
 				//if (system.weapon) { //make this work for non-weapons too
-					array.push(ship.systems[i]);
+				array.push(ship.systems[i]);
 				//}
 			}
 		}
@@ -9472,8 +9615,8 @@ shipManager.power = {
 				shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 			}
 		}
-		
-        webglScene.customEvent('SystemDataChanged', { ship: ship });
+
+		webglScene.customEvent('SystemDataChanged', { ship: ship });
 	},
 
 	onOnlineClicked: function onOnlineClicked(ship, system) {
@@ -9498,7 +9641,7 @@ shipManager.power = {
 		}
 
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	onOverloadClicked: function onOverloadClicked(ship, system) {
@@ -9515,7 +9658,7 @@ shipManager.power = {
 		shipManager.power.setOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
 	onStopOverloadClicked: function onStopOverloadClicked(ship, system) {
@@ -9528,12 +9671,12 @@ shipManager.power = {
 
 		if (shipManager.power.isOffline(ship, system)) return;
 
-		if(system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
+		if (system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
 
 		shipManager.power.stopOverloading(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);
 		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
-        webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 
 };
@@ -10051,7 +10194,9 @@ shipManager.movement = {
 
     /*just move ahead using all remaining movement*/
     doMoveFully: function doMoveFully(ship) {
-        while (shipManager.movement.getRemainingMovement(ship) > 0) shipManager.movement.doMove(ship);
+        while (shipManager.movement.getRemainingMovement(ship) > 0) {
+            if (shipManager.movement.doMove(ship) === false) break; // break only on explicit false (prevents infinite loop when canMove() returns false)
+        }
     },
 
     canDetach: function canDetach(ship) {
@@ -13022,6 +13167,52 @@ window.confirm = {
         }
     },
 
+    getMaxAmmoFit: function (ship, currentID) {
+        var baseShip = gamedata.getShipByType($(".confirmok").data("shipclass") || ship.phpclass);
+        if (!baseShip) baseShip = ship;
+
+        var ammoMag = null;
+        if (baseShip && baseShip.flight) {
+            var firstFighterKey = Object.keys(baseShip.systems)[0];
+            if (firstFighterKey && baseShip.systems[firstFighterKey].systems) {
+                for (var i in baseShip.systems[firstFighterKey].systems) {
+                    if (baseShip.systems[firstFighterKey].systems[i].name == "ammoMagazine") { ammoMag = baseShip.systems[firstFighterKey].systems[i]; break; }
+                }
+            }
+        } else if (baseShip) {
+            for (var i in baseShip.systems) {
+                if (baseShip.systems[i].name == "ammoMagazine") { ammoMag = baseShip.systems[i]; break; }
+            }
+        }
+
+        if (!ammoMag || typeof ammoMag.capacity === 'undefined') return 9999;
+
+        var capacity = ammoMag.capacity;
+
+        var totalExtraRequested = 0;
+
+        // Sum up other enhancements
+        var _enhNo = 0;
+        var _target = $(".selectAmount.shpenh" + _enhNo);
+        while (typeof _target.data("enhPrice") != 'undefined') {
+            var _noTaken = _target.data("count");
+            var _enhID = _target.data("enhID");
+
+            if (_enhID !== currentID && _noTaken > 0 && _enhID && (_enhID.startsWith("AMMO_") || _enhID.startsWith("MINE_") || _enhID.startsWith("SHELL_"))) {
+                var slots = 1;
+                if (_enhID == 'AMMO_K' || _enhID == 'AMMO_M') slots = 2;
+                totalExtraRequested += _noTaken * slots;
+            }
+            _enhNo++;
+            _target = $(".selectAmount.shpenh" + _enhNo);
+        }
+
+        var addedSlots = 1;
+        if (currentID == 'AMMO_K' || currentID == 'AMMO_M') addedSlots = 2;
+
+        return Math.floor((capacity - totalExtraRequested) / addedSlots);
+    },
+
     //    arrayIsEmpty: function(array){
     //        for(var i in array){
     //            return false;
@@ -13042,6 +13233,11 @@ window.confirm = {
         var inc = 1;
 
         if (value + inc <= maxVal) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+            if (maxFit < inc) return;
+
             var newValue = value + inc;
 
             target.data("value", newValue);
@@ -13071,44 +13267,40 @@ window.confirm = {
     },
 
     getTotalCost: function getTotalCost() {
-
         if ($(".confirm #bulkQuantity").length > 0) {
             return confirm.getTotalCostBulk();
         }
 
-        var flightSize = $(".fighterAmount").html();
-        if (!flightSize) {
-            flightSize = 1;
-        }
-
+        var flightSize = parseInt($(".fighterAmount").html()) || 1;
         var fighterCost = $(".fighterAmount").data("pV");
         if (!fighterCost) {
-            var span = $(".totalUnitCostAmount").data("value");
-            fighterCost = span;
+            fighterCost = $(".totalUnitCostAmount").data("value") || 0;
         }
 
-        var missileType = $(".selectText").data("firingMode");
-        var initialMissileAmount = $(".selectAmount." + missileType).data("initialValue");  //Sometime when editing this will already have an amount build into fighter cost.      
-        var missileAmount = $(".selectAmount." + missileType).data("value");
-        var launchers = $(".selectAmount." + missileType).data("launchers");
-        var missileCost = $(".selectAmount." + missileType).data("cost");
-        var initialMissilesCost = (initialMissileAmount * missileCost * flightSize) * launchers || 0; //Work out what we have to deduct during Edit.        
+        var totalMissileCost = 0;
+        // Sometime when editing this will already have an amount build into fighter cost.
+        // But since we start calculation from pristine base cost (naked), we only add cost of ALL selected missiles.
+        // If a missile is "built-in" and free, its cost is 0 anyway.
+        // If it's built-in and NOT free, but included in base cost, it should have been in pristineBaseCost.
 
-        if (!missileAmount) {
-            missileAmount = 0;
-        }
-        if (!missileCost) {
-            missileCost = 0;
-        }
-        if (!launchers) {
-            launchers = 0;
-        }
+        // Iterate over all missile/ammo options
+        $(".confirm .selectAmount").each(function () {
+            var $amt = $(this);
+            var firingMode = $amt.data("firingMode");
 
-        //	console.log(flightSize, fighterCost, missileAmount, launchers, missileCost);
+            // Check if it's a missile option (has firingMode and NOT an enhancement)
+            if (typeof firingMode !== 'undefined' && !$amt.hasClass("shpenh0") && !/shpenh\d+/.test($amt.attr('class'))) {
+                var amount = $amt.data("value") || 0;
+                var cost = $amt.data("cost") || 0;
+                var launchers = $amt.data("launchers") || 0;
 
-        var totalCost = flightSize * (fighterCost + launchers * missileAmount * missileCost) - initialMissilesCost;
+                totalMissileCost += (amount * cost * flightSize * launchers);
+            }
+        });
 
-        //add enhancement cost	   
+        var totalCost = (flightSize * fighterCost) + totalMissileCost;
+
+        // Add enhancement cost	   
         var enhCost = 0;
         var enhNo = 0;
         var target = $(".selectAmount.shpenh" + enhNo);
@@ -13218,6 +13410,16 @@ window.confirm = {
         var enhLimit = target.data("max");
         var enhPrice = target.data("enhPrice");
         var enhPriceStep = target.data("enhPriceStep");
+        var enhID = target.data("enhID");
+
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (maxFit <= noTaken) {
+                return;
+            }
+        }
 
         if (noTaken < enhLimit) { //increase possible
             var newCount = noTaken + 1;
@@ -13293,6 +13495,14 @@ window.confirm = {
         if (value < min) value = min;
         if (value > max) value = max;
 
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
+
         // Update the displayed and stored value
         $(this).text(value);
         $(this).data('value', value);
@@ -13345,6 +13555,14 @@ window.confirm = {
         // Enforce min/max
         if (value < min) value = min;
         if (value > max) value = max;
+
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
 
         // Update the value and trigger the input change handler
         $(this).text(value);
@@ -13399,6 +13617,12 @@ window.confirm = {
         // clamp
         if (current < min) current = min;
         if (current > max) current = max;
+
+        var missileType = $amt.data("firingMode");
+        var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+        if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+        var maxFit = confirm.getMaxAmmoFit(ship, missileType);
+        if (current > maxFit) current = Math.max(0, maxFit);
 
         // write both text & data
         $amt
@@ -13663,6 +13887,14 @@ window.confirm = {
         if (value < min) value = min;
         if (value > max) value = max;
 
+        var enhID = $(this).data("enhID");
+        if (enhID && (enhID.startsWith("AMMO_") || enhID.startsWith("MINE_") || enhID.startsWith("SHELL_"))) {
+            var ship = $(".confirmok").data("ship") || $(".confirmok").data("originalShipData");
+            if (!ship) ship = gamedata.getShipByType($(".confirmok").data("shipclass"));
+            var maxFit = confirm.getMaxAmmoFit(ship, enhID);
+            if (value > maxFit) value = Math.max(0, maxFit);
+        }
+
         // Update displayed value
         $(this).text(value);
         $(this).data('value', value);
@@ -13784,7 +14016,7 @@ window.confirm = {
             selectAmountItem.addClass("shpenh" + i);
             selectAmountItem.data('enhID', enhID);
             selectAmountItem.data('count', enhCount);
-            
+
             var initialEnhCost = 0;
             for (let eCount = 0; eCount < enhCount; eCount++) {
                 initialEnhCost += enhPrice + (eCount * enhPriceStep);
@@ -13794,7 +14026,7 @@ window.confirm = {
                 selectAmountItem.data('enhOptionCost', initialEnhCost);
                 selectAmountItem.data('enhIsOption', true);
             }
-            
+
             selectAmountItem.data('min', 0);
             selectAmountItem.data('max', enhLimit);
             selectAmountItem.data('enhPrice', enhPrice);
@@ -13893,7 +14125,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
@@ -13980,9 +14212,11 @@ window.confirm = {
         }
 
         var pointCost = ship.pointCost;
-        if (ship.maxFlightSize == 3) { //for single-unit flight cost is for a fighter; for usual 6+ flight, for 6 craft (and 6 craft will be set)
-            //but for 3-strong flight cost is still set for 6-strong flight...
-            pointCost = pointCost / 2;
+        if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+            //design pointCost is set for a 6-strong flight (cost-per-craft * 6).
+            //For any fixed sub-six flight (e.g. 3-strong Breaching Pods, 2-strong BPs), scale down to actual flight size.
+            //maxFlightSize 1 is single superheavy with its own pointCost; 6+ already matches the stored cost.
+            pointCost = pointCost * ship.maxFlightSize / 6;
         }
 
 
@@ -14112,7 +14346,7 @@ window.confirm = {
                     selectAmountItem.data("firingMode", i);
                 }
 
-                $(".selectText").data("firingMode", i);
+                $(".selectText", item).data("firingMode", i);
 
                 var plusButton = $(".plusButton", item);
                 plusButton.data("firingMode", i);
@@ -14142,10 +14376,10 @@ window.confirm = {
             var selectAmountItem = $(".selectAmount", item);
             selectAmountItem.removeClass("selectAmount").addClass("fighterAmount");
 
-            //special treatment for flight size 3 - as it's less than default 6...
-            if (ship.maxFlightSize == 3) {
-                selectAmountItem.html("3");
-            } else {//default 
+            //for any fixed sub-six flight size, start at that size; otherwise default to 6
+            if (ship.maxFlightSize >= 2 && ship.maxFlightSize < 6) {
+                selectAmountItem.html(ship.maxFlightSize);
+            } else {//default
                 selectAmountItem.html("6");
             }
             selectAmountItem.data('pV', Math.floor(ship.pointCost / 6));
@@ -14347,7 +14581,7 @@ window.confirm = {
         confirm.getTotalCost();
         a.fadeIn(250);
     },
-
+    /*
     // Helper function to handle input changes (edit mode)
     handleInputChangeEdit: function handleInputChangeEdit(e) {
         var currentText = $(this).text();
@@ -14411,7 +14645,7 @@ window.confirm = {
 
         confirm.getTotalCost();
     },
-
+    */
 
     showSaveFleet: function showSaveFleet(callback) {
         var e = $(this.whtml);
@@ -16011,7 +16245,11 @@ window.shipWindowManager = {
 
 			field.html(rem + "/" + output);
 		} else if (system.name == "reactor") {
-			field.html(shipManager.power.getReactorPower(ship, system));
+            var power = shipManager.power.getReactorPower(ship, system);
+            if (gamedata.gamephase > 1 && power < 0) {
+                power = 0;
+            }
+			field.html(power);
 		} else if (system.output > 0) {
 			field.html(output);
 		}
@@ -18773,29 +19011,29 @@ Stealth.prototype.isDetectedStealth = function (ship) {
 	}
 
 	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
-        var enemyTeams = [];
-        for (var i in gamedata.slots) {
-            var slot = gamedata.slots[i];
-            if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
-                enemyTeams.push(slot.team);
-            }
-        }
+		var enemyTeams = [];
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
+				enemyTeams.push(slot.team);
+			}
+		}
 
-        var allOthersDetected = (enemyTeams.length > 0);
-        for (var j = 0; j < enemyTeams.length; j++) {
-            var teamId = enemyTeams[j];
-            if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
-                allOthersDetected = false;
-                break;
-            }
-        }
+		var allOthersDetected = (enemyTeams.length > 0);
+		for (var j = 0; j < enemyTeams.length; j++) {
+			var teamId = enemyTeams[j];
+			if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
+				allOthersDetected = false;
+				break;
+			}
+		}
 
-        if (allOthersDetected) return true;
-	}	
+		if (allOthersDetected) return true;
+	}
 
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.
 	//if (shipManager.power.isOffline(ship, this)) return true;
-	if (weaponManager.shipHasFiringOrder(ship)) return true;	 
+	if (weaponManager.shipHasFiringOrder(ship)) return true;
 
 	/*
 	if (gamedata.gamephase != 3 && gamedata.gamephase != 5) return false;  //Cannot only try to detect at start of Pre-Firing/Firing Phase
@@ -18866,7 +19104,7 @@ MineStealth.prototype.constructor = MineStealth;
 MineStealth.prototype.initializationUpdate = function () {
 	var ship = this.ship;
 	this.data["Current Signature"] = ship.signature;
-	if(ship.mineType && ship.mineType == 'DEW' && ship.signature !== ship.detectedSignature) this.data["Activated Signature"] = ship.detectedSignature;	
+	if (ship.mineType && ship.mineType == 'DEW' && ship.signature !== ship.detectedSignature) this.data["Activated Signature"] = ship.detectedSignature;
 	return this
 }
 
@@ -18876,28 +19114,28 @@ MineStealth.prototype.isDetectedMine = function (ship) {
 	if (Array.isArray(this.detected)) {
 		if (this.detected.includes(myTeam)) return true;
 	} //else if (this.detected === true) {
-		//return true; //Already detected (legacy/fallback).
+	//return true; //Already detected (legacy/fallback).
 	//}
 	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
-        var enemyTeams = [];
-        for (var i in gamedata.slots) {
-            var slot = gamedata.slots[i];
-            if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
-                enemyTeams.push(slot.team);
-            }
-        }
+		var enemyTeams = [];
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
+				enemyTeams.push(slot.team);
+			}
+		}
 
-        var allOthersDetected = (enemyTeams.length > 0);
-        for (var j = 0; j < enemyTeams.length; j++) {
-            var teamId = enemyTeams[j];
-            if (!Array.isArray(this.detected) || this.detected.indexOf(teamId) === -1) {
-                allOthersDetected = false;
-                break;
-            }
-        }
+		var allOthersDetected = (enemyTeams.length > 0);
+		for (var j = 0; j < enemyTeams.length; j++) {
+			var teamId = enemyTeams[j];
+			if (!Array.isArray(this.detected) || this.detected.indexOf(teamId) === -1) {
+				allOthersDetected = false;
+				break;
+			}
+		}
 
-        if (allOthersDetected) return true;
-	}	
+		if (allOthersDetected) return true;
+	}
 
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed. 
 	if (shipManager.power.isOffline(ship, this)) return true;
@@ -18975,6 +19213,10 @@ ConnectionStrut.prototype.constructor = ConnectionStrut;
 
 var AdaptiveArmorController = function AdaptiveArmorController(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.availableAA = Object.assign({}, this.availableAA);
+	this.allocatedAA = Object.assign({}, this.allocatedAA);
+	this.currchangedAA = Object.assign({}, this.currchangedAA);
+	this.data = Object.assign({}, this.data);
 };
 AdaptiveArmorController.prototype = Object.create(ShipSystem.prototype);
 AdaptiveArmorController.prototype.constructor = AdaptiveArmorController;
@@ -19192,6 +19434,8 @@ AdaptiveArmorController.prototype.canIncreaseAnything = function () { //returns 
 
 var HyachComputer = function HyachComputer(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.allocatedBFCP = Object.assign({}, this.allocatedBFCP);
+	this.data = Object.assign({}, this.data);
 };
 HyachComputer.prototype = Object.create(ShipSystem.prototype);
 HyachComputer.prototype.constructor = HyachComputer;
@@ -19347,6 +19591,13 @@ HyachComputer.prototype.canIncreaseAnything = function () { //returns true if an
 
 var HyachSpecialists = function HyachSpecialists(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.availableSpec = Object.assign({}, this.availableSpec);
+	this.currSelectedSpec = Object.assign({}, this.currSelectedSpec);
+	this.currAllocatedSpec = Object.assign({}, this.currAllocatedSpec);
+	this.specAllocatedCount = Object.assign({}, this.specAllocatedCount);
+	this.specIncreased = Object.assign({}, this.specIncreased);
+	this.specDecreased = Object.assign({}, this.specDecreased);
+	this.data = Object.assign({}, this.data);
 };
 HyachSpecialists.prototype = Object.create(ShipSystem.prototype);
 HyachSpecialists.prototype.constructor = HyachSpecialists;
@@ -19929,6 +20180,7 @@ EnergyDiffuser.prototype.constructor = EnergyDiffuser;
 
 var SelfRepair = function SelfRepair(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.data = Object.assign({}, this.data);
 };
 SelfRepair.prototype = Object.create(ShipSystem.prototype);
 SelfRepair.prototype.constructor = SelfRepair;
@@ -20094,6 +20346,7 @@ Bulkhead.prototype.constructor = Bulkhead;
 
 var PowerCapacitor = function PowerCapacitor(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.data = Object.assign({}, this.data);
 };
 PowerCapacitor.prototype = Object.create(ShipSystem.prototype);
 PowerCapacitor.prototype.constructor = PowerCapacitor;
@@ -20257,6 +20510,7 @@ PlasmaBattery.prototype.doIndividualNotesTransfer = function () { //prepare indi
 
 var ThirdspaceShieldGenerator = function ThirdspaceShieldGenerator(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.data = Object.assign({}, this.data);
 };
 ThirdspaceShieldGenerator.prototype = Object.create(ShipSystem.prototype);
 ThirdspaceShieldGenerator.prototype.constructor = ThirdspaceShieldGenerator;
@@ -20701,30 +20955,30 @@ ShadingField.prototype.isDetectedTorvalus = function (ship, detection = 15) {
 	if (gamedata.gamephase == -1 && gamedata.turn == 1) return true;  //Do not hide in Turn 1 Deployment Phase.  
 	if (shipManager.isDestroyed(ship)) return true;//It's blown up, assume revealed.        
 	if (this.detected === true) return true; // Fallback support for boolean legacy saves
-	var myTeam = gamedata.getPlayerTeam();	
+	var myTeam = gamedata.getPlayerTeam();
 	if (Array.isArray(this.detectedNew) && this.detectedNew.includes(myTeam)) return true; // Already detected by our team.
-	
+
 	if (myTeam === undefined) { // A third player viewing, only show detected ships if ALL teams can see them
-        var enemyTeams = [];
-        for (var i in gamedata.slots) {
-            var slot = gamedata.slots[i];
-            if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
-                enemyTeams.push(slot.team);
-            }
-        }
+		var enemyTeams = [];
+		for (var i in gamedata.slots) {
+			var slot = gamedata.slots[i];
+			if (slot.team !== ship.team && enemyTeams.indexOf(slot.team) === -1) {
+				enemyTeams.push(slot.team);
+			}
+		}
 
-        var allOthersDetected = (enemyTeams.length > 0);
-        for (var j = 0; j < enemyTeams.length; j++) {
-            var teamId = enemyTeams[j];
-            if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
-                allOthersDetected = false;
-                break;
-            }
-        }
+		var allOthersDetected = (enemyTeams.length > 0);
+		for (var j = 0; j < enemyTeams.length; j++) {
+			var teamId = enemyTeams[j];
+			if (!Array.isArray(this.detectedNew) || this.detectedNew.indexOf(teamId) === -1) {
+				allOthersDetected = false;
+				break;
+			}
+		}
 
-        if (allOthersDetected) return true;
-	}	
-	
+		if (allOthersDetected) return true;
+	}
+
 	if (shipManager.systems.isDestroyed(ship, this)) return true;
 	if (shipManager.power.isOffline(ship, this)) return true;
 
@@ -20888,6 +21142,8 @@ FtrPetals.prototype.doIndividualNotesTransfer = function () {
 
 var MineControllerDEW = function MineControllerDEW(json, ship) {
 	ShipSystem.call(this, json, ship);
+	this.allocatedRanges = Object.assign({}, this.allocatedRanges);
+	this.data = Object.assign({}, this.data);
 };
 MineControllerDEW.prototype = Object.create(ShipSystem.prototype);
 MineControllerDEW.prototype.constructor = MineControllerDEW;
@@ -20895,7 +21151,7 @@ MineControllerDEW.prototype.constructor = MineControllerDEW;
 MineControllerDEW.prototype.initializationUpdate = function () {
 	var ship = this.ship;
 
-	if (gamedata.gamephase == -2 && !this.FCRefreshed){//Buying phase, need to set FC for DEW weapons in Front End only.
+	if (gamedata.gamephase == -2 && !this.FCRefreshed) {//Buying phase, need to set FC for DEW weapons in Front End only.
 		this.refreshFireControl();
 	}
 
@@ -20909,9 +21165,9 @@ MineControllerDEW.prototype.refreshFireControl = function () { //refresh descrip
 	for (var i in ship.systems) {
 		var weapon = ship.systems[i];
 		if (weapon instanceof Weapon && weapon.name !== "RammingAttack") {
-			if (weapon.fireControl[0] !== null)  weapon.fireControl[0] = weapon.fireControl[0] + this.data["Accuracy"];
-			if (weapon.fireControl[1] !== null)  weapon.fireControl[1] = weapon.fireControl[1] + this.data["Accuracy"];
-			if (weapon.fireControl[2] !== null)  weapon.fireControl[2] = weapon.fireControl[2] + this.data["Accuracy"];								
+			if (weapon.fireControl[0] !== null) weapon.fireControl[0] = weapon.fireControl[0] + this.data["Accuracy"];
+			if (weapon.fireControl[1] !== null) weapon.fireControl[1] = weapon.fireControl[1] + this.data["Accuracy"];
+			if (weapon.fireControl[2] !== null) weapon.fireControl[2] = weapon.fireControl[2] + this.data["Accuracy"];
 		}
 	}
 	this.FCRefreshed = true;
@@ -25391,6 +25647,10 @@ LightEnergyMine.prototype.constructor = LightEnergyMine;
 
 var CaptorMine = function CaptorMine(json, ship) {
 	Aoe.call(this, json, ship);
+	this.allocatedRanges = Object.assign({}, this.allocatedRanges);
+	this.data = Object.assign({}, this.data);
+	this.currClass = '';
+	if (this.rangeSetting === undefined) this.rangeSetting = this.range;
 };
 CaptorMine.prototype = Object.create(Aoe.prototype);
 CaptorMine.prototype.constructor = CaptorMine;
@@ -25462,8 +25722,6 @@ CaptorMine.prototype.doIncrease = function () { //increase BFCP usage
 
 	if (allocated < this.range) { //else use regular pool 
 		this.allocatedRanges[this.currClass] = allocated + 1;
-
-		//this.BFCPtotal_used++;
 	}
 	this.mineSet = true; //user changed something, assume they are content.	
 	this.refreshData();
@@ -25476,7 +25734,6 @@ CaptorMine.prototype.doDecrease = function () { //decrease BFCP usage
 
 	if (allocated > 0) {
 		this.allocatedRanges[this.currClass] = allocated - 1;
-		//this.BFCPtotal_used--;
 	}
 	this.mineSet = true; //user changed something, assume they are content.	
 	this.refreshData();
@@ -25489,23 +25746,23 @@ CaptorMine.prototype.refreshData = function () { //refresh description to show c
 	var range = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
-	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
+	if (gamedata.gamephase !== -2) if (!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
 
-    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-    //if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
-    //    //hiddenDisplay = "?";
+	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	//if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+	//    //hiddenDisplay = "?";
 	//	this.data["Max Range"] = hiddenDisplay;		
-    //}else{
+	//}else{
 	//	this.data["Max Range"] = this.range;			
 	//}
 
-	this.data["Fire control (fighter/med/cap)"] = this.fireControl[0]*5 + '/' + this.fireControl[1]*5 + '/' + this.fireControl[2]*5;
+	this.data["Fire control (fighter/med/cap)"] = this.fireControl[0] * 5 + '/' + this.fireControl[1] * 5 + '/' + this.fireControl[2] * 5;
 
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
 		range = this.allocatedRanges[currType];
-		if(range == null) range = this.range;
-		if(hiddenDisplay == '?') range = hiddenDisplay;
+		if (range == null) range = this.range;
+		if (hiddenDisplay == '?') range = hiddenDisplay;
 		//entry should exist, just change it to show current values
 		entryName = ' - ' + currType;
 		this.data[entryName + " range"] = range;
@@ -25566,6 +25823,10 @@ CaptorMine.prototype.doIndividualNotesTransfer = function () { //prepare individ
 
 var ProximityMine = function ProximityMine(json, ship) {
 	Aoe.call(this, json, ship);
+	this.allocatedShipTypes = Object.assign({}, this.allocatedShipTypes);
+	this.data = Object.assign({}, this.data);
+	this.currClass = '';
+	if (this.rangeSetting === undefined) this.rangeSetting = this.range;
 };
 ProximityMine.prototype = Object.create(Aoe.prototype);
 ProximityMine.prototype.constructor = ProximityMine;
@@ -25660,24 +25921,25 @@ ProximityMine.prototype.refreshData = function () { //refresh description to sho
 	var attack = null;
 	var hiddenDisplay = '';
 	var ship = this.ship;
-	if(gamedata.gamephase !== -2) if(!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
-	
-    var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
-    //if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
+	if (gamedata.gamephase !== -2) if (!gamedata.isMyOrTeamOneShip(ship)) hiddenDisplay = '?';
+
+	var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
+	//if (stealthSystem && !stealthSystem.isMineRevealed(ship)) {
 	//	this.data["Max Range"] = hiddenDisplay;		
-    //}else{
+	//}else{
 	//	this.data["Max Range"] = this.range;		
 	//}
-	
+
 	for (var i = 0; i < classes.length; i++) {
 		currType = classes[i];
 		attack = this.allocatedShipTypes[currType];
-		if(hiddenDisplay == '?'){ attack = hiddenDisplay;
-		}else if(attack == true){ 
+		if (hiddenDisplay == '?') {
+			attack = hiddenDisplay;
+		} else if (attack == true) {
 			attack = "Yes";
-		}else{
-			attack = "No";			
-		}	
+		} else {
+			attack = "No";
+		}
 		//entry should exist, just change it to show current values
 		//entryName = ' - ' + currType;
 		this.data[" - Attack " + currType] = attack;

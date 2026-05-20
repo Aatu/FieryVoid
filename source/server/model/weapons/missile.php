@@ -2259,7 +2259,7 @@ class BallisticMineLauncher extends AmmoMissileRackS{
 			$this->ammoClassesArray = array();
 			$this->ammoClassesArray[] =  new AmmoBLMineB();
 			$this->ammoClassesArray[] =  new AmmoBLMineH();				
-			$this->ammoClassesArray[] =  new AmmoBLMineW();					
+			$this->ammoClassesArray[] =  new AmmoBLMineW();			
 			$this->availableAmmoAlreadySet = true;
 		}	            		
             						

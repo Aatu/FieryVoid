@@ -54,13 +54,21 @@ window.ShipMovementCallbacks = function () {
 	
     ShipMovementCallbacks.prototype.accelCallback = function (e) {
         e.stopPropagation();
-        shipManager.movement.changeSpeed(this.ship, true);
+        if (event.which == 3 && gamedata.gamephase == -1 && this.ship.deploymove) { // r-click during deployment: set to max speed
+            this.ship.deploymove.speed = 10;
+        } else {
+            shipManager.movement.changeSpeed(this.ship, true);
+        }
         this.updateCallback({ ship: this.ship });
     };
 
     ShipMovementCallbacks.prototype.deaccCallback = function (e) {
         e.stopPropagation();
-        shipManager.movement.changeSpeed(this.ship, false);
+        if (event.which == 3 && gamedata.gamephase == -1 && this.ship.deploymove) { // r-click during deployment: set to min speed
+            this.ship.deploymove.speed = 0;
+        } else {
+            shipManager.movement.changeSpeed(this.ship, false);
+        }
         this.updateCallback({ ship: this.ship });
     };
 

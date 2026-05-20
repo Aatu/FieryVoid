@@ -1991,7 +1991,7 @@ window.gamedata = {
 
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
-				var startClosed = ((categoryIndex === 1  && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
+				var startClosed = ((categoryIndex === 1 && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
 				if (faction === "Terrain") {
 					startClosed = false;
 				}
@@ -2629,9 +2629,32 @@ window.gamedata = {
 		newShip.name = copiedShip.name;
 		newShip.pointCost = copiedShip.pointCost;
 		newShip.flightSize = copiedShip.flightSize;
-		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [],
+		newShip.enhancementOptions = copiedShip.enhancementOptions ? [...copiedShip.enhancementOptions] : [];
 
-			$(".confirm").remove();
+		// Copy ammo counts
+		if (newShip.flight && copiedShip.flight) {
+			for (var i in newShip.systems) {
+				if (copiedShip.systems[i]) {
+					var fighter = newShip.systems[i];
+					var copiedFighter = copiedShip.systems[i];
+					for (var j in fighter.systems) {
+						if (copiedFighter.systems[j]) {
+							var weapon = fighter.systems[j];
+							var copiedWeapon = copiedFighter.systems[j];
+							if (weapon.missileArray && copiedWeapon.missileArray) {
+								for (var k in weapon.missileArray) {
+									if (copiedWeapon.missileArray[k]) {
+										weapon.missileArray[k].amount = copiedWeapon.missileArray[k].amount;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+
+		$(".confirm").remove();
 
 		window.confirm.showShipEdit(newShip, gamedata.doCopyShip);
 	},
@@ -2904,8 +2927,28 @@ window.gamedata = {
 			} else { }
 		}
 
+		if (ship.flight) {
+			lobbyEnhancements.setEnhancementsFighter(ship);
+		} else {
+			lobbyEnhancements.setEnhancementsShip(ship);
+		}
+
+		// Systems were replaced with fresh baseShip clones, so the old window DOM
+		// references stale objects. Destroy it and null the reference so that
+		// it can be recreated correctly with the new ship.id that updateFleet assigns.
+		var wasVisible = false;
+		if (ship.shipStatusWindow) {
+			wasVisible = ship.shipStatusWindow.is(":visible");
+			ship.shipStatusWindow.remove();
+			ship.shipStatusWindow = null;
+		}
+
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
+
+		if (wasVisible) {
+			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
+		}
 		//gamedata.populateFleetDropdown();		
 	},
 

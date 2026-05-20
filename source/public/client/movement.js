@@ -509,7 +509,9 @@ shipManager.movement = {
 
     /*just move ahead using all remaining movement*/
     doMoveFully: function doMoveFully(ship) {
-        while (shipManager.movement.getRemainingMovement(ship) > 0) shipManager.movement.doMove(ship);
+        while (shipManager.movement.getRemainingMovement(ship) > 0) {
+            if (shipManager.movement.doMove(ship) === false) break; // break only on explicit false (prevents infinite loop when canMove() returns false)
+        }
     },
 
     canDetach: function canDetach(ship) {

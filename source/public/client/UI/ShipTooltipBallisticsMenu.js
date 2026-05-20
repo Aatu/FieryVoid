@@ -55,6 +55,11 @@ window.ShipTooltipBallisticsMenu = function () {
 
         const grouped = groupByOriginAndHitChange.call(this, ballistics)
 
+        // Delegate hit-chance tooltip events on .incoming. We bind locally rather
+        // than on document because the parent ShipTooltip element calls
+        // stopPropagation() on mouseover/out and would otherwise eat the event.
+        weaponManager.attachHitChanceTooltipDelegation(jQuery(".incoming", element));
+
         Object.keys(grouped).forEach(function (key) {
             var ball = grouped[key].ballistic;
             const amount = grouped[key].amount;
@@ -76,8 +81,15 @@ window.ShipTooltipBallisticsMenu = function () {
             textToDisplay = ball.shooter.name + ', ' + textToDisplay + ' (' + ball.weapon.firingModes[ball.fireOrder.firingMode] + ') ';
             jQuery(".weapon", ballElement).html(textToDisplay);
 
-			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);        
+			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);
             var hitchanceNormalMode = ball.fireOrder.chance ?? ball.fireOrder.needed;
+
+            // Live re-derived breakdown for the hover tooltip (geometry is locked
+            // at start of turn via getFiringHex, so the breakdown remains representative
+            // of how the chance was derived at launch).
+            var ballTarget = gamedata.getShip(ball.fireOrder.targetid);
+            var hitChanceResult = weaponManager.calculateHitChange(ball.shooter, ballTarget, ball.weapon, undefined);
+            var tooltipText = weaponManager.buildHitChanceTooltipText(hitChanceResult);
         
             // Build hitchance list manually, based on number of ballistics.
             /*let hitchanceList = [];
@@ -131,6 +143,13 @@ window.ShipTooltipBallisticsMenu = function () {
                 jQuery(".hitchange", ballElement).html('- Approx: ' + hitchanceNormalMode + '%');
             } else {
                 jQuery(".hitchange", ballElement).html('- Approx: ' + hitchance + '%');
+            }
+
+            // Attach hover-tooltip with the per-modifier breakdown.
+            if (tooltipText) {
+                jQuery(".hitchange", ballElement)
+                    .addClass('hit-chance-tooltip')
+                    .attr('data-tooltip', tooltipText);
             }
             /*
 			var hitchance = weaponManager.calculataBallisticHitChange(ballisticEntry);

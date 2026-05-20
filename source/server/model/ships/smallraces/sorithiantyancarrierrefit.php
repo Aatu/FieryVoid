@@ -7,7 +7,7 @@ class SorithianTyanCarrierRefit extends BaseShip{
         $this->pointCost = 475;
         $this->faction = "Small Races";
         $this->phpclass = "SorithianTyanCarrierRefit";
-        $this->imagePath = "img/ships/BASurveyShip.png";
+        $this->imagePath = "img/ships/SorinthianTyanCarrier.png";
         $this->shipClass = "Sorithian Tyan Carrier (Refit)";
 			$this->variantOf = "Sorithian Tyan Carrier";
 			$this->occurence = "common";

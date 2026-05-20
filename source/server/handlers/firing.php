@@ -431,13 +431,7 @@ class Firing
 
 
 
-        if ($firingweapon->ballistic) {
- 			$pos = $firingweapon->getFiringHex($gd, $fire); //Added Mar '24 - To enable intercept for BallisticMineLauncher
-            $relativeBearing = $interceptingShip->getBearingOnPos($pos);
-        } else {
-            $pos = $shooter->getCoPos(); //current hex of firing unit
-            $relativeBearing = $interceptingShip->getBearingOnUnit($shooter);
-        }
+        $relativeBearing = $firingweapon->getIncomingBearing($interceptingShip, $fire, $gd);
 
         //New arc check that checks split arcs like Heavy Slicer as well = DK Dec 2025
         if (!mathlib::isInAnyArc(
@@ -1014,7 +1008,10 @@ public static function firePreFiringWeapons($gamedata){
         //Check if any ships have activate jump engines and do this after all other fire (in case they or their jump engine got destroyed)
         foreach ($gamedata->ships as $ship) {   
             
-            $jumpList = $ship->getSystemsByName('Jump Engine'); //Won't return if Jump engine destroyed.     
+            $jumpList = $ship->getSystemsByName('Jump Engine'); //Won't return if Jump engine destroyed.
+            if ($ship->faction === 'Shadow Association') { //PhasingDrive extends JumpEngine but has a different display name; only Shadow Association ships have one.
+                $jumpList = array_merge($jumpList, $ship->getSystemsByName('Phasing Drive'));
+            }
             foreach($jumpList as $jumpEngine){
                 //is it overloading?...
                 if( $jumpEngine->isOverloading($gamedata->turn) ){ //primed for entering hyperspace!				

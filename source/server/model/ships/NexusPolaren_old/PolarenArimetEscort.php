@@ -44,9 +44,9 @@ class PolarenArimetEscort extends LCV{
 		$this->addPrimarySystem(new Bulkhead(0, 1));
 		$this->addPrimarySystem(new Bulkhead(0, 1));
 
-		$this->addFrontSystem(new LtBlastCannon(1, 4, 1, 180, 60));
+		$this->addFrontSystem(new LtBlastCannon(1, 4, 1, 240, 120));
 		$this->addFrontSystem(new NexusSandCaster(2, 4, 2, 270, 90));
-		$this->addFrontSystem(new NexusSandCaster(2, 4, 2, 300, 180));
+		$this->addFrontSystem(new NexusSandCaster(2, 4, 2, 270, 90));
     
         $this->addPrimarySystem(new Structure(4, 36));
 	    

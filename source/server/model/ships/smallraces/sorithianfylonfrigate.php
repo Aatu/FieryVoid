@@ -7,7 +7,7 @@ class SorithianFylonFrigate extends MediumShip{
         $this->pointCost = 300;
         $this->faction = "Small Races";
         $this->phpclass = "SorithianFylonFrigate";
-        $this->imagePath = "img/ships/BAMediumGunboat.png";
+        $this->imagePath = "img/ships/SorinthianFylonFrigate.png";
         $this->shipClass = "Sorithian Fylon Frigate";
         $this->occurence = "common";
         $this->isd = 2209;

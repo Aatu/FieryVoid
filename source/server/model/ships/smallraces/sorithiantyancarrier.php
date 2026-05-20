@@ -7,7 +7,7 @@ class SorithianTyanCarrier extends BaseShip{
         $this->pointCost = 450;
         $this->faction = "Small Races";
         $this->phpclass = "SorithianTyanCarrier";
-        $this->imagePath = "img/ships/BASurveyShip.png";
+        $this->imagePath = "img/ships/SorinthianTyanCarrier.png";
         $this->shipClass = "Sorithian Tyan Carrier";
         $this->shipSizeClass = 3;
         $this->fighters = array("medium"=>24);
