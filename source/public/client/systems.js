@@ -444,6 +444,22 @@ shipManager.systems = {
         };
     },
 
+    //Picks the single Hangar system that should display the ship's default
+    //shuttle load (see getDefaultShuttles). Prefers a hangar in the primary
+    //section (location 0); otherwise the first hangar found. Returns the
+    //system, or null if the ship has no hangars.
+    getDefaultShuttleHangar: function getDefaultShuttleHangar(ship) {
+        if (!ship || !ship.systems) return null;
+        var firstHangar = null;
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system || system.name != "hangar") continue;
+            if (firstHangar === null) firstHangar = system;
+            if (system.location == 0) return system;
+        }
+        return firstHangar;
+    },
+
     //Display label for a ship's auto-populated default shuttle. Mirrors
     //HangarOps::factionShuttleClass on the server — extend this switch in
     //lockstep whenever a faction-specific default shuttle subclass is added

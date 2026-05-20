@@ -33,6 +33,20 @@ window.systemInfo = {
 			h += '<div><span class="header">' + i + ':</span><span class="value">' + system.data[i] + "</span></div>";
 		}
 
+		//Leftover hangar capacity is auto-filled with shuttles (or minesweeping
+		//shuttles / Flyers per faction) — same rule as shipwindow.js. The pool is
+		//ship-wide, so show it on a single Hangar tooltip (primary section, else
+		//first hangar) rather than repeating the total on every hangar.
+		if (system.name == "hangar") {
+			var defaultHangar = shipManager.systems.getDefaultShuttleHangar(ship);
+			if (defaultHangar && defaultHangar.id == system.id) {
+				var defaultShuttles = shipManager.systems.getDefaultShuttles(ship);
+				if (defaultShuttles.count > 0) {
+					h += '<div><span class="header">' + defaultShuttles.type + ':</span><span class="value">' + defaultShuttles.count + "</span></div>";
+				}
+			}
+		}
+
 		if (Object.keys(system.critData).length > 0) {
 			var currentCrits = shipManager.criticals.getAllCriticals(system,gamedata.turn); //system.criticals may contain crits that are not current
 			h += "<div><span>DAMAGE:</span></div><ul>";
