@@ -50,6 +50,7 @@ class Shuttle extends FighterFlight
         $this->jinkinglimit = 0;
         $this->pivotcost = 2;                     //shuttles pivot slowly
         $this->turncost = 0.33;
+        $this->minesweeper = false; //denotes if shuttle is a minesweeping type
 
         $this->hangarRequired = 'shuttles';       //matches "shuttles" key in carrier $fighters
         $this->iniativebonus = 9 * 5;             //slow
@@ -129,8 +130,31 @@ class Flyer extends Shuttle
         $this->phpclass = "Flyer";
         $this->shipClass = "Flyer";
         $this->faction = "Minbari Federation";
-
-        $this->freethrust = 8;
+        $this->forwardDefense = 9;
+        $this->sideDefense = 7;
+        $this->freethrust = 10;
         $this->gravitic = true;
+        $this->iniativebonus = 10 * 5;             //slow        
     }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+
+            $fighter->addAftSystem(new Jammer(0, 1, 0));	            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
 }
