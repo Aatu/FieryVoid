@@ -291,11 +291,11 @@ window.ShipTooltip = function () {
         if (ship.flight === true) {
             var firstFighter = shipManager.systems.getSystem(ship, 1);
             if (firstFighter && shipManager.criticals.hasCritical(firstFighter, "LaunchedThisTurn")) {
-                toDisplay += '<span style="color:orange;">Just Launched</span>; ';
+                toDisplay += '<span style="color:cyan;">Just Launched</span>; ';
             }
         }
         if (shipManager.criticals.hasCriticalInAnySystem(ship, "HangarOperations")) {
-            toDisplay += '<span style="color:orange;">Hangar Operations</span>; ';
+            toDisplay += '<span style="color:cyan;">Hangar Operations</span>; ';
         }
         if (ship.flight === true) {
             if (shipManager.movement.hasCombatPivoted(ship) && (!ship.ignoreManoeuvreMods)) rollPivotModifier -= 5;
