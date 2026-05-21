@@ -38,7 +38,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
-                <li><a href="#escorts">Fighter Escorts</a></li>                
+                <li><a href="#escorts">Fighter Escorts</a></li>
+                <li><a href="#hangar">Hangar Operations</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
                 <li><a href="#mines">Mines</a></li>                               
@@ -270,6 +271,66 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 the fighters will use their weapons to intercept ballistics on behalf of the ship providing all other conditions of intercept are true e.g. 
                 their weapons have an intercept rating, the incoming shot is in arc, the fighters are not jinking etc.        
             </li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+        <h3 id="hangar" >Hangar Operations</h3>
+        <ul>
+            <li>Carriers can launch and recover their fighters, shuttles and other small craft <em>during</em> a battle, as well as start them docked inside the carrier
+                rather than placing them directly on the map. The options to do so appear automatically on any ship with hangar capacity.</li>
+            <br>
+
+            <li><b>What's in your hangars at the start:</b>
+                <ul class="circle-list">
+                    <li>A ship's hangar capacity not already allocated to fighters/assault shuttles or breaching pods capacity is automatically filled with <b>Shuttles</b> (or <b>Minesweeping Shuttles</b> on ships with a minesweeper bonus).</li>              
+                    <li>Hover over a <b>Hangar</b> system in the ship's SCS to see its starting contents, shown as e.g. <i>"Carrying: 2 / 14 slots"</i> along with a list of the stored craft.</li>
+                    <li> 
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Deployment Phase docking:</b> During the Deployment Phase you can choose to deploy fighters in a ship's hangar by clicking on the ships hex and selecting the blue 'Dock...' option.  
+                        Or, if the fighters are already deployed to the carrier ship's hex you can click on the 'Deploy Flights in Hangar' tooltip button on the ship, or click on the Hangar system icon in the ship's SCS window.  
+                        Reinforcement flights arriving on later turns can dock into an already-deployed carrier the same way.
+                        Note, some fighters such as Orieni Hunter-Killers MUST deploy in hangars at the start of a game.</li>   
+
+            <li><b>Launching craft (Firing Phase):</b>
+                <ul class="circle-list">
+                    <li>Select one of your hangar ships and click the <b>Launch</b> tooltip button in its tooltip menu.  A dialog lets you pick which stored craft to launch, and how many.</li>
+                    <li>Shuttles are stored individually but can be launched as a single flight of 1–6.  Fighters launch as their stored flight (subject to the usual partial-flight rules).</li>
+                    <li>The order resolves at the <b>end of the turn</b>: the new flight appears in the carrier's hex, matching its heading and speed, facing the carrier's facing (plus an offset for side hangars).</li>
+                    <li>You cannot launch from a carrier that is pivoting or rolling that turn.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Recovering / Docking craft (Firing Phase):</b>
+                <ul class="circle-list">
+                    <li>Select one of your fighter flights and click the <b>Dock</b> button, or use the <b>Recover</b> tooltip button on the carrier to pull craft in from the carrier's side.</li>
+                    <li>A flight can only dock into a carrier that is in the <b>same hex</b>, on the <b>same heading</b>, and at a compatible speed (the carrier must be at least as fast as the flight,
+                        and the speed difference must be within the flight's thrust rating).</li>
+                    <li>The carrier must have a free hangar slot of a compatible type, must not be pivoting or rolling, and the hangar must not be destroyed.</li>
+                    <li>If more than one eligible carrier is in the hex, you'll be asked to pick one.  If a hangar can't hold the whole flight, you'll be offered a split — dock some now and leave the rest in space.</li>
+                    <li>Like launching, docking resolves at the end of the turn.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Launch / land budget:</b> Each hangar has a per-turn capacity (its <i>output</i>) that is <b>shared</b> between launching and landing.
+                A hangar with an output of 6 can launch 6 craft, recover 6 craft, or any combination (e.g. launch 4 and recover 2) in a single turn.</li>
+            <br>
+
+            <li><b>Initiative penalties:</b> Operating hangars is disruptive.  A carrier that launches and/or recovers craft suffers <b>−20 Initiative</b> on the following turn (just once, no matter how many craft it moved).
+                A freshly launched flight suffers <b>−50 Initiative</b> on the turn after it launches.  These penalties clear automatically.</li>
+            <br>
+
+            <li><b>Compatible hangar types:</b> Craft can only be stored in slots that fit them.  Universal fighter bays accept any size of combat fighter (and shuttles),
+                but Assault Shuttles and Breaching Pods need their own dedicated slots, and custom-named fighters (e.g. Thunderbolts) are limited by each carrier's individual capacity for that type.</li>
+            <br>
+
+            <li><b>Hangar damage:</b> If a hangar takes damage, stored craft are destroyed along with it (empty slots and shuttles are lost first, then the cheaper craft).</li>
+            <br>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
