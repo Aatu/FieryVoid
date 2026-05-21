@@ -710,9 +710,9 @@ window.gamedata = {
 						var preEnhID = lship.enhancementOptions[preEnh][0];
 						var preConvNum = lship.enhancementOptions[preEnh][2] || 0;
 						if (preConvNum <= 0) continue;
-						if (preEnhID === "HANG_BP") {
-							lship.fighters["Breaching Pods"] = (lship.fighters["Breaching Pods"] || 0) + preConvNum;
-						}
+						//if (preEnhID === "HANG_BP") { //Wrong place to update lship.fighter, check doesn't always run and seem to duplicate BP slots.
+							//lship.fighters["Breaching Pods"] = (lship.fighters["Breaching Pods"] || 0) + preConvNum;
+						//}
 					}
 				}
 
