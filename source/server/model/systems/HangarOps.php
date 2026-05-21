@@ -513,6 +513,39 @@ class HangarOps {
 		return self::evictCraftFromHangar($hangar, $stored - $remaining, $gamedata);
 	}
 
+	/* Per-turn servicing of flights sitting docked in this hangar. Runs from
+	 * Hangar::criticalPhaseEffects every turn. Walks the hangar's dockedFlightId
+	 * stash entries, resolves each flight, and calls whileDocked() on every
+	 * subsystem of every still-active fighter so reloadable weapons (SlugCannon
+	 * et al.) can top up ammo. Docked flights are excluded from
+	 * Criticals::setCriticals' $activeShips, so they cannot self-tick — the
+	 * live carrier's hangar is the only thing that processes them each turn.
+	 *
+	 * A flight must be docked a FULL turn before it is serviced: an entry whose
+	 * dockedTurn is the current turn (it just docked, or a fragment created this
+	 * turn by a partial-launch split) is skipped. A destroyed hangar services
+	 * nothing — and a destroyed carrier never reaches here, since it's dropped
+	 * from $activeShips, so docked craft on a dead carrier neither rearm nor tick.
+	 */
+	public static function serviceDockedFlights($hangar, $carrier, $gamedata){
+		if ($hangar->isDestroyed() || empty($hangar->hangarUsage)) return;
+		foreach ($hangar->hangarUsage as $entry){
+			if (!isset($entry['dockedFlightId'])) continue;
+			//Must have been docked since BEFORE this turn (no rearm on dock turn).
+			if (isset($entry['dockedTurn']) && (int)$entry['dockedTurn'] >= $gamedata->turn) continue;
+			$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
+			if (!($flight instanceof FighterFlight)) continue;
+			foreach ($flight->systems as $fighter){
+				if (!($fighter instanceof Fighter)) continue;
+				if ($fighter->isDestroyed($gamedata->turn)) continue;
+				if (!isset($fighter->systems) || !is_array($fighter->systems)) continue;
+				foreach ($fighter->systems as $sys){
+					$sys->whileDocked($flight, $carrier, $hangar, $gamedata);
+				}
+			}
+		}
+	}
+
 	/* === Stage 4: launch flow ============================================ */
 
 	/* Spawn a new FighterFlight from a hangar's stored craft.
@@ -1570,8 +1603,8 @@ class HangarOps {
 		return $fragment;
 	}
 
-	/* Copy a source fighter's damage history and damage-related criticals
-	 * onto a target fighter (newly-spawned, no prior history). State
+	/* Copy a source fighter's damage history, damage-related criticals, and
+	 * weapon ammo onto a target fighter (newly-spawned, no prior history). State
 	 * markers used by the dock pipeline itself — DockedFighter,
 	 * DisengagedFighter, LaunchedThisTurn — are intentionally NOT copied:
 	 * the target is born "clean" of those flight-control crits and its
@@ -1633,6 +1666,28 @@ class HangarOps {
 			$newCrit->updated = true;
 			$newCrit->newCrit = true;       //force DB insert
 			$targetFighter->criticals[] = $newCrit;
+		}
+
+		//Copy weapon ammo so a split / partial relaunch reflects the docked
+		//flight's depleted-and-rearmed ammo rather than a fresh full clip.
+		//(The new-spawn launch path inits weapons to a full default load; this
+		//runs afterwards and overrides it for dockedFlightId-linked launches.)
+		//Subsystems pair by order — source and target share a phpclass, so the
+		//layout is identical. Only scalar-ammo weapons (SlugCannon family) carry
+		//over here; missile racks (missileArray) are out of scope until Stage 13.
+		//Persisted via the same updateAmmoInfo path fire()/whileDocked use; the
+		//target is a runtime-spawned flight with no enhancementOptions, so there
+		//is no EXT_AMMO bonus to strip before saving.
+		$srcSubs = is_array($sourceFighter->systems) ? array_values($sourceFighter->systems) : array();
+		$tgtSubs = is_array($targetFighter->systems) ? array_values($targetFighter->systems) : array();
+		$pairs = min(count($srcSubs), count($tgtSubs));
+		for ($s = 0; $s < $pairs; $s++) {
+			$srcSub = $srcSubs[$s];
+			$tgtSub = $tgtSubs[$s];
+			if (!($tgtSub instanceof Weapon)) continue;
+			if (!isset($srcSub->ammunition) || !isset($tgtSub->ammunition)) continue;
+			$tgtSub->ammunition = $srcSub->ammunition;
+			Manager::updateAmmoInfo($targetFlight->id, $tgtSub->id, $gamedata->id, $tgtSub->firingMode, $tgtSub->ammunition, $gamedata->turn);
 		}
 	}
 

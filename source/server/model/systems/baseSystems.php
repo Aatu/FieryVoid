@@ -3176,7 +3176,15 @@ class Hangar extends ShipSystem{
 		//   first so the launch path sees the correct used budget.
 		HangarOps::processDockOrders($this, $ship, $gamedata);
 
-		//3. Process queued launch orders (Post-Turn Actions Step). Only runs
+		//3. Service flights docked a full turn (reload ammo on reloadable
+		//   weapons, etc.) BEFORE launches, so a flight that spent this turn
+		//   docked still earns its reload on the very turn it relaunches.
+		//   serviceDockedFlights skips flights that docked THIS turn
+		//   (dockedTurn == current turn); a launch later this step just carries
+		//   the freshly-reloaded ammo out with it.
+		HangarOps::serviceDockedFlights($this, $ship, $gamedata);
+
+		//4. Process queued launch orders (Post-Turn Actions Step). Only runs
 		//   in the Fire Phase advance — Criticals::setCriticals() is only
 		//   called there, and pendingLaunchOrders are filtered to the current
 		//   turn so old orders don't re-fire.
