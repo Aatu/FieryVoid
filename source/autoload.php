@@ -3546,13 +3546,7 @@ spl_autoload_register(
 				//Grappling Claw & Grapple ships
 				'grapplingclaw' => '/server/model/weapons/specialWeapons.php',					
 				'claweagle' => '/server/model/ships/drazi/claweagle.php',										
-				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',
-
-                //HANGER OPERATIONS CLASSES
-                'hangarops' => '/server/model/systems/HangarOps.php',
-                'shuttle' => '/server/model/ships/Shuttle.php',
-                'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
-                'flyer' => '/server/model/ships/Shuttle.php',                
+				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',            
                 
                 //MINES
 				'minestealth' => '/server/model/systems/baseSystems.php',
@@ -3795,6 +3789,14 @@ spl_autoload_register(
                 'dewminehafkaa' => '/server/model/ships/balosian/dewMineHafkaA.php',                 
                 'dewmined2bal' => '/server/model/ships/balosian/dewMineD2Bal.php',  
                 
+
+                //HANGER OPERATIONS CLASSES
+                'hangarops' => '/server/model/systems/HangarOps.php',
+                'shuttle' => '/server/model/ships/Shuttle.php',
+                'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
+                'flyer' => '/server/model/ships/Shuttle.php',
+                'flyerprotectorate' => '/server/model/ships/Shuttle.php',
+
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

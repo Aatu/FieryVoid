@@ -158,3 +158,20 @@ class Flyer extends Shuttle
     }
 
 }
+
+class FlyerProtectorate extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "FlyerProtectorate";
+        $this->shipClass = "Flyer";
+        $this->faction = "Minbari Protectorate";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 7;
+        $this->freethrust = 10;
+        $this->gravitic = true;
+        $this->iniativebonus = 10 * 5;             //slow        
+    }
+
+}

@@ -201,7 +201,7 @@ class HangarOps {
 	 */
 	private static $factionShuttleMap = array(
 		'Minbari Federation'   => 'Flyer',
-		'Minbari Protectorate' => 'Flyer',
+		'Minbari Protectorate' => 'FlyerProtectorate',
 	);
 
 	/* Resolves the right shuttle phpclass for a carrier based on faction.
@@ -232,6 +232,8 @@ class HangarOps {
 				return 'Minesweeping Shuttle';
 			case 'Flyer':
 				return 'Flyer';
+			case 'FlyerProtectorate':
+				return 'Flyer';				
 			case 'Shuttle':
 			default:
 				return 'Shuttle';
@@ -464,7 +466,7 @@ class HangarOps {
 		if ($phpclass === '') return 0;
 		if ($phpclass === 'MinesweepingShuttle') return 20;
 		if (stripos($phpclass, 'shuttle') !== false) return 10;
-		if ($phpclass === 'Flyer') return 10;
+		if ($phpclass === 'Flyer' || $phpclass === 'FlyerProtectorate') return 10;
 		if (class_exists($phpclass)) {
 			try {
 				$probe = new $phpclass(0, 0, '', 0);
