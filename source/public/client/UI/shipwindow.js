@@ -413,9 +413,10 @@ window.shipWindowManager = {
 			//Leftover hangar capacity is auto-filled with shuttles (or
 			//minesweeping shuttles when minesweeperbonus > 0) — same rule as
 			//HangarOps::populateInitialHangarUsage step 3 on the server.
-			var defaultShuttles = shipManager.systems.getDefaultShuttles(ship);
-			if (defaultShuttles.count > 0) {
-				notes.push("&nbsp;&nbsp;&nbsp;" + defaultShuttles.count + " " + defaultShuttles.type);
+			var defaultShuttles = shipManager.systems.getDefaultShuttleComposition(ship);
+			//if (defaultShuttles.count > 0) {
+			for (var s = 0; s < defaultShuttles.length; s++) {			
+				notes.push("&nbsp;&nbsp;&nbsp;" + defaultShuttles[s].count + " " + defaultShuttles[s].type);
 			}
 
 			if (ship.notes != '') {

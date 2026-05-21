@@ -476,6 +476,60 @@ shipManager.systems = {
         }
     },
 
+    //Post-enhancement breakdown of the auto-populated default shuttle pool, for
+    //display only (Hangar systemInfo tooltip, ship-info window). Applies the two
+    //shuttle-slot lobby enhancements:
+    //  HANG_BP  — converts N default slots into dedicated Breaching Pod slots.
+    //  HANG_MSW — retypes N default shuttles as Minesweeping Shuttles (no
+    //             capacity change; gated to non-minesweeper carriers server-side).
+    //Returns an ordered array of {type, count} rows (empty when no default pool).
+    //
+    //The pool size is read from a Breaching-Pod-clean fighters base: the
+    //gamelobby fleet check bakes HANG_BP into ship.fighters["Breaching Pods"]
+    //(snapshotting the pre-bake shape in ship._originalFighters), so using
+    //_originalFighters when present keeps this correct regardless of whether the
+    //fleet check has run — and avoids double-subtracting the converted slots.
+    getDefaultShuttleComposition: function getDefaultShuttleComposition(ship) {
+        var rows = [];
+        var capacity = shipManager.systems.getTotalHangarCapacity(ship);
+        if (capacity <= 0) return rows;
+        var base = ship._originalFighters || ship.fighters || {};
+        var declared = 0;
+        for (var k in base) declared += parseInt(base[k], 10) || 0;
+        var pool = capacity - declared;
+        if (pool <= 0) return rows;
+
+        var bp = 0, msw = 0;
+        if (ship.enhancementOptions) {
+            for (var e in ship.enhancementOptions) {
+                var id = ship.enhancementOptions[e][0];
+                var n = parseInt(ship.enhancementOptions[e][2], 10) || 0;
+                if (n <= 0) continue;
+                if (id === "HANG_BP") bp += n;
+                else if (id === "HANG_MSW") msw += n;
+            }
+        }
+        if (bp > pool) bp = pool;          //can't convert more slots than exist
+        var afterBP = pool - bp;           //BP conversion removes slots from the pool
+        if (msw > afterBP) msw = afterBP;  //MSW retypes within the remaining pool
+
+        var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
+        if (minesweeper) {
+            //Default pool is already MinesweepingShuttle; HANG_MSW is a no-op here.
+            if (afterBP > 0) rows.push({ type: "Minesweeping Shuttles", count: afterBP });
+        } else {
+            var plain = afterBP - msw;
+            if (plain > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: plain });
+            if (msw > 0) rows.push({ type: "Minesweeping Shuttles", count: msw });
+        }
+        //HANG_BP only converts a hangar slot to be BP-capable; the pod unit is
+        //bought separately. slotOnly flags this as available capacity, not a
+        //present unit, so the in-game Hangar tooltip can suppress it while the
+        //lobby loadout (shipwindow) still reflects the converted slot.
+        if (bp > 0) rows.push({ type: "Breaching Pods", count: bp, slotOnly: true });
+        return rows;
+    },
+
     getThrusters: function getThrusters(ship, direction) {
         var list = Array();
         for (var i in ship.systems) {

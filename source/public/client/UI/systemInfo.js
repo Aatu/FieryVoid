@@ -36,13 +36,17 @@ window.systemInfo = {
 		//Leftover hangar capacity is auto-filled with shuttles (or minesweeping
 		//shuttles / Flyers per faction) — same rule as shipwindow.js. The pool is
 		//ship-wide, so show it on a single Hangar tooltip (primary section, else
-		//first hangar) rather than repeating the total on every hangar.
+		//first hangar) rather than repeating the total on every hangar. The
+		//breakdown reflects the HANG_BP / HANG_MSW shuttle-slot enhancements.
 		if (system.name == "hangar") {
 			var defaultHangar = shipManager.systems.getDefaultShuttleHangar(ship);
 			if (defaultHangar && defaultHangar.id == system.id) {
-				var defaultShuttles = shipManager.systems.getDefaultShuttles(ship);
-				if (defaultShuttles.count > 0) {
-					h += '<div><span class="header">' + defaultShuttles.type + ':</span><span class="value">' + defaultShuttles.count + "</span></div>";
+				var shuttleRows = shipManager.systems.getDefaultShuttleComposition(ship);
+				for (var s = 0; s < shuttleRows.length; s++) {
+					//slotOnly rows (HANG_BP) are converted-but-empty capacity, not
+					//units present in the hangar — don't list them here.
+					if (shuttleRows[s].slotOnly) continue;
+					h += '<div><span class="header">' + shuttleRows[s].type + ':</span><span class="value">' + shuttleRows[s].count + "</span></div>";
 				}
 			}
 		}
