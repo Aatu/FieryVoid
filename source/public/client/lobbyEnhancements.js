@@ -145,14 +145,21 @@ window.lobbyEnhancements = {
 
 					case 'HANG_BP'://Default Shuttle slot to Breaching Pod slot
 						if (!ship.hangBPEnh) {
-							ship.notes += "<br>Breaching Pod Conversion (" + enhCount + ")";
+							//ship.notes += "<br>Breaching Pod Conversion (" + enhCount + ")";
+							/*if(Object.keys(ship.fighters).includes("Breaching Pods")){
+								ship.fighters["Breaching Pods"] += 1;
+							}else{
+								//ship.fighters.push("Breaching Pods");
+								ship.fighters["Breaching Pods"]	= 1;							
+							}*/
+								
 						}
 						ship.hangBPEnh = true;
 						break;
 
 					case 'HANG_MSW'://Default Shuttle unit to Minesweeping Shuttle
 						if (!ship.hangMswEnh) {
-							ship.notes += "<br>Minesweeping Shuttle Conversion (" + enhCount + ")";
+							//ship.notes += "<br>Minesweeping Shuttle Conversion (" + enhCount + ")";
 						}
 						ship.hangMswEnh = true;
 						break;
