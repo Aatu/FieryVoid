@@ -1373,7 +1373,7 @@ class Enhancements{
 	  $enhID = 'EXT_AMMO';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Additional Ammo for Gun';
-		  $enhLimit = 4;	
+		  $enhLimit = 2;	
 		  $enhPrice = 3; //price per craft, while flight price is per 6-craft flight	  
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
