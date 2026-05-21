@@ -4730,6 +4730,37 @@ class AdaptiveArmorController extends ShipSystem{
 							if ($gameData->turn==1) $this->availableAA[$weaponClass]++;
 						}
 
+						//SERVER-AUTHORITATIVE CLAMP - DK May 2026
+						//The client (canIncrease) already enforces these limits, but a malformed or
+						//inflated currchangedAA payload must never be persisted over the system's caps.
+						//Enforce the same hard invariants here so the database can never hold an illegal value.
+						foreach($this->allocatedAA as $weaponClass=>$allocated){
+							//never assign more than the per-type maximum
+							if ($allocated > $this->AApertype) $this->allocatedAA[$weaponClass] = $this->AApertype;
+							//never assign more than is available for that type
+							if (isset($this->availableAA[$weaponClass]) && $this->allocatedAA[$weaponClass] > $this->availableAA[$weaponClass]){
+								$this->allocatedAA[$weaponClass] = $this->availableAA[$weaponClass];
+							}
+						}
+						//availability itself can never exceed the per-type maximum
+						foreach($this->availableAA as $weaponClass=>$available){
+							if ($available > $this->AApertype) $this->availableAA[$weaponClass] = $this->AApertype;
+						}
+						//enforce the total pool: trim allocations (deterministic order) until within AAtotal
+						$this->AAtotal_used = 0;
+						foreach($this->allocatedAA as $weaponClass=>$allocated){
+							$this->AAtotal_used += $allocated;
+						}
+						if ($this->AAtotal_used > $this->AAtotal){
+							foreach($this->allocatedAA as $weaponClass=>$allocated){
+								while ($this->AAtotal_used > $this->AAtotal && $this->allocatedAA[$weaponClass] > 0){
+									$this->allocatedAA[$weaponClass]--;
+									$this->AAtotal_used--;
+								}
+							}
+						}
+						//endof clamp
+
 						foreach($this->availableAA as $weaponClass=>$ptsAvailable){
 							if (isset($this->allocatedAA[$weaponClass])){
 								$ptsSet = $this->allocatedAA[$weaponClass];
