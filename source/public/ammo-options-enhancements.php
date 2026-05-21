@@ -139,13 +139,27 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: 2</li>
         </ul>      
       </li>
-      <li><strong>Hangar Conversions</strong>
+      <li><strong>Assault Shuttle / Fighter Hangar Conversions</strong>
         <ul class="circle-list">
-            <li>Convert either a fighter slot into an assault shuttle slot, or vice versa</li>
+            <li>Converts either a fighter slot into an assault shuttle slot, or vice versa</li>
             <li>Points Cost: 5pts per slot converted</li>
             <li>Limit: Equal to the number of assault shuttle/fighter slots</li>
         </ul>      
-      </li>      
+      </li>
+      <li><strong>Shuttle to Breaching Pod Slot Conversion</strong>
+        <ul class="circle-list">
+            <li>Converts one of a ship's default shuttle slots to a hangar slot that can accommodate a Breaching Pod unit (replacing the shuttle in process).</li>
+            <li>Points Cost: 10pts per slot converted</li>
+            <li>Limit: Equal to the number of default shuttle slots.</li>
+        </ul>      
+      </li>         
+      <li><strong>Shuttle to Minesweeping Shuttle Conversion</strong>
+        <ul class="circle-list">
+            <li>Convert one of a ship's default shuttle units to a minesweeping shuttle.</li>
+            <li>Points Cost: 10pts per shuttle converted</li>
+            <li>Limit: Equal to the number of default shuttles.</li>
+        </ul>      
+      </li>              
     <li><strong>Identify Friend or Foe (IFF) System</strong>
         <ul class="circle-list">
             <li>Effect: Prevent ballistic mines from attacking friendly units</li>
