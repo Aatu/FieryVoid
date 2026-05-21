@@ -281,16 +281,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 rather than placing them directly on the map. The options to do so appear automatically on any ship with hangar capacity.</li>
             <br>
 
-            <li><b>What's in your hangars at the start:</b>
+            <li><b>Default shuttles:</b>
                 <ul class="circle-list">
-                    <li>A ship's hangar capacity not already allocated to fighters/assault shuttles or breaching pods capacity is automatically filled with <b>Shuttles</b> (or <b>Minesweeping Shuttles</b> on ships with a minesweeper bonus).</li>              
+                    <li>A ship's hangar capacity that is not already allocated to fighters/assault shuttles or breaching pods capacity is automatically filled with <b>Shuttles</b> (or <b>Minesweeping Shuttles</b> on ships with a minesweeper bonus).</li>              
                     <li>Hover over a <b>Hangar</b> system in the ship's SCS to see its starting contents, shown as e.g. <i>"Carrying: 2 / 14 slots"</i> along with a list of the stored craft.</li>
-                    <li> 
                 </ul>
             </li>
             <br>
 
-            <li><b>Deployment Phase docking:</b> During the Deployment Phase you can choose to deploy fighters in a ship's hangar by clicking on the ships hex and selecting the blue 'Dock...' option.  
+            <li><b>Deployment Phase:</b> During the Deployment Phase you can choose to deploy fighters in a ship's hangar by clicking on the ships hex and selecting the blue 'Dock...' option.  
                         Or, if the fighters are already deployed to the carrier ship's hex you can click on the 'Deploy Flights in Hangar' tooltip button on the ship, or click on the Hangar system icon in the ship's SCS window.  
                         Reinforcement flights arriving on later turns can dock into an already-deployed carrier the same way.
                         Note, some fighters such as Orieni Hunter-Killers MUST deploy in hangars at the start of a game.</li>   
