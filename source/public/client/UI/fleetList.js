@@ -389,7 +389,43 @@ window.fleetListManager = {
         window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
     },
 
+    //Hangar Ops: ids of docked flights whose carrier jumped to hyperspace. A
+    //jumped carrier stays in gamedata.ships and keeps its hangarUsage (and the
+    //dockedFlightId links) intact, so we map each jumped carrier's stored craft
+    //back to the flight rows the fleet list renders. updateFleetList uses this
+    //to show those flights as "Jumped" (orange) rather than "Docked" (blue) —
+    //a docked flight has no jump engine of its own, so hasJumpedNotDestroyed
+    //can't detect this on the flight directly.
+    getJumpedDockedFlightIds: function getJumpedDockedFlightIds() {
+        var ids = {};
+        for (var i in gamedata.ships) {
+            var carrier = gamedata.ships[i];
+            //hasJumpedNotDestroyed only distinguishes "jumped" from
+            //"damage-killed" among ships already out of play: on a healthy,
+            //in-play carrier it returns true purely because it has a jump
+            //engine and little non-jump damage. Gate on isDestroyed first —
+            //the same pairing updateFleetList uses for a ship's own row — so
+            //we only flag flights whose carrier actually left via hyperspace.
+            if (!shipManager.isDestroyed(carrier)) continue;
+            if (!shipManager.hasJumpedNotDestroyed(carrier)) continue;
+            if (!Array.isArray(carrier.systems)) continue;
+            for (var s = 0; s < carrier.systems.length; s++) {
+                var sys = carrier.systems[s];
+                if (!sys || !Array.isArray(sys.hangarUsage)) continue;
+                for (var u = 0; u < sys.hangarUsage.length; u++) {
+                    var entry = sys.hangarUsage[u];
+                    if (entry && entry.dockedFlightId) ids[entry.dockedFlightId] = true;
+                }
+            }
+        }
+        return ids;
+    },
+
     updateFleetList: function updateFleetList() {
+        //Hangar Ops: collect the docked flights whose carrier jumped to
+        //hyperspace once, before the row loop, so we can flag them below.
+        var jumpedDockedFlightIds = fleetListManager.getJumpedDockedFlightIds();
+
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
             var name = ship.name;
@@ -400,8 +436,16 @@ window.fleetListManager = {
                     //open the flight window (doScrollToShip routes removed
                     //flights to flightWindowManager.open directly since
                     //they're not on the board).
-                    $("#" + ship.id).addClass("docked");
-                    $("#" + ship.id + " .initiative").html("Docked");
+                    if (jumpedDockedFlightIds[ship.id]) {
+                        //Carrier jumped to hyperspace and took the flight with
+                        //it: it kept its combat value but is no longer in play,
+                        //so render it like a jumped ship (orange) not docked.
+                        $("#" + ship.id).addClass("jumped");
+                        $("#" + ship.id + " .initiative").html("Jumped");
+                    } else {
+                        $("#" + ship.id).addClass("docked");
+                        $("#" + ship.id + " .initiative").html("Docked");
+                    }
                     continue;
                 }
                 // Remove action listener and make everything italic to indicate the
