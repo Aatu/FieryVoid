@@ -94,28 +94,6 @@ class Shuttle extends FighterFlight
     }
 }
 
-
-/* Minesweeping shuttle variant. Auto-populated when a carrier declares
- * 'minesweeping shuttles' in $fighters, or when leftover hangar capacity
- * exists on a ship with $minesweeperbonus > 0. Kept faction-agnostic at
- * present — getImage() inherits Shuttle's switch, so if a future launch
- * path passes a carrier faction through, faction-flavoured minesweeping
- * art will follow automatically.
- */
-class MinesweepingShuttle extends Shuttle
-{
-    protected function setShuttleDefaults()
-    {
-        parent::setShuttleDefaults();
-        $this->phpclass = "MinesweepingShuttle";
-        $this->shipClass = "Minesweeping Shuttle";
-        $this->hangarRequired = 'minesweeping shuttles';
-        $this->offensivebonus = 4;
-        $this->minesweeper = true;
-    }
-}
-
-
 /* Minbari Flyer — the Minbari Federation / Minbari Protectorate equivalent
  * of the generic Shuttle. Gravitic with higher base thrust. Selected for
  * Minbari carriers by HangarOps::factionShuttleClass during initial hangar
@@ -145,7 +123,7 @@ class Flyer extends Shuttle
 
         for ($i = 0; $i < $toAdd; $i++) {
             $armour = array(1, 1, 1, 1);
-            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter = new Fighter($this->phpclass, $armour, 16, $this->id);
             $fighter->displayName = $this->shipClass;
             $fighter->imagePath = $this->imagePath;
             $fighter->iconPath = $this->iconPath;
@@ -158,6 +136,8 @@ class Flyer extends Shuttle
     }
 
 }
+
+
 
 class FlyerProtectorate extends Shuttle
 {
@@ -172,6 +152,134 @@ class FlyerProtectorate extends Shuttle
         $this->freethrust = 10;
         $this->gravitic = true;
         $this->iniativebonus = 10 * 5;             //slow        
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 16, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
+
+/* Minesweeping shuttle variant. Auto-populated when a carrier declares
+ * 'minesweeping shuttles' in $fighters, or when leftover hangar capacity
+ * exists on a ship with $minesweeperbonus > 0. Kept faction-agnostic at
+ * present — getImage() inherits Shuttle's switch, so if a future launch
+ * path passes a carrier faction through, faction-flavoured minesweeping
+ * art will follow automatically.
+ */
+class MinesweepingShuttle extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "MinesweepingShuttle";
+        $this->shipClass = "Minesweeping Shuttle";
+        $this->hangarRequired = 'minesweeping shuttles';
+        $this->offensivebonus = 4;
+        $this->minesweeper = true;
+    }
+}
+
+
+class ShuttleCent extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleEA";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Centauri Replublic";
+        $this->forwardDefense = 8;
+        $this->sideDefense = 10;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
+class ShuttleEA extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleEA";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Earth Alliance";
+        $this->forwardDefense = 8;
+        $this->sideDefense = 10;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+}
+
+
+class ShuttleNarn extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleNarn";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Narn Regime";
+        $this->forwardDefense = 10;
+        $this->sideDefense = 12;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 8, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
     }
 
 }

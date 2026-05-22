@@ -224,8 +224,11 @@ class HangarOps {
 	 * no other server-side wiring is required.
 	 */
 	private static $factionShuttleMap = array(
+		'Centauri Republic'  => 'ShuttleCent',		
+		'Earth Alliance'  => 'ShuttleEA',
 		'Minbari Federation'   => 'Flyer',
 		'Minbari Protectorate' => 'FlyerProtectorate',
+		'Narn Regime'  => 'ShuttleNarn',			
 	);
 
 	/* Resolves the right shuttle phpclass for a carrier based on faction.

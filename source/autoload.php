@@ -3792,11 +3792,13 @@ spl_autoload_register(
 
                 //HANGER OPERATIONS CLASSES
                 'hangarops' => '/server/model/systems/HangarOps.php',
-                'shuttle' => '/server/model/ships/Shuttle.php',
-                'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
                 'flyer' => '/server/model/ships/Shuttle.php',
                 'flyerprotectorate' => '/server/model/ships/Shuttle.php',
-
+                'minesweepingshuttle' => '/server/model/ships/Shuttle.php',                
+                'shuttle' => '/server/model/ships/Shuttle.php',
+                'shuttlecent' => '/server/model/ships/Shuttle.php',                  
+                'shuttleea' => '/server/model/ships/Shuttle.php',   
+                'shuttlenarn' => '/server/model/ships/Shuttle.php',                              
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',
