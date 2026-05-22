@@ -782,6 +782,7 @@ class HangarOps {
 		if (empty($hangar->hangarUsage)) return null;
 		foreach ($hangar->hangarUsage as $idx => $entry){
 			if (($entry['phpclass'] ?? '') !== $phpclass) continue;
+			if (!empty($entry['cannotLaunch'])) continue;   //Stage 16.5: wrecked-on-landing — never relaunch
 			$flightId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
 			if ($flightId <= 0) continue;
 			$entrySize = (int)($entry['flightSize'] ?? 0);
@@ -912,16 +913,23 @@ class HangarOps {
 			if ($used + $size > (int)$hangar->output) { $reason = 'launch rate exceeded'; return false; }
 		}
 
-		//Enough stored craft of this class
+		//Enough stored craft of this class. Stage 16.5: a stash entry flagged
+		//cannotLaunch (a fighter destroyed while landing on a damaged catapult)
+		//is a permanent wreck — it occupies the bay but contributes nothing to
+		//launchable craft.
 		$available = 0;
+		$blockedByWreck = false;
 		if (is_array($hangar->hangarUsage)) {
 			foreach ($hangar->hangarUsage as $entry) {
-				if (($entry['phpclass'] ?? '') === $phpclass) {
-					$available += (int)($entry['flightSize'] ?? 1);
-				}
+				if (($entry['phpclass'] ?? '') !== $phpclass) continue;
+				if (!empty($entry['cannotLaunch'])) { $blockedByWreck = true; continue; }
+				$available += (int)($entry['flightSize'] ?? 1);
 			}
 		}
-		if ($available < $size) { $reason = 'not enough stored craft'; return false; }
+		if ($available < $size) {
+			$reason = $blockedByWreck ? 'craft destroyed on landing — cannot relaunch' : 'not enough stored craft';
+			return false;
+		}
 
 		return true;
 	}
@@ -1304,6 +1312,23 @@ class HangarOps {
 			$flight->removedTurn = $gamedata->turn;
 		}
 
+		//Stage 16.5: landing on a DAMAGED catapult deals damage to the recovered
+		//fighter equal to the catapult's destroyed-box count (NOT total accumulated
+		//damage points). The craft still counts as recovered (the stash entry is
+		//written normally below), but if the landing damage destroys it the entry
+		//is flagged cannotLaunch — the wreck permanently occupies the catapult and
+		//can never launch again. A catapult only ever full-docks a single fighter
+		//(capacity 1, so $count == activeCount, never partial), so this targets
+		//$flight — which IS the stored craft via dockedFlightId. The !$partial
+		//guard keeps the damage off the wrong ship in the (rules-impossible)
+		//multi-craft case, where the stored unit would be a fragment, not $flight.
+		if (!empty($hangar->isCatapult) && !$partial) {
+			$markedBoxes = max(0, (int)$hangar->maxhealth - (int)$hangar->getRemainingHealth());
+			if ($markedBoxes > 0 && self::applyCatapultLandingDamage($flight, $markedBoxes, $gamedata)) {
+				$entry['cannotLaunch'] = true;
+			}
+		}
+
 		$hangar->hangarUsage[] = $entry;
 		$hangar->landedThisTurn += $count;
 
@@ -1324,6 +1349,40 @@ class HangarOps {
 		self::applyHangarOperationsCrit($carrier, $gamedata);
 
 		return $count;
+	}
+
+	/* Stage 16.5: deal $markedBoxes damage to every active fighter being recovered
+	 * onto a damaged catapult. Damage is written with armour 0 — the destroyed-box
+	 * metric is compared directly against the fighter's remaining health, per the
+	 * confirmed rule ("remaining health <= marked boxes -> destroyed"). The
+	 * DamageEntry is flagged updated (and destroyed, when fatal) so it persists via
+	 * FireGamePhase::advance's submitDamages call and shows on the replay timeline,
+	 * mirroring the Stage 10.4 persisted-damage pattern.
+	 *
+	 * A catapult holds exactly one fighter, so in practice this damages the single
+	 * recovered craft; the loop is defensive against a >1 flight. Returns true when
+	 * EVERY recovered craft is destroyed by the landing damage (caller flags the
+	 * stash entry cannotLaunch so the wreck can never relaunch).
+	 */
+	private static function applyCatapultLandingDamage($flight, $markedBoxes, $gamedata){
+		if (!($flight instanceof FighterFlight) || $markedBoxes <= 0) return false;
+		$damagedAny   = false;
+		$allDestroyed = true;
+		foreach ($flight->systems as $fighter) {
+			if (!($fighter instanceof Fighter)) continue;
+			if ($fighter->isDestroyed($gamedata->turn)) continue;   //already gone — not a recovered craft
+			$remaining = (int)$fighter->getRemainingHealth();
+			$destroyed = ($markedBoxes >= $remaining);
+			$dmg = new DamageEntry(
+				-1, $flight->id, -1, $gamedata->turn, $fighter->id,
+				(int)$markedBoxes, 0, 0, -1, $destroyed, false, "", "CatapultLanding"
+			);
+			$dmg->updated = true;
+			$fighter->damage[] = $dmg;
+			$damagedAny = true;
+			if (!$destroyed) $allDestroyed = false;
+		}
+		return $damagedAny && $allDestroyed;
 	}
 
 	/* === Stage 7: deployment-phase dock ================================== */
@@ -1807,7 +1866,9 @@ class HangarOps {
 		$newEntries = array();
 
 		foreach ($hangar->hangarUsage as $entry) {
-			if ($remaining <= 0 || ($entry['phpclass'] ?? '') !== $phpclass) {
+			//Stage 16.5: a cannotLaunch wreck is never consumed by a launch — keep
+			//it in place so it continues to occupy the catapult.
+			if ($remaining <= 0 || ($entry['phpclass'] ?? '') !== $phpclass || !empty($entry['cannotLaunch'])) {
 				$newEntries[] = $entry;
 				continue;
 			}

@@ -440,11 +440,15 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			? entry.phpclass
 			: ("(" + (entry.hangarType || "unknown") + " slot)");
 		var pendingMarker = entry._pending ? ('|' + entry._pending) : '';
-		var bucketKey = phpKey + pendingMarker;
+		//Stage 16.5: a cannotLaunch entry is a wreck (fighter destroyed landing on
+		//a damaged catapult). Bucket it apart so it renders distinctly and never
+		//merges with a launchable craft of the same class.
+		var wreckMarker = entry.cannotLaunch ? '|wrecked' : '';
+		var bucketKey = phpKey + pendingMarker + wreckMarker;
 		var entryDisplayName = entry.displayName
 			|| (entry.name && entry.name !== "" ? entry.name : phpKey);
 		if (!byClass[bucketKey]) {
-			byClass[bucketKey] = { name: entryDisplayName, count: 0, pending: entry._pending || null };
+			byClass[bucketKey] = { name: entryDisplayName, count: 0, pending: entry._pending || null, wrecked: !!entry.cannotLaunch };
 		}
 		byClass[bucketKey].count += parseInt(entry.flightSize || 1, 10);
 	}
@@ -467,7 +471,8 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	for (var k in byClass) {
 		if (byClass[k].count <= 0) continue;     //fully launched-out → suppress, "(Launching)" line below carries the info
 		var suffix = '';
-		if (byClass[k].pending === 'deploying')  suffix = ' (Deploying)';
+		if (byClass[k].wrecked) suffix = ' (wrecked — cannot relaunch)';
+		else if (byClass[k].pending === 'deploying')  suffix = ' (Deploying)';
 		else if (byClass[k].pending === 'recovering') suffix = ' (Recovering)';
 		lines.push(byClass[k].count + " x " + byClass[k].name + suffix);
 	}

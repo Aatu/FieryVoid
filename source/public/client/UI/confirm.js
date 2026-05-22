@@ -1963,10 +1963,19 @@ window.confirm = {
                 });
             }
 
-            // Group stored craft by phpclass for the selector
+            // Group stored craft by phpclass for the selector. Stage 16.5: a
+            // cannotLaunch entry (fighter destroyed while landing on a damaged
+            // catapult) is a wreck — it occupies the bay but can never relaunch,
+            // so it's bucketed apart and rendered as a greyed-out, input-less row.
             var byClass = {};
+            var wreckByClass = {};
             hangar.hangarUsage.forEach(function (entry) {
                 var key = entry.phpclass || 'unknown';
+                if (entry.cannotLaunch) {
+                    if (!wreckByClass[key]) wreckByClass[key] = { name: entry.name || key, count: 0 };
+                    wreckByClass[key].count += parseInt(entry.flightSize || 1, 10);
+                    return;
+                }
                 if (!byClass[key]) byClass[key] = { name: entry.name || key, count: 0 };
                 byClass[key].count += parseInt(entry.flightSize || 1, 10);
             });
@@ -1988,6 +1997,16 @@ window.confirm = {
 
                 // Live update the hangar's remaining-budget readout as the input changes.
                 $input.on('input change', function () { updateBudgetLabel(hangar); });
+            });
+
+            // Stage 16.5: greyed-out, input-less rows for wrecks (fighter destroyed
+            // landing on a damaged catapult) so the player sees the bay is occupied
+            // but understands it can't relaunch.
+            Object.keys(wreckByClass).forEach(function (cls) {
+                var winfo = wreckByClass[cls];
+                var wrow = $('<div class="multi-value-row"></div>');
+                $('<span class="multi-value-label" style="opacity:0.5;"><span class="hangar-craft-name">' + winfo.count + 'x ' + winfo.name + '</span> <span class="multi-value-max">(destroyed on landing — cannot relaunch)</span></span>').appendTo(wrow);
+                container.append(wrow);
             });
             // Seed the readout with the preset total
             updateBudgetLabel(hangar);
@@ -2704,6 +2723,13 @@ window.confirm = {
         }
 
         function hangarLabelFor(carrier, hangar) {
+            //Stage 16: catapults are labelled "Catapult" / "Catapult N" (numbered
+            //across all catapults on the carrier), independent of ship location.
+            if (hangar && (hangar.isCatapult || hangar.name === 'catapult')) {
+                var cats = carrier.systems.filter(function (s) { return s && (s.isCatapult || s.name === 'catapult'); });
+                if (cats.length <= 1) return 'Catapult';
+                return 'Catapult ' + (cats.indexOf(hangar) + 1);
+            }
             var prefix = (function (loc) {
                 var l = parseInt(loc, 10);
                 if (l === 0) return 'Main';

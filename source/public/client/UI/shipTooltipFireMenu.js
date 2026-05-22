@@ -112,6 +112,11 @@ window.ShipTooltipFireMenu = function () {
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
             if (!sys || (sys.name !== 'hangar' && !isCat)) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
+            //Stage 16.5: a cannotLaunch wreck (fighter destroyed landing on a
+            //damaged catapult) occupies the bay but can never relaunch — it
+            //doesn't count as launchable craft.
+            var hasLaunchableCraft = sys.hangarUsage.some(function (e) { return e && !e.cannotLaunch; });
+            if (!hasLaunchableCraft) continue;
             //A catapult launches its loaded fighter regardless of output budget
             //or damage (no shared launch+land budget), so skip the budget gate.
             if (isCat) return true;

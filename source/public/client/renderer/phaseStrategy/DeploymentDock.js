@@ -525,7 +525,9 @@ window.refreshDeploymentUIForDeployStart = function () {
             var s = gamedata.ships[key];
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
-                if (sys && isDockHangar(sys) && typeof sys.refreshHangarTooltip === 'function') {
+                //isDockHangar lives inside the IIFE scope above and is NOT visible
+                //here, so inline the check (Stage 16: a catapult is a dock hangar too).
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
@@ -567,7 +569,9 @@ window.refreshFiringHangarTooltips = function () {
             var s = gamedata.ships[key];
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
-                if (sys && isDockHangar(sys) && typeof sys.refreshHangarTooltip === 'function') {
+                //isDockHangar lives inside the IIFE scope above and is NOT visible
+                //here, so inline the check (Stage 16: a catapult is a dock hangar too).
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
