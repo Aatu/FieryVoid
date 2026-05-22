@@ -202,9 +202,9 @@ class ShuttleCent extends Shuttle
     protected function setShuttleDefaults()
     {
         parent::setShuttleDefaults();
-        $this->phpclass = "ShuttleEA";
+        $this->phpclass = "ShuttleCent";
         $this->shipClass = "Shuttle";
-        $this->faction = "Centauri Replublic";
+        $this->faction = "Centauri Republic";
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
         $this->freethrust = 4;
