@@ -108,8 +108,13 @@ window.ShipTooltipFireMenu = function () {
         if (!ship || !ship.systems) return false;
         for (var i in ship.systems) {
             var sys = ship.systems[i];
-            if (!sys || sys.name !== 'hangar') continue;
+            //Stage 16: a catapult (name "catapult") is launchable too.
+            var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
+            if (!sys || (sys.name !== 'hangar' && !isCat)) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
+            //A catapult launches its loaded fighter regardless of output budget
+            //or damage (no shared launch+land budget), so skip the budget gate.
+            if (isCat) return true;
             var output = parseInt(sys.output || 0, 10);
             var used = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
             if (used >= output) continue;
@@ -215,12 +220,15 @@ window.findEligibleCarriersForDock = function (flight) {
         if (!sMove) continue;
         if (!fPos || !sMove.position) continue;
         if (sMove.position.q !== fPos.q || sMove.position.r !== fPos.r) continue;
-        if (parseInt(sMove.heading, 10) !== fHeading) continue;
         if (Math.abs(parseInt(sMove.speed, 10) - fSpeed) > thrust) continue;
         if (shipManager.movement.isRolling(ship)) continue;
         if (shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== "no") continue;
 
-        var hangarsOnShip = collectReceivingHangars(ship, category);
+        // Heading is gated per-hangar inside collectReceivingHangars: ordinary
+        // hangars require the flight heading to match the carrier heading;
+        // catapults (Stage 16) require a rear approach (flight heading == carrier
+        // facing), so the carrier-level heading filter is no longer applied here.
+        var hangarsOnShip = collectReceivingHangars(ship, category, sMove);
         if (hangarsOnShip.length === 0) continue;
 
         var total = 0;
@@ -248,32 +256,58 @@ window.findEligibleCarriersForDock = function (flight) {
         return req;
     }
 
-    function collectReceivingHangars(ship, category) {
+    function collectReceivingHangars(ship, category, carrierMove) {
         var hangars = [];
         var flightId = parseInt(flight.id, 10);
+        var carrierHeading = carrierMove ? parseInt(carrierMove.heading, 10) : null;
+        var carrierFacing  = carrierMove ? parseInt(carrierMove.facing, 10)  : null;
         ship.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
-            if (shipManager.systems.isDestroyed(ship, sys)) return;
+            // Stage 16: a catapult (name "catapult") recovers its fighter from the
+            // REAR, holds exactly one craft, ignores its own damage and has no
+            // launch+land budget.
+            var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
+            if (!sys || (sys.name !== 'hangar' && !isCat)) return;
+            if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
 
             if (!hangarAcceptsCategory(sys.hangarType, category, ship)) return;
 
-            // Effective free boxes: maxhealth - net damage - usage.
-            var netDamage = 0;
-            if (Array.isArray(sys.damage)) {
-                sys.damage.forEach(function (d) {
-                    netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-                });
+            // Heading gate (per-hangar): ordinary hangar → flight heading must
+            // match the carrier heading; catapult → rear approach (flight heading
+            // == carrier facing).
+            if (carrierMove !== null && carrierMove !== undefined) {
+                var requiredHeading = isCat ? carrierFacing : carrierHeading;
+                if (fHeading !== requiredHeading) return;
             }
-            var effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+
+            // Effective free boxes. Catapult capacity is a flat 1 regardless of
+            // box count / damage; ordinary hangars use maxhealth - net damage.
+            var effective;
+            if (isCat) {
+                effective = 1;
+            } else {
+                var netDamage = 0;
+                if (Array.isArray(sys.damage)) {
+                    sys.damage.forEach(function (d) {
+                        netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
+                    });
+                }
+                effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+            }
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
             }
             var free = Math.max(0, effective - used);
 
-            var output = parseInt(sys.output || 0, 10);
-            var spent = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
-            var budget = Math.max(0, output - spent);
+            // Ordinary hangars share a launch+land output budget; catapults don't.
+            var budget;
+            if (isCat) {
+                budget = free;
+            } else {
+                var output = parseInt(sys.output || 0, 10);
+                var spent = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
+                budget = Math.max(0, output - spent);
+            }
 
             // Subtract queued allocations from OTHER flights/launches on this
             // hangar (shared output budget + physical free boxes). Skip this
@@ -285,16 +319,16 @@ window.findEligibleCarriersForDock = function (flight) {
                     if (parseInt(o.flightId, 10) === flightId) return;   //own queue is reclaimable
                     var n = parseInt(o.count || 0, 10);
                     free   = Math.max(0, free - n);
-                    budget = Math.max(0, budget - n);
+                    if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
-            if (Array.isArray(sys.pendingLaunchOrders)) {
+            if (!isCat && Array.isArray(sys.pendingLaunchOrders)) {
                 sys.pendingLaunchOrders.forEach(function (o) {
                     budget = Math.max(0, budget - parseInt(o.size || 0, 10));
                 });
             }
 
-            var capacity = Math.min(free, budget);
+            var capacity = isCat ? free : Math.min(free, budget);
             if (capacity > 0) hangars.push({ hangar: sys, capacity: capacity });
         });
 
@@ -455,11 +489,13 @@ window.findEligibleFlightsForDocking = function (carrier) {
         var fMove = shipManager.movement.getLastCommitedMove(flight);
         if (!fMove || !fMove.position) continue;
         if (fMove.position.q !== cPos.q || fMove.position.r !== cPos.r) continue;
-        if (parseInt(fMove.heading, 10) !== cHeading) continue;
 
         var thrust = parseInt(flight.freethrust || 0, 10);
         if (Math.abs(parseInt(fMove.speed, 10) - cSpeed) > thrust) continue;
 
+        // Heading is gated per-hangar inside collectReceivingHangarsForRecover:
+        // ordinary hangars require flight heading == carrier heading; catapults
+        // (Stage 16) require a rear approach (flight heading == carrier facing).
         var hangars = collectReceivingHangarsForRecover(carrier, flight);
         if (hangars.length === 0) continue;
 
@@ -487,27 +523,52 @@ window.findEligibleFlightsForDocking = function (carrier) {
             if (cap < size) return hangars;
         }
 
+        // Flight heading for the per-hangar rear-approach gate (catapults).
+        var rMove = shipManager.movement.getLastCommitedMove(flight);
+        var rFlightHeading = rMove ? parseInt(rMove.heading, 10) : null;
+        var rCarrierHeading = carrierMove ? parseInt(carrierMove.heading, 10) : null;
+        var rCarrierFacing  = carrierMove ? parseInt(carrierMove.facing, 10)  : null;
+
         ship.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
-            if (shipManager.systems.isDestroyed(ship, sys)) return;
+            // Stage 16: a catapult recovers from the REAR, holds one craft,
+            // ignores its own damage and has no launch+land budget.
+            var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
+            if (!sys || (sys.name !== 'hangar' && !isCat)) return;
+            if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
-            var netDamage = 0;
-            if (Array.isArray(sys.damage)) {
-                sys.damage.forEach(function (d) {
-                    netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-                });
+            // Per-hangar heading gate.
+            if (rFlightHeading !== null) {
+                var requiredHeading = isCat ? rCarrierFacing : rCarrierHeading;
+                if (rFlightHeading !== requiredHeading) return;
             }
-            var effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+
+            var effective;
+            if (isCat) {
+                effective = 1;
+            } else {
+                var netDamage = 0;
+                if (Array.isArray(sys.damage)) {
+                    sys.damage.forEach(function (d) {
+                        netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
+                    });
+                }
+                effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+            }
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
             }
             var free = Math.max(0, effective - used);
 
-            var output = parseInt(sys.output || 0, 10);
-            var spent  = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
-            var budget = Math.max(0, output - spent);
+            var budget;
+            if (isCat) {
+                budget = free;
+            } else {
+                var output = parseInt(sys.output || 0, 10);
+                var spent  = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
+                budget = Math.max(0, output - spent);
+            }
 
             // OTHER flights' queued docks consume both free boxes and the
             // shared launch+land budget. THIS flight's own queue is
@@ -517,17 +578,17 @@ window.findEligibleFlightsForDocking = function (carrier) {
                     if (parseInt(o.flightId, 10) === flightId) return;
                     var n = parseInt(o.count || 0, 10);
                     free   = Math.max(0, free - n);
-                    budget = Math.max(0, budget - n);
+                    if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
             // Queued launch orders consume budget only (no physical boxes since
             // the craft are leaving).
-            if (Array.isArray(sys.pendingLaunchOrders)) {
+            if (!isCat && Array.isArray(sys.pendingLaunchOrders)) {
                 sys.pendingLaunchOrders.forEach(function (o) {
                     budget = Math.max(0, budget - parseInt(o.size || 0, 10));
                 });
             }
-            var capacity = Math.min(free, budget);
+            var capacity = isCat ? free : Math.min(free, budget);
             if (capacity >= size) hangars.push({ hangar: sys, capacity: capacity });
         });
         return hangars;

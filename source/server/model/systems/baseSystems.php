@@ -3161,14 +3161,17 @@ class Hangar extends ShipSystem{
 	public function criticalPhaseEffects($ship, $gamedata){
 		parent::criticalPhaseEffects($ship, $gamedata);   //preserve base hooks (limpet bore, marine missions, etc.)
 
-		//Hangar Ops Stage 16.1/16.2: a Catapult is structurally a Hangar but its
-		//launch/land mechanics differ (no init penalty, rear-only landing, single
-		//fighter type, damage-agnostic, landing damage) and are staged separately
-		//in 16.3-16.5. Until then a catapult tracks capacity / shows its tooltip
-		//but does NOT process launch/dock/service orders. The client already
-		//excludes catapults from every launch/dock UI (helpers gate on
-		//name === 'hangar'); this is the matching server-side guard.
-		if (!empty($this->isCatapult)) return;
+		//Hangar Ops Stage 16.3/16.4: a catapult RECOVERS (rear-approach, 16.4)
+		//and LAUNCHES (no initiative penalty, fixed forward, regardless of damage,
+		//16.3) its single fighter. Dock is processed before launch, matching the
+		//hangar order. The hangar-style damage eviction (a catapult ignores its
+		//own damage) and reload servicing are deliberately NOT run for catapults;
+		//the landing-damage rule is added in 16.5.
+		if (!empty($this->isCatapult)) {
+			HangarOps::processDockOrders($this, $ship, $gamedata);
+			HangarOps::processLaunchOrders($this, $ship, $gamedata);
+			return;
+		}
 
 		//1. Apply damage eviction first (per B5W rules: boxes destroyed before
 		//   Post-Turn Actions). This may also reduce stored craft a launch
@@ -3303,7 +3306,7 @@ class Hangar extends ShipSystem{
 			//structural HP only (capacity is 1, not box count) and it launches
 			//forward / lands from the rear, ignoring its own damage.
 			$this->data["Special"]  = "Fixed launch rail for a single superheavy fighter.";
-			$this->data["Special"] .= "<br>Launches forward only; recovers from the rear; ignores its own damage.";
+			$this->data["Special"] .= "<br>Launches forward only.";
 			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
 		} else {
 			$this->data["Special"]  = "System responsible for launching and carrying docked fighter craft.";

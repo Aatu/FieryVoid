@@ -334,6 +334,9 @@ class HangarOps {
 	 * size of fighter through hangarAcceptsCategory's 'fighters' shortcut.
 	 */
 	public static function inferHangarType($hangar, $ship){
+		//Catapults are fixed at 'superheavy' by design — never narrow them from
+		//the ship's $fighters declaration (Stage 16).
+		if (!empty($hangar->isCatapult)) return;
 		$hType = strtolower(trim((string)$hangar->hangarType));
 		//Only narrow universal slots. Anything specific (medium, heavy, shuttles,
 		//assault shuttles, BPods, custom 'Raiders', etc.) was an intentional
@@ -392,8 +395,14 @@ class HangarOps {
 	 * on the actual auto-populated pool.
 	 */
 	public static function getDefaultShuttles($ship){
+		//Stage 16: catapult boxes are HP only and never join the default-shuttle
+		//pool, and the catapult-destined 'superheavy' fighters don't consume real
+		//hangar boxes. Mirror populateInitialHangarUsage's exclusions so the
+		//Enhancements (HANG_BP/HANG_MSW) gating sees the right pool size.
 		$capacity = 0;
+		$hasCatapult = false;
 		foreach (self::collectHangars($ship) as $h) {
+			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
 			$capacity += (int)$h->maxhealth;
 		}
 		if ($capacity <= 0) {
@@ -401,7 +410,10 @@ class HangarOps {
 		}
 		$declared = 0;
 		if (isset($ship->fighters) && is_array($ship->fighters)) {
-			foreach ($ship->fighters as $count) $declared += (int)$count;
+			foreach ($ship->fighters as $category => $count) {
+				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
+				$declared += (int)$count;
+			}
 		}
 		$leftover = $capacity - $declared;
 		if ($leftover < 0) $leftover = 0;
@@ -630,7 +642,10 @@ class HangarOps {
 			);
 			Manager::insertIndividualNote($note);
 
-			self::applyLaunchCrits($resurrectedFlight, $carrier, $gamedata);
+			//Stage 16: a catapult launch carries NO initiative penalty (neither the
+			//-50 LaunchedThisTurn on the flight nor the -20 HangarOperations on the
+			//carrier). Ordinary hangar launches still apply both.
+			if (empty($hangar->isCatapult)) self::applyLaunchCrits($resurrectedFlight, $carrier, $gamedata);
 			return $resurrectedFlight->id;
 		}
 
@@ -714,7 +729,8 @@ class HangarOps {
 		);
 		Manager::insertIndividualNote($note);
 
-		self::applyLaunchCrits($flight, $carrier, $gamedata);
+		//Stage 16: catapult launches carry no initiative penalty (see resurrect path).
+		if (empty($hangar->isCatapult)) self::applyLaunchCrits($flight, $carrier, $gamedata);
 		return $shipid;
 	}
 
@@ -878,7 +894,10 @@ class HangarOps {
 	public static function canLaunch($hangar, $carrier, $phpclass, $size, $gamedata, &$reason = null){
 		$size = (int)$size;
 		if ($size <= 0) { $reason = 'invalid size'; return false; }
-		if ($hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
+		//Stage 16: a catapult launches its fighter regardless of any damage it has
+		//sustained (even when destroyed), so the destroyed-hangar gate is skipped.
+		$isCatapult = !empty($hangar->isCatapult);
+		if (!$isCatapult && $hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
 
 		//Carrier may not launch on a turn it pivoted or rolled
 		if (Movement::isPivoting($carrier, $gamedata->turn, $gamedata) || Movement::isRolling($carrier, $gamedata->turn, $gamedata)) {
@@ -886,9 +905,12 @@ class HangarOps {
 			return false;
 		}
 
-		//Shared launch+land budget vs hangar output
-		$used = (int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn;
-		if ($used + $size > (int)$hangar->output) { $reason = 'launch rate exceeded'; return false; }
+		//Shared launch+land budget vs hangar output. Catapults have no output
+		//budget (no initiative penalty, one fighter) — skip the gate for them.
+		if (!$isCatapult) {
+			$used = (int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn;
+			if ($used + $size > (int)$hangar->output) { $reason = 'launch rate exceeded'; return false; }
+		}
 
 		//Enough stored craft of this class
 		$available = 0;
@@ -914,7 +936,10 @@ class HangarOps {
 	public static function canShipReceive($hangar, $carrier, $flight, $count, $gamedata, &$reason = null){
 		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
 		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
-		if ($hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
+		//Stage 16: a catapult recovers its fighter regardless of any damage it has
+		//sustained (even destroyed), so the destroyed-hangar gate is skipped for it.
+		$isCatapult = !empty($hangar->isCatapult);
+		if (!$isCatapult && $hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
 		if ($carrier->isDestroyed() || $carrier->removed) { $reason = 'carrier not in play'; return false; }
 
 		$count = (int)$count;
@@ -937,9 +962,19 @@ class HangarOps {
 			$reason = 'not in same hex'; return false;
 		}
 
-		//Same heading
-		if ((int)$carrierMove->heading !== (int)$flightMove->heading) {
-			$reason = 'heading mismatch'; return false;
+		//Heading. Ordinary hangars require the flight to match the carrier's
+		//heading (same velocity vector). A catapult (Stage 16) recovers a fighter
+		//only when it enters the carrier's hex from the REAR — i.e. the flight is
+		//travelling in the direction the carrier points (flight heading == carrier
+		//facing), so it overtakes the carrier from behind onto the launch rail.
+		if ($isCatapult) {
+			if ((int)$flightMove->heading !== (int)$carrierMove->facing) {
+				$reason = 'must approach catapult from rear'; return false;
+			}
+		} else {
+			if ((int)$carrierMove->heading !== (int)$flightMove->heading) {
+				$reason = 'heading mismatch'; return false;
+			}
 		}
 
 		//Speed gap must be within flight thrust budget. Fighters can decelerate
@@ -960,9 +995,12 @@ class HangarOps {
 		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
 		if ($free < $count) { $reason = 'hangar full'; return false; }
 
-		//Shared launch+land budget vs hangar output
-		$used = (int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn;
-		if ($used + $count > (int)$hangar->output) { $reason = 'land rate exceeded'; return false; }
+		//Shared launch+land budget vs hangar output. Catapults have no budget
+		//(one fighter, no initiative cost) — skip the gate for them.
+		if (!$isCatapult) {
+			$used = (int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn;
+			if ($used + $count > (int)$hangar->output) { $reason = 'land rate exceeded'; return false; }
+		}
 
 		//Stage 10.6.2: per-ship customFighter cap. Thunderbolt-named flights
 		//can only dock into carriers that declare $customFighter['Thunderbolt']
@@ -985,8 +1023,17 @@ class HangarOps {
 	 */
 	public static function freeBoxesByCategory($hangar, $category, $ship = null){
 		if (!self::hangarAcceptsCategory($hangar, $category, $ship)) return 0;
-		$max = (int)$hangar->getRemainingHealth();
+		$max = self::effectiveCapacity($hangar);
 		return max(0, $max - self::usageCountFor($hangar));
+	}
+
+	/* Effective storage capacity in "craft slots". A Catapult holds exactly ONE
+	 * fighter no matter how many (structural) boxes it has — its extra boxes are
+	 * HP only — and it operates regardless of damage, so its capacity is a flat 1.
+	 * Ordinary hangars use remaining (undamaged) health. (Stage 16.) */
+	public static function effectiveCapacity($hangar){
+		if (!empty($hangar->isCatapult)) return 1;
+		return (int)$hangar->getRemainingHealth();
 	}
 
 	public static function hangarAcceptsCategory($hangar, $category, $ship = null){
@@ -1128,13 +1175,19 @@ class HangarOps {
 		//regardless of how the carrier's $fighters declaration looks.
 		$category = self::trueSizeOf($flight);
 
-		//Exact match first
+		//Exact match first. Catapults (hangarType 'superheavy') land here for a
+		//superheavy flight; they ignore their own damage and have no output budget.
 		foreach ($hangars as $h){
 			if ($h->hangarType !== $category) continue;
-			if ($h->isDestroyed()) continue;
+			$isCat = !empty($h->isCatapult);
+			if (!$isCat && $h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
-			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
-			$capacity = min($free, $budget);
+			if ($isCat) {
+				$capacity = $free;   //no launch+land budget for catapults
+			} else {
+				$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
+				$capacity = min($free, $budget);
+			}
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
 		}
 		//Then any hangar that accepts the category via the size hierarchy

@@ -1858,7 +1858,9 @@ window.confirm = {
         var hangars = [];
         for (var k in ship.systems) {
             var sys = ship.systems[k];
-            if (!sys || sys.name !== 'hangar') continue;
+            //Stage 16: include catapults (name "catapult") — a loaded catapult
+            //launches its single fighter (capped to 1 by its stored count below).
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
             hangars.push(sys);
         }
@@ -1898,12 +1900,18 @@ window.confirm = {
             if (l === 4 || l === 41 || l === 42) return 'Stbd';
             return 'Hangar';
         };
+        // Stage 16: catapults are labelled "Catapult" / "Catapult N" (not by
+        // location like hangars), so they're counted separately and excluded
+        // from the hangar prefix tallies.
         var prefixCounts = {};
+        var catapultTotal = 0;
         hangars.forEach(function (h) {
+            if (h.isCatapult || h.name === 'catapult') { catapultTotal++; return; }
             var p = locationPrefixFor(h.location);
             prefixCounts[p] = (prefixCounts[p] || 0) + 1;
         });
         var prefixSeen = {};
+        var catapultSeen = 0;
 
         hangars.forEach(function (hangar, hidx) {
             var output = parseInt(hangar.output || 0, 10);
@@ -1928,11 +1936,17 @@ window.confirm = {
 
             // Hangar header row (no input — just labels). The "remaining" span is updated
             // live by updateBudgetLabel as the user changes inputs in this hangar's rows.
-            var prefix = locationPrefixFor(hangar.location);
-            prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
-            var hangarLabel = prefixCounts[prefix] > 1
-                ? (prefix + ' Hangar ' + prefixSeen[prefix])
-                : (prefix + ' Hangar');
+            var hangarLabel;
+            if (hangar.isCatapult || hangar.name === 'catapult') {
+                catapultSeen++;
+                hangarLabel = (catapultTotal > 1) ? ('Catapult ' + catapultSeen) : 'Catapult';
+            } else {
+                var prefix = locationPrefixFor(hangar.location);
+                prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
+                hangarLabel = prefixCounts[prefix] > 1
+                    ? (prefix + ' Hangar ' + prefixSeen[prefix])
+                    : (prefix + ' Hangar');
+            }
             var headerRow = $('<div class="multi-value-row"></div>');
             var label = $('<span class="multi-value-label"><span class="hangar-section-name">' + hangarLabel + '</span> <span class="multi-value-max">(Hangar Capacity: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
             label.appendTo(headerRow);
@@ -2106,12 +2120,17 @@ window.confirm = {
         var allRows = [];
         carriers.forEach(function (c) {
             var multiHangar = c.hangars.length > 1;
+            //Stage 16: catapults labelled "Catapult"/"Catapult N", counted apart
+            //from the hangar prefix tallies.
             var prefixCounts = {};
+            var catapultTotal = 0;
             c.hangars.forEach(function (h) {
+                if (h.hangar.isCatapult || h.hangar.name === 'catapult') { catapultTotal++; return; }
                 var p = locationPrefixFor(h.hangar.location);
                 prefixCounts[p] = (prefixCounts[p] || 0) + 1;
             });
             var prefixSeen = {};
+            var catapultSeen = 0;
             c.hangars.forEach(function (h, idx) {
                 var preset = 0;
                 if (Array.isArray(h.hangar.pendingDockOrders)) {
@@ -2121,11 +2140,17 @@ window.confirm = {
                         }
                     });
                 }
-                var prefix = locationPrefixFor(h.hangar.location);
-                prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
-                var hangarName = prefixCounts[prefix] > 1
-                    ? (prefix + ' Hangar ' + prefixSeen[prefix])
-                    : (prefix + ' Hangar');
+                var hangarName;
+                if (h.hangar.isCatapult || h.hangar.name === 'catapult') {
+                    catapultSeen++;
+                    hangarName = (catapultTotal > 1) ? ('Catapult ' + catapultSeen) : 'Catapult';
+                } else {
+                    var prefix = locationPrefixFor(h.hangar.location);
+                    prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
+                    hangarName = prefixCounts[prefix] > 1
+                        ? (prefix + ' Hangar ' + prefixSeen[prefix])
+                        : (prefix + ' Hangar');
+                }
                 var label = multiHangar
                     ? c.ship.name + ' – ' + hangarName
                     : c.ship.name;
@@ -2281,6 +2306,19 @@ window.confirm = {
 
         var eligibleEntries = window.findEligibleFlightsForDocking(carrier);
 
+        // Stage 16: a Catapult (name "catapult") is a dock-capable hangar that
+        // holds exactly ONE fighter regardless of box count / damage and has no
+        // launch+land output budget.
+        var isDockHangar = function (sys) { return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult')); };
+        var effectiveHangarBoxes = function (h) {
+            if (!h) return 0;
+            if (h.isCatapult || h.name === 'catapult') return 1;
+            var nd = 0;
+            if (Array.isArray(h.damage)) h.damage.forEach(function (d) { nd += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10)); });
+            return Math.max(0, parseInt(h.maxhealth, 10) - nd);
+        };
+        var isCatapultSys = function (sys) { return !!(sys && (sys.isCatapult || sys.name === 'catapult')); };
+
         // Exclude flights queued to a DIFFERENT carrier this turn — the player
         // can re-route via the per-flight "Enter Hangar" dialog (which shows
         // every eligible carrier in one place). Letting the carrier-side bulk
@@ -2293,7 +2331,7 @@ window.confirm = {
             if (!s || s.id === carrier.id) continue;
             if (!Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
-                if (!sys || sys.name !== 'hangar') return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
                 if (!Array.isArray(sys.pendingDockOrders)) return;
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.count || 0, 10) > 0) queuedOnOtherCarrier.add(parseInt(o.flightId, 10));
@@ -2310,7 +2348,7 @@ window.confirm = {
         var queuedByFlight = new Map();
         if (Array.isArray(carrier.systems)) {
             carrier.systems.forEach(function (sys) {
-                if (!sys || sys.name !== 'hangar') return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
                 if (!Array.isArray(sys.pendingDockOrders)) return;
                 sys.pendingDockOrders.forEach(function (o) {
                     var fid = parseInt(o.flightId, 10);
@@ -2370,16 +2408,11 @@ window.confirm = {
         var baseFreeByHangar = new Map();
         var baseBudgetByHangar = new Map();
         carrier.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
-            if (shipManager.systems.isDestroyed(carrier, sys)) return;
+            if (!sys || !isDockHangar(sys)) return;
+            var isCat = isCatapultSys(sys);
+            if (!isCat && shipManager.systems.isDestroyed(carrier, sys)) return;
 
-            var netDamage = 0;
-            if (Array.isArray(sys.damage)) {
-                sys.damage.forEach(function (d) {
-                    netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-                });
-            }
-            var effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+            var effective = effectiveHangarBoxes(sys);   //catapult → 1, regardless of damage
             var committed = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (entry) { committed += parseInt(entry.flightSize || 1, 10); });
@@ -2391,8 +2424,15 @@ window.confirm = {
                     committed += parseInt(o.count || 0, 10);
                 });
             }
-            baseFreeByHangar.set(sys.id, Math.max(0, effective - committed));
+            var freeBoxes = Math.max(0, effective - committed);
+            baseFreeByHangar.set(sys.id, freeBoxes);
 
+            //Catapults have no launch+land output budget — set the budget to the
+            //free-box count so capacity = min(free, budget) = free.
+            if (isCat) {
+                baseBudgetByHangar.set(sys.id, freeBoxes);
+                return;
+            }
             var output = parseInt(sys.output || 0, 10);
             var spent  = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
             var budgetUsed = spent;
@@ -2585,7 +2625,7 @@ window.confirm = {
                     ? parseInt(carrier.customFighter[name], 10) : 0;
                 var committed = 0;
                 carrier.systems.forEach(function (sys) {
-                    if (!sys || sys.name !== 'hangar') return;
+                    if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
                     if (Array.isArray(sys.hangarUsage)) {
                         sys.hangarUsage.forEach(function (entry) {
                             if (entry.customFtrName !== name) return;
@@ -2613,7 +2653,7 @@ window.confirm = {
             var anyOverflow = false;
             var $pillContainer = $('<span class="hangar-capacity-pills"></span>');
             carrier.systems.forEach(function (sys) {
-                if (!sys || sys.name !== 'hangar') return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
                 if (!baseFreeByHangar.has(sys.id)) return;
                 var avail = baseFreeByHangar.get(sys.id);
                 var budget = baseBudgetByHangar.get(sys.id);
@@ -2642,7 +2682,7 @@ window.confirm = {
             var fid = parseInt(flight.id, 10);
             if (!Array.isArray(carrier.systems)) return;
             carrier.systems.forEach(function (sys) {
-                if (!sys || sys.name !== 'hangar') return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
                 if (!Array.isArray(sys.pendingDockOrders)) return;
                 var before = sys.pendingDockOrders.length;
                 sys.pendingDockOrders = sys.pendingDockOrders.filter(function (o) {
@@ -2674,7 +2714,7 @@ window.confirm = {
                 return 'Hangar';
             })(hangar.location);
             var siblings = carrier.systems.filter(function (s) {
-                if (!s || s.name !== 'hangar') return false;
+                if (!s || s.name !== 'hangar') return false;     //hangars only — catapults labelled separately
                 var groupOf = function (l) {
                     if (l === 31 || l === 32) return 3;
                     if (l === 41 || l === 42) return 4;
@@ -2690,7 +2730,7 @@ window.confirm = {
         function hangarLabelByIdFor(carrier, hangarId) {
             for (var i = 0; i < carrier.systems.length; i++) {
                 var sys = carrier.systems[i];
-                if (sys && sys.name === 'hangar' && sys.id === hangarId) return hangarLabelFor(carrier, sys);
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && sys.id === hangarId) return hangarLabelFor(carrier, sys);
             }
             return 'Hangar';
         }
@@ -2761,6 +2801,17 @@ window.confirm = {
         if (!window.DeploymentDock || typeof window.DeploymentDock.findPendingFlightsForCarrier !== 'function') return;
         if (typeof window.DeploymentDock.eligibleHangarsForFlight !== 'function') return;
 
+        // Stage 16: a Catapult (name "catapult") is a dock-capable hangar that
+        // holds exactly ONE fighter regardless of box count / damage.
+        var isDockHangar = function (sys) { return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult')); };
+        var effectiveHangarBoxes = function (h) {
+            if (!h) return 0;
+            if (h.isCatapult || h.name === 'catapult') return 1;
+            var nd = 0;
+            if (Array.isArray(h.damage)) h.damage.forEach(function (d) { nd += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10)); });
+            return Math.max(0, parseInt(h.maxhealth, 10) - nd);
+        };
+
         var pending = window.DeploymentDock.findPendingFlightsForCarrier(carrier);
 
         // Pre-check flights already queued to THIS carrier (re-edit case).
@@ -2768,7 +2819,7 @@ window.confirm = {
         var preCheckedByFlight = new Map();
         if (Array.isArray(carrier.systems)) {
             carrier.systems.forEach(function (sys) {
-                if (!sys || sys.name !== 'hangar') return;
+                if (!sys || !isDockHangar(sys)) return;
                 if (!Array.isArray(sys.pendingDeployStartOrders)) return;
                 sys.pendingDeployStartOrders.forEach(function (o) {
                     preCheckedByFlight.set(parseInt(o.flightId, 10), { hangar: sys });
@@ -2820,15 +2871,9 @@ window.confirm = {
         var rowFlightIds = new Set(pending.map(function (f) { return parseInt(f.id, 10); }));
         var baseFreeByHangar = new Map();
         carrier.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
+            if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(carrier, sys)) return;
-            var netDamage = 0;
-            if (Array.isArray(sys.damage)) {
-                sys.damage.forEach(function (d) {
-                    netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-                });
-            }
-            var effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+            var effective = effectiveHangarBoxes(sys);
             var committed = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (entry) { committed += parseInt(entry.flightSize || 1, 10); });
@@ -3018,7 +3063,7 @@ window.confirm = {
                 //Existing usage from committed dock entries (other turns).
                 var committed = 0;
                 carrier.systems.forEach(function (sys) {
-                    if (!sys || sys.name !== 'hangar') return;
+                    if (!sys || !isDockHangar(sys)) return;
                     if (!Array.isArray(sys.hangarUsage)) return;
                     sys.hangarUsage.forEach(function (e) {
                         if (e.customFtrName !== name) return;
@@ -3042,7 +3087,7 @@ window.confirm = {
             //and got squashed on multi-hangar carriers.
             var $pillContainer = $('<span class="hangar-capacity-pills"></span>');
             carrier.systems.forEach(function (sys) {
-                if (!sys || sys.name !== 'hangar') return;
+                if (!sys || !isDockHangar(sys)) return;
                 if (!baseFreeByHangar.has(sys.id)) return;
                 var avail = baseFreeByHangar.get(sys.id);
                 var used = perHangar.get(sys.id) || 0;
@@ -3066,6 +3111,13 @@ window.confirm = {
         e.appendTo("body").fadeIn(250);
 
         function hangarLabelFor(carrier, hangar) {
+            //Stage 16: catapults are labelled "Catapult" / "Catapult N" (numbered
+            //across all catapults on the carrier), independent of ship location.
+            if (hangar && (hangar.isCatapult || hangar.name === 'catapult')) {
+                var cats = carrier.systems.filter(function (s) { return s && (s.isCatapult || s.name === 'catapult'); });
+                if (cats.length <= 1) return 'Catapult';
+                return 'Catapult ' + (cats.indexOf(hangar) + 1);
+            }
             //Stage 8: ship-location prefixes (Main/Front/Aft/Port/Stbd) with
             //per-prefix disambiguation when a carrier has multiple hangars on
             //the same location.
@@ -3079,7 +3131,7 @@ window.confirm = {
                 return 'Hangar';
             })(hangar.location);
             var siblings = carrier.systems.filter(function (s) {
-                if (!s || s.name !== 'hangar') return false;
+                if (!s || s.name !== 'hangar') return false;     //hangars only — catapults labelled separately
                 var sl = parseInt(s.location, 10);
                 var hl = parseInt(hangar.location, 10);
                 // Group SixSidedShip sub-locations (31/32, 41/42) under the same prefix.
@@ -3098,7 +3150,7 @@ window.confirm = {
         function hangarLabelByIdFor(carrier, hangarId) {
             for (var i = 0; i < carrier.systems.length; i++) {
                 var sys = carrier.systems[i];
-                if (sys && sys.name === 'hangar' && sys.id === hangarId) return hangarLabelFor(carrier, sys);
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && sys.id === hangarId) return hangarLabelFor(carrier, sys);
             }
             return 'Hangar';
         }

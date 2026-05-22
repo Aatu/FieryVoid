@@ -37,6 +37,25 @@ window.DeploymentDock = (function () {
         return hangars.length > 0;
     }
 
+    // Stage 16: a Catapult is a dock-capable hangar (name "catapult"). Treat it
+    // like a hangar everywhere deploy-dock iterates systems, but its capacity is
+    // a flat 1 (it holds one fighter; extra boxes are HP only, and it operates
+    // regardless of damage).
+    function isDockHangar(sys) {
+        return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult'));
+    }
+    function effectiveHangarBoxes(hangar) {
+        if (!hangar) return 0;
+        if (hangar.isCatapult || hangar.name === 'catapult') return 1;
+        var netDamage = 0;
+        if (Array.isArray(hangar.damage)) {
+            hangar.damage.forEach(function (d) {
+                netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
+            });
+        }
+        return Math.max(0, parseInt(hangar.maxhealth, 10) - netDamage);
+    }
+
     // All non-destroyed Hangar systems on $ship, regardless of free capacity.
     // Used by shipHasOpenableDockDialog (Issue 7) so the button surfaces even
     // for fully-loaded hangars (the dialog still needs to expose docked-flight
@@ -44,7 +63,7 @@ window.DeploymentDock = (function () {
     function collectAllHangars(ship) {
         var out = [];
         ship.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
+            if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
             out.push(sys);
         });
@@ -56,7 +75,7 @@ window.DeploymentDock = (function () {
     function collectUsableHangars(ship) {
         var out = [];
         ship.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
+            if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
             var free = hangarFreeBoxes(sys);
             if (free > 0) out.push({ hangar: sys, free: free });
@@ -68,13 +87,7 @@ window.DeploymentDock = (function () {
     //                      - already-stored usage
     //                      - flights queued for deploy-start dock here this session.
     function hangarFreeBoxes(hangar) {
-        var netDamage = 0;
-        if (Array.isArray(hangar.damage)) {
-            hangar.damage.forEach(function (d) {
-                netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-            });
-        }
-        var effective = Math.max(0, parseInt(hangar.maxhealth, 10) - netDamage);
+        var effective = effectiveHangarBoxes(hangar);
 
         var used = 0;
         if (Array.isArray(hangar.hangarUsage)) {
@@ -277,7 +290,7 @@ window.DeploymentDock = (function () {
             var s = gamedata.ships[key];
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
-                if (!sys || sys.name !== 'hangar') return;
+                if (!sys || !isDockHangar(sys)) return;
                 if (!Array.isArray(sys.pendingDeployStartOrders)) return;
                 var before = sys.pendingDeployStartOrders.length;
                 sys.pendingDeployStartOrders = sys.pendingDeployStartOrders.filter(function (o) {
@@ -364,19 +377,13 @@ window.DeploymentDock = (function () {
 
         var out = [];
         carrier.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
+            if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(carrier, sys)) return;
             if (!hangarAcceptsCategory(sys.hangarType, category, carrier)) return;
 
             //Compute free boxes — but reclaim THIS flight's own queued entry
-            //so re-edit doesn't think the hangar is full.
-            var netDamage = 0;
-            if (Array.isArray(sys.damage)) {
-                sys.damage.forEach(function (d) {
-                    netDamage += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10));
-                });
-            }
-            var effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
+            //so re-edit doesn't think the hangar is full. (Catapult → 1 slot.)
+            var effective = effectiveHangarBoxes(sys);
 
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
@@ -410,7 +417,7 @@ window.DeploymentDock = (function () {
         var declared = parseInt(carrier.customFighter[name], 10);
         var used = 0;
         carrier.systems.forEach(function (sys) {
-            if (!sys || sys.name !== 'hangar') return;
+            if (!sys || !isDockHangar(sys)) return;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) {
                     if (e.customFtrName !== name) return;
@@ -518,7 +525,7 @@ window.refreshDeploymentUIForDeployStart = function () {
             var s = gamedata.ships[key];
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
-                if (sys && sys.name === 'hangar' && typeof sys.refreshHangarTooltip === 'function') {
+                if (sys && isDockHangar(sys) && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
@@ -560,7 +567,7 @@ window.refreshFiringHangarTooltips = function () {
             var s = gamedata.ships[key];
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
-                if (sys && sys.name === 'hangar' && typeof sys.refreshHangarTooltip === 'function') {
+                if (sys && isDockHangar(sys) && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
