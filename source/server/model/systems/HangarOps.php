@@ -30,6 +30,23 @@ class HangarOps {
 		//Mark all hangars done up-front so re-entry guards short-circuit
 		foreach ($hangars as $h) $h->usagePopulated = true;
 
+		//Stage 16: catapults are Hangars structurally, but their (multiple)
+		//boxes are HP only — they hold ONE superheavy fighter and contribute
+		//NOTHING to the default-shuttle pool. Partition them out so the shuttle
+		//auto-fill (steps 2 & 3) and the leftover-capacity math below see only
+		//real hangar boxes. Catapults themselves start EMPTY at turn 1: the
+		//superheavy fighter is a combat unit that auto-deploys to space via the
+		//fleet-builder flow (like any medium/heavy fighter), then gets recovered
+		//into the catapult in-game (Stage 16.4). $shuttleHangars also matches the
+		//PRE-Stage-16 behaviour, where catapults weren't `instanceof Hangar` at
+		//all and so were never part of collectHangars / the shuttle pool.
+		$hasCatapult   = false;
+		$shuttleHangars = array();
+		foreach ($hangars as $h){
+			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
+			$shuttleHangars[] = $h;
+		}
+
 		//Step 1: place flights the player chose to start in hangar (Stage 7; empty for now).
 		$undeployedByCategory = self::collectUndeployedFlightsByCategory($ship, $gamedata);
 		if (is_array($ship->fighters)) {
@@ -54,6 +71,13 @@ class HangarOps {
 		$totalDeclared = 0;
 		if (is_array($ship->fighters)) {
 			foreach ($ship->fighters as $category => $declaredCount){
+				//Stage 16: superheavy fighters live in the catapult, not the
+				//shuttle-pool hangars — don't count them toward $totalDeclared
+				//(which would shrink the leftover shuttle fill) and never try to
+				//auto-fill them. Only special-cased when the ship actually has a
+				//catapult, so catapult-less ships behave exactly as before.
+				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
+
 				$count = (int)$declaredCount;
 				$totalDeclared += $count;
 				$shuttleClass = self::shuttlePhpclassForCategory($category, $ship);
@@ -62,7 +86,7 @@ class HangarOps {
 				$shuttleName = self::shuttleDisplayNameFor($shuttleClass);
 
 				while ($count > 0){
-					$hangar = self::pickHangarForShuttle($hangars, 1);
+					$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
 					if (!$hangar) break;
 					
 					$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
@@ -89,7 +113,7 @@ class HangarOps {
 		//unchanged — MinesweepingShuttle still counts as a default shuttle for
 		//fleet-check purposes.
 		$totalCapacity = 0;
-		foreach ($hangars as $h) $totalCapacity += (int)$h->maxhealth;
+		foreach ($shuttleHangars as $h) $totalCapacity += (int)$h->maxhealth;   //Stage 16: catapult boxes excluded from the shuttle pool
 
 		//Account for HANG_BP enhancement before computing leftover. Enhancements::setEnhancementsShip
 		//mutates $ship->fighters["Breaching Pods"] but runs AFTER onIndividualNotesLoaded at game
@@ -129,7 +153,7 @@ class HangarOps {
 			//Place MinesweepingShuttle records first (one per box, so flightSize=1)
 			$mswRemaining = $hangMswRetype;
 			while ($mswRemaining > 0){
-				$hangar = self::pickHangarForShuttle($hangars, 1);
+				$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
 				if (!$hangar) break;
 				$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
 				$take = min($mswRemaining, $free);
@@ -148,7 +172,7 @@ class HangarOps {
 
 			$count = $leftover - $hangMswRetype;
 			while ($count > 0){
-				$hangar = self::pickHangarForShuttle($hangars, 1);
+				$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
 				if (!$hangar) break;
 
 				$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);

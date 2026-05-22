@@ -406,12 +406,18 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			netDamage += Math.max(0, parseInt(dmg.damage || 0, 10) - parseInt(dmg.armour || 0, 10));
 		}
 	}
-	var effectiveCapacity = Math.max(0, this.maxhealth - netDamage);
+	// Stage 16: a catapult holds ONE fighter — its extra boxes are structural HP,
+	// not capacity. Display "/ 1" regardless of box count, and a damaged catapult
+	// still has its single slot (it launches/lands regardless of damage), but we
+	// still surface "(N destroyed)" because the destroyed-box count drives the
+	// landing-damage rule (16.5) and is useful to the player.
+	var maxCapacity      = this.isCatapult ? 1 : this.maxhealth;
+	var effectiveCapacity = this.isCatapult ? 1 : Math.max(0, this.maxhealth - netDamage);
 
 	if (netDamage > 0) {
 		this.data["Capacity"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
 	} else {
-		this.data["Capacity"] = totalStored + " / " + this.maxhealth + " slots";
+		this.data["Capacity"] = totalStored + " / " + maxCapacity + " slots";
 	}
 
 	var hasLaunches = false;
@@ -477,10 +483,22 @@ var MindriderHangar = function MindriderHangar(json, ship) {
 MindriderHangar.prototype = Object.create(ShipSystem.prototype);
 MindriderHangar.prototype.constructor = MindriderHangar;
 
+// Hangar Ops Stage 16: a Catapult is a Hangar that holds one fighter and
+// displays capacity as 1 regardless of its (structural) box count. Extending
+// Hangar inherits the data deep-clone (Stage 12 shared-reference fix), the
+// pending-order hydration, refreshHangarTooltip, and doIndividualNotesTransfer.
+// The launch/dock UI helpers all gate on name === 'hangar', so a catapult is
+// not yet offered launch/dock dialogs (16.3-16.5 wire those up).
 var Catapult = function Catapult(json, ship) {
-	ShipSystem.call(this, json, ship);
+	Hangar.call(this, json, ship);
+	// Set the discriminator client-side so the tooltip / dialogs don't depend on
+	// it round-tripping through the gamedata JSON. Hangar.call already ran
+	// refreshHangarTooltip once (capacity = box count); recompute now that
+	// isCatapult is set so capacity renders as "/ 1".
+	this.isCatapult = true;
+	this.refreshHangarTooltip();
 };
-Catapult.prototype = Object.create(ShipSystem.prototype);
+Catapult.prototype = Object.create(Hangar.prototype);
 Catapult.prototype.constructor = Catapult;
 
 var CargoBay = function CargoBay(json, ship) {

@@ -3161,6 +3161,15 @@ class Hangar extends ShipSystem{
 	public function criticalPhaseEffects($ship, $gamedata){
 		parent::criticalPhaseEffects($ship, $gamedata);   //preserve base hooks (limpet bore, marine missions, etc.)
 
+		//Hangar Ops Stage 16.1/16.2: a Catapult is structurally a Hangar but its
+		//launch/land mechanics differ (no init penalty, rear-only landing, single
+		//fighter type, damage-agnostic, landing damage) and are staged separately
+		//in 16.3-16.5. Until then a catapult tracks capacity / shows its tooltip
+		//but does NOT process launch/dock/service orders. The client already
+		//excludes catapults from every launch/dock UI (helpers gate on
+		//name === 'hangar'); this is the matching server-side guard.
+		if (!empty($this->isCatapult)) return;
+
 		//1. Apply damage eviction first (per B5W rules: boxes destroyed before
 		//   Post-Turn Actions). This may also reduce stored craft a launch
 		//   order was relying on — if so, the launch's canLaunch() check fails
@@ -3274,6 +3283,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->hangarType = $this->hangarType;
 		$strippedSystem->direction = $this->direction;
+		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
@@ -3285,15 +3295,26 @@ class Hangar extends ShipSystem{
 		return $strippedSystem;
 	}
 
-	public function setSystemDataWindow($turn){		
+	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-        $this->data["Special"] = "System responsible for launching and carrying docked fighter craft.";	
-        $this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";		
+		$isCatapult = !empty($this->isCatapult);
+		if ($isCatapult) {
+			//Stage 16: a catapult holds ONE superheavy fighter; its extra boxes are
+			//structural HP only (capacity is 1, not box count) and it launches
+			//forward / lands from the rear, ignoring its own damage.
+			$this->data["Special"]  = "Fixed launch rail for a single superheavy fighter.";
+			$this->data["Special"] .= "<br>Launches forward only; recovers from the rear; ignores its own damage.";
+			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+		} else {
+			$this->data["Special"]  = "System responsible for launching and carrying docked fighter craft.";
+			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+			$this->data["Launch Rate"] = $this->output;
+		}
 		$this->data["Type"] = ucwords($this->hangarType);
-		$this->data["Launch Rate"] = $this->output;
 
 		$totalStored = HangarOps::usageCountFor($this);
-		$this->data["Capacity"] = $totalStored . " / " . $this->maxhealth . " slots";
+		$maxCapacity = $isCatapult ? 1 : $this->maxhealth;
+		$this->data["Capacity"] = $totalStored . " / " . $maxCapacity . " slots";
 		/*		
 		if (!empty($this->hangarUsage)){
 			$byClass = array();
@@ -3314,18 +3335,33 @@ class Hangar extends ShipSystem{
 }
 
 
-class Catapult extends ShipSystem{
+class Catapult extends Hangar{
     public $name = "catapult";
     public $displayName = "Catapult";
-    public $squadrons = Array();
     public $primary = false; //changed from true on 21.11 - let's not consider it a core system after all!
-    
+
 	//Catapult is not impotant at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
+
+	// === Hangar Ops Stage 16 ===
+	// A Catapult is a constrained Hangar: it holds exactly ONE superheavy
+	// fighter, launches only forward (direction 0), lands only from the rear,
+	// services a single fighter type, applies NO launch initiative penalty, and
+	// operates regardless of damage. $isCatapult is the single discriminator the
+	// HangarOps call sites branch on. Its extra boxes are structural HP only and
+	// must NOT contribute to the default-shuttle pool (HangarOps excludes them).
+	//
+	// Stage 16.1/16.2 wire up the data model (capacity tracking, no shuttle-pool
+	// contribution, "1 slot" capacity display). Launch/land/landing-damage are
+	// staged separately (16.3-16.5); until then Hangar::criticalPhaseEffects
+	// early-returns for catapults and the client launch/dock UI excludes them
+	// (every helper filters on name === 'hangar').
+	public $isCatapult = true;
+
     function __construct($armour, $maxhealth, $output = 1){
-        parent::__construct($armour, $maxhealth, 0, $output );
- 
+		// Hangar ctor: ($armour, $maxhealth, $output, $direction, $hangarType, $spawnableClasses)
+		// Fixed forward launch (direction 0); superheavy-only by design.
+        parent::__construct($armour, $maxhealth, $output, 0, 'superheavy');
     }
 }
 

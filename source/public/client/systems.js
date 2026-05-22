@@ -407,9 +407,39 @@ shipManager.systems = {
         if (!ship || !ship.systems) return 0;
         for (var i in ship.systems) {
             var system = ship.systems[i];
+            //Catapults (name "catapult") are excluded: their boxes are structural
+            //HP only and never contribute to the default-shuttle pool (Stage 16).
             if (system && system.name == "hangar") total += parseInt(system.maxhealth, 10) || 0;
         }
         return total;
+    },
+
+    //Stage 16: does this ship carry a Catapult? Superheavy fighters live in the
+    //catapult, not the shuttle-pool hangars, so when a catapult is present the
+    //'superheavy' fighters declaration must be excluded from the leftover-shuttle
+    //math (mirrors HangarOps::populateInitialHangarUsage skipping 'superheavy'
+    //from $totalDeclared when $hasCatapult).
+    shipHasCatapult: function shipHasCatapult(ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "catapult" || s.isCatapult)) return true;
+        }
+        return false;
+    },
+
+    //Sum of declared fighters that consume default-shuttle-pool hangar boxes.
+    //Excludes catapult-destined 'superheavy' fighters when the ship has a
+    //catapult. Single source of truth for getDefaultShuttles / Composition.
+    getShuttlePoolDeclared: function getShuttlePoolDeclared(fighters, ship) {
+        var declared = 0;
+        if (!fighters) return 0;
+        var hasCatapult = shipManager.systems.shipHasCatapult(ship);
+        for (var k in fighters) {
+            if (hasCatapult && String(k).toLowerCase().trim() === "superheavy") continue;
+            declared += parseInt(fighters[k], 10) || 0;
+        }
+        return declared;
     },
 
     //Mirrors HangarOps::populateInitialHangarUsage step 3: any hangar capacity
@@ -427,10 +457,7 @@ shipManager.systems = {
             return { count: 0, type: "Shuttles", key: "shuttles" };
         }
         var capacity = shipManager.systems.getTotalHangarCapacity(ship);
-        var declared = 0;
-        if (ship.fighters) {
-            for (var k in ship.fighters) declared += parseInt(ship.fighters[k], 10) || 0;
-        }
+        var declared = shipManager.systems.getShuttlePoolDeclared(ship.fighters, ship);
         var leftover = capacity - declared;
         if (leftover < 0) leftover = 0;
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
@@ -494,8 +521,7 @@ shipManager.systems = {
         var capacity = shipManager.systems.getTotalHangarCapacity(ship);
         if (capacity <= 0) return rows;
         var base = ship._originalFighters || ship.fighters || {};
-        var declared = 0;
-        for (var k in base) declared += parseInt(base[k], 10) || 0;
+        var declared = shipManager.systems.getShuttlePoolDeclared(base, ship);
         var pool = capacity - declared;
         if (pool <= 0) return rows;
 
