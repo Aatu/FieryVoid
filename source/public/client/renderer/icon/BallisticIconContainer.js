@@ -294,7 +294,7 @@ window.BallisticIconContainer = function () {
 				// Guard with targetPosition: mine-targeting fire orders (targetid !== -1) have a targetIcon
 				// but no targetPosition, which would make generateSplashHexes place hexes at 0,0 in Replay.
 				if (['Z - Antimine', 'Shredder', 'Energy Mine', 'Ion Storm', 'Jammer', '1-Blanket Shield', '3-Blanket Shade'].includes(modeName)) {
-					if ((gamedata.thisplayer === shooter.userid || replay) && targetPosition) {
+					if ((gamedata.isMyOrTeamOneShip(shooter) || replay) && targetPosition) {
 						let sizes = [];
 
 						switch (modeName) {
