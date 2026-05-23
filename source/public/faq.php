@@ -330,6 +330,25 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
             <li><b>Hangar damage:</b> If a hangar takes damage, stored craft are destroyed along with it (empty slots and shuttles are lost first, then the cheaper craft).</li>
             <br>
+
+            <li><b>Catapults:</b> Some carriers are equipped with a Catapult instead of (or in addition to) a standard hangar.  A catapult is a fixed forward-firing launch rail designed to hold and deploy a single superheavy fighter.
+                <ul class="circle-list">
+                    <li>A catapult holds <strong>exactly one</strong> superheavy fighter — no other craft may launch from or dock into it.</li>
+                    <li>The catapult's box count represents structural hit points only, but not additional capacity, so extra boxes do not hold shuttle as i the case with normal Hangars.</li>
+                    <li><strong>Launching:</strong> A catapult always launches its fighter directly forward (at the carrier's current facing).  Launching from a catapult applies <strong>no</strong> initiative penalty 
+                    — neither the −50 that a freshly launched flight would normally receive, nor the −20 applied to the carrier.  Launching works even if the catapult is damaged or destroyed.</li>
+                    <li><strong>Landing / recovery:</strong> The fighter may only dock back into the catapult if it approaches the carrier's hex from the <strong>rear</strong> — the flight's heading must match the carrier's facing (the fighter overtakes the carrier from behind).  
+                    Like launching, recovery works regardless of catapult damage, but the carrier still receives the standard −20 initiative penalty on the following turn.</li>
+                    <li><strong>Landing on a damaged catapult:</strong> If any catapult boxes are destroyed at the time of landing, the recovering fighter takes damage equal to the number of destroyed boxes.
+                        <ul class="circle-list">
+                            <li>If the fighter survives, it is stored with its damage intact and can be relaunched normally on a later turn.</li>
+                            <li>If the fighter is destroyed by the landing damage, it is still counted as recovered and stored — but it can <strong>never be relaunched</strong>.  
+                            The wreck permanently occupies the catapult bay for the rest of the battle; no replacement fighter can be loaded.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <br>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
