@@ -2861,19 +2861,19 @@ class RammingAttack extends Weapon{
 		}
 	}
 
-	private function getRamHitLocation($ship, $gamedata, $shipPosition){	
-				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.			
+	private function getRamHitLocation($ship, $gamedata, $shipPosition){
+				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.
 				// Now check other movements in the turn.
-				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
-				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
-				$previousFacing = $startMove->getFacingAngle();	
-				$location = 0;		
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
+				$previousFacing = $startMove->getFacingAngle();
+				$location = 0;
 
 				foreach ($ship->movement as $shipMove) {
 					if ($shipMove->turn == $gamedata->turn) {
-			
+
 						// Only interested in moves where ship enters a NEW hex!
-						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
 							// Check if the position matches the asteroids, e.g. zero distance.
 							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
 								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
@@ -2885,9 +2885,51 @@ class RammingAttack extends Weapon{
 						$previousFacing = $shipMove->getFacingAngle();
 					}
 				}
-								
+
 				return $location;
 	}//endof getRamHitLocation()
+
+
+	//For TerrainCrash return damage: compute hit location on the TERRAIN (not the colliding ship) based on bearing from terrain centre to the ship's incoming hex, in the terrain's frame of reference.
+	private function getTerrainReturnHitLocation($terrain, $ship, $gamedata){
+		$terrainPosition = $terrain->getHexPos();
+		$terrainMove = $terrain->getLastMovement();
+		$terrainFacing = $terrainMove ? $terrainMove->getFacingAngle() : 0;
+
+		//Build list of occupied hexes (mirrors checkForCollisions logic).
+		$occupiedHexes = [];
+		if (property_exists($terrain, 'hexOffsets') && !empty($terrain->hexOffsets)) {
+			foreach ($terrain->hexOffsets as $offset) {
+				$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $terrainFacing);
+			}
+		} else {
+			$occupiedHexes[] = $terrainPosition;
+			if ($terrain->Huge > 0) {
+				foreach (Mathlib::getNeighbouringHexes($terrainPosition, $terrain->Huge) as $n) {
+					$occupiedHexes[] = new OffsetCoordinate($n['q'], $n['r']);
+				}
+			}
+		}
+
+		$startMove = $ship->getLastTurnMovement($gamedata->turn);
+		$previousPosition = $startMove->position;
+
+		foreach ($ship->movement as $shipMove) {
+			if ($shipMove->turn != $gamedata->turn) continue;
+			if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
+				foreach ($occupiedHexes as $hex) {
+					if ($hex->q == $shipMove->position->q && $hex->r == $shipMove->position->r) {
+						//Bearing FROM terrain centre TO ship's prior hex, relative to terrain's facing.
+						$relativeBearing = $this->getTempBearing($terrainPosition, $previousPosition, $terrain, $terrainFacing);
+						return $this->getCollisionLocation($relativeBearing, $terrain);
+					}
+				}
+			}
+			$previousPosition = $shipMove->position;
+		}
+
+		return 1; //Safe default matching MediumShip front.
+	}//endof getTerrainReturnHitLocation()
 
 
 	public function fire($gamedata, $fireOrder){
@@ -2914,10 +2956,18 @@ class RammingAttack extends Weapon{
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
 
-			//Location is already determined for Terrain collisions/crashes.
-			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') {
+			//The chosenLocation set in beforePreFiringOrderResolution is the colliding ship's location and was used by parent::fire() to damage the ship correctly.
+			//For return damage, we now switch chosenLocation to refer to the unit taking it (this->unit).
+			if($fireOrder->damageclass == 'TerrainCrash') {
+				//Return damage lands on the terrain itself, not the colliding ship - recompute against terrain's own location chart.
+				$collider = $gamedata->getShipById($fireOrder->targetid);
+				if($collider) {
+					$fireOrder->chosenLocation = $this->getTerrainReturnHitLocation($target, $collider, $gamedata);
+				}
+			} else if($fireOrder->damageclass != 'TerrainCollision') {
 				$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
 			}
+			//TerrainCollision (asteroids): return damage stays 0 via damageModRolled, so chosenLocation is not used meaningfully.
 
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
