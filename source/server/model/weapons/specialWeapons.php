@@ -8396,7 +8396,7 @@ class SecondSight extends Weapon{
 			  if($ship->isDestroyed()) continue;		
 			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.
 			  if ($ship->isTerrain()) continue;		
-			  if ($target instanceof Mine) continue;				  	  
+			  if ($ship instanceof Mine) continue;				  	  
 			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!			  	
 			  $relevantShips[] = $ship;			
 		  }
