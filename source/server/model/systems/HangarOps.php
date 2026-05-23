@@ -209,15 +209,24 @@ class HangarOps {
 	 * no other server-side wiring is required.
 	 */
 	private static $factionShuttleMap = array(
+		'Abbai Matriarchate'  => 'ShuttleAbbai',
+		'Abbai Matriarchate (WotCR)'  => 'ShuttleAbbai',
+		'Brakiri Syndicracy'  => 'ShuttleBrakiri',						
 		'Centauri Republic'  => 'ShuttleCent',
 		'Centauri Republic (WotCR)'  => 'ShuttleCentWotCR',
-		'Dilgar Imperium'  => 'ShuttleDilgar',				
+		'Dilgar Imperium'  => 'ShuttleDilgar',
+		'Drazi Freehold'  => 'ShuttleDrazi',
+		'Drazi Freehold (WotCR)'  => 'ShuttleDraziWotCR',		
 		'Earth Alliance'  => 'ShuttleEA',
-		'Earth Alliance (Early)'  => 'ShuttleEA',		
+		'Earth Alliance (Early)'  => 'ShuttleEA',	
+		'Gaim Intelligence'  => 'ShuttleGaim',			
 		'Minbari Federation'   => 'Flyer',
 		'Minbari Protectorate' => 'FlyerProtectorate',
 		'Narn Regime'  => 'ShuttleNarn',
-		'Orieni Imperium'  => 'ShuttleOrieni',					
+		'Orieni Imperium'  => 'ShuttleOrieni',
+		"Pak'ma'ra Confederacy"  => 'ShuttlePakMaRa',	
+		'Vree Conglomerate'  => 'ShuttleVree',						
+
 	);
 
 	/* Resolves the right shuttle phpclass for a carrier based on faction.
