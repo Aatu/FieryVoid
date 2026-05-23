@@ -14,10 +14,13 @@ class HangarOps {
 
 	/* Initial population of hangar contents at game start.
 	 * Walks $ship->fighters (declared capacity per category) and:
-	 *   1. Docks any FighterFlights chosen to start in hangar (Stage 7 — empty for now).
-	 *   2. Auto-fills declared shuttle/minesweeping-shuttle slots with shuttle records.
-	 *   3. Auto-fills any leftover hangar capacity with shuttle records
+	 *   1. Auto-fills declared shuttle/minesweeping-shuttle slots with shuttle records.
+	 *   2. Auto-fills any leftover hangar capacity with shuttle records
 	 *      (MinesweepingShuttle if $ship->minesweeperbonus > 0, else Shuttle).
+	 *
+	 * Deployment-phase docking (Stage 7) is handled via a different path
+	 * (Hangar::pendingDeployStartTransfer -> HangarOps::processDeployStartTransfer),
+	 * not from here.
 	 *
 	 * Called from Hangar::onIndividualNotesLoaded by the FIRST hangar on the ship
 	 * (idempotency guard via $usagePopulated). All hangars on the ship are
@@ -33,7 +36,7 @@ class HangarOps {
 		//Stage 16: catapults are Hangars structurally, but their (multiple)
 		//boxes are HP only — they hold ONE superheavy fighter and contribute
 		//NOTHING to the default-shuttle pool. Partition them out so the shuttle
-		//auto-fill (steps 2 & 3) and the leftover-capacity math below see only
+		//auto-fill (steps 1 & 2) and the leftover-capacity math below see only
 		//real hangar boxes. Catapults themselves start EMPTY at turn 1: the
 		//superheavy fighter is a combat unit that auto-deploys to space via the
 		//fleet-builder flow (like any medium/heavy fighter), then gets recovered
@@ -47,25 +50,7 @@ class HangarOps {
 			$shuttleHangars[] = $h;
 		}
 
-		//Step 1: place flights the player chose to start in hangar (Stage 7; empty for now).
-		$undeployedByCategory = self::collectUndeployedFlightsByCategory($ship, $gamedata);
-		if (is_array($ship->fighters)) {
-			foreach ($ship->fighters as $category => $declaredCount){
-				if (empty($undeployedByCategory[$category])) continue;
-				foreach ($undeployedByCategory[$category] as $flight){
-					$hangar = self::pickHangarForCategory($hangars, $category, $flight->flightSize);
-					if (!$hangar) break;
-					$hangar->hangarUsage[] = array(
-						'phpclass'    => $flight->phpclass,
-						'name'        => $flight->name,
-						'flightSize'  => $flight->flightSize,
-						'hangarType'  => $category,
-					);
-				}
-			}
-		}
-
-		//Step 2: explicit shuttle/minesweeping-shuttle declarations get auto-filled
+		//Step 1: explicit shuttle/minesweeping-shuttle declarations get auto-filled
 		//(combat fighter declarations are NOT auto-filled here — those auto-deploy
 		// to space at turn 1 via the existing fleet-builder flow.)
 		$totalDeclared = 0;
@@ -103,7 +88,7 @@ class HangarOps {
 			}
 		}
 
-		//Step 3: leftover capacity → fill with shuttles. Minesweeper carriers get
+		//Step 2: leftover capacity → fill with shuttles. Minesweeper carriers get
 		//MinesweepingShuttle (faction-agnostic for now); everyone else gets the
 		//faction-appropriate shuttle subclass (Flyer for Minbari, Shuttle otherwise).
 		//
@@ -278,14 +263,6 @@ class HangarOps {
 		return null;
 	}
 
-	/* Stage 1 placeholder. Stage 7 (deployment-phase docking) will return
-	 * flights the player chose to start in hangar instead of on the map.
-	 * Returns: ['categoryKey' => [FighterFlight, ...], ...]
-	 */
-	public static function collectUndeployedFlightsByCategory($ship, $gamedata){
-		return array();
-	}
-
 	/* All Hangar systems on a given ship, in encounter order (primary, front, etc.) */
 	public static function collectHangars($ship){
 		$hangars = array();
@@ -294,25 +271,6 @@ class HangarOps {
 			if ($sys instanceof Hangar) $hangars[] = $sys;
 		}
 		return $hangars;
-	}
-
-	/* Picks the first hangar that
-	 *   (a) accepts $category (exact match or universal 'fighters' fallback)
-	 *   (b) has at least $flightSize free boxes
-	 * Returns null if no hangar fits.
-	 */
-	public static function pickHangarForCategory($hangars, $category, $flightSize){
-		//Exact category match first
-		foreach ($hangars as $h){
-			if ($h->hangarType !== $category) continue;
-			if ($h->maxhealth - self::usageCountFor($h) >= $flightSize) return $h;
-		}
-		//Fallback to universal hangars
-		foreach ($hangars as $h){
-			if ($h->hangarType !== 'fighters') continue;
-			if ($h->maxhealth - self::usageCountFor($h) >= $flightSize) return $h;
-		}
-		return null;
 	}
 
 	/* Total occupied boxes across this hangar. */
@@ -383,16 +341,10 @@ class HangarOps {
 		return $req;                           //preserve casing for 'Breaching Pods', 'Raiders', etc.
 	}
 
-	/* Total declared hangar capacity by category for a ship. */
-	public static function capacityByCategory($ship){
-		if (!is_array($ship->fighters)) return array();
-		return $ship->fighters;
-	}
-
 	/* Server-side mirror of getDefaultShuttles() in client systems.js. Default
 	 * shuttles aren't usually declared in $ship->fighters — they auto-fill any
 	 * hangar capacity not claimed by other categories (see populateInitialHangarUsage
-	 * step 3). Returns the leftover count, the matching $ship->fighters slot key
+	 * step 2). Returns the leftover count, the matching $ship->fighters slot key
 	 * ('shuttles' or 'minesweeping shuttles' when the carrier has minesweeperbonus),
 	 * and a display label. Used by Enhancements to gate Shuttle-slot conversions
 	 * on the actual auto-populated pool.
@@ -425,19 +377,6 @@ class HangarOps {
 			return array('count' => $leftover, 'type' => 'Minesweeping Shuttles', 'key' => 'minesweeping shuttles');
 		}
 		return array('count' => $leftover, 'type' => 'Shuttles', 'key' => 'shuttles');
-	}
-
-	/* Currently-used boxes by category across all hangars on $ship. */
-	public static function usageByCategory($ship){
-		$out = array();
-		foreach (self::collectHangars($ship) as $h){
-			foreach ($h->hangarUsage as $entry){
-				$cat = $entry['hangarType'] ?? $h->hangarType;
-				if (!isset($out[$cat])) $out[$cat] = 0;
-				$out[$cat] += (int)($entry['flightSize'] ?? 1);
-			}
-		}
-		return $out;
 	}
 
 	/* Evict $count craft from a hangar (1 box of damage = 1 craft destroyed).

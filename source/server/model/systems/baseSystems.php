@@ -3318,22 +3318,9 @@ class Hangar extends ShipSystem{
 		$totalStored = HangarOps::usageCountFor($this);
 		$maxCapacity = $isCatapult ? 1 : $this->maxhealth;
 		$this->data["Capacity"] = $totalStored . " / " . $maxCapacity . " slots";
-		/*		
-		if (!empty($this->hangarUsage)){
-			$byClass = array();
-			foreach ($this->hangarUsage as $entry){
-				$key = isset($entry['phpclass']) && $entry['phpclass'] !== '' ? $entry['phpclass'] : ('('.($entry['hangarType'] ?? 'unknown').' slot)');
-				$displayName = $entry['name'] ?? $key;
-				if (!isset($byClass[$key])) $byClass[$key] = array('name'=>$displayName, 'count'=>0);
-				$byClass[$key]['count'] += (int)($entry['flightSize'] ?? 1);
-			}
-			$lines = array();
-			foreach ($byClass as $info){
-				$lines[] = $info['count'] . " x " . $info['name'];
-			}
-			$this->data["Stored Craft"] = implode('<br>', $lines);
-		}
-		*/	
+		//"Stored Craft" line is computed client-side via Hangar.refreshHangarTooltip
+		//(baseSystems.js) — it has access to pendingDockOrders/pendingLaunchOrders
+		//for the live projection, which the server-side render doesn't.
 	}
 }
 
