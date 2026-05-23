@@ -2141,6 +2141,27 @@ window.gamedata = {
 		return displayName;
 	}, //endof prepareClassName
 
+	/*returns a small size-class tag for fighter entries, eg. [L] or [H].
+	  Mirrors the fleet checker: explicit hangarRequired wins; default 'fighters'
+	  falls back to jinkinglimit classification.*/
+	getFighterSizeTag: function (ship) {
+		var size = ship.hangarRequired;
+		if (size === 'fighters' || size === '' || size == null) {
+			if (ship.jinkinglimit >= 99) size = 'ultralight';
+			else if (ship.jinkinglimit >= 10) size = 'light';
+			else if (ship.jinkinglimit >= 8) size = 'medium';
+			else if (ship.jinkinglimit >= 6) size = 'heavy';
+		}
+		switch (size) {
+			case 'ultralight': return '[U]';
+			case 'light': case 'light fighters': return '[L]';
+			case 'medium': case 'medium fighters': return '[M]';
+			case 'heavy': case 'heavy fighters': case 'normal': return '[H]';
+			case 'superheavy': case 'superheavy fighters': return '[SHF]';			
+			default: return '';
+		}
+	},
+
 	/*prepares fleet list for purchases for display*/
 	parseShips: function (jsonShips) {
 		for (var faction in jsonShips) {
@@ -2241,11 +2262,15 @@ window.gamedata = {
 					shipDisplayName = this.prepareClassName(ship);
 					pointCostFull = ship.pointCost;
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull / 6 + ' ea.)';//for fighters: display price per craft, too!
+					var sizeTag = (categoryIndex === 0) ? this.getFighterSizeTag(ship) : '';
+					var sizeTagHtml = sizeTag ? ' <span class="fightersize">' + sizeTag + '</span>' : '';
 					h = $('<div oncontextmenu="return false;" class="ship storeship" data-custom="'
 						+ isCustomShip + '" data-isd="'
 						+ ship.isd
 						+ '"><span class="shiptype' + customShipHighlight + '">'
-						+ shipDisplayName + '</span><span class="pointcost">'
+						+ shipDisplayName + '</span>'
+						+ sizeTagHtml
+						+ '<span class="pointcost">'
 						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
 					let buyHandler = ship.mine ? this.buyBulk.bind(this, ship.phpclass) : this.buyShip.bind(this, ship.phpclass);
@@ -2264,12 +2289,16 @@ window.gamedata = {
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull / 6 + ' ea.)';//for fighters: display price per craft, too!
+						var sizeTagV = (categoryIndex === 0) ? this.getFighterSizeTag(shipV) : '';
+						var sizeTagHtmlV = sizeTagV ? ' <span class="fightersize">' + sizeTagV + '</span>' : '';
 						h = $('<div oncontextmenu="return false;" class="ship variant" data-custom="'
 							+ isCustomShip
 							+ '" data-isd="'
 							+ shipV.isd
 							+ '"><span class="shiptype' + customShipHighlight + '">'
-							+ shipDisplayName + '</span><span class="pointcost">'
+							+ shipDisplayName + '</span>'
+							+ sizeTagHtmlV
+							+ '<span class="pointcost">'
 							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
 						let buyHandlerV = shipV.mine ? this.buyBulk.bind(this, shipV.phpclass) : this.buyShip.bind(this, shipV.phpclass);

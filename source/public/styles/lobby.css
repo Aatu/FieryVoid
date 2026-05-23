@@ -251,6 +251,12 @@
     padding-left: 5px !important;
 }
 
+.fightersize {
+    font-weight: bold;
+    padding-left: 0px !important;
+    padding-right: 3px;
+}
+
 .store .storeship {
     /*color:#a3c0f5;*/
     color: #90b1ee;
