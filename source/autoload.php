@@ -3796,9 +3796,12 @@ spl_autoload_register(
                 'flyerprotectorate' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',                
                 'shuttle' => '/server/model/ships/Shuttle.php',
-                'shuttlecent' => '/server/model/ships/Shuttle.php',                  
+                'shuttlecent' => '/server/model/ships/Shuttle.php',
+                'shuttlecentwotcr' => '/server/model/ships/Shuttle.php',                
+                'shuttledilgar' => '/server/model/ships/Shuttle.php',                                   
                 'shuttleea' => '/server/model/ships/Shuttle.php',   
-                'shuttlenarn' => '/server/model/ships/Shuttle.php',                              
+                'shuttlenarn' => '/server/model/ships/Shuttle.php',
+                'shuttleorieni' => '/server/model/ships/Shuttle.php',                                                
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

@@ -232,6 +232,78 @@ class ShuttleCent extends Shuttle
 
 }
 
+
+class ShuttleCentWotCR extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleCent";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Centauri Republic";
+        $this->forwardDefense = 10;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 9, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
+
+class ShuttleDilgar extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleCent";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Centauri Republic";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 10;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 8, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
 class ShuttleEA extends Shuttle
 {
     protected function setShuttleDefaults()
@@ -271,6 +343,42 @@ class ShuttleNarn extends Shuttle
 
         for ($i = 0; $i < $toAdd; $i++) {
             $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 8, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
+
+class ShuttleOrieni extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleCent";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Centauri Republic";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
             $fighter = new Fighter($this->phpclass, $armour, 8, $this->id);
             $fighter->displayName = $this->shipClass;
             $fighter->imagePath = $this->imagePath;
