@@ -8627,7 +8627,7 @@ class ThoughtWave extends Plasma{
 			if($ship->isDestroyed()) continue;		
 			if ($ship->faction == "Mindriders") continue;//Mindriders not affected.
 			if ($ship->isTerrain()) continue;	
-			if ($target instanceof Mine) continue;							
+			if ($ship instanceof Mine) continue;							
 			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!				
 			$relevantShips[] = $ship;			
 		}
