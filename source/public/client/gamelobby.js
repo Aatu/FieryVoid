@@ -595,12 +595,26 @@ window.gamedata = {
 
 			totalPointsSpent += lship.pointCost;
 
+			// 10%/33% deployment brackets use the BASE ship cost only (no ammo, no
+			// enhancements). lship.pointCost is overwritten at purchase to the post-
+			// purchase total (base + ammo + enhancements); the canonical base lives on
+			// the catalog entry. For flights, catalog cost is for a full 6-craft flight,
+			// so scale by actual flightSize/6 to mirror confirm.js getTotalCost.
+			var bracketBaseCost = lship.pointCost;
+			var catalogShip = gamedata.getShipByType(lship.phpclass);
+			if (catalogShip) {
+				bracketBaseCost = catalogShip.pointCost;
+				if (lship.flight && lship.flightSize) {
+					bracketBaseCost = bracketBaseCost * (lship.flightSize / 6);
+				}
+			}
+
 			if (lship.limited == 10) {
-				points10 += lship.pointCost;
+				points10 += bracketBaseCost;
 				units10 += 1;
 			}
 			if (lship.limited == 33) {
-				points33 += lship.pointCost;
+				points33 += bracketBaseCost;
 				units33 += 1;
 			}
 			totalEnhancementsValue += lship.pointCostEnh;
@@ -710,9 +724,6 @@ window.gamedata = {
 						var preEnhID = lship.enhancementOptions[preEnh][0];
 						var preConvNum = lship.enhancementOptions[preEnh][2] || 0;
 						if (preConvNum <= 0) continue;
-						//if (preEnhID === "HANG_BP") { //Wrong place to update lship.fighter, check doesn't always run and seem to duplicate BP slots.
-							//lship.fighters["Breaching Pods"] = (lship.fighters["Breaching Pods"] || 0) + preConvNum;
-						//}
 					}
 				}
 
