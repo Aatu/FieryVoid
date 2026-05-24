@@ -3445,7 +3445,8 @@ class IonFieldGenerator extends Weapon{
 	/*actual applying of effect*/ 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		//not affecting units protected by Advanced Armor!
-		if(WeaponEM::isTargetEMResistant($ship,$system)) return;
+		if($system->advancedArmor) return;
+		if($ship instanceof Mine) return;		
 		//$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		//$shooterID = $shooter->id;
 		if ($system instanceOf Weapon) {//weapon "hit" is forced to shut down for a turn - on top of regular mandatory effects
