@@ -32,7 +32,7 @@ class TorataDartocCA extends BaseShip{
 		$this->addPrimarySystem(new Scanner(5, 18, 6, 8));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 16, 4, 27));
-		$this->addPrimarySystem(new Hangar(5, 2, 0, 0));
+		$this->addPrimarySystem(new Hangar(5, 2));
 		
 		$this->addFrontSystem(new LaserAccelerator(4, 7, 6, 300, 60));
 		$this->addFrontSystem(new PentagonArray(3, 8, 5, 270, 90));
