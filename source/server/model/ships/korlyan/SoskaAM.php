@@ -17,7 +17,7 @@ class SoskaAM extends BaseShip{
  		$this->unofficial = 'S'; //design released after AoG demise
 
 		$this->isd = 2230;
-        $this->fighters = array("assault shuttles"=>2);
+        //$this->fighters = array("assault shuttles"=>2);
 
 	    $this->notes = 'Atmospheric Capable';
 		$this->notes .= "<br>Showdowns-9";		

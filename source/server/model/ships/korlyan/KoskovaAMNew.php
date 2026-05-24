@@ -13,7 +13,7 @@ class KoskovaAMNew extends BaseShip{
 		$this->canvasSize = 160; //img has 200px per side
 
 		$this->isd = 2255;
-        $this->fighters = array("assault shuttles"=>2);
+        //$this->fighters = array("assault shuttles"=>2);
 
 	    $this->notes = 'Atmospheric Capable.';
         
