@@ -1932,12 +1932,12 @@ class GraviticMine extends Weapon{
         if ($unit instanceof Mine) return 0;
         if ($unit instanceof FighterFlight) return 1;
         if ($unit instanceof OSAT) return 1;
+        if ($unit instanceof LCV) return 2;        
         if ($unit->Enormous) return 6;
-        if ($unit->hangarRequired = 'LCVs') return 2;         
         if (!isset($unit->shipSizeClass)) return 0;
         switch ((int)$unit->shipSizeClass) {
             case 0: return 2; // Light combat vessels
-            case 1: return 3; // Medium ships (incl. LCV)
+            case 1: return 3; // Medium ships
             case 2: return 4; // Heavy combat vessels
             case 3: return 5; // Capital ships
             default: return 0;
