@@ -2962,6 +2962,12 @@ class Hangar extends ShipSystem{
 	public $landedThisTurn = 0;           //resets each turn
 	public $usagePopulated = false;       //idempotency guard — first hangar on a ship runs initial population once
 	private $lastSavedUsage = null;       //serialized snapshot of last persisted hangarUsage (avoids duplicate notes)
+	//Stage 15: per-carrier ordnance reload pool. Only the PRIMARY (first)
+	//hangar on a ship carries the spent counter — HangarOps::drawReload writes
+	//here and the per-load note pipeline persists it via hangarOrdReserve. Pool
+	//capacity is re-derived from the carrier's HANG_ORD enhancement on every load.
+	public $reloadPoolSpent = 0;
+	private $lastSavedOrdReserve = null;  //serialized snapshot of last persisted reloadPoolSpent
 	public $pendingLaunchOrder = null;    //decoded latest hangarLaunchOrder for this turn (set by onIndividualNotesLoaded)
 	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
 	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
@@ -3023,6 +3029,16 @@ class Hangar extends ShipSystem{
 				//Latest dock order wins (notes are pre-sorted by id ASC above)
 				$decoded = json_decode($note->notevalue, true);
 				if (is_array($decoded)) $this->pendingDockOrder = $decoded;
+			} else if ($note->notekey === 'hangarOrdReserve'){
+				//Stage 15: total reload points spent so far on this carrier.
+				//Only the primary (first) hangar persists this; secondary
+				//hangars' notes (if any leaked through) get ignored on the
+				//non-primary copies because HangarOps::reloadPoolSpent only
+				//reads from the primary.
+				$spent = (int)$note->notevalue;
+				if ($spent < 0) $spent = 0;
+				$this->reloadPoolSpent = $spent;
+				$this->lastSavedOrdReserve = (string)$spent;
 			}
 		}
 		$this->individualNotes = array();
@@ -3134,6 +3150,38 @@ class Hangar extends ShipSystem{
 				}
 			}
 			HangarOps::processDeployStartTransfer($this, $ship, $gamedata);
+		}
+
+		//Stage 15: persist hangarOrdReserve (ordnance pool spent) ONLY on the
+		//primary hangar. drawReload always writes to the primary; the snapshot
+		//compare here ensures we only write a note when the value actually
+		//changed. Must run BEFORE the hangarUsage early-return below — while
+		//fighters sit docked turn after turn hangarUsage is stable, but the
+		//ordnance pool can still be drawing down each turn and needs to persist.
+		//Mirror of hangarUsage's "don't write a useless first-time note" guard:
+		//player-submission paths (DeploymentGamePhase::process etc.) rebuild
+		//ships from POST JSON via Manager::getShipsFromJSON, producing fresh
+		//Hangar instances with reloadPoolSpent=0 and lastSavedOrdReserve=null
+		//(notes are only loaded for server-side reads via getTacGamedata).
+		//Without this guard, a spurious "0" note would be written every player
+		//submission and clobber the authoritative server-side "spent" value.
+		if (HangarOps::primaryHangar($ship) === $this
+			&& !($this->lastSavedOrdReserve === null && (int)$this->reloadPoolSpent === 0)) {
+			$currentOrd = (string)(int)$this->reloadPoolSpent;
+			if ($currentOrd !== $this->lastSavedOrdReserve){
+				$this->individualNotes[] = new IndividualNote(
+					-1,
+					$gamedata->id,
+					$gamedata->turn,
+					$gamedata->phase,
+					$ship->id,
+					$this->id,
+					'hangarOrdReserve',
+					'Hangar ordnance pool spent',
+					$currentOrd
+				);
+				$this->lastSavedOrdReserve = $currentOrd;
+			}
 		}
 
 		//Persist hangarUsage snapshot, but only if it has actually changed
@@ -3290,6 +3338,17 @@ class Hangar extends ShipSystem{
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
+		//Stage 15: only the primary hangar carries the carrier-level reload pool.
+		//Send capacity (from HANG_ORD) AND spent so the client can render
+		//remaining without needing to re-derive enhancement totals client-side.
+		$ship = $this->getUnit();
+		if ($ship && HangarOps::primaryHangar($ship) === $this) {
+			$cap = HangarOps::reloadPoolCapacity($ship);
+			if ($cap > 0) {
+				$strippedSystem->reloadPoolCapacity = $cap;
+				$strippedSystem->reloadPoolSpent    = (int)$this->reloadPoolSpent;
+			}
+		}
 		//Send last-submitted pending orders so the client can pre-fill the
 		//launch/dock dialogs after a page reload (re-edit a queued order
 		//mid-Firing-Phase, or cancel a queued dock).
@@ -8176,6 +8235,21 @@ class AmmoMagazine extends ShipSystem {
 public function onIndividualNotesLoaded($gamedata) {
     foreach ($this->individualNotes as $currNote) { // Assume ASCENDING sorting - so enact all changes as is
         switch ($currNote->notekey) {
+            case 'AmmoReplenished': // Stage 15: a round was restocked while this flight sat docked
+                // Mirror of AmmoUsed but reversed. Values may go positive temporarily relative
+                // to setEnhancementsFighter's addAmmoEntry which runs AFTER this hook at game
+                // load (TacGamedata::onConstructed) — addAmmoEntry then adds the base load on
+                // top, giving the correct "starting - used + restocked" final count.
+                if (!array_key_exists($currNote->notevalue, $this->ammoCountArray)) {
+                    $this->ammoCountArray[$currNote->notevalue] = 0;
+                }
+                if (!array_key_exists($currNote->notevalue, $this->ammoUsedTotal)) {
+                    $this->ammoUsedTotal[$currNote->notevalue] = 0;
+                }
+                $this->ammoCountArray[$currNote->notevalue] += 1;
+                $this->ammoUsedTotal[$currNote->notevalue]  -= 1;
+                break;
+
             case 'AmmoUsed': // Mode name for ammunition type that was expended
                 // Entry may not exist yet! Due to when enhancements and notes are loaded - in this case, initialize them - values will get negative for a moment, but it's not a problem
                 if (!array_key_exists($currNote->notevalue, $this->ammoCountArray)) {
@@ -8207,8 +8281,91 @@ public function onIndividualNotesLoaded($gamedata) {
         if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $modeName)  $this->ammoJustUsed[] = $modeName;
         $this->individualNotesTransfer = array(); //empty, just in case
     }
- 
-	
+
+	/* Stage 15: rearm at most one missile per turn while this fighter sits docked.
+	 * Driven by HangarOps::serviceDockedFlights, same per-turn tick that drives
+	 * Weapon::whileDocked for matter-weapon ammo. Eligible missile types are
+	 * derived from the docked FLIGHT's AMMO_F* enhancements (purchased load); the
+	 * starting load per fighter equals the enhancement count, so a missile is
+	 * "missing" iff ammoCountArray[mode] < enhancementCount. Most-expensive
+	 * missing type goes first; the carrier's reload pool (HANG_ORD) pays the
+	 * missile's enhancementPrice via HangarOps::drawReload. If the most expensive
+	 * candidate can't be afforded, fall through to the next.
+	 *
+	 * Persistence: writes an AmmoReplenished IndividualNote attached to THIS
+	 * magazine. The hangarOrdReserve note on the carrier's primary hangar is
+	 * persisted by the standard Hangar::generateIndividualNotes change-detection.
+	 * The launch-replay timeline shows neither (the rearm is silent on the carrier
+	 * side); the next turn-load reconstructs the magazine's state from the notes. */
+	public function whileDocked($flight, $carrier, $hangar, $gamedata){
+		if (!($flight instanceof FighterFlight)) return;
+		if (!isset($flight->enhancementOptions) || !is_array($flight->enhancementOptions)) return;
+		if ($this->isDestroyed($gamedata->turn)) return;
+		//Walk the flight's AMMO_F* enhancements and build a price-sorted list of
+		//restock candidates. Each AMMO_F* enhancement maps 1:1 to an AmmoMissileF*
+		//class via its modeName + enhancementPrice — same set setEnhancementsFighter
+		//instantiates when applying the initial load.
+		static $ammoMap = array(
+			'AMMO_FB'  => 'AmmoMissileFB',
+			'AMMO_FL'  => 'AmmoMissileFL',
+			'AMMO_FH'  => 'AmmoMissileFH',
+			'AMMO_FY'  => 'AmmoMissileFY',
+			'AMMO_FD'  => 'AmmoMissileFD',
+			'AMMO_DUM' => 'AmmoMissileFDum',
+		);
+		$candidates = array();
+		foreach ($flight->enhancementOptions as $opt){
+			$enhID    = (string)($opt[0] ?? '');
+			$enhCount = (int)($opt[2] ?? 0);
+			if ($enhCount <= 0)                continue;
+			if (!isset($ammoMap[$enhID]))      continue;
+			$className = $ammoMap[$enhID];
+			if (!class_exists($className))     continue;
+			$ammoClass = new $className();
+			$modeName  = $ammoClass->modeName;
+			//Only restock types this magazine actually carries.
+			if (!array_key_exists($modeName, $this->ammoCountArray)) continue;
+			//"Missing" relative to the starting per-fighter load (enhCount).
+			$current = (int)$this->ammoCountArray[$modeName];
+			if ($current >= $enhCount) continue;
+			$candidates[] = array(
+				'modeName' => $modeName,
+				'price'    => (int)$ammoClass->getPrice($flight),
+			);
+		}
+		if (empty($candidates)) return;
+		//Most expensive first.
+		usort($candidates, function($a, $b){ return $b['price'] - $a['price']; });
+		//Try each in order until one fits the remaining pool. Cheap-type
+		//fallback lets a partial reload happen even when the priciest type
+		//is out of reach — better than failing silently.
+		foreach ($candidates as $cand){
+			if (!HangarOps::drawReload($carrier, $cand['price'])) continue;
+			$this->ammoCountArray[$cand['modeName']] += 1;
+			if (!array_key_exists($cand['modeName'], $this->ammoUsedTotal)) $this->ammoUsedTotal[$cand['modeName']] = 0;
+			$this->ammoUsedTotal[$cand['modeName']] -= 1;
+			//Persist the restock. Note attaches to flight + magazine ids so
+			//reload reconstructs it via onIndividualNotesLoaded above. Use
+			//$flight->id explicitly (not $this->getUnit()) — the magazine is a
+			//subsystem of a Fighter which is itself a subsystem of the flight,
+			//and getUnit()'s exact resolution path varies; the caller already
+			//hands us the authoritative flight.
+			$note = new IndividualNote(
+				-1,
+				$gamedata->id,
+				$gamedata->turn,
+				$gamedata->phase,
+				$flight->id,
+				$this->id,
+				'AmmoReplenished',
+				'Ammunition Magazine - a round restocked',
+				$cand['modeName']
+			);
+			Manager::insertIndividualNote($note);
+			return;   //1 missile per fighter per turn
+		}
+	}
+
 } //endof AmmoMagazine
 
 

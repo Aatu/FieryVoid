@@ -420,6 +420,17 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		this.data["Capacity"] = totalStored + " / " + maxCapacity + " slots";
 	}
 
+	// Stage 15: the primary hangar carries the carrier-level reload-points
+	// reserve (from HANG_ORD). Server emits reloadPoolCapacity + reloadPoolSpent
+	// only on the primary; everything else gets undefined and skips this line.
+	if (typeof this.reloadPoolCapacity === 'number' && this.reloadPoolCapacity > 0) {
+		var spent = parseInt(this.reloadPoolSpent || 0, 10);
+		var remaining = Math.max(0, this.reloadPoolCapacity - spent);
+		this.data["Ordnance Reserve"] = remaining + " / " + this.reloadPoolCapacity + " pts";
+	} else {
+		delete this.data["Ordnance Reserve"];
+	}
+
 	var hasLaunches = false;
 	for (var lkc in launchByClass) { hasLaunches = true; break; }
 	if (displayEntries.length === 0 && !hasLaunches) {

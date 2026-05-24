@@ -211,21 +211,39 @@ class HangarOps {
 	private static $factionShuttleMap = array(
 		'Abbai Matriarchate'  => 'ShuttleAbbai',
 		'Abbai Matriarchate (WotCR)'  => 'ShuttleAbbai',
-		'Brakiri Syndicracy'  => 'ShuttleBrakiri',						
+		'Alacan Republic'  => 'ShuttleAlacan',
+		'Balosian Underdwellers'  => 'ShuttleBalosian',
+		'Belt Alliance'  => 'ShuttleBelt',								
+		'Brakiri Syndicracy'  => 'ShuttleBrakiri',
+		'Cascor Commonwealth'  => 'ShuttleCascor',								
 		'Centauri Republic'  => 'ShuttleCent',
-		'Centauri Republic (WotCR)'  => 'ShuttleCentWotCR',
+		'Centauri Republic (WotCR)'  => 'ShuttleCentWotCR', 
+		'Corillani Theocracy'  => 'ShuttleCorillani',
+		'Deneth Tribes'  => 'ShuttleDeneth',
+		'Descari Committees'  => 'ShuttleDescari',						
 		'Dilgar Imperium'  => 'ShuttleDilgar',
 		'Drazi Freehold'  => 'ShuttleDrazi',
 		'Drazi Freehold (WotCR)'  => 'ShuttleDraziWotCR',		
 		'Earth Alliance'  => 'ShuttleEA',
 		'Earth Alliance (Early)'  => 'ShuttleEA',	
-		'Gaim Intelligence'  => 'ShuttleGaim',			
+		'Gaim Intelligence'  => 'ShuttleGaim',	
+		'Grome Autocracy'  => 'ShuttleGrome',		
+		'Hurr Republic'  => 'ShuttleHurr',
+		'Hyach Gerontocracy'  => 'ShuttleHyach',
+		'Kor-Lyan Kingdoms'  => 'ShuttleKL',
+		'Llort'  => 'ShuttleLlort',	
+		'Markab Theocracy'  => 'ShuttleMarkab',																		
 		'Minbari Federation'   => 'Flyer',
 		'Minbari Protectorate' => 'FlyerProtectorate',
 		'Narn Regime'  => 'ShuttleNarn',
 		'Orieni Imperium'  => 'ShuttleOrieni',
-		"Pak'ma'ra Confederacy"  => 'ShuttlePakMaRa',	
-		'Vree Conglomerate'  => 'ShuttleVree',						
+		"Pak'ma'ra Confederacy"  => 'ShuttlePakMaRa',
+		'Rogolon Dynasty'  => 'ShuttleRogolon',		
+		'Torata Regency'  => 'ShuttleTorata',
+		'Usuuth Coalition'  => 'ShuttleUsuuth',	
+		'Vorlon Empire'  => 'ShuttleVorlons',									
+		'Vree Conglomerate'  => 'ShuttleVree',	
+		'Yolu Confederation'  => 'ShuttleYolu',								
 
 	);
 
@@ -537,6 +555,56 @@ class HangarOps {
 				}
 			}
 		}
+	}
+
+	/* === Stage 15: ordnance reload pool =================================== */
+
+	/* Total purchased reload-pool capacity for $carrier (read from the
+	 * HANG_ORD lobby enhancement). Re-derived on every load; the spent
+	 * portion persists separately via hangarOrdReserve notes. Returns 0
+	 * for carriers that didn't buy any. */
+	public static function reloadPoolCapacity($carrier){
+		if (!isset($carrier->enhancementOptions) || !is_array($carrier->enhancementOptions)) return 0;
+		foreach ($carrier->enhancementOptions as $opt){
+			if (($opt[0] ?? '') === 'HANG_ORD') return max(0, (int)($opt[2] ?? 0));
+		}
+		return 0;
+	}
+
+	/* Total reload points spent across this carrier's lifetime. Read from
+	 * the primary (first) hangar's $reloadPoolSpent field, which is
+	 * persisted via the hangarOrdReserve note in generateIndividualNotes. */
+	public static function reloadPoolSpent($carrier){
+		$primary = self::primaryHangar($carrier);
+		if (!$primary) return 0;
+		return max(0, (int)$primary->reloadPoolSpent);
+	}
+
+	public static function reloadPoolRemaining($carrier){
+		return max(0, self::reloadPoolCapacity($carrier) - self::reloadPoolSpent($carrier));
+	}
+
+	/* Try to draw $cost reload points from $carrier's pool. Returns true on
+	 * success (with the primary hangar's $reloadPoolSpent incremented), false
+	 * if not enough headroom. The mutation persists via the primary hangar's
+	 * generateIndividualNotes which writes a hangarOrdReserve note when the
+	 * counter changes — same change-detection pattern hangarUsage uses. */
+	public static function drawReload($carrier, $cost){
+		$cost = (int)$cost;
+		if ($cost <= 0) return true;
+		if (self::reloadPoolRemaining($carrier) < $cost) return false;
+		$primary = self::primaryHangar($carrier);
+		if (!$primary) return false;
+		$primary->reloadPoolSpent = (int)$primary->reloadPoolSpent + $cost;
+		return true;
+	}
+
+	/* The single hangar on $carrier responsible for holding the
+	 * hangarOrdReserve note. By convention this is the first Hangar in
+	 * encounter order — same one used by populateInitialHangarUsage. */
+	public static function primaryHangar($carrier){
+		foreach (self::collectHangars($carrier) as $h) return $h;   //first
+		return null;
 	}
 
 	/* === Stage 4: launch flow ============================================ */
@@ -1666,6 +1734,12 @@ class HangarOps {
 		}
 		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
 
+		//Stage 15: carry the source flight's AMMO_F* enhancements onto the
+		//fragment so its magazines have modes registered + base load applied
+		//on next-turn relaunch. copyFighterStateToTarget below writes
+		//per-magazine balancing notes for the actual current state.
+		self::copyFlightAmmoEnhancements($sourceFlight, $fragment, $gamedata);
+
 		//Copy damage and crits from each chosen source fighter onto the
 		//corresponding fragment fighter. Pairing is BY ORDER: chosenFighters[i]
 		//→ fragmentFighters[i]. Both flights are constructed from the same
@@ -1767,10 +1841,11 @@ class HangarOps {
 		//runs afterwards and overrides it for dockedFlightId-linked launches.)
 		//Subsystems pair by order — source and target share a phpclass, so the
 		//layout is identical. Only scalar-ammo weapons (SlugCannon family) carry
-		//over here; missile racks (missileArray) are out of scope until Stage 13.
+		//over here; AmmoMagazine state is handled by the Stage 15 block below.
 		//Persisted via the same updateAmmoInfo path fire()/whileDocked use; the
-		//target is a runtime-spawned flight with no enhancementOptions, so there
-		//is no EXT_AMMO bonus to strip before saving.
+		//target is a runtime-spawned flight whose enhancementOptions were just
+		//copied by copyFlightAmmoEnhancements, so there is no EXT_AMMO surprise
+		//to strip before saving.
 		$srcSubs = is_array($sourceFighter->systems) ? array_values($sourceFighter->systems) : array();
 		$tgtSubs = is_array($targetFighter->systems) ? array_values($targetFighter->systems) : array();
 		$pairs = min(count($srcSubs), count($tgtSubs));
@@ -1781,6 +1856,55 @@ class HangarOps {
 			if (!isset($srcSub->ammunition) || !isset($tgtSub->ammunition)) continue;
 			$tgtSub->ammunition = $srcSub->ammunition;
 			Manager::updateAmmoInfo($targetFlight->id, $tgtSub->id, $gamedata->id, $tgtSub->firingMode, $tgtSub->ammunition, $gamedata->turn);
+		}
+
+		//Stage 15: balance target magazines to match source's CURRENT effective
+		//missile count per mode. copyFlightAmmoEnhancements (called once per
+		//flight pair before this loop) added the enhancement count to target's
+		//magazines; per-mode delta = source_current - target_current. Positive
+		//delta means source has MORE than the as-purchased baseline (impossible
+		//absent restocks — write AmmoReplenished notes); negative means source
+		//has spent some — write AmmoUsed notes. Pairing by subsystem order is
+		//valid since source and target share phpclass / populate() layout.
+		for ($s = 0; $s < $pairs; $s++) {
+			if (!($srcSubs[$s] instanceof AmmoMagazine)) continue;
+			if (!($tgtSubs[$s] instanceof AmmoMagazine)) continue;
+			$srcMag = $srcSubs[$s];
+			$tgtMag = $tgtSubs[$s];
+			if (!is_array($srcMag->ammoCountArray)) continue;
+			foreach ($srcMag->ammoCountArray as $modeName => $srcCount) {
+				$srcCount = (int)$srcCount;
+				$tgtCount = (int)($tgtMag->ammoCountArray[$modeName] ?? 0);
+				$delta = $srcCount - $tgtCount;
+				if ($delta === 0) continue;
+				if ($delta > 0) {
+					$noteKey   = 'AmmoReplenished';
+					$noteHuman = 'Ammunition Magazine - a round restocked';
+					$count     = $delta;
+				} else {
+					$noteKey   = 'AmmoUsed';
+					$noteHuman = 'Ammunition Magazine - a round is drawn';
+					$count     = -$delta;
+				}
+				for ($i = 0; $i < $count; $i++) {
+					$note = new IndividualNote(
+						-1,
+						$gamedata->id,
+						$gamedata->turn,
+						$gamedata->phase,
+						$targetFlight->id,
+						$tgtMag->id,
+						$noteKey,
+						$noteHuman,
+						$modeName
+					);
+					Manager::insertIndividualNote($note);
+				}
+				if (!array_key_exists($modeName, $tgtMag->ammoCountArray)) {
+					$tgtMag->ammoCountArray[$modeName] = 0;
+				}
+				$tgtMag->ammoCountArray[$modeName] += $delta;
+			}
 		}
 	}
 
@@ -1819,6 +1943,7 @@ class HangarOps {
 
 		$remaining = $launchCount;
 		$newEntries = array();
+		$ammoCopiedFromFlightId = 0;   //Stage 15: copy AMMO_F* once per launchedFlight
 
 		foreach ($hangar->hangarUsage as $entry) {
 			//Stage 16.5: a cannotLaunch wreck is never consumed by a launch — keep
@@ -1836,9 +1961,18 @@ class HangarOps {
 				$fragmentId = (int)$entry['dockedFlightId'];
 				$fragment = $gamedata->getShipById($fragmentId);
 				if ($fragment instanceof FighterFlight) {
-					//Priority-select $take fighters from fragment (most-damaged
-					//first, back-of-array tiebreak) — same order Stage 10.3
-					//uses for dock selection.
+					//Stage 15: copy AMMO_F* enhancements from the (first) fragment
+					//to the launched flight ONCE so its magazines have the modes
+					//registered + base load applied. Per-fighter balancing notes
+					//written by copyFighterStateToTarget below adjust for actual
+					//current state (restocked + spent).
+					if ($ammoCopiedFromFlightId !== $fragment->id) {
+						self::copyFlightAmmoEnhancements($fragment, $launchedFlight, $gamedata);
+						$ammoCopiedFromFlightId = $fragment->id;
+					}
+
+					//Priority-select $take fighters from fragment (Stage 15:
+					//missile-count DESC, then damage DESC, back-of-array tiebreak).
 					$chosen = self::selectFightersForExtraction($fragment, $take, $gamedata);
 
 					//Transfer damage/crits onto the next slice of launched
@@ -1906,12 +2040,19 @@ class HangarOps {
 		$hangar->hangarUsage = $newEntries;
 	}
 
-	/* Priority-ordered fighter pick WITHOUT applying any crit (Stage 10.3
-	 * priority: most damage first, back-of-array tiebreak). Used by
+	/* Priority-ordered fighter pick WITHOUT applying any crit. Used by
 	 * consumeStashesForLaunch when extracting fighters from an OLD
 	 * fragment — the OLD fragment's selected fighters are NOT crit'd
 	 * directly; instead they're either fully destroyed (via
 	 * destroyAllFighters) or their state is copied to a new fragment.
+	 *
+	 * Priority (Stage 15 update):
+	 *   1. Loaded missile count DESC — fighters carrying carrier-pool
+	 *      restocks are extracted first so split-launches actually carry
+	 *      the restocked ordnance into combat (rather than leaving it in
+	 *      the leftover stashed fragment, which is the user-facing rule).
+	 *   2. Damage DESC — Stage 10.3 priority preserved as secondary.
+	 *   3. Index DESC — back-of-array tiebreak.
 	 */
 	private static function selectFightersForExtraction($flight, $count, $gamedata){
 		if ($count <= 0) return array();
@@ -1924,10 +2065,12 @@ class HangarOps {
 				'fighter' => $fighter,
 				'idx'     => $idx,
 				'damage'  => (int)$fighter->getTotalDamage(),
+				'ammo'    => self::countLoadedMissiles($fighter),
 			);
 		}
 
 		usort($candidates, function($a, $b){
+			if ($a['ammo']   !== $b['ammo'])   return $b['ammo']   - $a['ammo'];     //missiles DESC
 			if ($a['damage'] !== $b['damage']) return $b['damage'] - $a['damage'];   //damage DESC
 			return $b['idx'] - $a['idx'];                                            //index DESC
 		});
@@ -1938,6 +2081,78 @@ class HangarOps {
 			$chosen[] = $c['fighter'];
 		}
 		return $chosen;
+	}
+
+	/* Sum of all loaded missiles across a Fighter's AmmoMagazines. Used by
+	 * selectFightersForExtraction to surface "has carrier-pool restocked
+	 * missiles" as the primary extraction priority. */
+	private static function countLoadedMissiles($fighter){
+		if (!isset($fighter->systems) || !is_array($fighter->systems)) return 0;
+		$total = 0;
+		foreach ($fighter->systems as $sys) {
+			if (!($sys instanceof AmmoMagazine)) continue;
+			if (!is_array($sys->ammoCountArray)) continue;
+			foreach ($sys->ammoCountArray as $count) {
+				if ($count > 0) $total += (int)$count;
+			}
+		}
+		return $total;
+	}
+
+	/* Stage 15 carry-over: copies the source flight's purchased AMMO_F*
+	 * enhancements onto a runtime-spawned target flight (split-launch in
+	 * consumeStashesForLaunch, partial-dock/extract fragment in
+	 * spawnFragmentFlight). Runtime spawns don't inherit tac_enhancements
+	 * rows, so without this the target's magazines load with no modes
+	 * registered beyond populate()'s default and setEnhancementsFighter
+	 * applies nothing on next-turn load — any AMMO_F* state from the source
+	 * (including carrier-pool restocks) would vanish.
+	 *
+	 * Three side effects, each load-stage critical:
+	 *   1. Insert tac_enhancements rows so next-turn getEnhancementsForGame
+	 *      rebuilds target->enhancementOptions correctly.
+	 *   2. Mirror onto target->enhancementOptions in memory so current-turn
+	 *      callers (HangarOps::reloadPoolCapacity, future feature checks)
+	 *      see the same shape next-turn load will produce.
+	 *   3. Apply the enhancement count to target's magazines in memory so
+	 *      current-turn display + fire orders work — mirrors what
+	 *      setEnhancementsFighter does at load time.
+	 *
+	 * copyFighterStateToTarget then writes per-magazine balancing notes so
+	 * the rebuilt state reflects the source's *actual current* count
+	 * (post-firing, post-restocks), not just the as-purchased baseline.
+	 */
+	private static function copyFlightAmmoEnhancements($sourceFlight, $targetFlight, $gamedata){
+		if (!is_array($sourceFlight->enhancementOptions)) return;
+		static $ammoFmap = array(
+			'AMMO_FB'  => 'AmmoMissileFB',
+			'AMMO_FL'  => 'AmmoMissileFL',
+			'AMMO_FH'  => 'AmmoMissileFH',
+			'AMMO_FY'  => 'AmmoMissileFY',
+			'AMMO_FD'  => 'AmmoMissileFD',
+			'AMMO_DUM' => 'AmmoMissileFDum',
+		);
+		foreach ($sourceFlight->enhancementOptions as $opt){
+			$enhID    = (string)($opt[0] ?? '');
+			$enhName  = (string)($opt[1] ?? '');
+			$enhCount = (int)($opt[2] ?? 0);
+			if ($enhCount <= 0)                continue;
+			if (!isset($ammoFmap[$enhID]))     continue;
+			$cls = $ammoFmap[$enhID];
+			if (!class_exists($cls))           continue;
+
+			Manager::insertSingleEnhancement($gamedata, $targetFlight->id, $enhID, $enhCount, $enhName);
+			$targetFlight->enhancementOptions[] = array($enhID, $enhName, $enhCount, 0, 0, 0);
+
+			foreach ($targetFlight->systems as $craft) {
+				if (!($craft instanceof Fighter)) continue;
+				if (!isset($craft->systems) || !is_array($craft->systems)) continue;
+				foreach ($craft->systems as $sys) {
+					if (!($sys instanceof AmmoMagazine)) continue;
+					$sys->addAmmoEntry(new $cls(), $enhCount, true);
+				}
+			}
+		}
 	}
 
 	/* Apply DisengagedFighter to every active fighter on $flight. Used by

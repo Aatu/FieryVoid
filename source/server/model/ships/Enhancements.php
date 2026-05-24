@@ -49,6 +49,7 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'HANG_AS';
 		$unit->enhancementOptionsDisabled[] = 'HANG_BP';
 		$unit->enhancementOptionsDisabled[] = 'HANG_MSW';
+		$unit->enhancementOptionsDisabled[] = 'HANG_ORD';
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -291,6 +292,43 @@ class Enhancements{
 				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
 	    }
+	  }
+
+	  //Stage 15 — Extra Ordnance: carrier-level reload-points pool for docked
+	  //fighter missiles. 1 CP buys 1 reload point; a docked flight's
+	  //AmmoMagazine::whileDocked spends points equal to a restocked missile's
+	  //own enhancementPrice when re-arming. Read on demand from this option's
+	  //count by HangarOps::reloadPoolCapacity — no $ship mutation needed.
+	  //
+	  //Gated to carriers in factions that actually field missile-equipped
+	  //fighters (the only fleets where the pool can be drawn from). Restricted
+	  //to ships with a Hangar so non-carrier missile-faction ships (escorts,
+	  //bases without hangars) don't see it.
+	  $missileFactionWhitelist = array(
+		  'Earth Alliance', 'Earth Alliance (Early)',
+		  'Centauri Republic', 'Centauri Republic (WotCR)',
+		  'Narn Regime',
+		  'Dilgar Imperium',
+		  'Orieni Imperium', 'Orieni Imperium (defenses)',
+		  'Gaim Intelligence',
+		  'Hurr Republic',
+		  'Cascor Commonwealth',
+		  'Kor-Lyan Kingdoms',
+		  'Belt Alliance',
+		  'Rogolon Dynasty',
+		  'Raiders', 'Custom Ships',
+	  );
+	  $fighterSlotKeys = ['normal', 'heavy', 'medium', 'light', 'ultralight'];
+	  $hasFighters = array_sum(array_intersect_key($ship->fighters ?? [], array_flip($fighterSlotKeys))) > 0;
+	  if ($hasFighters && in_array($ship->faction, $missileFactionWhitelist, true)) {
+		  $enhID = 'HANG_ORD';
+		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Extra Ordnance Reserve';
+				$enhLimit = 200;            //practical ceiling — six AMMO_FH heavies (8 PV ea) on a 6-fighter heavy missile flight
+				$enhPrice = 1;             //1 CP = 1 reload point
+				$enhPriceStep = 0;         //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
 	  }
 
 	  $enhID = 'IFF_SYS';
@@ -1949,6 +1987,13 @@ class Enhancements{
 						//Instead, HangarOps::populateInitialHangarUsage reads HANG_MSW
 						//count directly and splits leftover-capacity auto-population
 						//between MinesweepingShuttle and regular Shuttle records.
+						break;
+
+					case 'HANG_ORD'://Stage 15 — Extra Ordnance Reserve (carrier-level reload pool)
+						//No $ship mutation needed. Pool capacity is re-derived on every
+						//load by HangarOps::reloadPoolCapacity reading this enhancement
+						//count directly; spent total persists via the hangarOrdReserve
+						//note on the primary hangar.
 						break;
 												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.

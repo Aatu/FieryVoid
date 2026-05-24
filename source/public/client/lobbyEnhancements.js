@@ -164,6 +164,13 @@ window.lobbyEnhancements = {
 						ship.hangMswEnh = true;
 						break;
 
+					case 'HANG_ORD'://Stage 15: Extra Ordnance Reserve (carrier missile reload pool)
+						if (!ship.hangOrdEnh) {
+							ship.notes += "<br>Extra Ordnance Reserve (" + enhCount + " pts)";
+						}
+						ship.hangOrdEnh = true;
+						break;
+
 
 					case 'IFF_SYS':
 						if (!ship.iffEnh) {
@@ -1358,6 +1365,10 @@ window.lobbyEnhancements = {
 
 				case 'HANG_MSW'://Default Shuttle unit to Minesweeping Shuttle
 					ship.hangMswEnh = false;
+					break;
+
+				case 'HANG_ORD'://Stage 15: Extra Ordnance Reserve (carrier missile reload pool)
+					ship.hangOrdEnh = false;
 					break;
 
 				case 'IFF_SYS':

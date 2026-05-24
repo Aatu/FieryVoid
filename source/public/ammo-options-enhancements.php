@@ -68,10 +68,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     This means your ammo magazine may show more missiles available than it can actually hold but you cannot actually launch more missiles than magazine total. 
     Essentially, the extra missiles purchased provide you with extra variety, but not actual extra missiles in your magazine!</p>
 
-    <p>Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo. 
+    <p>Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. 
+    This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo. 
     This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). 
-    You are therefore encouraged to observe the total number of missiles a fighter can have, but if you do not (whether by omission or intentionally) - you will get an extra missile variety, but no extra missiles. 
-    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons) and will lose a missile they are carrying if they take 2 or more damage from a single shot.</p>
+    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons) and will lose a missile they are carrying if they take 2 or more damage from a single shot. 
+  In addition, fighters can dock on firendly carriers and reload the missiles they started the game with, providing the carrier has purchased the Extra Ordnance Resource enhancement (see below) and there are sufficient ordnance points to cover the cost of the replacement missiles.</p>
 
     <p>Missiles do not use firing ship\'s OEW and their built-in guidance package is usually combined into weapons' Fire control, rather than being kept separate.  Fighter missiles do benefit from the fighter's offensive bonus.</p>
     <p>Ammo listings usually mention ISD year for when that missile type becomes available (if two dates the first refers to Kor-Lyan only). This is not enforced by Fiery Void so players will need to do this themselves.</p>
@@ -139,6 +140,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: 2</li>
         </ul>      
       </li>
+      <li><strong>Extra Ordnance Reserve</strong>
+        <ul class="circle-list">
+            <li>A pool of points used to re-stock missile and torpedo allocations to docked fighters</li>
+            <li>Points Cost: Up to 200pts can be bought, and the cost of missiles to restock docked fighters will be drawn from this reserve.</li>
+            <li>Limit: 200pts</li>
+        </ul>      
+      </li>      
       <li><strong>Assault Shuttle / Fighter Hangar Conversions</strong>
         <ul class="circle-list">
             <li>Converts either a fighter slot into an assault shuttle slot, or vice versa</li>
