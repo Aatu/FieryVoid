@@ -1634,7 +1634,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	
 	// ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-		if (WeaponEM::isTargetEMResistant($target,$system)){
+		if ($system->advancedArmor){
 			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 			$returnArmour = floor($returnArmour/2);
 			return $returnArmour;
