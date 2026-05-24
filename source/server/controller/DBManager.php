@@ -3833,21 +3833,16 @@ public function setLastTimeChatChecked($userid, $gameid)
 
     public function getLadderStandings()
     {
+        // Every player in tac_ladder_rankings appears in standings; wins/losses
+        // are counted directly from tac_ladder_games (no tac_game dependency),
+        // so a player's score persists after their old games are purged.
         $sql = "SELECT r.playerid, r.rating, p.username,
                 (SELECT COUNT(*) FROM tac_ladder_games g WHERE g.playerid = r.playerid AND g.status = 'WIN') as wins,
                 (SELECT COUNT(*) FROM tac_ladder_games g WHERE g.playerid = r.playerid AND g.status = 'LOSS') as losses
                 FROM tac_ladder_rankings r
                 LEFT JOIN player p ON r.playerid = p.id
-                WHERE 
-                    (SELECT COUNT(*) FROM tac_ladder_games lg WHERE lg.playerid = r.playerid) = 0
-                    OR
-                    EXISTS (
-                        SELECT 1 FROM tac_ladder_games lg 
-                        JOIN tac_game g ON lg.gameid = g.id 
-                        WHERE lg.playerid = r.playerid
-                    )
                 ORDER BY r.rating DESC";
-                
+
         return $this->query($sql);
     }
 }
