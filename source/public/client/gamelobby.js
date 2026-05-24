@@ -3512,7 +3512,7 @@ window.gamedata = {
 			}
 			const pointsAvailable = slot.points - spentPoints;
 			if (response.list && pointsAvailable < response.list.points) {
-				if (gamedata.selectedSlot.points !== -1) { // Unlimited points				
+				if (slot.points !== -1) { // Unlimited points				
 					confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
 					return;
 				}
