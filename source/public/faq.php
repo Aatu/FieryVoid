@@ -335,6 +335,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <ul class="circle-list">
                     <li><strong>Matter weapons</strong> (SlugCannon, Gatling Gun, etc.): restore 1 round per weapon per turn while docked, up to the weapon's starting load.  This is free and automatic — no carrier cost.</li>
                     <li><strong>Missiles</strong>: require a pre-purchased <strong>Ordnance Reserve</strong> enhancement on the carrier (see below).  One missile per fighter per turn is restocked automatically, most expensive missile type first, drawing from the shared pool.</li>
+                    <li><strong>Marines (Breaching Pods)</strong>: require a pre-purchased <strong>Extra Marine Contingents</strong> enhancement on the carrier (see below).  One marine unit per pod per turn is restocked automatically while docked, drawing from the shared marine pool.</li>
                     <li>The turn the flight docks does not count — rearming begins on the first full turn spent inside the hangar.</li>
                     <li>When a flight is split on relaunch, the fighters with the most missiles (i.e., those that were restocked) are extracted first into the launched flight.</li>
                 </ul>
@@ -347,6 +348,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Each turn a missile or torpedo flight is docked (and has been in for a full turn), the carrier spends points from the reserve equal to the <strong>PV of the missile type</strong> being restocked.  The most expensive type is always refilled first.</li>
                     <li>The pool is <strong>one-way</strong>: spent points does not regenerate during the battle.</li>
                     <li>Only carriers with combat fighter hangar slots (i.e. not small hangars with only shuttles) have access to the Ordnance Reserve option in the Lobby.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Extra Marine Contingents:</b> Any ship can purchase Extra Marine Contingents in the Fleet Lobby — a pool of additional marine units used to restock docked Breaching Pods.
+                <ul class="circle-list">
+                    <li>Each contingent costs <strong>10 points</strong> and represents a single marine unit.</li>
+                    <li>Limit per ship: <strong>1% of the ship's base Combat Point value</strong>, rounded up (e.g. a 600-PV ship can buy up to 6 contingents).</li>
+                    <li>The pool is <strong>shared across the whole carrier</strong> and is shown in the Hangar system tooltip as <i>"Marine Contingents: X / Y"</i>.</li>
+                    <li>Each turn a Breaching Pod flight is docked (and has been in for a full turn), the carrier spends 10 points from the pool to restock one marine unit per pod, up to each pod's starting load (including any Extra Marine Units flight enhancement).</li>
+                    <li>The pool is <strong>one-way</strong>: spent points do not regenerate during the battle.</li>
                 </ul>
             </li>
             <br>
