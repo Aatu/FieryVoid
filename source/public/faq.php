@@ -344,9 +344,9 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>Ordnance Reserve:</b> Carriers in missile-capable factions can purchase an Ordnance Reserve enhancement in the Fleet Lobby, up to 200 points.
                 <ul class="circle-list">
                     <li>The pool is <strong>shared across the whole carrier</strong> and is shown in the Hangar system tooltip as <i>"Ordnance Reserve: X / Y pts"</i>.</li>
-                    <li>Each turn a missile flight is docked (and has been in for a full turn), the carrier spends points from the reserve equal to the <strong>PV of the missile type</strong> being restocked — more expensive missiles cost more points.  The most expensive type is always refilled first.</li>
-                    <li>The pool is <strong>one-way</strong>: spent points do not regenerate during the battle.</li>
-                    <li>Only carriers with combat fighter hangar slots (not just shuttles) have access to the Ordnance Reserve option in the Lobby.</li>
+                    <li>Each turn a missile or torpedo flight is docked (and has been in for a full turn), the carrier spends points from the reserve equal to the <strong>PV of the missile type</strong> being restocked.  The most expensive type is always refilled first.</li>
+                    <li>The pool is <strong>one-way</strong>: spent points does not regenerate during the battle.</li>
+                    <li>Only carriers with combat fighter hangar slots (i.e. not small hangars with only shuttles) have access to the Ordnance Reserve option in the Lobby.</li>
                 </ul>
             </li>
             <br>
