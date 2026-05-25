@@ -357,7 +357,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Each contingent costs <strong>10 points</strong> and represents a single marine unit.</li>
                     <li>Limit per ship: <strong>1% of the ship's base Combat Point value</strong>, rounded up (e.g. a 600-PV ship can buy up to 6 contingents).</li>
                     <li>The pool is <strong>shared across the whole carrier</strong> and is shown in the Hangar system tooltip as <i>"Marine Contingents: X / Y"</i>.</li>
-                    <li>Each turn a Breaching Pod flight is docked (and has been in for a full turn), the carrier spends 10 points from the pool to restock one marine unit per pod, up to each pod's starting load (including any Extra Marine Units flight enhancement).</li>
+                    <li>Each turn a Breaching Pod flight is docked for a full turn it is able to restock one marine unit per pod from the Marine Contingent pool, up to each pod's starting load (including any Extra Marine Units bought as an enhancement).</li>
                     <li>The pool is <strong>one-way</strong>: spent points do not regenerate during the battle.</li>
                 </ul>
             </li>
