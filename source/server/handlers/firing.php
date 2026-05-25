@@ -488,10 +488,17 @@ class Firing
                         //    $selfPosPrevious = $selfPosNow;
                         //    $targetPosPrevious = $targetPosNow;
                         //} else {//standard - check actual position at the end of previous turn
+                            //Null-guard: getLastTurnMovement can return null when a unit
+                            //has no eligible movement entry for the start-of-turn lookup
+                            //(immobile terrain with only a "start" move on turn-1 firing;
+                            //or any future call site where the filter excludes every entry).
+                            //An immobile unit's previous-turn position equals its current
+                            //position, so falling back to getCoPos() preserves the same-hex
+                            //check semantics without changing established movement rules.
                             $movement = $interceptingShip->getLastTurnMovement($fire->turn);
-                            $selfPosPrevious = mathlib::hexCoToPixel($movement->position); //at start of turn
+                            $selfPosPrevious = $movement ? mathlib::hexCoToPixel($movement->position) : $selfPosNow;
                             $movement = $target->getLastTurnMovement($fire->turn);
-                            $targetPosPrevious = mathlib::hexCoToPixel($movement->position); //at start of turn
+                            $targetPosPrevious = $movement ? mathlib::hexCoToPixel($movement->position) : $targetPosNow;
                         //}
 
                         if (($selfPosNow == $targetPosNow) && ($selfPosPrevious == $targetPosPrevious)) {
