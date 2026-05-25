@@ -331,6 +331,24 @@ class Enhancements{
 		  }
 	  }
 
+	  //Stage 17 extension — Extra Marine Contingents: ship-level pool used to
+	  //restock Marines weapons on Breaching Pods docked in this ship's hangars.
+	  //Each enhancement point buys 1 marine unit at 10 CP; pool capacity is
+	  //read on demand by HangarOps::marinePoolCapacity from this entry's count.
+	  //Spent total persists on the primary hangar via the hangarMarineReserve
+	  //note (parallel to Stage 15's hangarOrdReserve). Available to all ships
+	  //per design — non-carrier ships can buy it but never trigger drawdown
+	  //(serviceDockedFlights iterates hangar contents, so no hangar = no draw).
+	  //Limit: 1% of ship's base point cost, rounded up.
+	  $enhID = 'MAR_CONT';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){
+		  $enhName = 'Extra Marine Contingents';
+		  $enhLimit = max(1, (int)ceil($ship->pointCost / 100));   //1% of PV, rounded up; minimum 1
+		  $enhPrice = 10;            //10 CP per marine
+		  $enhPriceStep = 0;         //flat rate
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+	  }
+
 	  $enhID = 'IFF_SYS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Identify Friend or Foe (IFF) System';
@@ -1994,6 +2012,13 @@ class Enhancements{
 						//load by HangarOps::reloadPoolCapacity reading this enhancement
 						//count directly; spent total persists via the hangarOrdReserve
 						//note on the primary hangar.
+						break;
+
+					case 'MAR_CONT'://Stage 17 ext — Extra Marine Contingents (ship-level marine pool)
+						//No $ship mutation needed. Pool capacity is re-derived on every
+						//load by HangarOps::marinePoolCapacity reading this enhancement
+						//count directly; spent total persists via the hangarMarineReserve
+						//note on the primary hangar. Drawn from by Marines::whileDocked.
 						break;
 												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.

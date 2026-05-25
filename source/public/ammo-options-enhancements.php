@@ -145,8 +145,15 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>A pool of points used to re-stock missile and torpedo allocations to docked fighters</li>
             <li>Points Cost: Up to 200pts can be bought, and the cost of missiles to restock docked fighters will be drawn from this reserve.</li>
             <li>Limit: 200pts</li>
-        </ul>      
-      </li>      
+        </ul>
+      </li>
+      <li><strong>Extra Marine Contingents</strong>
+        <ul class="circle-list">
+            <li>A pool of additional marine units used to re-stock the Marines weapon on Breaching Pods that dock back into the carrier (1 marine per pod per turn while docked).</li>
+            <li>Points Cost: 10pts per contingent — each contingent is a single marine unit.</li>
+            <li>Limit: 1% of the ship's base Combat Point value, rounded up (so a 600-PV ship can buy up to 6 contingents).</li>
+        </ul>
+      </li>
       <li><strong>Assault Shuttle / Fighter Hangar Conversions</strong>
         <ul class="circle-list">
             <li>Converts either a fighter slot into an assault shuttle slot, or vice versa</li>

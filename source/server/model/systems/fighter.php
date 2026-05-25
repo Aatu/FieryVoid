@@ -19,6 +19,11 @@
 		//(enforces 1 missile per fighter per turn). Not persisted — fresh objects
 		//each turn-load have this null, which is the desired reset behaviour.
 		public $missileRackReloadedTurn = null;
+		//Stage 17 ext: parallel transient gate for Marines::whileDocked.
+		//Stamped when a Marines weapon on this fighter restocks, read by
+		//sibling Marines weapons to enforce 1 marine per fighter per turn.
+		//Same reset-on-load semantics as missileRackReloadedTurn.
+		public $marinesReloadedTurn = null;
 
 
 		public $possibleCriticals = array();

@@ -2968,6 +2968,12 @@ class Hangar extends ShipSystem{
 	//capacity is re-derived from the carrier's HANG_ORD enhancement on every load.
 	public $reloadPoolSpent = 0;
 	private $lastSavedOrdReserve = null;  //serialized snapshot of last persisted reloadPoolSpent
+	//Stage 17 ext: per-carrier marine contingents pool. Same primary-hangar
+	//pattern as $reloadPoolSpent — HangarOps::drawMarineReload writes here,
+	//persisted via hangarMarineReserve note. Capacity re-derived from the
+	//carrier's MAR_CONT enhancement on every load.
+	public $marinePoolSpent = 0;
+	private $lastSavedMarinePool = null;  //serialized snapshot of last persisted marinePoolSpent
 	public $pendingLaunchOrder = null;    //decoded latest hangarLaunchOrder for this turn (set by onIndividualNotesLoaded)
 	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
 	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
@@ -3039,6 +3045,13 @@ class Hangar extends ShipSystem{
 				if ($spent < 0) $spent = 0;
 				$this->reloadPoolSpent = $spent;
 				$this->lastSavedOrdReserve = (string)$spent;
+			} else if ($note->notekey === 'hangarMarineReserve'){
+				//Stage 17 ext: total marine pool points spent so far. Parallel
+				//to hangarOrdReserve — only the primary hangar persists this.
+				$spent = (int)$note->notevalue;
+				if ($spent < 0) $spent = 0;
+				$this->marinePoolSpent = $spent;
+				$this->lastSavedMarinePool = (string)$spent;
 			}
 		}
 		$this->individualNotes = array();
@@ -3181,6 +3194,27 @@ class Hangar extends ShipSystem{
 					$currentOrd
 				);
 				$this->lastSavedOrdReserve = $currentOrd;
+			}
+		}
+
+		//Stage 17 ext: same primary-only persistence for marine pool, same
+		//POST-side reconstruction guard.
+		if (HangarOps::primaryHangar($ship) === $this
+			&& !($this->lastSavedMarinePool === null && (int)$this->marinePoolSpent === 0)) {
+			$currentMar = (string)(int)$this->marinePoolSpent;
+			if ($currentMar !== $this->lastSavedMarinePool){
+				$this->individualNotes[] = new IndividualNote(
+					-1,
+					$gamedata->id,
+					$gamedata->turn,
+					$gamedata->phase,
+					$ship->id,
+					$this->id,
+					'hangarMarineReserve',
+					'Hangar marine pool spent',
+					$currentMar
+				);
+				$this->lastSavedMarinePool = $currentMar;
 			}
 		}
 
@@ -3347,6 +3381,12 @@ class Hangar extends ShipSystem{
 			if ($cap > 0) {
 				$strippedSystem->reloadPoolCapacity = $cap;
 				$strippedSystem->reloadPoolSpent    = (int)$this->reloadPoolSpent;
+			}
+			//Stage 17 ext: same primary-only pattern for marine pool.
+			$marCap = HangarOps::marinePoolCapacity($ship);
+			if ($marCap > 0) {
+				$strippedSystem->marinePoolCapacity = $marCap;
+				$strippedSystem->marinePoolSpent    = (int)$this->marinePoolSpent;
 			}
 		}
 		//Send last-submitted pending orders so the client can pre-fill the

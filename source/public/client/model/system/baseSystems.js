@@ -166,6 +166,18 @@ CnC.prototype.initializationUpdate = function () {
 			else if (ship.shipSizeClass === 1) marines += 2;
 		}
 
+		// Stage 17 ext: live MAR_CONT count during buying — every purchased
+		// Extra Marine Contingent represents 1 marine unit added to defenders
+		// (spent total is 0 in buying phase so capacity == remaining).
+		if (ship.enhancementOptions && ship.enhancementOptions.length) {
+			for (var ei = 0; ei < ship.enhancementOptions.length; ei++) {
+				var enh = ship.enhancementOptions[ei];
+				if (enh && enh[0] === 'MAR_CONT' && (enh[2] | 0) > 0) {
+					marines += (enh[2] | 0);
+				}
+			}
+		}
+
 		this.data["Marine Units"] = Math.max(0, marines);
 	} else {
 		this.data["Marine Units"] = this.marines || 0;
@@ -429,6 +441,18 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		this.data["Ordnance Reserve"] = remaining + " / " + this.reloadPoolCapacity + " pts";
 	} else {
 		delete this.data["Ordnance Reserve"];
+	}
+
+	// Stage 17 ext: parallel marine-pool display (from MAR_CONT). Same
+	// primary-only emission pattern as Ordnance Reserve. Units are marines,
+	// not points — each pool entry equals one marine unit and each restock
+	// costs 10 CP to purchase (cost lives in the price, not the unit).
+	if (typeof this.marinePoolCapacity === 'number' && this.marinePoolCapacity > 0) {
+		var marSpent = parseInt(this.marinePoolSpent || 0, 10);
+		var marRemaining = Math.max(0, this.marinePoolCapacity - marSpent);
+		this.data["Marine Contingents"] = marRemaining + " / " + this.marinePoolCapacity;
+	} else {
+		delete this.data["Marine Contingents"];
 	}
 
 	var hasLaunches = false;

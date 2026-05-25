@@ -607,6 +607,47 @@ class HangarOps {
 		return null;
 	}
 
+	/* === Stage 17 ext: marine contingents pool ============================ */
+
+	/* Total purchased marine-pool capacity for $carrier (read from the
+	 * MAR_CONT lobby enhancement). Each point = 1 marine unit. Re-derived on
+	 * every load; spent portion persists separately via hangarMarineReserve
+	 * notes. Returns 0 for carriers that didn't buy any. */
+	public static function marinePoolCapacity($carrier){
+		if (!isset($carrier->enhancementOptions) || !is_array($carrier->enhancementOptions)) return 0;
+		foreach ($carrier->enhancementOptions as $opt){
+			if (($opt[0] ?? '') === 'MAR_CONT') return max(0, (int)($opt[2] ?? 0));
+		}
+		return 0;
+	}
+
+	/* Total marine pool points spent across this carrier's lifetime. Read
+	 * from the primary hangar's $marinePoolSpent (persisted via the
+	 * hangarMarineReserve note in generateIndividualNotes). */
+	public static function marinePoolSpent($carrier){
+		$primary = self::primaryHangar($carrier);
+		if (!$primary) return 0;
+		return max(0, (int)$primary->marinePoolSpent);
+	}
+
+	public static function marinePoolRemaining($carrier){
+		return max(0, self::marinePoolCapacity($carrier) - self::marinePoolSpent($carrier));
+	}
+
+	/* Try to draw $cost marine-pool points from $carrier's pool. Returns
+	 * true on success (with the primary hangar's $marinePoolSpent
+	 * incremented), false if not enough headroom or no primary hangar
+	 * exists. Mirrors drawReload exactly. */
+	public static function drawMarineReload($carrier, $cost){
+		$cost = (int)$cost;
+		if ($cost <= 0) return true;
+		if (self::marinePoolRemaining($carrier) < $cost) return false;
+		$primary = self::primaryHangar($carrier);
+		if (!$primary) return false;
+		$primary->marinePoolSpent = (int)$primary->marinePoolSpent + $cost;
+		return true;
+	}
+
 	/* === Stage 4: launch flow ============================================ */
 
 	/* Spawn a new FighterFlight from a hangar's stored craft.

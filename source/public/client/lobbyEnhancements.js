@@ -171,6 +171,13 @@ window.lobbyEnhancements = {
 						ship.hangOrdEnh = true;
 						break;
 
+					case 'MAR_CONT'://Stage 17 ext: Extra Marine Contingents (ship-level marine pool)
+						if (!ship.marContEnh) {
+							ship.notes += "<br>Extra Marine Contingents (" + enhCount + ")";
+						}
+						ship.marContEnh = true;
+						break;
+
 
 					case 'IFF_SYS':
 						if (!ship.iffEnh) {
@@ -1369,6 +1376,10 @@ window.lobbyEnhancements = {
 
 				case 'HANG_ORD'://Stage 15: Extra Ordnance Reserve (carrier missile reload pool)
 					ship.hangOrdEnh = false;
+					break;
+
+				case 'MAR_CONT'://Stage 17 ext: Extra Marine Contingents (ship-level marine pool)
+					ship.marContEnh = false;
 					break;
 
 				case 'IFF_SYS':

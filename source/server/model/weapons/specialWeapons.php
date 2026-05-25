@@ -7551,7 +7551,95 @@ class Marines extends Weapon implements SpecialAbility{
 	}
 
 
-	private function checkAttachedAmount($target, $gamedata, $fireOrder){	
+	/* Stage 17 ext: marine reload while docked. Driven by HangarOps::serviceDockedFlights
+	 * (same per-turn tick driving Weapon::whileDocked for matter weapons and
+	 * FighterMissileRack::whileDocked for fighter missiles). Each restocked
+	 * marine draws 10 pts from the carrier's MAR_CONT pool via
+	 * HangarOps::drawMarineReload.
+	 *
+	 * Rate: 1 marine per FIGHTER per turn, even if a fighter mounts multiple
+	 * Marines weapons (rare). The first Marines weapon encountered on the
+	 * fighter walks every Marines sibling, picks the most-empty below cap,
+	 * restocks one, then stamps $fighter->marinesReloadedTurn so remaining
+	 * siblings' whileDocked calls early-return.
+	 *
+	 * Cap: class default ammunition (2) + flight's EXT_MAR enhancement bonus.
+	 * Persistence: tac_ammo row via Manager::updateAmmoInfo (same path fire()
+	 * uses). Saved value EXCLUDES the EXT_MAR bonus because the bonus is
+	 * re-added on load via setEnhancementsFlight's EXT_MAR processing — matches
+	 * fire()'s saving convention.
+	 */
+	public function whileDocked($flight, $carrier, $hangar, $gamedata){
+		if (!($flight instanceof FighterFlight)) return;
+		if ($this->isDestroyed($gamedata->turn)) return;
+		//getUnit() returns the FighterFlight on a Marines weapon (per
+		//FighterFlight::addSystem); resolve parent Fighter via the flight's
+		//system-id lookup so the sibling walk and per-fighter gate work.
+		$fighter = $flight->getFighterBySystem($this->id);
+		if (!$fighter) return;
+
+		//Per-fighter rate gate. Transient — fresh Fighter objects each
+		//turn-load have this null, so the gate resets naturally.
+		if (!empty($fighter->marinesReloadedTurn)
+			&& (int)$fighter->marinesReloadedTurn >= (int)$gamedata->turn) return;
+
+		//Cap: class default (2) + flight's EXT_MAR bonus. EXT_MAR is a
+		//flight-level enhancement that adds to every Marines weapon on the
+		//flight; cap is the post-enhancement starting load.
+		$bonus = 0;
+		if (isset($flight->enhancementOptions) && is_array($flight->enhancementOptions)){
+			foreach ($flight->enhancementOptions as $enh){
+				if (($enh[0] ?? '') === 'EXT_MAR' && (int)($enh[2] ?? 0) > 0){
+					$bonus += (int)$enh[2];
+				}
+			}
+		}
+		$baseCap = 2;   //Marines class $ammunition default
+		$cap = $baseCap + $bonus;
+
+		//Build candidate list across every Marines sibling on this fighter
+		//(not just $this) — pick the most-empty across the whole loadout.
+		$candidates = array();
+		foreach ($fighter->systems as $sib){
+			if (!($sib instanceof Marines)) continue;
+			if ($sib->isDestroyed($gamedata->turn)) continue;
+			if ((int)$sib->ammunition >= $cap) continue;
+			$candidates[] = array(
+				'weapon'  => $sib,
+				'missing' => $cap - (int)$sib->ammunition,
+			);
+		}
+		if (empty($candidates)) return;
+
+		//Most-missing first (prioritise emptiest).
+		usort($candidates, function($a, $b){
+			return $b['missing'] - $a['missing'];
+		});
+
+		//Pool is denominated in MARINES (1 unit = 1 marine), not CP. The 10 CP
+		//price is paid up-front when buying the MAR_CONT enhancement in the
+		//lobby; each in-game restock draws 1 marine from the count.
+		$cost = 1;
+		foreach ($candidates as $cand){
+			if (!HangarOps::drawMarineReload($carrier, $cost)) return;   //pool exhausted
+			$cand['weapon']->ammunition = min($cap, (int)$cand['weapon']->ammunition + 1);
+			//Save with EXT_MAR bonus SUBTRACTED — bonus is re-added on load
+			//by setEnhancementsFlight's EXT_MAR case (mirrors fire() at line ~7728).
+			Manager::updateAmmoInfo(
+				$flight->id,
+				$cand['weapon']->id,
+				$gamedata->id,
+				$cand['weapon']->firingMode,
+				$cand['weapon']->ammunition - $bonus,
+				$gamedata->turn
+			);
+			$fighter->marinesReloadedTurn = (int)$gamedata->turn;
+			return;   //1 marine per fighter per turn
+		}
+	}
+
+
+	private function checkAttachedAmount($target, $gamedata, $fireOrder){
 		$tooMany = false;//Initialise
         $shooterId = $fireOrder->shooterid;
 		$noOfPods = Marines::getAttachedPodCount($target, $gamedata, $shooterId);

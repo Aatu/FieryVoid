@@ -565,8 +565,15 @@ class BaseShip {
 			}
 		}
 
+		//Stage 17 ext: unspent Extra Marine Contingents pool bolsters the
+		//ship's defenders. capacity - spent = marines still in stores that
+		//haven't been used to restock a docked Breaching Pod yet.
+		if (!($this instanceof FighterFlight)) {
+			$marines += HangarOps::marinePoolRemaining($this);
+		}
+
 		$totalMarines = max(0, $marines);
-		
+
 		return $totalMarines;
 	}
 
