@@ -13,7 +13,14 @@
 		public $systems = array();
 		protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present) - would be individual one for every fighter
 
-		
+		//Hangar Ops Stage 17: transient per-turn gate for FighterMissileRack::whileDocked.
+		//Stamped to the current turn when one of this fighter's legacy ballistic
+		//launchers restocks, read by sibling launchers' whileDocked to early-return
+		//(enforces 1 missile per fighter per turn). Not persisted — fresh objects
+		//each turn-load have this null, which is the desired reset behaviour.
+		public $missileRackReloadedTurn = null;
+
+
 		public $possibleCriticals = array();
 		
 			

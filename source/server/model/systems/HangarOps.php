@@ -1858,6 +1858,37 @@ class HangarOps {
 			Manager::updateAmmoInfo($targetFlight->id, $tgtSub->id, $gamedata->id, $tgtSub->firingMode, $tgtSub->ammunition, $gamedata->turn);
 		}
 
+		//Stage 17: copy FighterMissileRack-class missileArray amounts. The
+		//new-spawn path constructs racks with $missileArray[$mode]->amount = 0
+		//(the legacy default), so without this a partial-relaunch from a
+		//restocked-while-docked fragment would emerge with empty racks.
+		//Persisted via the same updateAmmoInfo path fire() and whileDocked use,
+		//mode-by-mode in case a ship file ever wires multi-mode racks (the
+		//common case is a single mode 1 — fire() and updateAmmoInfo both treat
+		//mode 1 specially, but we walk the array for full coverage).
+		for ($s = 0; $s < $pairs; $s++) {
+			if (!($srcSubs[$s] instanceof FighterMissileRack)) continue;
+			if (!($tgtSubs[$s] instanceof FighterMissileRack)) continue;
+			$srcRack = $srcSubs[$s];
+			$tgtRack = $tgtSubs[$s];
+			if (!is_array($srcRack->missileArray) || !is_array($tgtRack->missileArray)) continue;
+			foreach ($srcRack->missileArray as $mode => $srcAmmo) {
+				if (!$srcAmmo) continue;
+				if (!isset($tgtRack->missileArray[$mode])) continue;
+				$tgtAmmo = $tgtRack->missileArray[$mode];
+				if (!$tgtAmmo) continue;
+				$tgtAmmo->amount = (int)$srcAmmo->amount;
+				Manager::updateAmmoInfo(
+					$targetFlight->id,
+					$tgtRack->id,
+					$gamedata->id,
+					$tgtRack->firingMode,
+					$tgtAmmo->amount,
+					$gamedata->turn
+				);
+			}
+		}
+
 		//Stage 15: balance target magazines to match source's CURRENT effective
 		//missile count per mode. copyFlightAmmoEnhancements (called once per
 		//flight pair before this loop) added the enhancement count to target's
@@ -2083,17 +2114,31 @@ class HangarOps {
 		return $chosen;
 	}
 
-	/* Sum of all loaded missiles across a Fighter's AmmoMagazines. Used by
+	/* Sum of all loaded missiles across a Fighter's AmmoMagazines and any
+	 * legacy FighterMissileRack-class launchers (Stage 17). Used by
 	 * selectFightersForExtraction to surface "has carrier-pool restocked
 	 * missiles" as the primary extraction priority. */
 	private static function countLoadedMissiles($fighter){
 		if (!isset($fighter->systems) || !is_array($fighter->systems)) return 0;
 		$total = 0;
 		foreach ($fighter->systems as $sys) {
-			if (!($sys instanceof AmmoMagazine)) continue;
-			if (!is_array($sys->ammoCountArray)) continue;
-			foreach ($sys->ammoCountArray as $count) {
-				if ($count > 0) $total += (int)$count;
+			if ($sys instanceof AmmoMagazine) {
+				if (!is_array($sys->ammoCountArray)) continue;
+				foreach ($sys->ammoCountArray as $count) {
+					if ($count > 0) $total += (int)$count;
+				}
+			} elseif ($sys instanceof FighterMissileRack) {
+				//Stage 17: each legacy launcher's $missileArray[$mode]->amount
+				//is the per-launcher current round count; folding it in lets
+				//selectFightersForExtraction prefer restocked legacy-rack
+				//fighters at partial-launch time the same way it does for
+				//AmmoMagazine fighters.
+				if (!is_array($sys->missileArray)) continue;
+				foreach ($sys->missileArray as $ammo) {
+					if (!$ammo) continue;
+					$amt = (int)$ammo->amount;
+					if ($amt > 0) $total += $amt;
+				}
 			}
 		}
 		return $total;
