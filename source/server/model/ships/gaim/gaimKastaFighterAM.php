@@ -50,7 +50,7 @@ class gaimKastaFighterAM extends FighterFlight{
 			$this->enhancementOptionsEnabled[] = 'AMMO_FY';//add enhancement options for missiles - Class-FY
 			$this->enhancementOptionsEnabled[] = 'AMMO_FD';//add enhancement options for missiles - Class-FD
 			
-			$gun = new PairedParticleGun(330, 30, 3);
+			$gun = new PairedParticleGun(330, 30, 2);
 			$gun->displayName = "Light Particle Gun";
 			$fighter->addFrontSystem($gun);
 			$fighter->addFrontSystem(new AmmoFighterRack(330, 30, $ammoMagazine, false)); //$startArc, $endArc, $magazine, $base
