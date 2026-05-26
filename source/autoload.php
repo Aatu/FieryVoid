@@ -2670,6 +2670,7 @@ spl_autoload_register(
 				'gaimkastafighter' => '/server/model/ships/gaim/gaimKastaFighter.php',
 				'gaimkoistfighter' => '/server/model/ships/gaim/gaimKoistFighter.php',
 				'gaimkrastfighter' => '/server/model/ships/gaim/gaimKrastFighter.php',
+				'gaimkrastfighteram' => '/server/model/ships/gaim/gaimKrastFighterAM.php',                
 				'gaimkruppas' => '/server/model/ships/gaim/gaimKruppas.php',
 				'gaimkuach' => '/server/model/ships/gaim/gaimKuach.php',
 				'gaimkuan' => '/server/model/ships/gaim/gaimKuan.php',
