@@ -31,7 +31,7 @@ class TorataHeltakaCLog extends BaseShip{
 		$this->addPrimarySystem(new Scanner(4, 16, 5, 7));
 		$this->addPrimarySystem(new Engine(4, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(4, 16, 4, 27));
-		$this->addPrimarySystem(new Hangar(4, 4, 0, 0));
+		$this->addPrimarySystem(new Hangar(4, 4));
 		
 		$this->addFrontSystem(new PlasmaAccelerator(4, 10, 5, 300, 60));
 		$this->addFrontSystem(new PentagonArray(3, 8, 5, 240, 60));

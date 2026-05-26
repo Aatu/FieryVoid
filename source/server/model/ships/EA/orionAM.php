@@ -10,8 +10,10 @@ class OrionAM extends StarBaseSixSections{
 		$this->phpclass = "OrionAM";
 		$this->shipClass = "Orion Battle Station";
 		$this->fighters = array("heavy"=>36); 
+		$this->customFighter = array("Thunderbolt"=>36);		
+	    $this->notes = 'Thunderbolt capable.';
 		$this->isd = 2240;
-
+		
 		$this->shipSizeClass = 3; //Enormous is not implemented
         $this->Enormous = true;
 		$this->iniativebonus = -200; //no voluntary movement anyway

@@ -13,7 +13,7 @@ class RaklaviAM extends BaseShip{
         $this->shipSizeClass = 3;
 		$this->canvasSize = 190; //img has 200px per side
 
-		$this->fighters = array("assault shuttles"=>2, "normal"=>24);
+		$this->fighters = array("normal"=>24);
 
 		$this->isd = 2227;
 

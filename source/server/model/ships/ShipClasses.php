@@ -34,7 +34,9 @@ class BaseShip {
     public $pointCostEnh = 0; //points spent on enhanements (in addition to crafts' own price), DOES NOT include cost of items being only technically enhancements (special missiles, Navigators...)
 	public $pointCostEnh2 = 0; //points spent on non-enhancements - separation actuallly exists only at fleet selection, afterwards it will be always 0 with points added to $pointCostEnh
 	public $combatValue = 100; //current combat value, as percentage of original
-    public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning    
+    public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
+    public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
+    public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
@@ -204,11 +206,13 @@ class BaseShip {
 				$mod += -5*($CnC->hasCritical("tmpinidown", $gamedata->turn)); //-1 Ini per crit
 				//additional: ShadowPilotPain						
 			    $mod += -5*($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
+				$mod += -20*($CnC->hasCritical("HangarOperations", $gamedata->turn));
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
 			    if ($firstFighter){
-			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);				    
+			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);
+					$mod += -50* $firstFighter->hasCritical("LaunchedThisTurn", $gamedata->turn);
 			    }
 		    }
             if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.            
@@ -561,8 +565,15 @@ class BaseShip {
 			}
 		}
 
+		//Stage 17 ext: unspent Extra Marine Contingents pool bolsters the
+		//ship's defenders. capacity - spent = marines still in stores that
+		//haven't been used to restock a docked Breaching Pod yet.
+		if (!($this instanceof FighterFlight)) {
+			$marines += HangarOps::marinePoolRemaining($this);
+		}
+
 		$totalMarines = max(0, $marines);
-		
+
 		return $totalMarines;
 	}
 
@@ -593,7 +604,11 @@ class BaseShip {
         if (!empty($this->hasAttachedFacing)) $strippedShip->hasAttachedFacing = $this->hasAttachedFacing;
         if (!empty($this->attachedFacing)) $strippedShip->attachedFacing = $this->attachedFacing;
         if ($this->spawned !== null && $this->spawned !== -1) $strippedShip->spawned = $this->spawned;
-        
+        if ($this->removed) {
+            $strippedShip->removed = true;
+            if ($this->removedTurn !== null) $strippedShip->removedTurn = $this->removedTurn;
+        }
+
         $strippedShip->systems = array_map( function($system) {return $system->stripForJson();}, $this->systems);
 
         //With changes to how we cache ships, we sadly have to re-do this each time. DK - Dec 2025
@@ -940,12 +955,28 @@ class BaseShip {
 
     //Used in FireGamePhase->process to generate extra notes for Hyach Specialists, but could have other applications - DK - 27.12.25
 	public function generateAdditionalNotes($gameData, $dbManager) {
-        
-        if($gameData->phase == 3){        
+
+        if($gameData->phase == 3){
             $specialists = $this->getSystemByName("HyachSpecialists");
-            if ($specialists){ //Does ship have Specialists system?            
+            if ($specialists){ //Does ship have Specialists system?
                 $specialists->generateIndividualNotes($gameData, $dbManager); //Generate notes for Specialists system
-                $this->saveIndividualNotes($dbManager); //Save ship notes. 
+                $this->saveIndividualNotes($dbManager); //Save ship notes.
+            }
+
+            //Hangar Operations: persist any launch orders the player queued via
+            //the launch dialog. doIndividualNotesTransfer (called during ship
+            //reconstruction earlier in this request) stashed the payload into
+            //each Hangar's $pendingLaunchTransfer; here we let it write the
+            //hangarLaunchOrder note now that $gameData is hydrated.
+            $hasHangar = false;
+            foreach ($this->systems as $sys) {
+                if ($sys instanceof Hangar) {
+                    $sys->generateIndividualNotes($gameData, $dbManager);
+                    $hasHangar = true;
+                }
+            }
+            if ($hasHangar) {
+                $this->saveIndividualNotes($dbManager);
             }
         }
     }                
@@ -1214,7 +1245,7 @@ class BaseShip {
 			if(!$this->isCombatUnit) $this->notes .= '<br>Non-combatant!';
 			//required hangar
 			if($this->hangarRequired!='') { 
-				$this->notes .= '<br>Requires hangar space: ' . $this->hangarRequired;			
+                $this->notes .= '<br>Requires hangar space: ' . ucfirst(strtolower($this->hangarRequired));		
 				if($this->unitSize!=1) $this->notes .= ' (' . $this->unitSize . ' per slot)';
 			}
 			//Agile status
@@ -1896,6 +1927,17 @@ public function getAllEWExceptDEW($turn){
 
 
     public function isDestroyed($turn = false){
+        //Hangar Ops Stage 7: a docked flight has $removed=true; treat as
+        //destroyed for filtering purposes so the 379+ isDestroyed callsites
+        //(target lists, fleet iteration, hex occupancy, weapon scans like
+        //PulsarMine, etc.) transparently skip docked flights without each
+        //needing a !$removed check. Destruction explosions are gated on
+        //damageManager::getTurnDestroyed (turn-of-damage record), not on
+        //isDestroyed(), so no false explosions fire for docked flights.
+        //Mirrors the client-side shipManager.isDestroyed which has done the
+        //same since Stage 5; the server was the outlier.
+        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return true;
+
         foreach($this->systems as $system){
 			/*18.02.2023: now dying Reactor will destroy PRIMARY Structure as well, so no point in checking directly for Reactor destruction (this avoids infinite loops, too)
             if ($system instanceof Reactor && $system->isDestroyed($turn)){
@@ -1905,10 +1947,19 @@ public function getAllEWExceptDEW($turn){
             if ($system instanceof Structure && $system->location == 0 && $system->isDestroyed($turn)){
                 return true;
             }
-																									   
+
         }
 
         return false;
+    }
+
+    /* Returns true when the unit is still in play (not destroyed, not removed-by-docking).
+     * Stage 5 alias retained for self-documenting call sites; isDestroyed() now folds in the
+     * $removed check (Stage 7), so this is just `!isDestroyed($turn)` — kept as a positive
+     * predicate for readability where "is this ship on the board?" is the question being asked.
+     */
+    public function isOnBoard($turn = false){
+        return !$this->isDestroyed($turn);
     }
 
 
@@ -3155,6 +3206,11 @@ class StarBase extends BaseShip{
 
 
     public function isDestroyed($turn = false){
+        //Hangar Ops Stage 7: see BaseShip::isDestroyed for rationale — bases
+        //don't dock, so this branch is essentially dead, but stays consistent
+        //with the parent contract in case a future base-class carrier appears.
+        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return true;
+
         foreach($this->systems as $system){
             if ($system instanceof Reactor && $system->location == 0 &&  $system->isDestroyed($turn)){
                 return true;

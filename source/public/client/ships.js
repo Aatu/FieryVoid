@@ -555,6 +555,13 @@ window.shipManager = {
 
         if (ship.destroyed) return true; // Early exit if server-side status is already set - DK 04/26
 
+        // Hangar Ops Stage 5: a docked flight has $removed=true; treat as
+        // destroyed for filtering purposes (icon hide, target list exclusion,
+        // hex-occupancy). The destruction explosion is keyed off
+        // damageManager.getTurnDestroyed (turn-of-damage record), which we
+        // never write for docked flights — so no explosion fires.
+        if (ship.removed) return true;
+
         if (ship.flight) {
             for (var i in ship.systems) {
                 var fighter = ship.systems[i];
@@ -803,6 +810,11 @@ window.shipManager = {
             var ship2 = gamedata.ships[i];
 
             if (shipManager.isDestroyed(ship2)) continue;
+            //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock is
+            //logically inside a carrier's hangar, not on the board. Skip it for
+            //hex occupancy so the carrier can move back to the original dock
+            //hex without the (invisible) flight blocking placement.
+            if (ship2.pendingDeployDock) continue;
 
             //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
             // NO LONGER REQUIRED - Overridden by explicit isBlocked rules in Deployment Phase.
@@ -994,6 +1006,10 @@ window.shipManager = {
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
         if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
         if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
+        //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock isn't on the
+        //board — its icon should be hidden until either the dock is cancelled or the
+        //next reload (which sets ship.removed via the persisted hangarUsage snapshot).
+        if (ship.pendingDeployDock) return true;
         return false;
     },
 

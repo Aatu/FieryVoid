@@ -576,9 +576,12 @@ window.gamedata = {
 		var hangarConversionsAS = 0; //How many converted hangar slots TO Assault Shuttle slots.		
 		var totalFtrOther = new Array();//total other small craft
 		var smallCraftUsed = new Array();//small craft sizes that happen to be present, whether as hangar space or actual craft
+		var totalShuttleCapacity = 0; //sum of default shuttle/flyer pool capacity across the fleet (excludes minesweeping shuttles)
+		var defaultShuttleKeyList = []; //distinct lship.fighters keys used by default shuttle pools (e.g. "shuttles", "minbari flyers")
 
 		var totalEnhancementsValue = 0;
-		var totalBPCapacity = 0;
+		var totalBPSizeCap = 0;     //sum of per-ship size-based BP caps (1/2/4 with x2 for Assault hulls)
+		var totalBPDedicated = 0;   //sum of dedicated "Breaching Pods" slots declared in ship.fighters
 		var totalBPUsage = 0;
 		var shipHangarProfiles = [];
 		var breachingPodsList = [];
@@ -592,12 +595,26 @@ window.gamedata = {
 
 			totalPointsSpent += lship.pointCost;
 
+			// 10%/33% deployment brackets use the BASE ship cost only (no ammo, no
+			// enhancements). lship.pointCost is overwritten at purchase to the post-
+			// purchase total (base + ammo + enhancements); the canonical base lives on
+			// the catalog entry. For flights, catalog cost is for a full 6-craft flight,
+			// so scale by actual flightSize/6 to mirror confirm.js getTotalCost.
+			var bracketBaseCost = lship.pointCost;
+			var catalogShip = gamedata.getShipByType(lship.phpclass);
+			if (catalogShip) {
+				bracketBaseCost = catalogShip.pointCost;
+				if (lship.flight && lship.flightSize) {
+					bracketBaseCost = bracketBaseCost * (lship.flightSize / 6);
+				}
+			}
+
 			if (lship.limited == 10) {
-				points10 += lship.pointCost;
+				points10 += bracketBaseCost;
 				units10 += 1;
 			}
 			if (lship.limited == 33) {
-				points33 += lship.pointCost;
+				points33 += bracketBaseCost;
 				units33 += 1;
 			}
 			totalEnhancementsValue += lship.pointCostEnh;
@@ -686,15 +703,43 @@ window.gamedata = {
 			if (!lship.flight) {
 				totalShips++;
 
-				// Calculate Breaching Pod capacity for this ship - only if it has suitable hangar capacity
+				// Apply HANG_BP slot conversion to lship.fighters so every downstream
+				// consumer in this loop (BP totals, hangar tallies, getDefaultShuttles)
+				// sees the post-conversion shape. Mirrors the server-side mutation in
+				// Enhancements::setEnhancementsShip.
+				//
+				// HANG_MSW is deliberately NOT applied here — minesweeping shuttles
+				// still count as default shuttle capacity for fleet-check purposes;
+				// only the auto-populated *type* changes at game-load (HangarOps step 3).
+				//
+				// Snapshot the original on first encounter so subsequent fleet-check
+				// passes restore-then-reapply (otherwise enhCount changes would stack).
+				if (!lship._originalFighters) {
+					lship._originalFighters = JSON.parse(JSON.stringify(lship.fighters || {}));
+				} else {
+					lship.fighters = JSON.parse(JSON.stringify(lship._originalFighters));
+				}
+				if (lship.enhancementOptions) {
+					for (var preEnh in lship.enhancementOptions) {
+						var preEnhID = lship.enhancementOptions[preEnh][0];
+						var preConvNum = lship.enhancementOptions[preEnh][2] || 0;
+						if (preConvNum <= 0) continue;
+					}
+				}
+
+				// Calculate Breaching Pod capacity for this ship - only if it has suitable hangar capacity.
+				// Dedicated "Breaching Pods" slots in ship.fighters (e.g. Decurion's 4 side-bay pod racks)
+				// are guaranteed BP capacity, additive to the size-based limit, and BPs prefer them first.
 				var hasBPCompatibleHangar = false;
+				var shipBPDedicated = lship.fighters["Breaching Pods"] || 0;
 				var shipSlots = {
 					"heavy": lship.fighters["heavy"] || lship.fighters["normal"] || 0,
 					"medium": lship.fighters["medium"] || 0,
-					"assault shuttles": lship.fighters["assault shuttles"] || 0
+					"assault shuttles": lship.fighters["assault shuttles"] || 0,
+					"breaching pods": shipBPDedicated
 				};
 
-				if (shipSlots["heavy"] > 0 || shipSlots["medium"] > 0 || shipSlots["assault shuttles"] > 0) {
+				if (shipSlots["heavy"] > 0 || shipSlots["medium"] > 0 || shipSlots["assault shuttles"] > 0 || shipSlots["breaching pods"] > 0) {
 					hasBPCompatibleHangar = true;
 				}
 
@@ -710,14 +755,17 @@ window.gamedata = {
 					if (lship.shipClass.toLowerCase().indexOf("assault") !== -1) {
 						shipBPLimit *= 2;
 					}
-					totalBPCapacity += shipBPLimit;
+					totalBPSizeCap += shipBPLimit;
+					totalBPDedicated += shipBPDedicated;
 				}
 
 				// Record ship profile for per-ship validation
 				var shipProfile = {
 					id: lship.id,
 					name: lship.shipClass,
-					bpLimitRemaining: shipBPLimit,
+					bpLimit: shipBPLimit,           //original size-based cap (immutable)
+					bpDedicated: shipBPDedicated,   //original dedicated BP slot count (immutable)
+					bpLimitRemaining: shipBPLimit,  //decremented as BPs are assigned
 					slots: shipSlots
 				};
 				shipHangarProfiles.push(shipProfile);
@@ -743,6 +791,10 @@ window.gamedata = {
 							}
 							shipProfile.slots["assault shuttles"] += convNum;
 						}
+						//HANG_BP/HANG_MSW have already been baked into lship.fighters
+						//up-front (see _originalFighters snapshot block above), so
+						//shipBPDedicated / shipSlots / totalBPDedicated already include
+						//the conversion. Nothing further to do here.
 					}
 				}
 
@@ -757,7 +809,7 @@ window.gamedata = {
 				}
 
 
-				//check hangar space available...	
+				//check hangar space available...
 				for (var h in lship.fighters) {
 					var amount = lship.fighters[h];
 					if (h == "normal" || h == "heavy") {
@@ -770,6 +822,12 @@ window.gamedata = {
 						totalHangarXL += amount;
 					} else if (h == "assault shuttles") {
 						totalHangarAS += amount;
+					} else if (h == "Breaching Pods") {
+						//Dedicated BP slots are folded into totalBPCapacity above
+						//(plus per-ship shipSlots["breaching pods"] for assignment).
+						//Don't add them to totalHangarOther / smallCraftUsed — that
+						//would re-render them as a separate "Breaching Pods: X (allowed up to Y)"
+						//small-craft row alongside the main BP report.
 					} else { //something other than fighters
 						var found = false;
 						for (var nh in totalHangarOther) {
@@ -779,11 +837,40 @@ window.gamedata = {
 							}
 						}
 						if (found != true) { //such craft wasn't encountered yet
+							if(h == "minesweeping shuttles") continue; //These are no bought, don't add to checker.
 							totalHangarOther.push(new Array(h, amount));
 							smallCraftUsed.push(h);
 						}
 					}
 				}
+
+				//Default shuttle slots auto-populate any leftover hangar capacity
+				//(see HangarOps::populateInitialHangarUsage step 3 on the server).
+				//Surface them as 'shuttles' capacity so armed-shuttle variants
+				//(ArmedFlyer for Minbari, future ArmedShuttleEA, etc.) — which set
+				//hangarRequired='shuttles' — can be bought against this pool. We
+				//deliberately don't push to smallCraftUsed: the report row only
+				//appears when the player actually buys armed shuttles, so empty
+				//rows don't clutter ships that just have leftover default shuttles.
+				var defaultShuttles = shipManager.systems.getDefaultShuttles(lship);
+				if (defaultShuttles.count > 0 && defaultShuttles.key !== "minesweeping shuttles") {
+					var defaultKey = defaultShuttles.key;
+					var foundDefault = false;
+					for (var nh in totalHangarOther) {
+						if (totalHangarOther[nh][0] == defaultKey) {
+							foundDefault = true;
+							totalHangarOther[nh][1] += defaultShuttles.count;
+						}
+					}
+					if (!foundDefault) {
+						totalHangarOther.push(new Array(defaultKey, defaultShuttles.count));
+					}
+					totalShuttleCapacity += defaultShuttles.count;
+					if (defaultShuttleKeyList.indexOf(defaultKey) === -1) {
+						defaultShuttleKeyList.push(defaultKey);
+					}
+				}
+
 				//ship may actually require hangar, too! but this must be specified directly
 				if (lship.hangarRequired != '') { //classify based on explicit info from craft
 					if (lship.hangarRequired == 'Breaching Pods') {
@@ -1130,31 +1217,53 @@ window.gamedata = {
 		//fighters!
 		//ultralights count as half a fighter when accounting for hangar space used - IF packed into something other than ultralight hangars...
 
-		// Per-Ship Breaching Pod Assignment and Deduction
+		// Snapshot fleet-wide hangar totals before the BP assignment loop
+		// mutates them — needed below to compute the effective BP cap, which
+		// must exclude AS/H/M slots already claimed by non-BP small craft.
+		var preBPHangarAS = totalHangarAS;
+		var preBPHangarH = totalHangarH;
+		var preBPHangarM = totalHangarM;
+
+		// Per-Ship Breaching Pod Assignment and Deduction.
+		// Pass 1: fill dedicated "Breaching Pods" hangar slots first — these
+		// are guaranteed BP capacity and don't consume the ship's size-based
+		// BP cap (e.g. Decurion's 4 side-bay pod racks).
+		// Pass 2: overflow into AS/Heavy/Medium slots, capped by the ship's
+		// size-based bpLimitRemaining (1/2/4 with x2 for Assault hulls).
 		var unassignedBPs = 0;
 		for (var bpIdx = 0; bpIdx < breachingPodsList.length; bpIdx++) {
 			var assigned = false;
 			for (var shIdx = 0; shIdx < shipHangarProfiles.length; shIdx++) {
 				var ship = shipHangarProfiles[shIdx];
-				if (ship.bpLimitRemaining > 0) {
-					// Check for suitable slot: AS > Heavy > Medium
-					if (ship.slots["assault shuttles"] > 0) {
-						ship.slots["assault shuttles"]--;
-						totalHangarAS--;
-						assigned = true;
-					} else if (ship.slots["heavy"] > 0) {
-						ship.slots["heavy"]--;
-						totalHangarH--;
-						assigned = true;
-					} else if (ship.slots["medium"] > 0) {
-						ship.slots["medium"]--;
-						totalHangarM--;
-						assigned = true;
-					}
+				if (ship.slots["breaching pods"] > 0) {
+					ship.slots["breaching pods"]--;
+					assigned = true;
+					break;
+				}
+			}
+			if (!assigned) {
+				for (var shIdx = 0; shIdx < shipHangarProfiles.length; shIdx++) {
+					var ship = shipHangarProfiles[shIdx];
+					if (ship.bpLimitRemaining > 0) {
+						// Check for suitable slot: AS > Heavy > Medium
+						if (ship.slots["assault shuttles"] > 0) {
+							ship.slots["assault shuttles"]--;
+							totalHangarAS--;
+							assigned = true;
+						} else if (ship.slots["heavy"] > 0) {
+							ship.slots["heavy"]--;
+							totalHangarH--;
+							assigned = true;
+						} else if (ship.slots["medium"] > 0) {
+							ship.slots["medium"]--;
+							totalHangarM--;
+							assigned = true;
+						}
 
-					if (assigned) {
-						ship.bpLimitRemaining--;
-						break;
+						if (assigned) {
+							ship.bpLimitRemaining--;
+							break;
+						}
 					}
 				}
 			}
@@ -1346,6 +1455,9 @@ window.gamedata = {
 		//list each small craft size used separately!
 		for (var sc in smallCraftUsedUnique) {
 			var scSize = smallCraftUsedUnique[sc];
+			//Default shuttle pools ("shuttles", "minbari flyers", etc.) are reported once
+			//in the Breaching Pods & Shuttles section below — skip here to avoid duplication.
+			if (defaultShuttleKeyList.indexOf(scSize) !== -1) continue;
 			totalFtrCurr = 0;
 			totalHangarCurr = 0;
 			for (var nh in totalFtrOther) {
@@ -1358,7 +1470,10 @@ window.gamedata = {
 					totalHangarCurr = totalHangarOther[nh][1];
 				}
 			}
-			checkResult += " - " + scSize + ": " + totalFtrCurr;
+			//Title-case the slot key for display ("shuttles" → "Shuttles", "minesweeping
+			//shuttles" → "Minesweeping Shuttles"). Mirrors the pattern used in shipwindow.js.
+			var scLabel = scSize.split(' ').map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(' ');
+			checkResult += " - " + scLabel + ": " + totalFtrCurr;
 			if (scSize != 'Fighter Squadrons') { //standard
 				checkResult += " (allowed up to " + totalHangarCurr + ")";
 			} else { //Fighter Squadrons get treated as fighters - eg. half are required
@@ -1379,9 +1494,37 @@ window.gamedata = {
 		checkResult += "<br>";
 
 		//Lets just check Assault shuttle/Breaching Pod capacity separately using their own variables.
-		totalHangarAS = totalHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
+		//Reset totalHangarAS to the pre-BP-loop value (then apply hangar conversions). The BP
+		//assignment loop decrements totalHangarAS when BPs overflow into AS slots, which would
+		//otherwise make the AS report show a spurious failure: e.g. Decurion + 24 AS + 6 BPs
+		//would report "Total Assault Shuttles: 24 (allowed up to 22) FAILURE" alongside the
+		//real "Total Breaching Pods: 6 (allowed up to 4) FAILURE". The AS hangar capacity
+		//for AS units doesn't actually shrink because the player overcommitted BPs — the BP
+		//report is the right place to surface that failure.
+		totalHangarAS = preBPHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
 
-		checkResult += "<br><b><u>Breaching Pods:</u></b><br>";
+		// Effective BP capacity = guaranteed dedicated slots + size-based overflow
+		// capped by AS/H/M slots not already claimed by non-BP small craft.
+		// Without this clamp the report would show 8 BPs allowed on a Decurion
+		// (4 size-cap + 4 dedicated) even after all 24 AS slots are filled with
+		// Assault Shuttles — or 2 BPs allowed on a Primus (12 normal/Heavy slots,
+		// 2 BP size-cap) after all 12 slots are filled with fighters of any size.
+		//
+		// AS slots only accept AS units (per hangarAcceptsCategory), so AS demand
+		// is the only competition for the AS pool. The Heavy+Medium pool is
+		// shared across all fighter sizes via the size hierarchy: smaller
+		// fighters spill up into larger slots when their own slots fill, so the
+		// pool demand must include the spillover from Light and Ultralight too.
+		var freeASForBP = Math.max(0, preBPHangarAS - hangarConversionNet - totalFtrAS);
+		var hmPoolCapacity = preBPHangarH + preBPHangarM + hangarConversionNet;
+		var lightOverflow = Math.max(0, totalFtrL - totalHangarL);
+		var xlOverflow = Math.max(0, totalFtrXL - totalHangarXL) / 2;
+		var hmPoolDemand = totalFtrH + totalFtrM + lightOverflow + xlOverflow;
+		var freeHMForBP = Math.max(0, hmPoolCapacity - hmPoolDemand);
+		var freeOverflowSlots = freeASForBP + freeHMForBP;
+		var totalBPCapacity = totalBPDedicated + Math.min(totalBPSizeCap, freeOverflowSlots);
+
+		checkResult += "<br><b><u>Breaching Pods & Shuttles:</u></b><br><br>";
 		checkResult += " Total Breaching Pods: " + totalBPUsage;
 		checkResult += " (allowed up to " + totalBPCapacity + ")";
 		if (totalBPUsage > totalBPCapacity || unassignedBPs > 0) {
@@ -1399,17 +1542,54 @@ window.gamedata = {
 		}
 		checkResult += "<br>";
 
-		if (totalFtrAS > 0 || totalHangarAS > 0) { //do not show if there are no Assault Shuttles/hangars in this segment
-			checkResult += " Total Assault Shuttles: " + totalFtrAS;
-			checkResult += " (allowed up to " + totalHangarAS + ")";
-			if (totalFtrAS > totalHangarAS) { //Asssault Shuttle total is not within limits
-				checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
-				problemFound = true;
-			} else {
-				checkResult += " <span style='color: #33cc33;'>OK</span>";
-			}
-			checkResult += "<br>";
+		checkResult += " Total Assault Shuttles: " + totalFtrAS;
+		checkResult += " (allowed up to " + totalHangarAS + ")";
+		if (totalFtrAS > totalHangarAS) { //Asssault Shuttle total is not within limits
+			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+			problemFound = true;
+		} else {
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
 		}
+		checkResult += "<br>";
+
+		//Default shuttle pool — leftover hangar capacity that auto-fills with shuttles/flyers.
+		//Always displayed (even when no armed shuttle variants are bought) so the player can
+		//see the pool that armed-shuttle units (ArmedFlyer, future ArmedShuttleEA, etc.) draw from.
+		//Rules clarification: armed-shuttle variants (hangarRequired='shuttles') may also use
+		//any spare *fighter* slot (H/M/L/XL) — but NOT Assault Shuttle or Breaching Pod slots.
+		//So shuttle overflow past the default pool spills into unused fighter capacity.
+		var totalShuttleUsage = 0;
+		for (var nh in totalFtrOther) {
+			if (defaultShuttleKeyList.indexOf(totalFtrOther[nh][0]) !== -1) {
+				totalShuttleUsage += totalFtrOther[nh][1];
+			}
+		}
+		// Spare fighter slots available for shuttle overflow. Mirrors the BP free-pool maths:
+		//  - HM pool: subtract any BP overflow that already consumed HM slots (BPs prefer AS,
+		//    then HM, per the BP capacity calc above).
+		//  - L / XL pools: simple capacity − usage; smaller-fighter spillover already accounted
+		//    for in hmPoolDemand so leftover L/XL slots really are free.
+		var bpOverflowDemand = Math.max(0, totalBPUsage - totalBPDedicated);
+		var bpHMUsed = Math.min(Math.max(0, bpOverflowDemand - freeASForBP), freeHMForBP);
+		var spareHMForShuttle = Math.max(0, freeHMForBP - bpHMUsed);
+		var spareLForShuttle = Math.max(0, totalHangarL - totalFtrL);
+		var spareXLForShuttle = Math.max(0, totalHangarXL - totalFtrXL);
+		var spareFighterSlotsForShuttle = spareHMForShuttle + spareLForShuttle + spareXLForShuttle;
+		var shuttleOverflow = Math.max(0, totalShuttleUsage - totalShuttleCapacity);
+
+		checkResult += " Shuttles: " + totalShuttleUsage;
+		checkResult += " (allowed up to " + totalShuttleCapacity + ")";
+		if (shuttleOverflow === 0) {
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		} else if (shuttleOverflow <= spareFighterSlotsForShuttle) {
+			checkResult += " (+" + shuttleOverflow + " fighter slot" + (shuttleOverflow === 1 ? "" : "s") + " used)";
+			checkResult += " <span style='color: #33cc33;'>OK</span>";
+		} else {
+			checkResult += " (needs " + shuttleOverflow + " fighter slot" + (shuttleOverflow === 1 ? "" : "s") + ", " + spareFighterSlotsForShuttle + " spare)";
+			checkResult += " <b><span style='color: red;'>FAILURE!</span></b>";
+			problemFound = true;
+		}
+		checkResult += "<br>";
 
 		if (warningFound) {
 			checkResult = "<u>CAUTION: Unchecked or non-canon elements found - check text below details.</u>" + warningText + "<br><br>" + checkResult;
@@ -1961,6 +2141,27 @@ window.gamedata = {
 		return displayName;
 	}, //endof prepareClassName
 
+	/*returns a small size-class tag for fighter entries, eg. [L] or [H].
+	  Mirrors the fleet checker: explicit hangarRequired wins; default 'fighters'
+	  falls back to jinkinglimit classification.*/
+	getFighterSizeTag: function (ship) {
+		var size = ship.hangarRequired;
+		if (size === 'fighters' || size === '' || size == null) {
+			if (ship.jinkinglimit >= 99) size = 'ultralight';
+			else if (ship.jinkinglimit >= 10) size = 'light';
+			else if (ship.jinkinglimit >= 8) size = 'medium';
+			else if (ship.jinkinglimit >= 6) size = 'heavy';
+		}
+		switch (size) {
+			case 'ultralight': return '[U]';
+			case 'light': case 'light fighters': return '[L]';
+			case 'medium': case 'medium fighters': return '[M]';
+			case 'heavy': case 'heavy fighters': case 'normal': return '[H]';
+			case 'superheavy': case 'superheavy fighters': return '[SHF]';			
+			default: return '';
+		}
+	},
+
 	/*prepares fleet list for purchases for display*/
 	parseShips: function (jsonShips) {
 		for (var faction in jsonShips) {
@@ -2061,11 +2262,15 @@ window.gamedata = {
 					shipDisplayName = this.prepareClassName(ship);
 					pointCostFull = ship.pointCost;
 					if (ship.flight && (ship.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull / 6 + ' ea.)';//for fighters: display price per craft, too!
+					var sizeTag = (categoryIndex === 0) ? this.getFighterSizeTag(ship) : '';
+					var sizeTagHtml = sizeTag ? ' <span class="fightersize">' + sizeTag + '</span>' : '';
 					h = $('<div oncontextmenu="return false;" class="ship storeship" data-custom="'
 						+ isCustomShip + '" data-isd="'
 						+ ship.isd
 						+ '"><span class="shiptype' + customShipHighlight + '">'
-						+ shipDisplayName + '</span><span class="pointcost">'
+						+ shipDisplayName + '</span>'
+						+ sizeTagHtml
+						+ '<span class="pointcost">'
 						+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
 					let buyHandler = ship.mine ? this.buyBulk.bind(this, ship.phpclass) : this.buyShip.bind(this, ship.phpclass);
@@ -2084,12 +2289,16 @@ window.gamedata = {
 						shipDisplayName = this.prepareClassName(shipV);
 						pointCostFull = shipV.pointCost;
 						if (shipV.flight && (shipV.maxFlightSize != 1)) pointCostFull = pointCostFull + ' (' + pointCostFull / 6 + ' ea.)';//for fighters: display price per craft, too!
+						var sizeTagV = (categoryIndex === 0) ? this.getFighterSizeTag(shipV) : '';
+						var sizeTagHtmlV = sizeTagV ? ' <span class="fightersize">' + sizeTagV + '</span>' : '';
 						h = $('<div oncontextmenu="return false;" class="ship variant" data-custom="'
 							+ isCustomShip
 							+ '" data-isd="'
 							+ shipV.isd
 							+ '"><span class="shiptype' + customShipHighlight + '">'
-							+ shipDisplayName + '</span><span class="pointcost">'
+							+ shipDisplayName + '</span>'
+							+ sizeTagHtmlV
+							+ '<span class="pointcost">'
 							+ pointCostFull + '</span> -<span class="addship clickable">Add to fleet</span> -<span class="showship clickable">Show details</span></div>');
 
 						let buyHandlerV = shipV.mine ? this.buyBulk.bind(this, shipV.phpclass) : this.buyShip.bind(this, shipV.phpclass);
@@ -3303,7 +3512,7 @@ window.gamedata = {
 			}
 			const pointsAvailable = slot.points - spentPoints;
 			if (response.list && pointsAvailable < response.list.points) {
-				if (gamedata.selectedSlot.points !== -1) { // Unlimited points				
+				if (slot.points !== -1) { // Unlimited points				
 					confirm.warning("Failed to load fleet, you do not have enough points available (" + response.list.points + "pts needed)");
 					return;
 				}

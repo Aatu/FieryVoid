@@ -19,7 +19,7 @@ class Rogata extends HeavyCombatVessel{
         $this->pivotcost = 4;
         $this->iniativebonus = 25;
         $this->isd = 2105;
-        $this->fighters = array("shuttles"=>2);
+        //$this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new GravityNet(4, 8, 5, 240, 0));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));

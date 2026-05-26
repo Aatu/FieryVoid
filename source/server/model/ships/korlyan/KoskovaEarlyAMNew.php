@@ -17,7 +17,7 @@ class KoskovaEarlyAMNew extends BaseShip{
 		$this->unofficial = true; 
 
 		$this->isd = 2235;
-        $this->fighters = array("assault shuttles"=>2);
+        //$this->fighters = array("assault shuttles"=>2);
 
 	    $this->notes = 'Atmospheric Capable.';
         

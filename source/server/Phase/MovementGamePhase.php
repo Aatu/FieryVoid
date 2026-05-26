@@ -25,6 +25,7 @@ class MovementGamePhase implements Phase
             }
 
             // Skip destroyed, terrain, or undeployed ships
+            // (isDestroyed() also covers Hangar Ops $removed flights — see BaseShip::isDestroyed)
             if (
                 $ship->isDestroyed() ||
                 $ship->base || $ship->smallBase || $ship->mine ||
@@ -371,6 +372,7 @@ class MovementGamePhase implements Phase
             if ($firstship == null)
                 $firstship = $ship;
 
+            //isDestroyed() also covers Hangar Ops $removed flights — see BaseShip::isDestroyed
             if ($next && !$ship->isDestroyed() && !$ship->unavailable){
                 $nextship = $ship;
                 break;

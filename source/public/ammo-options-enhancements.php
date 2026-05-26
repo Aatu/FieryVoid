@@ -68,10 +68,11 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     This means your ammo magazine may show more missiles available than it can actually hold but you cannot actually launch more missiles than magazine total. 
     Essentially, the extra missiles purchased provide you with extra variety, but not actual extra missiles in your magazine!</p>
 
-    <p>Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo. 
+    <p>Any missile available in magazine can be fired by any launcher (that is capable of firing it), missiles are not directly tied to particular mounts. 
+    This is different for weapons that do store ammo directly on mount - but such weapons usually can only hold one kind of ammo. 
     This is particularly important for fighters (as ships' cavernous magazines are unlikely to run out during a battle). 
-    You are therefore encouraged to observe the total number of missiles a fighter can have, but if you do not (whether by omission or intentionally) - you will get an extra missile variety, but no extra missiles. 
-    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons) and will lose a missile they are carrying if they take 2 or more damage from a single shot.</p>
+    Note also that fighters usually start with empty magazine (although some missile entry is present, for technical reasons) and will lose a missile they are carrying if they take 2 or more damage from a single shot. 
+  In addition, fighters can dock on firendly carriers and reload the missiles they started the game with, providing the carrier has purchased the Extra Ordnance Resource enhancement (see below) and there are sufficient ordnance points to cover the cost of the replacement missiles.</p>
 
     <p>Missiles do not use firing ship\'s OEW and their built-in guidance package is usually combined into weapons' Fire control, rather than being kept separate.  Fighter missiles do benefit from the fighter's offensive bonus.</p>
     <p>Ammo listings usually mention ISD year for when that missile type becomes available (if two dates the first refers to Kor-Lyan only). This is not enforced by Fiery Void so players will need to do this themselves.</p>
@@ -139,13 +140,41 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: 2</li>
         </ul>      
       </li>
-      <li><strong>Hangar Conversions</strong>
+      <li><strong>Extra Ordnance Reserve</strong>
         <ul class="circle-list">
-            <li>Convert either a fighter slot into an assault shuttle slot, or vice versa</li>
+            <li>A pool of points used to re-stock missile and torpedo allocations to docked fighters</li>
+            <li>Points Cost: Up to 200pts can be bought, and the cost of missiles to restock docked fighters will be drawn from this reserve.</li>
+            <li>Limit: 200pts</li>
+        </ul>
+      </li>
+      <li><strong>Extra Marine Contingents</strong>
+        <ul class="circle-list">
+            <li>A pool of additional marine units used to re-stock the Marines weapon on Breaching Pods that dock back into the carrier (1 marine per pod per turn while docked).</li>
+            <li>Points Cost: 10pts per contingent — each contingent is a single marine unit.</li>
+            <li>Limit: 1% of the ship's base Combat Point value, rounded up (so a 600-PV ship can buy up to 6 contingents).</li>
+        </ul>
+      </li>
+      <li><strong>Assault Shuttle / Fighter Hangar Conversions</strong>
+        <ul class="circle-list">
+            <li>Converts either a fighter slot into an assault shuttle slot, or vice versa</li>
             <li>Points Cost: 5pts per slot converted</li>
             <li>Limit: Equal to the number of assault shuttle/fighter slots</li>
         </ul>      
-      </li>      
+      </li>
+      <li><strong>Shuttle to Breaching Pod Slot Conversion</strong>
+        <ul class="circle-list">
+            <li>Converts one of a ship's default shuttle slots to a hangar slot that can accommodate a Breaching Pod unit (replacing the shuttle in process).</li>
+            <li>Points Cost: 10pts per slot converted</li>
+            <li>Limit: Equal to the number of default shuttle slots.</li>
+        </ul>      
+      </li>         
+      <li><strong>Shuttle to Minesweeping Shuttle Conversion</strong>
+        <ul class="circle-list">
+            <li>Convert one of a ship's default shuttle units to a minesweeping shuttle.</li>
+            <li>Points Cost: 10pts per shuttle converted</li>
+            <li>Limit: Equal to the number of default shuttles.</li>
+        </ul>      
+      </li>              
     <li><strong>Identify Friend or Foe (IFF) System</strong>
         <ul class="circle-list">
             <li>Effect: Prevent ballistic mines from attacking friendly units</li>

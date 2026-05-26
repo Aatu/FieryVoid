@@ -400,6 +400,162 @@ shipManager.systems = {
         return armour;
     },
 
+    //Total declared hangar slots on a ship (sum of maxhealth across Hangar systems).
+    //Includes Hangars but not other system types.
+    getTotalHangarCapacity: function getTotalHangarCapacity(ship) {
+        var total = 0;
+        if (!ship || !ship.systems) return 0;
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            //Catapults (name "catapult") are excluded: their boxes are structural
+            //HP only and never contribute to the default-shuttle pool (Stage 16).
+            if (system && system.name == "hangar") total += parseInt(system.maxhealth, 10) || 0;
+        }
+        return total;
+    },
+
+    //Stage 16: does this ship carry a Catapult? Superheavy fighters live in the
+    //catapult, not the shuttle-pool hangars, so when a catapult is present the
+    //'superheavy' fighters declaration must be excluded from the leftover-shuttle
+    //math (mirrors HangarOps::populateInitialHangarUsage skipping 'superheavy'
+    //from $totalDeclared when $hasCatapult).
+    shipHasCatapult: function shipHasCatapult(ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "catapult" || s.isCatapult)) return true;
+        }
+        return false;
+    },
+
+    //Sum of declared fighters that consume default-shuttle-pool hangar boxes.
+    //Excludes catapult-destined 'superheavy' fighters when the ship has a
+    //catapult. Single source of truth for getDefaultShuttles / Composition.
+    getShuttlePoolDeclared: function getShuttlePoolDeclared(fighters, ship) {
+        var declared = 0;
+        if (!fighters) return 0;
+        var hasCatapult = shipManager.systems.shipHasCatapult(ship);
+        for (var k in fighters) {
+            if (hasCatapult && String(k).toLowerCase().trim() === "superheavy") continue;
+            declared += parseInt(fighters[k], 10) || 0;
+        }
+        return declared;
+    },
+
+    //Mirrors HangarOps::populateInitialHangarUsage step 3: any hangar capacity
+    //that isn't accounted for by entries in ship.fighters auto-fills with the
+    //faction-appropriate default shuttle (or MinesweepingShuttles when
+    //minesweeperbonus > 0). The hangar SLOT key stays "shuttles" regardless
+    //of faction — Flyers / Shuttles / armed variants all compete for the
+    //same pool in checkChoices.
+    //Returns {count, type, key} where:
+    //  type — display string ("Shuttles" / "Flyers" / "Minesweeping Shuttles")
+    //  key  — matching ship.fighters slot key ("shuttles" / "minesweeping shuttles")
+    //  count — leftover slot count (>= 0)
+    getDefaultShuttles: function getDefaultShuttles(ship) {
+        if (shipManager.systems.getTotalHangarCapacity(ship) <= 0) {
+            return { count: 0, type: "Shuttles", key: "shuttles" };
+        }
+        var capacity = shipManager.systems.getTotalHangarCapacity(ship);
+        var declared = shipManager.systems.getShuttlePoolDeclared(ship.fighters, ship);
+        var leftover = capacity - declared;
+        if (leftover < 0) leftover = 0;
+        var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
+        if (minesweeper) {
+            return { count: leftover, type: "Minesweeping Shuttles", key: "minesweeping shuttles" };
+        }
+        return {
+            count: leftover,
+            type: shipManager.systems.factionDefaultShuttleLabel(ship),
+            key: "shuttles"
+        };
+    },
+
+    //Picks the single Hangar system that should display the ship's default
+    //shuttle load (see getDefaultShuttles). Prefers a hangar in the primary
+    //section (location 0); otherwise the first hangar found. Returns the
+    //system, or null if the ship has no hangars.
+    getDefaultShuttleHangar: function getDefaultShuttleHangar(ship) {
+        if (!ship || !ship.systems) return null;
+        var firstHangar = null;
+        for (var i in ship.systems) {
+            var system = ship.systems[i];
+            if (!system || system.name != "hangar") continue;
+            if (firstHangar === null) firstHangar = system;
+            if (system.location == 0) return system;
+        }
+        return firstHangar;
+    },
+
+    //Display label for a ship's auto-populated default shuttle. Mirrors
+    //HangarOps::factionShuttleClass on the server — extend this switch in
+    //lockstep whenever a faction-specific default shuttle subclass is added
+    //(e.g. Flyer for Minbari). Plural form, used in the ship-info window
+    //and in the gamelobby fleet check report.
+    factionDefaultShuttleLabel: function factionDefaultShuttleLabel(ship) {
+        var faction = ship && ship.faction ? String(ship.faction) : "";
+        switch (faction) {
+            case "Minbari Federation":
+            case "Minbari Protectorate":
+                return "Flyers";
+            default:
+                return "Shuttles";
+        }
+    },
+
+    //Post-enhancement breakdown of the auto-populated default shuttle pool, for
+    //display only (Hangar systemInfo tooltip, ship-info window). Applies the two
+    //shuttle-slot lobby enhancements:
+    //  HANG_BP  — converts N default slots into dedicated Breaching Pod slots.
+    //  HANG_MSW — retypes N default shuttles as Minesweeping Shuttles (no
+    //             capacity change; gated to non-minesweeper carriers server-side).
+    //Returns an ordered array of {type, count} rows (empty when no default pool).
+    //
+    //The pool size is read from a Breaching-Pod-clean fighters base: the
+    //gamelobby fleet check bakes HANG_BP into ship.fighters["Breaching Pods"]
+    //(snapshotting the pre-bake shape in ship._originalFighters), so using
+    //_originalFighters when present keeps this correct regardless of whether the
+    //fleet check has run — and avoids double-subtracting the converted slots.
+    getDefaultShuttleComposition: function getDefaultShuttleComposition(ship) {
+        var rows = [];
+        var capacity = shipManager.systems.getTotalHangarCapacity(ship);
+        if (capacity <= 0) return rows;
+        var base = ship._originalFighters || ship.fighters || {};
+        var declared = shipManager.systems.getShuttlePoolDeclared(base, ship);
+        var pool = capacity - declared;
+        if (pool <= 0) return rows;
+
+        var bp = 0, msw = 0;
+        if (ship.enhancementOptions) {
+            for (var e in ship.enhancementOptions) {
+                var id = ship.enhancementOptions[e][0];
+                var n = parseInt(ship.enhancementOptions[e][2], 10) || 0;
+                if (n <= 0) continue;
+                if (id === "HANG_BP") bp += n;
+                else if (id === "HANG_MSW") msw += n;
+            }
+        }
+        if (bp > pool) bp = pool;          //can't convert more slots than exist
+        var afterBP = pool - bp;           //BP conversion removes slots from the pool
+        if (msw > afterBP) msw = afterBP;  //MSW retypes within the remaining pool
+
+        var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
+        if (minesweeper) {
+            //Default pool is already MinesweepingShuttle; HANG_MSW is a no-op here.
+            if (afterBP > 0) rows.push({ type: "Minesweeping Shuttles", count: afterBP });
+        } else {
+            var plain = afterBP - msw;
+            if (plain > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: plain });
+            if (msw > 0) rows.push({ type: "Minesweeping Shuttles", count: msw });
+        }
+        //HANG_BP only converts a hangar slot to be BP-capable; the pod unit is
+        //bought separately. slotOnly flags this as available capacity, not a
+        //present unit, so the in-game Hangar tooltip can suppress it while the
+        //lobby loadout (shipwindow) still reflects the converted slot.
+        if (bp > 0) rows.push({ type: "Breaching Pods", count: bp, slotOnly: true });
+        return rows;
+    },
+
     getThrusters: function getThrusters(ship, direction) {
         var list = Array();
         for (var i in ship.systems) {

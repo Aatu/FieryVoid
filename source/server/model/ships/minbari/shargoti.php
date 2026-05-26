@@ -12,7 +12,7 @@ class Shargoti extends BaseShip{
         $this->shipSizeClass = 3;
         $this->gravitic = true;
         $this->canvasSize = 310;
-        $this->fighters = array("normal"=>24, "shuttles"=>6);
+        $this->fighters = array("normal"=>24);
         $this->limited = 10;
         $this->forwardDefense = 16;
         $this->sideDefense = 20;

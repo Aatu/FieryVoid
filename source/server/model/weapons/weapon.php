@@ -69,6 +69,10 @@ class Weapon extends ShipSystem
 
     public $loadingtime = 1;
     public $loadingtimeArray = array();
+    //Hangar Ops: 0 = not reloadable while docked; >0 = base (starting) ammo
+    //count, used as the reload cap (plus any EXT_AMMO bonus). Reloadable
+    //weapons set this to match their starting $ammunition.
+    protected $reloadable = 0;
     public $turnsloaded;
     public $turnsloadedArray = array();
 	public $maxVariableShots = 0; //For front end to know how many shots weapon CAN fire for variable-shot weapons. 	  
@@ -2283,6 +2287,36 @@ full Advanced Armor effects (by rules) for reference:
 		if (isset($this->ammunition)){
 			$this->ammunition = $amount;
 		}
+	}
+
+	/* Hangar Ops: reload 1 round/turn while this weapon's flight sits docked
+	 * in a hangar (driven by HangarOps::serviceDockedFlights). Gated on
+	 * $reloadable (0 = never reloads). The cap is the starting ammo —
+	 * $reloadable plus any EXT_AMMO enhancement the flight bought, mirroring
+	 * how setEnhancementsShip tops up $ammunition at game start. The saved
+	 * value EXCLUDES the EXT_AMMO bonus because setEnhancementsShip re-adds it
+	 * on every load, exactly as fire() persists it. No carrier ammo cost in
+	 * this first pass (matter-weapon rounds are free to replace). */
+	public function whileDocked($flight, $carrier, $hangar, $gamedata){
+		if ((int)$this->reloadable <= 0) return;
+		if (!isset($this->ammunition)) return;
+		if ($this->isDestroyed($gamedata->turn)) return;
+
+		$bonus = 0;
+		if (isset($flight->enhancementOptions) && is_array($flight->enhancementOptions)){
+			foreach ($flight->enhancementOptions as $enh){
+				if (($enh[0] ?? '') === 'EXT_AMMO' && (int)($enh[2] ?? 0) > 0){
+					$bonus += (int)$enh[2];
+				}
+			}
+		}
+		$max = (int)$this->reloadable + $bonus;
+		if ($this->ammunition >= $max) return;
+
+		$this->ammunition = min($max, $this->ammunition + 1);
+		//Persist the base count (minus the EXT_AMMO bonus); setEnhancementsShip
+		//re-adds the bonus on load — same convention fire() uses.
+		Manager::updateAmmoInfo($flight->id, $this->id, $gamedata->id, $this->firingMode, $this->ammunition - $bonus, $gamedata->turn);
 	}
 
 

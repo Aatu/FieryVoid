@@ -24,7 +24,7 @@ class StreibArmedBreachingPod extends FighterFlight{
         $this->turndelaycost = 0.33;
 
         $this->maxFlightSize = 2;//this is an unusual type of 'fighter', limit flight size.          
-		$this->hangarRequired = 'shuttles'; //for fleet check
+		$this->hangarRequired = 'Breaching Pods'; //for fleet check
 		$this->iniativebonus = 8*5;
 
         $this->occurence = 'common';

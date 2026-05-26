@@ -53,7 +53,7 @@ class asteroidThreeHex  extends Terrain{
                 ),
                 2=> array(
                         20 => "Primary",
-                ),
+                ),             
         );
     }
 }

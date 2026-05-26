@@ -20,7 +20,7 @@ class ProtectorateRolentha extends HeavyCombatVessel{
         $this->iniativebonus = 25;
         $this->isd = 2267;
         $this->variantOf = "Rogata Tug";
-        $this->fighters = array("shuttles"=>2);
+        //$this->fighters = array("shuttles"=>2);
 
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 300, 60));

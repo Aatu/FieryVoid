@@ -15,7 +15,7 @@ class SolyrnAM extends HeavyCombatVessel{
 		$this->canvasSize = 130; 
 
 	    $this->notes = 'Atmospheric Capable.';
-        $this->fighters = array("assault shuttles"=>2);
+        //$this->fighters = array("assault shuttles"=>2);
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;

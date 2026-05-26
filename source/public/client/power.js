@@ -27,6 +27,12 @@ shipManager.power = {
 	copyLastTurnPower: function copyLastTurnPower(ship, system) {
 		if (shipManager.systems.isDestroyed(ship, system)) return;
 
+		//Defensive: mid-game-spawned fighter systems can arrive without
+		//$power populated if their static blueprint wasn't preloaded into
+		//window.staticShips. Without this, the .concat() call below crashes
+		//the InitialPhaseStrategy on the next-turn transition.
+		if (!Array.isArray(system.power)) system.power = [];
+
 		//if system WAS forcibly shut down last turn but is NOT forced to shut down any longer - it should get back online without player input!
 		var wasShutDown = false;
 		var isShutDown = false;

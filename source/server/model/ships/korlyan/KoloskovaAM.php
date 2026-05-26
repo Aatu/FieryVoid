@@ -13,7 +13,7 @@ class KoloskovaAM extends MediumShip{
  		$this->unofficial = 'S'; //design released after AoG demise
 	    
 	    $this->isd = 1972;
-        $this->fighters = array("assault shuttles"=>1);
+        //$this->fighters = array("assault shuttles"=>1);
 
 	    $this->notes = 'Antiquated Sensors (cannot be boosted).';
 	    $this->notes .= '<br>Atmospheric Capable';

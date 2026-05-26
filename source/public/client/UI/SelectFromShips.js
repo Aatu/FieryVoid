@@ -91,13 +91,66 @@ window.SelectFromShips = function () {
             if (!isBlocked && (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r)) {
                 var selectedName = this.phaseStrategy.selectedShip.name;
                 var deployButton = jQuery(
-                    '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
+                    //'<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
+                    '<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + '</div>'                    
                 ).on('click', function () {
                     this.phaseStrategy.onHexClicked(this.payload);
                     this.destroy();
                 }.bind(this));
-                
+
                 this.element.append(deployButton);
+            }
+
+            // Stage 7 (Hangar Ops): if the player has a flight selected and the
+            // clicked ship(s) include friendly carriers with hangars that fit
+            // the flight, expose a single DOCK button. If exactly one carrier
+            // is eligible, clicking it auto-docks into that carrier's first
+            // compatible hangar. If multiple carriers are eligible (Issue 6),
+            // clicking opens a sub-picker dialog so the player picks which
+            // carrier — mirrors the Firing-Phase Dock flow, minus splitting.
+            if (this.phaseStrategy.selectedShip.flight && window.DeploymentDock) {
+                var flight = this.phaseStrategy.selectedShip;
+                var eligibleCarriers = [];
+                this.ships.forEach(function (s) {
+                    if (!s || s.flight) return;
+                    if (!gamedata.isMyShip(s)) return;
+                    if (!window.DeploymentDock.shipHasOpenableDockDialog(s)) return;
+                    var eligible = window.DeploymentDock.eligibleHangarsForFlight(s, flight);
+                    if (eligible.length === 0) return;
+                    eligibleCarriers.push({ ship: s, hangars: eligible });
+                });
+
+                if (eligibleCarriers.length > 0) {
+                    var label;
+                    if (eligibleCarriers.length === 1) {
+                        //label = 'DOCK ' + flight.name.toUpperCase() + ' IN ' + eligibleCarriers[0].ship.name.toUpperCase();
+                        label = 'DOCK ' + flight.name.toUpperCase();                        
+                    } else {
+                        label = 'DOCK ' + flight.name.toUpperCase() + ' (' + eligibleCarriers.length + ' CARRIERS AVAILABLE)';
+                    }
+                    var dockButton = jQuery('<div class="name-value-button-dock">' + label + '</div>')
+                        .on('click', function () {
+                            if (eligibleCarriers.length === 1) {
+                                var carrier = eligibleCarriers[0].ship;
+                                if (window.DeploymentDock.autoQueueDockOnCarrier(carrier, flight)) {
+                                    if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                                        window.refreshDeploymentUIForDeployStart();
+                                    }
+                                    //Issue 2: hand selection over to the carrier
+                                    //so the now-invisible flight isn't lingering
+                                    //as the selectedShip.
+                                    if (typeof window.selectShipInDeploymentPhase === 'function') {
+                                        window.selectShipInDeploymentPhase(carrier);
+                                    }
+                                }
+                            } else if (window.confirm
+                                && typeof window.confirm.hangarDeployDockCarrierPicker === 'function') {
+                                window.confirm.hangarDeployDockCarrierPicker(flight, eligibleCarriers);
+                            }
+                            this.destroy();
+                        }.bind(this));
+                    this.element.append(dockButton);
+                }
             }
         }
         // ------------------------------------------------------------------

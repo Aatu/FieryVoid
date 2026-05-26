@@ -425,7 +425,7 @@ CREATE TABLE `tac_individual_notes` (
   `systemid` int(11) NOT NULL,  
   `notekey` varchar(40) DEFAULT '',
   `notekey_human` varchar(40) DEFAULT '',
-  `notevalue` varchar(100) DEFAULT '',
+  `notevalue` varchar(4096) DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `gameid` (`gameid`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;

@@ -49,6 +49,7 @@ window.damageManager = {
 		*/
         if (system.fighter) {
             var crit = shipManager.criticals.getCritical(system, "DisengagedFighter");
+            if (!crit) crit = shipManager.criticals.getCritical(system, "DockedFighter");
             if (crit) {
 				return crit.turn;
 			} else {

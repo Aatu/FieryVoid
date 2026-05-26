@@ -25,7 +25,7 @@ class centaurumUpgraded extends BaseShip{
 		$this->critRollMod += 1;
 		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
 
-	    $this->notes .= '<br>Ablated armor.';
+	    $this->notes .= 'Ablated armor.';
          
         $this->addPrimarySystem(new Reactor(6, 30, 0, 0));
         $this->addPrimarySystem(new CnC(6, 25, 0, 0));

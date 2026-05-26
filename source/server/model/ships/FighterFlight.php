@@ -45,7 +45,8 @@ class FighterFlight extends BaseShip
 	//custom StarWars fighters are carried on squadron basis - allowing different squadron sizes for diffeerent craft
 	
 	public $customFtrName = ""; //to be filled if fighter has special hangar requirements - see Balvarix/Rutarian for usage
-		
+	public $deploysInHangar = false; //Some fighters like HK's MUST deploy in Hangars
+    public $minesweeper = false;		
 
 
     public $canvasSize = 200;
@@ -460,6 +461,13 @@ class FighterFlight extends BaseShip
 
     public function isDestroyed($turn = false)
     {
+        //Hangar Ops Stage 7: a docked flight is "removed" — treat it as
+        //destroyed for filtering purposes (target lists, fleet iteration,
+        //weapon scans like PulsarMine, etc.) so the broad isDestroyed
+        //call surface transparently skips docked flights. See
+        //BaseShip::isDestroyed for the full rationale.
+        if ($this->removed && ($turn === false || $turn >= $this->removedTurn)) return true;
+
         foreach ($this->systems as $system) {
             if (!$system->isDestroyed($turn) && !$system->isDisengaged($turn)) {
                 return false;

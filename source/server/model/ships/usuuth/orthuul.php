@@ -30,7 +30,7 @@ class Orthuul  extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 9, 8));
         $this->addPrimarySystem(new Engine(5, 24, 0, 12, 4));
-        $this->addPrimarySystem(new Hangar(7, 23, 6));
+        $this->addPrimarySystem(new Hangar(7, 28, 6));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

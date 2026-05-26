@@ -451,7 +451,95 @@ class FighterMissileRack extends MissileLauncher
             $this->displayName = $ammo->displayName; //so missile name goes into log instead of launcher name
         }
     }
-    
+
+    /* Hangar Ops Stage 17: legacy ballistic missile reload while docked.
+     * Driven by HangarOps::serviceDockedFlights (same per-turn tick that drives
+     * Weapon::whileDocked for matter weapons and AmmoMagazine::whileDocked for
+     * modern fighter missiles). Each restocked round draws its $ammo->cost from
+     * the carrier's HANG_ORD pool via HangarOps::drawReload.
+     *
+     * Rate: 1 missile per FIGHTER per turn, even when the fighter mounts
+     * multiple FighterMissileRack launchers. Matches the AmmoMagazine cadence
+     * (Stage 15) rather than the per-launcher cadence of Stage 14 matter
+     * weapons. The first FighterMissileRack subsystem encountered on the
+     * fighter does the per-turn work for the whole fighter: walks every
+     * FighterMissileRack sibling, picks the priciest missing round across all
+     * of them (tiebreak most-missing), restocks one, then stamps a transient
+     * flag on the parent Fighter so the remaining siblings' whileDocked calls
+     * early-return.
+     *
+     * Persistence: tac_ammo per-turn row via Manager::updateAmmoInfo (same
+     * path fire() uses). The pool-spend side rides on Stage 15's hangarOrdReserve
+     * note via drawReload's mutation on the primary hangar's $reloadPoolSpent.
+     */
+    public function whileDocked($flight, $carrier, $hangar, $gamedata){
+        if (!($flight instanceof FighterFlight)) return;
+        if ($this->isDestroyed($gamedata->turn)) return;
+        //$this->getUnit() returns the FighterFlight, not the parent Fighter
+        //(FighterFlight::addSystem wires setUnit($this) for both the Fighter
+        //and every sub-system — see FighterFlight.php:297-304). Resolve the
+        //parent Fighter via the flight's existing system-id lookup so the
+        //sibling-walk and the per-fighter gate target the right scope.
+        $fighter = $flight->getFighterBySystem($this->id);
+        if (!$fighter) return;
+
+        //Per-fighter rate gate. $missileRackReloadedTurn is transient — lives
+        //only for the current criticalPhaseEffects pass; next turn-load builds
+        //fresh Fighter objects with the property unset, so the gate resets.
+        if (!empty($fighter->missileRackReloadedTurn)
+            && (int)$fighter->missileRackReloadedTurn >= (int)$gamedata->turn) return;
+
+        //Build candidate list from EVERY FighterMissileRack-class sibling on
+        //this fighter, not just $this — ensures we pick the best across the
+        //fighter's whole loadout, not just the first launcher iterated.
+        $candidates = array();
+        foreach ($fighter->systems as $sib) {
+            if (!($sib instanceof FighterMissileRack)) continue;
+            if ($sib->isDestroyed($gamedata->turn)) continue;
+            $cap = (int)$sib->maxAmount;
+            if ($cap <= 0) continue;
+            if (!is_array($sib->missileArray)) continue;
+            foreach ($sib->missileArray as $mode => $ammo) {
+                if (!$ammo) continue;
+                if ((int)$ammo->amount >= $cap) continue;
+                $candidates[] = array(
+                    'launcher' => $sib,
+                    'mode'     => $mode,
+                    'ammo'     => $ammo,
+                    'price'    => (int)$ammo->cost,
+                    'cap'      => $cap,
+                );
+            }
+        }
+        if (empty($candidates)) return;
+
+        //Priciest first; tiebreak by most-missing (cap - amount).
+        usort($candidates, function($a, $b){
+            if ($a['price'] !== $b['price']) return $b['price'] - $a['price'];
+            $aMissing = $a['cap'] - (int)$a['ammo']->amount;
+            $bMissing = $b['cap'] - (int)$b['ammo']->amount;
+            return $bMissing - $aMissing;
+        });
+
+        foreach ($candidates as $cand) {
+            if (!HangarOps::drawReload($carrier, $cand['price'])) continue;
+            $cand['ammo']->amount = min($cand['cap'], (int)$cand['ammo']->amount + 1);
+            //fire() uses $fireOrder->shooterid (the flight id) as the ship id
+            //and $this->firingMode as the mode — match that exactly so loading
+            //(setAmmo($mode, $amount)) targets the right launcher subsystem.
+            Manager::updateAmmoInfo(
+                $flight->id,
+                $cand['launcher']->id,
+                $gamedata->id,
+                $cand['launcher']->firingMode,
+                $cand['ammo']->amount,
+                $gamedata->turn
+            );
+            $fighter->missileRackReloadedTurn = (int)$gamedata->turn;
+            return;   //1 missile per fighter per turn
+        }
+    }
+
 } //endof FighterMissileRack
 
 

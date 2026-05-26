@@ -30,7 +30,13 @@ class DeploymentGamePhase implements Phase
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
     {
-        $moves = $this->validateDeployment($gameData, $ships);
+        //Stage 7: flights queued for hangar deploy-start dock skip the
+        //"must have a deploy movement" check below — they don't get placed on
+        //the board. The transfer field is set on each Hangar in Manager.php
+        //during ship parsing, BEFORE this method runs.
+        $dockedFlightIds = HangarOps::collectQueuedDeployStartFlightIds($ships);
+
+        $moves = $this->validateDeployment($gameData, $ships, $dockedFlightIds);
 		
 		foreach ($ships as $currShip){ //generate system-specific information if necessary
 			$currShip->generateIndividualNotes($gameData, $dbManager);
@@ -167,7 +173,7 @@ class DeploymentGamePhase implements Phase
         return true;
     }
 
-    private static function validateDeployment(TacGamedata $gamedata, $ships)
+    private static function validateDeployment(TacGamedata $gamedata, $ships, array $dockedFlightIds = array())
     {
         $shipIdMoves = array();
         foreach ($ships as $ship)
@@ -178,9 +184,17 @@ class DeploymentGamePhase implements Phase
 
             $depTurn = $ship->getTurnDeployed($gamedata);
 
+            //Stage 7: a flight queued for hangar deploy-start dock has no
+            //movement of its own — it goes straight into the carrier's hangar.
+            //Skip the "must have a deploy entry" requirement, write no moves.
+            if (isset($dockedFlightIds[(int)$ship->id])) {
+                $shipIdMoves[$ship->id] = array();
+                continue;
+            }
+
             $moves = array();
             $found = false;
-            
+
             if($depTurn == $gamedata->turn){ //Is ship deploying this turn?
                 foreach ($ship->movement as $move)
                 {

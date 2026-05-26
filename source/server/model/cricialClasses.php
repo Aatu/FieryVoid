@@ -46,6 +46,21 @@ class DisengagedFighter extends Critical{
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
 }
+
+/* Hangar Ops Stage 9.1: applied to Fighter subsystems that left a flight
+ * by entering a hangar (partial-dock, or partial-launch split where the
+ * remaining fighters stayed behind). Mirrors DisengagedFighter's lifetime
+ * (turnend=0 → permanent until relaunch) but renders as cyan "DOCKED"
+ * instead of green "DISENGAGED" in the flight window, and lets the replay
+ * audit trail distinguish docking from combat-disengagement.
+ */
+class DockedFighter extends Critical{
+    public $description = "DOCKED";
+	public $repairPriority = 0;//docked fighter will remain docked
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
 	
 	
 
@@ -602,9 +617,25 @@ class IncreasedRecharge1 extends Critical{
 class MissileLost extends Critical{
     //This one requires quite a bit of work within the weapon class to work properly, see Transverse Drive for an example.
     public $description = "A missile was lost to damage";
-	public $repairPriority = 0;//Can't repair.'       
-    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){  	
+	public $repairPriority = 0;//Can't repair.'
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
     parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+class HangarOperations extends Critical{
+    public $description = "-20 Initiative";
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
+class LaunchedThisTurn extends Critical{
+    public $description = "-50 Initiative";
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
 }
 
