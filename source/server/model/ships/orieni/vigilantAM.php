@@ -42,7 +42,7 @@ class VigilantAM extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 5, 6)); //+4 minesweeping
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
-        $this->addPrimarySystem(new Hangar(4, 14, 6));
+        $this->addPrimarySystem(new Hangar(4, 14, 12));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 12, 1, 1));
 		$this->addPrimarySystem(new AmmoMissileRackS(5, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
@@ -86,13 +86,24 @@ class VigilantAM extends BaseShip{
 		
 		//PRIMARY
 		0=> array( 
-
-			20 => "Hangar",
-
+			7 => "Structure",
+			8 => "Class-S Missile Rack",
+			10 => "Jump Engine",
+			12 => "Scanner",
+			14 => "Engine",
+			15 => "Reload Rack",
+			17 => "Hangar",
+			18 => "HK Control Node",
+			19 => "Reactor",
+			20 => "C&C",
 		),
 
 		//Forward
 		1=> array(
+			4 => "Thruster",
+			8 => "Class-S Missile Rack",
+			11 => "Rapid Gatling Railgun",
+			18 => "Structure",
 			20 => "Primary",
 		),
 
