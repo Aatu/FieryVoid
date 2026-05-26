@@ -331,6 +331,20 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>Hangar damage:</b> If a hangar takes damage, stored craft are destroyed along with it (empty slots and shuttles are lost first, then the cheaper craft).</li>
             <br>
 
+            <li><b>Carrier destruction &mdash; hangar craft may escape:</b> When a carrier is destroyed (other than by successfully jumping to hyperspace),
+                some of its docked fighters and shuttles may scramble out before the wreck goes up.  The game rolls a d20:
+                <ul class="circle-list">
+                    <li>1&ndash;5: no craft escape.</li>
+                    <li>6&ndash;10: one quarter of docked craft escape (round down).</li>
+                    <li>11&ndash;18: one half escape (round down).</li>
+                    <li>19&ndash;20: all docked craft escape.</li>
+                </ul>
+                Only combat fighters, armed shuttle variants, Assault Shuttles, and Breaching Pods are eligible for possible escape. Escapees are auto-selected by combat value (most expensive craft escape first).
+                They appear in the carrier's final hex with its heading and speed, facing the carrier's final facing plus the originating hangar's launch direction, and suffer
+                the standard &minus;50 Initiative penalty on their first acting turn (as if freshly launched).  Craft on a carrier that successfully jumped to hyperspace are
+                NOT subject to this roll &mdash; they ride along with the jump and retain their full combat value.</li>
+            <br>
+
             <li><b>Rearming docked craft:</b> A flight that remains docked for a full turn will automatically rearm its limited-ammo weapons before relaunching.
                 <ul class="circle-list">
                     <li><strong>Matter weapons</strong> (SlugCannon, Gatling Gun, etc.): restore 1 round per weapon per turn while docked, up to the weapon's starting load.  This is free and automatic — no carrier cost.</li>

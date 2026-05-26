@@ -268,6 +268,22 @@ class HangarOps {
 		return isset(self::$factionShuttleMap[$faction]) ? self::$factionShuttleMap[$faction] : null;
 	}
 
+	/* True when $phpclass is one of the auto-fill "default" shuttle classes —
+	 * the generic Shuttle, every faction variant (ShuttleEA, ShuttleNarn,
+	 * Flyer, FlyerProtectorate, ...), and MinesweepingShuttle. They all
+	 * extend Shuttle (see source/server/model/ships/Shuttle.php), whereas
+	 * armed-shuttle classes (e.g. genericArmedShuttle, drakhShuttle) extend
+	 * FighterFlight directly. Stage 18 uses this to exclude free auto-fill
+	 * shuttles from the carrier-destruction escape pool while still letting
+	 * armed shuttles / Assault Shuttles / Breaching Pods escape normally.
+	 */
+	public static function isDefaultShuttleClass($phpclass){
+		if (!is_string($phpclass) || $phpclass === '') return false;
+		if ($phpclass === 'Shuttle') return true;
+		if (!class_exists($phpclass)) return false;
+		return is_subclass_of($phpclass, 'Shuttle');
+	}
+
 	/* Display name for a shuttle phpclass — used in hangar tooltip aggregation. */
 	public static function shuttleDisplayNameFor($phpclass){
 		switch ($phpclass) {
@@ -500,6 +516,17 @@ class HangarOps {
 		//Reset shared launch+land budget for next turn
 		$hangar->launchedThisTurn = 0;
 		$hangar->landedThisTurn = 0;
+
+		//Stage 18: defer everything for a destroyed carrier — the Pass 3 sweep
+		//(processCarrierDestructionEscapes) owns the destroyed-carrier path. If
+		//we let the total-loss disengage branch fire here, it would disengage
+		//every dockedFlightId-linked source flight BEFORE Pass 3 had a chance
+		//to mark some as escapees. (Normally an already-destroyed carrier isn't
+		//in $activeShips and this hook isn't called for it; this guard covers
+		//the cascade case where a ship in $activeShips at Pass 1 start gets
+		//destroyed mid-Pass-1 by, e.g., ConnectionStrut, and still has its
+		//Pass 2 hooks run on the original snapshot.)
+		if ($ship->isDestroyed()) return 0;
 
 		if ($hangar->isDestroyed()){
 			//Total hangar loss: any dockedFlightId-linked craft also die.
@@ -2303,6 +2330,452 @@ class HangarOps {
 		}
 
 		$hangar->pendingDockOrder = null;
+	}
+
+	/* === Stage 18: hangar craft escape from a destroyed carrier =========== */
+
+	/* Walks $gamedata->ships looking for destroyed carriers that still hold
+	 * docked craft, rolls a d20 for each, spawns up to maxEscape craft as
+	 * live FighterFlights at the carrier's last hex/heading/(facing +
+	 * hangar->direction)/speed, and disengages the non-escapees so they
+	 * properly count as destroyed for fleetList / calculateCombatValue.
+	 *
+	 * Triggered from Criticals::setCriticals as a Pass 3 sweep AFTER the
+	 * standard $activeShips passes. The destroyed carrier isn't in
+	 * $activeShips so its hangars never see Pass 2's Hangar::criticalPhaseEffects;
+	 * Stage 18 owns the destroyed-carrier path end-to-end.
+	 *
+	 * One-shot per carrier: when the roll fires, a 'hangarEscapeRoll' note is
+	 * written on the carrier's primary hangar and Hangar->escapeRolled is
+	 * set. Subsequent loads reapply the flag from the note so this pass
+	 * skips already-rolled carriers.
+	 *
+	 * Carriers that successfully jumped to hyperspace are excluded — the
+	 * existing fleetList.getJumpedDockedFlightIds path preserves their
+	 * docked flights' combat value verbatim (matches the user spec). */
+	public static function processCarrierDestructionEscapes($gamedata){
+		//Snapshot the ship list — performEscapeSpawns mutates $gamedata->ships
+		//via Manager::insertSingleShip when spawning escape fragments / new flights.
+		$ships = array();
+		foreach ($gamedata->ships as $s) $ships[] = $s;
+
+		foreach ($ships as $carrier) {
+			if ($carrier instanceof FighterFlight) continue;
+			if (!$carrier->isDestroyed()) continue;
+
+			$jumpEngine = $carrier->getSystemByName('JumpEngine');
+			if ($jumpEngine && $jumpEngine->hasJumped()) continue;
+
+			$hangars = self::collectHangars($carrier);
+			if (empty($hangars)) continue;
+
+			$primary = self::primaryHangar($carrier);
+			if (!$primary) continue;
+
+			//One-shot gate. The flag is set when the note loads at the top of
+			//each request (see Hangar::onIndividualNotesLoaded), so once we
+			//roll for a given carrier we never roll again.
+			if (!empty($primary->escapeRolled)) continue;
+
+			$virtuals = self::buildEscapeCandidates($hangars, $gamedata);
+
+			//Roll d20. random_int draws from the OS CSPRNG, independent of
+			//any mt_srand state elsewhere in the request. The result is
+			//persisted immediately via the hangarEscapeRoll note in
+			//recordEscapeRoll (Manager::insertIndividualNote inserts to DB
+			//synchronously), so replay scrubs read the stored value rather
+			//than re-rolling. An earlier deterministic-seed (crc32) approach
+			//produced a uniform AGGREGATE distribution but clustered nearby
+			//seeds into the same outcome bucket — same carrier across
+			//consecutive turns kept rolling in the 11-18 range — so the
+			//player saw "half escape" every time. Rolling fresh fixes that.
+			$roll = random_int(1, 20);
+			$totalDocked = count($virtuals);
+			$maxEscape = self::computeEscapeCount($roll, $totalDocked);
+
+			$escapedNames = array();
+			if ($maxEscape > 0) {
+				//Priority sort: combat value DESC (Thunderbolts escape before
+				//armed shuttles), then damage ASC (least-damaged first so
+				//the healthiest survive).
+				usort($virtuals, function($a, $b){
+					if ($a['pointCost'] !== $b['pointCost']) return $b['pointCost'] - $a['pointCost'];
+					if ($a['damage']    !== $b['damage'])    return $a['damage']    - $b['damage'];
+					return 0;
+				});
+				$chosen = array_slice($virtuals, 0, $maxEscape);
+				$escapedNames = self::performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata);
+			}
+
+			//The wreck holds nothing now — every escapee is in space and the
+			//rest are dead with the ship. Default shuttles that were excluded
+			//from the escape pool die here too (auto-fill shuttles don't get
+			//to clutter the post-destruction picture per the user's call).
+			//Clears even when nothing escaped so the destroyed carrier's row
+			//doesn't keep stale stash data dangling.
+			foreach ($hangars as $h) {
+				$h->hangarUsage = array();
+			}
+
+			self::recordEscapeRoll($primary, $roll, $maxEscape, $totalDocked, $escapedNames, $carrier, $gamedata);
+		}
+	}
+
+	/* B5W d20 table for carrier-destruction escape:
+	 *   1–5   → 0 escape
+	 *   6–10  → 1/4 (drop fractions)
+	 *   11–18 → 1/2 (drop fractions)
+	 *   19–20 → all escape
+	 */
+	public static function computeEscapeCount($roll, $totalDocked){
+		if ($totalDocked <= 0) return 0;
+		if ($roll >= 19) return $totalDocked;
+		if ($roll >= 11) return (int)floor($totalDocked / 2);
+		if ($roll >= 6)  return (int)floor($totalDocked / 4);
+		return 0;
+	}
+
+	/* Per-craft virtual records used to drive the escape priority sort. Each
+	 * stash entry contributes one virtual per still-active craft it holds.
+	 * dockedFlightId-linked entries also carry the per-fighter damage (for
+	 * least-damaged-first tiebreak); other entries (anonymous orphan,
+	 * auto-shuttle) get damage 0 — they have no per-fighter granularity.
+	 *
+	 * cannotLaunch wrecks (Stage 16.5) are excluded from eligibility — they
+	 * are already CV=0 and can never be in flight again. */
+	private static function buildEscapeCandidates($hangars, $gamedata){
+		$virtuals = array();
+		foreach ($hangars as $hangar) {
+			if (!is_array($hangar->hangarUsage)) continue;
+			foreach ($hangar->hangarUsage as $entryIdx => $entry) {
+				if (!empty($entry['cannotLaunch'])) continue;
+				$phpclass = (string)($entry['phpclass'] ?? '');
+				//Stage 18: default (auto-fill) shuttles don't count toward the
+				//escape pool and can't escape. Per user call (2026-05-25): only
+				//combat fighters, armed shuttle variants, Assault Shuttles, and
+				//Breaching Pods are eligible — default shuttles that come free
+				//with a ship shouldn't clutter the wreck with survivors.
+				if (self::isDefaultShuttleClass($phpclass)) continue;
+				$size = max(1, (int)($entry['flightSize'] ?? 1));
+				$pcPerCraft = self::entryPointCostPerCraft($entry);
+
+				if (isset($entry['dockedFlightId']) && (int)$entry['dockedFlightId'] > 0) {
+					$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
+					if ($flight instanceof FighterFlight) {
+						foreach ($flight->systems as $idx => $f) {
+							if (!($f instanceof Fighter)) continue;
+							if ($f->isDestroyed($gamedata->turn)) continue;
+							$virtuals[] = array(
+								'hangarRef'  => $hangar,
+								'entryIdx'   => $entryIdx,
+								'phpclass'   => $phpclass,
+								'pointCost'  => $pcPerCraft,
+								'damage'     => (int)$f->getTotalDamage(),
+								'flightId'   => (int)$entry['dockedFlightId'],
+								'fighter'    => $f,
+								'fighterIdx' => $idx,
+							);
+						}
+						continue;
+					}
+					//Linked flight missing — fall through as if anonymous.
+				}
+
+				//Anonymous orphan / auto-shuttle / missing-linked-flight: one
+				//virtual per declared craft, all with damage 0.
+				for ($i = 0; $i < $size; $i++) {
+					$virtuals[] = array(
+						'hangarRef'  => $hangar,
+						'entryIdx'   => $entryIdx,
+						'phpclass'   => $phpclass,
+						'pointCost'  => $pcPerCraft,
+						'damage'     => 0,
+						'flightId'   => 0,
+						'fighter'    => null,
+						'fighterIdx' => $i,
+					);
+				}
+			}
+		}
+		return $virtuals;
+	}
+
+	/* Per-craft pointCost for an entry. fleetList.js renders flights as
+	 * pointCost * flightSize/6, but per-craft sorting only needs the relative
+	 * ranking — the absolute number doesn't matter, just that a 60-PV
+	 * Thunderbolt ranks above a 0-PV auto-shuttle. We use the raw class
+	 * pointCost directly. */
+	private static function entryPointCostPerCraft($entry){
+		$phpclass = (string)($entry['phpclass'] ?? '');
+		if ($phpclass === '' || !class_exists($phpclass)) return 0;
+		try {
+			$probe = new $phpclass(0, 0, '', 0);
+			return (int)($probe->pointCost ?? 0);
+		} catch (Exception $e) {
+			return 0;
+		}
+	}
+
+	/* Group the chosen virtuals by stash entry, spawn one escape flight per
+	 * bucket, then disengage every non-escapee source flight so the
+	 * fleet-list 0-CV fold hides their rows.
+	 *
+	 * Returns the list of escaped flight display names (for the replay note). */
+	private static function performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata){
+		//Bucket key "{hangarId}:{entryIdx}" — chosen virtuals from the same
+		//stash entry all spawn together (resurrect or single fragment).
+		$buckets = array();
+		foreach ($chosen as $v) {
+			$key = (int)$v['hangarRef']->id . ':' . (int)$v['entryIdx'];
+			if (!isset($buckets[$key])) {
+				$buckets[$key] = array(
+					'hangar'   => $v['hangarRef'],
+					'entryIdx' => (int)$v['entryIdx'],
+					'virtuals' => array(),
+				);
+			}
+			$buckets[$key]['virtuals'][] = $v;
+		}
+
+		$names = array();
+		foreach ($buckets as $bucket) {
+			$hangar = $bucket['hangar'];
+			$entry  = $hangar->hangarUsage[$bucket['entryIdx']] ?? null;
+			if (!is_array($entry)) continue;
+			$name = self::spawnEscapeForBucket($carrier, $hangar, $entry, $bucket['virtuals'], $gamedata);
+			if ($name !== null) $names[] = $name;
+		}
+
+		self::markNonEscapeesDestroyed($hangars, $buckets, $gamedata);
+
+		return $names;
+	}
+
+	/* Spawn the escape from a single stash entry. Three paths:
+	 *
+	 *  - dockedFlightId AND chosen-count >= source-flight active count →
+	 *    resurrect the linked flight directly (clear $removed, deploy
+	 *    MovementOrder, LaunchedThisTurn). Source flight IS the escape flight.
+	 *  - dockedFlightId AND partial → spawn a fragment carrying only the
+	 *    chosen fighters' damage state, clear its $removed flag (the
+	 *    spawnFragmentFlight helper births it removed for the dock case),
+	 *    overwrite its deploy move with hangar-direction-aware facing.
+	 *    The OLD source flight is disengaged by markNonEscapeesDestroyed.
+	 *  - anonymous orphan / auto-shuttle / missing-linked-flight → fresh
+	 *    FighterFlight via the new-spawn path (mirror performLaunch).
+	 *
+	 * Returns the new flight's display name (for the replay note), or null
+	 * on failure. */
+	private static function spawnEscapeForBucket($carrier, $hangar, $entry, $virtuals, $gamedata){
+		$phpclass = (string)($entry['phpclass'] ?? '');
+		if ($phpclass === '' || !class_exists($phpclass)) return null;
+		$count = count($virtuals);
+		if ($count <= 0) return null;
+
+		$lastMove = $carrier->getLastMovement();
+		if (!$lastMove) return null;
+		$spawnPos = $lastMove->position;
+		$heading  = (int)$lastMove->heading;
+		$facing   = ((int)$lastMove->facing + (int)$hangar->direction) % 6;
+		if ($facing < 0) $facing += 6;
+		$speed    = (int)$lastMove->speed;
+
+		$flightId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
+		if ($flightId > 0) {
+			$sourceFlight = $gamedata->getShipById($flightId);
+			if ($sourceFlight instanceof FighterFlight) {
+				$sourceActive = $sourceFlight->countActiveCraft($gamedata->turn);
+
+				if ($count >= $sourceActive) {
+					//Full escape — resurrect the source flight. The flight ship
+					//row IS the escape flight (no new ship inserted), so all
+					//its damage / crit state survives unchanged.
+					$sourceFlight->removed     = false;
+					$sourceFlight->removedTurn = null;
+					$sourceFlight->spawned     = $gamedata->turn;
+
+					$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
+					Manager::insertSingleMovement($gamedata->id, $sourceFlight->id, $deployMove);
+
+					self::applyEscapeCrits($sourceFlight, $gamedata);
+					self::writeEscapeEventNote($carrier, $hangar, $sourceFlight, $count, 'resurrected', $gamedata);
+					return $sourceFlight->name;
+				}
+
+				//Partial escape — spawn a fragment carrying the chosen
+				//fighters' state. Mirrors spawnFragmentFlight (Stage 10.4)
+				//but the result is on-the-board, not in-hangar.
+				$chosenFighters = array();
+				foreach ($virtuals as $v) {
+					if ($v['fighter'] instanceof Fighter) $chosenFighters[] = $v['fighter'];
+				}
+				if (empty($chosenFighters)) return null;
+
+				$escapeFlight = self::spawnFragmentFlight($sourceFlight, $chosenFighters, $carrier, $hangar, $gamedata);
+				if (!$escapeFlight) return null;
+
+				//spawnFragmentFlight births the fragment $removed=true (for
+				//the normal partial-dock case where it sits in a hangar).
+				//For escape, the fragment is live in space — clear the flag
+				//and overwrite the auto-inserted deploy move with the
+				//hangar-direction-aware facing.
+				$escapeFlight->removed     = false;
+				$escapeFlight->removedTurn = null;
+
+				$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
+				Manager::insertSingleMovement($gamedata->id, $escapeFlight->id, $deployMove);
+
+				self::applyEscapeCrits($escapeFlight, $gamedata);
+				self::writeEscapeEventNote($carrier, $hangar, $escapeFlight, $count, 'fragment', $gamedata);
+				return $escapeFlight->name;
+			}
+			//Linked flight missing — fall through to new-spawn.
+		}
+
+		//New-spawn path (anonymous orphan, auto-shuttle, or missing-linked-flight).
+		//Mirrors the second half of performLaunch's new-spawn branch.
+		$flightName = self::flightNameFor($phpclass, $carrier);
+		$flight = new $phpclass($gamedata->id, $carrier->userid, $flightName, $carrier->slot);
+		$flight->team = $carrier->team;
+		if ($count > $flight->flightSize) {
+			$flight->flightSize = $count;
+			if (method_exists($flight, 'populate')) {
+				$flight->populate();
+			}
+		}
+
+		$shipid = Manager::insertSingleShip($gamedata, $flight, $carrier->userid);
+		$flight->id = $shipid;
+		$flight->spawned = $gamedata->turn;
+
+		Manager::insertSingleFlightSize($gamedata->id, $shipid, $flight->flightSize);
+
+		$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
+		Manager::insertSingleMovement($gamedata->id, $shipid, $deployMove);
+
+		SystemData::initSystemData($gamedata->turn, $gamedata->id);
+		foreach ($flight->systems as $craft) {
+			$craft->setInitialSystemData($flight);
+			if (!isset($craft->systems) || !is_array($craft->systems)) continue;
+			foreach ($craft->systems as $sys) {
+				$sys->setInitialSystemData($flight);
+				if ($sys instanceof Weapon) {
+					$load = $sys->getStartLoading();
+					if ($load) {
+						$load->loading = $sys->loadingtime;
+						SystemData::addDataForSystem($sys->id, 0, $shipid, $load->toJSON());
+					}
+				}
+			}
+		}
+		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+		self::applyEscapeCrits($flight, $gamedata);
+		self::writeEscapeEventNote($carrier, $hangar, $flight, $count, 'newspawn', $gamedata);
+		return $flight->name;
+	}
+
+	/* Apply LaunchedThisTurn (-50 init next turn) to an escapee. UNLIKE
+	 * applyLaunchCrits, this does NOT apply HangarOperations to the carrier:
+	 * the carrier is dead, it can't take an initiative penalty. The flight
+	 * gets the standard penalty so an escapee can't immediately seize the
+	 * initiative on the turn after escaping. */
+	private static function applyEscapeCrits($flight, $gamedata){
+		if (!($flight instanceof FighterFlight)) return;
+		$firstFighter = $flight->getSampleFighter();
+		if (!$firstFighter) return;
+		$crit = new LaunchedThisTurn(-1, $flight->id, $firstFighter->id, 'LaunchedThisTurn', $gamedata->turn, $gamedata->turn + 1);
+		$crit->updated = true;
+		$firstFighter->criticals[] = $crit;
+	}
+
+	/* For every dockedFlightId-linked stash entry on the destroyed carrier,
+	 * disengage the source flight's fighters that did NOT escape (so the
+	 * 0-CV fold in fleetList hides those rows). $escapeBuckets is keyed by
+	 * "{hangarId}:{entryIdx}" and identifies which entries were resurrected
+	 * (full escape — DON'T disengage; the source IS the escape flight).
+	 *
+	 * Partial-escape entries: the chosen fighters' damage was copied onto a
+	 * NEW fragment via spawnFragmentFlight. Now disengage every original
+	 * fighter on the source flight so the source's combat value collapses
+	 * to 0 — the chosen fighters are still physically present on the source
+	 * flight, just like the partial-dock case in Stage 10.4. */
+	private static function markNonEscapeesDestroyed($hangars, $escapeBuckets, $gamedata){
+		foreach ($hangars as $hangar) {
+			if (!is_array($hangar->hangarUsage)) continue;
+			foreach ($hangar->hangarUsage as $entryIdx => $entry) {
+				if (!isset($entry['dockedFlightId'])) continue;
+				$flightId = (int)$entry['dockedFlightId'];
+				if ($flightId <= 0) continue;
+				$flight = $gamedata->getShipById($flightId);
+				if (!($flight instanceof FighterFlight)) continue;
+
+				$key = (int)$hangar->id . ':' . (int)$entryIdx;
+				$resurrected = false;
+				if (isset($escapeBuckets[$key])) {
+					$bucket = $escapeBuckets[$key];
+					$sourceActive = $flight->countActiveCraft($gamedata->turn);
+					$bucketCount = count($bucket['virtuals']);
+					if ($bucketCount >= $sourceActive) {
+						//Full extract via resurrect — source flight IS the
+						//escape flight, already cleared $removed. Skip.
+						$resurrected = true;
+					}
+				}
+				if ($resurrected) continue;
+
+				self::disengageFighters($flight, PHP_INT_MAX, $gamedata);
+			}
+		}
+	}
+
+	/* Persist the escape roll on the carrier's primary hangar and write a
+	 * single 'hangarEscapeRoll' note for replay. The in-memory $escapeRolled
+	 * flag short-circuits future Pass 3 sweeps in this request; the note
+	 * carries the same gate across requests via Hangar::onIndividualNotesLoaded. */
+	private static function recordEscapeRoll($primary, $roll, $maxEscape, $totalDocked, $escapedNames, $carrier, $gamedata){
+		$primary->escapeRolled = true;
+		$primary->escapeRoll   = (int)$roll;
+		$primary->escapeMax    = (int)$maxEscape;
+		$primary->escapeTotal  = (int)$totalDocked;
+		$primary->escapeNames  = $escapedNames;
+
+		$payload = json_encode(array(
+			'roll'  => (int)$roll,
+			'max'   => (int)$maxEscape,
+			'total' => (int)$totalDocked,
+			'names' => $escapedNames,
+			'turn'  => (int)$gamedata->turn,
+		));
+		$note = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$carrier->id,
+			$primary->id,
+			'hangarEscapeRoll',
+			'Hangar escape roll',
+			$payload
+		);
+		Manager::insertIndividualNote($note);
+	}
+
+	/* Per-escapee replay note. $kind ∈ {'resurrected', 'fragment', 'newspawn'}
+	 * for forensic clarity in DB inspection. */
+	private static function writeEscapeEventNote($carrier, $hangar, $flight, $count, $kind, $gamedata){
+		$note = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$carrier->id,
+			$hangar->id,
+			'hangarEscapeEvent',
+			'Hangar craft escaped destroyed carrier',
+			$flight->id . ':' . $flight->phpclass . ':' . $count . ':' . $kind
+		);
+		Manager::insertIndividualNote($note);
 	}
 
 }

@@ -21,8 +21,17 @@ function pointCostForPhpclass(phpclass) {
 //own (removed=true) flight ship row in the fleet list, so counting them
 //here would double-credit. Shuttles auto-fill carriers and have pointCost=0,
 //so they contribute nothing.
+//
+//Stage 18: a destroyed-non-jumped carrier loses its stash to the wreck —
+//don't credit the carrier for contents it no longer has. (Server-side,
+//processCarrierDestructionEscapes clears hangarUsage post-roll so this is
+//usually 0 already, but the guard covers stale state and the brief window
+//between in-game destruction and the next setCriticals sweep.) Jumped
+//carriers keep their stash since the jumped-flight preservation path
+//treats the whole carrier+contents as off-board-but-intact.
 function dockedCraftStashValue(ship) {
     if (!Array.isArray(ship.systems)) return 0;
+    if (shipManager.isDestroyed(ship) && !shipManager.hasJumpedNotDestroyed(ship)) return 0;
     var total = 0;
     for (var s = 0; s < ship.systems.length; s++) {
         var sys = ship.systems[s];

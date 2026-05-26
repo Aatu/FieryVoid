@@ -2974,6 +2974,17 @@ class Hangar extends ShipSystem{
 	//carrier's MAR_CONT enhancement on every load.
 	public $marinePoolSpent = 0;
 	private $lastSavedMarinePool = null;  //serialized snapshot of last persisted marinePoolSpent
+	//Stage 18: carrier-destruction escape roll. ONE-SHOT per carrier — set
+	//when HangarOps::processCarrierDestructionEscapes fires the d20 (or when
+	//a hangarEscapeRoll note is loaded). Only the PRIMARY hangar carries
+	//these; persisted via the hangarEscapeRoll note. escapeRoll/Max/Total/
+	//Names are shipped via stripForJson so the client can render the
+	//replay/audit state on the destroyed-carrier row.
+	public $escapeRolled = false;
+	public $escapeRoll = 0;
+	public $escapeMax = 0;
+	public $escapeTotal = 0;
+	public $escapeNames = array();
 	public $pendingLaunchOrder = null;    //decoded latest hangarLaunchOrder for this turn (set by onIndividualNotesLoaded)
 	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
 	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
@@ -3052,6 +3063,19 @@ class Hangar extends ShipSystem{
 				if ($spent < 0) $spent = 0;
 				$this->marinePoolSpent = $spent;
 				$this->lastSavedMarinePool = (string)$spent;
+			} else if ($note->notekey === 'hangarEscapeRoll'){
+				//Stage 18: d20 result + escapees from the moment this carrier
+				//was destroyed. Presence of this note is the one-shot gate
+				//that stops processCarrierDestructionEscapes from re-rolling
+				//on a later turn's setCriticals sweep.
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)){
+					$this->escapeRolled = true;
+					$this->escapeRoll   = (int)($decoded['roll']  ?? 0);
+					$this->escapeMax    = (int)($decoded['max']   ?? 0);
+					$this->escapeTotal  = (int)($decoded['total'] ?? 0);
+					$this->escapeNames  = is_array($decoded['names'] ?? null) ? $decoded['names'] : array();
+				}
 			}
 		}
 		$this->individualNotes = array();
@@ -3387,6 +3411,18 @@ class Hangar extends ShipSystem{
 			if ($marCap > 0) {
 				$strippedSystem->marinePoolCapacity = $marCap;
 				$strippedSystem->marinePoolSpent    = (int)$this->marinePoolSpent;
+			}
+			//Stage 18: ship the escape-roll outcome so the client can render
+			//replay state on the destroyed-carrier row. Only emitted when an
+			//escape roll actually fired (escapeRolled true); a live carrier's
+			//primary hangar omits these fields, matching the pool-capacity
+			//pattern above.
+			if ($this->escapeRolled) {
+				$strippedSystem->escapeRolled = true;
+				$strippedSystem->escapeRoll   = (int)$this->escapeRoll;
+				$strippedSystem->escapeMax    = (int)$this->escapeMax;
+				$strippedSystem->escapeTotal  = (int)$this->escapeTotal;
+				$strippedSystem->escapeNames  = $this->escapeNames;
 			}
 		}
 		//Send last-submitted pending orders so the client can pre-fill the

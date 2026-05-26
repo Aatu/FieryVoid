@@ -96,6 +96,18 @@ class Criticals{
             }
         }
 
+        /* Hangar Ops Stage 18: scan ALL ships (not just the activeShips
+         * snapshot) for destroyed-this-game carriers whose docked craft
+         * haven't yet had an escape roll. Rolls d20, spawns escapees as
+         * live FighterFlights at the carrier's last hex/heading/(facing +
+         * hangar->direction)/speed, and disengages the non-escapees so
+         * they properly fold to combat value 0. Jumped carriers are
+         * excluded; the existing fleetList.getJumpedDockedFlightIds path
+         * preserves their docked-flight CV verbatim. One-shot per carrier:
+         * the roll persists via a hangarEscapeRoll note on the primary
+         * hangar, gating subsequent passes via Hangar->escapeRolled. */
+        HangarOps::processCarrierDestructionEscapes($gamedata);
+
         return $crits;
     }
 
