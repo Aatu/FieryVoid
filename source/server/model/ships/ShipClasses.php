@@ -122,7 +122,8 @@ class BaseShip {
 	//public $messageOP = array(); //Used by fleet checker to give specific warnings about some fleet choices e.g. Warlock, e-mines.
 	
 	protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present)
-	protected $IFFSystem = false;   
+	protected $IFFSystem = false;  
+    protected $commandControl = false;     
 	    
         function __construct($id, $userid, $name, $slot){
             $this->id = (int)$id;
@@ -145,7 +146,7 @@ class BaseShip {
 	    }
 
 		public function getIFFSystem(){
-			return $this->IFFSystem;    
+			return $this->IFFSystem || $this->commandControl;
 	    }
        
 		public function setIFFSystem(){

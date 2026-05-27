@@ -1039,7 +1039,15 @@ class HangarOps {
 		//sustained (even destroyed), so the destroyed-hangar gate is skipped for it.
 		$isCatapult = !empty($hangar->isCatapult);
 		if (!$isCatapult && $hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
-		if ($carrier->isDestroyed() || $carrier->removed) { $reason = 'carrier not in play'; return false; }
+		//Jump-sequencing exception: a carrier killed this turn by its own jump
+		//(HyperspaceJump damage class) or jump failure (JumpFailure damage class)
+		//can still receive a dock — the fighter completes its dock mid-jump and
+		//either jumps along with the carrier or is destroyed with it. Ordinary
+		//wreck (no jump-class damage this turn) still rejects.
+		if ($carrier->removed) { $reason = 'carrier not in play'; return false; }
+		if ($carrier->isDestroyed() && !self::hasJumpDamageThisTurn($carrier, $gamedata)) {
+			$reason = 'carrier not in play'; return false;
+		}
 
 		$count = (int)$count;
 		if ($count <= 0) { $reason = 'invalid count'; return false; }
@@ -2332,6 +2340,78 @@ class HangarOps {
 		$hangar->pendingDockOrder = null;
 	}
 
+	/* === Jump-sequencing fix: dock onto a jumping/JumpFailed carrier ====== */
+
+	/* True when $carrier's primary structure has a damage entry of class
+	 * 'HyperspaceJump' or 'JumpFailure' dated to the current turn — i.e. the
+	 * destruction this turn was a jump event, not ordinary fire. Used by
+	 * canShipReceive and processJumpingCarrierDockOrders to identify carriers
+	 * that should still complete pending docks despite being isDestroyed().
+	 */
+	public static function hasJumpDamageThisTurn($carrier, $gamedata){
+		$struct = $carrier->getStructureSystem(0);
+		if (!$struct || !is_array($struct->damage)) return false;
+		foreach ($struct->damage as $entry) {
+			if ((int)$entry->turn !== (int)$gamedata->turn) continue;
+			if ($entry->damageclass === 'HyperspaceJump' || $entry->damageclass === 'JumpFailure') {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/* True when $carrier was destroyed this turn specifically by JumpFailure
+	 * (damaged Jump Drive rolled a failure in doHyperspaceJump). Used by
+	 * processCarrierDestructionEscapes to force 0 escape — every craft in
+	 * the hangar dies with the ship, no d20 roll, no survivors.
+	 */
+	public static function hasJumpFailureDamage($carrier, $gamedata){
+		$struct = $carrier->getStructureSystem(0);
+		if (!$struct || !is_array($struct->damage)) return false;
+		foreach ($struct->damage as $entry) {
+			if ((int)$entry->turn !== (int)$gamedata->turn) continue;
+			if ($entry->damageclass === 'JumpFailure') return true;
+		}
+		return false;
+	}
+
+	/* Resolve pending dock orders on carriers that jumped (or JumpFailed) this
+	 * turn. Firing::fireWeapons applies the jump damage entry at the END of
+	 * weapon fire (firing.php:1015-1028), so by the time Criticals::setCriticals
+	 * runs the jumping carrier already reads isDestroyed() and is excluded from
+	 * the $activeShips snapshot. That means Hangar::criticalPhaseEffects — the
+	 * usual entry point for processDockOrders — never fires on a jumping
+	 * carrier's hangars, and any queued hangarDockOrder is silently dropped.
+	 *
+	 * Per B5W §10.1 and the project spec: a fighter ordered to dock with a
+	 * carrier on the turn it jumps SHOULD complete the dock. Outcome:
+	 *   - HyperspaceJump (successful) → fighter is in the hangar and jumps
+	 *     along with the carrier (fleetList's getJumpedDockedFlightIds path
+	 *     preserves its CV, escape pass is skipped via hasJumped()).
+	 *   - JumpFailure (damaged Jump Drive) → fighter is in the hangar at the
+	 *     moment of destruction, then dies with the ship (no escape roll —
+	 *     see processCarrierDestructionEscapes' JumpFailure handling).
+	 *
+	 * Carriers killed by ordinary fire on the same turn are NOT covered here
+	 * (no jump-class damage entry); their pending dock orders remain ignored
+	 * so the docking flight stays in space, matching the "don't dock with a
+	 * normal wreck" rule.
+	 *
+	 * Called from Criticals::setCriticals BEFORE the $activeShips snapshot, so
+	 * processCarrierDestructionEscapes' Pass-3 sweep sees the post-dock state.
+	 */
+	public static function processJumpingCarrierDockOrders($gamedata){
+		foreach ($gamedata->ships as $carrier) {
+			if ($carrier instanceof FighterFlight) continue;
+			if (!$carrier->isDestroyed()) continue;
+			if (!self::hasJumpDamageThisTurn($carrier, $gamedata)) continue;
+
+			foreach (self::collectHangars($carrier) as $hangar) {
+				self::processDockOrders($hangar, $carrier, $gamedata);
+			}
+		}
+	}
+
 	/* === Stage 18: hangar craft escape from a destroyed carrier =========== */
 
 	/* Walks $gamedata->ships looking for destroyed carriers that still hold
@@ -2378,20 +2458,35 @@ class HangarOps {
 			if (!empty($primary->escapeRolled)) continue;
 
 			$virtuals = self::buildEscapeCandidates($hangars, $gamedata);
-
-			//Roll d20. random_int draws from the OS CSPRNG, independent of
-			//any mt_srand state elsewhere in the request. The result is
-			//persisted immediately via the hangarEscapeRoll note in
-			//recordEscapeRoll (Manager::insertIndividualNote inserts to DB
-			//synchronously), so replay scrubs read the stored value rather
-			//than re-rolling. An earlier deterministic-seed (crc32) approach
-			//produced a uniform AGGREGATE distribution but clustered nearby
-			//seeds into the same outcome bucket — same carrier across
-			//consecutive turns kept rolling in the 11-18 range — so the
-			//player saw "half escape" every time. Rolling fresh fixes that.
-			$roll = random_int(1, 20);
 			$totalDocked = count($virtuals);
-			$maxEscape = self::computeEscapeCount($roll, $totalDocked);
+
+			//JumpFailure short-circuit: a carrier destroyed by its own jump
+			//failure leaves NO chance to escape for craft in the hangar — they
+			//die with the ship. Skip the d20 roll, force $maxEscape = 0, and
+			//explicitly disengage every dockedFlightId-linked source flight so
+			//their combat value folds to 0 (the regular destroyed-carrier path
+			//only disengages non-escapees via performCarrierEscapeSpawns, which
+			//we're not running). Roll persists as 0 in the replay note so the
+			//forensic record shows "no roll, JumpFailure" rather than a real d20.
+			$isJumpFailure = self::hasJumpFailureDamage($carrier, $gamedata);
+			if ($isJumpFailure) {
+				$roll = 0;
+				$maxEscape = 0;
+				self::markAllDockedFlightsDestroyed($hangars, $gamedata);
+			} else {
+				//Roll d20. random_int draws from the OS CSPRNG, independent of
+				//any mt_srand state elsewhere in the request. The result is
+				//persisted immediately via the hangarEscapeRoll note in
+				//recordEscapeRoll (Manager::insertIndividualNote inserts to DB
+				//synchronously), so replay scrubs read the stored value rather
+				//than re-rolling. An earlier deterministic-seed (crc32) approach
+				//produced a uniform AGGREGATE distribution but clustered nearby
+				//seeds into the same outcome bucket — same carrier across
+				//consecutive turns kept rolling in the 11-18 range — so the
+				//player saw "half escape" every time. Rolling fresh fixes that.
+				$roll = random_int(1, 20);
+				$maxEscape = self::computeEscapeCount($roll, $totalDocked);
+			}
 
 			$escapedNames = array();
 			if ($maxEscape > 0) {
@@ -2418,6 +2513,27 @@ class HangarOps {
 			}
 
 			self::recordEscapeRoll($primary, $roll, $maxEscape, $totalDocked, $escapedNames, $carrier, $gamedata);
+		}
+	}
+
+	/* Disengage every fighter on every dockedFlightId-linked source flight
+	 * across $hangars. Used by the JumpFailure path in processCarrierDestructionEscapes
+	 * where no escape roll is rolled and every craft in the hangar dies — the
+	 * normal markNonEscapeesDestroyed helper is bypassed (it runs from inside
+	 * performCarrierEscapeSpawns), so this guarantees the combat-value fold
+	 * still happens for the destroyed source flights.
+	 */
+	private static function markAllDockedFlightsDestroyed($hangars, $gamedata){
+		foreach ($hangars as $hangar) {
+			if (!is_array($hangar->hangarUsage)) continue;
+			foreach ($hangar->hangarUsage as $entry) {
+				if (!isset($entry['dockedFlightId'])) continue;
+				$flightId = (int)$entry['dockedFlightId'];
+				if ($flightId <= 0) continue;
+				$flight = $gamedata->getShipById($flightId);
+				if (!($flight instanceof FighterFlight)) continue;
+				self::disengageFighters($flight, PHP_INT_MAX, $gamedata);
+			}
 		}
 	}
 

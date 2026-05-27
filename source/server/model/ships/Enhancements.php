@@ -323,7 +323,7 @@ class Enhancements{
 	  if ($hasFighters && in_array($ship->faction, $missileFactionWhitelist, true)) {
 		  $enhID = 'HANG_ORD';
 		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Extra Ordnance Reserve';
+				$enhName = 'Ballistic Ordnance Reserve';
 				$enhLimit = 200;            //practical ceiling — six AMMO_FH heavies (8 PV ea) on a 6-fighter heavy missile flight
 				$enhPrice = 1;             //1 CP = 1 reload point
 				$enhPriceStep = 0;         //flat rate

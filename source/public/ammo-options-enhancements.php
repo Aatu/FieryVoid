@@ -287,7 +287,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
       
         <li><strong>Command Controller</strong>
         <ul class="circle-list">
-            <li>Effect: Allows you to manually choose from valid targets, and overwrite mine's automatic targeting.</li>
+            <li>Effect: Allows you to manually choose from valid targets, and overwrite mine's automatic targeting.  Includes the 'Identify Friend or Foe (IFF) System' enhancement' as well.</li>
             <li>Points Cost: 33%</li>
             <li>Limit: 1</li>
             <li>Notes: Proximity Mines will trigger a Pre-Firing phase where you can target any ships that passed into range during movement. 

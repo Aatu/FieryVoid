@@ -146,6 +146,21 @@ window.ShipIconContainer = function () {
         var lastMove = icon.getLastMovement();
         var hex = lastMove.position;
 
+        // Attached boarder shares its host's hex AND movement history; the
+        // motion-direction stacking below would always put it behind the host
+        // regardless of which side it's actually gripping. Offset it on the
+        // side it attached to instead. The boarder's facing already points at
+        // the host's center (host_facing + attachOffset), so the opposite
+        // direction is "outward from the host" — where the boarder sits.
+        var ship = icon.ship;
+        if (ship && ship.attached && Object.keys(ship.attached).length > 0) {
+            var hostId = Object.keys(ship.attached)[0];
+            if (ship.attached[hostId] !== undefined && !ship.detached) {
+                var outward = mathlib.addToDirection(shipManager.getShipHeadingAngle(ship), 180);
+                return mathlib.getPointInDirection(20, outward, 0, 0);
+            }
+        }
+
         var iconsInHex = this.getFinalMovementInSameHex(hex).filter(function (otherIcon) {
             return shipManager.hasBetterInitive(icon.ship, otherIcon.ship);
         });

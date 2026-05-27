@@ -107,7 +107,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Hangar Operations</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
-        <li><strong>Shuttles</strong> - Ships now come equipped with their allocation of free shuttles and new enhancements ae available to convert these hangar slots.</li>                   
+        <li><strong>Shuttles</strong> - Ships come equipped with their allocation of free shuttles and new enhancements are available for hangar conversions.</li>                   
         <li><strong>Hit Chance and Combat Log Tooltips</strong> - Hit Chance and Combat Log tooltips available for greater firing information.</li>  
         <li><strong>Fleet Selection</strong> - Fleet checker now uses base points value for 10% and 33% checks and fighter weight classes are now shown in '[]'.</li>          
         <li><strong>Ammo Magazine Capacity</strong> - Ammo magazines will no longer more ammo than their maximum capacity.                                                                              

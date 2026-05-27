@@ -43,6 +43,18 @@ class Criticals{
             if (!$ship->isDestroyed()) $activeShips[] = $ship;
         }
 
+        /* Jump-sequencing fix: Firing::fireWeapons applies HyperspaceJump /
+         * JumpFailure damage to a jumping carrier's primary structure BEFORE
+         * setCriticals runs, so a carrier mid-jump reads isDestroyed() here and
+         * is absent from $activeShips. Pass 2 therefore never invokes
+         * Hangar::criticalPhaseEffects on its hangars, and any queued
+         * hangarDockOrder would be silently dropped. This pre-pass lands pending
+         * docks on jumping/JumpFailed carriers so fighters that ordered a dock
+         * this turn correctly count as being in the hangar at the moment of
+         * jump (or destruction, for JumpFailure). Pass 3
+         * (processCarrierDestructionEscapes) then sees the post-dock state. */
+        HangarOps::processJumpingCarrierDockOrders($gamedata);
+
         // ---- Pass 1: testCritical block --------------------------------
         foreach ($activeShips as $ship){
             foreach ($ship->systems as $system){

@@ -348,7 +348,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li><b>Rearming docked craft:</b> A flight that remains docked for a full turn will automatically rearm its limited-ammo weapons before relaunching.
                 <ul class="circle-list">
                     <li><strong>Matter weapons</strong> (SlugCannon, Gatling Gun, etc.): restore 1 round per weapon per turn while docked, up to the weapon's starting load.  This is free and automatic — no carrier cost.</li>
-                    <li><strong>Missiles</strong>: require a pre-purchased <strong>Ordnance Reserve</strong> enhancement on the carrier (see below).  One missile per fighter per turn is restocked automatically, most expensive missile type first, drawing from the shared pool.</li>
+                    <li><strong>Missiles</strong>: require a pre-purchased <strong>Ballistic Ordnance Reserve</strong> enhancement on the carrier (see below).  
+                    One missile per fighter per turn is restocked automatically, most expensive missile type first, drawing from the shared pool.</li>
                     <li><strong>Marines (Breaching Pods)</strong>: require a pre-purchased <strong>Extra Marine Contingents</strong> enhancement on the carrier (see below).  One marine unit per pod per turn is restocked automatically while docked, drawing from the shared marine pool.</li>
                     <li>The turn the flight docks does not count — rearming begins on the first full turn spent inside the hangar.</li>
                     <li>When a flight is split on relaunch, the fighters with the most missiles (i.e., those that were restocked) are extracted first into the launched flight.</li>
@@ -356,7 +357,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </li>
             <br>
 
-            <li><b>Ordnance Reserve:</b> Carriers in missile-capable factions can purchase an Ordnance Reserve enhancement in the Fleet Lobby, up to 200 points.
+            <li><b>Ballistic Ordnance Reserve:</b> Carriers in missile-capable factions can purchase an Ordnance Reserve enhancement in the Fleet Lobby, up to 200 points.
                 <ul class="circle-list">
                     <li>The pool is <strong>shared across the whole carrier</strong> and is shown in the Hangar system tooltip as <i>"Ordnance Reserve: X / Y pts"</i>.</li>
                     <li>Each turn a missile or torpedo flight is docked (and has been in for a full turn), the carrier spends points from the reserve equal to the <strong>PV of the missile type</strong> being restocked.  The most expensive type is always refilled first.</li>

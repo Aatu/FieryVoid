@@ -3122,7 +3122,18 @@ class Hangar extends ShipSystem{
 	public function generateIndividualNotes($gamedata, $dbManager){
 		$ship = $this->getUnit();
 		if (!$ship) return;
-		if ($ship->isDestroyed()) return;
+		//Jump-sequencing fix: a carrier killed this turn by HyperspaceJump or
+		//JumpFailure damage still needs to persist any in-memory hangarUsage
+		//change made during this same setCriticals pass (processJumpingCarrierDockOrders
+		//docks pending flights into the jumping carrier's hangar). Without
+		//letting this method run, the new hangarUsage entry — and the
+		//$flight->removed flag that's re-applied from it via
+		//onIndividualNotesLoaded — would never reach the DB, and the docked
+		//flight would resurface in space next turn. Carriers destroyed by
+		//ordinary fire on a previous turn still short-circuit (the change-
+		//detection guard around the hangarUsage write keeps them from emitting
+		//redundant notes).
+		if ($ship->isDestroyed() && !HangarOps::hasJumpDamageThisTurn($ship, $gamedata)) return;
 		if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
 
 		//Persist any pending launch order received from the client. Validation
