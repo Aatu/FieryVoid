@@ -12983,6 +12983,18 @@ window.mathlib = {
 		var tPos = shipManager.getShipPosition(target);
 
 		if (oPos.equals(tPos)) {
+			// Attached pair share a hex AND share movement history, so the
+			// motion-direction fallback below collapses to host's direction
+			// of travel. The boarder's facing already encodes the answer:
+			// it's maintained as host_facing + attachOffset, and the offset
+			// was set so the boarder's nose points at the host's center.
+			if (observer.attached && observer.attached[target.id] !== undefined) {
+				return shipManager.getShipHeadingAngle(observer);
+			}
+			if (target.attached && target.attached[observer.id] !== undefined) {
+				return mathlib.addToDirection(shipManager.getShipHeadingAngle(target), 180);
+			}
+
 			//if Target has speed 0, consider Observer to have better Init! that would be better for firing arcs...
 			//if Observer has speed 0 consider Target to have better Ini!
 			if ((shipManager.hasBetterInitive(observer, target) && (shipManager.movement.getSpeed(observer) != 0)) || (shipManager.movement.getSpeed(target) == 0)) {
