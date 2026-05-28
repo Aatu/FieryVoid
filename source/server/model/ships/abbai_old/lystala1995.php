@@ -29,7 +29,7 @@ class Lystala1995 extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 5));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(5, 1));
+		$this->addPrimarySystem(new Hangar(5, 1, 1));
         $this->addPrimarySystem(new ShieldGenerator(5, 12, 4, 2));
    
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
