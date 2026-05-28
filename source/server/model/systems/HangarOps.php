@@ -50,9 +50,9 @@ class HangarOps {
 			$shuttleHangars[] = $h;
 		}
 
-		//Step 1: explicit shuttle/minesweeping-shuttle declarations get auto-filled
-		//(combat fighter declarations are NOT auto-filled here — those auto-deploy
-		// to space at turn 1 via the existing fleet-builder flow.)
+		//Step 1: explicit shuttle / minesweeping-shuttle / cargo-shuttle declarations
+		//get auto-filled (combat fighter declarations are NOT auto-filled here —
+		//those auto-deploy to space at turn 1 via the existing fleet-builder flow.)
 		$totalDeclared = 0;
 		if (is_array($ship->fighters)) {
 			foreach ($ship->fighters as $category => $declaredCount){
@@ -197,6 +197,12 @@ class HangarOps {
 				return self::factionShuttleClass($ship);
 			case 'minesweeping shuttles':
 				return 'MinesweepingShuttle';
+			case 'cargo shuttles':
+				//Opt-in only: never auto-populates leftover capacity. Declared
+				//count in $ship->fighters becomes that many auto-filled CargoShuttle
+				//records via step 1; leftover hangar boxes go to the faction shuttle
+				//(or MinesweepingShuttle for minesweeper-bonus carriers) instead.
+				return 'CargoShuttle';
 			default:
 				return null;
 		}
@@ -296,10 +302,12 @@ class HangarOps {
 		switch ($phpclass) {
 			case 'MinesweepingShuttle':
 				return 'Minesweeping Shuttle';
+			case 'CargoShuttle':
+				return 'Cargo Shuttle';
 			case 'Flyer':
 				return 'Flyer';
 			case 'FlyerProtectorate':
-				return 'Flyer';				
+				return 'Flyer';
 			case 'Shuttle':
 			default:
 				return 'Shuttle';
@@ -1237,8 +1245,8 @@ class HangarOps {
 			return $sizeRank[$cat] <= $sizeRank[$hType];
 		}
 
-		//Shuttles & minesweeping shuttles can use any combat-fighter slot per B5W §10.1.
-		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles') && isset($sizeRank[$hType])) {
+		//Shuttles, minesweeping shuttles & cargo shuttles can use any combat-fighter slot per B5W §10.1.
+		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles') && isset($sizeRank[$hType])) {
 			return true;
 		}
 
@@ -1255,7 +1263,7 @@ class HangarOps {
 		//(AS+BP) or Falenna (heavy+AS)). Without ship context, fall back to
 		//the conservative "combat fighters + shuttles only" set.
 		if ($hType === 'fighters' || $hType === 'normal') {
-			if ($cat === 'shuttles' || $cat === 'minesweeping shuttles') return true;
+			if ($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles') return true;
 
 			if (!$ship || !is_array($ship->fighters)) {
 				//No ship context: combat fighters allowed, AS/BPs/custom rejected.

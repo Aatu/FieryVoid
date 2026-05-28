@@ -837,7 +837,7 @@ window.gamedata = {
 							}
 						}
 						if (found != true) { //such craft wasn't encountered yet
-							if(h == "minesweeping shuttles") continue; //These are no bought, don't add to checker.
+							if(h == "minesweeping shuttles" || h == "cargo shuttles") continue; //These are not bought, don't add to checker.
 							totalHangarOther.push(new Array(h, amount));
 							smallCraftUsed.push(h);
 						}

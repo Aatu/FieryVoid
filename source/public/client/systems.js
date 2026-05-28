@@ -527,15 +527,19 @@ shipManager.systems = {
         var base = ship._originalFighters || ship.fighters || {};
         var declared = shipManager.systems.getShuttlePoolDeclared(base, ship);
 
-        //Explicit shuttle-category declarations ("shuttles", "minesweeping shuttles")
-        //are auto-populated free shuttles per HangarOps step 1 — not purchasable
-        //slots like combat-fighter declarations. Surface them as composition rows
-        //so the Hangar tooltip reflects the full auto-populated picture (declared
-        //+ leftover), not just the leftover.
+        //Explicit shuttle-category declarations ("shuttles", "minesweeping shuttles",
+        //"cargo shuttles") are auto-populated free shuttles per HangarOps step 1 —
+        //not purchasable slots like combat-fighter declarations. Surface them as
+        //composition rows so the Hangar tooltip reflects the full auto-populated
+        //picture (declared + leftover), not just the leftover. Cargo shuttles are
+        //opt-in only — they never join the leftover-fill, so they show up here only
+        //when declared.
         var declaredMsw = parseInt(base["minesweeping shuttles"], 10) || 0;
         var declaredShuttle = parseInt(base["shuttles"], 10) || 0;
+        var declaredCargo = parseInt(base["cargo shuttles"], 10) || 0;
         if (declaredMsw > 0) rows.push({ type: "Minesweeping Shuttles", count: declaredMsw });
         if (declaredShuttle > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: declaredShuttle });
+        if (declaredCargo > 0) rows.push({ type: "Cargo Shuttles", count: declaredCargo });
 
         var pool = capacity - declared;
         if (pool <= 0) return rows;
