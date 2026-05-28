@@ -460,8 +460,12 @@ shipManager.systems = {
         var declared = shipManager.systems.getShuttlePoolDeclared(ship.fighters, ship);
         var leftover = capacity - declared;
         if (leftover < 0) leftover = 0;
+        //Explicit "minesweeping shuttles" in ship.fighters is the designer's
+        //authoritative MSW count — leftover falls through to the faction shuttle
+        //even on minesweeper-bonus carriers, matching HangarOps::populateInitialHangarUsage.
+        var hasExplicitMsw = !!(ship.fighters && parseInt(ship.fighters["minesweeping shuttles"], 10) > 0);
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
-        if (minesweeper) {
+        if (minesweeper && !hasExplicitMsw) {
             return { count: leftover, type: "Minesweeping Shuttles", key: "minesweeping shuttles" };
         }
         return {
@@ -522,6 +526,17 @@ shipManager.systems = {
         if (capacity <= 0) return rows;
         var base = ship._originalFighters || ship.fighters || {};
         var declared = shipManager.systems.getShuttlePoolDeclared(base, ship);
+
+        //Explicit shuttle-category declarations ("shuttles", "minesweeping shuttles")
+        //are auto-populated free shuttles per HangarOps step 1 — not purchasable
+        //slots like combat-fighter declarations. Surface them as composition rows
+        //so the Hangar tooltip reflects the full auto-populated picture (declared
+        //+ leftover), not just the leftover.
+        var declaredMsw = parseInt(base["minesweeping shuttles"], 10) || 0;
+        var declaredShuttle = parseInt(base["shuttles"], 10) || 0;
+        if (declaredMsw > 0) rows.push({ type: "Minesweeping Shuttles", count: declaredMsw });
+        if (declaredShuttle > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: declaredShuttle });
+
         var pool = capacity - declared;
         if (pool <= 0) return rows;
 
@@ -539,8 +554,12 @@ shipManager.systems = {
         var afterBP = pool - bp;           //BP conversion removes slots from the pool
         if (msw > afterBP) msw = afterBP;  //MSW retypes within the remaining pool
 
+        //Explicit "minesweeping shuttles" in ship.fighters is the designer's
+        //authoritative MSW count — the leftover pool falls through to the faction
+        //shuttle even on minesweeper-bonus carriers, matching HangarOps step 2.
+        var hasExplicitMsw = !!(base && parseInt(base["minesweeping shuttles"], 10) > 0);
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
-        if (minesweeper) {
+        if (minesweeper && !hasExplicitMsw) {
             //Default pool is already MinesweepingShuttle; HANG_MSW is a no-op here.
             if (afterBP > 0) rows.push({ type: "Minesweeping Shuttles", count: afterBP });
         } else {

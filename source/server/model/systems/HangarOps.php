@@ -117,7 +117,14 @@ class HangarOps {
 
 		$leftover = $totalCapacity - $totalDeclared - $hangBpExtraDeclared;
 		if ($leftover > 0){
-			$baseClass = (isset($ship->minesweeperbonus) && $ship->minesweeperbonus > 0)
+			//Explicit "minesweeping shuttles" in $ship->fighters is the designer's
+			//authoritative MSW count — leftover falls through to the faction shuttle
+			//even on minesweeper-bonus carriers, so the remaining boxes don't double
+			//up as more MinesweepingShuttles. Ships with no shuttle declarations on a
+			//minesweeper-bonus carrier keep the original "all leftover = MSW" default.
+			$hasExplicitMsw = is_array($ship->fighters)
+				&& !empty($ship->fighters['minesweeping shuttles']);
+			$baseClass = (!$hasExplicitMsw && isset($ship->minesweeperbonus) && $ship->minesweeperbonus > 0)
 				? 'MinesweepingShuttle'
 				: self::factionShuttleClass($ship);
 			$baseCategory = ($baseClass === 'MinesweepingShuttle') ? 'minesweeping shuttles' : 'shuttles';
