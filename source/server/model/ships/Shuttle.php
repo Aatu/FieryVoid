@@ -196,6 +196,41 @@ class MinesweepingShuttle extends Shuttle
     }
 }
 
+class CargoShuttle extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "CargoShuttle";
+        $this->shipClass = "Cargo Shuttle";
+        $this->hangarRequired = 'cargo shuttles';
+        $this->offensivebonus = 0;
+        $this->forwardDefense = 12;
+        $this->sideDefense = 12;
+        $this->freethrust = 3;        
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 24, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
 
 class ShuttleAbbai extends Shuttle
 {
