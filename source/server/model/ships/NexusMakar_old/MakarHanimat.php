@@ -15,7 +15,7 @@ class MakarHanimat extends BaseShip{
 		$this->canvasSize = 170; 
 		$this->unofficial = true;
 
-		$this->isd = 1932;
+		$this->isd = 2028;
 
 		$this->critRollMod += 1;
 	    $this->notes = '<br>Unreliable Ship:';

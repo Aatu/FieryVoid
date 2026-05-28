@@ -13,7 +13,7 @@ class MakarHalicin extends BaseShip{
 		$this->canvasSize = 170; 
 		$this->unofficial = true;
 
-		$this->isd = 1932;
+		$this->isd = 1936;
 
 		$this->critRollMod += 1;
 	    $this->notes = '<br>Unreliable Ship:';
