@@ -35,7 +35,7 @@ class Lykorai extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 16, 8, 8));
         $this->addPrimarySystem(new Engine(5, 21, 0, 15, 5));
         $this->addPrimarySystem(new JumpEngine(5, 12, 4, 28));
-	$this->addPrimarySystem(new Hangar(5, 4));
+	$this->addPrimarySystem(new Hangar(5, 4, 2));
    
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
@@ -53,12 +53,12 @@ class Lykorai extends BaseShip{
         $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(5, 10, 0, 4, 2));
 
-        $this->addLeftSystem(new Hangar(5, 24));
+        $this->addLeftSystem(new Hangar(5, 24, 12));
         $this->addLeftSystem(new GraviticThruster(5, 20, 0, 6, 3));
         $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
         $this->addLeftSystem(new GraviticBolt(3, 5, 2, 180, 0));
 
-        $this->addRightSystem(new Hangar(5, 24));
+        $this->addRightSystem(new Hangar(5, 24, 12));
         $this->addRightSystem(new GraviticThruster(5, 20, 0, 6, 4));
         $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));
         $this->addRightSystem(new GraviticBolt(3, 5, 2, 0, 180));

@@ -12,6 +12,7 @@ class BatradoEarly extends BaseShip{
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Avioki Heavy Cruiser';
         $this->shipSizeClass = 3;
+		$this->fighters = array("cargo shuttles"=>4);		
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		
 		$this->notes = 'Tor-Sikar LogTech';//Corporation producing the design
@@ -34,7 +35,7 @@ class BatradoEarly extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 12, 8, 7));
         $this->addPrimarySystem(new Engine(6, 16, 0, 15, 4));
         $this->addPrimarySystem(new JumpEngine(5, 10, 4, 28));
-		$this->addPrimarySystem(new Hangar(5, 4));
+		$this->addPrimarySystem(new Hangar(5, 4, 1));
    
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));

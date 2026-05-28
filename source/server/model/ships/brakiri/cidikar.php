@@ -54,7 +54,7 @@ class cidikar extends BaseShip{
 		$this->addLeftSystem(new GravitonPulsar(3, 5, 2, 180, 0));
 		$this->addLeftSystem(new HeavyLaser(4, 8, 6, 240, 0));
 		$this->addLeftSystem(new GraviticShield(0, 6, 0, 2, 240, 300));
-		$this->addLeftSystem(new Hangar(5, 12));
+		$this->addLeftSystem(new Hangar(5, 12, 6, 5));
         $this->addLeftSystem(new GraviticThruster(5, 20, 0, 8, 3));
         
 		$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
@@ -62,7 +62,7 @@ class cidikar extends BaseShip{
 		$this->addRightSystem(new GravitonPulsar(3, 5, 2, 0, 180));
 		$this->addRightSystem(new HeavyLaser(4, 8, 6, 0, 120));
 		$this->addRightSystem(new GraviticShield(0, 6, 0, 2, 60, 120));
-		$this->addRightSystem(new Hangar(5, 12));
+		$this->addRightSystem(new Hangar(5, 12, 6, 1));
         $this->addRightSystem(new GraviticThruster(5, 20, 0, 8, 4));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
