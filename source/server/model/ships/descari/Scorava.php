@@ -27,7 +27,7 @@ class Scorava extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 15, 4, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(5, 26));
+		$this->addPrimarySystem(new Hangar(5, 26, 12));
         
         $this->addFrontSystem(new LightPlasma(3, 4, 2, 270, 90));
         $this->addFrontSystem(new LightPlasma(3, 4, 2, 270, 90));       

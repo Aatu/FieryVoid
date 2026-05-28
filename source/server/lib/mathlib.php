@@ -71,22 +71,34 @@ class Mathlib{
     
     
     public static function getCompassHeadingOfShip($observer, $target){
-        
+
         $oPos = $observer->getCoPos();
         $tPos = $target->getCoPos();
-        
+
         if ($oPos["x"] == $tPos["x"] && $oPos["y"] == $tPos["y"]){
-            //target speed 0 is always considered to lose Ini for relative position purposes			
+            // Attached pair share a hex AND share movement history, so the
+            // motion-direction fallback below collapses to host's direction
+            // of travel. The boarder's facing already encodes the answer:
+            // it's maintained as host_facing + attachOffset, and the offset
+            // was set so the boarder's nose points at the host's center.
+            if (!empty($observer->attached) && isset($observer->attached[$target->id])){
+                return $observer->getFacingAngle();
+            }
+            if (!empty($target->attached) && isset($target->attached[$observer->id])){
+                return self::addToDirection($target->getFacingAngle(), 180);
+            }
+
+            //target speed 0 is always considered to lose Ini for relative position purposes
 			//if Observer has speed 0 consider Target to have better Ini!
             if ( (BaseShip::hasBetterIniative($observer, $target) && ($observer->getSpeed()!=0)) || ($target->getSpeed()==0) ){
                 $oPos =  $observer->getPreviousCoPos();
             }else{
                 $tPos =  $target->getPreviousCoPos();
             }
-        
+
         }
         return self::getCompassHeadingOfPoint($oPos, $tPos);
-        
+
     }
         
     public static function getCompassHeadingOfPoint($observer, $target){

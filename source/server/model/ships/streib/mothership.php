@@ -16,7 +16,7 @@ class Mothership extends BaseShip{
         
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
-        $this->fighters = array("shuttles" => 24); 
+        $this->fighters = array("Breaching Pods" => 24); 
        
         $this->turncost = 1.33;
         $this->turndelaycost = 1;

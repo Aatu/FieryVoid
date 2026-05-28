@@ -344,14 +344,15 @@ class TacGamedata {
         $ship->addDamageEntry($damage);    
     }
     
-    public function getFirstShip(){    
+    public function getFirstShip(){
+        //isDestroyed() also covers Hangar Ops $removed flights — see BaseShip::isDestroyed
         foreach ($this->ships as $ship){
             if ($ship->isDestroyed()) continue;
             if($ship->isTerrain()) continue; //Ignore terrain like asteroids.
-            if($ship->mine) continue; //Ignore terrain like asteroids.            
-            if($ship->getTurnDeployed($this) > $this->turn) continue;                          
+            if($ship->mine) continue; //Ignore terrain like asteroids.
+            if($ship->getTurnDeployed($this) > $this->turn) continue;
             return $ship;
-        }        
+        }
         return null;
     }
     

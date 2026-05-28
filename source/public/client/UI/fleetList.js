@@ -2,6 +2,52 @@
 
 jQuery(function () { });
 
+//Stage 9: look up the per-flight pointCost of a stored craft's phpclass from
+//window.staticShips so the carrier's fleet-list line can include the value
+//of anonymous stash records (orphaned partial-launch records and the like).
+//Returns 0 when the class isn't preloaded (e.g. a ship file forgot to add it
+//to $spawnableClasses) so we degrade silently instead of crashing the row.
+function pointCostForPhpclass(phpclass) {
+    if (!phpclass || !window.staticShips) return 0;
+    for (var faction in window.staticShips) {
+        var bp = window.staticShips[faction] && window.staticShips[faction][phpclass];
+        if (bp) return parseInt(bp.pointCost || 0, 10);
+    }
+    return 0;
+}
+
+//Stage 9: sum the pointCost of every anonymous hangarUsage entry on $ship.
+//dockedFlightId entries are skipped — those craft are represented by their
+//own (removed=true) flight ship row in the fleet list, so counting them
+//here would double-credit. Shuttles auto-fill carriers and have pointCost=0,
+//so they contribute nothing.
+//
+//Stage 18: a destroyed-non-jumped carrier loses its stash to the wreck —
+//don't credit the carrier for contents it no longer has. (Server-side,
+//processCarrierDestructionEscapes clears hangarUsage post-roll so this is
+//usually 0 already, but the guard covers stale state and the brief window
+//between in-game destruction and the next setCriticals sweep.) Jumped
+//carriers keep their stash since the jumped-flight preservation path
+//treats the whole carrier+contents as off-board-but-intact.
+function dockedCraftStashValue(ship) {
+    if (!Array.isArray(ship.systems)) return 0;
+    if (shipManager.isDestroyed(ship) && !shipManager.hasJumpedNotDestroyed(ship)) return 0;
+    var total = 0;
+    for (var s = 0; s < ship.systems.length; s++) {
+        var sys = ship.systems[s];
+        if (!sys || !Array.isArray(sys.hangarUsage)) continue;
+        for (var u = 0; u < sys.hangarUsage.length; u++) {
+            var entry = sys.hangarUsage[u];
+            if (!entry || entry.dockedFlightId) continue;
+            var per = pointCostForPhpclass(entry.phpclass);
+            if (per <= 0) continue;
+            var size = parseInt(entry.flightSize || 1, 10);
+            total += per * size / 6;
+        }
+    }
+    return Math.round(total);
+}
+
 window.fleetListManager = {
 
     initialized: false,
@@ -71,6 +117,12 @@ window.fleetListManager = {
             var ship = gamedata.ships[i];
             if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) continue;
 
+            //Hangar Ops Stage 9: a docked flight whose fighters were all
+            //disengaged (e.g. partial relaunch consumed its identity) carries
+            //combatValue 0 and adds no information — skip it. Normal docked
+            //flights (combatValue > 0) still render as "Docked" rows.
+            if (ship.removed && ship.flight && (ship.combatValue === 0)) continue;
+
             if (ship.userid == slot.playerid && ship.slot == slot.slot) {
                 if (ship.mine) {
                     if (ship.spawned != -1) continue; // Exclude spawned mines
@@ -139,6 +191,19 @@ window.fleetListManager = {
             }
             baseValue = Math.round(baseValue + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0));
             var currValue = Math.round(baseValue * (ship.combatValue !== undefined ? ship.combatValue : 100) / 100);
+
+            //Stage 9: carriers carry the point cost of any anonymous docked
+            //craft (auto-filled shuttles are 0-cost; orphaned fighter records
+            //from partial relaunches contribute). dockedFlightId records are
+            //shown as separate "Docked" rows, so we deliberately skip them.
+            //We add the same value to both baseValue and currValue — stash
+            //craft take no damage in storage; hangar damage that evicts them
+            //is reflected by the entry no longer being in hangarUsage.
+            var stashValue = dockedCraftStashValue(ship);
+            if (stashValue > 0) {
+                baseValue += stashValue;
+                currValue += stashValue;
+            }
 
             totalBaseValue += baseValue;
             totalCurrValue += currValue;
@@ -317,16 +382,81 @@ window.fleetListManager = {
 
         if (shipManager.shouldBeHidden(ship)) { //Enemy, stealth equipped and undetected, or not deployed yet.
             return; //Do not scroll to Stealthed ships
-        } else {
-            window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
         }
+
+        //Hangar Ops Stage 9.1: a docked flight isn't on the board, so a
+        //scroll-to-ship event has nothing to find. Open its status window
+        //directly instead so the player can inspect the docked fighters
+        //(DOCKED label in cyan over the faded icons).
+        if (ship.removed && ship.flight) {
+            if (typeof flightWindowManager !== 'undefined' && flightWindowManager.open) {
+                flightWindowManager.open(ship);
+            }
+            return;
+        }
+
+        window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
+    },
+
+    //Hangar Ops: ids of docked flights whose carrier jumped to hyperspace. A
+    //jumped carrier stays in gamedata.ships and keeps its hangarUsage (and the
+    //dockedFlightId links) intact, so we map each jumped carrier's stored craft
+    //back to the flight rows the fleet list renders. updateFleetList uses this
+    //to show those flights as "Jumped" (orange) rather than "Docked" (blue) —
+    //a docked flight has no jump engine of its own, so hasJumpedNotDestroyed
+    //can't detect this on the flight directly.
+    getJumpedDockedFlightIds: function getJumpedDockedFlightIds() {
+        var ids = {};
+        for (var i in gamedata.ships) {
+            var carrier = gamedata.ships[i];
+            //hasJumpedNotDestroyed only distinguishes "jumped" from
+            //"damage-killed" among ships already out of play: on a healthy,
+            //in-play carrier it returns true purely because it has a jump
+            //engine and little non-jump damage. Gate on isDestroyed first —
+            //the same pairing updateFleetList uses for a ship's own row — so
+            //we only flag flights whose carrier actually left via hyperspace.
+            if (!shipManager.isDestroyed(carrier)) continue;
+            if (!shipManager.hasJumpedNotDestroyed(carrier)) continue;
+            if (!Array.isArray(carrier.systems)) continue;
+            for (var s = 0; s < carrier.systems.length; s++) {
+                var sys = carrier.systems[s];
+                if (!sys || !Array.isArray(sys.hangarUsage)) continue;
+                for (var u = 0; u < sys.hangarUsage.length; u++) {
+                    var entry = sys.hangarUsage[u];
+                    if (entry && entry.dockedFlightId) ids[entry.dockedFlightId] = true;
+                }
+            }
+        }
+        return ids;
     },
 
     updateFleetList: function updateFleetList() {
+        //Hangar Ops: collect the docked flights whose carrier jumped to
+        //hyperspace once, before the row loop, so we can flag them below.
+        var jumpedDockedFlightIds = fleetListManager.getJumpedDockedFlightIds();
+
         for (var i in gamedata.ships) {
             var ship = gamedata.ships[i];
             var name = ship.name;
             if (shipManager.isDestroyed(ship)) {
+                if (ship.removed) {
+                    //Docked flight: same isDestroyed=true filtering, but not
+                    //actually destroyed. Keep .clickable so the player can
+                    //open the flight window (doScrollToShip routes removed
+                    //flights to flightWindowManager.open directly since
+                    //they're not on the board).
+                    if (jumpedDockedFlightIds[ship.id]) {
+                        //Carrier jumped to hyperspace and took the flight with
+                        //it: it kept its combat value but is no longer in play,
+                        //so render it like a jumped ship (orange) not docked.
+                        $("#" + ship.id).addClass("jumped");
+                        $("#" + ship.id + " .initiative").html("Jumped");
+                    } else {
+                        $("#" + ship.id).addClass("docked");
+                        $("#" + ship.id + " .initiative").html("Docked");
+                    }
+                    continue;
+                }
                 // Remove action listener and make everything italic to indicate the
                 // ship was destroyed.
                 $("#" + ship.id + " .shipname").removeClass("clickable");

@@ -30,7 +30,7 @@ class Prophet extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 30, 4, 7));
         $this->addPrimarySystem(new Engine(5, 30, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(5, 38, 30));
+        $this->addPrimarySystem(new Hangar(5, 38, 12));
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 24, 3, 3));
         

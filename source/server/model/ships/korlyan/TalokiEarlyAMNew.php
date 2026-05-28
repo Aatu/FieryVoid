@@ -10,7 +10,7 @@ class TalokiEarlyAMNew extends StarBaseSixSections{
 		$this->shipClass = "Taloki Starbase (2220)";
 			$this->occurence = "common";
 			$this->variantOf = 'Taloki Starbase (2240)';
-		$this->fighters = array("assault shuttles"=>4, "normal"=>24); 
+		$this->fighters = array("normal"=>24); 
 
         $this->isd = 2220;
 		$this->shipSizeClass = 3; //Enormous is not implemented

@@ -8,7 +8,7 @@ class TalokiAMNew extends StarBaseSixSections{
 		$this->faction = "Kor-Lyan Kingdoms";
 		$this->phpclass = "TalokiAMNew";
 		$this->shipClass = "Taloki Starbase (2240)";
-		$this->fighters = array("assault shuttles"=>4, "normal"=>24);
+		$this->fighters = array("normal"=>24);
 
         $this->isd = 2240;
 		$this->shipSizeClass = 3; //Enormous is not implemented

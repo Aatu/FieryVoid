@@ -396,17 +396,27 @@ window.shipWindowManager = {
 			if (ship.fighters.length != 0) {
 				for (var i in ship.fighters) {
 					var amount = ship.fighters[i];
+					var capitalizedType = i.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 					if (i == "normal") {
 						//skip description of kind of fighters
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " fighters");
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " Fighters");
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + i + " fighters");
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
 					} else {
 						//something other than fighters
-						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + i);
+						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType);
 					}
 				}
+			}
+
+			//Leftover hangar capacity is auto-filled with shuttles (or
+			//minesweeping shuttles when minesweeperbonus > 0) — same rule as
+			//HangarOps::populateInitialHangarUsage step 3 on the server.
+			var defaultShuttles = shipManager.systems.getDefaultShuttleComposition(ship);
+			//if (defaultShuttles.count > 0) {
+			for (var s = 0; s < defaultShuttles.length; s++) {			
+				notes.push("&nbsp;&nbsp;&nbsp;" + defaultShuttles[s].count + " " + defaultShuttles[s].type);
 			}
 
 			if (ship.notes != '') {
@@ -1027,7 +1037,7 @@ window.shipWindowManager = {
 		systemwindow.find(".mode").on("click", shipWindowManager.onModeClicked);
 	},
 
-	
+
 	removeSystemClasses: function removeSystemClasses(systemwindow) {
 		var classes = Array("destroyed", "loading", "selected", "firing", "duofiring", "critical", "canoffline", "offline", "canboost", "boosted", "canoverload", "overload", "forcedoffline", "modes", "ballistic", "selfIntercept");
 
@@ -1292,10 +1302,10 @@ window.shipWindowManager = {
 
 			field.html(rem + "/" + output);
 		} else if (system.name == "reactor") {
-            var power = shipManager.power.getReactorPower(ship, system);
-            if (gamedata.gamephase > 1 && power < 0) {
-                power = 0;
-            }
+			var power = shipManager.power.getReactorPower(ship, system);
+			if (gamedata.gamephase > 1 && power < 0) {
+				power = 0;
+			}
 			field.html(power);
 		} else if (system.output > 0) {
 			field.html(output);

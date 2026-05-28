@@ -416,6 +416,17 @@ body {
     padding: 2px 4px;
 }
 
+.name-value-button-dock {
+    border: solid cyan 1px;
+    background: rgba(20, 79, 128, 0.212);
+    font-weight: normal;
+    margin-bottom: 4px;
+    color: cyan;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 2px 4px;
+}
+
 
 .escorting {
     color: orange;
@@ -764,6 +775,11 @@ body {
     font-style: normal;
     /*color:#00d100;*/
     color: #cc8500;
+}
+
+.fleetlistentry .docked {
+    font-style: normal;
+    color: #00b8e6;
 }
 
 .fleetheader .headername {

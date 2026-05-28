@@ -94,8 +94,8 @@ window.UI = {
             UI.shipMovement.rollActiveElement.on("click touchstart", UI.shipMovement.rollCallback);
             UI.shipMovement.emergencyrollElement.on("click touchstart", UI.shipMovement.emergencyrollCallback);
 
-            UI.shipMovement.accElement.on("click touchstart", UI.shipMovement.accelCallback);
-            UI.shipMovement.deaccElement.on("click touchstart", UI.shipMovement.deaccCallback);
+            UI.shipMovement.accElement.on("click touchstart contextmenu", UI.shipMovement.accelCallback);
+            UI.shipMovement.deaccElement.on("click touchstart contextmenu", UI.shipMovement.deaccCallback);
 
             UI.shipMovement.morejinkElement.on("click touchstart", UI.shipMovement.morejinkCallback);
             UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);

@@ -231,7 +231,7 @@ window.flightWindowManager = {
 	},
 
 	removeSystemClasses: function removeSystemClasses(systemwindow) {
-		var classes = Array("destroyed", "loading", "droppedout", "selected", "firing", "disengaged");
+		var classes = Array("destroyed", "loading", "droppedout", "selected", "firing", "disengaged", "docked");
 
 		for (var i in classes) {
 			systemwindow.removeClass(classes[i]);
@@ -265,10 +265,11 @@ window.flightWindowManager = {
 			if (shipManager.systems.isDestroyed(flight, fighter)) {
 				systemwindow.addClass("destroyed");
 				if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter")) systemwindow.addClass("disengaged");
+				if (shipManager.criticals.hasCritical(fighter, "DockedFighter")) systemwindow.addClass("docked");
 
 				return;
 			}
-		}	
+		}
 
 		for (var i in fighter.systems) {
 			var system = fighter.systems[i];

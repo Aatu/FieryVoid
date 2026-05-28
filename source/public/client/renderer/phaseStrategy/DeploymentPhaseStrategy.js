@@ -21,6 +21,12 @@ window.DeploymentPhaseStrategy = function () {
         // Give MineDeployment access to deployment sprites for validation
         if (window.MineDeployment) window.MineDeployment.setDeploymentSprites(this.deploymentSprites);
 
+        // Stage 7: expose the sprite list so DeploymentDock can re-run the
+        // commit-button gate from the dock dialog without needing a back-ref
+        // to this strategy instance. Cleared on deactivate to avoid leaking
+        // a stale reference into later phases.
+        window._deploymentSprites = this.deploymentSprites;
+
         combatLog.onTurnStart();
         infowindow.informPhase(5000, null);
         this.selectFirstOwnShipOrActiveShip();
@@ -55,6 +61,7 @@ window.DeploymentPhaseStrategy = function () {
             window.MineDeployment.deactivate();
             window.MineDeployment.setDeploymentSprites(null);
         }
+        window._deploymentSprites = null;
         this.deploymentSprites.forEach(function (icon) {
             icon.ownSprite.hide();
             icon.enemySprite.hide();
@@ -214,6 +221,40 @@ window.DeploymentPhaseStrategy = function () {
         if (validateDeploymentPosition(this.selectedShip, hex, this.deploymentSprites)) {
             this.drawMovementUI(this.selectedShip);
         }
+    };
+
+    // Stage 7: override selectShip so the tooltip menu for own ships gets a
+    // "Dock pending flight here" button when the selected ship has a hangar
+    // with free capacity AND the slot has flights still in the deployment
+    // queue that fit. Base PhaseStrategy.selectShip already creates the
+    // standard menu — we recreate it here so we can add the dock button
+    // before it's rendered (addButton-after-render is a no-op).
+    DeploymentPhaseStrategy.prototype.selectShip = function (ship, payload) {
+        this.setSelectedShip(ship);
+        this.showAppropriateHighlight();
+        this.showAppropriateEW();
+        if (gamedata.showLoS) return;
+
+        var menu = new ShipTooltipMenu(this.selectedShip, ship, this.gamedata.turn);
+
+        if (window.DeploymentDock && window.DeploymentDock.shipHasOpenableDockDialog(ship)) {
+            //Reuse the firing-phase Dock button styling (dockFlight class →
+            //img/dockFlight.png) so the icon is consistent across phases.
+            //addLeadingButton places it to the LEFT of "Open ship details",
+            //matching the Firing Phase tooltip order (action icons first,
+            //info icon last).
+            menu.addLeadingButton("recoverFlights",
+                function () { return window.DeploymentDock.shipHasOpenableDockDialog(ship); },
+                function () {
+                    if (window.confirm && typeof window.confirm.hangarDeployDock === 'function') {
+                        window.confirm.hangarDeployDock(ship);
+                    }
+                },
+                "Deploy Flights in Hangar"
+            );
+        }
+
+        this.showShipTooltip(ship, payload, menu, false);
     };
 
     DeploymentPhaseStrategy.prototype.deselectShip = function (ship) {
@@ -476,6 +517,10 @@ window.DeploymentPhaseStrategy = function () {
 
             if (shipManager.getTurnDeployed(ship) != gamedata.turn) continue; //We're only validating ships that deploy this turn!
 
+            //Stage 7: flights queued for hangar deploy-start dock don't need a
+            //hex position — they go straight into the carrier's hangar.
+            if (ship.pendingDeployDock) continue;
+
             if (!validateDeploymentPosition(ship, null, deploymentSprites)) {
                 return false;
             }
@@ -532,6 +577,15 @@ window.DeploymentPhaseStrategy = function () {
     window.validateAllDeploymentGlobal = function (gamedataRef, deploymentSprites) {
         return validateAllDeployment(gamedataRef, deploymentSprites);
     };
+
+    // Hangar Operations Stage 7 deployment-phase dock helpers (window.DeploymentDock
+    // + computeFreeBoxes / trueSizeOfFlightForDock / hangarAcceptsCategoryForDock
+    // / flightHasCommittedPosition / flightQueuedToCarrier / carrierHasQueuedDocks)
+    // were defined here in an earlier pass, then re-implemented in
+    // DeploymentDock.js — which loads AFTER this file and overwrites
+    // window.DeploymentDock with the canonical IIFE-encapsulated version.
+    // The duplicate definitions and helpers have been removed; the live
+    // implementation is in DeploymentDock.js.
 
     return DeploymentPhaseStrategy;
 }();

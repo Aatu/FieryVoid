@@ -215,6 +215,15 @@ class ShipSystem {
         $this->effectCriticals();
         $this->destroyed = $this->isDestroyed();
     }
+
+    /* Hangar Ops: per-turn hook for a subsystem of a flight sitting docked
+     * in a hangar. Driven by HangarOps::serviceDockedFlights (from
+     * Hangar::criticalPhaseEffects) for every subsystem of every flight
+     * docked a FULL turn. Default no-op; Weapon overrides it to reload ammo
+     * (gated on $reloadable). $carrier/$hangar give the rearm context for
+     * future rules (e.g. carrier-owned replacement ammo).
+     */
+    public function whileDocked($flight, $carrier, $hangar, $gamedata){ }
 	
 	public function criticalPhaseEffects($ship, $gamedata){
 	    	    

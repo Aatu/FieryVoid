@@ -250,7 +250,8 @@ spl_autoload_register(
                 'devout2007' => '/server/model/ships/orieni/devout2007.php',
                 'dice' => '/server/lib/dice.php',
                 'disengagedfighter' => '/server/model/cricialClasses.php',
-				'dockingcollar' => '/server/model/systems/baseSystems.php',				
+                'dockedfighter' => '/server/model/cricialClasses.php',                
+				'dockingcollar' => '/server/model/systems/baseSystems.php',
                 'dorono' => '/server/model/ships/hurr/dorono.php',
                 'doublev' => '/server/model/ships/raiders/doubleV.php', //TO BE DELETED LATER
 //                'doublev_nav' => '/server/model/ships/raiders/doubleV_nav.php', //Deleted old version
@@ -409,6 +410,7 @@ spl_autoload_register(
                 'halosearly' => '/server/model/ships/brakiri/halosEarly.php',
                 'haltona' => '/server/model/ships/brakiri/haltona.php',
                 'hangar' => '/server/model/systems/baseSystems.php',
+                'hangaroperations' => '/server/model/cricialClasses.php',
                 'hastan' => '/server/model/ships/yolu/hastan.php',
                 'haven' => '/server/model/ships/centauri/haven.php',
                 'hawk' => '/server/model/ships/raiders/hawk.php',
@@ -534,6 +536,7 @@ spl_autoload_register(
                 'lasercutter' => '/server/model/weapons/lasers.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
                 //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used
+                'launchedthisturn' => '/server/model/cricialClasses.php',
                 'leevan' => '/server/model/ships/centauri_old/leevan.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',
@@ -2667,6 +2670,7 @@ spl_autoload_register(
 				'gaimkastafighter' => '/server/model/ships/gaim/gaimKastaFighter.php',
 				'gaimkoistfighter' => '/server/model/ships/gaim/gaimKoistFighter.php',
 				'gaimkrastfighter' => '/server/model/ships/gaim/gaimKrastFighter.php',
+				'gaimkrastfighteram' => '/server/model/ships/gaim/gaimKrastFighterAM.php',                
 				'gaimkruppas' => '/server/model/ships/gaim/gaimKruppas.php',
 				'gaimkuach' => '/server/model/ships/gaim/gaimKuach.php',
 				'gaimkuan' => '/server/model/ships/gaim/gaimKuan.php',
@@ -3543,8 +3547,7 @@ spl_autoload_register(
 				//Grappling Claw & Grapple ships
 				'grapplingclaw' => '/server/model/weapons/specialWeapons.php',					
 				'claweagle' => '/server/model/ships/drazi/claweagle.php',										
-				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',
-
+				'assaultsloop' => '/server/model/ships/raiders/assaultsloop.php',            
                 
                 //MINES
 				'minestealth' => '/server/model/systems/baseSystems.php',
@@ -3787,6 +3790,44 @@ spl_autoload_register(
                 'dewminehafkaa' => '/server/model/ships/balosian/dewMineHafkaA.php',                 
                 'dewmined2bal' => '/server/model/ships/balosian/dewMineD2Bal.php',  
                 
+
+                //HANGER OPERATIONS CLASSES
+                'hangarops' => '/server/model/systems/HangarOps.php',
+                'flyer' => '/server/model/ships/Shuttle.php',
+                'flyerprotectorate' => '/server/model/ships/Shuttle.php',
+                'minesweepingshuttle' => '/server/model/ships/Shuttle.php',                
+                'shuttle' => '/server/model/ships/Shuttle.php',
+                'shuttleabbai' => '/server/model/ships/Shuttle.php',
+                'shuttlealacan' => '/server/model/ships/Shuttle.php',
+                'shuttlebalosian' => '/server/model/ships/Shuttle.php',
+                'shuttlebelt' => '/server/model/ships/Shuttle.php',                                                 
+                'shuttlebrakiri' => '/server/model/ships/Shuttle.php', 
+                'shuttlecascor' => '/server/model/ships/Shuttle.php',                           
+                'shuttlecent' => '/server/model/ships/Shuttle.php',
+                'shuttlecentwotcr' => '/server/model/ships/Shuttle.php', 
+                'shuttlecorillani' => '/server/model/ships/Shuttle.php', 
+                'shuttledeneth' => '/server/model/ships/Shuttle.php', 
+                'shuttledescari' => '/server/model/ships/Shuttle.php',                                                                  
+                'shuttledilgar' => '/server/model/ships/Shuttle.php',   
+                'shuttledrazi' => '/server/model/ships/Shuttle.php', 
+                'shuttledraziwotcr' => '/server/model/ships/Shuttle.php',                                                                 
+                'shuttleea' => '/server/model/ships/Shuttle.php',   
+                'shuttlegaim' => '/server/model/ships/Shuttle.php', 
+                'shuttlegrome' => '/server/model/ships/Shuttle.php',
+                'shuttlehurr' => '/server/model/ships/Shuttle.php',
+                'shuttlehyach' => '/server/model/ships/Shuttle.php',
+                'shuttlekl' => '/server/model/ships/Shuttle.php', 
+                'shuttlellort' => '/server/model/ships/Shuttle.php',
+                'shuttlemarkab' => '/server/model/ships/Shuttle.php',                                                                                                                    
+                'shuttlenarn' => '/server/model/ships/Shuttle.php',
+                'shuttleorieni' => '/server/model/ships/Shuttle.php',  
+                'shuttlepakmara' => '/server/model/ships/Shuttle.php',
+                'shuttlerogolon' => '/server/model/ships/Shuttle.php',                
+                'shuttletorata' => '/server/model/ships/Shuttle.php',  
+                'shuttleusuuth' => '/server/model/ships/Shuttle.php',  
+                'shuttlevorlons' => '/server/model/ships/Shuttle.php',                                              
+                'shuttlevree' => '/server/model/ships/Shuttle.php',
+                'shuttleyolu' => '/server/model/ships/Shuttle.php',                                                                                               
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

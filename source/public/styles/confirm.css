@@ -343,7 +343,7 @@
 .confirm.multi-value-confirm .multi-value-container {
     display: flex;
     flex-direction: column;
-    gap: 15px;
+    gap: 10px;
     margin-bottom: 15px;
 }
 
@@ -404,4 +404,140 @@
     color: #DEFBFF;
     opacity: 0.8;
     /*margin-left: 5px;*/
+}
+
+/* === Hangar Operations dialogs ============================================
+   Steel/cyan theme for the four hangar confirm windows (Launch / Dock /
+   DeployDock / DeployCarrierPicker). Layered on top of .multi-value-confirm
+   so row/input layout is inherited; only the colour palette differs.
+   Selector specificity (0,3,0) beats the base (0,2,0) so these always win. */
+.confirm.multi-value-confirm.hangar-confirm {
+    background: #001218;
+    border: 3px solid #1f6f8b;
+    box-shadow: 0 0 8px rgba(88, 199, 230, 0.35);
+    color: #C9F0FF;
+    min-width: 500px;   
+    min-height: 120px;       
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-header {
+    color: #58c7e6;
+    text-shadow: 0 0 5px rgba(88, 199, 230, 0.5);
+    border-bottom: 1px solid rgba(31, 111, 139, 0.6);
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-row:hover {
+    background: rgba(88, 199, 230, 0.08);
+    border-color: #1f6f8b;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-label,
+.confirm.multi-value-confirm.hangar-confirm .multi-value-max {
+    color: #C9F0FF;
+    margin-right: 10px;       
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-name {
+    color: #C9F0FF;
+    margin-right: 10px;
+    font-weight: normal;
+}
+
+/* Hangar header rows (Main / Front / Aft / Port / Stbd Hangar). Brighter
+   cyan + slight letter-spacing to read as a section divider above the
+   craft rows it owns. */
+.confirm.multi-value-confirm.hangar-confirm .hangar-section-name {
+    color: #58c7e6;
+    margin-right: 10px;
+    font-weight: bold;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 4px rgba(88, 199, 230, 0.35);
+}
+
+/* Stored-craft rows (eg. "6x Aurora"). Softer than the hangar header so
+   the visual hierarchy reads section → contents. */
+.confirm.multi-value-confirm.hangar-confirm .hangar-craft-name {
+    color: #C9F0FF;
+    margin-right: 0px;
+    font-weight: normal;
+}
+
+/* Indent craft rows only in the Launch dialog, where they sit under a
+   per-hangar section header. The Dock and DeployDock dialogs list rows
+   flat (one carrier-hangar or one flight per row) and don't need it. */
+.confirm.multi-value-confirm.hangar-confirm.hangarLaunch .hangar-craft-name {
+    margin-left: 18px;
+}
+
+/* Hangar capacity readout in the Deployment Dock dialog. Each per-hangar
+   pill is its own inline element so the parent flex-wrap container can
+   break onto multiple lines when the carrier has many hangars — the
+   single-line "A: x/y &middot; B: x/y &middot; C: x/y" got squashed
+   unreadably on wide multi-hangar carriers. */
+.confirm.multi-value-confirm.hangar-confirm .hangarCapacityHeader {
+    /* Override the row's space-between justification — we want the
+       label hugging the left edge and the pills flowing after it. */
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    column-gap: 10px;
+    row-gap: 4px;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .hangar-capacity-label {
+    color: #C9F0FF;
+    font-weight: bold;
+    margin-right: 4px;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pills {
+    display: inline-flex;
+    flex-wrap: wrap;
+    column-gap: 12px;
+    row-gap: 4px;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pill {
+    white-space: nowrap;
+}
+
+/* Deployment Dock dialog checkboxes were rendering a few px above the
+   row's text baseline. Flex centering handles overall alignment, but the
+   checkbox's intrinsic box has top padding that the browser ignores in
+   `align-items: center` for replaced elements. Nudge it down to sit on
+   the same optical line as the label text. The `margin-left: auto`
+   pushes the checkbox (and the label after it) to the right edge of
+   the row so the checkbox + flight-name pair sits adjacent to the
+   hangar dropdown instead of being separated by a wide gap. */
+.confirm.multi-value-confirm.hangar-confirm .deployDockCheck {
+    align-self: center;
+    vertical-align: middle;
+    margin: 0 8px 0 auto;
+    transform: translateY(1px);
+}
+
+/* Deployment Dock and Firing-Phase Recover rows: keep the flight-name
+   label tight against its checkbox by dropping the base `flex: 1`
+   (which would otherwise stretch the label across the row and split
+   the pair). The checkbox's `margin-left: auto` above is what pushes
+   the whole pair to the right. Both dialogs use the same checkbox row
+   pattern so they share the rule. */
+.confirm.multi-value-confirm.hangar-confirm.hangarDeployDock .multi-value-row .multi-value-label,
+.confirm.multi-value-confirm.hangar-confirm.hangarRecover .multi-value-row .multi-value-label {
+    flex: 0 0 auto;
+    text-align: right;
+    margin-right: 10px;
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input {
+    background: #03161f;
+    border: 1px solid #1f6f8b;
+    color: #ffffff;
+    min-width: 130px; 
+    margin-left: 0px;     
+}
+
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input:focus {
+    border-color: #58c7e6;
+    box-shadow: 0 0 10px rgba(88, 199, 230, 0.6);
+    background: #000;
 }

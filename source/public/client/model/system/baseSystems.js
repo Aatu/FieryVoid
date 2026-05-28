@@ -166,6 +166,18 @@ CnC.prototype.initializationUpdate = function () {
 			else if (ship.shipSizeClass === 1) marines += 2;
 		}
 
+		// Stage 17 ext: live MAR_CONT count during buying — every purchased
+		// Extra Marine Contingent represents 1 marine unit added to defenders
+		// (spent total is 0 in buying phase so capacity == remaining).
+		if (ship.enhancementOptions && ship.enhancementOptions.length) {
+			for (var ei = 0; ei < ship.enhancementOptions.length; ei++) {
+				var enh = ship.enhancementOptions[ei];
+				if (enh && enh[0] === 'MAR_CONT' && (enh[2] | 0) > 0) {
+					marines += (enh[2] | 0);
+				}
+			}
+		}
+
 		this.data["Marine Units"] = Math.max(0, marines);
 	} else {
 		this.data["Marine Units"] = this.marines || 0;
@@ -224,9 +236,286 @@ MagGraviticThruster.prototype.constructor = MagGraviticThruster;
 
 var Hangar = function (json, ship) {
 	ShipSystem.call(this, json, ship);
+	//SystemFactory.createSystemFromJson uses Object.assign (shallow), and the
+	//server's stripForJson doesn't transmit `data` (it's computed client-side
+	//via refreshHangarTooltip below). Result: every Hangar instance built from
+	//the same static blueprint shares ONE `data` object reference. Without
+	//this clone, refreshHangarTooltip's writes to this.data["Capacity"] /
+	//this.data["Stored Craft"] mutate the shared object, so the last carrier
+	//to refresh overwrites every prior Whitestar's tooltip. Same fix the ship
+	//constructor already applies at the ship level (model/ship.js:11-13).
+	if (this.data && typeof this.data === 'object') {
+		this.data = JSON.parse(JSON.stringify(this.data));
+	} else {
+		this.data = {};
+	}
+	//Hydrate from any already-submitted orders for this turn so the dialogs
+	//can pre-fill (and the player can amend/cancel via the same dialog).
+	//pendingLaunchOrder/pendingDockOrder come from Hangar::stripForJson on the
+	//server (set by onIndividualNotesLoaded from the latest hangarLaunchOrder/
+	//hangarDockOrder note for the current turn).
+	this.pendingLaunchOrders = Array.isArray(this.pendingLaunchOrder) ? this.pendingLaunchOrder.slice() : [];
+	this.pendingDockOrders   = Array.isArray(this.pendingDockOrder)   ? this.pendingDockOrder.slice()   : [];
+	//Stage 7: deploy-start orders are one-shot (resolved immediately on commit
+	//rather than queued like Firing-Phase orders), so there's no server-side
+	//pendingDeployStartOrder to hydrate from — we just track them client-side
+	//for the current Deployment Phase session.
+	this.pendingDeployStartOrders = [];
+	//Dirty flags distinguish "the dialog has touched this since hydration"
+	//from "nothing to send". When a dialog OK leaves the list empty (a
+	//"cancel everything" action), we still need to ship an explicit empty
+	//payload so the server can replace any prior order from this Firing Phase.
+	this.pendingLaunchOrdersDirty      = false;
+	this.pendingDockOrdersDirty        = false;
+	this.pendingDeployStartOrdersDirty = false;
+	this.refreshHangarTooltip();
 }
 Hangar.prototype = Object.create(ShipSystem.prototype);
 Hangar.prototype.constructor = Hangar;
+
+// Submit-time hook called from ajaxInterface for every system. The base class
+// version resets individualNotesTransfer to "" — which would wipe any launch
+// orders the dialog set directly. Build the payload from pendingLaunchOrders
+// + pendingDockOrders here instead so it survives until serialisation.
+//
+// Payload shape (Stage 5+): {launches: [{phpclass, size}], docks: [{flightId, count}]}.
+// Stage 7 adds: {deployStarts: [{flightId}]}.
+// Any key may be empty / omitted; the server-side Hangar::doIndividualNotesTransfer
+// also accepts the legacy Stage 4 launches-only list shape for safety.
+Hangar.prototype.doIndividualNotesTransfer = function () {
+	// Send IF any of the three is non-empty OR the dialog explicitly touched it.
+	// The dirty flag lets a "clear all orders" pass through — without it, the
+	// server would keep replaying the prior turn's launch/dock note.
+	var launchDirty      = !!this.pendingLaunchOrdersDirty;
+	var dockDirty        = !!this.pendingDockOrdersDirty;
+	var deployStartDirty = !!this.pendingDeployStartOrdersDirty;
+	var hasLaunch       = launchDirty      || (Array.isArray(this.pendingLaunchOrders)      && this.pendingLaunchOrders.length      > 0);
+	var hasDock         = dockDirty        || (Array.isArray(this.pendingDockOrders)        && this.pendingDockOrders.length        > 0);
+	var hasDeployStart  = deployStartDirty || (Array.isArray(this.pendingDeployStartOrders) && this.pendingDeployStartOrders.length > 0);
+	if (!hasLaunch && !hasDock && !hasDeployStart) {
+		this.individualNotesTransfer = "";
+		return;
+	}
+	var payload = {};
+	if (hasLaunch)      payload.launches     = Array.isArray(this.pendingLaunchOrders)      ? this.pendingLaunchOrders      : [];
+	if (hasDock)        payload.docks        = Array.isArray(this.pendingDockOrders)        ? this.pendingDockOrders        : [];
+	if (hasDeployStart) payload.deployStarts = Array.isArray(this.pendingDeployStartOrders) ? this.pendingDeployStartOrders : [];
+	this.individualNotesTransfer = JSON.stringify(payload);
+	// Reset state — the next gamedata reload will re-hydrate from the server.
+	this.pendingLaunchOrders = [];
+	this.pendingDockOrders = [];
+	this.pendingDeployStartOrders = [];
+	this.pendingLaunchOrdersDirty = false;
+	this.pendingDockOrdersDirty = false;
+	this.pendingDeployStartOrdersDirty = false;
+};
+
+// "Carrying" and "Stored Craft" lines are recomputed from the live $hangarUsage
+// (sent via stripForJson) rather than read from the static blueprint, because
+// data[] isn't transmitted on the live gamedata payload — only the static
+// blueprint contains the baked-in (empty) version. Without this, the tooltip
+// would always say "0 / N boxes" no matter how many craft are actually stored.
+//
+// Stage 10.2 extends the projection to cover Firing-Phase queued orders too:
+//   - pendingDeployStartOrders (Stage 7, deployment): additive, "(Deploying)"
+//   - pendingDockOrders (Stage 5, firing-phase dock):  additive, "(Recovering)"
+//   - pendingLaunchOrders (Stage 4, firing-phase launch): SUBTRACTIVE — these
+//     consume stored craft, so they shrink "Carrying" and render as a separate
+//     "(Launching)" line beneath the stored-craft listing.
+Hangar.prototype.refreshHangarTooltip = function () {
+	if (!this.data) this.data = {};
+	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
+
+	// Additive projections: queued dock orders + queued deploy-start orders
+	// both bring craft INTO the hangar. The committed $hangarUsage list is
+	// the baseline; the two pending arrays each contribute extra entries
+	// flagged with a `_pending` variant that drives the suffix at render time.
+	var displayEntries = this.hangarUsage.slice();
+
+	if (Array.isArray(this.pendingDeployStartOrders) && this.pendingDeployStartOrders.length > 0) {
+		for (var q = 0; q < this.pendingDeployStartOrders.length; q++) {
+			var order = this.pendingDeployStartOrders[q];
+			var flight = order && order.flightId != null ? gamedata.getShip(order.flightId) : null;
+			if (!flight) continue;
+			displayEntries.push({
+				phpclass:   flight.phpclass,
+				name:       flight.name,
+				flightSize: parseInt(flight.flightSize || 1, 10),
+				hangarType: this.hangarType,
+				_pending:   'deploying'
+			});
+		}
+	}
+
+	// Firing-phase dock projection (Stage 10.2). pendingDockOrders is
+	// {flightId, count} per row where count may be < the source flight's
+	// full size (partial dock). Display label / phpclass come from the
+	// source flight so the player sees which flight is incoming.
+	if (Array.isArray(this.pendingDockOrders) && this.pendingDockOrders.length > 0) {
+		for (var d = 0; d < this.pendingDockOrders.length; d++) {
+			var dockOrder = this.pendingDockOrders[d];
+			var dockFlight = dockOrder && dockOrder.flightId != null ? gamedata.getShip(dockOrder.flightId) : null;
+			if (!dockFlight) continue;
+			var dockCount = parseInt(dockOrder.count || 0, 10);
+			if (dockCount <= 0) continue;
+			displayEntries.push({
+				phpclass:   dockFlight.phpclass,
+				name:       dockFlight.name,
+				flightSize: dockCount,
+				hangarType: this.hangarType,
+				_pending:   'recovering'
+			});
+		}
+	}
+
+	var totalStored = 0;
+	for (var i = 0; i < displayEntries.length; i++) {
+		totalStored += parseInt(displayEntries[i].flightSize || 1, 10);
+	}
+
+	// Subtractive projection: queued launches take craft OUT of the hangar.
+	// Subtract from totalStored so "Carrying" reflects projected post-resolve
+	// state; collect per-phpclass entries so we can render a separate
+	// "(Launching)" line per class beneath the stored-craft listing. Showing
+	// launches in a separate line (rather than decrementing the matching
+	// stored-craft line) keeps the math obvious: stored count is what's
+	// CURRENTLY in the hangar, launching count is what's about to leave,
+	// Carrying is the post-resolve delta. Trying to fold launches into the
+	// per-class stored line is ambiguous: "3 x Aurora" with "3 x Aurora
+	// (Launching)" beneath is clearer than "0 x Aurora" + "3 x Aurora (out)".
+	var launchByClass = {};
+	if (Array.isArray(this.pendingLaunchOrders) && this.pendingLaunchOrders.length > 0) {
+		for (var L = 0; L < this.pendingLaunchOrders.length; L++) {
+			var launchOrder = this.pendingLaunchOrders[L];
+			if (!launchOrder) continue;
+			var launchSize = parseInt(launchOrder.size || 0, 10);
+			if (launchSize <= 0) continue;
+			totalStored = Math.max(0, totalStored - launchSize);
+
+			var lphpclass = launchOrder.phpclass || 'unknown';
+			//Look up the launching craft's friendly name from a matching
+			//stash entry so the line reads "6 x Aurora", not "6 x starfuryEA".
+			var launchDisplayName = lphpclass;
+			for (var s = 0; s < this.hangarUsage.length; s++) {
+				if (this.hangarUsage[s] && this.hangarUsage[s].phpclass === lphpclass) {
+					launchDisplayName = this.hangarUsage[s].name || lphpclass;
+					break;
+				}
+			}
+			if (!launchByClass[lphpclass]) launchByClass[lphpclass] = { name: launchDisplayName, count: 0 };
+			launchByClass[lphpclass].count += launchSize;
+		}
+	}
+
+	// Effective capacity = maxhealth - damage that got past armour, clamped >= 0.
+	// Damage is needed in the line to make hangar damage visible — without it,
+	// "Carrying: 8 / 14" never changes when boxes are destroyed but no craft
+	// has been evicted (because the destroyed boxes were empty slots).
+	var netDamage = 0;
+	if (Array.isArray(this.damage)) {
+		for (var di = 0; di < this.damage.length; di++) {
+			var dmg = this.damage[di];
+			netDamage += Math.max(0, parseInt(dmg.damage || 0, 10) - parseInt(dmg.armour || 0, 10));
+		}
+	}
+	// Stage 16: a catapult holds ONE fighter — its extra boxes are structural HP,
+	// not capacity. Display "/ 1" regardless of box count, and a damaged catapult
+	// still has its single slot (it launches/lands regardless of damage), but we
+	// still surface "(N destroyed)" because the destroyed-box count drives the
+	// landing-damage rule (16.5) and is useful to the player.
+	var maxCapacity      = this.isCatapult ? 1 : this.maxhealth;
+	var effectiveCapacity = this.isCatapult ? 1 : Math.max(0, this.maxhealth - netDamage);
+
+	if (netDamage > 0) {
+		this.data["Capacity"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
+	} else {
+		this.data["Capacity"] = totalStored + " / " + maxCapacity + " slots";
+	}
+
+	// Stage 15: the primary hangar carries the carrier-level reload-points
+	// reserve (from HANG_ORD). Server emits reloadPoolCapacity + reloadPoolSpent
+	// only on the primary; everything else gets undefined and skips this line.
+	if (typeof this.reloadPoolCapacity === 'number' && this.reloadPoolCapacity > 0) {
+		var spent = parseInt(this.reloadPoolSpent || 0, 10);
+		var remaining = Math.max(0, this.reloadPoolCapacity - spent);
+		this.data["Ordnance Reserve"] = remaining + " / " + this.reloadPoolCapacity + " pts";
+	} else {
+		delete this.data["Ordnance Reserve"];
+	}
+
+	// Stage 17 ext: parallel marine-pool display (from MAR_CONT). Same
+	// primary-only emission pattern as Ordnance Reserve. Units are marines,
+	// not points — each pool entry equals one marine unit and each restock
+	// costs 10 CP to purchase (cost lives in the price, not the unit).
+	if (typeof this.marinePoolCapacity === 'number' && this.marinePoolCapacity > 0) {
+		var marSpent = parseInt(this.marinePoolSpent || 0, 10);
+		var marRemaining = Math.max(0, this.marinePoolCapacity - marSpent);
+		this.data["Marine Contingents"] = marRemaining + " / " + this.marinePoolCapacity;
+	} else {
+		delete this.data["Marine Contingents"];
+	}
+
+	var hasLaunches = false;
+	for (var lkc in launchByClass) { hasLaunches = true; break; }
+	if (displayEntries.length === 0 && !hasLaunches) {
+		delete this.data["Stored Craft"];
+		return;
+	}
+
+	// Group docked / queued craft for display. Prefer entry.name (the friendly
+	// flight name like "Aurora-1" or "Shuttle"), falling back to phpclass.
+	// Bucket by phpclass + _pending variant so launches/docks of the same
+	// fighter type aggregate per category but stay visually separated from
+	// already-stored craft. _pending values: undefined (committed),
+	// 'deploying' (Stage 7), 'recovering' (Stage 10.2).
+	var byClass = {};
+	for (var ei = 0; ei < displayEntries.length; ei++) {
+		var entry = displayEntries[ei];
+		var phpKey = (entry.phpclass && entry.phpclass !== "")
+			? entry.phpclass
+			: ("(" + (entry.hangarType || "unknown") + " slot)");
+		var pendingMarker = entry._pending ? ('|' + entry._pending) : '';
+		//Stage 16.5: a cannotLaunch entry is a wreck (fighter destroyed landing on
+		//a damaged catapult). Bucket it apart so it renders distinctly and never
+		//merges with a launchable craft of the same class.
+		var wreckMarker = entry.cannotLaunch ? '|wrecked' : '';
+		var bucketKey = phpKey + pendingMarker + wreckMarker;
+		var entryDisplayName = entry.displayName
+			|| (entry.name && entry.name !== "" ? entry.name : phpKey);
+		if (!byClass[bucketKey]) {
+			byClass[bucketKey] = { name: entryDisplayName, count: 0, pending: entry._pending || null, wrecked: !!entry.cannotLaunch };
+		}
+		byClass[bucketKey].count += parseInt(entry.flightSize || 1, 10);
+	}
+
+	// Launches consume committed stash — subtract the launching count from
+	// the matching committed bucket (phpclass key, no pending marker) so the
+	// stored-craft line only counts what's STAYING. Without this the player
+	// sees both "2 x Shuttle" and "2 x Shuttle (Launching)" simultaneously
+	// and the math reads as 4 shuttles total. Committed-only because the
+	// launch dialog reads $hangarUsage (committed stash) — you can't launch
+	// a fighter that hasn't arrived yet via a pending dock order, so the
+	// deploying/recovering buckets are never the source of a launch.
+	for (var lkc in launchByClass) {
+		if (byClass[lkc]) {
+			byClass[lkc].count = Math.max(0, byClass[lkc].count - launchByClass[lkc].count);
+		}
+	}
+
+	var lines = [];
+	for (var k in byClass) {
+		if (byClass[k].count <= 0) continue;     //fully launched-out → suppress, "(Launching)" line below carries the info
+		var suffix = '';
+		if (byClass[k].wrecked) suffix = ' (wrecked — cannot relaunch)';
+		else if (byClass[k].pending === 'deploying')  suffix = ' (Deploying)';
+		else if (byClass[k].pending === 'recovering') suffix = ' (Recovering)';
+		lines.push(byClass[k].count + " x " + byClass[k].name + suffix);
+	}
+	for (var lk in launchByClass) {
+		lines.push(launchByClass[lk].count + " x " + launchByClass[lk].name + ' (Launching)');
+	}
+	this.data["Stored Craft"] = "<br>" + lines.join("<br>");
+};
 
 var MindriderHangar = function MindriderHangar(json, ship) {
 	ShipSystem.call(this, json, ship);
@@ -234,10 +523,22 @@ var MindriderHangar = function MindriderHangar(json, ship) {
 MindriderHangar.prototype = Object.create(ShipSystem.prototype);
 MindriderHangar.prototype.constructor = MindriderHangar;
 
+// Hangar Ops Stage 16: a Catapult is a Hangar that holds one fighter and
+// displays capacity as 1 regardless of its (structural) box count. Extending
+// Hangar inherits the data deep-clone (Stage 12 shared-reference fix), the
+// pending-order hydration, refreshHangarTooltip, and doIndividualNotesTransfer.
+// The launch/dock UI helpers all gate on name === 'hangar', so a catapult is
+// not yet offered launch/dock dialogs (16.3-16.5 wire those up).
 var Catapult = function Catapult(json, ship) {
-	ShipSystem.call(this, json, ship);
+	Hangar.call(this, json, ship);
+	// Set the discriminator client-side so the tooltip / dialogs don't depend on
+	// it round-tripping through the gamedata JSON. Hangar.call already ran
+	// refreshHangarTooltip once (capacity = box count); recompute now that
+	// isCatapult is set so capacity renders as "/ 1".
+	this.isCatapult = true;
+	this.refreshHangarTooltip();
 };
-Catapult.prototype = Object.create(ShipSystem.prototype);
+Catapult.prototype = Object.create(Hangar.prototype);
 Catapult.prototype.constructor = Catapult;
 
 var CargoBay = function CargoBay(json, ship) {

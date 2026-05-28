@@ -344,6 +344,7 @@
 	/*Orieni fighter weapon*/
     class PairedGatlingGun extends LinkedWeapon{
         public $name = "pairedGatlingGun";
+        protected $reloadable = 6;     //Hangar Ops: reloads 1/turn while docked, cap = starting ammo (+EXT_AMMO)
         public $displayName = "Paired Gatling Guns";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);
@@ -436,6 +437,7 @@
 	/*Orieni assault shuttle weapon*/
     class LtGatlingGun extends LinkedWeapon{
         public $name = "LtGatlingGun";
+        protected $reloadable = 6;     //Hangar Ops: reloads 1/turn while docked, cap = starting ammo (+EXT_AMMO)
         public $displayName = "Light Gatling Gun";
         public $iconPath = "LightGatlingGun.png";
         public $animation = "trail";
@@ -516,7 +518,7 @@
         public $name = "MatterGun";
         public $displayName = "Matter Gun";  
 	    public $iconPath = 'pairedGatlingGun.png';
-	   
+        protected $reloadable = 6;     //Hangar Ops: reloads 1/turn while docked, cap = starting ammo (+EXT_AMMO)	   
 		public $priority = 3; //equivalent of d6+2, due to Matter properties
 	  
         public function getDamage($fireOrder){ //d6-1, minimum 1
@@ -744,6 +746,7 @@ class GromeFlakCannon extends Weapon{
 	/*Grome fighter weapon*/
 class SlugCannon extends LinkedWeapon{
         public $name = "SlugCannon";
+        protected $reloadable = 6;     //Hangar Ops: reloads 1/turn while docked, cap = starting ammo (+EXT_AMMO)
         public $displayName = "Slug Cannon";
         public $animation = "trail";
         public $animationColor = array(250, 250, 190);

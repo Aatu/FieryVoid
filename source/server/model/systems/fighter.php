@@ -13,7 +13,19 @@
 		public $systems = array();
 		protected $adaptiveArmorController = null; //Adaptive Armor Controller object (if present) - would be individual one for every fighter
 
-		
+		//Hangar Ops Stage 17: transient per-turn gate for FighterMissileRack::whileDocked.
+		//Stamped to the current turn when one of this fighter's legacy ballistic
+		//launchers restocks, read by sibling launchers' whileDocked to early-return
+		//(enforces 1 missile per fighter per turn). Not persisted — fresh objects
+		//each turn-load have this null, which is the desired reset behaviour.
+		public $missileRackReloadedTurn = null;
+		//Stage 17 ext: parallel transient gate for Marines::whileDocked.
+		//Stamped when a Marines weapon on this fighter restocks, read by
+		//sibling Marines weapons to enforce 1 marine per fighter per turn.
+		//Same reset-on-load semantics as missileRackReloadedTurn.
+		public $marinesReloadedTurn = null;
+
+
 		public $possibleCriticals = array();
 		
 			
@@ -112,11 +124,24 @@
             if ($this->hasCritical("DisengagedFighter", $turn))
 				return true;
         }
-			
+
+        /* Hangar Ops Stage 9.1: parallel to isDisengaged but for fighters
+         * that left the flight by entering a hangar (partial dock or
+         * partial-launch split). Same "permanent until relaunch" lifetime
+         * but distinct so the flight window can render DOCKED separately
+         * from DISENGAGED, and the replay audit trail isn't ambiguous.
+         */
+        public function isDocked($turn){
+            if ($this->hasCritical("DockedFighter", $turn))
+				return true;
+        }
+
         public function isDestroyed($turn = false){
             if ($this->isDisengaged($turn))
                 return true;
-            
+            if ($this->isDocked($turn))
+                return true;
+
             return parent::isDestroyed();
         }
 		

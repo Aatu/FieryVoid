@@ -15,7 +15,7 @@ class LeklantAM extends BaseShip{
         $this->limited = 33;
 
 		$this->isd = 2222;
-        $this->fighters = array("assault shuttles"=>4);
+        //$this->fighters = array("assault shuttles"=>4);
 
 	    $this->notes = 'Atmospheric Capable.';
         
