@@ -64,7 +64,7 @@ class HangarOps {
 				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
 
 				$count = (int)$declaredCount;
-				$totalDeclared += $count;
+				$totalDeclared += self::shuttlePoolBoxesFor($category, $count);
 				$shuttleClass = self::shuttlePhpclassForCategory($category, $ship);
 				if ($shuttleClass === null) continue;   //not a shuttle category
 
@@ -179,6 +179,22 @@ class HangarOps {
 				$count -= $take;
 			}
 		}
+	}
+
+	/* Hangar boxes consumed by a given ship->fighters declaration. Per
+	 * B5W §10.1, ultralight fighters fit two per box (0.5 each); every
+	 * other category is one box per craft. ceil() so an odd ultralight
+	 * count doesn't yield a free half-box of default-shuttle capacity.
+	 * Used by populateInitialHangarUsage and getDefaultShuttles so the
+	 * leftover-shuttle math matches the gamelobby's hangar-space check.
+	 */
+	public static function shuttlePoolBoxesFor($category, $count){
+		$count = (int)$count;
+		if ($count <= 0) return 0;
+		if (strtolower(trim((string)$category)) === 'ultralight') {
+			return (int)ceil($count / 2);
+		}
+		return $count;
 	}
 
 	/* Maps a $ship->fighters category key to a shuttle phpclass, or null
@@ -477,7 +493,7 @@ class HangarOps {
 		if (isset($ship->fighters) && is_array($ship->fighters)) {
 			foreach ($ship->fighters as $category => $count) {
 				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
-				$declared += (int)$count;
+				$declared += self::shuttlePoolBoxesFor($category, $count);
 			}
 		}
 		$leftover = $capacity - $declared;

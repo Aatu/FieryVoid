@@ -431,13 +431,19 @@ shipManager.systems = {
     //Sum of declared fighters that consume default-shuttle-pool hangar boxes.
     //Excludes catapult-destined 'superheavy' fighters when the ship has a
     //catapult. Single source of truth for getDefaultShuttles / Composition.
+    //Per B5W §10.1, ultralight fighters fit two per box (0.5 each); ceil()
+    //so an odd ultralight count doesn't yield a free half-box. Mirrors
+    //HangarOps::shuttlePoolBoxesFor on the server.
     getShuttlePoolDeclared: function getShuttlePoolDeclared(fighters, ship) {
         var declared = 0;
         if (!fighters) return 0;
         var hasCatapult = shipManager.systems.shipHasCatapult(ship);
         for (var k in fighters) {
-            if (hasCatapult && String(k).toLowerCase().trim() === "superheavy") continue;
-            declared += parseInt(fighters[k], 10) || 0;
+            var key = String(k).toLowerCase().trim();
+            if (hasCatapult && key === "superheavy") continue;
+            var count = parseInt(fighters[k], 10) || 0;
+            if (count <= 0) continue;
+            declared += (key === "ultralight") ? Math.ceil(count / 2) : count;
         }
         return declared;
     },
