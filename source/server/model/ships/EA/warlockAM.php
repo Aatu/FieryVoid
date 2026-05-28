@@ -50,7 +50,7 @@ class WarlockAM extends BaseShip{
 		$this->addPrimarySystem(new CnC(6, 20, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 20, 5, 9));
 		$this->addPrimarySystem(new Engine(6, 23, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(5, 26));
+		$this->addPrimarySystem(new Hangar(5, 26, 12));
 		$this->addPrimarySystem(new Jumpengine(6, 20, 4, 16));
 
 		$this->addFrontSystem(new Railgun(4, 9, 6, 300, 60));

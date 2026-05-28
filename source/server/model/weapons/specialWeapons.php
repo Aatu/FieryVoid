@@ -1634,7 +1634,7 @@ class SparkField extends Weapon implements DefensiveSystem{
 	
 	// ignore armor; advanced armor halves effect (due to weapon being Electromagnetic)
 	public function getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos = null){
-		if (WeaponEM::isTargetEMResistant($target,$system)){
+		if ($system->advancedArmor){
 			$returnArmour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);
 			$returnArmour = floor($returnArmour/2);
 			return $returnArmour;
@@ -1756,7 +1756,7 @@ class SurgeCannon extends Raking{
 		      $this->data["Special"] .= "<br> - 3 SC: 9-36 dmg, -2.5/hex"; 
 		      $this->data["Special"] .= "<br> - 4 SC: 14-50 dmg, -1.65/hex"; 
 		      $this->data["Special"] .= "<br> - 5 SC: 20-65 dmg, -1.25/hex"; 
-		      $this->data["Special"] .= "<br>If You allocate multiple Surge Cannons in higher mode of fire at the same target, they will be combined."; 
+		      $this->data["Special"] .= "<br>If you allocate multiple Surge Cannons in higher mode of fire at the same target, they will be combined."; 
 		      $this->data["Special"] .= "<br>If not enough weapons are allocated to be combined, weapons will be fired in single mode instead.";  
 		      $this->data["Special"] .= "<br>Cooldown period: 1 less than number of weapons combining.";  
 		      $this->data["Special"] .= "<br>+2 per rake to critical/dropout rolls on system(s) hit this turn.";  //original rule is more fancy
@@ -2861,19 +2861,19 @@ class RammingAttack extends Weapon{
 		}
 	}
 
-	private function getRamHitLocation($ship, $gamedata, $shipPosition){	
-				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.			
+	private function getRamHitLocation($ship, $gamedata, $shipPosition){
+				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.
 				// Now check other movements in the turn.
-				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
-				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
-				$previousFacing = $startMove->getFacingAngle();	
-				$location = 0;		
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
+				$previousFacing = $startMove->getFacingAngle();
+				$location = 0;
 
 				foreach ($ship->movement as $shipMove) {
 					if ($shipMove->turn == $gamedata->turn) {
-			
+
 						// Only interested in moves where ship enters a NEW hex!
-						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
 							// Check if the position matches the asteroids, e.g. zero distance.
 							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
 								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
@@ -2885,9 +2885,51 @@ class RammingAttack extends Weapon{
 						$previousFacing = $shipMove->getFacingAngle();
 					}
 				}
-								
+
 				return $location;
 	}//endof getRamHitLocation()
+
+
+	//For TerrainCrash return damage: compute hit location on the TERRAIN (not the colliding ship) based on bearing from terrain centre to the ship's incoming hex, in the terrain's frame of reference.
+	private function getTerrainReturnHitLocation($terrain, $ship, $gamedata){
+		$terrainPosition = $terrain->getHexPos();
+		$terrainMove = $terrain->getLastMovement();
+		$terrainFacing = $terrainMove ? $terrainMove->getFacingAngle() : 0;
+
+		//Build list of occupied hexes (mirrors checkForCollisions logic).
+		$occupiedHexes = [];
+		if (property_exists($terrain, 'hexOffsets') && !empty($terrain->hexOffsets)) {
+			foreach ($terrain->hexOffsets as $offset) {
+				$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $terrainFacing);
+			}
+		} else {
+			$occupiedHexes[] = $terrainPosition;
+			if ($terrain->Huge > 0) {
+				foreach (Mathlib::getNeighbouringHexes($terrainPosition, $terrain->Huge) as $n) {
+					$occupiedHexes[] = new OffsetCoordinate($n['q'], $n['r']);
+				}
+			}
+		}
+
+		$startMove = $ship->getLastTurnMovement($gamedata->turn);
+		$previousPosition = $startMove->position;
+
+		foreach ($ship->movement as $shipMove) {
+			if ($shipMove->turn != $gamedata->turn) continue;
+			if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {
+				foreach ($occupiedHexes as $hex) {
+					if ($hex->q == $shipMove->position->q && $hex->r == $shipMove->position->r) {
+						//Bearing FROM terrain centre TO ship's prior hex, relative to terrain's facing.
+						$relativeBearing = $this->getTempBearing($terrainPosition, $previousPosition, $terrain, $terrainFacing);
+						return $this->getCollisionLocation($relativeBearing, $terrain);
+					}
+				}
+			}
+			$previousPosition = $shipMove->position;
+		}
+
+		return 1; //Safe default matching MediumShip front.
+	}//endof getTerrainReturnHitLocation()
 
 
 	public function fire($gamedata, $fireOrder){
@@ -2914,10 +2956,18 @@ class RammingAttack extends Weapon{
 			$target = $this->unit;
 			$targetPos = $target->getHexPos();
 
-			//Location is already determined for Terrain collisions/crashes.
-			if($fireOrder->damageclass != 'TerrainCollision' && $fireOrder->damageclass != 'TerrainCrash') {
+			//The chosenLocation set in beforePreFiringOrderResolution is the colliding ship's location and was used by parent::fire() to damage the ship correctly.
+			//For return damage, we now switch chosenLocation to refer to the unit taking it (this->unit).
+			if($fireOrder->damageclass == 'TerrainCrash') {
+				//Return damage lands on the terrain itself, not the colliding ship - recompute against terrain's own location chart.
+				$collider = $gamedata->getShipById($fireOrder->targetid);
+				if($collider) {
+					$fireOrder->chosenLocation = $this->getTerrainReturnHitLocation($target, $collider, $gamedata);
+				}
+			} else if($fireOrder->damageclass != 'TerrainCollision') {
 				$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
 			}
+			//TerrainCollision (asteroids): return damage stays 0 via damageModRolled, so chosenLocation is not used meaningfully.
 
 			$damage = $this->getReturnDamage($fireOrder);
         		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
@@ -3395,7 +3445,8 @@ class IonFieldGenerator extends Weapon{
 	/*actual applying of effect*/ 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
 		//not affecting units protected by Advanced Armor!
-		if(WeaponEM::isTargetEMResistant($ship,$system)) return;
+		if($system->advancedArmor) return;
+		if($ship instanceof Mine) return;		
 		//$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		//$shooterID = $shooter->id;
 		if ($system instanceOf Weapon) {//weapon "hit" is forced to shut down for a turn - on top of regular mandatory effects
@@ -7500,7 +7551,95 @@ class Marines extends Weapon implements SpecialAbility{
 	}
 
 
-	private function checkAttachedAmount($target, $gamedata, $fireOrder){	
+	/* Stage 17 ext: marine reload while docked. Driven by HangarOps::serviceDockedFlights
+	 * (same per-turn tick driving Weapon::whileDocked for matter weapons and
+	 * FighterMissileRack::whileDocked for fighter missiles). Each restocked
+	 * marine draws 10 pts from the carrier's MAR_CONT pool via
+	 * HangarOps::drawMarineReload.
+	 *
+	 * Rate: 1 marine per FIGHTER per turn, even if a fighter mounts multiple
+	 * Marines weapons (rare). The first Marines weapon encountered on the
+	 * fighter walks every Marines sibling, picks the most-empty below cap,
+	 * restocks one, then stamps $fighter->marinesReloadedTurn so remaining
+	 * siblings' whileDocked calls early-return.
+	 *
+	 * Cap: class default ammunition (2) + flight's EXT_MAR enhancement bonus.
+	 * Persistence: tac_ammo row via Manager::updateAmmoInfo (same path fire()
+	 * uses). Saved value EXCLUDES the EXT_MAR bonus because the bonus is
+	 * re-added on load via setEnhancementsFlight's EXT_MAR processing — matches
+	 * fire()'s saving convention.
+	 */
+	public function whileDocked($flight, $carrier, $hangar, $gamedata){
+		if (!($flight instanceof FighterFlight)) return;
+		if ($this->isDestroyed($gamedata->turn)) return;
+		//getUnit() returns the FighterFlight on a Marines weapon (per
+		//FighterFlight::addSystem); resolve parent Fighter via the flight's
+		//system-id lookup so the sibling walk and per-fighter gate work.
+		$fighter = $flight->getFighterBySystem($this->id);
+		if (!$fighter) return;
+
+		//Per-fighter rate gate. Transient — fresh Fighter objects each
+		//turn-load have this null, so the gate resets naturally.
+		if (!empty($fighter->marinesReloadedTurn)
+			&& (int)$fighter->marinesReloadedTurn >= (int)$gamedata->turn) return;
+
+		//Cap: class default (2) + flight's EXT_MAR bonus. EXT_MAR is a
+		//flight-level enhancement that adds to every Marines weapon on the
+		//flight; cap is the post-enhancement starting load.
+		$bonus = 0;
+		if (isset($flight->enhancementOptions) && is_array($flight->enhancementOptions)){
+			foreach ($flight->enhancementOptions as $enh){
+				if (($enh[0] ?? '') === 'EXT_MAR' && (int)($enh[2] ?? 0) > 0){
+					$bonus += (int)$enh[2];
+				}
+			}
+		}
+		$baseCap = 2;   //Marines class $ammunition default
+		$cap = $baseCap + $bonus;
+
+		//Build candidate list across every Marines sibling on this fighter
+		//(not just $this) — pick the most-empty across the whole loadout.
+		$candidates = array();
+		foreach ($fighter->systems as $sib){
+			if (!($sib instanceof Marines)) continue;
+			if ($sib->isDestroyed($gamedata->turn)) continue;
+			if ((int)$sib->ammunition >= $cap) continue;
+			$candidates[] = array(
+				'weapon'  => $sib,
+				'missing' => $cap - (int)$sib->ammunition,
+			);
+		}
+		if (empty($candidates)) return;
+
+		//Most-missing first (prioritise emptiest).
+		usort($candidates, function($a, $b){
+			return $b['missing'] - $a['missing'];
+		});
+
+		//Pool is denominated in MARINES (1 unit = 1 marine), not CP. The 10 CP
+		//price is paid up-front when buying the MAR_CONT enhancement in the
+		//lobby; each in-game restock draws 1 marine from the count.
+		$cost = 1;
+		foreach ($candidates as $cand){
+			if (!HangarOps::drawMarineReload($carrier, $cost)) return;   //pool exhausted
+			$cand['weapon']->ammunition = min($cap, (int)$cand['weapon']->ammunition + 1);
+			//Save with EXT_MAR bonus SUBTRACTED — bonus is re-added on load
+			//by setEnhancementsFlight's EXT_MAR case (mirrors fire() at line ~7728).
+			Manager::updateAmmoInfo(
+				$flight->id,
+				$cand['weapon']->id,
+				$gamedata->id,
+				$cand['weapon']->firingMode,
+				$cand['weapon']->ammunition - $bonus,
+				$gamedata->turn
+			);
+			$fighter->marinesReloadedTurn = (int)$gamedata->turn;
+			return;   //1 marine per fighter per turn
+		}
+	}
+
+
+	private function checkAttachedAmount($target, $gamedata, $fireOrder){
 		$tooMany = false;//Initialise
         $shooterId = $fireOrder->shooterid;
 		$noOfPods = Marines::getAttachedPodCount($target, $gamedata, $shooterId);
@@ -8396,7 +8535,7 @@ class SecondSight extends Weapon{
 			  if($ship->isDestroyed()) continue;		
 			  if ($ship->team == $thisShip->team) continue;	//Ignore friendlies.
 			  if ($ship->isTerrain()) continue;		
-			  if ($target instanceof Mine) continue;				  	  
+			  if ($ship instanceof Mine) continue;				  	  
 			  if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!			  	
 			  $relevantShips[] = $ship;			
 		  }
@@ -8577,7 +8716,7 @@ class ThoughtWave extends Plasma{
 			if($ship->isDestroyed()) continue;		
 			if ($ship->faction == "Mindriders") continue;//Mindriders not affected.
 			if ($ship->isTerrain()) continue;	
-			if ($target instanceof Mine) continue;							
+			if ($ship instanceof Mine) continue;							
 			if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) continue;  //Ignore targets that are not deployed yet!				
 			$relevantShips[] = $ship;			
 		}

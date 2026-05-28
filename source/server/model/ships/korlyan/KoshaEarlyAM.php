@@ -16,7 +16,7 @@ class KoshaEarlyAM extends BaseShip{
 		$this->unofficial = true; 
 
 		$this->isd = 2190;
-        $this->fighters = array("assault shuttles"=>2);
+        //$this->fighters = array("assault shuttles"=>2);
 
 	    $this->notes = 'Atmospheric Capable.';
         

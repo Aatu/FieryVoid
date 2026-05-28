@@ -106,12 +106,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — May 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Comabt Log Improvements</strong> - Intercept modfiers and Dice Rolls can now be seen via hover tooltips in Combat Log.</li>          
-        <li><strong>Hit Chance Tooltips</strong> - Hit Chance tooltips available in Targeting Tooltip respectively.</li>   
-        <li><strong>Ammo Magazine Capacity</strong> - Ammo magazines will no longer more ammo than their maximum capacity.        
-        <li><strong>Polaren Revisions</strong> - Geoffrey has made some major revisions based on recent playtests of the newest Nexus faction.</li>    
-        <li><strong>Particle Concentrator</strong> - Can now combine with Concentrators on ships within 1 hex of each other.</li>       
-        <li><strong>Gravitic Mines</strong> - These are now available for Brakiri players to use with the new Tashkat variant, the Takatos.</li>                                                                  
+        <li><strong>Hangar Operations</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
+        <li><strong>Shuttles</strong> - Ships come equipped with their allocation of free shuttles and new enhancements are available for hangar conversions.</li>                   
+        <li><strong>Hit Chance and Combat Log Tooltips</strong> - Hit Chance and Combat Log tooltips available for greater firing information.</li>  
+        <li><strong>Fleet Selection</strong> - Fleet checker now uses base points value for 10% and 33% checks and fighter weight classes are now shown in '[]'.</li>          
+        <li><strong>Ammo Magazine Capacity</strong> - Ammo magazines will no longer more ammo than their maximum capacity.                                                                              
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

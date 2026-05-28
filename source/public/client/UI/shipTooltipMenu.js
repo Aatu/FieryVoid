@@ -6,6 +6,12 @@ window.ShipTooltipMenu = function () {
         this.selectedShip = selectedShip;
         this.targetedShip = targetedShip;
         this.turn = turn;
+        //leadingButtons render BEFORE the static ShipTooltipMenu.buttons (i.e.
+        //to the left of "Open ship details"). extraButtons render AFTER.
+        //This mirrors how ShipTooltipFireMenu places its phase-specific
+        //buttons (targetWeapons, launchFighters, dockFlight) ahead of the
+        //base menu's openSCS — keeps the icon order consistent across phases.
+        this.leadingButtons = [];
         this.extraButtons = [];
         this.currentInfo = "";
     }
@@ -50,7 +56,7 @@ window.ShipTooltipMenu = function () {
     };
 
     ShipTooltipMenu.prototype.getAllButtons = function () {
-        return ShipTooltipMenu.buttons.concat(this.extraButtons);
+        return this.leadingButtons.concat(ShipTooltipMenu.buttons, this.extraButtons);
     };
 
     ShipTooltipMenu.prototype.isEmpty = function () {
@@ -64,6 +70,13 @@ window.ShipTooltipMenu = function () {
 
     ShipTooltipMenu.prototype.addButton = function (className, condition, action, info) {
         this.extraButtons.push({ className: className, condition: condition, action: action, info: info });
+    };
+
+    //Same as addButton but places the button to the LEFT of the static
+    //base buttons (eg. openSCS). Use for phase-specific buttons that should
+    //sit alongside the firing-phase action icons, not after them.
+    ShipTooltipMenu.prototype.addLeadingButton = function (className, condition, action, info) {
+        this.leadingButtons.push({ className: className, condition: condition, action: action, info: info });
     };
 
     var LONG_PRESS_MS = 500;

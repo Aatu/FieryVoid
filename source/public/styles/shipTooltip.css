@@ -125,6 +125,18 @@
     background-image: url("../img/unfiring.png");
 }
 
+.launchFighters {
+    background-image: url("../img/launchFighters.png");
+}
+
+.dockFlight {
+    background-image: url("../img/dockFlight.png");
+}
+
+.recoverFlights {
+    background-image: url("../img/recoverFlights.png");
+}
+
 .openSCS {
     background-image: url("../img/openShipDetails.png");
 }

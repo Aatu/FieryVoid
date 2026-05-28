@@ -6,9 +6,10 @@ class gaimKrastFighter extends FighterFlight{
         
         $this->pointCost = 37*6;
         $this->faction = "Gaim Intelligence";
+
         $this->phpclass = "gaimKrastFighter";
         $this->shipClass = "Krast Recon flight";
-        $this->variantOf = "Koist Medium flight";
+            $this->variantOf = "OBSELETE";
         $this->imagePath = "img/ships/GaimKoist.png";
 		
         $this->isd = 2252;

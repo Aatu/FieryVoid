@@ -45,8 +45,8 @@ class ScoravarefittedAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(5, 26));
-		$this->addPrimarySystem(new Hangar(2, 6));		
+		$this->addPrimarySystem(new Hangar(5, 26, 12));
+		$this->addPrimarySystem(new Hangar(2, 6, 6));		
         
         $this->addFrontSystem(new LightPlasmaBolter(2, 0, 0, 300, 60));
         $this->addFrontSystem(new LightPlasmaBolter(2, 0, 0, 300, 60));       

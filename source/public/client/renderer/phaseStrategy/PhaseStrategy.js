@@ -710,7 +710,15 @@ window.PhaseStrategy = function () {
     function getInterestingStuffInPosition(payload, turn) {
         return this.shipIconContainer.getIconsInProximity(payload).filter(function (icon) {
             var turnDestroyed = shipManager.getTurnDestroyed(icon.ship);
-            return turnDestroyed === null || turnDestroyed >= turn;
+            if (turnDestroyed !== null && turnDestroyed < turn) return false;
+            //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock has
+            //its icon hidden but the icon object remains in the container with
+            //its old position. Without filtering it here, clicks on the vacated
+            //hex resolve to the hidden flight and get dropped by
+            //shouldBeHidden()-checks downstream — preventing other ships from
+            //being deployed to the same hex.
+            if (icon.ship && icon.ship.pendingDeployDock) return false;
+            return true;
         });
     }
 

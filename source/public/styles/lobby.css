@@ -251,6 +251,12 @@
     padding-left: 5px !important;
 }
 
+.fightersize {
+    font-weight: bold;
+    padding-left: 0px !important;
+    padding-right: 3px;
+}
+
 .store .storeship {
     /*color:#a3c0f5;*/
     color: #90b1ee;
@@ -744,6 +750,32 @@
 .action-buttons-row {
     text-align: right;
     margin-top: 8px;
+}
+
+/* Top-of-page Ready button — sits to the right of the 'Load a Saved Fleet' dropdown
+   in .fleet-loading-container. Intentionally independent of .btn / .btn-success-lobby
+   so it can be styled without affecting the lower Ready button. */
+.readybutton-top {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #3c7a3c;
+    color: white;
+    border: 1px solid #66b266;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 12px;
+    cursor: pointer;
+    user-select: none;
+    box-sizing: border-box;
+    min-width: 90px;
+    width: 140px;
+    height: 27px;    
+    margin-left: 5px;
+}
+
+.readybutton-top:hover {
+    background: #4d944d;
 }
 
 .fleet-checker-link-style {

@@ -66,5 +66,6 @@
             </div>
         </div>
     </div>
+    <p class="ladder-disclaimer" style="text-align:center;">Games older than three months will no longer be available to view.</p>
   </div>
 </div>

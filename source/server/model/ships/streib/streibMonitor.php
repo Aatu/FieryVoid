@@ -16,7 +16,7 @@ class StreibMonitor extends HeavyCombatVessel{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;
-        $this->fighters = array("shuttles" => 2); 
+        $this->fighters = array("Breaching Pods" => 2); 
        
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;

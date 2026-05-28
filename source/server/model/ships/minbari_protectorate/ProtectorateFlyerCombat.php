@@ -16,7 +16,7 @@ class ProtectorateFlyerCombat extends FighterFlight{
 		
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
-        $this->freethrust = 8;
+        $this->freethrust = 10;
         $this->offensivebonus = 4;
         $this->jinkinglimit = 0;
 		$this->pivotcost = 2; //shuttles have pivot cost higher
