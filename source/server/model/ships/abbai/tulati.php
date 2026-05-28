@@ -28,7 +28,7 @@ class Tulati extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 2));
-	$this->addPrimarySystem(new Hangar(3, 1));
+	$this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new ShieldGenerator(4, 8, 2, 1));
 	$this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));

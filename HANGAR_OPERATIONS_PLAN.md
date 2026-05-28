@@ -360,6 +360,30 @@ What to verify:
 - Balvarin (test ship): primary hangar launches forward; port hangar launches at carrier facing + 5 (visible in the dialog header); starboard at carrier facing + 1.
 - Decurion launches assault shuttles → they appear facing perpendicular to carrier.
 
+### Stage 8.5 — Player‑selectable launch direction (multi‑direction hangars) ✓ COMPLETE
+
+A single hangar can now advertise more than one allowed launch offset, and the player picks per launch from a dropdown in the launch dialog. Use this for carriers whose bay opens onto multiple arcs (e.g. EA Hyperion: ports out either side).
+
+Convention: `Hangar->directions` is an array of int offsets (0..5). When non‑empty:
+- The launch dialog renders a `<select>` next to the per‑hangar header label showing the resulting world facing for each option.
+- The player's pick is attached to every order entry from that hangar as `{phpclass, size, direction}` and round‑trips through the `hangarLaunchOrder` note.
+- `HangarOps::processLaunchOrders` validates the override is one of the allowed offsets (defence against stale/forged payloads) and passes it to `performLaunch` as a 6th arg, where it replaces `$hangar->direction` for the spawn facing.
+- Carrier‑destruction escape picks `directions[0]` automatically (player can't choose — carrier is gone), so a side‑launch bay doesn't eject escapees forward.
+
+The legacy single‑value `$direction` field is unchanged and still works for fixed‑arc hangars (Balvarin/Decurion). `$directions` overrides it only when non‑empty AND the player actually picked.
+
+Files:
+- [baseSystems.php](source/server/model/systems/baseSystems.php) Hangar — new `public $directions` field, `stripForJson` ships it, `doIndividualNotesTransfer` preserves per‑entry `direction` in the sanitised launch payload.
+- [HangarOps.php](source/server/model/systems/HangarOps.php) — `performLaunch` takes optional `$directionOverride`; `processLaunchOrders` validates entry direction against `$hangar->directions` before forwarding; escape spawn defaults to `directions[0]` when present.
+- [confirm.js](source/public/client/UI/confirm.js) `hangarLaunch` — per‑hangar `<select>` rendered when `hangar.directions.length > 1`, pre‑filled from any prior `pendingLaunchOrders[i].direction`; pick stashed in a `hangarDirChoice` Map and attached to every order entry on OK.
+- [hyperion.php](source/server/model/ships/EA/hyperion.php) — primary hangar `directions = [1, 5]` (example carrier).
+
+What to verify:
+- Hyperion launch dialog shows a dropdown next to "Main Hangar" with two options (carrier facing + 60° and + 300°).
+- Picking one and submitting → fighters spawn facing that direction at end of turn.
+- Re‑opening the dialog later in the same phase pre‑selects the previously chosen direction.
+- Hyperion destroyed with docked craft → escape pods exit at `directions[0]` (port side), not forward.
+
 ### Stage 9 — Polish & non‑critical edge cases ✓ COMPLETE
 
 - Fleet list: a docked flight (`removed = true`) is rendered as a blue "Docked" row instead of the red "Destroyed" label it inherited from the Stage 5 `isDestroyed` folding. New `.fleetlistentry .docked` CSS rule mirrors `.destroyed`/`.jumped` styling.

@@ -30,7 +30,7 @@ class Lokita extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 6, 10));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 3));
- 	$this->addPrimarySystem(new Hangar(5, 2));
+ 	    $this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 3));
    
 
@@ -53,12 +53,12 @@ class Lokita extends BaseShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 5, 2));
 
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 2, 240, 300));
-        $this->addLeftSystem(new Hangar(3, 6));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 5));
         $this->addLeftSystem(new Particleimpeder(2, 0, 0, 180, 360));
         $this->addLeftSystem(new Thruster(3, 13, 0, 6, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 2, 60, 120));
-        $this->addRightSystem(new Hangar(3, 6));
+        $this->addRightSystem(new Hangar(3, 6, 6, 1));
         $this->addRightSystem(new Particleimpeder(2, 0, 0, 0, 180));
         $this->addRightSystem(new Thruster(3, 13, 0, 6, 4));
 	    

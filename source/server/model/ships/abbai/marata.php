@@ -55,12 +55,12 @@ class Marata extends BaseShip{
         $this->addAftSystem(new Thruster(4, 21, 0, 9, 2));
 
         $this->addLeftSystem(new GraviticShield(0, 6, 0, 4, 240, 300));
-        $this->addLeftSystem(new Hangar(3, 9));
+        $this->addLeftSystem(new Hangar(3, 9, 3, 5));
         $this->addLeftSystem(new QuadArray(3, 0, 0, 180, 360));
         $this->addLeftSystem(new Thruster(4, 13, 0, 5, 3));
 
         $this->addRightSystem(new GraviticShield(0, 6, 0, 4, 60, 120));
-        $this->addRightSystem(new Hangar(3, 9));
+        $this->addRightSystem(new Hangar(3, 9, 3, 1));
         $this->addRightSystem(new QuadArray(3, 0, 0, 0, 180));
         $this->addRightSystem(new Thruster(4, 13, 0, 5, 4));
 	    
