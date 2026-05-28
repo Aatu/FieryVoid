@@ -30,7 +30,7 @@ class Nesacc extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 20, 6, 9));
         $this->addPrimarySystem(new Engine(4, 20, 0, 12, 6));
-        $this->addPrimarySystem(new Hangar(4, 8));
+        $this->addPrimarySystem(new Hangar(4, 8, 4));
         $this->addPrimarySystem(new CargoBay(4, 40));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
