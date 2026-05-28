@@ -73,10 +73,10 @@ class HangarOps {
 				while ($count > 0){
 					$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
 					if (!$hangar) break;
-					
+
 					$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
-					$take = min($count, $free);
-					
+					$take = min($count, $free, self::fairShareCap($shuttleHangars, $count));
+
 					$hangar->hangarUsage[] = array(
 						'phpclass'    => $shuttleClass,
 						'name'        => $shuttleName,
@@ -141,7 +141,7 @@ class HangarOps {
 				$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
 				if (!$hangar) break;
 				$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
-				$take = min($mswRemaining, $free);
+				$take = min($mswRemaining, $free, self::fairShareCap($shuttleHangars, $mswRemaining));
 				$hangar->hangarUsage[] = array(
 					'phpclass'    => 'MinesweepingShuttle',
 					'name'        => self::shuttleDisplayNameFor('MinesweepingShuttle'),
@@ -161,7 +161,7 @@ class HangarOps {
 				if (!$hangar) break;
 
 				$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
-				$take = min($count, $free);
+				$take = min($count, $free, self::fairShareCap($shuttleHangars, $count));
 
 				$hangar->hangarUsage[] = array(
 					'phpclass'    => $leftoverClass,
@@ -302,12 +302,60 @@ class HangarOps {
 	/* Picks any hangar with at least $flightSize free boxes — shuttles per
 	 * B5W §10.1 may use any fighter box. (A future "shuttle-only" hangar
 	 * type would still match here, since it accepts shuttles by definition.)
+	 *
+	 * When the ship has NO primary-structure hangar (e.g. Marata: two side
+	 * hangars only), prefer the hangar with the lowest current usage so the
+	 * default-shuttle pool splits evenly across the side hangars instead of
+	 * piling into whichever side appears first in $hangars. Paired with
+	 * fairShareCap() in the caller to bound how much each write takes.
 	 */
 	public static function pickHangarForShuttle($hangars, $flightSize){
+		if (!self::hasPrimaryHangar($hangars)){
+			$best = null;
+			$bestUsage = PHP_INT_MAX;
+			foreach ($hangars as $h){
+				$used = self::usageCountFor($h);
+				$free = (int)$h->maxhealth - $used;
+				if ($free < $flightSize) continue;
+				if ($used < $bestUsage){
+					$bestUsage = $used;
+					$best = $h;
+				}
+			}
+			return $best;
+		}
 		foreach ($hangars as $h){
 			if ($h->maxhealth - self::usageCountFor($h) >= $flightSize) return $h;
 		}
 		return null;
+	}
+
+	/* True when one of $hangars is in the primary structure (location 0). */
+	public static function hasPrimaryHangar($hangars){
+		foreach ($hangars as $h){
+			if ((int)$h->location === 0) return true;
+		}
+		return false;
+	}
+
+	/* Per-write fair-share cap on $take during initial hangar population.
+	 *
+	 * Returns PHP_INT_MAX when a primary hangar exists (preserve historical
+	 * "fill in encounter order" behaviour — primary first, then sides).
+	 *
+	 * Otherwise returns ceil($remainingTotal / $hangarsWithRoom) so each loop
+	 * iteration writes no more than its fair share. Combined with
+	 * pickHangarForShuttle's least-used preference above, this rounds defaults
+	 * evenly across side/wing hangars (e.g. Marata's 6 leftover shuttles split
+	 * 3+3 instead of 6+0). */
+	public static function fairShareCap($hangars, $remainingTotal){
+		if (self::hasPrimaryHangar($hangars)) return PHP_INT_MAX;
+		$hangarsWithRoom = 0;
+		foreach ($hangars as $h){
+			if ((int)$h->maxhealth - self::usageCountFor($h) > 0) $hangarsWithRoom++;
+		}
+		if ($hangarsWithRoom <= 1) return PHP_INT_MAX;
+		return (int)ceil($remainingTotal / $hangarsWithRoom);
 	}
 
 	/* All Hangar systems on a given ship, in encounter order (primary, front, etc.) */

@@ -556,6 +556,98 @@ shipManager.systems = {
         return rows;
     },
 
+    //Per-hangar slice of getDefaultShuttleComposition for the lobby/system-info
+    //tooltip — mirrors HangarOps::populateInitialHangarUsage so a hangar's
+    //tooltip in the lobby matches the in-game initial population.
+    //
+    //  • Primary-structure hangar present  → the primary (location 0) hangar
+    //    shows the full composition; the others show empty (preserves the
+    //    historical "concentrate on one representative hangar" behaviour).
+    //  • No primary hangar (e.g. Marata: two side hangars) → distribute each
+    //    composition row across hangars using the same least-used + fair-share
+    //    algorithm as pickHangarForShuttle + fairShareCap on the server, so
+    //    6 default shuttles across 2 side hangars render 3+3 instead of 6+0.
+    getDefaultShuttleCompositionForHangar: function getDefaultShuttleCompositionForHangar(ship, targetHangar) {
+        if (!ship || !targetHangar || !ship.systems) return [];
+        var hangars = [];
+        for (var si in ship.systems) {
+            var s = ship.systems[si];
+            if (s && s.name == "hangar" && !s.isCatapult) hangars.push(s);
+        }
+        if (hangars.length === 0) return [];
+
+        var fullRows = shipManager.systems.getDefaultShuttleComposition(ship);
+        if (fullRows.length === 0) return [];
+
+        var hasPrimary = false;
+        for (var h = 0; h < hangars.length; h++) {
+            if (parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
+        }
+
+        if (hasPrimary) {
+            if (parseInt(targetHangar.location, 10) === 0) return fullRows;
+            //Non-primary hangars on a ship that has a primary hangar show nothing
+            //(historical "single representative hangar" behaviour).
+            for (var i = 0; i < hangars.length; i++) {
+                if (parseInt(hangars[i].location, 10) === 0) return [];
+            }
+            return [];
+        }
+
+        //No primary: simulate the server's distribution across all hangars.
+        var per = [];
+        for (var p = 0; p < hangars.length; p++) {
+            per.push({ id: hangars[p].id, max: parseInt(hangars[p].maxhealth, 10) || 0, usage: 0, rows: [] });
+        }
+
+        var pickIdx = function (flightSize) {
+            var bestIdx = -1, bestUsage = Infinity;
+            for (var i = 0; i < per.length; i++) {
+                var free = per[i].max - per[i].usage;
+                if (free < flightSize) continue;
+                if (per[i].usage < bestUsage) { bestUsage = per[i].usage; bestIdx = i; }
+            }
+            return bestIdx;
+        };
+
+        var fairCap = function (remaining) {
+            var withRoom = 0;
+            for (var i = 0; i < per.length; i++) {
+                if (per[i].max - per[i].usage > 0) withRoom++;
+            }
+            if (withRoom <= 1) return Infinity;
+            return Math.ceil(remaining / withRoom);
+        };
+
+        for (var r = 0; r < fullRows.length; r++) {
+            var row = fullRows[r];
+            var count = parseInt(row.count, 10) || 0;
+            while (count > 0) {
+                var idx = pickIdx(1);
+                if (idx < 0) break;
+                var free = per[idx].max - per[idx].usage;
+                var take = Math.min(count, free, fairCap(count));
+                if (take <= 0) break;
+                var existing = null;
+                for (var er = 0; er < per[idx].rows.length; er++) {
+                    if (per[idx].rows[er].type === row.type && !!per[idx].rows[er].slotOnly === !!row.slotOnly) {
+                        existing = per[idx].rows[er];
+                        break;
+                    }
+                }
+                if (existing) existing.count += take;
+                else per[idx].rows.push({ type: row.type, count: take, slotOnly: row.slotOnly });
+                per[idx].usage += take;
+                count -= take;
+            }
+        }
+
+        for (var k = 0; k < per.length; k++) {
+            if (per[k].id == targetHangar.id) return per[k].rows;
+        }
+        return [];
+    },
+
     getThrusters: function getThrusters(ship, direction) {
         var list = Array();
         for (var i in ship.systems) {
