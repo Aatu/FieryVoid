@@ -2953,6 +2953,13 @@ class Hangar extends ShipSystem{
 	// === Hangar Operations (B5W §10.1) ===
 	public $hangarType = 'fighters';      //category key matching FighterFlight->hangarRequired and ship->fighters keys
 	public $direction = 0;                //0..5 hex offset from carrier facing on launch (0 = same heading)
+	//Stage 8.5: optional list of allowed launch directions for hangars whose
+	//bays open onto multiple arcs (e.g. EA Hyperion: ports out either side, so
+	//directions = [1,5]). When non-empty, the launch dialog shows a picker and
+	//the player's per-launch choice overrides $direction. The carrier-destruction
+	//escape spawn picks directions[0] as a sensible default so a "side-launch"
+	//hangar doesn't eject forward.
+	public $directions = array();
 	public $hangarUsage = array();        //list of stored craft records: [['phpclass'=>...,'name'=>...,'flightSize'=>N,'hangarType'=>...], ...]
 	public $spawnableClasses = array();   //FighterFlight phpclasses this hangar can launch (consumed by game.php blueprint preload)
 	//$output is the SHARED launch+land budget per turn:
@@ -3366,14 +3373,23 @@ class Hangar extends ShipSystem{
 			$hasLaunchKey = true;
 		}
 
-		//Sanitise launches: keep only well-formed {phpclass, size} entries
+		//Sanitise launches: keep only well-formed {phpclass, size} entries.
+		//Stage 8.5: an optional per-entry "direction" (0..5) is preserved when
+		//the hangar advertises a multi-direction picker; it overrides the
+		//hangar's default $direction at end-of-turn resolution.
 		$cleanLaunches = array();
 		foreach ($launches as $order) {
 			if (!is_array($order)) continue;
 			$phpclass = isset($order['phpclass']) ? (string)$order['phpclass'] : '';
 			$size     = isset($order['size'])     ? (int)$order['size']        : 0;
 			if ($phpclass === '' || $size <= 0) continue;
-			$cleanLaunches[] = array('phpclass' => $phpclass, 'size' => $size);
+			$clean = array('phpclass' => $phpclass, 'size' => $size);
+			if (array_key_exists('direction', $order)) {
+				$dir = (int)$order['direction'];
+				$dir = (($dir % 6) + 6) % 6;
+				$clean['direction'] = $dir;
+			}
+			$cleanLaunches[] = $clean;
 		}
 		if ($hasLaunchKey) $this->pendingLaunchTransfer = $cleanLaunches;
 
@@ -3403,6 +3419,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->hangarType = $this->hangarType;
 		$strippedSystem->direction = $this->direction;
+		$strippedSystem->directions = is_array($this->directions) ? array_values($this->directions) : array();
 		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;

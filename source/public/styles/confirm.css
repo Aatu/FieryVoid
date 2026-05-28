@@ -371,7 +371,8 @@
     margin-right: 15px;
 }
 
-.confirm.multi-value-confirm .multi-value-input {
+.confirm.multi-value-confirm .multi-value-input,
+.confirm.multi-value-confirm .hangarDirSelect {
     width: 60px;
     background: #0a151f;
     border: 1px solid #6a0080;
@@ -386,7 +387,8 @@
     transition: all 0.2s ease;
 }
 
-.confirm.multi-value-confirm .multi-value-input:focus {
+.confirm.multi-value-confirm .multi-value-input:focus,
+.confirm.multi-value-confirm .hangarDirSelect:focus {
     border-color: #6a0080;
     border: 1px solid #6a0080;
     box-shadow: 0 0 10px rgba(191, 0, 230, 0.75);
@@ -528,16 +530,32 @@
     margin-right: 10px;
 }
 
-.confirm.multi-value-confirm.hangar-confirm .multi-value-input {
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input,
+.confirm.multi-value-confirm.hangar-confirm .hangarDirSelect {
     background: #03161f;
     border: 1px solid #1f6f8b;
     color: #ffffff;
-    min-width: 130px; 
-    margin-left: 0px;     
+    min-width: 130px;
+    margin-left: 0px;
 }
 
-.confirm.multi-value-confirm.hangar-confirm .multi-value-input:focus {
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input:focus,
+.confirm.multi-value-confirm.hangar-confirm .hangarDirSelect:focus {
     border-color: #58c7e6;
     box-shadow: 0 0 10px rgba(88, 199, 230, 0.6);
     background: #000;
+}
+
+/* Stage 8.5: multi-direction launch picker (Hyperion etc.) lives inside the
+   per-hangar header label. The select inherits colour/border/font from the
+   .multi-value-input rules above; this block tunes the bits that only make
+   sense for a select (compact width to fit "60°"/"300°", consistent height
+   with adjacent number inputs, dropdown-caret colour). */
+.confirm.multi-value-confirm.hangar-confirm.hangarLaunch .hangarDirSelect {
+    min-width: 0;
+    width: auto;
+    padding: 3px 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+    cursor: pointer;
 }

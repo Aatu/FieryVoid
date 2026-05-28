@@ -1876,15 +1876,9 @@ window.confirm = {
         // the header label can update live as inputs change.
         var hangarBudgets = new Map();
         var budgetLabels  = new Map();         //hangar → jQuery .launch-budget span
-
-        // Stage 8: resulting fighter facing = (carrier facing + hangar direction) % 6.
-        // Carrier facing is locked in Firing Phase, so the last movement order's
-        // facing is authoritative. Ships always have at least one movement entry
-        // (deploy) so the array-length guard is belt-and-braces.
-        var carrierFacing = 0;
-        if (Array.isArray(ship.movement) && ship.movement.length > 0) {
-            carrierFacing = parseInt(ship.movement[ship.movement.length - 1].facing || 0, 10);
-        }
+        // Stage 8.5: multi-direction hangars — the player's per-hangar
+        // direction pick (overrides hangar.direction at end-of-turn resolution).
+        var hangarDirChoice = new Map();       //hangar → int (0..5)
 
         // Stage 8: header labels use the hangar's ship location instead of a
         // bare index. Location codes mirror addPrimary/Front/Aft/Left/Right
@@ -1927,11 +1921,54 @@ window.confirm = {
             // Stage 8: show resulting launch facing per hangar. Suppress for
             // direction 0 (matches carrier) to keep the legacy forward-launch
             // header uncluttered.
+            //
+            // The angle shown is the OFFSET from the carrier's nose, NOT a
+            // world-frame angle. mathlib.hexFacingToAngle returns world angles
+            // (0° = East on the map), so combining it with carrierFacing gave
+            // absolute map degrees, which is confusing when the player is
+            // reasoning about "where does the fighter exit relative to my
+            // ship." hangar.direction is already that offset (0..5 →
+            // 0°/60°/120°/180°/240°/300° clockwise from carrier forward), so
+            // feed it straight to hexFacingToAngle and label it accordingly.
+            //
+            // Stage 8.5: when hangar.directions advertises >1 allowed offsets
+            // (multi-direction bay, eg. Hyperion ports out either side), render
+            // a <select> instead of a static label so the player picks per
+            // launch. The chosen offset is stashed in hangarDirChoice and
+            // attached to every order entry on OK.
             var hangarDir = parseInt(hangar.direction || 0, 10);
+            var dirOptions = Array.isArray(hangar.directions) ? hangar.directions.slice() : [];
+            // Pre-select from a previously-submitted order (if any) so a
+            // re-open of the dialog reflects the last choice.
+            var prevDir = null;
+            if (Array.isArray(hangar.pendingLaunchOrders)) {
+                for (var pi = 0; pi < hangar.pendingLaunchOrders.length; pi++) {
+                    var po = hangar.pendingLaunchOrders[pi];
+                    if (po && typeof po.direction !== 'undefined') { prevDir = parseInt(po.direction, 10); break; }
+                }
+            }
             var facingSuffix = '';
-            if (hangarDir !== 0) {
-                var resultFacing = (((carrierFacing + hangarDir) % 6) + 6) % 6;
-                facingSuffix = ' <span class="multi-value-max">(launches at: ' + mathlib.hexFacingToAngle(resultFacing) + '°)</span>';
+            var dirSelectHtml = '';
+            if (dirOptions.length > 1) {
+                var picked = (prevDir !== null && dirOptions.indexOf(prevDir) !== -1)
+                    ? prevDir
+                    : parseInt(dirOptions[0], 10);
+                hangarDirChoice.set(hangar, picked);
+                var opts = '';
+                for (var di = 0; di < dirOptions.length; di++) {
+                    var d = parseInt(dirOptions[di], 10);
+                    var sel = (d === picked) ? ' selected' : '';
+                    opts += '<option value="' + d + '"' + sel + '>' + mathlib.hexFacingToAngle(d) + '°</option>';
+                }
+                dirSelectHtml = ' <span class="multi-value-max">Launch at: <select class="multiConfirmInput hangarDirSelect">' + opts + '</select></span>';
+            } else {
+                var effDir = (dirOptions.length === 1) ? parseInt(dirOptions[0], 10) : hangarDir;
+                if (effDir !== 0) {
+                    facingSuffix = ' <span class="multi-value-max">(launches at: ' + mathlib.hexFacingToAngle(effDir) + '° from carrier facing)</span>';
+                }
+                // Single-element directions still records the choice so the
+                // server's "in_array(directions)" gate accepts it.
+                if (dirOptions.length === 1) hangarDirChoice.set(hangar, parseInt(dirOptions[0], 10));
             }
 
             // Hangar header row (no input — just labels). The "remaining" span is updated
@@ -1948,9 +1985,15 @@ window.confirm = {
                     : (prefix + ' Hangar');
             }
             var headerRow = $('<div class="multi-value-row"></div>');
-            var label = $('<span class="multi-value-label"><span class="hangar-section-name">' + hangarLabel + '</span> <span class="multi-value-max">(Hangar Capacity: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
+            var label = $('<span class="multi-value-label"><span class="hangar-section-name">' + hangarLabel + '</span> <span class="multi-value-max">(Hangar Capacity: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + dirSelectHtml + '</span>');
             label.appendTo(headerRow);
             budgetLabels.set(hangar, label.find('.launch-budget-remaining'));
+            // Stage 8.5: track the player's direction pick for this hangar.
+            // The closure captures `hangar` by reference so the right Map key
+            // is updated even though the dialog can show multiple hangars.
+            label.find('.hangarDirSelect').on('change', (function (h) {
+                return function () { hangarDirChoice.set(h, parseInt($(this).val(), 10)); };
+            })(hangar));
             container.append(headerRow);
 
             // Map existing pendingLaunchOrders by phpclass so we can pre-fill.
@@ -1987,7 +2030,7 @@ window.confirm = {
                 var preset = Math.min(parseInt(preByClass[cls] || 0, 10), max);
 
                 var row = $('<div class="multi-value-row"></div>');
-                $('<span class="multi-value-label"><span class="hangar-craft-name">' + info.count + 'x ' + info.name + '</span> <span class="multi-value-max">(max launch: ' + max + ')</span></span>').appendTo(row);
+                $('<span class="multi-value-label"><span class="hangar-craft-name">' + info.count + 'x ' + info.name + '</span> <span class="multi-value-max">(max: ' + max + ')</span></span>').appendTo(row);
                 var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
                 var $input = $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="' + preset + '" min="0" max="' + max + '">').appendTo(inputWrapper);
 
@@ -2044,7 +2087,10 @@ window.confirm = {
                 var size = parseInt($('.launchSize', this).val() || 0, 10);
                 if (size <= 0) return;
                 if (!byHangar.has(hangar)) byHangar.set(hangar, []);
-                byHangar.get(hangar).push({ phpclass: cls, size: size });
+                var entry = { phpclass: cls, size: size };
+                // Stage 8.5: attach the player's chosen direction (multi-direction hangars).
+                if (hangarDirChoice.has(hangar)) entry.direction = hangarDirChoice.get(hangar);
+                byHangar.get(hangar).push(entry);
             });
 
             // Validate aggregate per-hangar against the shared output budget.

@@ -689,7 +689,7 @@ class HangarOps {
 	 * NOTE: caller is responsible for validating launch eligibility BEFORE
 	 * calling this — performLaunch trusts its inputs.
 	 */
-	public static function performLaunch($hangar, $carrier, $phpclass, $launchSize, $gamedata){
+	public static function performLaunch($hangar, $carrier, $phpclass, $launchSize, $gamedata, $directionOverride = null){
 		if (!is_string($phpclass) || $phpclass === '') return null;
 		if (!class_exists($phpclass)) return null;
 		$launchSize = max(1, (int)$launchSize);
@@ -697,9 +697,14 @@ class HangarOps {
 		$lastMove = $carrier->getLastMovement();
 		if (!$lastMove) return null;
 
+		//Stage 8.5: per-launch direction override (from the multi-direction
+		//picker) wins over the hangar's static $direction. Caller is
+		//responsible for validating the override is one of $hangar->directions.
+		$effDir = ($directionOverride !== null) ? (int)$directionOverride : (int)$hangar->direction;
 		$spawnPos = $lastMove->position;
 		$heading  = (int)$lastMove->heading;
-		$facing   = ($lastMove->facing + (int)$hangar->direction) % 6;
+		$facing   = ((int)$lastMove->facing + $effDir) % 6;
+		if ($facing < 0) $facing += 6;
 		$speed    = (int)$lastMove->speed;
 
 		//Resurrect path: if the launched stash entry matches a previously docked
@@ -957,6 +962,17 @@ class HangarOps {
 		foreach ($hangar->pendingLaunchOrder as $entry) {
 			$phpclass = isset($entry['phpclass']) ? (string)$entry['phpclass'] : '';
 			$size     = isset($entry['size'])     ? (int)$entry['size']        : 0;
+			//Stage 8.5: per-launch direction override is only honoured when the
+			//hangar actually advertises a multi-direction picker; an unsolicited
+			//direction field from a stale/forged client payload is ignored.
+			$dirOverride = null;
+			if (isset($entry['direction']) && is_array($hangar->directions) && !empty($hangar->directions)) {
+				$d = (int)$entry['direction'];
+				$d = (($d % 6) + 6) % 6;
+				if (in_array($d, array_map('intval', $hangar->directions), true)) {
+					$dirOverride = $d;
+				}
+			}
 			$reason   = null;
 			if (!self::canLaunch($hangar, $carrier, $phpclass, $size, $gamedata, $reason)) {
 				$failNote = new IndividualNote(
@@ -973,7 +989,7 @@ class HangarOps {
 				Manager::insertIndividualNote($failNote);
 				continue;
 			}
-			self::performLaunch($hangar, $carrier, $phpclass, $size, $gamedata);
+			self::performLaunch($hangar, $carrier, $phpclass, $size, $gamedata, $dirOverride);
 		}
 
 		$hangar->pendingLaunchOrder = null;   //consumed
@@ -2690,9 +2706,18 @@ class HangarOps {
 
 		$lastMove = $carrier->getLastMovement();
 		if (!$lastMove) return null;
+		//Stage 8.5: multi-direction hangar — players never choose for escape
+		//(carrier is gone), so pick directions[0] as a sensible default. A
+		//side-launch hangar (eg. Hyperion, directions = [1,5]) keeps its $direction
+		//at 0 by default; without this fallback escape pods would eject forward
+		//out of a bay that doesn't open forward.
+		$escDir = (int)$hangar->direction;
+		if (is_array($hangar->directions) && !empty($hangar->directions)) {
+			$escDir = (int)$hangar->directions[0];
+		}
 		$spawnPos = $lastMove->position;
 		$heading  = (int)$lastMove->heading;
-		$facing   = ((int)$lastMove->facing + (int)$hangar->direction) % 6;
+		$facing   = ((int)$lastMove->facing + $escDir) % 6;
 		if ($facing < 0) $facing += 6;
 		$speed    = (int)$lastMove->speed;
 
