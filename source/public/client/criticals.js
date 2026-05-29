@@ -103,6 +103,26 @@ window.shipManager.criticals = {
         return false;
     },
 
+    //Returns true when the system currently has active criticals AND every one
+    //of them is the named phpclass. Used to recolour the icon healthbar cyan
+    //instead of orange when the only critical is a benign initiative-penalty
+    //event (HangarOperations on a CnC, LaunchedThisTurn on a fighter). 05/26 DK
+    //  excludeForInfo mirrors hasCriticalsIcon vs hasCriticals: the SystemIcon
+    //  ignores forInfo criticals when colouring, the fighter healthbar does not,
+    //  so the "only critical" test must consider the same set that turns it orange.
+    hasOnlyCritical: function hasOnlyCritical(system, name, excludeForInfo) {
+        var found = false;
+        for (var i in system.criticals) {
+            var crit = system.criticals[i];
+            var active = (crit.turn <= gamedata.turn) && ((crit.turnend == 0) || (crit.turnend >= gamedata.turn));
+            if (!active) continue;
+            if (excludeForInfo && crit.forInfo) continue;
+            if (crit.phpclass != name) return false;
+            found = true;
+        }
+        return found;
+    },
+
     hasCriticalInAnySystem: function hasCriticalInAnySystem(ship, name) {
         var amount = 0;
         for (var a in ship.systems) {
