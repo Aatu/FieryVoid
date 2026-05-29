@@ -32,9 +32,9 @@ window.systemInfo = {
 		//Leftover hangar capacity is auto-filled with shuttles (or minesweeping
 		//shuttles / Flyers per faction) — same rule as shipwindow.js. The pool is
 		//ship-wide; per-hangar attribution is delegated to systems.js, mirroring
-		//HangarOps::populateInitialHangarUsage: primary-structure hangar gets the
-		//full pool, or — when no primary hangar exists — the pool splits across
-		//the remaining hangars (Marata's 6 leftover shuttles → 3+3, not 6+0).
+		//HangarOps::populateInitialHangarUsage: the pool splits evenly across the
+		//primary-structure hangars (Pirocia's three → 2+2+2), or across all
+		//hangars when none are primary (Marata's 6 leftover shuttles → 3+3).
 		//The breakdown reflects the HANG_BP / HANG_MSW shuttle-slot enhancements.
 		//Precompute it here so the Capacity line below can fold the auto-filled
 		//shuttle count into its "stored" number (the blueprint Capacity reads

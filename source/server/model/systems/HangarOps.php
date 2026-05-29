@@ -363,59 +363,69 @@ class HangarOps {
 		}
 	}
 
-	/* Picks any hangar with at least $flightSize free boxes — shuttles per
-	 * B5W §10.1 may use any fighter box. (A future "shuttle-only" hangar
-	 * type would still match here, since it accepts shuttles by definition.)
+	/* Picks the hangar that should receive the next default-shuttle box —
+	 * shuttles per B5W §10.1 may use any fighter box. (A future "shuttle-only"
+	 * hangar type would still match here, since it accepts shuttles by definition.)
 	 *
-	 * When the ship has NO primary-structure hangar (e.g. Marata: two side
-	 * hangars only), prefer the hangar with the lowest current usage so the
-	 * default-shuttle pool splits evenly across the side hangars instead of
-	 * piling into whichever side appears first in $hangars. Paired with
-	 * fairShareCap() in the caller to bound how much each write takes.
+	 * Distribution prefers the "distribution set" (see distributionHangars): the
+	 * primary-structure hangars if the ship has any, otherwise every hangar.
+	 * Within that set we pick the hangar with the lowest current usage so the
+	 * pool splits EVENLY rather than piling into whichever appears first — a ship
+	 * with several primary hangars (e.g. Pirocia's three) gets 2+2+2, and a ship
+	 * with side hangars only (e.g. Marata) gets 3+3. A lone primary hangar is the
+	 * whole set, so it still swallows the pool exactly as before. Once the
+	 * preferred set is full, overflow falls back to any remaining hangar in
+	 * encounter order. Paired with fairShareCap() in the caller to bound how much
+	 * each write takes.
 	 */
 	public static function pickHangarForShuttle($hangars, $flightSize){
-		if (!self::hasPrimaryHangar($hangars)){
-			$best = null;
-			$bestUsage = PHP_INT_MAX;
-			foreach ($hangars as $h){
-				$used = self::usageCountFor($h);
-				$free = (int)$h->maxhealth - $used;
-				if ($free < $flightSize) continue;
-				if ($used < $bestUsage){
-					$bestUsage = $used;
-					$best = $h;
-				}
+		$best = null;
+		$bestUsage = PHP_INT_MAX;
+		foreach (self::distributionHangars($hangars) as $h){
+			$used = self::usageCountFor($h);
+			if ((int)$h->maxhealth - $used < $flightSize) continue;
+			if ($used < $bestUsage){
+				$bestUsage = $used;
+				$best = $h;
 			}
-			return $best;
 		}
+		if ($best !== null) return $best;
+		//Preferred set full — overflow to any remaining hangar in encounter order.
 		foreach ($hangars as $h){
-			if ($h->maxhealth - self::usageCountFor($h) >= $flightSize) return $h;
+			if ((int)$h->maxhealth - self::usageCountFor($h) >= $flightSize) return $h;
 		}
 		return null;
 	}
 
-	/* True when one of $hangars is in the primary structure (location 0). */
-	public static function hasPrimaryHangar($hangars){
+	/* The subset of $hangars the default-shuttle pool is distributed across
+	 * first: the primary-structure (location 0) hangars if the ship has any,
+	 * otherwise every hangar. Multiple primary hangars therefore share the pool
+	 * evenly (Pirocia's three → 2+2+2) while a single primary still takes the
+	 * whole pool; side hangars on a ship that has primaries get only overflow
+	 * once the primaries are full. Mirrored client-side in systems.js
+	 * getDefaultShuttleCompositionForHangar so lobby tooltips match the in-game
+	 * initial population. */
+	public static function distributionHangars($hangars){
+		$primary = array();
 		foreach ($hangars as $h){
-			if ((int)$h->location === 0) return true;
+			if ((int)$h->location === 0) $primary[] = $h;
 		}
-		return false;
+		return !empty($primary) ? $primary : $hangars;
 	}
 
 	/* Per-write fair-share cap on $take during initial hangar population.
 	 *
-	 * Returns PHP_INT_MAX when a primary hangar exists (preserve historical
-	 * "fill in encounter order" behaviour — primary first, then sides).
-	 *
-	 * Otherwise returns ceil($remainingTotal / $hangarsWithRoom) so each loop
-	 * iteration writes no more than its fair share. Combined with
-	 * pickHangarForShuttle's least-used preference above, this rounds defaults
-	 * evenly across side/wing hangars (e.g. Marata's 6 leftover shuttles split
-	 * 3+3 instead of 6+0). */
+	 * Counts the hangars in the distribution set (distributionHangars) that
+	 * still have room and returns ceil($remainingTotal / thatCount), so each
+	 * loop iteration writes no more than its fair share and the pool rounds out
+	 * evenly across them. Returns PHP_INT_MAX when only one such hangar remains
+	 * (a lone primary, or the last hangar still taking overflow) — it simply
+	 * takes the rest, preserving the historical single-hangar fill. Combined
+	 * with pickHangarForShuttle's least-used preference, this yields 2+2+2 across
+	 * Pirocia's three primary hangars and 3+3 across Marata's two side hangars. */
 	public static function fairShareCap($hangars, $remainingTotal){
-		if (self::hasPrimaryHangar($hangars)) return PHP_INT_MAX;
 		$hangarsWithRoom = 0;
-		foreach ($hangars as $h){
+		foreach (self::distributionHangars($hangars) as $h){
 			if ((int)$h->maxhealth - self::usageCountFor($h) > 0) $hangarsWithRoom++;
 		}
 		if ($hangarsWithRoom <= 1) return PHP_INT_MAX;

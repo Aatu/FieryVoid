@@ -587,15 +587,16 @@ shipManager.systems = {
 
     //Per-hangar slice of getDefaultShuttleComposition for the lobby/system-info
     //tooltip — mirrors HangarOps::populateInitialHangarUsage so a hangar's
-    //tooltip in the lobby matches the in-game initial population.
+    //tooltip in the lobby matches the in-game initial population. Each
+    //composition row is distributed with the same least-used + fair-share
+    //algorithm as pickHangarForShuttle + fairShareCap on the server, over the
+    //distribution set (HangarOps::distributionHangars):
     //
-    //  • Primary-structure hangar present  → the primary (location 0) hangar
-    //    shows the full composition; the others show empty (preserves the
-    //    historical "concentrate on one representative hangar" behaviour).
-    //  • No primary hangar (e.g. Marata: two side hangars) → distribute each
-    //    composition row across hangars using the same least-used + fair-share
-    //    algorithm as pickHangarForShuttle + fairShareCap on the server, so
-    //    6 default shuttles across 2 side hangars render 3+3 instead of 6+0.
+    //  • Primary-structure hangars present → the pool splits evenly across the
+    //    primary (location 0) hangars (Pirocia's three → 2+2+2); a lone primary
+    //    still shows the whole pool, and side hangars show only overflow.
+    //  • No primary hangar (e.g. Marata: two side hangars) → the pool splits
+    //    evenly across all hangars (6 default shuttles → 3+3, not 6+0).
     getDefaultShuttleCompositionForHangar: function getDefaultShuttleCompositionForHangar(ship, targetHangar) {
         if (!ship || !targetHangar || !ship.systems) return [];
         var hangars = [];
@@ -608,41 +609,49 @@ shipManager.systems = {
         var fullRows = shipManager.systems.getDefaultShuttleComposition(ship);
         if (fullRows.length === 0) return [];
 
+        //Distribution set mirrors HangarOps::distributionHangars on the server:
+        //the primary (location 0) hangars if the ship has any, else every hangar.
+        //Several primary hangars (e.g. Pirocia's three) share the pool evenly
+        //(2+2+2); a lone primary still shows the whole pool. Side hangars on a
+        //ship that has primaries get only overflow once the primaries are full.
         var hasPrimary = false;
         for (var h = 0; h < hangars.length; h++) {
             if (parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
         }
 
-        if (hasPrimary) {
-            if (parseInt(targetHangar.location, 10) === 0) return fullRows;
-            //Non-primary hangars on a ship that has a primary hangar show nothing
-            //(historical "single representative hangar" behaviour).
-            for (var i = 0; i < hangars.length; i++) {
-                if (parseInt(hangars[i].location, 10) === 0) return [];
-            }
-            return [];
-        }
-
-        //No primary: simulate the server's distribution across all hangars.
         var per = [];
         for (var p = 0; p < hangars.length; p++) {
-            per.push({ id: hangars[p].id, max: parseInt(hangars[p].maxhealth, 10) || 0, usage: 0, rows: [] });
+            per.push({
+                id: hangars[p].id,
+                max: parseInt(hangars[p].maxhealth, 10) || 0,
+                usage: 0,
+                rows: [],
+                pref: hasPrimary ? (parseInt(hangars[p].location, 10) === 0) : true
+            });
         }
 
+        //Least-used hangar in the distribution set; overflow to any hangar with
+        //room (mirrors pickHangarForShuttle).
         var pickIdx = function (flightSize) {
             var bestIdx = -1, bestUsage = Infinity;
             for (var i = 0; i < per.length; i++) {
-                var free = per[i].max - per[i].usage;
-                if (free < flightSize) continue;
+                if (!per[i].pref) continue;
+                if (per[i].max - per[i].usage < flightSize) continue;
                 if (per[i].usage < bestUsage) { bestUsage = per[i].usage; bestIdx = i; }
             }
-            return bestIdx;
+            if (bestIdx !== -1) return bestIdx;
+            for (var j = 0; j < per.length; j++) {
+                if (per[j].max - per[j].usage >= flightSize) return j;
+            }
+            return -1;
         };
 
+        //Fair-share cap over the distribution-set hangars with room (mirrors
+        //fairShareCap): Infinity when only one remains so it takes the rest.
         var fairCap = function (remaining) {
             var withRoom = 0;
             for (var i = 0; i < per.length; i++) {
-                if (per[i].max - per[i].usage > 0) withRoom++;
+                if (per[i].pref && per[i].max - per[i].usage > 0) withRoom++;
             }
             if (withRoom <= 1) return Infinity;
             return Math.ceil(remaining / withRoom);
