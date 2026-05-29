@@ -2473,6 +2473,7 @@ class RammingAttack extends Weapon{
 				$type = "TerrainCollision"; //Moving through asteroids hex, d10 * speed damage.
 				if($shooter->Huge > 0 ) $type = "TerrainCrash"; //Larger Terrain, like Moons.  Full ramming damage.
 				$targetMovement = $target->getLastTurnMovement($gamedata->turn+1);
+				if (!$targetMovement) continue;
 
 				if ($target instanceof FighterFlight && $type === "TerrainCrash") {
 					$first = true; // Flag to track the first entry
@@ -2559,6 +2560,7 @@ class RammingAttack extends Weapon{
 				if($alreadyDeclared) continue;
 				//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already, either can't skin-dance or failed to – auto-ram it!
 				$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+				if (!$movementThisTurn) continue;
 				$fire = new FireOrder(-1, 'prefiring', $shooter->id, $targetID, $this->id, $calledid, $gamedata->turn,
 					1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, 'TerrainCrash'
 				);
@@ -2573,6 +2575,7 @@ class RammingAttack extends Weapon{
 				if($alreadyDeclared) continue;
 				//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already, either can't skin-dance or failed to – auto-ram it!
 				$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+				if (!$movementThisTurn) continue;
 				$fire = new FireOrder(-1, 'prefiring', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
 					1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, 'TerrainCrash'
 				);
@@ -2749,6 +2752,7 @@ class RammingAttack extends Weapon{
 	
 			foreach ($relevantShips as $ship) {  
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);
+				if (!$startMove) continue;
 				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
 				$previousFacing = $startMove->getFacingAngle();
 		
@@ -2783,6 +2787,7 @@ class RammingAttack extends Weapon{
 			foreach ($relevantShips as $ship) { // Look through relevant ships' movements and take appropriate action.					
 				// Now check other movements in the turn.
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+				if (!$startMove) continue;
 				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
 				$previousFacing = $startMove->getFacingAngle();			
 
@@ -2865,6 +2870,7 @@ class RammingAttack extends Weapon{
 				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.
 				// Now check other movements in the turn.
 				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.
+				if (!$startMove) return 1;
 				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.
 				$previousFacing = $startMove->getFacingAngle();
 				$location = 0;
@@ -2912,6 +2918,7 @@ class RammingAttack extends Weapon{
 		}
 
 		$startMove = $ship->getLastTurnMovement($gamedata->turn);
+		if (!$startMove) return 1;
 		$previousPosition = $startMove->position;
 
 		foreach ($ship->movement as $shipMove) {
