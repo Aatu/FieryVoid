@@ -761,6 +761,40 @@ window.ShipIcon = function () {
         var hexagon = new THREE.Mesh(geometry, material);
         hexagon.position.z = -1;
 
+        // Create a hexagon border with higher opacity (0.8) to define the boundaries
+        var borderShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) borderShape.moveTo(x, y);
+            else borderShape.lineTo(x, y);
+        }
+        borderShape.closePath();
+
+        var holePath = new THREE.Path();
+        var lineWidth = 4;
+        var innerDis = dis - lineWidth;
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = innerDis * Math.cos(angle);
+            let y = innerDis * Math.sin(angle);
+            if (i === 0) holePath.moveTo(x, y);
+            else holePath.lineTo(x, y);
+        }
+        holePath.closePath();
+        borderShape.holes.push(holePath);
+
+        var borderMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            opacity: 0.6,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
+        hexagon.add(border);
+
         this.mesh.add(hexagon);
         this.BDEWSprite = hexagon;
 
