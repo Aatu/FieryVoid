@@ -125,15 +125,15 @@ class HangarOps {
 			$hasExplicitMsw = is_array($ship->fighters)
 				&& !empty($ship->fighters['minesweeping shuttles']);
 			$baseClass = (!$hasExplicitMsw && isset($ship->minesweeperbonus) && $ship->minesweeperbonus > 0)
-				? 'MinesweepingShuttle'
+				? self::factionMinesweepingShuttleClass($ship)				
 				: self::factionShuttleClass($ship);
-			$baseCategory = ($baseClass === 'MinesweepingShuttle') ? 'minesweeping shuttles' : 'shuttles';
+			$baseCategory = self::isMinesweepingShuttleClass($baseClass) ? 'minesweeping shuttles' : 'shuttles';			
 			$baseName = self::shuttleDisplayNameFor($baseClass);
 
 			//HANG_MSW retype count — only meaningful when the carrier's default pool
 			//is NOT already MinesweepingShuttle. Capped at the leftover total.
 			$hangMswRetype = 0;
-			if ($baseClass !== 'MinesweepingShuttle' && isset($ship->enhancementOptions) && is_array($ship->enhancementOptions)) {
+			if (!self::isMinesweepingShuttleClass($baseClass) && isset($ship->enhancementOptions) && is_array($ship->enhancementOptions)) {			
 				foreach ($ship->enhancementOptions as $opt) {
 					if (($opt[0] ?? '') === 'HANG_MSW' && (int)($opt[2] ?? 0) > 0) {
 						$hangMswRetype = min((int)$opt[2], $leftover);
@@ -144,14 +144,16 @@ class HangarOps {
 
 			//Place MinesweepingShuttle records first (one per box, so flightSize=1)
 			$mswRemaining = $hangMswRetype;
+			$mswClass = self::factionMinesweepingShuttleClass($ship);
+			$mswName  = self::shuttleDisplayNameFor($mswClass);				
 			while ($mswRemaining > 0){
-				$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
+				$hangar = self::pickHangarForShuttle($shuttleHangars, 1);			
 				if (!$hangar) break;
 				$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
 				$take = min($mswRemaining, $free, self::fairShareCap($shuttleHangars, $mswRemaining));
 				$hangar->hangarUsage[] = array(
-					'phpclass'    => 'MinesweepingShuttle',
-					'name'        => self::shuttleDisplayNameFor('MinesweepingShuttle'),
+					'phpclass' => $mswClass,
+					'name' => $mswName,
 					'flightSize'  => $take,
 					'hangarType'  => 'minesweeping shuttles',
 				);
@@ -212,7 +214,8 @@ class HangarOps {
 			case 'shuttles':
 				return self::factionShuttleClass($ship);
 			case 'minesweeping shuttles':
-				return 'MinesweepingShuttle';
+				//return 'MinesweepingShuttle';
+				return self::factionMinesweepingShuttleClass($ship);				
 			case 'cargo shuttles':
 				//Opt-in only: never auto-populates leftover capacity. Declared
 				//count in $ship->fighters becomes that many auto-filled CargoShuttle
@@ -297,6 +300,35 @@ class HangarOps {
 		return isset(self::$factionShuttleMap[$faction]) ? self::$factionShuttleMap[$faction] : null;
 	}
 
+/* Faction-aware minesweeping shuttle class for a carrier. Mirrors
+	 * factionShuttleClass() but returns the faction's *minesweeping* variant.
+	 * class_exists() falls back to generic 'MinesweepingShuttle' when a faction
+	 * has no shuttle, or its minesweeping variant hasn't been defined — so this
+	 * degrades safely rather than producing an unloadable phpclass. */
+	public static function factionMinesweepingShuttleClass($ship){
+		$base = self::factionShuttleClass($ship);
+		if ($base === 'Shuttle') return 'MinesweepingShuttle';
+		$candidate = 'Minesweeping' . $base;
+		return class_exists($candidate) ? $candidate : 'MinesweepingShuttle';
+	}
+
+	/* By-faction-name variant, for the game.php blueprint preload pass.
+	 * Returns null when nothing extra beyond the generic is needed. */
+	public static function minesweepingShuttleClassForFactionName($faction){
+		$base = self::shuttleClassForFactionName($faction);
+		if ($base === null) return null;
+		$candidate = 'Minesweeping' . $base;
+		return class_exists($candidate) ? $candidate : null;
+	}
+
+	/* True for the generic MinesweepingShuttle and every faction variant — they
+	 * all share the 'Minesweeping' name prefix, so this classifies a stored
+	 * phpclass string without instantiating it. */
+	public static function isMinesweepingShuttleClass($phpclass){
+		return is_string($phpclass) && strpos($phpclass, 'Minesweeping') === 0;
+	}
+
+
 	/* True when $phpclass is one of the auto-fill "default" shuttle classes —
 	 * the generic Shuttle, every faction variant (ShuttleEA, ShuttleNarn,
 	 * Flyer, FlyerProtectorate, ...), and MinesweepingShuttle. They all
@@ -315,6 +347,7 @@ class HangarOps {
 
 	/* Display name for a shuttle phpclass — used in hangar tooltip aggregation. */
 	public static function shuttleDisplayNameFor($phpclass){
+	if (self::isMinesweepingShuttleClass($phpclass)) return 'Minesweeping Shuttle';	
 		switch ($phpclass) {
 			case 'MinesweepingShuttle':
 				return 'Minesweeping Shuttle';
@@ -568,7 +601,8 @@ class HangarOps {
 	public static function evictionPriorityFor($entry){
 		$phpclass = $entry['phpclass'] ?? '';
 		if ($phpclass === '') return 0;
-		if ($phpclass === 'MinesweepingShuttle') return 20;
+		//if ($phpclass === 'MinesweepingShuttle') return 20;
+		if (self::isMinesweepingShuttleClass($phpclass)) return 20;		
 		if (stripos($phpclass, 'shuttle') !== false) return 10;
 		if ($phpclass === 'Flyer' || $phpclass === 'FlyerProtectorate') return 10;
 		if (class_exists($phpclass)) {
