@@ -32,7 +32,7 @@ class mineFF extends Mine{
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));
         $this->addPrimarySystem(new MagGravReactorTechnical(0, 1, 0, 1));
         $this->addPrimarySystem(new mineStealth(0, 1, 1));
-        $this->addPrimarySystem(new Hangar(0, 1)); 
+        $this->addPrimarySystem(new Hangar(0, 1, 1)); 
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addPrimarySystem(new Structure(0, 10));
