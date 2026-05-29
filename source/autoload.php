@@ -1592,6 +1592,7 @@ spl_autoload_register(
 				'nexusacids' => '/server/model/weapons/customNexus.php',
 				'nexusautocannonftr' => '/server/model/weapons/customNexus.php',
 				'nexusautogun' => '/server/model/weapons/customNexus.php',
+                'nexusautocannon' => '/server/model/weapons/customNexus.php',                
 				'nexuscids' => '/server/model/weapons/customNexus.php',
 				'nexuscoilgun' => '/server/model/weapons/customNexus.php',
 				'nexusheavycoilgun' => '/server/model/weapons/customNexus.php',
