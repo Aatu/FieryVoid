@@ -13,7 +13,7 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
 	    $this->isd = 2052;
         $this->canvasSize = 200;
 	    
-        $this->fighters = array("assault shuttles" => 6); //originally 3 AS and 3 Breaching Pods
+        $this->fighters = array("assault shuttles" => 3, "Breaching Pods"=> 3); //originally 3 AS and 3 Breaching Pods
 
         $this->forwardDefense = 13;
         $this->sideDefense = 12;
@@ -29,7 +29,7 @@ class Sleekbird extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 7));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(4, 7));
+        $this->addPrimarySystem(new Hangar(4, 7, 3));
         $this->addAftSystem(new Thruster(4, 13, 0, 4, 1));
         $this->addAftSystem(new Thruster(5, 19, 0, 8, 2));
 
