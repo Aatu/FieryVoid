@@ -432,12 +432,67 @@ class HangarOps {
 		return $hangars;
 	}
 
-	/* Total occupied boxes across this hangar. */
+	/* Hangar boxes a single craft of $phpclass occupies. Per B5W §10.1 a few
+	 * superheavy/assault craft (Vorlon Assault Fighter, Drakh Heavy Raider,
+	 * Nausicaan Glider SHF, …) declare unitSize < 1 — one craft needs MORE than
+	 * one hangar box (e.g. unitSize 0.5 → 2 boxes). Ordinary craft (unitSize >= 1)
+	 * occupy exactly one box: we deliberately DON'T pack ultralights (unitSize 2)
+	 * two-to-a-box in live storage — that packing is only modelled in the
+	 * fleet-builder / default-shuttle-pool math (shuttlePoolBoxesFor /
+	 * gamelobby checkChoices), not in the per-box hangarUsage tracking here.
+	 * Cached per phpclass to avoid re-instantiating blueprints on every call. */
+	public static function boxesPerCraftForClass($phpclass){
+		static $cache = array();
+		if (!is_string($phpclass) || $phpclass === '') return 1;
+		if (isset($cache[$phpclass])) return $cache[$phpclass];
+		$boxes = 1;
+		if (class_exists($phpclass)) {
+			try {
+				$probe = new $phpclass(0, 0, '', 0);
+				$u = isset($probe->unitSize) ? (float)$probe->unitSize : 1.0;
+				if ($u > 0 && $u < 1) $boxes = (int)ceil(1 / $u);
+			} catch (Exception $e) {}
+		}
+		$cache[$phpclass] = $boxes;
+		return $boxes;
+	}
+
+	/* Boxes per craft for a stored hangarUsage entry. Prefers the boxesPerCraft
+	 * value stamped at dock time (performLand / performDeployStartDock) so we
+	 * avoid re-instantiating the blueprint; falls back to the phpclass lookup
+	 * for legacy entries written before the field existed (those resolve to 1
+	 * unless the class is a unitSize<1 craft). */
+	public static function boxesPerCraftForEntry($entry){
+		if (isset($entry['boxesPerCraft'])) {
+			$bpc = (int)$entry['boxesPerCraft'];
+			return $bpc >= 1 ? $bpc : 1;
+		}
+		return self::boxesPerCraftForClass($entry['phpclass'] ?? '');
+	}
+
+	/* Hangar boxes occupied by a single stored entry (craft count × per-craft boxes). */
+	public static function boxesForEntry($entry){
+		$flightSize = (int)($entry['flightSize'] ?? 1);
+		if ($flightSize <= 0) return 0;
+		return $flightSize * self::boxesPerCraftForEntry($entry);
+	}
+
+	/* Total occupied boxes across this hangar. A unitSize<1 craft consumes
+	 * more than one box per craft (see boxesPerCraftForClass), so this is NOT
+	 * simply the stored craft count. Compared against maxhealth / remaining
+	 * health (both in boxes) by every capacity / eviction caller.
+	 *
+	 * Catapults are exempt from the per-craft box multiplier: a catapult is a
+	 * single-fighter rail that holds exactly ONE craft regardless of unitSize
+	 * (its extra boxes are structural HP, and effectiveCapacity() is a flat 1),
+	 * so it counts craft 1:1. Without this a unitSize<1 superheavy could never
+	 * fit the catapult's single slot. */
 	public static function usageCountFor($hangar){
 		$n = 0;
 		if (!is_array($hangar->hangarUsage)) return 0;
+		$isCatapult = !empty($hangar->isCatapult);
 		foreach ($hangar->hangarUsage as $entry){
-			$n += (int)($entry['flightSize'] ?? 1);
+			$n += $isCatapult ? (int)($entry['flightSize'] ?? 1) : self::boxesForEntry($entry);
 		}
 		return $n;
 	}
@@ -538,11 +593,17 @@ class HangarOps {
 		return array('count' => $leftover, 'type' => 'Shuttles', 'key' => 'shuttles');
 	}
 
-	/* Evict $count craft from a hangar (1 box of damage = 1 craft destroyed).
-	 * Priority: shuttles first (cheapest, most fungible), then anything else
-	 * in stored order. For partial-flight evictions (e.g. damage=2 from a
-	 * stored 6-fighter flight), the record's $flightSize is reduced rather
-	 * than the whole record dropped.
+	/* Evict craft until at least $boxesToFree hangar boxes are freed (lost-box
+	 * damage handling: a damaged hangar drops stored craft to fit its reduced
+	 * capacity). Priority: shuttles first (cheapest, most fungible), then
+	 * anything else in stored order. For partial-flight evictions (e.g. 2 boxes
+	 * lost from a stored 6-fighter flight), the record's $flightSize is reduced
+	 * rather than the whole record dropped.
+	 *
+	 * Box-aware: a unitSize<1 craft frees boxesPerCraft boxes per craft evicted,
+	 * and the craft count needed is rounded UP — so a 2-box craft is evicted as
+	 * soon as even one of its boxes can no longer be held (stored craft never
+	 * exceed remaining capacity). Returns the number of CRAFT evicted.
 	 *
 	 * $gamedata is REQUIRED: when an evicted entry has dockedFlightId, the
 	 * same number of active Fighter subsystems are disengaged in the source
@@ -553,8 +614,8 @@ class HangarOps {
 	 * Dropping a dockedFlightId entry WITHOUT disengaging would reintroduce
 	 * that ghost, so the param is mandatory, not optional.
 	 */
-	public static function evictCraftFromHangar($hangar, $count, $gamedata){
-		if ($count <= 0 || empty($hangar->hangarUsage)) return 0;
+	public static function evictCraftFromHangar($hangar, $boxesToFree, $gamedata){
+		if ($boxesToFree <= 0 || empty($hangar->hangarUsage)) return 0;
 
 		$indexed = array();
 		foreach ($hangar->hangarUsage as $idx => $entry){
@@ -568,13 +629,19 @@ class HangarOps {
 			return $a['idx'] - $b['idx'];   //stable: original order within same priority
 		});
 
-		$evicted = 0;
+		$freed = 0;      //boxes freed so far
+		$evicted = 0;    //craft evicted so far (return value)
 		foreach ($indexed as $row){
-			if ($evicted >= $count) break;
+			if ($freed >= $boxesToFree) break;
 			$idx = $row['idx'];
 			$entry = $hangar->hangarUsage[$idx];
 			$available = (int)($entry['flightSize'] ?? 1);
-			$take = min($available, $count - $evicted);
+			if ($available <= 0) continue;
+			$bpc = self::boxesPerCraftForEntry($entry);
+			//Craft needed to cover the remaining box shortfall, rounded UP so a
+			//multi-box craft is evicted the moment one of its boxes can't fit.
+			$needCraft = (int)ceil(($boxesToFree - $freed) / $bpc);
+			$take = min($available, $needCraft);
 			if (isset($entry['dockedFlightId']) && $take > 0) {
 				$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
 				if ($flight instanceof FighterFlight) {
@@ -582,6 +649,7 @@ class HangarOps {
 				}
 			}
 			$hangar->hangarUsage[$idx]['flightSize'] = $available - $take;
+			$freed   += $take * $bpc;
 			$evicted += $take;
 		}
 
@@ -1222,17 +1290,24 @@ class HangarOps {
 			$reason = 'speed delta exceeds flight thrust'; return false;
 		}
 
-		//Hangar must have a compatible category with $count free boxes.
+		//Hangar must have a compatible category with enough free boxes for the
+		//$count craft. A unitSize<1 craft (e.g. Vorlon Assault Fighter) needs
+		//more than one box each, so the box requirement is $count × boxesPerCraft.
 		//Use the flight's TRUE size (not carrier-mapped category) so a heavy
 		//flight is rejected when the carrier only has medium slots, etc.
 		//Pass $carrier so universal hangars derive their permissions from
 		//the ship's $fighters declaration (Decurion-style multi-category).
 		$category = self::trueSizeOf($flight);
 		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
-		if ($free < $count) { $reason = 'hangar full'; return false; }
+		//Catapults count craft 1:1 (single-fighter rail); ordinary hangars charge
+		//$count × boxesPerCraft so unitSize<1 craft consume their extra boxes.
+		$boxesNeeded = $isCatapult ? $count : $count * self::boxesPerCraftForClass($flight->phpclass);
+		if ($free < $boxesNeeded) { $reason = 'hangar full'; return false; }
 
-		//Shared launch+land budget vs hangar output. Catapults have no budget
-		//(one fighter, no initiative cost) — skip the gate for them.
+		//Shared launch+land budget vs hangar output. The output budget is in
+		//CRAFT (one recovered fighter = one against the rate, regardless of how
+		//many boxes it occupies). Catapults have no budget (one fighter, no
+		//initiative cost) — skip the gate for them.
 		if (!$isCatapult) {
 			$used = (int)$hangar->launchedThisTurn + (int)$hangar->landedThisTurn;
 			if ($used + $count > (int)$hangar->output) { $reason = 'land rate exceeded'; return false; }
@@ -1410,6 +1485,9 @@ class HangarOps {
 		//Match against the flight's TRUE size so size hierarchy is honoured
 		//regardless of how the carrier's $fighters declaration looks.
 		$category = self::trueSizeOf($flight);
+		//Returned capacity is in CRAFT, so convert free boxes via the flight's
+		//per-craft box cost (unitSize<1 craft fit fewer per box).
+		$bpc = self::boxesPerCraftForClass($flight->phpclass);
 
 		//Exact match first. Catapults (hangarType 'superheavy') land here for a
 		//superheavy flight; they ignore their own damage and have no output budget.
@@ -1419,10 +1497,10 @@ class HangarOps {
 			if (!$isCat && $h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			if ($isCat) {
-				$capacity = $free;   //no launch+land budget for catapults
+				$capacity = $free;   //catapult counts craft 1:1; no launch+land budget
 			} else {
 				$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
-				$capacity = min($free, $budget);
+				$capacity = min((int)floor($free / $bpc), $budget);
 			}
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
 		}
@@ -1434,7 +1512,7 @@ class HangarOps {
 			if ($h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
-			$capacity = min($free, $budget);
+			$capacity = min((int)floor($free / $bpc), $budget);
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
 		}
 
@@ -1513,6 +1591,12 @@ class HangarOps {
 		if (!empty($flight->customFtrName)) {
 			$entry['customFtrName'] = $flight->customFtrName;
 		}
+		//Stamp per-craft box cost for unitSize<1 craft (Vorlon Assault Fighter et
+		//al.) so usageCountFor / eviction can charge the right number of boxes
+		//without re-instantiating the blueprint. Omitted for ordinary 1-box craft
+		//to keep the persisted note lean (boxesPerCraftForEntry defaults to 1).
+		$bpc = self::boxesPerCraftForClass($flight->phpclass);
+		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
 
 		if ($partial) {
 			//Stage 10.3: priority-ordered dockFighters returns the actual
@@ -1694,7 +1778,10 @@ class HangarOps {
 
 		$category = self::trueSizeOf($flight);
 		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
-		if ($free < $size) { $reason = 'hangar full'; return false; }
+		//unitSize<1 craft need more than one box each (see boxesPerCraftForClass);
+		//catapults are exempt (single-fighter rail, counts craft 1:1).
+		$boxesNeeded = !empty($hangar->isCatapult) ? $size : $size * self::boxesPerCraftForClass($flight->phpclass);
+		if ($free < $boxesNeeded) { $reason = 'hangar full'; return false; }
 
 		//Stage 10.6.2: per-ship customFighter cap.
 		$customName = isset($flight->customFtrName) ? (string)$flight->customFtrName : '';
@@ -1729,6 +1816,9 @@ class HangarOps {
 		if (!empty($flight->customFtrName)) {
 			$entry['customFtrName'] = $flight->customFtrName;
 		}
+		//Stamp per-craft box cost for unitSize<1 craft (see performLand).
+		$bpc = self::boxesPerCraftForClass($flight->phpclass);
+		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
 		$hangar->hangarUsage[] = $entry;
 
 		//Flag removed-from-board. Loaders re-apply this via dockedFlightId, but

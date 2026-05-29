@@ -1247,7 +1247,14 @@ class BaseShip {
 			//required hangar
 			if($this->hangarRequired!='') { 
                 $this->notes .= '<br>Requires hangar space: ' . ucfirst(strtolower($this->hangarRequired));		
-				if($this->unitSize!=1) $this->notes .= ' (' . $this->unitSize . ' per slot)';
+				if($this->unitSize!=1){
+                    $slotSize = 1 / $this->unitSize;
+                    if($this->unitSize < 1){
+                        $this->notes .= ' (Requires ' . $slotSize . ' hangar slots)';
+                    }else{
+                        $this->notes .= ' (' . $slotSize . ' per slot)';                        
+                    }    
+                } 
 			}
 			//Agile status
 			if($this->agile) $this->notes .= '<br>Agile';	    

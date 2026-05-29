@@ -326,6 +326,22 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
+	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
+	// Assault Fighter et al.) needs more than one box each: the server stamps
+	// boxesPerCraft on such stored entries, and for pending orders we derive it
+	// from the source flight's unitSize. Mirrors HangarOps::boxesPerCraftForEntry
+	// / boxesPerCraftForClass so the "Capacity: X / Y slots" line matches the
+	// server's box accounting. The per-class "Stored Craft" list below still
+	// counts CRAFT (so a 3-ship Vorlon flight reads "3 x Assault Fighter").
+	function boxesPerCraftOf(entry) {
+		if (entry && entry.boxesPerCraft) {
+			var b = parseInt(entry.boxesPerCraft, 10);
+			return b >= 1 ? b : 1;
+		}
+		var u = (entry && entry.unitSize != null) ? parseFloat(entry.unitSize) : 1;
+		return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1;
+	}
+
 	// Additive projections: queued dock orders + queued deploy-start orders
 	// both bring craft INTO the hangar. The committed $hangarUsage list is
 	// the baseline; the two pending arrays each contribute extra entries
@@ -341,6 +357,7 @@ Hangar.prototype.refreshHangarTooltip = function () {
 				phpclass:   flight.phpclass,
 				name:       flight.name,
 				flightSize: parseInt(flight.flightSize || 1, 10),
+				boxesPerCraft: boxesPerCraftOf({ unitSize: flight.unitSize }),
 				hangarType: this.hangarType,
 				_pending:   'deploying'
 			});
@@ -362,15 +379,18 @@ Hangar.prototype.refreshHangarTooltip = function () {
 				phpclass:   dockFlight.phpclass,
 				name:       dockFlight.name,
 				flightSize: dockCount,
+				boxesPerCraft: boxesPerCraftOf({ unitSize: dockFlight.unitSize }),
 				hangarType: this.hangarType,
 				_pending:   'recovering'
 			});
 		}
 	}
 
+	// totalStored is in BOXES (capacity units), so unitSize<1 craft count their
+	// per-craft box cost — matching the server's maxhealth-based capacity.
 	var totalStored = 0;
 	for (var i = 0; i < displayEntries.length; i++) {
-		totalStored += parseInt(displayEntries[i].flightSize || 1, 10);
+		totalStored += parseInt(displayEntries[i].flightSize || 1, 10) * boxesPerCraftOf(displayEntries[i]);
 	}
 
 	// Subtractive projection: queued launches take craft OUT of the hangar.
@@ -390,18 +410,21 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			if (!launchOrder) continue;
 			var launchSize = parseInt(launchOrder.size || 0, 10);
 			if (launchSize <= 0) continue;
-			totalStored = Math.max(0, totalStored - launchSize);
 
 			var lphpclass = launchOrder.phpclass || 'unknown';
-			//Look up the launching craft's friendly name from a matching
-			//stash entry so the line reads "6 x Aurora", not "6 x starfuryEA".
+			//Look up the launching craft's friendly name AND per-craft box cost
+			//from a matching stash entry so the line reads "6 x Aurora" (not
+			//"6 x starfuryEA") and the box subtraction matches what was stored.
 			var launchDisplayName = lphpclass;
+			var launchBpc = 1;
 			for (var s = 0; s < this.hangarUsage.length; s++) {
 				if (this.hangarUsage[s] && this.hangarUsage[s].phpclass === lphpclass) {
 					launchDisplayName = this.hangarUsage[s].name || lphpclass;
+					launchBpc = boxesPerCraftOf(this.hangarUsage[s]);
 					break;
 				}
 			}
+			totalStored = Math.max(0, totalStored - launchSize * launchBpc);
 			if (!launchByClass[lphpclass]) launchByClass[lphpclass] = { name: launchDisplayName, count: 0 };
 			launchByClass[lphpclass].count += launchSize;
 		}

@@ -56,6 +56,35 @@ window.DeploymentDock = (function () {
         return Math.max(0, parseInt(hangar.maxhealth, 10) - netDamage);
     }
 
+    // Hangar boxes a single craft occupies. A unitSize<1 craft (Vorlon Assault
+    // Fighter et al.) needs more than one box each; every other craft is one box.
+    // Mirrors HangarOps::boxesPerCraftForClass / boxesPerCraftForEntry (PHP).
+    // Duplicated here (not shared with shipTooltipFireMenu) to avoid a load-order
+    // dependency, same as the categoryForFlight / customFighterRemainingFor copies.
+    function boxesPerCraftFromUnitSize(unitSize) {
+        var u = (unitSize != null) ? parseFloat(unitSize) : 1;
+        return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1;
+    }
+    function boxesPerCraftForEntry(entry) {
+        if (entry && entry.boxesPerCraft) {
+            var b = parseInt(entry.boxesPerCraft, 10);
+            return b >= 1 ? b : 1;
+        }
+        return boxesPerCraftFromUnitSize(entry ? entry.unitSize : 1);
+    }
+    // Boxes occupied by an entry/flight in $hangar — a catapult is a single-fighter
+    // rail (counts craft 1:1); ordinary hangars charge the per-craft box cost.
+    function entryBoxesInHangar(hangar, entry) {
+        var n = parseInt(entry.flightSize || 1, 10);
+        var isCat = !!(hangar && (hangar.isCatapult || hangar.name === 'catapult'));
+        return isCat ? n : n * boxesPerCraftForEntry(entry);
+    }
+    function craftBoxesInHangar(hangar, count, unitSize) {
+        var n = parseInt(count || 0, 10);
+        var isCat = !!(hangar && (hangar.isCatapult || hangar.name === 'catapult'));
+        return isCat ? n : n * boxesPerCraftFromUnitSize(unitSize);
+    }
+
     // All non-destroyed Hangar systems on $ship, regardless of free capacity.
     // Used by shipHasOpenableDockDialog (Issue 7) so the button surfaces even
     // for fully-loaded hangars (the dialog still needs to expose docked-flight
@@ -89,16 +118,17 @@ window.DeploymentDock = (function () {
     function hangarFreeBoxes(hangar) {
         var effective = effectiveHangarBoxes(hangar);
 
+        // Box-aware: unitSize<1 craft consume >1 box each (catapults excepted).
         var used = 0;
         if (Array.isArray(hangar.hangarUsage)) {
-            hangar.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
+            hangar.hangarUsage.forEach(function (e) { used += entryBoxesInHangar(hangar, e); });
         }
 
         var queued = 0;
         if (Array.isArray(hangar.pendingDeployStartOrders)) {
             hangar.pendingDeployStartOrders.forEach(function (o) {
                 var f = gamedata.getShip(o.flightId);
-                if (f) queued += parseInt(f.flightSize || 1, 10);
+                if (f) queued += craftBoxesInHangar(hangar, f.flightSize, f.unitSize);
             });
         }
 
@@ -166,7 +196,8 @@ window.DeploymentDock = (function () {
         for (var i = 0; i < hangars.length; i++) {
             var h = hangars[i];
             if (!hangarAcceptsCategory(h.hangar.hangarType, cat, carrier)) continue;
-            if (h.free >= size) return h.hangar;
+            //h.free is in boxes; a unitSize<1 flight needs size × per-craft boxes.
+            if (h.free >= craftBoxesInHangar(h.hangar, size, flight.unitSize)) return h.hangar;
         }
         return null;
     }
@@ -385,9 +416,11 @@ window.DeploymentDock = (function () {
             //so re-edit doesn't think the hangar is full. (Catapult → 1 slot.)
             var effective = effectiveHangarBoxes(sys);
 
+            //Box-aware usage: unitSize<1 craft consume >1 box each (catapults
+            //counted 1:1 via entryBoxesInHangar / craftBoxesInHangar).
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
-                sys.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
+                sys.hangarUsage.forEach(function (e) { used += entryBoxesInHangar(sys, e); });
             }
 
             var queued = 0;
@@ -395,12 +428,12 @@ window.DeploymentDock = (function () {
                 sys.pendingDeployStartOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;          //own queue is reclaimable
                     var f = gamedata.getShip(o.flightId);
-                    if (f) queued += parseInt(f.flightSize || 1, 10);
+                    if (f) queued += craftBoxesInHangar(sys, f.flightSize, f.unitSize);
                 });
             }
 
             var free = Math.max(0, effective - used - queued);
-            if (free >= size) out.push({ hangar: sys, capacity: free });
+            if (free >= craftBoxesInHangar(sys, size, flight.unitSize)) out.push({ hangar: sys, capacity: free });
         });
         return out;
     }
