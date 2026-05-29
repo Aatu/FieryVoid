@@ -227,7 +227,7 @@ spl_autoload_register(
                 'damageentry' => '/server/model/BaseClasses.php',
                 'damagereductionremoved' => '/server/model/cricialClasses.php',
                 'dargan' => '/server/model/ships/centauri/dargan.php',
-                'darkhawk' => '/server/model/ships/drazi/darkhawk.php',
+                //'darkhawk' => '/server/model/ships/drazi/darkhawk.php',
                 //'darkhawkfull' => '/server/model/ships/drazi/darkhawkFull.php',
                 'darkner' => '/server/model/ships/centauri/darkner.php',
                 'darmoti' => '/server/model/ships/centauri/darmoti.php',
