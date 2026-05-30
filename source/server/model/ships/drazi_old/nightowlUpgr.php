@@ -31,7 +31,7 @@ class NightowlUpgr extends BaseShipNoAft{
         $this->addPrimarySystem(new ElintScanner(5, 20, 6, 9));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 3));
         $this->addAftSystem(new JumpEngine(5, 15, 4, 34));
-        $this->addPrimarySystem(new Hangar(3, 14));
+        $this->addAftSystem(new Hangar(3, 14, 6, 3));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         

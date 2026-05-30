@@ -37,7 +37,7 @@ class Kromala extends SmallStarBaseFourSections
 				
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
-		$this->addPrimarySystem(new Hangar(5, 28));
+		$this->addPrimarySystem(new Hangar(5, 28, 12));
 		$this->addPrimarySystem(new ParticleCannon(5, 8, 7, 0, 360));
 		$this->addPrimarySystem(new ParticleCannon(5, 8, 7, 0, 360));
 		$this->addPrimarySystem(new RepeaterGun(5, 6, 4, 0, 360));
