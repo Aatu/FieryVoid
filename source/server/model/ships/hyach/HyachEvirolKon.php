@@ -14,7 +14,7 @@ class HyachEvirolKon extends BaseShip{
         $this->limited = 33;
         $this->shipSizeClass = 3;
 
-        $this->fighters = array("normal"=>24);
+        $this->fighters = array("normal"=>24, "cargo shuttles"=>4);
 
         $this->isd = 2230;
         
@@ -38,7 +38,7 @@ class HyachEvirolKon extends BaseShip{
 			$this->addPrimarySystem($sensors); 
 
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 1));
 		$this->addPrimarySystem(new CargoBay(4, 25));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 20));
 

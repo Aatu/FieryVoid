@@ -44,7 +44,9 @@ class HyachTachilaKor extends BaseShip{
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
         $this->addFrontSystem(new GraviticThruster(4, 11, 0, 3, 1));
 		$this->addFrontSystem(new BlastLaser(3, 10, 5, 300, 60));
-		$this->addFrontSystem(new Hangar(4, 26));
+		$hangar = new Hangar(4, 26, 12);
+		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks when launching
+		$this->addPrimarySystem($hangar);		
 		$this->addFrontSystem(new Maser(2, 6, 3, 270, 90));
 		$this->addFrontSystem(new Maser(2, 6, 3, 270, 90));
 		$this->addFrontSystem(new Interdictor(2, 4, 1, 270, 90));
