@@ -33,7 +33,7 @@ class gaimMearc extends BaseShip{
 		$this->addPrimarySystem(new FlagBridge(5, 15, 0, 1, 'Moas Command Bonus', 10,  false, true, true, "Moas Gunship"));		
 		$this->addPrimarySystem(new Scanner(4, 18, 8, 8));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
 
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

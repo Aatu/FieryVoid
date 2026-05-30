@@ -49,7 +49,7 @@ class gaimSuom extends HeavyCombatVessel{
         $this->addAftSystem(new JumpEngine(3, 10, 3, 20));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 120, 360));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 0, 240));
-		$this->addAftSystem(new Hangar(5, 6));
+		$this->addAftSystem(new Hangar(5, 6, 6, 3));
         $this->addAftSystem(new Bulkhead(0, 3));
         $this->addAftSystem(new Bulkhead(0, 3));
         

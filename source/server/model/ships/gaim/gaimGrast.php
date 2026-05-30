@@ -27,7 +27,7 @@ class gaimGrast extends MediumShip{
         $this->addPrimarySystem(new Reactor(5, 17, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 5, 6));
 		$this->addPrimarySystem(new CnC(4, 6, 0, 0));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
 		

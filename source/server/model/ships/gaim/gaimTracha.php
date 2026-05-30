@@ -32,7 +32,7 @@ class gaimTracha extends BaseShip{
 		$this->addPrimarySystem(new CnC(4, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 16, 5, 6));
 		$this->addPrimarySystem(new Engine(4, 16, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(4, 8));
+		$this->addPrimarySystem(new Hangar(4, 8, 3));
 
 		$this->addFrontSystem(new ScatterGun(3, 8, 3, 240, 120));
 

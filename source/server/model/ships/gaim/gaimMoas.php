@@ -26,7 +26,7 @@ class GaimMoas extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 18, 8, 8));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
         
         $this->addFrontSystem(new ParticleConcentrator(4, 0, 0, 300, 60));
         $this->addFrontSystem(new HeavyPulse(4, 6, 4, 300, 60));
