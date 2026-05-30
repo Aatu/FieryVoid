@@ -979,6 +979,13 @@ class DBManager
             if ($fire->turn != $turn)
                 continue;
 
+            //Corrupt order rejected at submit-time validation (stale client
+            //blueprint — weaponid maps to a missing/non-weapon system). Never
+            //persist it; it would crash the next game load. See
+            //Firing::validateFireOrders.
+            if (!empty($fire->rejected))
+                continue;
+
   		if (($fire->type == "ballistic") && ($phase != 1) &&  ($fire->addToDB != true)) //28 Sept 2023 - Amended to enable Multimissile to shows multiple shots in Combat Log.
                 continue;
 
@@ -2823,7 +2830,56 @@ class DBManager
 
                 $entry->notes = $notes;
                 $entry->pubnotes = $pubnotes;
-                $gamedata->getShipById($shooterid)->getSystemById($weaponid)->setFireOrder($entry);
+
+                //Corrupt fire order guard. A fire order can reference a
+                //(shooterid, weaponid) that no longer resolves to a real weapon
+                //on reload. Confirmed live cause: a client submitting firing with
+                //a STALE staticShips blueprint — the posted weaponids belong to an
+                //older system layout for that phpclass, so on reload they either
+                //miss entirely or land on a non-weapon system. System ids are
+                //positional (BaseShip::addSystem assigns id = current system
+                //count), so any change to a ship's system list shifts every later
+                //id and desynchronises older client blueprints.
+                //
+                //Three failure shapes, all funnelled through this one chokepoint
+                //so no downstream consumer ever sees a bad attach (e.g. the
+                //unguarded $weapon->ballistic at TacGamedata::onConstructed only
+                //iterates orders that were actually attached here):
+                //  1. shooter ship missing            -> getShipById() null
+                //  2. weapon id missing on shooter     -> getSystemById() null
+                //  3. id resolves to a NON-weapon      -> e.g. Thruster, which has
+                //     no ->ballistic and threw "Undefined property: Thruster::$ballistic"
+                //
+                //A skipped order is a shot dropped from the replay/combat log, but
+                //that order was never valid for this ship to begin with. The real
+                //fix is upstream: validate posted weaponids against the server's
+                //construction at firing-submit time, and/or version the client
+                //blueprint so stale submissions are rejected before they hit the DB.
+                $shooter = $gamedata->getShipById($shooterid);
+                if ($shooter === null) {
+                    Debug::log("getFireOrdersForShips: corrupt fire order $id "
+                        . "(game {$gamedata->id}, turn $turn) — shooter $shooterid "
+                        . "not found; skipping. weaponid=$weaponid type=$type");
+                    continue;
+                }
+                $weapon = $shooter->getSystemById($weaponid);
+                if ($weapon === null) {
+                    Debug::log("getFireOrdersForShips: corrupt fire order $id "
+                        . "(game {$gamedata->id}, turn $turn) — weapon $weaponid "
+                        . "not found on shooter $shooterid ('{$shooter->name}'); "
+                        . "skipping. type=$type targetid=$targetid");
+                    continue;
+                }
+                if (!($weapon instanceof Weapon)) {
+                    Debug::log("getFireOrdersForShips: corrupt fire order $id "
+                        . "(game {$gamedata->id}, turn $turn) — system $weaponid on "
+                        . "shooter $shooterid ('{$shooter->name}') is a "
+                        . get_class($weapon) . ", not a Weapon (stale client "
+                        . "blueprint?); skipping. type=$type targetid=$targetid");
+                    continue;
+                }
+
+                $weapon->setFireOrder($entry);
             }
             $stmt->close();
         }
