@@ -31,26 +31,37 @@ window.ShipTooltipFireMenu = function () {
     // every other craft is one box. Mirrors HangarOps::boxesPerCraftForClass /
     // boxesPerCraftForEntry (PHP) so the in-game dock/recover capacity matches
     // what the server will accept.
-    function hangarBoxesPerCraftFromUnitSize(unitSize) {
+    // Exposed on window because the dock/recover helpers below
+    // (window.findEligibleCarriersForDock / ...ForRecover and their nested
+    // collectReceivingHangars*) live OUTSIDE this IIFE and would otherwise not
+    // see this closure-private function. The local var keeps in-closure callers
+    // working unchanged.
+    window.hangarBoxesPerCraftFromUnitSize = function (unitSize) {
         var u = (unitSize != null) ? parseFloat(unitSize) : 1;
         return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1;
-    }
-    function hangarBoxesPerCraftForEntry(entry) {
+    };
+    var hangarBoxesPerCraftFromUnitSize = window.hangarBoxesPerCraftFromUnitSize;
+    // Also exposed on window for the same reason as
+    // hangarBoxesPerCraftFromUnitSize above: the dock/recover helpers outside
+    // this IIFE call these.
+    window.hangarBoxesPerCraftForEntry = function (entry) {
         if (entry && entry.boxesPerCraft) {
             var b = parseInt(entry.boxesPerCraft, 10);
             return b >= 1 ? b : 1;
         }
         return hangarBoxesPerCraftFromUnitSize(entry ? entry.unitSize : 1);
-    }
+    };
+    var hangarBoxesPerCraftForEntry = window.hangarBoxesPerCraftForEntry;
     // Boxes consumed by a queued dock/deploy order of $count craft of the
     // flight referenced by the order, looked up for its unitSize.
-    function hangarBoxesForQueuedCraft(flightId, count) {
+    window.hangarBoxesForQueuedCraft = function (flightId, count) {
         var n = parseInt(count || 0, 10);
         if (n <= 0) return 0;
         var f = (flightId != null) ? gamedata.getShip(flightId) : null;
         var bpc = f ? hangarBoxesPerCraftFromUnitSize(f.unitSize) : 1;
         return n * bpc;
-    }
+    };
+    var hangarBoxesForQueuedCraft = window.hangarBoxesForQueuedCraft;
 
     function targetWeapons() {
         weaponManager.targetShip(this.selectedShip, this.targetedShip);
@@ -290,7 +301,7 @@ window.findEligibleCarriersForDock = function (flight) {
     function collectReceivingHangars(ship, category, carrierMove) {
         var hangars = [];
         var flightId = parseInt(flight.id, 10);
-        var bpcFlight = hangarBoxesPerCraftFromUnitSize(flight.unitSize);   //boxes per craft for THIS flight
+        var bpcFlight = window.hangarBoxesPerCraftFromUnitSize(flight.unitSize);   //boxes per craft for THIS flight
         var carrierHeading = carrierMove ? parseInt(carrierMove.heading, 10) : null;
         var carrierFacing  = carrierMove ? parseInt(carrierMove.facing, 10)  : null;
         ship.systems.forEach(function (sys) {
@@ -330,7 +341,7 @@ window.findEligibleCarriersForDock = function (flight) {
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) {
-                    var perCraft = isCat ? 1 : hangarBoxesPerCraftForEntry(e);
+                    var perCraft = isCat ? 1 : window.hangarBoxesPerCraftForEntry(e);
                     used += parseInt(e.flightSize || 1, 10) * perCraft;
                 });
             }
@@ -357,7 +368,7 @@ window.findEligibleCarriersForDock = function (flight) {
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;   //own queue is reclaimable
                     var n = parseInt(o.count || 0, 10);
-                    free   = Math.max(0, free - (isCat ? n : hangarBoxesForQueuedCraft(o.flightId, n)));
+                    free   = Math.max(0, free - (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n)));
                     if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
@@ -555,7 +566,7 @@ window.findEligibleFlightsForDocking = function (carrier) {
         var category = categoryForFlightRecover(flight);
         var size = countActiveInFlight(flight);
         if (size <= 0) return hangars;
-        var bpcFlight = hangarBoxesPerCraftFromUnitSize(flight.unitSize);   //boxes per craft for THIS flight
+        var bpcFlight = window.hangarBoxesPerCraftFromUnitSize(flight.unitSize);   //boxes per craft for THIS flight
 
         // Stage 10.6.2: bulk recover only ever docks a FULL flight into a
         // single hangar — if the carrier's customFighter cap can't hold the
@@ -603,7 +614,7 @@ window.findEligibleFlightsForDocking = function (carrier) {
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) {
-                    var perCraft = isCat ? 1 : hangarBoxesPerCraftForEntry(e);
+                    var perCraft = isCat ? 1 : window.hangarBoxesPerCraftForEntry(e);
                     used += parseInt(e.flightSize || 1, 10) * perCraft;
                 });
             }
@@ -626,7 +637,7 @@ window.findEligibleFlightsForDocking = function (carrier) {
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;
                     var n = parseInt(o.count || 0, 10);
-                    free   = Math.max(0, free - (isCat ? n : hangarBoxesForQueuedCraft(o.flightId, n)));
+                    free   = Math.max(0, free - (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n)));
                     if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
