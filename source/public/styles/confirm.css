@@ -442,8 +442,12 @@
     border: 3px solid #1f6f8b;
     box-shadow: 0 0 8px rgba(88, 199, 230, 0.35);
     color: #C9F0FF;
-    min-width: 500px;   
-    min-height: 120px;       
+    min-width: 500px;
+    /* Cap growth so a carrier with many hangars (long capacity readout or
+       many rows) can't stretch the dialog across the screen. Content wraps
+       within instead. The small-screen media query below clamps further. */
+    max-width: min(720px, calc(100% - 16px));
+    min-height: 120px;
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-header {
@@ -515,11 +519,16 @@
     margin-right: 4px;
 }
 
+/* Stack the per-hangar pills vertically (one per line) rather than flowing
+   them across a row. A horizontal flow has no width bound, so a carrier with
+   many hangars stretched the whole confirm dialog far too wide. A column
+   caps the readout width at the single widest pill instead. */
 .confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pills {
     display: inline-flex;
-    flex-wrap: wrap;
-    column-gap: 12px;
-    row-gap: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: 2px;
+    margin-left: 10px;
 }
 
 .confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pill {

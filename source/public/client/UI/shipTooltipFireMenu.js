@@ -145,9 +145,12 @@ window.ShipTooltipFireMenu = function () {
         if (!ship || !ship.systems) return false;
         for (var i in ship.systems) {
             var sys = ship.systems[i];
-            //Stage 16: a catapult (name "catapult") is launchable too.
+            //Stage 16: a catapult (name "catapult") is launchable too. Fighter
+            //Rails (name "fighterRail") launch like an ordinary hangar — they
+            //have an output budget and respect their own damage, so they fall
+            //through the isCat branches into the normal budget gate below.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
-            if (!sys || (sys.name !== 'hangar' && !isCat)) continue;
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat)) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
             //Stage 16.5: a cannotLaunch wreck (fighter destroyed landing on a
             //damaged catapult) occupies the bay but can never relaunch — it
@@ -309,7 +312,7 @@ window.findEligibleCarriersForDock = function (flight) {
             // REAR, holds exactly one craft, ignores its own damage and has no
             // launch+land budget.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
-            if (!sys || (sys.name !== 'hangar' && !isCat)) return;
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
 
             if (!hangarAcceptsCategory(sys.hangarType, category, ship)) return;
@@ -549,10 +552,15 @@ window.findEligibleFlightsForDocking = function (carrier) {
         // Heading is gated per-hangar inside collectReceivingHangarsForRecover:
         // ordinary hangars require flight heading == carrier heading; catapults
         // (Stage 16) require a rear approach (flight heading == carrier facing).
+        // hangars = bays that each hold the WHOLE flight (single-bay dock). Its
+        // .combinedFit property is true when the carrier's combined free space
+        // holds the flight even if no single bay does (rails are a pooled
+        // resource — a 9-flight spreads across a 6-box + 3-box rail); the dialog
+        // then auto-distributes across bays.
         var hangars = collectReceivingHangarsForRecover(carrier, flight);
-        if (hangars.length === 0) continue;
+        if (hangars.length === 0 && !hangars.combinedFit) continue;
 
-        out.push({ flight: flight, hangars: hangars });
+        out.push({ flight: flight, hangars: hangars, combinedFit: hangars.combinedFit });
     }
     return out;
 
@@ -561,7 +569,9 @@ window.findEligibleFlightsForDocking = function (carrier) {
     // the bulk-recover dialog doesn't split a flight across hangars (splitter
     // remains on the per-flight Dock dialog).
     function collectReceivingHangarsForRecover(ship, flight) {
-        var hangars = [];
+        var hangars = [];          //bays that each hold the WHOLE flight
+        hangars.combinedFit = false;
+        var combinedCraft = 0;     //running sum of every eligible bay's craft capacity
         var flightId = parseInt(flight.id, 10);
         var category = categoryForFlightRecover(flight);
         var size = countActiveInFlight(flight);
@@ -587,7 +597,7 @@ window.findEligibleFlightsForDocking = function (carrier) {
             // Stage 16: a catapult recovers from the REAR, holds one craft,
             // ignores its own damage and has no launch+land budget.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
-            if (!sys || (sys.name !== 'hangar' && !isCat)) return;
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
@@ -648,12 +658,16 @@ window.findEligibleFlightsForDocking = function (carrier) {
                     budget = Math.max(0, budget - parseInt(o.size || 0, 10));
                 });
             }
-            // Bulk recover needs the WHOLE flight to fit one hangar. Capacity is
-            // in CRAFT: a catapult's free craft slots, else floor(free boxes /
-            // boxes-per-craft) capped by the craft output budget.
+            // Capacity is in CRAFT: a catapult's free craft slots, else floor(free
+            // boxes / boxes-per-craft) capped by the craft output budget.
             var capacity = isCat ? free : Math.min(Math.floor(free / bpcFlight), budget);
-            if (capacity >= size) hangars.push({ hangar: sys, capacity: capacity });
+            if (capacity <= 0) return;
+            combinedCraft += capacity;                                  //counts toward combined-pool fit
+            if (capacity >= size) hangars.push({ hangar: sys, capacity: capacity });   //single-bay dock
         });
+        //Combined-pool fit: the carrier's rails/bays together hold the flight even
+        //when no single bay does (the dialog then auto-distributes across bays).
+        hangars.combinedFit = (combinedCraft >= size);
         return hangars;
     }
 

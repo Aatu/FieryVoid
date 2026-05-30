@@ -3305,6 +3305,47 @@ class Hangar extends ShipSystem{
 			return;
 		}
 
+		//Fighter Rails (B5W §10.1): a rail launches/lands like an ordinary hangar
+		//(it has an output budget and respects its own damage) PLUS two unique
+		//mechanics — the structure-coupled 1d20 "whole rail destroyed" crit and
+		//per-box fighter escape. The rail-specific destruction runs FIRST so a
+		//rail wiped this turn can't also launch/recover this turn.
+		if (!empty($this->isRail)) {
+			//R0: a destroyed carrier's docked craft escape is owned by Stage 18's
+			//Pass 3 (processCarrierDestructionEscapes) — don't double-spawn here.
+			//(Mirrors HangarOps::onHangarCriticalPhase's $ship->isDestroyed guard;
+			//covers the cascade case where a still-alive ship at Pass 1 start is
+			//destroyed mid-pass and still has its Pass 2 hooks run.)
+			if ($ship->isDestroyed()) return;
+
+			//R1a: full external-structure-block loss. If this rail's parent
+			//structure was destroyed this turn, the whole block (all its rails)
+			//is gone — every docked fighter attempts escape, and the 1d20 crit is
+			//moot (skip it). Carrier-death (PRIMARY structure) is handled by Stage
+			//18 instead; an external block dying leaves the carrier alive.
+			if (HangarOps::onRailStructureLost($this, $ship, $gamedata)) {
+				//Block destroyed — fall through to the ordinary-hangar pipeline so
+				//onHangarCriticalPhase evicts the now-zero-capacity rail cleanly.
+				HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
+				return;
+			}
+
+			//R1b: 1d20-on-16-20 whole-rail destruction + per-box escape, fired when
+			//this rail's parent structure took damage this turn (per-structure,
+			//per-turn dedup inside onRailStructureDamage).
+			HangarOps::onRailStructureDamage($this, $ship, $gamedata);
+
+			//R2-R5: same pipeline as an ordinary hangar. onHangarCriticalPhase
+			//evicts stored craft to fit any boxes the rail crit destroyed (and
+			//resets the per-turn launch/land budget); serviceDockedFlights honours
+			//the rail half-cadence gate internally (RAIL-3).
+			HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
+			HangarOps::processDockOrders($this, $ship, $gamedata);
+			HangarOps::serviceDockedFlights($this, $ship, $gamedata);
+			HangarOps::processLaunchOrders($this, $ship, $gamedata);
+			return;
+		}
+
 		//1. Apply damage eviction first (per B5W rules: boxes destroyed before
 		//   Post-Turn Actions). This may also reduce stored craft a launch
 		//   order was relying on — if so, the launch's canLaunch() check fails
@@ -3412,13 +3453,19 @@ class Hangar extends ShipSystem{
 		}
 		if ($hasDockKey) $this->pendingDockTransfer = $cleanDocks;
 
-		//Stage 7: sanitise deployStarts: {flightId}
+		//Stage 7: sanitise deployStarts: {flightId} (+ optional per-hangar count
+		//for a Fighter-Rail auto-distribute spread — a flight too big for any one
+		//bay is split across several, each order carrying its slice).
 		$cleanDeployStarts = array();
 		foreach ($deployStarts as $order) {
 			if (!is_array($order)) continue;
 			$flightId = isset($order['flightId']) ? (int)$order['flightId'] : 0;
 			if ($flightId <= 0) continue;
-			$cleanDeployStarts[] = array('flightId' => $flightId);
+			$clean = array('flightId' => $flightId);
+			if (isset($order['count']) && (int)$order['count'] > 0) {
+				$clean['count'] = (int)$order['count'];
+			}
+			$cleanDeployStarts[] = $clean;
 		}
 		if ($hasDeployStartKey) $this->pendingDeployStartTransfer = $cleanDeployStarts;
 	}
@@ -3429,6 +3476,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem->direction = $this->direction;
 		$strippedSystem->directions = is_array($this->directions) ? array_values($this->directions) : array();
 		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
+		$strippedSystem->isRail = !empty($this->isRail);           //Fighter Rails: rail discriminator (false for ordinary hangars/catapults)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
@@ -3523,6 +3571,120 @@ class Catapult extends Hangar{
 		// Hangar ctor: ($armour, $maxhealth, $output, $direction, $hangarType, $spawnableClasses)
 		// Fixed forward launch (direction 0); superheavy-only by design.
         parent::__construct($armour, $maxhealth, $output, 0, 'superheavy');
+    }
+}
+
+
+/* Fighter Rail (B5W "Fighter Racks") — external launch rail.
+ *
+ * A FighterRail is a constrained Hangar whose boxes are bolted to a structure
+ * block: each box holds one fighter that launches/lands INDEPENDENTLY of every
+ * other fighter, with NO day-after initiative penalty on the launched fighter
+ * (the carrier still takes the normal launch/land penalty that turn). The
+ * trade-offs vs. a hangar bay:
+ *   - $maxhealth = the rail length in BOXES (not extra HP). effectiveCapacity()
+ *     returns getRemainingHealth(), so capacity shrinks as boxes are destroyed.
+ *   - Rail boxes are destroyed by (a) a unique unmodified 1d20 on 16-20 that
+ *     wipes one ENTIRE rail when its parent structure takes damage this turn,
+ *     and (b) full structure-block destruction (the inherited structure-loss
+ *     fall-off). There is NO per-structure-point box attrition.
+ *   - Fighters on a destroyed rail attempt escape via the existing escape rules
+ *     (the carrier-destruction d20 table); escapees DO get the -50 next-turn
+ *     penalty (HangarOps::railBoxEscape, Stage 18 machinery reuse).
+ *   - Docked-flight reload takes twice as long (narrow airlocks) — half cadence
+ *     via the rail gate in HangarOps::serviceDockedFlights.
+ *
+ * $isRail is the single discriminator the HangarOps call sites branch on,
+ * parallel to Catapult's $isCatapult. The launch/dock/service pipeline runs
+ * through the standard Hangar path (rails respect their output budget and their
+ * own damage, unlike catapults). The rail-specific mechanics live in the
+ * Hangar::criticalPhaseEffects rail branch + HangarOps::onRailStructureDamage.
+ */
+class FighterRail extends Hangar{
+    public $name           = "fighterRail";
+    public $displayName    = "Fighter Rail";
+    public $primary        = false;
+    public $repairPriority = 1;   //like Catapult — tactically unimportant to repair
+
+    public $isRail = true;        //single discriminator, parallel to $isCatapult
+
+    //Detached boxes: destroyed via structure hits/crits, never targeted directly.
+    //Mirrors ConnectionStrut / AdaptiveArmorController, which exclude themselves
+    //from the damage allocator. (The ship's hit chart also has no rail entry.)
+    public $isTargetable        = false;
+    public $isPrimaryTargetable = false;
+	public $iconPath = "FighterRail3.png";
+
+    //Rail boxes are PART OF THE STRUCTURE BLOCK — their HP lives in the section's
+    //Structure (e.g. the StrikeCarrier's 78-box front structure already INCLUDES
+    //the rail boxes). So a rail must NOT add its own HP to the ship's combat value
+    /// structural-integrity total, or the carrier would be over-valued (and over-
+    //tough) by the box count. $maxhealth here is a CAPACITY number (how many
+    //fighters the rail holds), consumed by effectiveCapacity; it is excluded from
+    //calculateCombatValue via this flag (same mechanism ConnectionStrut uses).
+    //The rail is destroyed only by the 1d20 whole-rail crit or by full structure
+    //loss — never by independently soaking hits.
+    protected $doCountForCombatValue = false;
+
+    //RAIL-4: replay-deterministic 1d20 rail crit. setCriticals re-runs on every
+    //replay scrub and Dice::d is non-deterministic, so the rolled value for the
+    //structure-damage turn is persisted in a railCritRoll note on the OWNING
+    //rail (the lowest-id rail on a given structure — see HangarOps::railCritOwner)
+    //and read back here. railCritLoadedTurn/Value hold the loaded roll for the
+    //current turn so onRailStructureDamage uses the stored value instead of
+    //rolling fresh. (0 turn = nothing loaded → roll fresh + persist.)
+    public $railCritLoadedTurn  = 0;
+    public $railCritLoadedValue = 0;
+
+    // ($armour, $maxhealth = rail length in boxes, $output = launch+land budget,
+    //  $direction = 0 forward, $hangarType = the rail's combat-fighter category)
+    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters'){
+		switch($maxhealth){
+			case 3: //retro
+				$this->iconPath = "FighterRail3.png";
+				break;
+			case 6: //main
+				$this->iconPath = "FighterRail6.png";
+				break;	
+			Default://Port
+				$this->iconPath = "FighterRail3.png";
+				break;
+		}        
+	
+		parent::__construct($armour, $maxhealth, $output, $direction, $hangarType);
+    }
+
+    public function onIndividualNotesLoaded($gamedata){
+        //Read the railCritRoll note(s) BEFORE the parent clears $individualNotes.
+        //Keep the value for the current turn (the latest, by id, if duplicated)
+        //so onRailStructureDamage can reuse the stored roll on a replay scrub.
+        foreach ($this->individualNotes as $note){
+            if ($note->notekey === 'railCritRoll' && (int)$note->turn === (int)$gamedata->turn){
+                $decoded = json_decode($note->notevalue, true);
+                if (is_array($decoded)){
+                    $this->railCritLoadedTurn  = (int)$gamedata->turn;
+                    $this->railCritLoadedValue = (int)($decoded['roll'] ?? 0);
+                }
+            }
+        }
+        parent::onIndividualNotesLoaded($gamedata);
+    }
+
+    public function setSystemDataWindow($turn){
+        //Hangar::setSystemDataWindow handles the ordinary (box-count) capacity
+        //line; we only override the "Special" flavour text. Skip straight to
+        //ShipSystem so we don't inherit Hangar's hangar/catapult Special block.
+        ShipSystem::setSystemDataWindow($turn);
+        $this->data["Special"]  = "External launch rail — each box carries one fighter that launches and lands independently.";
+        $this->data["Special"] .= "<br>No initiative penalty on fighters launching from rails.";
+        $this->data["Special"] .= "<br>Part of the structure block: structure hit may destroy an entire rail.";
+        $this->data["Special"] .= "<br>Reloading docked craft takes twice as long.";
+        $this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+        $this->data["Type"] = ucwords($this->hangarType);
+        $this->data["Launch Rate"] = $this->output;
+
+        $totalStored = HangarOps::usageCountFor($this);
+        $this->data["Capacity"] = $totalStored . " / " . $this->maxhealth . " slots";
     }
 }
 

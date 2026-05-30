@@ -43,12 +43,20 @@ class HangarOps {
 		//into the catapult in-game (Stage 16.4). $shuttleHangars also matches the
 		//PRE-Stage-16 behaviour, where catapults weren't `instanceof Hangar` at
 		//all and so were never part of collectHangars / the shuttle pool.
+		//Fighter Rails get the SAME treatment as catapults here: their boxes are
+		//structure-coupled HP that hold combat fighters (auto-deploying to space
+		//at turn 1), NOT default-shuttle slots. Partition them out of the shuttle
+		//pool and skip their fighter category from $totalDeclared below, exactly
+		//as 'superheavy' is skipped for catapults. $railCategories is the set of
+		//$ship->fighters keys (e.g. 'light') that ride this ship's rails.
 		$hasCatapult   = false;
 		$shuttleHangars = array();
 		foreach ($hangars as $h){
 			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
+			if (!empty($h->isRail))     { continue; }
 			$shuttleHangars[] = $h;
 		}
+		$railCategories = self::railFighterCategories($ship);
 
 		//Step 1: explicit shuttle / minesweeping-shuttle / cargo-shuttle declarations
 		//get auto-filled (combat fighter declarations are NOT auto-filled here —
@@ -62,6 +70,10 @@ class HangarOps {
 				//auto-fill them. Only special-cased when the ship actually has a
 				//catapult, so catapult-less ships behave exactly as before.
 				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
+				//Rail-borne fighter categories live on the rail, not the shuttle-
+				//pool hangars — exclude them from $totalDeclared so the real
+				//Hangar's leftover shuttle fill isn't shrunk by rail capacity.
+				if (isset($railCategories[strtolower(trim((string)$category))])) continue;
 
 				$count = (int)$declaredCount;
 				$totalDeclared += self::shuttlePoolBoxesFor($category, $count);
@@ -442,6 +454,41 @@ class HangarOps {
 		return $hangars;
 	}
 
+	/* Fighter Rails: just the FighterRail instances on a ship (a subset of
+	 * collectHangars, since FighterRail extends Hangar). Used by the rail crit
+	 * dedup / pickRailToDestroy and the shuttle-pool exclusion below. */
+	public static function collectRails($ship){
+		$rails = array();
+		if (!isset($ship->systems) || !is_array($ship->systems)) return $rails;
+		foreach ($ship->systems as $sys){
+			if (!empty($sys->isRail)) $rails[] = $sys;
+		}
+		return $rails;
+	}
+
+	/* True if $ship mounts any FighterRail. Mirror of the client systems.js
+	 * shipHasRail() so the shuttle-pool math stays in lockstep across the
+	 * server/client divide. */
+	public static function shipHasRail($ship){
+		foreach (self::collectRails($ship) as $r) return true;
+		return false;
+	}
+
+	/* Lowercased set of fighter-category keys (e.g. 'light') that belong to
+	 * this ship's rails. Rail-borne fighters auto-deploy to space at turn 1
+	 * like any combat fighter, so their declared $ship->fighters capacity must
+	 * be excluded from the default-shuttle leftover math (parallel to the
+	 * catapult 'superheavy' exclusion). Returns an associative set for O(1)
+	 * membership tests. */
+	public static function railFighterCategories($ship){
+		$cats = array();
+		foreach (self::collectRails($ship) as $r){
+			$cat = strtolower(trim((string)$r->hangarType));
+			if ($cat !== '') $cats[$cat] = true;
+		}
+		return $cats;
+	}
+
 	/* Hangar boxes a single craft of $phpclass occupies. Per B5W §10.1 a few
 	 * superheavy/assault craft (Vorlon Assault Fighter, Drakh Heavy Raider,
 	 * Nausicaan Glider SHF, …) declare unitSize < 1 — one craft needs MORE than
@@ -520,8 +567,10 @@ class HangarOps {
 	 */
 	public static function inferHangarType($hangar, $ship){
 		//Catapults are fixed at 'superheavy' by design — never narrow them from
-		//the ship's $fighters declaration (Stage 16).
-		if (!empty($hangar->isCatapult)) return;
+		//the ship's $fighters declaration (Stage 16). Fighter Rails carry an
+		//explicit category from the ship file (load-bearing for launch/dock
+		//eligibility) — leave them untouched too.
+		if (!empty($hangar->isCatapult) || !empty($hangar->isRail)) return;
 		$hType = strtolower(trim((string)$hangar->hangarType));
 		//Only narrow universal slots. Anything specific (medium, heavy, shuttles,
 		//assault shuttles, BPods, custom 'Raiders', etc.) was an intentional
@@ -582,15 +631,18 @@ class HangarOps {
 		$hasCatapult = false;
 		foreach (self::collectHangars($ship) as $h) {
 			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
+			if (!empty($h->isRail))     { continue; }   //rail boxes are structure HP, not shuttle pool
 			$capacity += (int)$h->maxhealth;
 		}
 		if ($capacity <= 0) {
 			return array('count' => 0, 'type' => 'Shuttles', 'key' => 'shuttles');
 		}
+		$railCategories = self::railFighterCategories($ship);
 		$declared = 0;
 		if (isset($ship->fighters) && is_array($ship->fighters)) {
 			foreach ($ship->fighters as $category => $count) {
 				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
+				if (isset($railCategories[strtolower(trim((string)$category))])) continue;
 				$declared += self::shuttlePoolBoxesFor($category, $count);
 			}
 		}
@@ -758,10 +810,21 @@ class HangarOps {
 	 */
 	public static function serviceDockedFlights($hangar, $carrier, $gamedata){
 		if ($hangar->isDestroyed() || empty($hangar->hangarUsage)) return;
+		$isRail = !empty($hangar->isRail);
 		foreach ($hangar->hangarUsage as $entry){
 			if (!isset($entry['dockedFlightId'])) continue;
 			//Must have been docked since BEFORE this turn (no rearm on dock turn).
 			if (isset($entry['dockedTurn']) && (int)$entry['dockedTurn'] >= $gamedata->turn) continue;
+			//Fighter Rails: hangar ops through the narrow airlocks take TWICE as
+			//long (B5W §10.1). A docked-turn-T flight services on T+2, T+4, …
+			//(elapsed even and > 0) — half the cadence of an ordinary hangar,
+			//which services every turn from T+1. Gating the whole entry here
+			//halves the rate uniformly across every whileDocked reload hook
+			//(matter ammo, ordnance-pool missiles, marines).
+			if ($isRail && isset($entry['dockedTurn'])){
+				$elapsed = $gamedata->turn - (int)$entry['dockedTurn'];
+				if ($elapsed <= 0 || ($elapsed % 2) !== 0) continue;
+			}
 			$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
 			if (!($flight instanceof FighterFlight)) continue;
 			foreach ($flight->systems as $fighter){
@@ -773,6 +836,212 @@ class HangarOps {
 				}
 			}
 		}
+	}
+
+	/* === Fighter Rails: structure-coupled destruction (B5W §10.1) ========= */
+
+	/* The "owning" rail for a structure block: the lowest-id FighterRail mounted
+	 * on $structure. Deterministic across requests (system ids are stable), so a
+	 * replay re-derives the same owner. Only the owner rolls/persists the
+	 * per-structure 1d20, guaranteeing exactly ONE roll per structure-damage
+	 * event even when several rails share a structure. Returns null if no rail
+	 * is attached to $structure. */
+	public static function railCritOwner($structure, $ship){
+		if (!$structure) return null;
+		$owner = null;
+		foreach (self::collectRails($ship) as $rail){
+			if ($rail->getStructureSystem() !== $structure) continue;
+			if ($owner === null || (int)$rail->id < (int)$owner->id) $owner = $rail;
+		}
+		return $owner;
+	}
+
+	/* End-of-turn rail crit check, called from Hangar::criticalPhaseEffects for
+	 * every rail. When the rail's parent structure took damage this turn, the
+	 * OWNING rail (railCritOwner) rolls an unmodified 1d20 — on a natural 16-20
+	 * one ENTIRE rail on that structure is destroyed (auto-picked) and its
+	 * fighters attempt escape. Non-owning rails on the same structure no-op
+	 * (the owner already covered the structure's single roll). There is NO
+	 * per-structure-point box attrition — the only in-battle box-loss paths are
+	 * this 1d20 and full structure-block destruction (the inherited fall-off).
+	 *
+	 * Replay-deterministic: the rolled value is read from a railCritRoll note
+	 * via FighterRail::onIndividualNotesLoaded (railCritLoadedTurn/Value) when
+	 * present for this turn, and only rolled fresh + persisted on the live Fire
+	 * Phase advance. */
+	public static function onRailStructureDamage($rail, $ship, $gamedata){
+		$structure = $rail->getStructureSystem();
+		if (!$structure) return;
+
+		//Only the owning rail rolls for its structure (per-structure dedup).
+		$owner = self::railCritOwner($structure, $ship);
+		if ($owner !== $rail) return;
+
+		//Roll only if the structure took post-armour damage THIS turn.
+		if ($structure->damageReceivedOnTurn($gamedata->turn) <= 0) return;
+
+		//Replay-deterministic roll: reuse the stored value when this turn's
+		//railCritRoll note was loaded; otherwise roll fresh and persist.
+		if ($rail->railCritLoadedTurn === (int)$gamedata->turn){
+			$roll = (int)$rail->railCritLoadedValue;
+		} else {
+			$roll = Dice::d(20);   //NO crit modifiers (B5W: ignore weapon bonuses)
+			self::recordRailCritRoll($rail, $roll, $gamedata);
+			//Stamp the loaded fields so a second pass in the same request (or a
+			//re-entry) treats the roll as already taken.
+			$rail->railCritLoadedTurn  = (int)$gamedata->turn;
+			$rail->railCritLoadedValue = $roll;
+		}
+
+		if ($roll >= 16){
+			$target = self::pickRailToDestroy($structure, $ship);
+			if ($target) self::destroyEntireRail($target, $ship, $gamedata);
+		}
+	}
+
+	/* Full-structure-block loss: when a rail's parent (external) structure is
+	 * itself destroyed this turn, EVERY rail on that block is destroyed with it
+	 * (the inherited isDestroyed fall-off drops them a turn later, but the boxes
+	 * are gone now) and all their docked fighters attempt escape — the second of
+	 * the two box-loss paths (the 1d20 whole-rail crit being the first). The
+	 * carrier itself is NOT destroyed here (only PRIMARY structure loss kills a
+	 * ship; an external block dying leaves the carrier alive) — the destroyed-
+	 * CARRIER case is owned by Stage 18's processCarrierDestructionEscapes, which
+	 * already covers rails via collectHangars. Called for every rail; per-
+	 * structure dedup via railCritOwner so the block's rails are processed once.
+	 *
+	 * Replay-safe WITHOUT a roll note: railBoxEscape clears each rail's hangarUsage
+	 * after spawning, so a replay scrub re-enters with empty usage → zero escape
+	 * candidates → no double-spawn (same idempotency the 1d20 path relies on). The
+	 * per-rail escape d20 is re-rolled on replay but never reached (no candidates).
+	 *
+	 * Returns true if the structure was destroyed (so the caller skips the 1d20
+	 * crit — the rails are already gone). */
+	public static function onRailStructureLost($rail, $ship, $gamedata){
+		$structure = $rail->getStructureSystem();
+		if (!$structure) return false;
+
+		//Only the owning rail processes the block (per-structure dedup), so N
+		//rails on one destroyed block escape exactly once each, not N×.
+		$owner = self::railCritOwner($structure, $ship);
+		if ($owner !== $rail) {
+			//Non-owner: report whether the block is gone so the caller still
+			//skips this rail's 1d20 (the owner did the escape work).
+			return $structure->isDestroyed($gamedata->turn);
+		}
+
+		//Structure intact → nothing to do here; the 1d20 path handles damage.
+		if (!$structure->isDestroyed($gamedata->turn)) return false;
+
+		foreach (self::collectRails($ship) as $r){
+			if ($r->getStructureSystem() !== $structure) continue;
+			if (!is_array($r->hangarUsage) || empty($r->hangarUsage)) continue;   //already escaped (replay) or empty
+			self::railBoxEscape($r, $ship, $gamedata);
+			$r->hangarUsage = array();   //boxes gone — clear stash (idempotency for replay)
+		}
+		return true;
+	}
+
+	/* Which rail on $structure the 16-20 crit destroys. The tabletop lets the
+	 * OWNING PLAYER choose; a player-choice dialog is a future polish item
+	 * (mirrors the Stage 18.6 auto-pick-then-optional-override note). Auto-pick
+	 * heuristic: the rail with the FEWEST remaining boxes (smallest sacrifice —
+	 * the player-favourable default; e.g. a StrikeCarrier loses a 3-box rail
+	 * before a 6-box one). Ties broken by encounter order for determinism. */
+	public static function pickRailToDestroy($structure, $ship){
+		$target = null;
+		$targetBoxes = PHP_INT_MAX;
+		foreach (self::collectRails($ship) as $rail){
+			if ($rail->getStructureSystem() !== $structure) continue;
+			$rem = (int)$rail->getRemainingHealth();
+			if ($rem <= 0) continue;
+			if ($rem < $targetBoxes){
+				$target = $rail;
+				$targetBoxes = $rem;
+			}
+		}
+		return $target;
+	}
+
+	/* Destroy an entire rail: mark all its remaining boxes destroyed via a single
+	 * DamageEntry on the rail itself (replay-safe, no new note state — getRemaining
+	 * Health recomputes capacity to 0 on reload), let its fighters attempt escape,
+	 * then clear its hangarUsage (the boxes are gone). */
+	public static function destroyEntireRail($rail, $ship, $gamedata){
+		$remaining = (int)$rail->getRemainingHealth();
+		if ($remaining > 0){
+			$entry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $rail->id, $remaining, 0, 0, -1, true, false, "Rail destroyed", "RailCrit");
+			$entry->updated = true;
+			$rail->damage[] = $entry;
+		}
+
+		//Fighters on the destroyed rail attempt escape using the existing escape
+		//rules (the carrier-destruction d20 table), scoped to this one rail.
+		self::railBoxEscape($rail, $ship, $gamedata);
+
+		//Boxes are gone — clear whatever stash survived the escape (non-escapees
+		//were disengaged inside railBoxEscape; their stash records are now moot).
+		$rail->hangarUsage = array();
+	}
+
+	/* A rail loses all its boxes (whole-rail crit) while the carrier is still
+	 * alive: its docked fighters attempt escape into space. Reuses the Stage 18
+	 * machinery scoped to a single rail — buildEscapeCandidates([$rail]) +
+	 * computeEscapeCount (the d20 escape table) + performCarrierEscapeSpawns.
+	 * Escapees spawn at the carrier's current hex/heading/(facing + rail
+	 * direction)/speed and get the -50 LaunchedThisTurn penalty (rule 3 — unlike
+	 * a normal rail launch, a forced escape IS penalised next turn). Non-escapees
+	 * are disengaged by performCarrierEscapeSpawns -> markNonEscapeesDestroyed. */
+	public static function railBoxEscape($rail, $carrier, $gamedata){
+		$hangars = array($rail);
+		$virtuals = self::buildEscapeCandidates($hangars, $gamedata);
+		$totalAboard = count($virtuals);
+		if ($totalAboard <= 0) return;
+
+		$roll = random_int(1, 20);
+		$maxEscape = self::computeEscapeCount($roll, $totalAboard);
+		if ($maxEscape <= 0){
+			//Nobody escapes — disengage every docked fighter on the rail so the
+			//fleet-list 0-CV fold hides them (performCarrierEscapeSpawns would do
+			//this via markNonEscapeesDestroyed, but it's only reached when there's
+			//something to spawn; replicate the no-escape branch here).
+			foreach ($rail->hangarUsage as $entry){
+				if (!isset($entry['dockedFlightId'])) continue;
+				$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
+				if ($flight instanceof FighterFlight) self::disengageFighters($flight, PHP_INT_MAX, $gamedata);
+			}
+			return;
+		}
+
+		usort($virtuals, function($a, $b){
+			if ($a['pointCost'] !== $b['pointCost']) return $b['pointCost'] - $a['pointCost'];
+			if ($a['damage']    !== $b['damage']) return $a['damage']    - $b['damage'];
+			return 0;
+		});
+		$chosen = array_slice($virtuals, 0, $maxEscape);
+		self::performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata);
+	}
+
+	/* Persist the rail's 1d20 result on the owning rail for replay determinism.
+	 * Written ONLY from setCriticals (the live Fire Phase advance), never from a
+	 * player submission, so the Stage-15 POST-side-reconstruction clobber trap
+	 * doesn't apply. notekey_human kept <= 40 chars (tac_individual_notes column). */
+	private static function recordRailCritRoll($rail, $roll, $gamedata){
+		$ship = $rail->getUnit();
+		$shipId = $ship ? $ship->id : 0;
+		$payload = json_encode(array('roll' => (int)$roll, 'turn' => (int)$gamedata->turn));
+		$note = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$shipId,
+			$rail->id,
+			'railCritRoll',
+			'Fighter rail critical roll',
+			$payload
+		);
+		Manager::insertIndividualNote($note);
 	}
 
 	/* === Stage 15: ordnance reload pool =================================== */
@@ -821,8 +1090,18 @@ class HangarOps {
 	 * hangarOrdReserve note. By convention this is the first Hangar in
 	 * encounter order — same one used by populateInitialHangarUsage. */
 	public static function primaryHangar($carrier){
-		foreach (self::collectHangars($carrier) as $h) return $h;   //first
-		return null;
+		//The primary hangar carries the carrier-level ordnance/marine pools
+		//(Stage 15/17.1) and the Stage 18 escape-roll note. A FighterRail is
+		//structure-coupled and frequently destroyed, so it must never become the
+		//primary — pick the first NON-rail hangar regardless of ship-systems
+		//order. (Falls back to the first rail only on a hypothetical rails-only
+		//carrier; no such ship exists today — the StrikeCarrier has a real Hangar.)
+		$firstAny = null;
+		foreach (self::collectHangars($carrier) as $h){
+			if ($firstAny === null) $firstAny = $h;
+			if (empty($h->isRail)) return $h;
+		}
+		return $firstAny;
 	}
 
 	/* === Stage 17 ext: marine contingents pool ============================ */
@@ -931,8 +1210,10 @@ class HangarOps {
 
 			//Stage 16: a catapult launch carries NO initiative penalty (neither the
 			//-50 LaunchedThisTurn on the flight nor the -20 HangarOperations on the
-			//carrier). Ordinary hangar launches still apply both.
-			if (empty($hangar->isCatapult)) self::applyLaunchCrits($resurrectedFlight, $carrier, $gamedata);
+			//carrier). Fighter Rails skip ONLY the flight-side -50 (independent
+			//launch, no day-after penalty) but the carrier still eats the -20.
+			//Ordinary hangar launches apply both.
+			if (empty($hangar->isCatapult)) self::applyLaunchCrits($resurrectedFlight, $carrier, $gamedata, !empty($hangar->isRail));
 			return $resurrectedFlight->id;
 		}
 
@@ -1017,7 +1298,8 @@ class HangarOps {
 		Manager::insertIndividualNote($note);
 
 		//Stage 16: catapult launches carry no initiative penalty (see resurrect path).
-		if (empty($hangar->isCatapult)) self::applyLaunchCrits($flight, $carrier, $gamedata);
+		//Fighter Rails skip only the flight-side -50, keep the carrier -20.
+		if (empty($hangar->isCatapult)) self::applyLaunchCrits($flight, $carrier, $gamedata, !empty($hangar->isRail));
 		return $shipid;
 	}
 
@@ -1025,8 +1307,20 @@ class HangarOps {
 	 * - LaunchedThisTurn (-50 ini) on the new flight's first fighter
 	 * - HangarOperations (-20 ini) on the carrier's CnC (via shared helper)
 	 */
-	private static function applyLaunchCrits($flight, $carrier, $gamedata){
-		if ($flight instanceof FighterFlight) {
+	/* Apply launch-time initiative criticals.
+	 *
+	 * Two penalties exist (B5W §10.1):
+	 *   - LaunchedThisTurn (-50) on the launched flight, expiring next turn.
+	 *   - HangarOperations (-20) on the carrier's CnC (idempotent per turn).
+	 *
+	 * $skipFlightCrit suppresses ONLY the flight-side LaunchedThisTurn — used
+	 * by Fighter Rails, whose fighters launch independently with NO day-after
+	 * penalty, while the carrier STILL takes the normal launch/land -20 that
+	 * turn. (Catapults skip BOTH penalties; their call sites suppress this
+	 * whole call instead.)
+	 */
+	private static function applyLaunchCrits($flight, $carrier, $gamedata, $skipFlightCrit = false){
+		if (!$skipFlightCrit && $flight instanceof FighterFlight) {
 			$firstFighter = $flight->getSampleFighter();
 			if ($firstFighter) {
 				$crit = new LaunchedThisTurn(-1, $flight->id, $firstFighter->id, 'LaunchedThisTurn', $gamedata->turn, $gamedata->turn + 1);
@@ -1737,8 +2031,13 @@ class HangarOps {
 		foreach ($hangar->pendingDeployStartTransfer as $entry) {
 			$flightId = isset($entry['flightId']) ? (int)$entry['flightId'] : 0;
 			$flight   = ($flightId > 0) ? $gamedata->getShipById($flightId) : null;
+			//Optional per-hangar slice for an auto-distributed multi-hangar dock
+			//(rails). NULL/absent → the whole flight goes into this hangar (legacy
+			//single-hangar dock). When the client spreads a 9-flight across a 6-box
+			//+ 3-box rail, each hangar's order carries its own count.
+			$count = (isset($entry['count']) && (int)$entry['count'] > 0) ? (int)$entry['count'] : null;
 			$reason   = null;
-			if (!$flight || !self::canDeployStartDock($hangar, $carrier, $flight, $gamedata, $reason)) {
+			if (!$flight || !self::canDeployStartDock($hangar, $carrier, $flight, $gamedata, $reason, $count)) {
 				$failNote = new IndividualNote(
 					-1,
 					$gamedata->id,
@@ -1753,7 +2052,7 @@ class HangarOps {
 				Manager::insertIndividualNote($failNote);
 				continue;
 			}
-			self::performDeployStartDock($hangar, $carrier, $flight, $gamedata);
+			self::performDeployStartDock($hangar, $carrier, $flight, $gamedata, $count);
 		}
 
 		$hangar->pendingDeployStartTransfer = null;   //consumed
@@ -1769,7 +2068,7 @@ class HangarOps {
 	 *   - Carrier hangar isn't destroyed and has compatible free boxes for the
 	 *     flight's full size
 	 */
-	public static function canDeployStartDock($hangar, $carrier, $flight, $gamedata, &$reason = null){
+	public static function canDeployStartDock($hangar, $carrier, $flight, $gamedata, &$reason = null, $count = null){
 		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
 		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
 		if ($hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
@@ -1788,9 +2087,12 @@ class HangarOps {
 			$reason = 'carrier not deploying this turn'; return false;
 		}
 
-		//Whole flight goes into the hangar — partial deploy-dock isn't a thing
-		//(the player hasn't placed any of the flight yet).
-		$size = (int)$flight->flightSize;
+		//$count is the number of craft this hangar will take. NULL = the whole
+		//flight (legacy single-hangar dock). A multi-hangar auto-distribute
+		//(rails: a 9-flight spread across a 6-box + 3-box rail) passes the
+		//per-hangar slice — partial deploy-docks split the flight into fragments
+		//exactly like the Firing-Phase splitter (performLand).
+		$size = ($count === null) ? (int)$flight->flightSize : (int)$count;
 		if ($size <= 0) { $reason = 'flight has no craft'; return false; }
 
 		$category = self::trueSizeOf($flight);
@@ -1800,7 +2102,10 @@ class HangarOps {
 		$boxesNeeded = !empty($hangar->isCatapult) ? $size : $size * self::boxesPerCraftForClass($flight->phpclass);
 		if ($free < $boxesNeeded) { $reason = 'hangar full'; return false; }
 
-		//Stage 10.6.2: per-ship customFighter cap.
+		//Stage 10.6.2: per-ship customFighter cap. Checked against the per-hangar
+		//slice; the aggregate across hangars is bounded by the cap because each
+		//slice consumes from the same shared remaining (entries stamped as they
+		//are written within this processing pass).
 		$customName = isset($flight->customFtrName) ? (string)$flight->customFtrName : '';
 		if ($customName !== '') {
 			$remaining = self::customFighterRemaining($carrier, $customName);
@@ -1810,15 +2115,31 @@ class HangarOps {
 		return true;
 	}
 
-	/* Move $flight from "deploying to map" into $hangar's storage.
-	 * Mirrors performLand's full-dock branch — stash entry carries
-	 * dockedFlightId so a later launch (Stage 4) can resurrect this ship row.
+	/* Move $flight (or $count craft of it) from "deploying to map" into $hangar's
+	 * storage. Stash entry carries dockedFlightId so a later launch (Stage 4) can
+	 * resurrect the ship row.
 	 *
-	 * Mutates: $hangar->hangarUsage, $flight->removed/$flight->removedTurn.
-	 * Writes a hangarDeployStartEvent note for replay/audit.
+	 * $count NULL → the whole flight goes into this one hangar (legacy single-
+	 * hangar dock). A multi-hangar auto-distribute (rails: a 9-flight across a
+	 * 6-box + 3-box rail) passes the per-hangar slice; when the slice is smaller
+	 * than the flight's currently-active craft it splits off a fragment exactly
+	 * like performLand's partial branch (the source flight's remaining craft are
+	 * docked by the final slice). Deployment flights carry no damage yet, so the
+	 * fragment is clean.
+	 *
+	 * Mutates: $hangar->hangarUsage, $flight->removed/$flight->removedTurn (or the
+	 * fragment's). Writes a hangarDeployStartEvent note for replay/audit.
 	 */
-	public static function performDeployStartDock($hangar, $carrier, $flight, $gamedata){
-		$count = (int)$flight->flightSize;
+	public static function performDeployStartDock($hangar, $carrier, $flight, $gamedata, $count = null){
+		//Clamp to the flight's still-active craft (earlier slices this pass may
+		//have already split some off into fragments).
+		$activeCount = $flight->countActiveCraft($gamedata->turn);
+		if ($activeCount <= 0) return;
+		$count = ($count === null) ? $activeCount : (int)$count;
+		if ($count > $activeCount) $count = $activeCount;
+		if ($count <= 0) return;
+
+		$partial = ($count < $activeCount);
 		$category = self::trueSizeOf($flight);
 
 		$entry = array(
@@ -1827,7 +2148,6 @@ class HangarOps {
 			'flightSize'     => $count,
 			'hangarType'     => $category,
 			'dockedTurn'     => $gamedata->turn,
-			'dockedFlightId' => $flight->id,
 		);
 		//Stage 10.6.2: stamp customFtrName for per-ship cap accounting.
 		if (!empty($flight->customFtrName)) {
@@ -1836,14 +2156,30 @@ class HangarOps {
 		//Stamp per-craft box cost for unitSize<1 craft (see performLand).
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
 		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
-		$hangar->hangarUsage[] = $entry;
 
-		//Flag removed-from-board. Loaders re-apply this via dockedFlightId, but
-		//setting it here keeps the current request's downstream consumers (e.g.
-		//the movement-insertion loop in DeploymentGamePhase) aware that the
-		//flight isn't on the board.
-		$flight->removed = true;
-		$flight->removedTurn = $gamedata->turn;
+		if ($partial) {
+			//Split a fragment off for this hangar's slice (mirrors performLand).
+			//dockFighters disengages the chosen craft in the source flight; the
+			//fragment carries them (no damage to copy pre-game, but reuse the
+			//same helper so the resurrect path is identical).
+			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
+			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $hangar, $gamedata);
+			if ($fragment) {
+				$entry['dockedFlightId'] = $fragment->id;
+				$entry['name']           = $fragment->name;
+				$entry['fragment']       = true;
+			}
+		} else {
+			//Whole (remaining) flight goes here — the source flight IS the docked
+			//unit. Loaders re-apply $removed via dockedFlightId, but set it here so
+			//the current request's downstream consumers (the movement-insertion
+			//loop in DeploymentGamePhase) know the flight isn't on the board.
+			$entry['dockedFlightId'] = $flight->id;
+			$flight->removed = true;
+			$flight->removedTurn = $gamedata->turn;
+		}
+
+		$hangar->hangarUsage[] = $entry;
 
 		$note = new IndividualNote(
 			-1,
@@ -1854,7 +2190,7 @@ class HangarOps {
 			$hangar->id,
 			'hangarDeployStartEvent',
 			'Hangar received flight (deployment)',
-			$flight->id . ':' . $flight->phpclass . ':' . $count
+			$flight->id . ':' . $flight->phpclass . ':' . $count . ($partial ? ':partial' : '')
 		);
 		Manager::insertIndividualNote($note);
 	}

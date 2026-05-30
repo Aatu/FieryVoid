@@ -428,6 +428,35 @@ shipManager.systems = {
         return false;
     },
 
+    //Fighter Rails mirror the catapult exclusion: rail boxes are structure HP
+    //(already excluded from getTotalHangarCapacity, which sums only name=="hangar"),
+    //and the rail-borne fighter category (e.g. "light") must be excluded from the
+    //declared-shuttle-pool sum so leftover-shuttle math matches the server's
+    //HangarOps::getDefaultShuttles. Mirrors HangarOps::shipHasRail / railFighterCategories.
+    shipHasRail: function shipHasRail(ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "fighterRail" || s.isRail)) return true;
+        }
+        return false;
+    },
+
+    //Lowercased set of ship.fighters category keys (e.g. "light") that ride this
+    //ship's rails. Returns a plain object used as a membership set.
+    railFighterCategories: function railFighterCategories(ship) {
+        var cats = {};
+        if (!ship || !ship.systems) return cats;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "fighterRail" || s.isRail)) {
+                var cat = String(s.hangarType || "").toLowerCase().trim();
+                if (cat !== "") cats[cat] = true;
+            }
+        }
+        return cats;
+    },
+
     //Sum of declared fighters that consume default-shuttle-pool hangar boxes.
     //Excludes catapult-destined 'superheavy' fighters when the ship has a
     //catapult. Single source of truth for getDefaultShuttles / Composition.
@@ -438,9 +467,11 @@ shipManager.systems = {
         var declared = 0;
         if (!fighters) return 0;
         var hasCatapult = shipManager.systems.shipHasCatapult(ship);
+        var railCategories = shipManager.systems.railFighterCategories(ship);
         for (var k in fighters) {
             var key = String(k).toLowerCase().trim();
             if (hasCatapult && key === "superheavy") continue;
+            if (railCategories[key]) continue;   //rail-borne fighters aren't shuttle pool
             var count = parseInt(fighters[k], 10) || 0;
             if (count <= 0) continue;
             declared += (key === "ultralight") ? Math.ceil(count / 2) : count;

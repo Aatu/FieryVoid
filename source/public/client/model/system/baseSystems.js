@@ -353,10 +353,16 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			var order = this.pendingDeployStartOrders[q];
 			var flight = order && order.flightId != null ? gamedata.getShip(order.flightId) : null;
 			if (!flight) continue;
+			//A Fighter-Rail auto-distribute spread sends a per-bay `count` slice
+			//(a 9-flight across a 6-box + 3-box rail → 6 here, 3 there); fall back
+			//to the full flight size for a legacy single-bay deploy-dock order.
+			var deploySlice = (order.count != null && parseInt(order.count, 10) > 0)
+				? parseInt(order.count, 10)
+				: parseInt(flight.flightSize || 1, 10);
 			displayEntries.push({
 				phpclass:   flight.phpclass,
 				name:       flight.name,
-				flightSize: parseInt(flight.flightSize || 1, 10),
+				flightSize: deploySlice,
 				boxesPerCraft: boxesPerCraftOf({ unitSize: flight.unitSize }),
 				hangarType: this.hangarType,
 				_pending:   'deploying'
@@ -563,6 +569,26 @@ var Catapult = function Catapult(json, ship) {
 };
 Catapult.prototype = Object.create(Hangar.prototype);
 Catapult.prototype.constructor = Catapult;
+
+// Fighter Rails (B5W "Fighter Racks"): a FighterRail is a Hangar whose boxes
+// are bolted to a structure block — each box carries one fighter that launches
+// and lands independently. Extending Hangar inherits the data deep-clone (Stage
+// 12 shared-reference fix), pending-order hydration, refreshHangarTooltip, and
+// doIndividualNotesTransfer. UNLIKE a catapult, a rail uses the ordinary
+// (box-count) capacity arithmetic — it has a launch/land output budget and its
+// capacity shrinks with damage — so refreshHangarTooltip's non-catapult branch
+// is already correct and the "(N destroyed)" line works from box-loss damage
+// rows. The launch/dock UI helpers gate on name (added alongside 'catapult').
+var FighterRail = function FighterRail(json, ship) {
+	Hangar.call(this, json, ship);
+	// Set the discriminator client-side so the tooltip / dialogs don't depend on
+	// it round-tripping through the gamedata JSON (matches Catapult). Hangar.call
+	// already ran refreshHangarTooltip once; no need to recompute — a rail's
+	// capacity uses the same non-catapult branch Hangar already rendered.
+	this.isRail = true;
+};
+FighterRail.prototype = Object.create(Hangar.prototype);
+FighterRail.prototype.constructor = FighterRail;
 
 var CargoBay = function CargoBay(json, ship) {
 	ShipSystem.call(this, json, ship);

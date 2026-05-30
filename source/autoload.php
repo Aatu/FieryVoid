@@ -3794,6 +3794,7 @@ spl_autoload_register(
 
                 //HANGER OPERATIONS CLASSES
                 'hangarops' => '/server/model/systems/HangarOps.php',
+                'fighterrail' => '/server/model/systems/baseSystems.php',                
                 'flyer' => '/server/model/ships/Shuttle.php',
                 'flyerprotectorate' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',

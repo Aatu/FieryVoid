@@ -40,10 +40,21 @@ class DeploymentGamePhase implements Phase
 		
 		foreach ($ships as $currShip){ //generate system-specific information if necessary
 			$currShip->generateIndividualNotes($gameData, $dbManager);
-		}		
+		}
 		foreach ($ships as $currShip){ //save system-specific information if necessary (separate loop - generate for all, THEN save for all!
 			$currShip->saveIndividualNotes($dbManager);
         }
+
+        //Hangar Ops: a deployment-phase dock that SPLITS a flight across rails/bays
+        //(performDeployStartDock -> dockFighters) marks the docked fighters in the
+        //SOURCE flight with a DockedFighter critical so they don't relaunch with the
+        //flight. Those crits are created during generateIndividualNotes above but —
+        //unlike the Fire Phase — are never persisted here, so on reload the source
+        //flight regained its full size (a 9-flight split 3+3+3 relaunched 9+3+3 = 15).
+        //Persist them now (mirrors FireGamePhase::advance). New crits carry id < 1
+        //and updated = true; loaded crits are id >= 1 / updated = false, so this
+        //inserts only the fresh dock crits with no duplication.
+        $dbManager->submitCriticals($gameData->id, $gameData->getUpdatedCriticals(), $gameData->turn);
 
         /*//Attempted segment when boosting in other phases was allowed
         foreach ($ships as $ship){

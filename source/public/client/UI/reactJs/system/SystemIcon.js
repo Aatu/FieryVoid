@@ -184,7 +184,7 @@ class SystemIcon extends React.Component {
         // (deployment → hangarDeployDock, firing → hangarLaunch). Fall through
         // to the SystemClicked menu when no dialog is applicable so the player
         // still gets the info popup for empty/queued hangars.
-        if (gamedata.isMyShip(ship) && (system.name === 'hangar' || system.name === 'catapult')) {
+        if (gamedata.isMyShip(ship) && (system.name === 'hangar' || system.name === 'catapult' || system.name === 'fighterRail')) {
             if (gamedata.gamephase === -1
                 && window.DeploymentDock
                 && typeof window.DeploymentDock.shipHasOpenableDockDialog === 'function'

@@ -42,7 +42,10 @@ window.DeploymentDock = (function () {
     // a flat 1 (it holds one fighter; extra boxes are HP only, and it operates
     // regardless of damage).
     function isDockHangar(sys) {
-        return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult'));
+        //Fighter Rails (name "fighterRail") are dock-capable too; like an ordinary
+        //hangar they use box-count capacity and respect their own damage (the
+        //isCat branches in the box-cost helpers stay catapult-only).
+        return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail'));
     }
     function effectiveHangarBoxes(hangar) {
         if (!hangar) return 0;
@@ -101,12 +104,14 @@ window.DeploymentDock = (function () {
 
     // Friendly hangars on $ship that aren't destroyed and still have free
     // boxes (accounting for current usage AND already-queued deploy starts).
-    function collectUsableHangars(ship) {
+    // $reclaimFlightId (optional): that flight's own reservations are treated as
+    // reclaimable (for re-planning an already-queued flight).
+    function collectUsableHangars(ship, reclaimFlightId) {
         var out = [];
         ship.systems.forEach(function (sys) {
             if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
-            var free = hangarFreeBoxes(sys);
+            var free = hangarFreeBoxes(sys, reclaimFlightId);
             if (free > 0) out.push({ hangar: sys, free: free });
         });
         return out;
@@ -115,8 +120,13 @@ window.DeploymentDock = (function () {
     // Effective free boxes = effective max (maxhealth - net damage)
     //                      - already-stored usage
     //                      - flights queued for deploy-start dock here this session.
-    function hangarFreeBoxes(hangar) {
+    // $reclaimFlightId (optional): treat that flight's OWN existing reservations
+    // as reclaimable (not committed) so a re-edit/re-plan of an already-queued
+    // flight sees the capacity it had before queuing — mirrors
+    // eligibleHangarsForFlight's own-order reclaim.
+    function hangarFreeBoxes(hangar, reclaimFlightId) {
         var effective = effectiveHangarBoxes(hangar);
+        var reclaim = (reclaimFlightId != null) ? parseInt(reclaimFlightId, 10) : null;
 
         // Box-aware: unitSize<1 craft consume >1 box each (catapults excepted).
         var used = 0;
@@ -127,8 +137,16 @@ window.DeploymentDock = (function () {
         var queued = 0;
         if (Array.isArray(hangar.pendingDeployStartOrders)) {
             hangar.pendingDeployStartOrders.forEach(function (o) {
+                if (reclaim != null && parseInt(o.flightId, 10) === reclaim) return;   //own queue is reclaimable
                 var f = gamedata.getShip(o.flightId);
-                if (f) queued += craftBoxesInHangar(hangar, f.flightSize, f.unitSize);
+                if (!f) return;
+                //Auto-distribute orders carry a per-bay `count` slice; legacy
+                //single-bay orders reserve the whole flight. Use the slice so a
+                //flight spread across bays doesn't over-reserve each one.
+                var slice = (o.count != null && parseInt(o.count, 10) > 0)
+                    ? parseInt(o.count, 10)
+                    : parseInt(f.flightSize || 1, 10);
+                queued += craftBoxesInHangar(hangar, slice, f.unitSize);
             });
         }
 
@@ -276,23 +294,71 @@ window.DeploymentDock = (function () {
         return false;
     }
 
-    // Add $flight to $carrier's first-fitting hangar's pendingDeployStartOrders,
-    // and stamp $flight.pendingDeployDock so validateAllDeployment skips it.
-    // Returns true on success, false if no hangar can hold the flight.
+    // Greedy auto-distribution of $flight across $carrier's usable hangars/rails,
+    // biggest free first. A flight larger than any single bay (e.g. a 9-fighter
+    // flight onto a StrikeCarrier whose rails are 6+3+3+3+3+2) spreads across
+    // several bays — each gets a {flightId, count} order so the server splits the
+    // flight into fragments (mirrors the Firing-Phase dock splitter). Returns the
+    // list of hangars used (with their allocated counts), or [] if the carrier's
+    // COMBINED free capacity can't hold the whole flight.
+    //
+    // Box-aware: free is in boxes; a unitSize<1 craft costs >1 box each, so the
+    // per-bay craft capacity is floor(free / perCraftBoxes).
+    // $reclaimFlightId (optional): re-planning an already-queued flight — its own
+    // existing reservations are reclaimed so the plan sees true free capacity.
+    function distributeFlightAcrossHangars(carrier, flight, reclaimFlightId) {
+        var cat = categoryForFlight(flight);
+        var perCraft = craftBoxesInHangar(null, 1, flight.unitSize); //boxes per single craft (catapult-agnostic here; rails/hangars are non-catapult)
+        if (perCraft < 1) perCraft = 1;
+        var remaining = parseInt(flight.flightSize, 10) || 1;
+
+        var hangars = collectUsableHangars(carrier, reclaimFlightId).filter(function (h) {
+            return hangarAcceptsCategory(h.hangar.hangarType, cat, carrier);
+        });
+        //Biggest free first so we use the fewest bays (and prefer the 6-box rail
+        //before the 3-box ones). Ties keep encounter order.
+        hangars.sort(function (a, b) { return b.free - a.free; });
+
+        var plan = [];
+        for (var i = 0; i < hangars.length && remaining > 0; i++) {
+            var h = hangars[i];
+            //Catapults count craft 1:1; rails/hangars charge per-craft boxes.
+            var isCat = !!(h.hangar.isCatapult || h.hangar.name === 'catapult');
+            var craftFit = isCat ? h.free : Math.floor(h.free / perCraft);
+            if (craftFit <= 0) continue;
+            var take = Math.min(remaining, craftFit);
+            plan.push({ hangar: h.hangar, count: take });
+            remaining -= take;
+        }
+        if (remaining > 0) return [];   //combined capacity insufficient
+        return plan;
+    }
+
+    // Queue $flight for deployment-dock onto $carrier, auto-distributing across
+    // its hangars/rails. Stamps $flight.pendingDeployDock so validateAllDeployment
+    // skips it. Returns true on success, false if the carrier can't hold the
+    // whole flight across all its bays.
     function queueDeployStartDock(carrier, flight) {
         if (!flight || !carrier) return false;
         if (flight.pendingDeployDock) return false;          //already queued somewhere
-        var hangars = collectUsableHangars(carrier);
-        var hangar = firstFittingHangar(hangars, flight, carrier);
-        if (!hangar) return false;
+        var plan = distributeFlightAcrossHangars(carrier, flight);
+        if (plan.length === 0) return false;
 
-        if (!Array.isArray(hangar.pendingDeployStartOrders)) hangar.pendingDeployStartOrders = [];
-        hangar.pendingDeployStartOrders.push({ flightId: parseInt(flight.id, 10) });
-        hangar.pendingDeployStartOrdersDirty = true;
+        var fid = parseInt(flight.id, 10);
+        var single = (plan.length === 1);
+        plan.forEach(function (slot) {
+            if (!Array.isArray(slot.hangar.pendingDeployStartOrders)) slot.hangar.pendingDeployStartOrders = [];
+            //Single-bay dock omits count (server treats as the whole flight) so the
+            //common one-hangar case behaves exactly as before — no fragmenting.
+            var order = { flightId: fid };
+            if (!single) order.count = slot.count;
+            slot.hangar.pendingDeployStartOrders.push(order);
+            slot.hangar.pendingDeployStartOrdersDirty = true;
+        });
 
         flight.pendingDeployDock = {
             carrierId: parseInt(carrier.id, 10),
-            hangarId:  parseInt(hangar.id, 10)
+            hangarId:  parseInt(plan[0].hangar.id, 10)   //informational only (first bay used)
         };
         return true;
     }
@@ -362,20 +428,13 @@ window.DeploymentDock = (function () {
             unqueueDeployStartDock(flight);
         }
 
-        //eligibleHangarsForFlight already filters by category + free space and
-        //treats THIS flight's own queue as reclaimable. Pick the first match.
-        var eligible = eligibleHangarsForFlight(carrier, flight);
-        if (eligible.length === 0) return null;
-        var hangar = eligible[0].hangar;
-
-        if (!Array.isArray(hangar.pendingDeployStartOrders)) hangar.pendingDeployStartOrders = [];
-        hangar.pendingDeployStartOrders.push({ flightId: parseInt(flight.id, 10) });
-        hangar.pendingDeployStartOrdersDirty = true;
-        flight.pendingDeployDock = {
-            carrierId: parseInt(carrier.id, 10),
-            hangarId:  parseInt(hangar.id, 10)
-        };
-        return hangar;
+        //Auto-distribute across the carrier's bays (handles a flight larger than
+        //any single rail by spreading it; queueDeployStartDock does the work and
+        //sets pendingDeployDock). Returns the first bay used so callers that just
+        //need a truthy "it docked" signal keep working.
+        if (!queueDeployStartDock(carrier, flight)) return null;
+        var hid = flight.pendingDeployDock ? flight.pendingDeployDock.hangarId : null;
+        return (hid != null) ? gamedata.getShip(carrier.id).systems.find(function (s) { return s && s.id === hid; }) || null : null;
     }
 
     // Public wrapper used by confirm.js. Same as collectPendingFlightsForSlot
@@ -480,7 +539,8 @@ window.DeploymentDock = (function () {
         queueDeployStartDock:         queueDeployStartDock,
         autoQueueDockOnCarrier:       autoQueueDockOnCarrier,
         unqueueDeployStartDock:       unqueueDeployStartDock,
-        hangarFreeBoxes:              hangarFreeBoxes
+        hangarFreeBoxes:              hangarFreeBoxes,
+        distributeFlightAcrossHangars: distributeFlightAcrossHangars
     };
 })();
 
@@ -559,8 +619,9 @@ window.refreshDeploymentUIForDeployStart = function () {
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
                 //isDockHangar lives inside the IIFE scope above and is NOT visible
-                //here, so inline the check (Stage 16: a catapult is a dock hangar too).
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && typeof sys.refreshHangarTooltip === 'function') {
+                //here, so inline the check (Stage 16: a catapult is a dock hangar too;
+                //Fighter Rails likewise have a refreshable hangar tooltip).
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
@@ -603,8 +664,9 @@ window.refreshFiringHangarTooltips = function () {
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
                 //isDockHangar lives inside the IIFE scope above and is NOT visible
-                //here, so inline the check (Stage 16: a catapult is a dock hangar too).
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && typeof sys.refreshHangarTooltip === 'function') {
+                //here, so inline the check (Stage 16: a catapult is a dock hangar too;
+                //Fighter Rails likewise have a refreshable hangar tooltip).
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
