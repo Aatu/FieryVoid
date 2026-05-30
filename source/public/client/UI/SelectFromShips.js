@@ -172,7 +172,20 @@ window.SelectFromShips = function () {
             if (ship.flight) {
                 var noOfFighters = 0;
                 ship.systems.forEach(ftr => {
-                    if (!shipManager.systems.isDestroyed(ship, ftr)) {
+                    //In replay, count fighters by their state AS OF the viewed turn
+                    //(gamedata.turn is the replay turn). A fighter docked/destroyed
+                    //THIS turn was still flying when this turn's combat happened, so
+                    //it should still be counted — otherwise a flight that partial-docks
+                    //3 of 6 on turn N shows "(3)" on turn N instead of the "(6)" that
+                    //were present. Outside replay, fall back to the plain destroyed check.
+                    var counted;
+                    if (gamedata.replay) {
+                        var turnDestroyed = damageManager.getTurnDestroyed(ship, ftr);
+                        counted = (turnDestroyed === null || turnDestroyed >= gamedata.turn);
+                    } else {
+                        counted = !shipManager.systems.isDestroyed(ship, ftr);
+                    }
+                    if (counted) {
                         noOfFighters++;
                     }
                 });

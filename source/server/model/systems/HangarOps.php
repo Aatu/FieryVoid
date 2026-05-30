@@ -1623,6 +1623,13 @@ class HangarOps {
 			if ($fragment) {
 				$entry['dockedFlightId'] = $fragment->id;
 				$entry['name']           = $fragment->name;     //"$sourceName - Detachment"
+				//A fragment is born $removed at the dock turn — it never existed
+				//on the board as its own flight. Mark it so onIndividualNotesLoaded
+				//can restore $spawned == dockedTurn on reload (spawned isn't a
+				//tac_ship column); the replay uses spawned==removedTurn to hide
+				//the fragment on its dock turn instead of rendering a phantom
+				//detachment alongside the still-full source flight.
+				$entry['fragment'] = true;
 			}
 		} else {
 			//Full dock: the source flight IS the docked unit. Stash entry
@@ -2340,6 +2347,15 @@ class HangarOps {
 						if ($newFragment) {
 							$newEntry['dockedFlightId'] = $newFragment->id;
 							$newEntry['name']           = $newFragment->name;
+							//This fragment is born $removed THIS (launch) turn —
+							//like the partial-dock fragment, it never existed on
+							//the board on its own. Stamp the marker + the current
+							//turn so onIndividualNotesLoaded restores spawned ==
+							//removedTurn == this turn and the replay hides it on
+							//the turn it was split off. (Inherited dockedTurn from
+							//the original dock would be the WRONG turn here.)
+							$newEntry['fragment']   = true;
+							$newEntry['dockedTurn'] = $gamedata->turn;
 						}
 						$newEntries[] = $newEntry;
 					} else {

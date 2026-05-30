@@ -3102,6 +3102,14 @@ class Hangar extends ShipSystem{
 				if (!$flight) continue;
 				$flight->removed = true;
 				if (isset($entry['dockedTurn'])) $flight->removedTurn = (int)$entry['dockedTurn'];
+				//A fragment flight (partial-dock detachment) was born $removed at
+				//the dock turn and never existed on the board. $spawned isn't a
+				//tac_ship column, so restore it here from dockedTurn — the replay
+				//hides a flight whose spawned == removedTurn on that turn instead
+				//of rendering a phantom detachment beside the still-full source.
+				if (!empty($entry['fragment']) && isset($entry['dockedTurn'])) {
+					$flight->spawned = (int)$entry['dockedTurn'];
+				}
 			}
 		}
 
