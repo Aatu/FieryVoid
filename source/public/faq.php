@@ -395,6 +395,31 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     </li>
                 </ul>
             </li>
+
+            <li><b>Fighter Rails:</b> Some carriers are equipped with external Fighter Rails instead of, or in addition to, standard hangar bays.
+                <ul class="circle-list">
+                    <li><strong>Capacity:</strong> The rail's structure is also its capacity — a 6 structure rail carries up to 6 fighters.
+                        However, rail boxes are part of the associated structure block on the carrier, not a separate HP pool, so they do not add extra hit points to the ship.</li>
+                    <li><strong>Compatible craft:</strong> Fighter Rails hold combat fighters only (the type declared in the ship file, e.g. light fighters).
+                        They do not hold shuttles, assault shuttles, or breaching pods.</li>
+                    <li><strong>Launching:</strong> Each fighter on a rail launches independently, like a normal hangar.
+                        The carrier suffers the standard <strong>−20 Initiative</strong> penalty on the following turn, but the launched flight receives
+                        <strong>no −50 Initiative penalty</strong> — fighters launch directly from the rail with no disorientation.</li>
+                    <li><strong>Landing / recovery:</strong> Fighters dock back onto the rail exactly as they would into a normal hangar — same hex, matching heading and speed.
+                        The carrier still receives the −20 Initiative penalty on the following turn.</li>
+                    <li><strong>Reload cadence:</strong> Because the airlocks connecting rails to the carrier's interior are narrow, rearming a docked fighter takes
+                        <strong>twice as long</strong> as a standard hangar — a docked flight begins rearming on the second full turn inside the rail.</li>
+                    <li><strong>Structure-coupled destruction — damage crit (1d20):</strong> Whenever the structure block a rail is attached to takes damage in a turn,
+                        an unmodified d20 is rolled at the end of that turn.  On a natural <strong>16–20</strong> one entire rail on that structure is destroyed
+                        (the smallest remaining rail is chosen automatically).  Any fighters on the destroyed rail immediately attempt to escape using the standard
+                        carrier-destruction escape table (see <em>Carrier destruction</em> above), but escapees <strong>do</strong> suffer the −50 Initiative penalty
+                        on the following turn — a forced evacuation is not a clean launch.</li>
+                    <li><strong>Structure-coupled destruction — structure block destroyed:</strong> If the structure block itself is destroyed entirely, all rails attached to it
+                        are simultaneously destroyed.  Each rail's fighters independently attempt escape using the same d20 table.</li>
+                    <li><strong>Deployment phase docking:</strong> Flights too large for any single rail are automatically distributed across multiple rails
+                        (e.g. a 9-fighter flight onto a carrier with 6-box and 3-box rails will split 6 + 3 automatically).</li>
+                </ul>
+            </li>
             <br>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
