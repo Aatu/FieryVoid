@@ -313,6 +313,30 @@
     .confirm {
         min-width: unset;
     }
+
+    /* The multi-value and hangar confirm dialogs set fixed min-widths
+       (400px / 500px) that override .confirm's max-width:100% and push the
+       window wider than a phone viewport, causing horizontal overflow.
+       Drop those floors on small screens so max-width can clamp the dialog
+       to the viewport, and leave a small gutter so the border isn't flush
+       against the screen edges. box-sizing keeps the padding inside the
+       clamped width. */
+    .confirm.multi-value-confirm,
+    .confirm.multi-value-confirm.hangar-confirm {
+        min-width: 0;
+        max-width: calc(100% - 16px);
+        box-sizing: border-box;
+    }
+
+    /* Let rows wrap on narrow viewports: the inputs/selects carry a 130px
+       min-width that, paired with a non-shrinking label (the DeployDock and
+       Recover rows pin their label to flex:0 0 auto), can exceed a phone's
+       row width. Wrapping drops the control onto a second line instead of
+       overflowing the dialog. */
+    .confirm.multi-value-confirm .multi-value-row {
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
 }
 
 /* Multi-value input dialog styles */
