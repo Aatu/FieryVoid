@@ -962,7 +962,7 @@ class HangarOps {
 			$rail->railCritLoadedTurn  = (int)$gamedata->turn;
 			$rail->railCritLoadedValue = $roll;
 		}
-
+		//$roll = 17; //For debugging reasons.		
 		if ($roll >= 16){
 			$target = self::pickRailToDestroy($structure, $ship);
 			if ($target) self::destroyEntireRail($target, $ship, $gamedata);
@@ -1003,11 +1003,17 @@ class HangarOps {
 		//Structure intact → nothing to do here; the 1d20 path handles damage.
 		if (!$structure->isDestroyed($gamedata->turn)) return false;
 
+		//Every rail on the dead block loses all its boxes. shedBoxesFromBay sheds
+		//each rail's craft (escape per d20) and trims the host entries; a flight
+		//spanning two rails on THIS block is shed across both per-rail passes (its
+		//flightSize reaches 0 and the entry compacts). Re-homing onto a sibling is
+		//suppressed for a sibling that is itself a destroyed-block rail (shedBoxes
+		//FromBay's getRemainingHealth<=0 guard), so survivors don't migrate onto a
+		//dying bay. Stage 21.3: replaces the pre-no-split railBoxEscape + blanket
+		//hangarUsage clear, which lost foreign-occupancy survivors hosted elsewhere.
 		foreach (self::collectRails($ship) as $r){
 			if ($r->getStructureSystem() !== $structure) continue;
-			if (!is_array($r->hangarUsage) || empty($r->hangarUsage)) continue;   //already escaped (replay) or empty
-			self::railBoxEscape($r, $ship, $gamedata);
-			$r->hangarUsage = array();   //boxes gone — clear stash (idempotency for replay)
+			self::shedBoxesFromBay($r, $ship, $gamedata);
 		}
 		return true;
 	}
@@ -1015,28 +1021,42 @@ class HangarOps {
 	/* Which rail on $structure the 16-20 crit destroys. The tabletop lets the
 	 * OWNING PLAYER choose; a player-choice dialog is a future polish item
 	 * (mirrors the Stage 18.6 auto-pick-then-optional-override note). Auto-pick
-	 * heuristic: the rail with the FEWEST remaining boxes (smallest sacrifice —
-	 * the player-favourable default; e.g. a StrikeCarrier loses a 3-box rail
-	 * before a 6-box one). Ties broken by encounter order for determinism. */
+	 * heuristic (Stage 21.3, player-favourable):
+	 *   1. Prefer an EMPTY rail (no stored craft — own or foreign occupancy): a
+	 *      player would sacrifice a bare rail before one carrying fighters. Among
+	 *      empties, pick the smallest remaining boxes.
+	 *   2. If every rail on the block is occupied, fall back to the smallest
+	 *      remaining-boxes rail (smallest sacrifice — e.g. a StrikeCarrier loses a
+	 *      3-box rail before a 6-box one).
+	 * Ties broken by encounter (collectRails) order for replay determinism. */
 	public static function pickRailToDestroy($structure, $ship){
-		$target = null;
-		$targetBoxes = PHP_INT_MAX;
+		$emptyTarget = null;  $emptyBoxes = PHP_INT_MAX;
+		$anyTarget   = null;  $anyBoxes   = PHP_INT_MAX;
 		foreach (self::collectRails($ship) as $rail){
 			if ($rail->getStructureSystem() !== $structure) continue;
 			$rem = (int)$rail->getRemainingHealth();
 			if ($rem <= 0) continue;
-			if ($rem < $targetBoxes){
-				$target = $rail;
-				$targetBoxes = $rem;
+			if ($rem < $anyBoxes){ $anyTarget = $rail; $anyBoxes = $rem; }
+			//usageCountFor is occupancy-aware: 0 means no own craft AND no foreign
+			//occupancy boxes from a sibling-hosted multi-bay flight spilling here.
+			if (self::usageCountFor($rail) === 0 && $rem < $emptyBoxes){
+				$emptyTarget = $rail; $emptyBoxes = $rem;
 			}
 		}
-		return $target;
+		return $emptyTarget !== null ? $emptyTarget : $anyTarget;
 	}
 
 	/* Destroy an entire rail: mark all its remaining boxes destroyed via a single
 	 * DamageEntry on the rail itself (replay-safe, no new note state — getRemaining
-	 * Health recomputes capacity to 0 on reload), let its fighters attempt escape,
-	 * then clear its hangarUsage (the boxes are gone). */
+	 * Health recomputes capacity to 0 on reload), then shed every craft that lived
+	 * in those boxes (escape attempt + host-entry shrink).
+	 *
+	 * Stage 21.3 (no-split): the boxes on this rail may belong to entries hosted on
+	 * a SIBLING bay (occupancy spilled onto this rail) as well as to entries hosted
+	 * here. shedBoxesFromBay handles both — it sheds from the correct host flight
+	 * and trims the host entry's occupancy, leaving survivors on intact bays as ONE
+	 * ship. Any own-entry stash that survives the shed is then cleared (its boxes are
+	 * gone); foreign-occupancy entries were trimmed in place on their host bay. */
 	public static function destroyEntireRail($rail, $ship, $gamedata){
 		$remaining = (int)$rail->getRemainingHealth();
 		if ($remaining > 0){
@@ -1045,51 +1065,250 @@ class HangarOps {
 			$rail->damage[] = $entry;
 		}
 
-		//Fighters on the destroyed rail attempt escape using the existing escape
-		//rules (the carrier-destruction d20 table), scoped to this one rail.
-		self::railBoxEscape($rail, $ship, $gamedata);
-
-		//Boxes are gone — clear whatever stash survived the escape (non-escapees
-		//were disengaged inside railBoxEscape; their stash records are now moot).
-		$rail->hangarUsage = array();
+		//Shed the craft that occupied this rail's boxes (escape per d20) and trim /
+		//re-home the host entries. shedBoxesFromBay owns the stash mutation now (it
+		//re-homes a surviving multi-bay entry whose host WAS this rail onto a
+		//surviving sibling), so we do NOT blanket-clear $rail->hangarUsage here —
+		//that would drop survivors accounted via a sibling's occupancy.
+		self::shedBoxesFromBay($rail, $ship, $gamedata);
 	}
 
-	/* A rail loses all its boxes (whole-rail crit) while the carrier is still
-	 * alive: its docked fighters attempt escape into space. Reuses the Stage 18
-	 * machinery scoped to a single rail — buildEscapeCandidates([$rail]) +
-	 * computeEscapeCount (the d20 escape table) + performCarrierEscapeSpawns.
-	 * Escapees spawn at the carrier's current hex/heading/(facing + rail
-	 * direction)/speed and get the -50 LaunchedThisTurn penalty (rule 3 — unlike
-	 * a normal rail launch, a forced escape IS penalised next turn). Non-escapees
-	 * are disengaged by performCarrierEscapeSpawns -> markNonEscapeesDestroyed. */
-	public static function railBoxEscape($rail, $carrier, $gamedata){
-		$hangars = array($rail);
-		$virtuals = self::buildEscapeCandidates($hangars, $gamedata);
-		$totalAboard = count($virtuals);
-		if ($totalAboard <= 0) return;
-
-		$roll = random_int(1, 20);
-		$maxEscape = self::computeEscapeCount($roll, $totalAboard);
-		if ($maxEscape <= 0){
-			//Nobody escapes — disengage every docked fighter on the rail so the
-			//fleet-list 0-CV fold hides them (performCarrierEscapeSpawns would do
-			//this via markNonEscapeesDestroyed, but it's only reached when there's
-			//something to spawn; replicate the no-escape branch here).
-			foreach ($rail->hangarUsage as $entry){
-				if (!isset($entry['dockedFlightId'])) continue;
-				$flight = $gamedata->getShipById((int)$entry['dockedFlightId']);
-				if ($flight instanceof FighterFlight) self::disengageFighters($flight, PHP_INT_MAX, $gamedata);
+	/* Stage 21.3 — occupancy-aware lost-box shedding. A bay (rail) lost all its
+	 * boxes; shed exactly the craft those boxes held, wherever their host entry
+	 * lives. Under the no-split model a flight is ONE entry on its primary bay with
+	 * an occupancy list spanning bays, so the boxes on $rail may belong to:
+	 *   (a) an entry HOSTED on $rail (with or without occupancy), or
+	 *   (b) an entry hosted on a SIBLING bay whose occupancy spills onto $rail.
+	 * Either way we shed only the craft on THIS rail's boxes, run the escape d20 on
+	 * them, and trim the host entry (occupancy line for $rail + flightSize) — the
+	 * survivors stay docked on intact bays as the same ship. A multi-bay entry whose
+	 * HOST was this rail but which keeps boxes on a sibling is re-homed onto that
+	 * sibling (so it isn't lost when the rail's stash is gone).
+	 *
+	 * Replay-safe: the trim drops this rail's occupancy AND clears the destroyed
+	 * rail's own hangarUsage of anything fully shed, so a replay scrub re-enters
+	 * with the boxes already gone → zero candidates → no double spawn (same
+	 * idempotency the old whole-rail clear relied on). */
+	public static function shedBoxesFromBay($rail, $carrier, $gamedata){
+		$railId = (int)$rail->id;
+		//PASS 1 — identify every entry holding boxes on this rail, keyed by a STABLE
+		//identity (host hangar id + dockedFlightId|phpclass|index) so the later trim
+		//re-resolves the live index (a compaction on the same host shifts indices).
+		//Walk ALL of the carrier's hangars (foreign-occupancy hosts live elsewhere);
+		//also catch own no-occupancy entries hosted directly on the destroyed rail.
+		$affected = array();
+		foreach (self::collectHangars($carrier) as $h){
+			if (!is_array($h->hangarUsage)) continue;
+			foreach ($h->hangarUsage as $idx => $entry){
+				$boxesHere = 0;
+				if (!empty($entry['occupancy']) && is_array($entry['occupancy'])){
+					$boxesHere = self::entryBoxesOnHangar($entry, $railId);
+				} elseif ((int)$h->id === $railId){
+					//Legacy / single-bay entry hosted directly on the destroyed rail.
+					$boxesHere = self::boxesForEntry($entry);
+				}
+				if ($boxesHere <= 0) continue;
+				$bpc   = max(1, self::boxesPerCraftForEntry($entry));
+				$craftToShed = min((int)($entry['flightSize'] ?? 0), (int)ceil($boxesHere / $bpc));
+				if ($craftToShed <= 0) continue;
+				$affected[] = array(
+					'host'       => $h,
+					'dockedId'   => isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0,
+					'phpclass'   => (string)($entry['phpclass'] ?? ''),
+					'origIdx'    => $idx,
+					'entry'      => $entry,
+					'shed'       => $craftToShed,
+				);
 			}
-			return;
+		}
+		if (empty($affected)) return;
+
+		//PASS 2 — escape attempt per affected entry (touches only flights/criticals,
+		//never the hangarUsage arrays, so indices stay valid through this pass).
+		foreach ($affected as $a){
+			self::escapeShedCraft($carrier, $rail, $a['entry'], $a['shed'], $gamedata);
 		}
 
-		usort($virtuals, function($a, $b){
-			if ($a['pointCost'] !== $b['pointCost']) return $b['pointCost'] - $a['pointCost'];
-			if ($a['damage']    !== $b['damage']) return $a['damage']    - $b['damage'];
-			return 0;
-		});
-		$chosen = array_slice($virtuals, 0, $maxEscape);
-		self::performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata);
+		//PASS 3 — trim each host entry (re-resolved by identity, compaction-safe) and
+		//re-home a surviving multi-bay entry whose host WAS the destroyed rail.
+		foreach ($affected as $a){
+			self::trimHostEntryAfterShed($a['host'], $a['dockedId'], $a['phpclass'], $a['origIdx'], $railId, $a['shed']);
+		}
+	}
+
+	/* Run the escape d20 over the $k craft shed off a destroyed bay for one host
+	 * entry: the first $maxEscape (most-ammo / least-damaged first) spawn as a
+	 * "<name> - Split" flight at the carrier's hex with the rail-direction facing +
+	 * the -50 next-turn penalty (rule 3: a forced evac IS penalised). Every shed
+	 * craft (escapee or not) is disengaged on the docked ship so its roster shrinks
+	 * by $k. Mirrors the partial-launch state-copy path (launchWholeFlight) but with
+	 * an escape roll gating which of the $k fly free. The host-entry trim is done
+	 * separately in PASS 3 (trimHostEntryAfterShed). */
+	private static function escapeShedCraft($carrier, $rail, $entry, $k, $gamedata){
+		$dockedId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
+		$flight   = $dockedId > 0 ? $gamedata->getShipById($dockedId) : null;
+		if (!($flight instanceof FighterFlight)) return;   //anonymous/auto entry: no per-craft escape, trim only
+
+		$roll      = random_int(1, 20);
+		$maxEscape = self::computeEscapeCount($roll, $k);
+
+		$shed = self::selectFightersForExtraction($flight, $k, $gamedata);
+		if (empty($shed)) return;
+
+		$escapees = ($maxEscape > 0) ? array_slice($shed, 0, $maxEscape) : array();
+		if (!empty($escapees)){
+			self::spawnRailEscapeFlight($carrier, $rail, $entry, $flight, $escapees, $gamedata);
+		}
+		//Every shed craft (escapee or not) leaves the docked ship's active roster.
+		foreach ($shed as $f){
+			if ($f->isDestroyed($gamedata->turn)) continue;
+			$crit = new DisengagedFighter(-1, $flight->id, $f->id, 'DisengagedFighter', $gamedata->turn);
+			$crit->updated = true; $crit->newCrit = true;
+			$f->criticals[] = $crit;
+		}
+	}
+
+	/* PASS 3 of shedBoxesFromBay: re-resolve the host entry by identity (its live
+	 * index may have shifted from a prior trim's compaction), trim it by $k craft +
+	 * drop the destroyed bay's occupancy line, then re-home it if it was hosted ON
+	 * the destroyed rail but still has boxes on a surviving sibling. */
+	private static function trimHostEntryAfterShed($host, $dockedId, $phpclass, $origIdx, $lostBayId, $k){
+		$idx = self::resolveEntryIndex($host, $dockedId, $phpclass, $origIdx);
+		if ($idx === null) return;
+
+		//If the destroyed bay IS this entry's host, capture where the survivor will
+		//re-home BEFORE the trim (which may collapse + unset the occupancy list).
+		//The re-home target is the first surviving (boxes>0, not-destroyed) sibling
+		//bay in the entry's occupancy other than the dead host. Full-block loss
+		//destroys sibling rails too — skip any candidate with 0 remaining health so a
+		//survivor never migrates onto a dying bay (a later per-rail pass sheds it).
+		$reHomeTo = null;
+		$hostIsLostBay = ((int)$host->id === (int)$lostBayId);
+		if ($hostIsLostBay){
+			$e0 = $host->hangarUsage[$idx];
+			if (!empty($e0['occupancy']) && is_array($e0['occupancy'])){
+				foreach ($e0['occupancy'] as $occ){
+					$sid = (int)($occ['systemId'] ?? 0);
+					if ($sid === (int)$lostBayId || (int)($occ['boxes'] ?? 0) <= 0) continue;
+					$cand = self::hangarById($host->getUnit(), $sid);
+					if (!$cand || $cand === $host || (int)$cand->getRemainingHealth() <= 0) continue;
+					$reHomeTo = $cand;
+					break;
+				}
+			}
+		}
+
+		self::trimEntryForLostBay($host, $idx, $lostBayId, $k);
+
+		if (!$hostIsLostBay) return;   //sibling-hosted entry: trimmed in place, done.
+
+		//The entry (if it survived) is still physically in the dead rail's stash.
+		//Move it to the captured surviving sibling; if none survives, drop the residue
+		//(its only remaining boxes were on bays that are all gone).
+		$idx = self::resolveEntryIndex($host, $dockedId, $phpclass, $idx);
+		if ($idx === null) return;   //fully shed (flightSize hit 0) — already compacted.
+		$e = $host->hangarUsage[$idx];
+		array_splice($host->hangarUsage, $idx, 1);
+		$host->hangarUsage = array_values($host->hangarUsage);
+		if ($reHomeTo) $reHomeTo->hangarUsage[] = $e;
+	}
+
+	/* Find a stash entry's current index on $host by (dockedFlightId, phpclass),
+	 * preferring $hintIdx when it still matches (cheap fast path). Returns null if
+	 * the entry is gone (fully shed/compacted). */
+	private static function resolveEntryIndex($host, $dockedId, $phpclass, $hintIdx){
+		if (!is_array($host->hangarUsage)) return null;
+		$matches = function($e) use ($dockedId, $phpclass){
+			if (($e['phpclass'] ?? '') !== $phpclass) return false;
+			return (int)($e['dockedFlightId'] ?? 0) === (int)$dockedId;
+		};
+		if (isset($host->hangarUsage[$hintIdx]) && $matches($host->hangarUsage[$hintIdx])) return $hintIdx;
+		foreach ($host->hangarUsage as $i => $e){
+			if ($matches($e)) return $i;
+		}
+		return null;
+	}
+
+	/* Hangar (incl. rail/catapult) on $ship by system id, or null. */
+	private static function hangarById($ship, $id){
+		if (!$ship) return null;
+		foreach (self::collectHangars($ship) as $h){
+			if ((int)$h->id === (int)$id) return $h;
+		}
+		return null;
+	}
+
+	/* Spawn a "<name> - Split" escape flight carrying the chosen escapee fighters'
+	 * state, at the carrier's current hex with (facing + rail direction) and the
+	 * -50 LaunchedThisTurn penalty (rule 3: a forced rail evac IS penalised next
+	 * turn, unlike a clean rail launch). Mirrors spawnLaunchedKFlight + the partial
+	 * launch state-copy, but applies escape (penalised) crits. Returns the new id. */
+	private static function spawnRailEscapeFlight($carrier, $rail, $entry, $sourceFlight, $escapees, $gamedata){
+		$phpclass = (string)($entry['phpclass'] ?? '');
+		$count = count($escapees);
+		if ($phpclass === '' || !class_exists($phpclass) || $count <= 0) return null;
+
+		$lastMove = $carrier->getLastMovement();
+		if (!$lastMove) return null;
+		$escDir = (int)$rail->direction;
+		if (is_array($rail->directions) && !empty($rail->directions)) $escDir = (int)$rail->directions[0];
+		$spawnPos = $lastMove->position;
+		$heading  = (int)$lastMove->heading;
+		$facing   = ((((int)$lastMove->facing + $escDir) % 6) + 6) % 6;
+		$speed    = (int)$lastMove->speed;
+
+		$flightName = self::dockedSplitName($entry);
+		if ($flightName === null) $flightName = self::flightNameFor($phpclass, $carrier);
+		$escapeFlight = self::spawnLaunchedKFlight($phpclass, $count, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceFlight, $gamedata);
+		if (!$escapeFlight) return null;
+
+		//Copy the chosen escapees' ammo/damage/crit state onto the new flight.
+		self::copyFlightAmmoEnhancements($sourceFlight, $escapeFlight, $gamedata);
+		$targetFighters = array();
+		foreach ($escapeFlight->systems as $f){ if ($f instanceof Fighter) $targetFighters[] = $f; }
+		for ($i = 0; $i < count($escapees); $i++){
+			if (!isset($targetFighters[$i])) break;
+			self::copyFighterStateToTarget($escapees[$i], $targetFighters[$i], $escapeFlight, $gamedata);
+		}
+
+		//A forced rail evac IS penalised next turn (NOT a clean rail launch).
+		self::applyEscapeCrits($escapeFlight, $gamedata);
+		self::writeEscapeEventNote($carrier, $rail, $escapeFlight, $count, 'railEvac', $gamedata);
+		return $escapeFlight->id;
+	}
+
+	/* Trim a host entry because bay $lostBayId was destroyed: flightSize -$k and
+	 * remove $k*bpc boxes from the occupancy line for $lostBayId SPECIFICALLY (the
+	 * destroyed bay), unlike shrinkDockedEntry which trims smallest-bay-first. If the
+	 * entry empties, compact it away. */
+	private static function trimEntryForLostBay($host, $entryIdx, $lostBayId, $k){
+		if (!is_array($host->hangarUsage) || !isset($host->hangarUsage[$entryIdx])) return;
+		$e = $host->hangarUsage[$entryIdx];
+		$bpc = max(1, (int)($e['boxesPerCraft'] ?? 1));
+		$e['flightSize'] = max(0, (int)($e['flightSize'] ?? 0) - (int)$k);
+		$boxesToFree = (int)$k * $bpc;
+
+		if (!empty($e['occupancy']) && is_array($e['occupancy'])){
+			$occ = array();
+			foreach ($e['occupancy'] as $o){
+				$b = (int)($o['boxes'] ?? 0);
+				if ((int)($o['systemId'] ?? 0) === (int)$lostBayId && $boxesToFree > 0){
+					$drop = min($b, $boxesToFree);
+					$b -= $drop; $boxesToFree -= $drop;
+				}
+				if ($b > 0) $occ[] = array('systemId' => (int)$o['systemId'], 'boxes' => $b);
+			}
+			//A single surviving bay no longer needs an occupancy list (it's a plain
+			//single-bay entry again); >1 keeps the multi-bay shape.
+			if (count($occ) > 1) $e['occupancy'] = $occ; else unset($e['occupancy']);
+		}
+
+		if ((int)$e['flightSize'] <= 0){
+			array_splice($host->hangarUsage, $entryIdx, 1);
+			$host->hangarUsage = array_values($host->hangarUsage);
+		} else {
+			$host->hangarUsage[$entryIdx] = $e;
+		}
 	}
 
 	/* Persist the rail's 1d20 result on the owning rail for replay determinism.
