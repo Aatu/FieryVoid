@@ -1499,10 +1499,516 @@ class HangarOps {
 		return true;
 	}
 
+	/* === Stage 21: no-split whole-flight launch ========================= */
+
+	/*
+	 * Carrier-level launch coalescer (once per carrier per turn). A docked flight
+	 * is ONE entry (on its primary bay, occupancy spanning bays), so a launch
+	 * order queued on ANY bay must be resolved against the entry wherever it
+	 * lives. Each order carries the docked flight's id (dockedFlightId) so it
+	 * targets the exact flight (disambiguating two same-class docked flights).
+	 *
+	 *  - Full launch (size >= entry flightSize): resurrect the docked ship
+	 *    (un-remove, deploy move, drop the whole entry incl. occupancy).
+	 *  - Partial launch (size < flightSize): spawn a fresh "<source> - Split"
+	 *    K-flight with the most-ammo/least-damaged K fighters' state, and shrink
+	 *    the original docked ship IN PLACE to N-K (disengage those K fighters on
+	 *    it; reduce the entry's flightSize + trim its occupancy boxes). No
+	 *    fragment ship — the remnant IS the original docked ship.
+	 *
+	 * Budget (launchedThisTurn) is charged across the entry's occupancy bays.
+	 * Guarded by $carrier->launchCoalesceDone (transient).
+	 */
+	public static function processWholeFlightLaunches($carrier, $gamedata){
+		if (!empty($carrier->launchCoalesceDone)) return;
+		$carrier->launchCoalesceDone = true;
+		if (!self::isFlowEnabled($gamedata->id)) return;
+
+		$hangars = self::collectHangars($carrier);
+		if (empty($hangars)) return;
+
+		//Gather every non-catapult bay's launch orders (catapults launch via their
+		//own per-bay processLaunchOrders). Preserve order so direction picks apply.
+		$orders = array();
+		foreach ($hangars as $hangar){
+			if (!empty($hangar->isCatapult)) continue;
+			if (empty($hangar->pendingLaunchOrder)) continue;
+			foreach ($hangar->pendingLaunchOrder as $o){ $orders[] = array('hangar' => $hangar, 'order' => $o); }
+			$hangar->pendingLaunchOrder = null;   //consumed by the coalescer
+		}
+
+		foreach ($orders as $oi){
+			$orderHangar = $oi['hangar'];
+			$o = $oi['order'];
+			$phpclass = isset($o['phpclass']) ? (string)$o['phpclass'] : '';
+			$size     = isset($o['size'])     ? (int)$o['size']        : 0;
+			$dfid     = isset($o['dockedFlightId']) ? (int)$o['dockedFlightId'] : 0;
+			if ($phpclass === '' || $size <= 0) continue;
+
+			//Direction override validated against the ORDER's hangar advertised dirs.
+			$dirOverride = null;
+			if (isset($o['direction']) && is_array($orderHangar->directions) && !empty($orderHangar->directions)){
+				$d = ((((int)$o['direction']) % 6) + 6) % 6;
+				if (in_array($d, array_map('intval', $orderHangar->directions), true)) $dirOverride = $d;
+			}
+
+			//ANONYMOUS stash (no dockedFlightId) = auto-filled shuttles / orphans.
+			//These aren't a resurrectable docked ship — fresh-spawn a new flight
+			//and decrement ONLY the specific anonymous entry (never a docked one).
+			if ($dfid <= 0){
+				self::launchAnonymousStash($carrier, $orderHangar, $phpclass, $size, $dirOverride, $gamedata);
+				continue;
+			}
+
+			//TARGETED docked flight — resolve by dockedFlightId across all bays.
+			$loc = self::findDockedEntry($carrier, $dfid, $phpclass);
+			if (!$loc){
+				self::launchFailNote($carrier, $orderHangar, $phpclass, $size, 'no such docked flight', $gamedata);
+				continue;
+			}
+			$entryHangar = $loc['hangar'];
+			$entry       = $loc['entry'];
+			if (!empty($entry['cannotLaunch'])){
+				self::launchFailNote($carrier, $orderHangar, $phpclass, $size, 'craft wrecked — cannot relaunch', $gamedata);
+				continue;
+			}
+
+			$reason = null;
+			if (!self::canLaunchWholeFlight($carrier, $entry, $size, $gamedata, $reason)){
+				self::launchFailNote($carrier, $orderHangar, $phpclass, $size, $reason, $gamedata);
+				continue;
+			}
+
+			self::launchWholeFlight($carrier, $entryHangar, $entry, $size, $dirOverride, $gamedata);
+		}
+	}
+
+	/* Find the first ANONYMOUS (no dockedFlightId) launchable stash entry of
+	 * $phpclass across $carrier's bays — auto-filled shuttles / orphans that
+	 * fresh-spawn on launch. Returns {hangar, entry, idx} or null. */
+	public static function findAnonymousStash($carrier, $phpclass){
+		foreach (self::collectHangars($carrier) as $h){
+			if (!is_array($h->hangarUsage)) continue;
+			foreach ($h->hangarUsage as $idx => $entry){
+				if (($entry['phpclass'] ?? '') !== $phpclass) continue;
+				if (!empty($entry['cannotLaunch'])) continue;
+				if ((int)($entry['dockedFlightId'] ?? 0) > 0) continue;   //skip docked flights
+				return array('hangar' => $h, 'entry' => $entry, 'idx' => $idx);
+			}
+		}
+		return null;
+	}
+
+	/* Launch $size craft of an ANONYMOUS $phpclass stash (auto-shuttles/orphans)
+	 * as a fresh flight. Decrements ONLY anonymous entries (never a docked one),
+	 * spawns a clean flight, charges launch budget on the draining bay, and
+	 * applies launch crits. */
+	public static function launchAnonymousStash($carrier, $orderHangar, $phpclass, $size, $dirOverride, $gamedata){
+		$size = max(1, (int)$size);
+
+		//Total available anonymous craft of this phpclass + first holding bay.
+		$avail = 0; $firstBay = null;
+		foreach (self::collectHangars($carrier) as $h){
+			if (!is_array($h->hangarUsage)) continue;
+			foreach ($h->hangarUsage as $e){
+				if (($e['phpclass'] ?? '') !== $phpclass) continue;
+				if (!empty($e['cannotLaunch'])) continue;
+				if ((int)($e['dockedFlightId'] ?? 0) > 0) continue;
+				$avail += (int)($e['flightSize'] ?? 1);
+				if ($firstBay === null) $firstBay = $h;
+			}
+		}
+		if ($firstBay === null || $avail <= 0){
+			self::launchFailNote($carrier, $orderHangar, $phpclass, $size, 'no stored craft', $gamedata);
+			return;
+		}
+		if (Movement::isPivoting($carrier, $gamedata->turn, $gamedata) || Movement::isRolling($carrier, $gamedata->turn, $gamedata)){
+			self::launchFailNote($carrier, $orderHangar, $phpclass, $size, 'carrier pivoting/rolling', $gamedata);
+			return;
+		}
+		if ($size > $avail) $size = $avail;
+		//Budget on the draining bay.
+		$head = (int)$firstBay->output - ((int)$firstBay->launchedThisTurn + (int)$firstBay->landedThisTurn);
+		if ($head < $size){
+			self::launchFailNote($carrier, $orderHangar, $phpclass, $size, 'launch rate exceeded', $gamedata);
+			return;
+		}
+
+		//Spawn geometry from the carrier's last move + the draining bay's direction.
+		$lastMove = $carrier->getLastMovement();
+		if (!$lastMove) return;
+		$effDir   = ($dirOverride !== null) ? (int)$dirOverride : (int)$firstBay->direction;
+		$spawnPos = $lastMove->position;
+		$heading  = (int)$lastMove->heading;
+		$facing   = ((((int)$lastMove->facing + $effDir) % 6) + 6) % 6;
+		$speed    = (int)$lastMove->speed;
+
+		$flightName = self::flightNameFor($phpclass, $carrier);
+		$flight = self::spawnLaunchedKFlight($phpclass, $size, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, /*sourceDocked*/ $carrier, $gamedata);
+		if (!$flight) return;
+
+		//Decrement $size from anonymous entries (in encounter order), dropping
+		//emptied ones. Charge budget on the bays drained.
+		$remaining = $size;
+		foreach (self::collectHangars($carrier) as $h){
+			if ($remaining <= 0) break;
+			if (!is_array($h->hangarUsage)) continue;
+			$newUsage = array();
+			foreach ($h->hangarUsage as $e){
+				if ($remaining > 0 && ($e['phpclass'] ?? '') === $phpclass
+					&& empty($e['cannotLaunch']) && (int)($e['dockedFlightId'] ?? 0) <= 0){
+					$es = (int)($e['flightSize'] ?? 1);
+					$take = min($es, $remaining);
+					$remaining -= $take;
+					$h->launchedThisTurn += $take;
+					$es -= $take;
+					if ($es > 0){ $e['flightSize'] = $es; $newUsage[] = $e; }
+					//emptied → dropped
+				} else {
+					$newUsage[] = $e;
+				}
+			}
+			$h->hangarUsage = $newUsage;
+		}
+
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+			$carrier->id, $firstBay->id,
+			'hangarLaunchEvent', 'Hangar launched flight',
+			$flight->id . ':' . $phpclass . ':' . $size
+		);
+		Manager::insertIndividualNote($note);
+
+		//Shuttles launch from ordinary bays/rails → rail skips flight-side -50.
+		self::applyLaunchCrits($flight, $carrier, $gamedata, !empty($firstBay->isRail));
+	}
+
+	/* Find the docked-flight stash entry across all of $carrier's bays. Matches
+	 * by dockedFlightId when $dfid > 0; otherwise the first df-linked entry of
+	 * $phpclass (legacy order with no id). Returns {hangar, entry, idx} or null. */
+	public static function findDockedEntry($carrier, $dfid, $phpclass){
+		foreach (self::collectHangars($carrier) as $h){
+			if (!is_array($h->hangarUsage)) continue;
+			foreach ($h->hangarUsage as $idx => $entry){
+				if (($entry['phpclass'] ?? '') !== $phpclass) continue;
+				$eId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
+				if ($dfid > 0){
+					if ($eId === $dfid) return array('hangar' => $h, 'entry' => $entry, 'idx' => $idx);
+				} else {
+					if ($eId > 0) return array('hangar' => $h, 'entry' => $entry, 'idx' => $idx);
+				}
+			}
+		}
+		return null;
+	}
+
+	/* Validate a whole-flight launch of $size craft from a docked $entry RIGHT
+	 * NOW: carrier not pivoting/rolling, the entry holds >= $size craft, and the
+	 * shared launch+land budget across the entry's occupancy bays has headroom. */
+	public static function canLaunchWholeFlight($carrier, $entry, $size, $gamedata, &$reason = null){
+		$size = (int)$size;
+		if ($size <= 0){ $reason = 'invalid size'; return false; }
+		if (Movement::isPivoting($carrier, $gamedata->turn, $gamedata) || Movement::isRolling($carrier, $gamedata->turn, $gamedata)){
+			$reason = 'carrier pivoting/rolling'; return false;
+		}
+		$have = (int)($entry['flightSize'] ?? 0);
+		if ($have < $size){ $reason = 'not enough stored craft'; return false; }
+
+		//Budget: a launch of $size DRAWS $size craft, distributed smallest-bay-
+		//first across the entry's occupancy (matching the fighter drain + the
+		//client display). Each bay is charged only what is drawn FROM it, and must
+		//have that much launch-rate headroom.
+		$bays = self::occupancyBaysFor($entry, $carrier);
+		if (empty($bays)) return true;   //legacy single-bay; checked in launchWholeFlight
+		$bpc = max(1, (int)($entry['boxesPerCraft'] ?? 1));
+		$charge = self::distributeCraftAcrossBays($bays, $size, $bpc);   //hangarId => craft
+		foreach ($bays as $b){
+			$h = $b['hangar'];
+			if (!empty($h->isCatapult)) continue;
+			$need = (int)($charge[(int)$h->id] ?? 0);
+			if ($need <= 0) continue;
+			$head = (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn);
+			if ($head < $need){ $reason = 'launch rate exceeded'; return false; }
+		}
+		return true;
+	}
+
+	/* Distribute $k craft across $bays (each {hangar, boxes}) smallest-bay-first,
+	 * returning hangarId => craft drawn. Matches shrinkDockedEntry's drain order
+	 * and the client's live-budget display. */
+	private static function distributeCraftAcrossBays($bays, $k, $bpc){
+		$bpc = max(1, (int)$bpc);
+		$sorted = $bays;
+		usort($sorted, function($a, $b){ return (int)$a['boxes'] - (int)$b['boxes']; });
+		$out = array();
+		$remaining = (int)$k;
+		foreach ($sorted as $b){
+			if ($remaining <= 0) break;
+			$bayCraft = (int)floor((int)$b['boxes'] / $bpc);
+			$take = min($remaining, $bayCraft);
+			if ($take <= 0) continue;
+			$out[(int)$b['hangar']->id] = ($out[(int)$b['hangar']->id] ?? 0) + $take;
+			$remaining -= $take;
+		}
+		return $out;
+	}
+
+	/* Resolve an $entry's occupancy bays to [{hangar, boxes}]. For a legacy
+	 * single-bay entry (no occupancy) returns [] (caller treats its own hangar
+	 * as the sole bay). */
+	public static function occupancyBaysFor($entry, $carrier){
+		if (empty($entry['occupancy']) || !is_array($entry['occupancy'])) return array();
+		$out = array();
+		$byId = array();
+		foreach (self::collectHangars($carrier) as $h){ $byId[(int)$h->id] = $h; }
+		foreach ($entry['occupancy'] as $occ){
+			$id = (int)($occ['systemId'] ?? 0);
+			if (isset($byId[$id])) $out[] = array('hangar' => $byId[$id], 'boxes' => (int)($occ['boxes'] ?? 0));
+		}
+		return $out;
+	}
+
+	private static function launchFailNote($carrier, $hangar, $phpclass, $size, $reason, $gamedata){
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+			$carrier->id, ($hangar ? $hangar->id : 0),
+			'hangarLaunchEvent', 'Hangar launch failed',
+			'fail:' . $phpclass . ':' . $size . ':' . ($reason ?? 'unknown')
+		);
+		Manager::insertIndividualNote($note);
+	}
+
+	/* Launch $size craft of the docked flight described by $entry (which lives on
+	 * $entryHangar->hangarUsage). Full launch = resurrect the original ship and
+	 * drop the entry; partial = spawn a "<source> - Split" K-flight + shrink the
+	 * original docked ship + entry in place. Charges budget across occupancy bays
+	 * and applies launch crits. */
+	public static function launchWholeFlight($carrier, $entryHangar, $entry, $size, $dirOverride, $gamedata){
+		$phpclass   = (string)($entry['phpclass'] ?? '');
+		$dockedId   = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
+		$flightSize = (int)($entry['flightSize'] ?? 0);
+		$size = max(1, min((int)$size, $flightSize));
+		if ($dockedId <= 0 || $size <= 0) return null;
+
+		$docked = $gamedata->getShipById($dockedId);
+		if (!($docked instanceof FighterFlight)) return null;
+
+		$lastMove = $carrier->getLastMovement();
+		if (!$lastMove) return null;
+		//Spawn geometry. Rails advertise per-launch direction; a multi-bay launch
+		//uses the override (validated) or the entry-hangar's static direction.
+		$effDir   = ($dirOverride !== null) ? (int)$dirOverride : (int)$entryHangar->direction;
+		$spawnPos = $lastMove->position;
+		$heading  = (int)$lastMove->heading;
+		$facing   = ((((int)$lastMove->facing + $effDir) % 6) + 6) % 6;
+		$speed    = (int)$lastMove->speed;
+
+		//Rail discriminator for the day-after init penalty: a launch is rail-only
+		//(skips the flight-side -50) when EVERY occupancy bay is a rail. A legacy
+		//single-bay entry uses its own hangar's flag.
+		$bays = self::occupancyBaysFor($entry, $carrier);
+		if (empty($bays)) $bays = array(array('hangar' => $entryHangar, 'boxes' => self::boxesForEntry($entry)));
+		$allRail = true;
+		foreach ($bays as $b){ if (empty($b['hangar']->isRail)) { $allRail = false; break; } }
+
+		$full = ($size >= $flightSize);
+
+		if ($full){
+			//FULL LAUNCH — resurrect the original docked ship; drop the whole entry.
+			$docked->removed = false;
+			$docked->removedTurn = null;
+			$docked->spawned = $gamedata->turn;
+			$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
+			Manager::insertSingleMovement($gamedata->id, $docked->id, $deployMove);
+
+			self::removeEntryFromHangar($entryHangar, $dockedId, $phpclass);
+			self::chargeLaunchBudget($bays, $size, $entry);
+
+			$note = new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+				$carrier->id, $entryHangar->id,
+				'hangarLaunchEvent', 'Hangar relaunched docked flight',
+				$docked->id . ':' . $phpclass . ':' . $size . ':resurrected'
+			);
+			Manager::insertIndividualNote($note);
+
+			self::applyLaunchCrits($docked, $carrier, $gamedata, $allRail);
+			return $docked->id;
+		}
+
+		//PARTIAL LAUNCH — spawn a fresh K-flight; shrink the original docked ship.
+		$flightName = self::dockedSplitName($entry);
+		$launched = self::spawnLaunchedKFlight($phpclass, $size, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $docked, $gamedata);
+		if (!$launched) return null;
+
+		//Choose the K fighters that leave (most-ammo / least-damaged first), copy
+		//their state onto the launched flight, and disengage them on the docked
+		//ship so it shrinks to N-K active craft (the remnant stays the same ship).
+		self::copyFlightAmmoEnhancements($docked, $launched, $gamedata);
+		$chosen = self::selectFightersForExtraction($docked, $size, $gamedata);
+		$launchedFighters = array();
+		foreach ($launched->systems as $f){ if ($f instanceof Fighter) $launchedFighters[] = $f; }
+		for ($i = 0; $i < count($chosen); $i++){
+			if (!isset($launchedFighters[$i])) break;
+			self::copyFighterStateToTarget($chosen[$i], $launchedFighters[$i], $launched, $gamedata);
+		}
+		//Disengage the chosen K on the docked ship (they left). Stamp DockedFighter
+		//is wrong here — they DEPARTED, so DisengagedFighter marks them gone from
+		//the docked ship's active roster (its flightSize shrinks accordingly).
+		foreach ($chosen as $f){
+			if ($f->isDestroyed($gamedata->turn)) continue;
+			$crit = new DisengagedFighter(-1, $docked->id, $f->id, 'DisengagedFighter', $gamedata->turn);
+			$crit->updated = true; $crit->newCrit = true;
+			$f->criticals[] = $crit;
+		}
+
+		//Shrink the entry: flightSize -K, trim occupancy boxes K*bpc smallest-bay-first.
+		self::shrinkDockedEntry($entryHangar, $dockedId, $phpclass, $size, $entry);
+		self::chargeLaunchBudget($bays, $size, $entry);
+
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+			$carrier->id, $entryHangar->id,
+			'hangarLaunchEvent', 'Hangar launched partial flight',
+			$launched->id . ':' . $phpclass . ':' . $size . ':split'
+		);
+		Manager::insertIndividualNote($note);
+
+		self::applyLaunchCrits($launched, $carrier, $gamedata, $allRail);
+		return $launched->id;
+	}
+
+	/* Name for a partial-launched detachment: "<docked name> - Split" (deduped). */
+	private static function dockedSplitName($entry){
+		$base = (string)($entry['name'] ?? '');
+		if ($base === '') return null;
+		if (strpos($base, ' - Split') !== false) return $base;
+		return $base . ' - Split';
+	}
+
+	/* Charge $size against launchedThisTurn on each occupancy bay, capped by the
+	 * craft that bay physically holds (boxes / boxesPerCraft). */
+	private static function chargeLaunchBudget($bays, $size, $entry){
+		$bpc = max(1, (int)($entry['boxesPerCraft'] ?? 1));
+		//Charge each bay only the craft DRAWN from it (smallest-bay-first),
+		//matching the fighter drain + the client's live budget display.
+		$charge = self::distributeCraftAcrossBays($bays, $size, $bpc);
+		foreach ($bays as $b){
+			$h = $b['hangar'];
+			$c = (int)($charge[(int)$h->id] ?? 0);
+			if ($c > 0) $h->launchedThisTurn += $c;
+		}
+	}
+
+	/* Drop the whole docked entry (by dockedFlightId) from $entryHangar. */
+	private static function removeEntryFromHangar($entryHangar, $dockedId, $phpclass){
+		if (!is_array($entryHangar->hangarUsage)) return;
+		foreach ($entryHangar->hangarUsage as $idx => $e){
+			if (($e['phpclass'] ?? '') !== $phpclass) continue;
+			if ((int)($e['dockedFlightId'] ?? 0) !== (int)$dockedId) continue;
+			array_splice($entryHangar->hangarUsage, $idx, 1);
+			$entryHangar->hangarUsage = array_values($entryHangar->hangarUsage);
+			return;
+		}
+	}
+
+	/* Shrink the docked entry by $k craft: flightSize -k and trim k*bpc boxes off
+	 * the occupancy (smallest-bay-first, so small rails free up whole). */
+	private static function shrinkDockedEntry($entryHangar, $dockedId, $phpclass, $k, $entryHint){
+		if (!is_array($entryHangar->hangarUsage)) return;
+		foreach ($entryHangar->hangarUsage as $idx => $e){
+			if (($e['phpclass'] ?? '') !== $phpclass) continue;
+			if ((int)($e['dockedFlightId'] ?? 0) !== (int)$dockedId) continue;
+
+			$bpc = max(1, (int)($e['boxesPerCraft'] ?? 1));
+			$e['flightSize'] = max(0, (int)$e['flightSize'] - (int)$k);
+			$boxesToFree = (int)$k * $bpc;
+
+			if (!empty($e['occupancy']) && is_array($e['occupancy'])){
+				//Smallest-bay-first so a small rail clears entirely.
+				usort($e['occupancy'], function($a, $b){ return (int)$a['boxes'] - (int)$b['boxes']; });
+				$occ = array();
+				foreach ($e['occupancy'] as $o){
+					$b = (int)$o['boxes'];
+					if ($boxesToFree > 0){
+						$drop = min($b, $boxesToFree);
+						$b -= $drop; $boxesToFree -= $drop;
+					}
+					if ($b > 0) $occ[] = array('systemId' => (int)$o['systemId'], 'boxes' => $b);
+				}
+				if (count($occ) > 1) $e['occupancy'] = $occ; else unset($e['occupancy']);
+			}
+
+			if ((int)$e['flightSize'] <= 0){
+				array_splice($entryHangar->hangarUsage, $idx, 1);
+				$entryHangar->hangarUsage = array_values($entryHangar->hangarUsage);
+			} else {
+				$entryHangar->hangarUsage[$idx] = $e;
+			}
+			return;
+		}
+	}
+
+	/* Spawn a fresh K-fighter launched flight (partial launch). Mirrors the
+	 * new-spawn block of performLaunch: insert ship + flightsize + deploy move +
+	 * per-system data (weapons fully charged). Carries pointCostEnh proportionally
+	 * from the docked source so fleet-list value is right. */
+	private static function spawnLaunchedKFlight($phpclass, $k, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceDocked, $gamedata){
+		if (!is_string($phpclass) || $phpclass === '' || !class_exists($phpclass)) return null;
+		$k = max(1, (int)$k);
+		if ($flightName === null || $flightName === '') $flightName = self::flightNameFor($phpclass, $carrier);
+
+		$flight = new $phpclass($gamedata->id, $carrier->userid, $flightName, $carrier->slot);
+		$flight->team = $carrier->team;
+		//Proportional enhancement cost from the source docked flight, when there
+		//is one (partial launch). Anonymous shuttle launches pass no real source
+		//(no enhancements to carry) — guarded by the FighterFlight check.
+		if ($sourceDocked instanceof FighterFlight){
+			$srcSize = (int)$sourceDocked->flightSize;
+			$srcEnh  = (float)($sourceDocked->pointCostEnh ?? 0) + (float)($sourceDocked->pointCostEnh2 ?? 0);
+			if ($srcSize > 0 && $srcEnh > 0){
+				$flight->pointCostEnh = (int)round($srcEnh * $k / $srcSize);
+				$flight->pointCostEnh2 = 0;
+			}
+		}
+		if ($k > $flight->flightSize){
+			$flight->flightSize = $k;
+			if (method_exists($flight, 'populate')) $flight->populate();
+		}
+
+		$shipid = Manager::insertSingleShip($gamedata, $flight, $carrier->userid);
+		$flight->id = $shipid;
+		$flight->spawned = $gamedata->turn;
+		Manager::insertSingleFlightSize($gamedata->id, $shipid, $flight->flightSize);
+
+		$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
+		Manager::insertSingleMovement($gamedata->id, $shipid, $deployMove);
+
+		SystemData::initSystemData($gamedata->turn, $gamedata->id);
+		foreach ($flight->systems as $craft){
+			if (!($craft instanceof Fighter)) continue;
+			$craft->setInitialSystemData($flight);
+			if (!isset($craft->systems) || !is_array($craft->systems)) continue;
+			foreach ($craft->systems as $sys){
+				$sys->setInitialSystemData($flight);
+				if ($sys instanceof Weapon){
+					$load = $sys->getStartLoading();
+					if ($load){ $load->loading = $sys->loadingtime; SystemData::addDataForSystem($sys->id, 0, $shipid, $load->toJSON()); }
+				}
+			}
+		}
+		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+		return $flight;
+	}
+
 	/* Resolve queued launch orders for a hangar at end of turn.
 	 * Reads $hangar->pendingLaunchOrder (populated from the latest
 	 * 'hangarLaunchOrder' note in onIndividualNotesLoaded) and calls
 	 * performLaunch for each entry that still passes canLaunch validation.
+	 *
+	 * Stage 21: this per-bay path is retained ONLY for catapults (single-fighter,
+	 * never multi-bay). Ordinary hangars + rails launch via the carrier-level
+	 * processWholeFlightLaunches coalescer instead.
 	 *
 	 * Failed entries are silently dropped with a 'hangarLaunchEvent' note
 	 * recording the reason — players can see this in replay.

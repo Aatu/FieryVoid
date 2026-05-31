@@ -3353,7 +3353,9 @@ class Hangar extends ShipSystem{
 			//it, the rest no-op. Replaces the per-bay processDockOrders.
 			HangarOps::processWholeFlightDocks($ship, $gamedata);
 			HangarOps::serviceDockedFlights($this, $ship, $gamedata);
-			HangarOps::processLaunchOrders($this, $ship, $gamedata);
+			//Stage 21: launches resolve once per carrier via the whole-flight
+			//coalescer (no fragments). Guarded; first bay runs it, the rest no-op.
+			HangarOps::processWholeFlightLaunches($ship, $gamedata);
 			return;
 		}
 
@@ -3379,11 +3381,11 @@ class Hangar extends ShipSystem{
 		//   the freshly-reloaded ammo out with it.
 		HangarOps::serviceDockedFlights($this, $ship, $gamedata);
 
-		//4. Process queued launch orders (Post-Turn Actions Step). Only runs
-		//   in the Fire Phase advance — Criticals::setCriticals() is only
-		//   called there, and pendingLaunchOrders are filtered to the current
-		//   turn so old orders don't re-fire.
-		HangarOps::processLaunchOrders($this, $ship, $gamedata);
+		//4. Process queued launch orders (Post-Turn Actions Step). Stage 21:
+		//   whole-flight coalescer, once per carrier — a docked flight is ONE
+		//   entry; full launch resurrects it, partial spawns a "- Split" K-flight
+		//   and shrinks the original in place. Only runs in the Fire Phase advance.
+		HangarOps::processWholeFlightLaunches($ship, $gamedata);
 	}
 
 	/* Receives a JSON-encoded list of launch orders from the client. Per the
@@ -3447,6 +3449,12 @@ class Hangar extends ShipSystem{
 				$dir = (int)$order['direction'];
 				$dir = (($dir % 6) + 6) % 6;
 				$clean['direction'] = $dir;
+			}
+			//Stage 21: the docked flight's id so the carrier-level launch
+			//coalescer targets the exact docked flight (vs two same-class flights
+			//or a multi-bay entry living on another bay). Optional for legacy.
+			if (isset($order['dockedFlightId']) && (int)$order['dockedFlightId'] > 0) {
+				$clean['dockedFlightId'] = (int)$order['dockedFlightId'];
 			}
 			$cleanLaunches[] = $clean;
 		}
