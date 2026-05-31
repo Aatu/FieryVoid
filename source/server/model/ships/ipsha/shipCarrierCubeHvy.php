@@ -71,12 +71,18 @@ class ShipCarrierCubeHvy extends BaseShip{
 	$this->addLeftSystem(new EmPulsar(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new EmPulsar(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
-	$this->addLeftSystem(new Hangar(4, 18));
+	//$this->addLeftSystem(new Hangar(4, 18));
+		$hangar1 = new Hangar(4, 18);
+		$hangar1->directions = array(0, 3); 
+		$this->addLeftSystem($hangar1);		
 	    
 	$this->addRightSystem(new EmPulsar(3, 0, 0, 30, 150));
 	$this->addRightSystem(new EmPulsar(3, 0, 0, 30, 150));	    
         $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
-	$this->addRightSystem(new Hangar(4, 18));
+	//$this->addRightSystem(new Hangar(4, 18));
+		$hangar2 = new Hangar(4, 18);
+		$hangar2->directions = array(0, 3); 
+		$this->addLeftSystem($hangar2);		 	
 	    
 		
 		
