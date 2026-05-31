@@ -1654,6 +1654,77 @@ Hangar Ops Stage 18: hangar craft escape from destroyed carriers
 
 ---
 
+### Stage 19 — Fighter Rails (B5W §10.1 external launch rails) ✓ COMPLETE
+
+**Goal.** Implement B5W "Fighter Racks" — external launch rails bolted to a structure block, each carrying one fighter on the outside of the hull. Unlike a standard hangar bay, rail boxes are part of the carrier's structure block and can be destroyed by structure hits. The Raiders `StrikeCarrier` is the test ship (TT layout: 4×3-box + 2×6-box rails = 24 boxes, all on the front structure).
+
+**Behavioural differences from a Hangar:**
+
+| Property | Hangar | Fighter Rail |
+|---|---|---|
+| HP track | Own independent boxes | Part of the attached structure block — no extra HP |
+| Box loss | Hangar damage | (a) 1d20 ≥16 on any structure-damage turn → whole rail destroyed; (b) full structure-block destruction |
+| Launch init penalty | −50 on flight, −20 on carrier | −20 on carrier only (no day-after penalty on flight) |
+| Reload cadence | Every turn (T+1) | Half-rate: T+2, T+4, … (narrow airlocks) |
+| Auto-populates with shuttles | Yes (leftover slots) | No — combat fighters only, excluded from shuttle pool |
+| Capacity accounting | `maxhealth` = HP and capacity | `maxhealth` = capacity only (`doCountForCombatValue = false`) |
+
+**Design.**
+
+`FighterRail extends Hangar` with a single `$isRail = true` discriminator, parallel to `Catapult::$isCatapult`. The entire HangarOps pipeline (initial population, launch, dock, service, Stage 18 escape) runs through the ordinary Hangar path with rail-specific branches keyed on `$isRail`. `collectHangars` matches `instanceof Hangar` so rails are included everywhere automatically; `primaryHangar` skips rails (the ordnance/marine pool note anchor must never be a structure-coupled rail).
+
+**Box loss — the two paths:**
+
+1. **1d20 whole-rail crit** (`HangarOps::onRailStructureDamage`, called from `Hangar::criticalPhaseEffects` rail branch). When the rail's parent structure `damageReceivedOnTurn > 0`, the owning rail (lowest-id rail on that structure — `railCritOwner`, dedup) rolls an unmodified d20. On 16–20, `pickRailToDestroy` auto-picks the rail with fewest remaining boxes, `destroyEntireRail` writes a full-`maxhealth` `DamageEntry` (RailCrit damageclass, `destroyed=true`), and `railBoxEscape` fires the escape. Replay-deterministic: the roll is persisted as a `railCritRoll` IndividualNote on the owning rail, read back in `FighterRail::onIndividualNotesLoaded` before the parent clears `individualNotes`. Cleared `hangarUsage` makes escape-spawn idempotent on replay (empty stash → 0 candidates → no double-spawn).
+
+2. **Full structure-block destruction** (`HangarOps::onRailStructureLost`, called first in the rail branch). When `$structure->isDestroyed($turn)` is true, the owner processes all rails on the block: each non-empty rail runs `railBoxEscape` and its `hangarUsage` is cleared. Returns `true` → caller skips the 1d20 (rails gone). Carrier-death (primary structure) is owned by Stage 18 — this handles the carrier-alive-but-external-block-destroyed case only. Replay-safe via the same cleared-hangarUsage idempotency.
+
+**Escape** reuses the Stage 18 machinery scoped to a single rail: `buildEscapeCandidates([$rail])` + `computeEscapeCount(d20)` + `performCarrierEscapeSpawns`. Escapees **do** suffer the −50 `LaunchedThisTurn` penalty (forced evacuation ≠ clean launch). Non-escapees are disengaged.
+
+**Multi-bay deployment dock** (auto-distribute). A flight larger than any single rail (e.g. a 12-fighter flight vs 6-box rails) auto-distributes across multiple bays. Client `DeploymentDock.distributeFlightAcrossHangars` computes a greedy biggest-free-first plan and `queueDeployStartDock` pushes per-bay `{flightId, count}` orders. Server `performDeployStartDock` mirrors `performLand`'s partial→fragment branch (each slice spawns a fragment). The deployment dialog's capacity pills and overflow guard both reflect the per-bay split. The firing-phase bulk-recover dialog (`hangarRecover`) has the matching auto-distribute path for flights docked across multiple rails. Both re-edit paths (deployment and firing phase) track `bayCount` to detect a previously-distributed flight and re-edit it as auto-distribute rather than collapsing it onto one bay.
+
+**Deployment-phase critical persistence gap** (bug found and fixed). `DeploymentGamePhase::process` did not call `submitCriticals`, so the `DockedFighter` criticals added to source-flight fighters by `dockFighters` during the split were never persisted. On reload the source flight regained its full size (a 9-flight split 3+3+3 relaunched 9+3+3=15). Fixed by adding `$dbManager->submitCriticals(...)` at the end of `process`, mirroring `FireGamePhase::advance`.
+
+**`$structureSystem` visibility** (bug found and fixed). `ShipSystem::$structureSystem` is `protected`. HangarOps is an external static class, so `$rail->structureSystem` threw `Error: Cannot access protected property`. Fixed by adding a public `ShipSystem::getStructureSystem()` accessor; all three HangarOps call sites use it.
+
+**Key decisions confirmed with user:**
+- Rail HP lives in the section's `Structure` (front Structure stays 78, includes rail boxes). Rails carry capacity only; `doCountForCombatValue = false` prevents double-counting.
+- 1d20 + full-structure-loss only (no per-box attrition).
+- Carrier-side escape uses the carrier-destruction d20 table; escapees get the −50 penalty.
+- Auto-distribute only for deployment/recovery dock — no per-bay UI.
+- Destroying an external structure never kills the ship (only primary structure loss does). Stage 18 covers the primary-death case; `onRailStructureLost` covers the external-block-death case.
+
+**Files changed:**
+- [`baseSystems.php`](source/server/model/systems/baseSystems.php) — new `FighterRail extends Hangar` class; `Hangar::criticalPhaseEffects` rail branch (R0/R1a/R1b/R2–R5); `stripForJson` ships `isRail`; deploy-start sanitiser preserves optional `count`.
+- [`HangarOps.php`](source/server/model/systems/HangarOps.php) — `collectRails`, `shipHasRail`, `railFighterCategories`; `primaryHangar` skips rails; `populateInitialHangarUsage` / `getDefaultShuttles` exclude rails; `inferHangarType` skips rails; `serviceDockedFlights` half-cadence gate; `applyLaunchCrits` new `$skipFlightCrit` param; `performDeployStartDock` / `canDeployStartDock` new `$count` param; `onRailStructureDamage`, `onRailStructureLost`, `railCritOwner`, `pickRailToDestroy`, `destroyEntireRail`, `railBoxEscape`, `recordRailCritRoll`.
+- [`ShipSystem.php`](source/server/model/systems/ShipSystem.php) — `public function getStructureSystem()` accessor.
+- [`DeploymentGamePhase.php`](source/server/Phase/DeploymentGamePhase.php) — `submitCriticals` call after the notes loop.
+- [`strikeCarrier.php`](source/server/model/ships/raiders/strikeCarrier.php) — 6 `FighterRail` systems added; front Structure kept at 78.
+- [`autoload.php`](source/autoload.php) — `'fighterrail' => '/server/model/systems/baseSystems.php'`.
+- [`baseSystems.js`](source/public/client/model/system/baseSystems.js) — `FighterRail extends Hangar`; `refreshHangarTooltip` deploy-slice fix.
+- [`DeploymentDock.js`](source/public/client/renderer/phaseStrategy/DeploymentDock.js) — `isDockHangar` adds rail; `collectUsableHangars` / `hangarFreeBoxes` / `distributeFlightAcrossHangars` with optional `reclaimFlightId`; `queueDeployStartDock` / `autoQueueDockOnCarrier` use auto-distribute.
+- [`confirm.js`](source/public/client/UI/confirm.js) — rail gate triage across all 6 dialog surfaces; `bayCount` re-edit tracking; `planForRow` / `distributeFlightAcrossBays` helpers; `computePerHangarUsage(forDisplay)` flag; rail labels.
+- [`shipTooltipFireMenu.js`](source/public/client/UI/shipTooltipFireMenu.js) — rail gates in launch / dock / recover helpers; `collectReceivingHangarsForRecover` adds `combinedFit`.
+- [`SelectFromShips.js`](source/public/client/UI/SelectFromShips.js) — deployment DOCK button falls back to combined capacity.
+- [`SystemIcon.js`](source/public/client/UI/reactJs/system/SystemIcon.js) — click gate adds `'fighterRail'`.
+- [`systems.js`](source/public/client/systems.js) — `shipHasRail`, `railFighterCategories`, `getShuttlePoolDeclared` exclusion.
+- [`faq.php`](source/public/faq.php) — Fighter Rails section added to Hangar Operations.
+
+**Verification (Docker, gameID 4135/4138):**
+- Deploy 12-fighter flight onto StrikeCarrier → auto-distributes across rails; pills show correct per-rail split; re-opening dialog shows "→ across rails/bays" row (not 12/6 overflow).
+- Launch fighters from rails → no −50 on flight, carrier takes −20; fires and relaunches correctly.
+- Front structure damaged (not destroyed) → 1d20 rolled; on 16–20 one rail destroyed, fighters attempt escape; on <16 nothing happens.
+- Front structure destroyed entirely → all four remaining rails escape their fighters independently (each rolls its own d20); carrier survives.
+- `railCritRoll` note persisted; replay scrub reuses the stored value.
+
+**Commit cadence:**
+
+```
+Fighter Rails: FighterRail class, structure-coupled destruction, escape, deploy-dock auto-distribute
+```
+
+---
+
 ## 5. Database changes
 
 One migration: `tac_individual_notes.notevalue` was `varchar(100)` — too small to hold the JSON payload for multi-hangar carriers. Bumped to `varchar(4096)` via [`db/hangarOpsNoteValue.sql`](db/hangarOpsNoteValue.sql); the canonical schema in `db/emptyDatabase.sql` is updated to match.
