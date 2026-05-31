@@ -1722,8 +1722,193 @@ Hangar Ops Stage 18: hangar craft escape from destroyed carriers
 ```
 Fighter Rails: FighterRail class, structure-coupled destruction, escape, deploy-dock auto-distribute
 ```
+```
 
 ---
+
+### Stage 20 — Same-unit launch coalescing (rejoin a split flight on launch) ⟲ REVERTED → superseded by Stage 21
+
+> **Status (2026-05-31): the Stage 20 implementation was reverted (uncommitted working-tree discard) in favour of the Stage 21 no-split model.** Stage 20 patched the *symptom* — a flight split across bays into overlapping source+fragment ships — by re-collecting them on launch, then needed six follow-up rounds (coalescing, husk-hiding, enh-carry, lost-unit consolidation) to chase the overlap through every accounting path. Stage 21 removes the *cause* (the split itself), so all of the Stage 20 code below is obsolete and was discarded back to the Stage 19 base. The design notes are retained only as a record of what the fragment model required; **do not re-implement them** — Stage 21 deletes the need for coalescing entirely. The detailed testing-round notes from the reverted implementation have been trimmed.
+
+**Goal (original).** A flight docked across multiple bays (e.g. a 9-fighter unit spread over three 3-box Fighter Rails, or across two ordinary hangars) should **relaunch as a single flight**, not one flight per bay. Partial launches still split: launching 6 of the 9 spawns one 6-flight and leaves a 3-fighter remnant docked (existing Stage 5/10 behaviour, applied to the coalesced unit).
+
+This is the launch-side mirror of the Stage 19 *multi-bay docking* work: docking already auto-distributes one flight **across** bays; Stage 20 makes launch auto-**re-collect** those bays into one flight.
+
+**Root cause of the split.** [`Hangar::criticalPhaseEffects`](source/server/model/systems/baseSystems.php#L3293) runs **once per hangar system**. Each call invokes [`HangarOps::processLaunchOrders($this, …)`](source/server/model/systems/HangarOps.php#L1440) → [`performLaunch`](source/server/model/systems/HangarOps.php#L1162), which spawns **one fresh `FighterFlight` per hangar's order**. Three rails each holding 3 fighters of the same unit → three independent `performLaunch` calls → three 3-flights. Nothing coalesces them.
+
+**The unit identity already exists.** Every docked stash record carries `dockedFlightId` (the id of the flight it came from — set in `performLand`/`performDeployStartDock`). A flight docked across N bays produces N stash entries that **share the same `dockedFlightId`**. Anonymous orphans (partial-relaunch leftovers) and auto-filled shuttles have **no** `dockedFlightId`. So "same unit" = "same `dockedFlightId`", and it is already in the data — Stage 20 just groups on it at launch time.
+
+**Design — a carrier-level coalescing pre-pass.**
+
+Rather than change the per-system dispatch in `criticals.php`, the **first** hangar on the carrier to reach the shared launch path runs a once-per-carrier coalescing pass (idempotency guard mirroring `usagePopulated`); the normal per-hangar loop then handles only the *uncoalesced remainder* (anonymous/shuttle orders).
+
+New `HangarOps::processCoalescedLaunchOrders($carrier, $gamedata)`:
+
+1. **Gather** every hangar's `pendingLaunchOrder` on the carrier. Build a map keyed by `dockedFlightId` → `{phpclass, totalRequested, perBay:[{hangar, available(=entry flightSize), direction}]}`, summing requested sizes across bays for the same unit. An order whose matching stash entry has **no** `dockedFlightId`, or a `cannotLaunch`/catapult entry, is left untouched (the per-hangar pass consumes it as today).
+2. For each `dockedFlightId` group:
+   - **Validate** the *combined* launch: `take = min(sum(requested), sum(available))`; per-bay output budget across the participating hangars (`launchedThisTurn+landedThisTurn+slice <= output`, charged on each bay as fighters are drained from it). Re-check `isDestroyed` per bay (a bay killed earlier in `criticalPhaseEffects` already cleared its `hangarUsage`). Clamp `take` to what budget allows; fail-note the shortfall via `hangarLaunchEvent`.
+   - **Drain smallest-bay-first** (user decision): sort the unit's bays by current `flightSize` ascending and pull fighters until `take` is met. Tends to fully clear small rails first, freeing whole rails for reload sooner.
+   - **Spawn ONE flight** for the whole group. **Identity: revive when possible** (user decision):
+     - Pick the *largest* surviving fragment ship row among the unit's bays whose `dockedFlightId` resolves to a live `FighterFlight` AND whose `flightSize` slice is fully drained by this launch (so its ship identity is free to leave). Relaunch THAT row via the existing `resurrectDockedFlight` mechanics (clear `removed`/`removedTurn`, set `spawned`, write a deploy `MovementOrder`), preserving its name/id/damage.
+     - Fold the *other* bays' drained fighters into the revived flight: bump its `flightSize` to `take`, `populate()` the extra Fighter slots, and `copyFighterStateToTargetBulk` the donor fragments' per-fighter damage/crits/ammo onto the new slots.
+     - **Fallback to fresh spawn** when no fragment row qualifies for revival (all partial, or rows missing): use `performLaunch`'s new-spawn block (factored into `spawnLaunchedFlight(...)`), named via `splitFlightNameFor`.
+   - **Shrink/destroy donor fragments**: each bay either fully drained → `destroyAllFighters` on its fragment + drop the stash entry; or partially drained → `spawnFragmentFlight` for the remnant, relink the bay's `dockedFlightId`/`name`/`fragment`/`dockedTurn` (exactly the partial branch in [`consumeStashesForLaunch`](source/server/model/systems/HangarOps.php#L2613), generalised across multiple bays). The *revived* row's own bay is consumed (its identity left with the launch).
+   - **Init penalty**: the coalesced flight is ONE flight → exactly one `LaunchedThisTurn` (−50) unless **every** participating bay is a rail (rails skip the flight-side −50). Mixed rail+hangar unit → apply −50. Carrier −20 `HangarOperations` is idempotent per turn regardless. Reuse `applyLaunchCrits($flight,$carrier,$gamedata,$allRail)`.
+   - **One replay note** (`hangarLaunchEvent`, `coalesced`) for the whole launch.
+   - Remove the consumed entries from each bay's `pendingLaunchOrder` so the per-hangar pass that follows does not double-launch them.
+3. Mark `carrier->coalescedLaunchDone = true` for the turn (reset alongside `launchedThisTurn`).
+
+`Hangar::criticalPhaseEffects` shared path (today three `processLaunchOrders` call sites at [3304/3345/3376](source/server/model/systems/baseSystems.php#L3304)) gains a coalescing call guarded once-per-carrier *before* the per-hangar `processLaunchOrders`. The rail branch (R0–R3) is unchanged; rails fall through to this same shared path, so a rail-spread unit coalesces here too.
+
+**Client UI — one grouped row per unit** (user decision). [`shipTooltipFireMenu.openHangarLaunch`](source/public/client/UI/shipTooltipFireMenu.js#L182) → [`confirm.hangarLaunch`](source/public/client/UI/confirm.js#L1857) currently builds one section per hangar with one stepper per stash record. Stage 20 changes the dialog model:
+- Across all of the ship's hangars, group stored craft by `dockedFlightId`. Each group renders as **one row** labelled with the unit name and the *combined* docked count (e.g. "Sentri #3 (9 docked across 3 rails)") with a single 0–N stepper (N = combined `flightSize`).
+- Records with no `dockedFlightId` keep one row each (today's behaviour) under their owning hangar.
+- On OK, a grouped row's quantity is distributed back to the per-hangar `pendingLaunchOrders` smallest-bay-first (the same drain order the server uses), so the existing note schema (`{phpclass,size,direction}` per hangar) is **unchanged** and the server's coalescing pass re-joins them. The direction picker (Stage 8.5) attaches per participating hangar as today.
+- Keeps the wire format and `doIndividualNotesTransfer`/`hangarLaunchOrder` note untouched — only the dialog's grouping and the OK-time distribution change.
+
+**Scope** (user decision): applies to **all hangars**, not just rails — any flight split across multiple bays (rails OR ordinary hangars) re-merges on launch by `dockedFlightId`. The grouping logic is bay-type-agnostic. (Catapults are single-fighter and never split, so they are unaffected; their `isCatapult` entries are excluded from grouping.)
+
+**Replay / idempotency.** The coalescing pass mutates `hangarUsage` (drains entries, relinks remnant `dockedFlightId`) and spawns/revives the flight via the same `Manager::insertSingleShip`/`insertSingleMovement`/note paths as `performLaunch`, which are already replay-deterministic (autoid sequence reproducible, consumed `pendingLaunchOrder` cleared). The once-per-carrier guard prevents a re-entry from re-coalescing. No new RNG → no roll note needed.
+
+**Edge cases:**
+- A unit partly launched in a *previous* turn already lives as anonymous orphans + a surviving fragment; only entries that still share a `dockedFlightId` coalesce. Orphans launch per-record as today.
+- Output budget exhausted mid-drain across bays → launch as many as the combined budget allows (clamp `take`), leave the rest docked, fail-note the shortfall.
+- A bay whose structure/rail was destroyed this turn already cleared its `hangarUsage` before the shared path → excluded automatically.
+- Mixed-phpclass "same unit" cannot happen (a flight is one phpclass); grouping by `dockedFlightId` implies a single phpclass per group — assert and skip on mismatch defensively.
+- Revival edge: if the would-be revived row is itself only *partially* drained (player launched fewer than its bay holds), it does NOT qualify for revival (its identity must stay with the docked remnant); fall through to fresh-spawn for the coalesced flight and shrink that bay as a normal partial donor.
+
+**Files to change:**
+- [`HangarOps.php`](source/server/model/systems/HangarOps.php) — new `processCoalescedLaunchOrders`; factor `performLaunch`'s new-spawn block into `spawnLaunchedFlight`; add `copyFighterStateToTargetBulk` (or loop `copyFighterStateToTarget`) across multiple donor bays; smallest-bay-first drain; revive-largest-fragment logic reusing `resurrectDockedFlight`.
+- [`baseSystems.php`](source/server/model/systems/baseSystems.php) — `Hangar::criticalPhaseEffects` shared path calls the coalescing pass first (once-per-carrier guard); add `coalescedLaunchDone` carrier-turn guard reset where `launchedThisTurn` resets.
+- [`FirePhaseStrategy.js`](source/public/client/renderer/phaseStrategy/FirePhaseStrategy.js) / [`shipTooltipFireMenu.js`](source/public/client/UI/shipTooltipFireMenu.js) / [`confirm.js`](source/public/client/UI/confirm.js) — grouped-by-`dockedFlightId` launch row; distribute grouped qty to per-hangar `pendingLaunchOrders` smallest-bay-first on OK.
+- [`faq.php`](source/public/faq.php) — note that a split flight rejoins on launch.
+
+**What to verify (Docker, StrikeCarrier gameID 3730):** *(verified 2026-05-31 unless noted)*
+- [x] Dock a flight onto the StrikeCarrier so it auto-distributes across multiple rails. Launch dialog shows ONE "… (N docked across M bays)" row, not one per bay, with `max = N` and a live "Launching from — Rail 1: x, Rail 2: y" caption.
+- [x] Launch the whole unit → a single N-flight spawns at the carrier's hex, **plain unit name** (no " - Split"), every fighter fully charged; the rail stash entries are gone.
+- [ ] Launch a partial (e.g. 9 of 12) → one 9-flight named "… - Split" spawns; the remnant stays docked (smallest bays drained first). Net fighters conserved; per-fighter damage/ammo preserved.
+- [ ] Two distinct flights docked on the same carrier → two grouped rows; launching one does not disturb the other.
+- [ ] A unit split across one rail + one ordinary hangar → still coalesces into one flight on launch (scope = all hangars).
+- [ ] Carrier −20 applied once; coalesced flight gets one −50 (or none if every source bay is a rail).
+- [ ] Replay scrub reproduces the single coalesced launch (no double-spawn, no ghost rows).
+
+**Commit cadence:**
+
+```
+Hangar Ops: coalesce a multi-bay docked flight back into one flight on launch
+```
+
+#### Stage 20 implementation notes (2026-05-31)
+
+**Grouping key is `sourceFlightId`, not `dockedFlightId`.** The plan assumed the bays of one docked flight share a `dockedFlightId`. They don't: a multi-bay dock calls `performLand`/`performDeployStartDock` once per receiving hangar, and each PARTIAL bay spawns its OWN fragment, stamping THAT fragment's id as `dockedFlightId` (only the final, full bay carries the source flight's id). So a 9-flight across three 3-box rails leaves three entries with three different `dockedFlightId`s. Fix: stamp a new shared **`sourceFlightId`** (= the original flight's id) on every dock entry in `performLand` and `performDeployStartDock`. Partial-relaunch remnant entries inherit it automatically (`$newEntry = $entry` copies it), so a remnant re-coalesces with its siblings on a later launch. Each bay still keeps its own `dockedFlightId` for the revive/extract mechanics. **Backward compatible:** flights docked before this change have `dockedFlightId` but no `sourceFlightId`, so coalescing skips them and they relaunch one-bay-at-a-time via the unchanged per-hangar `resurrectDockedFlight` path until re-docked.
+
+**Ordering: a carrier-level orchestrator, not a pre-pass that runs first.** Coalescing must see every bay's POST-eviction `hangarUsage` AND consume `sourceFlightId`-linked orders before any per-hangar launch fires them individually. But `criticalPhaseEffects` runs per-system, so the first hangar to reach its launch step hasn't had the other hangars' damage-eviction/dock/service run yet. Resolution: `HangarOps::processAllLaunches($carrier, $gamedata)` replaces the per-hangar `processLaunchOrders` call in both the ordinary and rail dispatch paths. Each hangar marks itself `hangarPhaseProcessed` (transient, per-request) after its damage/dock/service, then calls `processAllLaunches`, which **defers** until every non-catapult hangar is settled. Driven by whichever hangar settles last, it then runs the coalescing pre-pass (consumes `sourceFlightId` orders, rewrites each hangar's `pendingLaunchOrder` to its anonymous residual) and finally runs per-hangar `processLaunchOrders` for the residuals. `coalescedLaunchDone` (transient, on BaseShip) makes it once-per-carrier. The rail R1a early-return (`onRailStructureLost`) also marks-and-calls so the readiness gate can't stall on a destroyed rail. Catapults are excluded from both the gate and coalescing and keep their own direct `processLaunchOrders`.
+
+**Identity + smallest-bay-first drain.** `launchCoalescedGroup` collapses the group's bays per `(hangar, dockedFlightId)`, sorts by live entry size ascending, and drains each under its own remaining output budget (clamps `take`, fail-notes the shortfall via `hangarLaunchEvent`). Identity (corrected from the original "revive largest fragment" design — see *Server follow-up* below): a **single-bay** fully-drained group reuses its existing ship row (the clean `resurrectDockedFlight` semantics — name/id/damage preserved); a **multi-bay** group always **fresh-spawns** a clean N-fighter flight via the factored-out `spawnLaunchedFlight` (the new-spawn block lifted out of `performLaunch`) and copies every bay's fighter state onto fresh, fully-charged slots with `copyFighterStateToTarget` (no separate `copyFighterStateToTargetBulk` helper was needed). Donor bays fully drained → `destroyAllFighters` + drop entry; partially drained → `spawnFragmentFlight` for the remnant + relink (the existing partial branch, generalised across bays). One `LaunchedThisTurn` (−50) unless every bay is a rail; carrier −20 idempotent. One `coalesced` replay note. The mutation loop re-resolves each entry index by `dockedFlightId` just before splicing (a prior same-hangar splice shifts indices).
+
+**Client.** `confirm.hangarLaunch` now renders one grouped row per `sourceFlightId` across all non-catapult hangars (label = unit name + combined docked count + bay count), with a single 0–N stepper capped by combined bay budget. On OK the quantity distributes smallest-bay-first into the per-hangar `pendingLaunchOrders`, so the wire format (`{phpclass,size,direction}` per hangar) and `doIndividualNotesTransfer`/`hangarLaunchOrder` note are unchanged — the server's pass re-joins them. Anonymous orphans / auto-shuttles / catapult records keep their per-hangar rows.
+
+**Client follow-up (testing round 1).** Two dialog fixes after a 12-across-two-6-box-rails test:
+- The grouped row's `max` was clamped by `launchSizeMaxFor` (the per-flight *partial-launch* cap, 6), so 12 docked craft only offered 6. A coalesced unit docked AS one flight and relaunches up to its full docked size (`FighterFlight::$maxFlightSize` defaults to 12; the docked count is already self-limiting since it couldn't have docked larger than a legal flight). Fixed: grouped-row `max = min(combined docked count, combined bay budget)` — no per-flight cap.
+- Wired the live "remaining" feedback: a grouped stepper now renders a "Launching from — Fighter Rail 1: 6, Fighter Rail 2: 6" caption (smallest-bay-first split, the same order the server drains and OK ships) and updates each participating bay's *Hangar Capacity* "remaining" readout as it changes (turning red on oversubscription). Shared `distributeCoalesced(rd)` helper drives the caption, the per-bay budget labels, and the OK distribution so all three agree; a `hangarLabelMap` built up front names the bays consistently across the coalesced captions and the per-hangar headers.
+
+**Server follow-up (testing round 1).** Two bugs surfaced launching a 12-flight docked across two 6-box rails:
+- *Folded-in donor fighters spawned with uncharged weapons (0/loadingtime).* The revive-grow path called `populate()` to add the extra Fighter slots but never initialised their per-system data — only the fresh-spawn path charged weapons. Fixed by factoring the charge loop out of `spawnLaunchedFlight` into `initLaunchedCraftSystemData($flight, $crafts, $gamedata)` and calling it for the newly-appended slots after a revive-grow (snapshotting pre-existing fighter ids so only the new ones are initialised; `FighterFlight::$autoid` advances past the existing fighters on load, so new ids never collide).
+- *Full coalesced relaunch wrongly got a " - Split" suffix, and reviving a multi-bay unit lost fighters.* Root cause: **revival is unsafe for a multi-bay unit.** When a flight docks across bays, the original source row keeps the OTHER bays' fighters marked disengaged (and a per-bay fragment holds them separately) — reviving the source yields a flight short its folded-in fighters carrying ghost-disengaged ones; reviving a fragment inherits its " - Split" name (and ship names are write-once, never updated, so an in-memory rename wouldn't persist). Fix: **revive ONLY single-bay groups** (`count(drained) === 1 && fullyDrained` → clean reuse, the existing `resurrectDockedFlight` semantics); a multi-bay group always **fresh-spawns** a clean N-fighter flight and copies every bay's fighter state (damage/crits/ammo) onto fresh, fully-charged slots via `copyFighterStateToTarget`. Naming: strip any inherited " - Split" from the source name and re-append it only when part of the unit stays docked (`totalTake < groupTotalAvailable`), so a full relaunch keeps the plain unit name and a partial keeps the detachment label. AMMO_F* enhancement copy now runs once per target (not once per donor) since a coalesced unit is homogeneous; per-fighter Stage-15 balancing still corrects each slot to its donor's actual count.
+
+**Reverted testing rounds (summary only).** The Stage 20 implementation needed six follow-up rounds, each chasing the source+fragment overlap through another accounting path: (2) per-unit launch targeting via `sourceFlightId` + unit-aware stored-craft tooltip; (3) fleet-list consolidation of multi-bay docked units (`buildDockedUnitGroups`); (4) hiding consumed-launch husks via `DockedFighter` + `isConsumedLaunchHusk`; (5) carrier-destruction escape — non-escapee husk hiding + proportional `pointCostEnh` carry on runtime-spawned flights; (6) server-side lost-unit consolidation note (`recordLostDockedUnits`/`hangarLostUnits`) for accurate "Destroyed" rows. **All discarded.** That this many rounds were needed is precisely why Stage 21 removes the split. (Two findings worth carrying forward to Stage 21: runtime-spawned flights must carry `pointCostEnh` proportionally so value is right; and the Stage-18 rail-loss disengage in Pass 2 runs *before* the escape candidate count in Pass 3, under-counting escape eligibility for rail-docked units — fix in 21.4.)
+
+---
+
+### Stage 21 — No-split docking: a docked flight stays ONE ship (model rewrite) — PLAN
+
+**Motivation.** Stages 5/10/19/20 each layered reconciliation onto a model where a multi-bay dock SPLITS a flight into overlapping ship rows: a full-size source `FighterFlight` (`removed=true`, some fighters `DockedFighter`-crit'd) PLUS separate per-bay fragment ships holding copies of the split-off fighters. A 6-fighter unit across two bays becomes **9 fighter subsystems across 2 ships** (6 + 3, with 3 overlapping ghosts). Every feature — fleet-list value, launch coalescing, carrier-destruction escape, husk hiding — must subtract that overlap, and each does it slightly differently, which is the source of the recurring "7 fighters for a 6-flight" / "44 not 76 CP" bugs. **Decision (user, after ~6 patch rounds): rewrite the model so a flight NEVER splits on dock.**
+
+**Core model (per-bay-primary-with-occupancy — user choice 2026-05-31).** A docked flight is exactly ONE ship (`removed=true`), no matter how many bays its boxes span. The single stash entry lives on its **primary bay** (the hangar that holds the most of it — i.e. the bay the dock dialog/auto-distribute fills first), with an `occupancy` list naming every bay (incl. the primary) that holds boxes for it. This is deliberately the *less-disruptive* variant: the entry still lives on a real hangar system, so the many per-hangar readers (`setSystemDataWindow`, client `refreshHangarTooltip`, capacity display) keep working for the common single-bay case and only the multi-bay accounting consults `occupancy`.
+
+```
+// ONE stash entry per docked flight, on its PRIMARY bay's hangarUsage:
+{
+  phpclass, name, flightId,            // the single docked ship's id (== dockedFlightId)
+  flightSize,                          // whole flight (e.g. 6)
+  hangarType, dockedTurn,
+  customFtrName?, boxesPerCraft?,      // (existing fields preserved)
+  pointCostEnh,                        // carried so value is right (no spawn needed)
+  occupancy: [ {systemId, boxes}, … ]  // every bay holding boxes for it, incl. the
+                                       // primary; Σ boxes == flightSize × boxesPerCraft.
+                                       // A single-bay dock has one entry: [{primary, n}].
+}
+```
+
+`dockedFlightId` is kept (== `flightId`) so legacy readers and the existing `resurrectDockedFlight`/`onIndividualNotesLoaded` `$removed`-restore path keep functioning unchanged. The sibling bays named in `occupancy` do NOT get their own stash entry — their boxes are accounted as occupied via the primary's occupancy list (free-box math on a sibling bay subtracts any occupancy other entries place on it).
+
+- **No `spawnFragmentFlight` on dock.** `performLand` / `performDeployStartDock` mark the WHOLE flight `removed=true` and write one occupancy-bearing stash entry on its primary bay. A flight too big for one bay records extra `occupancy` on sibling bays but stays one ship — no fragment ships, no `DockedFighter` split-crits, no overlap.
+- **Capacity per bay unchanged; multi-bay dock spends sibling boxes via occupancy.** A bay's free boxes = its own capacity − (its own entries' boxes) − (boxes other bays' entries place on it via their `occupancy`). When a bay/rail is destroyed, its boxes drop out; if a docked unit's occupancy on the dead bay can't be re-homed within the carrier's remaining free boxes, **evict** the overflow — shrink that docked flight by the overflow count (disengage that many of its fighters in place; the flight stays one ship) and, for rail-box loss, the evicted fighters attempt escape per the rail rules.
+- **Rails-as-one-hangar falls out for free.** Rails are just systems contributing boxes; a unit's `occupancy` can list several rail systemIds. No special rail-group abstraction needed beyond the existing per-rail 1d20 structure crit (which removes a rail's boxes → triggers the same overflow eviction).
+
+**What this DELETES vs the Stage-19 base (net simplification).**
+- `spawnFragmentFlight` and all fragment book-keeping (`fragment` flag, per-bay fragment ships). Multi-bay docks no longer create extra ships.
+- The partial-launch fresh-spawn + `consumeStashesForLaunch` fragment machinery: a unit is one entry → launch is `resurrectDockedFlight` (un-remove the ship) for full, and an in-place shrink for partial. No fresh spawn, no `- Split` naming.
+- (Stage 20 coalescing / fleet-list husk helpers were already reverted before Stage 21 — nothing to delete there.)
+
+**Launch under the new model.** `resurrectDockedFlight` brings the one ship back: clear `removed`, deploy MovementOrder, drop/shrink the stash entry by the launched count. Partial launch shrinks the docked entry's `flightSize` + occupancy and re-engages only the launched fighters (the rest stay docked on the SAME ship). No fresh spawn, no name suffix, no fragments. Ammo/damage are already on the one ship — nothing to copy.
+
+**Carrier-destruction escape under the new model.** One ship per unit: roll d20 over total docked craft; the escapees re-engage on a NEW small flight (single `spawnEscapeFlight`, the only place a spawn still happens) OR, cleaner, the parent flight is resized to the escapee count and un-removed, and the lost remainder simply dies with the carrier (parent ship gone). Either way: ONE escapee flight + the rest lost; no fragment husks, no lost-unit consolidation note.
+
+**Live-compatibility (CRITICAL — see memory `project_hangar_live_compat`).** The live `DouglasChanges` server already runs the fragment model (stash entries with `dockedFlightId` + `fragment`, NO `sourceFlightId`, no rails). Refined, **lower-risk** approach (no destructive load-time merging of live data):
+- **`dockedFlightId` is preserved** and remains the dock identity. A legacy entry with NO `occupancy` field is read as a single-bay dock on its own hangar (its boxes accounted on that hangar, exactly as today). The existing `resurrectDockedFlight` and `onIndividualNotesLoaded` `$removed`-restore paths are unchanged, so **every legacy single-bay full/partial dock keeps working with zero migration.**
+- **Dual read path, coexisting indefinitely.** New docks WRITE `occupancy`; readers treat "no `occupancy`" as the legacy single-bay shape. No code forcibly converts legacy fragment ships.
+- **Legacy multi-bay fragment docks** (a flight too big for one bay, split into fragment ships) only ever existed via the dock dialog's split; they are rare-to-nonexistent on live (no rails there, and ordinary multi-bay split is uncommon). They keep rendering exactly as the Stage-19 fragment model does — we do NOT retro-merge them. New multi-bay docks use occupancy. So both models coexist per-entry; nothing in flight breaks.
+- Verify against a copy of a live game DB before deploy (regression, not migration).
+
+> **Base for Stage 21:** the working tree was reset to the committed **Stage 19** state (Fighter Rails done, pre-Stage-20). So there is NO Stage 20 coalescing code to remove — Stage 21 builds the no-split model directly on Stage 19. The Stage 19 dock path still SPLITS (it's the fragment model); 21.1 replaces that.
+
+**Staged rollout (each independently testable on gameID 3730 / 4143):**
+1. **21.1 — Model + dock:** new occupancy stash; `performLand`/`performDeployStartDock` no-split (one ship, `occupancy` across systems, carry `pointCostEnh`); capacity/free-box math reads occupancy; legacy-load normalisation folds the Stage-19 fragment stash into the new shape. Delete `spawnFragmentFlight`-on-dock.
+2. **21.2 — Launch:** launch via plain `resurrectDockedFlight` (full + partial-shrink: shrink the docked entry's `flightSize`/`occupancy`, re-engage only the launched fighters, the rest stay docked on the SAME ship). No fresh spawn, no name suffix, no fragments. Confirm the existing per-flight launch dialog still drives it (a unit is one entry — no grouped dialog needed).
+3. **21.3 — Rails contribute boxes:** rail systems feed carrier capacity; rail box/structure destruction → overflow eviction + escape per the rules below. Confirm StrikeCarrier (rails) and a 2-ordinary-hangar carrier (Ossari Kasta case) both behave. Catapults stay single-fighter, unchanged.
+4. **21.4 — Escape rewrite:** single escapee flight + parent loss (no fragments, no consolidation note). Fix the Pass-2/Pass-3 ordering so rail-loss disengage doesn't under-count escape eligibility.
+5. **21.5 — Fleet-list/value cleanup:** one row per unit from its own ship (its own `flightSize`/`pointCostEnh`); remove any leftover docked-unit consolidation/husk helpers.
+6. **21.6 — Live-compat verification:** run a copy of a live `DouglasChanges` game DB through load + a turn advance; confirm legacy fragment docks upgrade to the new shape cleanly, no double-count, no orphan ghosts. Verify **normal Hangars and Catapults are unaffected** (regression).
+
+**Fighter Rails — authoritative rules (B5W, reconcile against the no-split model in 21.3/21.4):**
+- External launch rails are a row of detached boxes connected to a structure block; **one fighter per box**. Each can launch/land **independently**. **No initiative penalty on the fighter the turn after launch** (the ship still takes the normal launch/land penalty that turn). *(Already in Stage 19: rails skip the flight-side −50, carrier keeps −20.)*
+- Rails are **part of the structure block for all purposes** — structure hits are common, so rails are destroyed far more often than a normal bay. If a **rail box is destroyed and a fighter is present**, that fighter may **attempt to escape** (existing escape rules); a rail-box escapee **IS subject** to the next-turn initiative penalty (a forced evac is not a clean launch).
+- **Structure-block 1d20 crit:** if a structure block *with rails* takes damage in a turn, roll 1d20 with **no modifiers**; on a **natural 16–20, one entire rail is destroyed** (a rail = any row of external boxes on one straight segment). The **owning player chooses which rail** is destroyed. *(Stage 19 picks smallest automatically; revisit player-choice in 21.3.)*
+- Rail fighters perform hangar ops through **narrow airlocks → all reload/hangar-ops take twice as long.** *(Already in Stage 19: rail half-cadence reload.)*
+- Under no-split: rail boxes contribute to the carrier's capacity; destroying rail boxes (per-box or whole-rail crit) removes that capacity → the docked unit sheds the overflow (those fighters attempt escape per the rule above), but the unit stays **one ship**.
+
+**What to verify (end state):**
+- 6-fighter unit docked across 2 bays → ONE fleet-list row, ONE ship, correct value incl. enhancements. Launch all → one flight, plain name. Partial launch → one launched flight + one shrunken docked entry (still one ship). No "- Split" anywhere.
+- Destroy a bay holding part of a unit → unit shrinks by the bay's boxes (overflow evicted); remaining stays one docked ship.
+- Carrier destroyed, partial escape → one escapee flight (correct value) + parent gone; no husks, no "Destroyed 0/132" overcount, no 7-for-6.
+- A legacy (live-shape) docked game loads and advances a turn without corruption; its docked units upgrade to the new shape.
+
+**Commit cadence:** one commit per sub-stage (21.1 … 21.6), e.g. `Hangar Ops Stage 21.1: no-split docking model + legacy normalisation`.
+
+#### 21.1 — ✓ VERIFIED (server) 2026-05-31
+
+Docker-tested clean across all three dock paths: single-bay deploy (Primus → one entry, no `occupancy`), multi-bay firing-phase dock (Strike Carrier → one entry `occupancy:[{11:3},{12:3},{13:6}]`), and multi-bay deploy dock (Strike Carrier → one entry `occupancy:[{13:6},{14:6}]`, correctly avoiding the full 2-box universal shuttle bay). No fragment ships, one `dockedFlightId` per docked flight, no spurious fails.
+
+
+
+Server-side no-split dock landed on the Stage-19 base (PHP lint clean):
+- **Occupancy accounting** (additive, legacy-safe): `foreignOccupancyBoxesOn`, `entryBoxesOnHangar`; `usageCountFor($hangar, $ship=null)` now counts an occupancy entry's boxes only on its primary bay and adds boxes other bays' occupancy place on this one (defaults `$ship` to `getUnit()` so existing call sites need no change); `freeBoxesByCategory` passes `$ship` through. An entry with **no** `occupancy` field is the legacy single-bay shape — counted on its own hangar exactly as before.
+- **`performWholeFlightDock($carrier,$flight,$count,$bays,$gamedata)`** — docks the whole flight as ONE entry on the primary bay with `occupancy:[{systemId,boxes}]` spanning the fill-order bays (occupancy omitted for single-bay so the common/legacy path is untouched). Full dock → `dockedFlightId`+`removed`; partial → `dockFighters` (anonymous entry, unchanged 21.1 semantics; 21.2 does partial-shrink). No `spawnFragmentFlight`.
+- **`processWholeFlightDocks($carrier,$gamedata)`** — once-per-carrier (`dockCoalesceDone` transient on BaseShip) Firing-Phase coalescer: gathers every non-catapult bay's `pendingDockOrder`, groups by `flightId`, docks each whole flight once via `buildDockBays` (player-preferred bays first, top up from any eligible bay). Catapults keep their own per-bay `processDockOrders`.
+- **`performDeployStartDock` rewritten** to whole-flight no-split (primary = the processed bay, occupancy across siblings; bails if already `removed`).
+- **Dispatch** (`Hangar::criticalPhaseEffects`): rail + ordinary dock steps now call `processWholeFlightDocks`; `performLand` retained only for the jumping-carrier path (reworked in 21.4).
+- **`$removed`-restore on load unchanged** — keys on `dockedFlightId`, which the new entry carries, so multi-bay docks restore correctly from the single primary-bay entry. Legacy `fragment` entries still restore via the same loop.
+
+Not yet done in 21.1: launch-side still uses the Stage-19 path (21.2); rails-as-boxes capacity + rail-destruction eviction (21.3); the once-per-carrier dock coalescer runs at the first bay's dock step without a full readiness gate (acceptable for 21.1; revisit in 21.3 if same-turn rail damage + dock interact).
+
+**21.1 test round 2 (2026-05-31) — deploy-dock server-authoritative re-home.** With the round-1 fix deployed, a multi-bay deploy dock then failed outright (`hangar full`) because the validation checked "whole flight fits in ONE bay". Resolved by making the deploy dock **server-authoritative**: `validateDeployBayOrders` now checks only the per-flight gates (slot/owner/both-deploying/customcap), and `performDeployStartDockFromOrders` re-homes the whole flight across bays using TRUE (DB-side, via `$dbCarrier`) free boxes — preferring the client's chosen bays, **dropping full/incompatible ones** (e.g. a universal 2-box bay already full of auto-shuttles), topping up from any other eligible bay, tracking this-pass POST-side commits, and fail-noting only if the carrier genuinely can't hold the flight. The occupancy metadata entry is hosted on the in-flight bay (snapshot pending) even if that bay contributes 0 boxes (usageCountFor reads an occupancy entry's boxes from the bays its occupancy names, not its host). Firing-phase dock was already server-authoritative (`buildDockBays` on the DB-loaded ship), so it's unaffected. NOTE: the client's deploy-dock distribution can still over-optimistically offer a full universal bay — harmless now (server drops it) but worth a client-side tidy later.
+
+**21.1 test round 1 (2026-05-31) — deploy-dock POST-side fix.** First Docker test: single-bay deploy dock ✓ (no occupancy), firing-phase multi-bay dock ✓ (one entry, occupancy 3+3+6, no fragments). BUG: a multi-bay DEPLOY dock spilled a light-fighter unit's boxes into a *shuttle* bay (sys 4) and emitted spurious `hangar full` / `flight already removed` fails. Root cause: deploy-dock resolves on the POST-side hangar objects, whose sibling bays have EMPTY `hangarUsage` — so the server's cross-bay free-box re-distribution saw full bays as empty and mis-placed boxes. Fix: the deploy path no longer re-distributes server-side; it **coalesces the client's per-bay `count` orders** (which were split against true capacity client-side) into ONE occupancy entry. `processDeployStartTransfer` now processes the flights THIS bay ordered, gathers each flight's per-bay counts across all POST-side bays (consuming them), and `performDeployStartDockFromOrders` writes one entry on the in-flight bay (snapshot still pending) with `occupancy` = per-bay client counts. The old re-distributing `performDeployStartDock` was deleted. The firing-phase coalescer is unaffected (it runs on the DB-loaded ship, where sibling capacity is correct).
+
+---
+
+
 
 ## 5. Database changes
 
