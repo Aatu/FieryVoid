@@ -3201,6 +3201,8 @@ class Hangar extends ShipSystem{
 		//below; otherwise a Stage 7 dock would replace the whole hangar with
 		//just the newly-docked flight.
 		if ($this->pendingDeployStartTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			//Seed THIS POST-side hangar's usage from the DB counterpart so its
+			//pre-existing entries (auto-shuttles, prior docks) survive the snapshot.
 			$dbShip = $gamedata->getShipById($ship->id);
 			if ($dbShip && is_array($dbShip->systems)) {
 				foreach ($dbShip->systems as $dbSys) {
@@ -3212,7 +3214,13 @@ class Hangar extends ShipSystem{
 					break;
 				}
 			}
-			HangarOps::processDeployStartTransfer($this, $ship, $gamedata);
+			//Stage 21 (no-split): coalesce this flight's per-bay deploy orders
+			//across all POST-side bays into ONE occupancy entry, using the client's
+			//per-bay counts (which were distributed against true capacity client
+			//-side — the POST-side siblings have empty usage so the server must NOT
+			//re-distribute). Runs from each hangar that still holds orders; the
+			//helper consumes the orders it folds in so siblings no-op.
+			HangarOps::processDeployStartTransfer($this, $ship, $gamedata, $dbShip);
 		}
 
 		//Stage 15: persist hangarOrdReserve (ordnance pool spent) ONLY on the
@@ -3340,7 +3348,10 @@ class Hangar extends ShipSystem{
 			//resets the per-turn launch/land budget); serviceDockedFlights honours
 			//the rail half-cadence gate internally (RAIL-3).
 			HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
-			HangarOps::processDockOrders($this, $ship, $gamedata);
+			//Stage 21: docks resolve once per carrier via the whole-flight coalescer
+			//(no fragments). Guarded; the first non-catapult bay to reach this runs
+			//it, the rest no-op. Replaces the per-bay processDockOrders.
+			HangarOps::processWholeFlightDocks($ship, $gamedata);
 			HangarOps::serviceDockedFlights($this, $ship, $gamedata);
 			HangarOps::processLaunchOrders($this, $ship, $gamedata);
 			return;
@@ -3354,12 +3365,11 @@ class Hangar extends ShipSystem{
 		//   source flight, keeping its rendered combat value in sync.
 		HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
 
-		//2. Process queued dock orders BEFORE launches: a flight that just
-		//   docked frees up no boxes (they're consuming, not vacating) but
-		//   docking-then-launching from the same hangar in one turn must
-		//   respect the shared output budget — landedThisTurn increments
-		//   first so the launch path sees the correct used budget.
-		HangarOps::processDockOrders($this, $ship, $gamedata);
+		//2. Process queued dock orders BEFORE launches. Stage 21: whole-flight
+		//   coalescer (no fragments), once per carrier — a flight docks as ONE
+		//   ship with occupancy spanning bays. landedThisTurn increments here so
+		//   the launch path sees the correct used budget.
+		HangarOps::processWholeFlightDocks($ship, $gamedata);
 
 		//3. Service flights docked a full turn (reload ammo on reloadable
 		//   weapons, etc.) BEFORE launches, so a flight that spent this turn

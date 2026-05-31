@@ -534,6 +534,60 @@ class HangarOps {
 		return $flightSize * self::boxesPerCraftForEntry($entry);
 	}
 
+	/* === Stage 21: occupancy (no-split docking) ========================== */
+	/*
+	 * A docked flight is ONE ship with ONE stash entry on its PRIMARY bay. When
+	 * the flight is too big for that bay, the entry carries an `occupancy` list
+	 *   occupancy: [ {systemId, boxes}, … ]
+	 * naming every bay (incl. the primary) that holds boxes for it. The sibling
+	 * bays do NOT get their own stash entry — their boxes are accounted as
+	 * occupied by reading the primary entry's occupancy from the OTHER hangars.
+	 *
+	 * Legacy compatibility: an entry with NO `occupancy` is a single-bay dock on
+	 * its own hangar (the Stage-19 / live shape) — boxesForEntry covers it; it
+	 * places no boxes on sibling bays.
+	 */
+
+	/* Boxes that entries on OTHER hangars of $ship place on $hangar via their
+	 * occupancy lists. Added to $hangar's own usage so free-box math sees a bay
+	 * filled by a multi-bay flight whose primary entry lives elsewhere.
+	 * Catapults never participate in occupancy (single-fighter, 1:1). */
+	public static function foreignOccupancyBoxesOn($hangar, $ship){
+		if (!empty($hangar->isCatapult)) return 0;
+		if (!$ship || !isset($ship->systems) || !is_array($ship->systems)) return 0;
+		$myId = (int)$hangar->id;
+		$boxes = 0;
+		foreach ($ship->systems as $sys){
+			if (!($sys instanceof Hangar)) continue;
+			if ($sys === $hangar) continue;                 //own usage counted separately
+			if (!is_array($sys->hangarUsage)) continue;
+			foreach ($sys->hangarUsage as $entry){
+				if (empty($entry['occupancy']) || !is_array($entry['occupancy'])) continue;
+				foreach ($entry['occupancy'] as $occ){
+					if ((int)($occ['systemId'] ?? 0) === $myId){
+						$boxes += max(0, (int)($occ['boxes'] ?? 0));
+					}
+				}
+			}
+		}
+		return $boxes;
+	}
+
+	/* Boxes a single entry occupies ON A SPECIFIC hangar id. For an entry with an
+	 * occupancy list, the boxes recorded for that systemId; for a legacy/no-occ
+	 * entry, its full boxesForEntry only if it lives on that hangar. */
+	public static function entryBoxesOnHangar($entry, $hangarId){
+		$hangarId = (int)$hangarId;
+		if (!empty($entry['occupancy']) && is_array($entry['occupancy'])){
+			$b = 0;
+			foreach ($entry['occupancy'] as $occ){
+				if ((int)($occ['systemId'] ?? 0) === $hangarId) $b += max(0, (int)($occ['boxes'] ?? 0));
+			}
+			return $b;
+		}
+		return 0;   //no-occ entries are counted on their own hangar by boxesForEntry, not here
+	}
+
 	/* Total occupied boxes across this hangar. A unitSize<1 craft consumes
 	 * more than one box per craft (see boxesPerCraftForClass), so this is NOT
 	 * simply the stored craft count. Compared against maxhealth / remaining
@@ -544,13 +598,29 @@ class HangarOps {
 	 * (its extra boxes are structural HP, and effectiveCapacity() is a flat 1),
 	 * so it counts craft 1:1. Without this a unitSize<1 superheavy could never
 	 * fit the catapult's single slot. */
-	public static function usageCountFor($hangar){
+	public static function usageCountFor($hangar, $ship = null){
 		$n = 0;
 		if (!is_array($hangar->hangarUsage)) return 0;
 		$isCatapult = !empty($hangar->isCatapult);
+		$myId = (int)$hangar->id;
 		foreach ($hangar->hangarUsage as $entry){
-			$n += $isCatapult ? (int)($entry['flightSize'] ?? 1) : self::boxesForEntry($entry);
+			if ($isCatapult){
+				$n += (int)($entry['flightSize'] ?? 1);
+				continue;
+			}
+			//Stage 21: an occupancy-bearing entry (multi-bay no-split dock) counts
+			//only the boxes its occupancy assigns to THIS (primary) hangar; the
+			//sibling-bay boxes are counted on those bays via foreignOccupancyBoxesOn.
+			//A legacy / single-bay entry (no occupancy) counts its full boxes here.
+			if (!empty($entry['occupancy']) && is_array($entry['occupancy'])){
+				$n += self::entryBoxesOnHangar($entry, $myId);
+			} else {
+				$n += self::boxesForEntry($entry);
+			}
 		}
+		//Stage 21: add boxes that OTHER bays' multi-bay entries place on this one.
+		if (!$isCatapult && $ship === null) $ship = $hangar->getUnit();
+		if (!$isCatapult && $ship) $n += self::foreignOccupancyBoxesOn($hangar, $ship);
 		return $n;
 	}
 
@@ -1639,7 +1709,9 @@ class HangarOps {
 	public static function freeBoxesByCategory($hangar, $category, $ship = null){
 		if (!self::hangarAcceptsCategory($hangar, $category, $ship)) return 0;
 		$max = self::effectiveCapacity($hangar);
-		return max(0, $max - self::usageCountFor($hangar));
+		//Stage 21: usageCountFor now also subtracts boxes that other bays' multi-bay
+		//(occupancy) entries place on this hangar — pass $ship so it can see them.
+		return max(0, $max - self::usageCountFor($hangar, $ship));
 	}
 
 	/* Effective storage capacity in "craft slots". A Catapult holds exactly ONE
@@ -1844,6 +1916,217 @@ class HangarOps {
 		return $out;
 	}
 
+	/* === Stage 21: no-split whole-flight dock ============================ */
+
+	/*
+	 * Dock $count craft of $flight into $carrier as ONE ship — no fragments.
+	 * $bays is an ordered list of [hangar, freeBoxes] (fill order, primary first)
+	 * across which the flight's boxes are spread. Writes ONE stash entry on the
+	 * primary bay with an `occupancy` list naming every bay it actually fills.
+	 *
+	 * Full dock ($count >= active): the flight ship IS the docked unit — mark it
+	 * removed, link the entry via dockedFlightId/flightId. Relaunch resurrects
+	 * the same ship with all its damage/ammo intact (no copy, no spawn).
+	 *
+	 * Partial dock ($count < active): the docked $count fighters leave the flight
+	 * (DisengagedFighter) and the entry is NOT flightId-linked (relaunch spawns
+	 * fresh) — same as the Stage-19 partial semantics, but still ONE entry with
+	 * occupancy, never a fragment ship. (Under no-split, a partial relaunch is
+	 * handled in 21.2; for 21.1 the partial-dock entry is anonymous as before.)
+	 *
+	 * Returns the number actually docked. Caller validates fit beforehand.
+	 */
+	public static function performWholeFlightDock($carrier, $flight, $count, $bays, $gamedata){
+		if (!($flight instanceof FighterFlight)) return 0;
+		if (empty($bays)) return 0;
+		$activeCount = $flight->countActiveCraft($gamedata->turn);
+		if ($activeCount <= 0) return 0;
+		$count = max(1, (int)$count);
+		if ($count > $activeCount) $count = $activeCount;
+		$partial = ($count < $activeCount);
+
+		$category = self::trueSizeOf($flight);
+		$bpc = self::boxesPerCraftForClass($flight->phpclass);
+		$boxesNeeded = $count * max(1, $bpc);
+
+		//Distribute boxes across the bays in fill order (primary first), capped by
+		//each bay's free boxes. Build the occupancy list of {systemId, boxes}.
+		$occupancy = array();
+		$remaining = $boxesNeeded;
+		$primaryHangar = null;
+		foreach ($bays as $b){
+			if ($remaining <= 0) break;
+			$h = $b['hangar'];
+			$freeBoxes = (int)$b['freeBoxes'];
+			if ($freeBoxes <= 0) continue;
+			$take = min($freeBoxes, $remaining);
+			$remaining -= $take;
+			$occupancy[] = array('systemId' => (int)$h->id, 'boxes' => $take);
+			if ($primaryHangar === null) $primaryHangar = $h;
+		}
+		if ($primaryHangar === null || $remaining > 0){
+			//Couldn't place all boxes — caller should have validated. Bail safely.
+			return 0;
+		}
+
+		$entry = array(
+			'phpclass'   => $flight->phpclass,
+			'name'       => $flight->name,
+			'flightSize' => $count,
+			'hangarType' => $category,
+			'dockedTurn' => $gamedata->turn,
+		);
+		if (!empty($flight->customFtrName)) $entry['customFtrName'] = $flight->customFtrName;
+		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
+		//Stage 21: occupancy is only recorded for true multi-bay docks; a
+		//single-bay dock leaves it off so legacy readers + the common path are
+		//untouched (the entry's boxes are simply counted on its own hangar).
+		if (count($occupancy) > 1) $entry['occupancy'] = $occupancy;
+
+		if ($partial){
+			//Partial: the docked fighters leave the flight; entry stays anonymous
+			//(no flightId link) exactly as Stage 19, so 21.1 doesn't change the
+			//partial-relaunch behaviour yet (21.2 handles partial-shrink).
+			self::dockFighters($flight, $count, $gamedata);
+		} else {
+			//Full: the flight ship IS the docked unit.
+			$entry['dockedFlightId'] = $flight->id;
+			$flight->removed = true;
+			$flight->removedTurn = $gamedata->turn;
+		}
+
+		$primaryHangar->hangarUsage[] = $entry;
+		$primaryHangar->landedThisTurn += $count;
+
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+			$carrier->id, $primaryHangar->id,
+			'hangarDockEvent',
+			$partial ? 'Hangar partial dock' : 'Hangar received flight',
+			$flight->id . ':' . $flight->phpclass . ':' . $count . ($partial ? ':partial' : '')
+		);
+		Manager::insertIndividualNote($note);
+
+		self::applyHangarOperationsCrit($carrier, $gamedata);
+		return $count;
+	}
+
+	/* Carrier-level dock coalescer (Stage 21, approach B). Runs once per carrier:
+	 * gathers every hangar's pendingDockOrder, groups by flightId (summing the
+	 * per-bay counts the client queued), and docks each WHOLE flight once via
+	 * performWholeFlightDock — spreading its boxes across the bays the player
+	 * targeted (and, if those don't have room, any other eligible bay). This
+	 * replaces the Stage-19 per-bay performLand calls that produced fragments.
+	 *
+	 * Guarded by $carrier->dockCoalesceDone so only the first hangar to reach the
+	 * dock step runs it; the rest no-op. Mirrors the once-per-carrier pattern.
+	 */
+	public static function processWholeFlightDocks($carrier, $gamedata){
+		if (!empty($carrier->dockCoalesceDone)) return;
+		$carrier->dockCoalesceDone = true;
+		if (!self::isFlowEnabled($gamedata->id)) return;
+
+		$hangars = self::collectHangars($carrier);
+		if (empty($hangars)) return;
+
+		//Gather per-flight: total requested count + the ordered list of bays that
+		//ordered it (preserving the player's bay preference as fill order).
+		$byFlight = array();   //flightId => {count, bays:[hangar,…]}
+		foreach ($hangars as $hangar){
+			//Catapults dock their single fighter through their own per-hangar path
+			//(processDockOrders) — exclude from whole-flight coalescing.
+			if (!empty($hangar->isCatapult)) continue;
+			if (empty($hangar->pendingDockOrder)) continue;
+			foreach ($hangar->pendingDockOrder as $order){
+				$fid = isset($order['flightId']) ? (int)$order['flightId'] : 0;
+				$cnt = isset($order['count'])    ? (int)$order['count']    : 0;
+				if ($fid <= 0 || $cnt <= 0) continue;
+				if (!isset($byFlight[$fid])) $byFlight[$fid] = array('count' => 0, 'bays' => array());
+				$byFlight[$fid]['count'] += $cnt;
+				$byFlight[$fid]['bays'][spl_object_hash($hangar)] = $hangar;   //dedup, keep order
+			}
+			$hangar->pendingDockOrder = null;   //consumed by the coalescer
+		}
+
+		foreach ($byFlight as $flightId => $info){
+			$flight = $gamedata->getShipById((int)$flightId);
+			if (!($flight instanceof FighterFlight)) continue;
+
+			//Validate the WHOLE-flight dock and build the fill-order bay list with
+			//live free boxes. Start from the bays the player targeted, then top up
+			//from any other eligible bay so the flight always lands as one ship.
+			$wanted = (int)$info['count'];
+			$reason = null;
+			$bays = self::buildDockBays($carrier, $flight, array_values($info['bays']), $wanted, $gamedata, $reason);
+			if (empty($bays)){
+				$failNote = new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+					$carrier->id, ($hangars[0]->id ?? 0),
+					'hangarDockEvent', 'Hangar dock failed',
+					'fail:' . $flightId . ':' . $wanted . ':' . ($reason ?? 'no room')
+				);
+				Manager::insertIndividualNote($failNote);
+				continue;
+			}
+			self::performWholeFlightDock($carrier, $flight, $wanted, $bays, $gamedata);
+		}
+	}
+
+	/* Build the fill-order bay list (each {hangar, freeBoxes}) for docking
+	 * $count craft of $flight, starting from $preferredHangars (the bays the
+	 * player ordered) and topping up from any other eligible bay until the
+	 * flight's box requirement is met. Returns [] (and sets $reason) if the
+	 * carrier can't hold $count after all. */
+	public static function buildDockBays($carrier, $flight, $preferredHangars, $count, $gamedata, &$reason = null){
+		$category = self::trueSizeOf($flight);
+		$bpc = self::boxesPerCraftForClass($flight->phpclass);
+		$boxesNeeded = max(1, (int)$count) * max(1, $bpc);
+
+		//Validate basic eligibility (hex/heading/speed/pivot/customcap) once via
+		//canShipReceive against the carrier's best bay — it short-circuits the
+		//common rejects without per-bay noise.
+		if (!self::canShipReceive(self::primaryHangar($carrier), $carrier, $flight, 1, $gamedata, $reason)){
+			//primary bay may not accept this category; fall through to the
+			//eligible-bay scan which applies hangarAcceptsCategory per bay.
+		}
+
+		$seen = array();
+		$ordered = array();
+		//Preferred bays first (player intent / fill order).
+		foreach ($preferredHangars as $h){
+			if (!($h instanceof Hangar)) continue;
+			$ordered[] = $h; $seen[spl_object_hash($h)] = true;
+		}
+		//Then any other eligible bay on the carrier.
+		foreach (self::collectHangars($carrier) as $h){
+			if (!empty($h->isCatapult)) continue;
+			if (isset($seen[spl_object_hash($h)])) continue;
+			$ordered[] = $h;
+		}
+
+		$bays = array();
+		$boxesAvail = 0;
+		foreach ($ordered as $h){
+			if (!empty($h->isCatapult)) continue;
+			if ($h->isDestroyed()) continue;
+			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+			$free = self::freeBoxesByCategory($h, $category, $carrier);
+			//Respect the shared launch+land budget per bay.
+			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
+			$free = min($free, $budget * max(1, $bpc));
+			if ($free <= 0) continue;
+			$bays[] = array('hangar' => $h, 'freeBoxes' => (int)$free);
+			$boxesAvail += (int)$free;
+			if ($boxesAvail >= $boxesNeeded) break;
+		}
+
+		if ($boxesAvail < $boxesNeeded){
+			$reason = $reason ?? 'not enough free boxes on carrier';
+			return array();
+		}
+		return $bays;
+	}
+
 	/* Materialise $count craft from $flight into $hangar's storage.
 	 * Returns the actual number docked (capped at the flight's current active
 	 * craft count). Caller should validate via canShipReceive first.
@@ -1864,6 +2147,11 @@ class HangarOps {
 	 * Mutates: $hangar->hangarUsage (appends entry), $hangar->landedThisTurn,
 	 * and either $flight->removed/$flight->removedTurn (full) or per-fighter
 	 * criticals (partial).
+	 *
+	 * Stage 21: this per-bay primitive is no longer the dock entry point — the
+	 * carrier-level processWholeFlightDocks coalesces all of a flight's orders
+	 * and calls performWholeFlightDock instead (no fragments). performLand is
+	 * retained only for the jumping-carrier dock path until 21.4 reworks it.
 	 */
 	public static function performLand($hangar, $carrier, $flight, $count, $gamedata){
 		if (!$flight instanceof FighterFlight) return 0;
@@ -2022,40 +2310,207 @@ class HangarOps {
 	 *
 	 * Failed entries are silently dropped with a hangarDeployStartEvent fail note.
 	 */
-	public static function processDeployStartTransfer($hangar, $carrier, $gamedata){
+	/* Stage 21 (no-split): coalesce a flight's per-bay deploy-dock orders — which
+	 * may be spread across several POST-side hangars — into ONE occupancy entry,
+	 * built from the CLIENT's per-bay counts (the client distributed them against
+	 * true capacity; the POST-side sibling hangars have empty hangarUsage, so the
+	 * server must NOT re-distribute or recompute free boxes here).
+	 *
+	 * $hangar is the POST-side hangar currently in generateIndividualNotes (its
+	 * usage is already DB-seeded by the caller). $dbCarrier is the DB-loaded ship
+	 * (true sibling usage) — used only to seed a sibling primary bay if the
+	 * occupancy's primary turns out to be a different bay than $hangar.
+	 *
+	 * Gathers orders for each flight from $hangar AND its POST-side siblings,
+	 * consuming them so the sibling passes no-op.
+	 */
+	public static function processDeployStartTransfer($hangar, $carrier, $gamedata, $dbCarrier = null){
 		if (empty($hangar->pendingDeployStartTransfer)) {
 			$hangar->pendingDeployStartTransfer = null;
 			return;
 		}
 
-		foreach ($hangar->pendingDeployStartTransfer as $entry) {
-			$flightId = isset($entry['flightId']) ? (int)$entry['flightId'] : 0;
-			$flight   = ($flightId > 0) ? $gamedata->getShipById($flightId) : null;
-			//Optional per-hangar slice for an auto-distributed multi-hangar dock
-			//(rails). NULL/absent → the whole flight goes into this hangar (legacy
-			//single-hangar dock). When the client spreads a 9-flight across a 6-box
-			//+ 3-box rail, each hangar's order carries its own count.
-			$count = (isset($entry['count']) && (int)$entry['count'] > 0) ? (int)$entry['count'] : null;
-			$reason   = null;
-			if (!$flight || !self::canDeployStartDock($hangar, $carrier, $flight, $gamedata, $reason, $count)) {
+		//Process ONLY the flights THIS bay ($hangar) ordered — its entry is written
+		//here, on the bay whose generateIndividualNotes snapshot is still pending,
+		//so it reliably persists. For each such flight, gather its per-bay counts
+		//across ALL POST-side bays (the client may have spread it across siblings)
+		//and consume those sibling orders so they don't double-dock.
+		$myFlightIds = array();
+		foreach ($hangar->pendingDeployStartTransfer as $order){
+			$fid = isset($order['flightId']) ? (int)$order['flightId'] : 0;
+			if ($fid > 0) $myFlightIds[$fid] = true;
+		}
+
+		$postHangars = self::collectHangars($carrier);
+		foreach (array_keys($myFlightIds) as $flightId){
+			//Gather this flight's bay orders across all POST-side bays, in bay order,
+			//and remove them from each bay's pending list.
+			$bayOrders = array();   //[ {hangar, count}, … ]
+			foreach ($postHangars as $h){
+				if (!is_array($h->pendingDeployStartTransfer)) continue;
+				$kept = array();
+				foreach ($h->pendingDeployStartTransfer as $order){
+					$fid = isset($order['flightId']) ? (int)$order['flightId'] : 0;
+					if ($fid === (int)$flightId){
+						$cnt = (isset($order['count']) && (int)$order['count'] > 0) ? (int)$order['count'] : null;
+						$bayOrders[] = array('hangar' => $h, 'count' => $cnt);
+					} else {
+						$kept[] = $order;
+					}
+				}
+				$h->pendingDeployStartTransfer = empty($kept) ? null : $kept;
+			}
+			if (empty($bayOrders)) continue;
+
+			$flight = $gamedata->getShipById((int)$flightId);
+			$reason = null;
+			if (!$flight || !self::validateDeployBayOrders($carrier, $dbCarrier, $flight, $bayOrders, $gamedata, $reason)){
 				$failNote = new IndividualNote(
-					-1,
-					$gamedata->id,
-					$gamedata->turn,
-					$gamedata->phase,
-					$carrier->id,
-					$hangar->id,
-					'hangarDeployStartEvent',
-					'Hangar deploy-start dock failed',
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+					$carrier->id, $hangar->id,
+					'hangarDeployStartEvent', 'Hangar deploy-start dock failed',
 					'fail:' . $flightId . ':' . ($reason ?? 'unknown')
 				);
 				Manager::insertIndividualNote($failNote);
 				continue;
 			}
-			self::performDeployStartDock($hangar, $carrier, $flight, $gamedata, $count);
+			//Primary = $hangar (the in-flight bay). Ensure $hangar is in the
+			//occupancy list (it ordered this flight, so it is).
+			self::performDeployStartDockFromOrders($hangar, $carrier, $flight, $bayOrders, $gamedata, $dbCarrier);
 		}
 
-		$hangar->pendingDeployStartTransfer = null;   //consumed
+		//Any orders left on THIS bay (none, normally) are cleared.
+		$hangar->pendingDeployStartTransfer = null;
+	}
+
+	/* Build ONE occupancy deploy-dock entry, server-authoritatively. The client's
+	 * per-bay order list is only a PREFERENCE for fill order — the server re-homes
+	 * the whole flight across bays using TRUE (DB-side) free boxes, clamping each
+	 * bay to what it can actually hold and topping up from any other eligible bay.
+	 * This is robust against a stale/over-optimistic client distribution (e.g. one
+	 * that offered a bay already full of auto-filled shuttles). The entry is
+	 * written to the in-flight $preferredPrimary (snapshot still pending) so it
+	 * persists. Returns the number docked (0 on total failure). */
+	public static function performDeployStartDockFromOrders($preferredPrimary, $carrier, $flight, $bayOrders, $gamedata, $dbCarrier = null){
+		if ($flight->removed) return 0;
+		$activeCount = $flight->countActiveCraft($gamedata->turn);
+		if ($activeCount <= 0) return 0;
+
+		$bpc = max(1, self::boxesPerCraftForClass($flight->phpclass));
+		$category = self::trueSizeOf($flight);
+		$boxesNeeded = $activeCount * $bpc;
+
+		//Fill order: the client's chosen bays first (dedup), then any other
+		//eligible bay on the carrier. Free boxes are read from the DB-side bay
+		//PLUS this-pass POST-side commits (entries the coalescer already appended).
+		$seen = array();
+		$ordered = array();
+		foreach ($bayOrders as $bo){
+			$h = $bo['hangar'];
+			$k = spl_object_hash($h);
+			if (isset($seen[$k])) continue;
+			$seen[$k] = true; $ordered[] = $h;
+		}
+		foreach (self::collectHangars($carrier) as $h){
+			$k = spl_object_hash($h);
+			if (isset($seen[$k])) continue;
+			if (!empty($h->isCatapult)) continue;
+			$seen[$k] = true; $ordered[] = $h;
+		}
+
+		$occupancy = array();
+		$remaining = $boxesNeeded;
+		foreach ($ordered as $h){
+			if ($remaining <= 0) break;
+			if (!empty($h->isCatapult)) continue;
+			if ($h->isDestroyed()) continue;
+			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+
+			//TRUE free boxes for this bay = effective capacity − max(DB usage,
+			//POST-side this-pass usage). The POST-side bay accumulates entries the
+			//coalescer appends this pass; the DB-side bay has pre-existing usage
+			//(auto-shuttles, prior docks). Take the larger so neither is missed.
+			$cap = self::effectiveCapacity($h);
+			$dbUsed = 0;
+			if ($dbCarrier && is_array($dbCarrier->systems)){
+				foreach ($dbCarrier->systems as $dbSys){
+					if (!($dbSys instanceof Hangar) || (int)$dbSys->id !== (int)$h->id) continue;
+					$dbUsed = self::usageCountFor($dbSys, $dbCarrier);
+					break;
+				}
+			}
+			$postUsed = 0;
+			if (is_array($h->hangarUsage)){
+				foreach ($h->hangarUsage as $e){ $postUsed += self::boxesForEntry($e); }
+			}
+			$free = max(0, $cap - max($dbUsed, $postUsed));
+			if ($free <= 0) continue;
+			$take = min($free, $remaining);
+			$occupancy[] = array('systemId' => (int)$h->id, 'boxes' => $take);
+			$remaining -= $take;
+		}
+
+		if ($remaining > 0 || empty($occupancy)){
+			//Carrier truly can't hold the whole flight — fail cleanly, leave it on
+			//the map (don't mark removed).
+			$note = new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+				$carrier->id, $preferredPrimary->id,
+				'hangarDeployStartEvent', 'Hangar deploy-start dock failed',
+				'fail:' . $flight->id . ':carrier full'
+			);
+			Manager::insertIndividualNote($note);
+			return 0;
+		}
+
+		$totalCraft = $activeCount;
+
+		//Entry host = the in-flight $preferredPrimary ($hangar), whose snapshot is
+		//still pending this request so the entry reliably persists. The host need
+		//NOT be one of the occupancy bays: usageCountFor counts an occupancy
+		//entry's boxes only on the bays named in its occupancy list (via
+		//entryBoxesOnHangar / foreignOccupancyBoxesOn), so hosting the metadata
+		//record on a bay that contributes 0 boxes is correct (it adds 0 to that
+		//bay's own usage). This avoids ever writing to a bay whose snapshot may
+		//have already run.
+		$entryHost = $preferredPrimary;
+
+		//Seed the entry host's POST-side usage from DB so its existing entries
+		//(auto-shuttles, prior docks) survive its snapshot write.
+		if ($dbCarrier && is_array($dbCarrier->systems) && empty($entryHost->hangarUsage)){
+			foreach ($dbCarrier->systems as $dbSys){
+				if (!($dbSys instanceof Hangar) || (int)$dbSys->id !== (int)$entryHost->id) continue;
+				if (is_array($dbSys->hangarUsage)) $entryHost->hangarUsage = $dbSys->hangarUsage;
+				break;
+			}
+		}
+
+		$entry = array(
+			'phpclass'       => $flight->phpclass,
+			'name'           => $flight->name,
+			'flightSize'     => $totalCraft,
+			'hangarType'     => $category,
+			'dockedTurn'     => $gamedata->turn,
+			'dockedFlightId' => $flight->id,
+		);
+		if (!empty($flight->customFtrName)) $entry['customFtrName'] = $flight->customFtrName;
+		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
+		if (count($occupancy) > 1) $entry['occupancy'] = $occupancy;
+
+		$flight->removed = true;
+		$flight->removedTurn = $gamedata->turn;
+
+		if (!is_array($entryHost->hangarUsage)) $entryHost->hangarUsage = array();
+		$entryHost->hangarUsage[] = $entry;
+
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+			$carrier->id, $entryHost->id,
+			'hangarDeployStartEvent', 'Hangar received flight (deployment)',
+			$flight->id . ':' . $flight->phpclass . ':' . $totalCraft
+		);
+		Manager::insertIndividualNote($note);
+		return $totalCraft;
 	}
 
 	/* Returns true if $flight can be docked into $hangar on $carrier during
@@ -2068,6 +2523,44 @@ class HangarOps {
 	 *   - Carrier hangar isn't destroyed and has compatible free boxes for the
 	 *     flight's full size
 	 */
+	/* Stage 21: validate a coalesced multi-bay deploy-dock against the client's
+	 * per-bay distribution. The per-flight gates (slot / owner / both-deploying-
+	 * this-turn / category fit / customFighter cap) are checked once; each bay's
+	 * slice is checked against THAT bay's TRUE (DB-side) free boxes — the POST-
+	 * side carrier's sibling bays have empty hangarUsage so we must read capacity
+	 * from $dbCarrier. Returns false + sets $reason on the first failing gate.
+	 *
+	 * Boxes already committed to OTHER flights earlier in THIS deploy pass are
+	 * tracked via the POST-side bays' hangarUsage (which the coalescer appends
+	 * to as it docks), so two big flights deploying into the same bays this pass
+	 * don't both think the bay is empty. */
+	public static function validateDeployBayOrders($carrier, $dbCarrier, $flight, $bayOrders, $gamedata, &$reason = null){
+		if (!($flight instanceof FighterFlight)) { $reason = 'not a flight'; return false; }
+		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
+		if ($carrier->isDestroyed() || $carrier->removed) { $reason = 'carrier not in play'; return false; }
+		if ((int)$flight->slot   !== (int)$carrier->slot)   { $reason = 'slot mismatch';  return false; }
+		if ((int)$flight->userid !== (int)$carrier->userid) { $reason = 'owner mismatch'; return false; }
+		if ($flight->getTurnDeployed($gamedata) != $gamedata->turn) { $reason = 'flight not deploying this turn'; return false; }
+		if ($carrier->getTurnDeployed($gamedata) != $gamedata->turn) { $reason = 'carrier not deploying this turn'; return false; }
+
+		$activeCount = $flight->countActiveCraft($gamedata->turn);
+		if ($activeCount <= 0) { $reason = 'flight has no craft'; return false; }
+
+		//customFighter cap (shared across bays) against the whole-flight count.
+		$customName = isset($flight->customFtrName) ? (string)$flight->customFtrName : '';
+		if ($customName !== ''){
+			$remaining = self::customFighterRemaining($carrier, $customName);
+			if ($remaining < $activeCount) { $reason = 'customFighter cap exceeded'; return false; }
+		}
+
+		//Per-BAY capacity is NOT checked here — performDeployStartDockFromOrders is
+		//server-authoritative: it re-homes the whole flight across bays using TRUE
+		//(DB-side) free boxes, drops full/incompatible bays, tops up elsewhere, and
+		//fail-notes only if the carrier genuinely can't hold the flight. This keeps
+		//the validation robust against a stale/over-optimistic client distribution.
+		return true;
+	}
+
 	public static function canDeployStartDock($hangar, $carrier, $flight, $gamedata, &$reason = null, $count = null){
 		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
 		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
@@ -2115,85 +2608,12 @@ class HangarOps {
 		return true;
 	}
 
-	/* Move $flight (or $count craft of it) from "deploying to map" into $hangar's
-	 * storage. Stash entry carries dockedFlightId so a later launch (Stage 4) can
-	 * resurrect the ship row.
-	 *
-	 * $count NULL → the whole flight goes into this one hangar (legacy single-
-	 * hangar dock). A multi-hangar auto-distribute (rails: a 9-flight across a
-	 * 6-box + 3-box rail) passes the per-hangar slice; when the slice is smaller
-	 * than the flight's currently-active craft it splits off a fragment exactly
-	 * like performLand's partial branch (the source flight's remaining craft are
-	 * docked by the final slice). Deployment flights carry no damage yet, so the
-	 * fragment is clean.
-	 *
-	 * Mutates: $hangar->hangarUsage, $flight->removed/$flight->removedTurn (or the
-	 * fragment's). Writes a hangarDeployStartEvent note for replay/audit.
-	 */
-	public static function performDeployStartDock($hangar, $carrier, $flight, $gamedata, $count = null){
-		//Clamp to the flight's still-active craft (earlier slices this pass may
-		//have already split some off into fragments).
-		$activeCount = $flight->countActiveCraft($gamedata->turn);
-		if ($activeCount <= 0) return;
-		$count = ($count === null) ? $activeCount : (int)$count;
-		if ($count > $activeCount) $count = $activeCount;
-		if ($count <= 0) return;
-
-		$partial = ($count < $activeCount);
-		$category = self::trueSizeOf($flight);
-
-		$entry = array(
-			'phpclass'       => $flight->phpclass,
-			'name'           => $flight->name,
-			'flightSize'     => $count,
-			'hangarType'     => $category,
-			'dockedTurn'     => $gamedata->turn,
-		);
-		//Stage 10.6.2: stamp customFtrName for per-ship cap accounting.
-		if (!empty($flight->customFtrName)) {
-			$entry['customFtrName'] = $flight->customFtrName;
-		}
-		//Stamp per-craft box cost for unitSize<1 craft (see performLand).
-		$bpc = self::boxesPerCraftForClass($flight->phpclass);
-		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
-
-		if ($partial) {
-			//Split a fragment off for this hangar's slice (mirrors performLand).
-			//dockFighters disengages the chosen craft in the source flight; the
-			//fragment carries them (no damage to copy pre-game, but reuse the
-			//same helper so the resurrect path is identical).
-			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
-			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $hangar, $gamedata);
-			if ($fragment) {
-				$entry['dockedFlightId'] = $fragment->id;
-				$entry['name']           = $fragment->name;
-				$entry['fragment']       = true;
-			}
-		} else {
-			//Whole (remaining) flight goes here — the source flight IS the docked
-			//unit. Loaders re-apply $removed via dockedFlightId, but set it here so
-			//the current request's downstream consumers (the movement-insertion
-			//loop in DeploymentGamePhase) know the flight isn't on the board.
-			$entry['dockedFlightId'] = $flight->id;
-			$flight->removed = true;
-			$flight->removedTurn = $gamedata->turn;
-		}
-
-		$hangar->hangarUsage[] = $entry;
-
-		$note = new IndividualNote(
-			-1,
-			$gamedata->id,
-			$gamedata->turn,
-			$gamedata->phase,
-			$carrier->id,
-			$hangar->id,
-			'hangarDeployStartEvent',
-			'Hangar received flight (deployment)',
-			$flight->id . ':' . $flight->phpclass . ':' . $count . ($partial ? ':partial' : '')
-		);
-		Manager::insertIndividualNote($note);
-	}
+	/* (Stage 21: the old per-bay performDeployStartDock — which re-distributed
+	 * boxes server-side and, pre-21.1, split into fragments — was replaced by the
+	 * coalescing processDeployStartTransfer → performDeployStartDockFromOrders
+	 * pair, which builds ONE occupancy entry from the client's per-bay counts.
+	 * Server-side re-distribution was wrong on the POST-side because sibling bays
+	 * have empty hangarUsage there, so it couldn't see their true occupancy.) */
 
 	/* Collect flight IDs queued for deployment-phase dock across every hangar
 	 * on every ship in $ships. Used by DeploymentGamePhase::validateDeployment
