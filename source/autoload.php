@@ -3819,6 +3819,7 @@ spl_autoload_register(
                 'shuttlegrome' => '/server/model/ships/Shuttle.php',
                 'shuttlehurr' => '/server/model/ships/Shuttle.php',
                 'shuttlehyach' => '/server/model/ships/Shuttle.php',
+                'shuttleipsha' => '/server/model/ships/Shuttle.php',                
                 'shuttlekl' => '/server/model/ships/Shuttle.php', 
                 'shuttlellort' => '/server/model/ships/Shuttle.php',
                 'shuttlemarkab' => '/server/model/ships/Shuttle.php',                                                                                                                    

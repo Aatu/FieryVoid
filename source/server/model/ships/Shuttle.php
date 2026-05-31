@@ -895,6 +895,42 @@ class ShuttleHyach extends Shuttle
 }
 
 
+class ShuttleIpsha extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleIpsha";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Ipsha Baronies";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 9;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
+
 class ShuttleKL extends Shuttle
 {
     protected function setShuttleDefaults()
