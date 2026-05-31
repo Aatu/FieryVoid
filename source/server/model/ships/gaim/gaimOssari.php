@@ -40,7 +40,10 @@ class gaimOssari extends BaseShip{
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
 		$this->addFrontSystem(new PacketTorpedo(4, 6, 5, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 4));
-		$this->addFrontSystem(new Bulkhead(0, 4));
+		$this->addFrontSystem(new Bulkhead(0, 4));		
+		$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+
 
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));

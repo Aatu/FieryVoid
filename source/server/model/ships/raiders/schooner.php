@@ -31,6 +31,9 @@ class Schooner extends MediumShip{
         $this->addPrimarySystem(new Scanner(4, 8, 3, 4));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));		
+		
 		
 		$temp1 = new CargoBay(3, 16);
 		$temp2 = new CargoBay(3, 16);

@@ -34,7 +34,10 @@ class Sloop extends MediumShip{
         $this->addPrimarySystem(new Hangar(3, 2));
     	$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 3));
     	$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 4));
-		
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));
+        
+
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
