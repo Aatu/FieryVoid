@@ -57,6 +57,59 @@ function dockedCraftStashValue(ship) {
     return Math.round(total);
 }
 
+//Hangar Ops Stage 21.7 (value follow-up): for a flight that is still in
+//space but has some craft docked-out (partial dock) or disengaged, value it
+//by its ACTIVE craft count rather than its persisted flightSize. The flight
+//keeps flightSize at the full roster (replay/reload-safe — the docked craft's
+//state lives on the "- Split" fragment and returns on relaunch), so the raw
+//baseValue (pointCost*flightSize/6) over-counts the docked craft, while the
+//server combatValue (round(100*active/total)) under-counts because it treats
+//docked craft as destroyed in the DENOMINATOR. The two compound: a 3-of-6
+//partial-dock remnant rendered 360*0.5 = 180 instead of the 228 a clean
+//flight of 3 shows. This recomputes both base and CV over the active roster
+//so the in-space remnant reads the same as an equivalent fresh flight.
+//
+//Returns null when no re-base is needed (not a flight, fully active, or no
+//systems) so callers fall through to the existing flightSize/combatValue
+//path unchanged for every ordinary flight.
+function activeFlightValue(ship) {
+    if (!ship || ship.flight !== true || !Array.isArray(ship.systems)) return null;
+    //A removed flight (fully docked / jumped with its carrier) isn't in space —
+    //it's rendered by the "Docked"/"Jumped" row path and valued elsewhere. Only
+    //re-base flights actually on the board (a partial-dock remnant), or we'd zero
+    //out a fully-docked flight's row (all its craft carry DockedFighter).
+    if (ship.removed) return null;
+
+    var total = 0;       //fighter craft in the roster (matches server craftTotal)
+    var active = 0;      //craft still in space (not docked-out / disengaged / dead)
+    var cvAccum = 0;     //combat-value weight summed over active craft
+    for (var i = 0; i < ship.systems.length; i++) {
+        var fighter = ship.systems[i];
+        if (!fighter || !fighter.fighter) continue;   //skip non-Fighter entries
+        total++;
+
+        if (fighter.destroyed) continue;
+        if (shipManager.criticals.hasCritical(fighter, "DockedFighter")) continue;
+        if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter")) continue;
+
+        active++;
+        //Mirror FighterFlight::calculateCombatValue: >50% damage -> 3/4 value.
+        var dmg = damageManager.getDamage(ship, fighter);
+        if ((fighter.maxhealth - dmg) * 2 < fighter.maxhealth) {
+            cvAccum += 0.75;
+        } else {
+            cvAccum += 1;
+        }
+    }
+
+    //Only re-base when craft are actually missing from the in-space roster.
+    //A full (or empty) flight falls through to the unchanged default path.
+    if (total <= 0 || active >= total) return null;
+
+    var effectiveCV = (active > 0) ? Math.round(100 * (cvAccum / active)) : 0;
+    return { activeCraft: active, combatValue: effectiveCV };
+}
+
 window.fleetListManager = {
 
     initialized: false,
@@ -194,12 +247,24 @@ window.fleetListManager = {
             }
 
             var baseValue = ship.pointCost || 0;
+            //Hangar Ops Stage 21.7: a partial-dock remnant keeps the full
+            //flightSize but only some craft are still in space — value it by its
+            //active roster (and a CV recomputed over those craft) so it matches a
+            //fresh flight of the same active size. Returns null for ordinary
+            //flights, so the default flightSize/combatValue path is unchanged.
+            var activeVal = activeFlightValue(ship);
+            var effectiveCV = (ship.combatValue !== undefined ? ship.combatValue : 100);
             if (ship.flight === true) {
-                // Flights have cost calculated per 6 fighters
-                baseValue = (ship.pointCost || 0) * (ship.flightSize / 6);
+                if (activeVal) {
+                    baseValue = (ship.pointCost || 0) * (activeVal.activeCraft / 6);
+                    effectiveCV = activeVal.combatValue;
+                } else {
+                    // Flights have cost calculated per 6 fighters
+                    baseValue = (ship.pointCost || 0) * (ship.flightSize / 6);
+                }
             }
             baseValue = Math.round(baseValue + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0));
-            var currValue = Math.round(baseValue * (ship.combatValue !== undefined ? ship.combatValue : 100) / 100);
+            var currValue = Math.round(baseValue * effectiveCV / 100);
 
             //Stage 9: carriers carry the point cost of any anonymous docked
             //craft (auto-filled shuttles are 0-cost; orphaned fighter records

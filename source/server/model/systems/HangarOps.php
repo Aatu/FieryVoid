@@ -2835,10 +2835,57 @@ class HangarOps {
 		if (count($occupancy) > 1) $entry['occupancy'] = $occupancy;
 
 		if ($partial){
-			//Partial: the docked fighters leave the flight; entry stays anonymous
-			//(no flightId link) exactly as Stage 19, so 21.1 doesn't change the
-			//partial-relaunch behaviour yet (21.2 handles partial-shrink).
-			self::dockFighters($flight, $count, $gamedata);
+			//Partial: the docked fighters leave the source flight (it keeps its
+			//N-K remnant in space). Spawn a fragment FighterFlight holding the
+			//chosen fighters' damage/crit/ammo state and link the entry to it via
+			//dockedFlightId — exactly the Stage 10.4 fragment shape performLand
+			//produces. This gives the docked portion its OWN removed=true ship row
+			//so it appears in the fleet list as a "<name> - Split" Docked row with
+			//the right CP value (previously the partial-dock entry was anonymous,
+			//so the docked fighters had no ship row and vanished from the fleet
+			//list — only an invisible carrier-credit via dockedCraftStashValue).
+			//The dockedFlightId link also routes relaunch through the standard
+			//resurrectDockedFlight / processWholeFlightLaunches paths, and lets
+			//dockedCraftStashValue skip the entry so the carrier isn't double-
+			//credited for craft that now have their own row.
+			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
+			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $primaryHangar, $gamedata);
+			if ($fragment){
+				$entry['dockedFlightId'] = $fragment->id;
+				$entry['name']           = $fragment->name;   //"<source> - Split"
+				//Born removed at the dock turn — never existed on the board as its
+				//own flight. onIndividualNotesLoaded uses this to restore
+				//spawned==dockedTurn on reload so replay hides the fragment on its
+				//dock turn instead of rendering a phantom alongside the remnant.
+				$entry['fragment'] = true;
+
+				//Split the enhancement value (pointCostEnh) between the docked
+				//fragment and the remnant left in space — the docked K fighters
+				//keep their enhancements (spawnFragmentFlight already copies the
+				//AMMO_F* magazine loads onto the fragment), so their share of the
+				//cost must travel with them. Mirror of the partial-LAUNCH split
+				//(Stage 21.5): give the K-craft side round(total*K/N), give the
+				//N-K remnant the remainder so the two rows always sum back to the
+				//original total (no double-count, no drift from re-rounding).
+				//$activeCount is the pre-dock size (captured before dockFighters);
+				//$count is K. spawnFragmentFlight doesn't set pointCostEnh, so the
+				//fragment starts at 0 and we set its share explicitly here.
+				$totalEnh = (int)round((float)($flight->pointCostEnh ?? 0) + (float)($flight->pointCostEnh2 ?? 0));
+				if ($totalEnh > 0 && $activeCount > 0){
+					$fragmentEnh = (int)round($totalEnh * $count / $activeCount);
+					$remnantEnh  = max(0, $totalEnh - $fragmentEnh);
+
+					$fragment->pointCostEnh  = $fragmentEnh;
+					$fragment->pointCostEnh2 = 0;
+					Manager::insertSingleEnhValue($fragment->id, $fragmentEnh);
+
+					if ($remnantEnh !== $totalEnh){
+						$flight->pointCostEnh  = $remnantEnh;
+						$flight->pointCostEnh2 = 0;
+						Manager::insertSingleEnhValue($flight->id, $remnantEnh);
+					}
+				}
+			}
 		} else {
 			//Full: the flight ship IS the docked unit.
 			$entry['dockedFlightId'] = $flight->id;
@@ -3004,10 +3051,12 @@ class HangarOps {
 	 * and either $flight->removed/$flight->removedTurn (full) or per-fighter
 	 * criticals (partial).
 	 *
-	 * Stage 21: this per-bay primitive is no longer the dock entry point — the
-	 * carrier-level processWholeFlightDocks coalesces all of a flight's orders
-	 * and calls performWholeFlightDock instead (no fragments). performLand is
-	 * retained only for the jumping-carrier dock path until 21.4 reworks it.
+	 * Stage 21: this per-bay primitive is no longer the firing-phase dock entry
+	 * point — the carrier-level processWholeFlightDocks coalesces all of a
+	 * flight's orders and calls performWholeFlightDock instead. (Both paths now
+	 * spawn a "- Split" fragment on a PARTIAL dock — Stage 21.7 — so the docked
+	 * portion gets its own fleet-list row; a FULL dock links the source flight
+	 * directly.) performLand is retained only for the jumping-carrier dock path.
 	 */
 	public static function performLand($hangar, $carrier, $flight, $count, $gamedata){
 		if (!$flight instanceof FighterFlight) return 0;
