@@ -11,7 +11,8 @@ class AlacanAzafac extends HeavyCombatVessel{
         $this->shipClass = "Azafac Armed Freighter";
 		$this->isd = 2208;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-        
+		$this->fighters = array("cargo shuttles"=>3); 
+
         $this->forwardDefense = 18;
         $this->sideDefense = 18;
         
@@ -44,7 +45,7 @@ class AlacanAzafac extends HeavyCombatVessel{
 
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 0));
 		$this->addAftSystem(new CargoBay(3, 28));
-		$this->addAftSystem(new Hangar(3,3));
+		$this->addAftSystem(new Hangar(3, 3, 1));
 		$this->addAftSystem(new CargoBay(3, 28));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
