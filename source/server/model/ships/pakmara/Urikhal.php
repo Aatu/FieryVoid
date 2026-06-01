@@ -38,7 +38,7 @@ class Urikhal extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 15, 0, 2));
         $this->addPrimarySystem(new Scanner(4, 10, 5, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 14, 2));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
 		$this->addPrimarySystem(new Thruster(4, 13, 0, 7, 3));
 		$this->addPrimarySystem(new Thruster(4, 13, 0, 7, 4));	
 		$this->addPrimarySystem(new CargoBay(2, 8));			

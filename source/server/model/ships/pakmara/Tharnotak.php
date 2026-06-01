@@ -41,7 +41,7 @@ class Tharnotak extends BaseShip{
 		$this->addPrimarySystem(new Reactor(5, 28, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 7));
 		$this->addPrimarySystem(new Engine(5, 18, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 1));
 		$this->addPrimarySystem(new CargoBay(2, 8));
 		$this->addPrimarySystem(new CargoBay(2, 8));				
 

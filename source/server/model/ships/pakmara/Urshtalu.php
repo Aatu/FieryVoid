@@ -49,7 +49,7 @@ class Urshtalu extends StarBaseSixSections
 		$this->addPrimarySystem(new SecondaryCnC(6, 16, 0, 0));//all-around by default	
         
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
-		$this->addPrimarySystem(new Hangar(6, 6));
+		$this->addPrimarySystem(new Hangar(6, 6, 1));
 		$this->addPrimarySystem(new Scanner(6, 18, 6, 8));
 		$this->addPrimarySystem(new Scanner(6, 18, 6, 8));
 		$this->addPrimarySystem(new MediumPlasma(6, 5, 3, 0, 360));	         				
@@ -76,7 +76,7 @@ class Urshtalu extends StarBaseSixSections
 			$subReactor = new SubReactorUniversal(5, 23, 0, 0);
 			$subReactor->startArc = $min;
 			$subReactor->endArc = $max;
-			$hangar = new Hangar(5, 6, 0, 0);
+			$hangar = new Hangar(5, 6, 6);
 			$hangar->startArc = $min;
 			$hangar->endArc = $max;
 			$battery = new PlasmaBattery(5, 6, 0, 0);
