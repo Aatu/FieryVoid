@@ -1149,8 +1149,7 @@ class HangarOps {
 		$flight   = $dockedId > 0 ? $gamedata->getShipById($dockedId) : null;
 		if (!($flight instanceof FighterFlight)) return;   //anonymous/auto entry: no per-craft escape, trim only
 
-		$roll = random_int(1, 20);
-		$roll = 13;		
+		$roll = random_int(1, 20);	
 		$maxEscape = self::computeEscapeCount($roll, $k);
 
 		//Pre-shed active count for the proportional enhancement-value split below.
@@ -4248,7 +4247,6 @@ class HangarOps {
 				//consecutive turns kept rolling in the 11-18 range — so the
 				//player saw "half escape" every time. Rolling fresh fixes that.
 				$roll = random_int(1, 20);
-				$roll = 13;
 				$maxEscape = self::computeEscapeCount($roll, $totalDocked);
 			}
 
