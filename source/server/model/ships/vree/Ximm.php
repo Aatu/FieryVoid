@@ -30,7 +30,7 @@ class Ximm extends VreeCapital{
 		$this->canvasSize = 200;
 
 		$this->addPrimarySystem(new Reactor(5, 17, 0, 0));
-		$this->addPrimarySystem(new Hangar(5, 1));
+		$this->addPrimarySystem(new Hangar(5, 1, 1));
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 9, 8));
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
