@@ -57,7 +57,7 @@ class LeklantEarlyAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 7, 9));
         $this->addPrimarySystem(new Engine(5, 18, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
         $this->addPrimarySystem(new JumpEngine(4, 20, 4, 30));
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));

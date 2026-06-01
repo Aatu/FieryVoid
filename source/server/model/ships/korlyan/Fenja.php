@@ -12,7 +12,7 @@ class Fenja extends MediumShip{
 			$this->occurence = "uncommon";
 			$this->variantOf = 'Axor Assault Frigate';
         $this->canvasSize = 70;
-		//$this->fighters = array("assault shuttles"=>4);
+		$this->fighters = array("Breaching Pods"=>4);
 	    
 	    $this->isd = 2243;
 
@@ -35,7 +35,7 @@ class Fenja extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 3, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 4, 1));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 4, 2));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 4));
 		

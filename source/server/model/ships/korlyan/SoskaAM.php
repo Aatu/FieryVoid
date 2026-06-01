@@ -56,7 +56,7 @@ class SoskaAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 4, 5));
         $this->addPrimarySystem(new Engine(5, 18, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 2));
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 2, 1));
