@@ -2344,7 +2344,7 @@ window.confirm = {
         $('<div class="multi-value-header">' + headerText + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Allocate craft to dock per hangar.</span></div>').appendTo(container);
+        //$('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Allocate craft to dock per hangar.</span></div>').appendTo(container);
 
         // Live cross-row total: updates each input's max so the sum can never exceed flightCount.
         // Built as a single span so the flex row treats it as one child (avoiding space-between split).
