@@ -2001,26 +2001,58 @@ window.confirm = {
             });
             return out;
         }
-        // Recompute every bay's "remaining" readout from all rows that charge it.
-        function updateBudgets() {
-            var charged = {};   // hangarId -> total craft charged
+        // Craft this row charges to each bay it draws from, for a given value k.
+        function chargesForRow(rd, k) {
+            if (k <= 0) return {};
+            if (rd.dockedFlightId > 0 && rd.occBays && rd.occBays.length) {
+                return distributeDockedCharge(rd, k);
+            }
+            var out = {};
+            out[parseInt(rd.entryHangar.id, 10)] = k;
+            return out;
+        }
+        // Sum the craft every row charges to each bay → {hangarId: craft}.
+        function tallyCharges() {
+            var charged = {};
             rowData.forEach(function (rd) {
                 if (rd.isCat) return;   // catapults have no budget
-                var k = parseInt(rd.$input.val() || 0, 10);
-                if (k <= 0) return;
-                if (rd.dockedFlightId > 0 && rd.occBays && rd.occBays.length) {
-                    var dist = distributeDockedCharge(rd, k);
-                    Object.keys(dist).forEach(function (hid) { charged[hid] = (charged[hid] || 0) + dist[hid]; });
+                var c = chargesForRow(rd, parseInt(rd.$input.val() || 0, 10));
+                Object.keys(c).forEach(function (hid) { charged[hid] = (charged[hid] || 0) + c[hid]; });
+            });
+            return charged;
+        }
+        // True if the current allocation pushes any bay past its launch budget.
+        function anyBayOverBudget(charged) {
+            var over = false;
+            bayBudget.forEach(function (base, hangar) {
+                if ((charged[parseInt(hangar.id, 10)] || 0) > base) over = true;
+            });
+            return over;
+        }
+        // Recompute every bay's "remaining" readout, and stop a row from being
+        // raised once its bay's budget is spent: if the latest edit tips any bay
+        // over, revert ONLY that row to its last accepted value (other rows are
+        // never altered to make room).
+        function updateBudgets() {
+            rowData.forEach(function (rd) {
+                if (rd.isCat) return;   // catapults have no budget
+                var cur = parseInt(rd.$input.val() || 0, 10);
+                if (cur < 0) cur = 0;
+                // Only an INCREASE can newly break a budget; if this row went up
+                // and the result is over budget, roll just this row back.
+                if (cur > (rd.lastVal || 0) && anyBayOverBudget(tallyCharges())) {
+                    rd.$input.val(rd.lastVal || 0);
                 } else {
-                    var hid = parseInt(rd.entryHangar.id, 10);
-                    charged[hid] = (charged[hid] || 0) + k;
+                    rd.lastVal = cur;
                 }
             });
+
+            var charged = tallyCharges();
             budgetSpans.forEach(function ($span, hangar) {
                 var base = bayBudget.get(hangar) || 0;
                 var rem = base - (charged[parseInt(hangar.id, 10)] || 0);
                 $span.text(rem);
-                $span.css('color', rem < 0 ? '#ff6666' : '');
+                $span.css('color', rem <= 0 ? '#ff6666' : '');
             });
         }
 
