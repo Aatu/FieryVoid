@@ -1820,7 +1820,7 @@ Hangar Ops: coalesce a multi-bay docked flight back into one flight on launch
 
 ---
 
-### Stage 21 — No-split docking: a docked flight stays ONE ship (model rewrite) — PLAN
+### Stage 21 — No-split docking: a docked flight stays ONE ship (model rewrite) — ✓ COMPLETE (21.1–21.6; live-DB run pending next deploy)
 
 **Motivation.** Stages 5/10/19/20 each layered reconciliation onto a model where a multi-bay dock SPLITS a flight into overlapping ship rows: a full-size source `FighterFlight` (`removed=true`, some fighters `DockedFighter`-crit'd) PLUS separate per-bay fragment ships holding copies of the split-off fighters. A 6-fighter unit across two bays becomes **9 fighter subsystems across 2 ships** (6 + 3, with 3 overlapping ghosts). Every feature — fleet-list value, launch coalescing, carrier-destruction escape, husk hiding — must subtract that overlap, and each does it slightly differently, which is the source of the recurring "7 fighters for a 6-flight" / "44 not 76 CP" bugs. **Decision (user, after ~6 patch rounds): rewrite the model so a flight NEVER splits on dock.**
 
@@ -1874,7 +1874,7 @@ Hangar Ops: coalesce a multi-bay docked flight back into one flight on launch
 3. **21.3 — Rails contribute boxes:** ✓ DONE — rail systems feed carrier capacity; rail box/structure destruction → occupancy-aware overflow eviction + escape. StrikeCarrier (rails) and a 2-ordinary-hangar carrier (Ossari Kasta case) both behave. Catapults stay single-fighter, unchanged.
 4. **21.4 — Escape rewrite:** ✓ DONE + VERIFIED (gameID 4149) — carrier-destruction partial escape spawns ONE "<name> - Split" K-flight per source flight (no fragment ship); escapees spread round-robin across flights; source flights die with the carrier (CV → 0). Fixed the destroyed-carrier hangarUsage-persist bug (escapees were re-marked removed on reload). Pass-2/Pass-3 ordering already correct via the `$ship->isDestroyed()` guards.
 5. **21.5 — Fleet-list/value cleanup:** ✓ DONE — husk/consolidation helpers were already reverted pre-Stage-21 (nothing to remove). Fixed a latent `pointCostEnh` double-count: a partial launch / rail-shed left the docked remnant carrying the FULL enhancement cost while the launched/escape "- Split" flight also took a proportional share. Remnant now drops its share (persisted via new `Manager::insertSingleEnhValue` → `tac_ship.enhvalue`). `dockedCraftStashValue` KEPT as a legacy/orphan guard (contributes 0 under no-split) + documented.
-6. **21.6 — Live-compat verification:** run a copy of a live `DouglasChanges` game DB through load + a turn advance; confirm legacy fragment docks upgrade to the new shape cleanly, no double-count, no orphan ghosts. Verify **normal Hangars and Catapults are unaffected** (regression).
+6. **21.6 — Live-compat verification:** ✓ DONE (code audit — user opted out of a live-DB run; no local dump, remote unreachable). Proved every no-split read/write path degrades correctly to the legacy single-bay shape when `occupancy` is absent; legacy `fragment` + `dockedFlightId` entries restore + render exactly as the Stage-19/live model (no retro-merge, no double-count, no crash). The live-DB run is deferred to the user's next deploy.
 
 **Fighter Rails — authoritative rules (B5W, reconcile against the no-split model in 21.3/21.4):**
 - External launch rails are a row of detached boxes connected to a structure block; **one fighter per box**. Each can launch/land **independently**. **No initiative penalty on the fighter the turn after launch** (the ship still takes the normal launch/land penalty that turn). *(Already in Stage 19: rails skip the flight-side −50, carrier keeps −20.)*
@@ -1979,7 +1979,23 @@ Fleet-list / value cleanup. The "remove leftover docked-unit consolidation/husk 
 
 **21.5 testing follow-up (2026-06-01) — dead escape-source row value (decision: leave as-is).** On a 50% carrier-destruction escape, the dead source flight's fleet-list row shows `0/(fullValue)` (the escaped half is separately shown by the Split flight's `half/half` row). User asked whether the dead row should instead read `0/(halfValue)`. **Decision: leave it `0/(fullValue)`** — that's how EVERY destroyed flight in the game renders (base value = full as-paid roster; current value = 0 because dead; a normal 6-fighter flight wiped in combat shows `0/(full 6-CP)`, never a partial). Reducing the dead source's base value would (a) break that game-wide convention and (b) risk a real bug: cutting a flight's persisted `flightSize` orphans the per-fighter disengage crits (keyed by fighter system id, rebuilt by `populate()` from flightSize) and could resurface the dead flight on reload. No code change. NOTE: the 21.5 `pointCostEnh` fix above only ever reduces a **surviving** remnant's value (partial-launch / rail-shed survivor — a live "Docked" row that should show its true reduced enh), never a dead row; consistent with this decision. The remnant's `pointCost·flightSize/6` term still shows the full roster (flightSize unchanged for safety), same as any damaged-but-alive flight.
 
-Not yet done: live-compat verification against a copy of a live `DouglasChanges` DB (21.6).
+#### 21.6 — ✓ DONE (code audit; live-DB run deferred to next deploy) 2026-06-01
+
+Live-compat verification. No local copy of a live `DouglasChanges` DB exists and the remote server is unreachable from here; the only `.sql` files under `C:\FV_env\*` are single-scenario debug snapshots, not a live hangar game. **User opted for a code audit** rather than hand-crafting a synthetic legacy fixture. The audit traces the live (Stage-19/fragment) shape — stash entries with `dockedFlightId` (+ `fragment` for partial docks), **NO `occupancy`**, no rails, possibly an overlapping full-size `removed=true` source flight with `DockedFighter` crits — through every no-split read/write path and confirms each degrades to the legacy single-bay behaviour:
+
+| Path | Legacy (no-`occupancy`) handling | OK |
+|---|---|---|
+| `usageCountFor` / `entryBoxesOnHangar` / `foreignOccupancyBoxesOn` | no-occ entry → full `boxesForEntry` on its OWN bay, places 0 on siblings → no double-count | ✓ |
+| `evictCraftFromHangar` (damage) | per-entry `flightSize` + `dockedFlightId`, `bpc` defaults 1; no occupancy dep | ✓ |
+| `$removed`-restore + `fragment` `spawned`-restore (`Hangar::onIndividualNotesLoaded`) | keys on `dockedFlightId` (present in legacy); `fragment` flag still honoured | ✓ |
+| Launch (`launchWholeFlight` / `occupancyBaysFor`) | empty occupancy → own-hangar fallback bay | ✓ |
+| Carrier-destruction escape (`buildEscapeCandidates` → `chooseEscapees`) | entry-level fields only; one bucket per legacy entry | ✓ |
+| Client `refreshHangarTooltip` (`baseSystems.js`) | mirrors server dual-read (`entryBoxesOnThis` no-occ → full size; foreign-occ only for occ entries) | ✓ |
+| `DockedFighter` critical (live overlapping-row shape) | crit class (`cricialClasses.php`) + handler (`fighter.php`) retained → renders as on live, no retro-merge | ✓ |
+| Catapults | short-circuit BEFORE all occupancy code (`usageCountFor`/`foreignOccupancyBoxesOn` early-return) | ✓ |
+| Every `$entry['occupancy']` access (18 sites, server) | all guarded `!empty(...) && is_array(...)` — no unguarded read, legacy entry never crashes | ✓ |
+
+**Conclusion:** the dual-read path the plan promised holds end-to-end — a legacy fragment dock loads, advances a turn (damage/eviction/launch/escape), and renders without double-count, orphan ghosts, or 7-for-6. Normal Hangars + Catapults never touch the occupancy code. No code change was required by the audit. **The empirical live-DB load+advance is deferred to the user's next deploy** (regression check, not migration — nothing forcibly converts legacy entries).
 
 
 
