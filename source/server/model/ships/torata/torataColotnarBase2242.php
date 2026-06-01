@@ -41,7 +41,7 @@ class TorataColotnarBase2242 extends SmallStarBaseFourSections
 
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 7));
-		$this->addPrimarySystem(new Hangar(5, 4));
+		$this->addPrimarySystem(new Hangar(5, 4, 1));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));

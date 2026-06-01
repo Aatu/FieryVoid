@@ -28,7 +28,7 @@ class TorataToglatMonitor extends BaseShip{
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 18, 6, 8));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(5, 4));
+		$this->addPrimarySystem(new Hangar(5, 4, 1));
 		
 		$this->addFrontSystem(new LaserAccelerator(4, 7, 6, 300, 60));
 		$this->addFrontSystem(new LaserAccelerator(4, 7, 6, 240, 120));
