@@ -57,31 +57,35 @@ function dockedCraftStashValue(ship) {
     return Math.round(total);
 }
 
-//Hangar Ops Stage 21.7 (value follow-up): for a flight that is still in
-//space but has some craft docked-out (partial dock) or disengaged, value it
-//by its ACTIVE craft count rather than its persisted flightSize. The flight
-//keeps flightSize at the full roster (replay/reload-safe — the docked craft's
-//state lives on the "- Split" fragment and returns on relaunch), so the raw
-//baseValue (pointCost*flightSize/6) over-counts the docked craft, while the
-//server combatValue (round(100*active/total)) under-counts because it treats
-//docked craft as destroyed in the DENOMINATOR. The two compound: a 3-of-6
-//partial-dock remnant rendered 360*0.5 = 180 instead of the 228 a clean
-//flight of 3 shows. This recomputes both base and CV over the active roster
-//so the in-space remnant reads the same as an equivalent fresh flight.
+//Hangar Ops Stage 21.7 (value follow-up): value a flight that has lost some
+//craft from its roster — to a partial dock (some fighters DockedFighter'd out),
+//a partial launch (the docked remnant has the launched fighters DisengagedFighter'd
+//out), or combat disengagement — by its ACTIVE craft count rather than its
+//persisted flightSize. The flight keeps flightSize at the full roster
+//(replay/reload-safe — the departed craft's state lives on the "- Split" flight
+//and returns on relaunch), so the raw baseValue (pointCost*flightSize/6)
+//over-counts the missing craft, while the server combatValue
+//(round(100*active/total)) under-counts because it treats the missing craft as
+//destroyed in the DENOMINATOR. The two compound and don't cancel (the CV multiply
+//also scales the enh term, which shouldn't be discounted):
+//  - in-space partial-DOCK remnant: rendered 360*0.5 = 180 vs the 228 a clean
+//    flight of 3 shows (game 4148);
+//  - docked partial-LAUNCH remnant: rendered 612*0.5 = 306 vs the 402 the launched
+//    "- Split" flight correctly shows (game 4151).
+//This recomputes both base and CV over the active roster so each remnant reads the
+//same as an equivalent fresh flight of that size.
 //
 //Returns null when no re-base is needed (not a flight, fully active, or no
-//systems) so callers fall through to the existing flightSize/combatValue
-//path unchanged for every ordinary flight.
+//systems) so callers fall through to the existing flightSize/combatValue path
+//unchanged. Note it intentionally applies to removed (docked) flights too: a
+//FULLY-docked flight has every craft present (no per-fighter Docked/Disengaged
+//crit) so active==total => null => its full value stands; only a PARTIAL docked
+//remnant (some craft launched away) gets re-based.
 function activeFlightValue(ship) {
     if (!ship || ship.flight !== true || !Array.isArray(ship.systems)) return null;
-    //A removed flight (fully docked / jumped with its carrier) isn't in space —
-    //it's rendered by the "Docked"/"Jumped" row path and valued elsewhere. Only
-    //re-base flights actually on the board (a partial-dock remnant), or we'd zero
-    //out a fully-docked flight's row (all its craft carry DockedFighter).
-    if (ship.removed) return null;
 
     var total = 0;       //fighter craft in the roster (matches server craftTotal)
-    var active = 0;      //craft still in space (not docked-out / disengaged / dead)
+    var active = 0;      //craft still present (not docked-out / disengaged / dead)
     var cvAccum = 0;     //combat-value weight summed over active craft
     for (var i = 0; i < ship.systems.length; i++) {
         var fighter = ship.systems[i];
