@@ -418,13 +418,39 @@ class HangarOps {
 	 * whole pool; side hangars on a ship that has primaries get only overflow
 	 * once the primaries are full. Mirrored client-side in systems.js
 	 * getDefaultShuttleCompositionForHangar so lobby tooltips match the in-game
-	 * initial population. */
+	 * initial population.
+	 *
+	 * Shuttle-only hangars: a few ships (Vree Xeecra/Xaarix/Vyreel) carry a
+	 * small dedicated shuttle bay (declared with hangarType 'shuttles') ALONGSIDE
+	 * larger general fighter bays on the SAME structure section. The intent is
+	 * that all default shuttles pile into the small bay, leaving the big bays free
+	 * for fighters. So if the candidate set contains any explicitly shuttle-tagged
+	 * hangar, narrow the distribution set to just those — the general bays then
+	 * receive default shuttles only as overflow (pickHangarForShuttle's fallback
+	 * loop), once the shuttle bays are full. Ships with no shuttle-tagged hangar
+	 * (the overwhelming majority) are unaffected. */
 	public static function distributionHangars($hangars){
 		$primary = array();
 		foreach ($hangars as $h){
 			if ((int)$h->location === 0) $primary[] = $h;
 		}
-		return !empty($primary) ? $primary : $hangars;
+		$set = !empty($primary) ? $primary : $hangars;
+		$shuttleOnly = array();
+		foreach ($set as $h){
+			if (self::isShuttleOnlyHangar($h)) $shuttleOnly[] = $h;
+		}
+		return !empty($shuttleOnly) ? $shuttleOnly : $set;
+	}
+
+	/* True when a hangar was explicitly designated in its ship file as a
+	 * shuttle-only bay (hangarType 'shuttles' or 'minesweeping shuttles').
+	 * inferHangarType deliberately preserves these designer-set values (it only
+	 * narrows the universal 'fighters'/'normal' default), so the tag survives a
+	 * load. Catapults/rails never qualify — their hangarType is structural. */
+	public static function isShuttleOnlyHangar($hangar){
+		if (!empty($hangar->isCatapult) || !empty($hangar->isRail)) return false;
+		$t = strtolower(trim((string)$hangar->hangarType));
+		return $t === 'shuttles' || $t === 'minesweeping shuttles';
 	}
 
 	/* Per-write fair-share cap on $take during initial hangar population.

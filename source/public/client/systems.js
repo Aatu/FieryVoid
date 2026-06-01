@@ -650,6 +650,25 @@ shipManager.systems = {
             if (parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
         }
 
+        //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if the
+        //distribution set contains any explicitly shuttle-tagged bay (hangarType
+        //'shuttles'/'minesweeping shuttles' — e.g. Vree Xeecra/Xaarix/Vyreel's
+        //small shuttle bay next to big fighter bays), the default-shuttle pool
+        //prefers those bays only, so the fighter bays stay free. The general bays
+        //still get overflow once the shuttle bays fill.
+        var isShuttleOnly = function (hgr) {
+            if (hgr.isCatapult || hgr.isRail) return false;
+            var t = ("" + (hgr.hangarType || "")).toLowerCase().trim();
+            return t === "shuttles" || t === "minesweeping shuttles";
+        };
+        var inSet = function (hgr) {
+            return hasPrimary ? (parseInt(hgr.location, 10) === 0) : true;
+        };
+        var hasShuttleOnly = false;
+        for (var sh = 0; sh < hangars.length; sh++) {
+            if (inSet(hangars[sh]) && isShuttleOnly(hangars[sh])) { hasShuttleOnly = true; break; }
+        }
+
         var per = [];
         for (var p = 0; p < hangars.length; p++) {
             per.push({
@@ -657,7 +676,7 @@ shipManager.systems = {
                 max: parseInt(hangars[p].maxhealth, 10) || 0,
                 usage: 0,
                 rows: [],
-                pref: hasPrimary ? (parseInt(hangars[p].location, 10) === 0) : true
+                pref: hasShuttleOnly ? (inSet(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p])
             });
         }
 
