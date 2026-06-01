@@ -50,10 +50,10 @@ class StrikeCarrier extends BaseShip{
 		//arg order: $armour, boxes, output, direction 0=forward, 'light').
 	
 		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
-		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
 		$this->addFrontSystem(new FighterRail(5, 6, 6, 0, 'light'));
-		$this->addFrontSystem(new FighterRail(5, 6, 6, 0, 'light'));		
 		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
+		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
+		$this->addFrontSystem(new FighterRail(5, 6, 6, 0, 'light'));		
 		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
 
 

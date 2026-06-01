@@ -3701,9 +3701,8 @@ class FighterRail extends Hangar{
         //line; we only override the "Special" flavour text. Skip straight to
         //ShipSystem so we don't inherit Hangar's hangar/catapult Special block.
         ShipSystem::setSystemDataWindow($turn);
-        $this->data["Special"]  = "External launch rail — each box carries one fighter that launches and lands independently.";
-        $this->data["Special"] .= "<br>No initiative penalty on fighters launching from rails.";
-        $this->data["Special"] .= "<br>Part of the structure block: structure hit may destroy an entire rail.";
+        $this->data["Special"]  = "External launch rail — carries fighters that can launche without initiative penalty.";
+        $this->data["Special"] .= "<br>Part of the structure block: Structure critical hits may destroy an entire rail.";
         $this->data["Special"] .= "<br>Reloading docked craft takes twice as long.";
         $this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
         $this->data["Type"] = ucwords($this->hangarType);
