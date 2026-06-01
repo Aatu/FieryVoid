@@ -30,7 +30,7 @@ class ChoukaPenitentPatrolShip extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 5, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 2));
 		$this->addPrimarySystem(new Quarters(3, 16));
 		$this->addPrimarySystem(new CargoBay(3, 15));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));

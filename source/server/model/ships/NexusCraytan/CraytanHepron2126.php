@@ -31,7 +31,7 @@ class CraytanHepron2126 extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 6));
         $this->addPrimarySystem(new Engine(3, 14, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(2, 4));
+        $this->addPrimarySystem(new Hangar(2, 4, 4));
 		$this->addPrimarySystem(new Magazine(3, 9));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 5, 4));

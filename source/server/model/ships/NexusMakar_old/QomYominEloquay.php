@@ -55,7 +55,7 @@ class QomYominEloquay extends MediumShip{
 		$this->addAftSystem(new NexusLightChargeCannon(3, 4, 1, 180, 60));
 		$this->addAftSystem(new NexusLightChargeCannon(3, 4, 1, 0, 360));
 		$this->addAftSystem(new NexusLightChargeCannon(3, 4, 1, 300, 180));
-		$this->addAftSystem(new Hangar(2, 2));
+		$this->addAftSystem(new Hangar(2, 8, 6));
 		$this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
         

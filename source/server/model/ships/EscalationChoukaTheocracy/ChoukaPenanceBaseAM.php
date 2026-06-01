@@ -35,7 +35,7 @@ class ChoukaPenanceBaseAM extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(4, 17, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 16, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 6));
-		$this->addPrimarySystem(new Hangar(4, 16));
+		$this->addPrimarySystem(new Hangar(4, 16, 6));
 
 		$this->addFrontSystem(new EWHeavyPointPlasmaGun(3, 7, 3, 270, 90));
         $this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

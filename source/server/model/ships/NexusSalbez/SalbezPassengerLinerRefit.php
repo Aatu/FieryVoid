@@ -32,7 +32,7 @@ class SalbezPassengerLinerRefit extends MediumShip{
 		$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));        
-        $this->addPrimarySystem(new Hangar(0, 4));
+        $this->addPrimarySystem(new Hangar(0, 4, 4));
         
 		$this->addFrontSystem(new Quarters(1, 6));
 		$this->addFrontSystem(new Quarters(1, 6));

@@ -13,7 +13,7 @@ class MakarKrashnor extends LCV{
 		$this->unofficial = true;
 			$this->isd = 1861;
 
-        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
+//        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
 	    $this->notes .= '<br>Atmospheric capable';
         

@@ -29,7 +29,7 @@ class KastanIroncrest extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 2, 5));
         $this->addPrimarySystem(new Engine(3, 13, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(3, 6));
+		$this->addPrimarySystem(new Hangar(3, 6, 3));
 		$this->addPrimarySystem(new CargoBay(2, 200));
    
         $this->addFrontSystem(new Thruster(3, 13, 0, 3, 1));

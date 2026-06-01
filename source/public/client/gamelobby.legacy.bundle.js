@@ -193,8 +193,11 @@ window.gamedata = {
 			case 'Escalation Wars Civilian':
 				powerRating = 'Tier N/A, Custom';
 				break;
+			case 'Escalation Wars Support Units':
+				powerRating = 'Tier 3; Designs for scenarios, Custom';
+				break;
 			case 'Escalation Wars Chouka Raider':
-				powerRating = 'Tier 2; Not balanced, Custom faction';
+				powerRating = 'Tier 3; Custom faction';
 				break;
 			case 'Escalation Wars Chouka Theocracy':
 				powerRating = 'Tier 2; Custom faction';
@@ -5975,6 +5978,51 @@ window.lobbyEnhancements = {
 								totalRounds += enhCount;
 							}
 							ship.ammoMLWEnh = true;
+							break;
+
+						case 'MINE_AML': //Chouka Mine Launcher Vedas-A Mine -- GTS													
+							if (!ship.ammoAMLEnh) {
+								//May need a different method as Basic entry already exists in Special data.
+								let special = ammoMagazine.data["Special"];
+								if (special.includes("- Basic Mine: ")) {
+									special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+									ammoMagazine.data["Special"] = special;
+								} else {
+									ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								}
+								totalRounds += enhCount;
+							}
+							ship.ammoAMLEnh = true;
+							break;
+
+						case 'MINE_BML': //Chouka Mine Launcher Vedas-B Mine -- GTS													
+							if (!ship.ammoBMLEnh) {
+								//May need a different method as Basic entry already exists in Special data.
+								let special = ammoMagazine.data["Special"];
+								if (special.includes("- Basic Mine: ")) {
+									special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+									ammoMagazine.data["Special"] = special;
+								} else {
+									ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								}
+								totalRounds += enhCount;
+							}
+							ship.ammoBMLEnh = true;
+							break;
+
+						case 'MINE_CML': //Chouka Mine Launcher Vedas-C Mine -- GTS													
+							if (!ship.ammoCMLEnh) {
+								//May need a different method as Basic entry already exists in Special data.
+								let special = ammoMagazine.data["Special"];
+								if (special.includes("- Basic Mine: ")) {
+									special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+									ammoMagazine.data["Special"] = special;
+								} else {
+									ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								}
+								totalRounds += enhCount;
+							}
+							ship.ammoCMLEnh = true;
 							break;
 
 						//AMMO TYPES FOR DIRECT FIRE WEAPONS					
@@ -30410,9 +30458,7 @@ AbbaiMineLauncher.prototype.initializationUpdate = function() {
 
 AbbaiMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
 	return "Mine";
-};
-    
-;
+};;
 
 /* Source: client/model/weapon/ion.js */
 "use strict";
@@ -32289,6 +32335,11 @@ var LtPlasmaCannonFtr = function LtPlasmaCannonFtr(json, ship) {
 LtPlasmaCannonFtr.prototype = Object.create(Weapon.prototype);
 LtPlasmaCannonFtr.prototype.constructor = LtPlasmaCannonFtr;
 
+var NexusRailgunAccelerator = function NexusRailgunAccelerator(json, ship) {
+    Matter.call(this, json, ship);
+};
+NexusRailgunAccelerator.prototype = Object.create(Matter.prototype);
+NexusRailgunAccelerator.prototype.constructor = NexusRailgunAccelerator;
 
 
 
@@ -32897,7 +32948,27 @@ EWGraviticTractingRod.prototype.validateTargetMoveHex = function(hexpos, maxmove
 EWGraviticTractingRod.prototype.checkFinished = function () {
 	if(this.fireOrders.length > 1) return true;
     return false;
-};;
+};
+
+var ChoukaMineLauncher = function ChoukaMineLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ChoukaMineLauncher.prototype = Object.create(Weapon.prototype);
+ChoukaMineLauncher.prototype.constructor = ChoukaMineLauncher; 
+
+ChoukaMineLauncher.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'MultiModeHex';
+	}			        
+	return this;
+};
+
+ChoukaMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
+	return "Mine";
+};
+;
 
 /* Source: client/model/weapon/customBSG.js */
 var BSGHypergun = function BSGHypergun(json, ship) {

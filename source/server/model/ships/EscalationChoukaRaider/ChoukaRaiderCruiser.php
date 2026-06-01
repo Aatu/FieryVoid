@@ -33,7 +33,7 @@ class ChoukaRaiderCruiser extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 13, 4, 6));
         $this->addPrimarySystem(new Engine(3, 14, 0, 9, 5));
-		$this->addPrimarySystem(new Hangar(3, 14));
+		$this->addPrimarySystem(new Hangar(3, 14, 12));
    
         $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
@@ -44,8 +44,8 @@ class ChoukaRaiderCruiser extends BaseShip{
         $this->addAftSystem(new Thruster(1, 3, 0, 2, 2));
         $this->addAftSystem(new Thruster(1, 18, 0, 6, 2));
 		$this->addAftSystem(new CargoBay(1, 18));
-		$this->addAftSystem(new Hangar(2, 6));
-		$this->addAftSystem(new Hangar(2, 6));
+		$this->addAftSystem(new Hangar(2, 6, 6));
+		$this->addAftSystem(new Hangar(2, 6, 6));
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 120, 300));
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 60, 240));
 

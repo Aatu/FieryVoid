@@ -5,10 +5,10 @@ class CircasianNalessinFreighter extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 300;
-	$this->faction = "Escalation Wars Circasian Empire";
+	$this->faction = "Escalation Wars Support Units";
         $this->phpclass = "CircasianNalessinFreighter";
         $this->imagePath = "img/ships/EscalationWars/CircasianNalessin.png";
-        $this->shipClass = "Nalessin Military Freighter";
+        $this->shipClass = "Circasian Nalessin Military Freighter";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;
@@ -30,7 +30,7 @@ class CircasianNalessinFreighter extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
         $this->addPrimarySystem(new Engine(4, 15, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 4, 2));
 		$this->addPrimarySystem(new CargoBay(2, 26));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

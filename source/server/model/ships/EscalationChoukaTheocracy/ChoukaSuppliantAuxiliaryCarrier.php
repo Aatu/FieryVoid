@@ -9,7 +9,7 @@ class ChoukaSuppliantAuxiliaryCarrier extends MediumShip{
         $this->phpclass = "ChoukaSuppliantAuxiliaryCarrier";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRevelation.png";
         $this->shipClass = "Suppliant Auxiliary Carrier";
-			$this->variantOf = "Flagellant Armed Freighter";
+			$this->variantOf = "Revelation War Barge";
 			$this->occurence = "uncommon";		
 		$this->unofficial = true;
         $this->canvasSize = 75;
@@ -31,7 +31,7 @@ class ChoukaSuppliantAuxiliaryCarrier extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
 		$this->addPrimarySystem(new CargoBay(3, 16));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        
@@ -43,7 +43,7 @@ class ChoukaSuppliantAuxiliaryCarrier extends MediumShip{
 		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addFrontSystem(new Thruster(2, 13, 0, 3, 1));
 
-		$this->addAftSystem(new Hangar(2, 12));
+		$this->addAftSystem(new Hangar(2, 12, 6));
 		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
 		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addAftSystem(new Thruster(2, 18, 0, 6, 2));    

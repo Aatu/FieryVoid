@@ -36,7 +36,7 @@ class SshelathAlvekaScoutAM extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 15, 5, 7));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 5));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
 		
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));

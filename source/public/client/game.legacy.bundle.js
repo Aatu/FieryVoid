@@ -51161,9 +51161,7 @@ AbbaiMineLauncher.prototype.initializationUpdate = function() {
 
 AbbaiMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
 	return "Mine";
-};
-    
-;
+};;
 
 /* Source: client/model/weapon/ion.js */
 "use strict";
@@ -53040,6 +53038,11 @@ var LtPlasmaCannonFtr = function LtPlasmaCannonFtr(json, ship) {
 LtPlasmaCannonFtr.prototype = Object.create(Weapon.prototype);
 LtPlasmaCannonFtr.prototype.constructor = LtPlasmaCannonFtr;
 
+var NexusRailgunAccelerator = function NexusRailgunAccelerator(json, ship) {
+    Matter.call(this, json, ship);
+};
+NexusRailgunAccelerator.prototype = Object.create(Matter.prototype);
+NexusRailgunAccelerator.prototype.constructor = NexusRailgunAccelerator;
 
 
 
@@ -53557,7 +53560,27 @@ EWGraviticTractingRod.prototype.validateTargetMoveHex = function(hexpos, maxmove
 EWGraviticTractingRod.prototype.checkFinished = function () {
 	if(this.fireOrders.length > 1) return true;
     return false;
-};;
+};
+
+var ChoukaMineLauncher = function ChoukaMineLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ChoukaMineLauncher.prototype = Object.create(Weapon.prototype);
+ChoukaMineLauncher.prototype.constructor = ChoukaMineLauncher; 
+
+ChoukaMineLauncher.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'MultiModeHex';
+	}			        
+	return this;
+};
+
+ChoukaMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
+	return "Mine";
+};
+;
 
 /* Source: client/model/weapon/customDevelopment.js */
 var LaserArray = function  LaserArray(json, ship) {

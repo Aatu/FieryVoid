@@ -29,7 +29,7 @@ class SshelathVahskal extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 7, 2, 3));
         $this->addPrimarySystem(new Engine(3, 7, 0, 4, 1));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 14, 12));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));   
         

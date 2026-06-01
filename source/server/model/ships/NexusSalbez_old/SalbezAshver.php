@@ -30,7 +30,7 @@ class SalbezAshver extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 16, 4, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(1, 8));
+		$this->addPrimarySystem(new Hangar(1, 8, 6));
 		$this->addPrimarySystem(new Thruster(3, 20, 0, 8, 2));
 
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));

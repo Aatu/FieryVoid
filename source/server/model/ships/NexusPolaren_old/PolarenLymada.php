@@ -4,14 +4,14 @@ class PolarenLymada extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 490;
+		$this->pointCost = 450;
 		$this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenLymada";
         $this->imagePath = "img/ships/Nexus/polarenLymada.png";
 			$this->canvasSize = 165; //img has 200px per side
         $this->shipClass = "Lymada Salvage Cruiser";
-			$this->variantOf = "Oranet Jump Cruiser";
-			$this->occurence = "rare";
+//			$this->variantOf = "Oranet Jump Cruiser";
+//			$this->occurence = "rare";
 		$this->limited = 10;
 		$this->unofficial = true;
 		$this->isd = 1713;
@@ -32,7 +32,7 @@ class PolarenLymada extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
 		$this->addPrimarySystem(New JumpEngine(3, 12, 6, 36));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 4, 2));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 4, 2));
@@ -50,14 +50,14 @@ class PolarenLymada extends BaseShipNoAft{
 		$this->addLeftSystem(new RadCannon(3, 8, 6, 240, 360));
 		$this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
 		$this->addLeftSystem(new NexusSandCaster(1, 4, 2, 180, 360));
-		$this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
+		$this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
 		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 		
 		$this->addRightSystem(new Thruster(2, 15, 0, 4, 4));
 		$this->addRightSystem(new RadCannon(3, 8, 6, 0, 120));
 		$this->addRightSystem(new Maser(2, 6, 3, 300, 120));
 		$this->addRightSystem(new NexusSandCaster(1, 4, 2, 0, 180));
-		$this->addRightSystem(new Maser(2, 6, 3, 60, 240));
+		$this->addRightSystem(new Maser(2, 6, 3, 0, 180));
 		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

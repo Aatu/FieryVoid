@@ -39,8 +39,8 @@ class ChoukaCitadel extends StarBaseSixSections{
 		$this->addPrimarySystem(new ProtectedCnC(6, 50, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30
 		$this->addPrimarySystem(new Scanner(5, 20, 7, 7));
 		$this->addPrimarySystem(new Scanner(5, 20, 7, 7));
-		$this->addPrimarySystem(new Hangar(5, 21));
-		$this->addPrimarySystem(new Hangar(5, 21));
+		$this->addPrimarySystem(new Hangar(5, 21, 12));
+		$this->addPrimarySystem(new Hangar(5, 21, 12));
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360, true));
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360, true));
 		$this->addPrimarySystem(new SMissileRack(3, 6, 0, 0, 360, true));

@@ -14,6 +14,8 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
 			$this->occurence = "common";
 			$this->unofficial = true;
         $this->isd = 2108;
+
+        $this->fighters = array("LCVs"=>2);
         
         $this->forwardDefense = 12;
         $this->sideDefense = 13;
@@ -29,7 +31,7 @@ class BrixadiiDestroyerEscortRefit extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 5, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(1, 2));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 7, 0, 3, 4));

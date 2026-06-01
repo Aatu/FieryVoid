@@ -51,14 +51,14 @@ class overseerGC extends BaseShip{
         $this->addAftSystem(new Thruster(3, 15, 0, 3, 2));
 		
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
-        $this->addLeftSystem(new Hangar(2, 6));
-        $this->addLeftSystem(new Hangar(2, 6));
+        $this->addLeftSystem(new Hangar(2, 6, 6));
+        $this->addLeftSystem(new Hangar(2, 6, 6));
         $this->addLeftSystem(new ImpRapidGatling(2, 4, 2, 180, 360));
         $this->addLeftSystem(new ImpRapidGatling(2, 4, 2, 180, 360));
 
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
-        $this->addRightSystem(new Hangar(2, 6));
-        $this->addRightSystem(new Hangar(2, 6));
+        $this->addRightSystem(new Hangar(2, 6, 6));
+        $this->addRightSystem(new Hangar(2, 6, 6));
         $this->addRightSystem(new ImpRapidGatling(2, 4, 2, 0, 180));
         $this->addRightSystem(new ImpRapidGatling(2, 4, 2, 0, 180));
 

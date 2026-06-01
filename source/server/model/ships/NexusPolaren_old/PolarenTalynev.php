@@ -4,7 +4,7 @@ class PolarenTalynev extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 150;
+        $this->pointCost = 130;
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenTalynev";
         $this->imagePath = "img/ships/Nexus/polarenTalynev.png";
@@ -13,7 +13,7 @@ class PolarenTalynev extends LCV{
 		$this->unofficial = true;
 			$this->isd = 1714;
 
-        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
+//        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
         
         $this->forwardDefense = 10;
@@ -35,7 +35,7 @@ class PolarenTalynev extends LCV{
 		$this->addPrimarySystem(new Reactor(2, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
-    	$sensors = new Scanner(2, 7, 3, 3);
+    	$sensors = new Scanner(2, 7, 3, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(2, 8, 0, 6, 3));
@@ -44,7 +44,7 @@ class PolarenTalynev extends LCV{
 		$this->addFrontSystem(new LtBlastCannon(1, 4, 1, 240, 120));
 		$this->addFrontSystem(new Maser(2, 6, 3, 300, 60));
     
-        $this->addPrimarySystem(new Structure(2, 24));
+        $this->addPrimarySystem(new Structure(3, 24));
 	    
         $this->hitChart = array(
         		0=> array( 

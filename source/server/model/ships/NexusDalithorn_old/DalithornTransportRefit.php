@@ -31,7 +31,7 @@ class DalithornTransportRefit extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 3, 4));
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 2));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
 		$this->addPrimarySystem(new Magazine(2, 6));
 		$this->addPrimarySystem(new Catapult(1, 6));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));

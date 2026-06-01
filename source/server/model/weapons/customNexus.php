@@ -4488,22 +4488,24 @@ class NexusImpactor extends Matter{
         public $projectilespeed = 20;
         public $animationWidth = 4;
         public $trailLength = 10;
-        public $loadingtime = 2;
+ 
+		public $loadingtime = 1;
         public $priority = 9;
 
         public $rangePenalty = 0.33; //-1/3 hexes
-        public $fireControl = array(-3, 1, 2); // fighters, <mediums, <capitals
+        public $fireControl = array(-3, 2, 2); // fighters, <mediums, <capitals
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		//maxhealth and power reqirement are fixed; left option to override with hand-written values
             if ( $maxhealth == 0 ) $maxhealth = 6;
-            if ( $powerReq == 0 ) $powerReq = 3;
+            if ( $powerReq == 0 ) $powerReq = 4;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
         }
 
-        public function getDamage($fireOrder){ return Dice::d(10, 2)+0;   }
-        public function setMinDamage(){     $this->minDamage = 2 ;      }
-        public function setMaxDamage(){     $this->maxDamage = 20 ;      }
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+4;   }
+        public function setMinDamage(){     $this->minDamage = 5 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+		
 }// endof NexusImpactor
 
 
@@ -5353,13 +5355,12 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
     class NexusSmallXrayLaser extends LinkedWeapon{
 
         public $name = "NexusSmallXrayLaser";
-//        public $iconPath = "NexusLightXRayLaser.png";
+        public $iconPath = "EWLightLaserBeam.png";
         public $displayName = "Small X-Ray Laser";
         public $animation = "bolt";
         public $animationColor = array(0, 150, 255);
         public $priority = 3;
         public $uninterceptable = true; // This is a laser        
-		
 
         public $intercept = 2;
 
@@ -9435,6 +9436,99 @@ class BattleLaserFtr extends BattleLaser {
         public function setMaxDamage(){     $this->maxDamage = 6+$this->damagebonus ;      }
 
     } //endof GatlingGunFtr
+
+
+
+    class NexusRailgunAccelerator extends Matter{
+		public $name = "NexusRailgunAccelerator";
+        public $displayName = "Railgun Accelerator";
+		public $iconPath = "NexusRGAccelerator.png";
+        
+        public $loadingtime = 1;
+		public $normalload = 3;
+		
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-3, 2, 2); // fighters, <=mediums, <=capitals 
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 6;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+	    
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);   
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}	    		
+		$this->data["Special"] .= "Can fire accelerated for less damage";  
+		$this->data["Special"] .= "<br> - 1 turn: 1d10+1"; 
+		$this->data["Special"] .= "<br> - 2 turns: 2d10+2"; 
+		$this->data["Special"] .= "<br> - 3 turns (full): 3d10+3"; 
+	}
+
+	public function getDamage($fireOrder){
+            switch($this->turnsloaded){
+                case 0:
+                case 1:
+                    return Dice::d(10)+1;
+			    	break;
+                case 2:
+                    return Dice::d(10, 2)+2;
+			    	break;
+                default:
+                    return Dice::d(10,3)+3;
+			    	break;
+            }
+	}
+        
+        public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 2 ;
+                    break;
+                case 2:
+                    $this->minDamage = 4 ;  
+                    break;
+                default:
+                    $this->minDamage = 6 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 11 ;
+                    break;
+                case 2:
+                    $this->maxDamage = 22 ;  
+                    break;
+                default:
+                    $this->maxDamage = 33 ;  
+                    break;
+            }
+		}
+
+		public function stripForJson(){
+			$strippedSystem = parent::stripForJson();
+			$strippedSystem->data = $this->data;
+			$strippedSystem->minDamage = $this->minDamage;
+			$strippedSystem->minDamageArray = $this->minDamageArray;
+			$strippedSystem->maxDamage = $this->maxDamage;
+			$strippedSystem->maxDamageArray = $this->maxDamageArray;				
+			return $strippedSystem;
+		}
+
+}//endof class NexusRailgunAccelerator
+
+
+
+
+
 
 
 

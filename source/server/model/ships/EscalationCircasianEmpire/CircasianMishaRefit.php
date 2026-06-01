@@ -34,7 +34,7 @@ class CircasianMishaRefit extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 7));
         $this->addPrimarySystem(new Engine(5, 15, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(5, 27));
+		$this->addPrimarySystem(new Hangar(5, 27, 12));
         $this->addPrimarySystem(new JumpEngine(4, 15, 3, 32));
 		
    

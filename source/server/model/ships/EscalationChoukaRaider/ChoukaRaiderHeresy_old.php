@@ -29,8 +29,8 @@ class ChoukaRaiderHeresy extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 11, 4, 4));
         $this->addPrimarySystem(new Engine(2, 10, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(3, 4));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 3));
+        $this->addPrimarySystem(new Hangar(3, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 2, 4));
       

@@ -786,6 +786,51 @@ window.lobbyEnhancements = {
 							ship.ammoMLWEnh = true;
 							break;
 
+						case 'MINE_AML': //Chouka Mine Launcher Vedas-A Mine -- GTS													
+							if (!ship.ammoAMLEnh) {
+								//May need a different method as Basic entry already exists in Special data.
+								let special = ammoMagazine.data["Special"];
+								if (special.includes("- Basic Mine: ")) {
+									special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+									ammoMagazine.data["Special"] = special;
+								} else {
+									ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								}
+								totalRounds += enhCount;
+							}
+							ship.ammoAMLEnh = true;
+							break;
+
+						case 'MINE_BML': //Chouka Mine Launcher Vedas-B Mine -- GTS													
+							if (!ship.ammoBMLEnh) {
+								//May need a different method as Basic entry already exists in Special data.
+								let special = ammoMagazine.data["Special"];
+								if (special.includes("- Basic Mine: ")) {
+									special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+									ammoMagazine.data["Special"] = special;
+								} else {
+									ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								}
+								totalRounds += enhCount;
+							}
+							ship.ammoBMLEnh = true;
+							break;
+
+						case 'MINE_CML': //Chouka Mine Launcher Vedas-C Mine -- GTS													
+							if (!ship.ammoCMLEnh) {
+								//May need a different method as Basic entry already exists in Special data.
+								let special = ammoMagazine.data["Special"];
+								if (special.includes("- Basic Mine: ")) {
+									special = special.replace(/(- Basic Mine: )\d+/, `$1${enhCount}`);
+									ammoMagazine.data["Special"] = special;
+								} else {
+									ammoMagazine.data["Special"] += "<br>- Basic Mine: " + enhCount;
+								}
+								totalRounds += enhCount;
+							}
+							ship.ammoCMLEnh = true;
+							break;
+
 						//AMMO TYPES FOR DIRECT FIRE WEAPONS					
 						case 'SHELL_HBSC': //Standard Ammo for Heavy Railgun						
 							if (!ship.shellHBEnh) {

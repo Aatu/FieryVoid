@@ -35,7 +35,7 @@ class SalbezAvrtzRefit extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 32, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 25, 7, 10));
         $this->addPrimarySystem(new Engine(4, 25, 0, 12, 4));
-		$this->addPrimarySystem(new Hangar(2, 18));
+		$this->addPrimarySystem(new Hangar(2, 18, 6));
 		
         $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));

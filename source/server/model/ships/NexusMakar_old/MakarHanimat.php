@@ -41,7 +41,7 @@ class MakarHanimat extends BaseShip{
  		$sensors = new Scanner(3, 16, 4, 6);
 			$sensors->markSensorFlux();
 			$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Hangar(0, 6));
+		$this->addPrimarySystem(new Hangar(0, 6, 6));
 		
         $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));

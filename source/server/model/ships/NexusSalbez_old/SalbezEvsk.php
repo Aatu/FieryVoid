@@ -13,7 +13,7 @@ class SalbezEvsk extends LCV{
 		$this->unofficial = true;
 			$this->isd = 2003;
 
-        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
+//        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
         
         $this->forwardDefense = 9;

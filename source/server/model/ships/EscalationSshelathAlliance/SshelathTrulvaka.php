@@ -31,7 +31,7 @@ class SshelathTrulvaka extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new AntiquatedScanner(3, 7, 2, 3));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 4));        
 

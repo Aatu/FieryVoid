@@ -36,7 +36,7 @@ class SalbezJertkat extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(2, 8));
+		$this->addPrimarySystem(new Hangar(2, 8, 6));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

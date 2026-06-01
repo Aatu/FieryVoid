@@ -22,7 +22,7 @@ class PolarenArimetEscort extends LCV{
         $this->sideDefense = 12;
         
 		$this->agile = true;
-        $this->turncost = 0.33;
+        $this->turncost = 0.25;
         $this->turndelaycost = 0.33;
         $this->accelcost = 1;
         $this->rollcost = 1;

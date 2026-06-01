@@ -14,6 +14,7 @@ class PolarenColonyJumpshipRefit extends BaseShip{
 			$this->occurence = "common";
 		$this->limited = 10;
 		$this->unofficial = true;
+        $this->Enormous = true;
 		$this->isd = 2121;
          
         $this->fighters = array("assault shuttles"=>4); //2 breaching pods    
@@ -32,7 +33,7 @@ class PolarenColonyJumpshipRefit extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 28, 0, 0));
 //		$this->addPrimarySystem(new FlagBridge(4, 28, 0, 1, 'Polaren Command Bonus', 60,  true, true, true, false, array("Nexus Polaren Confederacy (early)", "Nexus Polaren Confederacy (early)")));
         $this->addPrimarySystem(new ELINTScanner(3, 25, 7, 10));
-		$this->addPrimarySystem(new Hangar(2, 10));
+		$this->addPrimarySystem(new Hangar(2, 10, 8));
 		$this->addPrimarySystem(New JumpEngine(2, 30, 9, 50));
 
         $this->addFrontSystem(new Thruster(2, 20, 0, 4, 1));
@@ -41,6 +42,7 @@ class PolarenColonyJumpshipRefit extends BaseShip{
 		$this->addFrontSystem(new NexusHeavyMaser(3, 7, 4, 240, 360));
 		$this->addFrontSystem(new NexusHeavyMaser(3, 7, 4, 0, 120));
 		$this->addFrontSystem(new LtBlastCannon(2, 4, 1, 300, 120));
+        $this->addFrontSystem(new NexusPolarenLCVController(5, 10, 5, 1));
 
         $this->addAftSystem(new Engine(3, 30, 0, 16, 5));
 		$this->addAftSystem(new Thruster(2, 24, 0, 5, 2));
@@ -56,8 +58,10 @@ class PolarenColonyJumpshipRefit extends BaseShip{
 		$this->addLeftSystem(new Thruster(2, 20, 0, 8, 3));
 		$this->addLeftSystem(new Maser(1, 6, 3, 180, 360));
 		$this->addLeftSystem(new Maser(1, 6, 3, 180, 360));
+		$this->addLeftSystem(new Maser(1, 6, 3, 180, 360));
 		$this->addLeftSystem(new NexusSandCaster(1, 4, 2, 180, 360));
 		$this->addLeftSystem(new NexusSandCaster(1, 4, 2, 180, 360));
+		$this->addLeftSystem(new NexusRailgunAccelerator(3, 8, 6, 300, 360));
 		$this->addLeftSystem(new DockingCollar(2, 10));
 		$this->addLeftSystem(new DockingCollar(2, 10));
 		$this->addLeftSystem(new DockingCollar(2, 10));
@@ -65,8 +69,10 @@ class PolarenColonyJumpshipRefit extends BaseShip{
 		$this->addRightSystem(new Thruster(2, 20, 0, 8, 4));
 		$this->addRightSystem(new Maser(1, 6, 3, 0, 180));
 		$this->addRightSystem(new Maser(1, 6, 3, 0, 180));
+		$this->addRightSystem(new Maser(1, 6, 3, 0, 180));
 		$this->addRightSystem(new NexusSandCaster(1, 4, 2, 0, 180));
 		$this->addRightSystem(new NexusSandCaster(1, 4, 2, 0, 180));
+		$this->addRightSystem(new NexusRailgunAccelerator(3, 8, 6, 0, 60));
 		$this->addRightSystem(new DockingCollar(2, 10));
 		$this->addRightSystem(new DockingCollar(2, 10));
 		$this->addRightSystem(new DockingCollar(2, 10));
@@ -88,7 +94,8 @@ class PolarenColonyJumpshipRefit extends BaseShip{
                     20 => "C&C",
             ),
             1=> array(
-                    6 => "Thruster",
+                    4 => "Thruster",
+					6 => "Polaren LCV Controller",
 					8 => "Heavy Maser",
 					10 => "Light Blast Cannon",
 					18 => "Structure",
@@ -104,17 +111,19 @@ class PolarenColonyJumpshipRefit extends BaseShip{
                     20 => "Primary",
             ),
             3=> array(
-                    4 => "Thruster",
-					6 => "Maser",
-					8 => "Sand Caster",
+                    3 => "Thruster",
+					5 => "Maser",
+					6 => "Sand Caster",
+					8 => "Railgun Accelerator",
 					11 => "Docking Collar",
                     18 => "Structure",
                     20 => "Primary",
 			),
             4=> array(
-                    4 => "Thruster",
-					6 => "Maser",
-					8 => "Sand Caster",
+                    3 => "Thruster",
+					5 => "Maser",
+					6 => "Sand Caster",
+					8 => "Railgun Accelerator",
 					11 => "Docking Collar",
                     18 => "Structure",
                     20 => "Primary",

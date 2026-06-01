@@ -30,7 +30,7 @@ class SalbezNarkenRefit extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 10, 3, 4));
         $this->addPrimarySystem(new Engine(3, 11, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 2));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
         $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 14, 0, 4, 4));
       

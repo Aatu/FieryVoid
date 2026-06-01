@@ -29,7 +29,7 @@ class ChoukaRaiderHeresy extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(3, 8));
+        $this->addPrimarySystem(new Hangar(3, 8, 6));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        
         

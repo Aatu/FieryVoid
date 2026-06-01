@@ -28,7 +28,7 @@ class MakarPycirin extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 25, 0, 0));
         $this->addPrimarySystem(new CnC(4, 24, 0, 0));
  		$this->addPrimarySystem(new Scanner(4, 16, 5, 6));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
         $this->addPrimarySystem(new Engine(4, 20, 0, 10, 4));
 		
         $this->addFrontSystem(new Thruster(4, 14, 0, 4, 1));

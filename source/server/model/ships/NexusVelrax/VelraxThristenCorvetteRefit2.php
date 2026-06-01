@@ -41,7 +41,7 @@ class VelraxThristenCorvetteRefit2 extends MediumShip{
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
-        $this->addAftSystem(new Hangar(1, 2));
+        $this->addAftSystem(new Hangar(1, 2, 2));
 		$this->addAftSystem(new NexusIonGun(1, 2, 2, 120, 360));
 		$this->addAftSystem(new NexusIonGun(1, 2, 2, 0, 240));
        

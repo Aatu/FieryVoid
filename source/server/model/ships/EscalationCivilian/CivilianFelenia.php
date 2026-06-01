@@ -5,10 +5,10 @@ class CivilianFelenia extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 100;
-        $this->faction = "Escalation Wars Civilian";
+        $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "CivilianFelenia";
         $this->imagePath = "img/ships/EscalationWars/CivilianFelenia.png";
-        $this->shipClass = "Felenia Small Transport";
+        $this->shipClass = "Circasian Felenia Small Transport";
 		$this->unofficial = true;
         $this->canvasSize = 75;
 
@@ -37,7 +37,7 @@ class CivilianFelenia extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 8, 2, 2));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 2));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));        
         

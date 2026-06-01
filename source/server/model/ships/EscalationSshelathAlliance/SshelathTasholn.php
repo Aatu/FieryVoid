@@ -28,7 +28,7 @@ class SshelathTasholn extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
 		$this->addFrontSystem(new LaserCutter(2, 6, 4, 300, 60));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(3, 1));
+		$this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addAftSystem(new Thruster(2, 12, 0, 4, 2));

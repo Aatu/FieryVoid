@@ -5,10 +5,10 @@ class ChoukaFlagellantFreighter extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 150;
-        $this->faction = "Escalation Wars Chouka Theocracy";
+        $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "ChoukaFlagellantFreighter";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRevelation.png";
-        $this->shipClass = "Flagellant Armed Freighter";
+        $this->shipClass = "Chouka Flagellant Armed Freighter";
 		$this->unofficial = true;
         $this->canvasSize = 75;
 	    $this->isd = 1916;
@@ -27,7 +27,7 @@ class ChoukaFlagellantFreighter extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
 		$this->addPrimarySystem(new Quarters(3, 12));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        

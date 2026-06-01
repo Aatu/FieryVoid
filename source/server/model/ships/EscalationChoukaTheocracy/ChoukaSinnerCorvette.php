@@ -28,7 +28,7 @@ class ChoukaSinnerCorvette extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 7, 4, 4));
         $this->addPrimarySystem(new Engine(3, 11, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
         

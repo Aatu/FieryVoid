@@ -30,7 +30,7 @@ class CircasianTorminBeta extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(4, 8));
+        $this->addPrimarySystem(new Hangar(4, 8, 6));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 4, 4));
       

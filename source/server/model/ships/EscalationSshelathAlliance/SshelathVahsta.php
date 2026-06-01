@@ -5,10 +5,10 @@ class SshelathVahsta extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 150;
-        $this->faction = "Escalation Wars Sshel'ath Alliance";
+        $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "SshelathVahsta";
         $this->imagePath = "img/ships/EscalationWars/SshelathVahsta.png";
-        $this->shipClass = "Vahsta Hauler";
+        $this->shipClass = "Sshel'ath Vahsta Hauler";
 		$this->unofficial = true;
         $this->canvasSize = 85;
 	    $this->isd = 1932;
@@ -27,7 +27,7 @@ class SshelathVahsta extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 7, 2, 3));
         $this->addPrimarySystem(new Engine(3, 7, 0, 4, 1));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));   
 		$this->addPrimarySystem(new CargoBay(1, 14));

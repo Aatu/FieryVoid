@@ -29,7 +29,7 @@ class ChoukaReverendEscort extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 5, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
       

@@ -34,7 +34,7 @@ class CircasianXandar extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
-		$this->addFrontSystem(new Hangar(3, 2));
+		$this->addFrontSystem(new Hangar(3, 2, 2));
 		$this->addFrontSystem(new EWRocketLauncher(2, 4, 1, 240, 360));
 		$this->addFrontSystem(new EWRocketLauncher(2, 2, 1, 0, 120));
 		$this->addFrontSystem(new EWParticleLance(2, 10, 10, 330, 30));
