@@ -86,7 +86,7 @@ class HangarOps {
 					$hangar = self::pickHangarForShuttle($shuttleHangars, 1);
 					if (!$hangar) break;
 
-					$free = (int)$hangar->maxhealth - self::usageCountFor($hangar);
+					$free = (int)$hangar->maxhealth - self::occupiedBoxes($hangar);
 					$take = min($count, $free, self::fairShareCap($shuttleHangars, $count));
 
 					$hangar->hangarUsage[] = array(
@@ -394,8 +394,10 @@ class HangarOps {
 		$best = null;
 		$bestUsage = PHP_INT_MAX;
 		foreach (self::distributionHangars($hangars) as $h){
+			//Free-space gate uses occupiedBoxes (whole boxes); the least-used
+			//ordering can stay on the raw (possibly fractional) usage.
+			if ((int)$h->maxhealth - self::occupiedBoxes($h) < $flightSize) continue;
 			$used = self::usageCountFor($h);
-			if ((int)$h->maxhealth - $used < $flightSize) continue;
 			if ($used < $bestUsage){
 				$bestUsage = $used;
 				$best = $h;
@@ -404,7 +406,7 @@ class HangarOps {
 		if ($best !== null) return $best;
 		//Preferred set full — overflow to any remaining hangar in encounter order.
 		foreach ($hangars as $h){
-			if ((int)$h->maxhealth - self::usageCountFor($h) >= $flightSize) return $h;
+			if ((int)$h->maxhealth - self::occupiedBoxes($h) >= $flightSize) return $h;
 		}
 		return null;
 	}
@@ -438,7 +440,7 @@ class HangarOps {
 	public static function fairShareCap($hangars, $remainingTotal){
 		$hangarsWithRoom = 0;
 		foreach (self::distributionHangars($hangars) as $h){
-			if ((int)$h->maxhealth - self::usageCountFor($h) > 0) $hangarsWithRoom++;
+			if ((int)$h->maxhealth - self::occupiedBoxes($h) > 0) $hangarsWithRoom++;
 		}
 		if ($hangarsWithRoom <= 1) return PHP_INT_MAX;
 		return (int)ceil($remainingTotal / $hangarsWithRoom);
@@ -489,15 +491,19 @@ class HangarOps {
 		return $cats;
 	}
 
-	/* Hangar boxes a single craft of $phpclass occupies. Per B5W §10.1 a few
-	 * superheavy/assault craft (Vorlon Assault Fighter, Drakh Heavy Raider,
-	 * Nausicaan Glider SHF, …) declare unitSize < 1 — one craft needs MORE than
-	 * one hangar box (e.g. unitSize 0.5 → 2 boxes). Ordinary craft (unitSize >= 1)
-	 * occupy exactly one box: we deliberately DON'T pack ultralights (unitSize 2)
-	 * two-to-a-box in live storage — that packing is only modelled in the
-	 * fleet-builder / default-shuttle-pool math (shuttlePoolBoxesFor /
-	 * gamelobby checkChoices), not in the per-box hangarUsage tracking here.
-	 * Cached per phpclass to avoid re-instantiating blueprints on every call. */
+	/* Hangar boxes a single craft of $phpclass occupies. Per B5W §10.1 craft come
+	 * in two non-standard sizes:
+	 *   - unitSize < 1 (Vorlon Assault Fighter, Drakh Heavy Raider, Nausicaan
+	 *     Glider SHF, …): one craft needs MORE than one hangar box
+	 *     (e.g. unitSize 0.5 → 2 boxes), so this returns the integer ceil(1/unitSize).
+	 *   - unitSize > 1 (ultralights: Zorth, VreeSalvageZorth, LtViper): two (or more)
+	 *     craft pack into a single box, so one craft costs a FRACTIONAL 1/unitSize
+	 *     boxes (e.g. unitSize 2 → 0.5). The per-box hangarUsage sum is therefore
+	 *     fractional; every capacity/free-box gate rounds the hangar's TOTAL
+	 *     occupancy UP to a whole box (see freeBoxesByCategory / canShipReceive), so
+	 *     12 boxes hold 24 Zorth but a lone Zorth still consumes a whole box.
+	 * Ordinary craft (unitSize == 1) occupy exactly one box. Cached per phpclass to
+	 * avoid re-instantiating blueprints on every call. Return type is int|float. */
 	public static function boxesPerCraftForClass($phpclass){
 		static $cache = array();
 		if (!is_string($phpclass) || $phpclass === '') return 1;
@@ -507,7 +513,8 @@ class HangarOps {
 			try {
 				$probe = new $phpclass(0, 0, '', 0);
 				$u = isset($probe->unitSize) ? (float)$probe->unitSize : 1.0;
-				if ($u > 0 && $u < 1) $boxes = (int)ceil(1 / $u);
+				if ($u > 0 && $u < 1)      $boxes = (int)ceil(1 / $u);  //superheavy: >1 box/craft
+				else if ($u > 1)           $boxes = 1 / $u;             //ultralight: fractional box/craft
 			} catch (Exception $e) {}
 		}
 		$cache[$phpclass] = $boxes;
@@ -518,11 +525,12 @@ class HangarOps {
 	 * value stamped at dock time (performLand / performDeployStartDock) so we
 	 * avoid re-instantiating the blueprint; falls back to the phpclass lookup
 	 * for legacy entries written before the field existed (those resolve to 1
-	 * unless the class is a unitSize<1 craft). */
+	 * unless the class is a unitSize<1 superheavy or unitSize>1 ultralight).
+	 * Read as a FLOAT so a stamped fractional cost (ultralight, 0.5) round-trips. */
 	public static function boxesPerCraftForEntry($entry){
 		if (isset($entry['boxesPerCraft'])) {
-			$bpc = (int)$entry['boxesPerCraft'];
-			return $bpc >= 1 ? $bpc : 1;
+			$bpc = (float)$entry['boxesPerCraft'];
+			return $bpc > 0 ? $bpc : 1;
 		}
 		return self::boxesPerCraftForClass($entry['phpclass'] ?? '');
 	}
@@ -588,10 +596,13 @@ class HangarOps {
 		return 0;   //no-occ entries are counted on their own hangar by boxesForEntry, not here
 	}
 
-	/* Total occupied boxes across this hangar. A unitSize<1 craft consumes
-	 * more than one box per craft (see boxesPerCraftForClass), so this is NOT
-	 * simply the stored craft count. Compared against maxhealth / remaining
-	 * health (both in boxes) by every capacity / eviction caller.
+	/* Total occupied boxes across this hangar. A unitSize<1 craft consumes more
+	 * than one box per craft, and a unitSize>1 ultralight consumes a FRACTIONAL
+	 * box (0.5) per craft (see boxesPerCraftForClass), so this is NOT simply the
+	 * stored craft count and may be fractional. Callers comparing against integer
+	 * maxhealth / remaining health round this UP to whole boxes (see
+	 * freeBoxesByCategory / canShipReceive); the raw fractional sum is returned
+	 * here so multi-bay occupancy math stays exact.
 	 *
 	 * Catapults are exempt from the per-craft box multiplier: a catapult is a
 	 * single-fighter rail that holds exactly ONE craft regardless of unitSize
@@ -622,6 +633,16 @@ class HangarOps {
 		if (!$isCatapult && $ship === null) $ship = $hangar->getUnit();
 		if (!$isCatapult && $ship) $n += self::foreignOccupancyBoxesOn($hangar, $ship);
 		return $n;
+	}
+
+	/* Occupied boxes ROUNDED UP to whole boxes — the conservative "round up for
+	 * safety" capacity unit. With ultralights (fractional per-craft cost) a hangar
+	 * can hold 0.5/1.5/… raw boxes of usage; comparing that against the integer
+	 * maxhealth / getRemainingHealth must round UP so a partly-filled box still
+	 * reserves a whole box (3 Zorth = 1.5 → 2 boxes consumed). For integer usage
+	 * (the common case and the unitSize<1 superheavy case) this is a no-op. */
+	public static function occupiedBoxes($hangar, $ship = null){
+		return (int)ceil(self::usageCountFor($hangar, $ship));
 	}
 
 	/* Narrows a Hangar's hangarType from its ship's $fighters declaration when
@@ -857,8 +878,10 @@ class HangarOps {
 			return 0;
 		}
 
-		$remaining = $hangar->getRemainingHealth();
-		$stored = self::usageCountFor($hangar);
+		$remaining = (int)$hangar->getRemainingHealth();
+		//Occupied boxes round UP (ultralights leave fractional usage): a half-filled
+		//box still needs a whole box to live in, so it's lost when capacity drops to it.
+		$stored = self::occupiedBoxes($hangar);
 		if ($stored <= $remaining) return 0;
 
 		return self::evictCraftFromHangar($hangar, $stored - $remaining, $gamedata);
@@ -1037,9 +1060,13 @@ class HangarOps {
 			$rem = (int)$rail->getRemainingHealth();
 			if ($rem <= 0) continue;
 			if ($rem < $anyBoxes){ $anyTarget = $rail; $anyBoxes = $rem; }
-			//usageCountFor is occupancy-aware: 0 means no own craft AND no foreign
+			//usageCountFor is occupancy-aware: empty means no own craft AND no foreign
 			//occupancy boxes from a sibling-hosted multi-bay flight spilling here.
-			if (self::usageCountFor($rail) === 0 && $rem < $emptyBoxes){
+			//<= 0 (not === 0): a rail holding a single ultralight has fractional usage
+			//(0.5) and is NOT empty — it must stay out of the empty-preferred set so a
+			//crit sacrifices a bare rail before one carrying a fighter. A strict === 0
+			//would also break on the float/int mismatch (0.0 === 0 is false in PHP).
+			if (self::usageCountFor($rail) <= 0 && $rem < $emptyBoxes){
 				$emptyTarget = $rail; $emptyBoxes = $rem;
 			}
 		}
@@ -1108,7 +1135,10 @@ class HangarOps {
 					$boxesHere = self::boxesForEntry($entry);
 				}
 				if ($boxesHere <= 0) continue;
-				$bpc   = max(1, self::boxesPerCraftForEntry($entry));
+				//Don't clamp bpc to >=1: ultralights cost 0.5 box each, so a 1.5-box
+				//rail holds 3 of them — ceil(1.5/0.5)=3 craft to shed, not ceil(1.5/1)=2.
+				$bpc   = self::boxesPerCraftForEntry($entry);
+				if ($bpc <= 0) $bpc = 1;
 				$craftToShed = min((int)($entry['flightSize'] ?? 0), (int)ceil($boxesHere / $bpc));
 				if ($craftToShed <= 0) continue;
 				$affected[] = array(
@@ -1304,9 +1334,12 @@ class HangarOps {
 	private static function trimEntryForLostBay($host, $entryIdx, $lostBayId, $k){
 		if (!is_array($host->hangarUsage) || !isset($host->hangarUsage[$entryIdx])) return;
 		$e = $host->hangarUsage[$entryIdx];
-		$bpc = max(1, (int)($e['boxesPerCraft'] ?? 1));
+		//Fractional-safe bpc (ultralight 0.5); free only whole boxes the removed
+		//craft fully vacate (floor) so a leftover half-box stays reserved.
+		$bpc = self::boxesPerCraftForEntry($e);
+		if ($bpc <= 0) $bpc = 1;
 		$e['flightSize'] = max(0, (int)($e['flightSize'] ?? 0) - (int)$k);
-		$boxesToFree = (int)$k * $bpc;
+		$boxesToFree = (int)floor((int)$k * $bpc);
 
 		if (!empty($e['occupancy']) && is_array($e['occupancy'])){
 			$occ = array();
@@ -1959,7 +1992,7 @@ class HangarOps {
 		//have that much launch-rate headroom.
 		$bays = self::occupancyBaysFor($entry, $carrier);
 		if (empty($bays)) return true;   //legacy single-bay; checked in launchWholeFlight
-		$bpc = max(1, (int)($entry['boxesPerCraft'] ?? 1));
+		$bpc = self::boxesPerCraftForEntry($entry);   //fractional-safe (ultralight 0.5)
 		$charge = self::distributeCraftAcrossBays($bays, $size, $bpc);   //hangarId => craft
 		foreach ($bays as $b){
 			$h = $b['hangar'];
@@ -1976,7 +2009,11 @@ class HangarOps {
 	 * returning hangarId => craft drawn. Matches shrinkDockedEntry's drain order
 	 * and the client's live-budget display. */
 	private static function distributeCraftAcrossBays($bays, $k, $bpc){
-		$bpc = max(1, (int)$bpc);
+		//bpc may be fractional (ultralight, 0.5) — DON'T clamp to an int, or a bay's
+		//box→craft conversion (floor(boxes / bpc)) would halve an ultralight bay's
+		//capacity. Only guard a non-positive value.
+		$bpc = (float)$bpc;
+		if ($bpc <= 0) $bpc = 1;
 		$sorted = $bays;
 		usort($sorted, function($a, $b){ return (int)$a['boxes'] - (int)$b['boxes']; });
 		$out = array();
@@ -2144,7 +2181,7 @@ class HangarOps {
 	/* Charge $size against launchedThisTurn on each occupancy bay, capped by the
 	 * craft that bay physically holds (boxes / boxesPerCraft). */
 	private static function chargeLaunchBudget($bays, $size, $entry){
-		$bpc = max(1, (int)($entry['boxesPerCraft'] ?? 1));
+		$bpc = self::boxesPerCraftForEntry($entry);   //fractional-safe (ultralight 0.5)
 		//Charge each bay only the craft DRAWN from it (smallest-bay-first),
 		//matching the fighter drain + the client's live budget display.
 		$charge = self::distributeCraftAcrossBays($bays, $size, $bpc);
@@ -2175,9 +2212,15 @@ class HangarOps {
 			if (($e['phpclass'] ?? '') !== $phpclass) continue;
 			if ((int)($e['dockedFlightId'] ?? 0) !== (int)$dockedId) continue;
 
-			$bpc = max(1, (int)($e['boxesPerCraft'] ?? 1));
+			//bpc may be fractional (ultralight 0.5). Free only WHOLE boxes that the
+			//removed craft fully vacate: floor(k*bpc). A leftover half-box (odd
+			//ultralight count) stays reserved until its last craft leaves (removeEntry
+			//FromHangar handles full removal), so a box is never freed while it still
+			//holds a craft.
+			$bpc = self::boxesPerCraftForEntry($e);
+			if ($bpc <= 0) $bpc = 1;
 			$e['flightSize'] = max(0, (int)$e['flightSize'] - (int)$k);
-			$boxesToFree = (int)$k * $bpc;
+			$boxesToFree = (int)floor((int)$k * $bpc);
 
 			if (!empty($e['occupancy']) && is_array($e['occupancy'])){
 				//Smallest-bay-first so a small rail clears entirely.
@@ -2425,19 +2468,29 @@ class HangarOps {
 			$reason = 'speed delta exceeds flight thrust'; return false;
 		}
 
-		//Hangar must have a compatible category with enough free boxes for the
-		//$count craft. A unitSize<1 craft (e.g. Vorlon Assault Fighter) needs
-		//more than one box each, so the box requirement is $count × boxesPerCraft.
-		//Use the flight's TRUE size (not carrier-mapped category) so a heavy
-		//flight is rejected when the carrier only has medium slots, etc.
-		//Pass $carrier so universal hangars derive their permissions from
-		//the ship's $fighters declaration (Decurion-style multi-category).
+		//Hangar must have a compatible category with room for the $count craft.
+		//A unitSize<1 craft (Vorlon Assault Fighter) needs >1 box each; a unitSize>1
+		//ultralight (Zorth) needs a FRACTIONAL box each, so several pack into one box.
+		//Use the flight's TRUE size (not carrier-mapped category) so a heavy flight is
+		//rejected when the carrier only has medium slots, etc. Pass $carrier so
+		//universal hangars derive their permissions from the ship's $fighters
+		//declaration (Decurion-style multi-category).
 		$category = self::trueSizeOf($flight);
-		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
-		//Catapults count craft 1:1 (single-fighter rail); ordinary hangars charge
-		//$count × boxesPerCraft so unitSize<1 craft consume their extra boxes.
-		$boxesNeeded = $isCatapult ? $count : $count * self::boxesPerCraftForClass($flight->phpclass);
-		if ($free < $boxesNeeded) { $reason = 'hangar full'; return false; }
+		if (!self::hangarAcceptsCategory($hangar, $category, $carrier)) { $reason = 'hangar full'; return false; }
+
+		if ($isCatapult) {
+			//Catapults count craft 1:1 (single-fighter rail).
+			$free = self::effectiveCapacity($hangar) - (int)self::usageCountFor($hangar);
+			if ($free < $count) { $reason = 'hangar full'; return false; }
+		} else {
+			//Pack against the TOTAL: round up (existing fractional usage + new craft's
+			//fractional cost) and compare to integer capacity. Rounding the TOTAL (not
+			//each dock separately) is what lets a half-box already in use share with a
+			//new half-box, so 12 boxes really hold 24 Zorth rather than 12.
+			$bpc = self::boxesPerCraftForClass($flight->phpclass);
+			$projected = (int)ceil(self::usageCountFor($hangar, $carrier) + $count * $bpc);
+			if ($projected > self::effectiveCapacity($hangar)) { $reason = 'hangar full'; return false; }
+		}
 
 		//Shared launch+land budget vs hangar output. The output budget is in
 		//CRAFT (one recovered fighter = one against the rate, regardless of how
@@ -2472,7 +2525,11 @@ class HangarOps {
 		$max = self::effectiveCapacity($hangar);
 		//Stage 21: usageCountFor now also subtracts boxes that other bays' multi-bay
 		//(occupancy) entries place on this hangar — pass $ship so it can see them.
-		return max(0, $max - self::usageCountFor($hangar, $ship));
+		//Round usage UP to whole boxes (occupiedBoxes): with ultralights the raw
+		//usage can be fractional (0.5), and free space is whole boxes — a partly
+		//filled box is not free. canShipReceive does the finer-grained packing check
+		//(it knows the new craft's fractional cost can share the same partial box).
+		return max(0, $max - self::occupiedBoxes($hangar, $ship));
 	}
 
 	/* Effective storage capacity in "craft slots". A Catapult holds exactly ONE
@@ -2707,22 +2764,29 @@ class HangarOps {
 		$partial = ($count < $activeCount);
 
 		$category = self::trueSizeOf($flight);
+		//Fractional-safe per-craft box cost (ultralight 0.5, superheavy >1). Don't
+		//clamp to 1 or ultralights would be re-priced at a full box each.
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
-		$boxesNeeded = $count * max(1, $bpc);
+		if ($bpc <= 0) $bpc = 1;
 
-		//Distribute boxes across the bays in fill order (primary first), capped by
-		//each bay's free boxes. Build the occupancy list of {systemId, boxes}.
+		//Distribute craft across the bays in fill order (primary first), reserving
+		//WHOLE boxes per bay (occupancy boxes are read as ints everywhere). Each bay
+		//takes min(craft-that-fit, remaining) where craft-that-fit = floor(freeBoxes /
+		//bpc); its reserved boxes is ceil(craftHere * bpc) so an odd ultralight count
+		//rounds its half-box up to a whole reserved box.
 		$occupancy = array();
-		$remaining = $boxesNeeded;
+		$remaining = $count;   //craft still to place
 		$primaryHangar = null;
 		foreach ($bays as $b){
 			if ($remaining <= 0) break;
 			$h = $b['hangar'];
 			$freeBoxes = (int)$b['freeBoxes'];
 			if ($freeBoxes <= 0) continue;
-			$take = min($freeBoxes, $remaining);
-			$remaining -= $take;
-			$occupancy[] = array('systemId' => (int)$h->id, 'boxes' => $take);
+			$craftFit = (int)floor($freeBoxes / $bpc);
+			$craftHere = min($remaining, $craftFit);
+			if ($craftHere <= 0) continue;
+			$remaining -= $craftHere;
+			$occupancy[] = array('systemId' => (int)$h->id, 'boxes' => (int)ceil($craftHere * $bpc));
 			if ($primaryHangar === null) $primaryHangar = $h;
 		}
 		if ($primaryHangar === null || $remaining > 0){
@@ -2738,7 +2802,7 @@ class HangarOps {
 			'dockedTurn' => $gamedata->turn,
 		);
 		if (!empty($flight->customFtrName)) $entry['customFtrName'] = $flight->customFtrName;
-		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
+		if ($bpc != 1) $entry['boxesPerCraft'] = $bpc;   //stamp fractional (0.5) and >1 alike
 		//Stage 21: occupancy is only recorded for true multi-bay docks; a
 		//single-bay dock leaves it off so legacy readers + the common path are
 		//untouched (the entry's boxes are simply counted on its own hangar).
@@ -2840,8 +2904,11 @@ class HangarOps {
 	 * carrier can't hold $count after all. */
 	public static function buildDockBays($carrier, $flight, $preferredHangars, $count, $gamedata, &$reason = null){
 		$category = self::trueSizeOf($flight);
+		//Fractional-safe per-craft box cost; don't clamp bpc to 1 or 24 Zorth (12
+		//boxes) would be mis-priced as 24 boxes and rejected on a 12-box hangar.
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
-		$boxesNeeded = max(1, (int)$count) * max(1, $bpc);
+		if ($bpc <= 0) $bpc = 1;
+		$boxesNeeded = max(1, (int)$count) * $bpc;   //fractional for ultralights
 
 		//Validate basic eligibility (hex/heading/speed/pivot/customcap) once via
 		//canShipReceive against the carrier's best bay — it short-circuits the
@@ -2872,9 +2939,11 @@ class HangarOps {
 			if ($h->isDestroyed()) continue;
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
-			//Respect the shared launch+land budget per bay.
+			//Respect the shared launch+land budget per bay. Budget is in CRAFT;
+			//convert to its box-equivalent with the real (fractional) bpc so an
+			//ultralight bay isn't over-restricted (24-craft budget = 12 boxes).
 			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
-			$free = min($free, $budget * max(1, $bpc));
+			$free = min($free, (int)floor($budget * $bpc));
 			if ($free <= 0) continue;
 			$bays[] = array('hangar' => $h, 'freeBoxes' => (int)$free);
 			$boxesAvail += (int)$free;
@@ -2944,12 +3013,13 @@ class HangarOps {
 		if (!empty($flight->customFtrName)) {
 			$entry['customFtrName'] = $flight->customFtrName;
 		}
-		//Stamp per-craft box cost for unitSize<1 craft (Vorlon Assault Fighter et
-		//al.) so usageCountFor / eviction can charge the right number of boxes
-		//without re-instantiating the blueprint. Omitted for ordinary 1-box craft
-		//to keep the persisted note lean (boxesPerCraftForEntry defaults to 1).
+		//Stamp per-craft box cost for non-standard craft — unitSize<1 superheavy
+		//(>1 box each) AND unitSize>1 ultralight (fractional 0.5 box each) — so
+		//usageCountFor / eviction can charge the right number of boxes without
+		//re-instantiating the blueprint. Omitted for ordinary 1-box craft to keep
+		//the persisted note lean (boxesPerCraftForEntry defaults to 1).
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
-		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
+		if ($bpc != 1) $entry['boxesPerCraft'] = $bpc;
 
 		if ($partial) {
 			//Stage 10.3: priority-ordered dockFighters returns the actual
@@ -3157,9 +3227,13 @@ class HangarOps {
 		$activeCount = $flight->countActiveCraft($gamedata->turn);
 		if ($activeCount <= 0) return 0;
 
-		$bpc = max(1, self::boxesPerCraftForClass($flight->phpclass));
+		//Per-craft box cost: <1 for ultralights (Zorth, 0.5), >1 for superheavy
+		//(Vorlon, 2). Do NOT clamp to a minimum of 1 — that would silently re-price
+		//ultralights at a full box each and defeat the 2-per-box packing on the
+		//deploy path. Only guard against a non-positive lookup.
+		$bpc = self::boxesPerCraftForClass($flight->phpclass);
+		if ($bpc <= 0) $bpc = 1;
 		$category = self::trueSizeOf($flight);
-		$boxesNeeded = $activeCount * $bpc;
 
 		//Fill order: the client's chosen bays first (dedup), then any other
 		//eligible bay on the carrier. Free boxes are read from the DB-side bay
@@ -3179,8 +3253,15 @@ class HangarOps {
 			$seen[$k] = true; $ordered[] = $h;
 		}
 
+		//Occupancy is tracked in WHOLE boxes per bay (every consumer reads
+		//occ['boxes'] as an int). For ultralights we therefore reserve craft in
+		//bay-sized whole boxes: $remaining counts craft, and each bay takes
+		//min(craft-that-fit, remaining) where craft-that-fit = floor(freeBoxes / bpc).
+		//A bay's stored boxes is the whole-box ceiling of the craft it actually holds
+		//(ceil(craftHere * bpc)) — so a half-box from an odd ultralight count rounds
+		//up to a reserved whole box (the "round up for safety" rule).
 		$occupancy = array();
-		$remaining = $boxesNeeded;
+		$remaining = $activeCount;   //craft still to place
 		foreach ($ordered as $h){
 			if ($remaining <= 0) break;
 			if (!empty($h->isCatapult)) continue;
@@ -3204,11 +3285,18 @@ class HangarOps {
 			if (is_array($h->hangarUsage)){
 				foreach ($h->hangarUsage as $e){ $postUsed += self::boxesForEntry($e); }
 			}
-			$free = max(0, $cap - max($dbUsed, $postUsed));
+			//Free WHOLE boxes in this bay = capacity − existing usage rounded UP (a
+			//partly-filled box can't be shared with this flight on the deploy path).
+			$free = max(0, $cap - (int)ceil(max($dbUsed, $postUsed)));
 			if ($free <= 0) continue;
-			$take = min($free, $remaining);
-			$occupancy[] = array('systemId' => (int)$h->id, 'boxes' => $take);
-			$remaining -= $take;
+			//Craft that fit in those whole boxes, then the whole boxes they actually
+			//reserve (ceil so an odd ultralight count rounds its half-box up).
+			$craftFit = (int)floor($free / $bpc);
+			$craftHere = min($remaining, $craftFit);
+			if ($craftHere <= 0) continue;
+			$boxesHere = (int)ceil($craftHere * $bpc);
+			$occupancy[] = array('systemId' => (int)$h->id, 'boxes' => $boxesHere);
+			$remaining -= $craftHere;
 		}
 
 		if ($remaining > 0 || empty($occupancy)){
@@ -3255,7 +3343,7 @@ class HangarOps {
 			'dockedFlightId' => $flight->id,
 		);
 		if (!empty($flight->customFtrName)) $entry['customFtrName'] = $flight->customFtrName;
-		if ($bpc > 1) $entry['boxesPerCraft'] = $bpc;
+		if ($bpc != 1) $entry['boxesPerCraft'] = $bpc;   //stamp fractional (0.5) and >1 alike; 1 stays lean
 		if (count($occupancy) > 1) $entry['occupancy'] = $occupancy;
 
 		$flight->removed = true;

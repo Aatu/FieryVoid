@@ -327,19 +327,23 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
 	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
-	// Assault Fighter et al.) needs more than one box each: the server stamps
-	// boxesPerCraft on such stored entries, and for pending orders we derive it
-	// from the source flight's unitSize. Mirrors HangarOps::boxesPerCraftForEntry
-	// / boxesPerCraftForClass so the "Capacity: X / Y slots" line matches the
-	// server's box accounting. The per-class "Stored Craft" list below still
-	// counts CRAFT (so a 3-ship Vorlon flight reads "3 x Assault Fighter").
+	// Assault Fighter et al.) needs more than one box each; a unitSize>1 ultralight
+	// (Zorth) packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5).
+	// The server stamps boxesPerCraft on such stored entries, and for pending orders
+	// we derive it from the source flight's unitSize. Mirrors
+	// HangarOps::boxesPerCraftForEntry / boxesPerCraftForClass so the "Capacity:
+	// X / Y slots" line matches the server's box accounting (totalStored is summed
+	// fractional and the displayed used-boxes is rounded UP). The per-class "Stored
+	// Craft" list below still counts CRAFT (so a 3-ship Vorlon flight reads "3 x").
 	function boxesPerCraftOf(entry) {
 		if (entry && entry.boxesPerCraft) {
-			var b = parseInt(entry.boxesPerCraft, 10);
-			return b >= 1 ? b : 1;
+			var b = parseFloat(entry.boxesPerCraft);   // float: fractional (0.5) round-trips
+			return b > 0 ? b : 1;
 		}
 		var u = (entry && entry.unitSize != null) ? parseFloat(entry.unitSize) : 1;
-		return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1;
+		if (u > 0 && u < 1) return Math.ceil(1 / u);   // superheavy: >1 box/craft
+		if (u > 1) return 1 / u;                        // ultralight: fractional box/craft
+		return 1;
 	}
 
 	// Additive projections: queued dock orders + queued deploy-start orders
@@ -491,10 +495,14 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	var maxCapacity      = this.isCatapult ? 1 : this.maxhealth;
 	var effectiveCapacity = this.isCatapult ? 1 : Math.max(0, this.maxhealth - netDamage);
 
+	// Used boxes round UP to whole boxes (ultralights leave fractional totalStored,
+	// e.g. 3 Zorth = 1.5 → shows 2): mirrors HangarOps::occupiedBoxes so the line
+	// reads "12 / 12 slots" for 24 Zorth, never "12.5 / 12".
+	var usedBoxes = Math.ceil(totalStored);
 	if (netDamage > 0) {
-		this.data["Capacity"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
+		this.data["Capacity"] = usedBoxes + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
 	} else {
-		this.data["Capacity"] = totalStored + " / " + maxCapacity + " slots";
+		this.data["Capacity"] = usedBoxes + " / " + maxCapacity + " slots";
 	}
 
 	// Stage 15: the primary hangar carries the carrier-level reload-points

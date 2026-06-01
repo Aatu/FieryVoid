@@ -38,7 +38,9 @@ window.ShipTooltipFireMenu = function () {
     // working unchanged.
     window.hangarBoxesPerCraftFromUnitSize = function (unitSize) {
         var u = (unitSize != null) ? parseFloat(unitSize) : 1;
-        return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1;
+        if (u > 0 && u < 1) return Math.ceil(1 / u);   // superheavy: >1 box/craft
+        if (u > 1) return 1 / u;                        // ultralight: fractional box/craft (Zorth 0.5)
+        return 1;
     };
     var hangarBoxesPerCraftFromUnitSize = window.hangarBoxesPerCraftFromUnitSize;
     // Also exposed on window for the same reason as
@@ -46,8 +48,8 @@ window.ShipTooltipFireMenu = function () {
     // this IIFE call these.
     window.hangarBoxesPerCraftForEntry = function (entry) {
         if (entry && entry.boxesPerCraft) {
-            var b = parseInt(entry.boxesPerCraft, 10);
-            return b >= 1 ? b : 1;
+            var b = parseFloat(entry.boxesPerCraft);   // float: fractional (0.5) round-trips
+            return b > 0 ? b : 1;
         }
         return hangarBoxesPerCraftFromUnitSize(entry ? entry.unitSize : 1);
     };
@@ -339,42 +341,48 @@ window.findEligibleCarriersForDock = function (flight) {
                 }
                 effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
             }
-            // Occupied boxes. unitSize<1 craft consume >1 box each (ordinary
-            // hangars only); a catapult counts craft 1:1 (single-fighter rail).
-            var used = 0;
+            // Occupied boxes. unitSize<1 craft consume >1 box each, unitSize>1
+            // ultralights consume a FRACTIONAL box each (ordinary hangars only);
+            // a catapult counts craft 1:1 (single-fighter rail). Sum the box cost
+            // fractionally and round the TOTAL up once below — so 24 Zorth (12.0)
+            // and two separate half-box docks pack correctly rather than each
+            // reserving a whole box.
+            var usedBoxes = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) {
                     var perCraft = isCat ? 1 : window.hangarBoxesPerCraftForEntry(e);
-                    used += parseInt(e.flightSize || 1, 10) * perCraft;
+                    usedBoxes += parseInt(e.flightSize || 1, 10) * perCraft;
                 });
             }
-            var free = Math.max(0, effective - used);   //free boxes (catapult: free craft slots)
 
             // Ordinary hangars share a launch+land output budget; catapults don't.
             var budget;
             if (isCat) {
-                budget = free;
+                budget = 0;   //set after free is known
             } else {
                 var output = parseInt(sys.output || 0, 10);
                 var spent = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
                 budget = Math.max(0, output - spent);
             }
 
-            // Subtract queued allocations from OTHER flights/launches on this
-            // hangar (shared output budget + physical free boxes). Skip this
-            // flight's OWN dock orders so re-editing/cancelling sees the full
-            // capacity it had before queuing — the dialog re-applies the
-            // queued amount as a pre-fill on the splitter input instead. The
-            // output budget is in CRAFT; physical free space is in BOXES, so a
-            // queued unitSize<1 dock consumes its per-craft box cost.
+            // Add queued allocations from OTHER flights/launches on this hangar
+            // (shared output budget + physical free boxes) to the box total. Skip
+            // this flight's OWN dock orders so re-editing/cancelling sees the full
+            // capacity it had before queuing — the dialog re-applies the queued
+            // amount as a pre-fill on the splitter input instead. The output budget
+            // is in CRAFT; physical free space is in BOXES, so a queued ultralight
+            // dock consumes its (fractional) per-craft box cost.
             if (Array.isArray(sys.pendingDockOrders)) {
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;   //own queue is reclaimable
                     var n = parseInt(o.count || 0, 10);
-                    free   = Math.max(0, free - (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n)));
+                    usedBoxes += (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n));
                     if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
+            // Free WHOLE boxes = capacity − total used rounded UP (catapult: free craft slots).
+            var free = Math.max(0, effective - Math.ceil(usedBoxes));
+            if (isCat) budget = free;
             if (!isCat && Array.isArray(sys.pendingLaunchOrders)) {
                 sys.pendingLaunchOrders.forEach(function (o) {
                     budget = Math.max(0, budget - parseInt(o.size || 0, 10));
@@ -619,38 +627,41 @@ window.findEligibleFlightsForDocking = function (carrier) {
                 }
                 effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
             }
-            // Occupied boxes. unitSize<1 craft consume >1 box each (ordinary
-            // hangars only); a catapult counts craft 1:1 (single-fighter rail).
-            var used = 0;
+            // Occupied boxes. unitSize<1 craft consume >1 box each, unitSize>1
+            // ultralights consume a FRACTIONAL box each (ordinary hangars only);
+            // a catapult counts craft 1:1. Sum fractionally, round the TOTAL up once.
+            var usedBoxes = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) {
                     var perCraft = isCat ? 1 : window.hangarBoxesPerCraftForEntry(e);
-                    used += parseInt(e.flightSize || 1, 10) * perCraft;
+                    usedBoxes += parseInt(e.flightSize || 1, 10) * perCraft;
                 });
             }
-            var free = Math.max(0, effective - used);   //free boxes (catapult: free craft slots)
 
             var budget;
             if (isCat) {
-                budget = free;
+                budget = 0;   //set after free is known
             } else {
                 var output = parseInt(sys.output || 0, 10);
                 var spent  = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
                 budget = Math.max(0, output - spent);
             }
 
-            // OTHER flights' queued docks consume both free boxes and the
-            // shared launch+land budget. THIS flight's own queue is
-            // reclaimable so the row's hangar dropdown can re-pick it. Budget is
-            // in CRAFT; free space is in BOXES (queued unitSize<1 docks cost more).
+            // OTHER flights' queued docks consume both free boxes and the shared
+            // launch+land budget. THIS flight's own queue is reclaimable so the
+            // row's hangar dropdown can re-pick it. Budget is in CRAFT; free space
+            // is in BOXES (queued ultralight docks cost a fractional box each).
             if (Array.isArray(sys.pendingDockOrders)) {
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;
                     var n = parseInt(o.count || 0, 10);
-                    free   = Math.max(0, free - (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n)));
+                    usedBoxes += (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n));
                     if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
+            // Free WHOLE boxes = capacity − total used rounded UP (catapult: free craft slots).
+            var free = Math.max(0, effective - Math.ceil(usedBoxes));
+            if (isCat) budget = free;
             // Queued launch orders consume budget only (no physical boxes since
             // the craft are leaving).
             if (!isCat && Array.isArray(sys.pendingLaunchOrders)) {

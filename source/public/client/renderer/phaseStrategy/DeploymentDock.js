@@ -60,18 +60,21 @@ window.DeploymentDock = (function () {
     }
 
     // Hangar boxes a single craft occupies. A unitSize<1 craft (Vorlon Assault
-    // Fighter et al.) needs more than one box each; every other craft is one box.
-    // Mirrors HangarOps::boxesPerCraftForClass / boxesPerCraftForEntry (PHP).
-    // Duplicated here (not shared with shipTooltipFireMenu) to avoid a load-order
-    // dependency, same as the categoryForFlight / customFighterRemainingFor copies.
+    // Fighter et al.) needs more than one box each; a unitSize>1 ultralight (Zorth)
+    // packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5). Mirrors
+    // HangarOps::boxesPerCraftForClass / boxesPerCraftForEntry (PHP). Duplicated
+    // here (not shared with shipTooltipFireMenu) to avoid a load-order dependency,
+    // same as the categoryForFlight / customFighterRemainingFor copies.
     function boxesPerCraftFromUnitSize(unitSize) {
         var u = (unitSize != null) ? parseFloat(unitSize) : 1;
-        return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1;
+        if (u > 0 && u < 1) return Math.ceil(1 / u);   // superheavy: >1 box/craft
+        if (u > 1) return 1 / u;                        // ultralight: fractional box/craft
+        return 1;
     }
     function boxesPerCraftForEntry(entry) {
         if (entry && entry.boxesPerCraft) {
-            var b = parseInt(entry.boxesPerCraft, 10);
-            return b >= 1 ? b : 1;
+            var b = parseFloat(entry.boxesPerCraft);   // float: fractional (0.5) round-trips
+            return b > 0 ? b : 1;
         }
         return boxesPerCraftFromUnitSize(entry ? entry.unitSize : 1);
     }
@@ -128,13 +131,15 @@ window.DeploymentDock = (function () {
         var effective = effectiveHangarBoxes(hangar);
         var reclaim = (reclaimFlightId != null) ? parseInt(reclaimFlightId, 10) : null;
 
-        // Box-aware: unitSize<1 craft consume >1 box each (catapults excepted).
+        // Box-aware: unitSize<1 craft consume >1 box each; unitSize>1 ultralights
+        // consume a fractional box each (catapults excepted). Sum committed + queued
+        // box cost fractionally and round the TOTAL up so the free count is whole
+        // boxes (mirrors HangarOps::occupiedBoxes).
         var used = 0;
         if (Array.isArray(hangar.hangarUsage)) {
             hangar.hangarUsage.forEach(function (e) { used += entryBoxesInHangar(hangar, e); });
         }
 
-        var queued = 0;
         if (Array.isArray(hangar.pendingDeployStartOrders)) {
             hangar.pendingDeployStartOrders.forEach(function (o) {
                 if (reclaim != null && parseInt(o.flightId, 10) === reclaim) return;   //own queue is reclaimable
@@ -146,11 +151,11 @@ window.DeploymentDock = (function () {
                 var slice = (o.count != null && parseInt(o.count, 10) > 0)
                     ? parseInt(o.count, 10)
                     : parseInt(f.flightSize || 1, 10);
-                queued += craftBoxesInHangar(hangar, slice, f.unitSize);
+                used += craftBoxesInHangar(hangar, slice, f.unitSize);
             });
         }
 
-        return Math.max(0, effective - used - queued);
+        return Math.max(0, effective - Math.ceil(used));
     }
 
     // Pending flights belonging to the same slot/player as $carrier that:
@@ -302,14 +307,15 @@ window.DeploymentDock = (function () {
     // list of hangars used (with their allocated counts), or [] if the carrier's
     // COMBINED free capacity can't hold the whole flight.
     //
-    // Box-aware: free is in boxes; a unitSize<1 craft costs >1 box each, so the
-    // per-bay craft capacity is floor(free / perCraftBoxes).
+    // Box-aware: free is in boxes; a unitSize<1 craft costs >1 box each and a
+    // unitSize>1 ultralight costs a FRACTIONAL box each (0.5), so the per-bay craft
+    // capacity is floor(free / perCraftBoxes) — which is 2 craft per box for Zorth.
     // $reclaimFlightId (optional): re-planning an already-queued flight — its own
     // existing reservations are reclaimed so the plan sees true free capacity.
     function distributeFlightAcrossHangars(carrier, flight, reclaimFlightId) {
         var cat = categoryForFlight(flight);
         var perCraft = craftBoxesInHangar(null, 1, flight.unitSize); //boxes per single craft (catapult-agnostic here; rails/hangars are non-catapult)
-        if (perCraft < 1) perCraft = 1;
+        if (perCraft <= 0) perCraft = 1;   //don't clamp to >=1: ultralights are 0.5 box/craft
         var remaining = parseInt(flight.flightSize, 10) || 1;
 
         var hangars = collectUsableHangars(carrier, reclaimFlightId).filter(function (h) {
@@ -475,23 +481,24 @@ window.DeploymentDock = (function () {
             //so re-edit doesn't think the hangar is full. (Catapult → 1 slot.)
             var effective = effectiveHangarBoxes(sys);
 
-            //Box-aware usage: unitSize<1 craft consume >1 box each (catapults
-            //counted 1:1 via entryBoxesInHangar / craftBoxesInHangar).
+            //Box-aware usage: unitSize<1 craft consume >1 box each, unitSize>1
+            //ultralights a fractional box each (catapults counted 1:1 via
+            //entryBoxesInHangar / craftBoxesInHangar). Sum committed + queued box
+            //cost fractionally and round the TOTAL up to whole free boxes.
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (e) { used += entryBoxesInHangar(sys, e); });
             }
 
-            var queued = 0;
             if (Array.isArray(sys.pendingDeployStartOrders)) {
                 sys.pendingDeployStartOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;          //own queue is reclaimable
                     var f = gamedata.getShip(o.flightId);
-                    if (f) queued += craftBoxesInHangar(sys, f.flightSize, f.unitSize);
+                    if (f) used += craftBoxesInHangar(sys, f.flightSize, f.unitSize);
                 });
             }
 
-            var free = Math.max(0, effective - used - queued);
+            var free = Math.max(0, effective - Math.ceil(used));
             if (free >= craftBoxesInHangar(sys, size, flight.unitSize)) out.push({ hangar: sys, capacity: free });
         });
         return out;

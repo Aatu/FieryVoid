@@ -1925,7 +1925,9 @@ window.confirm = {
         function boxesUsedInHangar(hangar) {
             var used = 0;
             (hangar.hangarUsage || []).forEach(function (e) {
-                var bpc = parseInt(e.boxesPerCraft || 1, 10) || 1;
+                //Fractional-safe per-craft box cost (ultralight 0.5). Occupancy boxes
+                //are whole ints; non-occupancy entries cost flightSize*bpc.
+                var bpc = e.boxesPerCraft ? (parseFloat(e.boxesPerCraft) || 1) : 1;
                 if (Array.isArray(e.occupancy)) {
                     e.occupancy.forEach(function (o) {
                         if (parseInt(o.systemId, 10) === parseInt(hangar.id, 10)) used += parseInt(o.boxes || 0, 10);
@@ -2073,7 +2075,7 @@ window.confirm = {
             var label = hangarLabelFor(hangar);
             bayLabels.set(hangar, label);
             var headerRow = $('<div class="multi-value-row"></div>');
-            $('<span class="multi-value-label"><span class="hangar-section-name">' + label + '</span> <span class="multi-value-max">(Capacity: ' + used + '/' + cap + ' boxes · launch budget: <span class="launch-budget-remaining">' + budget + '</span>/' + budget + ')</span>' + dirSelectHtml + '</span>').appendTo(headerRow);
+            $('<span class="multi-value-label"><span class="hangar-section-name">' + label + '</span> <span class="multi-value-max">(Capacity: ' + Math.ceil(used) + '/' + cap + ' boxes · launch budget: <span class="launch-budget-remaining">' + budget + '</span>/' + budget + ')</span>' + dirSelectHtml + '</span>').appendTo(headerRow);
             container.append(headerRow);
             budgetSpans.set(hangar, headerRow.find('.launch-budget-remaining'));
         });
@@ -2095,7 +2097,8 @@ window.confirm = {
                 if (dfid <= 0) return;   // anonymous handled below
                 var cls = entry.phpclass || 'unknown';
                 var size = parseInt(entry.flightSize || 1, 10);
-                var bpc = parseInt(entry.boxesPerCraft || 1, 10) || 1;
+                //Fractional-safe (ultralight 0.5): occupancy box→craft is floor(boxes/bpc).
+                var bpc = entry.boxesPerCraft ? (parseFloat(entry.boxesPerCraft) || 1) : 1;
                 var max = Math.min(size, launchSizeMaxFor(cls));
                 var nm = entry.name || cls;
 
@@ -2488,10 +2491,11 @@ window.confirm = {
         };
         var isCatapultSys = function (sys) { return !!(sys && (sys.isCatapult || sys.name === 'catapult')); };
         // Box-cost helpers: a unitSize<1 craft (Vorlon Assault Fighter et al.)
-        // occupies >1 box each; catapults are single-fighter rails (1:1).
+        // occupies >1 box each; a unitSize>1 ultralight (Zorth) packs several per
+        // box (fractional 0.5 box/craft); catapults are single-fighter rails (1:1).
         // Mirrors HangarOps::boxesPerCraftForClass / boxesPerCraftForEntry (PHP).
-        var boxesPerCraftFromUnitSize = function (u) { u = (u != null) ? parseFloat(u) : 1; return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1; };
-        var boxesPerCraftForEntry = function (e) { if (e && e.boxesPerCraft) { var b = parseInt(e.boxesPerCraft, 10); return b >= 1 ? b : 1; } return boxesPerCraftFromUnitSize(e ? e.unitSize : 1); };
+        var boxesPerCraftFromUnitSize = function (u) { u = (u != null) ? parseFloat(u) : 1; if (u > 0 && u < 1) return Math.ceil(1 / u); if (u > 1) return 1 / u; return 1; };
+        var boxesPerCraftForEntry = function (e) { if (e && e.boxesPerCraft) { var b = parseFloat(e.boxesPerCraft); return b > 0 ? b : 1; } return boxesPerCraftFromUnitSize(e ? e.unitSize : 1); };
         var entryBoxesIn = function (sys, e) { var n = parseInt(e.flightSize || 1, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftForEntry(e); };
         var craftBoxesIn = function (sys, count, unitSize) { var n = parseInt(count || 0, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftFromUnitSize(unitSize); };
 
@@ -2596,7 +2600,8 @@ window.confirm = {
             if (!isCat && shipManager.systems.isDestroyed(carrier, sys)) return;
 
             var effective = effectiveHangarBoxes(sys);   //catapult → 1, regardless of damage
-            //committed is in BOXES: unitSize<1 craft consume >1 box each.
+            //committed is in BOXES (fractional for ultralights); round the TOTAL up
+            //to whole boxes so free space is whole boxes (mirrors occupiedBoxes).
             var committed = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (entry) { committed += entryBoxesIn(sys, entry); });
@@ -2609,7 +2614,7 @@ window.confirm = {
                     committed += craftBoxesIn(sys, o.count, of ? of.unitSize : 1);
                 });
             }
-            var freeBoxes = Math.max(0, effective - committed);
+            var freeBoxes = Math.max(0, effective - Math.ceil(committed));
             baseFreeByHangar.set(sys.id, freeBoxes);
 
             //Catapults have no launch+land output budget — set the budget to the
@@ -2836,7 +2841,8 @@ window.confirm = {
         // [{hangar, count}] or [] if combined capacity can't hold the flight.
         function distributeFlightAcrossBays(flight, count) {
             var u = flight ? parseFloat(flight.unitSize) : 1;
-            var perCraftBoxes = (u > 0 && u < 1) ? Math.ceil(1 / u) : 1;
+            //per-craft boxes: >1 superheavy, fractional 0.5 ultralight, else 1.
+            var perCraftBoxes = (u > 0 && u < 1) ? Math.ceil(1 / u) : (u > 1 ? 1 / u : 1);
             var bays = [];
             carrier.systems.forEach(function (sys) {
                 if (!sys || !isDockHangar(sys)) return;
@@ -3051,11 +3057,12 @@ window.confirm = {
             //Sum free boxes across the carrier's eligible hangars for the readout.
             var totalCapacity = 0;
             entry.hangars.forEach(function (h) { totalCapacity += parseInt(h.capacity || 0, 10); });
-            //Boxes this flight needs: unitSize<1 craft cost >1 box each.
+            //Boxes this flight needs: unitSize<1 craft cost >1 box each, unitSize>1
+            //ultralights a fractional box each; round the total need UP to whole boxes.
             var size = parseInt(flight.flightSize || 1, 10);
             var fu = parseFloat(flight.unitSize);
-            var bpc = (fu > 0 && fu < 1) ? Math.ceil(1 / fu) : 1;
-            var boxesNeeded = size * bpc;
+            var bpc = (fu > 0 && fu < 1) ? Math.ceil(1 / fu) : (fu > 1 ? 1 / fu : 1);
+            var boxesNeeded = Math.ceil(size * bpc);
 
             var row = $('<div class="multi-value-row"></div>');
             var btn = $('<div class="name-value-button-ally" style="flex:1;">DOCK IN ' + carrier.name.toUpperCase() + ' (' + boxesNeeded + '/' + totalCapacity + ' boxes)</div>');
@@ -3093,11 +3100,12 @@ window.confirm = {
             if (Array.isArray(h.damage)) h.damage.forEach(function (d) { nd += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10)); });
             return Math.max(0, parseInt(h.maxhealth, 10) - nd);
         };
-        // Box-cost helpers: unitSize<1 craft occupy >1 box each; catapults are
+        // Box-cost helpers: unitSize<1 craft occupy >1 box each; unitSize>1
+        // ultralights pack several per box (fractional 0.5 box/craft); catapults are
         // single-fighter rails (1:1). Mirrors HangarOps::boxesPerCraftForClass.
         var isCatapultSys = function (sys) { return !!(sys && (sys.isCatapult || sys.name === 'catapult')); };
-        var boxesPerCraftFromUnitSize = function (u) { u = (u != null) ? parseFloat(u) : 1; return (u > 0 && u < 1) ? Math.ceil(1 / u) : 1; };
-        var boxesPerCraftForEntry = function (en) { if (en && en.boxesPerCraft) { var b = parseInt(en.boxesPerCraft, 10); return b >= 1 ? b : 1; } return boxesPerCraftFromUnitSize(en ? en.unitSize : 1); };
+        var boxesPerCraftFromUnitSize = function (u) { u = (u != null) ? parseFloat(u) : 1; if (u > 0 && u < 1) return Math.ceil(1 / u); if (u > 1) return 1 / u; return 1; };
+        var boxesPerCraftForEntry = function (en) { if (en && en.boxesPerCraft) { var b = parseFloat(en.boxesPerCraft); return b > 0 ? b : 1; } return boxesPerCraftFromUnitSize(en ? en.unitSize : 1); };
         var entryBoxesIn = function (sys, en) { var n = parseInt(en.flightSize || 1, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftForEntry(en); };
         var craftBoxesIn = function (sys, count, unitSize) { var n = parseInt(count || 0, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftFromUnitSize(unitSize); };
 
@@ -3170,7 +3178,8 @@ window.confirm = {
             if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(carrier, sys)) return;
             var effective = effectiveHangarBoxes(sys);
-            //committed is in BOXES: unitSize<1 craft consume >1 box each.
+            //committed is in BOXES (fractional for ultralights); round the TOTAL up
+            //to whole boxes so free space is whole boxes (mirrors occupiedBoxes).
             var committed = 0;
             if (Array.isArray(sys.hangarUsage)) {
                 sys.hangarUsage.forEach(function (entry) { committed += entryBoxesIn(sys, entry); });
@@ -3183,7 +3192,7 @@ window.confirm = {
                     if (f) committed += craftBoxesIn(sys, f.flightSize, f.unitSize);
                 });
             }
-            baseFreeByHangar.set(sys.id, Math.max(0, effective - committed));
+            baseFreeByHangar.set(sys.id, Math.max(0, effective - Math.ceil(committed)));
         });
 
         // Build rows. Track per-flight {row, flight, hangarSelect (or fixed hangar)}.
