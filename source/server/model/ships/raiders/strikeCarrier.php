@@ -30,7 +30,7 @@ class StrikeCarrier extends BaseShip{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 6));
 		$this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 2));
 		$this->addPrimarySystem(new CargoBay(5, 30));
 
 		$this->addFrontSystem(new Thruster(4, 13, 0, 5, 1));
