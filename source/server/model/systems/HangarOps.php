@@ -1149,8 +1149,12 @@ class HangarOps {
 		$flight   = $dockedId > 0 ? $gamedata->getShipById($dockedId) : null;
 		if (!($flight instanceof FighterFlight)) return;   //anonymous/auto entry: no per-craft escape, trim only
 
-		$roll      = random_int(1, 20);
+		$roll = random_int(1, 20);
+		$roll = 13;		
 		$maxEscape = self::computeEscapeCount($roll, $k);
+
+		//Pre-shed active count for the proportional enhancement-value split below.
+		$activeBefore = $flight->countActiveCraft($gamedata->turn);
 
 		$shed = self::selectFightersForExtraction($flight, $k, $gamedata);
 		if (empty($shed)) return;
@@ -1160,11 +1164,28 @@ class HangarOps {
 			self::spawnRailEscapeFlight($carrier, $rail, $entry, $flight, $escapees, $gamedata);
 		}
 		//Every shed craft (escapee or not) leaves the docked ship's active roster.
+		$shedCount = 0;
 		foreach ($shed as $f){
 			if ($f->isDestroyed($gamedata->turn)) continue;
 			$crit = new DisengagedFighter(-1, $flight->id, $f->id, 'DisengagedFighter', $gamedata->turn);
 			$crit->updated = true; $crit->newCrit = true;
 			$f->criticals[] = $crit;
+			$shedCount++;
+		}
+
+		//Stage 21.5 (value): the shed craft (escaped onto a "- Split" flight, or
+		//dead) leave the docked remnant — drop the remnant's enhancement cost by
+		//their proportional share so a surviving docked row doesn't keep the full
+		//pointCostEnh (which would double-count the escape flight's carried share).
+		//If the whole flight was shed the remnant disappears and this is moot.
+		if ($shedCount > 0 && $activeBefore > 0 && $shedCount < $activeBefore){
+			$totalEnh = (int)round((float)($flight->pointCostEnh ?? 0) + (float)($flight->pointCostEnh2 ?? 0));
+			if ($totalEnh > 0){
+				$remnantEnh = (int)round($totalEnh * ($activeBefore - $shedCount) / $activeBefore);
+				$flight->pointCostEnh  = $remnantEnh;
+				$flight->pointCostEnh2 = 0;
+				Manager::insertSingleEnhValue($flight->id, $remnantEnh);
+			}
 		}
 	}
 
@@ -2084,6 +2105,22 @@ class HangarOps {
 		//Shrink the entry: flightSize -K, trim occupancy boxes K*bpc smallest-bay-first.
 		self::shrinkDockedEntry($entryHangar, $dockedId, $phpclass, $size, $entry);
 		self::chargeLaunchBudget($bays, $size, $entry);
+
+		//Stage 21.5 (value): the launched K-flight took a proportional share of the
+		//enhancement cost (spawnLaunchedKFlight set its pointCostEnh = round(total *
+		//K/N)). Subtract exactly that from the docked remnant so the enhancement
+		//value isn't double-counted across the two rows (remnant kept the FULL
+		//pointCostEnh before this — fleet-list showed the carrier's docked row + the
+		//launched row each carrying the whole enhancement). Conserve by remainder
+		//(total - launched share) rather than re-rounding, so the two always sum back.
+		$totalEnh = (int)round((float)($docked->pointCostEnh ?? 0) + (float)($docked->pointCostEnh2 ?? 0));
+		$remnantEnh = max(0, $totalEnh - (int)($launched->pointCostEnh ?? 0));
+		if ($remnantEnh !== $totalEnh){
+			$docked->pointCostEnh  = $remnantEnh;
+			$docked->pointCostEnh2 = 0;
+			//Persist on the existing ship row (enhvalue column is the load source).
+			Manager::insertSingleEnhValue($docked->id, $remnantEnh);
+		}
 
 		$note = new IndividualNote(
 			-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
@@ -4211,20 +4248,13 @@ class HangarOps {
 				//consecutive turns kept rolling in the 11-18 range — so the
 				//player saw "half escape" every time. Rolling fresh fixes that.
 				$roll = random_int(1, 20);
+				$roll = 13;
 				$maxEscape = self::computeEscapeCount($roll, $totalDocked);
 			}
 
 			$escapedNames = array();
 			if ($maxEscape > 0) {
-				//Priority sort: combat value DESC (Thunderbolts escape before
-				//armed shuttles), then damage ASC (least-damaged first so
-				//the healthiest survive).
-				usort($virtuals, function($a, $b){
-					if ($a['pointCost'] !== $b['pointCost']) return $b['pointCost'] - $a['pointCost'];
-					if ($a['damage']    !== $b['damage'])    return $a['damage']    - $b['damage'];
-					return 0;
-				});
-				$chosen = array_slice($virtuals, 0, $maxEscape);
+				$chosen = self::chooseEscapees($virtuals, $maxEscape);
 				$escapedNames = self::performCarrierEscapeSpawns($carrier, $hangars, $chosen, $gamedata);
 			}
 
@@ -4358,6 +4388,57 @@ class HangarOps {
 		}
 	}
 
+	/* Choose which $maxEscape of the $virtuals fly free, SPREAD across the docked
+	 * flights rather than draining one flight before touching the next (user call
+	 * 2026-06-01). Two identical 12-flights with a 12-escape budget each contribute
+	 * ~6 (one "- Split" per flight) instead of one whole resurrect + one whole loss.
+	 *
+	 * Method: bucket virtuals by source stash entry ("{hangarId}:{entryIdx}"),
+	 * priority-sort WITHIN each bucket (pointCost DESC, damage ASC — best craft of
+	 * each flight escape first), order the buckets by their top craft's priority
+	 * (so when the budget divides unevenly the more valuable flight gets the spare),
+	 * then round-robin one craft per bucket until $maxEscape is filled. */
+	private static function chooseEscapees($virtuals, $maxEscape){
+		if ($maxEscape <= 0 || empty($virtuals)) return array();
+
+		$prio = function($a, $b){
+			if ($a['pointCost'] !== $b['pointCost']) return $b['pointCost'] - $a['pointCost'];
+			if ($a['damage']    !== $b['damage'])    return $a['damage']    - $b['damage'];
+			return 0;
+		};
+
+		//Bucket by stash entry. Key matches performCarrierEscapeSpawns' bucketing so
+		//each docked flight is one bucket (a multi-bay no-split flight is one entry).
+		$buckets = array();
+		foreach ($virtuals as $v){
+			$key = (int)$v['hangarRef']->id . ':' . (int)$v['entryIdx'];
+			$buckets[$key][] = $v;
+		}
+		foreach ($buckets as &$b){ usort($b, $prio); } unset($b);
+
+		//Order buckets by their best (first, post-sort) craft so an uneven split
+		//favours the higher-value flight.
+		$ordered = array_values($buckets);
+		usort($ordered, function($x, $y) use ($prio){ return $prio($x[0], $y[0]); });
+
+		//Round-robin draw across buckets until the budget is spent.
+		$chosen = array();
+		$cursor = array_fill(0, count($ordered), 0);
+		$progress = true;
+		while (count($chosen) < $maxEscape && $progress){
+			$progress = false;
+			foreach ($ordered as $i => $bucket){
+				if (count($chosen) >= $maxEscape) break;
+				$c = $cursor[$i];
+				if ($c >= count($bucket)) continue;
+				$chosen[] = $bucket[$c];
+				$cursor[$i] = $c + 1;
+				$progress = true;
+			}
+		}
+		return $chosen;
+	}
+
 	/* Group the chosen virtuals by stash entry, spawn one escape flight per
 	 * bucket, then disengage every non-escapee source flight so the
 	 * fleet-list 0-CV fold hides their rows.
@@ -4393,16 +4474,18 @@ class HangarOps {
 		return $names;
 	}
 
-	/* Spawn the escape from a single stash entry. Three paths:
+	/* Spawn the escape from a single stash entry. Three paths (Stage 21.4
+	 * no-split rewrite — partial escape no longer spawns a fragment ship):
 	 *
 	 *  - dockedFlightId AND chosen-count >= source-flight active count →
 	 *    resurrect the linked flight directly (clear $removed, deploy
 	 *    MovementOrder, LaunchedThisTurn). Source flight IS the escape flight.
-	 *  - dockedFlightId AND partial → spawn a fragment carrying only the
-	 *    chosen fighters' damage state, clear its $removed flag (the
-	 *    spawnFragmentFlight helper births it removed for the dock case),
-	 *    overwrite its deploy move with hangar-direction-aware facing.
-	 *    The OLD source flight is disengaged by markNonEscapeesDestroyed.
+	 *  - dockedFlightId AND partial → spawn ONE "<name> - Split" K-flight via
+	 *    spawnLaunchedKFlight (proportional pointCostEnh) carrying only the
+	 *    escapees' ammo/damage/crit state — exactly like the rail-escape path
+	 *    (spawnRailEscapeFlight). NO fragment ship: the source flight dies with
+	 *    the carrier, so markNonEscapeesDestroyed disengages its whole roster
+	 *    (CV → 0); the K escapees live on the new K-flight.
 	 *  - anonymous orphan / auto-shuttle / missing-linked-flight → fresh
 	 *    FighterFlight via the new-spawn path (mirror performLaunch).
 	 *
@@ -4453,73 +4536,46 @@ class HangarOps {
 					return $sourceFlight->name;
 				}
 
-				//Partial escape — spawn a fragment carrying the chosen
-				//fighters' state. Mirrors spawnFragmentFlight (Stage 10.4)
-				//but the result is on-the-board, not in-hangar.
+				//Partial escape — spawn ONE "<name> - Split" K-flight carrying
+				//only the chosen escapees' state (Stage 21.4: no fragment ship,
+				//mirrors spawnRailEscapeFlight). The non-escapees die with the
+				//carrier — markNonEscapeesDestroyed disengages the whole source
+				//roster afterwards so its row folds to CV 0.
 				$chosenFighters = array();
 				foreach ($virtuals as $v) {
 					if ($v['fighter'] instanceof Fighter) $chosenFighters[] = $v['fighter'];
 				}
 				if (empty($chosenFighters)) return null;
 
-				$escapeFlight = self::spawnFragmentFlight($sourceFlight, $chosenFighters, $carrier, $hangar, $gamedata);
+				$flightName = self::dockedSplitName($entry);
+				if ($flightName === null) $flightName = self::flightNameFor($phpclass, $carrier);
+				$escapeFlight = self::spawnLaunchedKFlight($phpclass, $count, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, $sourceFlight, $gamedata);
 				if (!$escapeFlight) return null;
 
-				//spawnFragmentFlight births the fragment $removed=true (for
-				//the normal partial-dock case where it sits in a hangar).
-				//For escape, the fragment is live in space — clear the flag
-				//and overwrite the auto-inserted deploy move with the
-				//hangar-direction-aware facing.
-				$escapeFlight->removed     = false;
-				$escapeFlight->removedTurn = null;
-
-				$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
-				Manager::insertSingleMovement($gamedata->id, $escapeFlight->id, $deployMove);
+				//Copy the chosen escapees' ammo/damage/crit state onto the new
+				//K-flight (same state-copy the rail-escape + partial-launch use).
+				self::copyFlightAmmoEnhancements($sourceFlight, $escapeFlight, $gamedata);
+				$targetFighters = array();
+				foreach ($escapeFlight->systems as $f){ if ($f instanceof Fighter) $targetFighters[] = $f; }
+				for ($i = 0; $i < count($chosenFighters); $i++){
+					if (!isset($targetFighters[$i])) break;
+					self::copyFighterStateToTarget($chosenFighters[$i], $targetFighters[$i], $escapeFlight, $gamedata);
+				}
 
 				self::applyEscapeCrits($escapeFlight, $gamedata);
-				self::writeEscapeEventNote($carrier, $hangar, $escapeFlight, $count, 'fragment', $gamedata);
+				self::writeEscapeEventNote($carrier, $hangar, $escapeFlight, $count, 'split', $gamedata);
 				return $escapeFlight->name;
 			}
 			//Linked flight missing — fall through to new-spawn.
 		}
 
-		//New-spawn path (anonymous orphan, auto-shuttle, or missing-linked-flight).
-		//Mirrors the second half of performLaunch's new-spawn branch.
+		//New-spawn path (anonymous orphan, auto-shuttle, or missing-linked-flight):
+		//no source flight to copy state from, so spawn a fresh K-flight via the
+		//shared spawner (Stage 21.4 — same no-split helper the partial path uses;
+		//null source = no pointCostEnh carry, matching the old hand-rolled spawn).
 		$flightName = self::flightNameFor($phpclass, $carrier);
-		$flight = new $phpclass($gamedata->id, $carrier->userid, $flightName, $carrier->slot);
-		$flight->team = $carrier->team;
-		if ($count > $flight->flightSize) {
-			$flight->flightSize = $count;
-			if (method_exists($flight, 'populate')) {
-				$flight->populate();
-			}
-		}
-
-		$shipid = Manager::insertSingleShip($gamedata, $flight, $carrier->userid);
-		$flight->id = $shipid;
-		$flight->spawned = $gamedata->turn;
-
-		Manager::insertSingleFlightSize($gamedata->id, $shipid, $flight->flightSize);
-
-		$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
-		Manager::insertSingleMovement($gamedata->id, $shipid, $deployMove);
-
-		SystemData::initSystemData($gamedata->turn, $gamedata->id);
-		foreach ($flight->systems as $craft) {
-			$craft->setInitialSystemData($flight);
-			if (!isset($craft->systems) || !is_array($craft->systems)) continue;
-			foreach ($craft->systems as $sys) {
-				$sys->setInitialSystemData($flight);
-				if ($sys instanceof Weapon) {
-					$load = $sys->getStartLoading();
-					if ($load) {
-						$load->loading = $sys->loadingtime;
-						SystemData::addDataForSystem($sys->id, 0, $shipid, $load->toJSON());
-					}
-				}
-			}
-		}
-		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+		$flight = self::spawnLaunchedKFlight($phpclass, $count, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, null, $gamedata);
+		if (!$flight) return null;
 
 		self::applyEscapeCrits($flight, $gamedata);
 		self::writeEscapeEventNote($carrier, $hangar, $flight, $count, 'newspawn', $gamedata);
@@ -4546,11 +4602,11 @@ class HangarOps {
 	 * "{hangarId}:{entryIdx}" and identifies which entries were resurrected
 	 * (full escape — DON'T disengage; the source IS the escape flight).
 	 *
-	 * Partial-escape entries: the chosen fighters' damage was copied onto a
-	 * NEW fragment via spawnFragmentFlight. Now disengage every original
-	 * fighter on the source flight so the source's combat value collapses
-	 * to 0 — the chosen fighters are still physically present on the source
-	 * flight, just like the partial-dock case in Stage 10.4. */
+	 * Partial-escape entries (Stage 21.4 no-split): the chosen escapees' state
+	 * was copied onto a separate "<name> - Split" K-flight (spawnLaunchedKFlight).
+	 * The source flight is NOT the escape flight and dies with the carrier, so
+	 * disengage its ENTIRE roster here (CV → 0). No fragment ship is left behind;
+	 * the escapees live only on the new K-flight. */
 	private static function markNonEscapeesDestroyed($hangars, $escapeBuckets, $gamedata){
 		foreach ($hangars as $hangar) {
 			if (!is_array($hangar->hangarUsage)) continue;
@@ -4612,8 +4668,8 @@ class HangarOps {
 		Manager::insertIndividualNote($note);
 	}
 
-	/* Per-escapee replay note. $kind ∈ {'resurrected', 'fragment', 'newspawn'}
-	 * for forensic clarity in DB inspection. */
+	/* Per-escapee replay note. $kind ∈ {'resurrected', 'split', 'newspawn',
+	 * 'railEvac'} for forensic clarity in DB inspection. */
 	private static function writeEscapeEventNote($carrier, $hangar, $flight, $count, $kind, $gamedata){
 		$note = new IndividualNote(
 			-1,

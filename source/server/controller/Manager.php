@@ -1510,7 +1510,14 @@ class Manager{
 
     public static function insertSingleFlightSize($gameid, $shipid, $flightSize){
 		self::$dbManager->submitFlightSize($gameid, $shipid, $flightSize);
-    }       
+    }
+
+    //Hangar Ops Stage 21.5: persist a reduced enhancement cost on an existing
+    //ship row (partial-launch remnant gives up its launched share). Mutate
+    //$ship->pointCostEnh in memory alongside this so the current request agrees.
+    public static function insertSingleEnhValue($shipid, $enhValue){
+		self::$dbManager->submitEnhValue($shipid, (int)$enhValue);
+    }
                  
 
     //Used by Pakmara Plasma Web to retrieve fire orders in workflow and get most recent id etc

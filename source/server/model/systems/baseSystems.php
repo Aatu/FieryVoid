@@ -3137,19 +3137,24 @@ class Hangar extends ShipSystem{
 	public function generateIndividualNotes($gamedata, $dbManager){
 		$ship = $this->getUnit();
 		if (!$ship) return;
-		//Jump-sequencing fix: a carrier killed this turn by HyperspaceJump or
-		//JumpFailure damage still needs to persist any in-memory hangarUsage
-		//change made during this same setCriticals pass (processJumpingCarrierDockOrders
-		//docks pending flights into the jumping carrier's hangar). Without
-		//letting this method run, the new hangarUsage entry — and the
-		//$flight->removed flag that's re-applied from it via
-		//onIndividualNotesLoaded — would never reach the DB, and the docked
-		//flight would resurface in space next turn. Carriers destroyed by
-		//ordinary fire on a previous turn still short-circuit (the change-
-		//detection guard around the hangarUsage write keeps them from emitting
-		//redundant notes).
-		if ($ship->isDestroyed() && !HangarOps::hasJumpDamageThisTurn($ship, $gamedata)) return;
 		if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
+
+		//A destroyed carrier never processes launch/dock/pool orders, but it MUST
+		//still reach the hangarUsage snapshot tail below: Stage 18's carrier-
+		//destruction escape (processCarrierDestructionEscapes, Pass 3) clears each
+		//hangar's $hangarUsage in memory after resurrecting/spawning escapees. If
+		//that empty snapshot isn't persisted, the latest hangarUsage note in the
+		//DB stays the pre-destruction one (with its dockedFlightId entries), and
+		//onIndividualNotesLoaded re-applies $removed=true to the resurrected
+		//escapees on the next load — they vanish from the board. The snapshot
+		//tail's own change-detection ($current === $this->lastSavedUsage) keeps a
+		//carrier destroyed on a PREVIOUS turn (already-empty, already-persisted)
+		//from emitting a redundant note. The jump path (processJumpingCarrierDockOrders)
+		//docks pending flights into a jumping carrier's hangar in the same pass and
+		//likewise relies on this snapshot persisting. So: skip the order blocks for
+		//a destroyed carrier, but always fall through to the hangarUsage snapshot.
+		$destroyed = $ship->isDestroyed();
+		if (!$destroyed) {
 
 		//Persist any pending launch order received from the client. Validation
 		//(canLaunch) happens at end-of-turn during processLaunchOrders — this
@@ -3276,9 +3281,12 @@ class Hangar extends ShipSystem{
 			}
 		}
 
+		} //endif (!$destroyed) — order/pool blocks skipped for a destroyed carrier
+
 		//Persist hangarUsage snapshot, but only if it has actually changed
 		//since the last saved snapshot. Stage 4+ docking/launching mutate
-		//$hangarUsage and rely on this to snapshot it.
+		//$hangarUsage and rely on this to snapshot it. A destroyed carrier reaches
+		//here too (escape cleared its hangarUsage — see the $destroyed note above).
 		$current = json_encode($this->hangarUsage);
 		if ($current === $this->lastSavedUsage) return;
 		//Don't write a useless first-time note for an empty hangar

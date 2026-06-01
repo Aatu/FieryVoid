@@ -187,6 +187,19 @@ class DBManager
         $id = $this->insert($sql);
     }
 
+    /* Hangar Ops Stage 21.5: update an existing ship row's persisted enhancement
+     * cost (tac_ship.enhvalue, the source of $ship->pointCostEnh on load). Used
+     * when a partial launch carries a proportional share of a docked flight's
+     * enhancement onto the launched K-flight — the docked remnant's stored value
+     * must drop by that share so the two rows don't double-count it in fleetList. */
+    public function submitEnhValue($shipid, $enhValue)
+    {
+        $stmt = $this->connection->prepare("UPDATE `tac_ship` SET enhvalue = ? WHERE id = ?");
+        $stmt->bind_param('ii', $enhValue, $shipid);
+        $stmt->execute();
+        $stmt->close();
+    }
+
 
     public function submitAmmo($shipid, $systemid, $gameid, $firingMode, $ammoAmount, $turn)
     {

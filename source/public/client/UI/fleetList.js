@@ -22,13 +22,22 @@ function pointCostForPhpclass(phpclass) {
 //here would double-credit. Shuttles auto-fill carriers and have pointCost=0,
 //so they contribute nothing.
 //
+//Stage 21.5 (no-split): under the no-split model EVERY value-bearing docked
+//flight is its own ship row (full dock links dockedFlightId to the source
+//flight; partial dock/launch link to a "- Split" K-flight). The only anonymous
+//(no-dockedFlightId) entries left are auto-fill shuttles (pointCost 0), so this
+//helper now contributes 0 in practice. It is KEPT as a deliberate legacy/orphan
+//safety net: a legacy DB (pre-no-split fragment docks) or a future orphan entry
+//carrying real value is still credited to the carrier rather than silently
+//dropped. Don't remove without auditing legacy-shape games (Stage 21.6).
+//
 //Stage 18: a destroyed-non-jumped carrier loses its stash to the wreck —
 //don't credit the carrier for contents it no longer has. (Server-side,
-//processCarrierDestructionEscapes clears hangarUsage post-roll so this is
-//usually 0 already, but the guard covers stale state and the brief window
-//between in-game destruction and the next setCriticals sweep.) Jumped
-//carriers keep their stash since the jumped-flight preservation path
-//treats the whole carrier+contents as off-board-but-intact.
+//processCarrierDestructionEscapes clears hangarUsage post-roll AND now persists
+//that clear — Stage 21.4 fix — so this is 0 by next load, but the guard still
+//covers the in-request window between destruction and the next setCriticals
+//sweep.) Jumped carriers keep their stash since the jumped-flight preservation
+//path treats the whole carrier+contents as off-board-but-intact.
 function dockedCraftStashValue(ship) {
     if (!Array.isArray(ship.systems)) return 0;
     if (shipManager.isDestroyed(ship) && !shipManager.hasJumpedNotDestroyed(ship)) return 0;
