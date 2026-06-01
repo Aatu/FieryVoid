@@ -27,7 +27,7 @@ class Seffensa extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 12, 4, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(6, 2));
+        $this->addPrimarySystem(new Hangar(6, 2, 1));
 
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 60));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 180, 60));
