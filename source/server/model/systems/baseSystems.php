@@ -2726,9 +2726,8 @@ class Quarters extends ShipSystem{
 
 class DockingCollar extends ShipSystem{
     public $name = "DockingCollar";
-    public $displayName = "Docking Collar";
+    public $displayName = "LCV Rail";
     
-	//Quarters is not important at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth, $output = 1){
