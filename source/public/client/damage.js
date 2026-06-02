@@ -50,6 +50,10 @@ window.damageManager = {
         if (system.fighter) {
             var crit = shipManager.criticals.getCritical(system, "DisengagedFighter");
             if (!crit) crit = shipManager.criticals.getCritical(system, "DockedFighter");
+            //Hangar Ops Stage 21.7: a fighter launched out of a docked flight as a
+            //"- Split" row is gone from this flight too (mirrors the server isDestroyed
+            //fold), so it counts as turn-destroyed here for icon/health rendering.
+            if (!crit) crit = shipManager.criticals.getCritical(system, "SplitLaunchedFighter");
             if (crit) {
 				return crit.turn;
 			} else {

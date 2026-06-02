@@ -136,10 +136,19 @@
 				return true;
         }
 
+        /* Hangar Ops Stage 21.7: left this (docked) flight via a partial launch —
+         * now on its own "- Split" row. Gone from this flight, like docked/disengaged. */
+        public function isSplitLaunched($turn){
+            if ($this->hasCritical("SplitLaunchedFighter", $turn))
+				return true;
+        }
+
         public function isDestroyed($turn = false){
             if ($this->isDisengaged($turn))
                 return true;
             if ($this->isDocked($turn))
+                return true;
+            if ($this->isSplitLaunched($turn))
                 return true;
 
             return parent::isDestroyed();

@@ -266,6 +266,9 @@ window.flightWindowManager = {
 				systemwindow.addClass("destroyed");
 				if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter")) systemwindow.addClass("disengaged");
 				if (shipManager.criticals.hasCritical(fighter, "DockedFighter")) systemwindow.addClass("docked");
+				//Hangar Ops Stage 21.7: launched-out-of-a-docked-flight ("- Split"); reuse
+				//the cyan "docked" styling since it's the same "left to its own row" state.
+				if (shipManager.criticals.hasCritical(fighter, "SplitLaunchedFighter")) systemwindow.addClass("docked");
 
 				return;
 			}
