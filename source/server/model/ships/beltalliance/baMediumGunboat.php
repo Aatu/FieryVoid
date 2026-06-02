@@ -27,7 +27,7 @@ class BAMediumGunboat extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 13, 0, 0));
         $this->addPrimarySystem(new CnC(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 6));
-	$this->addPrimarySystem(new Hangar(3, 1));
+	$this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new LtBlastCannon(3, 0, 0, 240, 60));
         $this->addPrimarySystem(new LtBlastCannon(3, 0, 0, 300, 120));
 	$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));

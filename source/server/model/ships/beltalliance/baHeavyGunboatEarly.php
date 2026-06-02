@@ -31,7 +31,7 @@ class BAHeavyGunboatEarly extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 14, 4, 7));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 1));
         $this->addPrimarySystem(new LtBlastCannon(3, 4, 1, 240, 60));
         $this->addPrimarySystem(new LtBlastCannon(3, 4, 1, 300, 120));        
 
