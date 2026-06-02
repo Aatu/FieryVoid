@@ -55,15 +55,19 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.createShipWindow = function (ship) {
+        // Lazy: build the (expensive) legacy DOM status window only when it is first
+        // opened (shipWindowManager.open / ensureShipWindow). At load and on each turn
+        // refresh we only re-link to an already-built window — if a ship's window has
+        // never been opened, ship.shipStatusWindow stays null and setData no-ops.
+        // This removes the per-ship DOM build that blocked first paint in large games.
         var element = jQuery(".shipwindow.ship_" + ship.id);
 
-        if (!element.length) {
-            ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
-        } else {
+        if (element.length) {
             ship.shipStatusWindow = element;
+            shipWindowManager.setData(ship);
+        } else {
+            ship.shipStatusWindow = null;
         }
-
-        shipWindowManager.setData(ship);
     };
 
     ShipIcon.prototype.setPosition = function (position) {

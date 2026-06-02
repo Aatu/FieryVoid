@@ -25,7 +25,8 @@ window.flightWindowManager = {
 			old = $(".shipwindow:visible");
 		}
 
-		var n = ship.shipStatusWindow;
+		// Lazy build the window on first open (see shipWindowManager.ensureShipWindow).
+		var n = shipWindowManager.ensureShipWindow(ship);
 
 		if (!n) return;
 

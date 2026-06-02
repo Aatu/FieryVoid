@@ -21,15 +21,17 @@ window.FlightIcon = function () {
     };
 
     FlightIcon.prototype.createShipWindow = function (ship) {
+        // Lazy: build the flight status window only when first opened. See the matching
+        // comment on ShipIcon.prototype.createShipWindow. Until then shipStatusWindow is
+        // null and shipWindowManager.setData(ship) safely no-ops.
         var element = jQuery(".shipwindow.ship_" + ship.id);
 
-        if (!element.length) {
-            ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
-        } else {
+        if (element.length) {
             ship.shipStatusWindow = element;
+            shipWindowManager.setData(ship);
+        } else {
+            ship.shipStatusWindow = null;
         }
-
-        shipWindowManager.setData(ship);
     };
 
     FlightIcon.prototype.hideDestroyedFighters = function () {
