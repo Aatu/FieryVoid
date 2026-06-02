@@ -107,7 +107,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Hangar Operations (Beta)</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
-        <li><strong>Hangar Rollout</strong> - Improvements/fixes to Hangar Operations and update to hangar stats continues, thanks to Nato for checking against Tabletop stats!</li>  
+        <li><strong>Hangar Rollout</strong> - Improvements/fixes to Hangar Operations and rolling updates to hangar stats, thanks to Nato for providing the info needed!</li>  
         <li><strong>Fighter Rails</strong> - Fighter Rails now available to use on ships equipped with them, see FAQ for details.</li>                           
         <li><strong>Polaren Confederacy</strong> - The Nexus Polarn get more functionality updates (Thanks Lunara, Tyrel, and Abraxas!).</li>  
         <li><strong>Tyrel's Escalation Wars</strong> -  Breaching pods added, four new ships, and the Chouka ballistic mine and Star Fortress added!</li>                                                                                       
