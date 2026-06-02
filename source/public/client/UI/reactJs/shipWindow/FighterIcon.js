@@ -227,18 +227,22 @@ class FighterIcon extends React.Component {
 
         const destroyed = shipManager.systems.isDestroyed(ship, fighter);
         const docked = shipManager.criticals.isDockedFighter(fighter);
+        //Hangar Ops Stage 21.7: a fighter that launched out of a docked flight as a
+        //"- Split" row — gone from this flight, but NOT destroyed/dropped out.
+        const launched = !docked && shipManager.criticals.isSplitLaunchedFighter(fighter);
         //DisengagedFighter is the B5W dropout mechanic — applied when a
         //damaged fighter fails its dropout roll (fighter.php::testCritical).
         //Render it as DROPOUT so the label matches the rulebook term.
-        const droppedOut = !docked && shipManager.criticals.isDisengagedFighter(fighter);
+        const droppedOut = !docked && !launched && shipManager.criticals.isDisengagedFighter(fighter);
 
-        //State-label precedence: DOCKED > DROPOUT > DESTROYED. Each is a
-        //"fighter not in the fight" condition; DOCKED takes priority because
-        //it implies the others are derivative (a docked fighter is also flagged
-        //destroyed server-side so destroyed=true alone isn't enough info).
+        //State-label precedence: DOCKED > LAUNCHED > DROPOUT > DESTROYED. Each is a
+        //"fighter not in the fight" condition; the departed-to-own-row states (DOCKED,
+        //LAUNCHED) take priority because a fighter in those states is also flagged
+        //destroyed server-side, so destroyed=true alone isn't enough info.
         let overlay = null;
         if (destroyed) {
             if (docked)          overlay = <OverlayLabel $color="#00b8e6">DOCKED</OverlayLabel>;
+            else if (launched)   overlay = <OverlayLabel $color="#00b8e6">SPLIT</OverlayLabel>;
             else if (droppedOut) overlay = <OverlayLabel $color="#ff8c00">DROPOUT</OverlayLabel>;
             else                 overlay = <OverlayLabel $color="#ff5252">DESTROYED</OverlayLabel>;
         }

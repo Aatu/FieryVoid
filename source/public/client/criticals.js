@@ -141,6 +141,15 @@ window.shipManager.criticals = {
     //split). The flight window renders these with a cyan DOCKED label.
     isDockedFighter: function (fighter) {
         return Boolean(shipManager.criticals.hasCritical(fighter, "DockedFighter"));
+    },
+
+    //Hangar Ops Stage 21.7: a fighter that left a DOCKED flight via a partial
+    //launch (now on its own "- Split" row). Distinct from DisengagedFighter,
+    //which is reserved for combat dropout (took too much damage and left the
+    //game, losing its value). Both this and DockedFighter mean "departed to its
+    //own row" — used by the fleet list to re-base a remnant's value past them.
+    isSplitLaunchedFighter: function (fighter) {
+        return Boolean(shipManager.criticals.hasCritical(fighter, "SplitLaunchedFighter"));
     }
 
 };

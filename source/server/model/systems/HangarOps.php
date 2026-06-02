@@ -1195,17 +1195,27 @@ class HangarOps {
 	/* Run the escape d20 over the $k craft shed off a destroyed bay for one host
 	 * entry: the first $maxEscape (most-ammo / least-damaged first) spawn as a
 	 * "<name> - Split" flight at the carrier's hex with the rail-direction facing +
-	 * the -50 next-turn penalty (rule 3: a forced evac IS penalised). Every shed
-	 * craft (escapee or not) is disengaged on the docked ship so its roster shrinks
-	 * by $k. Mirrors the partial-launch state-copy path (launchWholeFlight) but with
-	 * an escape roll gating which of the $k fly free. The host-entry trim is done
-	 * separately in PASS 3 (trimHostEntryAfterShed). */
+	 * the -50 next-turn penalty (rule 3: a forced evac IS penalised). Mirrors the
+	 * partial-launch state-copy path (launchWholeFlight) but with an escape roll
+	 * gating which of the $k fly free. The host-entry trim is done separately in
+	 * PASS 3 (trimHostEntryAfterShed).
+	 *
+	 * Stage 21.7: the two fates of a shed craft are now marked DIFFERENTLY so the
+	 * fleet list values them correctly:
+	 *   - ESCAPEES → spawned onto the "<name> - Split" row (value preserved there) →
+	 *     SplitLaunchedFighter on the remnant, so the remnant's base excludes them
+	 *     (counting them here would double them against the escape row).
+	 *   - NON-ESCAPEES → destroyed with the rail → a real lethal DamageEntry, so they
+	 *     stay in the remnant's paid roster at 0 combat value ("0 / their points"),
+	 *     exactly like any combat-destroyed craft.
+	 * Previously every shed craft got DisengagedFighter, so the remnant double-counted
+	 * the escapees as lost while the Split row also showed them. */
 	private static function escapeShedCraft($carrier, $rail, $entry, $k, $gamedata){
 		$dockedId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
 		$flight   = $dockedId > 0 ? $gamedata->getShipById($dockedId) : null;
 		if (!($flight instanceof FighterFlight)) return;   //anonymous/auto entry: no per-craft escape, trim only
 
-		$roll = random_int(1, 20);	
+		$roll = random_int(1, 20);
 		$maxEscape = self::computeEscapeCount($roll, $k);
 
 		//Pre-shed active count for the proportional enhancement-value split below.
@@ -1218,25 +1228,45 @@ class HangarOps {
 		if (!empty($escapees)){
 			self::spawnRailEscapeFlight($carrier, $rail, $entry, $flight, $escapees, $gamedata);
 		}
-		//Every shed craft (escapee or not) leaves the docked ship's active roster.
-		$shedCount = 0;
+
+		//Set membership of the escapees so we can mark the rest as destroyed.
+		$escapeeIds = array();
+		foreach ($escapees as $e){ $escapeeIds[(int)$e->id] = true; }
+
+		$escapeeCount = 0;   //left to their own row — excluded from remnant base
 		foreach ($shed as $f){
 			if ($f->isDestroyed($gamedata->turn)) continue;
-			$crit = new DisengagedFighter(-1, $flight->id, $f->id, 'DisengagedFighter', $gamedata->turn);
-			$crit->updated = true; $crit->newCrit = true;
-			$f->criticals[] = $crit;
-			$shedCount++;
+			if (isset($escapeeIds[(int)$f->id])){
+				//Escaped onto the "- Split" row — mark as launched-away (value lives there).
+				$crit = new SplitLaunchedFighter(-1, $flight->id, $f->id, 'SplitLaunchedFighter', $gamedata->turn);
+				$crit->updated = true; $crit->newCrit = true;
+				$f->criticals[] = $crit;
+				$escapeeCount++;
+			} else {
+				//Did NOT escape — destroyed with the rail. Lethal DamageEntry (armour 0,
+				//destroyed=true) so it reads as destroyed (0 CV) and stays in the
+				//remnant's paid roster: the row shows it as "0 / its points".
+				$lethal = max(1, (int)$f->getRemainingHealth());
+				$dmg = new DamageEntry(
+					-1, $flight->id, -1, $gamedata->turn, $f->id,
+					$lethal, 0, 0, -1, true, false, "Lost with destroyed bay", "RailCrit"
+				);
+				$dmg->updated = true;
+				$f->damage[] = $dmg;
+			}
 		}
 
-		//Stage 21.5 (value): the shed craft (escaped onto a "- Split" flight, or
-		//dead) leave the docked remnant — drop the remnant's enhancement cost by
-		//their proportional share so a surviving docked row doesn't keep the full
-		//pointCostEnh (which would double-count the escape flight's carried share).
-		//If the whole flight was shed the remnant disappears and this is moot.
-		if ($shedCount > 0 && $activeBefore > 0 && $shedCount < $activeBefore){
+		//Stage 21.5/21.7 (value): only the ESCAPEES leave the remnant's value (their
+		//enhancement share went with them onto the "- Split" flight, via
+		//spawnLaunchedKFlight's pointCostEnh = round(total*E/N)). Subtract exactly that
+		//escapee share so the two rows don't double-count it. The NON-escaping dead
+		//keep their enhancement share ON the remnant — it's "lost points" shown as
+		//0/their-value, not moved to another row. If every craft escaped (no remnant
+		//survivors with value to show) the proportional drop still holds.
+		if ($escapeeCount > 0 && $activeBefore > 0 && $escapeeCount < $activeBefore){
 			$totalEnh = (int)round((float)($flight->pointCostEnh ?? 0) + (float)($flight->pointCostEnh2 ?? 0));
 			if ($totalEnh > 0){
-				$remnantEnh = (int)round($totalEnh * ($activeBefore - $shedCount) / $activeBefore);
+				$remnantEnh = (int)round($totalEnh * ($activeBefore - $escapeeCount) / $activeBefore);
 				$flight->pointCostEnh  = $remnantEnh;
 				$flight->pointCostEnh2 = 0;
 				Manager::insertSingleEnhValue($flight->id, $remnantEnh);
@@ -2154,12 +2184,18 @@ class HangarOps {
 			if (!isset($launchedFighters[$i])) break;
 			self::copyFighterStateToTarget($chosen[$i], $launchedFighters[$i], $launched, $gamedata);
 		}
-		//Disengage the chosen K on the docked ship (they left). Stamp DockedFighter
-		//is wrong here — they DEPARTED, so DisengagedFighter marks them gone from
-		//the docked ship's active roster (its flightSize shrinks accordingly).
+		//Mark the chosen K on the docked ship as gone — they launched away to the new
+		//"- Split" flight. Stage 21.7: SplitLaunchedFighter, NOT DisengagedFighter.
+		//Both fold into isDestroyed identically (the remnant's active roster shrinks,
+		//the launched craft drop off target lists), but DisengagedFighter must stay
+		//reserved for its true meaning — a fighter that took too much damage and
+		//dropped out of the game (losing its combat value). A launch-departure keeps
+		//its value (on the Split row), so it gets the distinct marker; the fleet list
+		//uses that to re-base the docked remnant past these craft (→ 402/402, not the
+		//306/612 reusing DisengagedFighter produced in game 4151).
 		foreach ($chosen as $f){
 			if ($f->isDestroyed($gamedata->turn)) continue;
-			$crit = new DisengagedFighter(-1, $docked->id, $f->id, 'DisengagedFighter', $gamedata->turn);
+			$crit = new SplitLaunchedFighter(-1, $docked->id, $f->id, 'SplitLaunchedFighter', $gamedata->turn);
 			$crit->updated = true; $crit->newCrit = true;
 			$f->criticals[] = $crit;
 		}
@@ -3806,9 +3842,10 @@ class HangarOps {
 		}
 
 		static $skipPhpclasses = array(
-			'DisengagedFighter' => true,    //combat-disengage state marker, source-only
-			'DockedFighter'     => true,    //dock state marker, source-only
-			'LaunchedThisTurn'  => true,    //initiative penalty, turn-specific event
+			'DisengagedFighter'    => true, //combat dropout state marker, source-only
+			'DockedFighter'        => true, //dock state marker, source-only
+			'SplitLaunchedFighter' => true, //partial-launch split marker, source-only
+			'LaunchedThisTurn'     => true, //initiative penalty, turn-specific event
 		);
 		foreach ($sourceFighter->criticals as $crit) {
 			if (isset($skipPhpclasses[$crit->phpclass])) continue;
