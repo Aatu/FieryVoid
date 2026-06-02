@@ -106,10 +106,12 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
                 }
             }
         }
-        foreach (array_keys($factionsWithHangars) as $faction) {
-            $factionShuttle = HangarOps::shuttleClassForFactionName($faction);
-            if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
-        }
+		foreach (array_keys($factionsWithHangars) as $faction) {
+			$factionShuttle = HangarOps::shuttleClassForFactionName($faction);
+			if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
+			$factionMsw = HangarOps::minesweepingShuttleClassForFactionName($faction);
+			if ($factionMsw !== null) $spawnableClasses[] = $factionMsw;
+		}            
         if (!empty($spawnableClasses)) {
             $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));
             foreach ($spawnableStaticShips as $faction => $classes) {

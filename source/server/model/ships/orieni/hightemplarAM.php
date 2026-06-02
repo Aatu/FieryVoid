@@ -27,7 +27,7 @@ class HighTemplarAM extends FighterFlight{
     	$this->iniativebonus = 100;
         $this->populate();
     
-        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+        //$this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
         	
     }
 

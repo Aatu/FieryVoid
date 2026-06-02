@@ -10,6 +10,7 @@ class Fessa extends MediumShip{
         $this->imagePath = "img/ships/Hassa.png";
         $this->shipClass = "Fessa Warship";
         $this->canvasSize = 200;
+		$this->fighters = array("cargo shuttles"=>4);         
         
         $this->forwardDefense = 12;
         $this->sideDefense = 17;
@@ -33,13 +34,15 @@ class Fessa extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
  	    $this->addPrimarySystem(new Engine(3, 6, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));  
         $this->addFrontSystem(new IonCannon(3, 6, 4, 240, 0));
         $this->addFrontSystem(new IonCannon(3, 6, 4, 0, 120));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 4));
+		$this->addFrontSystem(new FighterRail(3, 3, 3, 0, 'heavy'));
+		$this->addFrontSystem(new FighterRail(3, 3, 3, 0, 'heavy'));                
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));

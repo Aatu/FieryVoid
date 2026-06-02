@@ -520,6 +520,7 @@
 	    public $iconPath = 'pairedGatlingGun.png';
         protected $reloadable = 6;     //Hangar Ops: reloads 1/turn while docked, cap = starting ammo (+EXT_AMMO)	   
 		public $priority = 3; //equivalent of d6+2, due to Matter properties
+        public $intercept = 0; //Specifically stated it can't intercept in rules
 	  
         public function getDamage($fireOrder){ //d6-1, minimum 1
             $dmg = Dice::d(6, 1) -1;

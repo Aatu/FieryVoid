@@ -46,7 +46,7 @@ class Pshultau extends BaseShip{
 		$this->addPrimarySystem(new Scanner(5, 13, 7, 8));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 20, 4, 48));
-		$this->addPrimarySystem(new Hangar(4, 27));
+		$this->addPrimarySystem(new Hangar(4, 27, 12));
 
 		$this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
 		$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

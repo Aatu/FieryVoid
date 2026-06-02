@@ -12,7 +12,7 @@ class Kabrik extends MediumShip{
         $this->agile = true;
         $this->gravitic = true;
         $this->canvasSize = 100;
-	    $this->fighters = array("assault shuttles"=>6); //4 Assault Shuttles and 2 Breaching Pods, by design
+	    $this->fighters = array("assault shuttles"=>4, "Breaching Pods"=>2); //4 Assault Shuttles and 2 Breaching Pods, by design
         
 		$this->notes = 'Pri-Wakat Concepts & Solutions';//Corporation producing the design
 		$this->isd = 2241;
@@ -31,7 +31,7 @@ class Kabrik extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 8, 4, 6));
         $this->addPrimarySystem(new Engine(4, 7, 0, 7, 2));
-	$this->addPrimarySystem(new Hangar(3, 7));
+	$this->addPrimarySystem(new Hangar(3, 7, 2));
 	$this->addPrimarySystem(new GraviticThruster(4, 8, 0, 4, 3));
 	$this->addPrimarySystem(new GraviticThruster(4, 8, 0, 4, 4));
 		

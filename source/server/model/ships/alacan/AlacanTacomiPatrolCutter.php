@@ -27,7 +27,7 @@ class AlacanTacomiPatrolCutter extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 10, 3, 5));
         $this->addPrimarySystem(new Engine(5, 9, 0, 6, 2));
-		$this->addPrimarySystem(new Hangar(5, 1));
+		$this->addPrimarySystem(new Hangar(5, 1, 1));
         $this->addPrimarySystem(new Thruster(4, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(4, 8, 0, 3, 4));
    

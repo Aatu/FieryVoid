@@ -45,13 +45,13 @@ class Orrono extends BaseShip{
         $this->addLeftSystem(new TwinArray(2, 6, 2, 240, 60));
         $this->addLeftSystem(new Thruster(3, 8, 0, 3, 3));
         $this->addLeftSystem(new Thruster(3, 8, 0, 3, 3));
-        $this->addLeftSystem(new Hangar(2, 2));        
+        $this->addLeftSystem(new Hangar(2, 2, 1));        
 		
  		$this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 120));
         $this->addRightSystem(new TwinArray(2, 6, 2, 300, 120));
         $this->addRightSystem(new Thruster(3, 8, 0, 3, 4));
         $this->addRightSystem(new Thruster(3, 8, 0, 3, 4));
-        $this->addRightSystem(new Hangar(2, 2));        
+        $this->addRightSystem(new Hangar(2, 2, 1));        
         
 		
         $this->addFrontSystem(new Structure(4, 40));

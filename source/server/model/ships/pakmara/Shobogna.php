@@ -27,7 +27,7 @@ class Shobogna extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 4, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 9, 2));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
 		$this->addPrimarySystem(new PakmaraPlasmaWeb(2, 4, 2, 0, 360));

@@ -57,10 +57,25 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 	// go bother the server for the ships of that faction only.
 	
 	$factions = json_encode(Manager::getAllFactions(), JSON_NUMERIC_CHECK);
-	
+
+	// Cache-busting versions for per-faction static ship JSON.
+	// The lobby fetches ships on demand from gamelobbyloader.php, which serves
+	// static/json/<faction>.json (regenerated on every patch). Relying on the
+	// ETag/Last-Modified revalidation alone proved unreliable on mobile/BFCache
+	// (browsers skip the revalidation round-trip and serve stale ships). We emit
+	// each faction file's mtime so the client can append ?v=<mtime>, making the
+	// request URL change whenever the ship data changes — same approach as
+	// AssetLoader::getAssetUrl() uses for the JS bundles.
+	$factionVersions = [];
+	$jsonDir = __DIR__ . '/static/json';
+	foreach (glob($jsonDir . '/*.json') as $jsonFile) {
+		$factionVersions[basename($jsonFile, '.json')] = filemtime($jsonFile);
+	}
+	$factionVersionsJSON = json_encode($factionVersions, JSON_UNESCAPED_UNICODE);
+
 	$ships = [];
-	
-	
+
+
 ?>
 
 <!DOCTYPE HTML>
@@ -243,6 +258,9 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         
         jQuery(function($){            
             var lobbyData = <?php print($gamelobbydataJSON); ?>;
+            // Per-faction static-ship versions (file mtimes) for cache-busting
+            // the gamelobbyloader.php fetch. See $factionVersions in gamelobby.php.
+            window.factionVersions = <?php print($factionVersionsJSON); ?>;
             gamedata.parseServerData(lobbyData);
             gamedata.parseFactions(<?php print($factions); ?>);
             

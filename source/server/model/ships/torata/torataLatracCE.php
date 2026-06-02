@@ -31,7 +31,7 @@ class TorataLatracCE extends BaseShip{
 		$this->addPrimarySystem(new Scanner(5, 18, 6, 8));
 		$this->addPrimarySystem(new Engine(5, 16, 0, 9, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 16, 4, 27));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
 		
 		$this->addFrontSystem(new PulseAccelerator(4, 9, 4, 270, 90));
 		$this->addFrontSystem(new PulseAccelerator(4, 9, 4, 270, 90));

@@ -28,7 +28,7 @@ class AdvancedSeffensa extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 12, 4, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(6, 8));
+        $this->addPrimarySystem(new Hangar(6, 2, 1));
 
         $this->addFrontSystem(new AdvParticleBeam(4, 4, 1, 180, 60));
         $this->addFrontSystem(new AdvParticleBeam(4, 4, 1, 180, 60));

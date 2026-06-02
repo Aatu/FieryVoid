@@ -28,7 +28,7 @@ class Benota2017 extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
         $this->addPrimarySystem(new ShieldGenerator(4, 12, 4, 2));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));

@@ -558,12 +558,37 @@ window.ReplayAnimationStrategy = function () {
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
             var destroyed = shipManager.isDestroyed(ship);
 
+            // Hangar Ops: a docked flight is removed=true, which makes
+            // isDestroyed() true for ALL turns (ships.js). But a FULL dock only
+            // sets the ship-level removed flag — it applies no per-fighter
+            // DockedFighter crit — so getTurnDestroyed() returns null and the
+            // flight would be hidden on the very turn it docked, suppressing its
+            // firing animation in this turn's replay. Treat removedTurn the same
+            // way turnDestroyed is treated below: a flight removed THIS turn (or
+            // later in replay time) is still on the board for this turn and must
+            // stay visible so it can be seen firing before it docks. Only hide it
+            // once the replay has advanced past its dock turn.
+            //
+            // EXCEPT a partial-dock fragment (spawnFragmentFlight): it is born
+            // removed=true with spawned == removedTurn == the dock turn. It never
+            // existed on the board as its own flight — the craft that docked are
+            // already shown firing as part of the SOURCE flight — so a fragment
+            // must stay hidden on its spawn/dock turn, otherwise a 3-of-6 dock
+            // renders as the surviving flight PLUS a phantom 3-fighter fragment.
+            // A genuine flight that docked this turn was spawned earlier, so
+            // spawned < removedTurn distinguishes the two.
+            var bornAndRemovedSameTurn = ship.spawned !== undefined &&
+                ship.spawned !== -1 && ship.removedTurn != null &&
+                ship.spawned >= ship.removedTurn;
+            var removedFuture = ship.removed && !bornAndRemovedSameTurn &&
+                (ship.removedTurn == null || ship.removedTurn >= this.turn);
+
             // Hide if:
             // - destroyed this or a previous turn
             // - OR is an undetected stealth ship
             return (
                 (turnDestroyed !== null && turnDestroyed < this.turn) ||
-                (turnDestroyed === null && destroyed) ||
+                (turnDestroyed === null && destroyed && !removedFuture) ||
                 (shipManager.shouldBeHidden(ship))
             );
         }, this).forEach(function (ship) {

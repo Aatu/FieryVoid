@@ -31,7 +31,7 @@ class gaimOssari extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 20, 4, 24));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
 		$this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 0, 360));
 
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
@@ -40,7 +40,10 @@ class gaimOssari extends BaseShip{
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
 		$this->addFrontSystem(new PacketTorpedo(4, 6, 5, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 4));
-		$this->addFrontSystem(new Bulkhead(0, 4));
+		$this->addFrontSystem(new Bulkhead(0, 4));		
+		$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+
 
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
 		$this->addAftSystem(new Thruster(4, 12, 0, 4, 2));

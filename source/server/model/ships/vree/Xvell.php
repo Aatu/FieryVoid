@@ -31,7 +31,7 @@ class Xvell extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 6, 6));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 2));
-		$this->addPrimarySystem(new Hangar(3, 1));	
+		$this->addPrimarySystem(new Hangar(3, 1, 1));	
 		$this->addPrimarySystem(new GraviticThruster(3, 10, 0, 6, 3));      
         $this->addPrimarySystem(new GraviticThruster(3, 10, 0, 6, 1));
         $this->addPrimarySystem(new GraviticThruster(3, 10, 0, 6, 2)); 

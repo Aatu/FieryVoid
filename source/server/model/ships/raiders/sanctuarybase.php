@@ -60,10 +60,13 @@ class SanctuaryBase extends StarBaseSixSections{
 			$subReactor = new SubReactorUniversal(5, 8, 0, 0);
 			$subReactor->startArc = $min;
 			$subReactor->endArc = $max;
+		
 
 			$systems = array(
 				new StdParticleBeam(3, 4, 1, $min, $max),
 				new StdParticleBeam(3, 4, 1, $min, $max),
+				new FighterRail(3, 3, 3, 0, 'heavy'),
+				new FighterRail(3, 3, 3, 0, 'heavy'),					
 				$hangar,
 				$subReactor,
 				$cargoBay,

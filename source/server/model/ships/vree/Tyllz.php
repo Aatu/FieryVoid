@@ -38,7 +38,7 @@ class Tyllz extends StarBaseSixSections
 
 
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 0));
-		$this->addPrimarySystem(new Hangar(5, 30));
+		$this->addPrimarySystem(new Hangar(5, 30, 12));
 //		$this->addPrimarySystem(new ProtectedCnC(6, 32, 0, 0));
 
 		$cnc = new CnC(5, 16, 0, 0);

@@ -326,6 +326,26 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
+	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
+	// Assault Fighter et al.) needs more than one box each; a unitSize>1 ultralight
+	// (Zorth) packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5).
+	// The server stamps boxesPerCraft on such stored entries, and for pending orders
+	// we derive it from the source flight's unitSize. Mirrors
+	// HangarOps::boxesPerCraftForEntry / boxesPerCraftForClass so the "Capacity:
+	// X / Y slots" line matches the server's box accounting (totalStored is summed
+	// fractional and the displayed used-boxes is rounded UP). The per-class "Stored
+	// Craft" list below still counts CRAFT (so a 3-ship Vorlon flight reads "3 x").
+	function boxesPerCraftOf(entry) {
+		if (entry && entry.boxesPerCraft) {
+			var b = parseFloat(entry.boxesPerCraft);   // float: fractional (0.5) round-trips
+			return b > 0 ? b : 1;
+		}
+		var u = (entry && entry.unitSize != null) ? parseFloat(entry.unitSize) : 1;
+		if (u > 0 && u < 1) return Math.ceil(1 / u);   // superheavy: >1 box/craft
+		if (u > 1) return 1 / u;                        // ultralight: fractional box/craft
+		return 1;
+	}
+
 	// Additive projections: queued dock orders + queued deploy-start orders
 	// both bring craft INTO the hangar. The committed $hangarUsage list is
 	// the baseline; the two pending arrays each contribute extra entries
@@ -337,10 +357,17 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			var order = this.pendingDeployStartOrders[q];
 			var flight = order && order.flightId != null ? gamedata.getShip(order.flightId) : null;
 			if (!flight) continue;
+			//A Fighter-Rail auto-distribute spread sends a per-bay `count` slice
+			//(a 9-flight across a 6-box + 3-box rail → 6 here, 3 there); fall back
+			//to the full flight size for a legacy single-bay deploy-dock order.
+			var deploySlice = (order.count != null && parseInt(order.count, 10) > 0)
+				? parseInt(order.count, 10)
+				: parseInt(flight.flightSize || 1, 10);
 			displayEntries.push({
 				phpclass:   flight.phpclass,
 				name:       flight.name,
-				flightSize: parseInt(flight.flightSize || 1, 10),
+				flightSize: deploySlice,
+				boxesPerCraft: boxesPerCraftOf({ unitSize: flight.unitSize }),
 				hangarType: this.hangarType,
 				_pending:   'deploying'
 			});
@@ -362,16 +389,55 @@ Hangar.prototype.refreshHangarTooltip = function () {
 				phpclass:   dockFlight.phpclass,
 				name:       dockFlight.name,
 				flightSize: dockCount,
+				boxesPerCraft: boxesPerCraftOf({ unitSize: dockFlight.unitSize }),
 				hangarType: this.hangarType,
 				_pending:   'recovering'
 			});
 		}
 	}
 
-	var totalStored = 0;
-	for (var i = 0; i < displayEntries.length; i++) {
-		totalStored += parseInt(displayEntries[i].flightSize || 1, 10);
-	}
+// totalStored is in BOXES (capacity units), so unitSize<1 craft count their
+		// per-craft box cost — matching the server's maxhealth-based capacity.
+		//
+		// Stage 21 (no-split): a multi-bay docked flight is ONE entry on its primary
+		// bay with an `occupancy` list naming every bay it fills. Count only the
+		// boxes occupancy assigns to THIS bay (not the whole flight); boxes that
+		// sibling bays' entries spill onto this one are added after the loop. An
+		// entry with no occupancy (single-bay / legacy / pending projection) counts
+		// its full boxes here. Mirrors HangarOps usageCountFor + foreignOccupancyBoxesOn.
+		var myId = parseInt(this.id, 10);
+		var selfHangar = this;
+		function entryBoxesOnThis(entry) {
+			if (entry && Array.isArray(entry.occupancy)) {
+				var b = 0;
+				for (var oi = 0; oi < entry.occupancy.length; oi++) {
+					if (parseInt(entry.occupancy[oi].systemId, 10) === myId) b += parseInt(entry.occupancy[oi].boxes || 0, 10);
+				}
+				return b;
+			}
+			return parseInt(entry.flightSize || 1, 10) * boxesPerCraftOf(entry);
+		}
+		var totalStored = 0;
+		for (var i = 0; i < displayEntries.length; i++) {
+			totalStored += entryBoxesOnThis(displayEntries[i]);
+		}
+		// Foreign occupancy: boxes that OTHER hangar-family systems' entries place
+		// on this bay (an entry hosted on a sibling rail spilling into this one).
+		if (selfHangar.ship && Array.isArray(selfHangar.ship.systems)) {
+			for (var si = 0; si < selfHangar.ship.systems.length; si++) {
+				var fsys = selfHangar.ship.systems[si];
+				if (!fsys || fsys === selfHangar) continue;
+				if (fsys.name !== 'hangar' && fsys.name !== 'fighterRail' && fsys.name !== 'catapult') continue;
+				if (!Array.isArray(fsys.hangarUsage)) continue;
+				for (var ei = 0; ei < fsys.hangarUsage.length; ei++) {
+					var oe = fsys.hangarUsage[ei];
+					if (!oe || !Array.isArray(oe.occupancy)) continue;
+					for (var oj = 0; oj < oe.occupancy.length; oj++) {
+						if (parseInt(oe.occupancy[oj].systemId, 10) === myId) totalStored += parseInt(oe.occupancy[oj].boxes || 0, 10);
+					}
+				}
+			}
+		}
 
 	// Subtractive projection: queued launches take craft OUT of the hangar.
 	// Subtract from totalStored so "Carrying" reflects projected post-resolve
@@ -390,18 +456,21 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			if (!launchOrder) continue;
 			var launchSize = parseInt(launchOrder.size || 0, 10);
 			if (launchSize <= 0) continue;
-			totalStored = Math.max(0, totalStored - launchSize);
 
 			var lphpclass = launchOrder.phpclass || 'unknown';
-			//Look up the launching craft's friendly name from a matching
-			//stash entry so the line reads "6 x Aurora", not "6 x starfuryEA".
+			//Look up the launching craft's friendly name AND per-craft box cost
+			//from a matching stash entry so the line reads "6 x Aurora" (not
+			//"6 x starfuryEA") and the box subtraction matches what was stored.
 			var launchDisplayName = lphpclass;
+			var launchBpc = 1;
 			for (var s = 0; s < this.hangarUsage.length; s++) {
 				if (this.hangarUsage[s] && this.hangarUsage[s].phpclass === lphpclass) {
 					launchDisplayName = this.hangarUsage[s].name || lphpclass;
+					launchBpc = boxesPerCraftOf(this.hangarUsage[s]);
 					break;
 				}
 			}
+			totalStored = Math.max(0, totalStored - launchSize * launchBpc);
 			if (!launchByClass[lphpclass]) launchByClass[lphpclass] = { name: launchDisplayName, count: 0 };
 			launchByClass[lphpclass].count += launchSize;
 		}
@@ -426,10 +495,14 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	var maxCapacity      = this.isCatapult ? 1 : this.maxhealth;
 	var effectiveCapacity = this.isCatapult ? 1 : Math.max(0, this.maxhealth - netDamage);
 
+	// Used boxes round UP to whole boxes (ultralights leave fractional totalStored,
+	// e.g. 3 Zorth = 1.5 → shows 2): mirrors HangarOps::occupiedBoxes so the line
+	// reads "12 / 12 slots" for 24 Zorth, never "12.5 / 12".
+	var usedBoxes = Math.ceil(totalStored);
 	if (netDamage > 0) {
-		this.data["Capacity"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
+		this.data["Capacity"] = usedBoxes + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
 	} else {
-		this.data["Capacity"] = totalStored + " / " + maxCapacity + " slots";
+		this.data["Capacity"] = usedBoxes + " / " + maxCapacity + " slots";
 	}
 
 	// Stage 15: the primary hangar carries the carrier-level reload-points
@@ -457,7 +530,25 @@ Hangar.prototype.refreshHangarTooltip = function () {
 
 	var hasLaunches = false;
 	for (var lkc in launchByClass) { hasLaunches = true; break; }
-	if (displayEntries.length === 0 && !hasLaunches) {
+	// Stage 21: this bay may hold NO entries of its own yet still hold boxes of a
+	// multi-bay flight hosted on a sibling bay (foreign occupancy). Detect that so
+	// we don't early-return and skip listing those craft below.
+	var hasForeignOccupancy = false;
+	if (selfHangar.ship && Array.isArray(selfHangar.ship.systems)) {
+		for (var hfi = 0; hfi < selfHangar.ship.systems.length && !hasForeignOccupancy; hfi++) {
+			var hfsys = selfHangar.ship.systems[hfi];
+			if (!hfsys || hfsys === selfHangar || !Array.isArray(hfsys.hangarUsage)) continue;
+			for (var hfei = 0; hfei < hfsys.hangarUsage.length; hfei++) {
+				var hfoe = hfsys.hangarUsage[hfei];
+				if (!hfoe || !Array.isArray(hfoe.occupancy)) continue;
+				for (var hfoj = 0; hfoj < hfoe.occupancy.length; hfoj++) {
+					if (parseInt(hfoe.occupancy[hfoj].systemId, 10) === myId) { hasForeignOccupancy = true; break; }
+				}
+				if (hasForeignOccupancy) break;
+			}
+		}
+	}
+	if (displayEntries.length === 0 && !hasLaunches && !hasForeignOccupancy) {
 		delete this.data["Stored Craft"];
 		return;
 	}
@@ -468,9 +559,27 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	// fighter type aggregate per category but stay visually separated from
 	// already-stored craft. _pending values: undefined (committed),
 	// 'deploying' (Stage 7), 'recovering' (Stage 10.2).
+// Stage 21 (no-split, split-count display): a multi-bay docked flight is ONE
+	// entry on its host bay; show only the CRAFT it keeps in THIS bay (its
+	// occupancy boxes here / boxesPerCraft) so a 12-flight across two rails reads
+	// "6 x DeltaV" in each, matching the per-bay capacity. An entry with no
+	// occupancy (single-bay / legacy / pending projection) counts its full size.
+	function entryCraftOnThis(entry) {
+		if (entry && Array.isArray(entry.occupancy)) {
+			var bpc = boxesPerCraftOf(entry);
+			var boxes = 0;
+			for (var oi = 0; oi < entry.occupancy.length; oi++) {
+				if (parseInt(entry.occupancy[oi].systemId, 10) === myId) boxes += parseInt(entry.occupancy[oi].boxes || 0, 10);
+			}
+			return Math.floor(boxes / (bpc > 0 ? bpc : 1));
+		}
+		return parseInt(entry.flightSize || 1, 10);
+	}
 	var byClass = {};
 	for (var ei = 0; ei < displayEntries.length; ei++) {
 		var entry = displayEntries[ei];
+		var entryCraftHere = entryCraftOnThis(entry);
+		if (entryCraftHere <= 0) continue;   // none of this entry's craft live in this bay
 		var phpKey = (entry.phpclass && entry.phpclass !== "")
 			? entry.phpclass
 			: ("(" + (entry.hangarType || "unknown") + " slot)");
@@ -479,26 +588,71 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		//a damaged catapult). Bucket it apart so it renders distinctly and never
 		//merges with a launchable craft of the same class.
 		var wreckMarker = entry.cannotLaunch ? '|wrecked' : '';
-		var bucketKey = phpKey + pendingMarker + wreckMarker;
 		var entryDisplayName = entry.displayName
 			|| (entry.name && entry.name !== "" ? entry.name : phpKey);
+		//Stage 21.2: bucket by the friendly flight name (not phpclass alone) so two
+		//distinct flights of the same class — e.g. "Sentri #2" and "Sentri #3" both
+		//docked in one Primus bay — list as separate lines instead of merging into
+		//one "12 x Sentri #3" entry (the count summed correctly but the name was
+		//whichever flight created the bucket first). phpKey stays in the key so a
+		//launch (which keys off phpclass) can still find and decrement these via the
+		//phpKey-matching loop below; phpKey is also stashed on the bucket for that.
+		var bucketKey = phpKey + '|' + entryDisplayName + pendingMarker + wreckMarker;
 		if (!byClass[bucketKey]) {
-			byClass[bucketKey] = { name: entryDisplayName, count: 0, pending: entry._pending || null, wrecked: !!entry.cannotLaunch };
+			byClass[bucketKey] = { name: entryDisplayName, phpKey: phpKey, count: 0, pending: entry._pending || null, wrecked: !!entry.cannotLaunch };
 		}
-		byClass[bucketKey].count += parseInt(entry.flightSize || 1, 10);
+		byClass[bucketKey].count += entryCraftHere;
+	}
+	// Foreign occupancy: craft that OTHER bays' multi-bay entries keep in THIS bay
+	// (an entry hosted on a sibling rail spilling into this one) — list them here
+	// too so the per-bay "Stored Craft" matches the capacity number.
+	if (selfHangar.ship && Array.isArray(selfHangar.ship.systems)) {
+		for (var fsi = 0; fsi < selfHangar.ship.systems.length; fsi++) {
+			var fsys2 = selfHangar.ship.systems[fsi];
+			if (!fsys2 || fsys2 === selfHangar) continue;
+			if (fsys2.name !== 'hangar' && fsys2.name !== 'fighterRail' && fsys2.name !== 'catapult') continue;
+			if (!Array.isArray(fsys2.hangarUsage)) continue;
+			for (var fei = 0; fei < fsys2.hangarUsage.length; fei++) {
+				var foe = fsys2.hangarUsage[fei];
+				if (!foe || !Array.isArray(foe.occupancy)) continue;
+				var fbpc = boxesPerCraftOf(foe);
+				var fboxes = 0;
+				for (var foj = 0; foj < foe.occupancy.length; foj++) {
+					if (parseInt(foe.occupancy[foj].systemId, 10) === myId) fboxes += parseInt(foe.occupancy[foj].boxes || 0, 10);
+				}
+				var fcraft = Math.floor(fboxes / (fbpc > 0 ? fbpc : 1));
+				if (fcraft <= 0) continue;
+				var fphpKey = (foe.phpclass && foe.phpclass !== "") ? foe.phpclass : ("(" + (foe.hangarType || "unknown") + " slot)");
+				var fName = foe.displayName || (foe.name && foe.name !== "" ? foe.name : fphpKey);
+				var fKey = fphpKey + '|' + fName;   //Stage 21.2: name in key, see stored-craft loop above
+				if (!byClass[fKey]) byClass[fKey] = { name: fName, phpKey: fphpKey, count: 0, pending: null, wrecked: false };
+				byClass[fKey].count += fcraft;
+			}
+		}
 	}
 
 	// Launches consume committed stash — subtract the launching count from
-	// the matching committed bucket (phpclass key, no pending marker) so the
-	// stored-craft line only counts what's STAYING. Without this the player
-	// sees both "2 x Shuttle" and "2 x Shuttle (Launching)" simultaneously
-	// and the math reads as 4 shuttles total. Committed-only because the
-	// launch dialog reads $hangarUsage (committed stash) — you can't launch
-	// a fighter that hasn't arrived yet via a pending dock order, so the
-	// deploying/recovering buckets are never the source of a launch.
+	// the matching committed bucket(s) so the stored-craft line only counts
+	// what's STAYING. Without this the player sees both "2 x Shuttle" and
+	// "2 x Shuttle (Launching)" simultaneously and the math reads as 4 shuttles
+	// total. Committed-only because the launch dialog reads $hangarUsage
+	// (committed stash) — you can't launch a fighter that hasn't arrived yet via
+	// a pending dock order, so the deploying/recovering buckets are never the
+	// source of a launch.
+	//
+	// Stage 21.2: buckets are now keyed by phpclass+name (so same-class flights
+	// list separately), but a launch order carries only a phpclass — no flight
+	// identity. Spread the launch count across every committed (non-pending,
+	// non-wreck) bucket sharing that phpKey, in iteration order, until exhausted.
 	for (var lkc in launchByClass) {
-		if (byClass[lkc]) {
-			byClass[lkc].count = Math.max(0, byClass[lkc].count - launchByClass[lkc].count);
+		var toRemove = launchByClass[lkc].count;
+		for (var bk in byClass) {
+			if (toRemove <= 0) break;
+			if (byClass[bk].phpKey !== lkc) continue;
+			if (byClass[bk].pending || byClass[bk].wrecked) continue;
+			var take = Math.min(byClass[bk].count, toRemove);
+			byClass[bk].count -= take;
+			toRemove -= take;
 		}
 	}
 
@@ -540,6 +694,26 @@ var Catapult = function Catapult(json, ship) {
 };
 Catapult.prototype = Object.create(Hangar.prototype);
 Catapult.prototype.constructor = Catapult;
+
+// Fighter Rails (B5W "Fighter Racks"): a FighterRail is a Hangar whose boxes
+// are bolted to a structure block — each box carries one fighter that launches
+// and lands independently. Extending Hangar inherits the data deep-clone (Stage
+// 12 shared-reference fix), pending-order hydration, refreshHangarTooltip, and
+// doIndividualNotesTransfer. UNLIKE a catapult, a rail uses the ordinary
+// (box-count) capacity arithmetic — it has a launch/land output budget and its
+// capacity shrinks with damage — so refreshHangarTooltip's non-catapult branch
+// is already correct and the "(N destroyed)" line works from box-loss damage
+// rows. The launch/dock UI helpers gate on name (added alongside 'catapult').
+var FighterRail = function FighterRail(json, ship) {
+	Hangar.call(this, json, ship);
+	// Set the discriminator client-side so the tooltip / dialogs don't depend on
+	// it round-tripping through the gamedata JSON (matches Catapult). Hangar.call
+	// already ran refreshHangarTooltip once; no need to recompute — a rail's
+	// capacity uses the same non-catapult branch Hangar already rendered.
+	this.isRail = true;
+};
+FighterRail.prototype = Object.create(Hangar.prototype);
+FighterRail.prototype.constructor = FighterRail;
 
 var CargoBay = function CargoBay(json, ship) {
 	ShipSystem.call(this, json, ship);

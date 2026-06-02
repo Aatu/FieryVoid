@@ -38,7 +38,7 @@ class Watchtower extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 30, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
-		$this->addPrimarySystem(new Hangar(5, 8, 6));
+		$this->addPrimarySystem(new Hangar(5, 8, 2));
 		$this->addPrimarySystem(new CargoBay(5, 48));
 		$this->addPrimarySystem(new Structure( 5, 60));
 		
@@ -50,9 +50,9 @@ class Watchtower extends SmallStarBaseFourSections{
 			$hangar = new Hangar(4, 6, 6);
 			$hangar->startArc = $min;
 			$hangar->endArc = $max;
-			$catapult = new Catapult(8, maxhealth: 8);
-			$catapult->startArc = $min;
-			$catapult->endArc = $max;
+			$LCVRail = new DockingCollar(4, 8);
+			$LCVRail->startArc = $min;
+			$LCVRail->endArc = $max;
 
 			$systems = array(
 				new TwinArray(4, 6, 2, $min, $max),
@@ -63,7 +63,7 @@ class Watchtower extends SmallStarBaseFourSections{
 				new AssaultLaser(6, 6, 4, $min, $max),
 				new AssaultLaser(6, 6, 4, $min, $max),
 				$hangar,
-				$catapult,
+				$LCVRail,
 				$struct
 			);
 			$loc = $this->locations[$i];

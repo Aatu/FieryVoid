@@ -10,7 +10,7 @@ class HyachEvirolTek extends BaseShip{
         $this->imagePath = "img/ships/HyachEvirolTek.png";
         $this->shipClass = "Evirol Tek Logistics Cruiser";
         $this->shipSizeClass = 3;
-
+		$this->fighters = array("cargo shuttles"=>4); 
         $this->isd = 2216;
         
         $this->forwardDefense = 15;
@@ -32,7 +32,7 @@ class HyachEvirolTek extends BaseShip{
 			$this->addPrimarySystem($sensors); 
 
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 1));
 		$this->addPrimarySystem(new CargoBay(4, 25));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 20));
 

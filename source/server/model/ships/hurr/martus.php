@@ -29,7 +29,7 @@ class Martus extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(4, 14, 4, 5));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 8, 0, 3, 4));
-	$this->addPrimarySystem(new Hangar(2, 2));
+	$this->addPrimarySystem(new Hangar(2, 2, 2));
         
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

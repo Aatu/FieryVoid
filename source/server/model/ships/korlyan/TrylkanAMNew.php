@@ -50,7 +50,7 @@ class TrylkanAMNew extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(4, 10, 5, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 9, 2));
         $this->addPrimarySystem(new ReloadRack(4, 9));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));        
         

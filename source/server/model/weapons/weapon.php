@@ -2457,23 +2457,30 @@ full Advanced Armor effects (by rules) for reference:
 
 class checkForSelfInterceptFire
 {
+    //Per-request record of which (ship, weapon) actually fired defensively via a
+    //selfIntercept nomination, keyed by the turn it happened on.
+    //
+    //IMPORTANT: the turn MUST be stored in each entry and matched on it. This
+    //record is read during loading calculation (calculateLoadingFromLastTurn,
+    //via firedOnTurn) which runs in the SAME request as automateIntercept - but
+    //AFTER Manager::changeTurn has already advanced TacGamedata::$currentTurn to
+    //the next turn. An older version reset the whole record whenever the queried
+    //turn != TacGamedata::$currentTurn; that wiped the firing record the instant
+    //the turn rolled over, so a multi-turn-recharge interceptor (e.g. MLPA) that
+    //fired via selfIntercept was never seen as having fired and skipped cooldown.
+    //Keying entries by their own turn keeps the record valid across the in-request
+    //turn change (and across the multi-turn advanceGameState loop).
     private static $fired = array();
 
     public static function setFired($shipid, $weaponid, $turn)
     {
-        if ($turn != TacGamedata::$currentTurn) {
-            checkForSelfInterceptFire::$fired = array();
-        }
-        checkForSelfInterceptFire::$fired[] = array('shipid' => $shipid, 'weaponid' => $weaponid);
+        checkForSelfInterceptFire::$fired[] = array('shipid' => $shipid, 'weaponid' => $weaponid, 'turn' => $turn);
     }
 
     public static function checkFired($shipid, $weaponid, $turn)
     {
-        if ($turn != TacGamedata::$currentTurn) {
-            checkForSelfInterceptFire::$fired = array();
-        }
         foreach (checkForSelfInterceptFire::$fired as $weapon) {
-            if ($weapon['shipid'] == $shipid && $weapon['weaponid'] == $weaponid) {
+            if ($weapon['shipid'] == $shipid && $weapon['weaponid'] == $weaponid && $weapon['turn'] == $turn) {
                 return true;
             }
         }

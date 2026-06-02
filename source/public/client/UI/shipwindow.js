@@ -403,6 +403,9 @@ window.shipWindowManager = {
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
+					} else if (i == "shuttles" || i == "minesweeping shuttles" || i == "cargo shuttles") {
+						//Auto-populated free shuttles — listed via getDefaultShuttleComposition below.
+						continue;
 					} else {
 						//something other than fighters
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType);

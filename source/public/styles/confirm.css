@@ -313,6 +313,30 @@
     .confirm {
         min-width: unset;
     }
+
+    /* The multi-value and hangar confirm dialogs set fixed min-widths
+       (400px / 500px) that override .confirm's max-width:100% and push the
+       window wider than a phone viewport, causing horizontal overflow.
+       Drop those floors on small screens so max-width can clamp the dialog
+       to the viewport, and leave a small gutter so the border isn't flush
+       against the screen edges. box-sizing keeps the padding inside the
+       clamped width. */
+    .confirm.multi-value-confirm,
+    .confirm.multi-value-confirm.hangar-confirm {
+        min-width: 0;
+        max-width: calc(100% - 16px);
+        box-sizing: border-box;
+    }
+
+    /* Let rows wrap on narrow viewports: the inputs/selects carry a 130px
+       min-width that, paired with a non-shrinking label (the DeployDock and
+       Recover rows pin their label to flex:0 0 auto), can exceed a phone's
+       row width. Wrapping drops the control onto a second line instead of
+       overflowing the dialog. */
+    .confirm.multi-value-confirm .multi-value-row {
+        flex-wrap: wrap;
+        row-gap: 4px;
+    }
 }
 
 /* Multi-value input dialog styles */
@@ -371,7 +395,8 @@
     margin-right: 15px;
 }
 
-.confirm.multi-value-confirm .multi-value-input {
+.confirm.multi-value-confirm .multi-value-input,
+.confirm.multi-value-confirm .hangarDirSelect {
     width: 60px;
     background: #0a151f;
     border: 1px solid #6a0080;
@@ -386,7 +411,8 @@
     transition: all 0.2s ease;
 }
 
-.confirm.multi-value-confirm .multi-value-input:focus {
+.confirm.multi-value-confirm .multi-value-input:focus,
+.confirm.multi-value-confirm .hangarDirSelect:focus {
     border-color: #6a0080;
     border: 1px solid #6a0080;
     box-shadow: 0 0 10px rgba(191, 0, 230, 0.75);
@@ -416,8 +442,12 @@
     border: 3px solid #1f6f8b;
     box-shadow: 0 0 8px rgba(88, 199, 230, 0.35);
     color: #C9F0FF;
-    min-width: 500px;   
-    min-height: 120px;       
+    min-width: 500px;
+    /* Cap growth so a carrier with many hangars (long capacity readout or
+       many rows) can't stretch the dialog across the screen. Content wraps
+       within instead. The small-screen media query below clamps further. */
+    max-width: min(720px, calc(100% - 16px));
+    min-height: 120px;
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-header {
@@ -489,11 +519,16 @@
     margin-right: 4px;
 }
 
+/* Stack the per-hangar pills vertically (one per line) rather than flowing
+   them across a row. A horizontal flow has no width bound, so a carrier with
+   many hangars stretched the whole confirm dialog far too wide. A column
+   caps the readout width at the single widest pill instead. */
 .confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pills {
     display: inline-flex;
-    flex-wrap: wrap;
-    column-gap: 12px;
-    row-gap: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+    row-gap: 2px;
+    margin-left: 10px;
 }
 
 .confirm.multi-value-confirm.hangar-confirm .hangar-capacity-pill {
@@ -528,16 +563,32 @@
     margin-right: 10px;
 }
 
-.confirm.multi-value-confirm.hangar-confirm .multi-value-input {
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input,
+.confirm.multi-value-confirm.hangar-confirm .hangarDirSelect {
     background: #03161f;
     border: 1px solid #1f6f8b;
     color: #ffffff;
-    min-width: 130px; 
-    margin-left: 0px;     
+    min-width: 130px;
+    margin-left: 0px;
 }
 
-.confirm.multi-value-confirm.hangar-confirm .multi-value-input:focus {
+.confirm.multi-value-confirm.hangar-confirm .multi-value-input:focus,
+.confirm.multi-value-confirm.hangar-confirm .hangarDirSelect:focus {
     border-color: #58c7e6;
     box-shadow: 0 0 10px rgba(88, 199, 230, 0.6);
     background: #000;
+}
+
+/* Stage 8.5: multi-direction launch picker (Hyperion etc.) lives inside the
+   per-hangar header label. The select inherits colour/border/font from the
+   .multi-value-input rules above; this block tunes the bits that only make
+   sense for a select (compact width to fit "60°"/"300°", consistent height
+   with adjacent number inputs, dropdown-caret colour). */
+.confirm.multi-value-confirm.hangar-confirm.hangarLaunch .hangarDirSelect {
+    min-width: 0;
+    width: auto;
+    padding: 3px 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+    cursor: pointer;
 }

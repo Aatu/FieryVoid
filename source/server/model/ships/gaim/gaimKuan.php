@@ -27,7 +27,7 @@ class gaimKuan extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(4, 1));
+        $this->addPrimarySystem(new Hangar(4, 1, 1));
         $this->addAftSystem(new Thruster(4, 13, 0, 4, 1));
         $this->addAftSystem(new Thruster(5, 19, 0, 8, 2));
         $this->addFrontSystem(new ScatterGun(4, 8, 3, 240, 120));

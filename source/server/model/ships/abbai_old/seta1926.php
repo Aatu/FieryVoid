@@ -27,7 +27,7 @@ class Seta1926 extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 6, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 12, 5, 6));
         $this->addPrimarySystem(new Engine(4, 11, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
         $this->addPrimarySystem(new ShieldGenerator(4, 12, 4, 2));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));

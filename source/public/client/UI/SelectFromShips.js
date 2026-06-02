@@ -115,8 +115,27 @@ window.SelectFromShips = function () {
                     if (!s || s.flight) return;
                     if (!gamedata.isMyShip(s)) return;
                     if (!window.DeploymentDock.shipHasOpenableDockDialog(s)) return;
+                    //A bay-by-bay eligible list (whole flight fits one bay) is the
+                    //common case. But the carrier's rails/bays are a COMBINED pool:
+                    //a flight bigger than any single bay (e.g. 9 fighters vs 6-box
+                    //rails) is still dockable if the carrier's TOTAL free space
+                    //holds it — auto-distribute spreads it across bays on click.
+                    //Surface the DOCK button on combined capacity, not just
+                    //single-bay fit, so it doesn't disappear when space remains.
                     var eligible = window.DeploymentDock.eligibleHangarsForFlight(s, flight);
-                    if (eligible.length === 0) return;
+                    if (eligible.length === 0) {
+                        var plan = window.DeploymentDock.distributeFlightAcrossHangars(s, flight);
+                        if (plan.length === 0) return;        //even combined capacity can't hold it
+                        //Report each used bay's REAL free box count (not just the
+                        //allocated slice) so the carrier-picker readout shows true
+                        //headroom rather than a misleading exact-fit total.
+                        eligible = plan.map(function (p) {
+                            var freeBoxes = (typeof window.DeploymentDock.hangarFreeBoxes === 'function')
+                                ? window.DeploymentDock.hangarFreeBoxes(p.hangar)
+                                : p.count;
+                            return { hangar: p.hangar, capacity: freeBoxes };
+                        });
+                    }
                     eligibleCarriers.push({ ship: s, hangars: eligible });
                 });
 
@@ -172,7 +191,20 @@ window.SelectFromShips = function () {
             if (ship.flight) {
                 var noOfFighters = 0;
                 ship.systems.forEach(ftr => {
-                    if (!shipManager.systems.isDestroyed(ship, ftr)) {
+                    //In replay, count fighters by their state AS OF the viewed turn
+                    //(gamedata.turn is the replay turn). A fighter docked/destroyed
+                    //THIS turn was still flying when this turn's combat happened, so
+                    //it should still be counted — otherwise a flight that partial-docks
+                    //3 of 6 on turn N shows "(3)" on turn N instead of the "(6)" that
+                    //were present. Outside replay, fall back to the plain destroyed check.
+                    var counted;
+                    if (gamedata.replay) {
+                        var turnDestroyed = damageManager.getTurnDestroyed(ship, ftr);
+                        counted = (turnDestroyed === null || turnDestroyed >= gamedata.turn);
+                    } else {
+                        counted = !shipManager.systems.isDestroyed(ship, ftr);
+                    }
+                    if (counted) {
                         noOfFighters++;
                     }
                 });

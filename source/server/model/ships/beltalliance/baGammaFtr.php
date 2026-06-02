@@ -22,7 +22,7 @@ class baGammaFtr extends FighterFlight{
 		$this->iniativebonus = 90;
         $this->populate();
     
-        $this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
+        //$this->enhancementOptionsEnabled[] = 'EXT_AMMO'; //To enable extra Ammo for main gun.
            
     }
 

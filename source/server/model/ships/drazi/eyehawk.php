@@ -29,7 +29,7 @@ class Eyehawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new ElintScanner(4, 13, 4, 8));
         $this->addFrontSystem(new ElintScanner(4, 6, 2, 4));
         $this->addPrimarySystem(new Engine(5, 11, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addAftSystem(new JumpEngine(4, 16, 4, 36));
         $this->addAftSystem(new Thruster(4, 15, 0, 5, 1));
         $this->addAftSystem(new Thruster(5, 21, 0, 10, 2));

@@ -43,7 +43,7 @@ class RakartaLaserEarly extends MediumShip{
 
 		$this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
 		$this->addAftSystem(new GraviticThruster(4, 10, 0, 5, 2));
-		$this->addAftSystem(new Hangar(3, 1));
+		$this->addAftSystem(new Hangar(3, 1, 1));
 
 		$this->addPrimarySystem(new Structure( 4, 50));
 

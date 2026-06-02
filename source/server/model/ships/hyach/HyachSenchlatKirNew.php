@@ -31,7 +31,7 @@ class HyachSenchlatKirNew extends HeavyCombatVessel{
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
         $this->addPrimarySystem(new Engine(4, 20, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new GraviticThruster(4, 18, 0, 5, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 18, 0, 5, 4));
 		$this->addPrimarySystem(new HyachComputer(4, 15, 0, 3));//$armour, $maxhealth, $powerReq, $output	        

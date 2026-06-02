@@ -12,7 +12,7 @@ class Padashar extends MediumShip{
         $this->canvasSize = 100;
 			$this->variantOf = "Tra'shu'li Armed Liner";
 			$this->occurence = "uncommon";
-        $this->fighters = array("assault shuttles"=>6); 				        
+        $this->fighters = array("assault shuttles"=>4, "Breaching Pods"=>4); 				        
 
         $this->isd = 2231;
         
@@ -42,7 +42,7 @@ class Padashar extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 4, 5));
         $this->addPrimarySystem(new Engine(3, 11, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(2, 8));
+        $this->addPrimarySystem(new Hangar(2, 8, 2));
 		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
 		$this->addPrimarySystem(new Quarters(2, 18));

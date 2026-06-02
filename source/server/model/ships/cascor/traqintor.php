@@ -103,7 +103,7 @@ class Traqintor extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 18, 5, 7));
-		$this->addPrimarySystem(new Hangar(5, 4));
+		$this->addPrimarySystem(new Hangar(5, 4, 1));
 		$this->addPrimarySystem(new IonTorpedo(5, 5, 4, 0, 360));
 		$this->addPrimarySystem(new IonTorpedo(5, 5, 4, 0, 360));
 		

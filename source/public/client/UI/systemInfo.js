@@ -31,9 +31,11 @@ window.systemInfo = {
 
 		//Leftover hangar capacity is auto-filled with shuttles (or minesweeping
 		//shuttles / Flyers per faction) — same rule as shipwindow.js. The pool is
-		//ship-wide, so show it on a single Hangar tooltip (primary section, else
-		//first hangar) rather than repeating the total on every hangar. The
-		//breakdown reflects the HANG_BP / HANG_MSW shuttle-slot enhancements.
+		//ship-wide; per-hangar attribution is delegated to systems.js, mirroring
+		//HangarOps::populateInitialHangarUsage: the pool splits evenly across the
+		//primary-structure hangars (Pirocia's three → 2+2+2), or across all
+		//hangars when none are primary (Marata's 6 leftover shuttles → 3+3).
+		//The breakdown reflects the HANG_BP / HANG_MSW shuttle-slot enhancements.
 		//Precompute it here so the Capacity line below can fold the auto-filled
 		//shuttle count into its "stored" number (the blueprint Capacity reads
 		//"0 / N" pre-game because hangarUsage is empty; combat fighters auto-deploy
@@ -42,10 +44,9 @@ window.systemInfo = {
 		var defaultShuttleRows = [];
 		var defaultShuttleStored = 0;
 		if (system.name == "hangar") {
-			var defaultHangar = shipManager.systems.getDefaultShuttleHangar(ship);
-			isDefaultShuttleHangar = !!(defaultHangar && defaultHangar.id == system.id);
+			defaultShuttleRows = shipManager.systems.getDefaultShuttleCompositionForHangar(ship, system);
+			isDefaultShuttleHangar = defaultShuttleRows.length > 0;
 			if (isDefaultShuttleHangar) {
-				defaultShuttleRows = shipManager.systems.getDefaultShuttleComposition(ship);
 				for (var s = 0; s < defaultShuttleRows.length; s++) {
 					//slotOnly rows (HANG_BP) are converted-but-empty capacity, not units present.
 					if (defaultShuttleRows[s].slotOnly) continue;

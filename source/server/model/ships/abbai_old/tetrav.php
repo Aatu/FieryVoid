@@ -26,7 +26,7 @@ class Tetrav extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 10, 3, 5));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
- 	$this->addPrimarySystem(new Hangar(5, 1));
+ 	$this->addPrimarySystem(new Hangar(5, 1, 1));
         $this->addPrimarySystem(new ShieldGenerator(5, 12, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));

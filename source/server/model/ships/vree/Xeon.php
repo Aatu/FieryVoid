@@ -10,7 +10,7 @@ class Xeon extends VreeCapital{
 		$this->shipClass = "Xeon Assault Saucer";
 		$this->isd = 2225;
 		$this->locations = array(41, 42, 2, 32, 31, 1);
-        $this->fighters = array("assault shuttles"=>12);
+        $this->fighters = array("assault shuttles"=>7, "Breaching Pods"=>5);
   		$this->occurence = "uncommon";
     	$this->variantOf = 'Xeel War Carrier';	        				
 

@@ -109,7 +109,11 @@ const HealthBar = styled.div`
         left: 0;
         bottom: 0;
         z-index: 0;
-        background-color: ${props => props.$docked ? '#00b8e6' : (props.$criticals ? '#ed6738' : '#427231')};
+        background-color: ${props => {
+        if (props.$docked) return '#00b8e6';
+        if (props.$criticals) return props.$criticalsBenign ? '#00ccff' : '#ed6738'; //cyan when the only crit is LaunchedThisTurn
+        return '#427231';
+    }};
         border: 1px solid black;
     }
 `;
@@ -244,7 +248,7 @@ class FighterIcon extends React.Component {
                 <FadedContent $destroyed={destroyed} $img={fighter.iconPath}>
                     <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
                     <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
-                    <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)} $docked={docked}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
+                    <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)} $criticalsBenign={hasOnlyLaunchedThisTurn(fighter)} $docked={docked}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
                 </FadedContent>
                 {overlay}
             </FighterIconContainer>
@@ -255,6 +259,11 @@ class FighterIcon extends React.Component {
 const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.getDamage(ship, system)) / system.maxhealth * 100;
 
 const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
+
+//Colour the healthbar cyan rather than orange when LaunchedThisTurn (a benign
+//-50 init penalty for having just launched) is the only critical on the fighter.
+//Includes forInfo criticals to match hasCriticals above, which drives the orange.
+const hasOnlyLaunchedThisTurn = (fighter) => shipManager.criticals.hasOnlyCritical(fighter, 'LaunchedThisTurn', false)
 
 const getWeapons = fighter => fighter.systems.filter(system => system.weapon);
 

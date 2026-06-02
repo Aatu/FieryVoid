@@ -29,7 +29,7 @@ class gaimOutpost extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 30, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
-		$this->addPrimarySystem(new Hangar(5, 14));
+		$this->addPrimarySystem(new Hangar(5, 14, 12));
 
 		$this->addFrontSystem(new ScatterGun(4, 8, 3, 300, 60));
 		$this->addFrontSystem(new ScatterGun(4, 8, 3, 300, 60));

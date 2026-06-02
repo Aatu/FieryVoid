@@ -45,7 +45,7 @@ class IntonaAM extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 12, 4, 7));
         $this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));
         $this->addPrimarySystem(new JumpEngine(4, 15, 4, 36));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         
       
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

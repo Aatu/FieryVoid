@@ -29,7 +29,7 @@ class Jumphawk extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 10, 2));
         $this->addAftSystem(new JumpEngine(4, 16, 4, 0));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));
         $this->addAftSystem(new Thruster(4, 15, 0, 5, 1));
         $this->addAftSystem(new Thruster(5, 21, 0, 10, 2));

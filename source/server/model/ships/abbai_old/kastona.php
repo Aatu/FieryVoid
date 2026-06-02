@@ -27,7 +27,7 @@ class Kastona extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 6));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new ShieldGenerator(6, 12, 4, 2));
    
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

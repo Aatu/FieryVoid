@@ -26,7 +26,7 @@ class Bimith extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 6, 9));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
- 	$this->addPrimarySystem(new Hangar(4, 2));
+ 	$this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new ShieldGenerator(4, 16, 4, 4));
    
         $this->addFrontSystem(new Particleimpeder(2, 0, 0, 270, 90));

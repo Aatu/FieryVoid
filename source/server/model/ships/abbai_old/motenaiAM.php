@@ -10,6 +10,7 @@ class motenaiAM extends BaseShip{
         $this->imagePath = "img/ships/AbbaiMotenai.png";
         $this->shipClass = "Motenai Heavy Mine Layer";
         $this->shipSizeClass = 3;
+        $this->fighters = array("minesweeping shuttles"=>6);	        
 		
         $this->minesweeperbonus = 4;    	
 
@@ -40,7 +41,7 @@ class motenaiAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 5, 6));  //+4 Minesweeper
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(4, 8));
+		$this->addPrimarySystem(new Hangar(4, 8, 2));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 4));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

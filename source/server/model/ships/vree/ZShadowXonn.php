@@ -34,7 +34,7 @@ class ZShadowXonn extends VreeCapital{
 		$this->canvasSize = 240;
 
 		$this->addPrimarySystem(new Reactor(6, 25, 0, 0));
-		$this->addPrimarySystem(new Hangar(6, 3));
+		$this->addPrimarySystem(new Hangar(6, 3, 3));
 		$this->addPrimarySystem(new CnC(7, 16, 0, 0));
 		$scanner = new Scanner(6, 18, 9, 10);   
 		$scanner->markImproved();

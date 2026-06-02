@@ -29,7 +29,7 @@ class Talacca extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 3, 6));
         $this->addPrimarySystem(new Engine(3, 14, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(3, 1));
+		$this->addPrimarySystem(new Hangar(3, 1, 1));
 		$this->addPrimarySystem(new Thruster(3, 16, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 16, 0, 4, 4));
 		

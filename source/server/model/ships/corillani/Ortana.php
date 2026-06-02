@@ -32,7 +32,7 @@ class Ortana extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(4, 16, 6, 8));
         $this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));
         $this->addPrimarySystem(new JumpEngine(4, 15, 4, 36));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         
       
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

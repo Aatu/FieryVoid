@@ -27,7 +27,7 @@ class gaimSlyach extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 12, 0, 3));
         $this->addPrimarySystem(new Scanner(4, 13, 5, 8));
 		$this->addPrimarySystem(new CnC(5, 9, 0, 0));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
 		$this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));

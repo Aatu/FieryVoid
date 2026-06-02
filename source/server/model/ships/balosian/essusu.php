@@ -29,7 +29,7 @@ class Essusu extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 3, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
 

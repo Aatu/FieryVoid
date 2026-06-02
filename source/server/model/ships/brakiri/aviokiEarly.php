@@ -33,7 +33,7 @@ class AviokiEarly extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 13, 8, 8));
         $this->addPrimarySystem(new Engine(6, 16, 0, 15, 4));
         $this->addPrimarySystem(new JumpEngine(5, 12, 4, 28));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
    
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
         $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
