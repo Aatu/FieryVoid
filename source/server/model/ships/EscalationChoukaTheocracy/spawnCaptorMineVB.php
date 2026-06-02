@@ -10,7 +10,7 @@ class spawnCaptorMineVB extends Mine{
         $this->imagePath = "img/ships/eaMine.png";
         $this->shipClass = "Vedas-B Captor Mine";
 		$this->occurence = "common";
-		//$this->variantOf = 'NONE';
+		$this->variantOf = 'NONE';
         $this->isd = 1875;
         
         $this->forwardDefense = 12;
