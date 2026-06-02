@@ -107,10 +107,10 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Hangar Operations (Beta)</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
-        <li><strong>Hangar Rollout</strong> - Improvements/fixes to Hangar Operations and rolling updates to hangar stats, thanks to Nato for providing the info needed!</li>  
+        <li><strong>Hangar Refinements</strong> - Improvements/fixes to hangar systems so they match their B5W properties, huge thanks to Nato for providing the info needed to correct these!</li>  
         <li><strong>Fighter Rails</strong> - Fighter Rails now available to use on ships equipped with them, see FAQ for details.</li>                           
-        <li><strong>Polaren Confederacy</strong> - The Nexus Polarn get more functionality updates (Thanks Lunara, Tyrel, and Abraxas!).</li>  
-        <li><strong>Tyrel's Escalation Wars</strong> -  Breaching pods added, four new ships, and the Chouka ballistic mine and Star Fortress added!</li>                                                                                       
+        <li><strong>Polaren Confederacy</strong> - Geoff's added more functionality updates to the Nexus Polaren (Thanks also to Lunara, Tyrel, and Abraxas!).</li>  
+        <li><strong>Escalation Wars</strong> -  Breaching pods added to Escalation factions, plus four new ships, the Chouka ballistic mine, and Star Fortress added!</li>                                                                                       
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
