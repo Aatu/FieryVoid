@@ -44,7 +44,7 @@ class HyperionMissileAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(6, 16, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Hangar(5, 2, 8));
         $this->addPrimarySystem(new ReloadRack(5, 9));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 

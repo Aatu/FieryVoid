@@ -129,18 +129,53 @@ window.lobbyEnhancements = {
 						ship.gunsightEnh = true;
 						break;
 
-					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.
 						if (!ship.hangFEnh) {
 							ship.notes += "<br>Fighter Conversion (" + enhCount + ")";
 						}
 						ship.hangFEnh = true;
 						break;
 
-					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.
 						if (!ship.hangASEnh) {
 							ship.notes += "<br>Shuttle Conversion (" + enhCount + ")";
 						}
 						ship.hangASEnh = true;
+						break;
+
+					case 'HANG_BP'://Default Shuttle slot to Breaching Pod slot
+						if (!ship.hangBPEnh) {
+							//ship.notes += "<br>Breaching Pod Conversion (" + enhCount + ")";
+							/*if(Object.keys(ship.fighters).includes("Breaching Pods")){
+								ship.fighters["Breaching Pods"] += 1;
+							}else{
+								//ship.fighters.push("Breaching Pods");
+								ship.fighters["Breaching Pods"]	= 1;							
+							}*/
+								
+						}
+						ship.hangBPEnh = true;
+						break;
+
+					case 'HANG_MSW'://Default Shuttle unit to Minesweeping Shuttle
+						if (!ship.hangMswEnh) {
+							//ship.notes += "<br>Minesweeping Shuttle Conversion (" + enhCount + ")";
+						}
+						ship.hangMswEnh = true;
+						break;
+
+					case 'HANG_ORD'://Stage 15: Extra Ordnance Reserve (carrier missile reload pool)
+						if (!ship.hangOrdEnh) {
+							ship.notes += "<br>Extra Ordnance Reserve (" + enhCount + " pts)";
+						}
+						ship.hangOrdEnh = true;
+						break;
+
+					case 'MAR_CONT'://Stage 17 ext: Extra Marine Contingents (ship-level marine pool)
+						if (!ship.marContEnh) {
+							ship.notes += "<br>Extra Marine Contingents (" + enhCount + ")";
+						}
+						ship.marContEnh = true;
 						break;
 
 
@@ -1323,12 +1358,28 @@ window.lobbyEnhancements = {
 					ship.exMrnEnhShip = false;
 					break;
 
-				case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
+				case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.
 					ship.hangFEnh = false;
 					break;
 
-				case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
+				case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.
 					ship.hangASEnh = false;
+					break;
+
+				case 'HANG_BP'://Default Shuttle slot to Breaching Pod slot
+					ship.hangBPEnh = false;
+					break;
+
+				case 'HANG_MSW'://Default Shuttle unit to Minesweeping Shuttle
+					ship.hangMswEnh = false;
+					break;
+
+				case 'HANG_ORD'://Stage 15: Extra Ordnance Reserve (carrier missile reload pool)
+					ship.hangOrdEnh = false;
+					break;
+
+				case 'MAR_CONT'://Stage 17 ext: Extra Marine Contingents (ship-level marine pool)
+					ship.marContEnh = false;
 					break;
 
 				case 'IFF_SYS':

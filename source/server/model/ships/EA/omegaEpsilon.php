@@ -40,7 +40,7 @@ class OmegaEpsilon  extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0)); //I'm afraid to put in second C&C, so I combine their structure and increase armor
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(6, 23, 0, 9, 3));
-		$this->addPrimarySystem(new Hangar(6, 26, 24));
+		$this->addPrimarySystem(new Hangar(6, 26, 12));
         $this->addPrimarySystem(new JumpEngine(6, 20, 3, 20));
 	    
 		

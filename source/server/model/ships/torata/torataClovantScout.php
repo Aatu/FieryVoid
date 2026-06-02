@@ -35,7 +35,7 @@ class TorataClovantScout extends BaseShip{
 		$this->addPrimarySystem(new ElintScanner(5, 24, 6, 10));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 9, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 16, 4, 27));
-		$this->addPrimarySystem(new Hangar(5, 8, 0, 0));
+		$this->addPrimarySystem(new Hangar(5, 8));
 		
 		$this->addFrontSystem(new ParticleAccelerator(4, 0, 0, 300, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));

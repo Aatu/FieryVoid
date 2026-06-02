@@ -38,7 +38,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>                
                 <li><a href="#enormous">Enormous Units</a></li>
-                <li><a href="#escorts">Fighter Escorts</a></li>                
+                <li><a href="#escorts">Fighter Escorts</a></li>
+                <li><a href="#hangar">Hangar Operations</a></li>
                 <li><a href="#jump">Jump Drives</a></li>
                 <li><a href="#ladder">Online Ladder</a></li> 
                 <li><a href="#mines">Mines</a></li>                               
@@ -270,6 +271,131 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 the fighters will use their weapons to intercept ballistics on behalf of the ship providing all other conditions of intercept are true e.g. 
                 their weapons have an intercept rating, the incoming shot is in arc, the fighters are not jinking etc.        
             </li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+
+        <h3 id="hangar" >Hangar Operations</h3>
+        <ul>
+            <li>Carriers can launch and recover their fighters, shuttles and other small craft <em>during</em> a battle, as well as start them docked inside the carrier
+                rather than placing them directly on the map. The options to do so appear automatically on any ship with hangar capacity.</li>
+            <br>
+
+            <li><b>Default shuttles:</b>
+                <ul class="circle-list">
+                    <li>A ship's hangar capacity that is not already allocated to fighters/assault shuttles or breaching pods capacity is automatically filled with <b>Shuttles</b> (or <b>Minesweeping Shuttles</b> on ships with a minesweeper bonus).</li>              
+                    <li>Hover over a <b>Hangar</b> system in the ship's SCS to see its starting contents, shown as e.g. <i>"Carrying: 2 / 14 slots"</i> along with a list of the stored craft.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Deployment Phase:</b> During the Deployment Phase you can choose to deploy fighters in a ship's hangar by clicking on the ships hex and selecting the blue 'Dock...' option.  
+                        Or, if the fighters are already deployed to the carrier ship's hex you can click on the 'Deploy Flights in Hangar' tooltip button on the ship, or click on the Hangar system icon in the ship's SCS window.  
+                        Reinforcement flights arriving on later turns can dock into an already-deployed carrier the same way.
+                        Note, some fighters such as Orieni Hunter-Killers MUST deploy in hangars at the start of a game.</li>   
+
+            <li><b>Launching craft (Firing Phase):</b>
+                <ul class="circle-list">
+                    <li>Select one of your hangar ships and click the <b>Launch</b> tooltip button in its tooltip menu.  A dialog lets you pick which stored craft to launch, and how many.</li>
+                    <li>Shuttles are stored individually but can be launched as a single flight of 1–6.  Fighters launch as their stored flight (subject to the usual partial-flight rules).</li>
+                    <li>The order resolves at the <b>end of the turn</b>: the new flight appears in the carrier's hex, matching its heading and speed, facing the carrier's facing (plus an offset for side hangars).</li>
+                    <li>You cannot launch from a carrier that is pivoting or rolling that turn.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Recovering / Docking craft (Firing Phase):</b>
+                <ul class="circle-list">
+                    <li>Select one of your fighter flights and click the <b>Dock</b> button, or use the <b>Recover</b> tooltip button on the carrier to pull craft in from the carrier's side.</li>
+                    <li>A flight can only dock into a carrier that is in the <b>same hex</b>, on the <b>same heading</b>, and at a compatible speed (the carrier must be at least as fast as the flight,
+                        and the speed difference must be within the flight's thrust rating).</li>
+                    <li>The carrier must have a free hangar slot of a compatible type, must not be pivoting or rolling, and the hangar must not be destroyed.</li>
+                    <li>If more than one eligible carrier is in the hex, you'll be asked to pick one.  If a hangar can't hold the whole flight, you'll be offered a split — dock some now and leave the rest in space.</li>
+                    <li>Like launching, docking resolves at the end of the turn.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Launch / land budget:</b> Each hangar has a per-turn capacity (its <i>output</i>) that is <b>shared</b> between launching and landing.
+                A hangar with an output of 6 can launch 6 craft, recover 6 craft, or any combination (e.g. launch 4 and recover 2) in a single turn.</li>
+            <br>
+
+            <li><b>Initiative penalties:</b> Operating hangars is disruptive.  A carrier that launches and/or recovers craft suffers <b>−20 Initiative</b> on the following turn (just once, no matter how many craft it moved).
+                A freshly launched flight suffers <b>−50 Initiative</b> on the turn after it launches.  These penalties clear automatically.</li>
+            <br>
+
+            <li><b>Compatible hangar types:</b> Craft can only be stored in slots that fit them.  Universal fighter bays accept any size of combat fighter (and shuttles),
+                but Assault Shuttles and Breaching Pods need their own dedicated slots, and custom-named fighters (e.g. Thunderbolts) are limited by each carrier's individual capacity for that type.</li>
+            <br>
+
+            <li><b>Hangar damage:</b> If a hangar takes damage, stored craft are destroyed along with it (empty slots and shuttles are lost first, then the cheaper craft).</li>
+            <br>
+
+            <li><b>Carrier destruction &mdash; hangar craft may escape:</b> When a carrier is destroyed (other than by successfully jumping to hyperspace),
+                some of its docked fighters and shuttles may scramble out before the wreck goes up.  The game rolls a d20:
+                <ul class="circle-list">
+                    <li>1&ndash;5: no craft escape.</li>
+                    <li>6&ndash;10: one quarter of docked craft escape (round down).</li>
+                    <li>11&ndash;18: one half escape (round down).</li>
+                    <li>19&ndash;20: all docked craft escape.</li>
+                </ul>
+                Only combat fighters, armed shuttle variants, Assault Shuttles, and Breaching Pods are eligible for possible escape. Escapees are auto-selected by combat value (most expensive craft escape first).
+                They appear in the carrier's final hex with its heading and speed, facing the carrier's final facing plus the originating hangar's launch direction, and suffer
+                the standard &minus;50 Initiative penalty on their first acting turn (as if freshly launched).  Craft on a carrier that successfully jumped to hyperspace are
+                NOT subject to this roll &mdash; they ride along with the jump and retain their full combat value.</li>
+            <br>
+
+            <li><b>Rearming docked craft:</b> A flight that remains docked for a full turn will automatically rearm its limited-ammo weapons before relaunching.
+                <ul class="circle-list">
+                    <li><strong>Matter weapons</strong> (SlugCannon, Gatling Gun, etc.): restore 1 round per weapon per turn while docked, up to the weapon's starting load.  This is free and automatic — no carrier cost.</li>
+                    <li><strong>Missiles</strong>: require a pre-purchased <strong>Ballistic Ordnance Reserve</strong> enhancement on the carrier (see below).  
+                    One missile per fighter per turn is restocked automatically, most expensive missile type first, drawing from the shared pool.</li>
+                    <li><strong>Marines (Breaching Pods)</strong>: require a pre-purchased <strong>Extra Marine Contingents</strong> enhancement on the carrier (see below).  One marine unit per pod per turn is restocked automatically while docked, drawing from the shared marine pool.</li>
+                    <li>The turn the flight docks does not count — rearming begins on the first full turn spent inside the hangar.</li>
+                    <li>When a flight is split on relaunch, the fighters with the most missiles (i.e., those that were restocked) are extracted first into the launched flight.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Ballistic Ordnance Reserve:</b> Carriers in missile-capable factions can purchase an Ordnance Reserve enhancement in the Fleet Lobby, up to 200 points.
+                <ul class="circle-list">
+                    <li>The pool is <strong>shared across the whole carrier</strong> and is shown in the Hangar system tooltip as <i>"Ordnance Reserve: X / Y pts"</i>.</li>
+                    <li>Each turn a missile or torpedo flight is docked (and has been in for a full turn), the carrier spends points from the reserve equal to the <strong>PV of the missile type</strong> being restocked.  The most expensive type is always refilled first.</li>
+                    <li>The pool is <strong>one-way</strong>: spent points does not regenerate during the battle.</li>
+                    <li>Only carriers with combat fighter hangar slots (i.e. not small hangars with only shuttles) have access to the Ordnance Reserve option in the Lobby.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Extra Marine Contingents:</b> Any ship can purchase Extra Marine Contingents in the Fleet Lobby — a pool of additional marine units used to restock docked Breaching Pods.
+                <ul class="circle-list">
+                    <li>Each contingent costs <strong>10 points</strong> and represents a single marine unit.</li>
+                    <li>Limit per ship: <strong>1% of the ship's base Combat Point value</strong>, rounded up (e.g. a 600-PV ship can buy up to 6 contingents).</li>
+                    <li>The pool is <strong>shared across the whole carrier</strong> and is shown in the Hangar system tooltip as <i>"Marine Contingents: X / Y"</i>.</li>
+                    <li>Each turn a Breaching Pod flight is docked for a full turn it is able to restock one marine unit per pod from the Marine Contingent pool, up to each pod's starting load (including any Extra Marine Units bought as an enhancement).</li>
+                    <li>The pool is <strong>one-way</strong>: spent points do not regenerate during the battle.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Catapults:</b> Some carriers are equipped with a Catapult instead of (or in addition to) a standard hangar.  A catapult is a fixed forward-firing launch rail designed to hold and deploy a single superheavy fighter.
+                <ul class="circle-list">
+                    <li>A catapult holds <strong>exactly one</strong> superheavy fighter — no other craft may launch from or dock into it.</li>
+                    <li>The catapult's box count represents structural hit points only, but not additional capacity, so extra boxes do not hold shuttle as i the case with normal Hangars.</li>
+                    <li><strong>Launching:</strong> A catapult always launches its fighter directly forward (at the carrier's current facing).  Launching from a catapult applies <strong>no</strong> initiative penalty 
+                    — neither the −50 that a freshly launched flight would normally receive, nor the −20 applied to the carrier.  Launching works even if the catapult is damaged or destroyed.</li>
+                    <li><strong>Landing / recovery:</strong> The fighter may only dock back into the catapult if it approaches the carrier's hex from the <strong>rear</strong> — the flight's heading must match the carrier's facing (the fighter overtakes the carrier from behind).  
+                    Like launching, recovery works regardless of catapult damage, but the carrier still receives the standard −20 initiative penalty on the following turn.</li>
+                    <li><strong>Landing on a damaged catapult:</strong> If any catapult boxes are destroyed at the time of landing, the recovering fighter takes damage equal to the number of destroyed boxes.
+                        <ul class="circle-list">
+                            <li>If the fighter survives, it is stored with its damage intact and can be relaunched normally on a later turn.</li>
+                            <li>If the fighter is destroyed by the landing damage, it is still counted as recovered and stored — but it can <strong>never be relaunched</strong>.  
+                            The wreck permanently occupies the catapult bay for the rest of the battle; no replacement fighter can be loaded.</li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+            <br>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -506,6 +632,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                         Must still be a valid deployment e.g. Fighters and Mines can stack with ships, but ships cannot be deployed with other ships.</li>
                     <li>Double Left-click - Instantly select a single unit in a hex (if there are multiple units in the hex you'll still need to select from list), when you already have a deployable unit as your selected ship.  
                         Makes it slightly quicker to select units when you have fighters or mines as you selected ship.</li>
+                    <li>Right-click on + and - Movement Icons -  Will set the speed of the ship to maximum (Speed 10) or the minimum (Speed 0) in a single click.</li>                        
                 </ul>
             </li>
             <br>            

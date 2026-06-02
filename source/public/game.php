@@ -85,7 +85,13 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
         // Auto-discover dynamically spawnable ship blueprints from weapon system properties.
         // Any weapon with a $spawnableClasses array will have its listed classes preloaded here,
         // so the frontend has their full blueprint when a mine/unit is spawned mid-game.
+        //
+        // Hangar Ops: faction-specific default shuttles (e.g. Flyer for Minbari) live on
+        // HangarOps::$factionShuttleMap rather than on every Hangar's $spawnableClasses,
+        // so each game only preloads the shuttle classes of factions actually present
+        // (and carrying a Hangar) — not all ~80 factions in the codebase.
         $spawnableClasses = [];
+        $factionsWithHangars = [];
         foreach ($staticShips as $faction => $shipBlueprints) {
             foreach ($shipBlueprints as $blueprint) {
                 foreach ($blueprint->systems as $system) {
@@ -94,8 +100,15 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
                             $spawnableClasses[] = $cls;
                         }
                     }
+                    if ($system instanceof Hangar) {
+                        $factionsWithHangars[$faction] = true;
+                    }
                 }
             }
+        }
+        foreach (array_keys($factionsWithHangars) as $faction) {
+            $factionShuttle = HangarOps::shuttleClassForFactionName($faction);
+            if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
         }
         if (!empty($spawnableClasses)) {
             $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));
@@ -225,6 +238,7 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
     <script defer src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/MineDeployment.js"></script>
+    <script defer src="client/renderer/phaseStrategy/DeploymentDock.js"></script>
     <script defer src="client/renderer/phaseStrategy/WaitingPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/InitialPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/MovementPhaseStrategy.js"></script>
@@ -402,6 +416,7 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
     <div class="fighter">
 		<div class="destroyedtext"><span>DESTROYED</span></div>
 		<div class="disengagedtext"><span>DISENGAGED</span></div>
+		<div class="dockedtext"><span>DOCKED</span></div>
         <div class="systemcontainer">
             <div class="icon">
 				<table class="fightersystemcontainer 1"><tr></tr></table>

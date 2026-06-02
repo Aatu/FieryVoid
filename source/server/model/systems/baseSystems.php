@@ -2946,31 +2946,558 @@ class Hangar extends ShipSystem{
     public $displayName = "Hangar";
     public $squadrons = Array();
     public $primary = false; //changed from true on 21.11 - let's not consider it a core system after all!
-    
+
 	//Hangar is not important at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
-    function __construct($armour, $maxhealth, $output = null){
-		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the usual combat craft capacity)
-			$output = floor($maxhealth/6)*6;
+
+	// === Hangar Operations (B5W §10.1) ===
+	public $hangarType = 'fighters';      //category key matching FighterFlight->hangarRequired and ship->fighters keys
+	public $direction = 0;                //0..5 hex offset from carrier facing on launch (0 = same heading)
+	public $hangarUsage = array();        //list of stored craft records: [['phpclass'=>...,'name'=>...,'flightSize'=>N,'hangarType'=>...], ...]
+	public $spawnableClasses = array();   //FighterFlight phpclasses this hangar can launch (consumed by game.php blueprint preload)
+	//$output is the SHARED launch+land budget per turn:
+	//(launchedThisTurn + landedThisTurn) <= $output. A 6-output hangar can launch 6,
+	//OR land 6, OR any split (4 launch + 2 land, etc.).
+	public $launchedThisTurn = 0;         //resets each turn
+	public $landedThisTurn = 0;           //resets each turn
+	public $usagePopulated = false;       //idempotency guard — first hangar on a ship runs initial population once
+	private $lastSavedUsage = null;       //serialized snapshot of last persisted hangarUsage (avoids duplicate notes)
+	//Stage 15: per-carrier ordnance reload pool. Only the PRIMARY (first)
+	//hangar on a ship carries the spent counter — HangarOps::drawReload writes
+	//here and the per-load note pipeline persists it via hangarOrdReserve. Pool
+	//capacity is re-derived from the carrier's HANG_ORD enhancement on every load.
+	public $reloadPoolSpent = 0;
+	private $lastSavedOrdReserve = null;  //serialized snapshot of last persisted reloadPoolSpent
+	//Stage 17 ext: per-carrier marine contingents pool. Same primary-hangar
+	//pattern as $reloadPoolSpent — HangarOps::drawMarineReload writes here,
+	//persisted via hangarMarineReserve note. Capacity re-derived from the
+	//carrier's MAR_CONT enhancement on every load.
+	public $marinePoolSpent = 0;
+	private $lastSavedMarinePool = null;  //serialized snapshot of last persisted marinePoolSpent
+	//Stage 18: carrier-destruction escape roll. ONE-SHOT per carrier — set
+	//when HangarOps::processCarrierDestructionEscapes fires the d20 (or when
+	//a hangarEscapeRoll note is loaded). Only the PRIMARY hangar carries
+	//these; persisted via the hangarEscapeRoll note. escapeRoll/Max/Total/
+	//Names are shipped via stripForJson so the client can render the
+	//replay/audit state on the destroyed-carrier row.
+	public $escapeRolled = false;
+	public $escapeRoll = 0;
+	public $escapeMax = 0;
+	public $escapeTotal = 0;
+	public $escapeNames = array();
+	public $pendingLaunchOrder = null;    //decoded latest hangarLaunchOrder for this turn (set by onIndividualNotesLoaded)
+	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
+	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
+	private $pendingDockTransfer = null;  //dock payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
+	public $pendingDeployStartTransfer = null; //Stage 7: deployment-phase dock payload; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt docked flights from movement validation BEFORE notes are generated.
+
+    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters',  $spawnableClasses = array()){
+		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the msot typical capacity)
+			//$output = floor($maxhealth/6)*6;
+			$output = 6;
 		}
-        parent::__construct($armour, $maxhealth, 0, $output ); 
+		//Legacy ship files (eg. torata) pass a literal 0 as the 4th positional
+		//arg, expecting it to be a no-op carried over from the pre-HangarOps
+		//constructor signature. Coerce non-string/empty values back to the
+		//universal default — inferHangarType (called on load) will then
+		//narrow it from the ship's $fighters declaration when possible.
+		if (!is_string($hangarType) || trim($hangarType) === '') {
+			$hangarType = 'fighters';
+		}
+		$this->hangarType = $hangarType;
+		$this->direction = (int)$direction;
+		//Always include the generic shuttle classes — every hangar can launch
+		//shuttles per B5W §10.1, and these are faction-agnostic. Faction-specific
+		//default shuttles (e.g. Flyer for Minbari) are NOT baked into every
+		//Hangar's spawnableClasses; they would force the client-side blueprint
+		//preload to load every faction's shuttle regardless of who's in the
+		//current game. Instead, game.php appends them via HangarOps::shuttleClassForFactionName
+		//only for factions actually present (and carrying a Hangar) in this game.
+		$defaults = array('Shuttle', 'MinesweepingShuttle');
+		$extras = is_array($spawnableClasses) ? $spawnableClasses : array();
+		$this->spawnableClasses = array_values(array_unique(array_merge($defaults, $extras)));
+        parent::__construct($armour, $maxhealth, 0, $output );
     }
+
+	public function onIndividualNotesLoaded($gamedata){
+		//Sort notes chronologically so the most recent hangarUsage wins.
+		//Phase numbers are NOT in chronological order (PreFiring=5 happens
+		//between Movement=2 and Fire=3 due to historical addition), so we
+		//sort by auto-increment id within a turn — ids are monotonic by
+		//actual insertion time.
+		usort($this->individualNotes, function($a, $b){
+			if ($a->turn !== $b->turn) return ($a->turn < $b->turn) ? -1 : 1;
+			return ($a->id < $b->id) ? -1 : 1;
+		});
+
+		foreach ($this->individualNotes as $note){
+			if ($note->notekey === 'hangarUsage'){
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)){
+					$this->hangarUsage = $decoded;
+					$this->lastSavedUsage = $note->notevalue;
+					$this->usagePopulated = true;
+				}
+			} else if ($note->notekey === 'hangarLaunchOrder' && $note->turn == $gamedata->turn){
+				//Latest order wins (notes are pre-sorted by id ASC above)
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)) $this->pendingLaunchOrder = $decoded;
+			} else if ($note->notekey === 'hangarDockOrder' && $note->turn == $gamedata->turn){
+				//Latest dock order wins (notes are pre-sorted by id ASC above)
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)) $this->pendingDockOrder = $decoded;
+			} else if ($note->notekey === 'hangarOrdReserve'){
+				//Stage 15: total reload points spent so far on this carrier.
+				//Only the primary (first) hangar persists this; secondary
+				//hangars' notes (if any leaked through) get ignored on the
+				//non-primary copies because HangarOps::reloadPoolSpent only
+				//reads from the primary.
+				$spent = (int)$note->notevalue;
+				if ($spent < 0) $spent = 0;
+				$this->reloadPoolSpent = $spent;
+				$this->lastSavedOrdReserve = (string)$spent;
+			} else if ($note->notekey === 'hangarMarineReserve'){
+				//Stage 17 ext: total marine pool points spent so far. Parallel
+				//to hangarOrdReserve — only the primary hangar persists this.
+				$spent = (int)$note->notevalue;
+				if ($spent < 0) $spent = 0;
+				$this->marinePoolSpent = $spent;
+				$this->lastSavedMarinePool = (string)$spent;
+			} else if ($note->notekey === 'hangarEscapeRoll'){
+				//Stage 18: d20 result + escapees from the moment this carrier
+				//was destroyed. Presence of this note is the one-shot gate
+				//that stops processCarrierDestructionEscapes from re-rolling
+				//on a later turn's setCriticals sweep.
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)){
+					$this->escapeRolled = true;
+					$this->escapeRoll   = (int)($decoded['roll']  ?? 0);
+					$this->escapeMax    = (int)($decoded['max']   ?? 0);
+					$this->escapeTotal  = (int)($decoded['total'] ?? 0);
+					$this->escapeNames  = is_array($decoded['names'] ?? null) ? $decoded['names'] : array();
+				}
+			}
+		}
+		$this->individualNotes = array();
+
+		//Re-apply $removed flag to any flights stored in THIS hangar (via
+		//dockedFlightId markers). Walking only $this->hangarUsage avoids
+		//duplicating work — every hangar on the ship runs this for its own
+		//entries, so the union covers every docked flight on the carrier.
+		//$gamedata->ships is numerically-indexed when loaded from DB; only
+		//getShipById() is reliable for looking up by ship id.
+		$ship = $this->getUnit();
+		if ($ship && is_array($this->hangarUsage)) {
+			foreach ($this->hangarUsage as $entry) {
+				$flightId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
+				if ($flightId <= 0) continue;
+				$flight = $gamedata->getShipById($flightId);
+				if (!$flight) continue;
+				$flight->removed = true;
+				if (isset($entry['dockedTurn'])) $flight->removedTurn = (int)$entry['dockedTurn'];
+			}
+		}
+
+		//Narrow universal-default hangarType from the ship's $fighters
+		//declaration (eg. Var'Nic's lone medium bay). Runs every load so a
+		//ship-file change picks up without DB migration; idempotent because
+		//inferHangarType only acts on universal/empty types.
+		if ($ship) HangarOps::inferHangarType($this, $ship);
+
+		if ($this->usagePopulated) return;
+
+		if (!$ship) return;
+
+		//First hangar on a multi-hangar ship runs the initial population for all hangars
+		foreach ($ship->systems as $sys){
+			if ($sys instanceof Hangar && $sys !== $this && $sys->usagePopulated){
+				$this->usagePopulated = true;
+				return;
+			}
+		}
+
+		HangarOps::populateInitialHangarUsage($ship, $gamedata);
+	}
+
+	public function generateIndividualNotes($gamedata, $dbManager){
+		$ship = $this->getUnit();
+		if (!$ship) return;
+		//Jump-sequencing fix: a carrier killed this turn by HyperspaceJump or
+		//JumpFailure damage still needs to persist any in-memory hangarUsage
+		//change made during this same setCriticals pass (processJumpingCarrierDockOrders
+		//docks pending flights into the jumping carrier's hangar). Without
+		//letting this method run, the new hangarUsage entry — and the
+		//$flight->removed flag that's re-applied from it via
+		//onIndividualNotesLoaded — would never reach the DB, and the docked
+		//flight would resurface in space next turn. Carriers destroyed by
+		//ordinary fire on a previous turn still short-circuit (the change-
+		//detection guard around the hangarUsage write keeps them from emitting
+		//redundant notes).
+		if ($ship->isDestroyed() && !HangarOps::hasJumpDamageThisTurn($ship, $gamedata)) return;
+		if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
+
+		//Persist any pending launch order received from the client. Validation
+		//(canLaunch) happens at end-of-turn during processLaunchOrders — this
+		//path just records the player's intent.
+		if ($this->pendingLaunchTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			$this->individualNotes[] = new IndividualNote(
+				-1,
+				$gamedata->id,
+				$gamedata->turn,
+				$gamedata->phase,
+				$ship->id,
+				$this->id,
+				'hangarLaunchOrder',
+				'Hangar launch order',
+				json_encode($this->pendingLaunchTransfer)
+			);
+			$this->pendingLaunchTransfer = null;   //consumed
+		}
+
+		//Same pattern for dock orders (Stage 5).
+		if ($this->pendingDockTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			$this->individualNotes[] = new IndividualNote(
+				-1,
+				$gamedata->id,
+				$gamedata->turn,
+				$gamedata->phase,
+				$ship->id,
+				$this->id,
+				'hangarDockOrder',
+				'Hangar dock order',
+				json_encode($this->pendingDockTransfer)
+			);
+			$this->pendingDockTransfer = null;     //consumed
+		}
+
+		//Stage 7: deployment-phase dock. Unlike launch/dock orders (resolved at
+		//end-of-turn via criticalPhaseEffects in Fire Phase), deploy-start docks
+		//are resolved RIGHT NOW: this hook fires during DeploymentGamePhase::process,
+		//which is the only chance to mutate $hangarUsage before the snapshot is
+		//written below. HangarOps::processDeployStartTransfer validates each
+		//entry, applies the dock (appends to $hangarUsage, marks flight $removed),
+		//writes a hangarDeployStartEvent audit note, and clears the transfer.
+		//
+		//IMPORTANT: $this is the POST-side Hangar (rebuilt from the client's
+		//submission) and has an empty $hangarUsage by default — system objects
+		//are reconstructed from POST data without their persisted individual
+		//notes. Seed from the DB-loaded counterpart hangar so pre-existing
+		//entries (auto-filled shuttles, prior docks) survive the snapshot write
+		//below; otherwise a Stage 7 dock would replace the whole hangar with
+		//just the newly-docked flight.
+		if ($this->pendingDeployStartTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			$dbShip = $gamedata->getShipById($ship->id);
+			if ($dbShip && is_array($dbShip->systems)) {
+				foreach ($dbShip->systems as $dbSys) {
+					if (!($dbSys instanceof Hangar)) continue;
+					if ((int)$dbSys->id !== (int)$this->id) continue;
+					if (is_array($dbSys->hangarUsage)) {
+						$this->hangarUsage = $dbSys->hangarUsage;
+					}
+					break;
+				}
+			}
+			HangarOps::processDeployStartTransfer($this, $ship, $gamedata);
+		}
+
+		//Stage 15: persist hangarOrdReserve (ordnance pool spent) ONLY on the
+		//primary hangar. drawReload always writes to the primary; the snapshot
+		//compare here ensures we only write a note when the value actually
+		//changed. Must run BEFORE the hangarUsage early-return below — while
+		//fighters sit docked turn after turn hangarUsage is stable, but the
+		//ordnance pool can still be drawing down each turn and needs to persist.
+		//Mirror of hangarUsage's "don't write a useless first-time note" guard:
+		//player-submission paths (DeploymentGamePhase::process etc.) rebuild
+		//ships from POST JSON via Manager::getShipsFromJSON, producing fresh
+		//Hangar instances with reloadPoolSpent=0 and lastSavedOrdReserve=null
+		//(notes are only loaded for server-side reads via getTacGamedata).
+		//Without this guard, a spurious "0" note would be written every player
+		//submission and clobber the authoritative server-side "spent" value.
+		if (HangarOps::primaryHangar($ship) === $this
+			&& !($this->lastSavedOrdReserve === null && (int)$this->reloadPoolSpent === 0)) {
+			$currentOrd = (string)(int)$this->reloadPoolSpent;
+			if ($currentOrd !== $this->lastSavedOrdReserve){
+				$this->individualNotes[] = new IndividualNote(
+					-1,
+					$gamedata->id,
+					$gamedata->turn,
+					$gamedata->phase,
+					$ship->id,
+					$this->id,
+					'hangarOrdReserve',
+					'Hangar ordnance pool spent',
+					$currentOrd
+				);
+				$this->lastSavedOrdReserve = $currentOrd;
+			}
+		}
+
+		//Stage 17 ext: same primary-only persistence for marine pool, same
+		//POST-side reconstruction guard.
+		if (HangarOps::primaryHangar($ship) === $this
+			&& !($this->lastSavedMarinePool === null && (int)$this->marinePoolSpent === 0)) {
+			$currentMar = (string)(int)$this->marinePoolSpent;
+			if ($currentMar !== $this->lastSavedMarinePool){
+				$this->individualNotes[] = new IndividualNote(
+					-1,
+					$gamedata->id,
+					$gamedata->turn,
+					$gamedata->phase,
+					$ship->id,
+					$this->id,
+					'hangarMarineReserve',
+					'Hangar marine pool spent',
+					$currentMar
+				);
+				$this->lastSavedMarinePool = $currentMar;
+			}
+		}
+
+		//Persist hangarUsage snapshot, but only if it has actually changed
+		//since the last saved snapshot. Stage 4+ docking/launching mutate
+		//$hangarUsage and rely on this to snapshot it.
+		$current = json_encode($this->hangarUsage);
+		if ($current === $this->lastSavedUsage) return;
+		//Don't write a useless first-time note for an empty hangar
+		if ($this->lastSavedUsage === null && empty($this->hangarUsage)) return;
+
+		$this->individualNotes[] = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$ship->id,
+			$this->id,
+			'hangarUsage',
+			'Hangar contents',
+			$current
+		);
+		$this->lastSavedUsage = $current;
+	}
+
+	public function criticalPhaseEffects($ship, $gamedata){
+		parent::criticalPhaseEffects($ship, $gamedata);   //preserve base hooks (limpet bore, marine missions, etc.)
+
+		//Hangar Ops Stage 16.3/16.4: a catapult RECOVERS (rear-approach, 16.4)
+		//and LAUNCHES (no initiative penalty, fixed forward, regardless of damage,
+		//16.3) its single fighter. Dock is processed before launch, matching the
+		//hangar order. The hangar-style damage eviction (a catapult ignores its
+		//own damage) and reload servicing are deliberately NOT run for catapults;
+		//the landing-damage rule is added in 16.5.
+		if (!empty($this->isCatapult)) {
+			HangarOps::processDockOrders($this, $ship, $gamedata);
+			HangarOps::processLaunchOrders($this, $ship, $gamedata);
+			return;
+		}
+
+		//1. Apply damage eviction first (per B5W rules: boxes destroyed before
+		//   Post-Turn Actions). This may also reduce stored craft a launch
+		//   order was relying on — if so, the launch's canLaunch() check fails
+		//   gracefully below. Pass $ship/$gamedata so eviction of dockedFlightId
+		//   stash records can also disengage the corresponding fighters in the
+		//   source flight, keeping its rendered combat value in sync.
+		HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
+
+		//2. Process queued dock orders BEFORE launches: a flight that just
+		//   docked frees up no boxes (they're consuming, not vacating) but
+		//   docking-then-launching from the same hangar in one turn must
+		//   respect the shared output budget — landedThisTurn increments
+		//   first so the launch path sees the correct used budget.
+		HangarOps::processDockOrders($this, $ship, $gamedata);
+
+		//3. Service flights docked a full turn (reload ammo on reloadable
+		//   weapons, etc.) BEFORE launches, so a flight that spent this turn
+		//   docked still earns its reload on the very turn it relaunches.
+		//   serviceDockedFlights skips flights that docked THIS turn
+		//   (dockedTurn == current turn); a launch later this step just carries
+		//   the freshly-reloaded ammo out with it.
+		HangarOps::serviceDockedFlights($this, $ship, $gamedata);
+
+		//4. Process queued launch orders (Post-Turn Actions Step). Only runs
+		//   in the Fire Phase advance — Criticals::setCriticals() is only
+		//   called there, and pendingLaunchOrders are filtered to the current
+		//   turn so old orders don't re-fire.
+		HangarOps::processLaunchOrders($this, $ship, $gamedata);
+	}
+
+	/* Receives a JSON-encoded list of launch orders from the client. Per the
+	 * standard FV pattern (see HyachComputer, AdaptiveArmorController) this
+	 * runs DURING ship reconstruction — TacGamedata statics aren't yet set
+	 * and writing notes here would fail with a NULL gameid. So we just
+	 * stash the validated payload into $pendingLaunchTransfer, which
+	 * generateIndividualNotes consumes later in the same request once
+	 * gamedata is hydrated.
+	 *
+	 * Expected payload shape (JSON string):
+	 *   [{"phpclass":"Shuttle","size":3}, {"phpclass":"MinesweepingShuttle","size":6}]
+	 */
+	public function doIndividualNotesTransfer(){
+		$raw = $this->individualNotesTransfer;
+		$this->individualNotesTransfer = '';
+		if (!is_string($raw) || $raw === '') return;
+
+		$payload = json_decode($raw, true);
+		if (!is_array($payload) || empty($payload)) return;
+
+		//Three accepted shapes:
+		//  legacy (Stage 4): a list of {phpclass, size}                    → all launches
+		//  Stage 5:          {"launches": [...], "docks": [...]}
+		//  Stage 7:          + {"deployStarts": [{"flightId": X}, ...]}    → deployment-phase dock orders
+		$launches     = array();
+		$docks        = array();
+		$deployStarts = array();
+		//Whether the client EXPLICITLY sent a launches/docks/deployStarts key — distinguishes
+		//"untouched" (no key) from "intentionally cleared" (key present, empty).
+		//The empty-array case must still create a note so onIndividualNotesLoaded
+		//can replace any prior order from earlier in the same phase.
+		$hasLaunchKey      = false;
+		$hasDockKey        = false;
+		$hasDeployStartKey = false;
+		if (array_key_exists('launches', $payload) || array_key_exists('docks', $payload) || array_key_exists('deployStarts', $payload)) {
+			$hasLaunchKey      = array_key_exists('launches',     $payload);
+			$hasDockKey        = array_key_exists('docks',        $payload);
+			$hasDeployStartKey = array_key_exists('deployStarts', $payload);
+			$launches     = is_array($payload['launches']     ?? null) ? $payload['launches']     : array();
+			$docks        = is_array($payload['docks']        ?? null) ? $payload['docks']        : array();
+			$deployStarts = is_array($payload['deployStarts'] ?? null) ? $payload['deployStarts'] : array();
+		} else {
+			//assume legacy launch-only payload
+			$launches = $payload;
+			$hasLaunchKey = true;
+		}
+
+		//Sanitise launches: keep only well-formed {phpclass, size} entries
+		$cleanLaunches = array();
+		foreach ($launches as $order) {
+			if (!is_array($order)) continue;
+			$phpclass = isset($order['phpclass']) ? (string)$order['phpclass'] : '';
+			$size     = isset($order['size'])     ? (int)$order['size']        : 0;
+			if ($phpclass === '' || $size <= 0) continue;
+			$cleanLaunches[] = array('phpclass' => $phpclass, 'size' => $size);
+		}
+		if ($hasLaunchKey) $this->pendingLaunchTransfer = $cleanLaunches;
+
+		//Sanitise docks: {flightId, count}
+		$cleanDocks = array();
+		foreach ($docks as $order) {
+			if (!is_array($order)) continue;
+			$flightId = isset($order['flightId']) ? (int)$order['flightId'] : 0;
+			$count    = isset($order['count'])    ? (int)$order['count']    : 0;
+			if ($flightId <= 0 || $count <= 0) continue;
+			$cleanDocks[] = array('flightId' => $flightId, 'count' => $count);
+		}
+		if ($hasDockKey) $this->pendingDockTransfer = $cleanDocks;
+
+		//Stage 7: sanitise deployStarts: {flightId}
+		$cleanDeployStarts = array();
+		foreach ($deployStarts as $order) {
+			if (!is_array($order)) continue;
+			$flightId = isset($order['flightId']) ? (int)$order['flightId'] : 0;
+			if ($flightId <= 0) continue;
+			$cleanDeployStarts[] = array('flightId' => $flightId);
+		}
+		if ($hasDeployStartKey) $this->pendingDeployStartTransfer = $cleanDeployStarts;
+	}
+
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->hangarType = $this->hangarType;
+		$strippedSystem->direction = $this->direction;
+		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
+		$strippedSystem->hangarUsage = $this->hangarUsage;
+		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
+		$strippedSystem->landedThisTurn = $this->landedThisTurn;
+		//Stage 15: only the primary hangar carries the carrier-level reload pool.
+		//Send capacity (from HANG_ORD) AND spent so the client can render
+		//remaining without needing to re-derive enhancement totals client-side.
+		$ship = $this->getUnit();
+		if ($ship && HangarOps::primaryHangar($ship) === $this) {
+			$cap = HangarOps::reloadPoolCapacity($ship);
+			if ($cap > 0) {
+				$strippedSystem->reloadPoolCapacity = $cap;
+				$strippedSystem->reloadPoolSpent    = (int)$this->reloadPoolSpent;
+			}
+			//Stage 17 ext: same primary-only pattern for marine pool.
+			$marCap = HangarOps::marinePoolCapacity($ship);
+			if ($marCap > 0) {
+				$strippedSystem->marinePoolCapacity = $marCap;
+				$strippedSystem->marinePoolSpent    = (int)$this->marinePoolSpent;
+			}
+			//Stage 18: ship the escape-roll outcome so the client can render
+			//replay state on the destroyed-carrier row. Only emitted when an
+			//escape roll actually fired (escapeRolled true); a live carrier's
+			//primary hangar omits these fields, matching the pool-capacity
+			//pattern above.
+			if ($this->escapeRolled) {
+				$strippedSystem->escapeRolled = true;
+				$strippedSystem->escapeRoll   = (int)$this->escapeRoll;
+				$strippedSystem->escapeMax    = (int)$this->escapeMax;
+				$strippedSystem->escapeTotal  = (int)$this->escapeTotal;
+				$strippedSystem->escapeNames  = $this->escapeNames;
+			}
+		}
+		//Send last-submitted pending orders so the client can pre-fill the
+		//launch/dock dialogs after a page reload (re-edit a queued order
+		//mid-Firing-Phase, or cancel a queued dock).
+		if ($this->pendingLaunchOrder !== null) $strippedSystem->pendingLaunchOrder = $this->pendingLaunchOrder;
+		if ($this->pendingDockOrder !== null)   $strippedSystem->pendingDockOrder   = $this->pendingDockOrder;
+		return $strippedSystem;
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$isCatapult = !empty($this->isCatapult);
+		if ($isCatapult) {
+			//Stage 16: a catapult holds ONE superheavy fighter; its extra boxes are
+			//structural HP only (capacity is 1, not box count) and it launches
+			//forward / lands from the rear, ignoring its own damage.
+			$this->data["Special"]  = "Fixed launch rail for a single superheavy fighter.";
+			$this->data["Special"] .= "<br>Launches forward only.";
+			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+		} else {
+			$this->data["Special"]  = "System responsible for launching and carrying docked fighter craft.";
+			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+			$this->data["Launch Rate"] = $this->output;
+		}
+		$this->data["Type"] = ucwords($this->hangarType);
+
+		$totalStored = HangarOps::usageCountFor($this);
+		$maxCapacity = $isCatapult ? 1 : $this->maxhealth;
+		$this->data["Capacity"] = $totalStored . " / " . $maxCapacity . " slots";
+		//"Stored Craft" line is computed client-side via Hangar.refreshHangarTooltip
+		//(baseSystems.js) — it has access to pendingDockOrders/pendingLaunchOrders
+		//for the live projection, which the server-side render doesn't.
+	}
 }
 
 
-class Catapult extends ShipSystem{
+class Catapult extends Hangar{
     public $name = "catapult";
     public $displayName = "Catapult";
-    public $squadrons = Array();
     public $primary = false; //changed from true on 21.11 - let's not consider it a core system after all!
-    
+
 	//Catapult is not impotant at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
+
+	// === Hangar Ops Stage 16 ===
+	// A Catapult is a constrained Hangar: it holds exactly ONE superheavy
+	// fighter, launches only forward (direction 0), lands only from the rear,
+	// services a single fighter type, applies NO launch initiative penalty, and
+	// operates regardless of damage. $isCatapult is the single discriminator the
+	// HangarOps call sites branch on. Its extra boxes are structural HP only and
+	// must NOT contribute to the default-shuttle pool (HangarOps excludes them).
+	//
+	// Stage 16.1/16.2 wire up the data model (capacity tracking, no shuttle-pool
+	// contribution, "1 slot" capacity display). Launch/land/landing-damage are
+	// staged separately (16.3-16.5); until then Hangar::criticalPhaseEffects
+	// early-returns for catapults and the client launch/dock UI excludes them
+	// (every helper filters on name === 'hangar').
+	public $isCatapult = true;
+
     function __construct($armour, $maxhealth, $output = 1){
-        parent::__construct($armour, $maxhealth, 0, $output );
- 
+		// Hangar ctor: ($armour, $maxhealth, $output, $direction, $hangarType, $spawnableClasses)
+		// Fixed forward launch (direction 0); superheavy-only by design.
+        parent::__construct($armour, $maxhealth, $output, 0, 'superheavy');
     }
 }
 
@@ -3454,10 +3981,12 @@ class HkControlNode extends ShipSystem{
 		$howPartial = HkControlNode::getUncontrolledMod($playerID,$gamedata);
 		$iniModifier = HkControlNode::$fullIniPenalty*$howPartial;
 		    
+		/* //No long required as Hangars Operations now exist
 		if($gamedata->turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
 			$iniModifier+=HkControlNode::$fullIniPenalty;
 		}		
-		
+		*/
+
 		$iniModifier = floor($iniModifier);
 		return $iniModifier;
 	}//endof function getIniMod
@@ -7793,6 +8322,21 @@ class AmmoMagazine extends ShipSystem {
 public function onIndividualNotesLoaded($gamedata) {
     foreach ($this->individualNotes as $currNote) { // Assume ASCENDING sorting - so enact all changes as is
         switch ($currNote->notekey) {
+            case 'AmmoReplenished': // Stage 15: a round was restocked while this flight sat docked
+                // Mirror of AmmoUsed but reversed. Values may go positive temporarily relative
+                // to setEnhancementsFighter's addAmmoEntry which runs AFTER this hook at game
+                // load (TacGamedata::onConstructed) — addAmmoEntry then adds the base load on
+                // top, giving the correct "starting - used + restocked" final count.
+                if (!array_key_exists($currNote->notevalue, $this->ammoCountArray)) {
+                    $this->ammoCountArray[$currNote->notevalue] = 0;
+                }
+                if (!array_key_exists($currNote->notevalue, $this->ammoUsedTotal)) {
+                    $this->ammoUsedTotal[$currNote->notevalue] = 0;
+                }
+                $this->ammoCountArray[$currNote->notevalue] += 1;
+                $this->ammoUsedTotal[$currNote->notevalue]  -= 1;
+                break;
+
             case 'AmmoUsed': // Mode name for ammunition type that was expended
                 // Entry may not exist yet! Due to when enhancements and notes are loaded - in this case, initialize them - values will get negative for a moment, but it's not a problem
                 if (!array_key_exists($currNote->notevalue, $this->ammoCountArray)) {
@@ -7824,8 +8368,91 @@ public function onIndividualNotesLoaded($gamedata) {
         if(is_array($this->individualNotesTransfer)) foreach($this->individualNotesTransfer as $modeName)  $this->ammoJustUsed[] = $modeName;
         $this->individualNotesTransfer = array(); //empty, just in case
     }
- 
-	
+
+	/* Stage 15: rearm at most one missile per turn while this fighter sits docked.
+	 * Driven by HangarOps::serviceDockedFlights, same per-turn tick that drives
+	 * Weapon::whileDocked for matter-weapon ammo. Eligible missile types are
+	 * derived from the docked FLIGHT's AMMO_F* enhancements (purchased load); the
+	 * starting load per fighter equals the enhancement count, so a missile is
+	 * "missing" iff ammoCountArray[mode] < enhancementCount. Most-expensive
+	 * missing type goes first; the carrier's reload pool (HANG_ORD) pays the
+	 * missile's enhancementPrice via HangarOps::drawReload. If the most expensive
+	 * candidate can't be afforded, fall through to the next.
+	 *
+	 * Persistence: writes an AmmoReplenished IndividualNote attached to THIS
+	 * magazine. The hangarOrdReserve note on the carrier's primary hangar is
+	 * persisted by the standard Hangar::generateIndividualNotes change-detection.
+	 * The launch-replay timeline shows neither (the rearm is silent on the carrier
+	 * side); the next turn-load reconstructs the magazine's state from the notes. */
+	public function whileDocked($flight, $carrier, $hangar, $gamedata){
+		if (!($flight instanceof FighterFlight)) return;
+		if (!isset($flight->enhancementOptions) || !is_array($flight->enhancementOptions)) return;
+		if ($this->isDestroyed($gamedata->turn)) return;
+		//Walk the flight's AMMO_F* enhancements and build a price-sorted list of
+		//restock candidates. Each AMMO_F* enhancement maps 1:1 to an AmmoMissileF*
+		//class via its modeName + enhancementPrice — same set setEnhancementsFighter
+		//instantiates when applying the initial load.
+		static $ammoMap = array(
+			'AMMO_FB'  => 'AmmoMissileFB',
+			'AMMO_FL'  => 'AmmoMissileFL',
+			'AMMO_FH'  => 'AmmoMissileFH',
+			'AMMO_FY'  => 'AmmoMissileFY',
+			'AMMO_FD'  => 'AmmoMissileFD',
+			'AMMO_DUM' => 'AmmoMissileFDum',
+		);
+		$candidates = array();
+		foreach ($flight->enhancementOptions as $opt){
+			$enhID    = (string)($opt[0] ?? '');
+			$enhCount = (int)($opt[2] ?? 0);
+			if ($enhCount <= 0)                continue;
+			if (!isset($ammoMap[$enhID]))      continue;
+			$className = $ammoMap[$enhID];
+			if (!class_exists($className))     continue;
+			$ammoClass = new $className();
+			$modeName  = $ammoClass->modeName;
+			//Only restock types this magazine actually carries.
+			if (!array_key_exists($modeName, $this->ammoCountArray)) continue;
+			//"Missing" relative to the starting per-fighter load (enhCount).
+			$current = (int)$this->ammoCountArray[$modeName];
+			if ($current >= $enhCount) continue;
+			$candidates[] = array(
+				'modeName' => $modeName,
+				'price'    => (int)$ammoClass->getPrice($flight),
+			);
+		}
+		if (empty($candidates)) return;
+		//Most expensive first.
+		usort($candidates, function($a, $b){ return $b['price'] - $a['price']; });
+		//Try each in order until one fits the remaining pool. Cheap-type
+		//fallback lets a partial reload happen even when the priciest type
+		//is out of reach — better than failing silently.
+		foreach ($candidates as $cand){
+			if (!HangarOps::drawReload($carrier, $cand['price'])) continue;
+			$this->ammoCountArray[$cand['modeName']] += 1;
+			if (!array_key_exists($cand['modeName'], $this->ammoUsedTotal)) $this->ammoUsedTotal[$cand['modeName']] = 0;
+			$this->ammoUsedTotal[$cand['modeName']] -= 1;
+			//Persist the restock. Note attaches to flight + magazine ids so
+			//reload reconstructs it via onIndividualNotesLoaded above. Use
+			//$flight->id explicitly (not $this->getUnit()) — the magazine is a
+			//subsystem of a Fighter which is itself a subsystem of the flight,
+			//and getUnit()'s exact resolution path varies; the caller already
+			//hands us the authoritative flight.
+			$note = new IndividualNote(
+				-1,
+				$gamedata->id,
+				$gamedata->turn,
+				$gamedata->phase,
+				$flight->id,
+				$this->id,
+				'AmmoReplenished',
+				'Ammunition Magazine - a round restocked',
+				$cand['modeName']
+			);
+			Manager::insertIndividualNote($note);
+			return;   //1 missile per fighter per turn
+		}
+	}
+
 } //endof AmmoMagazine
 
 

@@ -14,7 +14,7 @@ class Lekra extends MediumShip{
         $this->canvasSize = 70;
 	    
 	    $this->isd = 2245;
-        $this->fighters = array("assault shuttles"=>1);
+        //$this->fighters = array("assault shuttles"=>1);
 
 	    $this->notes = 'Atmospheric Capable.';
         $this->agile = true;

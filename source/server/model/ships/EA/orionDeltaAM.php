@@ -9,7 +9,9 @@ class OrionDeltaAM extends StarBaseSixSections{
         $this->faction = "Earth Alliance";       
 		$this->phpclass = "OrionDeltaAM";
 		$this->shipClass = "Orion Battle Station (Delta)";
-		$this->fighters = array("heavy"=>36); 
+		$this->fighters = array("heavy"=>36);
+		$this->customFighter = array("Thunderbolt"=>36);			
+		$this->notes = 'Thunderbolt capable.'; 
 		
 		$this->occurence = "common";
 		$this->variantOf = 'Orion Battle Station';

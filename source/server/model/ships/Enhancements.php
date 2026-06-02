@@ -46,7 +46,10 @@ class Enhancements{
 	  }else{ //enhancements for ships
 		$unit->enhancementOptionsDisabled[] = 'ELITE_CREW';
 		$unit->enhancementOptionsDisabled[] = 'HANG_F';
-		$unit->enhancementOptionsDisabled[] = 'HANG_AS';					 
+		$unit->enhancementOptionsDisabled[] = 'HANG_AS';
+		$unit->enhancementOptionsDisabled[] = 'HANG_BP';
+		$unit->enhancementOptionsDisabled[] = 'HANG_MSW';
+		$unit->enhancementOptionsDisabled[] = 'HANG_ORD';
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
@@ -240,16 +243,110 @@ class Enhancements{
 	  //To convert Fighter hangar slots to Assault Shuttle Slots
 	  $keysToCheck = ["normal", "heavy", "medium"]; //Light and Ultralight cannot be converted.
 	  $matchingKeys = array_intersect_key($ship->fighters, array_flip($keysToCheck)); // Find matching keys
-	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys 
-	  if ($totalCount > 0) { 	  
+	  $totalCount = array_sum($matchingKeys); // Sum up the values of the found keys
+	  if ($totalCount > 0) {
 	    $enhID = 'HANG_AS';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = 'Fighter to Assault Shuttle slot';
 				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
-				$enhPrice = 5; //Flat 5 pts per slot converted	  
+				$enhPrice = 5; //Flat 5 pts per slot converted
 				$enhPriceStep = 0; //flat rate
-				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);	
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		}
+	  }
+
+	  //Shuttle-slot conversions — default shuttles auto-populate leftover
+	  //hangar capacity (HangarOps::populateInitialHangarUsage step 3), so the
+	  //available pool is derived from HangarOps::getDefaultShuttles rather
+	  //than an explicit 'shuttles' key in $ship->fighters.
+	  $defaultShuttles = HangarOps::getDefaultShuttles($ship);
+	  if ($defaultShuttles['count'] > 0) {
+
+	    //To convert default Shuttle (or Minesweeping Shuttle) slots to Breaching Pod slots.
+	    //Works on both regular-shuttle and minesweeper-bonus carriers — adding to
+	    //"Breaching Pods" steals from whichever default pool the leftover capacity is
+	    //feeding (Shuttles or MinesweepingShuttles).
+	    $enhID = 'HANG_BP';
+		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = ($defaultShuttles['key'] === 'minesweeping shuttles')
+					? 'Shuttle to Breaching Pod slot' //Can add a specific minesweeping shuttle reference, but brevity is better in Confirm window for now.
+					: 'Shuttle to Breaching Pod slot';
+				$enhLimit = $defaultShuttles['count']; //leftover hangar capacity = default shuttle pool
+				$enhPrice = 10; //Flat 10 pts per slot converted
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		}
+
+	    //To convert default Shuttle units to Minesweeping Shuttle units — only meaningful
+	    //when the default pool is regular shuttles; minesweeper-bonus carriers already
+	    //auto-populate Minesweeping Shuttles via HangarOps step 3.
+	    if ($defaultShuttles['key'] === 'shuttles') {
+	      $enhID = 'HANG_MSW';
+		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Shuttle to Minesweeping Shuttle';
+				$enhLimit = $defaultShuttles['count'];
+				//Per B5W: 10pts or 20% of MinesweepingShuttle cost, whichever is higher.
+				//MinesweepingShuttle auto-populates with pointCost=0, so floor of 10 currently wins.
+				$enhPrice = 10;
+				$enhPriceStep = 0; //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+	    }
+	  }
+
+	  //Stage 15 — Extra Ordnance: carrier-level reload-points pool for docked
+	  //fighter missiles. 1 CP buys 1 reload point; a docked flight's
+	  //AmmoMagazine::whileDocked spends points equal to a restocked missile's
+	  //own enhancementPrice when re-arming. Read on demand from this option's
+	  //count by HangarOps::reloadPoolCapacity — no $ship mutation needed.
+	  //
+	  //Gated to carriers in factions that actually field missile-equipped
+	  //fighters (the only fleets where the pool can be drawn from). Restricted
+	  //to ships with a Hangar so non-carrier missile-faction ships (escorts,
+	  //bases without hangars) don't see it.
+	  $missileFactionWhitelist = array(
+		  'Earth Alliance', 'Earth Alliance (Early)',
+		  'Centauri Republic', 'Centauri Republic (WotCR)',
+		  'Narn Regime',
+		  'Dilgar Imperium',
+		  'Orieni Imperium', 'Orieni Imperium (defenses)',
+		  'Gaim Intelligence',
+		  'Hurr Republic',
+		  'Cascor Commonwealth',
+		  'Kor-Lyan Kingdoms',
+		  'Belt Alliance',
+		  'Rogolon Dynasty',
+		  'Raiders', 'Custom Ships',
+	  );
+	  $fighterSlotKeys = ['normal', 'heavy', 'medium', 'light', 'ultralight'];
+	  $hasFighters = array_sum(array_intersect_key($ship->fighters ?? [], array_flip($fighterSlotKeys))) > 0;
+	  if ($hasFighters && in_array($ship->faction, $missileFactionWhitelist, true)) {
+		  $enhID = 'HANG_ORD';
+		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
+				$enhName = 'Ballistic Ordnance Reserve';
+				$enhLimit = 200;            //practical ceiling — six AMMO_FH heavies (8 PV ea) on a 6-fighter heavy missile flight
+				$enhPrice = 1;             //1 CP = 1 reload point
+				$enhPriceStep = 0;         //flat rate
+				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
+		  }
+	  }
+
+	  //Stage 17 extension — Extra Marine Contingents: ship-level pool used to
+	  //restock Marines weapons on Breaching Pods docked in this ship's hangars.
+	  //Each enhancement point buys 1 marine unit at 10 CP; pool capacity is
+	  //read on demand by HangarOps::marinePoolCapacity from this entry's count.
+	  //Spent total persists on the primary hangar via the hangarMarineReserve
+	  //note (parallel to Stage 15's hangarOrdReserve). Available to all ships
+	  //per design — non-carrier ships can buy it but never trigger drawdown
+	  //(serviceDockedFlights iterates hangar contents, so no hangar = no draw).
+	  //Limit: 1% of ship's base point cost, rounded up.
+	  $enhID = 'MAR_CONT';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){
+		  $enhName = 'Extra Marine Contingents';
+		  $enhLimit = max(1, (int)ceil($ship->pointCost / 100));   //1% of PV, rounded up; minimum 1
+		  $enhPrice = 10;            //10 CP per marine
+		  $enhPriceStep = 0;         //flat rate
+		  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 	  }
 
 	  $enhID = 'IFF_SYS';
@@ -1332,7 +1429,7 @@ class Enhancements{
 	  $enhID = 'EXT_AMMO';	  
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Additional Ammo for Gun';
-		  $enhLimit = 4;	
+		  $enhLimit = 2;	
 		  $enhPrice = 3; //price per craft, while flight price is per 6-craft flight	  
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
@@ -1861,11 +1958,68 @@ class Enhancements{
 						}
 						break;	
 
-					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.  
-						break;	
+					case 'HANG_F'://Hangar Conversion of AS slot to (Heavy) Fighter slot.
+						//Mirror of gamelobby.js shipProfile.slots tracking. Mutating
+						//$ship->fighters lets universal-slot hangarAcceptsCategory
+						//and downstream consumers see the post-conversion shape;
+						//addShipEnhancementsForJSON emits the array to the client.
+						//"normal" is a legacy alias for "heavy" — preserve whichever
+						//key the ship file declared (gamelobby.js does the same via
+						//lship.fighters["heavy"] || lship.fighters["normal"]).
+						$ship->fighters["assault shuttles"] = max(0, ($ship->fighters["assault shuttles"] ?? 0) - $enhCount);
+						$heavyKey = isset($ship->fighters["heavy"]) ? "heavy"
+								  : (isset($ship->fighters["normal"]) ? "normal" : "heavy");
+						$ship->fighters[$heavyKey] = ($ship->fighters[$heavyKey] ?? 0) + $enhCount;
+						break;
 
-					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.  
-						break;	
+					case 'HANG_AS'://Hangar Conversion of (Heavy/Medium) Fighter slot to Assault Shuttle slot.
+						//Deduct from heavy/normal first, then medium for the
+						//remainder — same order as gamelobby.js shipProfile.slots
+						//tracking. "normal" is a legacy alias for "heavy" (see the
+						//$keysToCheck list in HANG_AS registration above).
+						$toDeduct = $enhCount;
+						foreach (array("heavy", "normal") as $heavyKey) {
+							if ($toDeduct <= 0) break;
+							$avail = ($ship->fighters[$heavyKey] ?? 0);
+							if ($avail <= 0) continue;
+							$taken = min($toDeduct, $avail);
+							$ship->fighters[$heavyKey] = $avail - $taken;
+							$toDeduct -= $taken;
+						}
+						if ($toDeduct > 0) {
+							$ship->fighters["medium"] = max(0, ($ship->fighters["medium"] ?? 0) - $toDeduct);
+						}
+						$ship->fighters["assault shuttles"] = ($ship->fighters["assault shuttles"] ?? 0) + $enhCount;
+						break;
+
+					case 'HANG_BP'://Convert default Shuttle slots to Breaching Pod slots
+						//Default shuttles auto-populate leftover hangar capacity, so adding
+						//to "Breaching Pods" implicitly steals from that leftover pool —
+						//no explicit "shuttles" decrement needed.
+						$ship->fighters["Breaching Pods"] = ($ship->fighters["Breaching Pods"] ?? 0) + $enhCount;
+						break;
+
+					case 'HANG_MSW'://Convert default Shuttle units to Minesweeping Shuttle units
+						//Does NOT change $ship->fighters — minesweeping shuttles still
+						//count as default shuttle capacity for fleet-check purposes.
+						//Instead, HangarOps::populateInitialHangarUsage reads HANG_MSW
+						//count directly and splits leftover-capacity auto-population
+						//between MinesweepingShuttle and regular Shuttle records.
+						break;
+
+					case 'HANG_ORD'://Stage 15 — Extra Ordnance Reserve (carrier-level reload pool)
+						//No $ship mutation needed. Pool capacity is re-derived on every
+						//load by HangarOps::reloadPoolCapacity reading this enhancement
+						//count directly; spent total persists via the hangarOrdReserve
+						//note on the primary hangar.
+						break;
+
+					case 'MAR_CONT'://Stage 17 ext — Extra Marine Contingents (ship-level marine pool)
+						//No $ship mutation needed. Pool capacity is re-derived on every
+						//load by HangarOps::marinePoolCapacity reading this enhancement
+						//count directly; spent total persists via the hangarMarineReserve
+						//note on the primary hangar. Drawn from by Marines::whileDocked.
+						break;
 												
 					case 'IFF_SYS': //Add IFF system for Mine Launcher ships.
 						//Mark true
@@ -2441,8 +2595,19 @@ class Enhancements{
 						case 'SLUGGISH': //Sluggish: Initiative  modified
 							$strippedShip->iniativebonus = $ship->iniativebonus;
 							break;
-					
-					}					
+
+						case 'HANG_F':  //AS slot → Heavy fighter slot
+						case 'HANG_AS': //Heavy/Medium fighter slot → AS slot
+						case 'HANG_BP': //Default shuttle slot → Breaching Pod slot
+							//stripForJson omits $ship->fighters (client normally pulls
+							//it from window.staticShips), so universal-hangar
+							//hangarAcceptsCategory checks on the client would miss
+							//these conversions. Emit the post-enhancement array so
+							//the client sees the same shape the server uses.
+							$strippedShip->fighters = $ship->fighters;
+							break;
+
+					}
 				}
 		    }
 			return $strippedShip;
