@@ -58,22 +58,35 @@ try {
     if (file_exists($jsonPath)) {
         // Serve static file directly
         header('X-Source: Static');
-        
+
         // Enable Browser Caching with Validation
         $lastModifiedTime = filemtime($jsonPath);
         $etag = md5_file($jsonPath);
-        
+
         header("Last-Modified: " . gmdate("D, d M Y H:i:s", $lastModifiedTime) . " GMT");
         header("Etag: $etag");
-        header('Cache-Control: no-cache, must-revalidate'); // Require validation every time
 
-        // Check if browser has cached version
-        if (
-            (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= $lastModifiedTime) ||
-            (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag)
-        ) {
-            header("HTTP/1.1 304 Not Modified");
-            exit;
+        // Caching strategy depends on whether the caller versioned the URL.
+        // The lobby appends ?v=<filemtime> (see window.factionVersions / gamelobby.php),
+        // which makes the URL change whenever the ship data changes. A versioned URL
+        // is therefore safe to cache long-term & immutably — the browser serves it
+        // instantly without a revalidation round-trip, and a patch's new ?v= forces a
+        // fresh fetch. Unversioned callers keep the old must-revalidate behaviour so
+        // they can never go stale.
+        if (isset($_GET['v']) && $_GET['v'] !== '') {
+            // Versioned URL — safe to cache forever; no revalidation needed.
+            header('Cache-Control: public, max-age=31536000, immutable');
+        } else {
+            header('Cache-Control: no-cache, must-revalidate'); // Require validation every time
+
+            // Check if browser has cached version (unversioned callers only)
+            if (
+                (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) >= $lastModifiedTime) ||
+                (isset($_SERVER['HTTP_IF_NONE_MATCH']) && trim($_SERVER['HTTP_IF_NONE_MATCH']) === $etag)
+            ) {
+                header("HTTP/1.1 304 Not Modified");
+                exit;
+            }
         }
         header('Pragma: cache');
         // Buffer output, gzip is handled natively by zlib.output_compression

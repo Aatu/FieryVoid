@@ -28,7 +28,16 @@ class Manager{
     private static function getCachePrefix() {
         global $database_name;
         // Use a safe fallback if for some reason db name is missing, though strictly it should be there.
-        return ($database_name ?? 'default') . '_';
+        // Include the deploy version so a code patch automatically orphans all
+        // APCu entries produced by the previous code. Without this, the per-game
+        // JSON cache (validated only against the game's last_update timestamp) can
+        // survive a deploy and keep serving old-shape gamedata — e.g. system ids
+        // not matching the new system count — until the game is next touched.
+        // AssetLoader is loaded by global.php on every live request; guard anyway
+        // so any non-web context that lacks it degrades to the old prefix instead
+        // of fataling (it just won't get deploy-scoped invalidation).
+        $deployVersion = class_exists('AssetLoader') ? AssetLoader::getDeployVersion() : 'v0';
+        return ($database_name ?? 'default') . '_' . $deployVersion . '_';
     }
 
     public static function setDBManager(DBManager $dbManager) {
