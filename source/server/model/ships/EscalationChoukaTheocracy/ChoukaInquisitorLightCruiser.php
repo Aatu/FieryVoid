@@ -31,7 +31,7 @@ class ChoukaInquisitorLightCruiser extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 11, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 13, 5, 5));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 4));
-		$this->addPrimarySystem(new Hangar(3, 8));
+		$this->addPrimarySystem(new Hangar(3, 8, 6));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 6, 1));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));

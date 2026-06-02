@@ -9,7 +9,7 @@ class ChoukaPledgeMinelayer extends MediumShip{
         $this->phpclass = "ChoukaPledgeMinelayer";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRevelation.png";
         $this->shipClass = "Pledge Minelayer";
-			$this->variantOf = "Flagellant Armed Freighter";
+			$this->variantOf = "Revelation War Barge";
 			$this->occurence = "uncommon";		
 		$this->unofficial = true;
         $this->canvasSize = 75;
@@ -29,7 +29,7 @@ class ChoukaPledgeMinelayer extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
 		$this->addPrimarySystem(new CargoBay(3, 16));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        

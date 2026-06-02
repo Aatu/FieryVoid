@@ -16,11 +16,13 @@ class PolarenDrinev extends MediumShip{
         $this->agile = true;
 	    $this->isd = 1730;
 
+        $this->fighters = array("assault shuttles"=>1); //1 breaching pod  
 	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         
+		$this->agile = true;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.5;
         $this->accelcost = 2;
@@ -43,14 +45,14 @@ class PolarenDrinev extends MediumShip{
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
 		$this->addFrontSystem(new Bulkhead(0, 2));
 	    
-		$this->addAftSystem(new Maser(2, 6, 3, 120, 360));
-		$this->addAftSystem(new Maser(2, 6, 3, 0, 240));
+		$this->addAftSystem(new StunBeam(2, 6, 5, 180, 360));
+		$this->addAftSystem(new StunBeam(2, 6, 5, 0, 180));
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
-		$this->addAftSystem(new Hangar(1, 1));
+		$this->addAftSystem(new Hangar(1, 1, 1));
 		$this->addAftSystem(new Bulkhead(0, 2));
         
-        $this->addPrimarySystem(new Structure(3, 33));
+        $this->addPrimarySystem(new Structure(4, 33));
 
 	//d20 hit chart
 	$this->hitChart = array(
@@ -74,7 +76,7 @@ class PolarenDrinev extends MediumShip{
 
 		2=> array(
 			6 => "Thruster",
-			8 => "Maser",
+			8 => "Stun Beam",
 			9 => "Hangar",
 			17 => "Structure",
 			20 => "Primary",

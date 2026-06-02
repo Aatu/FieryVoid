@@ -13,7 +13,7 @@ class VelraxGunboatRefit2 extends LCV{
 		$this->unofficial = true;
 			$this->isd = 2110;
 
-        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
+//        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'Atmospheric Capable.';
 	    $this->notes .= '<br>May deploy independently.';
         

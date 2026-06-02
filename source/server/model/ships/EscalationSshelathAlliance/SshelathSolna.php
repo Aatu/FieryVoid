@@ -28,7 +28,7 @@ class SshelathSolna extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 11, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 18, 0, 8, 2));
 
         $this->addFrontSystem(new Railgun(2, 9, 6, 270, 90));

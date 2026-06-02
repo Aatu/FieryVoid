@@ -42,7 +42,7 @@ class KastanIronbladeRefit2AM extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 15, 3, 7));
         $this->addPrimarySystem(new Engine(4, 18, 0, 12, 3));
 		$this->addPrimarySystem(new AmmoMissileRackSO(4, 0, 0, 0, 360, $ammoMagazine, false));
-		$this->addPrimarySystem(new Hangar(4, 8));
+		$this->addPrimarySystem(new Hangar(4, 8, 6));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 24));
 		
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));

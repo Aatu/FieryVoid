@@ -42,7 +42,7 @@ class QomYominMaYol extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(4, 18, 0, 6, 3));
         $this->addAftSystem(new Thruster(3, 13, 0, 6, 1));
         $this->addAftSystem(new Thruster(3, 15, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
 		
         $this->addLeftSystem(new Thruster(3, 15, 0, 6, 3));
 		$this->addLeftSystem(new EWHeavyRocketLauncher(3, 6, 2, 300, 60));

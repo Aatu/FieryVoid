@@ -13,6 +13,8 @@ class BloodSwordRazor extends MediumShip{
         $this->agile = true;		
         $this->canvasSize = 75;
 	    $this->isd = 1940;
+
+	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 11;
         $this->sideDefense = 12;
@@ -28,7 +30,7 @@ class BloodSwordRazor extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 3, 4));        
         

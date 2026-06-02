@@ -2145,4 +2145,129 @@ class TractingRodHandler {
 // END MATTER WEAPONS
 
 
+
+
+
+class ChoukaMineLauncher extends BallisticMineLauncher{
+	public $name = "ChoukaMineLauncher";
+    public $displayName = "Mine Launcher";
+    public $iconPath = "BallisticMineLauncher.png";
+
+    // Overrides parent — Chouka launcher spawns its own mine types.
+    public $spawnableClasses = [
+        'spawnCaptorMineVA',
+        'spawnCaptorMineVB',
+        'spawnCaptorMineVC',
+    ];
+	
+    public $range = 30;
+    public $distanceRange = 60;   
+    
+	//basic launcher data, before being modified by actual missiles
+	protected $basicFC=array(0,0,0);
+	protected $basicRange = 30;
+	protected $basicDistanceRange = 60; //Just so scattering past 30 hexes doesn't cause an issue.
+	
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base=false)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 7;
+            	if ( $powerReq == 0 ) $powerReq = 4;
+
+		//Set mine availability! (Cannot fire missiles like S-Rack)
+		if(!$this->availableAmmoAlreadySet){
+			$this->ammoClassesArray = array();
+			$this->ammoClassesArray[] =  new AmmoVedasA();			
+			$this->ammoClassesArray[] =  new AmmoVedasB();					
+			$this->ammoClassesArray[] =  new AmmoVedasC();					
+			$this->availableAmmoAlreadySet = true;
+		}	            		
+            						
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $magazine, $base); //Parent routines take care of the rest
+	}   
+	
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Range"] = $this->range; //Don't need to display distanceRange like Missile Racks do :)
+		$this->data["Special"] = 'Available firing modes depend on ammo, tracked in Ammo Magazine system.';
+		$this->data["Special"] = 'Hex-targeted weapon with a 25% chance to scatter.';
+		$this->data["Special"] .= '<br>Will try to attack the closest ship from the hex where it detonates, up to its maximum radius and can be intercepted.';
+		$this->data["Special"] .= '<br>If several ships are of equal distance to the mines, it will choose a target randomly.';		
+		$this->data["Special"] .= '<br>Damage, Fire Control and Range from target hex depends on ammo type:';	
+		$this->data["Special"] .= '<br>  - A-Vedas: 12 damage, +3 to hit and 4 hex radius.';	
+		$this->data["Special"] .= '<br>  - B-Vedas: 15 damage, +4 to hit and 5 hex radius.';	
+		$this->data["Special"] .= '<br>  - C-Vedas: 18 damage, +6 to hit and 6 hex radius.';	
+		$this->data["Special"] .= '<br>If no targets are available the mine will remain in place until destroyed or it finds a target.';															
+		$this->data["Special"] .= '<br>See Fiery Void FAQ for more details about Mines.';		
+	}	
+	
+    public function createLoiteringMine($gamedata, $fireOrder, $shooter, $mineRange, $IFFSystem){
+		$mine = null;
+		switch($mineRange){ //We can discern mine type here by it's range.
+			case 8:
+				$mine = new spawnCaptorMineVA($gamedata->id, $shooter->userid, "Vedas-A Captor Mine", $shooter->slot);					
+				break;
+			case 9:
+				$mine = new spawnCaptorMineVB($gamedata->id, $shooter->userid, "Vedas-B Captor Mine", $shooter->slot);
+				break;
+			case 10:
+				$mine = new spawnCaptorMineVC($gamedata->id, $shooter->userid, "Vedas-C Captor Mine", $shooter->slot);			
+				break;
+			default:
+				$mine = new spawnCaptorMineVA($gamedata->id, $shooter->userid, "Vedas-A Captor Mine", $shooter->slot);
+				break;			
+		}	
+		if($mine !== null) {
+			$shipid = Manager::insertSingleShip($gamedata, $mine, $shooter->userid);
+			$mine->spawned = $gamedata->turn;
+
+			if($IFFSystem){ //Pass IFF enhancement on to newly created mine!
+				Manager::insertSingleEnhancement($gamedata, $shipid, 'IFF_SYS', 1, 'Identify Friend or Foe (IFF) System');
+			}
+
+		//Create new movement orders to $targetPos.
+        $deployMine = new MovementOrder(null, "deploy", new OffsetCoordinate($fireOrder->x, $fireOrder->y), 0, 0, 0, 0, 0, false, $gamedata->turn, 0, 0);
+		//Add movement order to database
+		Manager::insertSingleMovement($gamedata->id, $shipid, $deployMine);	
+
+        // Initialize weapon loading so the mine doesn't spawn uncharged
+        $mine->id = $shipid;
+        SystemData::initSystemData($gamedata->turn, $gamedata->id);
+        foreach ($mine->systems as $system) {
+            $system->setInitialSystemData($mine);
+            if ($system instanceof Weapon) {
+                $load = $system->getStartLoading();
+                if ($load) {
+                    $load->loading = $system->loadingtime; // Set to fully loaded
+                    SystemData::addDataForSystem($system->id, 0, $shipid, $load->toJSON());
+                }
+            }
+        }
+        Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+
+			//Now create a note so we remember what turn mine was created.
+			$note = new IndividualNote(
+						-1,
+						$gamedata->id,
+						1, // Set to 1 so the note is loaded in replay for all turns
+						1, 
+						$shooter->id,
+						$this->id,
+						$shipid,
+						"New Mine spawned",
+						$gamedata->turn
+			);
+
+			Manager::insertIndividualNote($note);
+
+		}
+	}
+
+
+} //endof class ChoukaMineLauncher
+
+
+
+
+
+
 ?>

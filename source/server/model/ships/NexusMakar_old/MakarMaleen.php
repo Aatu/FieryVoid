@@ -37,7 +37,7 @@ class MakarMaleen extends HeavyCombatVessel{
 		$sensors = new Scanner(3, 16, 4, 6);
 			$sensors->markSensorFlux();
 			$this->addPrimarySystem($sensors);
-        $this->addPrimarySystem(new Hangar(0, 2));
+        $this->addPrimarySystem(new Hangar(0, 2, 2));
 		$this->addPrimarySystem(new NexusDefenseGun(1, 4, 1, 0, 360));
 		$this->addPrimarySystem(new NexusDefenseGun(1, 4, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));

@@ -29,7 +29,7 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 30, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 24, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 16, 6, 6));
-		$this->addPrimarySystem(new Hangar(5, 18));
+		$this->addPrimarySystem(new Hangar(5, 12, 12));
 		$this->addPrimarySystem(new Magazine(5, 24));
 		$this->addPrimarySystem(new NexusAssaultCannonBattery(5, 16, 10, 0, 360));
 		
@@ -44,7 +44,7 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
 			$this->addFrontSystem($cargoBay);
-			$hangar = new Hangar(4, 3);
+			$hangar = new Hangar(4, 3, 3);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);
@@ -60,7 +60,7 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 90;
 			$cargoBay->endArc = 270;
 			$this->addAftSystem($cargoBay);
-			$hangar = new Hangar(4, 3);
+			$hangar = new Hangar(4, 3, 3);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
 			$this->addAftSystem($hangar);
@@ -76,7 +76,7 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 360;
 			$this->addLeftSystem($cargoBay);
-			$hangar = new Hangar(4, 3);
+			$hangar = new Hangar(4, 3, 3);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
 			$this->addLeftSystem($hangar);
@@ -92,7 +92,7 @@ class CraytanOlipanCombat extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
 			$this->addRightSystem($cargoBay);
-			$hangar = new Hangar(4, 3);
+			$hangar = new Hangar(4, 3, 3);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
 			$this->addRightSystem($hangar);

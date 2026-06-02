@@ -4,7 +4,7 @@ class PolarenPrevnoran extends BaseShipNoAft{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 580;
+		$this->pointCost = 570;
 		$this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenPrevnoran";
         $this->imagePath = "img/ships/Nexus/polarenOranet.png";
@@ -21,8 +21,8 @@ class PolarenPrevnoran extends BaseShipNoAft{
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
         
-        $this->turncost = 1;
-        $this->turndelaycost = 1;
+        $this->turncost = 0.75;
+        $this->turndelaycost = 0.75;
         $this->accelcost = 3;
         $this->rollcost = 3;
         $this->pivotcost = 3;
@@ -32,7 +32,7 @@ class PolarenPrevnoran extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 12, 6, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
 		$this->addPrimarySystem(New JumpEngine(3, 12, 6, 36));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 4, 2));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 4, 2));
@@ -41,7 +41,7 @@ class PolarenPrevnoran extends BaseShipNoAft{
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
 		$this->addFrontSystem(new CargoBay(1, 18));
 		$this->addFrontSystem(new CargoBay(1, 18));
-		$this->addFrontSystem(new ELINTScanner(4, 12, 6, 4));
+		$this->addFrontSystem(new ELINTScanner(4, 12, 6, 3));
 		$this->addFrontSystem(new Maser(2, 6, 3, 240, 60));
 		$this->addFrontSystem(new Maser(2, 6, 3, 300, 120));
         
@@ -49,21 +49,21 @@ class PolarenPrevnoran extends BaseShipNoAft{
 		$this->addLeftSystem(new RadCannon(3, 8, 6, 240, 360));
 		$this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
 		$this->addLeftSystem(new NexusSandCaster(1, 4, 2, 180, 360));
-		$this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
+		$this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
 		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 		
 		$this->addRightSystem(new Thruster(2, 15, 0, 4, 4));
 		$this->addRightSystem(new RadCannon(3, 8, 6, 0, 120));
 		$this->addRightSystem(new Maser(2, 6, 3, 300, 120));
 		$this->addRightSystem(new NexusSandCaster(1, 4, 2, 0, 180));
-		$this->addRightSystem(new Maser(2, 6, 3, 60, 240));
+		$this->addRightSystem(new Maser(2, 6, 3, 0, 180));
 		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 3, 36));
-        $this->addLeftSystem(new Structure( 3, 36));
-        $this->addRightSystem(new Structure( 3, 36));
-        $this->addPrimarySystem(new Structure( 3, 36));
+        $this->addFrontSystem(new Structure( 4, 36));
+        $this->addLeftSystem(new Structure( 4, 36));
+        $this->addRightSystem(new Structure( 4, 36));
+        $this->addPrimarySystem(new Structure( 4, 36));
 		
         $this->hitChart = array(
             0=> array(

@@ -29,7 +29,7 @@ class communeGC extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 8));
         $this->addPrimarySystem(new Engine(4, 18, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));        
 

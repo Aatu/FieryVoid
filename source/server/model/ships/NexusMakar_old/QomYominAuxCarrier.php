@@ -51,14 +51,14 @@ class QomYominAuxCarrier extends HeavyCombatVesselLeftRight{
 		$this->addLeftSystem(new NexusLightChargeCannon(1, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusLightChargeCannon(1, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusWaterCaster(1, 4, 1, 180, 360));
-		$this->addLeftSystem(new Hangar(1, 8));
+		$this->addLeftSystem(new Hangar(1, 8, 6));
 		
         $this->addRightSystem(new Thruster(2, 13, 0, 6, 4));
         $this->addRightSystem(new HKControlNode(2, 10, 2, 1));
 		$this->addRightSystem(new NexusLightChargeCannon(1, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusLightChargeCannon(1, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusWaterCaster(1, 4, 1, 0, 180));
-		$this->addRightSystem(new Hangar(1, 8));
+		$this->addRightSystem(new Hangar(1, 8, 6));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addLeftSystem(new Structure( 3, 35));

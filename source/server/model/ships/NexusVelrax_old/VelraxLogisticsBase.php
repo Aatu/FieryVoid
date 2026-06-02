@@ -29,7 +29,7 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(3, 35, 0, 0));
 		$this->addPrimarySystem(new CnC(3, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 16, 5, 5));
-		$this->addPrimarySystem(new Hangar(3, 6));
+		$this->addPrimarySystem(new Hangar(3, 6, 3));
 		$this->addPrimarySystem(new CargoBay(3, 39));
 		$this->addPrimarySystem(new NexusDartInterceptor(3, 4, 1, 0, 360));
 		$this->addPrimarySystem(new NexusDartInterceptor(3, 4, 1, 0, 360));
@@ -46,7 +46,7 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
 			$this->addFrontSystem($cargoBay);
-			$hangar = new Hangar(3, 6);
+			$hangar = new Hangar(3, 6, 3);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);
@@ -62,7 +62,7 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 90;
 			$cargoBay->endArc = 270;
 			$this->addAftSystem($cargoBay);
-			$hangar = new Hangar(3, 6);
+			$hangar = new Hangar(3, 6, 3);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
 			$this->addAftSystem($hangar);
@@ -78,7 +78,7 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 360;
 			$this->addLeftSystem($cargoBay);
-			$hangar = new Hangar(3, 6);
+			$hangar = new Hangar(3, 6, 3);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
 			$this->addLeftSystem($hangar);
@@ -94,7 +94,7 @@ class VelraxLogisticsBase extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
 			$this->addRightSystem($cargoBay);
-			$hangar = new Hangar(3, 6);
+			$hangar = new Hangar(3, 6, 3);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
 			$this->addRightSystem($hangar);

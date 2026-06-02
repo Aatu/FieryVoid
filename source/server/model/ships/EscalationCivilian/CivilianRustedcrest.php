@@ -5,10 +5,10 @@ class CivilianRustedcrest extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 225;
-	$this->faction = "Escalation Wars Civilian";
+	$this->faction = "Escalation Wars Support Units";
         $this->phpclass = "CivilianRustedcrest";
         $this->imagePath = "img/ships/EscalationWars/CivilianRustedcrest.png";
-        $this->shipClass = "Rustedcrest Ore Barge";
+        $this->shipClass = "Kastan Rustedcrest Ore Barge";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;
@@ -31,7 +31,7 @@ class CivilianRustedcrest extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 2, 3));
         $this->addPrimarySystem(new Engine(3, 13, 0, 6, 3));
-		$this->addPrimarySystem(new Hangar(3, 6));
+		$this->addPrimarySystem(new Hangar(3, 6, 3));
 		$this->addPrimarySystem(new CargoBay(2, 200));
    
         $this->addFrontSystem(new Thruster(2, 13, 0, 3, 1));

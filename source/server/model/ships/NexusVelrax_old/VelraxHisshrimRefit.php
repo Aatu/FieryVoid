@@ -39,14 +39,14 @@ class VelraxHisshrimRefit extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new NexusDartInterceptor(2, 4, 1, 180, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 240, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 120, 300));
-		$this->addLeftSystem(new Hangar(3, 8));
+		$this->addLeftSystem(new Hangar(3, 8, 6));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 
         $this->addRightSystem(new NexusHeavyLaserSpear(3, 6, 4, 0, 120));
         $this->addRightSystem(new NexusDartInterceptor(2, 4, 1, 300, 180));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 60, 240));
-		$this->addRightSystem(new Hangar(3, 8));
+		$this->addRightSystem(new Hangar(3, 8, 6));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

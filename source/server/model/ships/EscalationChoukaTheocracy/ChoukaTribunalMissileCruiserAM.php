@@ -37,7 +37,7 @@ class ChoukaTribunalMissileCruiserAM extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 11, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 13, 5, 5));
         $this->addPrimarySystem(new Engine(3, 13, 0, 9, 4));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 2));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 6, 1));
 		$this->addFrontSystem(new AmmoMissileRackO(3, 0, 0, 240, 120, $ammoMagazine, false));

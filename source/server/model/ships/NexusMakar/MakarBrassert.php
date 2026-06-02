@@ -32,7 +32,7 @@ class MakarBrassert extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 2));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 13, 0, 5, 4));        
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
         
 		$this->addFrontSystem(new NexusDefenseGun(2, 4, 1, 270, 90));
 		$this->addFrontSystem(new NexusXRayLaser(3, 5, 2, 300, 60));

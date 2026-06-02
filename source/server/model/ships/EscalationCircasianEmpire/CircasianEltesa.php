@@ -29,7 +29,7 @@ class CircasianEltesa extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 3, 5));
         $this->addPrimarySystem(new Engine(4, 11, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 2));
    
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));

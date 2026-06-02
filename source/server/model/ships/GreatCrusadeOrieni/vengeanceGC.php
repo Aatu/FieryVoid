@@ -29,7 +29,7 @@ class vengeanceGC extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 7));
         $this->addPrimarySystem(new Engine(3, 15, 0, 12, 2));
-		$this->addPrimarySystem(new Hangar(1, 1));
+		$this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 	

@@ -30,7 +30,7 @@ class VelraxVersissRefit extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 16, 6, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 5, 1));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));

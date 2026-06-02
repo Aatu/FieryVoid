@@ -31,7 +31,7 @@ class CircasianKolanis extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 4, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 9, 3));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 1));
    
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));

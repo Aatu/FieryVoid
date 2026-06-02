@@ -33,7 +33,7 @@ class SshelathSkulnaRefit extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 5));
         $this->addPrimarySystem(new Engine(3, 11, 0, 9, 5));
-		$this->addPrimarySystem(new Hangar(3, 14));
+		$this->addPrimarySystem(new Hangar(3, 14, 6));
 		
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
@@ -44,8 +44,8 @@ class SshelathSkulnaRefit extends BaseShip{
         $this->addAftSystem(new Thruster(2, 26, 0, 9, 2));
 		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
 		$this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 90, 270));
-		$this->addAftSystem(new Hangar(2, 6));
-		$this->addAftSystem(new Hangar(2, 6));
+		$this->addAftSystem(new Hangar(2, 6, 6));
+		$this->addAftSystem(new Hangar(2, 6, 6));
 
         $this->addLeftSystem(new LightRailGun(2, 6, 3, 240, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));

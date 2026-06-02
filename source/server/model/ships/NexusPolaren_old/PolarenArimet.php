@@ -4,7 +4,7 @@ class PolarenArimet extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 175;
+        $this->pointCost = 160;
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenArimet";
         $this->imagePath = "img/ships/Nexus/polarenArimet.png";
@@ -13,14 +13,14 @@ class PolarenArimet extends LCV{
 		$this->unofficial = true;
 			$this->isd = 2109;
 
-        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
+//        $this->hangarRequired = ''; //Nexus LCVs are more independent than their B5 counterparts
 	    $this->notes = 'May deploy independently.';
         
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
         
 		$this->agile = true;
-        $this->turncost = 0.33;
+        $this->turncost = 0.25;
         $this->turndelaycost = 0.33;
         $this->accelcost = 1;
         $this->rollcost = 1;

@@ -11,7 +11,6 @@ class BloodSwordFirebrand extends HeavyCombatVessel{
 			$this->canvasSize = 125; //img has 200px per side
         $this->shipClass = "Firebrand Frigate";
 			$this->unofficial = true;
-		$this->limited = 33;
 
         $this->fighters = array("light"=>6);
 
@@ -27,13 +26,13 @@ class BloodSwordFirebrand extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 40;
          
-        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
+        $this->addPrimarySystem(new Reactor(4, 17, 0, 0));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
+        $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(3, 8));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
-        $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
+        $this->addPrimarySystem(new Hangar(3, 8, 3));
+        $this->addPrimarySystem(new Thruster(3, 13, 0, 3, 3));
+        $this->addPrimarySystem(new Thruster(3, 13, 0, 3, 4));
       
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));

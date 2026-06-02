@@ -31,7 +31,7 @@ class SalbezTarsk extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 5, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 4));
       
@@ -40,7 +40,7 @@ class SalbezTarsk extends HeavyCombatVessel{
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 60));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
-		$this->addFrontSystem(new Hangar(3, 6));
+		$this->addFrontSystem(new Hangar(3, 6, 6));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));
         $this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 300, 120));

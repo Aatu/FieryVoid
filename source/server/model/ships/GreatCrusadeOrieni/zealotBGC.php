@@ -29,7 +29,7 @@ class zealotBGC extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 5, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(2, 2));
+		$this->addPrimarySystem(new Hangar(2, 2, 2));
 		$this->addPrimarySystem(new JumpEngine(5, 10, 5, 36));
 		$this->addPrimarySystem(new Thruster(5, 21, 0, 12, 2));
 

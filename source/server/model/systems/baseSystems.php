@@ -9989,6 +9989,95 @@ class AmmoBistifB extends AmmoMissileTemplate{
 
 
 
+//ammunition for AmmoMagazine - Vedas-A Mine for ChoukaMineLauncher
+class AmmoVedasA extends AmmoMissileTemplate{	
+	public $name = 'AmmoVedasA';
+	public $displayName = 'Vedas-A';
+	public $modeName = 'A-Vedas';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_AML'; //enhancement name to be enabled
+	public $enhancementDescription = '(AMMO) Vedas-A'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(3, 3, 3); //MODIFIER for weapon fire control!
+	public $minDamage = 12;
+	public $maxDamage = 12;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 4;	
+
+    public function getDamage($fireOrder){        return 12;   } 
+
+} //endof class AmmoVedasA
+
+//ammunition for AmmoMagazine - Vedas-B Mine for ChoukaMineLauncher
+class AmmoVedasB extends AmmoMissileTemplate{	
+	public $name = 'AmmoVedasB';
+	public $displayName = 'Vedas-B';
+	public $modeName = 'B-Vedas';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_BML'; //enhancement name to be enabled
+	public $enhancementDescription = '(AMMO) Vedas-B'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(4, 4, 4); //MODIFIER for weapon fire control!
+	public $minDamage = 15;
+	public $maxDamage = 15;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 5;	
+
+    public function getDamage($fireOrder){        return 15;   } 
+
+} //endof class AmmoVedasB
+
+//ammunition for AmmoMagazine - Vedas-C Mine for ChoukaMineLauncher
+class AmmoVedasC extends AmmoMissileTemplate{	
+	public $name = 'AmmoVedasC';
+	public $displayName = 'Vedas-C';
+	public $modeName = 'C-Vedas';
+	public $size = 1; //how many store slots are required for a single round
+	public $enhancementName = 'MINE_CML'; //enhancement name to be enabled
+	public $enhancementDescription = '(AMMO) Vedas-C'; //enhancement description
+	public $enhancementPrice = 6;
+	
+	public $rangeMod = 0; //MODIFIER for launch range
+	public $distanceRangeMod = 0; //MODIFIER for distance range
+	public $fireControlMod = array(6, 6, 6); //MODIFIER for weapon fire control!
+	public $minDamage = 18;
+	public $maxDamage = 18;	
+	public $damageType = 'Standard';//mode of dealing damage
+	public $weaponClass = 'Ballistic';//weapon class
+	public $priority = 6;
+	public $priorityAF = 5;
+	
+	public $hidetarget = true;
+
+    public $hextarget = true; 
+	public $mineRange = 6;	
+
+    public function getDamage($fireOrder){        return 18;   } 
+
+} //endof class AmmoVedasA
+
+
+
 
 
 ?>

@@ -1221,6 +1221,11 @@ var LtPlasmaCannonFtr = function LtPlasmaCannonFtr(json, ship) {
 LtPlasmaCannonFtr.prototype = Object.create(Weapon.prototype);
 LtPlasmaCannonFtr.prototype.constructor = LtPlasmaCannonFtr;
 
+var NexusRailgunAccelerator = function NexusRailgunAccelerator(json, ship) {
+    Matter.call(this, json, ship);
+};
+NexusRailgunAccelerator.prototype = Object.create(Matter.prototype);
+NexusRailgunAccelerator.prototype.constructor = NexusRailgunAccelerator;
 
 
 

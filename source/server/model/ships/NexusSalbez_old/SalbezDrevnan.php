@@ -30,7 +30,7 @@ class SalbezDrevnan extends MediumShip{
 		$this->addPrimarySystem(new LightLaser(0, 4, 3, 0, 360));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 5, 4));        
-        $this->addPrimarySystem(new Hangar(0, 4));
+        $this->addPrimarySystem(new Hangar(0, 4, 4));
         
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 180, 60));
 		$this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 240, 120));

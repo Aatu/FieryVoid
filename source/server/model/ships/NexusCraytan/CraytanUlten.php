@@ -31,7 +31,7 @@ class CraytanUlten extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 12, 6, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(3, 9));
+        $this->addPrimarySystem(new Hangar(3, 9, 6));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));
       

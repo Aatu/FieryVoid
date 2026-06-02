@@ -5,12 +5,12 @@ class CircasianLotana extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 375;
-	$this->faction = "Escalation Wars Circasian Empire";
+	$this->faction = "Escalation Wars Support Units";
         $this->phpclass = "CircasianLotana";
         $this->imagePath = "img/ships/EscalationWars/CircasianKolanis.png";
-        $this->shipClass = "Lotana Logistics Cruiser";
-			$this->variantOf = "Kolanis Cruiser";
-			$this->occurence = "common";
+        $this->shipClass = "Circasian Lotana Logistics Cruiser";
+//			$this->variantOf = "Kolanis Cruiser";
+//			$this->occurence = "common";
 			$this->unofficial = true;
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
@@ -31,7 +31,7 @@ class CircasianLotana extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 4, 5));
         $this->addPrimarySystem(new Engine(4, 15, 0, 9, 3));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 1));
    
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));

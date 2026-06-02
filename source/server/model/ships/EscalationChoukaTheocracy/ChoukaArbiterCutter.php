@@ -32,7 +32,7 @@ class ChoukaArbiterCutter extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 8, 4, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 1));
 		$this->addPrimarySystem(new Quarters(3, 9));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(1, 11, 0, 3, 4));        
         

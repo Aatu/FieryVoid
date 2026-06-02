@@ -42,7 +42,7 @@ class purifierGCAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 4, 7));
         $this->addPrimarySystem(new Engine(5, 25, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
 		$this->addPrimarySystem(new AmmoMissileRackL(5, 6, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
               
 		$this->addFrontSystem(new AmmoMissileRackL(5, 6, 0, 240, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
