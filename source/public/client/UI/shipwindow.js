@@ -30,6 +30,29 @@ window.shipWindowManager = {
 		$(this).parent().parent().hide();
 	},
 
+	// Builds the legacy DOM status window for a ship on demand (lazy load) if it does
+	// not exist yet, dispatching flights to the flight window builder. Returns the
+	// jQuery element (or null if it could not be built). Ship windows are no longer
+	// built eagerly at load — see ShipIcon.prototype.createShipWindow.
+	ensureShipWindow: function ensureShipWindow(ship) {
+		if (ship.shipStatusWindow && ship.shipStatusWindow.length) {
+			return ship.shipStatusWindow;
+		}
+
+		// Reuse an existing DOM window (e.g. built last turn) if one is present.
+		var existing = $(".shipwindow.ship_" + ship.id);
+		if (existing.length) {
+			ship.shipStatusWindow = existing;
+		} else if (ship.flight) {
+			ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
+		} else {
+			ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
+		}
+
+		shipWindowManager.setData(ship);
+		return ship.shipStatusWindow;
+	},
+
 	open: function open(ship) {
 		var old;
 
@@ -43,7 +66,7 @@ window.shipWindowManager = {
 			old = $(".shipwindow:visible");
 		}
 
-		var n = ship.shipStatusWindow;
+		var n = shipWindowManager.ensureShipWindow(ship);
 
 		if (!n) return;
 
@@ -319,6 +342,11 @@ window.shipWindowManager = {
 
 	updateNotes: function updateNotes(ship) {
 		var shipWindow = ship.shipStatusWindow;
+		// Legacy status windows are built lazily on first open; nothing to update when
+		// this ship's window has never been opened.
+		if (!shipWindow || !shipWindow.length) {
+			return;
+		}
 		shipWindow.find(".notes").html("");
 
 		var abilities = Array();
@@ -895,6 +923,13 @@ window.shipWindowManager = {
 			shipwindow = ship.shipStatusWindow;
 		}
 
+		// Legacy status windows are built lazily on first open; nothing to update when
+		// this ship's window has never been opened (callers without an explicit
+		// container, e.g. onShipEwChanged, pass none). The React EW UI handles display.
+		if (!shipwindow || !shipwindow.length) {
+			return;
+		}
+
 		shipwindow.find(".value.DEW").html(dew);
 		shipwindow.find(".value.CCEW").html(ccew);
 
@@ -1325,18 +1360,24 @@ window.shipWindowManager = {
 
 		var shipwindow = ship.shipStatusWindow;
 
-		$(".thruster", shipwindow).each(function () {
-			var direction = $(this).data("direction");
+		// Legacy status windows are now built lazily on first open, so a ship's window
+		// may not exist when thrust is assigned via the React thrust UI. Only style the
+		// legacy window when it is present; the webglScene event below still fires.
+		if (shipwindow && shipwindow.length) {
+			$(".thruster", shipwindow).each(function () {
+				var direction = $(this).data("direction");
 
-			if (requiredThrust[direction] != null) {
-				$(this).addClass("enableAssignThrust");
-			}
-			if (stillReq[direction] == null) {
-				$(this).removeClass("enableAssignThrust");
-			}
-		});
+				if (requiredThrust[direction] != null) {
+					$(this).addClass("enableAssignThrust");
+				}
+				if (stillReq[direction] == null) {
+					$(this).removeClass("enableAssignThrust");
+				}
+			});
 
-		shipwindow.addClass("assignThrust");
+			shipwindow.addClass("assignThrust");
+		}
+
 		window.webglScene.customEvent("AssignThrust", { ship: ship, totalRequired: requiredThrust, remainginRequired: stillReq, movement: movement })
 	},
 

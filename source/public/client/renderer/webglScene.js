@@ -59,6 +59,15 @@ window.webglScene = function () {
         this.scene.add(sprite.mesh);
          */
 
+        // Optional sub-step timing for the load-perf breakdown (?perf in the URL).
+        // Fully gated on ?perf — with no ?perf, _step is a no-op and nothing is timed.
+        var _perf = (window.location.search.toLowerCase().indexOf('perf') !== -1);
+        var _now = (window.performance && performance.now) ? function(){ return performance.now(); } : function(){ return Date.now(); };
+        var _p = _perf ? _now() : 0;
+        var _step = _perf
+            ? function(label){ var n = _now(); console.log('[FV load]     init/' + label + ': ' + (n - _p).toFixed(1) + ' ms'); _p = n; }
+            : function(){};
+
         //this.scene.add(new THREE.AmbientLight(0xff0000));
         this.renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
         this.renderer.setSize(this.width, this.height);
@@ -71,10 +80,14 @@ window.webglScene = function () {
         this.initEventListeners();
 
         this.initialized = true;
+        _step('WebGLRenderer create');
         this.hexGridRenderer.renderHexGrid(this.scene, ZOOM_MIN, ZOOM_MAX);
+        _step('renderHexGrid');
         this.phaseDirector.receiveGamedata(gamedata, this);
+        _step('receiveGamedata (ship icons)');
         this.starField = new StarField(this);
         this.render();
+        _step('first render');
     };
 
     webglScene.prototype.receiveGamedata = function (gamedata) {
