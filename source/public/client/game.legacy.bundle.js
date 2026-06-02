@@ -3385,6 +3385,40 @@ window.ShipIcon = function () {
         var hexagon = new THREE.Mesh(geometry, material);
         hexagon.position.z = -1;
 
+        // Create a hexagon border with higher opacity (0.8) to define the boundaries
+        var borderShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) borderShape.moveTo(x, y);
+            else borderShape.lineTo(x, y);
+        }
+        borderShape.closePath();
+
+        var holePath = new THREE.Path();
+        var lineWidth = 4;
+        var innerDis = dis - lineWidth;
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = innerDis * Math.cos(angle);
+            let y = innerDis * Math.sin(angle);
+            if (i === 0) holePath.moveTo(x, y);
+            else holePath.lineTo(x, y);
+        }
+        holePath.closePath();
+        borderShape.holes.push(holePath);
+
+        var borderMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            opacity: 0.6,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
+        hexagon.add(border);
+
         this.mesh.add(hexagon);
         this.BDEWSprite = hexagon;
 
@@ -5991,12 +6025,37 @@ window.ReplayAnimationStrategy = function () {
             var turnDestroyed = shipManager.getTurnDestroyed(ship);
             var destroyed = shipManager.isDestroyed(ship);
 
+            // Hangar Ops: a docked flight is removed=true, which makes
+            // isDestroyed() true for ALL turns (ships.js). But a FULL dock only
+            // sets the ship-level removed flag — it applies no per-fighter
+            // DockedFighter crit — so getTurnDestroyed() returns null and the
+            // flight would be hidden on the very turn it docked, suppressing its
+            // firing animation in this turn's replay. Treat removedTurn the same
+            // way turnDestroyed is treated below: a flight removed THIS turn (or
+            // later in replay time) is still on the board for this turn and must
+            // stay visible so it can be seen firing before it docks. Only hide it
+            // once the replay has advanced past its dock turn.
+            //
+            // EXCEPT a partial-dock fragment (spawnFragmentFlight): it is born
+            // removed=true with spawned == removedTurn == the dock turn. It never
+            // existed on the board as its own flight — the craft that docked are
+            // already shown firing as part of the SOURCE flight — so a fragment
+            // must stay hidden on its spawn/dock turn, otherwise a 3-of-6 dock
+            // renders as the surviving flight PLUS a phantom 3-fighter fragment.
+            // A genuine flight that docked this turn was spawned earlier, so
+            // spawned < removedTurn distinguishes the two.
+            var bornAndRemovedSameTurn = ship.spawned !== undefined &&
+                ship.spawned !== -1 && ship.removedTurn != null &&
+                ship.spawned >= ship.removedTurn;
+            var removedFuture = ship.removed && !bornAndRemovedSameTurn &&
+                (ship.removedTurn == null || ship.removedTurn >= this.turn);
+
             // Hide if:
             // - destroyed this or a previous turn
             // - OR is an undetected stealth ship
             return (
                 (turnDestroyed !== null && turnDestroyed < this.turn) ||
-                (turnDestroyed === null && destroyed) ||
+                (turnDestroyed === null && destroyed && !removedFuture) ||
                 (shipManager.shouldBeHidden(ship))
             );
         }, this).forEach(function (ship) {
@@ -13061,7 +13120,10 @@ window.DeploymentDock = (function () {
     // a flat 1 (it holds one fighter; extra boxes are HP only, and it operates
     // regardless of damage).
     function isDockHangar(sys) {
-        return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult'));
+        //Fighter Rails (name "fighterRail") are dock-capable too; like an ordinary
+        //hangar they use box-count capacity and respect their own damage (the
+        //isCat branches in the box-cost helpers stay catapult-only).
+        return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail'));
     }
     function effectiveHangarBoxes(hangar) {
         if (!hangar) return 0;
@@ -13073,6 +13135,38 @@ window.DeploymentDock = (function () {
             });
         }
         return Math.max(0, parseInt(hangar.maxhealth, 10) - netDamage);
+    }
+
+    // Hangar boxes a single craft occupies. A unitSize<1 craft (Vorlon Assault
+    // Fighter et al.) needs more than one box each; a unitSize>1 ultralight (Zorth)
+    // packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5). Mirrors
+    // HangarOps::boxesPerCraftForClass / boxesPerCraftForEntry (PHP). Duplicated
+    // here (not shared with shipTooltipFireMenu) to avoid a load-order dependency,
+    // same as the categoryForFlight / customFighterRemainingFor copies.
+    function boxesPerCraftFromUnitSize(unitSize) {
+        var u = (unitSize != null) ? parseFloat(unitSize) : 1;
+        if (u > 0 && u < 1) return Math.ceil(1 / u);   // superheavy: >1 box/craft
+        if (u > 1) return 1 / u;                        // ultralight: fractional box/craft
+        return 1;
+    }
+    function boxesPerCraftForEntry(entry) {
+        if (entry && entry.boxesPerCraft) {
+            var b = parseFloat(entry.boxesPerCraft);   // float: fractional (0.5) round-trips
+            return b > 0 ? b : 1;
+        }
+        return boxesPerCraftFromUnitSize(entry ? entry.unitSize : 1);
+    }
+    // Boxes occupied by an entry/flight in $hangar — a catapult is a single-fighter
+    // rail (counts craft 1:1); ordinary hangars charge the per-craft box cost.
+    function entryBoxesInHangar(hangar, entry) {
+        var n = parseInt(entry.flightSize || 1, 10);
+        var isCat = !!(hangar && (hangar.isCatapult || hangar.name === 'catapult'));
+        return isCat ? n : n * boxesPerCraftForEntry(entry);
+    }
+    function craftBoxesInHangar(hangar, count, unitSize) {
+        var n = parseInt(count || 0, 10);
+        var isCat = !!(hangar && (hangar.isCatapult || hangar.name === 'catapult'));
+        return isCat ? n : n * boxesPerCraftFromUnitSize(unitSize);
     }
 
     // All non-destroyed Hangar systems on $ship, regardless of free capacity.
@@ -13091,12 +13185,14 @@ window.DeploymentDock = (function () {
 
     // Friendly hangars on $ship that aren't destroyed and still have free
     // boxes (accounting for current usage AND already-queued deploy starts).
-    function collectUsableHangars(ship) {
+    // $reclaimFlightId (optional): that flight's own reservations are treated as
+    // reclaimable (for re-planning an already-queued flight).
+    function collectUsableHangars(ship, reclaimFlightId) {
         var out = [];
         ship.systems.forEach(function (sys) {
             if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(ship, sys)) return;
-            var free = hangarFreeBoxes(sys);
+            var free = hangarFreeBoxes(sys, reclaimFlightId);
             if (free > 0) out.push({ hangar: sys, free: free });
         });
         return out;
@@ -13105,23 +13201,39 @@ window.DeploymentDock = (function () {
     // Effective free boxes = effective max (maxhealth - net damage)
     //                      - already-stored usage
     //                      - flights queued for deploy-start dock here this session.
-    function hangarFreeBoxes(hangar) {
+    // $reclaimFlightId (optional): treat that flight's OWN existing reservations
+    // as reclaimable (not committed) so a re-edit/re-plan of an already-queued
+    // flight sees the capacity it had before queuing — mirrors
+    // eligibleHangarsForFlight's own-order reclaim.
+    function hangarFreeBoxes(hangar, reclaimFlightId) {
         var effective = effectiveHangarBoxes(hangar);
+        var reclaim = (reclaimFlightId != null) ? parseInt(reclaimFlightId, 10) : null;
 
+        // Box-aware: unitSize<1 craft consume >1 box each; unitSize>1 ultralights
+        // consume a fractional box each (catapults excepted). Sum committed + queued
+        // box cost fractionally and round the TOTAL up so the free count is whole
+        // boxes (mirrors HangarOps::occupiedBoxes).
         var used = 0;
         if (Array.isArray(hangar.hangarUsage)) {
-            hangar.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
+            hangar.hangarUsage.forEach(function (e) { used += entryBoxesInHangar(hangar, e); });
         }
 
-        var queued = 0;
         if (Array.isArray(hangar.pendingDeployStartOrders)) {
             hangar.pendingDeployStartOrders.forEach(function (o) {
+                if (reclaim != null && parseInt(o.flightId, 10) === reclaim) return;   //own queue is reclaimable
                 var f = gamedata.getShip(o.flightId);
-                if (f) queued += parseInt(f.flightSize || 1, 10);
+                if (!f) return;
+                //Auto-distribute orders carry a per-bay `count` slice; legacy
+                //single-bay orders reserve the whole flight. Use the slice so a
+                //flight spread across bays doesn't over-reserve each one.
+                var slice = (o.count != null && parseInt(o.count, 10) > 0)
+                    ? parseInt(o.count, 10)
+                    : parseInt(f.flightSize || 1, 10);
+                used += craftBoxesInHangar(hangar, slice, f.unitSize);
             });
         }
 
-        return Math.max(0, effective - used - queued);
+        return Math.max(0, effective - Math.ceil(used));
     }
 
     // Pending flights belonging to the same slot/player as $carrier that:
@@ -13185,7 +13297,8 @@ window.DeploymentDock = (function () {
         for (var i = 0; i < hangars.length; i++) {
             var h = hangars[i];
             if (!hangarAcceptsCategory(h.hangar.hangarType, cat, carrier)) continue;
-            if (h.free >= size) return h.hangar;
+            //h.free is in boxes; a unitSize<1 flight needs size × per-craft boxes.
+            if (h.free >= craftBoxesInHangar(h.hangar, size, flight.unitSize)) return h.hangar;
         }
         return null;
     }
@@ -13264,23 +13377,72 @@ window.DeploymentDock = (function () {
         return false;
     }
 
-    // Add $flight to $carrier's first-fitting hangar's pendingDeployStartOrders,
-    // and stamp $flight.pendingDeployDock so validateAllDeployment skips it.
-    // Returns true on success, false if no hangar can hold the flight.
+    // Greedy auto-distribution of $flight across $carrier's usable hangars/rails,
+    // biggest free first. A flight larger than any single bay (e.g. a 9-fighter
+    // flight onto a StrikeCarrier whose rails are 6+3+3+3+3+2) spreads across
+    // several bays — each gets a {flightId, count} order so the server splits the
+    // flight into fragments (mirrors the Firing-Phase dock splitter). Returns the
+    // list of hangars used (with their allocated counts), or [] if the carrier's
+    // COMBINED free capacity can't hold the whole flight.
+    //
+    // Box-aware: free is in boxes; a unitSize<1 craft costs >1 box each and a
+    // unitSize>1 ultralight costs a FRACTIONAL box each (0.5), so the per-bay craft
+    // capacity is floor(free / perCraftBoxes) — which is 2 craft per box for Zorth.
+    // $reclaimFlightId (optional): re-planning an already-queued flight — its own
+    // existing reservations are reclaimed so the plan sees true free capacity.
+    function distributeFlightAcrossHangars(carrier, flight, reclaimFlightId) {
+        var cat = categoryForFlight(flight);
+        var perCraft = craftBoxesInHangar(null, 1, flight.unitSize); //boxes per single craft (catapult-agnostic here; rails/hangars are non-catapult)
+        if (perCraft <= 0) perCraft = 1;   //don't clamp to >=1: ultralights are 0.5 box/craft
+        var remaining = parseInt(flight.flightSize, 10) || 1;
+
+        var hangars = collectUsableHangars(carrier, reclaimFlightId).filter(function (h) {
+            return hangarAcceptsCategory(h.hangar.hangarType, cat, carrier);
+        });
+        //Biggest free first so we use the fewest bays (and prefer the 6-box rail
+        //before the 3-box ones). Ties keep encounter order.
+        hangars.sort(function (a, b) { return b.free - a.free; });
+
+        var plan = [];
+        for (var i = 0; i < hangars.length && remaining > 0; i++) {
+            var h = hangars[i];
+            //Catapults count craft 1:1; rails/hangars charge per-craft boxes.
+            var isCat = !!(h.hangar.isCatapult || h.hangar.name === 'catapult');
+            var craftFit = isCat ? h.free : Math.floor(h.free / perCraft);
+            if (craftFit <= 0) continue;
+            var take = Math.min(remaining, craftFit);
+            plan.push({ hangar: h.hangar, count: take });
+            remaining -= take;
+        }
+        if (remaining > 0) return [];   //combined capacity insufficient
+        return plan;
+    }
+
+    // Queue $flight for deployment-dock onto $carrier, auto-distributing across
+    // its hangars/rails. Stamps $flight.pendingDeployDock so validateAllDeployment
+    // skips it. Returns true on success, false if the carrier can't hold the
+    // whole flight across all its bays.
     function queueDeployStartDock(carrier, flight) {
         if (!flight || !carrier) return false;
         if (flight.pendingDeployDock) return false;          //already queued somewhere
-        var hangars = collectUsableHangars(carrier);
-        var hangar = firstFittingHangar(hangars, flight, carrier);
-        if (!hangar) return false;
+        var plan = distributeFlightAcrossHangars(carrier, flight);
+        if (plan.length === 0) return false;
 
-        if (!Array.isArray(hangar.pendingDeployStartOrders)) hangar.pendingDeployStartOrders = [];
-        hangar.pendingDeployStartOrders.push({ flightId: parseInt(flight.id, 10) });
-        hangar.pendingDeployStartOrdersDirty = true;
+        var fid = parseInt(flight.id, 10);
+        var single = (plan.length === 1);
+        plan.forEach(function (slot) {
+            if (!Array.isArray(slot.hangar.pendingDeployStartOrders)) slot.hangar.pendingDeployStartOrders = [];
+            //Single-bay dock omits count (server treats as the whole flight) so the
+            //common one-hangar case behaves exactly as before — no fragmenting.
+            var order = { flightId: fid };
+            if (!single) order.count = slot.count;
+            slot.hangar.pendingDeployStartOrders.push(order);
+            slot.hangar.pendingDeployStartOrdersDirty = true;
+        });
 
         flight.pendingDeployDock = {
             carrierId: parseInt(carrier.id, 10),
-            hangarId:  parseInt(hangar.id, 10)
+            hangarId:  parseInt(plan[0].hangar.id, 10)   //informational only (first bay used)
         };
         return true;
     }
@@ -13350,20 +13512,13 @@ window.DeploymentDock = (function () {
             unqueueDeployStartDock(flight);
         }
 
-        //eligibleHangarsForFlight already filters by category + free space and
-        //treats THIS flight's own queue as reclaimable. Pick the first match.
-        var eligible = eligibleHangarsForFlight(carrier, flight);
-        if (eligible.length === 0) return null;
-        var hangar = eligible[0].hangar;
-
-        if (!Array.isArray(hangar.pendingDeployStartOrders)) hangar.pendingDeployStartOrders = [];
-        hangar.pendingDeployStartOrders.push({ flightId: parseInt(flight.id, 10) });
-        hangar.pendingDeployStartOrdersDirty = true;
-        flight.pendingDeployDock = {
-            carrierId: parseInt(carrier.id, 10),
-            hangarId:  parseInt(hangar.id, 10)
-        };
-        return hangar;
+        //Auto-distribute across the carrier's bays (handles a flight larger than
+        //any single rail by spreading it; queueDeployStartDock does the work and
+        //sets pendingDeployDock). Returns the first bay used so callers that just
+        //need a truthy "it docked" signal keep working.
+        if (!queueDeployStartDock(carrier, flight)) return null;
+        var hid = flight.pendingDeployDock ? flight.pendingDeployDock.hangarId : null;
+        return (hid != null) ? gamedata.getShip(carrier.id).systems.find(function (s) { return s && s.id === hid; }) || null : null;
     }
 
     // Public wrapper used by confirm.js. Same as collectPendingFlightsForSlot
@@ -13404,22 +13559,25 @@ window.DeploymentDock = (function () {
             //so re-edit doesn't think the hangar is full. (Catapult → 1 slot.)
             var effective = effectiveHangarBoxes(sys);
 
+            //Box-aware usage: unitSize<1 craft consume >1 box each, unitSize>1
+            //ultralights a fractional box each (catapults counted 1:1 via
+            //entryBoxesInHangar / craftBoxesInHangar). Sum committed + queued box
+            //cost fractionally and round the TOTAL up to whole free boxes.
             var used = 0;
             if (Array.isArray(sys.hangarUsage)) {
-                sys.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
+                sys.hangarUsage.forEach(function (e) { used += entryBoxesInHangar(sys, e); });
             }
 
-            var queued = 0;
             if (Array.isArray(sys.pendingDeployStartOrders)) {
                 sys.pendingDeployStartOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;          //own queue is reclaimable
                     var f = gamedata.getShip(o.flightId);
-                    if (f) queued += parseInt(f.flightSize || 1, 10);
+                    if (f) used += craftBoxesInHangar(sys, f.flightSize, f.unitSize);
                 });
             }
 
-            var free = Math.max(0, effective - used - queued);
-            if (free >= size) out.push({ hangar: sys, capacity: free });
+            var free = Math.max(0, effective - Math.ceil(used));
+            if (free >= craftBoxesInHangar(sys, size, flight.unitSize)) out.push({ hangar: sys, capacity: free });
         });
         return out;
     }
@@ -13466,7 +13624,8 @@ window.DeploymentDock = (function () {
         queueDeployStartDock:         queueDeployStartDock,
         autoQueueDockOnCarrier:       autoQueueDockOnCarrier,
         unqueueDeployStartDock:       unqueueDeployStartDock,
-        hangarFreeBoxes:              hangarFreeBoxes
+        hangarFreeBoxes:              hangarFreeBoxes,
+        distributeFlightAcrossHangars: distributeFlightAcrossHangars
     };
 })();
 
@@ -13545,8 +13704,9 @@ window.refreshDeploymentUIForDeployStart = function () {
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
                 //isDockHangar lives inside the IIFE scope above and is NOT visible
-                //here, so inline the check (Stage 16: a catapult is a dock hangar too).
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && typeof sys.refreshHangarTooltip === 'function') {
+                //here, so inline the check (Stage 16: a catapult is a dock hangar too;
+                //Fighter Rails likewise have a refreshable hangar tooltip).
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
@@ -13589,8 +13749,9 @@ window.refreshFiringHangarTooltips = function () {
             if (!s || !Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
                 //isDockHangar lives inside the IIFE scope above and is NOT visible
-                //here, so inline the check (Stage 16: a catapult is a dock hangar too).
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && typeof sys.refreshHangarTooltip === 'function') {
+                //here, so inline the check (Stage 16: a catapult is a dock hangar too;
+                //Fighter Rails likewise have a refreshable hangar tooltip).
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
@@ -15864,8 +16025,27 @@ window.SelectFromShips = function () {
                     if (!s || s.flight) return;
                     if (!gamedata.isMyShip(s)) return;
                     if (!window.DeploymentDock.shipHasOpenableDockDialog(s)) return;
+                    //A bay-by-bay eligible list (whole flight fits one bay) is the
+                    //common case. But the carrier's rails/bays are a COMBINED pool:
+                    //a flight bigger than any single bay (e.g. 9 fighters vs 6-box
+                    //rails) is still dockable if the carrier's TOTAL free space
+                    //holds it — auto-distribute spreads it across bays on click.
+                    //Surface the DOCK button on combined capacity, not just
+                    //single-bay fit, so it doesn't disappear when space remains.
                     var eligible = window.DeploymentDock.eligibleHangarsForFlight(s, flight);
-                    if (eligible.length === 0) return;
+                    if (eligible.length === 0) {
+                        var plan = window.DeploymentDock.distributeFlightAcrossHangars(s, flight);
+                        if (plan.length === 0) return;        //even combined capacity can't hold it
+                        //Report each used bay's REAL free box count (not just the
+                        //allocated slice) so the carrier-picker readout shows true
+                        //headroom rather than a misleading exact-fit total.
+                        eligible = plan.map(function (p) {
+                            var freeBoxes = (typeof window.DeploymentDock.hangarFreeBoxes === 'function')
+                                ? window.DeploymentDock.hangarFreeBoxes(p.hangar)
+                                : p.count;
+                            return { hangar: p.hangar, capacity: freeBoxes };
+                        });
+                    }
                     eligibleCarriers.push({ ship: s, hangars: eligible });
                 });
 
@@ -15921,7 +16101,20 @@ window.SelectFromShips = function () {
             if (ship.flight) {
                 var noOfFighters = 0;
                 ship.systems.forEach(ftr => {
-                    if (!shipManager.systems.isDestroyed(ship, ftr)) {
+                    //In replay, count fighters by their state AS OF the viewed turn
+                    //(gamedata.turn is the replay turn). A fighter docked/destroyed
+                    //THIS turn was still flying when this turn's combat happened, so
+                    //it should still be counted — otherwise a flight that partial-docks
+                    //3 of 6 on turn N shows "(3)" on turn N instead of the "(6)" that
+                    //were present. Outside replay, fall back to the plain destroyed check.
+                    var counted;
+                    if (gamedata.replay) {
+                        var turnDestroyed = damageManager.getTurnDestroyed(ship, ftr);
+                        counted = (turnDestroyed === null || turnDestroyed >= gamedata.turn);
+                    } else {
+                        counted = !shipManager.systems.isDestroyed(ship, ftr);
+                    }
+                    if (counted) {
                         noOfFighters++;
                     }
                 });
@@ -16467,6 +16660,45 @@ window.ShipTooltipFireMenu = function () {
         return ShipTooltipFireMenu.buttons.concat(ShipTooltipMenu.prototype.getAllButtons.call(this));
     };
 
+    // Hangar boxes a single craft occupies. A unitSize<1 craft (Vorlon Assault
+    // Fighter et al.) needs more than one box each (e.g. unitSize 0.5 → 2 boxes);
+    // every other craft is one box. Mirrors HangarOps::boxesPerCraftForClass /
+    // boxesPerCraftForEntry (PHP) so the in-game dock/recover capacity matches
+    // what the server will accept.
+    // Exposed on window because the dock/recover helpers below
+    // (window.findEligibleCarriersForDock / ...ForRecover and their nested
+    // collectReceivingHangars*) live OUTSIDE this IIFE and would otherwise not
+    // see this closure-private function. The local var keeps in-closure callers
+    // working unchanged.
+    window.hangarBoxesPerCraftFromUnitSize = function (unitSize) {
+        var u = (unitSize != null) ? parseFloat(unitSize) : 1;
+        if (u > 0 && u < 1) return Math.ceil(1 / u);   // superheavy: >1 box/craft
+        if (u > 1) return 1 / u;                        // ultralight: fractional box/craft (Zorth 0.5)
+        return 1;
+    };
+    var hangarBoxesPerCraftFromUnitSize = window.hangarBoxesPerCraftFromUnitSize;
+    // Also exposed on window for the same reason as
+    // hangarBoxesPerCraftFromUnitSize above: the dock/recover helpers outside
+    // this IIFE call these.
+    window.hangarBoxesPerCraftForEntry = function (entry) {
+        if (entry && entry.boxesPerCraft) {
+            var b = parseFloat(entry.boxesPerCraft);   // float: fractional (0.5) round-trips
+            return b > 0 ? b : 1;
+        }
+        return hangarBoxesPerCraftFromUnitSize(entry ? entry.unitSize : 1);
+    };
+    var hangarBoxesPerCraftForEntry = window.hangarBoxesPerCraftForEntry;
+    // Boxes consumed by a queued dock/deploy order of $count craft of the
+    // flight referenced by the order, looked up for its unitSize.
+    window.hangarBoxesForQueuedCraft = function (flightId, count) {
+        var n = parseInt(count || 0, 10);
+        if (n <= 0) return 0;
+        var f = (flightId != null) ? gamedata.getShip(flightId) : null;
+        var bpc = f ? hangarBoxesPerCraftFromUnitSize(f.unitSize) : 1;
+        return n * bpc;
+    };
+    var hangarBoxesForQueuedCraft = window.hangarBoxesForQueuedCraft;
+
     function targetWeapons() {
         weaponManager.targetShip(this.selectedShip, this.targetedShip);
     }	
@@ -16549,9 +16781,12 @@ window.ShipTooltipFireMenu = function () {
         if (!ship || !ship.systems) return false;
         for (var i in ship.systems) {
             var sys = ship.systems[i];
-            //Stage 16: a catapult (name "catapult") is launchable too.
+            //Stage 16: a catapult (name "catapult") is launchable too. Fighter
+            //Rails (name "fighterRail") launch like an ordinary hangar — they
+            //have an output budget and respect their own damage, so they fall
+            //through the isCat branches into the normal budget gate below.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
-            if (!sys || (sys.name !== 'hangar' && !isCat)) continue;
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat)) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
             //Stage 16.5: a cannotLaunch wreck (fighter destroyed landing on a
             //damaged catapult) occupies the bay but can never relaunch — it
@@ -16705,6 +16940,7 @@ window.findEligibleCarriersForDock = function (flight) {
     function collectReceivingHangars(ship, category, carrierMove) {
         var hangars = [];
         var flightId = parseInt(flight.id, 10);
+        var bpcFlight = window.hangarBoxesPerCraftFromUnitSize(flight.unitSize);   //boxes per craft for THIS flight
         var carrierHeading = carrierMove ? parseInt(carrierMove.heading, 10) : null;
         var carrierFacing  = carrierMove ? parseInt(carrierMove.facing, 10)  : null;
         ship.systems.forEach(function (sys) {
@@ -16712,7 +16948,7 @@ window.findEligibleCarriersForDock = function (flight) {
             // REAR, holds exactly one craft, ignores its own damage and has no
             // launch+land budget.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
-            if (!sys || (sys.name !== 'hangar' && !isCat)) return;
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
 
             if (!hangarAcceptsCategory(sys.hangarType, category, ship)) return;
@@ -16739,42 +16975,58 @@ window.findEligibleCarriersForDock = function (flight) {
                 }
                 effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
             }
-            var used = 0;
+            // Occupied boxes. unitSize<1 craft consume >1 box each, unitSize>1
+            // ultralights consume a FRACTIONAL box each (ordinary hangars only);
+            // a catapult counts craft 1:1 (single-fighter rail). Sum the box cost
+            // fractionally and round the TOTAL up once below — so 24 Zorth (12.0)
+            // and two separate half-box docks pack correctly rather than each
+            // reserving a whole box.
+            var usedBoxes = 0;
             if (Array.isArray(sys.hangarUsage)) {
-                sys.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
+                sys.hangarUsage.forEach(function (e) {
+                    var perCraft = isCat ? 1 : window.hangarBoxesPerCraftForEntry(e);
+                    usedBoxes += parseInt(e.flightSize || 1, 10) * perCraft;
+                });
             }
-            var free = Math.max(0, effective - used);
 
             // Ordinary hangars share a launch+land output budget; catapults don't.
             var budget;
             if (isCat) {
-                budget = free;
+                budget = 0;   //set after free is known
             } else {
                 var output = parseInt(sys.output || 0, 10);
                 var spent = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
                 budget = Math.max(0, output - spent);
             }
 
-            // Subtract queued allocations from OTHER flights/launches on this
-            // hangar (shared output budget + physical free boxes). Skip this
-            // flight's OWN dock orders so re-editing/cancelling sees the full
-            // capacity it had before queuing — the dialog re-applies the
-            // queued amount as a pre-fill on the splitter input instead.
+            // Add queued allocations from OTHER flights/launches on this hangar
+            // (shared output budget + physical free boxes) to the box total. Skip
+            // this flight's OWN dock orders so re-editing/cancelling sees the full
+            // capacity it had before queuing — the dialog re-applies the queued
+            // amount as a pre-fill on the splitter input instead. The output budget
+            // is in CRAFT; physical free space is in BOXES, so a queued ultralight
+            // dock consumes its (fractional) per-craft box cost.
             if (Array.isArray(sys.pendingDockOrders)) {
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;   //own queue is reclaimable
                     var n = parseInt(o.count || 0, 10);
-                    free   = Math.max(0, free - n);
+                    usedBoxes += (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n));
                     if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
+            // Free WHOLE boxes = capacity − total used rounded UP (catapult: free craft slots).
+            var free = Math.max(0, effective - Math.ceil(usedBoxes));
+            if (isCat) budget = free;
             if (!isCat && Array.isArray(sys.pendingLaunchOrders)) {
                 sys.pendingLaunchOrders.forEach(function (o) {
                     budget = Math.max(0, budget - parseInt(o.size || 0, 10));
                 });
             }
 
-            var capacity = isCat ? free : Math.min(free, budget);
+            // Capacity is returned in CRAFT (the splitter/totals are craft): a
+            // catapult holds its free craft slots; an ordinary hangar fits
+            // floor(free boxes / boxes-per-craft) of THIS flight, capped by budget.
+            var capacity = isCat ? free : Math.min(Math.floor(free / bpcFlight), budget);
             if (capacity > 0) hangars.push({ hangar: sys, capacity: capacity });
         });
 
@@ -16942,10 +17194,15 @@ window.findEligibleFlightsForDocking = function (carrier) {
         // Heading is gated per-hangar inside collectReceivingHangarsForRecover:
         // ordinary hangars require flight heading == carrier heading; catapults
         // (Stage 16) require a rear approach (flight heading == carrier facing).
+        // hangars = bays that each hold the WHOLE flight (single-bay dock). Its
+        // .combinedFit property is true when the carrier's combined free space
+        // holds the flight even if no single bay does (rails are a pooled
+        // resource — a 9-flight spreads across a 6-box + 3-box rail); the dialog
+        // then auto-distributes across bays.
         var hangars = collectReceivingHangarsForRecover(carrier, flight);
-        if (hangars.length === 0) continue;
+        if (hangars.length === 0 && !hangars.combinedFit) continue;
 
-        out.push({ flight: flight, hangars: hangars });
+        out.push({ flight: flight, hangars: hangars, combinedFit: hangars.combinedFit });
     }
     return out;
 
@@ -16954,11 +17211,14 @@ window.findEligibleFlightsForDocking = function (carrier) {
     // the bulk-recover dialog doesn't split a flight across hangars (splitter
     // remains on the per-flight Dock dialog).
     function collectReceivingHangarsForRecover(ship, flight) {
-        var hangars = [];
+        var hangars = [];          //bays that each hold the WHOLE flight
+        hangars.combinedFit = false;
+        var combinedCraft = 0;     //running sum of every eligible bay's craft capacity
         var flightId = parseInt(flight.id, 10);
         var category = categoryForFlightRecover(flight);
         var size = countActiveInFlight(flight);
         if (size <= 0) return hangars;
+        var bpcFlight = window.hangarBoxesPerCraftFromUnitSize(flight.unitSize);   //boxes per craft for THIS flight
 
         // Stage 10.6.2: bulk recover only ever docks a FULL flight into a
         // single hangar — if the carrier's customFighter cap can't hold the
@@ -16979,7 +17239,7 @@ window.findEligibleFlightsForDocking = function (carrier) {
             // Stage 16: a catapult recovers from the REAR, holds one craft,
             // ignores its own damage and has no launch+land budget.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
-            if (!sys || (sys.name !== 'hangar' && !isCat)) return;
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
@@ -17001,32 +17261,41 @@ window.findEligibleFlightsForDocking = function (carrier) {
                 }
                 effective = Math.max(0, parseInt(sys.maxhealth, 10) - netDamage);
             }
-            var used = 0;
+            // Occupied boxes. unitSize<1 craft consume >1 box each, unitSize>1
+            // ultralights consume a FRACTIONAL box each (ordinary hangars only);
+            // a catapult counts craft 1:1. Sum fractionally, round the TOTAL up once.
+            var usedBoxes = 0;
             if (Array.isArray(sys.hangarUsage)) {
-                sys.hangarUsage.forEach(function (e) { used += parseInt(e.flightSize || 1, 10); });
+                sys.hangarUsage.forEach(function (e) {
+                    var perCraft = isCat ? 1 : window.hangarBoxesPerCraftForEntry(e);
+                    usedBoxes += parseInt(e.flightSize || 1, 10) * perCraft;
+                });
             }
-            var free = Math.max(0, effective - used);
 
             var budget;
             if (isCat) {
-                budget = free;
+                budget = 0;   //set after free is known
             } else {
                 var output = parseInt(sys.output || 0, 10);
                 var spent  = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
                 budget = Math.max(0, output - spent);
             }
 
-            // OTHER flights' queued docks consume both free boxes and the
-            // shared launch+land budget. THIS flight's own queue is
-            // reclaimable so the row's hangar dropdown can re-pick it.
+            // OTHER flights' queued docks consume both free boxes and the shared
+            // launch+land budget. THIS flight's own queue is reclaimable so the
+            // row's hangar dropdown can re-pick it. Budget is in CRAFT; free space
+            // is in BOXES (queued ultralight docks cost a fractional box each).
             if (Array.isArray(sys.pendingDockOrders)) {
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.flightId, 10) === flightId) return;
                     var n = parseInt(o.count || 0, 10);
-                    free   = Math.max(0, free - n);
+                    usedBoxes += (isCat ? n : window.hangarBoxesForQueuedCraft(o.flightId, n));
                     if (!isCat) budget = Math.max(0, budget - n);
                 });
             }
+            // Free WHOLE boxes = capacity − total used rounded UP (catapult: free craft slots).
+            var free = Math.max(0, effective - Math.ceil(usedBoxes));
+            if (isCat) budget = free;
             // Queued launch orders consume budget only (no physical boxes since
             // the craft are leaving).
             if (!isCat && Array.isArray(sys.pendingLaunchOrders)) {
@@ -17034,9 +17303,16 @@ window.findEligibleFlightsForDocking = function (carrier) {
                     budget = Math.max(0, budget - parseInt(o.size || 0, 10));
                 });
             }
-            var capacity = isCat ? free : Math.min(free, budget);
-            if (capacity >= size) hangars.push({ hangar: sys, capacity: capacity });
+            // Capacity is in CRAFT: a catapult's free craft slots, else floor(free
+            // boxes / boxes-per-craft) capped by the craft output budget.
+            var capacity = isCat ? free : Math.min(Math.floor(free / bpcFlight), budget);
+            if (capacity <= 0) return;
+            combinedCraft += capacity;                                  //counts toward combined-pool fit
+            if (capacity >= size) hangars.push({ hangar: sys, capacity: capacity });   //single-bay dock
         });
+        //Combined-pool fit: the carrier's rails/bays together hold the flight even
+        //when no single bay does (the dialog then auto-distributes across bays).
+        hangars.combinedFit = (combinedCraft >= size);
         return hangars;
     }
 
@@ -19863,6 +20139,29 @@ jQuery(function () {
 
     $(".committurn").on("click", gamedata.onCommitClicked);
     $(".cancelturn").on("click", gamedata.onCancelClicked);
+});
+
+// BFCache restore freshness (game page).
+// game.php bakes its gamedata JSON into the page at server-render time and
+// parses it once inside the window "load" handler. That handler does not
+// re-fire when Chrome restores a frozen page from the back/forward cache
+// (e.g. session restore on browser startup), so the page comes back showing
+// the stale render-time snapshot. The polling loop has also usually decayed to
+// its 30-minute interval (and its setTimeout was suspended while frozen), so it
+// can be a long time before fresh data arrives on its own.
+// On a persisted restore: force one immediate fetch, then restart the loop with
+// its decay reset if the game is still live.
+window.addEventListener("pageshow", function (event) {
+    if (!event.persisted) return;                       // only BFCache restores
+    if (typeof ajaxInterface === "undefined") return;   // not on a polling page
+
+    ajaxInterface.stopPolling();                        // clear any suspended/decayed timer
+    ajaxInterface.submiting = false;                    // a frozen in-flight XHR never completed
+    ajaxInterface.requestGamedata();                    // one guaranteed catch-up fetch
+
+    if (typeof gamedata !== "undefined" && gamedata.waiting) {
+        ajaxInterface.startPollingGamedata();           // resume live polling, decay reset
+    }
 });;
 
 /* Source: client/mathlib.js */
@@ -21001,10 +21300,21 @@ window.ajaxInterface = {
         this.nextFaction = null;
         this.submiting = true;
 
+        // Cache-bust per faction: append the static JSON file's version (mtime,
+        // emitted into window.factionVersions by gamelobby.php) to the URL. A new
+        // patch regenerates static/json/<faction>.json with a fresh mtime, so the
+        // URL changes and the browser cannot serve a stale cached response —
+        // robust where ETag/Last-Modified revalidation gets skipped (mobile/BFCache).
+        var loaderUrl = 'gamelobbyloader.php';
+        var factionVersion = (window.factionVersions || {})[factionRequest];
+        if (factionVersion) {
+            loaderUrl += '?v=' + encodeURIComponent(factionVersion);
+        }
+
         // Use _doAjaxWithRetry to handle transient 507 errors
         this._doAjaxWithRetry({
             type: 'POST',
-            url: 'gamelobbyloader.php',
+            url: loaderUrl,
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({ faction: String(factionRequest) }),
@@ -28707,6 +29017,16 @@ window.shipManager = {
         if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
         if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
+        //Hangar Ops: a partial-dock fragment ("- Split") is born removed=true with
+        //spawned == removedTurn == the dock turn — it never existed on the board as
+        //its own flight (its craft are shown firing as part of the SOURCE flight).
+        //So it must stay hidden EVERYWHERE on/after its dock turn, including replay
+        //(where ordinary removed flights are deliberately still shown so they appear
+        //in earlier turns). This mirrors ReplayAnimationStrategy's bornAndRemovedSameTurn
+        //board-hide so the hex ship-list / target popups don't list a phantom split.
+        if (ship.removed && ship.spawned !== undefined && ship.spawned !== -1 &&
+            ship.removedTurn != null && ship.spawned >= ship.removedTurn &&
+            gamedata.turn >= ship.removedTurn) return true;
         if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock isn't on the
         //board — its icon should be hidden until either the dock is cancelled or the
@@ -31608,6 +31928,26 @@ window.shipManager.criticals = {
         return false;
     },
 
+    //Returns true when the system currently has active criticals AND every one
+    //of them is the named phpclass. Used to recolour the icon healthbar cyan
+    //instead of orange when the only critical is a benign initiative-penalty
+    //event (HangarOperations on a CnC, LaunchedThisTurn on a fighter). 05/26 DK
+    //  excludeForInfo mirrors hasCriticalsIcon vs hasCriticals: the SystemIcon
+    //  ignores forInfo criticals when colouring, the fighter healthbar does not,
+    //  so the "only critical" test must consider the same set that turns it orange.
+    hasOnlyCritical: function hasOnlyCritical(system, name, excludeForInfo) {
+        var found = false;
+        for (var i in system.criticals) {
+            var crit = system.criticals[i];
+            var active = (crit.turn <= gamedata.turn) && ((crit.turnend == 0) || (crit.turnend >= gamedata.turn));
+            if (!active) continue;
+            if (excludeForInfo && crit.forInfo) continue;
+            if (crit.phpclass != name) return false;
+            found = true;
+        }
+        return found;
+    },
+
     hasCriticalInAnySystem: function hasCriticalInAnySystem(ship, name) {
         var amount = 0;
         for (var a in ship.systems) {
@@ -32061,16 +32401,53 @@ shipManager.systems = {
         return false;
     },
 
+    //Fighter Rails mirror the catapult exclusion: rail boxes are structure HP
+    //(already excluded from getTotalHangarCapacity, which sums only name=="hangar"),
+    //and the rail-borne fighter category (e.g. "light") must be excluded from the
+    //declared-shuttle-pool sum so leftover-shuttle math matches the server's
+    //HangarOps::getDefaultShuttles. Mirrors HangarOps::shipHasRail / railFighterCategories.
+    shipHasRail: function shipHasRail(ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "fighterRail" || s.isRail)) return true;
+        }
+        return false;
+    },
+
+    //Lowercased set of ship.fighters category keys (e.g. "light") that ride this
+    //ship's rails. Returns a plain object used as a membership set.
+    railFighterCategories: function railFighterCategories(ship) {
+        var cats = {};
+        if (!ship || !ship.systems) return cats;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "fighterRail" || s.isRail)) {
+                var cat = String(s.hangarType || "").toLowerCase().trim();
+                if (cat !== "") cats[cat] = true;
+            }
+        }
+        return cats;
+    },
+
     //Sum of declared fighters that consume default-shuttle-pool hangar boxes.
     //Excludes catapult-destined 'superheavy' fighters when the ship has a
     //catapult. Single source of truth for getDefaultShuttles / Composition.
+    //Per B5W §10.1, ultralight fighters fit two per box (0.5 each); ceil()
+    //so an odd ultralight count doesn't yield a free half-box. Mirrors
+    //HangarOps::shuttlePoolBoxesFor on the server.
     getShuttlePoolDeclared: function getShuttlePoolDeclared(fighters, ship) {
         var declared = 0;
         if (!fighters) return 0;
         var hasCatapult = shipManager.systems.shipHasCatapult(ship);
+        var railCategories = shipManager.systems.railFighterCategories(ship);
         for (var k in fighters) {
-            if (hasCatapult && String(k).toLowerCase().trim() === "superheavy") continue;
-            declared += parseInt(fighters[k], 10) || 0;
+            var key = String(k).toLowerCase().trim();
+            if (hasCatapult && key === "superheavy") continue;
+            if (railCategories[key]) continue;   //rail-borne fighters aren't shuttle pool
+            var count = parseInt(fighters[k], 10) || 0;
+            if (count <= 0) continue;
+            declared += (key === "ultralight") ? Math.ceil(count / 2) : count;
         }
         return declared;
     },
@@ -32093,8 +32470,12 @@ shipManager.systems = {
         var declared = shipManager.systems.getShuttlePoolDeclared(ship.fighters, ship);
         var leftover = capacity - declared;
         if (leftover < 0) leftover = 0;
+        //Explicit "minesweeping shuttles" in ship.fighters is the designer's
+        //authoritative MSW count — leftover falls through to the faction shuttle
+        //even on minesweeper-bonus carriers, matching HangarOps::populateInitialHangarUsage.
+        var hasExplicitMsw = !!(ship.fighters && parseInt(ship.fighters["minesweeping shuttles"], 10) > 0);
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
-        if (minesweeper) {
+        if (minesweeper && !hasExplicitMsw) {
             return { count: leftover, type: "Minesweeping Shuttles", key: "minesweeping shuttles" };
         }
         return {
@@ -32155,6 +32536,21 @@ shipManager.systems = {
         if (capacity <= 0) return rows;
         var base = ship._originalFighters || ship.fighters || {};
         var declared = shipManager.systems.getShuttlePoolDeclared(base, ship);
+
+        //Explicit shuttle-category declarations ("shuttles", "minesweeping shuttles",
+        //"cargo shuttles") are auto-populated free shuttles per HangarOps step 1 —
+        //not purchasable slots like combat-fighter declarations. Surface them as
+        //composition rows so the Hangar tooltip reflects the full auto-populated
+        //picture (declared + leftover), not just the leftover. Cargo shuttles are
+        //opt-in only — they never join the leftover-fill, so they show up here only
+        //when declared.
+        var declaredMsw = parseInt(base["minesweeping shuttles"], 10) || 0;
+        var declaredShuttle = parseInt(base["shuttles"], 10) || 0;
+        var declaredCargo = parseInt(base["cargo shuttles"], 10) || 0;
+        if (declaredMsw > 0) rows.push({ type: "Minesweeping Shuttles", count: declaredMsw });
+        if (declaredShuttle > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: declaredShuttle });
+        if (declaredCargo > 0) rows.push({ type: "Cargo Shuttles", count: declaredCargo });
+
         var pool = capacity - declared;
         if (pool <= 0) return rows;
 
@@ -32172,8 +32568,12 @@ shipManager.systems = {
         var afterBP = pool - bp;           //BP conversion removes slots from the pool
         if (msw > afterBP) msw = afterBP;  //MSW retypes within the remaining pool
 
+        //Explicit "minesweeping shuttles" in ship.fighters is the designer's
+        //authoritative MSW count — the leftover pool falls through to the faction
+        //shuttle even on minesweeper-bonus carriers, matching HangarOps step 2.
+        var hasExplicitMsw = !!(base && parseInt(base["minesweeping shuttles"], 10) > 0);
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
-        if (minesweeper) {
+        if (minesweeper && !hasExplicitMsw) {
             //Default pool is already MinesweepingShuttle; HANG_MSW is a no-op here.
             if (afterBP > 0) rows.push({ type: "Minesweeping Shuttles", count: afterBP });
         } else {
@@ -32187,6 +32587,126 @@ shipManager.systems = {
         //lobby loadout (shipwindow) still reflects the converted slot.
         if (bp > 0) rows.push({ type: "Breaching Pods", count: bp, slotOnly: true });
         return rows;
+    },
+
+    //Per-hangar slice of getDefaultShuttleComposition for the lobby/system-info
+    //tooltip — mirrors HangarOps::populateInitialHangarUsage so a hangar's
+    //tooltip in the lobby matches the in-game initial population. Each
+    //composition row is distributed with the same least-used + fair-share
+    //algorithm as pickHangarForShuttle + fairShareCap on the server, over the
+    //distribution set (HangarOps::distributionHangars):
+    //
+    //  • Primary-structure hangars present → the pool splits evenly across the
+    //    primary (location 0) hangars (Pirocia's three → 2+2+2); a lone primary
+    //    still shows the whole pool, and side hangars show only overflow.
+    //  • No primary hangar (e.g. Marata: two side hangars) → the pool splits
+    //    evenly across all hangars (6 default shuttles → 3+3, not 6+0).
+    getDefaultShuttleCompositionForHangar: function getDefaultShuttleCompositionForHangar(ship, targetHangar) {
+        if (!ship || !targetHangar || !ship.systems) return [];
+        var hangars = [];
+        for (var si in ship.systems) {
+            var s = ship.systems[si];
+            if (s && s.name == "hangar" && !s.isCatapult) hangars.push(s);
+        }
+        if (hangars.length === 0) return [];
+
+        var fullRows = shipManager.systems.getDefaultShuttleComposition(ship);
+        if (fullRows.length === 0) return [];
+
+        //Distribution set mirrors HangarOps::distributionHangars on the server:
+        //the primary (location 0) hangars if the ship has any, else every hangar.
+        //Several primary hangars (e.g. Pirocia's three) share the pool evenly
+        //(2+2+2); a lone primary still shows the whole pool. Side hangars on a
+        //ship that has primaries get only overflow once the primaries are full.
+        var hasPrimary = false;
+        for (var h = 0; h < hangars.length; h++) {
+            if (parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
+        }
+
+        //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if the
+        //distribution set contains any explicitly shuttle-tagged bay (hangarType
+        //'shuttles'/'minesweeping shuttles' — e.g. Vree Xeecra/Xaarix/Vyreel's
+        //small shuttle bay next to big fighter bays), the default-shuttle pool
+        //prefers those bays only, so the fighter bays stay free. The general bays
+        //still get overflow once the shuttle bays fill.
+        var isShuttleOnly = function (hgr) {
+            if (hgr.isCatapult || hgr.isRail) return false;
+            var t = ("" + (hgr.hangarType || "")).toLowerCase().trim();
+            return t === "shuttles" || t === "minesweeping shuttles";
+        };
+        var inSet = function (hgr) {
+            return hasPrimary ? (parseInt(hgr.location, 10) === 0) : true;
+        };
+        var hasShuttleOnly = false;
+        for (var sh = 0; sh < hangars.length; sh++) {
+            if (inSet(hangars[sh]) && isShuttleOnly(hangars[sh])) { hasShuttleOnly = true; break; }
+        }
+
+        var per = [];
+        for (var p = 0; p < hangars.length; p++) {
+            per.push({
+                id: hangars[p].id,
+                max: parseInt(hangars[p].maxhealth, 10) || 0,
+                usage: 0,
+                rows: [],
+                pref: hasShuttleOnly ? (inSet(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p])
+            });
+        }
+
+        //Least-used hangar in the distribution set; overflow to any hangar with
+        //room (mirrors pickHangarForShuttle).
+        var pickIdx = function (flightSize) {
+            var bestIdx = -1, bestUsage = Infinity;
+            for (var i = 0; i < per.length; i++) {
+                if (!per[i].pref) continue;
+                if (per[i].max - per[i].usage < flightSize) continue;
+                if (per[i].usage < bestUsage) { bestUsage = per[i].usage; bestIdx = i; }
+            }
+            if (bestIdx !== -1) return bestIdx;
+            for (var j = 0; j < per.length; j++) {
+                if (per[j].max - per[j].usage >= flightSize) return j;
+            }
+            return -1;
+        };
+
+        //Fair-share cap over the distribution-set hangars with room (mirrors
+        //fairShareCap): Infinity when only one remains so it takes the rest.
+        var fairCap = function (remaining) {
+            var withRoom = 0;
+            for (var i = 0; i < per.length; i++) {
+                if (per[i].pref && per[i].max - per[i].usage > 0) withRoom++;
+            }
+            if (withRoom <= 1) return Infinity;
+            return Math.ceil(remaining / withRoom);
+        };
+
+        for (var r = 0; r < fullRows.length; r++) {
+            var row = fullRows[r];
+            var count = parseInt(row.count, 10) || 0;
+            while (count > 0) {
+                var idx = pickIdx(1);
+                if (idx < 0) break;
+                var free = per[idx].max - per[idx].usage;
+                var take = Math.min(count, free, fairCap(count));
+                if (take <= 0) break;
+                var existing = null;
+                for (var er = 0; er < per[idx].rows.length; er++) {
+                    if (per[idx].rows[er].type === row.type && !!per[idx].rows[er].slotOnly === !!row.slotOnly) {
+                        existing = per[idx].rows[er];
+                        break;
+                    }
+                }
+                if (existing) existing.count += take;
+                else per[idx].rows.push({ type: row.type, count: take, slotOnly: row.slotOnly });
+                per[idx].usage += take;
+                count -= take;
+            }
+        }
+
+        for (var k = 0; k < per.length; k++) {
+            if (per[k].id == targetHangar.id) return per[k].rows;
+        }
+        return [];
     },
 
     getThrusters: function getThrusters(ship, direction) {
@@ -34343,9 +34863,11 @@ window.systemInfo = {
 
 		//Leftover hangar capacity is auto-filled with shuttles (or minesweeping
 		//shuttles / Flyers per faction) — same rule as shipwindow.js. The pool is
-		//ship-wide, so show it on a single Hangar tooltip (primary section, else
-		//first hangar) rather than repeating the total on every hangar. The
-		//breakdown reflects the HANG_BP / HANG_MSW shuttle-slot enhancements.
+		//ship-wide; per-hangar attribution is delegated to systems.js, mirroring
+		//HangarOps::populateInitialHangarUsage: the pool splits evenly across the
+		//primary-structure hangars (Pirocia's three → 2+2+2), or across all
+		//hangars when none are primary (Marata's 6 leftover shuttles → 3+3).
+		//The breakdown reflects the HANG_BP / HANG_MSW shuttle-slot enhancements.
 		//Precompute it here so the Capacity line below can fold the auto-filled
 		//shuttle count into its "stored" number (the blueprint Capacity reads
 		//"0 / N" pre-game because hangarUsage is empty; combat fighters auto-deploy
@@ -34354,10 +34876,9 @@ window.systemInfo = {
 		var defaultShuttleRows = [];
 		var defaultShuttleStored = 0;
 		if (system.name == "hangar") {
-			var defaultHangar = shipManager.systems.getDefaultShuttleHangar(ship);
-			isDefaultShuttleHangar = !!(defaultHangar && defaultHangar.id == system.id);
+			defaultShuttleRows = shipManager.systems.getDefaultShuttleCompositionForHangar(ship, system);
+			isDefaultShuttleHangar = defaultShuttleRows.length > 0;
 			if (isDefaultShuttleHangar) {
-				defaultShuttleRows = shipManager.systems.getDefaultShuttleComposition(ship);
 				for (var s = 0; s < defaultShuttleRows.length; s++) {
 					//slotOnly rows (HANG_BP) are converted-but-empty capacity, not units present.
 					if (defaultShuttleRows[s].slotOnly) continue;
@@ -34837,6 +35358,9 @@ window.shipWindowManager = {
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
+					} else if (i == "shuttles" || i == "minesweeping shuttles" || i == "cargo shuttles") {
+						//Auto-populated free shuttles — listed via getDefaultShuttleComposition below.
+						continue;
 					} else {
 						//something other than fighters
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType);
@@ -35984,13 +36508,22 @@ function pointCostForPhpclass(phpclass) {
 //here would double-credit. Shuttles auto-fill carriers and have pointCost=0,
 //so they contribute nothing.
 //
+//Stage 21.5 (no-split): under the no-split model EVERY value-bearing docked
+//flight is its own ship row (full dock links dockedFlightId to the source
+//flight; partial dock/launch link to a "- Split" K-flight). The only anonymous
+//(no-dockedFlightId) entries left are auto-fill shuttles (pointCost 0), so this
+//helper now contributes 0 in practice. It is KEPT as a deliberate legacy/orphan
+//safety net: a legacy DB (pre-no-split fragment docks) or a future orphan entry
+//carrying real value is still credited to the carrier rather than silently
+//dropped. Don't remove without auditing legacy-shape games (Stage 21.6).
+//
 //Stage 18: a destroyed-non-jumped carrier loses its stash to the wreck —
 //don't credit the carrier for contents it no longer has. (Server-side,
-//processCarrierDestructionEscapes clears hangarUsage post-roll so this is
-//usually 0 already, but the guard covers stale state and the brief window
-//between in-game destruction and the next setCriticals sweep.) Jumped
-//carriers keep their stash since the jumped-flight preservation path
-//treats the whole carrier+contents as off-board-but-intact.
+//processCarrierDestructionEscapes clears hangarUsage post-roll AND now persists
+//that clear — Stage 21.4 fix — so this is 0 by next load, but the guard still
+//covers the in-request window between destruction and the next setCriticals
+//sweep.) Jumped carriers keep their stash since the jumped-flight preservation
+//path treats the whole carrier+contents as off-board-but-intact.
 function dockedCraftStashValue(ship) {
     if (!Array.isArray(ship.systems)) return 0;
     if (shipManager.isDestroyed(ship) && !shipManager.hasJumpedNotDestroyed(ship)) return 0;
@@ -36008,6 +36541,63 @@ function dockedCraftStashValue(ship) {
         }
     }
     return Math.round(total);
+}
+
+//Hangar Ops Stage 21.7 (value follow-up): value a flight that has lost some
+//craft from its roster — to a partial dock (some fighters DockedFighter'd out),
+//a partial launch (the docked remnant has the launched fighters DisengagedFighter'd
+//out), or combat disengagement — by its ACTIVE craft count rather than its
+//persisted flightSize. The flight keeps flightSize at the full roster
+//(replay/reload-safe — the departed craft's state lives on the "- Split" flight
+//and returns on relaunch), so the raw baseValue (pointCost*flightSize/6)
+//over-counts the missing craft, while the server combatValue
+//(round(100*active/total)) under-counts because it treats the missing craft as
+//destroyed in the DENOMINATOR. The two compound and don't cancel (the CV multiply
+//also scales the enh term, which shouldn't be discounted):
+//  - in-space partial-DOCK remnant: rendered 360*0.5 = 180 vs the 228 a clean
+//    flight of 3 shows (game 4148);
+//  - docked partial-LAUNCH remnant: rendered 612*0.5 = 306 vs the 402 the launched
+//    "- Split" flight correctly shows (game 4151).
+//This recomputes both base and CV over the active roster so each remnant reads the
+//same as an equivalent fresh flight of that size.
+//
+//Returns null when no re-base is needed (not a flight, fully active, or no
+//systems) so callers fall through to the existing flightSize/combatValue path
+//unchanged. Note it intentionally applies to removed (docked) flights too: a
+//FULLY-docked flight has every craft present (no per-fighter Docked/Disengaged
+//crit) so active==total => null => its full value stands; only a PARTIAL docked
+//remnant (some craft launched away) gets re-based.
+function activeFlightValue(ship) {
+    if (!ship || ship.flight !== true || !Array.isArray(ship.systems)) return null;
+
+    var total = 0;       //fighter craft in the roster (matches server craftTotal)
+    var active = 0;      //craft still present (not docked-out / disengaged / dead)
+    var cvAccum = 0;     //combat-value weight summed over active craft
+    for (var i = 0; i < ship.systems.length; i++) {
+        var fighter = ship.systems[i];
+        if (!fighter || !fighter.fighter) continue;   //skip non-Fighter entries
+        total++;
+
+        if (fighter.destroyed) continue;
+        if (shipManager.criticals.hasCritical(fighter, "DockedFighter")) continue;
+        if (shipManager.criticals.hasCritical(fighter, "DisengagedFighter")) continue;
+
+        active++;
+        //Mirror FighterFlight::calculateCombatValue: >50% damage -> 3/4 value.
+        var dmg = damageManager.getDamage(ship, fighter);
+        if ((fighter.maxhealth - dmg) * 2 < fighter.maxhealth) {
+            cvAccum += 0.75;
+        } else {
+            cvAccum += 1;
+        }
+    }
+
+    //Only re-base when craft are actually missing from the in-space roster.
+    //A full (or empty) flight falls through to the unchanged default path.
+    if (total <= 0 || active >= total) return null;
+
+    var effectiveCV = (active > 0) ? Math.round(100 * (cvAccum / active)) : 0;
+    return { activeCraft: active, combatValue: effectiveCV };
 }
 
 window.fleetListManager = {
@@ -36147,12 +36737,24 @@ window.fleetListManager = {
             }
 
             var baseValue = ship.pointCost || 0;
+            //Hangar Ops Stage 21.7: a partial-dock remnant keeps the full
+            //flightSize but only some craft are still in space — value it by its
+            //active roster (and a CV recomputed over those craft) so it matches a
+            //fresh flight of the same active size. Returns null for ordinary
+            //flights, so the default flightSize/combatValue path is unchanged.
+            var activeVal = activeFlightValue(ship);
+            var effectiveCV = (ship.combatValue !== undefined ? ship.combatValue : 100);
             if (ship.flight === true) {
-                // Flights have cost calculated per 6 fighters
-                baseValue = (ship.pointCost || 0) * (ship.flightSize / 6);
+                if (activeVal) {
+                    baseValue = (ship.pointCost || 0) * (activeVal.activeCraft / 6);
+                    effectiveCV = activeVal.combatValue;
+                } else {
+                    // Flights have cost calculated per 6 fighters
+                    baseValue = (ship.pointCost || 0) * (ship.flightSize / 6);
+                }
             }
             baseValue = Math.round(baseValue + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0));
-            var currValue = Math.round(baseValue * (ship.combatValue !== undefined ? ship.combatValue : 100) / 100);
+            var currValue = Math.round(baseValue * effectiveCV / 100);
 
             //Stage 9: carriers carry the point cost of any anonymous docked
             //craft (auto-filled shuttles are 0-cost; orphaned fighter records
@@ -38691,44 +39293,62 @@ window.confirm = {
     // then persists them as hangarLaunchOrder notes for end-of-turn resolution.
     // Setting individualNotesTransfer DIRECTLY here would be wiped by the base
     // ShipSystem.doIndividualNotesTransfer at submit time.
+    // === Hangar Operations Stage 21: no-split launch dialog ===
+    //
+    // A docked flight is ONE entry (with a dockedFlightId) on its primary bay,
+    // its occupancy spanning bays. The dialog shows ONE row per docked flight
+    // (not per phpclass-per-bay): the flight name, its docked size, and a 0–N
+    // stepper. On OK each row emits {phpclass, size, dockedFlightId, direction}
+    // onto the bay where its entry lives; the server's carrier-level launch
+    // coalescer (processWholeFlightLaunches) resolves each by dockedFlightId —
+    // full launch resurrects the ship, partial spawns a "- Split" K-flight and
+    // shrinks the original in place.
+    //
+    // Catapults (single fighter, no dockedFlightId/occupancy) keep the simple
+    // per-phpclass rows since they launch via the legacy per-bay path.
     hangarLaunch: function hangarLaunch(ship) {
-        var hangars = [];
+        // Collect every hangar-family system. A bay is shown if it holds its own
+        // craft OR is referenced by another bay's multi-bay occupancy (so a rail
+        // holding 6 boxes of a flight hosted on a sibling rail still appears with
+        // an accurate 6/6 header). Stage 21: a flight spanning two rails must show
+        // BOTH rails, not just the host.
+        var all = [];
         for (var k in ship.systems) {
             var sys = ship.systems[k];
-            //Stage 16: include catapults (name "catapult") — a loaded catapult
-            //launches its single fighter (capped to 1 by its stored count below).
-            if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) continue;
-            if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
-            hangars.push(sys);
+            if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) continue;
+            all.push(sys);
         }
+        // Set of system ids referenced by any occupancy list on the ship.
+        var occupiedIds = {};
+        all.forEach(function (h) {
+            if (!Array.isArray(h.hangarUsage)) return;
+            h.hangarUsage.forEach(function (e) {
+                if (Array.isArray(e.occupancy)) e.occupancy.forEach(function (o) { occupiedIds[parseInt(o.systemId, 10)] = true; });
+            });
+        });
+        var hangars = all.filter(function (h) {
+            var hasOwn = Array.isArray(h.hangarUsage) && h.hangarUsage.length > 0;
+            return hasOwn || occupiedIds[parseInt(h.id, 10)];
+        });
         if (hangars.length === 0) return;
 
-        // Reuse askForMultipleValues row/input styling (multi-value-confirm)
-        // and layer hangar-confirm on top for the steel/cyan hangar theme.
+        return window.confirm.hangarLaunchNoSplit(ship, hangars);
+    },
+
+    // Renders the Stage-21 per-docked-flight launch dialog.
+    hangarLaunchNoSplit: function hangarLaunchNoSplit(ship, hangars) {
         var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarLaunch"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
-        $('<div class="multi-value-header">Launch fighters/shuttles from ' + ship.name + '</div>').prependTo(e);
+        $('<div class="multi-value-header">Launch from ' + ship.name + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        // Track budget per hangar so we can validate the total on OK and so
-        // the header label can update live as inputs change.
-        var hangarBudgets = new Map();
-        var budgetLabels  = new Map();         //hangar → jQuery .launch-budget span
-
-        // Stage 8: resulting fighter facing = (carrier facing + hangar direction) % 6.
-        // Carrier facing is locked in Firing Phase, so the last movement order's
-        // facing is authoritative. Ships always have at least one movement entry
-        // (deploy) so the array-length guard is belt-and-braces.
-        var carrierFacing = 0;
-        if (Array.isArray(ship.movement) && ship.movement.length > 0) {
-            carrierFacing = parseInt(ship.movement[ship.movement.length - 1].facing || 0, 10);
+        function launchSizeMaxFor(phpclass) {
+            var lower = (phpclass || '').toLowerCase();
+            if (lower.indexOf('shuttle') !== -1) return 6;
+            if (lower.indexOf('breachingpod') !== -1 || lower.indexOf('breaching') !== -1) return 2;
+            if (lower.indexOf('superheavy') !== -1 || lower.indexOf('shf') !== -1) return 3;
+            return 12;   //no-split: a docked flight relaunches up to its full size
         }
-
-        // Stage 8: header labels use the hangar's ship location instead of a
-        // bare index. Location codes mirror addPrimary/Front/Aft/Left/Right
-        // (0/1/2/3/4) plus the SixSidedShip subsections (31/32 = port subs,
-        // 41/42 = stbd subs). If a location has more than one hangar, suffix
-        // with a 1-based counter so they remain distinguishable.
-        var locationPrefixFor = function (loc) {
+        function locationPrefixFor(loc) {
             var l = parseInt(loc, 10);
             if (l === 0) return 'Main';
             if (l === 1) return 'Front';
@@ -38736,164 +39356,349 @@ window.confirm = {
             if (l === 3 || l === 31 || l === 32) return 'Port';
             if (l === 4 || l === 41 || l === 42) return 'Stbd';
             return 'Hangar';
-        };
-        // Stage 16: catapults are labelled "Catapult" / "Catapult N" (not by
-        // location like hangars), so they're counted separately and excluded
-        // from the hangar prefix tallies.
-        var prefixCounts = {};
-        var catapultTotal = 0;
+        }
+
+        // Boxes used in a hangar by its own entries (a multi-bay entry's boxes
+        // are counted on the bays its occupancy names; an entry without
+        // occupancy counts its full size on its own bay).
+        function boxesUsedInHangar(hangar) {
+            var used = 0;
+            (hangar.hangarUsage || []).forEach(function (e) {
+                //Fractional-safe per-craft box cost (ultralight 0.5). Occupancy boxes
+                //are whole ints; non-occupancy entries cost flightSize*bpc.
+                var bpc = e.boxesPerCraft ? (parseFloat(e.boxesPerCraft) || 1) : 1;
+                if (Array.isArray(e.occupancy)) {
+                    e.occupancy.forEach(function (o) {
+                        if (parseInt(o.systemId, 10) === parseInt(hangar.id, 10)) used += parseInt(o.boxes || 0, 10);
+                    });
+                } else {
+                    used += parseInt(e.flightSize || 1, 10) * bpc;
+                }
+            });
+            // Plus boxes other bays' occupancy places on this one.
+            hangars.forEach(function (oh) {
+                if (oh === hangar) return;
+                (oh.hangarUsage || []).forEach(function (e) {
+                    if (!Array.isArray(e.occupancy)) return;
+                    e.occupancy.forEach(function (o) {
+                        if (parseInt(o.systemId, 10) === parseInt(hangar.id, 10)) used += parseInt(o.boxes || 0, 10);
+                    });
+                });
+            });
+            return used;
+        }
+
+        // Hangar display labels (Main/Front/.../Rail N).
+        var prefixCounts = {}, catTotal = 0, railTotal = 0;
         hangars.forEach(function (h) {
-            if (h.isCatapult || h.name === 'catapult') { catapultTotal++; return; }
+            if (h.isCatapult || h.name === 'catapult') { catTotal++; return; }
+            if (h.isRail || h.name === 'fighterRail') { railTotal++; return; }
             var p = locationPrefixFor(h.location);
             prefixCounts[p] = (prefixCounts[p] || 0) + 1;
         });
-        var prefixSeen = {};
-        var catapultSeen = 0;
+        var prefixSeen = {}, railSeen = 0;
+        function hangarLabelFor(hangar) {
+            if (hangar.isRail || hangar.name === 'fighterRail') { railSeen++; return (railTotal > 1) ? ('Fighter Rail ' + railSeen) : 'Fighter Rail'; }
+            var prefix = locationPrefixFor(hangar.location);
+            prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
+            return prefixCounts[prefix] > 1 ? (prefix + ' Hangar ' + prefixSeen[prefix]) : (prefix + ' Hangar');
+        }
 
-        hangars.forEach(function (hangar, hidx) {
-            var output = parseInt(hangar.output || 0, 10);
+        // ----- Per-hangar sections: capacity header + docked-flight rows +
+        //       anonymous-stash (shuttle/orphan) rows -----
+        // Each non-catapult bay has its own launch budget (output - this-turn
+        // launches/lands - queued docks). A launch CHARGES the bays it draws
+        // from: an anonymous-stash row charges its own bay; a docked-flight row
+        // charges its occupancy bays smallest-first (matching the server drain).
+        var rowData = [];   // {$input, dockedFlightId, phpclass, entryHangar, max, isAnon, isCat, occBays}
+        var dirChoice = new Map();    // hangar -> chosen direction (multi-dir bays)
+        var bayBudget = new Map();    // hangar -> base launch budget (number)
+        var budgetSpans = new Map();  // hangar -> jQuery .launch-budget-remaining span
+        var bayLabels = new Map();    // hangar -> display label (captured once)
+        function hangarLabelForId(hangar) { return bayLabels.get(hangar) || 'Bay'; }
+
+        function baseBudget(hangar) {
+            var out = parseInt(hangar.output || 0, 10);
             var used = parseInt(hangar.launchedThisTurn || 0, 10) + parseInt(hangar.landedThisTurn || 0, 10);
-            // Subtract docks already queued this submit cycle (shared budget),
-            // but NOT pendingLaunchOrders — those are what THIS dialog is editing.
             if (Array.isArray(hangar.pendingDockOrders)) {
                 hangar.pendingDockOrders.forEach(function (o) { used += parseInt(o.count || 0, 10); });
             }
-            var budget = Math.max(0, output - used);
-            hangarBudgets.set(hangar, budget);
-
-            // Stage 8: show resulting launch facing per hangar. Suppress for
-            // direction 0 (matches carrier) to keep the legacy forward-launch
-            // header uncluttered.
-            var hangarDir = parseInt(hangar.direction || 0, 10);
-            var facingSuffix = '';
-            if (hangarDir !== 0) {
-                var resultFacing = (((carrierFacing + hangarDir) % 6) + 6) % 6;
-                facingSuffix = ' <span class="multi-value-max">(launches at: ' + mathlib.hexFacingToAngle(resultFacing) + '°)</span>';
+            return Math.max(0, out - used);
+        }
+        // Distribute K craft of a docked row across its occupancy bays
+        // smallest-bay-first → {hangarId: charge}. perCraftBoxes converts boxes
+        // to craft; bays drain by craft.
+        function distributeDockedCharge(rd, k) {
+            var out = {};
+            var remaining = k;
+            (rd.occBays || []).forEach(function (b) {
+                if (remaining <= 0) return;
+                var take = Math.min(remaining, b.craft);
+                if (take <= 0) return;
+                out[b.hangarId] = (out[b.hangarId] || 0) + take;
+                remaining -= take;
+            });
+            return out;
+        }
+        // Craft this row charges to each bay it draws from, for a given value k.
+        function chargesForRow(rd, k) {
+            if (k <= 0) return {};
+            if (rd.dockedFlightId > 0 && rd.occBays && rd.occBays.length) {
+                return distributeDockedCharge(rd, k);
             }
-
-            // Hangar header row (no input — just labels). The "remaining" span is updated
-            // live by updateBudgetLabel as the user changes inputs in this hangar's rows.
-            var hangarLabel;
-            if (hangar.isCatapult || hangar.name === 'catapult') {
-                catapultSeen++;
-                hangarLabel = (catapultTotal > 1) ? ('Catapult ' + catapultSeen) : 'Catapult';
-            } else {
-                var prefix = locationPrefixFor(hangar.location);
-                prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
-                hangarLabel = prefixCounts[prefix] > 1
-                    ? (prefix + ' Hangar ' + prefixSeen[prefix])
-                    : (prefix + ' Hangar');
-            }
-            var headerRow = $('<div class="multi-value-row"></div>');
-            var label = $('<span class="multi-value-label"><span class="hangar-section-name">' + hangarLabel + '</span> <span class="multi-value-max">(Hangar Capacity: <span class="launch-budget-remaining">' + budget + '</span> / ' + budget + ')</span>' + facingSuffix + '</span>');
-            label.appendTo(headerRow);
-            budgetLabels.set(hangar, label.find('.launch-budget-remaining'));
-            container.append(headerRow);
-
-            // Map existing pendingLaunchOrders by phpclass so we can pre-fill.
-            var preByClass = {};
-            if (Array.isArray(hangar.pendingLaunchOrders)) {
-                hangar.pendingLaunchOrders.forEach(function (o) {
-                    if (!o) return;
-                    var k = o.phpclass || 'unknown';
-                    preByClass[k] = (preByClass[k] || 0) + parseInt(o.size || 0, 10);
-                });
-            }
-
-            // Group stored craft by phpclass for the selector. Stage 16.5: a
-            // cannotLaunch entry (fighter destroyed while landing on a damaged
-            // catapult) is a wreck — it occupies the bay but can never relaunch,
-            // so it's bucketed apart and rendered as a greyed-out, input-less row.
-            var byClass = {};
-            var wreckByClass = {};
-            hangar.hangarUsage.forEach(function (entry) {
-                var key = entry.phpclass || 'unknown';
-                if (entry.cannotLaunch) {
-                    if (!wreckByClass[key]) wreckByClass[key] = { name: entry.name || key, count: 0 };
-                    wreckByClass[key].count += parseInt(entry.flightSize || 1, 10);
-                    return;
+            var out = {};
+            out[parseInt(rd.entryHangar.id, 10)] = k;
+            return out;
+        }
+        // Sum the craft every row charges to each bay → {hangarId: craft}.
+        function tallyCharges() {
+            var charged = {};
+            rowData.forEach(function (rd) {
+                if (rd.isCat) return;   // catapults have no budget
+                var c = chargesForRow(rd, parseInt(rd.$input.val() || 0, 10));
+                Object.keys(c).forEach(function (hid) { charged[hid] = (charged[hid] || 0) + c[hid]; });
+            });
+            return charged;
+        }
+        // True if the current allocation pushes any bay past its launch budget.
+        function anyBayOverBudget(charged) {
+            var over = false;
+            bayBudget.forEach(function (base, hangar) {
+                if ((charged[parseInt(hangar.id, 10)] || 0) > base) over = true;
+            });
+            return over;
+        }
+        // Recompute every bay's "remaining" readout, and stop a row from being
+        // raised once its bay's budget is spent: if the latest edit tips any bay
+        // over, revert ONLY that row to its last accepted value (other rows are
+        // never altered to make room).
+        function updateBudgets() {
+            rowData.forEach(function (rd) {
+                if (rd.isCat) return;   // catapults have no budget
+                var cur = parseInt(rd.$input.val() || 0, 10);
+                if (cur < 0) cur = 0;
+                // Only an INCREASE can newly break a budget; if this row went up
+                // and the result is over budget, roll just this row back.
+                if (cur > (rd.lastVal || 0) && anyBayOverBudget(tallyCharges())) {
+                    rd.$input.val(rd.lastVal || 0);
+                } else {
+                    rd.lastVal = cur;
                 }
-                if (!byClass[key]) byClass[key] = { name: entry.name || key, count: 0 };
-                byClass[key].count += parseInt(entry.flightSize || 1, 10);
             });
 
-            Object.keys(byClass).forEach(function (cls) {
-                var info = byClass[cls];
-                var maxByRules = launchSizeMaxFor(cls);     // 1-6 default; SHF/BPod/Shuttle handled
-                var max = Math.min(info.count, maxByRules, budget);
-                var preset = Math.min(parseInt(preByClass[cls] || 0, 10), max);
-
-                var row = $('<div class="multi-value-row"></div>');
-                $('<span class="multi-value-label"><span class="hangar-craft-name">' + info.count + 'x ' + info.name + '</span> <span class="multi-value-max">(max launch: ' + max + ')</span></span>').appendTo(row);
-                var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
-                var $input = $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="' + preset + '" min="0" max="' + max + '">').appendTo(inputWrapper);
-
-                row.data('hangar', hangar);
-                row.data('phpclass', cls);
-                container.append(row);
-
-                // Live update the hangar's remaining-budget readout as the input changes.
-                $input.on('input change', function () { updateBudgetLabel(hangar); });
+            var charged = tallyCharges();
+            budgetSpans.forEach(function ($span, hangar) {
+                var base = bayBudget.get(hangar) || 0;
+                var rem = base - (charged[parseInt(hangar.id, 10)] || 0);
+                $span.text(rem);
+                $span.css('color', rem <= 0 ? '#ff6666' : '');
             });
-
-            // Stage 16.5: greyed-out, input-less rows for wrecks (fighter destroyed
-            // landing on a damaged catapult) so the player sees the bay is occupied
-            // but understands it can't relaunch.
-            Object.keys(wreckByClass).forEach(function (cls) {
-                var winfo = wreckByClass[cls];
-                var wrow = $('<div class="multi-value-row"></div>');
-                $('<span class="multi-value-label" style="opacity:0.5;"><span class="hangar-craft-name">' + winfo.count + 'x ' + winfo.name + '</span> <span class="multi-value-max">(destroyed on landing — cannot relaunch)</span></span>').appendTo(wrow);
-                container.append(wrow);
-            });
-            // Seed the readout with the preset total
-            updateBudgetLabel(hangar);
-        });
-
-        // Recompute "launch budget: X remaining of Y" for one hangar from the
-        // current values of every launchSize input belonging to that hangar.
-        function updateBudgetLabel(hangar) {
-            var $span = budgetLabels.get(hangar);
-            if (!$span) return;
-            var budget = hangarBudgets.get(hangar) || 0;
-            var allocated = 0;
-            container.find('.multi-value-row').each(function () {
-                var $row = $(this);
-                if ($row.data('hangar') !== hangar) return;
-                allocated += parseInt($('.launchSize', this).val() || 0, 10);
-            });
-            var remaining = budget - allocated;
-            $span.text(remaining);
-            $span.css('color', remaining < 0 ? '#ff6666' : '');     //red when oversubscribed
         }
 
-        $(".confirmok", e).on("click", function () {
-            // Aggregate selections per hangar (including hangars that received
-            // an OK with all-zeros — we need to ship an explicit empty list so
-            // the server replaces any prior order).
-            var byHangar = new Map();
-            // Seed every hangar we showed so a "cleared all" OK still records an empty list.
-            hangars.forEach(function (h) { byHangar.set(h, []); });
-            container.find('.multi-value-row').each(function () {
-                var $row = $(this);
-                var hangar = $row.data('hangar');
-                var cls = $row.data('phpclass');
-                if (!hangar) return;     // header rows have no data
-                var size = parseInt($('.launchSize', this).val() || 0, 10);
-                if (size <= 0) return;
-                if (!byHangar.has(hangar)) byHangar.set(hangar, []);
-                byHangar.get(hangar).push({ phpclass: cls, size: size });
+        // Pre-fill helper: sum prior pendingLaunchOrders on a bay matching a key.
+        function presetFor(hangar, matchFn) {
+            var n = 0;
+            if (Array.isArray(hangar.pendingLaunchOrders)) {
+                hangar.pendingLaunchOrders.forEach(function (o) { if (o && matchFn(o)) n += parseInt(o.size || 0, 10); });
+            }
+            return n;
+        }
+
+        hangars.forEach(function (hangar) {
+            var isCat = !!(hangar.isCatapult || hangar.name === 'catapult');
+            if (isCat) return;   // catapults handled below
+            if (!Array.isArray(hangar.hangarUsage)) hangar.hangarUsage = [];
+
+            var cap = parseInt(hangar.maxhealth || 0, 10);   // box capacity
+            var used = boxesUsedInHangar(hangar);            // incl. foreign occupancy
+            var budget = baseBudget(hangar);
+            bayBudget.set(hangar, budget);
+
+            // Multi-direction picker (rails/Hyperion).
+            var dirOptions = Array.isArray(hangar.directions) ? hangar.directions.slice() : [];
+            var prevDir = null;
+            if (Array.isArray(hangar.pendingLaunchOrders)) {
+                for (var pi = 0; pi < hangar.pendingLaunchOrders.length; pi++) {
+                    var po = hangar.pendingLaunchOrders[pi];
+                    if (po && typeof po.direction !== 'undefined') { prevDir = parseInt(po.direction, 10); break; }
+                }
+            }
+            var dirSelectHtml = '';
+            if (dirOptions.length > 1) {
+                var picked = (prevDir !== null && dirOptions.indexOf(prevDir) !== -1) ? prevDir : parseInt(dirOptions[0], 10);
+                dirChoice.set(hangar, picked);
+                var opts = '';
+                for (var di = 0; di < dirOptions.length; di++) {
+                    var d = parseInt(dirOptions[di], 10);
+                    opts += '<option value="' + d + '"' + (d === picked ? ' selected' : '') + '>' + mathlib.hexFacingToAngle(d) + '°</option>';
+                }
+                dirSelectHtml = ' <span class="multi-value-max">Launch at: <select class="multiConfirmInput hangarDirSelect" data-hid="' + hangar.id + '">' + opts + '</select></span>';
+            } else if (dirOptions.length === 1) {
+                dirChoice.set(hangar, parseInt(dirOptions[0], 10));
+                var ed = parseInt(dirOptions[0], 10);
+                if (ed !== 0) dirSelectHtml = ' <span class="multi-value-max">(launches at: ' + mathlib.hexFacingToAngle(ed) + '°)</span>';
+            }
+
+            // Hangar header row: capacity used/total + LIVE launch budget.
+            // (Pass 1 — all bay headers are grouped first, launch rows follow in
+            // Pass 2 below, so a multi-bay flight's input isn't wedged between two
+            // bay labels.)
+            var label = hangarLabelFor(hangar);
+            bayLabels.set(hangar, label);
+            var headerRow = $('<div class="multi-value-row"></div>');
+            $('<span class="multi-value-label"><span class="hangar-section-name">' + label + '</span> <span class="multi-value-max">(Capacity: ' + Math.ceil(used) + '/' + cap + ' boxes · launch budget: <span class="launch-budget-remaining">' + budget + '</span>/' + budget + ')</span>' + dirSelectHtml + '</span>').appendTo(headerRow);
+            container.append(headerRow);
+            budgetSpans.set(hangar, headerRow.find('.launch-budget-remaining'));
+        });
+
+        // Separator between the bay-capacity overview and the launch rows.
+        //$('<div class="multi-value-row" style="border-top:1px solid rgba(120,160,200,0.35); margin-top:4px; padding-top:4px;"><span class="multi-value-label"><span class="hangar-section-name">Launch</span></span></div>').appendTo(container);
+
+        // ----- Pass 2: launch rows (one per docked flight, then anonymous) -----
+        hangars.forEach(function (hangar) {
+            var isCat = !!(hangar.isCatapult || hangar.name === 'catapult');
+            if (isCat) return;
+            if (!Array.isArray(hangar.hangarUsage)) return;
+            var budget = bayBudget.get(hangar) || 0;
+
+            // Docked-flight rows (one per dockedFlightId entry).
+            hangar.hangarUsage.forEach(function (entry) {
+                if (!entry || entry.cannotLaunch) return;
+                var dfid = parseInt(entry.dockedFlightId || 0, 10);
+                if (dfid <= 0) return;   // anonymous handled below
+                var cls = entry.phpclass || 'unknown';
+                var size = parseInt(entry.flightSize || 1, 10);
+                //Fractional-safe (ultralight 0.5): occupancy box→craft is floor(boxes/bpc).
+                var bpc = entry.boxesPerCraft ? (parseFloat(entry.boxesPerCraft) || 1) : 1;
+                var max = Math.min(size, launchSizeMaxFor(cls));
+                var nm = entry.name || cls;
+
+                // Occupancy bays for live budget charging (smallest-first).
+                var occBays = [];
+                if (Array.isArray(entry.occupancy)) {
+                    entry.occupancy.forEach(function (o) {
+                        occBays.push({ hangarId: parseInt(o.systemId, 10), craft: Math.floor(parseInt(o.boxes || 0, 10) / bpc) });
+                    });
+                } else {
+                    occBays.push({ hangarId: parseInt(hangar.id, 10), craft: size });
+                }
+                occBays.sort(function (a, b) { return a.craft - b.craft; });
+                var bayNote = (occBays.length > 1) ? (' across ' + occBays.length + ' bays') : '';
+
+                var preset = Math.min(presetFor(hangar, function (o) { return parseInt(o.dockedFlightId || 0, 10) === dfid; }), max);
+
+                var row = $('<div class="multi-value-row"></div>');
+                $('<span class="multi-value-label"><span class="hangar-craft-name">' + nm + '</span> <span class="multi-value-max">(' + size + ' docked' + bayNote + ', max ' + max + ')</span></span>').appendTo(row);
+                var iw = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
+                var $in = $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="' + preset + '" min="0" max="' + max + '">').appendTo(iw);
+                container.append(row);
+                $in.on('input change', updateBudgets);
+                rowData.push({ $input: $in, dockedFlightId: dfid, phpclass: cls, entryHangar: hangar, max: max, occBays: occBays });
             });
 
-            // Validate aggregate per-hangar against the shared output budget.
-            var oversub = null;
-            byHangar.forEach(function (orders, hangar) {
-                var total = 0;
-                orders.forEach(function (o) { total += parseInt(o.size || 0, 10); });
-                var budget = hangarBudgets.get(hangar) || 0;
-                if (total > budget) oversub = { total: total, budget: budget };
+            // Anonymous stash rows (auto-filled shuttles / orphans), grouped by
+            // phpclass — these fresh-spawn on launch (no dockedFlightId).
+            var anon = {};
+            hangar.hangarUsage.forEach(function (entry) {
+                if (!entry || entry.cannotLaunch) return;
+                if (parseInt(entry.dockedFlightId || 0, 10) > 0) return;   // docked, handled above
+                var cls = entry.phpclass || 'unknown';
+                if (!anon[cls]) anon[cls] = { name: entry.name || cls, count: 0 };
+                anon[cls].count += parseInt(entry.flightSize || 1, 10);
             });
-            if (oversub) {
-                alert("Launch total (" + oversub.total + ") exceeds shared launch+land budget (" + oversub.budget + "). Reduce the count and try again.");
+            Object.keys(anon).forEach(function (cls) {
+                var info = anon[cls];
+                var max = Math.min(info.count, launchSizeMaxFor(cls), budget);
+                var preset = Math.min(presetFor(hangar, function (o) { return (o.phpclass === cls) && !(parseInt(o.dockedFlightId || 0, 10) > 0); }), max);
+                var fromBay = bayLabels.get(hangar) || '';
+                var row = $('<div class="multi-value-row"></div>');
+                $('<span class="multi-value-label"><span class="hangar-craft-name">' + info.count + 'x ' + info.name + '</span> <span class="multi-value-max">(' + fromBay + ', max ' + max + ')</span></span>').appendTo(row);
+                var iw = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
+                var $in = $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="' + preset + '" min="0" max="' + max + '">').appendTo(iw);
+                container.append(row);
+                $in.on('input change', updateBudgets);
+                rowData.push({ $input: $in, dockedFlightId: 0, phpclass: cls, entryHangar: hangar, max: max, isAnon: true });
+            });
+        });
+
+        // ----- Catapults: single-fighter, launched via the legacy per-bay path -----
+        var catSeen = 0, catTotal = 0;
+        hangars.forEach(function (h) { if (h.isCatapult || h.name === 'catapult') catTotal++; });
+        hangars.forEach(function (hangar) {
+            if (!(hangar.isCatapult || hangar.name === 'catapult')) return;
+            if (!Array.isArray(hangar.hangarUsage)) return;
+            hangar.hangarUsage.forEach(function (entry) {
+                if (!entry) return;
+                var cls = entry.phpclass || 'unknown';
+                catSeen++;
+                var label = (catTotal > 1 ? ('Catapult ' + catSeen) : 'Catapult');
+                if (entry.cannotLaunch) {
+                    $('<div class="multi-value-row"><span class="multi-value-label" style="opacity:0.5;"><span class="hangar-craft-name">' + label + ': ' + (entry.name || cls) + '</span> <span class="multi-value-max">(wrecked — cannot relaunch)</span></span></div>').appendTo(container);
+                    return;
+                }
+                var row = $('<div class="multi-value-row"></div>');
+                $('<span class="multi-value-label"><span class="hangar-craft-name">' + label + ': ' + (entry.name || cls) + '</span> <span class="multi-value-max">(max 1)</span></span>').appendTo(row);
+                var inputWrapper = $('<div style="display:flex; align-items:center;"></div>').appendTo(row);
+                var $input = $('<input type="number" class="multiConfirmInput multi-value-input main-input launchSize" value="0" min="0" max="1">').appendTo(inputWrapper);
+                container.append(row);
+                // Catapults route through the legacy per-bay processLaunchOrders, so
+                // they use {phpclass,size} (no dockedFlightId needed). entryHangar is
+                // the catapult itself; mark isCat so OK puts it on that bay.
+                rowData.push({ $input: $input, dockedFlightId: 0, phpclass: cls, entryHangar: hangar, max: 1, isCat: true });
+            });
+        });
+
+        // Wire direction selects.
+        container.find('.hangarDirSelect').on('change', function () {
+            var hid = parseInt($(this).attr('data-hid'), 10);
+            var val = parseInt($(this).val(), 10);
+            hangars.forEach(function (h) { if (parseInt(h.id, 10) === hid) dirChoice.set(h, val); });
+        });
+
+        if (rowData.length === 0) {
+            $('<div class="multi-value-row"><span class="multi-value-label">No docked flights to launch.</span></div>').appendTo(container);
+        }
+
+        // Seed the live budget readouts from any pre-filled (re-edit) values.
+        updateBudgets();
+
+        $(".confirmok", e).on("click", function () {
+            // Build per-bay order lists keyed by the entry's hangar. Seed EVERY
+            // bay we showed (incl. catapults) so a cleared row ships an explicit
+            // empty list and cancels any prior queued order.
+            var byHangar = new Map();
+            hangars.forEach(function (h) { byHangar.set(h, []); });
+
+            // Validate per-bay budget (each bay's output is its own launch rate;
+            // a multi-bay docked launch charges its occupancy bays smallest-first).
+            var charged = {};   // hangarId -> craft charged
+            rowData.forEach(function (rd) {
+                var size = parseInt(rd.$input.val() || 0, 10);
+                if (size <= 0) return;
+                if (size > rd.max) size = rd.max;
+                if (!rd.isCat) {
+                    if (rd.dockedFlightId > 0 && rd.occBays && rd.occBays.length) {
+                        var dist = distributeDockedCharge(rd, size);
+                        Object.keys(dist).forEach(function (hid) { charged[hid] = (charged[hid] || 0) + dist[hid]; });
+                    } else {
+                        var hid = parseInt(rd.entryHangar.id, 10);
+                        charged[hid] = (charged[hid] || 0) + size;
+                    }
+                }
+                var order = { phpclass: rd.phpclass, size: size };
+                if (rd.dockedFlightId > 0) order.dockedFlightId = rd.dockedFlightId;
+                if (dirChoice.has(rd.entryHangar)) order.direction = dirChoice.get(rd.entryHangar);
+                if (!byHangar.has(rd.entryHangar)) byHangar.set(rd.entryHangar, []);
+                byHangar.get(rd.entryHangar).push(order);
+            });
+
+            var over = null;
+            bayBudget.forEach(function (base, hangar) {
+                var c = charged[parseInt(hangar.id, 10)] || 0;
+                if (c > base) over = { label: hangarLabelForId(hangar), c: c, base: base };
+            });
+            if (over) {
+                alert("Launch from " + over.label + " (" + over.c + ") exceeds that bay's launch rate (" + over.base + "). Reduce and retry.");
                 return;
             }
 
@@ -38902,35 +39707,11 @@ window.confirm = {
                 hangar.pendingLaunchOrdersDirty = true;
             });
 
-            //Stage 10.2: project newly-queued launches into every hangar
-            //tooltip so the player sees the post-resolve "Carrying" total
-            //and a "(Launching)" line for the outgoing craft.
-            if (typeof window.refreshFiringHangarTooltips === 'function') {
-                window.refreshFiringHangarTooltips();
-            }
-
+            if (typeof window.refreshFiringHangarTooltips === 'function') window.refreshFiringHangarTooltips();
             $(".confirm").remove();
         });
-
-        $(".confirmcancel", e).on("click", function () {
-            $(".confirm").remove();
-        });
-
+        $(".confirmcancel", e).on("click", function () { $(".confirm").remove(); });
         e.appendTo("body").fadeIn(250);
-
-        // Per-class flight size caps per B5W §10.1.2:
-        //   Shuttles 1-6, Super-Heavy Fighters 1-3, Breaching Pods 1-2,
-        //   everything else: full flight (capped at 6 by default; partial
-        //   is allowed when fewer than 6 remain stored).
-        function launchSizeMaxFor(phpclass) {
-            var lower = (phpclass || '').toLowerCase();
-            if (lower === 'shuttle' || lower === 'minesweepingshuttle') return 6;
-            if (lower.indexOf('shuttle') !== -1) return 6;
-            if (lower.indexOf('breachingpod') !== -1 || lower.indexOf('breaching') !== -1) return 2;
-            // Heuristic for super-heavy: phpclass usually contains 'SHF'/'SuperHeavy'.
-            if (lower.indexOf('superheavy') !== -1 || lower.indexOf('shf') !== -1) return 3;
-            return 6;
-        }
     },
 
     // === Hangar Operations Stage 5: dock fighters dialog ===
@@ -38980,13 +39761,16 @@ window.confirm = {
             //from the hangar prefix tallies.
             var prefixCounts = {};
             var catapultTotal = 0;
+            var railTotal = 0;
             c.hangars.forEach(function (h) {
                 if (h.hangar.isCatapult || h.hangar.name === 'catapult') { catapultTotal++; return; }
+                if (h.hangar.isRail || h.hangar.name === 'fighterRail') { railTotal++; return; }
                 var p = locationPrefixFor(h.hangar.location);
                 prefixCounts[p] = (prefixCounts[p] || 0) + 1;
             });
             var prefixSeen = {};
             var catapultSeen = 0;
+            var railSeen = 0;
             c.hangars.forEach(function (h, idx) {
                 var preset = 0;
                 if (Array.isArray(h.hangar.pendingDockOrders)) {
@@ -39000,6 +39784,9 @@ window.confirm = {
                 if (h.hangar.isCatapult || h.hangar.name === 'catapult') {
                     catapultSeen++;
                     hangarName = (catapultTotal > 1) ? ('Catapult ' + catapultSeen) : 'Catapult';
+                } else if (h.hangar.isRail || h.hangar.name === 'fighterRail') {
+                    railSeen++;
+                    hangarName = (railTotal > 1) ? ('Fighter Rail ' + railSeen) : 'Fighter Rail';
                 } else {
                     var prefix = locationPrefixFor(h.hangar.location);
                     prefixSeen[prefix] = (prefixSeen[prefix] || 0) + 1;
@@ -39028,7 +39815,7 @@ window.confirm = {
         $('<div class="multi-value-header">' + headerText + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Allocate craft to dock per hangar.</span></div>').appendTo(container);
+        //$('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Allocate craft to dock per hangar.</span></div>').appendTo(container);
 
         // Live cross-row total: updates each input's max so the sum can never exceed flightCount.
         // Built as a single span so the flex row treats it as one child (avoiding space-between split).
@@ -39165,7 +39952,7 @@ window.confirm = {
         // Stage 16: a Catapult (name "catapult") is a dock-capable hangar that
         // holds exactly ONE fighter regardless of box count / damage and has no
         // launch+land output budget.
-        var isDockHangar = function (sys) { return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult')); };
+        var isDockHangar = function (sys) { return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail')); };
         var effectiveHangarBoxes = function (h) {
             if (!h) return 0;
             if (h.isCatapult || h.name === 'catapult') return 1;
@@ -39174,6 +39961,14 @@ window.confirm = {
             return Math.max(0, parseInt(h.maxhealth, 10) - nd);
         };
         var isCatapultSys = function (sys) { return !!(sys && (sys.isCatapult || sys.name === 'catapult')); };
+        // Box-cost helpers: a unitSize<1 craft (Vorlon Assault Fighter et al.)
+        // occupies >1 box each; a unitSize>1 ultralight (Zorth) packs several per
+        // box (fractional 0.5 box/craft); catapults are single-fighter rails (1:1).
+        // Mirrors HangarOps::boxesPerCraftForClass / boxesPerCraftForEntry (PHP).
+        var boxesPerCraftFromUnitSize = function (u) { u = (u != null) ? parseFloat(u) : 1; if (u > 0 && u < 1) return Math.ceil(1 / u); if (u > 1) return 1 / u; return 1; };
+        var boxesPerCraftForEntry = function (e) { if (e && e.boxesPerCraft) { var b = parseFloat(e.boxesPerCraft); return b > 0 ? b : 1; } return boxesPerCraftFromUnitSize(e ? e.unitSize : 1); };
+        var entryBoxesIn = function (sys, e) { var n = parseInt(e.flightSize || 1, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftForEntry(e); };
+        var craftBoxesIn = function (sys, count, unitSize) { var n = parseInt(count || 0, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftFromUnitSize(unitSize); };
 
         // Exclude flights queued to a DIFFERENT carrier this turn — the player
         // can re-route via the per-flight "Enter Hangar" dialog (which shows
@@ -39187,7 +39982,7 @@ window.confirm = {
             if (!s || s.id === carrier.id) continue;
             if (!Array.isArray(s.systems)) continue;
             s.systems.forEach(function (sys) {
-                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) return;
                 if (!Array.isArray(sys.pendingDockOrders)) return;
                 sys.pendingDockOrders.forEach(function (o) {
                     if (parseInt(o.count || 0, 10) > 0) queuedOnOtherCarrier.add(parseInt(o.flightId, 10));
@@ -39204,7 +39999,7 @@ window.confirm = {
         var queuedByFlight = new Map();
         if (Array.isArray(carrier.systems)) {
             carrier.systems.forEach(function (sys) {
-                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) return;
                 if (!Array.isArray(sys.pendingDockOrders)) return;
                 sys.pendingDockOrders.forEach(function (o) {
                     var fid = parseInt(o.flightId, 10);
@@ -39213,8 +40008,15 @@ window.confirm = {
                     var prior = queuedByFlight.get(fid);
                     // Prefer the hangar with the largest allocation so the
                     // dropdown defaults to the player's clear primary choice
-                    // when an existing split exists.
-                    if (!prior || c > prior.count) queuedByFlight.set(fid, { hangar: sys, count: c });
+                    // when an existing split exists. bayCount tracks how many
+                    // distinct bays hold the flight — >1 means it was auto-
+                    // distributed and must re-edit as an auto-distribute row.
+                    if (!prior) {
+                        queuedByFlight.set(fid, { hangar: sys, count: c, bayCount: 1 });
+                    } else {
+                        prior.bayCount += 1;
+                        if (c > prior.count) { prior.hangar = sys; prior.count = c; }
+                    }
                 });
             });
         }
@@ -39269,18 +40071,21 @@ window.confirm = {
             if (!isCat && shipManager.systems.isDestroyed(carrier, sys)) return;
 
             var effective = effectiveHangarBoxes(sys);   //catapult → 1, regardless of damage
+            //committed is in BOXES (fractional for ultralights); round the TOTAL up
+            //to whole boxes so free space is whole boxes (mirrors occupiedBoxes).
             var committed = 0;
             if (Array.isArray(sys.hangarUsage)) {
-                sys.hangarUsage.forEach(function (entry) { committed += parseInt(entry.flightSize || 1, 10); });
+                sys.hangarUsage.forEach(function (entry) { committed += entryBoxesIn(sys, entry); });
             }
             if (Array.isArray(sys.pendingDockOrders)) {
                 sys.pendingDockOrders.forEach(function (o) {
                     var fid = parseInt(o.flightId, 10);
                     if (rowFlightIds.has(fid)) return;        //in dialog → reclaimable
-                    committed += parseInt(o.count || 0, 10);
+                    var of = gamedata.getShip(fid);
+                    committed += craftBoxesIn(sys, o.count, of ? of.unitSize : 1);
                 });
             }
-            var freeBoxes = Math.max(0, effective - committed);
+            var freeBoxes = Math.max(0, effective - Math.ceil(committed));
             baseFreeByHangar.set(sys.id, freeBoxes);
 
             //Catapults have no launch+land output budget — set the budget to the
@@ -39313,20 +40118,35 @@ window.confirm = {
             var hangars = entry.hangars;
             var preExisting = queuedByFlight.get(parseInt(flight.id, 10));
 
-            // Ensure the previously-queued hangar appears as an option even
-            // if current eligibility somehow recomputed without it (e.g.
-            // stale-eligibility flight injected above).
-            if (preExisting && preExisting.hangar) {
+            var active = countActiveCraftInFlightLocal(flight);
+            if (active <= 0) return;
+
+            // A flight already queued across >1 bay was auto-distributed (it's
+            // bigger than any single rail) and must re-edit as an auto-distribute
+            // row — never collapse back onto one recorded bay (which would assign
+            // the whole flight to a 6-box rail and trip the overflow guard).
+            var wasAutoDistributed = !!(preExisting && preExisting.bayCount > 1);
+
+            // No SINGLE bay holds the whole flight, but the carrier's rails/bays
+            // together do (entry.combinedFit) — offer an auto-distribute row that
+            // greedily spreads the flight across bays on OK (matches the
+            // Deployment-Phase "auto-distribute only" behaviour for rails).
+            var autoDistribute = false;
+            if (wasAutoDistributed || hangars.length === 0) {
+                if (!wasAutoDistributed && !entry.combinedFit) return;
+                var plan0 = distributeFlightAcrossBays(flight, active);
+                if (plan0.length === 0) return;       //combined capacity gone since open — skip
+                autoDistribute = true;
+            } else if (preExisting && preExisting.hangar) {
+                // Single-bay re-edit: ensure the previously-queued hangar appears
+                // as an option even if eligibility recomputed without it (e.g.
+                // stale-eligibility flight injected above).
                 var alreadyListed = hangars.some(function (h) { return h.hangar === preExisting.hangar; });
                 if (!alreadyListed) {
                     hangars = hangars.slice();
                     hangars.unshift({ hangar: preExisting.hangar, capacity: parseInt(flight.flightSize || 1, 10) });
                 }
             }
-            if (hangars.length === 0) return;
-
-            var active = countActiveCraftInFlightLocal(flight);
-            if (active <= 0) return;
 
             var label = flight.name + ' (' + active + ' x ' + flight.shipClass + ')';
             if (entry.stale) label += ' — queued (no longer in hex)';
@@ -39340,7 +40160,11 @@ window.confirm = {
             $labelSpan.appendTo(row);
 
             var $hangarPick;
-            if (hangars.length === 1) {
+            if (autoDistribute) {
+                row.append($('<span class="multi-value-max"> → across rails/bays</span>'));
+                $hangarPick = null;
+                row.data('autoDistribute', true);
+            } else if (hangars.length === 1) {
                 var only = hangars[0];
                 var hangarName = hangarLabelFor(carrier, only.hangar);
                 row.append($('<span class="multi-value-max"> → ' + hangarName + '</span>'));
@@ -39375,14 +40199,28 @@ window.confirm = {
 
         $(".confirmok", e).on("click", function () {
             // Reject if any hangar would overflow free boxes OR the shared
-            // launch+land budget. Mirrors hangarDeployDock's guard.
-            var per = computePerHangarUsage();
+            // launch+land budget. Physical capacity is measured in BOXES
+            // (unitSize<1 craft cost >1 box each); the launch+land budget is in
+            // CRAFT. Mirrors hangarDeployDock's guard. Each checked row resolves
+            // to a per-bay plan: a single chosen hangar for ordinary flights, a
+            // greedy multi-bay split for auto-distribute rows (rails).
+            var perBoxes = new Map();
+            var perCraft = new Map();
+            rowData.forEach(function ($row) {
+                if (!$row.find('.deployDockCheck').is(':checked')) return;
+                var f = $row.data('flight');
+                planForRow($row).forEach(function (slot) {
+                    perCraft.set(slot.hangar.id, (perCraft.get(slot.hangar.id) || 0) + slot.count);
+                    perBoxes.set(slot.hangar.id, (perBoxes.get(slot.hangar.id) || 0) + craftBoxesIn(slot.hangar, slot.count, f ? f.unitSize : 1));
+                });
+            });
             var overflow = [];
-            per.forEach(function (used, hangarId) {
+            perBoxes.forEach(function (boxesUsed, hangarId) {
                 var avail = baseFreeByHangar.get(hangarId) || 0;
                 var budget = baseBudgetByHangar.get(hangarId) || 0;
-                if (used > avail || used > budget) {
-                    overflow.push(hangarLabelByIdFor(carrier, hangarId) + ' (' + used + '/' + Math.min(avail, budget) + ')');
+                var craftUsed = perCraft.get(hangarId) || 0;
+                if (boxesUsed > avail || craftUsed > budget) {
+                    overflow.push(hangarLabelByIdFor(carrier, hangarId) + ' (' + boxesUsed + '/' + avail + ' boxes)');
                 }
             });
             if (overflow.length > 0) {
@@ -39410,20 +40248,18 @@ window.confirm = {
                     stripFlightFromCarrier(carrier, flight);
                     return;
                 }
-                var hangar = $row.data('chosenHangar');
-                if (!hangar) {
-                    var idx = parseInt($row.find('.deployDockHangar').val() || 0, 10);
-                    var eligible = $row.data('eligibleHangars');
-                    hangar = eligible[idx].hangar;
-                }
-                var count = parseInt($row.data('flightSize') || 0, 10);
-                if (count <= 0) return;
-                //Atomic full-flight write on THIS carrier — consolidates any
-                //pre-existing split into a single order.
+                var plan = planForRow($row);
+                if (plan.length === 0) return;
+                //Atomic rewrite on THIS carrier — strip any pre-existing split for
+                //the flight, then write the new per-bay order(s). A single-bay
+                //dock writes one order; an auto-distribute row writes one per bay.
                 stripFlightFromCarrier(carrier, flight);
-                if (!Array.isArray(hangar.pendingDockOrders)) hangar.pendingDockOrders = [];
-                hangar.pendingDockOrders.push({ flightId: parseInt(flight.id, 10), count: count });
-                hangar.pendingDockOrdersDirty = true;
+                plan.forEach(function (slot) {
+                    if (slot.count <= 0) return;
+                    if (!Array.isArray(slot.hangar.pendingDockOrders)) slot.hangar.pendingDockOrders = [];
+                    slot.hangar.pendingDockOrders.push({ flightId: parseInt(flight.id, 10), count: slot.count });
+                    slot.hangar.pendingDockOrdersDirty = true;
+                });
             });
 
             //Stage 10.2: project bulk-recover orders into every hangar tooltip
@@ -39442,17 +40278,66 @@ window.confirm = {
             var per = new Map();
             rowData.forEach(function ($row) {
                 if (!$row.find('.deployDockCheck').is(':checked')) return;
-                var hangar = $row.data('chosenHangar');
-                if (!hangar) {
-                    var idx = parseInt($row.find('.deployDockHangar').val() || 0, 10);
-                    var eligible = $row.data('eligibleHangars');
-                    if (!eligible || !eligible[idx]) return;
-                    hangar = eligible[idx].hangar;
-                }
-                var count = parseInt($row.data('flightSize') || 0, 10);
-                per.set(hangar.id, (per.get(hangar.id) || 0) + count);
+                planForRow($row).forEach(function (slot) {
+                    per.set(slot.hangar.id, (per.get(slot.hangar.id) || 0) + slot.count);
+                });
             });
             return per;
+        }
+
+        // Resolve a checked row to its per-bay [{hangar, count}] plan. Ordinary
+        // rows put the whole flight in the chosen/dropdown hangar; an auto-
+        // distribute row (flight bigger than any single bay) greedily spreads it
+        // across the carrier's bays. Returns [] if nothing is allocable.
+        function planForRow($row) {
+            var count = parseInt($row.data('flightSize') || 0, 10);
+            if (count <= 0) return [];
+            if ($row.data('autoDistribute')) {
+                return distributeFlightAcrossBays($row.data('flight'), count);
+            }
+            var hangar = $row.data('chosenHangar');
+            if (!hangar) {
+                var idx = parseInt($row.find('.deployDockHangar').val() || 0, 10);
+                var eligible = $row.data('eligibleHangars');
+                if (!eligible || !eligible[idx]) return [];
+                hangar = eligible[idx].hangar;
+            }
+            return [{ hangar: hangar, count: count }];
+        }
+
+        // Greedily spread $count craft of $flight across the carrier's bays
+        // (biggest free first), using the dialog's already-computed free-box and
+        // launch+land budget maps. Capacity is in BOXES (unitSize<1 craft cost
+        // >1 box each); the launch+land budget is in CRAFT. Returns
+        // [{hangar, count}] or [] if combined capacity can't hold the flight.
+        function distributeFlightAcrossBays(flight, count) {
+            var u = flight ? parseFloat(flight.unitSize) : 1;
+            //per-craft boxes: >1 superheavy, fractional 0.5 ultralight, else 1.
+            var perCraftBoxes = (u > 0 && u < 1) ? Math.ceil(1 / u) : (u > 1 ? 1 / u : 1);
+            var bays = [];
+            carrier.systems.forEach(function (sys) {
+                if (!sys || !isDockHangar(sys)) return;
+                if (!baseFreeByHangar.has(sys.id)) return;
+                var freeBoxes = baseFreeByHangar.get(sys.id);
+                var budget    = baseBudgetByHangar.get(sys.id);
+                var isCat = isCatapultSys(sys);
+                //Craft this bay can take: catapult counts 1:1, else floor(boxes /
+                //per-craft) capped by the launch+land budget.
+                var craftFit = isCat ? Math.min(freeBoxes, budget)
+                                     : Math.min(Math.floor(freeBoxes / perCraftBoxes), budget);
+                if (craftFit > 0) bays.push({ hangar: sys, fit: craftFit, free: freeBoxes });
+            });
+            bays.sort(function (a, b) { return b.free - a.free; });   //biggest free first
+
+            var remaining = count;
+            var plan = [];
+            for (var i = 0; i < bays.length && remaining > 0; i++) {
+                var take = Math.min(remaining, bays[i].fit);
+                if (take <= 0) continue;
+                plan.push({ hangar: bays[i].hangar, count: take });
+                remaining -= take;
+            }
+            return (remaining > 0) ? [] : plan;
         }
 
         //Stage 10.6.2: aggregate customFighter demand across the checked rows.
@@ -39481,7 +40366,7 @@ window.confirm = {
                     ? parseInt(carrier.customFighter[name], 10) : 0;
                 var committed = 0;
                 carrier.systems.forEach(function (sys) {
-                    if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
+                    if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) return;
                     if (Array.isArray(sys.hangarUsage)) {
                         sys.hangarUsage.forEach(function (entry) {
                             if (entry.customFtrName !== name) return;
@@ -39509,7 +40394,7 @@ window.confirm = {
             var anyOverflow = false;
             var $pillContainer = $('<span class="hangar-capacity-pills"></span>');
             carrier.systems.forEach(function (sys) {
-                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) return;
                 if (!baseFreeByHangar.has(sys.id)) return;
                 var avail = baseFreeByHangar.get(sys.id);
                 var budget = baseBudgetByHangar.get(sys.id);
@@ -39538,7 +40423,7 @@ window.confirm = {
             var fid = parseInt(flight.id, 10);
             if (!Array.isArray(carrier.systems)) return;
             carrier.systems.forEach(function (sys) {
-                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult')) return;
+                if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) return;
                 if (!Array.isArray(sys.pendingDockOrders)) return;
                 var before = sys.pendingDockOrders.length;
                 sys.pendingDockOrders = sys.pendingDockOrders.filter(function (o) {
@@ -39567,6 +40452,13 @@ window.confirm = {
                 if (cats.length <= 1) return 'Catapult';
                 return 'Catapult ' + (cats.indexOf(hangar) + 1);
             }
+            //Fighter Rails are labelled "Fighter Rail" / "Fighter Rail N" (numbered
+            //across all rails on the carrier), independent of ship location.
+            if (hangar && (hangar.isRail || hangar.name === 'fighterRail')) {
+                var rails = carrier.systems.filter(function (s) { return s && (s.isRail || s.name === 'fighterRail'); });
+                if (rails.length <= 1) return 'Fighter Rail';
+                return 'Fighter Rail ' + (rails.indexOf(hangar) + 1);
+            }
             var prefix = (function (loc) {
                 var l = parseInt(loc, 10);
                 if (l === 0) return 'Main';
@@ -39577,7 +40469,7 @@ window.confirm = {
                 return 'Hangar';
             })(hangar.location);
             var siblings = carrier.systems.filter(function (s) {
-                if (!s || s.name !== 'hangar') return false;     //hangars only — catapults labelled separately
+                if (!s || s.name !== 'hangar') return false;     //hangars only — catapults/rails labelled separately
                 var groupOf = function (l) {
                     if (l === 31 || l === 32) return 3;
                     if (l === 41 || l === 42) return 4;
@@ -39593,7 +40485,7 @@ window.confirm = {
         function hangarLabelByIdFor(carrier, hangarId) {
             for (var i = 0; i < carrier.systems.length; i++) {
                 var sys = carrier.systems[i];
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && sys.id === hangarId) return hangarLabelFor(carrier, sys);
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && sys.id === hangarId) return hangarLabelFor(carrier, sys);
             }
             return 'Hangar';
         }
@@ -39636,10 +40528,15 @@ window.confirm = {
             //Sum free boxes across the carrier's eligible hangars for the readout.
             var totalCapacity = 0;
             entry.hangars.forEach(function (h) { totalCapacity += parseInt(h.capacity || 0, 10); });
+            //Boxes this flight needs: unitSize<1 craft cost >1 box each, unitSize>1
+            //ultralights a fractional box each; round the total need UP to whole boxes.
             var size = parseInt(flight.flightSize || 1, 10);
+            var fu = parseFloat(flight.unitSize);
+            var bpc = (fu > 0 && fu < 1) ? Math.ceil(1 / fu) : (fu > 1 ? 1 / fu : 1);
+            var boxesNeeded = Math.ceil(size * bpc);
 
             var row = $('<div class="multi-value-row"></div>');
-            var btn = $('<div class="name-value-button-ally" style="flex:1;">DOCK IN ' + carrier.name.toUpperCase() + ' (' + size + '/' + totalCapacity + ' boxes)</div>');
+            var btn = $('<div class="name-value-button-ally" style="flex:1;">DOCK IN ' + carrier.name.toUpperCase() + ' (' + boxesNeeded + '/' + totalCapacity + ' boxes)</div>');
             btn.on('click', function () {
                 if (window.DeploymentDock.autoQueueDockOnCarrier(carrier, flight)) {
                     e.remove();
@@ -39666,7 +40563,7 @@ window.confirm = {
 
         // Stage 16: a Catapult (name "catapult") is a dock-capable hangar that
         // holds exactly ONE fighter regardless of box count / damage.
-        var isDockHangar = function (sys) { return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult')); };
+        var isDockHangar = function (sys) { return !!(sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail')); };
         var effectiveHangarBoxes = function (h) {
             if (!h) return 0;
             if (h.isCatapult || h.name === 'catapult') return 1;
@@ -39674,18 +40571,33 @@ window.confirm = {
             if (Array.isArray(h.damage)) h.damage.forEach(function (d) { nd += Math.max(0, parseInt(d.damage || 0, 10) - parseInt(d.armour || 0, 10)); });
             return Math.max(0, parseInt(h.maxhealth, 10) - nd);
         };
+        // Box-cost helpers: unitSize<1 craft occupy >1 box each; unitSize>1
+        // ultralights pack several per box (fractional 0.5 box/craft); catapults are
+        // single-fighter rails (1:1). Mirrors HangarOps::boxesPerCraftForClass.
+        var isCatapultSys = function (sys) { return !!(sys && (sys.isCatapult || sys.name === 'catapult')); };
+        var boxesPerCraftFromUnitSize = function (u) { u = (u != null) ? parseFloat(u) : 1; if (u > 0 && u < 1) return Math.ceil(1 / u); if (u > 1) return 1 / u; return 1; };
+        var boxesPerCraftForEntry = function (en) { if (en && en.boxesPerCraft) { var b = parseFloat(en.boxesPerCraft); return b > 0 ? b : 1; } return boxesPerCraftFromUnitSize(en ? en.unitSize : 1); };
+        var entryBoxesIn = function (sys, en) { var n = parseInt(en.flightSize || 1, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftForEntry(en); };
+        var craftBoxesIn = function (sys, count, unitSize) { var n = parseInt(count || 0, 10); return isCatapultSys(sys) ? n : n * boxesPerCraftFromUnitSize(unitSize); };
 
         var pending = window.DeploymentDock.findPendingFlightsForCarrier(carrier);
 
         // Pre-check flights already queued to THIS carrier (re-edit case).
-        // Build a map: flightId → existing {hangar} so OK can detect "uncheck = cancel".
+        // Build a map: flightId → existing {hangar, bayCount} so OK can detect
+        // "uncheck = cancel". bayCount tracks how many distinct bays the flight
+        // is queued across — a flight spread over >1 bay was auto-distributed
+        // (a flight bigger than any single rail) and must re-edit as an
+        // auto-distribute row, NOT collapse back onto its first recorded bay.
         var preCheckedByFlight = new Map();
         if (Array.isArray(carrier.systems)) {
             carrier.systems.forEach(function (sys) {
                 if (!sys || !isDockHangar(sys)) return;
                 if (!Array.isArray(sys.pendingDeployStartOrders)) return;
                 sys.pendingDeployStartOrders.forEach(function (o) {
-                    preCheckedByFlight.set(parseInt(o.flightId, 10), { hangar: sys });
+                    var fid = parseInt(o.flightId, 10);
+                    var prior = preCheckedByFlight.get(fid);
+                    if (prior) { prior.bayCount += 1; }
+                    else { preCheckedByFlight.set(fid, { hangar: sys, bayCount: 1 }); }
                 });
             });
         }
@@ -39737,19 +40649,21 @@ window.confirm = {
             if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(carrier, sys)) return;
             var effective = effectiveHangarBoxes(sys);
+            //committed is in BOXES (fractional for ultralights); round the TOTAL up
+            //to whole boxes so free space is whole boxes (mirrors occupiedBoxes).
             var committed = 0;
             if (Array.isArray(sys.hangarUsage)) {
-                sys.hangarUsage.forEach(function (entry) { committed += parseInt(entry.flightSize || 1, 10); });
+                sys.hangarUsage.forEach(function (entry) { committed += entryBoxesIn(sys, entry); });
             }
             if (Array.isArray(sys.pendingDeployStartOrders)) {
                 sys.pendingDeployStartOrders.forEach(function (o) {
                     var fid = parseInt(o.flightId, 10);
                     if (rowFlightIds.has(fid)) return;     //in dialog → reclaimable, don't double-count
                     var f = gamedata.getShip(fid);
-                    if (f) committed += parseInt(f.flightSize || 1, 10);
+                    if (f) committed += craftBoxesIn(sys, f.flightSize, f.unitSize);
                 });
             }
-            baseFreeByHangar.set(sys.id, Math.max(0, effective - committed));
+            baseFreeByHangar.set(sys.id, Math.max(0, effective - Math.ceil(committed)));
         });
 
         // Build rows. Track per-flight {row, flight, hangarSelect (or fixed hangar)}.
@@ -39758,17 +40672,32 @@ window.confirm = {
             var preExisting = preCheckedByFlight.get(parseInt(flight.id, 10));
             var eligibleHangars = window.DeploymentDock.eligibleHangarsForFlight(carrier, flight);
 
-            // If a queued allocation exists, the queued hangar must remain selectable
-            // even if other rows pre-checked above re-counted capacity. Ensure it
-            // shows up at the top of the list.
-            if (preExisting && preExisting.hangar) {
+            // A flight already queued across >1 bay was auto-distributed (it's
+            // bigger than any single rail) — it must re-edit as an auto-distribute
+            // row, never collapse back onto one recorded bay (that would assign
+            // the whole flight to a 6-box rail and trip the overflow guard, e.g.
+            // "Fighter Rail 4 (12/6)").
+            var wasAutoDistributed = !!(preExisting && preExisting.bayCount > 1);
+
+            // No SINGLE bay holds the whole flight. If the carrier's COMBINED free
+            // capacity fits it (e.g. a 9-flight across a StrikeCarrier's 6+3 rails),
+            // offer an auto-distribute row — the flight greedily spreads across bays
+            // on OK (no per-bay UI, per the "auto-distribute only" design call).
+            var autoDistribute = false;
+            if (wasAutoDistributed || eligibleHangars.length === 0) {
+                //Reclaim THIS flight's own reservations so a re-edit re-plans
+                //against true free capacity (not its already-queued boxes).
+                var plan = window.DeploymentDock.distributeFlightAcrossHangars(carrier, flight, flight.id);
+                if (plan.length === 0) return;            //even combined capacity can't hold it — skip the row
+                autoDistribute = true;
+            } else if (preExisting && preExisting.hangar) {
+                // Single-bay re-edit: keep the queued hangar selectable even if
+                // other pre-checked rows re-counted capacity below it.
                 var alreadyListed = eligibleHangars.some(function (h) { return h.hangar === preExisting.hangar; });
                 if (!alreadyListed) {
                     eligibleHangars.unshift({ hangar: preExisting.hangar, capacity: parseInt(flight.flightSize || 1, 10) });
                 }
             }
-
-            if (eligibleHangars.length === 0) return;     //no hangar can hold this flight — skip the row
 
             var size = parseInt(flight.flightSize || 1, 10);
             var label = flight.name + ' (' + size + ' x ' + flight.shipClass + ')';
@@ -39781,9 +40710,14 @@ window.confirm = {
             $check.appendTo(row);
             $labelSpan.appendTo(row);
 
-            // Hangar dropdown (or single static label when only one option).
+            // Hangar dropdown (or single static label when only one option). An
+            // auto-distribute flight shows a fixed "across bays" label and no picker.
             var $hangarPick;
-            if (eligibleHangars.length === 1) {
+            if (autoDistribute) {
+                row.append($('<span class="multi-value-max"> → across rails/bays</span>'));
+                $hangarPick = null;
+                row.data('autoDistribute', true);
+            } else if (eligibleHangars.length === 1) {
                 var only = eligibleHangars[0];
                 var hangarName = hangarLabelFor(carrier, only.hangar);
                 row.append($('<span class="multi-value-max"> → ' + hangarName + '</span>'));
@@ -39857,16 +40791,23 @@ window.confirm = {
                     }
                     return;
                 }
+                //Clear any prior queue (different hangar or different carrier)
+                //before re-queueing.
+                if (flight.pendingDeployDock) {
+                    window.DeploymentDock.unqueueDeployStartDock(flight);
+                }
+                //Auto-distribute rows (flight too big for any single bay) spread
+                //across the carrier's rails/bays via DeploymentDock.queueDeployStartDock,
+                //which pushes a per-bay {flightId, count} order set.
+                if ($row.data('autoDistribute')) {
+                    window.DeploymentDock.queueDeployStartDock(carrier, flight);
+                    return;
+                }
                 var hangar = $row.data('chosenHangar');
                 if (!hangar) {
                     var idx = parseInt($row.find('.deployDockHangar').val() || 0, 10);
                     var eligible = $row.data('eligibleHangars');
                     hangar = eligible[idx].hangar;
-                }
-                //Clear any prior queue (different hangar or different carrier)
-                //before re-queueing on the chosen hangar.
-                if (flight.pendingDeployDock) {
-                    window.DeploymentDock.unqueueDeployStartDock(flight);
                 }
                 queueDeployStartOrder(hangar, flight, carrier);
             });
@@ -39883,11 +40824,28 @@ window.confirm = {
             }
         });
 
-        function computePerHangarUsage() {
+        // $forDisplay: when true, INCLUDE auto-distribute rows by projecting their
+        // greedy per-bay plan into the map so the capacity pills show where the
+        // flight actually lands. When false (the overflow REJECTION guard), skip
+        // auto-distribute rows — their plan never overflows by construction and
+        // the server re-validates per-bay capacity at commit time, so counting
+        // them in the single-hangar rejection would false-positive.
+        function computePerHangarUsage(forDisplay) {
             var perHangar = new Map();
             rowData.forEach(function ($row) {
                 if (!$row.find('.deployDockCheck').is(':checked')) return;
                 var flight = $row.data('flight');
+                if ($row.data('autoDistribute')) {
+                    if (!forDisplay) return;
+                    //Project the same greedy plan OK will commit (reclaiming this
+                    //flight's own queued boxes) so the pills reflect the split.
+                    var plan = window.DeploymentDock.distributeFlightAcrossHangars(carrier, flight, flight.id);
+                    plan.forEach(function (slot) {
+                        perHangar.set(slot.hangar.id,
+                            (perHangar.get(slot.hangar.id) || 0) + craftBoxesIn(slot.hangar, slot.count, flight.unitSize));
+                    });
+                    return;
+                }
                 var hangar = $row.data('chosenHangar');
                 if (!hangar) {
                     var idx = parseInt($row.find('.deployDockHangar').val() || 0, 10);
@@ -39895,8 +40853,9 @@ window.confirm = {
                     if (!eligible || !eligible[idx]) return;
                     hangar = eligible[idx].hangar;
                 }
+                //Whole flight docks; usage is in BOXES (unitSize<1 → >1 box/craft).
                 var size = parseInt(flight.flightSize || 1, 10);
-                perHangar.set(hangar.id, (perHangar.get(hangar.id) || 0) + size);
+                perHangar.set(hangar.id, (perHangar.get(hangar.id) || 0) + craftBoxesIn(hangar, size, flight.unitSize));
             });
             return perHangar;
         }
@@ -39941,7 +40900,7 @@ window.confirm = {
         }
 
         function recomputeCapacity() {
-            var perHangar = computePerHangarUsage();
+            var perHangar = computePerHangarUsage(true);   //include auto-distribute split in the pills
             var anyOverflow = false;
             //Walk hangars in declared order so the readout matches the dropdown labels.
             //Build each pill as its own element so the row can flex-wrap onto
@@ -39981,6 +40940,12 @@ window.confirm = {
                 if (cats.length <= 1) return 'Catapult';
                 return 'Catapult ' + (cats.indexOf(hangar) + 1);
             }
+            //Fighter Rails are labelled "Fighter Rail" / "Fighter Rail N".
+            if (hangar && (hangar.isRail || hangar.name === 'fighterRail')) {
+                var rails = carrier.systems.filter(function (s) { return s && (s.isRail || s.name === 'fighterRail'); });
+                if (rails.length <= 1) return 'Fighter Rail';
+                return 'Fighter Rail ' + (rails.indexOf(hangar) + 1);
+            }
             //Stage 8: ship-location prefixes (Main/Front/Aft/Port/Stbd) with
             //per-prefix disambiguation when a carrier has multiple hangars on
             //the same location.
@@ -40013,7 +40978,7 @@ window.confirm = {
         function hangarLabelByIdFor(carrier, hangarId) {
             for (var i = 0; i < carrier.systems.length; i++) {
                 var sys = carrier.systems[i];
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult') && sys.id === hangarId) return hangarLabelFor(carrier, sys);
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && sys.id === hangarId) return hangarLabelFor(carrier, sys);
             }
             return 'Hangar';
         }
@@ -40087,7 +41052,7 @@ var Ship = function Ship(json) {
                 this._initializingSystems = true;
 
                 try {
-                    // Pass explicit staticSystems to factory to allow merging 
+                    // Pass explicit staticSystems to factory to allow merging
                     // without needing to access this.systems (which would recurse)
                     var parsed = SystemFactory.createSystemsFromJson(systemsToLoad, this, null, staticSystems);
 
@@ -40096,6 +41061,22 @@ var Ship = function Ship(json) {
                         enumerable: true,
                         writable: true
                     });
+
+                    // Stage 21: each Hangar computes its tooltip in its OWN
+                    // constructor, before sibling hangars exist — so a multi-bay
+                    // docked flight's foreign occupancy (boxes it places on OTHER
+                    // bays) wasn't counted, leaving those bays reading 0 capacity.
+                    // Now that every system is built AND cached on `this.systems`,
+                    // recompute each hangar's tooltip so per-bay capacity is
+                    // occupancy-accurate across all bays. (Must run after the
+                    // defineProperty above so the helpers can read this.ship.systems.)
+                    for (var hi in parsed) {
+                        var hsys = parsed[hi];
+                        if (hsys && (hsys.name === 'hangar' || hsys.name === 'fighterRail' || hsys.name === 'catapult')
+                            && typeof hsys.refreshHangarTooltip === 'function') {
+                            hsys.refreshHangarTooltip();
+                        }
+                    }
                     return parsed;
                 } finally {
                     delete this._initializingSystems;
@@ -41753,6 +42734,26 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
+	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
+	// Assault Fighter et al.) needs more than one box each; a unitSize>1 ultralight
+	// (Zorth) packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5).
+	// The server stamps boxesPerCraft on such stored entries, and for pending orders
+	// we derive it from the source flight's unitSize. Mirrors
+	// HangarOps::boxesPerCraftForEntry / boxesPerCraftForClass so the "Capacity:
+	// X / Y slots" line matches the server's box accounting (totalStored is summed
+	// fractional and the displayed used-boxes is rounded UP). The per-class "Stored
+	// Craft" list below still counts CRAFT (so a 3-ship Vorlon flight reads "3 x").
+	function boxesPerCraftOf(entry) {
+		if (entry && entry.boxesPerCraft) {
+			var b = parseFloat(entry.boxesPerCraft);   // float: fractional (0.5) round-trips
+			return b > 0 ? b : 1;
+		}
+		var u = (entry && entry.unitSize != null) ? parseFloat(entry.unitSize) : 1;
+		if (u > 0 && u < 1) return Math.ceil(1 / u);   // superheavy: >1 box/craft
+		if (u > 1) return 1 / u;                        // ultralight: fractional box/craft
+		return 1;
+	}
+
 	// Additive projections: queued dock orders + queued deploy-start orders
 	// both bring craft INTO the hangar. The committed $hangarUsage list is
 	// the baseline; the two pending arrays each contribute extra entries
@@ -41764,10 +42765,17 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			var order = this.pendingDeployStartOrders[q];
 			var flight = order && order.flightId != null ? gamedata.getShip(order.flightId) : null;
 			if (!flight) continue;
+			//A Fighter-Rail auto-distribute spread sends a per-bay `count` slice
+			//(a 9-flight across a 6-box + 3-box rail → 6 here, 3 there); fall back
+			//to the full flight size for a legacy single-bay deploy-dock order.
+			var deploySlice = (order.count != null && parseInt(order.count, 10) > 0)
+				? parseInt(order.count, 10)
+				: parseInt(flight.flightSize || 1, 10);
 			displayEntries.push({
 				phpclass:   flight.phpclass,
 				name:       flight.name,
-				flightSize: parseInt(flight.flightSize || 1, 10),
+				flightSize: deploySlice,
+				boxesPerCraft: boxesPerCraftOf({ unitSize: flight.unitSize }),
 				hangarType: this.hangarType,
 				_pending:   'deploying'
 			});
@@ -41789,16 +42797,55 @@ Hangar.prototype.refreshHangarTooltip = function () {
 				phpclass:   dockFlight.phpclass,
 				name:       dockFlight.name,
 				flightSize: dockCount,
+				boxesPerCraft: boxesPerCraftOf({ unitSize: dockFlight.unitSize }),
 				hangarType: this.hangarType,
 				_pending:   'recovering'
 			});
 		}
 	}
 
-	var totalStored = 0;
-	for (var i = 0; i < displayEntries.length; i++) {
-		totalStored += parseInt(displayEntries[i].flightSize || 1, 10);
-	}
+// totalStored is in BOXES (capacity units), so unitSize<1 craft count their
+		// per-craft box cost — matching the server's maxhealth-based capacity.
+		//
+		// Stage 21 (no-split): a multi-bay docked flight is ONE entry on its primary
+		// bay with an `occupancy` list naming every bay it fills. Count only the
+		// boxes occupancy assigns to THIS bay (not the whole flight); boxes that
+		// sibling bays' entries spill onto this one are added after the loop. An
+		// entry with no occupancy (single-bay / legacy / pending projection) counts
+		// its full boxes here. Mirrors HangarOps usageCountFor + foreignOccupancyBoxesOn.
+		var myId = parseInt(this.id, 10);
+		var selfHangar = this;
+		function entryBoxesOnThis(entry) {
+			if (entry && Array.isArray(entry.occupancy)) {
+				var b = 0;
+				for (var oi = 0; oi < entry.occupancy.length; oi++) {
+					if (parseInt(entry.occupancy[oi].systemId, 10) === myId) b += parseInt(entry.occupancy[oi].boxes || 0, 10);
+				}
+				return b;
+			}
+			return parseInt(entry.flightSize || 1, 10) * boxesPerCraftOf(entry);
+		}
+		var totalStored = 0;
+		for (var i = 0; i < displayEntries.length; i++) {
+			totalStored += entryBoxesOnThis(displayEntries[i]);
+		}
+		// Foreign occupancy: boxes that OTHER hangar-family systems' entries place
+		// on this bay (an entry hosted on a sibling rail spilling into this one).
+		if (selfHangar.ship && Array.isArray(selfHangar.ship.systems)) {
+			for (var si = 0; si < selfHangar.ship.systems.length; si++) {
+				var fsys = selfHangar.ship.systems[si];
+				if (!fsys || fsys === selfHangar) continue;
+				if (fsys.name !== 'hangar' && fsys.name !== 'fighterRail' && fsys.name !== 'catapult') continue;
+				if (!Array.isArray(fsys.hangarUsage)) continue;
+				for (var ei = 0; ei < fsys.hangarUsage.length; ei++) {
+					var oe = fsys.hangarUsage[ei];
+					if (!oe || !Array.isArray(oe.occupancy)) continue;
+					for (var oj = 0; oj < oe.occupancy.length; oj++) {
+						if (parseInt(oe.occupancy[oj].systemId, 10) === myId) totalStored += parseInt(oe.occupancy[oj].boxes || 0, 10);
+					}
+				}
+			}
+		}
 
 	// Subtractive projection: queued launches take craft OUT of the hangar.
 	// Subtract from totalStored so "Carrying" reflects projected post-resolve
@@ -41817,18 +42864,21 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			if (!launchOrder) continue;
 			var launchSize = parseInt(launchOrder.size || 0, 10);
 			if (launchSize <= 0) continue;
-			totalStored = Math.max(0, totalStored - launchSize);
 
 			var lphpclass = launchOrder.phpclass || 'unknown';
-			//Look up the launching craft's friendly name from a matching
-			//stash entry so the line reads "6 x Aurora", not "6 x starfuryEA".
+			//Look up the launching craft's friendly name AND per-craft box cost
+			//from a matching stash entry so the line reads "6 x Aurora" (not
+			//"6 x starfuryEA") and the box subtraction matches what was stored.
 			var launchDisplayName = lphpclass;
+			var launchBpc = 1;
 			for (var s = 0; s < this.hangarUsage.length; s++) {
 				if (this.hangarUsage[s] && this.hangarUsage[s].phpclass === lphpclass) {
 					launchDisplayName = this.hangarUsage[s].name || lphpclass;
+					launchBpc = boxesPerCraftOf(this.hangarUsage[s]);
 					break;
 				}
 			}
+			totalStored = Math.max(0, totalStored - launchSize * launchBpc);
 			if (!launchByClass[lphpclass]) launchByClass[lphpclass] = { name: launchDisplayName, count: 0 };
 			launchByClass[lphpclass].count += launchSize;
 		}
@@ -41853,10 +42903,14 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	var maxCapacity      = this.isCatapult ? 1 : this.maxhealth;
 	var effectiveCapacity = this.isCatapult ? 1 : Math.max(0, this.maxhealth - netDamage);
 
+	// Used boxes round UP to whole boxes (ultralights leave fractional totalStored,
+	// e.g. 3 Zorth = 1.5 → shows 2): mirrors HangarOps::occupiedBoxes so the line
+	// reads "12 / 12 slots" for 24 Zorth, never "12.5 / 12".
+	var usedBoxes = Math.ceil(totalStored);
 	if (netDamage > 0) {
-		this.data["Capacity"] = totalStored + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
+		this.data["Capacity"] = usedBoxes + " / " + effectiveCapacity + " slots (" + netDamage + " destroyed)";
 	} else {
-		this.data["Capacity"] = totalStored + " / " + maxCapacity + " slots";
+		this.data["Capacity"] = usedBoxes + " / " + maxCapacity + " slots";
 	}
 
 	// Stage 15: the primary hangar carries the carrier-level reload-points
@@ -41884,7 +42938,25 @@ Hangar.prototype.refreshHangarTooltip = function () {
 
 	var hasLaunches = false;
 	for (var lkc in launchByClass) { hasLaunches = true; break; }
-	if (displayEntries.length === 0 && !hasLaunches) {
+	// Stage 21: this bay may hold NO entries of its own yet still hold boxes of a
+	// multi-bay flight hosted on a sibling bay (foreign occupancy). Detect that so
+	// we don't early-return and skip listing those craft below.
+	var hasForeignOccupancy = false;
+	if (selfHangar.ship && Array.isArray(selfHangar.ship.systems)) {
+		for (var hfi = 0; hfi < selfHangar.ship.systems.length && !hasForeignOccupancy; hfi++) {
+			var hfsys = selfHangar.ship.systems[hfi];
+			if (!hfsys || hfsys === selfHangar || !Array.isArray(hfsys.hangarUsage)) continue;
+			for (var hfei = 0; hfei < hfsys.hangarUsage.length; hfei++) {
+				var hfoe = hfsys.hangarUsage[hfei];
+				if (!hfoe || !Array.isArray(hfoe.occupancy)) continue;
+				for (var hfoj = 0; hfoj < hfoe.occupancy.length; hfoj++) {
+					if (parseInt(hfoe.occupancy[hfoj].systemId, 10) === myId) { hasForeignOccupancy = true; break; }
+				}
+				if (hasForeignOccupancy) break;
+			}
+		}
+	}
+	if (displayEntries.length === 0 && !hasLaunches && !hasForeignOccupancy) {
 		delete this.data["Stored Craft"];
 		return;
 	}
@@ -41895,9 +42967,27 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	// fighter type aggregate per category but stay visually separated from
 	// already-stored craft. _pending values: undefined (committed),
 	// 'deploying' (Stage 7), 'recovering' (Stage 10.2).
+// Stage 21 (no-split, split-count display): a multi-bay docked flight is ONE
+	// entry on its host bay; show only the CRAFT it keeps in THIS bay (its
+	// occupancy boxes here / boxesPerCraft) so a 12-flight across two rails reads
+	// "6 x DeltaV" in each, matching the per-bay capacity. An entry with no
+	// occupancy (single-bay / legacy / pending projection) counts its full size.
+	function entryCraftOnThis(entry) {
+		if (entry && Array.isArray(entry.occupancy)) {
+			var bpc = boxesPerCraftOf(entry);
+			var boxes = 0;
+			for (var oi = 0; oi < entry.occupancy.length; oi++) {
+				if (parseInt(entry.occupancy[oi].systemId, 10) === myId) boxes += parseInt(entry.occupancy[oi].boxes || 0, 10);
+			}
+			return Math.floor(boxes / (bpc > 0 ? bpc : 1));
+		}
+		return parseInt(entry.flightSize || 1, 10);
+	}
 	var byClass = {};
 	for (var ei = 0; ei < displayEntries.length; ei++) {
 		var entry = displayEntries[ei];
+		var entryCraftHere = entryCraftOnThis(entry);
+		if (entryCraftHere <= 0) continue;   // none of this entry's craft live in this bay
 		var phpKey = (entry.phpclass && entry.phpclass !== "")
 			? entry.phpclass
 			: ("(" + (entry.hangarType || "unknown") + " slot)");
@@ -41906,26 +42996,71 @@ Hangar.prototype.refreshHangarTooltip = function () {
 		//a damaged catapult). Bucket it apart so it renders distinctly and never
 		//merges with a launchable craft of the same class.
 		var wreckMarker = entry.cannotLaunch ? '|wrecked' : '';
-		var bucketKey = phpKey + pendingMarker + wreckMarker;
 		var entryDisplayName = entry.displayName
 			|| (entry.name && entry.name !== "" ? entry.name : phpKey);
+		//Stage 21.2: bucket by the friendly flight name (not phpclass alone) so two
+		//distinct flights of the same class — e.g. "Sentri #2" and "Sentri #3" both
+		//docked in one Primus bay — list as separate lines instead of merging into
+		//one "12 x Sentri #3" entry (the count summed correctly but the name was
+		//whichever flight created the bucket first). phpKey stays in the key so a
+		//launch (which keys off phpclass) can still find and decrement these via the
+		//phpKey-matching loop below; phpKey is also stashed on the bucket for that.
+		var bucketKey = phpKey + '|' + entryDisplayName + pendingMarker + wreckMarker;
 		if (!byClass[bucketKey]) {
-			byClass[bucketKey] = { name: entryDisplayName, count: 0, pending: entry._pending || null, wrecked: !!entry.cannotLaunch };
+			byClass[bucketKey] = { name: entryDisplayName, phpKey: phpKey, count: 0, pending: entry._pending || null, wrecked: !!entry.cannotLaunch };
 		}
-		byClass[bucketKey].count += parseInt(entry.flightSize || 1, 10);
+		byClass[bucketKey].count += entryCraftHere;
+	}
+	// Foreign occupancy: craft that OTHER bays' multi-bay entries keep in THIS bay
+	// (an entry hosted on a sibling rail spilling into this one) — list them here
+	// too so the per-bay "Stored Craft" matches the capacity number.
+	if (selfHangar.ship && Array.isArray(selfHangar.ship.systems)) {
+		for (var fsi = 0; fsi < selfHangar.ship.systems.length; fsi++) {
+			var fsys2 = selfHangar.ship.systems[fsi];
+			if (!fsys2 || fsys2 === selfHangar) continue;
+			if (fsys2.name !== 'hangar' && fsys2.name !== 'fighterRail' && fsys2.name !== 'catapult') continue;
+			if (!Array.isArray(fsys2.hangarUsage)) continue;
+			for (var fei = 0; fei < fsys2.hangarUsage.length; fei++) {
+				var foe = fsys2.hangarUsage[fei];
+				if (!foe || !Array.isArray(foe.occupancy)) continue;
+				var fbpc = boxesPerCraftOf(foe);
+				var fboxes = 0;
+				for (var foj = 0; foj < foe.occupancy.length; foj++) {
+					if (parseInt(foe.occupancy[foj].systemId, 10) === myId) fboxes += parseInt(foe.occupancy[foj].boxes || 0, 10);
+				}
+				var fcraft = Math.floor(fboxes / (fbpc > 0 ? fbpc : 1));
+				if (fcraft <= 0) continue;
+				var fphpKey = (foe.phpclass && foe.phpclass !== "") ? foe.phpclass : ("(" + (foe.hangarType || "unknown") + " slot)");
+				var fName = foe.displayName || (foe.name && foe.name !== "" ? foe.name : fphpKey);
+				var fKey = fphpKey + '|' + fName;   //Stage 21.2: name in key, see stored-craft loop above
+				if (!byClass[fKey]) byClass[fKey] = { name: fName, phpKey: fphpKey, count: 0, pending: null, wrecked: false };
+				byClass[fKey].count += fcraft;
+			}
+		}
 	}
 
 	// Launches consume committed stash — subtract the launching count from
-	// the matching committed bucket (phpclass key, no pending marker) so the
-	// stored-craft line only counts what's STAYING. Without this the player
-	// sees both "2 x Shuttle" and "2 x Shuttle (Launching)" simultaneously
-	// and the math reads as 4 shuttles total. Committed-only because the
-	// launch dialog reads $hangarUsage (committed stash) — you can't launch
-	// a fighter that hasn't arrived yet via a pending dock order, so the
-	// deploying/recovering buckets are never the source of a launch.
+	// the matching committed bucket(s) so the stored-craft line only counts
+	// what's STAYING. Without this the player sees both "2 x Shuttle" and
+	// "2 x Shuttle (Launching)" simultaneously and the math reads as 4 shuttles
+	// total. Committed-only because the launch dialog reads $hangarUsage
+	// (committed stash) — you can't launch a fighter that hasn't arrived yet via
+	// a pending dock order, so the deploying/recovering buckets are never the
+	// source of a launch.
+	//
+	// Stage 21.2: buckets are now keyed by phpclass+name (so same-class flights
+	// list separately), but a launch order carries only a phpclass — no flight
+	// identity. Spread the launch count across every committed (non-pending,
+	// non-wreck) bucket sharing that phpKey, in iteration order, until exhausted.
 	for (var lkc in launchByClass) {
-		if (byClass[lkc]) {
-			byClass[lkc].count = Math.max(0, byClass[lkc].count - launchByClass[lkc].count);
+		var toRemove = launchByClass[lkc].count;
+		for (var bk in byClass) {
+			if (toRemove <= 0) break;
+			if (byClass[bk].phpKey !== lkc) continue;
+			if (byClass[bk].pending || byClass[bk].wrecked) continue;
+			var take = Math.min(byClass[bk].count, toRemove);
+			byClass[bk].count -= take;
+			toRemove -= take;
 		}
 	}
 
@@ -41967,6 +43102,26 @@ var Catapult = function Catapult(json, ship) {
 };
 Catapult.prototype = Object.create(Hangar.prototype);
 Catapult.prototype.constructor = Catapult;
+
+// Fighter Rails (B5W "Fighter Racks"): a FighterRail is a Hangar whose boxes
+// are bolted to a structure block — each box carries one fighter that launches
+// and lands independently. Extending Hangar inherits the data deep-clone (Stage
+// 12 shared-reference fix), pending-order hydration, refreshHangarTooltip, and
+// doIndividualNotesTransfer. UNLIKE a catapult, a rail uses the ordinary
+// (box-count) capacity arithmetic — it has a launch/land output budget and its
+// capacity shrinks with damage — so refreshHangarTooltip's non-catapult branch
+// is already correct and the "(N destroyed)" line works from box-loss damage
+// rows. The launch/dock UI helpers gate on name (added alongside 'catapult').
+var FighterRail = function FighterRail(json, ship) {
+	Hangar.call(this, json, ship);
+	// Set the discriminator client-side so the tooltip / dialogs don't depend on
+	// it round-tripping through the gamedata JSON (matches Catapult). Hangar.call
+	// already ran refreshHangarTooltip once; no need to recompute — a rail's
+	// capacity uses the same non-catapult branch Hangar already rendered.
+	this.isRail = true;
+};
+FighterRail.prototype = Object.create(Hangar.prototype);
+FighterRail.prototype.constructor = FighterRail;
 
 var CargoBay = function CargoBay(json, ship) {
 	ShipSystem.call(this, json, ship);
