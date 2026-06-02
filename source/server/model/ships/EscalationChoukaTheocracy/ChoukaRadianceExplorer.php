@@ -32,7 +32,7 @@ class ChoukaRadianceExplorer extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 25, 8, 8));
         $this->addPrimarySystem(new Engine(3, 18, 0, 12, 5));
-		$this->addPrimarySystem(new Hangar(3, 10));
+		$this->addPrimarySystem(new Hangar(3, 10, 6));
 		
         $this->addFrontSystem(new Thruster(3, 16, 0, 6, 1));
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 300, 360));

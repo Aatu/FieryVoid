@@ -32,7 +32,7 @@ class SshelathVilindras extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 15, 4, 7));
         $this->addPrimarySystem(new Engine(5, 16, 0, 9, 4));
-		$this->addPrimarySystem(new Hangar(5, 20));
+		$this->addPrimarySystem(new Hangar(5, 20, 12));
    
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

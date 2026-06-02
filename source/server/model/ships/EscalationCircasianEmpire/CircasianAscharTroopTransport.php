@@ -9,8 +9,8 @@ class CircasianAscharTroopTransport extends BaseShip{
         $this->phpclass = "CircasianAscharTroopTransport";
         $this->imagePath = "img/ships/EscalationWars/CircasianNalessin.png";
         $this->shipClass = "Aschar Troop Transport";
-			$this->variantOf = "Nalessin Military Freighter";
-			$this->occurence = "common";		
+//			$this->variantOf = "Nalessin Military Freighter";
+//			$this->occurence = "common";		
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;
@@ -34,7 +34,7 @@ class CircasianAscharTroopTransport extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(4, 20));
+		$this->addPrimarySystem(new Hangar(4, 20, 6));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

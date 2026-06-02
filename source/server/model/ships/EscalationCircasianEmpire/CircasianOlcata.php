@@ -29,7 +29,7 @@ class CircasianOlcata extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
         $this->addPrimarySystem(new Engine(3, 7, 0, 5, 2));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 2, 4));        
         

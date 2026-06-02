@@ -31,7 +31,7 @@ class SshelathNakesra extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 3, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 12, 4));
-		$this->addPrimarySystem(new Hangar(3, 1));
+		$this->addPrimarySystem(new Hangar(3, 1, 1));
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

@@ -38,7 +38,7 @@ class CraytanNeprinScoutRefita extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
         $this->addLeftSystem(new ElintScanner(2, 8, 2, 2));
 		$this->addLeftSystem(new CargoBay(2, 12));
-        $this->addLeftSystem(new Hangar(2, 2));
+        $this->addLeftSystem(new Hangar(2, 2, 2));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 360));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 180, 60));
                 
@@ -46,7 +46,7 @@ class CraytanNeprinScoutRefita extends HeavyCombatVesselLeftRight{
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
         $this->addRightSystem(new ElintScanner(2, 8, 2, 2));
 		$this->addRightSystem(new CargoBay(2, 12));
-        $this->addRightSystem(new Hangar(2, 2));
+        $this->addRightSystem(new Hangar(2, 2, 2));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 0, 240));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 180));
         

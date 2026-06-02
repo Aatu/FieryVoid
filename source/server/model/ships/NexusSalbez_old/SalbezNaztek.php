@@ -27,7 +27,7 @@ class SalbezNaztek extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 2, 3));
         $this->addPrimarySystem(new Engine(3, 11, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(1, 2));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
         $this->addPrimarySystem(new Thruster(3, 14, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(3, 14, 0, 3, 4));
       
@@ -35,7 +35,7 @@ class SalbezNaztek extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));
         $this->addFrontSystem(new NexusParticleGrid(1, 3, 1, 270, 90));
         $this->addFrontSystem(new NexusParticleGrid(1, 3, 1, 270, 90));
-        $this->addFrontSystem(new Hangar(2, 4));
+        $this->addFrontSystem(new Hangar(2, 4, 4));
 		$this->addFrontSystem(new CargoBay(2, 24));
                 
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));

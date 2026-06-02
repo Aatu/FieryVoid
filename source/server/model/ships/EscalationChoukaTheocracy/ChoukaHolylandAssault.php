@@ -34,7 +34,7 @@ class ChoukaHolylandAssault extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 5, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(4, 8));
+		$this->addPrimarySystem(new Hangar(4, 8, 6));
    
         $this->addFrontSystem(new Thruster(3, 13, 0, 5, 1));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));

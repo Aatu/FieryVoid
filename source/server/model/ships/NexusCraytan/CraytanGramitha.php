@@ -48,7 +48,7 @@ class CraytanGramitha extends MediumShip{
 		$this->addAftSystem(new NexusLightEnhPlasma(2, 5, 2, 0, 180));
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 5, 2));    
-		$this->addAftSystem(new Hangar(2, 2));
+		$this->addAftSystem(new Hangar(2, 2, 2));
         
         $this->addPrimarySystem(new Structure(4, 40));
 

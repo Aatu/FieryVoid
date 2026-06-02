@@ -30,7 +30,7 @@ class CircasianRollan extends BaseShip{
         $this->addPrimarySystem(new CnC(3, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 4));
         $this->addPrimarySystem(new Engine(3, 13, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(3, 3));
+		$this->addPrimarySystem(new Hangar(3, 3, 3));
    
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));

@@ -5,11 +5,11 @@ class CivilianHatanra extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 160;
-        $this->faction = "Escalation Wars Civilian";
+        $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "CivilianHatanra";
         $this->imagePath = "img/ships/EscalationWars/CivilianHatanra.png";
 			$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Hatanra Transport";
+        $this->shipClass = "Circasian Hatanra Transport";
 			$this->unofficial = true;
         $this->isd = 1926;
 
@@ -39,7 +39,7 @@ class CivilianHatanra extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 10, 2, 3));
         $this->addPrimarySystem(new Engine(3, 11, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(3, 6));
+        $this->addPrimarySystem(new Hangar(3, 6, 2));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 4));
       

@@ -33,7 +33,7 @@ class ChoukaReprisalCarrier extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 6, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 9, 4));
-		$this->addPrimarySystem(new Hangar(4, 14));
+		$this->addPrimarySystem(new Hangar(4, 14, 12));
    
         $this->addFrontSystem(new Thruster(3, 15, 0, 6, 1));
 		$this->addFrontSystem(new EWPointPlasmaGun(2, 3, 2, 240, 60));
@@ -50,13 +50,13 @@ class ChoukaReprisalCarrier extends BaseShip{
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 60, 240));
 
         $this->addLeftSystem(new MediumPlasma(3, 5, 3, 240, 360));
-        $this->addLeftSystem(new Hangar(3, 6));
+        $this->addLeftSystem(new Hangar(3, 6, 6));
         $this->addLeftSystem(new Thruster(2, 13, 0, 4, 3));
 		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
 		$this->addLeftSystem(new EWPointPlasmaGun(2, 3, 2, 180, 360));
 		
         $this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 120));
-        $this->addRightSystem(new Hangar(3, 6));
+        $this->addRightSystem(new Hangar(3, 6, 6));
         $this->addRightSystem(new Thruster(2, 13, 0, 4, 4));
 		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));
 		$this->addRightSystem(new EWPointPlasmaGun(2, 3, 2, 0, 180));		

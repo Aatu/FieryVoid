@@ -40,7 +40,7 @@ class PolarenTalynevAssault extends LCV{
 		$this->addPrimarySystem(new Reactor(2, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
-    	$sensors = new Scanner(2, 7, 3, 3);
+    	$sensors = new Scanner(2, 7, 3, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(2, 8, 0, 6, 3));
@@ -48,7 +48,7 @@ class PolarenTalynevAssault extends LCV{
 		$this->addFrontSystem(new StunBeam(2, 6, 5, 300, 60));
 		$this->addFrontSystem(new GrapplingClaw(5, 0, 0, 300, 60, 4, false));
     
-        $this->addPrimarySystem(new Structure(2, 24));
+        $this->addPrimarySystem(new Structure(3, 24));
 	    
         $this->hitChart = array(
         		0=> array( 

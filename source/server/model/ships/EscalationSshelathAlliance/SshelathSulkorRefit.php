@@ -30,7 +30,7 @@ class SshelathSulkorRefit extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 16, 4, 8));
         $this->addPrimarySystem(new Engine(4, 11, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));
       

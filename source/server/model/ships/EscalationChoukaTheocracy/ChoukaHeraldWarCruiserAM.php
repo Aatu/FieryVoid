@@ -40,7 +40,7 @@ class ChoukaHeraldWarCruiserAM extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 20, 7, 7));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 5));
-		$this->addPrimarySystem(new Hangar(3, 15));
+		$this->addPrimarySystem(new Hangar(3, 15, 12));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 36));
 		$this->addPrimarySystem(new AmmoMissileRackSO(3, 0, 0, 0, 360, $ammoMagazine, false));
 		$this->addPrimarySystem(new AmmoMissileRackSO(3, 0, 0, 0, 360, $ammoMagazine, false));

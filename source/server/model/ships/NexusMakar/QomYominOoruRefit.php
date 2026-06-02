@@ -46,7 +46,7 @@ class QomYominOoruRefit extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(4, 18, 0, 6, 3));
         $this->addAftSystem(new Thruster(3, 13, 0, 6, 1));
         $this->addAftSystem(new Thruster(3, 15, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(2, 8));
+		$this->addPrimarySystem(new Hangar(2, 16, 12));
 		
         $this->addLeftSystem(new Thruster(3, 15, 0, 6, 3));
 		$this->addLeftSystem(new NexusRAMLauncher(3, 8, 4, 300, 60));

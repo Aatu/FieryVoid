@@ -32,7 +32,7 @@ class SshelathNaslik extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 7, 4));
-		$this->addPrimarySystem(new Hangar(4, 14));
+		$this->addPrimarySystem(new Hangar(4, 14, 12));
    
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
@@ -48,12 +48,12 @@ class SshelathNaslik extends BaseShip{
 
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
 		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 180, 360));
-        $this->addLeftSystem(new Hangar(3, 6));
+        $this->addLeftSystem(new Hangar(3, 6, 6));
         $this->addLeftSystem(new Thruster(3, 13, 0, 3, 3));
 
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
 		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 0, 180));
-        $this->addRightSystem(new Hangar(3, 6));
+        $this->addRightSystem(new Hangar(3, 6, 6));
         $this->addRightSystem(new Thruster(3, 13, 0, 3, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

@@ -27,21 +27,21 @@ class VelraxHeavyTransport extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 8, 3, 3));
         $this->addPrimarySystem(new Engine(3, 15, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 1));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 3, 2));
 
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 120, 360));
-		$this->addLeftSystem(new Hangar(1, 2));
+		$this->addLeftSystem(new Hangar(1, 2, 2));
         $this->addLeftSystem(new Thruster(3, 12, 0, 3, 3));
 		$this->addLeftSystem(new CargoBay(1, 30)); 
 		$this->addLeftSystem(new CargoBay(1, 30)); 
 
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 180));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 240));
-		$this->addRightSystem(new Hangar(1, 2));
+		$this->addRightSystem(new Hangar(1, 2, 2));
         $this->addRightSystem(new Thruster(3, 12, 0, 3, 4));
 		$this->addRightSystem(new CargoBay(1, 30)); 
 		$this->addRightSystem(new CargoBay(1, 30)); 

@@ -5,10 +5,10 @@ class ChoukaDevotionFreeTrader extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 180;
-        $this->faction = "Escalation Wars Chouka Theocracy";
+        $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "ChoukaDevotionFreeTrader";
         $this->imagePath = "img/ships/EscalationWars/ChoukaDevotion.png";
-        $this->shipClass = "Devotion Free Trader";
+        $this->shipClass = "Chouka Devotion Free Trader";
 		$this->unofficial = true;
         $this->canvasSize = 75;
 	    $this->isd = 1940;
@@ -27,7 +27,7 @@ class ChoukaDevotionFreeTrader extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 6, 3, 3));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 5));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addPrimarySystem(new Thruster(1, 8, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(1, 8, 0, 4, 4));     
 		$this->addPrimarySystem(new CargoBay(1, 15));

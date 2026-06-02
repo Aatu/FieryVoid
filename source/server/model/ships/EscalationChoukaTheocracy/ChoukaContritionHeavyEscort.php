@@ -29,7 +29,7 @@ class ChoukaContritionHeavyEscort extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 6, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 2));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));        
         

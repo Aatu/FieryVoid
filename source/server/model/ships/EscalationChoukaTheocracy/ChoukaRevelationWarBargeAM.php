@@ -9,8 +9,8 @@ class ChoukaRevelationWarBargeAM extends MediumShip{
         $this->phpclass = "ChoukaRevelationWarBargeAM";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRevelation.png";
         $this->shipClass = "Revelation War Barge";
-        $this->variantOf = "Flagellant Armed Freighter";
-        $this->occurence = "common";		
+//        $this->variantOf = "Flagellant Armed Freighter";
+//        $this->occurence = "common";		
         $this->unofficial = true;
         $this->canvasSize = 75;
         $this->isd = 1943;
@@ -35,7 +35,7 @@ class ChoukaRevelationWarBargeAM extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
         $this->addPrimarySystem(new ReloadRack(3, 9));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        

@@ -29,7 +29,7 @@ class SalbezTavertez extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 4, 5));
         $this->addPrimarySystem(new Engine(3, 18, 0, 7, 3));
-		$this->addPrimarySystem(new Hangar(1, 8));
+		$this->addPrimarySystem(new Hangar(1, 8, 6));
 		$this->addPrimarySystem(new Thruster(3, 18, 0, 7, 2));
 
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));

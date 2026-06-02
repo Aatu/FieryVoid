@@ -31,7 +31,7 @@ class SalbezShvrezRefit extends MediumShip{
         $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));        
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 360));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));

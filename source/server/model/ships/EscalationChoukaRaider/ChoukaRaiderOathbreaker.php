@@ -29,7 +29,7 @@ class ChoukaRaiderOathbreaker extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(3, 8));
+        $this->addPrimarySystem(new Hangar(3, 8, 6));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        
         
@@ -43,7 +43,7 @@ class ChoukaRaiderOathbreaker extends MediumShip{
 		$this->addAftSystem(new LightPlasma(1, 4, 2, 120, 240));
 		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
 		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
-        $this->addAftSystem(new Hangar(2, 6));
+        $this->addAftSystem(new Hangar(2, 6, 6));
         $this->addAftSystem(new Thruster(2, 18, 0, 6, 2));    
        
         $this->addPrimarySystem(new Structure(3, 56));

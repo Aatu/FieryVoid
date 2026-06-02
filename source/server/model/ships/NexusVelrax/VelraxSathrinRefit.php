@@ -30,7 +30,7 @@ class VelraxSathrinRefit extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 10, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 2));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 4, 4));        
         

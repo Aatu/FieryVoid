@@ -31,7 +31,7 @@ class CircasianTrathaScout extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 15, 4, 6));
         $this->addPrimarySystem(new Engine(4, 11, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 4, 2));
 		$this->addPrimarySystem(new JumpEngine(4, 10, 3, 36));
    
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));

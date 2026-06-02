@@ -514,4 +514,3 @@ AbbaiMineLauncher.prototype.initializationUpdate = function() {
 AbbaiMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
 	return "Mine";
 };
-    

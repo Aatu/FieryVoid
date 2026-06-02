@@ -31,15 +31,15 @@ class DalithornNewCarrier extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 5, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 2));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
 		$this->addPrimarySystem(new Magazine(3, 12));
-		$this->addPrimarySystem(new Catapult(1, 6));
+		$this->addPrimarySystem(new Catapult(1, 6, 1));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
       
         $this->addFrontSystem(new Thruster(3, 10, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 2, 1));
-        $this->addFrontSystem(new Catapult(2, 6));
+        $this->addFrontSystem(new Catapult(2, 6, 1));
         $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 240, 360));
         $this->addFrontSystem(new NexusAutocannon(2, 4, 1, 0, 120));
         $this->addFrontSystem(new NexusProtector(2, 4, 1, 180, 60));

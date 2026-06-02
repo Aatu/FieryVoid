@@ -15,7 +15,7 @@ class MakarHanimat extends BaseShip{
 		$this->canvasSize = 170; 
 		$this->unofficial = true;
 
-		$this->isd = 1932;
+		$this->isd = 2028;
 
 		$this->critRollMod += 1;
 	    $this->notes = '<br>Unreliable Ship:';
@@ -41,7 +41,7 @@ class MakarHanimat extends BaseShip{
  		$sensors = new Scanner(3, 16, 4, 6);
 			$sensors->markSensorFlux();
 			$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Hangar(0, 6));
+		$this->addPrimarySystem(new Hangar(0, 6, 6));
 		
         $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 12, 0, 2, 1));

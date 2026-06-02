@@ -33,7 +33,7 @@ class SalbezAvrtz extends BaseShip{
         $this->addPrimarySystem(new CnC(3, 24, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 25, 7, 8));
         $this->addPrimarySystem(new Engine(3, 20, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(2, 18));
+		$this->addPrimarySystem(new Hangar(2, 18, 6));
 		
         $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 20, 0, 4, 1));

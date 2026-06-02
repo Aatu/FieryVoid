@@ -32,7 +32,7 @@ class VelraxFleetCarrierRefit extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(2, 18));
+		$this->addPrimarySystem(new Hangar(2, 18, 12));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -57,17 +57,17 @@ class VelraxFleetCarrierRefit extends BaseShip{
 		$this->addLeftSystem(new LaserLance(3, 6, 4, 240, 360));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
-		$this->addLeftSystem(new Hangar(2, 7));
-		$this->addLeftSystem(new Hangar(2, 7));
-		$this->addLeftSystem(new Hangar(2, 7));
+		$this->addLeftSystem(new Hangar(2, 7, 6));
+		$this->addLeftSystem(new Hangar(2, 7, 6));
+		$this->addLeftSystem(new Hangar(2, 7, 6));
 
 //		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 120));
 		$this->addRightSystem(new LaserLance(3, 6, 4, 0, 120));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
-		$this->addRightSystem(new Hangar(2, 7));
-		$this->addRightSystem(new Hangar(2, 7));
-		$this->addRightSystem(new Hangar(2, 7));
+		$this->addRightSystem(new Hangar(2, 7, 6));
+		$this->addRightSystem(new Hangar(2, 7, 6));
+		$this->addRightSystem(new Hangar(2, 7, 6));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 56));

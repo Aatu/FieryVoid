@@ -34,7 +34,7 @@ class DalithornHeavyDreadnought extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 16, 5, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(1, 2));
+		$this->addPrimarySystem(new Hangar(1, 2, 2));
 		$this->addPrimarySystem(new Magazine(4, 16));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

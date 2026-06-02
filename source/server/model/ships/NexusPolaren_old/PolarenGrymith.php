@@ -17,7 +17,7 @@ class PolarenGrymith extends HeavyCombatVesselLeftRight{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.66;
+        $this->turncost = 0.5;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
@@ -26,9 +26,9 @@ class PolarenGrymith extends HeavyCombatVesselLeftRight{
 
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
-        $this->addPrimarySystem(new ELINTScanner(4, 12, 5, 6));
+        $this->addPrimarySystem(new ELINTScanner(4, 12, 6, 7));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(2, 3));
+        $this->addPrimarySystem(new Hangar(2, 3, 3));
         $this->addFrontSystem(new StunBeam(2, 6, 5, 300, 60));
         $this->addFrontSystem(new NexusSandCaster(1, 4, 2, 0, 360));
         $this->addAftSystem(new Thruster(3, 12, 0, 6, 1));
@@ -37,17 +37,17 @@ class PolarenGrymith extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new ELINTScanner(3, 9, 3, 1));
         $this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
         $this->addLeftSystem(new Thruster(4, 12, 0, 4, 3));
-        $this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
+        $this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
 		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 
         $this->addRightSystem(new ELINTScanner(3, 9, 3, 1));
         $this->addRightSystem(new Maser(2, 6, 3, 300, 120));
         $this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
-        $this->addRightSystem(new Maser(2, 6, 3, 60, 240));
+        $this->addRightSystem(new Maser(2, 6, 3, 0, 180));
 		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addPrimarySystem(new Structure(3, 32));
+        $this->addPrimarySystem(new Structure(4, 32));
         $this->addLeftSystem(new Structure(3, 36));
         $this->addRightSystem(new Structure(3, 36));
         

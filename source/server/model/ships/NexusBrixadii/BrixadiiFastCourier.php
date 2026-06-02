@@ -29,7 +29,7 @@ class BrixadiiFastCourier extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
 		$this->addPrimarySystem(new JumpEngine(4, 12, 5, 40));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));
 		$this->addPrimarySystem(new Thruster(4, 15, 0, 5, 2));

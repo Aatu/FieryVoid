@@ -5,7 +5,7 @@ class SshelathKasolra extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 475;
-	$this->faction = "Escalation Wars Sshel'ath Alliance";
+    $this->faction = "Escalation Wars Sshel'ath Alliance";
         $this->phpclass = "SshelathKasolra";
         $this->imagePath = "img/ships/EscalationWars/SshelathKasolra.png";
         $this->shipClass = "Kasolra Bombardment Cruiser";
@@ -36,7 +36,7 @@ class SshelathKasolra extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(4, 3));
+		$this->addPrimarySystem(new Hangar(4, 3, 3));
         $this->addPrimarySystem(new ReloadRack(4, 9)); 
   
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

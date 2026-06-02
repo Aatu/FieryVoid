@@ -31,7 +31,7 @@ class ChoukaVengeanceCruiser extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 6, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 9, 4));
-		$this->addPrimarySystem(new Hangar(4, 14));
+		$this->addPrimarySystem(new Hangar(4, 14, 12));
    
         $this->addFrontSystem(new Thruster(3, 15, 0, 6, 1));
 		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));

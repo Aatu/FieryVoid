@@ -31,7 +31,7 @@ class DalithornSmallScout extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 10, 4, 4));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(1, 1));
+        $this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Magazine(3, 10));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 3, 4));        

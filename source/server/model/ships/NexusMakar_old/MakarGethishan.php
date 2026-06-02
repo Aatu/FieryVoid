@@ -30,7 +30,7 @@ class MakarGethishan extends HeavyCombatVessel{
         $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
         $this->addPrimarySystem(new CnC(4, 18, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 16, 5, 6));
-        $this->addPrimarySystem(new Hangar(0, 4));
+        $this->addPrimarySystem(new Hangar(0, 4, 4));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 3));
         $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 15, 0, 4, 4));

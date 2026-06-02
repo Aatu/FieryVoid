@@ -4,7 +4,7 @@ class PolarenNorevetRefit extends MediumShipLeftRight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 415;
+        $this->pointCost = 400;
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenNorevetRefit";
         $this->imagePath = "img/ships/Nexus/polarenNorevet.png";
@@ -19,7 +19,8 @@ class PolarenNorevetRefit extends MediumShipLeftRight{
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
-        
+
+		$this->agile = true;        
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
         $this->accelcost = 2;
@@ -30,22 +31,25 @@ class PolarenNorevetRefit extends MediumShipLeftRight{
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 3, 6));
-        $this->addPrimarySystem(new Engine(3, 12, 0, 10, 3));
+        $this->addPrimarySystem(new Engine(3, 12, 0, 9, 3));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
         $this->addAftSystem(new Thruster(2, 8, 0, 4, 1));
-        $this->addAftSystem(new Thruster(2, 13, 0, 10, 2));        
+        $this->addAftSystem(new Thruster(2, 13, 0, 9, 2));        
 		$this->addFrontSystem(new NexusSandCaster(1, 4, 2, 0, 360));
         
 		$this->addLeftSystem(new NexusHeavyMaser(2, 7, 4, 240, 360));
-		$this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
+		$this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
+		$this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
         $this->addLeftSystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 60));
 	    
 		$this->addRightSystem(new NexusHeavyMaser(2, 7, 4, 0, 120));
-		$this->addRightSystem(new Maser(2, 6, 3, 0, 180));
+		$this->addRightSystem(new Maser(2, 6, 3, 300, 120));
+		$this->addRightSystem(new Maser(2, 6, 3, 60, 240));
         $this->addRightSystem(new Thruster(2, 10, 0, 5, 4));
 		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 300, 180));
         
-        $this->addPrimarySystem(new Structure(3, 33));
+        $this->addPrimarySystem(new Structure(4, 33));
 
 		//d20 hit chart
 		$this->hitChart = array(
