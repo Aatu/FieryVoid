@@ -1337,9 +1337,11 @@ spl_autoload_register(
 				'bloodsworddarksoul' => '/server/model/ships/EscalationBloodSword/BloodSwordDarkSoul.php',
 				'bloodswordepee' => '/server/model/ships/EscalationBloodSword/BloodSwordEpee.php',
 				'bloodswordfirebrand' => '/server/model/ships/EscalationBloodSword/BloodSwordFirebrand.php',
-//				'bloodswordladyofdarksouls' => '/server/model/ships/EscalationBloodSword/BloodSwordLadyofDarkSouls.php',
+				'bloodswordladyofdarksouls' => '/server/model/ships/EscalationBloodSword/BloodSwordLadyofDarkSouls.php',
 				'bloodswordrazor' => '/server/model/ships/EscalationBloodSword/BloodSwordRazor.php',
+				'bloodswordrainingthunder' => '/server/model/ships/EscalationBloodSword/BloodSwordRainingThunder.php',
 				'bloodswordscythe' => '/server/model/ships/EscalationBloodSword/BloodSwordScythe.php',
+				'bloodswordyacht' => '/server/model/ships/EscalationBloodSword/BloodSwordYacht.php',
 
 
 

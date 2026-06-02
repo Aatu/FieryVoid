@@ -4,11 +4,11 @@ class BloodSwordLadyofDarkSouls extends BaseShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-	$this->pointCost = 825;
+	$this->pointCost = 715;
 	$this->faction = "Escalation Wars Blood Sword Raiders";
         $this->phpclass = "BloodSwordLadyofDarkSouls";
-        $this->imagePath = "img/ships/EscalationWars/BloodSwordDarksoul.png";
-        $this->shipClass = "Dark Soul Battlecruiser";
+        $this->imagePath = "img/ships/EscalationWars/BloodSwordLady.png";
+        $this->shipClass = "Lady of Dark Souls";
 			$this->variantOf = "Dark Soul Battlecruiser";
 			$this->occurence = "unique"; 
         $this->shipSizeClass = 3;
@@ -16,37 +16,36 @@ class BloodSwordLadyofDarkSouls extends BaseShip{
 		$this->unofficial = true;
 		$this->limited = 10;
 
-        $this->fighters = array("normal"=>12, "assault shuttles"=>2); //2 breaching pods
+        $this->fighters = array("normal"=>12, "assault shuttles"=>2, "Yacht"=>1); //2 breaching pods
 
 	    $this->notes = 'Elite Crew';
 
+		$this->critRollMod -= 1;
+		$this->enhancementOptionsDisabled[] = 'ELITE_CREW';
+		$this->enhancementOptionsDisabled[] = 'POOR_CREW';
+		$this->enhancementOptionsDisabled[] = 'VULN_CRIT';
+
 		$this->isd = 1943;
         
-        $this->forwardDefense = 15;
-        $this->sideDefense = 16;
+        $this->forwardDefense = 14;
+        $this->sideDefense = 15;
         
         $this->turncost = 1.0;
         $this->turndelaycost = 1.0;
         $this->accelcost = 3;
         $this->rollcost = 2;
         $this->pivotcost = 3;
-        $this->iniativebonus = 10;
+        $this->iniativebonus = 15;
 
-		// Remove ELITE_CREW from enabled array because this unit has an elite crew as standard
-		$eliteIndex = array_search('ELITE_CREW', $this->enhancementOptionsEnabled);
-		if ($eliteIndex !== false) {
-			unset($this->enhancementOptionsEnabled[$eliteIndex]);
-		}    
-        
-        $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
+        $this->addPrimarySystem(new Reactor(5, 20, 0, 2));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
-        $this->addPrimarySystem(new Engine(4, 18, 0, 12, 2));
-		$this->addPrimarySystem(new Hangar(4, 16, 6));
-		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 24));
+        $this->addPrimarySystem(new Scanner(4, 15, 3, 7));
+        $this->addPrimarySystem(new Engine(4, 18, 0, 14, 2));
+		$this->addPrimarySystem(new Hangar(4, 16, 12));
+		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 19));
 		
-        $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
-        $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
+        $this->addFrontSystem(new Thruster(3, 13, 0, 5, 1));
+        $this->addFrontSystem(new Thruster(3, 13, 0, 5, 1));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
@@ -60,12 +59,12 @@ class BloodSwordLadyofDarkSouls extends BaseShip{
         $this->addLeftSystem(new EWRoyalLaser(3, 6, 4, 240, 360));
         $this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 360));
 		$this->addLeftSystem(new CargoBay(3, 12));
-        $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
+        $this->addLeftSystem(new Thruster(3, 15, 0, 6, 3));
 		
         $this->addRightSystem(new EWRoyalLaser(3, 6, 4, 0, 120));
         $this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 180));
 		$this->addRightSystem(new CargoBay(3, 12));
-        $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
+        $this->addRightSystem(new Thruster(3, 15, 0, 6, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 48));

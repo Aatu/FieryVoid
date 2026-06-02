@@ -41,8 +41,8 @@ class BloodSwordDarkSoul extends BaseShip{
 		$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
 
-        $this->addAftSystem(new Thruster(3, 15, 0, 7, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 7, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
         $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
         $this->addAftSystem(new MediumPlasma(2, 5, 3, 90, 270));
         $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
