@@ -8,11 +8,12 @@ class ChoukaCitadel extends StarBaseSixSections{
 		$this->faction = "Escalation Wars Chouka Theocracy";
 		$this->phpclass = "ChoukaCitadel";
 		$this->shipClass = "Citadel Star Fortress";
-		$this->fighters = array("heavy"=>36); 
+		$this->fighters = array("normal"=>36); 
 		$this->isd = 1961;
 		$this->unofficial = true;
+		$this->Enormous = true;
 
-		$this->shipSizeClass = 3; //Enormous is not implemented
+		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway
 		$this->turncost = 0;
 		$this->turndelaycost = 0;
@@ -20,7 +21,7 @@ class ChoukaCitadel extends StarBaseSixSections{
 		$this->forwardDefense = 22;
 		$this->sideDefense = 22;
 
-		$this->imagePath = "img/ships/EscalationWars/ChoukaHellfireOSAT.png";
+		$this->imagePath = "img/ships/EscalationWars/ChoukaCitadel.png";
 		$this->canvasSize = 280; //Enormous Starbase
 
 		$this->locations = array(41, 42, 2, 32, 31, 1);
@@ -31,9 +32,16 @@ class ChoukaCitadel extends StarBaseSixSections{
 				14 => "Scanner",
 				16 => "Hangar",
 				18 => "Reactor",
-				20 => "C&C",
+				20 => "TAG:C&C",
 			),
 		);
+
+		$cnc = new CnC(5, 25, 0, 0);
+		$cnc->startArc = 0;
+		$cnc->endArc = 360;
+        $this->addPrimarySystem($cnc);
+		$cnc = new SecondaryCnC(5, 25, 0, 0);//all-around by default
+        $this->addPrimarySystem($cnc);
 
 		$this->addPrimarySystem(new Reactor(5, 30, 0, 0));
 		$this->addPrimarySystem(new ProtectedCnC(6, 50, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30

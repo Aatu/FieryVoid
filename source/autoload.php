@@ -1357,7 +1357,7 @@ spl_autoload_register(
 				'choukabloodlustfighter' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaBloodlustFighter.php',
 //				'choukabrimstoneheavyosat' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSAT.php',
 				'choukabrimstoneheavyosatam' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaBrimstoneHeavyOSATAM.php',
-//				'choukacitadel' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaCitadel.php',
+				'choukacitadel' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaCitadel.php',
 				'choukaclergy' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaClergy.php',
 				'choukacontritionheavyescort' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaContritionHeavyEscort.php',
 //				'choukacovenantminelayer' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaCovenantMinelayer.php',
