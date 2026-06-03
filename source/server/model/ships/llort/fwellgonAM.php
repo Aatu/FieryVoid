@@ -60,7 +60,7 @@ class fwellgonAM extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 2, 2));
-	$this->addAftSystem(new Hangar(3, 3));
+	$this->addAftSystem(new Hangar(3, 3, 1));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 180, 360));
 		$this->addAftSystem(new AmmoMissileRackS(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addAftSystem(new AmmoMissileRackS(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
