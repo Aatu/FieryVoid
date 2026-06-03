@@ -15,7 +15,7 @@ class CroscotuEarly extends MediumShip
 		$this->isd = 2193;
 		$this->variantOf = "Croscotu Frigate";	//Listed as separate hull in Showdowns 6 but made a variant here for tidier fleet selection.    
         $this->occurence = "common";  
- 		$this->unofficial = 'S'; //design released after AoG demise		
+ 		//$this->unofficial = 'S'; //design released after AoG demise		
 
 		$this->forwardDefense = 11;
 		$this->sideDefense = 12;
@@ -46,7 +46,7 @@ class CroscotuEarly extends MediumShip
 		
 		$this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
 		$this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
-		$this->addAftSystem(new Hangar(2, 1));		
+		$this->addAftSystem(new Hangar(2, 2, 2));		
 
 		$this->addPrimarySystem(new Structure(3, 54));
 
