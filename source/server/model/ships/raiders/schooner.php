@@ -10,6 +10,7 @@ class Schooner extends MediumShip{
         $this->imagePath = "img/ships/schooner.png";
         $this->shipClass = "Schooner";
         $this->canvasSize = 100;
+        $this->variantOf = "NONE";		
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
@@ -31,9 +32,6 @@ class Schooner extends MediumShip{
         $this->addPrimarySystem(new Scanner(4, 8, 3, 4));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));
-		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));
-		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));		
-		
 		
 		$temp1 = new CargoBay(3, 16);
 		$temp2 = new CargoBay(3, 16);

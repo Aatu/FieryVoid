@@ -1,18 +1,18 @@
 <?php
-class BAHeavyGunboatPulse extends HeavyCombatVessel{
+class BAHeavyGunboatPulseRails extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 490;
         $this->faction = "Belt Alliance";
-        $this->phpclass = "BAHeavyGunboatPulse";
+        $this->phpclass = "BAHeavyGunboatPulseRails";
         $this->imagePath = "img/ships/BAHeavyGunboat2.png";
         $this->shipClass = "BA Heavy Gunboat (Pulse)";
         $this->fighters = array("heavy"=>6); //external racks 
-        $this->variantOf = "NONE";        
 
         $this->occurence = "uncommon";
+        $this->variantOf = 'BA Heavy Gunboat';
         $this->isd = 2251;
         $this->limited = 33;
         
@@ -31,7 +31,7 @@ class BAHeavyGunboatPulse extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(3, 14, 4, 7));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
-	$this->addPrimarySystem(new Hangar(3, 2));
+	$this->addPrimarySystem(new Hangar(3, 2, 1));
         $this->addPrimarySystem(new LightPulse(3, 4, 2, 240, 60));
         $this->addPrimarySystem(new LightPulse(3, 4, 2, 300, 120));        
 
@@ -42,6 +42,7 @@ class BAHeavyGunboatPulse extends HeavyCombatVessel{
         $this->addFrontSystem(new BAInterceptorMkI(3, 4, 1, 270, 90));    
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 180, 60));
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 180)); 
+	$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'heavy'));        
 
         $this->addAftSystem(new Engine(3, 15, 0, 8, 2));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
@@ -49,6 +50,7 @@ class BAHeavyGunboatPulse extends HeavyCombatVessel{
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 360));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 240));
         $this->addAftSystem(new BAInterceptorMkI(3, 4, 1, 90, 270));  
+	$this->addAftSystem(new FighterRail(4, 3, 3, 0, 'heavy'));        
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 39));

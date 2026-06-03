@@ -1,19 +1,18 @@
 <?php
-class BAEscortCarrierRefit extends HeavyCombatVessel{
+class BAEscortCarrierRails extends HeavyCombatVessel{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 320;
+        $this->pointCost = 350;
         $this->faction = "Belt Alliance";
-        $this->phpclass = "BAEscortCarrierRefit";
+        $this->phpclass = "BAEscortCarrierRails";
         $this->imagePath = "img/ships/BAEscortCarrier2.png";
-        $this->shipClass = "BA Escort Carrier (refit)";
+        $this->shipClass = "BA Escort Carrier";
+        $this->occurence = "common";
         $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
-        $this->variantOf = "NONE";        
 
-        $this->occurence = "uncommon";
-        $this->isd = 2251;
+        $this->isd = 2235;
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -36,18 +35,23 @@ class BAEscortCarrierRefit extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
-	$this->addFrontSystem(new LightPulse(3, 4, 2, 240, 60));
-	$this->addFrontSystem(new LightPulse(3, 4, 2, 300, 120));
+	$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 240, 60));
+	$this->addFrontSystem(new MedBlastCannon(3, 0, 0, 300, 120));
         $this->addFrontSystem(new BAInterceptorMkI(3, 4, 1, 270, 90));    
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120)); 
+	$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'heavy'));
+	$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'heavy'));        
+        
 
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 360));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 240));
-        $this->addAftSystem(new BAInterceptorMkI(3, 4, 1, 90, 270));  
+        $this->addAftSystem(new BAInterceptorMkI(3, 4, 1, 90, 270)); 
+	$this->addAftSystem(new FighterRail(4, 3, 3, 0, 'heavy'));
+	$this->addAftSystem(new FighterRail(4, 3, 3, 0, 'heavy'));           
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 36));
@@ -66,7 +70,7 @@ class BAEscortCarrierRefit extends HeavyCombatVessel{
         	),
         	1=> array(
         		6 => "Thruster",
-        		8 => "Light Pulse Cannon",
+        		8 => "Medium Blast Cannon",
         		10 => "Standard Particle Beam",
         		11 => "BA Interceptor I",
         		18 => "Structure",

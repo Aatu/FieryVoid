@@ -1,16 +1,15 @@
 <?php
-class Sloop extends MediumShip{
+class SloopRails extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 380;
 		$this->faction = "Raiders";
-        $this->phpclass = "Sloop";
+        $this->phpclass = "SloopRails";
         $this->imagePath = "img/ships/Raidersloop.png";
         $this->shipClass = "Sloop";
         $this->canvasSize = 100;
-        $this->variantOf = "NONE";
 
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
@@ -35,7 +34,10 @@ class Sloop extends MediumShip{
         $this->addPrimarySystem(new Hangar(3, 2));
     	$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 3));
     	$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 4));
-		
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));
+        
+
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));
         $this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
