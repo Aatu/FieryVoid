@@ -25,12 +25,18 @@ window.ShipMovementCallbacks = function () {
     ShipMovementCallbacks.prototype.morejinkCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doJink(this.ship, 1);
+        if (event.which == 3) while (shipManager.movement.canJink(this.ship, 1)) { //r-click: jink to max available (thrust / jinking limit)
+            shipManager.movement.doJink(this.ship, 1);
+        }
         this.updateCallback({ ship: this.ship });
     };
 
     ShipMovementCallbacks.prototype.lessjinkCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doJink(this.ship, -1);
+        if (event.which == 3) while (shipManager.movement.canJink(this.ship, -1)) { //r-click: set jinking to 0, refunding all thrust
+            shipManager.movement.doJink(this.ship, -1);
+        }
         this.updateCallback({ ship: this.ship });
     };
 

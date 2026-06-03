@@ -252,6 +252,71 @@ window.gamedata = {
         }
     },
 
+    // Base team colours (sRGB 0-255), team 1..8. Teams 1-3 deliberately match the
+    // mine/enemy/ally colours used for participants so the two views stay consistent.
+    teamBaseColors: [
+        [160, 250, 100], // 1 Green  (== "mine")
+        [255, 40, 40],   // 2 Red    (== "enemy")
+        [51, 173, 255],  // 3 Blue   (== "ally")
+        [255, 150, 40],  // 4 Orange
+        [40, 230, 230],  // 5 Cyan
+        [230, 40, 230],  // 6 Magenta
+        [240, 230, 60],  // 7 Yellow
+        [170, 90, 230]   // 8 Purple
+    ],
+
+    // Raw sRGB [r,g,b] (0-255) team colour keyed on ship.team, for an observer.
+    // Teams beyond 8 reuse the palette but lightened one step per full cycle.
+    // Use this for canvas 2D (combat log, selection circles); getTeamColor()
+    // wraps it for sprite overlays (linear space).
+    getTeamColorRGB: function getTeamColorRGB(team) {
+        var palette = gamedata.teamBaseColors;
+        var count = palette.length;
+
+        // Teams are 1-indexed; guard against missing/0 values.
+        var index = (parseInt(team, 10) || 1) - 1;
+        if (index < 0) index = 0;
+
+        var cycle = Math.floor(index / count); // 0 for teams 1-8, 1 for 9-16, ...
+        var base = palette[index % count];
+
+        // Each extra cycle blends 35% further toward white (capped so it never washes out).
+        var lighten = Math.min(cycle * 0.35, 0.85);
+
+        return [
+            base[0] + (255 - base[0]) * lighten,
+            base[1] + (255 - base[1]) * lighten,
+            base[2] + (255 - base[2]) * lighten
+        ];
+    },
+
+    // Linear-space THREE.Color version of getTeamColorRGB, ready for sprite overlays.
+    getTeamColor: function getTeamColor(team) {
+        var rgb = gamedata.getTeamColorRGB(team);
+        return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255).convertSRGBToLinear();
+    },
+
+    // Overlay colour for a ship icon. Participants see the familiar mine/ally/enemy
+    // scheme; observers (not in the game) see a distinct colour per team instead of
+    // everything being red.
+    getShipOverlayColor: function getShipOverlayColor(ship, mine, ally, terrain) {
+        if (terrain) {
+            return new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear(); // Off-white
+        }
+
+        if (!gamedata.isPlayerInGame()) {
+            return gamedata.getTeamColor(ship.team);
+        }
+
+        if (mine) {
+            return new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear(); // Light green
+        }
+        if (ally) {
+            return new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear(); // Light blue
+        }
+        return new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
+    },
+
     isPlayerInGame: function isPlayerInGame() {
         if (gamedata.thisplayer === null || gamedata.thisplayer === -1) {
             return false;

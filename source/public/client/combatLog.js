@@ -9,6 +9,12 @@ window.combatLog = {
 
     onTurnStart: function onTurnStart() {
         $('.logentry').remove();
+        // logFireOrders emits the damage <ul> as a SIBLING of its .logentry div
+        // (the </div> closes before the <ul>), so it lands as a direct child of
+        // #log and survives the .logentry removal. Clear those orphaned damage
+        // lists too — but only the ones directly under #log, never the print's
+        // lists nested inside #combatLogContainer > #LogActual.
+        $('#log > ul').remove();
     },
 
     logDestroyedShip: function logDestroyedShip(ship, jumped) {
@@ -132,7 +138,11 @@ window.combatLog = {
         }
 
         var fireColor = "";
-        if (gamedata.isMyShip(ship)) {
+        if (!gamedata.isPlayerInGame()) {
+            // Observers: colour the FIRE: header by the shooter's team.
+            var rgb = gamedata.getTeamColorRGB(ship.team);
+            fireColor = "color:rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ");";
+        } else if (gamedata.isMyShip(ship)) {
             fireColor = "color:limegreen;";
         } else if (gamedata.isMyorMyTeamShip(ship)) {
             fireColor = "color:#33adff;";
@@ -433,6 +443,7 @@ window.combatLog = {
             document.getElementById('currentTurnButton').style.display = 'inline-block'; // Display next button when relevant.
         }
 
+        combatLog.onTurnStart(); // Clear leftover live replay messages (.logentry in #log) before showing the print.
         combatLog.fetchAndShowCombatLog();
     },
 
@@ -443,10 +454,11 @@ window.combatLog = {
 
         if (this.displayedTurn >= gamedata.turn) {
             document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
-            document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.            
+            document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.
             document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.
-            return; //Can't go forward past current turn. 
+            return; //Can't go forward past current turn.
         }
+        combatLog.onTurnStart(); // Clear leftover live replay messages (.logentry in #log) before showing the print.
         combatLog.fetchAndShowCombatLog();
     },
 

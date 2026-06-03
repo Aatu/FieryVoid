@@ -666,7 +666,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-clicking Electronic Warfare (EW) Add Button - Sets that EW type to the max available amount (Note- long press on touchscreen).</li>
                     <li>Right-clicking Electronic Warfare (EW) Remove Button - Sets that EW type to zero (Note- long press on touchscreen).</li>                    
                 </ul>
-            </li>                                      
+            </li>  
+            <li><b>During Mvoement Orders Phase:</b>
+                <ul class="circle-list">
+                    <li>Right-clicking + or - Jinking Buttons - Sets jinking levels to maximum allowed or 0 respectively (Note- long press on touchscreen).</li>
+                </ul>
+            </li>                                                 
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

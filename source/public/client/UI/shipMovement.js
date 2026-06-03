@@ -97,8 +97,8 @@ window.UI = {
             UI.shipMovement.accElement.on("click touchstart contextmenu", UI.shipMovement.accelCallback);
             UI.shipMovement.deaccElement.on("click touchstart contextmenu", UI.shipMovement.deaccCallback);
 
-            UI.shipMovement.morejinkElement.on("click touchstart", UI.shipMovement.morejinkCallback);
-            UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);
+            UI.shipMovement.morejinkElement.on("click touchstart contextmenu", UI.shipMovement.morejinkCallback);
+            UI.shipMovement.lessjinkElement.on("click touchstart contextmenu", UI.shipMovement.lessjinkCallback);
 
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
 

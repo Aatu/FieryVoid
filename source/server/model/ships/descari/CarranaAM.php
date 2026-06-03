@@ -52,7 +52,7 @@ class CarranaAM extends SmallStarBaseThreeSections{
 		$this->addPrimarySystem(new Reactor(5, 30, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(5, 16, 5, 7));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
 
 		$this->addPrimarySystem(new Structure(5, 52));
 

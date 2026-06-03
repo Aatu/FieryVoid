@@ -260,6 +260,24 @@ window.ShipIcon = function () {
         this.selected = value;
     };
 
+    // Selection/side circle args. Participants get the friend/foe type; observers
+    // (not in the game) get a per-team key + colour so the filled side circle matches
+    // the team-coloured ship overlay. Terrain is unaffected.
+    ShipIcon.prototype.getSideSpriteArgs = function (ship) {
+        if (this.terrain) {
+            return { type: 'terrain', teamColor: null };
+        }
+
+        if (!gamedata.isPlayerInGame()) {
+            return { type: 'team' + ship.team, teamColor: gamedata.getTeamColorRGB(ship.team) };
+        }
+
+        return {
+            type: this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy'),
+            teamColor: null
+        };
+    };
+
     ShipIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
@@ -284,13 +302,7 @@ window.ShipIcon = function () {
         this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
 
         this.shipSprite.setOverlayColor(
-            this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
-                : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
-                    : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
+            gamedata.getShipOverlayColor(ship, this.mine, this.ally, this.terrain)
         );
 
         //if (ship.imageFlipped) { //Old variable used to manually flip iamges in older version of THREE.js - DK
@@ -307,10 +319,12 @@ window.ShipIcon = function () {
         this.mesh.add(this.shipEWSprite.mesh);
         this.shipEWSprite.hide();
 
+        var sideArgs = this.getSideSpriteArgs(ship);
+
         this.ShipSelectedSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
-            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
+            sideArgs.type,
             true
         ).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
@@ -318,8 +332,9 @@ window.ShipIcon = function () {
         this.ShipSideSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
-            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
-            false
+            sideArgs.type,
+            false,
+            sideArgs.teamColor
         ).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 

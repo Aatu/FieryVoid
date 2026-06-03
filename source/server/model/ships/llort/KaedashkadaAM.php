@@ -47,7 +47,7 @@ class KaedashkadaAM extends UnevenBaseFourSections
 		$this->addPrimarySystem(new CnC(5, 30, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 16, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 16, 5, 7));
-		$this->addPrimarySystem(new Hangar(5, 6));
+		$this->addPrimarySystem(new Hangar(5, 6, 1));
         $this->addPrimarySystem(new ReloadRack(5, 6));	
         $this->addPrimarySystem(new CargoBay(5, 40));	
 		$this->addPrimarySystem(new AmmoMissileRackL(5, 0, 0, 0, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
