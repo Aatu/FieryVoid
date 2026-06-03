@@ -110,7 +110,7 @@ window.ShipTooltip = function () {
                 shipNameDisplay = "Mine";
             }
         }
-        jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + '</span>').appendTo(this.element.find('.namecontainer'));
+        jQuery('<span class="name value ' + getAllyClass(ship) + '"' + getNameStyle(ship) + '>' + shipNameDisplay + '</span>').appendTo(this.element.find('.namecontainer'));
 
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
@@ -452,7 +452,7 @@ window.ShipTooltip = function () {
                     shipNameDisplay = "Mine";
                 }
             }
-            jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
+            jQuery('<span class="name value ' + getAllyClass(ship) + '"' + getNameStyle(ship) + '>' + shipNameDisplay + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
 
             $(".ballistics", this.element).hide();
         }, this);
@@ -489,6 +489,18 @@ window.ShipTooltip = function () {
          }*/
         //Let's make allied team ships blue text, and terrain white - DK May 2025
         return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'));
+    }
+
+    // Inline colour for the ship name. Participants rely on the CSS class from
+    // getAllyClass; observers (not in the game) get a per-team colour instead so
+    // every ship isn't rendered as "enemy" red. Terrain keeps its neutral class.
+    function getNameStyle(ship) {
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid) || gamedata.isPlayerInGame()) {
+            return '';
+        }
+
+        var rgb = gamedata.getTeamColorRGB(ship.team);
+        return ' style="color:rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ');"';
     }
 
     return ShipTooltip;

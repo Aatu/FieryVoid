@@ -50,8 +50,13 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateEW();
 
         infowindow.informPhase(5000, function () { });
+        // Observers are permanently in replay (see PhaseDirector.resolvePhaseStrategy),
+        // so hiding the combat-log print buttons here would deny them the log entirely.
+        // Hide them only for participants, who get them back on deactivate.
         var combatLogContainer = document.getElementById('combatLogContainer');
-        if (combatLogContainer) combatLogContainer.style.display = 'none'; //Hide print Log buttons
+        if (combatLogContainer) {
+            combatLogContainer.style.display = gamedata.isPlayerInGame() ? 'none' : 'block';
+        }
         return this;
     };
 
@@ -265,6 +270,12 @@ window.ReplayPhaseStrategy = function () {
             return;
         }
 
+        // Starting playback: clear any printed combat log so the live replay log
+        // (written to #log) doesn't render over the top of the static print (#LogActual).
+        if (action === "play") {
+            window.combatLog.showCurrent();
+        }
+
         this.replayUI.activateButton(event.target);
 
         this.animationStrategy[action]();
@@ -293,6 +304,7 @@ window.ReplayPhaseStrategy = function () {
             return;
         }
 
+        clearCombatLogs();
         this.replayTurn--;
         activatePause.call(this);
         requestReplayGamedata.call(this);
@@ -303,9 +315,19 @@ window.ReplayPhaseStrategy = function () {
             return;
         }
 
+        clearCombatLogs();
         this.replayTurn++;
         activatePause.call(this);
         requestReplayGamedata.call(this);
+    }
+
+    // Changing the replayed turn must wipe both combat-log surfaces: the printed
+    // log (#LogActual via showCurrent) and the live replay messages (.logentry in
+    // #log via onTurnStart). Otherwise the previous turn's entries linger and the
+    // new turn's replay log renders over the top of them.
+    function clearCombatLogs() {
+        window.combatLog.showCurrent();
+        window.combatLog.onTurnStart();
     }
 
     /*

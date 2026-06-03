@@ -13,7 +13,12 @@ window.ShipSelectedSprite = function () {
     var TEXTURE_TERRAIN = null;
     var TEXTURE_TERRAIN_SELECTED = null;
 
-    function ShipSelectedSprite(size, z, type, selected) {
+    // Per-team filled-circle textures for observers, keyed by team number.
+    // Only the non-selected (filled) circle is team-coloured: observers can't
+    // actually select a ship, so the dotted "selected" rings never apply.
+    var TEXTURE_TEAM = {};
+
+    function ShipSelectedSprite(size, z, type, selected, teamColor) {
 
         this.DEW = 0;
         this.CCEW = 0;
@@ -23,7 +28,38 @@ window.ShipSelectedSprite = function () {
             createTextures();
         }
 
-        this.uniforms.spriteTexture.value = chooseTexture(type, selected);
+        // teamColor is an sRGB [r,g,b]; supplied for observer ships so each team
+        // gets a distinct filled circle instead of the friend/foe colours.
+        if (teamColor && !selected) {
+            this.uniforms.spriteTexture.value = getTeamTexture(type, teamColor);
+        } else {
+            this.uniforms.spriteTexture.value = chooseTexture(type, selected);
+        }
+    }
+
+    function getTeamTexture(team, teamColor) {
+        if (!TEXTURE_TEAM[team]) {
+            TEXTURE_TEAM[team] = createTeamTexture(teamColor);
+        }
+        return TEXTURE_TEAM[team];
+    }
+
+    function createTeamTexture(teamColor) {
+        var canvas = window.AbstractCanvas.create(TEXTURE_SIZE, TEXTURE_SIZE);
+        var context = canvas.getContext("2d");
+
+        // Match the alpha treatment of the non-selected friend/foe filled circle.
+        var rgb = Math.round(teamColor[0]) + "," + Math.round(teamColor[1]) + "," + Math.round(teamColor[2]);
+        context.strokeStyle = "rgba(" + rgb + ",0.40)";
+        context.fillStyle = "rgba(" + rgb + ",0.20)";
+
+        window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
+
+        var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+
+        return tex;
     }
 
     function chooseTexture(type, selected) {
