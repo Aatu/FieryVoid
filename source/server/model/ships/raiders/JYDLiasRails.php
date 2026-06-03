@@ -1,17 +1,16 @@
 <?php
-class JYDLias extends BaseShip{
+class JYDLiasRails extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 450;
 		$this->faction = 'Raiders';
-		$this->phpclass = "JYDLias";
+		$this->phpclass = "JYDLiasRails";
 		$this->imagePath = "img/ships/RaiderJYDLias.png";
 		$this->shipClass = "JYD Converted Lias Supply Ship";
 		$this->shipSizeClass = 3;
 			$this->occurence = "unique";
-        $this->variantOf = "NONE";			
 
         $this->fighters = array("light"=>12);
 	    
@@ -52,9 +51,13 @@ class JYDLias extends BaseShip{
 
 		$this->addLeftSystem(new Thruster(4, 15, 0, 5, 3));
 		$this->addLeftSystem(new LightParticleCannon(4, 6, 5, 240, 60));
+		$this->addLeftSystem(new FighterRail(5, 3, 3, 0, 'light'));
+		$this->addLeftSystem(new FighterRail(5, 3, 3, 0, 'light'));		
 
 		$this->addRightSystem(new Thruster(4, 15, 0, 5, 4));
 		$this->addRightSystem(new LightParticleCannon(4, 6, 5, 300, 120));
+		$this->addRightSystem(new FighterRail(5, 3, 3, 0, 'light'));
+		$this->addRightSystem(new FighterRail(5, 3, 3, 0, 'light'));			
         
         $this->addFrontSystem(new Structure( 5, 44));
         $this->addAftSystem(new Structure( 5, 44));

@@ -1,12 +1,12 @@
 <?php
-class proxMineCA extends Mine{
+class proxMineChCA extends Mine{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 6;
 		$this->faction = "Escalation Wars Chouka Theocracy";
-        $this->phpclass = "proxMineCA";
+        $this->phpclass = "proxMineChCA";
         $this->imagePath = "img/ships/eaMine.png";
         $this->shipClass = "Conviction-A Proximity Mine";
 		$this->occurence = "common";

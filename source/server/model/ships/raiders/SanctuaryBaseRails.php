@@ -1,15 +1,14 @@
 <?php
-class SanctuaryBase extends StarBaseSixSections{
+class SanctuaryBaseRails extends StarBaseSixSections{
 /*Raider Sanctuary Base: Ships of the Fleet*/
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
 		$this->pointCost = 600;
 		$this->faction = "Raiders";
-		$this->phpclass = "sanctuarybase";
+		$this->phpclass = "SanctuaryBaseRails";
 		$this->shipClass = "Sanctuary Base";
 		$this->fighters = array("medium"=>12, "heavy"=>36); 
 		$this->isd = 2196;
-        $this->variantOf = "NONE";		
 
 		$this->shipSizeClass = 3; //Enormous units not implemented
 		$this->iniativebonus = -200; //no voluntary movement anyway
@@ -61,10 +60,13 @@ class SanctuaryBase extends StarBaseSixSections{
 			$subReactor = new SubReactorUniversal(5, 8, 0, 0);
 			$subReactor->startArc = $min;
 			$subReactor->endArc = $max;
+		
 
 			$systems = array(
 				new StdParticleBeam(3, 4, 1, $min, $max),
 				new StdParticleBeam(3, 4, 1, $min, $max),
+				new FighterRail(3, 3, 3, 0, 'heavy'),
+				new FighterRail(3, 3, 3, 0, 'heavy'),					
 				$hangar,
 				$subReactor,
 				$cargoBay,

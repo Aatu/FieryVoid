@@ -1,23 +1,23 @@
 <?php
-class Fessa extends MediumShip{
+class FessaRails extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 275;
 		$this->faction = "Balosian Underdwellers";
-        $this->phpclass = "Fessa";
+        $this->phpclass = "FessaRails";
         $this->imagePath = "img/ships/Hassa.png";
         $this->shipClass = "Fessa Warship";
         $this->canvasSize = 200;
+		$this->fighters = array("cargo shuttles"=>4);         
         
         $this->forwardDefense = 12;
         $this->sideDefense = 17;
         $this->fighters = array("heavy" => 6); //fighters on external racks!
         $this->occurence = "common";
         //$this->variantOf = 'Hassa Freighter'; //freighter will be in Civilians directory
-       	$this->isd = 2239;  
-        $this->variantOf = "NONE";	               
+       	$this->isd = 2239;        
         
         $this->turncost = 1;
         $this->turndelaycost = 1;
@@ -34,13 +34,15 @@ class Fessa extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
  	    $this->addPrimarySystem(new Engine(3, 6, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 360));  
         $this->addFrontSystem(new IonCannon(3, 6, 4, 240, 0));
         $this->addFrontSystem(new IonCannon(3, 6, 4, 0, 120));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 2, 4));
+		$this->addFrontSystem(new FighterRail(3, 3, 3, 0, 'heavy'));
+		$this->addFrontSystem(new FighterRail(3, 3, 3, 0, 'heavy'));                
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));

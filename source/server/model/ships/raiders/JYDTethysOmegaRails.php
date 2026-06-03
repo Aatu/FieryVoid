@@ -1,18 +1,17 @@
 <?php
-class JYDTethysOmega extends MediumShip{
+class JYDTethysOmegaRails extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 485;
 		$this->faction = "Raiders";
-        $this->phpclass = "JYDTethysOmega";
+        $this->phpclass = "JYDTethysOmegaRails";
         $this->imagePath = "img/ships/RaiderJYDTethys.png";
         $this->shipClass = "JYD Tethys (Omega)";
 //		        $this->occurence = "unique";
         $this->canvasSize = 100;
         $this->fighters = array("light"=>6);
-        $this->variantOf = "NONE";        
 	    
 		$this->notes = 'Used only by the Junkyard Dogs';
 		$this->notes .= '<br>Only two exist';
@@ -35,6 +34,8 @@ class JYDTethysOmega extends MediumShip{
 		$this->addPrimarySystem(new Hangar(4, 2));
 		$this->addPrimarySystem(new Thruster(3, 15, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 15, 0, 4, 4));
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'light'));        
 		
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 9, 0, 3, 1));

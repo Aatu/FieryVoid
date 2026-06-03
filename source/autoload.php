@@ -3811,7 +3811,7 @@ spl_autoload_register(
                 'dewmined2bal' => '/server/model/ships/balosian/dewMineD2Bal.php',  
                 
                 //Escalation Wars Chouka Mines - 10
-                'proxmineca' => '/server/model/ships/EscalationChoukaTheocracy/proxMineCA.php', 
+                'proxminechca' => '/server/model/ships/EscalationChoukaTheocracy/proxMineChCA.php', 
                 'proxminecb' => '/server/model/ships/EscalationChoukaTheocracy/proxMineCB.php', 
                 'captormineva' => '/server/model/ships/EscalationChoukaTheocracy/captorMineVA.php',
                 'captorminevb' => '/server/model/ships/EscalationChoukaTheocracy/captorMineVB.php',
@@ -3900,6 +3900,22 @@ spl_autoload_register(
                 'minesweepingshuttlevorlons' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttlevree' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttleyolu' => '/server/model/ships/Shuttle.php',                                
+
+                //New version of ships with Rails
+                'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
+                'baescortcarrierearlyrails' => '/server/model/ships/beltalliance/baEscortCarrierEarlyRails.php',
+                'baescortcarrierrefitrails' => '/server/model/ships/beltalliance/baEscortCarrierRefitRails.php',
+                'baheavygunboatrails' => '/server/model/ships/beltalliance/baHeavyGunboatRails.php',
+                'baheavygunboatearlyrails' => '/server/model/ships/beltalliance/baHeavyGunboatEarlyRails.php',
+                'baheavygunboatpulserails' => '/server/model/ships/beltalliance/baHeavyGunboatPulseRails.php',
+				'gaimossarirails' => '/server/model/ships/gaim/gaimOssariRails.php',  
+                'jydliasrails' => '/server/model/ships/raiders/JYDLiasRails.php',                   
+                'jydtethysomegarails' => '/server/model/ships/raiders/JYDTethysOmegaRails.php',                   
+                'sanctuarybaserails' => '/server/model/ships/raiders/SanctuaryBaseRails.php',   
+                'schoonerrails' => '/server/model/ships/raiders/schoonerRails.php',                   
+                'slooprails' => '/server/model/ships/raiders/SloopRails.php',                
+                'fessarails' => '/server/model/ships/balosian/fessaRails.php',                
+                
 
 						//Satyra (Wolfgang campaign)
 						'satyrashield' => '/server/model/weapons/customDevelopment.php',

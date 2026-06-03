@@ -10,9 +10,10 @@ class BAEscortCarrierEarly extends HeavyCombatVessel{
         $this->imagePath = "img/ships/BAEscortCarrier2.png";
         $this->shipClass = "BA Escort Carrier (early)";
 			$this->occurence = "common";
-			$this->variantOf = 'BA Escort Carrier';
+
         $this->occurence = "common";
         $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
+        $this->variantOf = "NONE";        
 
         $this->isd = 2185;
         
@@ -42,17 +43,13 @@ class BAEscortCarrierEarly extends HeavyCombatVessel{
         $this->addFrontSystem(new BAInterceptorPrototype(3, 4, 1, 270, 90));    
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120)); 
-        $this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'heavy'));
-        $this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'heavy'));         
 
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 120, 360));
         $this->addAftSystem(new StdParticleBeam(2, 4, 1, 0, 240));
-        $this->addAftSystem(new BAInterceptorPrototype(3, 4, 1, 90, 270)); 
-        $this->addAftSystem(new FighterRail(4, 3, 3, 0, 'heavy'));
-        $this->addAftSystem(new FighterRail(4, 3, 3, 0, 'heavy'));          
+        $this->addAftSystem(new BAInterceptorPrototype(3, 4, 1, 90, 270));  
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 36));

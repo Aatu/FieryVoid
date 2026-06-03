@@ -1,7 +1,50 @@
 const fs = require('fs');
 const path = require('path');
+const esbuild = require('esbuild');
 
 const rootDir = path.resolve(__dirname, '..');
+
+// Minify the concatenated bundle in one pass. We minify the whole blob (not
+// per-file) because these legacy scripts share one global scope and reference
+// each other across file boundaries — minifying files individually would be
+// unsafe.
+//
+// minifyIdentifiers is deliberately OFF. The legacy files are non-strict,
+// global-scoped scripts where one file's top-level `function foo(){}` / `var
+// foo` can be referenced by name from another file, and several do `window.Foo
+// = Foo`. Renaming top-level identifiers across the blob is technically
+// consistent within one scope, but it's not worth the risk for the size it
+// saves — in this hand-written code whitespace + comments dominate, so
+// whitespace/syntax minification alone captures the large majority of the win
+// with essentially zero behavioral risk. (Can revisit enabling it once
+// validated in-game.)
+//
+// target: esnext so we never downlevel working syntax into something subtly
+// different — this is purely whitespace + comment + dead-code removal.
+//
+// On any failure we fall back to the raw concatenation so a single syntax quirk
+// in one source file can never break a deploy.
+function minifyBundle(code, name) {
+    // Escape hatch: the watcher (watch-legacy.js) sets FV_NO_MINIFY=1 so that
+    // local dev iteration keeps readable, line-numbered bundles. Production
+    // `yarn build` does not set it, so deploys are always minified.
+    if (process.env.FV_NO_MINIFY === '1') {
+        return code;
+    }
+    try {
+        const result = esbuild.transformSync(code, {
+            minifyWhitespace: true,
+            minifySyntax: true,
+            minifyIdentifiers: false,
+            target: 'esnext',
+            legalComments: 'none'
+        });
+        return result.code;
+    } catch (e) {
+        console.warn(`Warning: minification failed for ${name} (${e.message}). Falling back to un-minified bundle.`);
+        return code;
+    }
+}
 
 // Main execution
 const bundles = [
@@ -62,9 +105,14 @@ function createBundle(config) {
         }
     });
 
+    const rawKb = bundleContent.length / 1024;
+    const minified = minifyBundle(bundleContent, config.name);
+    const minKb = minified.length / 1024;
+    const saved = rawKb > 0 ? (100 * (1 - minKb / rawKb)).toFixed(1) : '0';
+
     console.log(`Writing bundle to ${outputPath}...`);
-    fs.writeFileSync(outputPath, bundleContent);
-    console.log(`${config.name} bundle created successfully! Size: ${(bundleContent.length / 1024).toFixed(2)} KB\n`);
+    fs.writeFileSync(outputPath, minified);
+    console.log(`${config.name} bundle created successfully! Size: ${minKb.toFixed(2)} KB (was ${rawKb.toFixed(2)} KB, -${saved}%)\n`);
 }
 
 // Modify extractScriptSources to accept excluded list
