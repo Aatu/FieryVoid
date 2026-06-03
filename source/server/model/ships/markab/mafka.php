@@ -18,6 +18,7 @@ class Mafka extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 6;
         $this->iniativebonus = -5; 
+		$this->fighters = array("cargo shuttles"=>8);         
         
 		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.               
         
@@ -25,7 +26,7 @@ class Mafka extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 6, 7));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(4, 8));
+        $this->addPrimarySystem(new Hangar(4, 8, 2));
         
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

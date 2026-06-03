@@ -35,7 +35,7 @@ class Trathor extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$hangar = new Hangar(3, 12, 12, 1, 'assault shuttles');
 		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
-		$this->addPrimarySystem($hangar);  
+		$this->addFrontSystem($hangar);  
 
 	$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new MediumPlasma(4, 5, 3, 240, 60));

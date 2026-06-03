@@ -33,7 +33,7 @@ class Turlisk extends BaseShip{
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
 		$hangar = new Hangar(3, 12, 12);
 		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
-		$this->addPrimarySystem($hangar);        
+		$this->addFrontSystem($hangar);        
 	    $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new ParticleCannon(4, 8, 7, 240, 60));
         $this->addFrontSystem(new ScatterGun(3, 8, 3, 270, 90));
