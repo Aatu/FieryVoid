@@ -1597,8 +1597,8 @@ getActiveShipName: function getActiveShipName() {
 
             //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
-            // Observers (not in the game) colour the initiative number, ship name
-            // and ship class by team instead of the mine/ally/enemy scheme.
+            // Observers (not in the game) colour the initiative number by team
+            // instead of the mine/ally/enemy scheme.
             var teamColorCss = "";
             if (!gamedata.isPlayerInGame()) {
                 var iniRgb = gamedata.getTeamColorRGB(ships[i].team);
@@ -1625,9 +1625,8 @@ getActiveShipName: function getActiveShipName() {
             td.className = "iniInfo";
 
             var span = document.createElement("span");
-            var iniNameStyle = teamColorCss ? " style='" + teamColorCss + "'" : "";
-            span.innerHTML += "<p class='iniName'" + iniNameStyle + ">" + ships[i].name + "</p>";
-            span.innerHTML += "<p class='iniClass'" + iniNameStyle + ">" + ships[i].shipClass + "</p>";
+            span.innerHTML += "<p class='iniName'>" + ships[i].name + "</p>";
+            span.innerHTML += "<p class='iniClass'>" + ships[i].shipClass + "</p>";
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
