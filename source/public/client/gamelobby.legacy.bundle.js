@@ -10616,7 +10616,7 @@ shipManager.movement = {
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!          
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
-        if (shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
+        if (accel > 0 && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false; //only adding jink costs thrust; reducing refunds it
         var jinking = shipManager.movement.getJinking(ship);
         if (jinking + accel > ship.jinkinglimit || jinking + accel < 0) return false;
         return true;

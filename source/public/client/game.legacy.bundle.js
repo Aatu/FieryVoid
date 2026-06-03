@@ -1816,7 +1816,12 @@ window.ShipSelectedSprite = function () {
     var TEXTURE_TERRAIN = null;
     var TEXTURE_TERRAIN_SELECTED = null;
 
-    function ShipSelectedSprite(size, z, type, selected) {
+    // Per-team filled-circle textures for observers, keyed by team number.
+    // Only the non-selected (filled) circle is team-coloured: observers can't
+    // actually select a ship, so the dotted "selected" rings never apply.
+    var TEXTURE_TEAM = {};
+
+    function ShipSelectedSprite(size, z, type, selected, teamColor) {
 
         this.DEW = 0;
         this.CCEW = 0;
@@ -1826,7 +1831,38 @@ window.ShipSelectedSprite = function () {
             createTextures();
         }
 
-        this.uniforms.spriteTexture.value = chooseTexture(type, selected);
+        // teamColor is an sRGB [r,g,b]; supplied for observer ships so each team
+        // gets a distinct filled circle instead of the friend/foe colours.
+        if (teamColor && !selected) {
+            this.uniforms.spriteTexture.value = getTeamTexture(type, teamColor);
+        } else {
+            this.uniforms.spriteTexture.value = chooseTexture(type, selected);
+        }
+    }
+
+    function getTeamTexture(team, teamColor) {
+        if (!TEXTURE_TEAM[team]) {
+            TEXTURE_TEAM[team] = createTeamTexture(teamColor);
+        }
+        return TEXTURE_TEAM[team];
+    }
+
+    function createTeamTexture(teamColor) {
+        var canvas = window.AbstractCanvas.create(TEXTURE_SIZE, TEXTURE_SIZE);
+        var context = canvas.getContext("2d");
+
+        // Match the alpha treatment of the non-selected friend/foe filled circle.
+        var rgb = Math.round(teamColor[0]) + "," + Math.round(teamColor[1]) + "," + Math.round(teamColor[2]);
+        context.strokeStyle = "rgba(" + rgb + ",0.40)";
+        context.fillStyle = "rgba(" + rgb + ",0.20)";
+
+        window.graphics.drawCircleAndFill(context, TEXTURE_SIZE / 2, TEXTURE_SIZE / 2, TEXTURE_SIZE * 0.30, 4);
+
+        var tex = new THREE.CanvasTexture(canvas);
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.needsUpdate = true;
+
+        return tex;
     }
 
     function chooseTexture(type, selected) {
@@ -2897,6 +2933,24 @@ window.ShipIcon = function () {
         this.selected = value;
     };
 
+    // Selection/side circle args. Participants get the friend/foe type; observers
+    // (not in the game) get a per-team key + colour so the filled side circle matches
+    // the team-coloured ship overlay. Terrain is unaffected.
+    ShipIcon.prototype.getSideSpriteArgs = function (ship) {
+        if (this.terrain) {
+            return { type: 'terrain', teamColor: null };
+        }
+
+        if (!gamedata.isPlayerInGame()) {
+            return { type: 'team' + ship.team, teamColor: gamedata.getTeamColorRGB(ship.team) };
+        }
+
+        return {
+            type: this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy'),
+            teamColor: null
+        };
+    };
+
     ShipIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
@@ -2921,13 +2975,7 @@ window.ShipIcon = function () {
         this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
 
         this.shipSprite.setOverlayColor(
-            this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
-                : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
-                    : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
+            gamedata.getShipOverlayColor(ship, this.mine, this.ally, this.terrain)
         );
 
         //if (ship.imageFlipped) { //Old variable used to manually flip iamges in older version of THREE.js - DK
@@ -2944,10 +2992,12 @@ window.ShipIcon = function () {
         this.mesh.add(this.shipEWSprite.mesh);
         this.shipEWSprite.hide();
 
+        var sideArgs = this.getSideSpriteArgs(ship);
+
         this.ShipSelectedSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
-            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
+            sideArgs.type,
             true
         ).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
@@ -2955,8 +3005,9 @@ window.ShipIcon = function () {
         this.ShipSideSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
-            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
-            false
+            sideArgs.type,
+            false,
+            sideArgs.teamColor
         ).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
@@ -3734,14 +3785,7 @@ window.FlightIcon = function () {
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
-        var overlayColour =
-            this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
-                : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
-                    : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
+        var overlayColour = gamedata.getShipOverlayColor(ship, this.mine, this.ally, this.terrain);
 
         this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
         this.mesh.add(this.shipDirectionOfProwSprite.mesh);
@@ -3767,10 +3811,12 @@ window.FlightIcon = function () {
         this.shipEWSprite = new window.ShipEWSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
+        var sideArgs = this.getSideSpriteArgs(ship);
+
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, sideArgs.type, true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
-        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, sideArgs.type, false, sideArgs.teamColor).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
         this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, 'neutral', false).hide();
@@ -6446,6 +6492,9 @@ window.ShipMovementAnimation = function () {
 
         this.shipIcon.setPosition(positionAndFacing.position);
         this.shipIcon.setFacing(-positionAndFacing.facing);
+        if (positionAndFacing.heading !== undefined) {
+            this.shipIcon.setHeading(-positionAndFacing.heading);
+        }
 
         if (this.cameraFollow && total > this.time && total < this.time + this.duration + this.endPause && !paused) {
             window.webglScene.moveCameraTo(positionAndFacing.position);
@@ -6456,7 +6505,11 @@ window.ShipMovementAnimation = function () {
 
         if (this.hexAnimations.length === 0) {
             var move = this.shipIcon.getLastMovement();
-            return { position: window.coordinateConverter.fromHexToGame(move.position), facing: mathlib.hexFacingToAngle(move.facing) };
+            return {
+                position: window.coordinateConverter.fromHexToGame(move.position),
+                facing: mathlib.hexFacingToAngle(move.facing),
+                heading: mathlib.hexFacingToAngle(move.heading)
+            };
         }
 
         var totalDone = (time - this.time) / this.duration;
@@ -6474,13 +6527,17 @@ window.ShipMovementAnimation = function () {
 
         var position;
         var facing;
+        var heading;
 
         var turnPercent = this.turnCurve.getPoint(done).y;
         position = animation.curve.getPoint(done);
         var turnAngle = animation.turnAngle * turnPercent;
         facing = mathlib.addToDirection(animation.startAngle, turnAngle);
 
-        return { position: position, facing: facing };
+        var headingTurnAngle = animation.headingTurnAngle * turnPercent;
+        heading = mathlib.addToDirection(animation.headingStartAngle, headingTurnAngle);
+
+        return { position: position, facing: facing, heading: heading };
     };
 
     ShipMovementAnimation.prototype.getStartPosition = function () {
@@ -6647,6 +6704,7 @@ window.ShipMovementAnimation = function () {
             );
 
             var turnData = calculateTurn(start, move);
+            var headingTurnData = calculateHeadingTurn(start, move);
 
             return {
                 move: move,
@@ -6654,6 +6712,9 @@ window.ShipMovementAnimation = function () {
                 turnAngle: turnData.turnAngle,
                 startAngle: turnData.startAngle,
                 endAngle: turnData.endAngle,
+                headingTurnAngle: headingTurnData.turnAngle,
+                headingStartAngle: headingTurnData.startAngle,
+                headingEndAngle: headingTurnData.endAngle,
                 length: calculateCurveLength(curve)
             };
         }, this);
@@ -6692,6 +6753,32 @@ window.ShipMovementAnimation = function () {
 
         return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
+
+    // Heading equivalent of calculateTurn: drives the direction-of-movement sprite.
+    // Mirrors the facing logic (including multi-pivot oldHeadings) so the heading
+    // arrow animates in replay instead of freezing at its pre-replay value.
+    function calculateHeadingTurn(startMove, endMove) {
+
+        var endHeading = endMove.heading;
+        var angleNew = mathlib.hexFacingToAngle(endHeading);
+
+        if (!startMove || startMove.heading === undefined) {
+            return { turnAngle: 0, startAngle: angleNew, endAngle: angleNew };
+        }
+
+        var startHeading = startMove.heading;
+        var angleOld = mathlib.hexFacingToAngle(startHeading);
+
+        if (startHeading === endHeading) {
+            return { turnAngle: 0, startAngle: angleOld, endAngle: angleNew };
+        }
+
+        return {
+            turnAngle: buildDirectionTurn(startHeading, endMove.oldHeadings, endHeading),
+            startAngle: angleOld,
+            endAngle: angleNew
+        };
+    }
     /* //Old version
         function buildTurn(endMove, startFacing) {
             if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
@@ -6726,34 +6813,40 @@ window.ShipMovementAnimation = function () {
     */
 
     function buildTurn(endMove, startFacing) {
+        return buildDirectionTurn(startFacing, endMove.oldFacings, endMove.facing);
+    }
 
-        // Build the correct sequence without mutating endMove
-        const sequence = [startFacing];
+    // Accumulates the signed shortest-path turn across a sequence
+    // start → oldDirections... → end. Shared by facing and heading so both
+    // animate identically through multi-pivot manoeuvres.
+    function buildDirectionTurn(startDirection, oldDirections, endDirection) {
 
-        if (Array.isArray(endMove.oldFacings) && endMove.oldFacings.length > 0) {
-            sequence.push(...endMove.oldFacings);
+        const sequence = [startDirection];
+
+        if (Array.isArray(oldDirections) && oldDirections.length > 0) {
+            sequence.push(...oldDirections);
         }
 
-        sequence.push(endMove.facing);
+        sequence.push(endDirection);
 
         let totalTurn = 0;
-        let lastFacing = null;
+        let lastDirection = null;
 
-        sequence.forEach(function (facing) {
-            if (lastFacing === null) {
-                lastFacing = facing;
+        sequence.forEach(function (direction) {
+            if (lastDirection === null) {
+                lastDirection = direction;
                 return;
             }
 
-            const angleLast = mathlib.hexFacingToAngle(lastFacing);
-            const angleNew = mathlib.hexFacingToAngle(facing);
+            const angleLast = mathlib.hexFacingToAngle(lastDirection);
+            const angleNew = mathlib.hexFacingToAngle(direction);
 
             const right = mathlib.getAngleBetween(angleLast, angleNew, true);
             const left = mathlib.getAngleBetween(angleLast, angleNew, false);
 
             totalTurn += Math.abs(right) < Math.abs(left) ? right : left;
 
-            lastFacing = facing;
+            lastDirection = direction;
         });
 
         return totalTurn;
@@ -14686,8 +14779,13 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateEW();
 
         infowindow.informPhase(5000, function () { });
+        // Observers are permanently in replay (see PhaseDirector.resolvePhaseStrategy),
+        // so hiding the combat-log print buttons here would deny them the log entirely.
+        // Hide them only for participants, who get them back on deactivate.
         var combatLogContainer = document.getElementById('combatLogContainer');
-        if (combatLogContainer) combatLogContainer.style.display = 'none'; //Hide print Log buttons
+        if (combatLogContainer) {
+            combatLogContainer.style.display = gamedata.isPlayerInGame() ? 'none' : 'block';
+        }
         return this;
     };
 
@@ -14901,6 +14999,12 @@ window.ReplayPhaseStrategy = function () {
             return;
         }
 
+        // Starting playback: clear any printed combat log so the live replay log
+        // (written to #log) doesn't render over the top of the static print (#LogActual).
+        if (action === "play") {
+            window.combatLog.showCurrent();
+        }
+
         this.replayUI.activateButton(event.target);
 
         this.animationStrategy[action]();
@@ -14929,6 +15033,7 @@ window.ReplayPhaseStrategy = function () {
             return;
         }
 
+        clearCombatLogs();
         this.replayTurn--;
         activatePause.call(this);
         requestReplayGamedata.call(this);
@@ -14939,9 +15044,19 @@ window.ReplayPhaseStrategy = function () {
             return;
         }
 
+        clearCombatLogs();
         this.replayTurn++;
         activatePause.call(this);
         requestReplayGamedata.call(this);
+    }
+
+    // Changing the replayed turn must wipe both combat-log surfaces: the printed
+    // log (#LogActual via showCurrent) and the live replay messages (.logentry in
+    // #log via onTurnStart). Otherwise the previous turn's entries linger and the
+    // new turn's replay log renders over the top of them.
+    function clearCombatLogs() {
+        window.combatLog.showCurrent();
+        window.combatLog.onTurnStart();
     }
 
     /*
@@ -15541,7 +15656,7 @@ window.ShipTooltip = function () {
                 shipNameDisplay = "Mine";
             }
         }
-        jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + '</span>').appendTo(this.element.find('.namecontainer'));
+        jQuery('<span class="name value ' + getAllyClass(ship) + '"' + getNameStyle(ship) + '>' + shipNameDisplay + '</span>').appendTo(this.element.find('.namecontainer'));
 
         var jinking = shipManager.movement.getJinking(ship) * 5;
         var flightArmour = shipManager.systems.getFlightArmour(ship);
@@ -15883,7 +15998,7 @@ window.ShipTooltip = function () {
                     shipNameDisplay = "Mine";
                 }
             }
-            jQuery('<span class="name value ' + getAllyClass(ship) + '">' + shipNameDisplay + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
+            jQuery('<span class="name value ' + getAllyClass(ship) + '"' + getNameStyle(ship) + '>' + shipNameDisplay + comma + ' </span>').appendTo(this.element.find('.namecontainer'));
 
             $(".ballistics", this.element).hide();
         }, this);
@@ -15920,6 +16035,18 @@ window.ShipTooltip = function () {
          }*/
         //Let's make allied team ships blue text, and terrain white - DK May 2025
         return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'));
+    }
+
+    // Inline colour for the ship name. Participants rely on the CSS class from
+    // getAllyClass; observers (not in the game) get a per-team colour instead so
+    // every ship isn't rendered as "enemy" red. Terrain keeps its neutral class.
+    function getNameStyle(ship) {
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid) || gamedata.isPlayerInGame()) {
+            return '';
+        }
+
+        var rgb = gamedata.getTeamColorRGB(ship.team);
+        return ' style="color:rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ');"';
     }
 
     return ShipTooltip;
@@ -17749,12 +17876,18 @@ window.ShipMovementCallbacks = function () {
     ShipMovementCallbacks.prototype.morejinkCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doJink(this.ship, 1);
+        if (event.which == 3) while (shipManager.movement.canJink(this.ship, 1)) { //r-click: jink to max available (thrust / jinking limit)
+            shipManager.movement.doJink(this.ship, 1);
+        }
         this.updateCallback({ ship: this.ship });
     };
 
     ShipMovementCallbacks.prototype.lessjinkCallback = function (e) {
         e.stopPropagation();
         shipManager.movement.doJink(this.ship, -1);
+        if (event.which == 3) while (shipManager.movement.canJink(this.ship, -1)) { //r-click: set jinking to 0, refunding all thrust
+            shipManager.movement.doJink(this.ship, -1);
+        }
         this.updateCallback({ ship: this.ship });
     };
 
@@ -18620,6 +18753,71 @@ window.gamedata = {
         for (var i in gamedata.selectedSystems) {
             if (gamedata.selectedSystems[i].canTargetAllies || gamedata.selectedSystems[i].canTargetAll) return true;
         }
+    },
+
+    // Base team colours (sRGB 0-255), team 1..8. Teams 1-3 deliberately match the
+    // mine/enemy/ally colours used for participants so the two views stay consistent.
+    teamBaseColors: [
+        [160, 250, 100], // 1 Green  (== "mine")
+        [255, 40, 40],   // 2 Red    (== "enemy")
+        [51, 173, 255],  // 3 Blue   (== "ally")
+        [255, 150, 40],  // 4 Orange
+        [40, 230, 230],  // 5 Cyan
+        [230, 40, 230],  // 6 Magenta
+        [240, 230, 60],  // 7 Yellow
+        [170, 90, 230]   // 8 Purple
+    ],
+
+    // Raw sRGB [r,g,b] (0-255) team colour keyed on ship.team, for an observer.
+    // Teams beyond 8 reuse the palette but lightened one step per full cycle.
+    // Use this for canvas 2D (combat log, selection circles); getTeamColor()
+    // wraps it for sprite overlays (linear space).
+    getTeamColorRGB: function getTeamColorRGB(team) {
+        var palette = gamedata.teamBaseColors;
+        var count = palette.length;
+
+        // Teams are 1-indexed; guard against missing/0 values.
+        var index = (parseInt(team, 10) || 1) - 1;
+        if (index < 0) index = 0;
+
+        var cycle = Math.floor(index / count); // 0 for teams 1-8, 1 for 9-16, ...
+        var base = palette[index % count];
+
+        // Each extra cycle blends 35% further toward white (capped so it never washes out).
+        var lighten = Math.min(cycle * 0.35, 0.85);
+
+        return [
+            base[0] + (255 - base[0]) * lighten,
+            base[1] + (255 - base[1]) * lighten,
+            base[2] + (255 - base[2]) * lighten
+        ];
+    },
+
+    // Linear-space THREE.Color version of getTeamColorRGB, ready for sprite overlays.
+    getTeamColor: function getTeamColor(team) {
+        var rgb = gamedata.getTeamColorRGB(team);
+        return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255).convertSRGBToLinear();
+    },
+
+    // Overlay colour for a ship icon. Participants see the familiar mine/ally/enemy
+    // scheme; observers (not in the game) see a distinct colour per team instead of
+    // everything being red.
+    getShipOverlayColor: function getShipOverlayColor(ship, mine, ally, terrain) {
+        if (terrain) {
+            return new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear(); // Off-white
+        }
+
+        if (!gamedata.isPlayerInGame()) {
+            return gamedata.getTeamColor(ship.team);
+        }
+
+        if (mine) {
+            return new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear(); // Light green
+        }
+        if (ally) {
+            return new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear(); // Light blue
+        }
+        return new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
     },
 
     isPlayerInGame: function isPlayerInGame() {
@@ -26892,6 +27090,12 @@ window.combatLog = {
 
     onTurnStart: function onTurnStart() {
         $('.logentry').remove();
+        // logFireOrders emits the damage <ul> as a SIBLING of its .logentry div
+        // (the </div> closes before the <ul>), so it lands as a direct child of
+        // #log and survives the .logentry removal. Clear those orphaned damage
+        // lists too — but only the ones directly under #log, never the print's
+        // lists nested inside #combatLogContainer > #LogActual.
+        $('#log > ul').remove();
     },
 
     logDestroyedShip: function logDestroyedShip(ship, jumped) {
@@ -27015,7 +27219,11 @@ window.combatLog = {
         }
 
         var fireColor = "";
-        if (gamedata.isMyShip(ship)) {
+        if (!gamedata.isPlayerInGame()) {
+            // Observers: colour the FIRE: header by the shooter's team.
+            var rgb = gamedata.getTeamColorRGB(ship.team);
+            fireColor = "color:rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ");";
+        } else if (gamedata.isMyShip(ship)) {
             fireColor = "color:limegreen;";
         } else if (gamedata.isMyorMyTeamShip(ship)) {
             fireColor = "color:#33adff;";
@@ -27316,6 +27524,7 @@ window.combatLog = {
             document.getElementById('currentTurnButton').style.display = 'inline-block'; // Display next button when relevant.
         }
 
+        combatLog.onTurnStart(); // Clear leftover live replay messages (.logentry in #log) before showing the print.
         combatLog.fetchAndShowCombatLog();
     },
 
@@ -27326,10 +27535,11 @@ window.combatLog = {
 
         if (this.displayedTurn >= gamedata.turn) {
             document.getElementById('nextTurnButton').style.display = 'none'; // Hide next turn button
-            document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.            
+            document.getElementById('currentTurnButton').style.display = 'none'; //Hide Turn number.
             document.getElementById('LogActual').style.display = 'none'; //Hide Turn number.
-            return; //Can't go forward past current turn. 
+            return; //Can't go forward past current turn.
         }
+        combatLog.onTurnStart(); // Clear leftover live replay messages (.logentry in #log) before showing the print.
         combatLog.fetchAndShowCombatLog();
     },
 
@@ -29352,7 +29562,7 @@ shipManager.movement = {
         if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!          
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
-        if (shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false;
+        if (accel > 0 && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false; //only adding jink costs thrust; reducing refunds it
         var jinking = shipManager.movement.getJinking(ship);
         if (jinking + accel > ship.jinkinglimit || jinking + accel < 0) return false;
         return true;
@@ -34163,8 +34373,8 @@ window.UI = {
             UI.shipMovement.accElement.on("click touchstart contextmenu", UI.shipMovement.accelCallback);
             UI.shipMovement.deaccElement.on("click touchstart contextmenu", UI.shipMovement.deaccCallback);
 
-            UI.shipMovement.morejinkElement.on("click touchstart", UI.shipMovement.morejinkCallback);
-            UI.shipMovement.lessjinkElement.on("click touchstart", UI.shipMovement.lessjinkCallback);
+            UI.shipMovement.morejinkElement.on("click touchstart contextmenu", UI.shipMovement.morejinkCallback);
+            UI.shipMovement.lessjinkElement.on("click touchstart contextmenu", UI.shipMovement.lessjinkCallback);
 
             UI.shipMovement.halfphaseElement.on("click touchstart", UI.shipMovement.halfphaseCallback);
 
