@@ -209,7 +209,7 @@ window.SelectFromShips = function () {
                     }
                 });
                 var name = jQuery(
-                    '<div class="name value button ' + getAllyClass(ship) + '">' + '(' + noOfFighters + ') ' + shipNameDisplay + deployedText + ' </div>'
+                    '<div class="name value button ' + getAllyClass(ship) + '"' + getTeamColorStyle(ship) + '>' + '(' + noOfFighters + ') ' + shipNameDisplay + deployedText + ' </div>'
                 )
                     .on('click', function () {
                         if (gamedata.gamephase === -1) {
@@ -235,7 +235,7 @@ window.SelectFromShips = function () {
                 this.element.append(name)
 
             } else {
-                var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '">' + shipNameDisplay + deployedText + ' </div>')
+                var name = jQuery('<div class="name value button ' + getAllyClass(ship) + '"' + getTeamColorStyle(ship) + '>' + shipNameDisplay + deployedText + ' </div>')
                     .on('click', function () {
                         if (gamedata.gamephase === -1) {
                             if (this.phaseStrategy.selectedShip) {
@@ -293,6 +293,16 @@ window.SelectFromShips = function () {
         }   
         */
         return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'))
+    }
+
+    // Observers (not in the game) colour each ship name by its team instead of
+    // the mine/ally/enemy scheme. Returns an inline style attribute, or '' for
+    // participants and terrain (which keep their existing class-based colour).
+    function getTeamColorStyle(ship) {
+        if (gamedata.isPlayerInGame()) return '';
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return '';
+        var rgb = gamedata.getTeamColorRGB(ship.team);
+        return ' style="color:rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ');"';
     }
 
     return ShipTooltip;
