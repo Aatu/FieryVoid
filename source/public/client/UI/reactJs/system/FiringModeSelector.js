@@ -74,6 +74,10 @@ export default class FiringModeSelector extends React.Component {
     render() {
         const { ship, system } = this.props;
 
+        // showModes lets callers host other controls (e.g. self-intercept) inside
+        // this styled box without the firing-mode grid when there's nothing to pick.
+        const showModes = this.props.showModes !== false;
+
         const currentModeIndex = parseInt(system.firingMode);
 
         let iconPath = '';
@@ -112,11 +116,11 @@ export default class FiringModeSelector extends React.Component {
 
         return (
             <Container>
-                <Header>Select Firing Mode</Header>
+                {showModes && <Header>Select Firing Mode</Header>}
                 <SelectorContainer>
-                    {modeList}
+                    {showModes && modeList}
+                    {this.props.children}
                 </SelectorContainer>
-                {this.props.children}
             </Container>
         );
     }
