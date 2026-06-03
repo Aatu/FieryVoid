@@ -767,7 +767,10 @@ const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && ((g
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
-const canRemIntercept = (ship, system) => system.weapon && weaponManager.canRemInterceptSingle(ship, system);
+//Non-split weapons hold only a single order, so their self-intercept is cancelled via the
+//top-row "remove fire order" button; only split-capable weapons need an in-menu intercept-remove
+//button to peel off one of several orders.
+const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && weaponManager.canRemInterceptSingle(ship, system);
 
 const canActivate = (ship, system) => system.canActivate && typeof system.canActivate === 'function' && system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
 const canDeactivate = (ship, system) => system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
