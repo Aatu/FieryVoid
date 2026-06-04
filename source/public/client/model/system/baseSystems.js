@@ -727,11 +727,99 @@ var Quarters = function Quarters(json, ship) {
 Quarters.prototype = Object.create(ShipSystem.prototype);
 Quarters.prototype.constructor = Quarters;
 
+// LCV Rails (B5W §10.1): a DockingCollar docks/launches a WHOLE LCV (a full
+// ship), not a FighterFlight. It extends Hangar to inherit the data deep-clone
+// and tooltip skeleton, but it does NOT use the fighter hangarUsage / launch /
+// dock order pipeline — instead it tracks a single pending LCV dock/launch order
+// and ships them under lcvDocks/lcvLaunches keys. isLCVRail is the discriminator
+// the dock/launch UI gates on (parallel to isCatapult / isRail).
 var DockingCollar = function DockingCollar(json, ship) {
-	ShipSystem.call(this, json, ship);
+	Hangar.call(this, json, ship);
+	this.isLCVRail = true;
+	// Pending whole-ship orders for this turn (one LCV per rail).
+	// Hydrated from server-sent pending orders so the dialog can amend/cancel.
+	this.pendingLcvDockOrders   = Array.isArray(this.pendingLcvDockOrder)   ? this.pendingLcvDockOrder.slice()   : [];
+	this.pendingLcvLaunchOrders = Array.isArray(this.pendingLcvLaunchOrder) ? this.pendingLcvLaunchOrder.slice() : [];
+	this.pendingLcvDockOrdersDirty   = false;
+	this.pendingLcvLaunchOrdersDirty = false;
+	//Deployment-phase deploy-dock queue (one LCV per rail). Resolved immediately
+	//on commit server-side, so there's no server-sent pending order to hydrate —
+	//tracked only for the current Deployment Phase session (mirrors fighters'
+	//pendingDeployStartOrders).
+	this.pendingLcvDeployStartOrders = [];
+	this.pendingLcvDeployStartOrdersDirty = false;
+	this.refreshHangarTooltip();
 };
-DockingCollar.prototype = Object.create(ShipSystem.prototype);
+DockingCollar.prototype = Object.create(Hangar.prototype);
 DockingCollar.prototype.constructor = DockingCollar;
+
+// LCV rails ship their orders under lcvDocks/lcvLaunches (Firing) and
+// lcvDeployStarts (Deployment), all whole-ship by shipId. Mirrors the base Hangar
+// transfer's dirty-flag semantics so a "cancel" sends an explicit empty.
+DockingCollar.prototype.doIndividualNotesTransfer = function () {
+	var dockDirty    = !!this.pendingLcvDockOrdersDirty;
+	var launchDirty  = !!this.pendingLcvLaunchOrdersDirty;
+	var deployDirty  = !!this.pendingLcvDeployStartOrdersDirty;
+	var hasDock        = dockDirty   || (Array.isArray(this.pendingLcvDockOrders)        && this.pendingLcvDockOrders.length        > 0);
+	var hasLaunch      = launchDirty || (Array.isArray(this.pendingLcvLaunchOrders)      && this.pendingLcvLaunchOrders.length      > 0);
+	var hasDeployStart = deployDirty || (Array.isArray(this.pendingLcvDeployStartOrders) && this.pendingLcvDeployStartOrders.length > 0);
+	if (!hasDock && !hasLaunch && !hasDeployStart) {
+		this.individualNotesTransfer = "";
+		return;
+	}
+	var payload = {};
+	if (hasDock)        payload.lcvDocks        = Array.isArray(this.pendingLcvDockOrders)        ? this.pendingLcvDockOrders        : [];
+	if (hasLaunch)      payload.lcvLaunches     = Array.isArray(this.pendingLcvLaunchOrders)      ? this.pendingLcvLaunchOrders      : [];
+	if (hasDeployStart) payload.lcvDeployStarts = Array.isArray(this.pendingLcvDeployStartOrders) ? this.pendingLcvDeployStartOrders : [];
+	this.individualNotesTransfer = JSON.stringify(payload);
+	this.pendingLcvDockOrders = [];
+	this.pendingLcvLaunchOrders = [];
+	this.pendingLcvDeployStartOrders = [];
+	this.pendingLcvDockOrdersDirty = false;
+	this.pendingLcvLaunchOrdersDirty = false;
+	this.pendingLcvDeployStartOrdersDirty = false;
+};
+
+// LCV rails hold one LCV; capacity is "occupied / 1", not box count. The occupant
+// is known from the server-sent lcvDocked link, adjusted by any pending order.
+// Mirrors the fighter "Stored Craft" line so the player sees the LCV name plus a
+// "(Recovering)" / "(Launching)" projection for queued orders this turn.
+DockingCollar.prototype.refreshHangarTooltip = function () {
+	if (!this.data) this.data = {};
+
+	var lcvName = function (id) {
+		if (!id) return 'LCV';
+		var s = (typeof gamedata !== 'undefined' && gamedata.getShip) ? gamedata.getShip(id) : null;
+		return (s && s.name) ? s.name : 'LCV';
+	};
+
+	// Committed occupant (server-sent link), then overlay queued orders.
+	var dockedNow = (this.lcvDocked && this.lcvDocked.shipId) ? 1 : 0;
+	var storedLine = '';
+	var pendingLaunch = Array.isArray(this.pendingLcvLaunchOrders) && this.pendingLcvLaunchOrders.length > 0;
+	var pendingDock   = Array.isArray(this.pendingLcvDockOrders)   && this.pendingLcvDockOrders.length   > 0;
+	var pendingDeploy = Array.isArray(this.pendingLcvDeployStartOrders) && this.pendingLcvDeployStartOrders.length > 0;
+
+	if (pendingDeploy) {
+		// Deployment-phase deploy-dock: the LCV starts docked here this turn.
+		dockedNow = 1;
+		storedLine = lcvName(this.pendingLcvDeployStartOrders[0].shipId) + ' (Deploying)';
+	} else if (pendingDock) {
+		// An incoming LCV this turn — shows as "(Recovering)" even if the rail was
+		// empty (the order claims it). Takes precedence over a stale committed link.
+		dockedNow = 1;
+		storedLine = lcvName(this.pendingLcvDockOrders[0].shipId) + ' (Recovering)';
+	} else if (this.lcvDocked && this.lcvDocked.shipId) {
+		dockedNow = 1;
+		storedLine = lcvName(this.lcvDocked.shipId) + (pendingLaunch ? ' (Launching)' : '');
+		if (pendingLaunch) dockedNow = 0;   // leaving this turn → capacity frees
+	}
+
+	this.data["Type"] = "LCVs";
+	this.data["Capacity"] = dockedNow + " / 1 slots";
+	if (storedLine) this.data["Stored Craft"] = "<br>" + storedLine;
+	else delete this.data["Stored Craft"];
+};
 
 var Magazine = function Magazine(json, ship) {
 	ShipSystem.call(this, json, ship);

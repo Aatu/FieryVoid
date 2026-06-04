@@ -17,7 +17,9 @@ window.ShipTooltipFireMenu = function () {
         { className: "removeMultiOrder", condition: [isEnemy, hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" },
         { className: "launchFighters", condition: [isMine, isFiringPhase, hasLaunchableHangar, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarLaunch, info: "Launch Fighters" },
         { className: "recoverFlights", condition: [isMine, isFiringPhase, hasReceivableFlights, isLaunchEnabledGame, carrierNotPivotingOrRolling], action: openHangarRecover, info: "Recover Flights" },
-        { className: "dockFlight", condition: [isMine, isFiringPhase, isFighterFlight, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" }
+        //"Enter Hangar" is reused for LCVs: isDockableUnit accepts a flight OR an
+        //LCV, and openHangarDock routes an LCV through the LCV-rail dock dialog.
+        { className: "dockFlight", condition: [isMine, isFiringPhase, isDockableUnit, isLaunchEnabledGame, hasEligibleCarrierInHex], action: openHangarDock, info: "Enter Hangar" }
         //{ className: "targetSuppWeapons", condition: [isFriendly, hasWeaponsSelected, notSelf], action: targetWeapons, info: "Target support weapons" },//30 June 2024 - DK - Added for Ally targeting.
         //{ className: "removeMultiOrder", condition: [hasWeaponsSelected, hasSplitWeaponFiringOrder], action: removeFiringOrderMulti, info: "Remove a Firing Order" }
 	];
@@ -167,7 +169,9 @@ window.ShipTooltipFireMenu = function () {
             if (used >= output) continue;
             return true;
         }
-        return false;
+        //LCV rails: the "Launch Fighters" button also surfaces when a rail holds
+        //an LCV and still has launch budget this turn.
+        return window.hasLaunchableLCVRail(ship);
     }
 
     function carrierNotPivotingOrRolling() {
@@ -181,31 +185,65 @@ window.ShipTooltipFireMenu = function () {
     }
 
     function openHangarLaunch() {
+        var carrier = this.targetedShip;
+        //hangarLaunch now appends an LCV launch section (appendLcvLaunchSection),
+        //so a carrier with both fighters and LCVs shows them together. Only when
+        //there is NO launchable fighter hangar (hangarLaunch would early-return on
+        //an empty hangar list) do we open the standalone LCV launch dialog.
+        if (!window.hasLaunchableFighterHangar(carrier) && window.hasLaunchableLCVRail(carrier)) {
+            if (window.confirm && typeof window.confirm.lcvLaunch === 'function') {
+                window.confirm.lcvLaunch(carrier);
+            }
+            return;
+        }
         if (window.confirm && typeof window.confirm.hangarLaunch === 'function') {
-            window.confirm.hangarLaunch(this.targetedShip);
+            window.confirm.hangarLaunch(carrier);
         }
     }
 
     // === Hangar Operations Stage 5: dock button conditions + action ===
 
-    function isFighterFlight() {
+    // An LCV is a full ship (not a flight) that docks onto an LCV rail. The
+    // "Enter Hangar" (dockFlight) button is reused for it — see isDockableUnit.
+    function isLCVUnit(ship) {
+        return !!(ship && !ship.flight && String(ship.hangarRequired || '').toLowerCase() === 'lcvs');
+    }
+
+    // The dock button surfaces for a fighter flight OR an LCV. The downstream
+    // gate (hasEligibleCarrierInHex) and action (openHangarDock) branch on which.
+    function isDockableUnit() {
         var ship = this.targetedShip;
-        return !!(ship && ship.flight);
+        return !!(ship && (ship.flight || isLCVUnit(ship)));
     }
 
     // Looks for at least one friendly carrier in the same hex with a hangar
-    // that can receive (some of) this flight. Doesn't enumerate exact splits;
-    // the dialog does the precise math.
+    // (LCV rail for an LCV) that can receive this unit. Doesn't enumerate exact
+    // splits; the dialog does the precise math.
     function hasEligibleCarrierInHex() {
-        var flight = this.targetedShip;
-        if (!flight || !flight.flight) return false;
-        var carriers = findEligibleCarriersForDock(flight);
+        var unit = this.targetedShip;
+        if (!unit) return false;
+        if (isLCVUnit(unit)) {
+            //Keep the button available when a dock is already queued for this LCV,
+            //so the player can re-open the dialog and un-declare it from the LCV
+            //side even if every rail is now claimed (no "free" rail remains).
+            if (window.findEligibleLCVRailsForDock(unit).length > 0) return true;
+            return !!window.lcvQueuedDockRail(unit);
+        }
+        if (!unit.flight) return false;
+        var carriers = findEligibleCarriersForDock(unit);
         return carriers.length > 0;
     }
 
     function openHangarDock() {
+        var unit = this.targetedShip;
+        if (isLCVUnit(unit)) {
+            if (window.confirm && typeof window.confirm.lcvDock === 'function') {
+                window.confirm.lcvDock(unit);
+            }
+            return;
+        }
         if (window.confirm && typeof window.confirm.hangarDock === 'function') {
-            window.confirm.hangarDock(this.targetedShip);
+            window.confirm.hangarDock(unit);
         }
     }
 
@@ -220,12 +258,21 @@ window.ShipTooltipFireMenu = function () {
         if (!ship || ship.flight) return false;
         if (!Array.isArray(ship.systems)) return false;
         var flights = findEligibleFlightsForDocking(ship);
-        return flights.length > 0;
+        if (flights.length > 0) return true;
+        //LCV rails: the same "Recover Flights" button also surfaces when this
+        //carrier has a free LCV rail and an eligible LCV sharing its hex.
+        return window.findEligibleLCVsForRecover(ship).length > 0;
     }
 
     function openHangarRecover() {
+        var carrier = this.targetedShip;
+        //hangarRecover now renders BOTH fighter flights AND eligible LCVs in one
+        //container (the LCV section is appended by appendLcvRecoverSection), so a
+        //carrier with both shows them together. When ONLY LCVs are receivable
+        //(no fighter bays / no eligible flights), hangarRecover still opens and
+        //its empty-flights branch shows just the LCV section.
         if (window.confirm && typeof window.confirm.hangarRecover === 'function') {
-            window.confirm.hangarRecover(this.targetedShip);
+            window.confirm.hangarRecover(carrier);
         }
     }
 
@@ -788,5 +835,186 @@ window.findEligibleFlightsForDocking = function (carrier) {
             }
         }
         return out;
+    }
+};
+
+// ===================================================================== //
+// LCV Rails (DockingCollar) — whole-ship dock/launch client helpers.     //
+// An LCV is a full ship (ship.hangarRequired === 'LCVs'), not a flight.  //
+// These mirror the server-side HangarOps::canLCVDock / collectLCVRails    //
+// gates so the fire-menu buttons + confirm dialogs surface only when a    //
+// dock/launch is actually legal.                                         //
+// ===================================================================== //
+
+// True if a system is an LCV rail (DockingCollar).
+window.isLCVRailSystem = function (sys) {
+    return !!(sys && (sys.isLCVRail || sys.name === 'dockingCollar'));
+};
+
+// Is this rail free (not destroyed, no LCV docked, launch+land budget left)?
+window.lcvRailFree = function (carrier, rail) {
+    if (!window.isLCVRailSystem(rail)) return false;
+    if (shipManager.systems.isDestroyed(carrier, rail)) return false;
+    if (rail.lcvDocked && rail.lcvDocked.shipId) return false;
+    // Pending dock order this turn already claims the rail.
+    if (Array.isArray(rail.pendingLcvDockOrders) && rail.pendingLcvDockOrders.length > 0) return false;
+    var out  = parseInt(rail.output || 0, 10);
+    var used = parseInt(rail.launchedThisTurn || 0, 10) + parseInt(rail.landedThisTurn || 0, 10);
+    return used < out;
+};
+
+// Is this rail occupied by an LCV and still able to launch it this turn?
+window.lcvRailLaunchable = function (carrier, rail) {
+    if (!window.isLCVRailSystem(rail)) return false;
+    if (shipManager.systems.isDestroyed(carrier, rail)) return false;
+    var occupied = (rail.lcvDocked && rail.lcvDocked.shipId)
+        || (Array.isArray(rail.pendingLcvDockOrders) && rail.pendingLcvDockOrders.length > 0);
+    if (!occupied) return false;
+    // A pending launch already empties it.
+    if (Array.isArray(rail.pendingLcvLaunchOrders) && rail.pendingLcvLaunchOrders.length > 0) return false;
+    var out  = parseInt(rail.output || 0, 10);
+    var used = parseInt(rail.launchedThisTurn || 0, 10) + parseInt(rail.landedThisTurn || 0, 10);
+    return used < out;
+};
+
+// Does $carrier have any LCV rail that could launch an LCV this turn?
+window.hasLaunchableLCVRail = function (carrier) {
+    if (!carrier || !Array.isArray(carrier.systems)) return false;
+    return carrier.systems.some(function (s) { return window.lcvRailLaunchable(carrier, s); });
+};
+
+// Does $carrier have any launchable FIGHTER hangar (ordinary/catapult/rail)?
+// Used by openHangarLaunch to decide between the fighter and LCV launch dialogs.
+window.hasLaunchableFighterHangar = function (carrier) {
+    if (!carrier || !Array.isArray(carrier.systems)) return false;
+    return carrier.systems.some(function (sys) {
+        var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
+        if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat)) return false;
+        if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) return false;
+        if (!sys.hangarUsage.some(function (e) { return e && !e.cannotLaunch; })) return false;
+        if (isCat) return true;
+        var out  = parseInt(sys.output || 0, 10);
+        var used = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
+        return used < out;
+    });
+};
+
+// The LCV's remaining engine thrust this turn (the dock-gate "1 thrust unspent"
+// value sent to the server). Delegates to the authoritative movement helper.
+window.lcvRemainingThrust = function (lcv) {
+    return Math.max(0, parseInt(shipManager.movement.getRemainingEngineThrust(lcv), 10) || 0);
+};
+
+// Carriers in $lcv's hex with a free LCV rail, satisfying the dock conditions
+// (carrier stationary, same hex, matching heading, LCV has >=1 thrust unspent).
+// Returns [{ ship, rails: [rail,...] }, ...]. Mirrors HangarOps::canLCVDock.
+window.findEligibleLCVRailsForDock = function (lcv) {
+    var out = [];
+    if (!lcv || lcv.flight) return out;
+    if (String(lcv.hangarRequired || '').toLowerCase() !== 'lcvs') return out;
+    if (shipManager.isDestroyed(lcv)) return out;
+
+    var lcvMove = shipManager.movement.getLastCommitedMove(lcv);
+    if (!lcvMove || !lcvMove.position) return out;
+    if (window.lcvRemainingThrust(lcv) < 1) return out;   //no thrust to dock
+
+    var lPos = lcvMove.position;
+    var lHeading = parseInt(lcvMove.heading, 10);
+
+    for (var key in gamedata.ships) {
+        var ship = gamedata.ships[key];
+        if (!ship || ship.id === lcv.id) continue;
+        if (ship.flight) continue;
+        if (shipManager.isDestroyed(ship)) continue;
+        if (!gamedata.isMyorMyTeamShip(ship)) continue;
+        if (!Array.isArray(ship.systems)) continue;
+
+        var sMove = shipManager.movement.getLastCommitedMove(ship);
+        if (!sMove || !sMove.position) continue;
+        if (parseInt(sMove.speed, 10) !== 0) continue;                    //carrier stationary
+        if (sMove.position.q !== lPos.q || sMove.position.r !== lPos.r) continue;  //same hex
+        if (parseInt(sMove.heading, 10) !== lHeading) continue;          //matching heading
+
+        var rails = ship.systems.filter(function (s) { return window.lcvRailFree(ship, s); });
+        if (rails.length === 0) continue;
+        out.push({ ship: ship, rails: rails });
+    }
+    return out;
+};
+
+// LCVs in $carrier's hex eligible to dock onto one of its free rails (the
+// carrier-side mirror of findEligibleLCVRailsForDock). Returns [lcv, ...].
+window.findEligibleLCVsForRecover = function (carrier) {
+    var out = [];
+    if (!carrier || carrier.flight) return out;
+    if (!Array.isArray(carrier.systems)) return out;
+    if (shipManager.isDestroyed(carrier)) return out;
+
+    var freeRails = carrier.systems.filter(function (s) { return window.lcvRailFree(carrier, s); });
+    if (freeRails.length === 0) return out;
+
+    var cMove = shipManager.movement.getLastCommitedMove(carrier);
+    if (!cMove || !cMove.position) return out;
+    if (parseInt(cMove.speed, 10) !== 0) return out;     //carrier must be stationary
+    var cPos = cMove.position;
+    var cHeading = parseInt(cMove.heading, 10);
+
+    for (var key in gamedata.ships) {
+        var lcv = gamedata.ships[key];
+        if (!lcv || lcv.id === carrier.id) continue;
+        if (lcv.flight) continue;
+        if (String(lcv.hangarRequired || '').toLowerCase() !== 'lcvs') continue;
+        if (shipManager.isDestroyed(lcv)) continue;
+        if (!gamedata.isMyorMyTeamShip(lcv)) continue;
+
+        var lMove = shipManager.movement.getLastCommitedMove(lcv);
+        if (!lMove || !lMove.position) continue;
+        if (lMove.position.q !== cPos.q || lMove.position.r !== cPos.r) continue;
+        if (parseInt(lMove.heading, 10) !== cHeading) continue;
+        if (window.lcvRemainingThrust(lcv) < 1) continue;
+        out.push(lcv);
+    }
+    return out;
+};
+
+// The rail (and its carrier) that already has a queued dock order for $lcv this
+// turn, or null. Used so the dock/recover dialogs can pre-check the box and
+// un-declare an existing order. Walks every owned ship's LCV rails.
+window.lcvQueuedDockRail = function (lcv) {
+    if (!lcv) return null;
+    var lcvId = parseInt(lcv.id, 10);
+    for (var key in gamedata.ships) {
+        var ship = gamedata.ships[key];
+        if (!ship || !Array.isArray(ship.systems)) continue;
+        for (var i = 0; i < ship.systems.length; i++) {
+            var sys = ship.systems[i];
+            if (!window.isLCVRailSystem(sys)) continue;
+            if (!Array.isArray(sys.pendingLcvDockOrders)) continue;
+            if (sys.pendingLcvDockOrders.some(function (o) { return parseInt(o.shipId, 10) === lcvId; })) {
+                return { carrier: ship, rail: sys };
+            }
+        }
+    }
+    return null;
+};
+
+// Remove any queued dock order for $lcv from every LCV rail (so unchecking the
+// dock box, or switching carriers, clears the stale order). Marks each touched
+// rail dirty so an emptied list is still submitted (cancel path).
+window.clearQueuedLcvDock = function (lcv) {
+    if (!lcv) return;
+    var lcvId = parseInt(lcv.id, 10);
+    for (var key in gamedata.ships) {
+        var ship = gamedata.ships[key];
+        if (!ship || !Array.isArray(ship.systems)) continue;
+        ship.systems.forEach(function (sys) {
+            if (!window.isLCVRailSystem(sys)) return;
+            if (!Array.isArray(sys.pendingLcvDockOrders)) return;
+            var had = sys.pendingLcvDockOrders.some(function (o) { return parseInt(o.shipId, 10) === lcvId; });
+            if (!had) return;
+            sys.pendingLcvDockOrders = sys.pendingLcvDockOrders.filter(function (o) { return parseInt(o.shipId, 10) !== lcvId; });
+            sys.pendingLcvDockOrdersDirty = true;
+            if (typeof sys.refreshHangarTooltip === 'function') sys.refreshHangarTooltip();
+        });
     }
 };

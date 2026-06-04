@@ -143,7 +143,7 @@ window.SelectFromShips = function () {
                     var label;
                     if (eligibleCarriers.length === 1) {
                         //label = 'DOCK ' + flight.name.toUpperCase() + ' IN ' + eligibleCarriers[0].ship.name.toUpperCase();
-                        label = 'DOCK ' + flight.name.toUpperCase();                        
+                        label = 'DOCK ' + flight.name.toUpperCase();
                     } else {
                         label = 'DOCK ' + flight.name.toUpperCase() + ' (' + eligibleCarriers.length + ' CARRIERS AVAILABLE)';
                     }
@@ -169,6 +169,53 @@ window.SelectFromShips = function () {
                             this.destroy();
                         }.bind(this));
                     this.element.append(dockButton);
+                }
+            }
+
+            // LCV Rails: an LCV can't share a deploy hex with other ships, so it
+            // deploy-docks directly onto a clicked carrier's free LCV rail. When an
+            // LCV is the selected ship and the clicked ship(s) include LCV-capable
+            // carriers with a free rail, expose a "DOCK <LCV> TO ..." button. One
+            // eligible carrier → auto-queue; several → a carrier-picker sub-dialog.
+            var selLcv = this.phaseStrategy.selectedShip;
+            if (selLcv && !selLcv.flight
+                && String(selLcv.hangarRequired || '').toLowerCase() === 'lcvs'
+                && window.DeploymentDock
+                && typeof window.DeploymentDock.carrierAcceptsLcvDeployDock === 'function') {
+                var lcvCarriers = [];
+                this.ships.forEach(function (s) {
+                    if (window.DeploymentDock.carrierAcceptsLcvDeployDock(s, selLcv)) {
+                        lcvCarriers.push({ ship: s, free: window.DeploymentDock.freeLcvDeployRailCount(s, selLcv.id) });
+                    }
+                });
+                if (lcvCarriers.length > 0) {
+                    var lcvLabel;
+                    if (lcvCarriers.length === 1) {
+                        //lcvLabel = 'DOCK ' + selLcv.name.toUpperCase() + ' TO ' + lcvCarriers[0].ship.name.toUpperCase()
+                        lcvLabel = 'DOCK ' + selLcv.name.toUpperCase()                        
+                        //    + ' (' + lcvCarriers[0].free + (lcvCarriers[0].free === 1 ? ' FREE RAIL)' : ' FREE RAILS)');
+                    } else {
+                        lcvLabel = 'DOCK ' + selLcv.name.toUpperCase() + ' (' + lcvCarriers.length + ' CARRIERS AVAILABLE)';
+                    }
+                    var lcvDockButton = jQuery('<div class="name-value-button-dock">' + lcvLabel + '</div>')
+                        .on('click', function () {
+                            if (lcvCarriers.length === 1) {
+                                var carrier = lcvCarriers[0].ship;
+                                if (window.DeploymentDock.queueLcvDeployDock(carrier, selLcv)) {
+                                    if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                                        window.refreshDeploymentUIForDeployStart();
+                                    }
+                                    if (typeof window.selectShipInDeploymentPhase === 'function') {
+                                        window.selectShipInDeploymentPhase(carrier);
+                                    }
+                                }
+                            } else if (window.confirm
+                                && typeof window.confirm.lcvDeployDockCarrierPicker === 'function') {
+                                window.confirm.lcvDeployDockCarrierPicker(selLcv, lcvCarriers);
+                            }
+                            this.destroy();
+                        }.bind(this));
+                    this.element.append(lcvDockButton);
                 }
             }
         }

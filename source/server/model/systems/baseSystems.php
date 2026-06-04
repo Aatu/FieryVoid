@@ -2724,18 +2724,6 @@ class Quarters extends ShipSystem{
     }
 }
 
-class DockingCollar extends ShipSystem{
-    public $name = "DockingCollar";
-    public $displayName = "LCV Rail";
-    
-	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
-    function __construct($armour, $maxhealth, $output = 1){
-        parent::__construct($armour, $maxhealth, 0, $output);
-    }
-}
-
-
 class Magazine extends ShipSystem{
     public $name = "Magazine";
     public $displayName = "Magazine";
@@ -2995,7 +2983,22 @@ class Hangar extends ShipSystem{
 	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
 	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
 	private $pendingDockTransfer = null;  //dock payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
+
+	// === LCV Rails (DockingCollar) — whole-ship dock state ===
+	// An LCV rail holds at most ONE docked LCV. The persistent link is a per-rail
+	// 'lcvDocked' note carrying {shipId, dockTurn, railDmgAtDock} (null = empty).
+	// This is the LCV-rail analogue of $hangarUsage: mutated by the LCV perform
+	// handlers, snapshot-persisted in generateIndividualNotes, reloaded (and the
+	// LCV's $removed flag re-applied) in onIndividualNotesLoaded. Only meaningful
+	// on $isLCVRail systems; left null/empty on ordinary hangars.
+	public $lcvDocked = null;             //decoded {shipId, dockTurn, railDmgAtDock} of the LCV on this rail, or null
+	private $lastSavedLcvDocked = null;   //serialized snapshot of last persisted lcvDocked (avoids duplicate notes)
+	public $pendingLcvDockOrder   = null; //decoded latest lcvDockOrder for this turn (set by onIndividualNotesLoaded)
+	public $pendingLcvLaunchOrder = null; //decoded latest lcvLaunchOrder for this turn (set by onIndividualNotesLoaded)
+	private $pendingLcvDockTransfer   = null; //LCV dock payload from client; consumed in generateIndividualNotes
+	private $pendingLcvLaunchTransfer = null; //LCV launch payload from client; consumed in generateIndividualNotes
 	public $pendingDeployStartTransfer = null; //Stage 7: deployment-phase dock payload; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt docked flights from movement validation BEFORE notes are generated.
+	public $pendingLcvDeployStartTransfer = null; //LCV deploy-dock payload from client; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt deploy-docked LCVs from movement validation.
 
     function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters',  $spawnableClasses = array()){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the msot typical capacity)
@@ -3082,9 +3085,28 @@ class Hangar extends ShipSystem{
 					$this->escapeTotal  = (int)($decoded['total'] ?? 0);
 					$this->escapeNames  = is_array($decoded['names'] ?? null) ? $decoded['names'] : array();
 				}
+			} else if ($note->notekey === 'lcvDocked'){
+				//LCV Rails: persistent rail→LCV link. A null/empty notevalue means
+				//the rail was emptied (launch / forced launch). Latest note wins
+				//(notes pre-sorted by id ASC) so dock-then-launch in one turn ends
+				//empty. lastSavedLcvDocked tracks the snapshot to avoid re-writing.
+				$decoded = json_decode($note->notevalue, true);
+				$this->lcvDocked = (is_array($decoded) && !empty($decoded['shipId'])) ? $decoded : null;
+				$this->lastSavedLcvDocked = $note->notevalue;
+			} else if ($note->notekey === 'lcvDockOrder' && $note->turn == $gamedata->turn){
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)) $this->pendingLcvDockOrder = $decoded;
+			} else if ($note->notekey === 'lcvLaunchOrder' && $note->turn == $gamedata->turn){
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)) $this->pendingLcvLaunchOrder = $decoded;
 			}
 		}
 		$this->individualNotes = array();
+
+		//LCV Rails: re-apply $removed to the LCV docked on THIS rail so it stays
+		//off the board across reloads (parallel to the dockedFlightId restoration
+		//below). The LCV is a full ship row, removed at dock time and resurrected
+		//on launch. getUnit()/getShipById resolve below; do it after $ship is set.
 
 		//Re-apply $removed flag to any flights stored in THIS hangar (via
 		//dockedFlightId markers). Walking only $this->hangarUsage avoids
@@ -3093,6 +3115,17 @@ class Hangar extends ShipSystem{
 		//$gamedata->ships is numerically-indexed when loaded from DB; only
 		//getShipById() is reliable for looking up by ship id.
 		$ship = $this->getUnit();
+		//LCV Rails: restore the docked LCV's $removed flag (whole-ship dock).
+		if ($ship && !empty($this->isLCVRail) && is_array($this->lcvDocked)) {
+			$lcvId = (int)($this->lcvDocked['shipId'] ?? 0);
+			if ($lcvId > 0) {
+				$lcv = $gamedata->getShipById($lcvId);
+				if ($lcv) {
+					$lcv->removed = true;
+					$lcv->removedTurn = (int)($this->lcvDocked['dockTurn'] ?? $gamedata->turn);
+				}
+			}
+		}
 		if ($ship && is_array($this->hangarUsage)) {
 			foreach ($this->hangarUsage as $entry) {
 				$flightId = isset($entry['dockedFlightId']) ? (int)$entry['dockedFlightId'] : 0;
@@ -3189,6 +3222,25 @@ class Hangar extends ShipSystem{
 			$this->pendingDockTransfer = null;     //consumed
 		}
 
+		//LCV Rails: persist pending LCV dock/launch orders (resolved end-of-turn
+		//in criticalPhaseEffects via processLCVDockOrders/processLCVLaunchOrders).
+		//Guarded on isLCVRail so a normal hangar never persists an LCV note even if
+		//a malformed payload set the transfer field.
+		if (!empty($this->isLCVRail) && $this->pendingLcvDockTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			$this->individualNotes[] = new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+				'lcvDockOrder', 'LCV rail dock order', json_encode($this->pendingLcvDockTransfer)
+			);
+			$this->pendingLcvDockTransfer = null;  //consumed
+		}
+		if (!empty($this->isLCVRail) && $this->pendingLcvLaunchTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			$this->individualNotes[] = new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+				'lcvLaunchOrder', 'LCV rail launch order', json_encode($this->pendingLcvLaunchTransfer)
+			);
+			$this->pendingLcvLaunchTransfer = null;  //consumed
+		}
+
 		//Stage 7: deployment-phase dock. Unlike launch/dock orders (resolved at
 		//end-of-turn via criticalPhaseEffects in Fire Phase), deploy-start docks
 		//are resolved RIGHT NOW: this hook fires during DeploymentGamePhase::process,
@@ -3225,6 +3277,13 @@ class Hangar extends ShipSystem{
 			//re-distribute). Runs from each hangar that still holds orders; the
 			//helper consumes the orders it folds in so siblings no-op.
 			HangarOps::processDeployStartTransfer($this, $ship, $gamedata, $dbShip);
+		}
+
+		//LCV Rails: resolve a deployment-phase LCV deploy-dock immediately (like
+		//the fighter deployStart above). Marks the LCV removed + sets this rail's
+		//lcvDocked; the lcvDocked snapshot tail below persists it.
+		if ($this->pendingLcvDeployStartTransfer !== null && !empty($this->isLCVRail) && HangarOps::isFlowEnabled($gamedata->id)) {
+			HangarOps::processLcvDeployStartTransfer($this, $ship, $gamedata);
 		}
 
 		//Stage 15: persist hangarOrdReserve (ordnance pool spent) ONLY on the
@@ -3282,6 +3341,25 @@ class Hangar extends ShipSystem{
 
 		} //endif (!$destroyed) — order/pool blocks skipped for a destroyed carrier
 
+		//LCV Rails: persist the rail→LCV link snapshot (parallel to hangarUsage).
+		//Runs for BOTH alive and destroyed carriers: a forced launch (destroyed
+		//rail or destroyed carrier) clears lcvDocked, and that cleared state MUST
+		//persist or reload would re-apply $removed to the launched LCV. Change-
+		//detection via lastSavedLcvDocked avoids a redundant note while an LCV
+		//sits docked turn after turn. The empty-first-time guard mirrors hangarUsage.
+		if (!empty($this->isLCVRail)) {
+			$currentLcv = json_encode($this->lcvDocked === null ? null : $this->lcvDocked);
+			$lcvUnchanged = ($currentLcv === $this->lastSavedLcvDocked);
+			$lcvEmptyFirst = ($this->lastSavedLcvDocked === null && $this->lcvDocked === null);
+			if (!$lcvUnchanged && !$lcvEmptyFirst) {
+				$this->individualNotes[] = new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+					'lcvDocked', 'LCV rail occupant', $currentLcv
+				);
+				$this->lastSavedLcvDocked = $currentLcv;
+			}
+		}
+
 		//Persist hangarUsage snapshot, but only if it has actually changed
 		//since the last saved snapshot. Stage 4+ docking/launching mutate
 		//$hangarUsage and rely on this to snapshot it. A destroyed carrier reaches
@@ -3307,6 +3385,21 @@ class Hangar extends ShipSystem{
 
 	public function criticalPhaseEffects($ship, $gamedata){
 		parent::criticalPhaseEffects($ship, $gamedata);   //preserve base hooks (limpet bore, marine missions, etc.)
+
+		//LCV Rails (B5W §10.1): a rail docks/launches a WHOLE LCV — none of the
+		//FighterFlight stash pipeline applies. Order: (1) if this rail is destroyed
+		//this turn and holds a docked LCV, force the LCV to launch + take fragment
+		//damage (onLCVRailDestroyed), so a wiped rail can't also dock/launch a
+		//fighter-style order; (2) otherwise process LCV dock then launch orders.
+		//Carrier-death disposition of docked LCVs is handled centrally by
+		//HangarOps::processLCVCarrierDestruction (Pass 3 sibling), not here.
+		if (!empty($this->isLCVRail)) {
+			if ($ship->isDestroyed()) return;   //carrier dead → Pass 3 owns docked LCVs
+			if (HangarOps::onLCVRailDestroyed($this, $ship, $gamedata)) return;
+			HangarOps::processLCVDockOrders($this, $ship, $gamedata);
+			HangarOps::processLCVLaunchOrders($this, $ship, $gamedata);
+			return;
+		}
 
 		//Hangar Ops Stage 16.3/16.4: a catapult RECOVERS (rear-approach, 16.4)
 		//and LAUNCHES (no initiative penalty, fixed forward, regardless of damage,
@@ -3418,6 +3511,7 @@ class Hangar extends ShipSystem{
 		//  legacy (Stage 4): a list of {phpclass, size}                    → all launches
 		//  Stage 5:          {"launches": [...], "docks": [...]}
 		//  Stage 7:          + {"deployStarts": [{"flightId": X}, ...]}    → deployment-phase dock orders
+		//  LCV Rails:        + {"lcvDocks": [{shipId, thrustLeft}], "lcvLaunches": [{shipId}]}
 		$launches     = array();
 		$docks        = array();
 		$deployStarts = array();
@@ -3428,13 +3522,28 @@ class Hangar extends ShipSystem{
 		$hasLaunchKey      = false;
 		$hasDockKey        = false;
 		$hasDeployStartKey = false;
-		if (array_key_exists('launches', $payload) || array_key_exists('docks', $payload) || array_key_exists('deployStarts', $payload)) {
+		$lcvDocks    = array();
+		$lcvLaunches = array();
+		$lcvDeployStarts = array();
+		$hasLcvDockKey   = false;
+		$hasLcvLaunchKey = false;
+		$hasLcvDeployStartKey = false;
+		$keyed = array_key_exists('launches', $payload) || array_key_exists('docks', $payload)
+			|| array_key_exists('deployStarts', $payload) || array_key_exists('lcvDocks', $payload)
+			|| array_key_exists('lcvLaunches', $payload) || array_key_exists('lcvDeployStarts', $payload);
+		if ($keyed) {
 			$hasLaunchKey      = array_key_exists('launches',     $payload);
 			$hasDockKey        = array_key_exists('docks',        $payload);
 			$hasDeployStartKey = array_key_exists('deployStarts', $payload);
+			$hasLcvDockKey     = array_key_exists('lcvDocks',     $payload);
+			$hasLcvLaunchKey   = array_key_exists('lcvLaunches',  $payload);
+			$hasLcvDeployStartKey = array_key_exists('lcvDeployStarts', $payload);
 			$launches     = is_array($payload['launches']     ?? null) ? $payload['launches']     : array();
 			$docks        = is_array($payload['docks']        ?? null) ? $payload['docks']        : array();
 			$deployStarts = is_array($payload['deployStarts'] ?? null) ? $payload['deployStarts'] : array();
+			$lcvDocks     = is_array($payload['lcvDocks']     ?? null) ? $payload['lcvDocks']     : array();
+			$lcvLaunches  = is_array($payload['lcvLaunches']  ?? null) ? $payload['lcvLaunches']  : array();
+			$lcvDeployStarts = is_array($payload['lcvDeployStarts'] ?? null) ? $payload['lcvDeployStarts'] : array();
 		} else {
 			//assume legacy launch-only payload
 			$launches = $payload;
@@ -3493,6 +3602,41 @@ class Hangar extends ShipSystem{
 			$cleanDeployStarts[] = $clean;
 		}
 		if ($hasDeployStartKey) $this->pendingDeployStartTransfer = $cleanDeployStarts;
+
+		//LCV Rails: sanitise lcvDocks {shipId, thrustLeft} and lcvLaunches {shipId}.
+		//thrustLeft is the client's getRemainingEngineThrust for the LCV (the dock
+		//gate's "1 thrust unspent" check, bounds-checked server-side at resolution).
+		$cleanLcvDocks = array();
+		foreach ($lcvDocks as $order) {
+			if (!is_array($order)) continue;
+			$shipId = isset($order['shipId']) ? (int)$order['shipId'] : 0;
+			if ($shipId <= 0) continue;
+			$cleanLcvDocks[] = array(
+				'shipId'     => $shipId,
+				'thrustLeft' => isset($order['thrustLeft']) ? (int)$order['thrustLeft'] : 0,
+			);
+		}
+		if ($hasLcvDockKey) $this->pendingLcvDockTransfer = $cleanLcvDocks;
+
+		$cleanLcvLaunches = array();
+		foreach ($lcvLaunches as $order) {
+			if (!is_array($order)) continue;
+			$shipId = isset($order['shipId']) ? (int)$order['shipId'] : 0;
+			if ($shipId <= 0) continue;
+			$cleanLcvLaunches[] = array('shipId' => $shipId);
+		}
+		if ($hasLcvLaunchKey) $this->pendingLcvLaunchTransfer = $cleanLcvLaunches;
+
+		//LCV Rails: deployment-phase deploy-dock orders {shipId}. Resolved
+		//immediately in DeploymentGamePhase::process (like fighter deployStarts).
+		$cleanLcvDeployStarts = array();
+		foreach ($lcvDeployStarts as $order) {
+			if (!is_array($order)) continue;
+			$shipId = isset($order['shipId']) ? (int)$order['shipId'] : 0;
+			if ($shipId <= 0) continue;
+			$cleanLcvDeployStarts[] = array('shipId' => $shipId);
+		}
+		if ($hasLcvDeployStartKey) $this->pendingLcvDeployStartTransfer = $cleanLcvDeployStarts;
 	}
 
 	public function stripForJson(){
@@ -3502,6 +3646,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem->directions = is_array($this->directions) ? array_values($this->directions) : array();
 		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
 		$strippedSystem->isRail = !empty($this->isRail);           //Fighter Rails: rail discriminator (false for ordinary hangars/catapults)
+		$strippedSystem->isLCVRail = !empty($this->isLCVRail);     //LCV Rails: whole-ship dock discriminator (false for ordinary hangars)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
@@ -3539,13 +3684,30 @@ class Hangar extends ShipSystem{
 		//mid-Firing-Phase, or cancel a queued dock).
 		if ($this->pendingLaunchOrder !== null) $strippedSystem->pendingLaunchOrder = $this->pendingLaunchOrder;
 		if ($this->pendingDockOrder !== null)   $strippedSystem->pendingDockOrder   = $this->pendingDockOrder;
+		//LCV Rails: ship the rail→LCV link + last-submitted LCV orders so the client
+		//tooltip/dialog renders the occupant and pre-fills/cancels a queued order.
+		if (!empty($this->isLCVRail)) {
+			if (is_array($this->lcvDocked)) $strippedSystem->lcvDocked = $this->lcvDocked;
+			if ($this->pendingLcvDockOrder   !== null) $strippedSystem->pendingLcvDockOrder   = $this->pendingLcvDockOrder;
+			if ($this->pendingLcvLaunchOrder !== null) $strippedSystem->pendingLcvLaunchOrder = $this->pendingLcvLaunchOrder;
+		}
 		return $strippedSystem;
 	}
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$isCatapult = !empty($this->isCatapult);
-		if ($isCatapult) {
+		$isLCVRail  = !empty($this->isLCVRail);
+		if ($isLCVRail) {
+			//LCV Rail: docks/launches a single whole LCV (not fighters). Launches
+			//forward at the carrier's speed; lands only a stationary, same-heading
+			//LCV that ends in the carrier's hex with thrust to spare. A docked LCV
+			//makes the carrier less manoeuvrable (+1 turn cost/delay, -10 initiative).
+			$this->data["Special"]  = "Docking rail for a single LCV.";
+			$this->data["Special"] .= "<br>Launches forward at the carrier's speed; lands a stationary, same-heading LCV.";
+			$this->data["Special"] .= "<br>Each docked LCV: +1 turn cost, +1 turn delay, -10 initiative to the carrier.";
+			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+		} else if ($isCatapult) {
 			//Stage 16: a catapult holds ONE superheavy fighter; its extra boxes are
 			//structural HP only (capacity is 1, not box count) and it launches
 			//forward / lands from the rear, ignoring its own damage.
@@ -3557,10 +3719,17 @@ class Hangar extends ShipSystem{
 			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
 			$this->data["Launch Rate"] = $this->output;
 		}
-		$this->data["Type"] = ucwords($this->hangarType);
+		$this->data["Type"] = $isLCVRail ? "LCVs" : ucwords($this->hangarType);
 
-		$totalStored = HangarOps::usageCountFor($this);
-		$maxCapacity = $isCatapult ? 1 : $this->maxhealth;
+		//LCV rails hold exactly one LCV; their box count is HP, not capacity.
+		if ($isLCVRail) {
+			$dockedLcv   = HangarOps::lcvDockedOn($this);
+			$totalStored = ($dockedLcv !== null) ? 1 : 0;
+			$maxCapacity = 1;
+		} else {
+			$totalStored = HangarOps::usageCountFor($this);
+			$maxCapacity = $isCatapult ? 1 : $this->maxhealth;
+		}
 		$this->data["Capacity"] = $totalStored . " / " . $maxCapacity . " slots";
 		//"Stored Craft" line is computed client-side via Hangar.refreshHangarTooltip
 		//(baseSystems.js) — it has access to pendingDockOrders/pendingLaunchOrders
@@ -3700,7 +3869,7 @@ class FighterRail extends Hangar{
         //line; we only override the "Special" flavour text. Skip straight to
         //ShipSystem so we don't inherit Hangar's hangar/catapult Special block.
         ShipSystem::setSystemDataWindow($turn);
-        $this->data["Special"]  = "External launch rail — carries fighters that can launche without initiative penalty.";
+        $this->data["Special"]  = "External launch rail — carries fighters that can launch without initiative penalty.";
         $this->data["Special"] .= "<br>Part of the structure block: Structure critical hits may destroy an entire rail.";
         $this->data["Special"] .= "<br>Reloading docked craft takes twice as long.";
         $this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
@@ -3709,6 +3878,54 @@ class FighterRail extends Hangar{
 
         $totalStored = HangarOps::usageCountFor($this);
         $this->data["Capacity"] = $totalStored . " / " . $this->maxhealth . " slots";
+    }
+}
+
+
+/* LCV Rail (B5W "LCV Rails") — docks/launches whole LCVs, NOT fighters.
+ *
+ * A DockingCollar is structurally a Hangar subclass (so it picks up the output
+ * budget / launchedThisTurn / landedThisTurn bookkeeping and is included in the
+ * generic Hangar pipeline), but its cargo is a full BaseShip — an LCV — not a
+ * FighterFlight. An LCV already exists on the map with its own movement, damage,
+ * ammo, and ship row; docking it is "remove the ship + remember which rail holds
+ * it", launching is "put the ship back at the carrier's hex/facing/speed". None
+ * of the FighterFlight stash machinery ($hangarUsage occupancy, phpclass
+ * coalescing) is used — that is gated to FighterFlight everywhere and is wrong
+ * for a unique full ship. All LCV-specific logic lives in HangarOps::*LCV*.
+ *
+ * $isLCVRail is the single discriminator the HangarOps call sites branch on,
+ * parallel to Catapult's $isCatapult and FighterRail's $isRail. Unlike a
+ * FighterRail, an LCV Rail is an ORDINARY targetable system with its own HP pool
+ * and its own hit-chart entry (see baLCVCarrier.php) — so it is NOT excluded from
+ * combat value and CAN be destroyed by direct fire. Landing on a damaged rail
+ * deals the rail's sustained damage to the docked LCV (HangarOps::performLCVDock);
+ * destroying an occupied rail forces the LCV to launch + 2d10 fragment damage
+ * (HangarOps::onLCVRailDestroyed).
+ *
+ * Capacity is 1 LCV per rail regardless of box count (boxes are HP). The single-
+ * occupancy limit is enforced by the dock handler (is this rail already linked to
+ * a docked LCV?), NOT by box accounting.
+ *
+ * NOTE: declared AFTER Hangar (and after Catapult/FighterRail) on purpose. A class
+ * whose parent is declared LATER in the same file forces the autoloader to fire
+ * for the parent at parse time, which re-includes this whole file and fatals with
+ * "Cannot declare class ... already in use". Keep all Hangar subclasses below the
+ * Hangar class.
+ */
+class DockingCollar extends Hangar{
+    public $name = "dockingCollar";
+    public $displayName = "LCV Rail";
+
+	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+    public $isLCVRail = true;   //single discriminator, parallel to $isCatapult / $isRail
+
+    // ($armour, $maxhealth = rail HP, $output = launch+land budget; default 1 =
+    //  one LCV launched OR landed per rail per turn). Fixed forward launch
+    //  (direction 0); hangarType 'LCVs' matches LCV->hangarRequired.
+    function __construct($armour, $maxhealth, $output = 1){
+        parent::__construct($armour, $maxhealth, $output, 0, 'LCVs');
     }
 }
 

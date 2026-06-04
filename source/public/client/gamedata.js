@@ -147,6 +147,8 @@ window.gamedata = {
             //they're going into a hangar, not onto the map, so auto-selecting them
             //in deployment would be misleading.
             if (ship.pendingDeployDock) continue;
+            //LCV Rails: skip LCVs queued to deploy-dock onto a rail.
+            if (ship.pendingLcvDeployDock) continue;
 
             if (gamedata.isMyShip(ship) && !ship.mine) {
                 return ship;

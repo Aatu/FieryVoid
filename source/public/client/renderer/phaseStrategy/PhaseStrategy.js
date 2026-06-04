@@ -718,6 +718,8 @@ window.PhaseStrategy = function () {
             //shouldBeHidden()-checks downstream — preventing other ships from
             //being deployed to the same hex.
             if (icon.ship && icon.ship.pendingDeployDock) return false;
+            //LCV Rails: same for an LCV queued to deploy-dock onto a rail.
+            if (icon.ship && icon.ship.pendingLcvDeployDock) return false;
             return true;
         });
     }

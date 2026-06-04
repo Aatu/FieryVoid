@@ -472,6 +472,7 @@ shipManager.systems = {
             var key = String(k).toLowerCase().trim();
             if (hasCatapult && key === "superheavy") continue;
             if (railCategories[key]) continue;   //rail-borne fighters aren't shuttle pool
+            if (key === "lcvs") continue;        //LCVs ride LCV rails, not the shuttle pool
             var count = parseInt(fighters[k], 10) || 0;
             if (count <= 0) continue;
             declared += (key === "ultralight") ? Math.ceil(count / 2) : count;

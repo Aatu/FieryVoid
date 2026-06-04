@@ -164,6 +164,22 @@ window.DeploymentPhaseStrategy = function () {
             }
         }
 
+        // LCV Rails: an LCV can't share a deploy hex with other ships, so it docks
+        // directly onto a carrier's free LCV rail instead of being placed. When an
+        // LCV is selected and we click a different friendly LCV-capable carrier
+        // with a free rail, show the SelectFromShips popup so its "DOCK <LCV> TO"
+        // button appears — bypassing the mine/flight-only gate AND the deployment-
+        // position check below (a docking LCV needs no board position of its own).
+        if (this.selectedShip && this.selectedShip.id !== ship.id
+            && !this.selectedShip.flight && !this.selectedShip.mine
+            && String(this.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs'
+            && window.DeploymentDock
+            && typeof window.DeploymentDock.carrierAcceptsLcvDeployDock === 'function'
+            && window.DeploymentDock.carrierAcceptsLcvDeployDock(ship, this.selectedShip)) {
+            this.showSelectFromShips([ship], payload);
+            return;
+        }
+
         // If we have a selected ship actively ready to deploy, and we click a valid DIFFERENT ship that is already placed on the map
         if (this.selectedShip && this.selectedShip.id !== ship.id) {
             var isPlacedOnMap = false;
@@ -520,6 +536,9 @@ window.DeploymentPhaseStrategy = function () {
             //Stage 7: flights queued for hangar deploy-start dock don't need a
             //hex position — they go straight into the carrier's hangar.
             if (ship.pendingDeployDock) continue;
+            //LCV Rails: an LCV queued to deploy-dock onto a rail likewise needs no
+            //hex position — it starts docked on the carrier.
+            if (ship.pendingLcvDeployDock) continue;
 
             if (!validateDeploymentPosition(ship, null, deploymentSprites)) {
                 return false;

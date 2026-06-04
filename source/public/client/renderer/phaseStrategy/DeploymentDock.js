@@ -535,8 +535,115 @@ window.DeploymentDock = (function () {
         return Math.max(0, declared - used);
     }
 
+    // === LCV Rails (DockingCollar) — deployment-phase dock ===
+    //
+    // LCVs can't share a deploy hex with other ships, so they can't be placed on
+    // the board next to a carrier and then dock. Instead they deploy-dock directly
+    // onto a free LCV rail. State model parallels the fighter deploy-dock:
+    //   rail.pendingLcvDeployStartOrders : [{shipId}]   client-side queue
+    //   lcv.pendingLcvDeployDock         : {carrierId, railId} | undefined
+    // On commit, DockingCollar.doIndividualNotesTransfer ships the queue as
+    // {lcvDeployStarts:[{shipId}]}; the server marks the LCV removed + writes the
+    // rail's lcvDocked note (HangarOps::processLcvDeployStartTransfer).
+
+    function isLCVRailSys(sys) {
+        return !!(sys && (sys.isLCVRail || sys.name === 'dockingCollar'));
+    }
+
+    // A rail is free for a DEPLOY dock if it isn't destroyed, holds no docked LCV,
+    // and has no pending deploy-start order already (one LCV per rail). The Firing-
+    // phase pendingLcvDockOrders aren't relevant in Deployment (different turn).
+    function lcvRailFreeForDeploy(carrier, rail) {
+        if (!isLCVRailSys(rail)) return false;
+        if (shipManager.systems.isDestroyed(carrier, rail)) return false;
+        if (rail.lcvDocked && rail.lcvDocked.shipId) return false;
+        if (Array.isArray(rail.pendingLcvDeployStartOrders) && rail.pendingLcvDeployStartOrders.length > 0) return false;
+        return true;
+    }
+
+    // Free LCV rails on $carrier available for a deploy dock (excluding $reclaimLcvId's
+    // own queued rail so a re-open/re-route sees its own reservation as free).
+    function freeLcvDeployRails(carrier, reclaimLcvId) {
+        if (!carrier || !Array.isArray(carrier.systems)) return [];
+        return carrier.systems.filter(function (s) {
+            if (!isLCVRailSys(s)) return false;
+            if (shipManager.systems.isDestroyed(carrier, s)) return false;
+            if (s.lcvDocked && s.lcvDocked.shipId) return false;
+            if (Array.isArray(s.pendingLcvDeployStartOrders)) {
+                var blocked = s.pendingLcvDeployStartOrders.some(function (o) {
+                    return parseInt(o.shipId, 10) !== parseInt(reclaimLcvId, 10);
+                });
+                if (blocked) return false;
+            }
+            return true;
+        });
+    }
+
+    // True if $carrier can accept $lcv as a deploy-start dock: $carrier is one of
+    // my ships deploying THIS turn (LCVs deploy-dock onto same-turn carriers, like
+    // fighters) and has a free LCV rail. $lcv must be an LCV unit.
+    function carrierAcceptsLcvDeployDock(carrier, lcv) {
+        if (!carrier || !lcv) return false;
+        if (!gamedata.isMyShip(carrier)) return false;
+        if (carrier.flight) return false;
+        if (String(lcv.hangarRequired || '').toLowerCase() !== 'lcvs') return false;
+        if (gamedata.isTerrain && gamedata.isTerrain(carrier.shipSizeClass, carrier.userid)) return false;
+        if (shipManager.getTurnDeployed(carrier) !== gamedata.turn) return false;
+        return freeLcvDeployRails(carrier, lcv.id).length > 0;
+    }
+
+    // Spare LCV-rail capacity on $carrier for the deploy DOCK-TO button label.
+    function freeLcvDeployRailCount(carrier, reclaimLcvId) {
+        return freeLcvDeployRails(carrier, reclaimLcvId).length;
+    }
+
+    // Queue $lcv to deploy-dock onto $carrier's first free LCV rail. Sets the
+    // rail's pendingLcvDeployStartOrders + the LCV's pendingLcvDeployDock marker.
+    // Returns the chosen rail, or null.
+    function queueLcvDeployDock(carrier, lcv) {
+        if (!carrier || !lcv) return null;
+        if (lcv.pendingLcvDeployDock) unqueueLcvDeployDock(lcv);   //re-route: release old reservation
+        var rails = freeLcvDeployRails(carrier, lcv.id);
+        if (rails.length === 0) return null;
+        var rail = rails[0];
+        if (!Array.isArray(rail.pendingLcvDeployStartOrders)) rail.pendingLcvDeployStartOrders = [];
+        rail.pendingLcvDeployStartOrders = [{ shipId: parseInt(lcv.id, 10) }];
+        rail.pendingLcvDeployStartOrdersDirty = true;
+        lcv.pendingLcvDeployDock = { carrierId: parseInt(carrier.id, 10), railId: parseInt(rail.id, 10) };
+        if (typeof rail.refreshHangarTooltip === 'function') rail.refreshHangarTooltip();
+        return rail;
+    }
+
+    // Remove $lcv from any rail's pendingLcvDeployStartOrders and clear its marker.
+    // Idempotent. (No board re-deploy needed — an un-docked LCV simply has no
+    // deploy position yet, so the player places it on the map as normal.)
+    function unqueueLcvDeployDock(lcv) {
+        if (!lcv) return;
+        var lcvId = parseInt(lcv.id, 10);
+        for (var key in gamedata.ships) {
+            var s = gamedata.ships[key];
+            if (!s || !Array.isArray(s.systems)) continue;
+            s.systems.forEach(function (sys) {
+                if (!isLCVRailSys(sys) || !Array.isArray(sys.pendingLcvDeployStartOrders)) return;
+                var before = sys.pendingLcvDeployStartOrders.length;
+                sys.pendingLcvDeployStartOrders = sys.pendingLcvDeployStartOrders.filter(function (o) {
+                    return parseInt(o.shipId, 10) !== lcvId;
+                });
+                if (sys.pendingLcvDeployStartOrders.length !== before) {
+                    sys.pendingLcvDeployStartOrdersDirty = true;
+                    if (typeof sys.refreshHangarTooltip === 'function') sys.refreshHangarTooltip();
+                }
+            });
+        }
+        delete lcv.pendingLcvDeployDock;
+    }
+
     return {
         shipHasOpenableDockDialog:    shipHasOpenableDockDialog,
+        carrierAcceptsLcvDeployDock:  carrierAcceptsLcvDeployDock,
+        freeLcvDeployRailCount:       freeLcvDeployRailCount,
+        queueLcvDeployDock:           queueLcvDeployDock,
+        unqueueLcvDeployDock:         unqueueLcvDeployDock,
         collectUsableHangars:         collectUsableHangars,
         collectAllHangars:            collectAllHangars,
         collectPendingFlightsForSlot: collectPendingFlightsForSlot,
@@ -628,7 +735,7 @@ window.refreshDeploymentUIForDeployStart = function () {
                 //isDockHangar lives inside the IIFE scope above and is NOT visible
                 //here, so inline the check (Stage 16: a catapult is a dock hangar too;
                 //Fighter Rails likewise have a refreshable hangar tooltip).
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && typeof sys.refreshHangarTooltip === 'function') {
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail' || sys.name === 'dockingCollar') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });
@@ -673,7 +780,7 @@ window.refreshFiringHangarTooltips = function () {
                 //isDockHangar lives inside the IIFE scope above and is NOT visible
                 //here, so inline the check (Stage 16: a catapult is a dock hangar too;
                 //Fighter Rails likewise have a refreshable hangar tooltip).
-                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail') && typeof sys.refreshHangarTooltip === 'function') {
+                if (sys && (sys.name === 'hangar' || sys.name === 'catapult' || sys.name === 'fighterRail' || sys.name === 'dockingCollar') && typeof sys.refreshHangarTooltip === 'function') {
                     sys.refreshHangarTooltip();
                 }
             });

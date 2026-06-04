@@ -250,7 +250,6 @@ spl_autoload_register(
                 'devout2007' => '/server/model/ships/orieni/devout2007.php',
                 'dice' => '/server/lib/dice.php',
                 'disengagedfighter' => '/server/model/cricialClasses.php',
-                'dockedfighter' => '/server/model/cricialClasses.php', 
                 'splitlaunchedfighter' => '/server/model/cricialClasses.php',                               
 				'dockingcollar' => '/server/model/systems/baseSystems.php',
                 'dorono' => '/server/model/ships/hurr/dorono.php',
@@ -536,8 +535,7 @@ spl_autoload_register(
                 'laser' => '/server/model/weapons/lasers.php',
                 'lasercutter' => '/server/model/weapons/lasers.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
-                //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used
-                'launchedthisturn' => '/server/model/cricialClasses.php',
+                //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used               
                 'leevan' => '/server/model/ships/centauri_old/leevan.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',
@@ -3825,8 +3823,12 @@ spl_autoload_register(
 
 
 
-                //HANGER OPERATIONS CLASSES
+                //HANGER OPERATIONS CLASSESd
                 'hangarops' => '/server/model/systems/HangarOps.php',
+                'dockedfighter' => '/server/model/cricialClasses.php',                 
+                'launchedthisturn' => '/server/model/cricialClasses.php',
+                'lcvlaunchedthisturn' => '/server/model/cricialClasses.php', 
+
                 'fighterrail' => '/server/model/systems/baseSystems.php',                
                 'flyer' => '/server/model/ships/Shuttle.php',
                 'flyerprotectorate' => '/server/model/ships/Shuttle.php',
@@ -3905,6 +3907,7 @@ spl_autoload_register(
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
                 'baescortcarrierearlyrails' => '/server/model/ships/beltalliance/baEscortCarrierEarlyRails.php',
                 'baescortcarrierrefitrails' => '/server/model/ships/beltalliance/baEscortCarrierRefitRails.php',
+                'baescortcarrierlcvrails' => '/server/model/ships/beltalliance/baEscortCarrierLCVRails.php',                
                 'baheavygunboatrails' => '/server/model/ships/beltalliance/baHeavyGunboatRails.php',
                 'baheavygunboatearlyrails' => '/server/model/ships/beltalliance/baHeavyGunboatEarlyRails.php',
                 'baheavygunboatpulserails' => '/server/model/ships/beltalliance/baHeavyGunboatPulseRails.php',
