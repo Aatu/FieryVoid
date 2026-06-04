@@ -19,7 +19,10 @@ const HealthBar = styled.div`
         height: 100%;
         left: 0;
         bottom: 0;
-        background-color: ${props => props.$criticals ? '#ed6738' : '#427231'};
+        background-color: ${props => {
+        if (!props.$criticals) return '#427231';
+        return props.$criticalsBenign ? '#00ffff' : '#ed6738'; //cyan when the only crit is HangarOperations
+    }};
     }
 `;
 
@@ -181,7 +184,7 @@ class SystemIcon extends React.Component {
         // (deployment → hangarDeployDock, firing → hangarLaunch). Fall through
         // to the SystemClicked menu when no dialog is applicable so the player
         // still gets the info popup for empty/queued hangars.
-        if (gamedata.isMyShip(ship) && (system.name === 'hangar' || system.name === 'catapult')) {
+        if (gamedata.isMyShip(ship) && (system.name === 'hangar' || system.name === 'catapult' || system.name === 'fighterRail')) {
             if (gamedata.gamephase === -1
                 && window.DeploymentDock
                 && typeof window.DeploymentDock.shipHasOpenableDockDialog === 'function'
@@ -370,7 +373,7 @@ class SystemIcon extends React.Component {
                 $boosted={isBoosted(ship, system)}
             >
                 <SystemText>{getText(ship, system)}</SystemText>
-                {(!fighter || hasCriticals(system)) && <HealthBar $scs={scs} $health={getStructureLeft(ship, system)} $criticals={hasCriticals(system)} />}
+                {(!fighter || hasCriticals(system)) && <HealthBar $scs={scs} $health={getStructureLeft(ship, system)} $criticals={hasCriticals(system)} $criticalsBenign={hasOnlyHangarOps(system)} />}
             </System>
         )
     }
@@ -413,6 +416,11 @@ const getBackgroundImage = (system) => {
 }
 
 const hasCriticals = (system) => shipManager.criticals.hasCriticalsIcon(system)
+
+//Colour the healthbar cyan rather than orange when HangarOperations (a benign
+//-20 init penalty on the CnC) is the only critical lighting it up. Mirrors the
+//forInfo-exclusion of hasCriticalsIcon above.
+const hasOnlyHangarOps = (system) => shipManager.criticals.hasOnlyCritical(system, 'HangarOperations', true)
 
 const hasBorderHighlight = (ship, system) => shipManager.systems.hasBorderHighlight(ship, system);
 

@@ -30,7 +30,7 @@ class gaimTocrat extends BaseShip{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 16, 5, 5));
 		$this->addPrimarySystem(new Engine(5, 12, 0, 6, 3));
-		$this->addPrimarySystem(new Hangar(4, 4));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
 		$this->addPrimarySystem(new CargoBay(2, 360));
 
 		$this->addFrontSystem(new Thruster(3, 17, 0, 3, 1));
@@ -50,14 +50,14 @@ class gaimTocrat extends BaseShip{
 		$this->addLeftSystem(new Thruster(3, 13, 0, 4, 3));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 120, 360));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
-		$this->addLeftSystem(new Hangar(3, 6));
+		$this->addLeftSystem(new Hangar(3, 6, 6, 5));
 		$this->addLeftSystem(new Bulkhead(0, 3));
 		$this->addLeftSystem(new Bulkhead(0, 3));
 
 		$this->addRightSystem(new Thruster(3, 13, 0, 4, 4));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 240));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
-		$this->addRightSystem(new Hangar(3, 6));
+		$this->addRightSystem(new Hangar(3, 6, 6, 2));
 		$this->addRightSystem(new Bulkhead(0, 3));
 		$this->addRightSystem(new Bulkhead(0, 3));
         

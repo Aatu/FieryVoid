@@ -53,9 +53,10 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
+		$unit->enhancementOptionsDisabled[] = 'MAR_CONT'; 			
 		$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
 		$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
-		$unit->enhancementOptionsDisabled[] = 'VULN_CRIT'; 		
+		$unit->enhancementOptionsDisabled[] = 'VULN_CRIT'; 	
 	  }
   }
   

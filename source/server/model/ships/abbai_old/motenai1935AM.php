@@ -12,6 +12,7 @@ class motenai1935AM extends BaseShip{
 			$this->occurence = "common";
 			$this->variantOf = 'Motenai Heavy Mine Layer';
         $this->shipSizeClass = 3;
+        $this->fighters = array("minesweeping shuttles"=>6);		
 		
         $this->minesweeperbonus = 3;    	
 
@@ -42,7 +43,7 @@ class motenai1935AM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 5, 5));  //+3 Minesweeper
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(4, 8));
+		$this->addPrimarySystem(new Hangar(4, 8, 2));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 3));
    
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

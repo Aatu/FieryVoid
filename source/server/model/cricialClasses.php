@@ -61,6 +61,26 @@ class DockedFighter extends Critical{
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
 }
+
+/* Hangar Ops Stage 21.7: applied to the fighters that LEFT a docked flight via a
+ * partial LAUNCH — they spawned as their own "<name> - Split" flight row (which
+ * carries their value), so they are gone from THIS docked-remnant flight. Behaves
+ * like DisengagedFighter/DockedFighter for every gameplay purpose (isDestroyed folds
+ * it in → permanent until relaunch, off target lists, etc.), but is a DISTINCT class
+ * for two reasons: (1) DisengagedFighter must stay reserved for its true meaning — a
+ * fighter that took too much damage and DROPPED OUT of the game, permanently losing
+ * its combat value; (2) the fleet list re-bases a flight's value past craft that left
+ * to their OWN row (Docked + this), but keeps dropped-out/destroyed craft in the paid
+ * roster (full base, 0 current value). Before this, partial-launch reused
+ * DisengagedFighter, so the docked remnant double-counted the launched craft as
+ * "lost" while the Split row also showed them — 306/612 instead of 402/402 (game 4151). */
+class SplitLaunchedFighter extends Critical{
+    public $description = "LAUNCHED";
+	public $repairPriority = 0;//launched fighter is gone from this flight until relaunch
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
 	
 	
 

@@ -53,7 +53,7 @@ class ScorotaAM extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 6));
         $this->addPrimarySystem(new Engine(5, 23, 0, 18, 3));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 1));
         
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 360));
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));

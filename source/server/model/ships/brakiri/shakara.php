@@ -32,7 +32,7 @@ class Shakara extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 16, 0, 14, 3));
 	    $this->addPrimarySystem(new ShieldGenerator(5, 14, 4, 4));
         $this->addPrimarySystem(new JumpEngine(5, 20, 6, 20));
-	    $this->addPrimarySystem(new Hangar(5, 3));
+	    $this->addPrimarySystem(new Hangar(5, 3, 1));
    
 
 	

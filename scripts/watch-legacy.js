@@ -26,7 +26,9 @@ function rebuildBundles() {
     console.log('\x1b[36m%s\x1b[0m', '>> File change detected. Rebuilding bundles...');
     isBuilding = true;
 
-    exec(`node "${bundleScript}"`, (error, stdout, stderr) => {
+    // Skip minification while watching so dev bundles stay readable and
+    // line-numbered for debugging; production `yarn build` minifies.
+    exec(`node "${bundleScript}"`, { env: { ...process.env, FV_NO_MINIFY: '1' } }, (error, stdout, stderr) => {
         isBuilding = false;
 
         if (error) {

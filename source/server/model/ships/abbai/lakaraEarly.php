@@ -29,7 +29,7 @@ class LakaraEarly extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 6, 10));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 3));
- 	    $this->addPrimarySystem(new Hangar(5, 2));
+ 	    $this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 3));
 
         $this->addFrontSystem(new AssaultLaser(3, 6, 4, 300, 60));

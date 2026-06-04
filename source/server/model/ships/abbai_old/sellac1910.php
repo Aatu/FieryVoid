@@ -29,7 +29,7 @@ class Sellac1910 extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 4, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 3));
         $this->addPrimarySystem(new Engine(4, 9, 0, 4, 4));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 2, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 2, 4));
 		

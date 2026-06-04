@@ -18,7 +18,7 @@ class HyachAlichiTal extends HeavyCombatVessel{
         $this->notes = "Stealth ship (see FAQ)";
         $this->notes .= "<br>Turning in reverse costs +33% thrust";
 		
-        $this->fighters = array("assault shuttles"=>12);
+        $this->fighters = array("assault shuttles"=>12, "Breaching Pods"=>2);
 		
         $this->forwardDefense = 10;
         $this->sideDefense = 12;
@@ -39,7 +39,7 @@ class HyachAlichiTal extends HeavyCombatVessel{
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
 		$this->addPrimarySystem(new Stealth(1,1,0));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 180, 360));
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 240, 360));

@@ -28,7 +28,7 @@ class gaimLaska extends BaseShip{
 		$this->addPrimarySystem(new CnC(7, 18, 0, 0));
 		$this->addPrimarySystem(new Scanner(7, 20, 4, 8));
 		$this->addPrimarySystem(new Engine(6, 20, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(7, 2));
+		$this->addPrimarySystem(new Hangar(7, 2, 1));
 
 		$this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));
 		$this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));

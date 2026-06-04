@@ -60,7 +60,7 @@ class govallAM extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 2, 2));
-	$this->addAftSystem(new Hangar(4, 4));
+	$this->addAftSystem(new Hangar(4, 4, 2));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 180, 360));
         $this->addAftSystem(new ScatterGun(3, 8, 3, 180, 360));
 		$this->addAftSystem(new AmmoMissileRackL(4, 0, 0, 300, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

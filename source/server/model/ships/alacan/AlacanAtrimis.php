@@ -42,7 +42,7 @@ class AlacanAtrimis extends BaseShip{
         $this->addAftSystem(new CustomLightSoMissileRack(3, 6, 0, 120, 300));
         $this->addAftSystem(new CustomLightSoMissileRack(3, 6, 0, 60, 240));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
-		$this->addAftSystem(new Hangar(3, 26));
+		$this->addAftSystem(new Hangar(3, 26, 6, 3));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
 
 

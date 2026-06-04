@@ -10,6 +10,7 @@ class Sashulkur extends BaseShip{
 		$this->imagePath = "img/ships/PakmaraReshkasu.png";
 		$this->shipClass = "Sashul'kur Blockade Runner";
 		$this->shipSizeClass = 3;
+		$this->fighters = array("cargo shuttles"=>3); 		
 		
 			$this->variantOf = "Resh'kas'u Light Carrier";
 			$this->occurence = "uncommon";			
@@ -45,7 +46,7 @@ class Sashulkur extends BaseShip{
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 7));
 		$this->addPrimarySystem(new Engine(5, 18, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 48));
-		$this->addPrimarySystem(new Hangar(3, 3));
+		$this->addPrimarySystem(new Hangar(3, 3, 3));
 		$this->addPrimarySystem(new Quarters(2, 9));		
 
 		$this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));

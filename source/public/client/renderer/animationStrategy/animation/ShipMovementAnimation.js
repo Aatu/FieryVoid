@@ -61,6 +61,9 @@ window.ShipMovementAnimation = function () {
 
         this.shipIcon.setPosition(positionAndFacing.position);
         this.shipIcon.setFacing(-positionAndFacing.facing);
+        if (positionAndFacing.heading !== undefined) {
+            this.shipIcon.setHeading(-positionAndFacing.heading);
+        }
 
         if (this.cameraFollow && total > this.time && total < this.time + this.duration + this.endPause && !paused) {
             window.webglScene.moveCameraTo(positionAndFacing.position);
@@ -71,7 +74,11 @@ window.ShipMovementAnimation = function () {
 
         if (this.hexAnimations.length === 0) {
             var move = this.shipIcon.getLastMovement();
-            return { position: window.coordinateConverter.fromHexToGame(move.position), facing: mathlib.hexFacingToAngle(move.facing) };
+            return {
+                position: window.coordinateConverter.fromHexToGame(move.position),
+                facing: mathlib.hexFacingToAngle(move.facing),
+                heading: mathlib.hexFacingToAngle(move.heading)
+            };
         }
 
         var totalDone = (time - this.time) / this.duration;
@@ -89,13 +96,17 @@ window.ShipMovementAnimation = function () {
 
         var position;
         var facing;
+        var heading;
 
         var turnPercent = this.turnCurve.getPoint(done).y;
         position = animation.curve.getPoint(done);
         var turnAngle = animation.turnAngle * turnPercent;
         facing = mathlib.addToDirection(animation.startAngle, turnAngle);
 
-        return { position: position, facing: facing };
+        var headingTurnAngle = animation.headingTurnAngle * turnPercent;
+        heading = mathlib.addToDirection(animation.headingStartAngle, headingTurnAngle);
+
+        return { position: position, facing: facing, heading: heading };
     };
 
     ShipMovementAnimation.prototype.getStartPosition = function () {
@@ -262,6 +273,7 @@ window.ShipMovementAnimation = function () {
             );
 
             var turnData = calculateTurn(start, move);
+            var headingTurnData = calculateHeadingTurn(start, move);
 
             return {
                 move: move,
@@ -269,6 +281,9 @@ window.ShipMovementAnimation = function () {
                 turnAngle: turnData.turnAngle,
                 startAngle: turnData.startAngle,
                 endAngle: turnData.endAngle,
+                headingTurnAngle: headingTurnData.turnAngle,
+                headingStartAngle: headingTurnData.startAngle,
+                headingEndAngle: headingTurnData.endAngle,
                 length: calculateCurveLength(curve)
             };
         }, this);
@@ -307,6 +322,32 @@ window.ShipMovementAnimation = function () {
 
         return { turnAngle: buildTurn(endMove, startFacing), startAngle: angleOld, endAngle: angleNew };
     }
+
+    // Heading equivalent of calculateTurn: drives the direction-of-movement sprite.
+    // Mirrors the facing logic (including multi-pivot oldHeadings) so the heading
+    // arrow animates in replay instead of freezing at its pre-replay value.
+    function calculateHeadingTurn(startMove, endMove) {
+
+        var endHeading = endMove.heading;
+        var angleNew = mathlib.hexFacingToAngle(endHeading);
+
+        if (!startMove || startMove.heading === undefined) {
+            return { turnAngle: 0, startAngle: angleNew, endAngle: angleNew };
+        }
+
+        var startHeading = startMove.heading;
+        var angleOld = mathlib.hexFacingToAngle(startHeading);
+
+        if (startHeading === endHeading) {
+            return { turnAngle: 0, startAngle: angleOld, endAngle: angleNew };
+        }
+
+        return {
+            turnAngle: buildDirectionTurn(startHeading, endMove.oldHeadings, endHeading),
+            startAngle: angleOld,
+            endAngle: angleNew
+        };
+    }
     /* //Old version
         function buildTurn(endMove, startFacing) {
             if(endMove.oldFacings.length == 0) endMove.oldFacings[0] = startFacing;
@@ -341,34 +382,40 @@ window.ShipMovementAnimation = function () {
     */
 
     function buildTurn(endMove, startFacing) {
+        return buildDirectionTurn(startFacing, endMove.oldFacings, endMove.facing);
+    }
 
-        // Build the correct sequence without mutating endMove
-        const sequence = [startFacing];
+    // Accumulates the signed shortest-path turn across a sequence
+    // start → oldDirections... → end. Shared by facing and heading so both
+    // animate identically through multi-pivot manoeuvres.
+    function buildDirectionTurn(startDirection, oldDirections, endDirection) {
 
-        if (Array.isArray(endMove.oldFacings) && endMove.oldFacings.length > 0) {
-            sequence.push(...endMove.oldFacings);
+        const sequence = [startDirection];
+
+        if (Array.isArray(oldDirections) && oldDirections.length > 0) {
+            sequence.push(...oldDirections);
         }
 
-        sequence.push(endMove.facing);
+        sequence.push(endDirection);
 
         let totalTurn = 0;
-        let lastFacing = null;
+        let lastDirection = null;
 
-        sequence.forEach(function (facing) {
-            if (lastFacing === null) {
-                lastFacing = facing;
+        sequence.forEach(function (direction) {
+            if (lastDirection === null) {
+                lastDirection = direction;
                 return;
             }
 
-            const angleLast = mathlib.hexFacingToAngle(lastFacing);
-            const angleNew = mathlib.hexFacingToAngle(facing);
+            const angleLast = mathlib.hexFacingToAngle(lastDirection);
+            const angleNew = mathlib.hexFacingToAngle(direction);
 
             const right = mathlib.getAngleBetween(angleLast, angleNew, true);
             const left = mathlib.getAngleBetween(angleLast, angleNew, false);
 
             totalTurn += Math.abs(right) < Math.abs(left) ? right : left;
 
-            lastFacing = facing;
+            lastDirection = direction;
         });
 
         return totalTurn;

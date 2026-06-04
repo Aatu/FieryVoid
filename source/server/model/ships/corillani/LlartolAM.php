@@ -10,7 +10,7 @@ class LlartolAM extends BaseShip{
         $this->imagePath = "img/ships/CorillaniMollanta.png";
         $this->shipClass = "Llartol Assault Cruiser";
         $this->shipSizeClass = 3;
-        $this->fighters = array("assault shuttles"=>12);
+        $this->fighters = array("assault shuttles"=>12, "Breaching Pods"=> 2);
 	    $this->isd = 2242;
 		$this->notes = "Corillani People's Navy (CPN)";   
         $this->occurence = "uncommon";
@@ -47,7 +47,7 @@ class LlartolAM extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 16, 4, 8));
         $this->addPrimarySystem(new Engine(4, 20, 0, 16, 4));
         $this->addPrimarySystem(new JumpEngine(4, 15, 4, 36));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         
 		
         $this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

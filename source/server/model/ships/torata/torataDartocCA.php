@@ -32,7 +32,7 @@ class TorataDartocCA extends BaseShip{
 		$this->addPrimarySystem(new Scanner(5, 18, 6, 8));
 		$this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 16, 4, 27));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
 		
 		$this->addFrontSystem(new LaserAccelerator(4, 7, 6, 300, 60));
 		$this->addFrontSystem(new PentagonArray(3, 8, 5, 270, 90));
@@ -47,11 +47,11 @@ class TorataDartocCA extends BaseShip{
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 
 		$this->addLeftSystem(new LaserAccelerator(4, 7, 6, 270, 60));
-		$this->addLeftSystem(new Hangar(4, 6, 0, 0)); //for a flight of fighters
+		$this->addLeftSystem(new Hangar(4, 6, 6)); //for a flight of fighters
 		$this->addLeftSystem(new Thruster(3, 15, 0, 6, 3));
 
 		$this->addRightSystem(new LaserAccelerator(4, 7, 6, 300, 90));
-		$this->addRightSystem(new Hangar(4, 6, 0, 0));//for a flight of fighters
+		$this->addRightSystem(new Hangar(4, 6, 6));//for a flight of fighters
 		$this->addRightSystem(new Thruster(3, 15, 0, 6, 4));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;

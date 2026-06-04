@@ -13,6 +13,7 @@ class Heron1940 extends HeavyCombatVesselLeftRight{
 			$this->variantOf = "Shrike Heavy Destroyer";
         
         $this->minesweeperbonus = 2;
+		$this->fighters = array("minesweeping shuttles"=>4);        
         
         $this->isd = 1940;
         $this->canvasSize = 160;
@@ -31,7 +32,7 @@ class Heron1940 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 5, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addAftSystem(new Thruster(4, 16, 0, 7, 2));
         $this->addFrontSystem(new StdParticleBeam(3, 4, 1, 240, 60));
@@ -39,13 +40,13 @@ class Heron1940 extends HeavyCombatVesselLeftRight{
 
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 60));
         $this->addLeftSystem(new StdParticleBeam(2, 4, 1, 240, 360));
-        $this->addLeftSystem(new Hangar(3, 2));
+        $this->addLeftSystem(new Hangar(3, 2, 1));
         $this->addLeftSystem(new Thruster(4, 11, 0, 3, 3));
 
 
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 300, 120));
         $this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 120));
-        $this->addRightSystem(new Hangar(3, 2));
+        $this->addRightSystem(new Hangar(3, 2, 1));
         $this->addRightSystem(new Thruster(4, 11, 0, 3, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

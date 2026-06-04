@@ -28,7 +28,7 @@ class Qoricc extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 21, 0, 9, 5));
-		$this->addPrimarySystem(new Hangar(4, 14));
+		$this->addPrimarySystem(new Hangar(4, 14, 12));
         
         $this->addFrontSystem(new Thruster(4, 15, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 3, 1));

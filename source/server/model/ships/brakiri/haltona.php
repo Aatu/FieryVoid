@@ -35,7 +35,7 @@ class Haltona extends MediumShip{
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 9, 5, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 10, 0, 5, 4));
    

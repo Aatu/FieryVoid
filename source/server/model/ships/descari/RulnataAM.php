@@ -44,7 +44,7 @@ class RulnataAM extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 18, 9, 4));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
         $this->addPrimarySystem(new AmmoMissileRackS(3, 0, 0, 180, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $

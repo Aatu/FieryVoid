@@ -38,7 +38,7 @@ class Cokra extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 5, 6));
         $this->addPrimarySystem(new Engine(3, 11, 0, 5, 1));
-		$this->addPrimarySystem(new Hangar(3, 1));
+		$this->addPrimarySystem(new Hangar(3, 1, 1));
 		$this->addPrimarySystem(new Thruster(3, 11, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 11, 0, 3, 4));
 		

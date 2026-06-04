@@ -33,7 +33,7 @@ class HyachOkathKur extends MediumShip{
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
 		$this->addPrimarySystem(new Engine(4, 20, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
 		$this->addPrimarySystem(new GraviticThruster(4, 16, 0, 5, 3));
 		$this->addPrimarySystem(new GraviticThruster(4, 16, 0, 5, 4));
 		$this->addPrimarySystem(new HyachComputer(4, 8, 0, 2));//$armour, $maxhealth, $powerReq, $output		

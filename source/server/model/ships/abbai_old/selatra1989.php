@@ -45,7 +45,7 @@ class Selatra1989 extends StarBaseSixSections{
 		$this->addPrimarySystem(new Reactor(5, 26, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
 		$this->addPrimarySystem(new Scanner(5, 24, 5, 7));
-		$this->addPrimarySystem(new Hangar(5, 6));
+		$this->addPrimarySystem(new Hangar(5, 6, 2));
        	$this->addPrimarySystem(new ShieldGenerator(5, 32, 4, 4));
 		$this->addPrimarySystem(new Structure(5, 88));
 

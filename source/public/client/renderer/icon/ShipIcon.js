@@ -55,15 +55,19 @@ window.ShipIcon = function () {
     };
 
     ShipIcon.prototype.createShipWindow = function (ship) {
+        // Lazy: build the (expensive) legacy DOM status window only when it is first
+        // opened (shipWindowManager.open / ensureShipWindow). At load and on each turn
+        // refresh we only re-link to an already-built window — if a ship's window has
+        // never been opened, ship.shipStatusWindow stays null and setData no-ops.
+        // This removes the per-ship DOM build that blocked first paint in large games.
         var element = jQuery(".shipwindow.ship_" + ship.id);
 
-        if (!element.length) {
-            ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
-        } else {
+        if (element.length) {
             ship.shipStatusWindow = element;
+            shipWindowManager.setData(ship);
+        } else {
+            ship.shipStatusWindow = null;
         }
-
-        shipWindowManager.setData(ship);
     };
 
     ShipIcon.prototype.setPosition = function (position) {
@@ -256,6 +260,24 @@ window.ShipIcon = function () {
         this.selected = value;
     };
 
+    // Selection/side circle args. Participants get the friend/foe type; observers
+    // (not in the game) get a per-team key + colour so the filled side circle matches
+    // the team-coloured ship overlay. Terrain is unaffected.
+    ShipIcon.prototype.getSideSpriteArgs = function (ship) {
+        if (this.terrain) {
+            return { type: 'terrain', teamColor: null };
+        }
+
+        if (!gamedata.isPlayerInGame()) {
+            return { type: 'team' + ship.team, teamColor: gamedata.getTeamColorRGB(ship.team) };
+        }
+
+        return {
+            type: this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy'),
+            teamColor: null
+        };
+    };
+
     ShipIcon.prototype.create = function (ship, scene) {
         var imagePath = ship.imagePath;
         this.mesh = new THREE.Object3D();
@@ -280,13 +302,7 @@ window.ShipIcon = function () {
         this.shipSprite = new window.webglSprite(imagePath, { width: this.size / 2, height: this.size / 2 }, 1);
 
         this.shipSprite.setOverlayColor(
-            this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
-                : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
-                    : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear() // Red
+            gamedata.getShipOverlayColor(ship, this.mine, this.ally, this.terrain)
         );
 
         //if (ship.imageFlipped) { //Old variable used to manually flip iamges in older version of THREE.js - DK
@@ -303,10 +319,12 @@ window.ShipIcon = function () {
         this.mesh.add(this.shipEWSprite.mesh);
         this.shipEWSprite.hide();
 
+        var sideArgs = this.getSideSpriteArgs(ship);
+
         this.ShipSelectedSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
-            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
+            sideArgs.type,
             true
         ).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
@@ -314,8 +332,9 @@ window.ShipIcon = function () {
         this.ShipSideSprite = new window.ShipSelectedSprite(
             { width: spriteWidth, height: spriteHeight },
             -2,
-            this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')),
-            false
+            sideArgs.type,
+            false,
+            sideArgs.teamColor
         ).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
@@ -760,6 +779,40 @@ window.ShipIcon = function () {
         var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.2, transparent: true });
         var hexagon = new THREE.Mesh(geometry, material);
         hexagon.position.z = -1;
+
+        // Create a hexagon border with higher opacity (0.8) to define the boundaries
+        var borderShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) borderShape.moveTo(x, y);
+            else borderShape.lineTo(x, y);
+        }
+        borderShape.closePath();
+
+        var holePath = new THREE.Path();
+        var lineWidth = 4;
+        var innerDis = dis - lineWidth;
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = innerDis * Math.cos(angle);
+            let y = innerDis * Math.sin(angle);
+            if (i === 0) holePath.moveTo(x, y);
+            else holePath.lineTo(x, y);
+        }
+        holePath.closePath();
+        borderShape.holes.push(holePath);
+
+        var borderMaterial = new THREE.MeshBasicMaterial({
+            color: color,
+            opacity: 0.6,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
+        hexagon.add(border);
 
         this.mesh.add(hexagon);
         this.BDEWSprite = hexagon;

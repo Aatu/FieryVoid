@@ -106,10 +106,12 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
                 }
             }
         }
-        foreach (array_keys($factionsWithHangars) as $faction) {
-            $factionShuttle = HangarOps::shuttleClassForFactionName($faction);
-            if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
-        }
+		foreach (array_keys($factionsWithHangars) as $faction) {
+			$factionShuttle = HangarOps::shuttleClassForFactionName($faction);
+			if ($factionShuttle !== null) $spawnableClasses[] = $factionShuttle;
+			$factionMsw = HangarOps::minesweepingShuttleClassForFactionName($faction);
+			if ($factionMsw !== null) $spawnableClasses[] = $factionMsw;
+		}            
         if (!empty($spawnableClasses)) {
             $spawnableStaticShips = ShipLoader::getShipsByClass(array_unique($spawnableClasses));
             foreach ($spawnableStaticShips as $faction => $classes) {
@@ -134,20 +136,37 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
         $(window).on("load", function(){
             // Yield execution to allow the browser to paint whatever HTML is currently visible
             setTimeout(function() {
+                // ----- Client-side load timing instrumentation -----
+                // Logs a breakdown of the synchronous work between JSON-received and first
+                // render, so the post-JSON pause can be measured. Entirely gated on ?perf in
+                // the URL — with no ?perf, _mark is a no-op and nothing is timed or logged.
+                var FV_PERF = (window.location.search.toLowerCase().indexOf('perf') !== -1);
+                var _t = (window.performance && performance.now) ? function(){ return performance.now(); } : function(){ return Date.now(); };
+                var _marks = [];
+                var _last = FV_PERF ? _t() : 0;
+                var _mark = FV_PERF
+                    ? function(label){ var now = _t(); _marks.push([label, now - _last]); _last = now; }
+                    : function(){};
+                var _loadStart = _last;
+
                 var serverError = <?php print($error); ?>;
                 if (serverError) {
                     var errorMsg = serverError.error || JSON.stringify(serverError);
                     alert("Server Error: " + errorMsg + (serverError.logid ? " [LogID: " + serverError.logid + "]" : ""));
                 }
-                
+
                 gamedata.parseServerData(<?php print($serverdataJSON); ?>);
-                
+                _mark('parseServerData');
+
                 if (gamedata.thisplayer == -1){
                     $(".notlogged").show();
                     $(".waiting").hide();
                     gamedata.waiting = false;
                 }
 
+                // webglScene.init drives the heavy work: hex grid, then phaseDirector ->
+                // phaseStrategy.activate -> consumeGamedata, which builds every ship icon
+                // (and, currently, every ship's status window).
                 webglScene.init(
                     '#webgl',
                     jQuery('#pagecontainer'),
@@ -156,16 +175,33 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
                     gamedata,
                     window.coordinateConverter
                 );
+                _mark('webglScene.init (icons + windows)');
 
                 window.UIManagerInstance = new window.UIManager($("body")[0]);
                 window.UIManagerInstance.PlayerSettings(window.Settings);
                 window.UIManagerInstance.FullScreen();
                 window.UIManagerInstance.EwButtons();
+                _mark('UIManager (React mounts)');
+
                 $("#pagecontainer").show();
+                _mark('pagecontainer.show');
+
+                // Report (only with ?perf). Total is the blocking JS time after JSON parse;
+                // images then stream in asynchronously via the throttled texture queue.
+                if (FV_PERF) {
+                    var _total = _t() - _loadStart;
+                    var _shipCount = (gamedata.ships && gamedata.ships.length) || 0;
+                    console.log('[FV load] total post-JSON blocking: ' + _total.toFixed(1) + ' ms for ' + _shipCount + ' ships');
+                    _marks.forEach(function(m){ console.log('[FV load]   ' + m[0] + ': ' + m[1].toFixed(1) + ' ms'); });
+                    if (window.performance && performance.timing) {
+                        var nav = performance.timing;
+                        console.log('[FV load]   (navigationStart -> load event: ' + (nav.loadEventStart - nav.navigationStart) + ' ms)');
+                    }
+                }
             }, 50);
         });
-        
-            
+
+
     </script>
 <!--	<script src="client/helper.js"></script>-->
     <?php if ($debug): ?>

@@ -911,9 +911,19 @@ class ShipSystem {
     }
 	
     public function getUnit(){
-		return $this->unit;    
+		return $this->unit;
     }
-    
+
+    /* The Structure system this system is mounted on (resolved in onConstructed
+     * from $this->location). Public accessor so external coordinators — e.g.
+     * HangarOps, which couples Fighter Rails to their parent structure for the
+     * 1d20 whole-rail crit — can read it without violating the protected
+     * visibility of $structureSystem. Returns null for ships/sections without a
+     * matching Structure (or before onConstructed has run). */
+    public function getStructureSystem(){
+		return $this->structureSystem;
+    }
+
     public function getSpecialAbilityList($list)
     {
         if ($this instanceof SpecialAbility)

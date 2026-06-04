@@ -27,7 +27,7 @@ class Xixx extends VreeHCV{
 		$this->canvasSize = 200;
 
 		$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
 		$this->addPrimarySystem(new CnC(4, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 14, 9, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 7, 2));

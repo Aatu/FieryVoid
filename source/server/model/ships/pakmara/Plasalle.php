@@ -10,6 +10,7 @@ class Plasalle extends BaseShip{
 		$this->imagePath = "img/ships/PakmaraSimsalle.png";
 		$this->shipClass = "Pla'sall'e Wave Cruiser";
 		$this->shipSizeClass = 3;
+		$this->fighters = array("cargo shuttles"=>4); 		
 		
 			$this->variantOf = "Sim'sall'e Transport Cruiser";
 			$this->occurence = "rare";		
@@ -42,7 +43,7 @@ class Plasalle extends BaseShip{
 		$this->addPrimarySystem(new Reactor(4, 18, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 2));
 		$this->addPrimarySystem(new CargoBay(3, 20));
 		$this->addPrimarySystem(new CargoBay(3, 20));				
 

@@ -2726,9 +2726,8 @@ class Quarters extends ShipSystem{
 
 class DockingCollar extends ShipSystem{
     public $name = "DockingCollar";
-    public $displayName = "Docking Collar";
+    public $displayName = "LCV Rail";
     
-	//Quarters is not important at all!
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
     
     function __construct($armour, $maxhealth, $output = 1){
@@ -2953,6 +2952,13 @@ class Hangar extends ShipSystem{
 	// === Hangar Operations (B5W §10.1) ===
 	public $hangarType = 'fighters';      //category key matching FighterFlight->hangarRequired and ship->fighters keys
 	public $direction = 0;                //0..5 hex offset from carrier facing on launch (0 = same heading)
+	//Stage 8.5: optional list of allowed launch directions for hangars whose
+	//bays open onto multiple arcs (e.g. EA Hyperion: ports out either side, so
+	//directions = [1,5]). When non-empty, the launch dialog shows a picker and
+	//the player's per-launch choice overrides $direction. The carrier-destruction
+	//escape spawn picks directions[0] as a sensible default so a "side-launch"
+	//hangar doesn't eject forward.
+	public $directions = array();
 	public $hangarUsage = array();        //list of stored craft records: [['phpclass'=>...,'name'=>...,'flightSize'=>N,'hangarType'=>...], ...]
 	public $spawnableClasses = array();   //FighterFlight phpclasses this hangar can launch (consumed by game.php blueprint preload)
 	//$output is the SHARED launch+land budget per turn:
@@ -3095,6 +3101,14 @@ class Hangar extends ShipSystem{
 				if (!$flight) continue;
 				$flight->removed = true;
 				if (isset($entry['dockedTurn'])) $flight->removedTurn = (int)$entry['dockedTurn'];
+				//A fragment flight (partial-dock detachment) was born $removed at
+				//the dock turn and never existed on the board. $spawned isn't a
+				//tac_ship column, so restore it here from dockedTurn — the replay
+				//hides a flight whose spawned == removedTurn on that turn instead
+				//of rendering a phantom detachment beside the still-full source.
+				if (!empty($entry['fragment']) && isset($entry['dockedTurn'])) {
+					$flight->spawned = (int)$entry['dockedTurn'];
+				}
 			}
 		}
 
@@ -3122,19 +3136,24 @@ class Hangar extends ShipSystem{
 	public function generateIndividualNotes($gamedata, $dbManager){
 		$ship = $this->getUnit();
 		if (!$ship) return;
-		//Jump-sequencing fix: a carrier killed this turn by HyperspaceJump or
-		//JumpFailure damage still needs to persist any in-memory hangarUsage
-		//change made during this same setCriticals pass (processJumpingCarrierDockOrders
-		//docks pending flights into the jumping carrier's hangar). Without
-		//letting this method run, the new hangarUsage entry — and the
-		//$flight->removed flag that's re-applied from it via
-		//onIndividualNotesLoaded — would never reach the DB, and the docked
-		//flight would resurface in space next turn. Carriers destroyed by
-		//ordinary fire on a previous turn still short-circuit (the change-
-		//detection guard around the hangarUsage write keeps them from emitting
-		//redundant notes).
-		if ($ship->isDestroyed() && !HangarOps::hasJumpDamageThisTurn($ship, $gamedata)) return;
 		if ($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
+
+		//A destroyed carrier never processes launch/dock/pool orders, but it MUST
+		//still reach the hangarUsage snapshot tail below: Stage 18's carrier-
+		//destruction escape (processCarrierDestructionEscapes, Pass 3) clears each
+		//hangar's $hangarUsage in memory after resurrecting/spawning escapees. If
+		//that empty snapshot isn't persisted, the latest hangarUsage note in the
+		//DB stays the pre-destruction one (with its dockedFlightId entries), and
+		//onIndividualNotesLoaded re-applies $removed=true to the resurrected
+		//escapees on the next load — they vanish from the board. The snapshot
+		//tail's own change-detection ($current === $this->lastSavedUsage) keeps a
+		//carrier destroyed on a PREVIOUS turn (already-empty, already-persisted)
+		//from emitting a redundant note. The jump path (processJumpingCarrierDockOrders)
+		//docks pending flights into a jumping carrier's hangar in the same pass and
+		//likewise relies on this snapshot persisting. So: skip the order blocks for
+		//a destroyed carrier, but always fall through to the hangarUsage snapshot.
+		$destroyed = $ship->isDestroyed();
+		if (!$destroyed) {
 
 		//Persist any pending launch order received from the client. Validation
 		//(canLaunch) happens at end-of-turn during processLaunchOrders — this
@@ -3186,6 +3205,8 @@ class Hangar extends ShipSystem{
 		//below; otherwise a Stage 7 dock would replace the whole hangar with
 		//just the newly-docked flight.
 		if ($this->pendingDeployStartTransfer !== null && HangarOps::isFlowEnabled($gamedata->id)) {
+			//Seed THIS POST-side hangar's usage from the DB counterpart so its
+			//pre-existing entries (auto-shuttles, prior docks) survive the snapshot.
 			$dbShip = $gamedata->getShipById($ship->id);
 			if ($dbShip && is_array($dbShip->systems)) {
 				foreach ($dbShip->systems as $dbSys) {
@@ -3197,7 +3218,13 @@ class Hangar extends ShipSystem{
 					break;
 				}
 			}
-			HangarOps::processDeployStartTransfer($this, $ship, $gamedata);
+			//Stage 21 (no-split): coalesce this flight's per-bay deploy orders
+			//across all POST-side bays into ONE occupancy entry, using the client's
+			//per-bay counts (which were distributed against true capacity client
+			//-side — the POST-side siblings have empty usage so the server must NOT
+			//re-distribute). Runs from each hangar that still holds orders; the
+			//helper consumes the orders it folds in so siblings no-op.
+			HangarOps::processDeployStartTransfer($this, $ship, $gamedata, $dbShip);
 		}
 
 		//Stage 15: persist hangarOrdReserve (ordnance pool spent) ONLY on the
@@ -3253,9 +3280,12 @@ class Hangar extends ShipSystem{
 			}
 		}
 
+		} //endif (!$destroyed) — order/pool blocks skipped for a destroyed carrier
+
 		//Persist hangarUsage snapshot, but only if it has actually changed
 		//since the last saved snapshot. Stage 4+ docking/launching mutate
-		//$hangarUsage and rely on this to snapshot it.
+		//$hangarUsage and rely on this to snapshot it. A destroyed carrier reaches
+		//here too (escape cleared its hangarUsage — see the $destroyed note above).
 		$current = json_encode($this->hangarUsage);
 		if ($current === $this->lastSavedUsage) return;
 		//Don't write a useless first-time note for an empty hangar
@@ -3290,6 +3320,52 @@ class Hangar extends ShipSystem{
 			return;
 		}
 
+		//Fighter Rails (B5W §10.1): a rail launches/lands like an ordinary hangar
+		//(it has an output budget and respects its own damage) PLUS two unique
+		//mechanics — the structure-coupled 1d20 "whole rail destroyed" crit and
+		//per-box fighter escape. The rail-specific destruction runs FIRST so a
+		//rail wiped this turn can't also launch/recover this turn.
+		if (!empty($this->isRail)) {
+			//R0: a destroyed carrier's docked craft escape is owned by Stage 18's
+			//Pass 3 (processCarrierDestructionEscapes) — don't double-spawn here.
+			//(Mirrors HangarOps::onHangarCriticalPhase's $ship->isDestroyed guard;
+			//covers the cascade case where a still-alive ship at Pass 1 start is
+			//destroyed mid-pass and still has its Pass 2 hooks run.)
+			if ($ship->isDestroyed()) return;
+
+			//R1a: full external-structure-block loss. If this rail's parent
+			//structure was destroyed this turn, the whole block (all its rails)
+			//is gone — every docked fighter attempts escape, and the 1d20 crit is
+			//moot (skip it). Carrier-death (PRIMARY structure) is handled by Stage
+			//18 instead; an external block dying leaves the carrier alive.
+			if (HangarOps::onRailStructureLost($this, $ship, $gamedata)) {
+				//Block destroyed — fall through to the ordinary-hangar pipeline so
+				//onHangarCriticalPhase evicts the now-zero-capacity rail cleanly.
+				HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
+				return;
+			}
+
+			//R1b: 1d20-on-16-20 whole-rail destruction + per-box escape, fired when
+			//this rail's parent structure took damage this turn (per-structure,
+			//per-turn dedup inside onRailStructureDamage).
+			HangarOps::onRailStructureDamage($this, $ship, $gamedata);
+
+			//R2-R5: same pipeline as an ordinary hangar. onHangarCriticalPhase
+			//evicts stored craft to fit any boxes the rail crit destroyed (and
+			//resets the per-turn launch/land budget); serviceDockedFlights honours
+			//the rail half-cadence gate internally (RAIL-3).
+			HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
+			//Stage 21: docks resolve once per carrier via the whole-flight coalescer
+			//(no fragments). Guarded; the first non-catapult bay to reach this runs
+			//it, the rest no-op. Replaces the per-bay processDockOrders.
+			HangarOps::processWholeFlightDocks($ship, $gamedata);
+			HangarOps::serviceDockedFlights($this, $ship, $gamedata);
+			//Stage 21: launches resolve once per carrier via the whole-flight
+			//coalescer (no fragments). Guarded; first bay runs it, the rest no-op.
+			HangarOps::processWholeFlightLaunches($ship, $gamedata);
+			return;
+		}
+
 		//1. Apply damage eviction first (per B5W rules: boxes destroyed before
 		//   Post-Turn Actions). This may also reduce stored craft a launch
 		//   order was relying on — if so, the launch's canLaunch() check fails
@@ -3298,12 +3374,11 @@ class Hangar extends ShipSystem{
 		//   source flight, keeping its rendered combat value in sync.
 		HangarOps::onHangarCriticalPhase($this, $ship, $gamedata);
 
-		//2. Process queued dock orders BEFORE launches: a flight that just
-		//   docked frees up no boxes (they're consuming, not vacating) but
-		//   docking-then-launching from the same hangar in one turn must
-		//   respect the shared output budget — landedThisTurn increments
-		//   first so the launch path sees the correct used budget.
-		HangarOps::processDockOrders($this, $ship, $gamedata);
+		//2. Process queued dock orders BEFORE launches. Stage 21: whole-flight
+		//   coalescer (no fragments), once per carrier — a flight docks as ONE
+		//   ship with occupancy spanning bays. landedThisTurn increments here so
+		//   the launch path sees the correct used budget.
+		HangarOps::processWholeFlightDocks($ship, $gamedata);
 
 		//3. Service flights docked a full turn (reload ammo on reloadable
 		//   weapons, etc.) BEFORE launches, so a flight that spent this turn
@@ -3313,11 +3388,11 @@ class Hangar extends ShipSystem{
 		//   the freshly-reloaded ammo out with it.
 		HangarOps::serviceDockedFlights($this, $ship, $gamedata);
 
-		//4. Process queued launch orders (Post-Turn Actions Step). Only runs
-		//   in the Fire Phase advance — Criticals::setCriticals() is only
-		//   called there, and pendingLaunchOrders are filtered to the current
-		//   turn so old orders don't re-fire.
-		HangarOps::processLaunchOrders($this, $ship, $gamedata);
+		//4. Process queued launch orders (Post-Turn Actions Step). Stage 21:
+		//   whole-flight coalescer, once per carrier — a docked flight is ONE
+		//   entry; full launch resurrects it, partial spawns a "- Split" K-flight
+		//   and shrinks the original in place. Only runs in the Fire Phase advance.
+		HangarOps::processWholeFlightLaunches($ship, $gamedata);
 	}
 
 	/* Receives a JSON-encoded list of launch orders from the client. Per the
@@ -3366,14 +3441,29 @@ class Hangar extends ShipSystem{
 			$hasLaunchKey = true;
 		}
 
-		//Sanitise launches: keep only well-formed {phpclass, size} entries
+		//Sanitise launches: keep only well-formed {phpclass, size} entries.
+		//Stage 8.5: an optional per-entry "direction" (0..5) is preserved when
+		//the hangar advertises a multi-direction picker; it overrides the
+		//hangar's default $direction at end-of-turn resolution.
 		$cleanLaunches = array();
 		foreach ($launches as $order) {
 			if (!is_array($order)) continue;
 			$phpclass = isset($order['phpclass']) ? (string)$order['phpclass'] : '';
 			$size     = isset($order['size'])     ? (int)$order['size']        : 0;
 			if ($phpclass === '' || $size <= 0) continue;
-			$cleanLaunches[] = array('phpclass' => $phpclass, 'size' => $size);
+			$clean = array('phpclass' => $phpclass, 'size' => $size);
+			if (array_key_exists('direction', $order)) {
+				$dir = (int)$order['direction'];
+				$dir = (($dir % 6) + 6) % 6;
+				$clean['direction'] = $dir;
+			}
+			//Stage 21: the docked flight's id so the carrier-level launch
+			//coalescer targets the exact docked flight (vs two same-class flights
+			//or a multi-bay entry living on another bay). Optional for legacy.
+			if (isset($order['dockedFlightId']) && (int)$order['dockedFlightId'] > 0) {
+				$clean['dockedFlightId'] = (int)$order['dockedFlightId'];
+			}
+			$cleanLaunches[] = $clean;
 		}
 		if ($hasLaunchKey) $this->pendingLaunchTransfer = $cleanLaunches;
 
@@ -3388,13 +3478,19 @@ class Hangar extends ShipSystem{
 		}
 		if ($hasDockKey) $this->pendingDockTransfer = $cleanDocks;
 
-		//Stage 7: sanitise deployStarts: {flightId}
+		//Stage 7: sanitise deployStarts: {flightId} (+ optional per-hangar count
+		//for a Fighter-Rail auto-distribute spread — a flight too big for any one
+		//bay is split across several, each order carrying its slice).
 		$cleanDeployStarts = array();
 		foreach ($deployStarts as $order) {
 			if (!is_array($order)) continue;
 			$flightId = isset($order['flightId']) ? (int)$order['flightId'] : 0;
 			if ($flightId <= 0) continue;
-			$cleanDeployStarts[] = array('flightId' => $flightId);
+			$clean = array('flightId' => $flightId);
+			if (isset($order['count']) && (int)$order['count'] > 0) {
+				$clean['count'] = (int)$order['count'];
+			}
+			$cleanDeployStarts[] = $clean;
 		}
 		if ($hasDeployStartKey) $this->pendingDeployStartTransfer = $cleanDeployStarts;
 	}
@@ -3403,7 +3499,9 @@ class Hangar extends ShipSystem{
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->hangarType = $this->hangarType;
 		$strippedSystem->direction = $this->direction;
+		$strippedSystem->directions = is_array($this->directions) ? array_values($this->directions) : array();
 		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
+		$strippedSystem->isRail = !empty($this->isRail);           //Fighter Rails: rail discriminator (false for ordinary hangars/catapults)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
@@ -3498,6 +3596,119 @@ class Catapult extends Hangar{
 		// Hangar ctor: ($armour, $maxhealth, $output, $direction, $hangarType, $spawnableClasses)
 		// Fixed forward launch (direction 0); superheavy-only by design.
         parent::__construct($armour, $maxhealth, $output, 0, 'superheavy');
+    }
+}
+
+
+/* Fighter Rail (B5W "Fighter Racks") — external launch rail.
+ *
+ * A FighterRail is a constrained Hangar whose boxes are bolted to a structure
+ * block: each box holds one fighter that launches/lands INDEPENDENTLY of every
+ * other fighter, with NO day-after initiative penalty on the launched fighter
+ * (the carrier still takes the normal launch/land penalty that turn). The
+ * trade-offs vs. a hangar bay:
+ *   - $maxhealth = the rail length in BOXES (not extra HP). effectiveCapacity()
+ *     returns getRemainingHealth(), so capacity shrinks as boxes are destroyed.
+ *   - Rail boxes are destroyed by (a) a unique unmodified 1d20 on 16-20 that
+ *     wipes one ENTIRE rail when its parent structure takes damage this turn,
+ *     and (b) full structure-block destruction (the inherited structure-loss
+ *     fall-off). There is NO per-structure-point box attrition.
+ *   - Fighters on a destroyed rail attempt escape via the existing escape rules
+ *     (the carrier-destruction d20 table); escapees DO get the -50 next-turn
+ *     penalty (HangarOps::railBoxEscape, Stage 18 machinery reuse).
+ *   - Docked-flight reload takes twice as long (narrow airlocks) — half cadence
+ *     via the rail gate in HangarOps::serviceDockedFlights.
+ *
+ * $isRail is the single discriminator the HangarOps call sites branch on,
+ * parallel to Catapult's $isCatapult. The launch/dock/service pipeline runs
+ * through the standard Hangar path (rails respect their output budget and their
+ * own damage, unlike catapults). The rail-specific mechanics live in the
+ * Hangar::criticalPhaseEffects rail branch + HangarOps::onRailStructureDamage.
+ */
+class FighterRail extends Hangar{
+    public $name           = "fighterRail";
+    public $displayName    = "Fighter Rail";
+    public $primary        = false;
+    public $repairPriority = 1;   //like Catapult — tactically unimportant to repair
+
+    public $isRail = true;        //single discriminator, parallel to $isCatapult
+
+    //Detached boxes: destroyed via structure hits/crits, never targeted directly.
+    //Mirrors ConnectionStrut / AdaptiveArmorController, which exclude themselves
+    //from the damage allocator. (The ship's hit chart also has no rail entry.)
+    public $isTargetable        = false;
+    public $isPrimaryTargetable = false;
+	public $iconPath = "FighterRail3.png";
+
+    //Rail boxes are PART OF THE STRUCTURE BLOCK — their HP lives in the section's
+    //Structure (e.g. the StrikeCarrier's 78-box front structure already INCLUDES
+    //the rail boxes). So a rail must NOT add its own HP to the ship's combat value
+    /// structural-integrity total, or the carrier would be over-valued (and over-
+    //tough) by the box count. $maxhealth here is a CAPACITY number (how many
+    //fighters the rail holds), consumed by effectiveCapacity; it is excluded from
+    //calculateCombatValue via this flag (same mechanism ConnectionStrut uses).
+    //The rail is destroyed only by the 1d20 whole-rail crit or by full structure
+    //loss — never by independently soaking hits.
+    protected $doCountForCombatValue = false;
+
+    //RAIL-4: replay-deterministic 1d20 rail crit. setCriticals re-runs on every
+    //replay scrub and Dice::d is non-deterministic, so the rolled value for the
+    //structure-damage turn is persisted in a railCritRoll note on the OWNING
+    //rail (the lowest-id rail on a given structure — see HangarOps::railCritOwner)
+    //and read back here. railCritLoadedTurn/Value hold the loaded roll for the
+    //current turn so onRailStructureDamage uses the stored value instead of
+    //rolling fresh. (0 turn = nothing loaded → roll fresh + persist.)
+    public $railCritLoadedTurn  = 0;
+    public $railCritLoadedValue = 0;
+
+    // ($armour, $maxhealth = rail length in boxes, $output = launch+land budget,
+    //  $direction = 0 forward, $hangarType = the rail's combat-fighter category)
+    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters'){
+		switch($maxhealth){
+			case 3: //retro
+				$this->iconPath = "FighterRail3.png";
+				break;
+			case 6: //main
+				$this->iconPath = "FighterRail6.png";
+				break;	
+			Default://Port
+				$this->iconPath = "FighterRail3.png";
+				break;
+		}        
+	
+		parent::__construct($armour, $maxhealth, $output, $direction, $hangarType);
+    }
+
+    public function onIndividualNotesLoaded($gamedata){
+        //Read the railCritRoll note(s) BEFORE the parent clears $individualNotes.
+        //Keep the value for the current turn (the latest, by id, if duplicated)
+        //so onRailStructureDamage can reuse the stored roll on a replay scrub.
+        foreach ($this->individualNotes as $note){
+            if ($note->notekey === 'railCritRoll' && (int)$note->turn === (int)$gamedata->turn){
+                $decoded = json_decode($note->notevalue, true);
+                if (is_array($decoded)){
+                    $this->railCritLoadedTurn  = (int)$gamedata->turn;
+                    $this->railCritLoadedValue = (int)($decoded['roll'] ?? 0);
+                }
+            }
+        }
+        parent::onIndividualNotesLoaded($gamedata);
+    }
+
+    public function setSystemDataWindow($turn){
+        //Hangar::setSystemDataWindow handles the ordinary (box-count) capacity
+        //line; we only override the "Special" flavour text. Skip straight to
+        //ShipSystem so we don't inherit Hangar's hangar/catapult Special block.
+        ShipSystem::setSystemDataWindow($turn);
+        $this->data["Special"]  = "External launch rail — carries fighters that can launche without initiative penalty.";
+        $this->data["Special"] .= "<br>Part of the structure block: Structure critical hits may destroy an entire rail.";
+        $this->data["Special"] .= "<br>Reloading docked craft takes twice as long.";
+        $this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
+        $this->data["Type"] = ucwords($this->hangarType);
+        $this->data["Launch Rate"] = $this->output;
+
+        $totalStored = HangarOps::usageCountFor($this);
+        $this->data["Capacity"] = $totalStored . " / " . $this->maxhealth . " slots";
     }
 }
 

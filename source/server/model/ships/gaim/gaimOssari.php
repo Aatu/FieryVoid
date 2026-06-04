@@ -12,6 +12,7 @@ class gaimOssari extends BaseShip{
         $this->shipSizeClass = 3;
 		$this->fighters = array("normal"=>6);
 			$this->limited = 33;
+        $this->variantOf = "NONE";	                        
 		
 	    
 		$this->isd = 2253;

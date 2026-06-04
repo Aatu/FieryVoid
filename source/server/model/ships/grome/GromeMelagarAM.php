@@ -42,7 +42,7 @@ class GromeMelagarAM extends MediumShip{
         $this->addPrimarySystem(new AntiquatedScanner(3, 12, 4, 5));
         $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 3, false, false)); //Armor, health, power, startarc, endarc, output, escort, base
         $this->addPrimarySystem(new Engine(3, 16, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 3, 4));     
         $this->addPrimarySystem(new ConnectionStrut(3));

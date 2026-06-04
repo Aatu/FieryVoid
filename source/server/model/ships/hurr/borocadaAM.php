@@ -41,7 +41,7 @@ class borocadaAM extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 25, 0, 0));
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 5));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
    
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 	$this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

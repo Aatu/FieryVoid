@@ -34,7 +34,7 @@ class BAEscortCarrierLCV extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(4, 18, 0, 9, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 5, 4));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 1));
         $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addPrimarySystem($LCVRail);

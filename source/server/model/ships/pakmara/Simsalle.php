@@ -10,6 +10,7 @@ class Simsalle extends BaseShip{
 		$this->imagePath = "img/ships/PakmaraSimsalle.png";
 		$this->shipClass = "Sim'sall'e Transport Cruiser";
 		$this->shipSizeClass = 3;
+		$this->fighters = array("cargo shuttles"=>4);         
 	    
         $this->isd = 2195;
 
@@ -40,7 +41,7 @@ class Simsalle extends BaseShip{
 		$this->addPrimarySystem(new Reactor(4, 18, 0, 2));
 		$this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 		$this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 2));
 		$this->addPrimarySystem(new CargoBay(3, 20));
 		$this->addPrimarySystem(new CargoBay(3, 20));				
 
