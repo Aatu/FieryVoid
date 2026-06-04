@@ -66,6 +66,8 @@ class Shuttle extends FighterFlight
     public function getImage()
     {
         switch ($this->faction) {
+            case 'Abbai Matriarchate':   
+                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png');                         
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
