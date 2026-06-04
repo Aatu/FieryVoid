@@ -250,7 +250,9 @@ class SystemPowerSettings extends Component {
 
     canOnline() {
         const { ship, system } = this.props;
-        return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
+        // A system forced offline by a cooldown / forced-shutdown crit cannot be
+        // powered back on by the player (it auto-recovers when the crit expires).
+        return gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system) && !shipManager.power.isForcedOffline(ship, system);
     }
 
     canBoost() {
