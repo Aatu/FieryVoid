@@ -724,7 +724,10 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
-const canOnline = (ship, system) => gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
+// A system forced offline by a cooldown / forced-shutdown crit cannot be powered back
+// on by the player (it auto-recovers when the crit expires); onOnlineClicked/onlineAll
+// also reject it at the source.
+const canOnline = (ship, system) => gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system) && !shipManager.power.isForcedOffline(ship, system);
 
 //change December 2021: can start overloading even if no Power is available, to be balanced at end of turn
 const canOverload = (ship, system) => gamedata.gamephase === 1 && !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) /*&& shipManager.power.canOverload(ship, system)*/;
