@@ -2622,3 +2622,81 @@ now gate on the `$LCVCarrier` boolean instead of scanning systems, so the vast
 majority of ships skip the LCV path with a single flag check. `shipHasLCVRail` /
 `collectLCVRails` remain for the genuine LCV-carrier paths. Server-only flag (client
 has its own per-system isLCVRailSystem checks; not serialized).
+
+### Stage L — deployment UX fixes + rail picker + labels (2026-06-05, test pass)
+
+First runtime test of the deployment-phase LCV flow surfaced three UX gaps (all
+client-only) plus one server crash, now fixed:
+
+1. **Un-dock a deploy-docked LCV without a page refresh.** The "Deploy Flights in
+   Hangar" button → `confirm.hangarDeployDock` handled only fighter flights. Added
+   `confirm.appendLcvDeployDockSection(container, carrier)` (mirrors
+   `appendLcvLaunchSection`): one pre-checked row per rail holding a pending
+   `pendingLcvDeployStartOrders`; unchecking + OK calls
+   `DeploymentDock.unqueueLcvDeployDock`. Folded into `hangarDeployDock` so the
+   dialog stays open for LCV-only carriers (empty-state now also checks
+   `lcvDeployRailCount`; fighter intro/capacity rows gated on `pending.length>0`).
+   `DeploymentDock.shipHasOpenableDockDialog` extended (`shipHasDeployDockedLcv`) so
+   a carrier with ONLY LCV rails still surfaces the button.
+   `unqueueLcvDeployDock` now SNAPS the released LCV to the carrier's current hex
+   (was: no re-deploy), mirroring fighter `unqueueDeployStartDock`.
+
+2. **Same-hex deploy block relaxed for LCVs** (smallest vessels, must co-locate with
+   the carrier). `selIsLcvUnit` exemption added to the isBlocked check in
+   `DeploymentPhaseStrategy.onHexClicked`, `SelectFromShips.create`, AND the
+   `onShipClicked` placed-ship popup gate (so clicking an occupied hex with an LCV
+   selected surfaces SelectFromShips with DEPLOY + cyan DOCK). The SelectFromShips
+   DEPLOY button now self-gates on new `window.validateDeploymentPositionForShip`
+   (uses `window._deploymentSprites`) because the LCV dock shortcut bypasses upstream
+   position validation.
+
+3. **Rail choice (Firing + Deployment).** Dock dialogs auto-picked `rails[0]`. Now one
+   radio row per FREE rail (mutually exclusive): `confirm.lcvDock` (firing) flattens
+   `findEligibleLCVRailsForDock` to per-rail; `confirm.lcvDeployDockCarrierPicker`
+   (deployment) enumerates `DeploymentDock.freeLcvDeployRails`; `queueLcvDeployDock`
+   got an optional `targetRail`. SelectFromShips auto-queues only when exactly ONE
+   free rail in the hex; else opens the picker. **Rail labels are now LOCATION-keyed**
+   via `window.lcvRailLabel(carrier, rail)` ("LCV Rail Forward 1", "LCV Rail Port",
+   "LCV Rail Starboard") — mirrors fighter `hangarLabelFor` location grouping
+   (0 Main/1 Forward/2 Aft/3,31,32 Port/4,41,42 Starboard) with LCV terms; trailing N
+   only when >1 rail shares a location. Used by every LCV dialog (dock/picker/un-dock/
+   launch/recover). Launch section keys off the FULL rail list so its label stays
+   correct despite `rails` being only the launchable subset.
+
+4. **Server crash on destroyed occupied rail (PHP 8.2 dynamic-property deprecation).**
+   `HangarOps::loadOrRollLCVFrag` set `$lcv->lcvFragRolledTurn/Value` on the LCV ship,
+   but those weren't declared → the registered error handler promoted the deprecation
+   to an `ErrorException`, aborting `onLCVRailDestroyed` mid-crit-resolution (trace:
+   FireGamePhase→Criticals→Hangar::criticalPhaseEffects). Fixed by declaring
+   `public $lcvFragRolledTurn = null; public $lcvFragRolledValue = 0;` on BaseShip
+   (next to `$LCVCarrier`). Same root cause / pattern as FighterRail's
+   `railCritLoadedTurn/Value`, which were already declared public — the general rule
+   (see [[arch_fighter_rails]] "Protected $structureSystem"): external static
+   coordinators like HangarOps must only touch DECLARED properties.
+
+### Stage L — firing-phase recover/launch dialog bugs (2026-06-05, test pass)
+
+Three carrier-side dialog bugs (all client-only, confirm.js + shipTooltipFireMenu.js):
+
+1. **Recover capacity pills mis-attributed a per-rail dock.** Docking an LCV to a
+   specific rail (e.g. Starboard) via the LCV's own dock menu, then opening the
+   carrier's recover dialog, showed that LCV occupying "Forward 1" — the recover
+   dialog re-assigned it greedily. `appendLcvRecoverSection` now builds
+   `pinnedRailByLcv` (lcvId→railId, from each rail's `pendingLcvDockOrders`): a
+   pinned LCV is excluded from `baseFreeRailIds`, the pill strip renders it on ITS
+   rail (`pinnedFill`, gated on the checkbox), and `commit` leaves a checked+pinned
+   LCV's order on its rail (only un-pinned checked LCVs are greedily assigned; only
+   unchecked OR un-pinned LCVs get `clearQueuedLcvDock`). Removed the now-dead
+   `railBaseOccupied` helper (its logic is inlined into the `baseFreeRailIds` filter).
+
+2. **Destroyed rails listed as 1/1.** The pill loop now renders `railDestroyed(rail)`
+   rails as "destroyed" (red), and destroyed rails are excluded from
+   `baseFreeRailIds` so nothing is ever assigned to them.
+
+3. **Launch menu listed a queued-but-not-docked LCV.** `lcvRailLaunchable` treated a
+   rail with a `pendingLcvDockOrders` as launchable — but you can't dock AND launch
+   in the same turn (server `canLCVLaunch` reads the COMMITTED `lcvDocked` link, set
+   only at end-of-turn dock resolution / reload). Fixed to require `lcvDocked` set
+   AND no pending dock order. Known pre-existing (NOT fixed, out of scope): a queued
+   LCV *launch* can't be un-declared from the launch dialog because `lcvRailLaunchable`
+   filters out rails with `pendingLcvLaunchOrders` (same as the original shape).

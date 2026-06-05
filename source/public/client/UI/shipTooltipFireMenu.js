@@ -864,12 +864,17 @@ window.lcvRailFree = function (carrier, rail) {
 };
 
 // Is this rail occupied by an LCV and still able to launch it this turn?
+// Only a COMMITTED occupant (server-sent lcvDocked link, set at end-of-turn dock
+// resolution / reload) is launchable — an LCV merely ORDERED to dock this turn is
+// not docked yet (you can't dock and launch in the same turn; mirrors the server
+// canLCVLaunch gate which reads lcvDocked, never the pending dock order).
 window.lcvRailLaunchable = function (carrier, rail) {
     if (!window.isLCVRailSystem(rail)) return false;
     if (shipManager.systems.isDestroyed(carrier, rail)) return false;
-    var occupied = (rail.lcvDocked && rail.lcvDocked.shipId)
-        || (Array.isArray(rail.pendingLcvDockOrders) && rail.pendingLcvDockOrders.length > 0);
-    if (!occupied) return false;
+    if (!(rail.lcvDocked && rail.lcvDocked.shipId)) return false;
+    // A pending dock order this turn (re-dock of a just-launched rail, or a
+    // mid-dialog order) is not yet a real occupant — don't offer to launch it.
+    if (Array.isArray(rail.pendingLcvDockOrders) && rail.pendingLcvDockOrders.length > 0) return false;
     // A pending launch already empties it.
     if (Array.isArray(rail.pendingLcvLaunchOrders) && rail.pendingLcvLaunchOrders.length > 0) return false;
     var out  = parseInt(rail.output || 0, 10);
@@ -1017,4 +1022,45 @@ window.clearQueuedLcvDock = function (lcv) {
             if (typeof sys.refreshHangarTooltip === 'function') sys.refreshHangarTooltip();
         });
     }
+};
+
+// Human-readable label for an LCV rail, keyed by its ship LOCATION rather than a
+// flat index — e.g. "LCV Rail Forward 1", "LCV Rail Port". Mirrors the fighter
+// hangar location-labelling in confirm.js (Main/Front/Aft/Port/Stbd numbered
+// within a location group), but using the LCV terms the Deliverer et al. expect
+// (Forward/Aft/Port/Starboard) and the "LCV Rail <Location> N" shape. The trailing
+// N appears only when >1 rail shares the same location group. Used by every LCV
+// dock/launch/recover dialog so a rail reads the same everywhere.
+window.lcvRailLabel = function (carrier, rail) {
+    if (!carrier || !Array.isArray(carrier.systems) || !rail) return 'LCV Rail';
+
+    //Collapse split-arc port/stbd codes (31/32 → 3, 41/42 → 4) so both halves of
+    //a side count as one location group (matches the fighter helper).
+    var groupOf = function (l) {
+        l = parseInt(l, 10);
+        if (l === 31 || l === 32) return 3;
+        if (l === 41 || l === 42) return 4;
+        return l;
+    };
+    var locName = function (l) {
+        switch (groupOf(l)) {
+            case 0:  return 'Main';
+            case 1:  return 'Forward';
+            case 2:  return 'Aft';
+            case 3:  return 'Port';
+            case 4:  return 'Starboard';
+            default: return '';
+        }
+    };
+
+    var loc = locName(rail.location);
+    //Rails sharing this rail's location group, in encounter (construction) order.
+    var siblings = carrier.systems.filter(function (s) {
+        return window.isLCVRailSystem(s) && groupOf(s.location) === groupOf(rail.location);
+    });
+
+    var base = loc ? ('LCV Rail ' + loc) : 'LCV Rail';
+    if (siblings.length <= 1) return base;
+    var idx = siblings.indexOf(rail);
+    return base + ' ' + (idx + 1);
 };

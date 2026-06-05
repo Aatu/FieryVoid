@@ -53,6 +53,13 @@ class BaseShip {
     //destruction sweep) short-circuit on the overwhelming majority of ships
     //without iterating their systems via HangarOps::shipHasLCVRail.
     public $LCVCarrier = false;
+    //LCV Rails: per-request memo for the 2d10 rail-fragment roll a forced-launched
+    //LCV takes (rail/carrier destroyed). Set on the LCV ship in
+    //HangarOps::loadOrRollLCVFrag so both destruction handlers can't double-roll in
+    //one in-memory sweep. Transient (not persisted/serialized) — declared here so
+    //PHP 8.2+ doesn't deprecate the dynamic-property assignment.
+    public $lcvFragRolledTurn = null;
+    public $lcvFragRolledValue = 0;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
 	public $mine = false;

@@ -81,14 +81,29 @@ window.SelectFromShips = function () {
             var hasTerrain = shipsInHex.some(function(s) {
                 return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3);
             });
-            
+
+            //LCVs are exempt from the same-hex occupancy block (mirrors
+            //DeploymentPhaseStrategy.onHexClicked) so an undocked LCV can be placed
+            //in the carrier's hex. Terrain still blocks them.
+            var selIsLcvUnit = !this.phaseStrategy.selectedShip.flight && !this.phaseStrategy.selectedShip.mine
+                && String(this.phaseStrategy.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
+
             if (hasTerrain) {
                 isBlocked = true;
-            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight)) {
+            } else if (!(this.phaseStrategy.selectedShip.mine || this.phaseStrategy.selectedShip.flight || selIsLcvUnit)) {
                 isBlocked = shipsInHex.some(function(s) { return !(s.mine || s.flight); });
             }
             
-            if (!isBlocked && (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r)) {
+            //The LCV dock shortcut surfaces this popup WITHOUT pre-validating the
+            //deploy position (docking needs none), so the DEPLOY button must check
+            //the selected ship's deploy zone itself — otherwise it would offer to
+            //place an LCV on a hex outside its deployment area. Non-LCV callers
+            //already validated upstream; the check is a cheap belt-and-braces there.
+            var posLegal = (typeof window.validateDeploymentPositionForShip !== 'function')
+                ? true
+                : window.validateDeploymentPositionForShip(this.phaseStrategy.selectedShip, this.payload.hex);
+
+            if (!isBlocked && posLegal && (!parsedSelectedPos || parsedSelectedPos.q !== this.payload.hex.q || parsedSelectedPos.r !== this.payload.hex.r)) {
                 var selectedName = this.phaseStrategy.selectedShip.name;
                 var deployButton = jQuery(
                     //'<div class="name-value-button-ally">DEPLOY ' + selectedName.toUpperCase() + ' HERE</div>'
@@ -172,34 +187,38 @@ window.SelectFromShips = function () {
                 }
             }
 
-            // LCV Rails: an LCV can't share a deploy hex with other ships, so it
-            // deploy-docks directly onto a clicked carrier's free LCV rail. When an
-            // LCV is the selected ship and the clicked ship(s) include LCV-capable
-            // carriers with a free rail, expose a "DOCK <LCV> TO ..." button. One
-            // eligible carrier → auto-queue; several → a carrier-picker sub-dialog.
+            // LCV Rails: an LCV can share the carrier's deploy hex (Issue 2), and
+            // deploy-docks onto a free LCV rail. When an LCV is the selected ship
+            // and the clicked ship(s) include LCV-capable carriers with a free rail,
+            // expose a cyan "DOCK <LCV>" button. Exactly ONE free rail total →
+            // auto-queue; more than one → the per-rail picker dialog so the player
+            // chooses the exact rail (Issue 3).
             var selLcv = this.phaseStrategy.selectedShip;
             if (selLcv && !selLcv.flight
                 && String(selLcv.hangarRequired || '').toLowerCase() === 'lcvs'
                 && window.DeploymentDock
                 && typeof window.DeploymentDock.carrierAcceptsLcvDeployDock === 'function') {
                 var lcvCarriers = [];
+                var totalFreeRails = 0;
                 this.ships.forEach(function (s) {
                     if (window.DeploymentDock.carrierAcceptsLcvDeployDock(s, selLcv)) {
-                        lcvCarriers.push({ ship: s, free: window.DeploymentDock.freeLcvDeployRailCount(s, selLcv.id) });
+                        var free = window.DeploymentDock.freeLcvDeployRailCount(s, selLcv.id);
+                        lcvCarriers.push({ ship: s, free: free });
+                        totalFreeRails += free;
                     }
                 });
                 if (lcvCarriers.length > 0) {
                     var lcvLabel;
                     if (lcvCarriers.length === 1) {
-                        //lcvLabel = 'DOCK ' + selLcv.name.toUpperCase() + ' TO ' + lcvCarriers[0].ship.name.toUpperCase()
-                        lcvLabel = 'DOCK ' + selLcv.name.toUpperCase()                        
-                        //    + ' (' + lcvCarriers[0].free + (lcvCarriers[0].free === 1 ? ' FREE RAIL)' : ' FREE RAILS)');
+                        lcvLabel = 'DOCK ' + selLcv.name.toUpperCase();
                     } else {
                         lcvLabel = 'DOCK ' + selLcv.name.toUpperCase() + ' (' + lcvCarriers.length + ' CARRIERS AVAILABLE)';
                     }
                     var lcvDockButton = jQuery('<div class="name-value-button-dock">' + lcvLabel + '</div>')
                         .on('click', function () {
-                            if (lcvCarriers.length === 1) {
+                            //One free rail in the whole hex → no choice to make, queue it.
+                            //Otherwise let the player pick the exact rail.
+                            if (totalFreeRails === 1 && lcvCarriers.length === 1) {
                                 var carrier = lcvCarriers[0].ship;
                                 if (window.DeploymentDock.queueLcvDeployDock(carrier, selLcv)) {
                                     if (typeof window.refreshDeploymentUIForDeployStart === 'function') {

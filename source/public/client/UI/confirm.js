@@ -1875,33 +1875,37 @@ window.confirm = {
         $('<div class="multi-value-header">Dock ' + lcv.name + ' to an LCV rail</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        // One choice per eligible carrier: {ship, rail (the rail to use), free}.
-        var choices = carriers.map(function (c) {
-            return { ship: c.ship, rail: c.rails[0], free: c.rails.length };
+        // ONE choice per FREE rail (flattened across eligible carriers), so the
+        // player picks the exact rail rather than letting the dialog auto-pick the
+        // carrier's first free one.
+        var choices = [];   // { carrier, rail }
+        carriers.forEach(function (c) {
+            c.rails.forEach(function (rail) { choices.push({ carrier: c.ship, rail: rail }); });
         });
-        // Ensure the already-queued carrier appears (and reads checked) even if it
-        // has no other free rail now — its queued rail is the one we'd reuse.
-        if (queued && !choices.some(function (c) { return c.ship.id === queued.carrier.id; })) {
-            choices.unshift({ ship: queued.carrier, rail: queued.rail, free: 1 });
+        // Ensure the already-queued rail appears (and reads checked) even though
+        // lcvRailFree excludes it from the "free" list — it's the one we'd reuse.
+        if (queued && !choices.some(function (c) { return c.rail.id === queued.rail.id; })) {
+            choices.unshift({ carrier: queued.carrier, rail: queued.rail });
         }
         if (choices.length === 0) { e.remove(); return; }
 
-        //$('<div class="multi-value-row" style="justify-content:center;"><span class="hangar-section-name">Dock to carrier</span></div>').appendTo(container);
-
         var rowChecks = [];   // { $chk, choice }
         choices.forEach(function (choice) {
-            var isQueued = !!(queued && choice.ship.id === queued.carrier.id);
-            var freeLabel = choice.free + (choice.free === 1 ? ' free rail' : ' free rails');
+            var isQueued = !!(queued && choice.rail.id === queued.rail.id);
+            // "Carrier — LCV Rail <Location> N" so each row identifies both ship and
+            // the rail's location (window.lcvRailLabel — shared with every dialog).
+            var railName = window.lcvRailLabel(choice.carrier, choice.rail);
+            var labelText = choice.carrier.name + ' — ' + railName;
             var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
             var $chk = $('<input type="checkbox" class="lcvDockCheck">');
             if (isQueued) $chk.prop('checked', true);
-            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span> <span class="multi-value-max">(' + freeLabel + ')</span></span>');
-            $labelSpan.find('.hangar-craft-name').text(choice.ship.name);
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            $labelSpan.find('.hangar-craft-name').text(labelText);
             $chk.appendTo(row);
             $labelSpan.appendTo(row);
             container.append(row);
             rowChecks.push({ $chk: $chk, choice: choice });
-            // Mutually exclusive: checking one carrier unchecks the rest.
+            // Mutually exclusive: checking one rail unchecks the rest (one LCV → one rail).
             $chk.on('change', function () {
                 if ($chk.is(':checked')) {
                     rowChecks.forEach(function (rc) { if (rc.$chk !== $chk) rc.$chk.prop('checked', false); });
@@ -1911,7 +1915,7 @@ window.confirm = {
 
         $(".confirmok", e).on("click", function () {
             // Clear any prior queued dock for this LCV across ALL rails first, so
-            // unchecking (or switching carriers) removes the stale order.
+            // unchecking (or switching rails) removes the stale order.
             window.clearQueuedLcvDock(lcv);
             var picked = rowChecks.filter(function (rc) { return rc.$chk.is(':checked'); })[0];
             if (picked && picked.choice.rail) {
@@ -1964,26 +1968,38 @@ window.confirm = {
         // All LCV rails on the carrier, in encounter order. Each holds 0 or 1 LCV.
         var rails = carrier.systems.filter(function (s) { return window.isLCVRailSystem(s); });
 
-        // BASE occupancy per rail (independent of this dialog's checkboxes):
-        //  - committed server link (lcvDocked) → occupied
-        //  - a queued dock order for an LCV that is NOT a row in this dialog →
-        //    occupied (a cross-LCV order we leave alone)
-        // Rails free in the base picture are the ones this dialog can fill.
+        // A destroyed rail can hold nothing — shown as "destroyed", never 0/1 or 1/1.
+        function railDestroyed(rail) {
+            if (rail.isDestroyed && rail.isDestroyed()) return true;   //defensive
+            return shipManager.systems.isDestroyed(carrier, rail);
+        }
+
+        // Which rail (id) a given dialog-row LCV is ALREADY queued to dock onto
+        // (e.g. the player chose Starboard via the LCV's own dock menu). Such an
+        // LCV is PINNED to that rail — the recover dialog must not re-assign it to
+        // a different rail greedily (that's the "shows on Forward 1" bug).
+        var pinnedRailByLcv = {};   // lcvId → railId
+        rails.forEach(function (rail) {
+            if (!Array.isArray(rail.pendingLcvDockOrders)) return;
+            rail.pendingLcvDockOrders.forEach(function (o) {
+                pinnedRailByLcv[parseInt(o.shipId, 10)] = rail.id;
+            });
+        });
+
+        // rowLcvIds: the LCVs this dialog has a row for. A pending dock order for an
+        // LCV NOT in this set is a cross-LCV order on some other rail we leave alone.
         var rowLcvIds = {};
         lcvs.forEach(function (l) { rowLcvIds[parseInt(l.id, 10)] = true; });
-        function railBaseOccupied(rail) {
-            if (rail.isDestroyed && rail.isDestroyed()) return true;   //defensive
-            if (shipManager.systems.isDestroyed(carrier, rail)) return true;
-            if (rail.lcvDocked && rail.lcvDocked.shipId) return true;
-            if (Array.isArray(rail.pendingLcvDockOrders)) {
-                var foreign = rail.pendingLcvDockOrders.some(function (o) {
-                    return !rowLcvIds[parseInt(o.shipId, 10)];   //order for an LCV not in this dialog
-                });
-                if (foreign) return true;
-            }
-            return false;
-        }
-        var baseFreeRailIds = rails.filter(function (r) { return !railBaseOccupied(r); }).map(function (r) { return r.id; });
+
+        // Rails available for the dialog to greedily assign newly-checked, NOT-yet-
+        // pinned LCVs onto: not destroyed, not committed-occupied (lcvDocked), and
+        // not already holding a pending dock order (which pins it to its own LCV).
+        var baseFreeRailIds = rails.filter(function (r) {
+            if (railDestroyed(r)) return false;
+            if (r.lcvDocked && r.lcvDocked.shipId) return false;
+            if (Array.isArray(r.pendingLcvDockOrders) && r.pendingLcvDockOrders.length > 0) return false;
+            return true;
+        }).map(function (r) { return r.id; });
 
         // Centred section header, then the live capacity pill strip.
         $('<div class="multi-value-row" style="justify-content:center;"><span class="hangar-section-name">LCV Rails</span></div>').appendTo(container);
@@ -1992,22 +2008,53 @@ window.confirm = {
 
         var checks = [];   // { lcv, lcvId, $chk }
         function railLabel(rail, idx) {
-            return rails.length > 1 ? ('LCV Rail ' + (idx + 1)) : 'LCV Rail';
+            //Location-keyed ("LCV Rail Forward 1" …), shared across all LCV dialogs.
+            return window.lcvRailLabel(carrier, rail);
         }
 
-        // Recompute the pill strip from the current checkbox state: base-occupied
-        // rails read 1/1; checked LCVs fill base-free rails greedily (ticking them
-        // to 1/1); overflow (more checked than free rails) is flagged red.
+        // Recompute the pill strip from the current checkbox state:
+        //  - destroyed rails read "destroyed" (grey, never 1/1).
+        //  - a rail PINNED to a checked LCV reads 1/1 (its own LCV fills it).
+        //  - base-occupied (committed lcvDocked, or pinned to a foreign LCV) read 1/1.
+        //  - remaining checked LCVs that are NOT pinned fill base-free rails greedily.
+        //  - overflow (more un-pinned checked LCVs than base-free rails) flagged red.
         function recompute() {
-            var checkedCount = checks.filter(function (c) { return c.$chk.is(':checked'); }).length;
+            //Pinned rails whose LCV is currently checked are "used by their own LCV";
+            //un-pinned checked LCVs are the ones that still need a base-free rail.
+            var unpinnedChecked = checks.filter(function (c) {
+                return c.$chk.is(':checked') && pinnedRailByLcv[c.lcvId] == null;
+            }).length;
+
             var freeIds = baseFreeRailIds.slice();
             var fillIds = {};
-            for (var i = 0; i < checkedCount && i < freeIds.length; i++) fillIds[freeIds[i]] = true;
-            var overflow = checkedCount > freeIds.length;
+            for (var i = 0; i < unpinnedChecked && i < freeIds.length; i++) fillIds[freeIds[i]] = true;
+            var overflow = unpinnedChecked > freeIds.length;
+
+            //Pinned rails are "filled" only while their own LCV stays checked.
+            var pinnedFill = {};
+            checks.forEach(function (c) {
+                var pid = pinnedRailByLcv[c.lcvId];
+                if (pid != null && c.$chk.is(':checked')) pinnedFill[pid] = true;
+            });
 
             var $pills = $('<span class="hangar-capacity-pills"></span>');
             rails.forEach(function (rail, idx) {
-                var occupied = railBaseOccupied(rail) || !!fillIds[rail.id];
+                if (railDestroyed(rail)) {
+                    $('<span class="hangar-capacity-pill" style="color:#ff7070;"></span>')
+                        .text(railLabel(rail, idx) + ': Destroyed')
+                        .appendTo($pills);
+                    return;
+                }
+                var occupied = (rail.lcvDocked && rail.lcvDocked.shipId)
+                    || !!pinnedFill[rail.id]
+                    || !!fillIds[rail.id];
+                //A rail pinned to a FOREIGN (non-row) LCV is occupied too — that's a
+                //cross-LCV dock order this dialog leaves alone. (A rail pinned to one
+                //of THIS dialog's LCVs is covered by pinnedFill above, gated on its
+                //checkbox.)
+                if (!occupied && Array.isArray(rail.pendingLcvDockOrders)) {
+                    occupied = rail.pendingLcvDockOrders.some(function (o) { return !rowLcvIds[parseInt(o.shipId, 10)]; });
+                }
                 var used = occupied ? 1 : 0;
                 var color = used > 0 ? '#ffff80' : '#bdbdbd';
                 $('<span class="hangar-capacity-pill" style="color:' + color + ';"></span>')
@@ -2038,13 +2085,22 @@ window.confirm = {
         recompute();   //seed pills from pre-checked state
 
         function commit() {
-            // Clear every dialog-row LCV's prior order first (idempotent), then
-            // assign the checked ones greedily onto base-free rails.
-            checks.forEach(function (c) { window.clearQueuedLcvDock(c.lcv); });
+            // Unchecked → clear any prior order (un-declare). A checked LCV that's
+            // PINNED to a rail (docked via its own menu, e.g. Starboard) KEEPS that
+            // rail — we don't clear+reassign it, so the dialog can't silently move it
+            // onto Forward 1. Only checked, NOT-pinned LCVs are assigned greedily
+            // onto the base-free rails.
+            checks.forEach(function (c) {
+                var checked = c.$chk.is(':checked');
+                var pinned = pinnedRailByLcv[c.lcvId] != null;
+                if (!checked || !pinned) window.clearQueuedLcvDock(c.lcv);   //pinned+checked: leave its order intact
+            });
+
             var freeIds = baseFreeRailIds.slice();
             var slot = 0;
             checks.forEach(function (c) {
                 if (!c.$chk.is(':checked')) return;
+                if (pinnedRailByLcv[c.lcvId] != null) return;   //already on its chosen rail — leave it
                 if (slot >= freeIds.length) return;   //overflow — silently skipped (recompute warned)
                 var rail = carrier.systems.filter(function (s) { return s.id === freeIds[slot]; })[0];
                 slot++;
@@ -2105,7 +2161,9 @@ window.confirm = {
             var lcvId = rail.lcvDocked && rail.lcvDocked.shipId ? parseInt(rail.lcvDocked.shipId, 10) : null;
             var lcv = lcvId ? gamedata.getShip(lcvId) : null;
             var name = lcv ? lcv.name : 'LCV';
-            var railName = rails.length > 1 ? ('LCV Rail ' + (i + 1) + ': ') : '';
+            //Location-keyed label (shared); keys off the FULL rail list so it stays
+            //correct even though `rails` here is only the launchable subset.
+            var railName = window.lcvRailLabel(carrier, rail) + ': ';
             var preChecked = Array.isArray(rail.pendingLcvLaunchOrders) && rail.pendingLcvLaunchOrders.length > 0;
 
             // center + gap keeps the checkbox and name together, centred (the
@@ -2130,6 +2188,64 @@ window.confirm = {
                 if (typeof rd.rail.refreshHangarTooltip === 'function') rd.rail.refreshHangarTooltip();
             });
             if (typeof window.refreshFiringHangarTooltips === 'function') window.refreshFiringHangarTooltips();
+        }
+
+        return { count: rails.length, commit: commit };
+    },
+
+    // Appends a DEPLOYMENT-phase LCV un-dock section into an existing dialog
+    // $container: a centred "LCV Rails" header, then one CHECKBOX row per rail
+    // that currently holds a pending deploy-dock LCV (pendingLcvDeployStartOrders),
+    // pre-checked. Unchecking + OK calls DeploymentDock.unqueueLcvDeployDock so the
+    // LCV is released back onto the map (no board position yet — the player places
+    // it). DEFERS commit — the returned commit() applies the un-checks on OK.
+    // Returns { count, commit } (count 0 if no deploy-docked LCV rail). Mirrors
+    // appendLcvLaunchSection's shape so hangarDeployDock can fold it in.
+    appendLcvDeployDockSection: function appendLcvDeployDockSection(container, carrier) {
+        var noop = { count: 0, commit: function () {} };
+        if (!carrier || !Array.isArray(carrier.systems)) return noop;
+        if (!window.isLCVRailSystem) return noop;
+
+        // Rails holding a pending deploy-dock LCV this session.
+        var rails = carrier.systems.filter(function (s) {
+            return window.isLCVRailSystem(s)
+                && Array.isArray(s.pendingLcvDeployStartOrders)
+                && s.pendingLcvDeployStartOrders.length > 0;
+        });
+        if (rails.length === 0) return noop;
+
+        $('<div class="multi-value-row" style="justify-content:center;"><span class="hangar-section-name">LCV Rails</span></div>').appendTo(container);
+
+        var rowData = [];
+        rails.forEach(function (rail) {
+            var lcvId = parseInt(rail.pendingLcvDeployStartOrders[0].shipId, 10);
+            var lcv = lcvId ? gamedata.getShip(lcvId) : null;
+            var name = (lcv && lcv.name) ? lcv.name : 'LCV';
+            //Location-keyed label ("LCV Rail Forward 1" …) shared with all dialogs.
+            var railName = window.lcvRailLabel(carrier, rail) + ': ';
+
+            var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
+            var $chk = $('<input type="checkbox" class="lcvDeployDockCheck">');
+            $chk.prop('checked', true);   //docked here now → checked; uncheck to release
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            $labelSpan.find('.hangar-craft-name').text(railName + name);
+            $chk.appendTo(row);
+            $labelSpan.appendTo(row);
+            container.append(row);
+            rowData.push({ $chk: $chk, rail: rail, lcv: lcv });
+        });
+
+        function commit() {
+            rowData.forEach(function (rd) {
+                //Still checked → leave the deploy-dock queued. Unchecked → release the
+                //LCV back to the map via DeploymentDock (clears the rail's pending
+                //order AND the LCV's pendingLcvDeployDock marker).
+                if (rd.$chk.is(':checked')) return;
+                if (rd.lcv && window.DeploymentDock
+                    && typeof window.DeploymentDock.unqueueLcvDeployDock === 'function') {
+                    window.DeploymentDock.unqueueLcvDeployDock(rd.lcv);
+                }
+            });
         }
 
         return { count: rails.length, commit: commit };
@@ -3462,38 +3578,68 @@ window.confirm = {
         e.appendTo("body").fadeIn(250);
     },
 
-    // LCV Rails: carrier picker for deploy-docking an LCV when several eligible
-    // carriers share the clicked hex. One button per carrier with its free-rail
-    // count; clicking queues the deploy dock onto that carrier's first free rail.
+    // LCV Rails: per-rail picker for deploy-docking an LCV. Lists every FREE rail
+    // across the eligible carrier(s) sharing the clicked hex as a radio row
+    // ("Carrier — LCV Rail N"), so the player picks the EXACT rail (not just the
+    // carrier's first free one). One LCV → one rail (mutually exclusive). Mirrors
+    // the Firing-Phase per-rail lcvDock dialog. $carriers is [{ship, free}, ...].
     lcvDeployDockCarrierPicker: function lcvDeployDockCarrierPicker(lcv, carriers) {
         if (!lcv || !Array.isArray(carriers) || carriers.length === 0) return;
         if (!window.DeploymentDock || typeof window.DeploymentDock.queueLcvDeployDock !== 'function') return;
+        if (typeof window.DeploymentDock.freeLcvDeployRails !== 'function') return;
+        if (typeof window.isLCVRailSystem !== 'function') return;
 
-        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarDeployCarrierPicker"><div class="ui"><div class="confirmcancel"></div></div></div>');
-        $('<div class="multi-value-header">Dock ' + lcv.name + ' — choose carrier</div>').prependTo(e);
-        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Pick which carrier the LCV should dock onto.</span></div>').appendTo(container);
-
+        // Flatten to one choice per free rail across all eligible carriers.
+        var choices = [];   // { carrier, rail }
         carriers.forEach(function (entry) {
             var carrier = entry.ship;
-            var free = parseInt(entry.free || 0, 10);
-            var row = $('<div class="multi-value-row"></div>');
-            var btn = $('<div class="name-value-button-ally" style="flex:1;">DOCK TO ' + carrier.name.toUpperCase() + ' (' + free + (free === 1 ? ' FREE RAIL)' : ' FREE RAILS)') + '</div>');
-            btn.on('click', function () {
-                if (window.DeploymentDock.queueLcvDeployDock(carrier, lcv)) {
-                    e.remove();
-                    if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
-                        window.refreshDeploymentUIForDeployStart();
-                    }
-                    if (typeof window.selectShipInDeploymentPhase === 'function') {
-                        window.selectShipInDeploymentPhase(carrier);
-                    }
+            window.DeploymentDock.freeLcvDeployRails(carrier, lcv.id).forEach(function (rail) {
+                choices.push({ carrier: carrier, rail: rail });
+            });
+        });
+        if (choices.length === 0) return;
+
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm hangarDeployCarrierPicker"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">Dock ' + lcv.name + ' — choose LCV rail</div>').prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+        //$('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Pick which LCV rail to dock onto.</span></div>').appendTo(container);
+
+        var rowChecks = [];   // { $chk, choice }
+        choices.forEach(function (choice, idx) {
+            //"Carrier — LCV Rail <Location> N" (window.lcvRailLabel — shared label).
+            var railName = window.lcvRailLabel(choice.carrier, choice.rail);
+            var labelText = choice.carrier.name + ' — ' + railName;
+            var row = $('<div class="multi-value-row" style="justify-content:center; gap:8px;"></div>');
+            var $chk = $('<input type="checkbox" class="lcvDeployDockCheck">');
+            if (idx === 0) $chk.prop('checked', true);   //default to the first rail
+            var $labelSpan = $('<span class="multi-value-label" style="flex:0 0 auto; text-align:left; margin:0;"><span class="hangar-craft-name"></span></span>');
+            $labelSpan.find('.hangar-craft-name').text(labelText);
+            $chk.appendTo(row);
+            $labelSpan.appendTo(row);
+            container.append(row);
+            rowChecks.push({ $chk: $chk, choice: choice });
+            // Mutually exclusive: checking one rail unchecks the rest.
+            $chk.on('change', function () {
+                if ($chk.is(':checked')) {
+                    rowChecks.forEach(function (rc) { if (rc.$chk !== $chk) rc.$chk.prop('checked', false); });
                 }
             });
-            row.append(btn);
-            container.append(row);
         });
 
+        $(".confirmok", e).on("click", function () {
+            var picked = rowChecks.filter(function (rc) { return rc.$chk.is(':checked'); })[0];
+            if (picked && window.DeploymentDock.queueLcvDeployDock(picked.choice.carrier, lcv, picked.choice.rail)) {
+                e.remove();
+                if (typeof window.refreshDeploymentUIForDeployStart === 'function') {
+                    window.refreshDeploymentUIForDeployStart();
+                }
+                if (typeof window.selectShipInDeploymentPhase === 'function') {
+                    window.selectShipInDeploymentPhase(picked.choice.carrier);
+                }
+            } else {
+                e.remove();
+            }
+        });
         $(".confirmcancel", e).on("click", function () { e.remove(); });
         e.appendTo("body").fadeIn(250);
     },
@@ -3562,7 +3708,23 @@ window.confirm = {
         $('<div class="multi-value-header">Dock flights into ' + carrier.name + '</div>').prependTo(e);
         var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
 
-        if (pending.length === 0) {
+        //LCV Rails: a deploy-docked LCV (pendingLcvDeployStartOrders) is a full
+        //ship, not a flight, so it never appears in the fighter `pending` list.
+        //Count its rails up-front so the empty-state guard below stays open when
+        //the ONLY thing to manage is an LCV un-dock. The actual rows + commit are
+        //appended after the fighter rows further down.
+        var lcvDeployRailCount = 0;
+        if (Array.isArray(carrier.systems) && window.isLCVRailSystem) {
+            carrier.systems.forEach(function (s) {
+                if (window.isLCVRailSystem(s)
+                    && Array.isArray(s.pendingLcvDeployStartOrders)
+                    && s.pendingLcvDeployStartOrders.length > 0) {
+                    lcvDeployRailCount++;
+                }
+            });
+        }
+
+        if (pending.length === 0 && lcvDeployRailCount === 0) {
             $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">No Hangar Operations available.</span></div>').appendTo(container);
             //Hide OK — there's nothing to commit. Cancel just closes.
             $('.confirmok', e).hide();
@@ -3571,7 +3733,11 @@ window.confirm = {
             return;
         }
 
-        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Check flights to dock into a hangar bay instead of placing on the map.</span></div>').appendTo(container);
+        //Only the fighter-dock instruction when there ARE fighter flights to dock
+        //(an LCV-only dialog skips it — its own "LCV Rails" section header suffices).
+        if (pending.length > 0) {
+            $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">Check flights to dock into a hangar bay instead of placing on the map.</span></div>').appendTo(container);
+        }
 
         //Live per-hangar capacity readout. Recomputed on every checkbox/dropdown
         //change so the player sees overflow before pressing OK. Without this the
@@ -3580,7 +3746,7 @@ window.confirm = {
         //the hangar — the server then silently dropped the overflow with a fail
         //note, leaving the player confused about why fewer fighters docked.
         var $capacityHeader = $('<div class="multi-value-row hangarCapacityHeader" style="font-style:normal;"></div>');
-        container.append($capacityHeader);
+        if (pending.length > 0) container.append($capacityHeader);
 
         //Base free per hangar (treats reservations from flights NOT in the
         //dialog as committed; reservations from flights IN the dialog are
@@ -3685,12 +3851,17 @@ window.confirm = {
             rowData.push(row);
         });
 
-        if (rowData.length === 0) {
+        //LCV Rails: fold in an un-dock section for any LCV deploy-docked onto a
+        //rail this session (Issue 1 — previously the only way to release a
+        //deploy-docked LCV was a page refresh). Unchecking + OK releases it.
+        var lcvDeploySection = window.confirm.appendLcvDeployDockSection(container, carrier);
+
+        if (rowData.length === 0 && lcvDeploySection.count === 0) {
             e.remove();
             return;
         }
 
-        recomputeCapacity();      //seed the header with the pre-checked state on open
+        if (pending.length > 0) recomputeCapacity();      //seed the header with the pre-checked state on open (fighters only)
 
         $(".confirmok", e).on("click", function () {
             //Issue 1: aggregate the user's selections per hangar and reject if
@@ -3753,6 +3924,11 @@ window.confirm = {
                 }
                 queueDeployStartOrder(hangar, flight, carrier);
             });
+
+            //LCV Rails: apply any LCV un-dock selections (unchecked rails release
+            //their deploy-docked LCV back onto the map). No overflow guard — each
+            //rail holds at most one LCV and we only ever remove here.
+            lcvDeploySection.commit();
 
             e.remove();
             if (typeof window.refreshDeploymentUIForDeployStart === 'function') {

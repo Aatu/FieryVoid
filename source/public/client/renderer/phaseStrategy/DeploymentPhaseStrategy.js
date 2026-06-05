@@ -99,9 +99,15 @@ window.DeploymentPhaseStrategy = function () {
                 return gamedata.isTerrain(s.shipSizeClass, s.userid) || (s.Huge > 0 && s.Huge <= 3);
             });
 
+            //LCVs are the smallest vessels and must be able to share the carrier's
+            //hex to dock, so they're exempt from the "no two ships in one hex" block
+            //(like mines/fighters). Terrain still blocks them.
+            var selIsLcvUnit = !this.selectedShip.flight && !this.selectedShip.mine
+                && String(this.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
+
             if (hasTerrain) {
                 isBlocked = true;
-            } else if (!(this.selectedShip.mine || this.selectedShip.flight)) {
+            } else if (!(this.selectedShip.mine || this.selectedShip.flight || selIsLcvUnit)) {
                 isBlocked = shipsInHex.some(function (s) { return !(s.mine || s.flight); });
             }
 
@@ -187,8 +193,17 @@ window.DeploymentPhaseStrategy = function () {
                 isPlacedOnMap = ship.movement[0].commit === true;
             }
 
+            //LCVs are the smallest vessels: like mines/fighters they may share a hex,
+            //so a click on a hex already holding a ship must still surface the
+            //SelectFromShips popup (which offers DEPLOY LCV HERE + the cyan DOCK
+            //button when a valid LCV carrier shares the hex). Without this the LCV
+            //falls through to plain ship-selection and the player can never reach
+            //the popup over an occupied hex.
+            var selIsLcvUnit = !this.selectedShip.flight && !this.selectedShip.mine
+                && String(this.selectedShip.hangarRequired || '').toLowerCase() === 'lcvs';
+
             var isTerrain = gamedata.isTerrain(ship.shipSizeClass, ship.userid) || (ship.Huge > 0 && ship.Huge <= 3);
-            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight)) {
+            if (!isTerrain && isPlacedOnMap && (this.selectedShip.mine || this.selectedShip.flight || ship.mine || ship.flight || selIsLcvUnit)) {
                 // Ensure we only ever show the deployment stacking pop-up if the clicked location is actually 
                 // a valid, legal deployment drop for our CURRENTLY selected piece.
                 // This implicitly strips the pop-up out of the "deployment bay" clicking interaction.
@@ -595,6 +610,18 @@ window.DeploymentPhaseStrategy = function () {
     // Expose full-deployment validation so MineDeployment.js can gate the commit button correctly
     window.validateAllDeploymentGlobal = function (gamedataRef, deploymentSprites) {
         return validateAllDeployment(gamedataRef, deploymentSprites);
+    };
+
+    // Expose single-ship deployment-position validation (uses the active
+    // deployment sprite list). Used by SelectFromShips to decide whether the
+    // "DEPLOY HERE" button is legal for an LCV clicked onto an occupied hex —
+    // the LCV dock shortcut surfaces the popup without pre-validating position,
+    // so the button must self-gate. Fail-soft to false on a missing sprite list.
+    window.validateDeploymentPositionForShip = function (ship, hex) {
+        var sprites = window._deploymentSprites;
+        if (!ship || !sprites) return false;
+        try { return validateDeploymentPosition(ship, hex, sprites); }
+        catch (e) { return false; }
     };
 
     // Hangar Operations Stage 7 deployment-phase dock helpers (window.DeploymentDock

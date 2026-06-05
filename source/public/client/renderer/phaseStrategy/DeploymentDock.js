@@ -34,7 +34,22 @@ window.DeploymentDock = (function () {
         if (shipManager.getTurnDeployed(ship) !== gamedata.turn) return false;
 
         var hangars = collectAllHangars(ship);
-        return hangars.length > 0;
+        if (hangars.length > 0) return true;
+
+        //LCV Rails: a carrier with ONLY LCV rails (no fighter hangar) still needs
+        //the dialog when it holds a deploy-docked LCV, so the player can release it
+        //without a page refresh (Issue 1). Surface the button on that case too.
+        return shipHasDeployDockedLcv(ship);
+    }
+
+    // True if any LCV rail on $ship currently holds a pending deploy-dock LCV.
+    function shipHasDeployDockedLcv(ship) {
+        if (!ship || !Array.isArray(ship.systems)) return false;
+        return ship.systems.some(function (sys) {
+            return isLCVRailSys(sys)
+                && Array.isArray(sys.pendingLcvDeployStartOrders)
+                && sys.pendingLcvDeployStartOrders.length > 0;
+        });
     }
 
     // Stage 16: a Catapult is a dock-capable hangar (name "catapult"). Treat it
@@ -597,15 +612,23 @@ window.DeploymentDock = (function () {
         return freeLcvDeployRails(carrier, reclaimLcvId).length;
     }
 
-    // Queue $lcv to deploy-dock onto $carrier's first free LCV rail. Sets the
-    // rail's pendingLcvDeployStartOrders + the LCV's pendingLcvDeployDock marker.
+    // Queue $lcv to deploy-dock onto a free LCV rail of $carrier. $targetRail
+    // (optional) docks onto that SPECIFIC rail when it's free (the per-rail
+    // picker); omitted/occupied falls back to the first free rail. Sets the rail's
+    // pendingLcvDeployStartOrders + the LCV's pendingLcvDeployDock marker.
     // Returns the chosen rail, or null.
-    function queueLcvDeployDock(carrier, lcv) {
+    function queueLcvDeployDock(carrier, lcv, targetRail) {
         if (!carrier || !lcv) return null;
         if (lcv.pendingLcvDeployDock) unqueueLcvDeployDock(lcv);   //re-route: release old reservation
         var rails = freeLcvDeployRails(carrier, lcv.id);
         if (rails.length === 0) return null;
-        var rail = rails[0];
+        var rail = null;
+        if (targetRail) {
+            //Honour the explicit rail choice only if it's actually among this
+            //carrier's free rails (defends against a stale picker selection).
+            rail = rails.filter(function (r) { return r.id === targetRail.id; })[0] || null;
+        }
+        if (!rail) rail = rails[0];
         if (!Array.isArray(rail.pendingLcvDeployStartOrders)) rail.pendingLcvDeployStartOrders = [];
         rail.pendingLcvDeployStartOrders = [{ shipId: parseInt(lcv.id, 10) }];
         rail.pendingLcvDeployStartOrdersDirty = true;
@@ -615,11 +638,21 @@ window.DeploymentDock = (function () {
     }
 
     // Remove $lcv from any rail's pendingLcvDeployStartOrders and clear its marker.
-    // Idempotent. (No board re-deploy needed — an un-docked LCV simply has no
-    // deploy position yet, so the player places it on the map as normal.)
+    // Idempotent. Snaps the released LCV to the host carrier's CURRENT hex so it
+    // reappears co-located with the carrier (LCVs are now allowed to share the
+    // carrier's hex — see DeploymentPhaseStrategy same-hex exemption); the player
+    // can then move it off or re-dock. Mirrors unqueueDeployStartDock's re-deploy.
     function unqueueLcvDeployDock(lcv) {
         if (!lcv) return;
         var lcvId = parseInt(lcv.id, 10);
+
+        //Capture the host carrier BEFORE clearing the marker — it tells us where
+        //to re-place the LCV.
+        var carrier = null;
+        if (lcv.pendingLcvDeployDock && lcv.pendingLcvDeployDock.carrierId != null) {
+            carrier = gamedata.getShip(lcv.pendingLcvDeployDock.carrierId);
+        }
+
         for (var key in gamedata.ships) {
             var s = gamedata.ships[key];
             if (!s || !Array.isArray(s.systems)) continue;
@@ -636,12 +669,26 @@ window.DeploymentDock = (function () {
             });
         }
         delete lcv.pendingLcvDeployDock;
+
+        //Re-deploy the LCV at the carrier's current hex so its icon reappears there
+        //(same-hex placement is allowed for LCVs). shipManager.movement.deploy is
+        //idempotent: it updates the existing deploy entry or creates one.
+        if (carrier && typeof shipManager.movement !== 'undefined'
+            && typeof shipManager.movement.deploy === 'function') {
+            try {
+                var carrierPos = shipManager.getShipPosition(carrier);
+                if (carrierPos) shipManager.movement.deploy(lcv, carrierPos);
+            } catch (e) {
+                //fail-soft: a missing position shouldn't break the un-queue
+            }
+        }
     }
 
     return {
         shipHasOpenableDockDialog:    shipHasOpenableDockDialog,
         carrierAcceptsLcvDeployDock:  carrierAcceptsLcvDeployDock,
         freeLcvDeployRailCount:       freeLcvDeployRailCount,
+        freeLcvDeployRails:           freeLcvDeployRails,
         queueLcvDeployDock:           queueLcvDeployDock,
         unqueueLcvDeployDock:         unqueueLcvDeployDock,
         collectUsableHangars:         collectUsableHangars,
