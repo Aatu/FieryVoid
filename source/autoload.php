@@ -1434,6 +1434,7 @@ spl_autoload_register(
 //				'choukaraiderreclumcfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumCFighter.php',
 //				'choukaraiderreclumdfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumDFighter.php',
 				'choukaraiderreclumdfighteram' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumDFighterAM.php',
+				'choukaraiderwraithbladefighteram' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderWraithbladeFighterAM.php',
 				'choukaraiderwrathwarship' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderWrathWarship.php',
 				
 
