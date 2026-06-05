@@ -1427,6 +1427,13 @@ class HangarOps {
 	 * from $activeShips, so docked craft on a dead carrier neither rearm nor tick.
 	 */
 	public static function serviceDockedFlights($hangar, $carrier, $gamedata){
+		//LCV Rails do NOT rearm a docked LCV. Unlike a docked FighterFlight, a docked
+		//LCV is a whole ship parked on the rail (tracked via $lcvDocked, NOT the
+		//$hangarUsage stash this method services), so it would never be reached here
+		//anyway — but LCV rails extend Hangar, so guard explicitly in case a future
+		//change ever routes one through the fighter pipeline. LCVs reload only by
+		//launching and re-docking through their own movement, not while docked.
+		if (!empty($hangar->isLCVRail)) return;
 		if ($hangar->isDestroyed() || empty($hangar->hangarUsage)) return;
 		$isRail = !empty($hangar->isRail);
 		foreach ($hangar->hangarUsage as $entry){
