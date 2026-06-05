@@ -1,15 +1,15 @@
 <?php
-class VelraxSevashRefit extends MediumShip{
+class VelraxSevashRefitRail extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 320;
         $this->faction = "Nexus Velrax Republic";
-        $this->phpclass = "VelraxSevashRefit";
+        $this->phpclass = "VelraxSevashRefitRail";
         $this->imagePath = "img/ships/Nexus/velraxSevash.png";
         $this->shipClass = "Sevash Escort Carrier (2108)";
-			$this->variantOf = "NONE";
+			$this->variantOf = "Sathrin Border Frigate (2108)";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;
@@ -33,9 +33,10 @@ class VelraxSevashRefit extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 14, 5, 5));
         $this->addPrimarySystem(new Engine(3, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(1, 8, 6));
+        $this->addPrimarySystem(new Hangar(1, 2, 2));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 12, 0, 5, 4));        
+		$this->addPrimarySystem(new FighterRail(4, 6, 6, 0, 'normal'));
         
 		$this->addFrontSystem(new LaserLance(3, 5, 4, 240, 60));
 		$this->addFrontSystem(new LaserLance(3, 5, 4, 300, 120));
