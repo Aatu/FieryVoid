@@ -1,15 +1,15 @@
 <?php
-class QomYominQortalKya extends BaseShip{
+class QomYominQortalKyaRail extends BaseShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 660;
 	$this->faction = "Nexus Makar Federation";
-        $this->phpclass = "QomYominQortalKya";
+        $this->phpclass = "QomYominQortalKyaRail";
         $this->imagePath = "img/ships/Nexus/makar_qortalmoro2.png";
         $this->shipClass = "Qortal Kya Drone Carrier";
-			$this->variantOf = "NONE";
+			$this->variantOf = "Qortal Moro Explorer (2109)";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;
 		$this->canvasSize = 175; 
@@ -38,7 +38,7 @@ class QomYominQortalKya extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 25, 0, 2));
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
  		$this->addPrimarySystem(new ELINTScanner(4, 16, 6, 9));
-		$this->addPrimarySystem(new Hangar(2, 22, 18));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
         $this->addPrimarySystem(new Engine(4, 23, 0, 6, 3));
 
 		//Need this to boost the Qom Yomin ramming factor to account for all of the water on board
@@ -68,6 +68,9 @@ class QomYominQortalKya extends BaseShip{
 		$this->addLeftSystem(new NexusWaterCaster(3, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusLightChargeCannon(3, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusPlasmaCharge(3, 7, 4, 240, 360));
+		$this->addLeftSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addLeftSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addLeftSystem(new FighterRail(4, 3, 3, 0, 'normal'));
 
 		$this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 		$this->addRightSystem(new HKControlNode(3, 10, 2, 2));
@@ -75,6 +78,9 @@ class QomYominQortalKya extends BaseShip{
 		$this->addRightSystem(new NexusWaterCaster(3, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusLightChargeCannon(3, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusPlasmaCharge(3, 7, 4, 0, 120));
+		$this->addRightSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addRightSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addRightSystem(new FighterRail(4, 3, 3, 0, 'normal'));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 46));

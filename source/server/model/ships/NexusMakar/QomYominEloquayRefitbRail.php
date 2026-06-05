@@ -1,16 +1,16 @@
 <?php
-class QomYominEloquayRefitb extends MediumShip{
+class QomYominEloquayRefitbRail extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 315;
         $this->faction = "Nexus Makar Federation";
-        $this->phpclass = "QomYominEloquayRefitb";
+        $this->phpclass = "QomYominEloquayRefitbRail";
         $this->imagePath = "img/ships/Nexus/makar_eloquay2.png";
         $this->shipClass = "Eloquay Drone Frigate (2023)";
-			$this->variantOf = "NONE";
-//			$this->occurence = "common";
+			$this->variantOf = "Sorol Ma Light Scout (2015)";
+			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 80;
 	    $this->isd = 2023;
@@ -39,6 +39,8 @@ class QomYominEloquayRefitb extends MediumShip{
 		$this->addPrimarySystem(new NexusWaterCaster(3, 4, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));   
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addPrimarySystem(new FighterRail(4, 3, 3, 0, 'normal'));
 
 		//Need this to boost the Qom Yomin ramming factor to account for all of the water on board
 		//Qom Yomin manned units typically have a +33% to ram
@@ -55,7 +57,7 @@ class QomYominEloquayRefitb extends MediumShip{
 		$this->addAftSystem(new NexusLightChargeCannon(3, 4, 1, 180, 60));
 		$this->addAftSystem(new NexusLightChargeCannon(3, 4, 1, 0, 360));
 		$this->addAftSystem(new NexusLightChargeCannon(3, 4, 1, 300, 180));
-		$this->addAftSystem(new Hangar(2, 8, 6));
+		$this->addAftSystem(new Hangar(2, 2, 2));
 		$this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
         $this->addAftSystem(new Thruster(3, 10, 0, 3, 2));    
         

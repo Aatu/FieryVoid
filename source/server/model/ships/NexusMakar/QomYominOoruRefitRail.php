@@ -1,26 +1,26 @@
 <?php
-class QomYominOoru extends HeavyCombatVesselLeftRight{
+class QomYominOoruRefitRail extends HeavyCombatVesselLeftRight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 440;
-        $this->faction = "Nexus Makar Federation (early)";
-        $this->phpclass = "QomYominOoru";
+        $this->pointCost = 470;
+        $this->faction = "Nexus Makar Federation";
+        $this->phpclass = "QomYominOoruRefitRail";
         $this->imagePath = "img/ships/Nexus/makar_mayol.png";
 		$this->canvasSize = 105; //img has 200px per side
-        $this->shipClass = "Ooru Drone Destroyer";
-			$this->variantOf = "NONE";
+        $this->shipClass = "Ooru Drone Destroyer (2109)";
+			$this->variantOf = "Ma Yol Heavy Destroyer (2109)";
 			$this->occurence = "common";
 		$this->unofficial = true;
-        $this->isd = 2053;
+        $this->isd = 2109;
 
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>6, "light"=>6);
 
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';
 		$this->notes .= '<br>Ramming damage is +33% greater due to large quantities of on board water.';
-		$this->notes .= '<br>Design using the original plasma charge.';
+//		$this->notes .= '<br>Design using the original plasma charge.';
 		$this->enhancementOptionsDisabled[] = 'SLUGGISH';
 
         $this->forwardDefense = 15;
@@ -46,21 +46,23 @@ class QomYominOoru extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new Engine(4, 18, 0, 6, 3));
         $this->addAftSystem(new Thruster(3, 13, 0, 6, 1));
         $this->addAftSystem(new Thruster(3, 15, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(2, 14, 12));
+		$this->addPrimarySystem(new Hangar(2, 10, 6));
 		
         $this->addLeftSystem(new Thruster(3, 15, 0, 6, 3));
-		$this->addLeftSystem(new EWHeavyRocketLauncher(3, 6, 2, 300, 60));
+		$this->addLeftSystem(new NexusRAMLauncher(3, 8, 4, 300, 60));
 		$this->addLeftSystem(new NexusLightChargeCannon(3, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusLightChargeCannon(3, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusLightChargeCannon(3, 4, 1, 180, 360));
 		$this->addLeftSystem(new NexusWaterCaster(1, 4, 1, 180, 360));
+		$this->addLeftSystem(new FighterRail(4, 3, 3, 0, 'light'));
 		
         $this->addRightSystem(new Thruster(3, 15, 0, 6, 4));
-		$this->addRightSystem(new EWHeavyRocketLauncher(3, 6, 2, 300, 60));
+		$this->addRightSystem(new NexusRAMLauncher(3, 8, 4, 300, 60));
 		$this->addRightSystem(new NexusLightChargeCannon(3, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusLightChargeCannon(3, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusLightChargeCannon(3, 4, 1, 0, 180));
 		$this->addRightSystem(new NexusWaterCaster(1, 4, 1, 0, 180));
+		$this->addRightSystem(new FighterRail(4, 3, 3, 0, 'light'));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addLeftSystem(new Structure( 4, 48));

@@ -1,5 +1,5 @@
 <?php
-class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
+class MakarSraeloonRefit2Rail extends SmallStarBaseFourSections{
 
 	function __construct($id, $userid, $name,  $slot){
 		parent::__construct($id, $userid, $name,  $slot);
@@ -8,13 +8,12 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 		$this->base = true;
 		$this->smallBase = true;
 		$this->faction = "Nexus Makar Federation";
-		$this->phpclass = "MakarSraeloonRefit2";
+		$this->phpclass = "MakarSraeloonRefit2Rail";
 		$this->shipClass = "Sraeloon Station (2108)";
 		$this->imagePath = "img/ships/Nexus/makar_base.png";
 		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2108;
-        $this->variantOf = "NONE";
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = false;
@@ -40,56 +39,56 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 		
 		$this->addFrontSystem(new NexusLightXRayLaser(4, 3, 1, 270, 90));
 		$this->addFrontSystem(new EWRangedDualHeavyRocketLauncher(4, 8, 4, 270, 90));
-		//$this->addFrontSystem(new Hangar(4, 1));
-		//$this->addFrontSystem(new CargoBay(4, 26));
+		$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addFrontSystem(new FighterRail(4, 3, 3, 0, 'normal'));
 
 			$cargoBay = new CargoBay(4, 26);
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
 			$this->addFrontSystem($cargoBay);
-			$hangar = new Hangar(4, 7, 6);
+			$hangar = new Hangar(4, 1, 1);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);
-					
+
 		$this->addAftSystem(new NexusLightXRayLaser(4, 3, 1, 90, 270));
 		$this->addAftSystem(new EWRangedDualHeavyRocketLauncher(4, 8, 4, 90, 270));
-		//$this->addAftSystem(new Hangar(4, 1));
-		//$this->addAftSystem(new CargoBay(4, 26));
+		$this->addAftSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addAftSystem(new FighterRail(4, 3, 3, 0, 'normal'));
 
 			$cargoBay = new CargoBay(4, 26);
 			$cargoBay->startArc = 90;
 			$cargoBay->endArc = 270;
 			$this->addAftSystem($cargoBay);
-			$hangar = new Hangar(4, 7, 6);
+			$hangar = new Hangar(4, 1, 1);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
 			$this->addAftSystem($hangar);
 					
 		$this->addLeftSystem(new NexusLightXRayLaser(4, 3, 1, 180, 360));
 		$this->addLeftSystem(new EWRangedDualHeavyRocketLauncher(4, 8, 4, 180, 360));
-		//$this->addLeftSystem(new Hangar(4, 1));
-		//$this->addLeftSystem(new CargoBay(4, 26));
+		$this->addLeftSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addLeftSystem(new FighterRail(4, 3, 3, 0, 'normal'));
 
 			$cargoBay = new CargoBay(4, 26);
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 360;
 			$this->addLeftSystem($cargoBay);
-			$hangar = new Hangar(4, 7, 6);
+			$hangar = new Hangar(4, 1, 1);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
 			$this->addLeftSystem($hangar);
 		
 		$this->addRightSystem(new NexusLightXRayLaser(4, 3, 1, 0, 180));
 		$this->addRightSystem(new EWRangedDualHeavyRocketLauncher(4, 8, 4, 0, 180));
-		//$this->addRightSystem(new Hangar(4, 1));
-		//$this->addRightSystem(new CargoBay(4, 26));
+		$this->addRightSystem(new FighterRail(4, 3, 3, 0, 'normal'));
+		$this->addRightSystem(new FighterRail(4, 3, 3, 0, 'normal'));
 
 			$cargoBay = new CargoBay(4, 26);
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
 			$this->addRightSystem($cargoBay);
-			$hangar = new Hangar(4, 7, 6);
+			$hangar = new Hangar(4, 1, 1);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
 			$this->addRightSystem($hangar);
