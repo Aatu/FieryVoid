@@ -1428,6 +1428,8 @@ spl_autoload_register(
 				'choukaraiderhighwaymanb_nocargo' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderHighwaymanB_NoCargo.php',
 //				'choukaraideroathbreaker' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOathbreaker.php',
 				'choukaraideroathbreakerrail' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOathbreakerRail.php',
+				'choukaraideroutlawa' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOutlawA.php',
+				'choukaraideroutlawb' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOutlawB.php',
 				'choukaraiderpillagerbp' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderPillagerBP.php',
 //				'choukaraiderreclumafighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumAFighter.php',
 //				'choukaraiderreclumbfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumBFighter.php',
