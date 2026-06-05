@@ -1,18 +1,18 @@
 <?php
-class ChoukaSinnerCorvette extends MediumShip{
+class ChoukaRaiderGambler extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 200;
-        $this->faction = "Escalation Wars Chouka Theocracy";
-        $this->phpclass = "ChoukaSinnerCorvette";
-        $this->imagePath = "img/ships/EscalationWars/ChoukaSinner.png";
-        $this->shipClass = "Sinner Corvette";
+        $this->faction = "Escalation Wars Chouka Raider";
+        $this->phpclass = "ChoukaRaiderGambler";
+        $this->imagePath = "img/ships/EscalationWars/ChoukaRaiderGambler.png";
+        $this->shipClass = "Gambler Blockade Runner";
 		$this->unofficial = true;
         $this->agile = true;		
         $this->canvasSize = 75;
-	    $this->isd = 1875;
+	    $this->isd = 1903;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 10;
@@ -24,17 +24,17 @@ class ChoukaSinnerCorvette extends MediumShip{
         $this->pivotcost = 1;
         $this->iniativebonus = 60;
          
-		$this->addPrimarySystem(new Reactor(3, 9, 0, 0));
+		$this->addPrimarySystem(new Reactor(3, 9, 0, 2));
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 7, 4, 4));
-        $this->addPrimarySystem(new Engine(3, 11, 0, 6, 2));
+        $this->addPrimarySystem(new Engine(3, 11, 0, 6, 1));
         $this->addPrimarySystem(new Hangar(2, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
-        
+ 		$this->addPrimarySystem(new CargoBay(2, 20));
+		$this->addPrimarySystem(new CargoBay(2, 20));
+       
 		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 240, 60));
-        $this->addFrontSystem(new EWHeavyPlasmaGun(2, 5, 3, 240, 360));
-        $this->addFrontSystem(new EWHeavyPlasmaGun(2, 5, 3, 0, 120));
 		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 300, 120));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
