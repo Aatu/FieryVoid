@@ -510,8 +510,24 @@ shipManager.power = {
 			return true;
 		}
 
+		//Treat an active cooldown / forced-shutdown crit as offline directly, not just
+		//via the type:1 power entry. That entry is only created for OWN ships (in
+		//applyForcedOfflineEntry / setPowerClasses), so without this an OPPONENT would
+		//see an enemy's cooling weapon (SurgeBlaster/SurgeCannon/ResonanceGenerator/
+		//burst-beam) as online during initial orders. These crits can't be cleared by
+		//the owner (we block re-enable), so they're safe to render offline for everyone.
+		//Mirrors the ForcedOfflineOneTurn handling above. (All callers pass gamedata.turn,
+		//so this only ever affects the current turn — the firing turn is excluded because
+		//the crit isn't present client-side until the turn after firing.)
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) {
+			return true;
+		}
+		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineForTurns", turn)) {
+			return true;
+		}
+
 		/* Marcin Sawicki - I _think_ this condition may be skipped
-		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){ 
+		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){
 			return true;
 		}
 		*/
