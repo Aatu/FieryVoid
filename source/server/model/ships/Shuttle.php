@@ -66,11 +66,17 @@ class Shuttle extends FighterFlight
     public function getImage()
     {
         switch ($this->faction) {
-            case 'Abbai Matriarchate':   
-                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png');                         
+            case 'Abbai Matriarchate':  
+            case 'Abbai Matriarchate (WotCR)':    
+                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png');  
+            case 'Centauri Republic':
+            case 'Centauri Republic (WotCR)': 
+                return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent.png');                                                        
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
+            case 'Narn Regime':
+                return array('img/ships/ShuttleNarn.png', 'img/ships/ShuttleNarn_large.png');                    
             default:
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
