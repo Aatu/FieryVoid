@@ -2700,3 +2700,37 @@ Three carrier-side dialog bugs (all client-only, confirm.js + shipTooltipFireMen
    AND no pending dock order. Known pre-existing (NOT fixed, out of scope): a queued
    LCV *launch* can't be un-declared from the launch dialog because `lcvRailLaunchable`
    filters out rails with `pendingLcvLaunchOrders` (same as the original shape).
+
+### Per-hangar default-shuttle opt-out — `$excludeFromDefaultShuttles` (2026-06-06)
+
+**Fringe case.** ScoravarefittedAM has two location-0 (primary) hangars: a 26-box
+medium-fighter bay and a 6-box heavy/normal-fighter bay. `fighters = medium 24 +
+normal 6 = 30` declared against 32 boxes → **2 leftover default shuttles**. The
+distribution logic (`distributionHangars` + `pickHangarForShuttle` least-used) split
+those 2 shuttles 1+1 across the two primary bays, so a stray shuttle in the 6-box bay
+blocked a full 6-flight of heavy fighters from docking.
+
+**Fix (NOT a new exclusion class).** New Hangar constructor flag
+`$excludeFromDefaultShuttles` (7th positional arg, after `$spawnableClasses`) +
+public property of the same name. Unlike catapult/rail exclusion — which drops boxes
+from the pool **wholesale** so the leftover COUNT shrinks — a flagged bay's boxes
+**still count toward total capacity**, so `getDefaultShuttles` / `getTotalHangarCapacity`
+are untouched and the ship still gets its 2 shuttles. Only the *placement* steers
+away: the shuttles pile into the other hangar(s), leaving the flagged bay free.
+
+- Server: `HangarOps::excludesDefaultShuttles($hangar)` (catapult/rail short-circuit
+  to false, then reads the flag). `distributionHangars` drops flagged bays from the
+  eligible set FIRST (before primary/shuttle-only narrowing), guarded so an
+  all-flagged ship still places shuttles somewhere. `pickHangarForShuttle`'s overflow
+  fallback skips flagged bays too (so they get nothing even once eligible bays fill).
+- Client mirror (`systems.js`): `excludesDefaultShuttles` helper +
+  `getDefaultShuttleCompositionForHangar` gains an `anyEligible`/`eligible()` filter
+  feeding `hasPrimary`/`inSet`/`per[].excluded`, matching the server (incl. the
+  all-flagged guard and the overflow skip).
+- Serialized via Hangar `stripForJson` (`excludeFromDefaultShuttles` bool) so the
+  client lobby tooltip matches the in-game initial population.
+- Applied to ScoravarefittedAM's 6-box bay: `new Hangar(2, 6, 6, 0, 'fighters',
+  array(), true)`. Result: 26-box bay holds 24 medium + 2 shuttles (full); 6-box bay
+  holds a clean 6 heavy fighters.
+
+Not yet Docker-tested (no local PHP; user tests via Docker).

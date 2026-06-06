@@ -410,8 +410,11 @@ class HangarOps {
 			}
 		}
 		if ($best !== null) return $best;
-		//Preferred set full — overflow to any remaining hangar in encounter order.
+		//Preferred set full — overflow to any remaining hangar in encounter
+		//order, but still skip $excludeFromDefaultShuttles bays so a flagged
+		//hangar never receives shuttles even once the eligible ones fill.
 		foreach ($hangars as $h){
+			if (self::excludesDefaultShuttles($h)) continue;
 			if ((int)$h->maxhealth - self::occupiedBoxes($h) >= $flightSize) return $h;
 		}
 		return null;
@@ -436,16 +439,44 @@ class HangarOps {
 	 * loop), once the shuttle bays are full. Ships with no shuttle-tagged hangar
 	 * (the overwhelming majority) are unaffected. */
 	public static function distributionHangars($hangars){
-		$primary = array();
+		//Hangars flagged $excludeFromDefaultShuttles (e.g. ScoravarefittedAM's
+		//dedicated heavy-fighter bay) are steered out of the default-shuttle
+		//distribution: their boxes STILL count toward total capacity (so the
+		//leftover-shuttle COUNT is unchanged), but the shuttles themselves pile
+		//into the other hangar(s), leaving the flagged bay free for a full
+		//fighter flight. Dropped first, before primary/shuttle-only narrowing,
+		//and also skipped in pickHangarForShuttle's overflow fallback so they
+		//never receive shuttles even when the eligible hangars fill. Guarded so
+		//a ship whose hangars are ALL flagged still places shuttles somewhere.
+		$eligible = array();
 		foreach ($hangars as $h){
+			if (!self::excludesDefaultShuttles($h)) $eligible[] = $h;
+		}
+		if (empty($eligible)) $eligible = $hangars;
+
+		$primary = array();
+		foreach ($eligible as $h){
 			if ((int)$h->location === 0) $primary[] = $h;
 		}
-		$set = !empty($primary) ? $primary : $hangars;
+		$set = !empty($primary) ? $primary : $eligible;
 		$shuttleOnly = array();
 		foreach ($set as $h){
 			if (self::isShuttleOnlyHangar($h)) $shuttleOnly[] = $h;
 		}
 		return !empty($shuttleOnly) ? $shuttleOnly : $set;
+	}
+
+	/* True when a hangar opts out of receiving default shuttles (Hangar
+	 * constructor's $excludeFromDefaultShuttles flag). Unlike catapult/rail
+	 * exclusion, the flagged hangar's boxes STILL count toward total hangar
+	 * capacity — only the placement of auto-populated shuttles avoids it, so
+	 * the leftover-shuttle COUNT is unchanged but they steer into the other
+	 * hangar(s). Catapults/rails are excluded from the shuttle pool wholesale
+	 * elsewhere and never reach this flag. Mirrored client-side in systems.js
+	 * (excludesDefaultShuttles). */
+	public static function excludesDefaultShuttles($hangar){
+		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail)) return false;
+		return !empty($hangar->excludeFromDefaultShuttles);
 	}
 
 	/* True when a hangar was explicitly designated in its ship file as a

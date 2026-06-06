@@ -2939,6 +2939,17 @@ class Hangar extends ShipSystem{
 
 	// === Hangar Operations (B5W §10.1) ===
 	public $hangarType = 'fighters';      //category key matching FighterFlight->hangarRequired and ship->fighters keys
+	//Steers the auto-populated default-shuttle pool AWAY from this hangar
+	//(set via the constructor's $excludeFromDefaultShuttles arg). The bay's
+	//boxes still count toward total hangar capacity — so the leftover-shuttle
+	//COUNT is unchanged — but the shuttles pile into the ship's other
+	//hangar(s), leaving this one free for a full fighter flight. Used by
+	//ships with a dedicated heavy-fighter bay (e.g. ScoravarefittedAM) where
+	//a stray shuttle would otherwise block a full 6-flight from docking.
+	//Honoured server-side by HangarOps::excludesDefaultShuttles and mirrored
+	//client-side in systems.js. Distinct from catapult/rail exclusion, which
+	//drops the boxes from the pool entirely.
+	public $excludeFromDefaultShuttles = false;
 	public $direction = 0;                //0..5 hex offset from carrier facing on launch (0 = same heading)
 	//Stage 8.5: optional list of allowed launch directions for hangars whose
 	//bays open onto multiple arcs (e.g. EA Hyperion: ports out either side, so
@@ -3000,7 +3011,7 @@ class Hangar extends ShipSystem{
 	public $pendingDeployStartTransfer = null; //Stage 7: deployment-phase dock payload; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt docked flights from movement validation BEFORE notes are generated.
 	public $pendingLcvDeployStartTransfer = null; //LCV deploy-dock payload from client; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt deploy-docked LCVs from movement validation.
 
-    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters',  $spawnableClasses = array()){
+    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters',  $spawnableClasses = array(), $excludeFromDefaultShuttles = false){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the msot typical capacity)
 			//$output = floor($maxhealth/6)*6;
 			$output = 6;
@@ -3014,6 +3025,7 @@ class Hangar extends ShipSystem{
 			$hangarType = 'fighters';
 		}
 		$this->hangarType = $hangarType;
+		$this->excludeFromDefaultShuttles = (bool)$excludeFromDefaultShuttles;
 		$this->direction = (int)$direction;
 		//Always include the generic shuttle classes — every hangar can launch
 		//shuttles per B5W §10.1, and these are faction-agnostic. Faction-specific
@@ -3647,6 +3659,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
 		$strippedSystem->isRail = !empty($this->isRail);           //Fighter Rails: rail discriminator (false for ordinary hangars/catapults)
 		$strippedSystem->isLCVRail = !empty($this->isLCVRail);     //LCV Rails: whole-ship dock discriminator (false for ordinary hangars)
+		$strippedSystem->excludeFromDefaultShuttles = !empty($this->excludeFromDefaultShuttles); //steers default shuttles away from this bay (boxes still count toward capacity)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;

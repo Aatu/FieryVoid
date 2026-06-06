@@ -442,6 +442,18 @@ shipManager.systems = {
         return false;
     },
 
+    //Mirror of HangarOps::excludesDefaultShuttles: a hangar flagged
+    //excludeFromDefaultShuttles (e.g. ScoravarefittedAM's heavy-fighter bay)
+    //is steered OUT of the default-shuttle distribution — its boxes still
+    //count toward total capacity (so the leftover COUNT is unchanged) but the
+    //shuttles pile into the other hangar(s). Catapults/rails are excluded from
+    //the pool wholesale elsewhere and never reach this flag.
+    excludesDefaultShuttles: function excludesDefaultShuttles(hangar) {
+        if (!hangar) return false;
+        if (hangar.isCatapult || hangar.isRail || hangar.isLCVRail) return false;
+        return !!hangar.excludeFromDefaultShuttles;
+    },
+
     //Lowercased set of ship.fighters category keys (e.g. "light") that ride this
     //ship's rails. Returns a plain object used as a membership set.
     railFighterCategories: function railFighterCategories(ship) {
@@ -646,9 +658,22 @@ shipManager.systems = {
         //Several primary hangars (e.g. Pirocia's three) share the pool evenly
         //(2+2+2); a lone primary still shows the whole pool. Side hangars on a
         //ship that has primaries get only overflow once the primaries are full.
+        //
+        //$excludeFromDefaultShuttles bays are dropped from the eligible set
+        //first (mirrors HangarOps::distributionHangars / excludesDefaultShuttles):
+        //their boxes still count in capacity, but shuttles steer to the other
+        //hangar(s). Guarded so a ship whose hangars are ALL flagged still places
+        //shuttles somewhere (fall back to treating none as excluded).
+        var anyEligible = false;
+        for (var ei = 0; ei < hangars.length; ei++) {
+            if (!shipManager.systems.excludesDefaultShuttles(hangars[ei])) { anyEligible = true; break; }
+        }
+        var eligible = function (hgr) {
+            return anyEligible ? !shipManager.systems.excludesDefaultShuttles(hgr) : true;
+        };
         var hasPrimary = false;
         for (var h = 0; h < hangars.length; h++) {
-            if (parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
+            if (eligible(hangars[h]) && parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
         }
 
         //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if the
@@ -663,6 +688,7 @@ shipManager.systems = {
             return t === "shuttles" || t === "minesweeping shuttles";
         };
         var inSet = function (hgr) {
+            if (!eligible(hgr)) return false;
             return hasPrimary ? (parseInt(hgr.location, 10) === 0) : true;
         };
         var hasShuttleOnly = false;
@@ -677,6 +703,7 @@ shipManager.systems = {
                 max: parseInt(hangars[p].maxhealth, 10) || 0,
                 usage: 0,
                 rows: [],
+                excluded: !eligible(hangars[p]),
                 pref: hasShuttleOnly ? (inSet(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p])
             });
         }
@@ -691,7 +718,11 @@ shipManager.systems = {
                 if (per[i].usage < bestUsage) { bestUsage = per[i].usage; bestIdx = i; }
             }
             if (bestIdx !== -1) return bestIdx;
+            //Overflow: any hangar with room, but still skip excluded bays so a
+            //flagged hangar never receives shuttles even once the eligible ones
+            //fill (mirrors pickHangarForShuttle's guarded fallback loop).
             for (var j = 0; j < per.length; j++) {
+                if (per[j].excluded) continue;
                 if (per[j].max - per[j].usage >= flightSize) return j;
             }
             return -1;
