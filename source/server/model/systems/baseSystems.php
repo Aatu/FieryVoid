@@ -3971,6 +3971,16 @@ class JumpEngine extends ShipSystem{
 		$primaryStruct = $ship->getStructureSystem(0); //If ship is otherwise destroyed also don't jump.
 		if($primaryStruct->isDestroyed()) return;
 
+		//The Jump Engine itself (and the section it sits on) must still be intact THIS turn.
+		//getSystemsByName's isDestroyed() filter only treats a section-mounted system as gone the
+		//turn AFTER its structure dies (B5W "falls off next turn" rule), so a Jump Engine whose host
+		//section was destroyed during this same fire phase would otherwise still complete the jump.
+		//Check directly: if the engine has no health left, or its host structure was destroyed this
+		//turn, the jump fails outright (no functioning drive = no jump).
+		if($this->getRemainingHealth() <= 0) return;
+		$hostStruct = $ship->getStructureSystem($this->location);
+		if($hostStruct && $hostStruct->isDestroyed($gamedata->turn)) return;
+
 		$currHealth = $this->getRemainingHealth();
 		$maxhealth = $this->maxhealth;
 		$healthDiff = $maxhealth - $currHealth;
