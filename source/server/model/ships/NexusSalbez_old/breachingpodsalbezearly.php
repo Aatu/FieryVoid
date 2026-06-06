@@ -1,20 +1,20 @@
 <?php
-class breachingpodsalbez extends FighterFlight{
+class breachingpodsalbezearly extends FighterFlight{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 42*6;
-		$this->faction = "Nexus Sal-bez Coalition";
-        $this->phpclass = "breachingpodsalbez";
-        $this->shipClass = "Ark-ven Breaching Pods";
+		$this->pointCost = 38*6;
+		$this->faction = "Nexus Sal-bez Coalition (early)";
+        $this->phpclass = "breachingpodsalbezearly";
+        $this->shipClass = "Ark-ven Breaching Pods (early)";
 		$this->imagePath = "img/ships/Nexus/salbez_arkven.png";
 
-		$this->isd = 2105;
+		$this->isd = 2007;
         
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
-        $this->freethrust = 7;
+        $this->freethrust = 6;
         $this->offensivebonus = 1;
         $this->jinkinglimit = 0;
         $this->pivotcost = 2; //shuttles have pivot cost higher
@@ -41,7 +41,7 @@ class breachingpodsalbez extends FighterFlight{
         $toAdd = $new - $current;
         for ($i = 0; $i < $toAdd; $i++){
 			
-			$armour = array(3, 2, 2, 2);
+			$armour = array(2, 2, 2, 2);
 			$fighter = new Fighter("breachingpodsalbez", $armour, 21, $this->id);
 			$fighter->displayName = "Ark-ven";
 			$fighter->imagePath = "img/ships/Nexus/salbez_arkven.png";
