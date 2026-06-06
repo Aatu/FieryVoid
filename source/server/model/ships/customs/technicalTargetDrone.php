@@ -9,7 +9,7 @@ class technicalTargetDrone extends VreeCapital
 		$this->pointCost = 5;
 		$this->faction = "Custom Ships";
 		$this->phpclass = "technicalTargetDrone";
-		$this->imagePath = "img/ships/kirishiacLordship2.png";
+		$this->imagePath = "img/ships/EscalationWars/CircasianKalichar.png";
 		$this->canvasSize = 200;
 		$this->shipClass = "Target Drone - DO NOT USE";
 		$this->shipSizeClass = 3;

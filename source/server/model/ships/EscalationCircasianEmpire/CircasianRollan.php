@@ -14,7 +14,7 @@ class CircasianRollan extends BaseShip{
 		$this->unofficial = true;
 		$this->limited = 33;
 
-	$this->isd = 1892;
+		$this->isd = 1892;
         
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
