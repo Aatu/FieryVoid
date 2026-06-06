@@ -12,6 +12,11 @@ window.AnimationStrategy = function () {
         this.shipIconContainer = shipIcons;
         this.turn = turn;
         this.goingBack = false;
+        // Replay fast-forward / rewind: scales how fast totalAnimationTime
+        // advances each frame. 1 = normal speed. Applied to the already
+        // sanitised currentDeltaTime (see updateTotalAnimationTime), so the
+        // >1000ms audio-spam guard in updateDeltaTime is preserved.
+        this.speedMultiplier = 1;
     }
 
     AnimationStrategy.prototype.activate = function () {
@@ -40,16 +45,28 @@ window.AnimationStrategy = function () {
     AnimationStrategy.prototype.back = function () {
         this.goingBack = true;
         this.paused = false;
+        this.speedMultiplier = 1;
     };
 
     AnimationStrategy.prototype.play = function () {
         this.paused = false;
         this.goingBack = false;
+        this.speedMultiplier = 1;
     };
 
     AnimationStrategy.prototype.pause = function () {
         this.paused = true;
         this.goingBack = false;
+        this.speedMultiplier = 1;
+    };
+
+    // Replay fast-forward / rewind. forward=false rewinds. multiplier is the
+    // playback rate (e.g. 2/4/8). multiplier 1 with forward true is identical
+    // to play(); with forward false identical to back().
+    AnimationStrategy.prototype.fastSeek = function (multiplier, forward) {
+        this.paused = false;
+        this.goingBack = !forward;
+        this.speedMultiplier = multiplier;
     };
 
     AnimationStrategy.prototype.isPaused = function () {
@@ -104,10 +121,12 @@ window.AnimationStrategy = function () {
             return;
         }
 
+        var step = this.currentDeltaTime * this.speedMultiplier;
+
         if (this.goingBack) {
-            this.totalAnimationTime -= this.currentDeltaTime;
+            this.totalAnimationTime -= step;
         } else {
-            this.totalAnimationTime += this.currentDeltaTime;
+            this.totalAnimationTime += step;
         }
     }
 
