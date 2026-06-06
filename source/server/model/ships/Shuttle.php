@@ -71,7 +71,9 @@ class Shuttle extends FighterFlight
                 return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png');  
             case 'Centauri Republic':
             case 'Centauri Republic (WotCR)': 
-                return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent.png');                                                        
+                return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
+            case 'Dilgar Imperium': 
+                return array('img/ships/shuttleDilgar.png', 'img/ships/ShuttleDilgar_large.png');                                                                         
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
