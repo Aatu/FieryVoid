@@ -11,7 +11,7 @@ class wlcTigata extends BaseShip{
         $this->shipClass = "Tigata Jump Cruiser";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
-        $this->fighters = array("normal"=>6, "medium"=>6);
+        $this->fighters = array("normal"=>6, "medium"=>6, "flyers"=>2);
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
         $this->turncost = 1.0;
@@ -20,7 +20,7 @@ class wlcTigata extends BaseShip{
         $this->rollcost = 3;
         $this->pivotcost = 4;
         $this->iniativebonus = 5;
-        $this->unofficial = 'S'; //it's custom, but not very far from standard - and greatly enhances options for early Minbari
+        $this->unofficial = true; //it's custom, but not very far from standard - and greatly enhances options for early Minbari
         $this->isd = 1870;
         $this->variantOf ="Tigara Attack Cruiser";
 		

@@ -15,7 +15,7 @@ class ProtectorateTigaraSurvey extends BaseShip{
         $this->shipSizeClass = 3;
         $this->gravitic = true;
 
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>6, "flyers"=>2);
 
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
