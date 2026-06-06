@@ -16,7 +16,7 @@ class BloodSwordLadyofDarkSouls extends BaseShip{
 		$this->unofficial = true;
 		$this->limited = 10;
 
-        $this->fighters = array("normal"=>12, "assault shuttles"=>2, "Yacht"=>1); //2 breaching pods
+        $this->fighters = array("normal"=>12, "Breaching Pods"=> 2, "Yacht"=>1); 
 
 	    $this->notes = 'Elite Crew';
 
