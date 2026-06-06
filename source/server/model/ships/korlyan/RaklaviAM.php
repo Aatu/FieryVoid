@@ -54,7 +54,7 @@ class RaklaviAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 5));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(5, 26));
+		$this->addPrimarySystem(new Hangar(5, 26, 12));
    
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 8, 0, 3, 1));

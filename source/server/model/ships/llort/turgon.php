@@ -29,7 +29,7 @@ class Turgon extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(4, 14));
+        $this->addPrimarySystem(new Hangar(4, 14, 12));
         $this->addPrimarySystem(new JumpEngine(4, 15, 5, 24));
   
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));

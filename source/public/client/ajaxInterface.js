@@ -103,10 +103,21 @@ window.ajaxInterface = {
         this.nextFaction = null;
         this.submiting = true;
 
+        // Cache-bust per faction: append the static JSON file's version (mtime,
+        // emitted into window.factionVersions by gamelobby.php) to the URL. A new
+        // patch regenerates static/json/<faction>.json with a fresh mtime, so the
+        // URL changes and the browser cannot serve a stale cached response —
+        // robust where ETag/Last-Modified revalidation gets skipped (mobile/BFCache).
+        var loaderUrl = 'gamelobbyloader.php';
+        var factionVersion = (window.factionVersions || {})[factionRequest];
+        if (factionVersion) {
+            loaderUrl += '?v=' + encodeURIComponent(factionVersion);
+        }
+
         // Use _doAjaxWithRetry to handle transient 507 errors
         this._doAjaxWithRetry({
             type: 'POST',
-            url: 'gamelobbyloader.php',
+            url: loaderUrl,
             dataType: 'json',
             contentType: 'application/json',
             data: JSON.stringify({ faction: String(factionRequest) }),

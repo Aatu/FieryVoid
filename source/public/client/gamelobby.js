@@ -191,8 +191,11 @@ window.gamedata = {
 			case 'Escalation Wars Civilian':
 				powerRating = 'Tier N/A, Custom';
 				break;
+			case 'Escalation Wars Support Units':
+				powerRating = 'Tier 3; Designs for scenarios, Custom';
+				break;
 			case 'Escalation Wars Chouka Raider':
-				powerRating = 'Tier 2; Not balanced, Custom faction';
+				powerRating = 'Tier 3; Custom faction';
 				break;
 			case 'Escalation Wars Chouka Theocracy':
 				powerRating = 'Tier 2; Custom faction';
@@ -837,7 +840,7 @@ window.gamedata = {
 							}
 						}
 						if (found != true) { //such craft wasn't encountered yet
-							if(h == "minesweeping shuttles") continue; //These are no bought, don't add to checker.
+							if(h == "minesweeping shuttles" || h == "cargo shuttles") continue; //These are not bought, don't add to checker.
 							totalHangarOther.push(new Array(h, amount));
 							smallCraftUsed.push(h);
 						}

@@ -36,7 +36,7 @@ class Tashkava extends BaseShip{
         $this->addPrimarySystem(new Engine(6, 18, 0, 16, 2));
 	$this->addPrimarySystem(new ShieldGenerator(5, 16, 4, 4));
         $this->addPrimarySystem(new JumpEngine(6, 20, 6, 16));
-	$this->addPrimarySystem(new Hangar(6, 3));
+	$this->addPrimarySystem(new Hangar(6, 3, 2));
    
 
 	$this->addFrontSystem(new GraviticShield(0, 6, 0, 3, 240, 0));

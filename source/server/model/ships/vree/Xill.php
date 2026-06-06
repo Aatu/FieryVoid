@@ -28,7 +28,7 @@ class Xill extends VreeCapital{
 		$this->canvasSize = 200;
 
 		$this->addPrimarySystem(new Reactor(6, 18, 0, 0));
-		$this->addPrimarySystem(new Hangar(6, 1));
+		$this->addPrimarySystem(new Hangar(6, 1, 1));
 		$this->addPrimarySystem(new CnC(6, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 14, 9, 10));
         $this->addPrimarySystem(new Engine(6, 16, 0, 9, 2));

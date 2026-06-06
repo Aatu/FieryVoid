@@ -37,7 +37,7 @@ class ChoukaTempleRefitAM extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 24, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(4, 16, 7, 7));
-		$this->addPrimarySystem(new Hangar(4, 16));
+		$this->addPrimarySystem(new Hangar(4, 16, 12));
 		$this->addPrimarySystem(new CargoBay(4, 30));
 		$this->addPrimarySystem(new Quarters(4, 8));
 		$this->addPrimarySystem(new Quarters(4, 8));

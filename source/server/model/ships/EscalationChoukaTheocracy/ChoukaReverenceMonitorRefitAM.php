@@ -40,7 +40,7 @@ class ChoukaReverenceMonitorRefitAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 5, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 5));
-		$this->addPrimarySystem(new Hangar(3, 28));
+		$this->addPrimarySystem(new Hangar(3, 28, 12));
         $this->addPrimarySystem(new ReloadRack(4, 9));
 		
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));

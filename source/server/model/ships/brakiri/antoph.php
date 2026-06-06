@@ -31,7 +31,7 @@ class Antoph extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 6, 7));
         $this->addPrimarySystem(new Engine(5, 14, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new GraviticThruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new GraviticThruster(3, 13, 0, 5, 4));
         $this->addPrimarySystem(new GraviticCannon(4, 6, 5, 240, 0));

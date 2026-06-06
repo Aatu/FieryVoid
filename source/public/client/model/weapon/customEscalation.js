@@ -407,3 +407,22 @@ EWGraviticTractingRod.prototype.checkFinished = function () {
 	if(this.fireOrders.length > 1) return true;
     return false;
 };
+
+var ChoukaMineLauncher = function ChoukaMineLauncher(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ChoukaMineLauncher.prototype = Object.create(Weapon.prototype);
+ChoukaMineLauncher.prototype.constructor = ChoukaMineLauncher; 
+
+ChoukaMineLauncher.prototype.initializationUpdate = function() {
+	var ship = this.ship;	
+    if (this.fireOrders.length > 0) {					
+		var aFireOrder = this.fireOrders[0]; 
+		if(aFireOrder)	aFireOrder.damageclass = 'MultiModeHex';
+	}			        
+	return this;
+};
+
+ChoukaMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
+	return "Mine";
+};

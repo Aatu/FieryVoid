@@ -11,6 +11,7 @@ class JYDLias extends BaseShip{
 		$this->shipClass = "JYD Converted Lias Supply Ship";
 		$this->shipSizeClass = 3;
 			$this->occurence = "unique";
+        $this->variantOf = "NONE";			
 
         $this->fighters = array("light"=>12);
 	    

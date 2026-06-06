@@ -30,7 +30,7 @@ class VelraxVersytheRefit2 extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 16, 6, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 1));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(3, 12, 0, 4, 2));
@@ -39,7 +39,7 @@ class VelraxVersytheRefit2 extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new LaserLance(3, 6, 4, 300, 60));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 180, 60));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 120, 360));
-		$this->addLeftSystem(new Hangar(3, 3));
+		$this->addLeftSystem(new Hangar(3, 3, 3));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
 		$this->addLeftSystem(new ELINTScanner(3, 9, 2, 2));
 		$this->addLeftSystem(new CargoBay(2, 30)); 
@@ -47,7 +47,7 @@ class VelraxVersytheRefit2 extends HeavyCombatVesselLeftRight{
         $this->addRightSystem(new LaserLance(3, 6, 4, 300, 60));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 300, 180));
         $this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 240));
-		$this->addRightSystem(new Hangar(3, 6));
+		$this->addRightSystem(new Hangar(3, 6, 6));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
 		$this->addRightSystem(new ELINTScanner(3, 9, 2, 2));
 		$this->addRightSystem(new Quarters(2, 20)); 

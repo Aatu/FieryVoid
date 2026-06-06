@@ -7,7 +7,83 @@ class Firing
 
     public static function validateFireOrders($fireOrders, $gamedata)
     {
+        //Submit-time corruption guard. A stale client blueprint (out-of-date
+        //staticShips for a phpclass) posts fire orders whose weaponid belongs to
+        //an older system layout — system ids are positional (BaseShip::addSystem
+        //assigns id = current system count), so any change to a ship's system
+        //list shifts every later id and desynchronises older clients. Such orders
+        //either reference a weaponid that no longer exists or one that now maps to
+        //a NON-weapon system (e.g. a Thruster). If written to tac_fireorder they
+        //crash the next game load in getFireOrdersForShips / TacGamedata (a
+        //Thruster has no ->ballistic). DBManager::getFireOrdersForShips guards the
+        //load path defensively; this is the DURABLE fix — reject the bad order
+        //before it ever reaches the DB.
+        //
+        //An invalid order is detached from its owning system in place so the very
+        //next $ship->getAllFireOrders() (used for the actual submit) no longer
+        //includes it. We still return true: a corrupt order is dropped silently
+        //rather than failing the whole ship's submission (some callers throw on
+        //false, which would abort turn processing over one bad shot).
+        foreach ($fireOrders as $fire) {
+            //Intercept/self-intercept orders legitimately reference another fire
+            //order id (or carry no weapon), so don't weapon-validate them here.
+            if ($fire->type === 'intercept' || $fire->type === 'selfIntercept')
+                continue;
+
+            $shooter = $gamedata->getShipById($fire->shooterid);
+            $weapon = $shooter ? $shooter->getSystemById($fire->weaponid) : null;
+
+            if ($weapon instanceof Weapon)
+                continue; //valid — leave it attached
+
+            //Invalid: shooter gone, weaponid missing, or it resolved to a
+            //non-weapon system. Mark the order rejected AND detach it from its
+            //owning system. The flag covers callers that submit the same array
+            //they validated (e.g. the mine-ballistic path passes $newFireOrders to
+            //both validate and submit); the detach covers callers that re-fetch
+            //$ship->getAllFireOrders() for the submit. submitFireorders skips any
+            //order with ->rejected set, so neither pattern can persist it.
+            $fire->rejected = true;
+
+            $sysType = $weapon ? get_class($weapon) : ($shooter ? 'missing weaponid' : 'missing shooter');
+            Debug::log("validateFireOrders: rejecting corrupt fire order "
+                . "(game {$gamedata->id}, shooter {$fire->shooterid}, weaponid {$fire->weaponid}, "
+                . "type {$fire->type}) — resolved to: $sysType. Likely stale client blueprint.");
+
+            if ($shooter)
+                self::detachFireOrder($shooter, $fire);
+        }
+
         return true;
+    }
+
+    /* Remove a specific FireOrder object from any system (or fighter subsystem)
+     * on $ship that currently holds it. Used by validateFireOrders to drop a
+     * corrupt order before submit. Matches by object identity, not weaponid,
+     * because the whole point is that the order's weaponid is untrustworthy. */
+    private static function detachFireOrder($ship, $badFire)
+    {
+        foreach ($ship->systems as $system) {
+            self::spliceFireOrder($system, $badFire);
+            if (!empty($system->systems) && is_array($system->systems)) {
+                foreach ($system->systems as $sub) {
+                    self::spliceFireOrder($sub, $badFire);
+                }
+            }
+        }
+    }
+
+    private static function spliceFireOrder($system, $badFire)
+    {
+        if (empty($system->fireOrders) || !is_array($system->fireOrders))
+            return;
+        foreach ($system->fireOrders as $i => $existing) {
+            if ($existing === $badFire) {
+                unset($system->fireOrders[$i]);
+            }
+        }
+        //Reindex so downstream count()/[0] access stays well-behaved.
+        $system->fireOrders = array_values($system->fireOrders);
     }
 
 

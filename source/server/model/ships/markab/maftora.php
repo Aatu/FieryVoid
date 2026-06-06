@@ -20,7 +20,7 @@ class Maftora extends HeavyCombatVessel{
         $this->pivotcost = 2;
         $this->iniativebonus = 30;
         $this->isd = 2003;
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>6, "Breaching Pods"=>2);
         $this->variantOf = 'Martoba Patrol Cutter';
         $this->occurence = "uncommon";
         

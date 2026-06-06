@@ -232,6 +232,7 @@ class FireOrder{
     public $pubnotes = "";
     public $updated = false;
     public $addToDB = false;
+    public $rejected = false; //set by Firing::validateFireOrders for corrupt orders (stale client blueprint); submitFireorders skips these so they never persist
     public $armorIgnored = array(); //convenient place to store info about armor pierced with this shot
     public $linkedHit = null; //convenient place to store info about system hit by linked weapons
     public $chosenLocation = null; //convenient place to store info about section chosen to be hit when determining hit chance

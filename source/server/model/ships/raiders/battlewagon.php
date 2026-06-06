@@ -30,7 +30,7 @@ class Battlewagon extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 3, 6));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(4, 26));
+        $this->addPrimarySystem(new Hangar(4, 26, 12));
         $this->addPrimarySystem(new CargoBay(4, 18));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
   

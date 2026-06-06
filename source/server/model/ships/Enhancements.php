@@ -53,9 +53,10 @@ class Enhancements{
 		$unit->enhancementOptionsDisabled[] = 'IMPR_ENG'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_REA'; 
 		$unit->enhancementOptionsDisabled[] = 'IMPR_SENS'; 
+		$unit->enhancementOptionsDisabled[] = 'MAR_CONT'; 			
 		$unit->enhancementOptionsDisabled[] = 'POOR_CREW'; 
 		$unit->enhancementOptionsDisabled[] = 'SLUGGISH'; 
-		$unit->enhancementOptionsDisabled[] = 'VULN_CRIT'; 		
+		$unit->enhancementOptionsDisabled[] = 'VULN_CRIT'; 	
 	  }
   }
   
@@ -1142,6 +1143,39 @@ class Enhancements{
 		  $enhID = 'MINE_MLW'; //Abbai Mine Launcher Wide-Ranged Mine
 		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 				$ammoClass = new AmmoBistifB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }	
+		  $enhID = 'MINE_AML'; //Chouka Mine Launcher Vedas-A Mine  --  GTS
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoVedasA();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }	
+		  $enhID = 'MINE_BML'; //Chouka Mine Launcher Vedas-B Mine  --  GTS
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoVedasB();
+				$ammoSize = $ammoClass->size;
+				$actualCapacity = floor($magazineCapacity/$ammoSize);
+			  $enhName = $ammoClass->enhancementDescription;
+			  $enhLimit = $actualCapacity;		
+			  $enhPrice = $ammoClass->getPrice($ship); 
+			  $enhPriceStep = 0; //flat rate
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }	
+		  $enhID = 'MINE_CML'; //Chouka Mine Launcher Vedas-C Mine  --  GTS
+		  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
+				$ammoClass = new AmmoVedasC();
 				$ammoSize = $ammoClass->size;
 				$actualCapacity = floor($magazineCapacity/$ammoSize);
 			  $enhName = $ammoClass->enhancementDescription;
@@ -2409,6 +2443,15 @@ class Enhancements{
 					case 'MINE_MLW': //Abbai Mine Launcher Wide-Ranged Mine						
 						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoBistifB(), $enhCount, true); //do notify dependent weapons, too!
 						break;
+					case 'MINE_AML': //Chouka Mine Launcher Vedas-A Mine -- GTS												
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoVedasA(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'MINE_BML': //Chouka Mine Launcher Vedas-B Mine -- GTS												
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoVedasB(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
+					case 'MINE_CML': //Chouka Mine Launcher Vedas-C Mine -- GTS												
+						if($ammoMagazine) $ammoMagazine->addAmmoEntry(new AmmoVedasC(), $enhCount, true); //do notify dependent weapons, too!
+						break;	
 						
 					//AMMO TYPES FOR DIRECT FIRE WEAPONS					
 					case 'SHELL_HBSC': //Standard Ammo for Heavy Railgun						

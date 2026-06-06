@@ -30,7 +30,7 @@ class CircasianMalasteCommand extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 6));
         $this->addPrimarySystem(new Engine(3, 13, 0, 10, 4));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 2));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
       

@@ -34,7 +34,7 @@ class gaimSkassa extends BaseShip{
 		$engine = new Engine(5, 20, 0, 9, 3);
 			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

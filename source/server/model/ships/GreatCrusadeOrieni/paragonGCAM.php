@@ -44,7 +44,7 @@ class paragonGCAM extends BaseShip{
 		$this->addPrimarySystem(new FlagBridge(6, 30, 0, 1, 'Orieni Command Bonus', 10,  true, true, true, false, array("Great Crusade Orieni Imperium", "Orieni Imperium")));
         $this->addPrimarySystem(new Scanner(5, 30, 5, 8));
         $this->addPrimarySystem(new Engine(5, 30, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(5, 38, 36));
+        $this->addPrimarySystem(new Hangar(5, 38, 12));
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 24, 3, 3));
         $this->addPrimarySystem(new LightLaserLance(3, 6, 5, 0, 360));

@@ -5,13 +5,13 @@ class CircasianGallahTransport extends HeavyCombatVessel{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 150;
-        $this->faction = "Escalation Wars Circasian Empire";
+        $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "CircasianGallahTransport";
         $this->imagePath = "img/ships/EscalationWars/CircasianGallah.png";
 			$this->canvasSize = 125; //img has 200px per side
-        $this->shipClass = "Gallah Transport";
-			$this->variantOf = "Gallah Auxiliary Carrier";
-			$this->occurence = "common";
+        $this->shipClass = "Circasian Gallah Transport";
+//			$this->variantOf = "Gallah Auxiliary Carrier";
+//			$this->occurence = "common";
 			$this->unofficial = true;
         $this->isd = 1942;
         
@@ -24,13 +24,12 @@ class CircasianGallahTransport extends HeavyCombatVessel{
         $this->rollcost = 2;
         $this->pivotcost = 2;
         $this->iniativebonus = 6*5;
-        
          
         $this->addPrimarySystem(new Reactor(3, 7, 0, 0));
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 2, 3));
         $this->addPrimarySystem(new Engine(2, 8, 0, 4, 2));
-        $this->addPrimarySystem(new Hangar(2, 3));
+        $this->addPrimarySystem(new Hangar(2, 3, 3));
 		$this->addPrimarySystem(new CargoBay(1, 30));
 		$this->addPrimarySystem(new CargoBay(1, 30));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));

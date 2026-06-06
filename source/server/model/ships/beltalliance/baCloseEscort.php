@@ -30,7 +30,7 @@ class BACloseEscort extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 10, 3, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 4, 2));
 	$this->addPrimarySystem(new CargoBay(3, 40));
-	$this->addPrimarySystem(new Hangar(3, 1));
+	$this->addPrimarySystem(new Hangar(3, 1, 1));
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));
 		

@@ -27,10 +27,9 @@ class SshelathAraunax extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
         $this->addPrimarySystem(new Engine(4, 11, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(4, 1));
+        $this->addPrimarySystem(new Hangar(4, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 4, 4));        
-        
 
 		$this->addFrontSystem(new EWLightGaussCannon(2, 6, 3, 270, 90));
 		$this->addFrontSystem(new LightLaser(3, 4, 3, 240, 360));

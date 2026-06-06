@@ -19,7 +19,7 @@ class PolarenWyrith extends HeavyCombatVesselLeftRight{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.66;
+        $this->turncost = 0.5;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
@@ -30,7 +30,7 @@ class PolarenWyrith extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(2, 3));
+        $this->addPrimarySystem(new Hangar(2, 3, 3));
         $this->addPrimarySystem(new NexusPolarenLCVController(5, 10, 5, 1));
         $this->addFrontSystem(new NexusSandCaster(1, 4, 2, 0, 360));
         $this->addAftSystem(new Thruster(3, 12, 0, 6, 1));
@@ -47,7 +47,7 @@ class PolarenWyrith extends HeavyCombatVesselLeftRight{
 		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addPrimarySystem(new Structure(3, 32));
+        $this->addPrimarySystem(new Structure(4, 32));
         $this->addLeftSystem(new Structure(3, 36));
         $this->addRightSystem(new Structure(3, 36));
         

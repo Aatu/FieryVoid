@@ -11,6 +11,7 @@ class BAHeavyGunboat extends HeavyCombatVessel{
         $this->shipClass = "BA Heavy Gunboat";
         $this->occurence = "common";
         $this->fighters = array("heavy"=>6); //external racks 
+        $this->variantOf = "NONE";        
 
         $this->isd = 2235;
         $this->limited = 33;

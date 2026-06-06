@@ -42,7 +42,7 @@ class VelraxArcCorvette extends MediumShip{
 	    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
         $this->addAftSystem(new Thruster(2, 9, 0, 4, 2));    
-        $this->addAftSystem(new Hangar(1, 2));
+        $this->addAftSystem(new Hangar(1, 2, 2));
        
         $this->addPrimarySystem(new Structure(3, 40));
 

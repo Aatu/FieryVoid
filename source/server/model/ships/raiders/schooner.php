@@ -10,6 +10,7 @@ class Schooner extends MediumShip{
         $this->imagePath = "img/ships/schooner.png";
         $this->shipClass = "Schooner";
         $this->canvasSize = 100;
+        $this->variantOf = "NONE";		
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";

@@ -62,6 +62,60 @@ shipManager.power = {
 		if (wasShutDown && (!isShutDown)) { //was forced to shut down, but is no longer - power up!
 			shipManager.power.setOnline(ship, system, true); //do skip message to player - if system cannot be powered up, it won't be powered up and that's it
 		}
+
+		//If the system is forced offline THIS turn (cooldown crit etc.), make sure the
+		//offline power entry exists. This used to be created only as a side-effect of
+		//rendering the legacy ship status window (setPowerClasses), which is now built
+		//lazily on first open (see ShipIcon.createShipWindow). Without this, a forced-
+		//offline weapon on a ship whose window is never opened never gets its type:1
+		//entry, so it never enters cooldown and the server (which trusts client power
+		//entries) lets the player turn it back on. Mirrors setPowerClasses' behaviour
+		//so the two paths agree and never double-add for the same turn.
+		//Scoped to non-flight ships: the legacy status window (and thus the original
+		//setPowerClasses side-effect) only ran for capital ships, never the flight
+		//window, so we don't introduce new offline behaviour for fighter subsystems.
+		if (isShutDown && !ship.flight) {
+			shipManager.power.applyForcedOfflineEntry(ship, system);
+		}
+	},
+
+	//True when the system is forced offline THIS turn by a cooldown / forced-shutdown
+	//crit (ForcedOfflineForTurns or ForcedOfflineOneTurn), as opposed to being powered
+	//down by player choice. Mirrors the isShutDown condition in copyLastTurnPower. Used
+	//to forbid the player from re-enabling a cooling weapon — the legacy DOM window used
+	//to silently re-add the offline entry on every render, but the React power UI does
+	//not, so the toggle has to be blocked at the source.
+	isForcedOffline: function isForcedOffline(ship, system) {
+		return Boolean(shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn")
+			|| shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns"));
+	},
+
+	//Window-independent forced-offline enforcement, extracted from setPowerClasses so it
+	//runs for every owned ship at turn start (repeatLastTurnPower) regardless of whether
+	//the legacy status window was ever opened. Adds the type:1 offline entry for the
+	//current turn if not already present, resets engine power, and stops overloading.
+	applyForcedOfflineEntry: function applyForcedOfflineEntry(ship, system) {
+		if (!Array.isArray(system.power)) system.power = [];
+
+		var alreadyOffline = false;
+		for (var i in system.power) {
+			var power = system.power[i];
+			if (power.turn != gamedata.turn) continue;
+			if (power.type == 1) {
+				alreadyOffline = true;
+				break;
+			}
+		}
+
+		if (system.name == "engine") {
+			system.power = [];
+			alreadyOffline = false; //array just cleared, re-add below
+		}
+
+		if (!alreadyOffline) {
+			system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
+			shipManager.power.stopOverloading(ship, system);
+		}
 	},
 
 	setPowerClasses: function setPowerClasses(ship, system, systemwindow) {
@@ -78,35 +132,10 @@ shipManager.power = {
 		} else if (shipManager.criticals.hasCritical(system, "ForcedOfflineOneTurn") || shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) {
 			systemwindow.addClass("forcedoffline");
 
-			// Because of the crit, add a power entry to the power array
-			// of this system.
-			// A bit of code is necessary to make sure this only happens once.
-			var isOnline = true;
-
-			//for Jammer, copy last turn's power - it's important for opponent!
-			//induces trouble AND does not work as intended
-			//if (system.name == "jammer"){
-			//	copyLastTurnPower(ship, system);
-			//}
-
-			for (var i in system.power) {
-				var power = system.power[i];
-				if (power.turn != gamedata.turn) continue;
-
-				if (power.type == 1) {
-					isOnline = false;
-					break;
-				}
-			}
-
-			if (system.name == "engine") {
-				system.power = [];
-			}
-
-			if (isOnline) {
-				system.power.push({ id: null, shipid: ship.id, systemid: system.id, type: 1, turn: gamedata.turn, amount: 0 });
-				shipManager.power.stopOverloading(ship, system);
-			}
+			// Because of the crit, add a power entry to the power array of this
+			// system (only once per turn). Shared with copyLastTurnPower so the
+			// window-render path and the turn-start path stay in lockstep.
+			shipManager.power.applyForcedOfflineEntry(ship, system);
 
 			return true;
 		}
@@ -481,8 +510,24 @@ shipManager.power = {
 			return true;
 		}
 
+		//Treat an active cooldown / forced-shutdown crit as offline directly, not just
+		//via the type:1 power entry. That entry is only created for OWN ships (in
+		//applyForcedOfflineEntry / setPowerClasses), so without this an OPPONENT would
+		//see an enemy's cooling weapon (SurgeBlaster/SurgeCannon/ResonanceGenerator/
+		//burst-beam) as online during initial orders. These crits can't be cleared by
+		//the owner (we block re-enable), so they're safe to render offline for everyone.
+		//Mirrors the ForcedOfflineOneTurn handling above. (All callers pass gamedata.turn,
+		//so this only ever affects the current turn — the firing turn is excluded because
+		//the crit isn't present client-side until the turn after firing.)
+		if (shipManager.criticals.hasCritical(system, "ForcedOfflineForTurns")) {
+			return true;
+		}
+		if (shipManager.criticals.hasCriticalOnTurn(system, "ForcedOfflineForTurns", turn)) {
+			return true;
+		}
+
 		/* Marcin Sawicki - I _think_ this condition may be skipped
-		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){ 
+		if ((system.powerReq > 0 || system.name == "reactor") && this.isPowerless(ship)){
 			return true;
 		}
 		*/
@@ -1049,6 +1094,8 @@ shipManager.power = {
 
 			if (shipManager.systems.isDestroyed(ship, array[i])) {
 				continue;
+			} else if (shipManager.power.isForcedOffline(ship, array[i])) {
+				continue; //cooldown crit — cannot be re-enabled by the player
 			} else if (shipManager.power.isOffline(ship, array[i])) {
 				shipManager.power.setOnline(ship, array[i]);
 				shipWindowManager.setDataForSystem(ship, array[i]);
@@ -1072,6 +1119,10 @@ shipManager.power = {
 		if (ship.userid != gamedata.thisplayer) return;
 
 		if (!shipManager.power.isOffline(ship, system)) return;
+
+		//A weapon/system forced offline by a cooldown crit cannot be powered back on by
+		//the player (the server now also rejects this — Firing::fire / isOfflineOnTurn).
+		if (shipManager.power.isForcedOffline(ship, system)) return;
 
 		shipManager.power.setOnline(ship, system);
 		shipWindowManager.setDataForSystem(ship, system);

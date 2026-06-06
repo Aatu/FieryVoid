@@ -29,7 +29,7 @@ class HyachEcamronTek extends MediumShip{
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
 		$this->addPrimarySystem(new Engine(4, 6, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 1));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 0, 360));
 		$this->addPrimarySystem(new GraviticThruster(3, 8, 0, 3, 3));
 		$this->addPrimarySystem(new GraviticThruster(3, 8, 0, 3, 4));

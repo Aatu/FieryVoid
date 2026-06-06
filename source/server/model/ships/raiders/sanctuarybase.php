@@ -9,6 +9,7 @@ class SanctuaryBase extends StarBaseSixSections{
 		$this->shipClass = "Sanctuary Base";
 		$this->fighters = array("medium"=>12, "heavy"=>36); 
 		$this->isd = 2196;
+        $this->variantOf = "NONE";		
 
 		$this->shipSizeClass = 3; //Enormous units not implemented
 		$this->iniativebonus = -200; //no voluntary movement anyway

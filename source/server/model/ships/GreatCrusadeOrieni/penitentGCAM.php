@@ -60,8 +60,8 @@ class penitentGCAM extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 44, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
-		$this->addPrimarySystem(new Hangar(5, 14));
-		$this->addPrimarySystem(new Hangar(5, 14));
+		$this->addPrimarySystem(new Hangar(5, 14, 6));
+		$this->addPrimarySystem(new Hangar(5, 14, 6));
         $this->addPrimarySystem(new HKControlNode(5, 30, 4, 4));
     	$this->addPrimarySystem(new WarLance(5, 9, 6, 0, 360));
        	$this->addPrimarySystem(new WarLance(5, 9, 6, 0, 360));
@@ -82,7 +82,7 @@ class penitentGCAM extends SmallStarBaseFourSections{
 		//$this->addFrontSystem(new CargoBay(5, 25));
 		//$this->addFrontSystem(new SubReactorUniversal(5, 30, 0, 0));
 
-			$hangar = new Hangar(5, 6);
+			$hangar = new Hangar(5, 6, 6);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);
@@ -109,7 +109,7 @@ class penitentGCAM extends SmallStarBaseFourSections{
 		//$this->addAftSystem(new CargoBay(5, 25));
 		//$this->addAftSystem(new SubReactorUniversal(5, 30, 0, 0));
 
-			$hangar = new Hangar(5, 6);
+			$hangar = new Hangar(5, 6, 6);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
 			$this->addAftSystem($hangar);
@@ -136,7 +136,7 @@ class penitentGCAM extends SmallStarBaseFourSections{
 		//$this->addLeftSystem(new CargoBay(5, 25));
 		//$this->addLeftSystem(new SubReactorUniversal(5, 30, 0, 0));
 			
-			$hangar = new Hangar(5, 6);
+			$hangar = new Hangar(5, 6, 6);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
 			$this->addLeftSystem($hangar);
@@ -163,7 +163,7 @@ class penitentGCAM extends SmallStarBaseFourSections{
 		//$this->addRightSystem(new CargoBay(5, 25));
 		//$this->addRightSystem(new SubReactorUniversal(5, 30, 0, 0));
 			
-			$hangar = new Hangar(5, 6);
+			$hangar = new Hangar(5, 6, 6);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
 			$this->addRightSystem($hangar);

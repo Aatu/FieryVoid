@@ -29,7 +29,7 @@ class gaimRoka extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
 		$this->addPrimarySystem(new CnC(4, 9, 0, 0));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 1));
         $this->addPrimarySystem(new Engine(3, 12, 0, 6, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 4));
@@ -38,8 +38,8 @@ class gaimRoka extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 6, 1));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 180));
-        $this->addFrontSystem(new Hangar(0, 3));
-        $this->addFrontSystem(new Hangar(0, 3));
+        $this->addFrontSystem(new Hangar(0, 3, 3));
+        $this->addFrontSystem(new Hangar(0, 3, 3));
 		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 3));

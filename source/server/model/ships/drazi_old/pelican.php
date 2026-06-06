@@ -12,6 +12,7 @@ class Pelican extends HeavyCombatVesselLeftRight{
         $this->isd = 1941;
         $this->canvasSize = 160;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>4);        
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
@@ -27,7 +28,7 @@ class Pelican extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(5, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 10, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 2));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));

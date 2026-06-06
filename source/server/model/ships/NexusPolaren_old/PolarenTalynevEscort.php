@@ -37,7 +37,7 @@ class PolarenTalynevEscort extends LCV{
 		$this->addPrimarySystem(new Reactor(2, 7, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
 //        $this->addPrimarySystem(new AntiquatedScanner(4, 12, 4, 4));
-    	$sensors = new Scanner(2, 7, 3, 3);
+    	$sensors = new Scanner(2, 7, 3, 4);
 			$sensors->markLCV();
 			$this->addPrimarySystem($sensors);
 		$this->addPrimarySystem(new Engine(2, 8, 0, 6, 3));
@@ -48,7 +48,7 @@ class PolarenTalynevEscort extends LCV{
 		$this->addFrontSystem(new NexusSandCaster(2, 4, 2, 270, 90));
 		$this->addFrontSystem(new LtBlastCannon(1, 4, 1, 300, 120));
     
-        $this->addPrimarySystem(new Structure(2, 24));
+        $this->addPrimarySystem(new Structure(3, 24));
 	    
         $this->hitChart = array(
         		0=> array( 

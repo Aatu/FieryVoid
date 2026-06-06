@@ -31,7 +31,7 @@ class CircasianReglata extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 13, 4, 6));
         $this->addPrimarySystem(new Engine(3, 13, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 2));
 		$this->addPrimarySystem(new CargoBay(3, 16));
    
         $this->addFrontSystem(new Thruster(2, 10, 0, 3, 1));

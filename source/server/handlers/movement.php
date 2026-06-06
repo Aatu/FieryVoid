@@ -348,13 +348,25 @@
             foreach ($move->assignedThrust as $i=>$value){
 				if (empty($value))
 					continue;
-					
+
 				 if ($ship instanceof FighterFlight){
-									
+
 					$assignedarray[0] += $value;
 
 				}else{
-					$direction = $ship->systems[$i]->direction;
+					// Guard against stale thrust keyed by a system id that no longer
+					// resolves to a Thruster. System ids are POSITIONAL (assigned in
+					// addSystem() construction order), so editing a ship's blueprint
+					// mid-game — e.g. inserting FighterRails — shifts every later id.
+					// Persisted assignedThrust then points at a different system class
+					// (a StdParticleBeam has no ->direction), which used to fatal here
+					// with "Undefined property: ...::$direction" and 500 the whole game
+					// at load. Skip such orphaned allocations instead of crashing.
+					$system = $ship->systems[$i] ?? null;
+					if ($system === null || !($system instanceof Thruster)) {
+						continue;
+					}
+					$direction = $system->direction;
 					$assignedarray[$direction] += $value;
 				}
             }

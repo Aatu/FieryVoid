@@ -30,7 +30,7 @@ class CircasianLuscanRefit extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 9, 2, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 5, 2));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 2));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(2, 11, 0, 5, 4));        
         

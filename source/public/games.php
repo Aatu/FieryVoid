@@ -106,11 +106,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — May 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
-        <li><strong>Hangar Operations</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
-        <li><strong>Shuttles</strong> - Ships come equipped with their allocation of free shuttles and new enhancements are available for hangar conversions.</li>                   
-        <li><strong>Hit Chance and Combat Log Tooltips</strong> - Hit Chance and Combat Log tooltips available for greater firing information.</li>  
-        <li><strong>Fleet Selection</strong> - Fleet checker now uses base points value for 10% and 33% checks and fighter weight classes are now shown in '[]'.</li>          
-        <li><strong>Ammo Magazine Capacity</strong> - Ammo magazines will no longer more ammo than their maximum capacity.                                                                              
+        <li><strong>Hangar Operations (Beta)</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
+        <li><strong>Hangar Refinements</strong> - Improvements/fixes to hangar systems so they match their B5W properties, huge thanks to Nato for providing the info needed to correct these!</li>  
+        <li><strong>Fighter Rails</strong> - Fighter Rails now available to use on ships equipped with them, see FAQ for details.</li>                           
+        <li><strong>Polaren Confederacy</strong> - Geoff's added more functionality updates to the Nexus Polaren (Thanks also to Lunara, Tyrel, and Abraxas!).</li>  
+        <li><strong>Escalation Wars</strong> -  Breaching pods added to Escalation factions, plus four new ships, the Chouka ballistic mine, and Star Fortress added!</li>                                                                                       
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

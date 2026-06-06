@@ -1005,6 +1005,16 @@ window.shipManager = {
         if (!gamedata.replay && shipManager.isDestroyed(ship)) return true; //Prevents lots of things from happening when a ship collides and dies to Terrain.
         if (shipManager.getTurnDeployed(ship) > gamedata.turn) return true; //Not deployed yet.
         if (ship.spawned !== -1 && ship.spawned > gamedata.turn) return true; //Not spawned yet.
+        //Hangar Ops: a partial-dock fragment ("- Split") is born removed=true with
+        //spawned == removedTurn == the dock turn — it never existed on the board as
+        //its own flight (its craft are shown firing as part of the SOURCE flight).
+        //So it must stay hidden EVERYWHERE on/after its dock turn, including replay
+        //(where ordinary removed flights are deliberately still shown so they appear
+        //in earlier turns). This mirrors ReplayAnimationStrategy's bornAndRemovedSameTurn
+        //board-hide so the hex ship-list / target popups don't list a phantom split.
+        if (ship.removed && ship.spawned !== undefined && ship.spawned !== -1 &&
+            ship.removedTurn != null && ship.spawned >= ship.removedTurn &&
+            gamedata.turn >= ship.removedTurn) return true;
         if (!gamedata.isMyorMyTeamShip(ship) && ship.trueStealth && !shipManager.isDetected(ship)) return true; //Enemy, stealth ship and not currently detected
         //Stage 7 (Hangar Ops): a flight queued for deployment-phase dock isn't on the
         //board — its icon should be hidden until either the dock is cancelled or the

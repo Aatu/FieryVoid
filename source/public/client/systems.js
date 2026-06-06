@@ -428,16 +428,53 @@ shipManager.systems = {
         return false;
     },
 
+    //Fighter Rails mirror the catapult exclusion: rail boxes are structure HP
+    //(already excluded from getTotalHangarCapacity, which sums only name=="hangar"),
+    //and the rail-borne fighter category (e.g. "light") must be excluded from the
+    //declared-shuttle-pool sum so leftover-shuttle math matches the server's
+    //HangarOps::getDefaultShuttles. Mirrors HangarOps::shipHasRail / railFighterCategories.
+    shipHasRail: function shipHasRail(ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "fighterRail" || s.isRail)) return true;
+        }
+        return false;
+    },
+
+    //Lowercased set of ship.fighters category keys (e.g. "light") that ride this
+    //ship's rails. Returns a plain object used as a membership set.
+    railFighterCategories: function railFighterCategories(ship) {
+        var cats = {};
+        if (!ship || !ship.systems) return cats;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && (s.name == "fighterRail" || s.isRail)) {
+                var cat = String(s.hangarType || "").toLowerCase().trim();
+                if (cat !== "") cats[cat] = true;
+            }
+        }
+        return cats;
+    },
+
     //Sum of declared fighters that consume default-shuttle-pool hangar boxes.
     //Excludes catapult-destined 'superheavy' fighters when the ship has a
     //catapult. Single source of truth for getDefaultShuttles / Composition.
+    //Per B5W §10.1, ultralight fighters fit two per box (0.5 each); ceil()
+    //so an odd ultralight count doesn't yield a free half-box. Mirrors
+    //HangarOps::shuttlePoolBoxesFor on the server.
     getShuttlePoolDeclared: function getShuttlePoolDeclared(fighters, ship) {
         var declared = 0;
         if (!fighters) return 0;
         var hasCatapult = shipManager.systems.shipHasCatapult(ship);
+        var railCategories = shipManager.systems.railFighterCategories(ship);
         for (var k in fighters) {
-            if (hasCatapult && String(k).toLowerCase().trim() === "superheavy") continue;
-            declared += parseInt(fighters[k], 10) || 0;
+            var key = String(k).toLowerCase().trim();
+            if (hasCatapult && key === "superheavy") continue;
+            if (railCategories[key]) continue;   //rail-borne fighters aren't shuttle pool
+            var count = parseInt(fighters[k], 10) || 0;
+            if (count <= 0) continue;
+            declared += (key === "ultralight") ? Math.ceil(count / 2) : count;
         }
         return declared;
     },
@@ -460,8 +497,12 @@ shipManager.systems = {
         var declared = shipManager.systems.getShuttlePoolDeclared(ship.fighters, ship);
         var leftover = capacity - declared;
         if (leftover < 0) leftover = 0;
+        //Explicit "minesweeping shuttles" in ship.fighters is the designer's
+        //authoritative MSW count — leftover falls through to the faction shuttle
+        //even on minesweeper-bonus carriers, matching HangarOps::populateInitialHangarUsage.
+        var hasExplicitMsw = !!(ship.fighters && parseInt(ship.fighters["minesweeping shuttles"], 10) > 0);
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
-        if (minesweeper) {
+        if (minesweeper && !hasExplicitMsw) {
             return { count: leftover, type: "Minesweeping Shuttles", key: "minesweeping shuttles" };
         }
         return {
@@ -522,6 +563,21 @@ shipManager.systems = {
         if (capacity <= 0) return rows;
         var base = ship._originalFighters || ship.fighters || {};
         var declared = shipManager.systems.getShuttlePoolDeclared(base, ship);
+
+        //Explicit shuttle-category declarations ("shuttles", "minesweeping shuttles",
+        //"cargo shuttles") are auto-populated free shuttles per HangarOps step 1 —
+        //not purchasable slots like combat-fighter declarations. Surface them as
+        //composition rows so the Hangar tooltip reflects the full auto-populated
+        //picture (declared + leftover), not just the leftover. Cargo shuttles are
+        //opt-in only — they never join the leftover-fill, so they show up here only
+        //when declared.
+        var declaredMsw = parseInt(base["minesweeping shuttles"], 10) || 0;
+        var declaredShuttle = parseInt(base["shuttles"], 10) || 0;
+        var declaredCargo = parseInt(base["cargo shuttles"], 10) || 0;
+        if (declaredMsw > 0) rows.push({ type: "Minesweeping Shuttles", count: declaredMsw });
+        if (declaredShuttle > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: declaredShuttle });
+        if (declaredCargo > 0) rows.push({ type: "Cargo Shuttles", count: declaredCargo });
+
         var pool = capacity - declared;
         if (pool <= 0) return rows;
 
@@ -539,8 +595,12 @@ shipManager.systems = {
         var afterBP = pool - bp;           //BP conversion removes slots from the pool
         if (msw > afterBP) msw = afterBP;  //MSW retypes within the remaining pool
 
+        //Explicit "minesweeping shuttles" in ship.fighters is the designer's
+        //authoritative MSW count — the leftover pool falls through to the faction
+        //shuttle even on minesweeper-bonus carriers, matching HangarOps step 2.
+        var hasExplicitMsw = !!(base && parseInt(base["minesweeping shuttles"], 10) > 0);
         var minesweeper = !!(ship.minesweeperbonus && parseInt(ship.minesweeperbonus, 10) > 0);
-        if (minesweeper) {
+        if (minesweeper && !hasExplicitMsw) {
             //Default pool is already MinesweepingShuttle; HANG_MSW is a no-op here.
             if (afterBP > 0) rows.push({ type: "Minesweeping Shuttles", count: afterBP });
         } else {
@@ -554,6 +614,126 @@ shipManager.systems = {
         //lobby loadout (shipwindow) still reflects the converted slot.
         if (bp > 0) rows.push({ type: "Breaching Pods", count: bp, slotOnly: true });
         return rows;
+    },
+
+    //Per-hangar slice of getDefaultShuttleComposition for the lobby/system-info
+    //tooltip — mirrors HangarOps::populateInitialHangarUsage so a hangar's
+    //tooltip in the lobby matches the in-game initial population. Each
+    //composition row is distributed with the same least-used + fair-share
+    //algorithm as pickHangarForShuttle + fairShareCap on the server, over the
+    //distribution set (HangarOps::distributionHangars):
+    //
+    //  • Primary-structure hangars present → the pool splits evenly across the
+    //    primary (location 0) hangars (Pirocia's three → 2+2+2); a lone primary
+    //    still shows the whole pool, and side hangars show only overflow.
+    //  • No primary hangar (e.g. Marata: two side hangars) → the pool splits
+    //    evenly across all hangars (6 default shuttles → 3+3, not 6+0).
+    getDefaultShuttleCompositionForHangar: function getDefaultShuttleCompositionForHangar(ship, targetHangar) {
+        if (!ship || !targetHangar || !ship.systems) return [];
+        var hangars = [];
+        for (var si in ship.systems) {
+            var s = ship.systems[si];
+            if (s && s.name == "hangar" && !s.isCatapult) hangars.push(s);
+        }
+        if (hangars.length === 0) return [];
+
+        var fullRows = shipManager.systems.getDefaultShuttleComposition(ship);
+        if (fullRows.length === 0) return [];
+
+        //Distribution set mirrors HangarOps::distributionHangars on the server:
+        //the primary (location 0) hangars if the ship has any, else every hangar.
+        //Several primary hangars (e.g. Pirocia's three) share the pool evenly
+        //(2+2+2); a lone primary still shows the whole pool. Side hangars on a
+        //ship that has primaries get only overflow once the primaries are full.
+        var hasPrimary = false;
+        for (var h = 0; h < hangars.length; h++) {
+            if (parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
+        }
+
+        //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if the
+        //distribution set contains any explicitly shuttle-tagged bay (hangarType
+        //'shuttles'/'minesweeping shuttles' — e.g. Vree Xeecra/Xaarix/Vyreel's
+        //small shuttle bay next to big fighter bays), the default-shuttle pool
+        //prefers those bays only, so the fighter bays stay free. The general bays
+        //still get overflow once the shuttle bays fill.
+        var isShuttleOnly = function (hgr) {
+            if (hgr.isCatapult || hgr.isRail) return false;
+            var t = ("" + (hgr.hangarType || "")).toLowerCase().trim();
+            return t === "shuttles" || t === "minesweeping shuttles";
+        };
+        var inSet = function (hgr) {
+            return hasPrimary ? (parseInt(hgr.location, 10) === 0) : true;
+        };
+        var hasShuttleOnly = false;
+        for (var sh = 0; sh < hangars.length; sh++) {
+            if (inSet(hangars[sh]) && isShuttleOnly(hangars[sh])) { hasShuttleOnly = true; break; }
+        }
+
+        var per = [];
+        for (var p = 0; p < hangars.length; p++) {
+            per.push({
+                id: hangars[p].id,
+                max: parseInt(hangars[p].maxhealth, 10) || 0,
+                usage: 0,
+                rows: [],
+                pref: hasShuttleOnly ? (inSet(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p])
+            });
+        }
+
+        //Least-used hangar in the distribution set; overflow to any hangar with
+        //room (mirrors pickHangarForShuttle).
+        var pickIdx = function (flightSize) {
+            var bestIdx = -1, bestUsage = Infinity;
+            for (var i = 0; i < per.length; i++) {
+                if (!per[i].pref) continue;
+                if (per[i].max - per[i].usage < flightSize) continue;
+                if (per[i].usage < bestUsage) { bestUsage = per[i].usage; bestIdx = i; }
+            }
+            if (bestIdx !== -1) return bestIdx;
+            for (var j = 0; j < per.length; j++) {
+                if (per[j].max - per[j].usage >= flightSize) return j;
+            }
+            return -1;
+        };
+
+        //Fair-share cap over the distribution-set hangars with room (mirrors
+        //fairShareCap): Infinity when only one remains so it takes the rest.
+        var fairCap = function (remaining) {
+            var withRoom = 0;
+            for (var i = 0; i < per.length; i++) {
+                if (per[i].pref && per[i].max - per[i].usage > 0) withRoom++;
+            }
+            if (withRoom <= 1) return Infinity;
+            return Math.ceil(remaining / withRoom);
+        };
+
+        for (var r = 0; r < fullRows.length; r++) {
+            var row = fullRows[r];
+            var count = parseInt(row.count, 10) || 0;
+            while (count > 0) {
+                var idx = pickIdx(1);
+                if (idx < 0) break;
+                var free = per[idx].max - per[idx].usage;
+                var take = Math.min(count, free, fairCap(count));
+                if (take <= 0) break;
+                var existing = null;
+                for (var er = 0; er < per[idx].rows.length; er++) {
+                    if (per[idx].rows[er].type === row.type && !!per[idx].rows[er].slotOnly === !!row.slotOnly) {
+                        existing = per[idx].rows[er];
+                        break;
+                    }
+                }
+                if (existing) existing.count += take;
+                else per[idx].rows.push({ type: row.type, count: take, slotOnly: row.slotOnly });
+                per[idx].usage += take;
+                count -= take;
+            }
+        }
+
+        for (var k = 0; k < per.length; k++) {
+            if (per[k].id == targetHangar.id) return per[k].rows;
+        }
+        return [];
     },
 
     getThrusters: function getThrusters(ship, direction) {

@@ -42,7 +42,7 @@ class CircasianDolinar extends BaseShip{
 			$engine->markEngineFlux();
 			$this->addPrimarySystem($engine);
 //        $this->addPrimarySystem(new Engine(3, 18, 0, 6, 3));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 2));
 		$laboratory = new Quarters(4, 9);
 			$laboratory->displayName = "Laboratory";
 			$this->addPrimarySystem($laboratory);

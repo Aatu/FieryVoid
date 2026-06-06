@@ -45,7 +45,7 @@ class MollantaAM extends BaseShip{
         $this->addPrimarySystem(new Scanner(4, 16, 4, 8));
         $this->addPrimarySystem(new Engine(4, 20, 0, 16, 4));
         $this->addPrimarySystem(new JumpEngine(4, 15, 4, 36));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
             
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));      

@@ -53,7 +53,7 @@ class Roskorbase2240AM extends SmallStarBaseFourSections
 
 		$this->addPrimarySystem(new Scanner(5, 16, 4, 5));
 		$this->addPrimarySystem(new Scanner(5, 16, 4, 5));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
 		$this->addPrimarySystem(new ReloadRack(5, 9));		
 		$this->addPrimarySystem(new HeavyPlasma(5, 8, 5, 0, 360));
 		$this->addPrimarySystem(new HeavyPlasma(5, 8, 5, 0, 360));

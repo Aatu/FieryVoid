@@ -28,7 +28,7 @@ class Stareagle extends MediumShipLeftRight{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 6));
         $this->addPrimarySystem(new Engine(5, 10, 0, 7, 2));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
 		$this->addAftSystem(new Thruster(4, 10, 0, 4, 1));
 		$this->addAftSystem(new Thruster(5, 14, 0, 7, 2));
 		

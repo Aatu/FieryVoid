@@ -547,19 +547,13 @@ class SystemInfoButtons extends React.Component {
 					{canRemoveFireOrder(ship, system) && <Button title="Remove all fire orders (RMB = All weapons selected)" onClick={this.removeFireOrder.bind(this)} onContextMenu={this.removeFireOrderAll.bind(this)} img="./img/firing.png"></Button>}
 				</ButtonRow>
 
-				{canChangeFiringMode(ship, system) && (
-					<FiringModeSelector ship={ship} system={system}>
-						{(canSelfIntercept(ship, system) || canRemIntercept(ship, system)) && (
-							<ButtonRow>
-								{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
-								{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
-							</ButtonRow>
-						)}
+				{(canChangeFiringMode(ship, system) || canSelfIntercept(ship, system) || canRemIntercept(ship, system)) && (
+					<FiringModeSelector ship={ship} system={system} showModes={canChangeFiringMode(ship, system)}>
+						{canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
+						{canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
 					</FiringModeSelector>
 				)}
 				<ButtonRow>
-					{!canChangeFiringMode(ship, system) && canSelfIntercept(ship, system) && <Button title="Allow interception (RMB = All systems selected)" onClick={this.declareSelfIntercept.bind(this)} onContextMenu={this.declareSelfInterceptAll.bind(this)} img="./img/addSelfIntercept.png"></Button>}
-					{!canChangeFiringMode(ship, system) && canRemIntercept(ship, system) && <Button title="Remove an intercept order" onClick={this.remSelfIntercept.bind(this)} onContextMenu={this.remSelfIntercept.bind(this)} img="./img/remSelfIntercept.png"></Button>}
 					{canSelectAllWeapons(ship, system) && <Button title="Select all weapons of this type" onClick={this.selectAllWeapons.bind(this)} img="./img/selectAllWeapons.png" $blend="screen"></Button>}
 					{canSelectAllWeapons(ship, system) && <Button title="Deselect all weapons of this type" onClick={this.deselectAllWeapons.bind(this)} img="./img/deselectAllWeapons.png" $blend="screen"></Button>}
 				</ButtonRow>
@@ -730,7 +724,10 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
-const canOnline = (ship, system) => gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system);
+// A system forced offline by a cooldown / forced-shutdown crit cannot be powered back
+// on by the player (it auto-recovers when the crit expires); onOnlineClicked/onlineAll
+// also reject it at the source.
+const canOnline = (ship, system) => gamedata.gamephase === 1 && shipManager.power.isOffline(ship, system) && !shipManager.power.isForcedOffline(ship, system);
 
 //change December 2021: can start overloading even if no Power is available, to be balanced at end of turn
 const canOverload = (ship, system) => gamedata.gamephase === 1 && !shipManager.power.isOffline(ship, system) && system.weapon && system.overloadable && !shipManager.power.isOverloading(ship, system) /*&& shipManager.power.canOverload(ship, system)*/;
@@ -773,7 +770,10 @@ const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && ((g
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
-const canRemIntercept = (ship, system) => system.weapon && weaponManager.canRemInterceptSingle(ship, system);
+//Non-split weapons hold only a single order, so their self-intercept is cancelled via the
+//top-row "remove fire order" button; only split-capable weapons need an in-menu intercept-remove
+//button to peel off one of several orders.
+const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && weaponManager.canRemInterceptSingle(ship, system);
 
 const canActivate = (ship, system) => system.canActivate && typeof system.canActivate === 'function' && system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
 const canDeactivate = (ship, system) => system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
@@ -814,7 +814,9 @@ export const hasStyledMenu = (ship, system) => {
 		canPowerCapacitor(ship, system) ||
 		canSystemPowerSettings(ship, system) ||
 		canSystemActivation(ship, system) ||
-		canChangeFiringMode(ship, system);
+		canChangeFiringMode(ship, system) ||
+		canSelfIntercept(ship, system) ||
+		canRemIntercept(ship, system);
 };
 
 

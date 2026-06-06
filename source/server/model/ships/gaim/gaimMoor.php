@@ -28,7 +28,7 @@ class gaimMoor extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 5, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(5, 1));
+        $this->addPrimarySystem(new Hangar(5, 1, 1));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
         

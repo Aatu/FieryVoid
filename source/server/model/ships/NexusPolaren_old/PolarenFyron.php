@@ -4,7 +4,7 @@ class PolarenFyron extends MediumShip{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 290;
+        $this->pointCost = 270;
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenFyron";
         $this->imagePath = "img/ships/Nexus/polarenFyron.png";
@@ -19,6 +19,7 @@ class PolarenFyron extends MediumShip{
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         
+		$this->agile = true;
         $this->turncost = 0.33;
         $this->turndelaycost = 0.5;
         $this->accelcost = 2;
@@ -46,10 +47,10 @@ class PolarenFyron extends MediumShip{
 		$this->addAftSystem(new Maser(2, 6, 3, 0, 240));
         $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
         $this->addAftSystem(new Thruster(2, 9, 0, 5, 2));    
-		$this->addAftSystem(new Hangar(1, 1));
+		$this->addAftSystem(new Hangar(1, 1, 1));
 		$this->addAftSystem(new Bulkhead(0, 2));
         
-        $this->addPrimarySystem(new Structure(3, 33));
+        $this->addPrimarySystem(new Structure(4, 33));
 
 	//d20 hit chart
 	$this->hitChart = array(

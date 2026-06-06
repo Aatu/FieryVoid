@@ -32,7 +32,7 @@ class VelraxEarlyCarrier extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 5));
         $this->addPrimarySystem(new Engine(4, 18, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(2, 8));
+		$this->addPrimarySystem(new Hangar(2, 10, 6));
    
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
@@ -52,13 +52,13 @@ class VelraxEarlyCarrier extends BaseShip{
         $this->addLeftSystem(new NexusDartInterceptor(2, 4, 1, 240, 60));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 180, 360));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
-		$this->addLeftSystem(new Hangar(2, 6));
+		$this->addLeftSystem(new Hangar(2, 6, 6));
 
 		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 300, 60));
         $this->addRightSystem(new NexusDartInterceptor(2, 4, 1, 300, 120));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 0, 180));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
-		$this->addRightSystem(new Hangar(2, 6));
+		$this->addRightSystem(new Hangar(2, 6, 6));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(3, 42));

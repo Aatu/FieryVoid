@@ -33,7 +33,7 @@ class HyachIrokaiKam extends BaseShip{
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
         $this->addPrimarySystem(new Engine(5, 26, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 1));
 		$this->addPrimarySystem(new JumpEngine(5, 21, 4, 20));
 		$this->addPrimarySystem(new HyachComputer(5, 15, 0, 3));//$armour, $maxhealth, $powerReq, $output		
 		

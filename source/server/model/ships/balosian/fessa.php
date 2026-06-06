@@ -16,7 +16,8 @@ class Fessa extends MediumShip{
         $this->fighters = array("heavy" => 6); //fighters on external racks!
         $this->occurence = "common";
         //$this->variantOf = 'Hassa Freighter'; //freighter will be in Civilians directory
-       	$this->isd = 2239;        
+       	$this->isd = 2239;  
+        $this->variantOf = "NONE";	               
         
         $this->turncost = 1;
         $this->turndelaycost = 1;

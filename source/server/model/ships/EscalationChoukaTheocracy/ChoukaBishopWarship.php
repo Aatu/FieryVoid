@@ -27,7 +27,7 @@ class ChoukaBishopWarship extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 6, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
         $this->addPrimarySystem(new Quarters(5, 9));
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));

@@ -11,6 +11,7 @@ class Hassa extends MediumShip{
         $this->shipClass = "Balosian Hassa Freighter";
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>4);         
         
         $this->forwardDefense = 12;
         $this->sideDefense = 17;
@@ -28,7 +29,7 @@ class Hassa extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 2));
  	    $this->addPrimarySystem(new Engine(3, 6, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(3, 4));
+        $this->addPrimarySystem(new Hangar(3, 4, 1));
         $this->addPrimarySystem(new CargoBay(3, 20));
         $this->addPrimarySystem(new CargoBay(3, 20));
         $this->addPrimarySystem(new CargoBay(3, 20));

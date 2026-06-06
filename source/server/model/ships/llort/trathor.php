@@ -29,11 +29,14 @@ class Trathor extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 20, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(4, 14));
+        $this->addPrimarySystem(new Hangar(4, 14, 12));
         $this->addPrimarySystem(new JumpEngine(4, 15, 5, 24));
   
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
-        $this->addFrontSystem(new Hangar(3, 12));
+		$hangar = new Hangar(3, 12, 12, 1, 'assault shuttles');
+		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
+		$this->addFrontSystem($hangar);  
+
 	$this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new MediumPlasma(4, 5, 3, 240, 60));
         $this->addFrontSystem(new MediumPlasma(4, 5, 3, 240, 60));

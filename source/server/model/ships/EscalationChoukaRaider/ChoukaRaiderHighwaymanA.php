@@ -27,7 +27,7 @@ class ChoukaRaiderHighwaymanA extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 9, 4, 4));
         $this->addPrimarySystem(new Engine(2, 9, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
         $this->addPrimarySystem(new Thruster(1, 8, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(1, 8, 0, 5, 4));     
 		$this->addPrimarySystem(new CargoBay(1, 14));

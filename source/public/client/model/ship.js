@@ -53,7 +53,7 @@ var Ship = function Ship(json) {
                 this._initializingSystems = true;
 
                 try {
-                    // Pass explicit staticSystems to factory to allow merging 
+                    // Pass explicit staticSystems to factory to allow merging
                     // without needing to access this.systems (which would recurse)
                     var parsed = SystemFactory.createSystemsFromJson(systemsToLoad, this, null, staticSystems);
 
@@ -62,6 +62,22 @@ var Ship = function Ship(json) {
                         enumerable: true,
                         writable: true
                     });
+
+                    // Stage 21: each Hangar computes its tooltip in its OWN
+                    // constructor, before sibling hangars exist — so a multi-bay
+                    // docked flight's foreign occupancy (boxes it places on OTHER
+                    // bays) wasn't counted, leaving those bays reading 0 capacity.
+                    // Now that every system is built AND cached on `this.systems`,
+                    // recompute each hangar's tooltip so per-bay capacity is
+                    // occupancy-accurate across all bays. (Must run after the
+                    // defineProperty above so the helpers can read this.ship.systems.)
+                    for (var hi in parsed) {
+                        var hsys = parsed[hi];
+                        if (hsys && (hsys.name === 'hangar' || hsys.name === 'fighterRail' || hsys.name === 'catapult')
+                            && typeof hsys.refreshHangarTooltip === 'function') {
+                            hsys.refreshHangarTooltip();
+                        }
+                    }
                     return parsed;
                 } finally {
                     delete this._initializingSystems;

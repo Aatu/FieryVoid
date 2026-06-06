@@ -36,7 +36,7 @@ class CircasianRolassa extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
-        $this->addFrontSystem(new Hangar(3, 8));
+        $this->addFrontSystem(new Hangar(3, 8, 6));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 240, 360));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 240, 360));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 0, 120));

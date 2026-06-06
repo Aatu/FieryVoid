@@ -30,8 +30,9 @@ class Xeecra extends VreeCapital{
 		$this->canvasSize = 200;
 
 		$this->addPrimarySystem(new Reactor(5, 15, 0, 0));
-		$this->addPrimarySystem(new Hangar(5, 6));
-		$this->addPrimarySystem(new Hangar(5, 6));		
+		$this->addPrimarySystem(new Hangar(5, 2, 1, 0, "shuttles"));		
+		$this->addPrimarySystem(new Hangar(5, 6, 6, 0, "fighters"));        	        
+		$this->addPrimarySystem(new Hangar(5, 6, 6, 0, "fighters"));   
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 6, 6));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 3));

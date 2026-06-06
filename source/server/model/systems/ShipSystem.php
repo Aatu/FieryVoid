@@ -911,9 +911,19 @@ class ShipSystem {
     }
 	
     public function getUnit(){
-		return $this->unit;    
+		return $this->unit;
     }
-    
+
+    /* The Structure system this system is mounted on (resolved in onConstructed
+     * from $this->location). Public accessor so external coordinators — e.g.
+     * HangarOps, which couples Fighter Rails to their parent structure for the
+     * 1d20 whole-rail crit — can read it without violating the protected
+     * visibility of $structureSystem. Returns null for ships/sections without a
+     * matching Structure (or before onConstructed has run). */
+    public function getStructureSystem(){
+		return $this->structureSystem;
+    }
+
     public function getSpecialAbilityList($list)
     {
         if ($this instanceof SpecialAbility)
@@ -1309,19 +1319,39 @@ class ShipSystem {
                 return true;
             }
         }
-        
-		/* no longer needed... I think... 
+
+		/* no longer needed... I think...
         if ($this->hasCritical("ForcedOfflineOneTurn", $turn-1)){
             return true;
         }*/
-		
 
-        if ($this->hasCritical("ForcedOfflineForTurn")){
-            return true;
-        }
-        
+		/* Authoritative cooldown check, independent of the client-supplied power
+		 * array. The type:1 power entry above is created client-side (power.js
+		 * applyForcedOfflineEntry / setPowerClasses) and the server otherwise
+		 * trusts it; if the client ever fails to send it (e.g. a ship whose status
+		 * window was never opened after the lazy-window change), the cooldown would
+		 * silently break and the player could re-enable the weapon. So we also read
+		 * the ForcedOfflineForTurns/ForcedOfflineOneTurn crit directly.
+		 *
+		 * Window: the crit's `turn` is the FIRING turn (weapon legitimately fired
+		 * that turn); cooldown begins the turn AFTER, through `turnend` inclusive.
+		 * Hence `crit->turn < turn` (strictly greater), NOT `hasCritical()`'s
+		 * inclusive window which would wrongly mark the firing turn offline and
+		 * corrupt that turn's loading calculation. A turnend of 0 means indefinite.
+		 * (NB: the previous code checked "ForcedOfflineForTurn" — singular — which
+		 * never matched the plural crit class, so this branch was effectively dead.)
+		 */
+		foreach ($this->criticals as $critical){
+			if (!$critical->inEffect) continue;
+			if (strcmp($critical->phpclass, "ForcedOfflineForTurns") != 0
+				&& strcmp($critical->phpclass, "ForcedOfflineOneTurn") != 0) continue;
+			if ($critical->turn < $turn && (($critical->turnend == 0) || ($critical->turnend >= $turn))){
+				return true;
+			}
+		}
+
         return false;
-    
+
     }
     
     public function isOverloadingOnTurn($turn = null){

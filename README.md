@@ -65,6 +65,34 @@ If your containers get out of sync or you need to cleanly force a rebuild of the
 
 docker-compose up -d --build --force-recreate
 
+6. Set-up database connection if you need it
+
+Current devs use SQL Workbench  here https://www.filehorse.com/download-mysql-workbench/download/
+
+Then set-up connection using details from mariadb part of you Docker container.
+
+Make sure the stack is up:
+
+
+docker compose ps
+Confirm the mariadb container shows Up and the port mapping is 0.0.0.0:3306->3306/tcp.
+
+Find the DB credentials. They're in the Fiery Void repo — check docker-compose.yml (look for MYSQL_ROOT_PASSWORD, MYSQL_USER, MYSQL_PASSWORD, MYSQL_DATABASE) and/or any .env file the compose file references. Whatever values are there are what Workbench needs.
+
+In MySQL Workbench → "+" next to MySQL Connections:
+
+Field	Value
+Connection Name	Fiery Void (Docker)
+Connection Method	Standard (TCP/IP)
+Hostname	127.0.0.1
+Port	3306
+Username	from compose (often root or fieryvoid)
+Password	"Store in Vault…" → paste from compose/.env
+Default Schema	leave blank, or the DB name from compose
+Click Test Connection → should succeed → OK.
+
+Open the connection and the Fiery Void schema(s) will show up in the left-hand SCHEMAS panel. Browse tables, run queries, etc. — same as any local DB.
+
 
 ## VAGRANT IS NO LONGER USED! ##
 
@@ -105,6 +133,9 @@ How to edit client side now:
 You'll need to run yarn watch:legacy in FV folder when editing client files now, similar to how we run yarn watch when editing React files.
 
 When uploading your branch to gitHub it's best not to include these files, as they will need to be regenerated anyway for the branch being deployed live and it makes merging easier not to have several versions of the bundles.
+
+Minification (from 3.6.2026):
+The bundler now depends on esbuild to minify the legacy bundles, (already present via Vite, so a normal yarn install covers it), and yarn watch:legacy intentionally produces un-minified output for debuggability while yarn build minifies.
 
 # Image Optimiser:
 

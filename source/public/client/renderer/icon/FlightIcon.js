@@ -21,15 +21,17 @@ window.FlightIcon = function () {
     };
 
     FlightIcon.prototype.createShipWindow = function (ship) {
+        // Lazy: build the flight status window only when first opened. See the matching
+        // comment on ShipIcon.prototype.createShipWindow. Until then shipStatusWindow is
+        // null and shipWindowManager.setData(ship) safely no-ops.
         var element = jQuery(".shipwindow.ship_" + ship.id);
 
-        if (!element.length) {
-            ship.shipStatusWindow = flightWindowManager.createShipWindow(ship);
-        } else {
+        if (element.length) {
             ship.shipStatusWindow = element;
+            shipWindowManager.setData(ship);
+        } else {
+            ship.shipStatusWindow = null;
         }
-
-        shipWindowManager.setData(ship);
     };
 
     FlightIcon.prototype.hideDestroyedFighters = function () {
@@ -88,14 +90,7 @@ window.FlightIcon = function () {
         this.mesh = new THREE.Object3D();
         this.mesh.position.set(500, 0, 0);
         this.mesh.renderDepth = 10;
-        var overlayColour =
-            this.terrain
-                ? new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear() // Off-white (#dedede)
-                : this.mine
-                    ? new THREE.Color(160 / 255, 250 / 255, 100 / 255).convertSRGBToLinear() // Light green
-                    : this.ally
-                        ? new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear() // Light blue
-                        : new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
+        var overlayColour = gamedata.getShipOverlayColor(ship, this.mine, this.ally, this.terrain);
 
         this.shipDirectionOfProwSprite = new window.webglSprite('./img/directionOfProw.png', { width: this.size / 1.5, height: this.size / 1.5 }, -2);
         this.mesh.add(this.shipDirectionOfProwSprite.mesh);
@@ -121,10 +116,12 @@ window.FlightIcon = function () {
         this.shipEWSprite = new window.ShipEWSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -1);
         this.mesh.add(this.shipEWSprite.mesh);
 
-        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), true).hide();
+        var sideArgs = this.getSideSpriteArgs(ship);
+
+        this.ShipSelectedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, sideArgs.type, true).hide();
         this.mesh.add(this.ShipSelectedSprite.mesh);
 
-        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, this.terrain ? 'terrain' : (this.mine ? 'mine' : (this.ally ? 'ally' : 'enemy')), false).hide();
+        this.ShipSideSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, sideArgs.type, false, sideArgs.teamColor).hide();
         this.mesh.add(this.ShipSideSprite.mesh);
 
         this.NotMovedSprite = new window.ShipSelectedSprite({ width: this.size * 0.75, height: this.size * 0.75 }, -2, 'neutral', false).hide();

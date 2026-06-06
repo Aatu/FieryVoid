@@ -29,7 +29,7 @@ class Penguin extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(5, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 10, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(3, 7));
+        $this->addPrimarySystem(new Hangar(3, 7, 2));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 60));
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 120));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));

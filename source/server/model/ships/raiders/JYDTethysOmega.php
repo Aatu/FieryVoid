@@ -12,6 +12,7 @@ class JYDTethysOmega extends MediumShip{
 //		        $this->occurence = "unique";
         $this->canvasSize = 100;
         $this->fighters = array("light"=>6);
+        $this->variantOf = "NONE";        
 	    
 		$this->notes = 'Used only by the Junkyard Dogs';
 		$this->notes .= '<br>Only two exist';

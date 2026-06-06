@@ -38,7 +38,7 @@ class SalbezBevtun extends BaseShip{
         $this->addPrimarySystem(new CnC(3, 16, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(3, 25, 6, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(2, 18));
+		$this->addPrimarySystem(new Hangar(2, 18, 6));
 		$this->addPrimarySystem(new CargoBay(2, 20));
 		
         $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));

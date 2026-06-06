@@ -37,6 +37,8 @@ class BaseShip {
     public $spawned = -1; //To denote if a unit was spawned by DURING the game, e.g. doesn't count for CPV etc, show in Replay prior to it spawning
     public $removed = false; //Hangar Ops (B5W §10.1): set when a flight has docked. Hides from board/target lists without triggering destruction; record stays in DB for replay history.
     public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
+    public $dockCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight dock coalescer (no-split docking). Not persisted/serialized — fresh false each load; first non-catapult hangar's criticalPhaseEffects runs the coalescer, the rest skip it.
+    public $launchCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight launch coalescer. Same lifetime as dockCoalesceDone.
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
@@ -1247,7 +1249,14 @@ class BaseShip {
 			//required hangar
 			if($this->hangarRequired!='') { 
                 $this->notes .= '<br>Requires hangar space: ' . ucfirst(strtolower($this->hangarRequired));		
-				if($this->unitSize!=1) $this->notes .= ' (' . $this->unitSize . ' per slot)';
+				if($this->unitSize!=1){
+                    $slotSize = 1 / $this->unitSize;
+                    if($this->unitSize < 1){
+                        $this->notes .= ' (Requires ' . $slotSize . ' hangar slots)';
+                    }else{
+                        $this->notes .= ' (' . $slotSize . ' per slot)';                        
+                    }    
+                } 
 			}
 			//Agile status
 			if($this->agile) $this->notes .= '<br>Agile';	    

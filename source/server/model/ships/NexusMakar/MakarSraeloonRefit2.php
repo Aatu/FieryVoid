@@ -29,7 +29,7 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(4, 35, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 24, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 14, 5, 8));
-		$this->addPrimarySystem(new Hangar(4, 6));
+		$this->addPrimarySystem(new Hangar(4, 6, 6));
 		$this->addPrimarySystem(new HKControlNode(4, 15, 3, 4));
 		$this->addPrimarySystem(new NexusPlasmaCharge(4, 7, 4, 0, 360));
 		$this->addPrimarySystem(new NexusWaterCaster(4, 4, 1, 0, 360));
@@ -46,7 +46,7 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
 			$this->addFrontSystem($cargoBay);
-			$hangar = new Hangar(4, 1);
+			$hangar = new Hangar(4, 7, 6);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);
@@ -60,7 +60,7 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 90;
 			$cargoBay->endArc = 270;
 			$this->addAftSystem($cargoBay);
-			$hangar = new Hangar(4, 1);
+			$hangar = new Hangar(4, 7, 6);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
 			$this->addAftSystem($hangar);
@@ -74,7 +74,7 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 360;
 			$this->addLeftSystem($cargoBay);
-			$hangar = new Hangar(4, 1);
+			$hangar = new Hangar(4, 7, 6);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
 			$this->addLeftSystem($hangar);
@@ -88,7 +88,7 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
 			$this->addRightSystem($cargoBay);
-			$hangar = new Hangar(4, 1);
+			$hangar = new Hangar(4, 7, 6);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
 			$this->addRightSystem($hangar);

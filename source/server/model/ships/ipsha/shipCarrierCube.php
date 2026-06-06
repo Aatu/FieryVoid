@@ -73,7 +73,10 @@ class ShipCarrierCube extends BaseShip{
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
 	$this->addLeftSystem(new SurgeCannon(3, 0, 0, 210, 330));
-	$this->addLeftSystem(new Hangar(4, 12));
+	//$this->addLeftSystem(new Hangar(4, 12));
+		$hangar1 = new Hangar(4, 12);
+		$hangar1->directions = array(0, 3); 
+		$this->addLeftSystem($hangar1);	
 	$this->addLeftSystem(new MagGraviticThruster(4, 15, 0, 99, 3));
 	    
 
@@ -81,7 +84,10 @@ class ShipCarrierCube extends BaseShip{
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));
 	$this->addRightSystem(new SurgeCannon(3, 0, 0, 30, 150));	
-	$this->addRightSystem(new Hangar(4, 12));    
+	//$this->addRightSystem(new Hangar(4, 12)); 
+		$hangar2 = new Hangar(4, 12);
+		$hangar2->directions = array(0, 3); 
+		$this->addLeftSystem($hangar2);		   
         $this->addRightSystem(new MagGraviticThruster(4, 15, 0, 99, 4));
 	    
 		

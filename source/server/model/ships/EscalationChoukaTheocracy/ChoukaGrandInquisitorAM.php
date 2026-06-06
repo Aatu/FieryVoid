@@ -37,7 +37,7 @@ class ChoukaGrandInquisitorAM extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 16, 6, 6));
         $this->addPrimarySystem(new Engine(3, 15, 0, 12, 4));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 4, 4));
 		$this->addPrimarySystem(new Quarters(3, 8));
 		$this->addPrimarySystem(new Quarters(3, 8));
 		

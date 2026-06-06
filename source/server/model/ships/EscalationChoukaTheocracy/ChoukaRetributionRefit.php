@@ -32,7 +32,7 @@ class ChoukaRetributionRefit extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 6, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 12, 5));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 4, 4));
 		
         $this->addFrontSystem(new Thruster(3, 16, 0, 6, 1));
 		$this->addFrontSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 240, 120));

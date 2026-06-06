@@ -46,7 +46,7 @@ class CroscotuRefit extends MediumShip
 		
 		$this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
 		$this->addAftSystem(new Thruster(3, 6, 0, 2, 2));
-		$this->addAftSystem(new Hangar(2, 1));		
+		$this->addAftSystem(new Hangar(2, 2, 2));		
 
 		$this->addPrimarySystem(new Structure(3, 54));
 

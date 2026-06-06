@@ -38,7 +38,7 @@ class enlightenmentGCAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 4, 6));
         $this->addPrimarySystem(new Engine(5, 25, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(4, 15));
+        $this->addPrimarySystem(new Hangar(4, 15, 6));
         $this->addPrimarySystem(new ReloadRack(6, 9));
         $this->addPrimarySystem(new CargoBay(4, 24));
               
@@ -62,7 +62,7 @@ class enlightenmentGCAM extends BaseShip{
 		$this->addLeftSystem(new AmmoMissileRackL(3, 0, 0, 240, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addLeftSystem(new ImpRapidGatling(2, 4, 2, 180, 360));
         $this->addLeftSystem(new ImpRapidGatling(2, 4, 2, 180, 360));
-        $this->addLeftSystem(new Hangar(3, 14));        
+        $this->addLeftSystem(new Hangar(3, 14, 6));        
         $this->addLeftSystem(new CargoBay(2, 25));    
         $this->addLeftSystem(new Thruster(4, 20, 0, 6, 3));
 
@@ -70,7 +70,7 @@ class enlightenmentGCAM extends BaseShip{
 		$this->addRightSystem(new AmmoMissileRackL(3, 0, 0, 0, 120, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addRightSystem(new ImpRapidGatling(2, 4, 2, 0, 180));
         $this->addRightSystem(new ImpRapidGatling(2, 4, 2, 0, 180));
-        $this->addRightSystem(new Hangar(3, 14));        
+        $this->addRightSystem(new Hangar(3, 14, 6));        
         $this->addRightSystem(new CargoBay(2, 25));    
         $this->addRightSystem(new Thruster(4, 20, 0, 6, 4));
 

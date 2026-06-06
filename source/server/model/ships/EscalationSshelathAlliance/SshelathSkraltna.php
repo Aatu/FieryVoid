@@ -31,7 +31,7 @@ class SshelathSkraltna extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 5));
         $this->addPrimarySystem(new Engine(3, 11, 0, 9, 5));
-		$this->addPrimarySystem(new Hangar(3, 14));
+		$this->addPrimarySystem(new Hangar(3, 14, 6));
 		
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 3, 1));

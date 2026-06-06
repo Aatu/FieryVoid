@@ -30,7 +30,7 @@ class KastanStormsabre extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, ));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
       

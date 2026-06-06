@@ -29,7 +29,7 @@ class Egret extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 20, 6, 7));
         $this->addPrimarySystem(new Engine(4, 12, 0, 7, 3));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addFrontSystem(new RepeaterGun(3, 6, 4, 300, 60));
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addAftSystem(new Thruster(4, 16, 0, 7, 2));

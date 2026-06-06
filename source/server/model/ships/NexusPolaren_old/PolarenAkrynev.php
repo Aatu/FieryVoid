@@ -31,7 +31,7 @@ class PolarenAkrynev extends BaseShipNoAft{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 16, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 4, 2));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 4, 2));
 

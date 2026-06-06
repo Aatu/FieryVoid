@@ -31,7 +31,7 @@ class CircasianKiralinaJumpship extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 28, 0, 0));
         $this->addPrimarySystem(new ElintScanner(3, 25, 6, 7));
         $this->addPrimarySystem(new Engine(4, 18, 0, 8, 5));
-		$this->addPrimarySystem(new Hangar(3, 18));
+		$this->addPrimarySystem(new Hangar(3, 18, 6));
 		$this->addPrimarySystem(new JumpEngine(4, 20, 5, 36));
 
         $this->addFrontSystem(new Thruster(3, 15, 0, 2, 1));

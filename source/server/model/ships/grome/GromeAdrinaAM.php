@@ -52,7 +52,7 @@ class GromeAdrinaAM extends BaseShip{
 			$targetingArray3->markHaphazard();
 			$this->addPrimarySystem($targetingArray3);							 
         $this->addPrimarySystem(new Engine(4, 24, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(2, 2));
+		$this->addPrimarySystem(new Hangar(2, 2, 2));
 		$this->addPrimarySystem(new JumpEngine(4, 20, 4, 36));
 		
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));

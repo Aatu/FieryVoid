@@ -30,7 +30,7 @@ class StrikeCarrier extends BaseShip{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 6));
 		$this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 2));
 		$this->addPrimarySystem(new CargoBay(5, 30));
 
 		$this->addFrontSystem(new Thruster(4, 13, 0, 5, 1));
@@ -38,6 +38,24 @@ class StrikeCarrier extends BaseShip{
 		$this->addFrontSystem(new MediumPulse(4, 6, 3, 300, 60));
 		$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 300, 60));
 		$this->addFrontSystem(new MediumPulse(4, 6, 3, 300, 60));
+
+		//External fighter rails (TT layout: 4 x 3-box + 2 x 6-box = 24 boxes,
+		//matching the light=>24 declaration — every light fighter rides a rail).
+		//All six connect to the FRONT structure block, so a front-structure hit
+		//rolls ONE unmodified 1d20 and, on 16-20, destroys ONE entire rail (fighters
+		//on it attempt escape). Add-order vs the front Structure below is irrelevant:
+		//each rail's structureSystem is resolved in onConstructed, a separate pass
+		//that runs AFTER every system is added (BaseShip::onConstructed).
+		//Each rail's launch+land budget == its box count (rails launch independently;
+		//arg order: $armour, boxes, output, direction 0=forward, 'light').
+	
+		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
+		$this->addFrontSystem(new FighterRail(5, 6, 6, 0, 'light'));
+		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
+		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
+		$this->addFrontSystem(new FighterRail(5, 6, 6, 0, 'light'));		
+		$this->addFrontSystem(new FighterRail(5, 3, 3, 0, 'light'));
+
 
 		$this->addAftSystem(new JumpEngine(4, 11, 4, 16));
 		$this->addAftSystem(new Thruster(4, 15, 0, 6, 2));
@@ -53,6 +71,11 @@ class StrikeCarrier extends BaseShip{
 		$this->addRightSystem(new MediumPulse(4, 6, 3, 0, 180));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
+		//Front structure is 78 and INCLUDES the rail boxes — rails are "part of the
+		//structure block" (B5W §10.1). The six FighterRail systems above carry
+		//CAPACITY only (doCountForCombatValue = false), so they don't add HP/combat
+		//value on top of this 78; rail loss comes from the 1d20 rail crit or full
+		//destruction of this block, not an independent rail HP track.
 		$this->addFrontSystem(new Structure( 5, 78));
 		$this->addAftSystem(new Structure( 5, 48));
 		$this->addLeftSystem(new Structure( 4, 36));

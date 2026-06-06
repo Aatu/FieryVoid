@@ -30,7 +30,7 @@ class Nota1856 extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new ElintScanner(5, 16, 6, 8));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new ShieldGenerator(5, 12, 4, 3));
         $this->addPrimarySystem(new CommJammer(3, 0, 0, 0, 360));
         $this->addPrimarySystem(new JumpEngine(5, 12, 4, 32));

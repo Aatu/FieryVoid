@@ -36,7 +36,7 @@ class HyachAlichiKav extends HeavyCombatVessel{
 			$sensors->markHyach();
 			$this->addPrimarySystem($sensors); 
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
 		$this->addPrimarySystem(new Stealth(1,1,0));
 		$this->addPrimarySystem(new Interdictor(2, 4, 1, 180, 360));
 		$this->addPrimarySystem(new MediumLaser(3, 6, 5, 240, 360));

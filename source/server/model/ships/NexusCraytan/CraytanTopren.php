@@ -29,7 +29,7 @@ class CraytanTopren extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(3, 3));
+        $this->addPrimarySystem(new Hangar(3, 3, 3));
 		$this->addPrimarySystem(new Magazine(4, 9));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));

@@ -29,7 +29,7 @@ class Romak extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 5, 5));
         $this->addPrimarySystem(new Engine(3, 9, 0, 4, 2));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 1));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 4));
 		

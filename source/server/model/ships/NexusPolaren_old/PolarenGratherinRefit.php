@@ -19,7 +19,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         $this->forwardDefense = 15;
         $this->sideDefense = 15;
         
-        $this->turncost = 0.66;
+        $this->turncost = 0.5;
         $this->turndelaycost = 0.66;
         $this->accelcost = 3;
         $this->rollcost = 2;
@@ -30,7 +30,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(2, 3));
+        $this->addPrimarySystem(new Hangar(2, 3, 3));
         $this->addFrontSystem(new StunBeam(2, 6, 5, 300, 60));
         $this->addFrontSystem(new NexusSandCaster(1, 4, 2, 0, 360));
         $this->addAftSystem(new Thruster(3, 12, 0, 6, 1));
@@ -39,17 +39,19 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new NexusHeavyMaser(3, 7, 4, 240, 360));
         $this->addLeftSystem(new Maser(2, 6, 3, 240, 60));
         $this->addLeftSystem(new Thruster(4, 12, 0, 4, 3));
-        $this->addLeftSystem(new Maser(2, 6, 3, 120, 300));
+        $this->addLeftSystem(new Maser(2, 6, 3, 180, 360));
+        $this->addLeftSystem(new NexusImpactor(2, 6, 4, 300, 360));
 		$this->addLeftSystem(new LtBlastCannon(2, 4, 1, 180, 360));
 
         $this->addRightSystem(new NexusHeavyMaser(3, 7, 4, 0, 120));
         $this->addRightSystem(new Maser(2, 6, 3, 300, 120));
         $this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
-        $this->addRightSystem(new Maser(2, 6, 3, 60, 240));
+        $this->addRightSystem(new Maser(2, 6, 3, 0, 180));
+        $this->addRightSystem(new NexusImpactor(2, 6, 4, 0, 60));
 		$this->addRightSystem(new LtBlastCannon(2, 4, 1, 0, 180));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addPrimarySystem(new Structure(3, 32));
+        $this->addPrimarySystem(new Structure(4, 32));
         $this->addLeftSystem(new Structure(3, 36));
         $this->addRightSystem(new Structure(3, 36));
         
@@ -66,18 +68,20 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
         				20 => "C&C",
         		),
         		3=> array(
-        				5 => "Thruster",
-        				7 => "Heavy Maser",
-        				9 => "Maser",
-						10 => "Light Blast Cannon",
+        				3 => "Thruster",
+        				5 => "Rad Cannon",
+        				7 => "Maser",
+						9 => "Light Blast Cannon",
+						11 => "Impactor",
         				18 => "Structure",
         				20 => "Primary",
         		),
         		4=> array(
-        				5 => "Thruster",
-        				7 => "Heavy Maser",
-        				9 => "Maser",
-						10 => "Light Blast Cannon",
+        				3 => "Thruster",
+        				5 => "Rad Cannon",
+        				7 => "Maser",
+						9 => "Light Blast Cannon",
+						11 => "Impactor",
         				18 => "Structure",
         				20 => "Primary",
         		),

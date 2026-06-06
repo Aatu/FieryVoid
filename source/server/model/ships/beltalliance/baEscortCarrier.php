@@ -11,6 +11,7 @@ class BAEscortCarrier extends HeavyCombatVessel{
         $this->shipClass = "BA Escort Carrier";
         $this->occurence = "common";
         $this->fighters = array("normal"=>12, "heavy"=>12); //"heavy" are external racks
+        $this->variantOf = "NONE";
 
         $this->isd = 2235;
         

@@ -14,7 +14,7 @@ class BloodSwordDarkSoul extends BaseShip{
 		$this->unofficial = true;
 		$this->limited = 10;
 
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>12, "assault shuttles"=>2); //2 breaching pods
 
 		$this->isd = 1943;
         
@@ -30,9 +30,9 @@ class BloodSwordDarkSoul extends BaseShip{
         
         $this->addPrimarySystem(new Reactor(5, 20, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 15, 3, 7));
-        $this->addPrimarySystem(new Engine(4, 18, 0, 13, 2));
-		$this->addPrimarySystem(new Hangar(4, 16));
+        $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
+        $this->addPrimarySystem(new Engine(4, 18, 0, 12, 2));
+		$this->addPrimarySystem(new Hangar(4, 16, 6));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 24));
 		
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
@@ -41,8 +41,8 @@ class BloodSwordDarkSoul extends BaseShip{
 		$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
 
-        $this->addAftSystem(new Thruster(3, 15, 0, 7, 2));
-        $this->addAftSystem(new Thruster(3, 15, 0, 7, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
+        $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
         $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
         $this->addAftSystem(new MediumPlasma(2, 5, 3, 90, 270));
         $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));

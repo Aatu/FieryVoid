@@ -4,7 +4,7 @@ class PolarenArimetMaser extends LCV{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 200;
+        $this->pointCost = 180;
         $this->faction = "Nexus Polaren Confederacy (early)";
         $this->phpclass = "PolarenArimetMaser";
         $this->imagePath = "img/ships/Nexus/polarenArimet.png";
@@ -22,7 +22,7 @@ class PolarenArimetMaser extends LCV{
         $this->sideDefense = 12;
         
 		$this->agile = true;
-        $this->turncost = 0.33;
+        $this->turncost = 0.25;
         $this->turndelaycost = 0.33;
         $this->accelcost = 1;
         $this->rollcost = 1;

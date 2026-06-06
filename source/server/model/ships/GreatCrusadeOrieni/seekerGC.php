@@ -33,7 +33,7 @@ class seekerGC extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(3, 12, 4, 6));
         $this->addPrimarySystem(new Engine(3, 18, 0, 12, 2));
-		$this->addPrimarySystem(new Hangar(1, 1));
+		$this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 

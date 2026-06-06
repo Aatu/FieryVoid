@@ -56,7 +56,7 @@ class KoskovaEarlyAMNew extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 16, 4, 6));
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(6, 2));
+		$this->addPrimarySystem(new Hangar(6, 2, 2));
         $this->addPrimarySystem(new ReloadRack(4, 9));
         $this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 0, 360));
         $this->addPrimarySystem(new StdParticleBeam(4, 4, 1, 0, 360));

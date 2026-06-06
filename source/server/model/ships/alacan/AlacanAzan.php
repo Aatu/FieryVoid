@@ -14,6 +14,7 @@ class AlacanAzan extends HeavyCombatVessel{
 		$this->unofficial = true;
 		$this->fighters = array("light"=>12);		
 		$this->isd = 2224;
+		$this->fighters = array("cargo shuttles"=>3);         
         
         $this->forwardDefense = 18;
         $this->sideDefense = 18;
@@ -44,9 +45,9 @@ class AlacanAzan extends HeavyCombatVessel{
         $this->addFrontSystem(new LightParticleBeamShip(2, 2, 1, 0, 120));
 
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 180, 300));
-		$this->addAftSystem(new Hangar(3,5));
-		$this->addAftSystem(new Hangar(3,3));
-		$this->addAftSystem(new Hangar(3,5));
+		$this->addAftSystem(new Hangar(3, 6));
+		$this->addAftSystem(new Hangar(3, 3, 3));
+		$this->addAftSystem(new Hangar(3, 6));
         $this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 60, 180));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(3, 8, 0, 3, 2));

@@ -31,7 +31,7 @@ class SalbezResktan extends MediumShip{
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 2));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));        
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
         
 		$this->addFrontSystem(new NexusBoltTorpedo(2, 5, 2, 300, 60));
 		$this->addFrontSystem(new LaserCutter(2, 6, 4, 240, 360));

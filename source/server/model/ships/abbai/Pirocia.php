@@ -46,9 +46,9 @@ class pirocia extends StarBaseSixSections
         $this->addPrimarySystem($cnc);
 
 		$this->addPrimarySystem(new Reactor(5, 25, 0, 0));
-		$this->addPrimarySystem(new Hangar(5, 14));
-		$this->addPrimarySystem(new Hangar(5, 14));
-		$this->addPrimarySystem(new Hangar(5, 14));				
+		$this->addPrimarySystem(new Hangar(5, 14, 6, 4));
+		$this->addPrimarySystem(new Hangar(5, 14, 6, 0));
+		$this->addPrimarySystem(new Hangar(5, 14, 6, 2));				
 		$this->addPrimarySystem(new Scanner(5, 20, 8, 10));
 		$this->addPrimarySystem(new Scanner(5, 20, 8, 10));
 		$this->addPrimarySystem(new ShieldGenerator(6, 32, 10, 8));//Combine into single Shield Generator (original: 2x armor 5, structure 16, rating 4)

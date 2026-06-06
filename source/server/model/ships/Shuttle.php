@@ -196,6 +196,41 @@ class MinesweepingShuttle extends Shuttle
     }
 }
 
+class CargoShuttle extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "CargoShuttle";
+        $this->shipClass = "Cargo Shuttle";
+        $this->hangarRequired = 'cargo shuttles';
+        $this->offensivebonus = 0;
+        $this->forwardDefense = 12;
+        $this->sideDefense = 12;
+        $this->freethrust = 3;        
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 24, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
 
 class ShuttleAbbai extends Shuttle
 {
@@ -860,6 +895,42 @@ class ShuttleHyach extends Shuttle
 }
 
 
+class ShuttleIpsha extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleIpsha";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Ipsha Baronies";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 9;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
+
 class ShuttleKL extends Shuttle
 {
     protected function setShuttleDefaults()
@@ -1285,4 +1356,43 @@ class ShuttleYolu extends Shuttle
     }
 }
 
+
+/* === Faction minesweeping shuttle variants ===========================
+ * Each extends its faction default shuttle (inheriting that faction's defence,
+ * thrust, art and populate()) and layers on the minesweeping behaviour.
+ * Resolved by HangarOps::factionMinesweepingShuttleClass(); generic
+ * MinesweepingShuttle (above) is the fallback for unlisted factions. */
+class MinesweepingShuttleAbbai extends ShuttleAbbai { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleAbbai"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleAlacan extends ShuttleAlacan { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleAlacan"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleBalosian extends ShuttleBalosian { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBalosian"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleBelt extends ShuttleBelt { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBelt"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleBrakiri extends ShuttleBrakiri { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBrakiri"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleCascor extends ShuttleCascor { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleCascor"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleCent extends ShuttleCent { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleCent"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleCentWotCR extends ShuttleCentWotCR { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleCentWotCR"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleCorillani extends ShuttleCorillani { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleCorillani"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleDeneth extends ShuttleDeneth { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleDeneth"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleDescari extends ShuttleDescari { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleDescari"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleDilgar extends ShuttleDilgar { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleDilgar"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleDrazi extends ShuttleDrazi { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleDrazi"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleDraziWotCR extends ShuttleDraziWotCR { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleDraziWotCR"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleEA extends ShuttleEA { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleEA"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleGaim extends ShuttleGaim { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleGaim"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleGrome extends ShuttleGrome { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleGrome"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleHurr extends ShuttleHurr { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleHurr"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleHyach extends ShuttleHyach { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleHyach"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleKL extends ShuttleKL { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleKL"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleLlort extends ShuttleLlort { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleLlort"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleMarkab extends ShuttleMarkab { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleMarkab"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingFlyer extends Flyer { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingFlyer"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingFlyerProtectorate extends FlyerProtectorate { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingFlyerProtectorate"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleNarn extends ShuttleNarn { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleNarn"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleOrieni extends ShuttleOrieni { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleOrieni"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttlePakMaRa extends ShuttlePakMaRa { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttlePakMaRa"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleRogolon extends ShuttleRogolon { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleRogolon"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleTorata extends ShuttleTorata { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleTorata"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleUsuuth extends ShuttleUsuuth { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleUsuuth"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleVorlons extends ShuttleVorlons { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleVorlons"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleVree extends ShuttleVree { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleVree"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleYolu extends ShuttleYolu { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleYolu"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
 

@@ -41,7 +41,7 @@ class MakarValkar extends HeavyCombatVessel{
 		$sensors = new Scanner(3, 16, 4, 6);
 			$sensors->markSensorFlux();
 			$this->addPrimarySystem($sensors);
-        $this->addPrimarySystem(new Hangar(0, 2));
+        $this->addPrimarySystem(new Hangar(0, 2, 2));
 		$this->addPrimarySystem(new NexusDefenseGun(1, 4, 1, 0, 360));
 		$this->addPrimarySystem(new NexusDefenseGun(1, 4, 1, 0, 360));
         $this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
@@ -50,9 +50,9 @@ class MakarValkar extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 12, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 12, 0, 2, 1));
 		$this->addFrontSystem(new EWRocketLauncher(3, 4, 1, 240, 60));
-		$this->addFrontSystem(new Hangar(1, 6));
+		$this->addFrontSystem(new Hangar(1, 6, 6));
 		$this->addFrontSystem(new EWHeavyRocketLauncher(3, 6, 2, 300, 60));
-		$this->addFrontSystem(new Hangar(1, 6));
+		$this->addFrontSystem(new Hangar(1, 6, 6));
 		$this->addFrontSystem(new EWRocketLauncher(3, 4, 1, 300, 120));
         $this->addFrontSystem(new ConnectionStrut(3));
                 

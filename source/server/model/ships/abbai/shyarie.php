@@ -28,7 +28,7 @@ class Shyarie extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 9, 0, 0));
         $this->addPrimarySystem(new ELINTScanner(4, 17, 6, 10));
         $this->addPrimarySystem(new Engine(4, 12, 0, 9, 2));
-	$this->addPrimarySystem(new Hangar(3, 1));
+	$this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new ShieldGenerator(4, 10, 3, 3));
 	$this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
 	$this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));

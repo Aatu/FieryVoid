@@ -28,7 +28,7 @@ class CircasianIlustris extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 4, 5));
         $this->addPrimarySystem(new Engine(3, 13, 0, 10, 4));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 2));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
       

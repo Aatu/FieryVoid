@@ -31,7 +31,7 @@ class Vymish extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 6, 6));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 2));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 1));
 		$this->addPrimarySystem(new CargoBay(3, 20));		
 		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 1)); 

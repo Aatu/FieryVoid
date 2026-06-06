@@ -46,7 +46,7 @@ class ChoukaAcolyteRefit extends HeavyCombatVessel{
                 
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 10, 0, 5, 2));
-		$this->addAftSystem(new Hangar(3, 8));
+		$this->addAftSystem(new Hangar(3, 8, 6));
         $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 240));
         $this->addAftSystem(new LightPlasma(2, 4, 2, 120, 240));
 		$this->addAftSystem(new EWHeavyPointPlasmaGun(2, 7, 3, 0, 360));

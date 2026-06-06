@@ -43,7 +43,7 @@ class RultharAM extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 4));   
         

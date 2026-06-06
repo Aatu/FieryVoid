@@ -34,7 +34,7 @@ class QomYominQortalMoroRefit extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 25, 0, 2));
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
  		$this->addPrimarySystem(new ELINTScanner(4, 16, 6, 9));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 4));
         $this->addPrimarySystem(new Engine(4, 23, 0, 6, 3));
 
 		//Need this to boost the Qom Yomin ramming factor to account for all of the water on board
