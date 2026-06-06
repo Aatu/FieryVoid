@@ -15,6 +15,7 @@ class SshelathStoaka extends MediumShip{
 
 	    $this->notes = 'A-hel-is Faction';
 	    $this->notes .= '<br>Light missiles only';
+	    $this->notes .= '<br>Antiquated Sensors (cannot be boosted)';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

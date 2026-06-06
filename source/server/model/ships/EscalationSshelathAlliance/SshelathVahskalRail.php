@@ -1,19 +1,19 @@
 <?php
-class SshelathVahskal extends MediumShip{
+class SshelathVahskalRail extends MediumShip{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 150;
         $this->faction = "Escalation Wars Sshel'ath Alliance";
-        $this->phpclass = "SshelathVahskal";
+        $this->phpclass = "SshelathVahskalRail";
         $this->imagePath = "img/ships/EscalationWars/SshelathVahskal.png";
         $this->shipClass = "Vahskal Patrol Carrier";
-        $this->variantOf = "NONE";
 		$this->unofficial = true;
         $this->canvasSize = 85;
 	    $this->isd = 1932;
 		
+	    $this->notes = 'Antiquated Sensors (cannot be boosted)';
         $this->fighters = array("normal"=>12);
         
         $this->forwardDefense = 12;
@@ -28,11 +28,15 @@ class SshelathVahskal extends MediumShip{
         
         $this->addPrimarySystem(new Reactor(3, 7, 0, 0));
         $this->addPrimarySystem(new CnC(4, 5, 0, 0));
-        $this->addPrimarySystem(new Scanner(3, 7, 2, 3));
+        $this->addPrimarySystem(new AntiquatedScanner(3, 7, 2, 3));
         $this->addPrimarySystem(new Engine(3, 7, 0, 4, 1));
-        $this->addPrimarySystem(new Hangar(2, 14, 12));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));   
+		$this->addPrimarySystem(new FighterRail(3, 3, 3, 0, 'normal'));
+		$this->addPrimarySystem(new FighterRail(3, 3, 3, 0, 'normal'));
+		$this->addPrimarySystem(new FighterRail(3, 3, 3, 0, 'normal'));
+		$this->addPrimarySystem(new FighterRail(3, 3, 3, 0, 'normal'));
         
 		$this->addFrontSystem(new EWDefenseLaser(1, 2, 1, 240, 60));
 		$this->addFrontSystem(new EWDefenseLaser(1, 2, 1, 300, 120));

@@ -13,6 +13,8 @@ class SshelathToglaka extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 65;
 	    $this->isd = 1945;
+
+	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 10;
