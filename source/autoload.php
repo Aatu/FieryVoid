@@ -1311,6 +1311,7 @@ spl_autoload_register(
                 'tractingrodhandler' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
+				'ewdefenselaser2' => '/server/model/weapons/customEscalation.php',
 				'ewduallaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewlaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewlaserboltftr' => '/server/model/weapons/customEscalation.php',
@@ -1326,10 +1327,13 @@ spl_autoload_register(
 				'lightenergymine' => '/server/model/weapons/AoE.php',
 			//EW electromagnetic weapons
 				'ewelectronpolarizer' => '/server/model/weapons/customEscalation.php',
+				'ewemlaser' => '/server/model/weapons/customEscalation.php',
+				'ewhvyemlaser' => '/server/model/weapons/customEscalation.php',
 				'ewemtorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW matter weapons
 				'ewearlyrailgun' => '/server/model/weapons/customEscalation.php',
 				'ewlightgausscannon' => '/server/model/weapons/customEscalation.php',
+				'ewflakbattery' => '/server/model/weapons/customEscalation.php',
 
 
 
@@ -1603,8 +1607,11 @@ spl_autoload_register(
 //				'sshelathvahskalrefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskalRefit.php',
 				'sshelathvahskalrefitrail' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskalRefitRail.php',
 				'sshelathvahsta' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahsta.php',
+				'sshelathvelvasa' => '/server/model/ships/EscalationSshelathAlliance/SshelathVelvasa.php',
 				'sshelathvilindras' => '/server/model/ships/EscalationSshelathAlliance/SshelathVilindras.php',
 				'sshelathvipindra' => '/server/model/ships/EscalationSshelathAlliance/SshelathVipindra.php',
+				'sshelathvulshara' => '/server/model/ships/EscalationSshelathAlliance/SshelathVulshara.php',
+				'sshelathvulshara2018' => '/server/model/ships/EscalationSshelathAlliance/SshelathVulshara2018.php',
 				
 				
 				

@@ -82,6 +82,9 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 8, false));	
 
 
+        $this->addFrontSystem(new EWFlakBattery(3, 4, 1, 270, 90));	
+
+
 /*
         $this->addFrontSystem(new HvyGraviticBolt(3, 8, 3, 270, 90));	
         $this->addFrontSystem(new HvyGraviticBolt(3, 8, 3, 270, 90));	
