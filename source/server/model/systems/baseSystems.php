@@ -7512,7 +7512,7 @@ class MindriderHangar extends ShipSystem{
     public $name = "MindriderHangar";
     public $displayName = "Hangar";
     public $primary = true;
-    public $iconPath = "hangar.png";
+    public $iconPath = "Mindriderhangar.png";
     
 	public $isPrimaryTargetable = true; //true if hangar has capacity
 	public $isTargetable = true; //true if hangar has capacity
