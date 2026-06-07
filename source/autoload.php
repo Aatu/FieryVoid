@@ -1571,6 +1571,8 @@ spl_autoload_register(
 				'sshelathniskiraa' => '/server/model/ships/EscalationSshelathAlliance/SshelathNiskiraA.php',
 				'sshelathniskirab' => '/server/model/ships/EscalationSshelathAlliance/SshelathNiskiraB.php',
 				'sshelathkavasabp' => '/server/model/ships/EscalationSshelathAlliance/SshelathKavasaBP.php',
+				'sshelathskaggha' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkaggha.php',
+				'sshelathskavna' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkavna.php',
 				'sshelathskonna' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkonna.php',
 				'sshelathskonnarefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkonnaRefit.php',
 				'sshelathskraltana' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkraltana.php',
