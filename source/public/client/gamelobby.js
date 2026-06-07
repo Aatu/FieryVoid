@@ -727,6 +727,14 @@ window.gamedata = {
 						var preEnhID = lship.enhancementOptions[preEnh][0];
 						var preConvNum = lship.enhancementOptions[preEnh][2] || 0;
 						if (preConvNum <= 0) continue;
+						//HANG_BP — convert default shuttle slots into dedicated Breaching
+						//Pod slots. Default shuttles auto-fill leftover hangar capacity,
+						//so adding to "Breaching Pods" implicitly steals from that pool;
+						//no explicit "shuttles" decrement needed. Mirrors the server-side
+						//mutation in Enhancements::setEnhancementsShip (HANG_BP case).
+						if (preEnhID === "HANG_BP") {
+							lship.fighters["Breaching Pods"] = (lship.fighters["Breaching Pods"] || 0) + preConvNum;
+						}
 					}
 				}
 
@@ -758,6 +766,16 @@ window.gamedata = {
 					if (lship.shipClass.toLowerCase().indexOf("assault") !== -1) {
 						shipBPLimit *= 2;
 					}
+					// The size-based cap is how many of THIS ship's own AS/Heavy/Medium
+					// slots it may dedicate to pods — it can't exceed the slots the ship
+					// actually has to host them. Dedicated "Breaching Pods" racks are
+					// counted separately (totalBPDedicated) and don't host size-cap pods.
+					// Without this clamp a ship that converted its ONLY hangar box into a
+					// BP rack (e.g. Urik'hal: capacity 1 → 1 rack, 0 fighter slots) would
+					// still contribute its full size cap to the fleet pool, letting those
+					// phantom slots be borrowed by another carrier's pods.
+					var shipOwnOverflowSlots = shipSlots["heavy"] + shipSlots["medium"] + shipSlots["assault shuttles"];
+					shipBPLimit = Math.min(shipBPLimit, shipOwnOverflowSlots);
 					totalBPSizeCap += shipBPLimit;
 					totalBPDedicated += shipBPDedicated;
 				}
@@ -1233,6 +1251,12 @@ window.gamedata = {
 		// BP cap (e.g. Decurion's 4 side-bay pod racks).
 		// Pass 2: overflow into AS/Heavy/Medium slots, capped by the ship's
 		// size-based bpLimitRemaining (1/2/4 with x2 for Assault hulls).
+		// Count of BPs that had to borrow an AS/Heavy/Medium hangar slot in Pass 2
+		// (i.e. didn't land in a dedicated "Breaching Pods" rack). This is the true
+		// "hangar slots used by BPs" figure — derived from the actual assignment
+		// rather than a fleet-wide totalBPUsage - totalBPDedicated subtraction, which
+		// can't tell one ship's dedicated racks apart from another's borrowed slots.
+		var bpHangarSlotsUsed = 0;
 		var unassignedBPs = 0;
 		for (var bpIdx = 0; bpIdx < breachingPodsList.length; bpIdx++) {
 			var assigned = false;
@@ -1265,6 +1289,7 @@ window.gamedata = {
 
 						if (assigned) {
 							ship.bpLimitRemaining--;
+							bpHangarSlotsUsed++;
 							break;
 						}
 					}
@@ -1507,25 +1532,39 @@ window.gamedata = {
 		totalHangarAS = preBPHangarAS - hangarConversionNet; //Deduct any Hangar conversions here.
 
 		// Effective BP capacity = guaranteed dedicated slots + size-based overflow
-		// capped by AS/H/M slots not already claimed by non-BP small craft.
-		// Without this clamp the report would show 8 BPs allowed on a Decurion
-		// (4 size-cap + 4 dedicated) even after all 24 AS slots are filled with
-		// Assault Shuttles — or 2 BPs allowed on a Primus (12 normal/Heavy slots,
-		// 2 BP size-cap) after all 12 slots are filled with fighters of any size.
+		// capped by the physical AS/H/M slots that actually exist to host them.
 		//
-		// AS slots only accept AS units (per hangarAcceptsCategory), so AS demand
-		// is the only competition for the AS pool. The Heavy+Medium pool is
-		// shared across all fighter sizes via the size hierarchy: smaller
-		// fighters spill up into larger slots when their own slots fill, so the
-		// pool demand must include the spillover from Light and Ultralight too.
+		// The cap is the GROSS pool of overflow-capable slots, NOT the slots left
+		// free after fighters/other small craft are placed. BPs and fighters
+		// compete for the same Heavy/Medium slots, but that competition is the
+		// Fighters check's job — when BPs borrow H/M slots the assignment loop
+		// physically removes them from totalHangarH/M, which is what drops the
+		// fighter allowance (e.g. 24 medium → 22 after 2 BPs). Clamping BP
+		// capacity by the *remaining* free slots as well would double-penalise the
+		// same over-commit: a single fleet would fail BOTH the BP check and the
+		// Fighter check for one shortage. Capping by gross slots still catches the
+		// genuine impossibility (more BPs than there are AS/H/M slots to host),
+		// which the per-ship assignment loop also surfaces via unassignedBPs.
+		//
+		// AS slots only accept AS units (per hangarAcceptsCategory), so the AS pool
+		// is shared by AS units and BP overflow; H/M slots are shared by fighters
+		// (incl. Light/Ultralight spillover) and BP overflow.
+		var grossASForBP = Math.max(0, preBPHangarAS - hangarConversionNet);
+		var grossHMForBP = Math.max(0, preBPHangarH + preBPHangarM + hangarConversionNet);
+		var grossOverflowSlots = grossASForBP + grossHMForBP;
+		var totalBPCapacity = totalBPDedicated + Math.min(totalBPSizeCap, grossOverflowSlots);
+
+		// Free (post-fighter) overflow slots — used only by the shuttle-overflow
+		// maths below to work out how many spare fighter slots armed shuttles can
+		// still borrow after fighters and BP overflow have taken theirs. Distinct
+		// from the gross figure above: shuttles get whatever is genuinely left
+		// over, whereas BP *capacity* is judged against the gross slot pool.
 		var freeASForBP = Math.max(0, preBPHangarAS - hangarConversionNet - totalFtrAS);
 		var hmPoolCapacity = preBPHangarH + preBPHangarM + hangarConversionNet;
 		var lightOverflow = Math.max(0, totalFtrL - totalHangarL);
 		var xlOverflow = Math.max(0, totalFtrXL - totalHangarXL) / 2;
 		var hmPoolDemand = totalFtrH + totalFtrM + lightOverflow + xlOverflow;
 		var freeHMForBP = Math.max(0, hmPoolCapacity - hmPoolDemand);
-		var freeOverflowSlots = freeASForBP + freeHMForBP;
-		var totalBPCapacity = totalBPDedicated + Math.min(totalBPSizeCap, freeOverflowSlots);
 
 		checkResult += "<br><b><u>Breaching Pods & Shuttles:</u></b><br><br>";
 		checkResult += " Total Breaching Pods: " + totalBPUsage;
@@ -1541,6 +1580,9 @@ window.gamedata = {
 			}
 			problemFound = true;
 		} else {
+			if (bpHangarSlotsUsed > 0) {
+				checkResult += " (" + bpHangarSlotsUsed + " fighters slot" + (bpHangarSlotsUsed === 1 ? "" : "(s)") + " used)";
+			}
 			checkResult += " <span style='color: #33cc33;'>OK</span>";
 		}
 		checkResult += "<br>";
