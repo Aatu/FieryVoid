@@ -116,7 +116,7 @@ class Flyer extends Shuttle
     {
         parent::setShuttleDefaults();
         $this->phpclass = "Flyer";
-        $this->shipClass = "Flyer";
+        $this->shipClass = "Cargo Flyer";
         $this->faction = "Minbari Federation";
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
@@ -155,7 +155,7 @@ class FlyerProtectorate extends Shuttle
     {
         parent::setShuttleDefaults();
         $this->phpclass = "FlyerProtectorate";
-        $this->shipClass = "Flyer";
+        $this->shipClass = "Cargo Flyer";
         $this->faction = "Minbari Protectorate";
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
@@ -241,6 +241,42 @@ class CargoShuttle extends Shuttle
 
 }
 
+
+class MedicalShuttle extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "MedicalShuttle";
+        $this->shipClass = "Medical Shuttle";
+        $this->hangarRequired = 'medical shuttles';
+        $this->faction = "Markab Theocracy";        
+        $this->offensivebonus = 0;
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;        
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 13, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
 
 class ShuttleAbbai extends Shuttle
 {

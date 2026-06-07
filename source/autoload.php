@@ -3833,6 +3833,9 @@ spl_autoload_register(
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
                 'cargoshuttle' => '/server/model/ships/Shuttle.php',                                
                 'shuttle' => '/server/model/ships/Shuttle.php',
+                'medicalshuttle' => '/server/model/ships/Shuttle.php',
+
+                //FACTION DEFAULT SHUTTLES
                 'shuttleabbai' => '/server/model/ships/Shuttle.php',
                 'shuttlealacan' => '/server/model/ships/Shuttle.php',
                 'shuttlebalosian' => '/server/model/ships/Shuttle.php',
