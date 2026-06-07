@@ -1556,6 +1556,8 @@ spl_autoload_register(
 				'sshelathkaraut' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaraut.php',
 				'sshelathkaraut1971' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaraut1971.php',
 				'sshelathkaraut1986' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaraut1986.php',
+				'sshelathkaumlar' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaumlar.php',
+				'sshelathkaumlarrefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaumlarRefit.php',
 				'sshelathkasolra' => '/server/model/ships/EscalationSshelathAlliance/SshelathKasolra.php',
 				'sshelathkastulva' => '/server/model/ships/EscalationSshelathAlliance/SshelathKastulva.php',
 				'sshelathkosluka' => '/server/model/ships/EscalationSshelathAlliance/SshelathKosluka.php',
