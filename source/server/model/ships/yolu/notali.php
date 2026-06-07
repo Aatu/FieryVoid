@@ -23,13 +23,13 @@ class Notali extends BaseShip{
         $this->pivotcost = 3;
         $this->iniativebonus = 0;
         $this->limited = 33;
-        $this->fighters = array("normal"=>24);
+        $this->fighters = array("normal"=>24, "Breaching Pods"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 25, 0, 0));
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 28, 4, 12));
         $this->addPrimarySystem(new Engine(5, 23, 0, 10, 5));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 4, 2));
 
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 60));
@@ -46,13 +46,13 @@ class Notali extends BaseShip{
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
-        $this->addLeftSystem(new Hangar(5, 12));
+        $this->addLeftSystem(new Hangar(5, 12, 12, 5));
 
         $this->addRightSystem(new GraviticThruster(5, 21, 0, 5, 4));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
-        $this->addRightSystem(new Hangar(5, 12));
+        $this->addRightSystem(new Hangar(5, 12, 12, 1));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 52));

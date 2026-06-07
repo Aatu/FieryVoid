@@ -11,7 +11,7 @@ class Notai extends BaseShip{
         $this->shipClass = "Notai Assault Carrier";
 			$this->variantOf = "Notali Carrier";
         $this->gravitic = true;
-        $this->fighters = array("assault shuttles"=>24); //18 assault shuttles and 6 breaching pods standard loadout    
+        $this->fighters = array("assault shuttles"=>18, "Breaching Pods"=>8); //18 assault shuttles and 6 breaching pods standard loadout    
 
         $this->isd = 2096;
 
@@ -29,7 +29,7 @@ class Notai extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 28, 4, 12));
         $this->addPrimarySystem(new Engine(5, 23, 0, 10, 5));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 4, 2));
 
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 240, 60));
@@ -45,13 +45,13 @@ class Notai extends BaseShip{
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addLeftSystem(new FusionCannon(3, 8, 1, 180, 360));
         $this->addLeftSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
-        $this->addLeftSystem(new Hangar(5, 12, 12));
+        $this->addLeftSystem(new Hangar(5, 12, 12, 5));
 
         $this->addRightSystem(new GraviticThruster(5, 18, 0, 5, 4));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 120, 240));
         $this->addRightSystem(new FusionCannon(3, 8, 1, 0, 180));
         $this->addRightSystem(new MolecularDisruptor(4, 8, 6, 300, 60));
-        $this->addRightSystem(new Hangar(5, 12, 12));
+        $this->addRightSystem(new Hangar(5, 12, 12, 5));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 52));
