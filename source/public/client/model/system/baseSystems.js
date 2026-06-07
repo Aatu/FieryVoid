@@ -677,6 +677,11 @@ var MindriderHangar = function MindriderHangar(json, ship) {
 MindriderHangar.prototype = Object.create(ShipSystem.prototype);
 MindriderHangar.prototype.constructor = MindriderHangar;
 
+MindriderHangar.prototype.initializationUpdate = function () {
+	this.outputDisplay = '-'; //Doesn't operate as a Hangar, so show null capacity.
+	return this;
+}
+
 // Hangar Ops Stage 16: a Catapult is a Hangar that holds one fighter and
 // displays capacity as 1 regardless of its (structural) box count. Extending
 // Hangar inherits the data deep-clone (Stage 12 shared-reference fix), the
