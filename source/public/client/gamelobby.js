@@ -2237,7 +2237,7 @@ window.gamedata = {
 
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
-				var startClosed = ((categoryIndex === 1 && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
+				var startClosed = ((categoryIndex === 1 && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace" && ship.faction !== "Usuuth Coalition") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
 				if (faction === "Terrain") {
 					startClosed = false;
 				}
