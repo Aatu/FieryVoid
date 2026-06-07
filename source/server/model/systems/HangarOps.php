@@ -3895,6 +3895,19 @@ class HangarOps {
 		if ($bpc <= 0) $bpc = 1;
 		$category = self::trueSizeOf($flight);
 
+		//hangarAcceptsCategory reads the carrier's $fighters declaration to decide
+		//whether a universal ('fighters'/'normal') bay accepts a category it can't
+		//infer from hangarType alone (Breaching Pods, Assault Shuttles, custom). But
+		//$carrier here is the POST-side ship rebuilt by getShipsFromJSON, which never
+		//runs Enhancements::setEnhancements — so a HANG_BP carrier's $fighters never
+		//gains its "Breaching Pods" slot and the bay wrongly rejects the pod ("carrier
+		//full"). $dbCarrier IS the gamedata-loaded ship (onConstructed → setEnhancements
+		//ran), so its $fighters reflects the enhancement. Use it for the capability
+		//check; fall back to $carrier when no DB ship was passed. (Ships that DECLARE
+		//the category natively in their constructor — e.g. Omega's "normal" fighters —
+		//already pass on $carrier, which is why only HANG_BP/HANG_AS carriers broke.)
+		$capabilityCarrier = $dbCarrier ?: $carrier;
+
 		//Fill order: the client's chosen bays first (dedup), then any other
 		//eligible bay on the carrier. Free boxes are read from the DB-side bay
 		//PLUS this-pass POST-side commits (entries the coalescer already appended).
@@ -3926,7 +3939,7 @@ class HangarOps {
 			if ($remaining <= 0) break;
 			if (!empty($h->isCatapult)) continue;
 			if ($h->isDestroyed()) continue;
-			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+			if (!self::hangarAcceptsCategory($h, $category, $capabilityCarrier)) continue;
 
 			//TRUE free boxes for this bay = effective capacity − max(DB usage,
 			//POST-side this-pass usage). The POST-side bay accumulates entries the

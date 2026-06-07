@@ -836,6 +836,17 @@ Design decision (confirmed with the user): hide in the in-game tooltip, keep as-
 
 **Files**: [systems.js](source/public/client/systems.js), [systemInfo.js](source/public/client/UI/systemInfo.js).
 
+**Follow-up (2026-06-07) — HANG_BP Breaching Pods rejected at deploy-dock ("carrier full"); landed on the map instead.** (gameID 4160, Urik'hal carrier)
+
+A Breaching Pod that deploy-docked fine in the client was rejected by the server on commit and started the game on the map in its `start` position. Trace: the deploy-dock resolves in `DeploymentGamePhase::process` → `generateIndividualNotes` → `HangarOps::performDeployStartDockFromOrders`, which runs on the **POST-side carrier** (rebuilt by `Manager::getShipsFromJSON`). That builder never calls `Enhancements::setEnhancements()`, so the POST-side ship's `$ship->fighters` is still the constructor default — empty for the Urik'hal, which declares no native fighters. `hangarAcceptsCategory($hangar, 'Breaching Pods', $postCarrier)` reads that empty declaration → returns false → no bay accepts the pod → "carrier full" fail note (DB note `19361: fail:873357:carrier full`). The Omega in the same game docked its Lampreys fine because it declares `fighters = ["normal"=>24]` in its constructor (survives the POST round-trip); only **enhancement-granted** capacity (HANG_BP, and by the same logic HANG_AS) was broken.
+
+Fix:
+- [HangarOps.php:3900-3913](source/server/model/systems/HangarOps.php#L3900-L3913) — `performDeployStartDockFromOrders` now resolves `$capabilityCarrier = $dbCarrier ?: $carrier` and uses it for both `hangarAcceptsCategory` checks. `$dbCarrier` is the gamedata-loaded ship (`getTacGamedata` → `onConstructed` → `setEnhancements` ran), so its `$fighters` correctly shows the enhancement-granted `"Breaching Pods"` slot. Capacity/occupancy math is unchanged — only the "does this bay accept this category" question consults the enhancement-applied declaration.
+
+Scope: the Fire-phase land/dock path (`processDockOrders` → `canShipReceive`) runs on gamedata ships in `criticals.php` and was never affected; the fix is limited to the deploy-start path. Same `$dbCarrier` fallback also covers HANG_AS carriers (identical latent bug).
+
+**Files**: [HangarOps.php](source/server/model/systems/HangarOps.php).
+
 ---
 
 ### Stage 13 — Lobby fleet-check polish & shuttle/fighter overflow rule ✓ COMPLETE
