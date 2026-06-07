@@ -7701,6 +7701,7 @@ class MindriderHangar extends ShipSystem{
 			$this->data["Special"] = "Technical system only.";
 		}else{		       	     
 			$this->data["Special"] = "Hangar capacity equals number of Thought Projections this ship can control.";
+			$this->data["Special"] .= "Cannot dock or launch fighters.";			
 		}    
     }	    	
 
