@@ -551,7 +551,7 @@ shipManager.systems = {
         switch (faction) {
             case "Minbari Federation":
             case "Minbari Protectorate":
-                return "Flyers";
+                return "Cargo Flyers";
             default:
                 return "Shuttles";
         }

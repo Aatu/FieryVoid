@@ -32,7 +32,7 @@ class ProtectorateLeshath extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(6, 35, 8, 15));
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 3));
         $this->addPrimarySystem(new JumpEngine(6, 25, 5, 16));
-        $this->addPrimarySystem(new Hangar(5, 8));
+        $this->addPrimarySystem(new Hangar(5, 8, 3));
         $this->addPrimarySystem(new Jammer(5, 10, 5));
 
         // weapons arguments: armor, health, power, start arc, end arc

@@ -27,7 +27,7 @@ class ProtectorateTroligan extends BaseShip{
         $this->addPrimarySystem(new CnC(8, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(7, 23, 4, 10));
         $this->addPrimarySystem(new Engine(7, 16, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(7, 2));
+        $this->addPrimarySystem(new Hangar(7, 2, 1));
         
         // weapons arguments: armor, health, power, start arc, end arc
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));

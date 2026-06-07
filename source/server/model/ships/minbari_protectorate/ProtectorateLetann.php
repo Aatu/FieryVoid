@@ -29,7 +29,7 @@ class ProtectorateLetann extends HeavyCombatVessel{
         $this->addPrimarySystem(new ElintScanner(5, 24, 6, 13));
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 3));
         $this->addPrimarySystem(new JumpEngine(5, 20, 3, 12));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
         $this->addPrimarySystem(new GraviticThruster(4, 13, 0, 4, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 13, 0, 4, 4));
 
