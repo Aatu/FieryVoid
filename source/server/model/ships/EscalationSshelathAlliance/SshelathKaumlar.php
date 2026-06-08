@@ -11,6 +11,7 @@ class SshelathKaumlar extends OSAT{
         $this->shipClass = "Kaumlar Command Fortress";
         $this->isd = 1908;
 		$this->limited = 33;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;

@@ -13,6 +13,7 @@ class SshelathKaumlarRefit extends OSAT{
 			$this->occurence = "common";
         $this->isd = 1918;
 		$this->limited = 33;
+		$this->unofficial = true;
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
