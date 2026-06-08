@@ -78,7 +78,9 @@ class ShadowCruiser extends MediumShip{
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 4, 8));
-        $this->addPrimarySystem(new Hangar(5, 6, 6));
+		$hangar = new Hangar(5, 6, 6);
+		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
+		$this->addPrimarySystem($hangar);			
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
 		

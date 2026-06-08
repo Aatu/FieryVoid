@@ -65,10 +65,23 @@ class shadowRegenBase extends OSAT{
 		$scanner = new Scanner(6, 20, 4, 14);
 			$scanner->markAdvanced();
 			$this->addPrimarySystem($scanner);
-        $this->addPrimarySystem(new Hangar(5, 6, 6));
-        $this->addPrimarySystem(new Hangar(5, 6, 6));
-        $this->addPrimarySystem(new Hangar(5, 6, 6));
-        $this->addPrimarySystem(new Hangar(5, 6, 6));
+
+		$hangar1 = new Hangar(5, 6, 6);
+		$hangar1->directions = array(0, 1, 4, 5);
+		$this->addPrimarySystem($hangar1);		
+
+		$hangar2 = new Hangar(5, 6, 6);
+		$hangar2->directions = array(0, 1, 2, 5);
+		$this->addPrimarySystem($hangar2);	
+
+		$hangar3 = new Hangar(5, 6, 6);
+		$hangar3->directions = array(1, 2, 3, 4);
+		$this->addPrimarySystem($hangar3);	
+
+		$hangar4 = new Hangar(5, 6, 6);
+		$hangar4->directions = array(2, 3, 4, 5);
+		$this->addPrimarySystem($hangar4);	
+
         $this->addPrimarySystem(new SelfRepair(6, 16, 8)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(6, 16, 8)); //armor, structure, output
 
