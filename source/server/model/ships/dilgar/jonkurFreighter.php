@@ -24,7 +24,8 @@ class JonkurFreighter extends MediumShip{
         $this->pivotcost = 999;
         $this->iniativebonus = -20;
 
-        $this->addPrimarySystem(new LightLaser(2, 4, 3, 0, 360));
+
+        $this->addPrimarySystem(new ScatterPulsar(2, 4, 2, 0, 360));        
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 9, 1, 3));
