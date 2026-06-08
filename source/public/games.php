@@ -64,6 +64,28 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     function loadFireList() {
       ajaxInterface.getFirePhaseGames();
     }
+
+    // BFCache restore freshness (games list page).
+    // games.php bakes its game list into the page at server-render time and
+    // parses it once on jQuery ready. That handler does not re-fire when the
+    // browser restores a frozen page from the back/forward cache (clicking back
+    // from a game, or session restore on startup), so the lists come back
+    // showing the stale render-time snapshot. There is no polling loop on this
+    // page (startPollingGames is a no-op), so nothing refreshes on its own.
+    // On a persisted restore: force one immediate fetch of the games list, and
+    // refresh the recent-activity panel too if it has already been populated.
+    window.addEventListener("pageshow", function (event) {
+      if (!event.persisted) return;                       // only BFCache restores
+      if (typeof ajaxInterface === "undefined") return;
+
+      ajaxInterface.submitingGames = false;               // a frozen in-flight XHR never completed
+      ajaxInterface.requestAllGames();                    // refresh YOUR GAMES + JOIN GAMES
+
+      var fireList = document.getElementById("fireList");
+      if (fireList && fireList.children.length > 0) {
+        ajaxInterface.getFirePhaseGames();                // refresh RECENT ACTIVITY if shown
+      }
+    });
   </script>
 </head>
 
