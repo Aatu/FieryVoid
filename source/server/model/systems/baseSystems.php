@@ -3940,6 +3940,17 @@ class DockingCollar extends Hangar{
     function __construct($armour, $maxhealth, $output = 1){
         parent::__construct($armour, $maxhealth, $output, 0, 'LCVs');
     }
+
+    public function setSystemDataWindow($turn){
+        //Hangar::setSystemDataWindow handles the ordinary (box-count) capacity
+        //line; we only override the "Special" flavour text. Skip straight to
+        //ShipSystem so we don't inherit Hangar's hangar/catapult Special block.
+        ShipSystem::setSystemDataWindow($turn);
+        $this->data["Special"]  = "External launch rail for LCVs.";
+        $this->data["Special"] .= "<br>LCVs can dock and launch from this system.";		
+        $this->data["Special"] .= "<br>Further details of Hangar Operations can be found in Fiery Void FAQ.";
+    }
+
 }
 
 
