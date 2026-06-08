@@ -30,7 +30,7 @@ class StreibIntruder extends MediumShip{
         $this->addPrimarySystem(new Scanner(7, 6, 4, 9));
         $this->addPrimarySystem(new JumpEngine(7, 8, 4, 12));
         $this->addPrimarySystem(new SurgeLaser(5, 6, 3, 0, 240));
-        $this->addPrimarySystem(new Hangar(6, 2, 0));
+        $this->addPrimarySystem(new Hangar(6, 2, 2));
         $this->addPrimarySystem(new CargoBay(6, 9));
         $this->addPrimarySystem(new CargoBay(7, 6));
         $this->addPrimarySystem(new GraviticThruster(7, 8, 0, 4, 3));
