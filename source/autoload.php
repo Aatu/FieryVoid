@@ -3180,8 +3180,18 @@ spl_autoload_register(
 				'shadowgarundaam' => '/server/model/ships/customs/ShadowGarundaAM.php',	
 				'shadowmollantaam' => '/server/model/ships/customs/ShadowMollantaAM.php',	
 				'shadownollita' => '/server/model/ships/customs/ShadowNollita.php',	
+
+				'shadowattackdreadnought' => '/server/model/ships/customs/shadowAttackDreadnought.php',	
+				'shadowcruiseradvanced' => '/server/model/ships/customs/shadowCruiserAdvanced.php',	
+				'shadowdefenseosat' => '/server/model/ships/customs/shadowDefenseOSAT.php',	
+				'shadowheavyosat' => '/server/model/ships/customs/shadowHeavyOSAT.php',	
+				'shadowosat' => '/server/model/ships/customs/shadowOSAT.php',	
+				'shadowstrikecruiser' => '/server/model/ships/customs/shadowStrikeCruiser.php',	
+
 				
-															 
+				//TEMPORARY campaign-related weapons
+				'molecularslicerbeama' => '/server/model/weapons/customs.php',
+				
 															   
 				
 				// ~~~ AmmoMagazine ~~~ and related classes
