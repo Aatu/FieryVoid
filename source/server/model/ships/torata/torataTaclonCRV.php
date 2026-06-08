@@ -10,7 +10,7 @@ class TorataTaclonCRV extends MediumShip
 		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataTaclonCRV";
 		$this->imagePath = "img/ships/TorataAtlac.png";
-		$this->canvasSize = 100;
+		$this->canvasSize = 125;
 		$this->shipClass = "Taclon Escort Corvette";
 		$this->variantOf = "Atlac Corvette";
 		$this->occurence = "uncommon";
