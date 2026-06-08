@@ -10,6 +10,7 @@ class wlcChlonasHeArpa extends BaseShip{
         $this->imagePath = "img/ships/ChlonasHeArpa.png";
         $this->shipClass = "Chlonas He'Arpa Transport";
         $this->canvasSize = 200;
+		$this->fighters = array("cargo shuttles"=>4); 		
 	    
 		$this->isd = 2200;
         
@@ -27,7 +28,7 @@ class wlcChlonasHeArpa extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 3));
         $this->addPrimarySystem(new Engine(3, 11, 0, 6, 6));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 4, 2));
 		$this->addPrimarySystem(new CargoBay(2, 100));
 		
         $this->addFrontSystem(new Thruster(2, 15, 0, 4, 1));

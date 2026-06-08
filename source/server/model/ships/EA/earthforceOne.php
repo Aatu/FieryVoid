@@ -33,7 +33,8 @@ class EarthforceOne  extends BaseShip{
 		$this->addPrimarySystem(new ProtectedCnC(6, 28, 0, 0)); //originally 2 systems (one in forward structure) with sructure 12+16, armor 5 each
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(6, 20, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(5, 7));
+        $this->addPrimarySystem(new Hangar(5, 7, 6, 3));
+        $this->addPrimarySystem(new Hangar(5, 7, 6, 3));        
         $this->addPrimarySystem(new JumpEngine(6, 15, 5, 20));
 		$this->addPrimarySystem(new Quarters(5, 21));
 		$this->addPrimarySystem(new Quarters(5, 21));

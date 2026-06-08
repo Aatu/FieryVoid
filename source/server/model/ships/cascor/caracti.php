@@ -44,7 +44,7 @@ class Caracti extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(2, 8, 0, 3, 2));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 180, 300));
         $this->addAftSystem(new IonCannon(3, 6, 4, 120, 240));
-        $this->addAftSystem(new Hangar(3, 6));
+        $this->addAftSystem(new Hangar(3, 6, 6, 0, 'fighters', array(), true));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

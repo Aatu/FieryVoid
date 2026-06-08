@@ -12,6 +12,7 @@ class MissileBarge extends BaseShip{
         $this->shipSizeClass = 3;
         $this->limited = 33;
         $this->isd = 2191;
+		$this->fighters = array("cargo shuttles"=>6);         
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;

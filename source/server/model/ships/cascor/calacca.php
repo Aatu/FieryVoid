@@ -13,6 +13,7 @@ class Calacca extends HeavyCombatVessel{
         $this->shipClass = "Cascor Calacca Freighter";
         $this->isd = 2225;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>3);         
         
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
@@ -34,7 +35,7 @@ class Calacca extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new DualIonBolter(2, 4, 4, 240, 360));
-        $this->addFrontSystem(new Hangar(3, 3));
+        $this->addFrontSystem(new Hangar(3, 3, 3));
         $this->addFrontSystem(new DualIonBolter(2, 4, 4, 0, 120));
         $this->addFrontSystem(new CargoBay(3, 20));
         $this->addFrontSystem(new CargoBay(3, 20));

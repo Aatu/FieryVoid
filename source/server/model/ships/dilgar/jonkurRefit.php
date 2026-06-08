@@ -14,6 +14,7 @@ class JonkurRefit extends MediumShip{
         $this->canvasSize = 100;
         $this->isd = 2208;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>2);         
         
         $this->forwardDefense = 11;
         $this->sideDefense = 16;
@@ -35,7 +36,7 @@ class JonkurRefit extends MediumShip{
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
-        $this->addFrontSystem(new Hangar(2, 1));
+        $this->addFrontSystem(new Hangar(2, 1, 1));
         $this->addFrontSystem(new CargoBay(1, 25));
         $this->addFrontSystem(new CargoBay(1, 25));
 
