@@ -195,6 +195,12 @@ var EWDefenseLaser = function  EWDefenseLaser(json, ship) {
 EWDefenseLaser.prototype = Object.create(Weapon.prototype);
 EWDefenseLaser.prototype.constructor =  EWDefenseLaser;
 
+var EWDefenseLaser2 = function  EWDefenseLaser2(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWDefenseLaser2.prototype = Object.create(Weapon.prototype);
+EWDefenseLaser2.prototype.constructor =  EWDefenseLaser2;
+
 var EWNuclearTorpedo = function  EWNuclearTorpedo(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -426,3 +432,30 @@ ChoukaMineLauncher.prototype.initializationUpdate = function() {
 ChoukaMineLauncher.prototype.getModeNameForEnemy = function (fireOrder) {
 	return "Mine";
 };
+
+var EWFlakBattery = function EWFlakBattery(json, ship) {
+    Weapon.call(this, json, ship);
+};
+EWFlakBattery.prototype = Object.create(Weapon.prototype);
+EWFlakBattery.prototype.constructor = EWFlakBattery;
+//EWFlakBattery.prototype.initializationUpdate = function () {
+//    this.data['Range'] = this.range;
+//    return this;
+EWFlakBattery.prototype.initializationUpdate = function () {
+    const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
+    if (rangeCrit > 0) this.range = 1;
+    this.data['Range'] = this.range;
+    return this;
+};
+
+var EWEMLaser = function  EWEMLaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+EWEMLaser.prototype = Object.create(Laser.prototype);
+EWEMLaser.prototype.constructor =  EWEMLaser;
+
+var EWHvyEMLaser = function  EWHvyEMLaser(json, ship) {
+    Laser.call(this, json, ship);
+};
+EWHvyEMLaser.prototype = Object.create(Laser.prototype);
+EWHvyEMLaser.prototype.constructor =  EWHvyEMLaser;

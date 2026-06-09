@@ -1307,6 +1307,7 @@ spl_autoload_register(
                 'tractingrodhandler' => '/server/model/weapons/customEscalation.php',
 			//EW laser weapons
 				'ewdefenselaser' => '/server/model/weapons/customEscalation.php',
+				'ewdefenselaser2' => '/server/model/weapons/customEscalation.php',
 				'ewduallaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewlaserbolt' => '/server/model/weapons/customEscalation.php',
 				'ewlaserboltftr' => '/server/model/weapons/customEscalation.php',
@@ -1322,10 +1323,13 @@ spl_autoload_register(
 				'lightenergymine' => '/server/model/weapons/AoE.php',
 			//EW electromagnetic weapons
 				'ewelectronpolarizer' => '/server/model/weapons/customEscalation.php',
+				'ewemlaser' => '/server/model/weapons/customEscalation.php',
+				'ewhvyemlaser' => '/server/model/weapons/customEscalation.php',
 				'ewemtorpedo' => '/server/model/weapons/customEscalation.php',
 			//EW matter weapons
 				'ewearlyrailgun' => '/server/model/weapons/customEscalation.php',
 				'ewlightgausscannon' => '/server/model/weapons/customEscalation.php',
+				'ewflakbattery' => '/server/model/weapons/customEscalation.php',
 
 
 
@@ -1416,18 +1420,23 @@ spl_autoload_register(
 				//Escalation Wars - Chouka Raiders
 				'choukaraidercruiser' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderCruiser.php',
 				'choukaraiderjumpcruiser' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderJumpcruiser.php',
+				'choukaraidergambler' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderGambler.php',
 				'choukaraiderheresy' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderHeresy.php',
 				'choukaraiderhighwaymana' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderHighwaymanA.php',
 				'choukaraiderhighwaymana_nocargo' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderHighwaymanA_NoCargo.php',
 				'choukaraiderhighwaymanb' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderHighwaymanB.php',
 				'choukaraiderhighwaymanb_nocargo' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderHighwaymanB_NoCargo.php',
 				'choukaraideroathbreaker' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOathbreaker.php',
+				'choukaraideroathbreakerrail' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOathbreakerRail.php',
+				'choukaraideroutlawa' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOutlawA.php',
+				'choukaraideroutlawb' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderOutlawB.php',
 				'choukaraiderpillagerbp' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderPillagerBP.php',
-				'choukaraiderreclumafighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumAFighter.php',
-				'choukaraiderreclumbfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumBFighter.php',
-				'choukaraiderreclumcfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumCFighter.php',
+//				'choukaraiderreclumafighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumAFighter.php',
+//				'choukaraiderreclumbfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumBFighter.php',
+//				'choukaraiderreclumcfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumCFighter.php',
 //				'choukaraiderreclumdfighter' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumDFighter.php',
 				'choukaraiderreclumdfighteram' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderReclumDFighterAM.php',
+				'choukaraiderwraithbladefighteram' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderWraithbladeFighterAM.php',
 				'choukaraiderwrathwarship' => '/server/model/ships/EscalationChoukaRaider/ChoukaRaiderWrathWarship.php',
 				
 
@@ -1448,6 +1457,7 @@ spl_autoload_register(
 				'circasianistale' => '/server/model/ships/EscalationCircasianEmpire/CircasianIstale.php',
 				'circasianjagafighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianJagaFighter.php',
 				'circasianjagalltorpedofighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianJagallTorpedoFighter.php',
+				'circasiankalichar' => '/server/model/ships/EscalationCircasianEmpire/CircasianKalichar.php',
 				'circasiankatinbp' => '/server/model/ships/EscalationCircasianEmpire/CircasianKatinBP.php',
 				'circasiankolamfighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianKolamFighter.php',
 				'circasiankolanis' => '/server/model/ships/EscalationCircasianEmpire/CircasianKolanis.php',
@@ -1542,6 +1552,8 @@ spl_autoload_register(
 				'sshelathkaraut' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaraut.php',
 				'sshelathkaraut1971' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaraut1971.php',
 				'sshelathkaraut1986' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaraut1986.php',
+				'sshelathkaumlar' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaumlar.php',
+				'sshelathkaumlarrefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathKaumlarRefit.php',
 				'sshelathkasolra' => '/server/model/ships/EscalationSshelathAlliance/SshelathKasolra.php',
 				'sshelathkastulva' => '/server/model/ships/EscalationSshelathAlliance/SshelathKastulva.php',
 				'sshelathkosluka' => '/server/model/ships/EscalationSshelathAlliance/SshelathKosluka.php',
@@ -1557,6 +1569,10 @@ spl_autoload_register(
 				'sshelathniskiraa' => '/server/model/ships/EscalationSshelathAlliance/SshelathNiskiraA.php',
 				'sshelathniskirab' => '/server/model/ships/EscalationSshelathAlliance/SshelathNiskiraB.php',
 				'sshelathkavasabp' => '/server/model/ships/EscalationSshelathAlliance/SshelathKavasaBP.php',
+				'sshelathritesh' => '/server/model/ships/EscalationSshelathAlliance/SshelathRitesh.php',
+				'sshelathriteshrefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathRiteshRefit.php',
+				'sshelathskaggha' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkaggha.php',
+				'sshelathskavna' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkavna.php',
 				'sshelathskonna' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkonna.php',
 				'sshelathskonnarefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkonnaRefit.php',
 				'sshelathskraltana' => '/server/model/ships/EscalationSshelathAlliance/SshelathSkraltana.php',
@@ -1589,10 +1605,15 @@ spl_autoload_register(
 				'sshelathukanda' => '/server/model/ships/EscalationSshelathAlliance/SshelathUkanda.php',
 				'sshelathushula' => '/server/model/ships/EscalationSshelathAlliance/SshelathUshula.php',
 				'sshelathvahskal' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskal.php',
+				'sshelathvahskalrail' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskalRail.php',
 				'sshelathvahskalrefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskalRefit.php',
+				'sshelathvahskalrefitrail' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskalRefitRail.php',
 				'sshelathvahsta' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahsta.php',
+				'sshelathvelvasa' => '/server/model/ships/EscalationSshelathAlliance/SshelathVelvasa.php',
 				'sshelathvilindras' => '/server/model/ships/EscalationSshelathAlliance/SshelathVilindras.php',
 				'sshelathvipindra' => '/server/model/ships/EscalationSshelathAlliance/SshelathVipindra.php',
+				'sshelathvulshara' => '/server/model/ships/EscalationSshelathAlliance/SshelathVulshara.php',
+				'sshelathvulshara2018' => '/server/model/ships/EscalationSshelathAlliance/SshelathVulshara2018.php',
 				
 				
 				
@@ -1940,6 +1961,7 @@ spl_autoload_register(
                 'makarsraeloon' => '/server/model/ships/NexusMakar_old/MakarSraeloon.php',					
                 'makarsraeloonrefit' => '/server/model/ships/NexusMakar_old/MakarSraeloonRefit.php',					
                 'makarsraeloonrefit2' => '/server/model/ships/NexusMakar/MakarSraeloonRefit2.php',					
+                'makarsraeloonrefit2rail' => '/server/model/ships/NexusMakar/MakarSraeloonRefit2Rail.php',					
                 'makartorgeth' => '/server/model/ships/NexusMakar_old/MakarTorgeth.php',					
                 'makartramit' => '/server/model/ships/NexusMakar_old/MakarTramit.php',					
                 'makartramitrefit' => '/server/model/ships/NexusMakar/MakarTramitRefit.php',					
@@ -1954,6 +1976,7 @@ spl_autoload_register(
                 'qomyomineloquay' => '/server/model/ships/NexusMakar_old/QomYominEloquay.php',					
                 'qomyomineloquayrefita' => '/server/model/ships/NexusMakar_old/QomYominEloquayRefita.php',					
                 'qomyomineloquayrefitb' => '/server/model/ships/NexusMakar/QomYominEloquayRefitb.php',					
+                'qomyomineloquayrefitbrail' => '/server/model/ships/NexusMakar/QomYominEloquayRefitbRail.php',					
                 'qomyominhauler' => '/server/model/ships/NexusMakar_old/QomYominHauler.php',					
                 'qomyominlightscout' => '/server/model/ships/NexusMakar_old/QomYominLightScout.php',					
                 'qomyominlightscoutrefita' => '/server/model/ships/NexusMakar_old/QomYominLightScoutRefita.php',					
@@ -1961,10 +1984,13 @@ spl_autoload_register(
                 'qomyominmayol' => '/server/model/ships/NexusMakar_old/QomYominMaYol.php',					
                 'qomyominmayolrefit' => '/server/model/ships/NexusMakar/QomYominMaYolRefit.php',					
                 'qomyominooru' => '/server/model/ships/NexusMakar_old/QomYominOoru.php',					
+                'qomyominoorurail' => '/server/model/ships/NexusMakar_old/QomYominOoruRail.php',					
                 'qomyominoorurefit' => '/server/model/ships/NexusMakar/QomYominOoruRefit.php',					
+                'qomyominoorurefitrail' => '/server/model/ships/NexusMakar/QomYominOoruRefitRail.php',					
                 'qomyominqolata' => '/server/model/ships/NexusMakar_old/QomYominQolAta.php',					
                 'qomyominqolatb' => '/server/model/ships/NexusMakar/QomYominQolAtb.php',					
                 'qomyominqortalkya' => '/server/model/ships/NexusMakar/QomYominQortalKya.php',					
+                'qomyominqortalkyarail' => '/server/model/ships/NexusMakar/QomYominQortalKyaRail.php',					
                 'qomyominqortalmoro' => '/server/model/ships/NexusMakar_old/QomYominQortalMoro.php',					
                 'qomyominqortalmororefit' => '/server/model/ships/NexusMakar/QomYominQortalMoroRefit.php',					
                 'qomyomintalrenhk' => '/server/model/ships/NexusMakar_old/QomYominTalRenHK.php',					
@@ -2017,6 +2043,7 @@ spl_autoload_register(
 
 				//Nexus ships - Sal-bez
                 'breachingpodsalbez' => '/server/model/ships/NexusSalbez/breachingpodsalbez.php',					
+                'breachingpodsalbezearly' => '/server/model/ships/NexusSalbez_old/breachingpodsalbezearly.php',					
                 'salbezashver' => '/server/model/ships/NexusSalbez_old/SalbezAshver.php',					
                 'salbezavrtz' => '/server/model/ships/NexusSalbez_old/SalbezAvrtz.php',					
                 'salbezavrtzrefit' => '/server/model/ships/NexusSalbez/SalbezAvrtzRefit.php',					
@@ -2122,7 +2149,9 @@ spl_autoload_register(
                 'velraxsathrinrefit' => '/server/model/ships/NexusVelrax/VelraxSathrinRefit.php',					
 //                'velraxsathrinrefit2' => '/server/model/ships/NexusVelrax/VelraxSathrinRefit2.php',					
                 'velraxsevashcarrier' => '/server/model/ships/NexusVelrax_old/VelraxSevashCarrier.php',					
+                'velraxsevashcarrierrail' => '/server/model/ships/NexusVelrax_old/VelraxSevashCarrierRail.php',					
                 'velraxsevashrefit' => '/server/model/ships/NexusVelrax/VelraxSevashRefit.php',					
+                'velraxsevashrefitrail' => '/server/model/ships/NexusVelrax/VelraxSevashRefitRail.php',					
                 'velraxsivringunship' => '/server/model/ships/NexusVelrax_old/VelraxSivrinGunship.php',					
                 'velraxsivrinrefit' => '/server/model/ships/NexusVelrax_old/VelraxSivrinRefit.php',					
                 'velraxsivrinrefit2' => '/server/model/ships/NexusVelrax/VelraxSivrinRefit2.php',					
@@ -3149,8 +3178,18 @@ spl_autoload_register(
 				'shadowgarundaam' => '/server/model/ships/customs/ShadowGarundaAM.php',	
 				'shadowmollantaam' => '/server/model/ships/customs/ShadowMollantaAM.php',	
 				'shadownollita' => '/server/model/ships/customs/ShadowNollita.php',	
+
+				'shadowattackdreadnought' => '/server/model/ships/customs/shadowAttackDreadnought.php',	
+				'shadowcruiseradvanced' => '/server/model/ships/customs/shadowCruiserAdvanced.php',	
+				'shadowdefenseosat' => '/server/model/ships/customs/shadowDefenseOSAT.php',	
+				'shadowheavyosat' => '/server/model/ships/customs/shadowHeavyOSAT.php',	
+				'shadowosat' => '/server/model/ships/customs/shadowOSAT.php',	
+				'shadowstrikecruiser' => '/server/model/ships/customs/shadowStrikeCruiser.php',	
+
 				
-															 
+				//TEMPORARY campaign-related weapons
+				'molecularslicerbeama' => '/server/model/weapons/customs.php',
+				
 															   
 				
 				// ~~~ AmmoMagazine ~~~ and related classes

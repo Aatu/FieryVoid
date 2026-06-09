@@ -14,7 +14,7 @@ class SalbezShvrez extends MediumShip{
 
 	    $this->isd = 2125;
 
-        $this->fighters = array("assault shuttles"=>1);
+        $this->fighters = array("Breaching Pods"=>1);
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
@@ -32,7 +32,7 @@ class SalbezShvrez extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));        
-        $this->addPrimarySystem(new Hangar(2, 2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         
 		$this->addFrontSystem(new MediumLaser(3, 6, 5, 240, 360));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 270, 90));

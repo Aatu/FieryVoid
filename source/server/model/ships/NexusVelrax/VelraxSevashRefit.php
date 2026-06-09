@@ -9,7 +9,7 @@ class VelraxSevashRefit extends MediumShip{
         $this->phpclass = "VelraxSevashRefit";
         $this->imagePath = "img/ships/Nexus/velraxSevash.png";
         $this->shipClass = "Sevash Escort Carrier (2108)";
-			$this->variantOf = "Sathrin Border Frigate (2108)";
+			$this->variantOf = "NONE";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;

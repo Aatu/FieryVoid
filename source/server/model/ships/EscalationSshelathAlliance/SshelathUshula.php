@@ -12,6 +12,8 @@ class SshelathUshula extends MediumShip{
 		$this->unofficial = true;
         $this->canvasSize = 60;
 	    $this->isd = 1962;
+
+	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;
@@ -36,8 +38,8 @@ class SshelathUshula extends MediumShip{
 
 		$this->addFrontSystem(new EWLightGaussCannon(2, 6, 3, 180, 60));
 		$this->addFrontSystem(new EWLightGaussCannon(2, 6, 3, 300, 180));
-		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
-		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 8, false));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 5, false));
+		$this->addFrontSystem(new GrapplingClaw(3, 0, 0, 300, 60, 5, false));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
 	    
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));    

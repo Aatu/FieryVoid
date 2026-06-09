@@ -14,6 +14,7 @@ class MakarSraeloonRefit2 extends SmallStarBaseFourSections{
 		$this->canvasSize = 140; 
 		$this->unofficial = true;
 		$this->isd = 2108;
+        $this->variantOf = "NONE";
 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = false;

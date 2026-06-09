@@ -1,7 +1,6 @@
 <?php
 /*file for Escalation Wars universe weapons*/
 
-
 // PARTICLE WEAPONS
 
 class EWParticleLance extends Raking{
@@ -758,6 +757,46 @@ class EWHeavyGatlingLaser extends Pulse{
 
     } //endof class EWDefenseLaser
 
+    class EWDefenseLaser2 extends EWDefenseLaser{
+        public $name = "EWDefenseLaser2";
+        public $displayName = "Defense Laser II";
+        public $iconPath = "EWDefenseLaser.png"; 
+        public $animationColor = array(255, 30, 30);
+        public $animation = "bolt"; //a bolt, not beam
+        public $animationExplosionScale = 0.15;
+        public $projectilespeed = 25;
+        public $animationWidth = 10;
+        public $trailLength = 5;
+        public $priority = 3; //very light Standard weapons
+        public $uninterceptable = true; // This is a laser
+
+        public $loadingtime = 1;
+
+        public $intercept = 2;
+		public $ballisticIntercept = true;
+
+        public $rangePenalty = 1;
+        public $fireControl = array(4, 0, 0); // fighters, <mediums, <capitals
+
+        public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+        public $weaponClass = "Laser";
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            if ( $maxhealth == 0 ) $maxhealth = 2;
+            if ( $powerReq == 0 ) $powerReq = 1;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+		
+		public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Uninterceptable and can intercept.'; 
+		}
+
+        public function getDamage($fireOrder){ return Dice::d(10, 1)+2; }
+        public function setMinDamage(){ $this->minDamage = 3 ; }
+        public function setMaxDamage(){ $this->maxDamage = 12 ; }
+
+    } //endof class EWDefenseLaser2
 
     class EWHETLaser extends Laser{
      
@@ -2267,6 +2306,239 @@ class ChoukaMineLauncher extends BallisticMineLauncher{
 
 
 
+
+class EWFlakBattery extends Weapon {        
+    public $name = "EWFlakBattery";
+    public $displayName = "Flak Battery";
+    public $iconPath = "EWFlakBattery.png";
+    public $animation = "ball";
+    public $animationColor = array(75, 250, 90);    	
+    public $animationExplosionScale = 0.5;
+    public $noProjectile = true;
+
+    public $ballistic = false;
+    public $hextarget = true;
+    public $hidetarget = false;
+    public $priority = 1;
+
+    public $uninterceptable = true;
+    public $doNotIntercept = true;
+	public $canInterceptUninterceptable = true; //able to intercept shots that are normally uninterceptable, eg. Lasers
+    public $useOEW = false;
+        		
+    public $loadingtime = 1;
+    public $intercept = 3;
+
+    public $tohitPenalty = 0;
+    public $damagePenalty = 0;        
+         		
+    public $range = 1;
+    public $rangePenalty = 0;
+
+	public $priorityArray = array(1 => 1);   
+	public $firingMode = 1;
+	
+    public $boostable = false;
+
+    public $weaponClassArray = array(1 => 'Matter');
+    public $damageTypeArray = array(1 => 'Matter');
+//    public $firingMode = "Offensive";
+        
+    public $firingModes = array(
+        1 => "Anti-Fighter",
+    );
+
+    public $fireControlArray = array(1 => array(0, null, null)); // fighters only
+
+    protected $autoHit = true;
+
+    protected $possibleCriticals = array(
+        17 => array("OutputReduced1", "ReducedRangeValue")
+    );
+
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc) {
+        if ($maxhealth == 0) $maxhealth = 4;
+        if ($powerReq == 0) $powerReq = 1;            
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+    }
+
+    public function calculateHitBase($gamedata, $fireOrder) {
+        $this->changeFiringMode($fireOrder->firingMode);
+            
+        $fireOrder->needed = 100;				
+        $fireOrder->updated = true;
+        $fireOrder->shots = 1;					
+        $fireOrder->notes .= 'Flak Battery shot.';
+    }		
+
+    public function fire($gamedata, $fireOrder) {
+        $shooter = $gamedata->getShipById($fireOrder->shooterid);
+        $this->changeFiringMode($fireOrder->firingMode);
+
+        $rolled = Dice::d(100);
+        $fireOrder->rolled = $rolled;
+        $fireOrder->shotshit = 1;
+
+        $fireOrder->pubnotes .= "Flak Battery deals D6 Matter damage to all fighters in hex.";
+
+        $target = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+        $ships = $gamedata->getShipsInDistance($target);
+                    
+        foreach ($ships as $targetShip) {
+            if ($targetShip instanceof FighterFlight) {
+                $this->AOEdamage($targetShip, $shooter, $fireOrder, $gamedata);
+            }
+        }
+
+        TacGamedata::$lastFiringResolutionNo++;
+        $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;
+        $fireOrder->rolled = max(1, $fireOrder->rolled);
+        $fireOrder->updated = true;		
+    }
+
+    public function AOEdamage($target, $shooter, $fireOrder, $gamedata) {
+        if ($target->isDestroyed()) return;
+            
+        foreach ($target->systems as $fighter) {
+            if ($fighter == null || $fighter->isDestroyed()) {
+                continue;
+            }
+                
+            $damage = $this->getDamage($fireOrder);
+            $damage = $this->getDamageMod($damage, $shooter, $target, null, $gamedata);
+            $damage -= $target->getDamageMod($shooter, null, $gamedata->turn, $this);
+
+            $this->doDamage($target, $shooter, $fighter, $damage, $fireOrder, null, $gamedata, false);
+        }
+    }
+
+    public function getDamage($fireOrder) {
+        return Dice::d(6, 1);
+    }
+
+    public function setMinDamage() {
+        $this->minDamage = 1;
+        $this->minDamageArray[$this->firingMode] = $this->minDamage;
+    }							
+    
+    public function setMaxDamage() {
+        $this->maxDamage = 6;
+        $this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+    }
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Deals D6 Matter damage to all fighters in targeted hex.';
+        $this->data["Special"] .= '<br>Can intercept lasers.';
+//        $this->data["Special"] .= '<br>Multiple Sand Casters may each deal damage independently.';
+    }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->autoHit = $this->autoHit;
+        $strippedSystem->noProjectile = $this->noProjectile;
+        return $strippedSystem;
+    }
+
+} // end of class EWFlakBattery
+
+
+    class EWEMLaser extends Laser{        
+        public $name = "EWEMLaser";
+        public $iconPath = "EWEMLaser.png";
+        public $displayName = "EM Laser";
+        public $animation = "laser";
+        public $animationColor = array(160, 0, 255);
+	
+        public $priority = 8; //light Raking
+        public $loadingtime = 3;
+        public $raking = 10;
+        
+        public $rangePenalty = 0.5;
+        public $fireControl = array(-3, 2, 3); // fighters, <mediums, <capitals 
+        
+        public $damageType = "Raking"; 
+        public $weaponClass = "Electromagnetic"; 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 6;
+            if ( $powerReq == 0 ) $powerReq = 5;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+			$system->critRollMod += 3;
+		} //endof function onDamagedSystem
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Electromagnetic class laser.';
+        $this->data["Special"] .= '<br>Causes +3 to criticals';
+//        $this->data["Special"] .= '<br>Multiple Sand Casters may each deal damage independently.';
+    }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 3)+10;   }
+        public function setMinDamage(){     $this->minDamage = 13 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 40 ;      }    
+		
+    } //EWEMLaser
+
+    class EWHvyEMLaser extends Laser{        
+        public $name = "EWHvyEMLaser";
+        public $iconPath = "EWHvyEMLaser.png";
+        public $displayName = "Heavy EM Laser";
+        public $animation = "laser";
+        public $animationColor = array(160, 0, 255);
+	
+        public $priority = 8; //light Raking
+        public $loadingtime = 4;
+        public $raking = 10;
+        
+        public $rangePenalty = 0.33;
+        public $fireControl = array(-4, 2, 3); // fighters, <mediums, <capitals 
+        
+        public $damageType = "Raking"; 
+        public $weaponClass = "Electromagnetic"; 
+    
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ) $maxhealth = 8;
+            if ( $powerReq == 0 ) $powerReq = 7;
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+			$system->critRollMod += 4;
+		} //endof function onDamagedSystem
+
+    public function setSystemDataWindow($turn) {
+        parent::setSystemDataWindow($turn);
+        if (!isset($this->data["Special"])) {
+            $this->data["Special"] = '';
+        } else {
+            $this->data["Special"] .= '<br>';
+        }
+        $this->data["Special"] .= 'Electromagnetic class laser.';
+        $this->data["Special"] .= '<br>Causes +4 to criticals';
+//        $this->data["Special"] .= '<br>Multiple Sand Casters may each deal damage independently.';
+    }
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 4)+16;   }
+        public function setMinDamage(){     $this->minDamage = 20 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 56 ;      }    
+		
+    } //EWHvyEMLaser
 
 
 

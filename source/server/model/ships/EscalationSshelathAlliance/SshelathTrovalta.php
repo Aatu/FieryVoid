@@ -16,6 +16,7 @@ class SshelathTrovalta extends MediumShip{
 	    $this->notes = 'Mst-as Faction';
 	    $this->notes .= '<br>Light missiles only';
 	    $this->notes .= '<br>Atmospheric capable';
+	    $this->notes .= '<br>Antiquated Sensors (cannot be boosted)';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 13;

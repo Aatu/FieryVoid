@@ -14,7 +14,7 @@ class BloodSwordDarkSoul extends BaseShip{
 		$this->unofficial = true;
 		$this->limited = 10;
 
-        $this->fighters = array("normal"=>12, "assault shuttles"=>2); //2 breaching pods
+        $this->fighters = array("normal"=>12, "Breaching Pods"=> 2);
 
 		$this->isd = 1943;
         
