@@ -95,6 +95,12 @@ window.PhaseStrategy = function () {
         this.animationStrategy.render(coordinateConverter, scene, zoom);
     };
 
+    // Idle render-loop gating: delegates to the animation strategy so
+    // webglScene can keep rendering full frames only while animations play.
+    PhaseStrategy.prototype.isAnimating = function () {
+        return Boolean(this.animationStrategy && this.animationStrategy.isAnimating());
+    };
+
     PhaseStrategy.prototype.update = function (gamedata) {
         this.gamedata = gamedata;
         this.consumeGamedata();

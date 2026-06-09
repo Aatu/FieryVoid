@@ -46,12 +46,19 @@ window.AnimationStrategy = function () {
         this.goingBack = true;
         this.paused = false;
         this.speedMultiplier = 1;
+        this.lastAnimationTime = 0; // Re-baseline after an idle gap (see play()).
     };
 
     AnimationStrategy.prototype.play = function () {
         this.paused = false;
         this.goingBack = false;
         this.speedMultiplier = 1;
+        // Idle render-loop gating: the loop stops calling render() while the board
+        // is static, so lastAnimationTime can be stale by an arbitrary gap when an
+        // animation (re)starts. Clear it so updateDeltaTime re-baselines on the
+        // first frame (delta 0) instead of fast-forwarding totalAnimationTime by
+        // the whole idle gap — which skipped projectile travel straight to impact.
+        this.lastAnimationTime = 0;
     };
 
     AnimationStrategy.prototype.pause = function () {
@@ -67,10 +74,18 @@ window.AnimationStrategy = function () {
         this.paused = false;
         this.goingBack = !forward;
         this.speedMultiplier = multiplier;
+        this.lastAnimationTime = 0; // Re-baseline after an idle gap (see play()).
     };
 
     AnimationStrategy.prototype.isPaused = function () {
         return this.paused;
+    };
+
+    // Idle render-loop gating: true while frames need to keep advancing.
+    // Active (non-paused) playback with at least one animation means the board
+    // is moving; a paused strategy or an empty animation list is static.
+    AnimationStrategy.prototype.isAnimating = function () {
+        return !this.paused && this.animations.length > 0;
     };
 
     AnimationStrategy.prototype.deactivate = function () {

@@ -347,6 +347,9 @@ class ShieldGeneratorList extends Component {
             const shipIcon = window.webglScene.phaseDirector.shipIconContainer.getByShip(this.props.ship);
             if (shipIcon) {
                 shipIcon.showWeaponArc(this.props.ship, shield);
+                // This hover mutates the THREE scene from React, bypassing the
+                // canvas input handlers; kick the gated render loop so the arc paints.
+                window.webglScene.requestRender();
             }
         }
     }
@@ -356,6 +359,7 @@ class ShieldGeneratorList extends Component {
             const shipIcon = window.webglScene.phaseDirector.shipIconContainer.getByShip(this.props.ship);
             if (shipIcon) {
                 shipIcon.hideWeaponArcs();
+                window.webglScene.requestRender();
             }
         }
     }

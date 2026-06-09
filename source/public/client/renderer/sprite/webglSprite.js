@@ -179,6 +179,14 @@ window.webglSprite = function () {
             loadedTextures[image].then(texture => {
                 setTimeout(() => {
                     this.uniforms.spriteTexture.value = texture;
+                    // Textures resolve asynchronously, long after the render-loop
+                    // budget from page load may have drained. Without a kick the
+                    // newly-textured sprite wouldn't paint until the next input
+                    // (idle render-loop gating in webglScene). Safe-guarded: the
+                    // scene may not exist yet for sprites built before init.
+                    if (window.webglScene && window.webglScene.requestRender) {
+                        window.webglScene.requestRender();
+                    }
                 }, 0);
             });
         }
