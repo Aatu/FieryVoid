@@ -668,6 +668,7 @@ Factions that point for point will have uphill battle against Tier 2, and quite 
  - Rogolon Dynasty
  - Usuuth Coalition
  - Escalation Blood Sword Raiders  (custom faction - Escalation Wars universe)
+ - Escalation Chouka Raiders (custom faction - Escalation Wars universe)
  - Nexus Brixadii Clans (early) (custom faction - Nexus universe)
  - Nexus Craytan Union (early) (custom faction - Nexus universe)
  - Nexus Dalithorn Commonwealth (early) (custom faction - Nexus universe)
@@ -708,6 +709,7 @@ Raptor - The Raptor super-heavy fighter is a support unit that provides +5 initi
 ESCALATION BLOOD SWORD RAIDERS (custom, alternate universe faction)
 The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.
 - This faction uses ships acquired from the Kastan, and have access to the same technologies as that faction
+- The Lady of Dark Souls and Raining Thunder are unique Blood Swords units that come with elite crews
 
 
 ESCALATION CHOUKA (custom, alternate universe faction)
@@ -754,6 +756,7 @@ are inelastic and they are highly resistant to radiation.
 Gatling Laser - Evolved from the basic light laser cannon, the gatling laser fires several short, discreet volleys in pulse mode.
 Electromagnetic Torpedo - The EM Torpedo was developed to counter Novon shields. This ballistic weapon releases a large electromagnetic pulse and can destroy or short out enemy systems.
 Electron Polarizer - A flash mode electromagnetic weapon, this can destroy or short out numerous systems on a target.
+Unique Physiology - The Sshel'ath have a bonus in boarding operations, whether offensively or defensively
 
 
 NEXUS SETTING

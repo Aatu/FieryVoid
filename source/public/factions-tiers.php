@@ -1429,6 +1429,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="bloodsword" >BLOOD SWORD RAIDERS</h4>
         <p>The Blood Swords were a pirate group active during the Circasian "Raider Wars" time period. They were a serious threat to the trade routes near the Thaline node of the Outward sector trade routes due to the size and capabilities of their warships. 
             The raiders were eventually defeated by the Circasians, and their defeat marked the unofficial end of the Raider Wars.</p>
+        <p>The Blood Swords have two specialty units, the Lady of Dark Souls and Raining Thunder, each of which come with an elite crew.</p>
     <a class="back-to-top" href="#escalationwars">↩ Back to Escalation Wars</a>
 
     <h4 id="choukaraiders" >CHOUKA RAIDERS</h4>
@@ -1445,7 +1446,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             Plasma weapons continued to be used for anti-fighter work into the Chouka War period, however.</p>    
         <h5>Point Plasma Guns</h5>
             <ul>
-<li>A specialized, flak-style system to defend their ships. This can intercept for friendly units and is capable of intercepting lasers.</li>
+<li>A plasma-based defensive weapon.</li>
         </ul>
 <h5>Gravitic Tracting Rod</h5>
             <ul>
@@ -1492,6 +1493,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             It was not until the later Circasian defeat of the Chouka that the Sshel'ath managed to expand into and capture several Chouka worlds.</p>
         <p>The Sshel'ath themselves are made of intertwined mass of rope-like elastic fibers, which allow for limited rearrangement of their body's form. 
             Only their faces are inelastic and they are highly resistant to radiation.</p>    
+        <h5>Physiology</h5>
+            <ul>
+<li>The Sshel'ath gain a 1 point advantage to their role when attempting to board or when defending against boarding.</li>
+        </ul>
         <h5>Gatling Laser</h5>
             <ul>
 <li>Evolved from the basic light laser cannon, the gatling laser fires several short, discreet volleys in pulse mode.</li>

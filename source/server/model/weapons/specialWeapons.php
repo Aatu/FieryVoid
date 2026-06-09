@@ -7834,9 +7834,10 @@ class Marines extends Weapon implements SpecialAbility{
 		$rollMod = 0;
 		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
 
-		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" )	$rollMod += 1; //Certain factions defend harder! 
+		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" || $target->faction == "Escalation Wars Sshel'ath Alliance")	$rollMod += 1; //Certain factions defend harder! 
 
 		if($shooter->faction == "Llort")  $rollMod -= 1; //Llort should get bonus to Rescue and Capture, but making them elite feels incorrect.  Have instead made it easier for their marines to board. 	
+		if($shooter->faction == "Escalation Wars Sshel'ath Alliance")  $rollMod -= 1; //Sshel'ath physiology makes it easier for their marines to board. 	
 		if($shooter->faction == "Yolu Confederation")  $rollMod -= 2; //Yolu have -2 to deliver marines.	
 						
 		$location = $fireOrder->chosenLocation ;

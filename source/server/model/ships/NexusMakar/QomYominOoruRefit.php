@@ -10,7 +10,7 @@ class QomYominOoruRefit extends HeavyCombatVesselLeftRight{
         $this->imagePath = "img/ships/Nexus/makar_mayol.png";
 		$this->canvasSize = 105; //img has 200px per side
         $this->shipClass = "Ooru Drone Destroyer (2109)";
-			$this->variantOf = "Ma Yol Heavy Destroyer (2109)";
+			$this->variantOf = "NONE";
 			$this->occurence = "common";
 		$this->unofficial = true;
         $this->isd = 2109;

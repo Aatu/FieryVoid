@@ -15,6 +15,8 @@ class SshelathAlvekaScoutAM extends BaseShip{
 		$this->unofficial = true;
 
 		$this->isd = 1942;
+
+	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

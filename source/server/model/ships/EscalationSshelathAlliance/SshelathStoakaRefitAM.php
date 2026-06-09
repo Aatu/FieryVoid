@@ -16,6 +16,7 @@ class SshelathStoakaRefitAM extends MediumShip{
 	    $this->isd = 1928;
 
 	    $this->notes = 'A-hel-is Faction';
+	    $this->notes .= '<br>Antiquated Sensors (cannot be boosted)';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

@@ -412,3 +412,180 @@ var AttackLaser = function AttackLaser(json, ship) {
 };
 AttackLaser.prototype = Object.create(Laser.prototype);
 AttackLaser.prototype.constructor = AttackLaser;
+
+
+
+var MolecularSlicerBeamA = function MolecularSlicerBeamA(json, ship) {
+	MolecularSlicerBeamL.call(this, json, ship);
+};
+MolecularSlicerBeamA.prototype = Object.create(MolecularSlicerBeamL.prototype);
+MolecularSlicerBeamA.prototype.constructor = MolecularSlicerBeamA;
+
+MolecularSlicerBeamA.prototype.initializationUpdate = function () {
+	var shots = 0; //Initialise
+	var minDam = 0;
+	var maxDam = 0;
+
+	switch (this.turnsloaded) {
+		case 1:
+			shots = 8;
+			minDam = 20;
+			maxDam = 92;
+			break;
+		case 2:
+			shots = 12;
+			minDam = 36;
+			maxDam = 144;
+			break;
+		case 3:
+			shots = 16;
+			minDam = 52;
+			maxDam = 196;
+			break;
+		default:
+			shots = 16;
+			minDam = 52;
+			maxDam = 196;
+			break;
+	}
+
+	this.fireControl = this.fireControlArray[this.firingMode]; //reset 
+
+	//Piercing Mode at 1 or 2 turn charge doesn't get -20% hitchance
+	//if(this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)){
+	if(this.turnsloaded < 3 && this.firingMode == 1){					
+		this.data["Fire control (fighter/med/cap)"] = '0/10/20';         
+	}		
+
+	this.data["Max number of Dice"] = shots;
+
+	if (gamedata.gamephase == 3) {
+		var isFiring = weaponManager.hasFiringOrder(this.ship, this);
+		var shotsUsed = this.getShotsUsed();
+		this.data["Defensive Dice"] = 0;
+		if (isFiring) {
+			for (var i in this.fireOrders) {
+				var fireOrder = this.fireOrders[i];
+				if (fireOrder.type == "selfIntercept") {
+					this.data["Defensive Dice"]++;
+					minDam -= 1; //Adjust damage values by 1d10.
+					maxDam -= 10;
+				}
+			}
+
+		}
+		this.data["Offensive Dice"] = shotsUsed - this.data["Defensive Dice"];
+		this.data["Remaining Dice"] = shots - shotsUsed;
+	}
+
+	//if(this.turnsloaded == 3 && (this.firingMode == 2 || this.firingMode == 4)){
+	if(this.turnsloaded == 3 && this.firingMode == 2){		
+		minDam = 36;
+		maxDam = 144;		
+	}
+
+	this.data["Damage"] = "" + minDam + "-" + maxDam;
+
+	return this;
+};
+
+MolecularSlicerBeamA.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
+	var mod = 0;
+	//Check fireOrders length and deduct (length -1 *5)
+	var currentShots = this.fireOrders.length; //
+	mod -= Math.max(0, currentShots); //This is called when considering the NEXT shot.  So can just use current length as mod.
+
+	//if (this.turnsloaded < 3 && (this.firingMode == 1 || this.firingMode == 3)) mod += 4;
+	if (this.turnsloaded < 3 && this.firingMode == 1) mod += 4;	
+
+    if(target.flight &&  calledid && calledid !== -1){ //Has fireorder against fighter unit, and is a called shot
+        mod += 8; //CalledShotmod is -8, so just compensate for that.            
+    }
+
+	return mod;
+};
+
+// A inherits doMultipleFireOrders from L now that L handles grouping and delegation.
+// We only need to override isLegalToFireMode.
+MolecularSlicerBeamA.prototype.isLegalToFireMode = function (shooter) {
+	if (this.turnsloaded >= 3) {
+		const currentMode = this.firingMode;
+
+		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
+			const existingMode = this.fireOrders[i].firingMode;
+
+			//const existingPiercing = (existingMode === 1 || existingMode === 3);
+			//const currentPiercing = (currentMode === 1 || currentMode === 3);
+			const existingPiercing = existingMode === 1;
+			const currentPiercing = currentMode === 1;			
+
+			if (existingPiercing !== currentPiercing) {
+				confirm.error("You cannot mix Piercing and Raking modes whilst at full charge.");
+				return false;
+			}
+		}
+	}
+	return true;
+};
+
+MolecularSlicerBeamA.prototype.removeMultiModeSplit = function (ship, target) {
+
+	let removed = false;
+
+	if (target) {
+		// Search from newest → oldest
+		for (let i = this.fireOrders.length - 1; i >= 0; i--) {
+			const fireOrder = this.fireOrders[i];
+
+			if (this.firingMode == fireOrder.firingMode && fireOrder.targetid == target.id) {
+				// Remove the matching fire order
+				this.fireOrders.splice(i, 1);
+				removed = true;
+				break;
+			}
+		}
+	}
+
+	// If NONE matched, remove the last fire order instead
+	if (!removed && this.fireOrders.length > 0) {
+		removed = true;
+		this.fireOrders.pop();  // removes last item
+	}
+
+	// Always fire the events if something was removed
+	if (removed) {
+		webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+		webglScene.customEvent('SplitOrderRemoved', { shooter: ship, target: target });
+	}
+};
+
+MolecularSlicerBeamA.prototype.removeAllMultiModeSplit = function (ship) {
+
+	for (var i = this.fireOrders.length - 1; i >= 0; i--) {
+		this.fireOrders.splice(i, 1); // Remove the specific fire order
+
+	}
+
+	webglScene.customEvent('SystemDataChanged', { ship: ship, system: this });
+};
+
+MolecularSlicerBeamA.prototype.checkFinished = function () {
+	var shots = 0; //Initialise
+
+	switch (this.turnsloaded) {
+		case 1:
+			shots = 8;
+			break;
+		case 2:
+			shots = 12;
+			break;
+		case 3:
+			shots = 16;
+			break;
+		default:
+			shots = 16;
+			break;
+	}
+	if (this.getShotsUsed() >= shots) return true;
+	return false;
+};

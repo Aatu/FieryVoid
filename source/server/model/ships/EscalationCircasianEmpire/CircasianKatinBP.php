@@ -7,7 +7,7 @@ class CircasianKatinBP extends FighterFlight{
         $this->pointCost = 35 * 6;
         $this->faction = "Escalation Wars Circasian Empire";
         $this->phpclass = "CircasianKatinBP";
-        $this->shipClass = "Katin Breaching Pods";
+        $this->shipClass = "Kat'in Breaching Pods";
         $this->imagePath = "img/ships/EscalationWars/CircasianKatin.png";
         $this->isd = 1875;
         
@@ -43,7 +43,7 @@ class CircasianKatinBP extends FighterFlight{
         for ($i = 0; $i < $toAdd; $i++){
             $armour = array(2, 2, 2, 2);
             $fighter = new Fighter("CircasianKatinBP", $armour, 15, $this->id);
-            $fighter->displayName = "Katin";
+            $fighter->displayName = "Kat'in";
             $fighter->imagePath = "img/ships/EscalationWars/CircasianKatin.png";
             $fighter->iconPath = "img/ships/EscalationWars/CircasianKatin_Large.png";
 

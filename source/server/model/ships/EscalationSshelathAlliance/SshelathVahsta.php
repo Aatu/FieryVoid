@@ -12,6 +12,8 @@ class SshelathVahsta extends MediumShip{
 		$this->unofficial = true;
         $this->canvasSize = 85;
 	    $this->isd = 1932;
+
+	    $this->notes = 'Antiquated Sensors (cannot be boosted)';
         
         $this->forwardDefense = 12;
         $this->sideDefense = 14;

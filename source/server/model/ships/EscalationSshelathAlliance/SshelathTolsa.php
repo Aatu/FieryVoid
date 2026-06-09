@@ -36,11 +36,11 @@ class SshelathTolsa extends LCV{
   
 		$this->addPrimarySystem(new Reactor(3, 8, 0, 0));
 		$this->addPrimarySystem(new CnC(99, 1, 0, 0)); //C&C should be unhittable anyway
-        $this->addPrimarySystem(new AntiquatedScanner(3, 8, 4, 3));
-//    	$sensors = new Scanner(3, 10, 2, 4);
-//			$sensors->markLCV();
-//			$this->addPrimarySystem($sensors);
-		$this->addPrimarySystem(new Engine(3, 7, 0, 4, 3));
+//        $this->addPrimarySystem(new AntiquatedScanner(3, 8, 4, 3));
+    	$sensors = new Scanner(3, 8, 4, 3);
+			$sensors->markLCV();
+			$this->addPrimarySystem($sensors);
+		$this->addPrimarySystem(new Engine(3, 9, 0, 5, 2));
 
 		$this->addFrontSystem(new NexusLightLaserCutter(2, 4, 3, 300, 60));
 		$this->addFrontSystem(new EWDefenseLaser(1, 2, 1, 0, 360));

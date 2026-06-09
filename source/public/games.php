@@ -87,6 +87,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <h3>Get Started</h3>
   <a href="./starterGuide.php" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
   <a href="https://www.youtube.com/playlist?list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target="_blank" rel="noopener noreferrer">Video Tutorials</a> | 
+  <a href="https://fieryvoidmogwaitools.netlify.app/" target="_blank" rel="noopener noreferrer">Tool Suite</a> | 
   <a href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Discord</a> | 
   <a href="https://www.facebook.com/groups/fieryvoid" target="_blank" rel="noopener noreferrer">Facebook</a>
 </div>
