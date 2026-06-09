@@ -31,7 +31,7 @@ class SalbezCreisver extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));        
-        $this->addPrimarySystem(new Hangar(2, 2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 270, 90));
 		$this->addFrontSystem(new NexusImprovedParticleBeam(2, 3, 1, 240, 120));

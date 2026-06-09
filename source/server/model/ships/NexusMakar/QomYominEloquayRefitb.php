@@ -9,8 +9,8 @@ class QomYominEloquayRefitb extends MediumShip{
         $this->phpclass = "QomYominEloquayRefitb";
         $this->imagePath = "img/ships/Nexus/makar_eloquay2.png";
         $this->shipClass = "Eloquay Drone Frigate (2023)";
-			$this->variantOf = "Sorol Ma Light Scout (2015)";
-			$this->occurence = "common";
+			$this->variantOf = "NONE";
+//			$this->occurence = "common";
 		$this->unofficial = true;
         $this->canvasSize = 80;
 	    $this->isd = 2023;

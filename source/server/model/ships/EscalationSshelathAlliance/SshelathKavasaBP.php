@@ -24,6 +24,8 @@ class SshelathKavasaBP extends FighterFlight{
         $this->maxFlightSize = 2;//this is an unusual type of 'fighter', limit flight size.      
         $this->hangarRequired = 'Breaching Pods'; //for fleet check   
 		$this->unitSize = 1; 		
+
+		$this->notes = "Bonus to delivery roll for marines.";
 		
     	$this->iniativebonus = 9 * 5;
         $this->populate();

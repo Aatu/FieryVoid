@@ -5,12 +5,12 @@ class KastanDullknife extends MediumShip{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 150;
-        $this->faction = "Escalation Wars Kastan Monarchy";
+        $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "KastanDullknife";
-        $this->imagePath = "img/ships/EscalationWars/KastanBattleknife.png";
-        $this->shipClass = "Dullknife Priority Freighter";
-			$this->variantOf = "Battleknife";
-			$this->occurence = "common";
+        $this->imagePath = "img/ships/EscalationWars/KastanDullknife.png";
+        $this->shipClass = "Kastan Dullknife Priority Freighter";
+//			$this->variantOf = "Battleknife";
+//			$this->occurence = "common";
 		$this->unofficial = true;
         $this->agile = true;		
         $this->canvasSize = 75;

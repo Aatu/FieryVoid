@@ -5,10 +5,10 @@ class KastanIronbladeRefit2AM extends BaseShip{
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 550;
-	$this->faction = "Escalation Warss Kastan Monarchy";
+	$this->faction = "Escalation Wars Kastan Monarchy";
         $this->phpclass = "KastanIronbladeRefit2AM";
         $this->imagePath = "img/ships/EscalationWars/KastanIronblade.png";
-        $this->shipClass = "Ironblade Heavy Cruiser (1934 refit)";
+        $this->shipClass = "Ironblade Heavy Cruiser (1934)";
 			$this->variantOf = "Ironblade Heavy Cruiser";
 			$this->occurence = "common";
         $this->shipSizeClass = 3;

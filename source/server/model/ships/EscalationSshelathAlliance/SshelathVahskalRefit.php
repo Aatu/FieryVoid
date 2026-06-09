@@ -9,7 +9,7 @@ class SshelathVahskalRefit extends MediumShip{
         $this->phpclass = "SshelathVahskalRefit";
         $this->imagePath = "img/ships/EscalationWars/SshelathVahskal.png";
         $this->shipClass = "Vahskal Patrol Carrier (1944 Refit)";
-			$this->variantOf = "Vahskal Patrol Carrier";
+			$this->variantOf = "NONE";
 			$this->occurence = "common";		
 		$this->unofficial = true;
         $this->canvasSize = 85;

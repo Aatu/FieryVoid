@@ -9,6 +9,7 @@ class ChoukaRaiderOathbreaker extends MediumShip{
         $this->phpclass = "ChoukaRaiderOathbreaker";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRaiderHeresy.png";
         $this->shipClass = "Oathbreaker Raider Barge";
+			$this->variantOf = "NONE";
 		$this->unofficial = true;
         $this->canvasSize = 75;
 	    $this->isd = 1938;
