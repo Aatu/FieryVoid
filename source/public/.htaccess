@@ -62,3 +62,14 @@
     Header set Cache-Control "max-age=31536000, public, immutable"
   </IfModule>
 </FilesMatch>
+
+# Self-hosted jQuery / jQuery-UI are loaded via AssetLoader::getAssetUrl() with a
+# ?v=mtime cache-buster, so the URL changes only when the file is upgraded. Same
+# immutable contract as the bundles above. (three.min.js / THREE.MeshLine.js are
+# deliberately NOT listed here — they are loaded without a ?v= query, so an upgrade
+# must be able to invalidate the cache; they keep the generic 1-month expiry.)
+<FilesMatch "(jquery-[0-9][^/]*\.min\.js|jquery-ui-[0-9][^/]*\.min\.js)$">
+  <IfModule mod_headers.c>
+    Header set Cache-Control "max-age=31536000, public, immutable"
+  </IfModule>
+</FilesMatch>
