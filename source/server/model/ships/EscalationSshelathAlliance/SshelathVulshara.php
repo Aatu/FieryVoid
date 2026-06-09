@@ -10,7 +10,7 @@ class SshelathVulshara extends BaseShip{
         $this->imagePath = "img/ships/EscalationWars/SshelathVulshara.png";
         $this->shipClass = "Vulshara Heavy Cruiser";
         $this->shipSizeClass = 3;
-		$this->canvasSize = 150; //img has 200px per side
+		$this->canvasSize = 170; //img has 200px per side
 		$this->unofficial = true;
 
 		$this->isd = 1986;

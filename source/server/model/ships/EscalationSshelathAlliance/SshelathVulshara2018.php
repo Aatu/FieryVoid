@@ -12,7 +12,7 @@ class SshelathVulshara2018 extends BaseShip{
 			$this->variantOf = "Vulshara Heavy Cruiser";
 			$this->occurence = "common";		
         $this->shipSizeClass = 3;
-		$this->canvasSize = 150; //img has 200px per side
+		$this->canvasSize = 170; //img has 200px per side
 		$this->unofficial = true;
 
 		$this->isd = 2018;

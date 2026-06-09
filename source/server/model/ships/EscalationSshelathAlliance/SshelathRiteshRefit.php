@@ -13,6 +13,7 @@ class SshelathRiteshRefit extends OSAT{
 			$this->occurence = "common";
 	    $this->isd = 1918;
 		$this->unofficial = true;
+        $this->canvasSize = 80;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;

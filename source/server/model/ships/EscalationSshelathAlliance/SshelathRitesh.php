@@ -11,6 +11,7 @@ class SshelathRitesh extends OSAT{
         $this->shipClass = 'Ritesh OSAT';
 	    $this->isd = 1900;
 		$this->unofficial = true;
+        $this->canvasSize = 80;
         
         $this->forwardDefense = 7;
         $this->sideDefense = 7;

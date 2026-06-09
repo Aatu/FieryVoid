@@ -36,11 +36,11 @@ class SshelathSkaggha extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));        
 
 		$this->addFrontSystem(new EWGatlingLaser(2, 7, 4, 240, 60));
-        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 270, 120));
-        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 270, 120));
+        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 240, 120));
+        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 240, 120));
 		$this->addFrontSystem(new EWGatlingLaser(2, 7, 4, 300, 60));
-        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 270, 120));
-        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 270, 120));
+        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 240, 120));
+        $this->addFrontSystem(new EWDefenseLaser2(1, 2, 1, 240, 120));
 		$this->addFrontSystem(new EWGatlingLaser(2, 7, 4, 300, 120));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));

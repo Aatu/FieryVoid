@@ -12,6 +12,8 @@ class SshelathKaumlar extends OSAT{
         $this->isd = 1908;
 		$this->limited = 33;
 		$this->unofficial = true;
+
+		$this->notes = "Immobile";
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
