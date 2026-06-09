@@ -25,7 +25,7 @@ class Vorchan extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(7, 11, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(6, 2));
+		$this->addPrimarySystem(new Hangar(6, 2, 2));
 		$this->addPrimarySystem(new Thruster(5, 15, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(5, 15, 0, 5, 4));
 		

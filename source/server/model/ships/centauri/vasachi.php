@@ -28,7 +28,7 @@ class Vasachi extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 15, 5, 8));
         $this->addPrimarySystem(new Engine(5, 15, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(5, 1));
+        $this->addPrimarySystem(new Hangar(5, 1, 1));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
         
