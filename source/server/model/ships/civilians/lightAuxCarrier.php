@@ -12,9 +12,9 @@ class lightAuxCarrier extends MediumShip{
 			$this->variantOf = "Commercial Freighter";	    
 			$this->occurence = "common";
         $this->canvasSize = 100;
-		$this->isd = 2160;
+		$this->isd = 2160;	
 
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>8, "cargo shuttles"=>4);
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -48,7 +48,7 @@ class lightAuxCarrier extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 2, 2));
         $this->addPrimarySystem(new Engine(3, 6, 0, 4, 3));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 12)); //Technically the Hangar capacity is in the CargoBays, but we can't do that yet
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 2, 0, 360));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 2, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 2, 4));

@@ -11,7 +11,7 @@ class Morshin extends HeavyCombatVessel{
         $this->shipClass = "Morshin Carrier";
         $this->gravitic = true;
         $this->limited = 33;
-        $this->fighters = array("normal"=>48);
+        $this->fighters = array("normal"=>48, "flyers"=>2);
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
         $this->turncost = 0.75;

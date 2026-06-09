@@ -47,9 +47,9 @@ class Kraken extends StarBaseSixSections{
         $this->addPrimarySystem($cnc);
 		
 		$this->addPrimarySystem(new Reactor(7, 35, 0, 0));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
-		$this->addPrimarySystem(new Hangar(7, 14, 12));
+		$this->addPrimarySystem(new Hangar(7, 14, 6));
+		$this->addPrimarySystem(new Hangar(7, 14, 6));
+		$this->addPrimarySystem(new Hangar(7, 14, 6));
 		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 		$this->addPrimarySystem(new Scanner(7, 32, 5, 10));
 		$this->addPrimarySystem(new BattleLaser(7, 6, 6, 0, 360));

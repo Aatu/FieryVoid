@@ -659,5 +659,17 @@ class LaunchedThisTurn extends Critical{
     }
 }
 
+//LCV Rails (B5W §10.1): an LCV suffers -50 initiative the turn it is launched
+//from a rail (same as a launched fighter flight). Stamped on the launched LCV's
+//CnC by HangarOps::applyLCVLaunchCrit; the -50 is applied in BaseShip::getIniativeMod's
+//CnC crit block. Expires the following turn (turnend = launch turn + 1).
+class LCVLaunchedThisTurn extends Critical{
+    public $description = "-50 Initiative";
+    public $repairPriority = 0;
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
+
 
 ?>

@@ -26,7 +26,7 @@ class Tacit extends HeavyCombatVessel{
     $this->addPrimarySystem(new CnC(5, 12, 0, 0));
     $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
     $this->addPrimarySystem(new Engine(4, 20, 0, 12, 2));
-    $this->addPrimarySystem(new Hangar(4, 3));
+    $this->addPrimarySystem(new Hangar(4, 3, 3));
     $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
     $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
 

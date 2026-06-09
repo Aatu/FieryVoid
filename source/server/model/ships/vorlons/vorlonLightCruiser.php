@@ -40,7 +40,7 @@ class VorlonLightCruiser extends VorlonCapitalShip{
 		$scanner = new Scanner(6, 18, 0, 13);//Vorlon Scanners do not need power - base systems are included in zero hull running costs
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);			
-		$this->addPrimarySystem(new Hangar(5, 2, 0));
+		$this->addPrimarySystem(new Hangar(5, 2, 1));
 		$this->addPrimarySystem(new Engine(6, 21, 0, 12, 4));
         $this->addPrimarySystem(new SelfRepair(6, 9, 6)); //armor, structure, output
 		$AAC = $this->createAdaptiveArmorController(5, 3, 3); //$AAtotal, $AApertype, $AApreallocated

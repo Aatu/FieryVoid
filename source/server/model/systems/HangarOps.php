@@ -54,6 +54,7 @@ class HangarOps {
 		foreach ($hangars as $h){
 			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
 			if (!empty($h->isRail))     { continue; }
+			if (!empty($h->isLCVRail))  { continue; }   //LCV rails hold whole LCVs, never default shuttles
 			$shuttleHangars[] = $h;
 		}
 		$railCategories = self::railFighterCategories($ship);
@@ -74,6 +75,11 @@ class HangarOps {
 				//pool hangars — exclude them from $totalDeclared so the real
 				//Hangar's leftover shuttle fill isn't shrunk by rail capacity.
 				if (isset($railCategories[strtolower(trim((string)$category))])) continue;
+				//LCVs ride LCV rails (DockingCollar), not the shuttle-pool hangars,
+				//and never auto-fill as shuttles — don't count them toward
+				//$totalDeclared or the leftover shuttle fill would shrink by the
+				//LCV count even though no real hangar box is consumed.
+				if (strtolower(trim((string)$category)) === 'lcvs') continue;
 
 				$count = (int)$declaredCount;
 				$totalDeclared += self::shuttlePoolBoxesFor($category, $count);
@@ -234,6 +240,12 @@ class HangarOps {
 				//records via step 1; leftover hangar boxes go to the faction shuttle
 				//(or MinesweepingShuttle for minesweeper-bonus carriers) instead.
 				return 'CargoShuttle';
+			case 'medical shuttles':
+				//Opt-in only: never auto-populates leftover capacity. Declared
+				//count in $ship->fighters becomes that many auto-filled CargoShuttle
+				//records via step 1; leftover hangar boxes go to the faction shuttle
+				//(or MinesweepingShuttle for minesweeper-bonus carriers) instead.
+				return 'MedicalShuttle';				
 			default:
 				return null;
 		}
@@ -404,8 +416,11 @@ class HangarOps {
 			}
 		}
 		if ($best !== null) return $best;
-		//Preferred set full — overflow to any remaining hangar in encounter order.
+		//Preferred set full — overflow to any remaining hangar in encounter
+		//order, but still skip $excludeFromDefaultShuttles bays so a flagged
+		//hangar never receives shuttles even once the eligible ones fill.
 		foreach ($hangars as $h){
+			if (self::excludesDefaultShuttles($h)) continue;
 			if ((int)$h->maxhealth - self::occupiedBoxes($h) >= $flightSize) return $h;
 		}
 		return null;
@@ -430,16 +445,44 @@ class HangarOps {
 	 * loop), once the shuttle bays are full. Ships with no shuttle-tagged hangar
 	 * (the overwhelming majority) are unaffected. */
 	public static function distributionHangars($hangars){
-		$primary = array();
+		//Hangars flagged $excludeFromDefaultShuttles (e.g. ScoravarefittedAM's
+		//dedicated heavy-fighter bay) are steered out of the default-shuttle
+		//distribution: their boxes STILL count toward total capacity (so the
+		//leftover-shuttle COUNT is unchanged), but the shuttles themselves pile
+		//into the other hangar(s), leaving the flagged bay free for a full
+		//fighter flight. Dropped first, before primary/shuttle-only narrowing,
+		//and also skipped in pickHangarForShuttle's overflow fallback so they
+		//never receive shuttles even when the eligible hangars fill. Guarded so
+		//a ship whose hangars are ALL flagged still places shuttles somewhere.
+		$eligible = array();
 		foreach ($hangars as $h){
+			if (!self::excludesDefaultShuttles($h)) $eligible[] = $h;
+		}
+		if (empty($eligible)) $eligible = $hangars;
+
+		$primary = array();
+		foreach ($eligible as $h){
 			if ((int)$h->location === 0) $primary[] = $h;
 		}
-		$set = !empty($primary) ? $primary : $hangars;
+		$set = !empty($primary) ? $primary : $eligible;
 		$shuttleOnly = array();
 		foreach ($set as $h){
 			if (self::isShuttleOnlyHangar($h)) $shuttleOnly[] = $h;
 		}
 		return !empty($shuttleOnly) ? $shuttleOnly : $set;
+	}
+
+	/* True when a hangar opts out of receiving default shuttles (Hangar
+	 * constructor's $excludeFromDefaultShuttles flag). Unlike catapult/rail
+	 * exclusion, the flagged hangar's boxes STILL count toward total hangar
+	 * capacity — only the placement of auto-populated shuttles avoids it, so
+	 * the leftover-shuttle COUNT is unchanged but they steer into the other
+	 * hangar(s). Catapults/rails are excluded from the shuttle pool wholesale
+	 * elsewhere and never reach this flag. Mirrored client-side in systems.js
+	 * (excludesDefaultShuttles). */
+	public static function excludesDefaultShuttles($hangar){
+		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail)) return false;
+		return !empty($hangar->excludeFromDefaultShuttles);
 	}
 
 	/* True when a hangar was explicitly designated in its ship file as a
@@ -515,6 +558,495 @@ class HangarOps {
 			if ($cat !== '') $cats[$cat] = true;
 		}
 		return $cats;
+	}
+
+	/* ===================================================================== *
+	 * LCV Rails (DockingCollar) — whole-ship dock/launch                     *
+	 *                                                                       *
+	 * An LCV is a full BaseShip (LCV extends MediumShip, hangarRequired      *
+	 * 'LCVs'), NOT a FighterFlight. None of the FighterFlight stash pipeline *
+	 * (hangarUsage occupancy, phpclass coalescing, escape buckets) applies.  *
+	 * Docking removes the LCV's own ship row from the board and records the   *
+	 * rail→LCV link in the rail's $lcvDocked note; launching resurrects the   *
+	 * same ship at the carrier's hex/facing/speed. State persistence + the    *
+	 * $removed restoration live in Hangar::generateIndividualNotes /          *
+	 * onIndividualNotesLoaded (the 'lcvDocked' note).                         *
+	 * ===================================================================== */
+
+	/* All DockingCollar (LCV-rail) systems on a ship. */
+	public static function collectLCVRails($ship){
+		$rails = array();
+		if (!isset($ship->systems) || !is_array($ship->systems)) return $rails;
+		foreach ($ship->systems as $sys){
+			if (!empty($sys->isLCVRail)) $rails[] = $sys;
+		}
+		return $rails;
+	}
+
+	/* True if $ship mounts any LCV rail. */
+	public static function shipHasLCVRail($ship){
+		foreach (self::collectLCVRails($ship) as $r) return true;
+		return false;
+	}
+
+	/* The LCV ship id docked on $rail, or null if the rail is empty. Reads the
+	 * rail's persistent $lcvDocked link (set by onIndividualNotesLoaded). The
+	 * optional $gamedata is unused here (the link is already hydrated) but kept
+	 * for call-site symmetry with the can*/  /* helpers. */
+	public static function lcvDockedOn($rail, $gamedata = null){
+		if (empty($rail->isLCVRail)) return null;
+		if (!is_array($rail->lcvDocked)) return null;
+		$id = (int)($rail->lcvDocked['shipId'] ?? 0);
+		return $id > 0 ? $id : null;
+	}
+
+	/* Number of LCVs currently docked on $carrier (sum across all its rails).
+	 * Drives the per-docked-LCV penalties (initiative -10/LCV, +1 turn cost/delay
+	 * thrust per LCV). Counts a rail's occupant if the LCV ship still exists and
+	 * is not damage-DESTROYED.
+	 *
+	 * IMPORTANT: a docked LCV is $removed (so isDestroyed() returns true — the
+	 * Stage-7 docked-unit behaviour). We must NOT use isDestroyed() to exclude it
+	 * or the penalty never applies (the same removed→isDestroyed trap that zeroed
+	 * the fleet-list value). Only exclude a genuinely wrecked LCV — one whose
+	 * PRIMARY structure is actually destroyed. */
+	public static function dockedLCVCount($carrier, $gamedata = null){
+		$n = 0;
+		foreach (self::collectLCVRails($carrier) as $rail){
+			$id = self::lcvDockedOn($rail);
+			if ($id === null) continue;
+			if ($gamedata){
+				$lcv = $gamedata->getShipById($id);
+				if (!$lcv) continue;
+				$struct = method_exists($lcv, 'getStructureSystem') ? $lcv->getStructureSystem(0) : null;
+				if ($struct && $struct->isDestroyed()) continue;   //genuinely wrecked, not just docked
+			}
+			$n++;
+		}
+		return $n;
+	}
+
+	/* True if $lcv is an LCV-class craft (uses an LCV rail). */
+	public static function isLCVUnit($lcv){
+		if (!$lcv) return false;
+		if ($lcv instanceof LCV) return true;
+		return isset($lcv->hangarRequired) && strtolower(trim((string)$lcv->hangarRequired)) === 'lcvs';
+	}
+
+	/* Server-side mirror of movement.js getRemainingEngineThrust core for an
+	 * LCV (engine output - thrustwasted - assignedThrust this turn). Used as a
+	 * conservative backstop; the authoritative value is the client-supplied
+	 * thrustLeft in the dock order (per design: client computes, server bounds-
+	 * checks). Omits the rare weapon-thrust-boost / tractor-beam deductions that
+	 * never apply to a docking LCV. */
+	public static function lcvRemainingThrust($lcv, $gamedata){
+		$rem = 0;
+		if (!isset($lcv->systems) || !is_array($lcv->systems)) return 0;
+		foreach ($lcv->systems as $sys){
+			if ($sys->isDestroyed()) continue;
+			if ($sys instanceof Engine)   $rem += (int)$sys->getOutput();
+			if ($sys instanceof Thruster) $rem -= (int)$sys->thrustwasted;
+		}
+		foreach ($lcv->movement as $move){
+			if ((int)$move->turn !== (int)$gamedata->turn) continue;
+			if (!is_array($move->assignedThrust)) continue;
+			foreach ($move->assignedThrust as $amt){ $rem -= (int)$amt; }
+		}
+		return $rem;
+	}
+
+	/* Can $lcv dock onto $rail of $carrier RIGHT NOW? Hard-gates the B5W
+	 * conditions: rail free + alive, LCV is an LCV unit, carrier stationary,
+	 * LCV ends its move in the carrier's hex, matching heading, and >=1 thrust
+	 * unspent. $clientThrustLeft is the client's getRemainingEngineThrust for the
+	 * LCV (per design); we also compute a server backstop and require BOTH to be
+	 * >=1 so a stale/forged "plenty of thrust" client value can't override a
+	 * server reading of zero. */
+	public static function canLCVDock($rail, $carrier, $lcv, $clientThrustLeft, $gamedata, &$reason = null){
+		if (empty($rail->isLCVRail)) { $reason = 'not an LCV rail'; return false; }
+		if ($rail->isDestroyed())    { $reason = 'rail destroyed';  return false; }
+		if (self::lcvDockedOn($rail) !== null) { $reason = 'rail already occupied'; return false; }
+		if (!self::isLCVUnit($lcv))  { $reason = 'not an LCV';      return false; }
+		if ($lcv->isDestroyed())     { $reason = 'LCV destroyed';   return false; }
+
+		//Launch+land budget: one operation per rail per turn.
+		$budget = max(0, (int)$rail->output - ((int)$rail->launchedThisTurn + (int)$rail->landedThisTurn));
+		if ($budget <= 0) { $reason = 'rail already used this turn'; return false; }
+
+		$carrierMove = $carrier->getLastMovement();
+		$lcvMove     = $lcv->getLastMovement();
+		if (!$carrierMove || !$lcvMove) { $reason = 'no movement'; return false; }
+
+		//Carrier must be stationary (B5W: LCVs only dock to a stationary carrier).
+		if ((int)$carrierMove->speed !== 0) { $reason = 'carrier not stationary'; return false; }
+
+		//LCV must end its movement in the carrier's hex.
+		if (!($carrierMove->position instanceof OffsetCoordinate)
+			|| !($lcvMove->position instanceof OffsetCoordinate)
+			|| !$lcvMove->position->equals($carrierMove->position)) {
+			$reason = 'LCV not in carrier hex'; return false;
+		}
+
+		//Headings must match (rail lands craft that share the carrier's heading).
+		if ((int)$lcvMove->heading !== (int)$carrierMove->heading) { $reason = 'heading mismatch'; return false; }
+
+		//At least 1 thrust unspent. Require BOTH the client value and the server
+		//backstop to clear, so neither a forged client value nor a server edge
+		//case alone permits an illegal dock.
+		$serverThrust = self::lcvRemainingThrust($lcv, $gamedata);
+		if ((int)$clientThrustLeft < 1 || $serverThrust < 1) { $reason = 'no thrust left to dock'; return false; }
+
+		return true;
+	}
+
+	/* Dock $lcv onto $rail. Removes the LCV from the board (its $removed flag is
+	 * re-derived from the lcvDocked note on reload), records the rail→LCV link,
+	 * applies landing-on-a-damaged-rail Structure damage, and charges the rail's
+	 * land budget + the carrier's hangar-op crit. Returns true on success. */
+	public static function performLCVDock($rail, $carrier, $lcv, $gamedata){
+		$railDmg = max(0, (int)$rail->maxhealth - (int)$rail->getRemainingHealth());
+
+		$lcv->removed = true;
+		$lcv->removedTurn = $gamedata->turn;
+
+		$rail->lcvDocked = array(
+			'shipId'        => (int)$lcv->id,
+			'dockTurn'      => (int)$gamedata->turn,
+			'railDmgAtDock' => (int)$railDmg,
+		);
+		$rail->landedThisTurn += 1;
+
+		//Landing on a DAMAGED rail deals the rail's sustained damage to the LCV's
+		//Structure (B5W). Persisted DamageEntry, mirroring applyCatapultLandingDamage.
+		if ($railDmg > 0) self::applyLCVStructureDamage($lcv, $railDmg, 'LCVLandingDamage', $gamedata);
+
+		//Carrier takes the standard hangar-operations -20 initiative for the turn
+		//it docks a craft (same as a fighter landing).
+		self::applyHangarOperationsCrit($carrier, $gamedata);
+
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $rail->id,
+			'hangarDockEvent', 'LCV rail received LCV', $lcv->id . ':LCV:1'
+		);
+		Manager::insertIndividualNote($note);
+		return true;
+	}
+
+	/* Can the LCV docked on $rail launch RIGHT NOW? */
+	public static function canLCVLaunch($rail, $carrier, $gamedata, &$reason = null){
+		if (empty($rail->isLCVRail)) { $reason = 'not an LCV rail'; return false; }
+		if ($rail->isDestroyed())    { $reason = 'rail destroyed';  return false; }
+		if (self::lcvDockedOn($rail) === null) { $reason = 'rail empty'; return false; }
+		$budget = max(0, (int)$rail->output - ((int)$rail->launchedThisTurn + (int)$rail->landedThisTurn));
+		if ($budget <= 0) { $reason = 'rail already used this turn'; return false; }
+		return true;
+	}
+
+	/* Launch the LCV docked on $rail. Resurrects the LCV ship at the carrier's
+	 * hex / heading / facing (forward, direction 0) / speed (B5W: a launched LCV
+	 * inherits the carrier's facing and starting speed), re-inits its weapon data,
+	 * clears the rail link, charges the launch budget, and applies the -10
+	 * launch-initiative penalty. Returns the launched LCV id, or null. */
+	public static function performLCVLaunch($rail, $carrier, $gamedata){
+		$lcvId = self::lcvDockedOn($rail);
+		if ($lcvId === null) return null;
+		$lcv = $gamedata->getShipById($lcvId);
+		if (!$lcv) { $rail->lcvDocked = null; return null; }
+
+		$lastMove = $carrier->getLastMovement();
+		if (!$lastMove) return null;
+		$spawnPos = $lastMove->position;
+		$heading  = (int)$lastMove->heading;
+		$facing   = (int)$lastMove->facing;   //direction 0 — forward, carrier facing
+		$speed    = (int)$lastMove->speed;
+
+		$lcv->removed = false;
+		$lcv->removedTurn = null;
+		$lcv->spawned = $gamedata->turn;
+
+		$deployMove = new MovementOrder(null, "deploy", $spawnPos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, 0);
+		Manager::insertSingleMovement($gamedata->id, $lcv->id, $deployMove);
+
+		//Re-init per-system data so weapons aren't left uncharged after relaunch
+		//(mirrors performLaunch's setInitialSystemData loop for a fresh flight).
+		self::reinitLaunchedShipSystems($lcv, $gamedata);
+
+		$rail->lcvDocked = null;
+		$rail->launchedThisTurn += 1;
+
+		//B5W: an LCV suffers -10 initiative the turn it is launched.
+		self::applyLCVLaunchCrit($lcv, $gamedata);
+
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $rail->id,
+			'hangarLaunchEvent', 'LCV rail launched LCV', $lcv->id . ':LCV:1'
+		);
+		Manager::insertIndividualNote($note);
+		return $lcv->id;
+	}
+
+	/* End-of-turn: resolve the queued LCV dock order for $rail (if any). Validates
+	 * via canLCVDock; a failed order is dropped with an audit note. */
+	public static function processLCVDockOrders($rail, $carrier, $gamedata){
+		if (empty($rail->pendingLcvDockOrder)) return;
+		if (!self::isFlowEnabled($gamedata->id)) { $rail->pendingLcvDockOrder = null; return; }
+
+		foreach ($rail->pendingLcvDockOrder as $order){
+			$shipId      = (int)($order['shipId'] ?? 0);
+			$thrustLeft  = (int)($order['thrustLeft'] ?? 0);
+			if ($shipId <= 0) continue;
+			$lcv = $gamedata->getShipById($shipId);
+			$reason = null;
+			if (!$lcv || !self::canLCVDock($rail, $carrier, $lcv, $thrustLeft, $gamedata, $reason)){
+				$fail = new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $rail->id,
+					'hangarDockEvent', 'LCV dock failed', 'fail:' . $shipId . ':' . ($reason ?? 'unknown')
+				);
+				Manager::insertIndividualNote($fail);
+				continue;
+			}
+			self::performLCVDock($rail, $carrier, $lcv, $gamedata);
+			break;   //a rail holds one LCV — first valid order wins
+		}
+		$rail->pendingLcvDockOrder = null;   //consumed
+	}
+
+	/* Deployment-phase: resolve a queued LCV deploy-dock onto $rail immediately
+	 * (the LCV starts the game docked, with no board position). Unlike the Firing-
+	 * phase dock there are no stationary/hex/thrust conditions — the player is
+	 * choosing where the LCV begins. Just mark the LCV removed and link it to the
+	 * rail; the lcvDocked snapshot in generateIndividualNotes persists it, and
+	 * onIndividualNotesLoaded re-applies $removed on the next load. A later launch
+	 * follows the normal rail-launch rules (incl. the -10 init that turn). */
+	public static function processLcvDeployStartTransfer($rail, $carrier, $gamedata){
+		if (empty($rail->pendingLcvDeployStartTransfer)) { $rail->pendingLcvDeployStartTransfer = null; return; }
+		if (empty($rail->isLCVRail)) { $rail->pendingLcvDeployStartTransfer = null; return; }
+
+		//Seed the POST-side rail's lcvDocked from the DB counterpart so a rail that
+		//already holds an LCV isn't silently overwritten (defensive — the client
+		//only queues onto free rails).
+		$dbShip = $gamedata->getShipById($carrier->id);
+		if ($dbShip && is_array($dbShip->systems)) {
+			foreach ($dbShip->systems as $dbSys) {
+				if ((int)$dbSys->id !== (int)$rail->id) continue;
+				if (is_array($dbSys->lcvDocked)) $rail->lcvDocked = $dbSys->lcvDocked;
+				break;
+			}
+		}
+
+		foreach ($rail->pendingLcvDeployStartTransfer as $order){
+			$shipId = (int)($order['shipId'] ?? 0);
+			if ($shipId <= 0) continue;
+			if (self::lcvDockedOn($rail) !== null) break;   //rail already occupied
+			$lcv = $gamedata->getShipById($shipId);
+			if (!$lcv || !self::isLCVUnit($lcv)) continue;
+
+			$lcv->removed = true;
+			$lcv->removedTurn = $gamedata->turn;
+			$rail->lcvDocked = array(
+				'shipId'        => (int)$lcv->id,
+				'dockTurn'      => (int)$gamedata->turn,
+				'railDmgAtDock' => 0,
+			);
+			$note = new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $rail->id,
+				'hangarDeployStartEvent', 'LCV deploy-docked', $lcv->id . ':LCV:1'
+			);
+			Manager::insertIndividualNote($note);
+			break;   //one LCV per rail
+		}
+		$rail->pendingLcvDeployStartTransfer = null;   //consumed
+	}
+
+	/* End-of-turn: resolve the queued LCV launch order for $rail (if any). */
+	public static function processLCVLaunchOrders($rail, $carrier, $gamedata){
+		if (empty($rail->pendingLcvLaunchOrder)) return;
+		if (!self::isFlowEnabled($gamedata->id)) { $rail->pendingLcvLaunchOrder = null; return; }
+
+		foreach ($rail->pendingLcvLaunchOrder as $order){
+			$reason = null;
+			if (!self::canLCVLaunch($rail, $carrier, $gamedata, $reason)){
+				$fail = new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $rail->id,
+					'hangarLaunchEvent', 'LCV launch failed', 'fail:' . ($reason ?? 'unknown')
+				);
+				Manager::insertIndividualNote($fail);
+				continue;
+			}
+			self::performLCVLaunch($rail, $carrier, $gamedata);
+			break;   //one LCV per rail
+		}
+		$rail->pendingLcvLaunchOrder = null;   //consumed
+	}
+
+	/* Apply $amount Matter Structure damage to an LCV's Structure system, as a
+	 * persisted DamageEntry (mirrors applyCatapultLandingDamage). $damageClass
+	 * tags the source on the replay timeline. Returns true if the LCV is killed. */
+	public static function applyLCVStructureDamage($lcv, $amount, $damageClass, $gamedata){
+		$amount = (int)$amount;
+		if ($amount <= 0) return false;
+		$structure = method_exists($lcv, 'getStructureSystem') ? $lcv->getStructureSystem(0) : null;
+		if (!$structure) return false;
+		$remaining = (int)$structure->getRemainingHealth();
+		$destroyed = ($amount >= $remaining);
+		$dmg = new DamageEntry(
+			-1, $lcv->id, -1, $gamedata->turn, $structure->id,
+			$amount, 0, 0, -1, $destroyed, false, "", $damageClass
+		);
+		$dmg->updated = true;
+		$structure->damage[] = $dmg;
+		return $destroyed;
+	}
+
+	/* Re-init a relaunched ship's system data (weapons loaded, etc.) — the
+	 * whole-ship analogue of performLaunch's per-fighter setInitialSystemData
+	 * loop. Safe to call on a resurrected LCV that already has system data; it
+	 * tops up start-loading so weapons aren't uncharged on the launch turn. */
+	private static function reinitLaunchedShipSystems($ship, $gamedata){
+		SystemData::initSystemData($gamedata->turn, $gamedata->id);
+		foreach ($ship->systems as $sys){
+			$sys->setInitialSystemData($ship);
+			if ($sys instanceof Weapon){
+				$load = $sys->getStartLoading();
+				if ($load){
+					$load->loading = $sys->loadingtime;   //fully loaded on launch
+					SystemData::addDataForSystem($sys->id, 0, $ship->id, $load->toJSON());
+				}
+			}
+		}
+		Manager::insertSystemData(SystemData::getAndPurgeAllSystemData());
+	}
+
+	/* Apply the -50 launch-initiative penalty to a launched LCV, expiring next
+	 * turn. Stamped as an LCVLaunchedThisTurn crit on the LCV's CnC (the LCV is a
+	 * full ship; its initiative is governed by getInitiativebonus + criticals). */
+	private static function applyLCVLaunchCrit($lcv, $gamedata){
+		$cnc = $lcv->getSystemByName('CnC');
+		if (!$cnc) {
+			//Fallback: first non-structure system (LCVs are mostly one big PRIMARY).
+			foreach ($lcv->systems as $s){ if (!($s instanceof Structure)){ $cnc = $s; break; } }
+		}
+		if (!$cnc) return;
+		foreach ($cnc->criticals as $c){
+			if ($c->phpclass === 'LCVLaunchedThisTurn' && $c->turn === $gamedata->turn) return; //idempotent
+		}
+		$crit = new LCVLaunchedThisTurn(-1, $lcv->id, $cnc->id, 'LCVLaunchedThisTurn', $gamedata->turn, $gamedata->turn + 1);
+		$crit->updated = true;
+		$cnc->criticals[] = $crit;
+	}
+
+	/* Destroyed-rail forced launch. When $rail (an LCV rail) is destroyed THIS
+	 * turn and holds a docked LCV, the LCV is treated as launched (placed back on
+	 * the board at the carrier's hex/heading/speed) and takes Structure damage =
+	 * the rail's sustained damage + 2d10 Matter (rail fragments). Returns true if
+	 * it fired (so criticalPhaseEffects skips the ordinary dock/launch path).
+	 *
+	 * Replay-safe via the cleared-lcvDocked idempotency (see loadOrRollLCVFrag):
+	 * once the rail link is cleared + persisted, a scrub re-loads an empty rail
+	 * and never re-enters, so the 2d10 is never re-rolled. */
+	public static function onLCVRailDestroyed($rail, $carrier, $gamedata){
+		if (empty($rail->isLCVRail)) return false;
+		if (!$rail->isDestroyed()) return false;
+		$lcvId = self::lcvDockedOn($rail);
+		if ($lcvId === null) return false;
+		$lcv = $gamedata->getShipById($lcvId);
+		if (!$lcv){ $rail->lcvDocked = null; return true; }
+
+		//Rail damage at the moment of destruction. A fully destroyed rail's
+		//sustained damage is its whole maxhealth.
+		$railDmg = max(0, (int)$rail->maxhealth - (int)$rail->getRemainingHealth());
+
+		//Replay-deterministic 2d10 fragment roll (persist once, reuse on scrub).
+		$frag = self::loadOrRollLCVFrag($lcv, $gamedata);
+
+		//Forced launch placement (same as performLCVLaunch's placement, but the
+		//LCV still takes the -10 launch penalty per the rail-escape rule).
+		$lastMove = $carrier->getLastMovement();
+		if ($lastMove){
+			$lcv->removed = false;
+			$lcv->removedTurn = null;
+			$lcv->spawned = $gamedata->turn;
+			$deployMove = new MovementOrder(null, "deploy", $lastMove->position, 0, 0,
+				(int)$lastMove->speed, (int)$lastMove->heading, (int)$lastMove->facing, false, $gamedata->turn, 0, 0);
+			Manager::insertSingleMovement($gamedata->id, $lcv->id, $deployMove);
+			self::reinitLaunchedShipSystems($lcv, $gamedata);
+			self::applyLCVLaunchCrit($lcv, $gamedata);
+		}
+
+		//Structure damage = rail's sustained damage + 2d10 Matter fragments.
+		self::applyLCVStructureDamage($lcv, $railDmg + $frag, 'LCVRailFragments', $gamedata);
+
+		$rail->lcvDocked = null;
+
+		$note = new IndividualNote(
+			-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $rail->id,
+			'hangarLaunchEvent', 'LCV forced launch (rail destroyed)', $lcv->id . ':LCV:1:railDmg=' . $railDmg . ':frag=' . $frag
+		);
+		Manager::insertIndividualNote($note);
+		return true;
+	}
+
+	/* 2d10 rail-fragment roll for a forced-launched LCV.
+	 *
+	 * Replay determinism is handled NOT by persisting the roll, but by the same
+	 * idempotency the FighterRail escape uses: onLCVRailDestroyed /
+	 * processLCVCarrierDestruction clear (and persist) the rail's lcvDocked link
+	 * the first time they fire, so a later setCriticals sweep (replay scrub) re-
+	 * loads an already-empty rail and never re-enters this path — the roll is
+	 * never reached a second time. The per-request memo on $lcv guards the
+	 * (rules-impossible) case of both the rail-destroyed and carrier-destroyed
+	 * handlers touching the same LCV in one in-memory sweep. */
+	private static function loadOrRollLCVFrag($lcv, $gamedata){
+		if (isset($lcv->lcvFragRolledTurn) && (int)$lcv->lcvFragRolledTurn === (int)$gamedata->turn){
+			return (int)$lcv->lcvFragRolledValue;
+		}
+		$frag = Dice::d(10, 2);
+		$lcv->lcvFragRolledTurn  = (int)$gamedata->turn;
+		$lcv->lcvFragRolledValue = (int)$frag;
+		return $frag;
+	}
+
+	/* Carrier-destruction disposition of docked LCVs (Pass-3 sibling of
+	 * processCarrierDestructionEscapes). When a carrier with docked LCVs is
+	 * destroyed, each docked LCV is treated as launched (escapes) and takes the
+	 * rail's sustained damage + 2d10 fragments — same as a destroyed rail. Called
+	 * once per gamedata sweep from Criticals::setCriticals. */
+	public static function processLCVCarrierDestruction($gamedata){
+		foreach ($gamedata->ships as $carrier){
+			if (!($carrier instanceof BaseShip)) continue;
+			if ($carrier instanceof FighterFlight) continue;
+			if (empty($carrier->LCVCarrier)) continue;   //fast skip: only LCV carriers
+			if (!$carrier->isDestroyed()) continue;
+			foreach (self::collectLCVRails($carrier) as $rail){
+				$lcvId = self::lcvDockedOn($rail);
+				if ($lcvId === null) continue;
+				$lcv = $gamedata->getShipById($lcvId);
+				if (!$lcv){ $rail->lcvDocked = null; continue; }
+
+				$railDmg = max(0, (int)$rail->maxhealth - (int)$rail->getRemainingHealth());
+				$frag = self::loadOrRollLCVFrag($lcv, $gamedata);
+
+				$lastMove = $carrier->getLastMovement();
+				if ($lastMove){
+					$lcv->removed = false;
+					$lcv->removedTurn = null;
+					$lcv->spawned = $gamedata->turn;
+					$deployMove = new MovementOrder(null, "deploy", $lastMove->position, 0, 0,
+						(int)$lastMove->speed, (int)$lastMove->heading, (int)$lastMove->facing, false, $gamedata->turn, 0, 0);
+					Manager::insertSingleMovement($gamedata->id, $lcv->id, $deployMove);
+					self::reinitLaunchedShipSystems($lcv, $gamedata);
+					self::applyLCVLaunchCrit($lcv, $gamedata);
+				}
+				self::applyLCVStructureDamage($lcv, $railDmg + $frag, 'LCVRailFragments', $gamedata);
+				$rail->lcvDocked = null;
+
+				$note = new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $carrier->id, $rail->id,
+					'hangarLaunchEvent', 'LCV escaped destroyed carrier', $lcv->id . ':LCV:1:railDmg=' . $railDmg . ':frag=' . $frag
+				);
+				Manager::insertIndividualNote($note);
+			}
+		}
 	}
 
 	/* Hangar boxes a single craft of $phpclass occupies. Per B5W §10.1 craft come
@@ -686,8 +1218,9 @@ class HangarOps {
 		//Catapults are fixed at 'superheavy' by design — never narrow them from
 		//the ship's $fighters declaration (Stage 16). Fighter Rails carry an
 		//explicit category from the ship file (load-bearing for launch/dock
-		//eligibility) — leave them untouched too.
-		if (!empty($hangar->isCatapult) || !empty($hangar->isRail)) return;
+		//eligibility) — leave them untouched too. LCV Rails are fixed at 'LCVs'
+		//(whole-ship dock, not a fighter category) — never narrow them either.
+		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail)) return;
 		$hType = strtolower(trim((string)$hangar->hangarType));
 		//Only narrow universal slots. Anything specific (medium, heavy, shuttles,
 		//assault shuttles, BPods, custom 'Raiders', etc.) was an intentional
@@ -749,6 +1282,7 @@ class HangarOps {
 		foreach (self::collectHangars($ship) as $h) {
 			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
 			if (!empty($h->isRail))     { continue; }   //rail boxes are structure HP, not shuttle pool
+			if (!empty($h->isLCVRail))  { continue; }   //LCV rails hold whole LCVs, not the shuttle pool
 			$capacity += (int)$h->maxhealth;
 		}
 		if ($capacity <= 0) {
@@ -760,6 +1294,8 @@ class HangarOps {
 			foreach ($ship->fighters as $category => $count) {
 				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
 				if (isset($railCategories[strtolower(trim((string)$category))])) continue;
+				//LCVs ride LCV rails, not the shuttle pool — don't shrink leftover.
+				if (strtolower(trim((string)$category)) === 'lcvs') continue;
 				$declared += self::shuttlePoolBoxesFor($category, $count);
 			}
 		}
@@ -928,6 +1464,13 @@ class HangarOps {
 	 * from $activeShips, so docked craft on a dead carrier neither rearm nor tick.
 	 */
 	public static function serviceDockedFlights($hangar, $carrier, $gamedata){
+		//LCV Rails do NOT rearm a docked LCV. Unlike a docked FighterFlight, a docked
+		//LCV is a whole ship parked on the rail (tracked via $lcvDocked, NOT the
+		//$hangarUsage stash this method services), so it would never be reached here
+		//anyway — but LCV rails extend Hangar, so guard explicitly in case a future
+		//change ever routes one through the fighter pipeline. LCVs reload only by
+		//launching and re-docking through their own movement, not while docked.
+		if (!empty($hangar->isLCVRail)) return;
 		if ($hangar->isDestroyed() || empty($hangar->hangarUsage)) return;
 		$isRail = !empty($hangar->isRail);
 		foreach ($hangar->hangarUsage as $entry){
@@ -1494,8 +2037,12 @@ class HangarOps {
 		//primary — pick the first NON-rail hangar regardless of ship-systems
 		//order. (Falls back to the first rail only on a hypothetical rails-only
 		//carrier; no such ship exists today — the StrikeCarrier has a real Hangar.)
+		//Also skip LCV rails: they hold whole LCVs (no fighter stash / escape note)
+		//and are ordinary targetable systems that can be destroyed by direct fire,
+		//so they must never carry the carrier-level pools or escape note.
 		$firstAny = null;
 		foreach (self::collectHangars($carrier) as $h){
+			if (!empty($h->isLCVRail)) continue;
 			if ($firstAny === null) $firstAny = $h;
 			if (empty($h->isRail)) return $h;
 		}
@@ -2627,7 +3174,7 @@ class HangarOps {
 		}
 
 		//Shuttles, minesweeping shuttles & cargo shuttles can use any combat-fighter slot per B5W §10.1.
-		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles') && isset($sizeRank[$hType])) {
+		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles' || $cat === 'medical shuttles') && isset($sizeRank[$hType])) {
 			return true;
 		}
 
@@ -2748,6 +3295,7 @@ class HangarOps {
 		//Exact match first. Catapults (hangarType 'superheavy') land here for a
 		//superheavy flight; they ignore their own damage and have no output budget.
 		foreach ($hangars as $h){
+			if (!empty($h->isLCVRail)) continue;   //LCV rails dock whole LCVs, never FighterFlights
 			if ($h->hangarType !== $category) continue;
 			$isCat = !empty($h->isCatapult);
 			if (!$isCat && $h->isDestroyed()) continue;
@@ -2763,6 +3311,7 @@ class HangarOps {
 		//Then any hangar that accepts the category via the size hierarchy
 		//(larger fighter slots, universal slots, shuttle-compatible slots).
 		foreach ($hangars as $h){
+			if (!empty($h->isLCVRail)) continue;                   //LCV rails dock whole LCVs, never FighterFlights
 			if ($h->hangarType === $category) continue;            //already considered above
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
 			if ($h->isDestroyed()) continue;
@@ -3346,6 +3895,19 @@ class HangarOps {
 		if ($bpc <= 0) $bpc = 1;
 		$category = self::trueSizeOf($flight);
 
+		//hangarAcceptsCategory reads the carrier's $fighters declaration to decide
+		//whether a universal ('fighters'/'normal') bay accepts a category it can't
+		//infer from hangarType alone (Breaching Pods, Assault Shuttles, custom). But
+		//$carrier here is the POST-side ship rebuilt by getShipsFromJSON, which never
+		//runs Enhancements::setEnhancements — so a HANG_BP carrier's $fighters never
+		//gains its "Breaching Pods" slot and the bay wrongly rejects the pod ("carrier
+		//full"). $dbCarrier IS the gamedata-loaded ship (onConstructed → setEnhancements
+		//ran), so its $fighters reflects the enhancement. Use it for the capability
+		//check; fall back to $carrier when no DB ship was passed. (Ships that DECLARE
+		//the category natively in their constructor — e.g. Omega's "normal" fighters —
+		//already pass on $carrier, which is why only HANG_BP/HANG_AS carriers broke.)
+		$capabilityCarrier = $dbCarrier ?: $carrier;
+
 		//Fill order: the client's chosen bays first (dedup), then any other
 		//eligible bay on the carrier. Free boxes are read from the DB-side bay
 		//PLUS this-pass POST-side commits (entries the coalescer already appended).
@@ -3377,7 +3939,7 @@ class HangarOps {
 			if ($remaining <= 0) break;
 			if (!empty($h->isCatapult)) continue;
 			if ($h->isDestroyed()) continue;
-			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+			if (!self::hangarAcceptsCategory($h, $category, $capabilityCarrier)) continue;
 
 			//TRUE free boxes for this bay = effective capacity − max(DB usage,
 			//POST-side this-pass usage). The POST-side bay accumulates entries the
@@ -3586,9 +4148,17 @@ class HangarOps {
 			if (!isset($ship->systems) || !is_array($ship->systems)) continue;
 			foreach ($ship->systems as $sys) {
 				if (!($sys instanceof Hangar)) continue;
-				if (empty($sys->pendingDeployStartTransfer)) continue;
-				foreach ($sys->pendingDeployStartTransfer as $entry) {
-					if (isset($entry['flightId'])) $ids[(int)$entry['flightId']] = true;
+				if (!empty($sys->pendingDeployStartTransfer)) {
+					foreach ($sys->pendingDeployStartTransfer as $entry) {
+						if (isset($entry['flightId'])) $ids[(int)$entry['flightId']] = true;
+					}
+				}
+				//LCV Rails: a deploy-docked LCV likewise has no board position, so
+				//its ship id must be exempted from the deployment movement check.
+				if (!empty($sys->isLCVRail) && !empty($sys->pendingLcvDeployStartTransfer)) {
+					foreach ($sys->pendingLcvDeployStartTransfer as $entry) {
+						if (isset($entry['shipId'])) $ids[(int)$entry['shipId']] = true;
+					}
 				}
 			}
 		}

@@ -66,9 +66,19 @@ class Shuttle extends FighterFlight
     public function getImage()
     {
         switch ($this->faction) {
+            case 'Abbai Matriarchate':  
+            case 'Abbai Matriarchate (WotCR)':    
+                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png');  
+            case 'Centauri Republic':
+            case 'Centauri Republic (WotCR)': 
+                return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
+            case 'Dilgar Imperium': 
+                return array('img/ships/shuttleDilgar.png', 'img/ships/ShuttleDilgar_large.png');                                                                         
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
+            case 'Narn Regime':
+                return array('img/ships/ShuttleNarn.png', 'img/ships/ShuttleNarn_large.png');                    
             default:
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
@@ -106,7 +116,7 @@ class Flyer extends Shuttle
     {
         parent::setShuttleDefaults();
         $this->phpclass = "Flyer";
-        $this->shipClass = "Flyer";
+        $this->shipClass = "Cargo Flyer";
         $this->faction = "Minbari Federation";
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
@@ -145,7 +155,7 @@ class FlyerProtectorate extends Shuttle
     {
         parent::setShuttleDefaults();
         $this->phpclass = "FlyerProtectorate";
-        $this->shipClass = "Flyer";
+        $this->shipClass = "Cargo Flyer";
         $this->faction = "Minbari Protectorate";
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
@@ -231,6 +241,42 @@ class CargoShuttle extends Shuttle
 
 }
 
+
+class MedicalShuttle extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "MedicalShuttle";
+        $this->shipClass = "Medical Shuttle";
+        $this->hangarRequired = 'medical shuttles';
+        $this->faction = "Markab Theocracy";        
+        $this->offensivebonus = 0;
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;        
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 13, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
 
 class ShuttleAbbai extends Shuttle
 {

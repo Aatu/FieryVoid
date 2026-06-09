@@ -2453,7 +2453,7 @@ class RammingAttack extends Weapon{
 		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
 	
 		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
-		if($shooter->isTerrain() && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
+		if($shooter->isTerrain() && !$shooter->isDestroyed() && $shooter->Enormous){ //Only Enormous terrain (asteroids/moons) collides; bases like shipyards/jumpgates do not.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.

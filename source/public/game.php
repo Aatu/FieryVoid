@@ -49,6 +49,9 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
     <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, minimal-ui' />
 
     <!-- Preload critical bundles to parallelize their download with the large inline JSON payloads below -->
+    <!-- jQuery stays a synchronous <script> (the inline bootstrap needs $ at parse time);
+         preload it here so the browser fetches it in parallel rather than discovering it mid-head. -->
+    <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>" as="script">
     <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>" as="script">
     <?php $debug = (isset($_GET['debug']) || isset($_GET['DEBUG'])); ?>
     <?php if (!$debug): ?>
@@ -61,9 +64,14 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
     <link href="styles/replay.css" rel="stylesheet" type="text/css">
     <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
 <!--	<link href="styles/helper.css" rel="stylesheet" type="text/css">-->
-    <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-    <script src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
-    <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
+    <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party TLS).
+         Both kept SYNCHRONOUS: jQuery for the inline $(window).on("load") bootstrap below, and
+         jQuery-UI alongside it so $.fn.draggable is guaranteed present for any drag path without
+         relying on defer/ready ordering (kept consistent with gamelobby.php). assetManager.js
+         has no jQuery dep, so it defers. The big win here is self-hosting, not the defer. -->
+    <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
+    <script defer src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
+    <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-ui-1.14.2.min.js'); ?>"></script>
     <script defer src="client/lib/three.min.js"></script>
     <script defer src="client/lib/THREE.MeshLine.js"></script>
     <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>"></script>

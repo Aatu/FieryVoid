@@ -250,7 +250,6 @@ spl_autoload_register(
                 'devout2007' => '/server/model/ships/orieni/devout2007.php',
                 'dice' => '/server/lib/dice.php',
                 'disengagedfighter' => '/server/model/cricialClasses.php',
-                'dockedfighter' => '/server/model/cricialClasses.php', 
                 'splitlaunchedfighter' => '/server/model/cricialClasses.php',                               
 				'dockingcollar' => '/server/model/systems/baseSystems.php',
                 'dorono' => '/server/model/ships/hurr/dorono.php',
@@ -536,8 +535,7 @@ spl_autoload_register(
                 'laser' => '/server/model/weapons/lasers.php',
                 'lasercutter' => '/server/model/weapons/lasers.php',
                 'laserlance' => '/server/model/weapons/lasers.php',
-                //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used
-                'launchedthisturn' => '/server/model/cricialClasses.php',
+                //'laserpulsearray' => '/server/model/weapons/dualWeapon.php', //no longer used               
                 'leevan' => '/server/model/ships/centauri_old/leevan.php',
                 'legiona' => '/server/model/ships/centauri_old/legionA.php',
                 'legionb' => '/server/model/ships/centauri_old/legionB.php',
@@ -840,16 +838,14 @@ spl_autoload_register(
                 'rogolonchelekftr' => '/server/model/ships/rogolon/rogolonChelekFtr.php',
                 'rogolonltplasmacannon' => '/server/model/weapons/plasma.php',
                 'rogolonltplasmagun' => '/server/model/weapons/plasma.php',
-                'rogolonrogon' => '/server/model/ships/rogolon/rogolonRogon.php',
+                //'rogolonrogon' => '/server/model/ships/rogolon/rogolonRogon.php',
 				'rogolonrogonam' => '/server/model/ships/rogolon/rogolonRogonAM.php',
 				'rogolonrostovam' => '/server/model/ships/rogolon/rogolonRostovAM.php',
                 'rogolonshogalovam' => '/server/model/ships/rogolon/rogolonShogalovAM.php',
                 'rogolontascoam' => '/server/model/ships/rogolon/rogolonTascoAM.php',
-                'rogolontolov' => '/server/model/ships/rogolon/rogolonTolov.php',
-				//'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
-                'rogolontovin' => '/server/model/ships/rogolon/rogolonTovin.php',
+                //'rogolontolov' => '/server/model/ships/rogolon/rogolonTolov.php',
+                //'rogolontovin' => '/server/model/ships/rogolon/rogolonTovin.php',
                 'rogolontovinam' => '/server/model/ships/rogolon/rogolonTovinAM.php',
-				//'rogolontolovam' => '/server/model/ships/rogolon/rogolonTolovAM.php',
 				'rogolontussova' => '/server/model/ships/rogolon/rogolonTussova.php',
                 'rogolonvasturshf' => '/server/model/ships/rogolon/rogolonVasturSHF.php',
                 //'rogolonvostorshf' => '/server/model/ships/rogolon/rogolonVostorSHF.php',
@@ -3825,14 +3821,21 @@ spl_autoload_register(
 
 
 
-                //HANGER OPERATIONS CLASSES
+                //HANGER OPERATIONS CLASSESd
                 'hangarops' => '/server/model/systems/HangarOps.php',
+                'dockedfighter' => '/server/model/cricialClasses.php',                 
+                'launchedthisturn' => '/server/model/cricialClasses.php',
+                'lcvlaunchedthisturn' => '/server/model/cricialClasses.php', 
+
                 'fighterrail' => '/server/model/systems/baseSystems.php',                
                 'flyer' => '/server/model/ships/Shuttle.php',
                 'flyerprotectorate' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
                 'cargoshuttle' => '/server/model/ships/Shuttle.php',                                
                 'shuttle' => '/server/model/ships/Shuttle.php',
+                'medicalshuttle' => '/server/model/ships/Shuttle.php',
+
+                //FACTION DEFAULT SHUTTLES
                 'shuttleabbai' => '/server/model/ships/Shuttle.php',
                 'shuttlealacan' => '/server/model/ships/Shuttle.php',
                 'shuttlebalosian' => '/server/model/ships/Shuttle.php',
@@ -3905,6 +3908,7 @@ spl_autoload_register(
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
                 'baescortcarrierearlyrails' => '/server/model/ships/beltalliance/baEscortCarrierEarlyRails.php',
                 'baescortcarrierrefitrails' => '/server/model/ships/beltalliance/baEscortCarrierRefitRails.php',
+                'baescortcarrierlcvrails' => '/server/model/ships/beltalliance/baEscortCarrierLCVRails.php',                
                 'baheavygunboatrails' => '/server/model/ships/beltalliance/baHeavyGunboatRails.php',
                 'baheavygunboatearlyrails' => '/server/model/ships/beltalliance/baHeavyGunboatEarlyRails.php',
                 'baheavygunboatpulserails' => '/server/model/ships/beltalliance/baHeavyGunboatPulseRails.php',

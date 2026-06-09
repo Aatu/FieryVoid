@@ -40,10 +40,10 @@ class SinthonLCV extends HeavyCombatVessel{
         $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 240, 60));
         $this->addFrontSystem(new LightParticleProjector(2, 3, 1, 300, 120));
         $this->addFrontSystem(new ParticleProjector(2, 6, 1, 270, 90));
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addFrontSystem($LCVRail);
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addFrontSystem($LCVRail);
         
@@ -51,7 +51,7 @@ class SinthonLCV extends HeavyCombatVessel{
         $this->addAftSystem(new Thruster(4, 10, 0, 4, 2));
         $this->addAftSystem(new ParticleProjector(2, 6, 1, 240, 60));
         $this->addAftSystem(new ParticleProjector(2, 6, 1, 300, 120));
-        $LCVRail = new Catapult(3, 8);
+        $LCVRail = new DockingCollar(3, 8);
         $LCVRail->displayName = "LCV Rail";
         $this->addAftSystem($LCVRail);
         

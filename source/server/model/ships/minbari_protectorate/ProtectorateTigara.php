@@ -11,7 +11,7 @@ class ProtectorateTigara extends BaseShip{
         $this->shipClass = "Tigara Attack Cruiser";
         $this->shipSizeClass = 3;
         $this->gravitic = true;
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>6, "flyers"=>2);
         $this->forwardDefense = 15;
         $this->sideDefense = 17;
         $this->turncost = 1.0;
@@ -27,7 +27,7 @@ class ProtectorateTigara extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 25, 4, 10));
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(5, 8));
+        $this->addPrimarySystem(new Hangar(5, 8, 3));
 
         // weapons arguments: armor, health, power, start arc, end arc
         $this->addFrontSystem(new FusionCannon(3, 8, 1, 300, 60));

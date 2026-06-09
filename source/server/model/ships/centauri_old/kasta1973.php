@@ -28,7 +28,7 @@ class Kasta1973 extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 22, 4, 7));
         $this->addPrimarySystem(new Engine(5, 18, 0, 9, 3));
-		$this->addPrimarySystem(new Hangar(4, 2));		
+		$this->addPrimarySystem(new Hangar(4, 2, 2));		
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));

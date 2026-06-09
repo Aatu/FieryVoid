@@ -12,7 +12,7 @@ class Nergell extends SmallStarBaseFourSections{
 		$this->shipClass = "Nergell Military Guardpost";
 		$this->imagePath = "img/ships/MinbariGuardpost.png";
 		$this->canvasSize = 200;
-		$this->fighters = array("heavy"=>12); 
+		$this->fighters = array("heavy"=>12, "flyers"=>4); 
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway

@@ -12,6 +12,7 @@ class FastFreighter extends MediumShip{
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		$this->isd = 2188;
+		$this->fighters = array("cargo shuttles"=>2); 		
         
         $this->forwardDefense = 13;
         $this->sideDefense = 15;
@@ -37,7 +38,7 @@ class FastFreighter extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 2, 2));
         $this->addPrimarySystem(new Engine(3, 18, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(3, 2));
+		$this->addPrimarySystem(new Hangar(3, 2, 1));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 		$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 4));

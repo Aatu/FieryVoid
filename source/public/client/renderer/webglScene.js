@@ -30,6 +30,16 @@ window.webglScene = function () {
 
         this.lastPinchDistance = null;
         this.lastTouchMove = null;
+
+        // Idle render-loop gating. The rAF loop runs forever, but a full scene
+        // render (phaseDirector + WebGL draw) only happens while there is work:
+        // playing animations, an in-progress zoom, or a recent input/gamedata
+        // event. `framesToRender` is a small budget refilled by requestRender();
+        // it draws a short burst per event so scene mutations that land a tick
+        // after the event (hover tooltips, EW lines) still get painted. When the
+        // budget hits 0 and nothing is animating, frames become near-free.
+        this.framesToRender = 0;
+        this.renderBurst = 4;
     }
 
     webglScene.prototype.init = function (canvasId, element, hexGridRenderer, animationTimeline, gamedata, coordinateConverter) {
@@ -86,6 +96,11 @@ window.webglScene = function () {
         this.phaseDirector.receiveGamedata(gamedata, this);
         _step('receiveGamedata (ship icons)');
         this.starField = new StarField(this);
+        // Seed the render budget so the opening (synchronous) scene paints before
+        // the loop idles. Asynchronously-loaded ship icon textures self-trigger a
+        // render when they resolve (see webglSprite), so this only needs to cover
+        // the initial hex grid + already-built sprites.
+        this.requestRender();
         this.render();
         _step('first render');
     };
@@ -96,6 +111,7 @@ window.webglScene = function () {
         }
 
         this.phaseDirector.receiveGamedata(gamedata, this);
+        this.requestRender();
     };
 
     webglScene.prototype.customEvent = function (name, payload) {
@@ -104,6 +120,7 @@ window.webglScene = function () {
         }
 
         this.phaseDirector.relayEvent(name, payload);
+        this.requestRender();
     };
 
     webglScene.prototype.moveCamera = function (position) {
@@ -116,6 +133,7 @@ window.webglScene = function () {
 
         this.coordinateConverter.onCameraMoved(this.camera.position);
         this.phaseDirector.relayEvent('ScrollEvent', this.camera.position);
+        this.requestRender();
     };
 
 
@@ -129,6 +147,7 @@ window.webglScene = function () {
 
         this.coordinateConverter.onCameraMoved(this.camera.position);
         this.phaseDirector.relayEvent('ScrollEvent', this.camera.position);
+        this.requestRender();
     };
 
     webglScene.prototype.zoomCamera = function (zoom, animationReady) {
@@ -159,14 +178,35 @@ window.webglScene = function () {
         }
 
         jQuery('#background').css({ opacity: 1 - alpha });
+        this.requestRender();
+    };
+
+    // Request a short burst of full-render frames. Call from any path that
+    // changes what is on the board outside the animation list (input events,
+    // new gamedata, camera moves). Cheap and idempotent — safe to over-call.
+    webglScene.prototype.requestRender = function () {
+        this.framesToRender = this.renderBurst;
     };
 
     webglScene.prototype.render = function () {
+        // Always keep the loop alive; gating decides whether to do real work.
+        requestAnimationFrame(this.render.bind(this));
+
+        var zooming = this.zoomTarget && this.zoomTarget != this.zoom;
+        var animating = this.phaseDirector && this.phaseDirector.isAnimating();
+
+        if (this.framesToRender <= 0 && !zooming && !animating) {
+            return; // Idle: skip the expensive phase + WebGL render this frame.
+        }
+
+        if (this.framesToRender > 0) {
+            this.framesToRender--;
+        }
+
         this.phaseDirector.render(this.scene, this.coordinateConverter, this.zoom);
         this.renderer.render(this.scene, this.camera);
         animateZoom.call(this);
         this.starField.render();
-        requestAnimationFrame(this.render.bind(this));
     };
 
     webglScene.prototype.initEventListeners = function () {
@@ -190,6 +230,7 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.touchstart = function (event) {
+        this.requestRender();
         this.lastTouchMove = event;
         if (event.originalEvent.touches.length === 1) {
             // Long-press = touchscreen equivalent of Shift+Click. Fires a synthetic click
@@ -217,6 +258,7 @@ window.webglScene = function () {
     webglScene.prototype.touchmove = function (event) {
         event.stopPropagation();
         event.preventDefault();
+        this.requestRender();
 
         this.lastTouchMove = event;
 
@@ -260,6 +302,7 @@ window.webglScene = function () {
     webglScene.prototype.touchend = function (event) {
         event.stopPropagation();
         event.preventDefault();
+        this.requestRender();
 
         clearTimeout(this.longPressTimer);
         this.longPressTimer = null;
@@ -303,6 +346,7 @@ window.webglScene = function () {
     webglScene.prototype.mouseDown = function (event) {
         event.stopPropagation();
         event.preventDefault();
+        this.requestRender();
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
 
@@ -336,6 +380,7 @@ window.webglScene = function () {
     webglScene.prototype.mouseUp = function (event) {
         event.stopPropagation();
         event.preventDefault();
+        this.requestRender();
 
         if (this.distanceDragged < this.draggingDistanceTreshold && !this.longPressFired) this.click(event);
         this.longPressFired = false;
@@ -347,6 +392,7 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.mouseOut = function (e) {
+        this.requestRender();
         if (this.dragging) this.fireEvent('DragEvent', { release: true });
 
         this.fireEvent('MouseOutEvent', {});
@@ -358,6 +404,7 @@ window.webglScene = function () {
     webglScene.prototype.mouseOver = function (e) { };
 
     webglScene.prototype.mouseMove = function (event) {
+        this.requestRender();
         if (this.dragging) this.drag(event); else this.doMouseMove(event);
     };
 
@@ -401,6 +448,7 @@ window.webglScene = function () {
     };
 
     webglScene.prototype.click = function (event, modifierOverride) {
+        this.requestRender();
         var pos = getMousePositionInObservedElement.call(this, event);
         var gamePos = this.coordinateConverter.fromViewPortToGame(pos);
         var hexPos = this.coordinateConverter.fromGameToHex(gamePos, true);

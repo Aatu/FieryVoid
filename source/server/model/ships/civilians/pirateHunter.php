@@ -25,7 +25,7 @@ class PirateHunter extends MediumShip{
         $this->addPrimarySystem(new Reactor(4, 12, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 4, 5));
-        $this->addPrimarySystem(new Hangar(3, 1));
+        $this->addPrimarySystem(new Hangar(3, 1, 1));
         $this->addPrimarySystem(new Engine(4, 11, 0, 8, 2));
     	$this->addPrimarySystem(new Thruster(4, 10, 0, 3, 3));
     	$this->addPrimarySystem(new Thruster(4, 10, 0, 3, 4));

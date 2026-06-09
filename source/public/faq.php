@@ -421,6 +421,41 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 </ul>
             </li>
             <br>
+
+            <li><b>LCV Rails:</b> Some carriers (such as the Deneth <em>Deliverer</em>) are fitted with LCV Rails — external docking collars that carry a whole
+                Light Combat Vessel (LCV) rather than a fighter flight.  An LCV is a full ship in its own right, so an LCV Rail behaves differently to a fighter hangar.
+                <ul class="circle-list">
+                    <li><strong>Capacity:</strong> Each LCV Rail holds <strong>exactly one</strong> LCV.  Unlike Fighter Rails, an LCV Rail is an ordinary targetable
+                        system with its own hit points — it has its own entry on the carrier's damage chart and can be destroyed by direct fire.</li>
+                    <li><strong>Compatible craft:</strong> LCV Rails carry LCVs only.  Fighters, shuttles, and other small craft cannot dock to them, and an LCV cannot
+                        dock into an ordinary hangar or fighter rail.</li>
+                    <li><strong>Docking (recovery):</strong> To dock, the LCV must end its move in the <strong>same hex</strong> as the carrier, on a
+                        <strong>matching heading</strong>, with the carrier <strong>stationary</strong>, and the LCV must have at least <strong>1 thrust unspent</strong>.
+                        You can dock from the LCV's own "Enter Hangar" button or from the carrier's "Recover" button, and you may choose <strong>which specific rail</strong>
+                        (e.g. Forward, Port, Starboard) the LCV docks onto.</li>
+                    <li><strong>Launching:</strong> A launched LCV is placed back in the carrier's hex, inheriting the carrier's facing and speed.  The launched LCV
+                        suffers a <strong>−50 Initiative</strong> penalty on the following turn (the LCV is briefly disoriented after release).</li>
+                    <li><strong>Penalties while docked:</strong> Carrying LCVs makes a ship more sluggish.  For <em>each</em> LCV currently docked, the carrier suffers:
+                        <ul class="circle-list">
+                            <li><strong>−10 Initiative</strong>, and</li>
+                            <li><strong>+1 thrust</strong> to the cost of a turn <em>and</em> to its turn delay (the ship's printed turn cost is unchanged — only the
+                                thrust actually paid each turn increases, e.g. a carrier with four LCVs docked pays four extra thrust to turn).</li>
+                        </ul>
+                    </li>
+                    <li><strong>No rearming while docked:</strong> Unlike fighters in a hangar, a docked LCV does <strong>not</strong> rearm or reload its weapons —
+                        it simply sits on the rail until launched.</li>
+                    <li><strong>Landing on a damaged rail:</strong> If the rail has taken damage when the LCV docks, the LCV takes Structure damage equal to the rail's
+                        sustained damage.</li>
+                    <li><strong>Rail destroyed while occupied:</strong> If an LCV Rail is destroyed while holding an LCV, the LCV is <strong>forced to launch</strong> and takes
+                        Structure damage equal to the rail's lost hit points <strong>plus 2d10</strong> Matter damage from the resulting debris.</li>
+                    <li><strong>Carrier destroyed:</strong> If the whole carrier is destroyed, every docked LCV escapes in the same way — each is forced to launch and takes the
+                        rail's damage plus 2d10.</li>
+                    <li><strong>Deployment phase docking:</strong> Because LCVs are the smallest vessels, they may share the carrier's hex during deployment.  You can
+                        deploy an LCV directly onto a chosen rail (it starts the battle docked), place it in the carrier's hex, or un-dock a deploy-docked LCV from the
+                        carrier's "Deploy Flights in Hangar" menu before committing.</li>
+                </ul>
+            </li>
+            <br>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

@@ -85,7 +85,7 @@ class smallBase extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 15, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(4, 14, 3, 4));
-		$this->addPrimarySystem(new Hangar(4, 6));
+		$this->addPrimarySystem(new Hangar(4, 6, 6, 0, 'fighters', array(), true));
 		$this->addPrimarySystem(new CargoBay(4, 36));
 
 		$this->addFrontSystem(new MediumPlasma(2, 5, 3, 270, 90));
@@ -97,7 +97,7 @@ class smallBase extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
 			$this->addFrontSystem(system: $cargoBay);
-			$hangar = new Hangar(2, 1);
+			$hangar = new Hangar(2, 1, 1);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
 			$this->addFrontSystem($hangar);	

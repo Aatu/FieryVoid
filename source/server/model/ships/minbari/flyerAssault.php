@@ -22,7 +22,7 @@ class FlyerAssault extends FighterFlight{
 		$this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
 		
-		$this->hangarRequired = 'shuttles'; //for fleet check
+		$this->hangarRequired = 'flyers'; //for fleet check
         $this->iniativebonus = 10*5;
         
         $this->gravitic = true;

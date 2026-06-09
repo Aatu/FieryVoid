@@ -28,7 +28,7 @@ class Talvan1990 extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 2));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

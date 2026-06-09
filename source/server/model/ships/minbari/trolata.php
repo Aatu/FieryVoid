@@ -22,7 +22,7 @@ class Trolata extends BaseShip{
         $this->isd = 2201;
         $this->occurence = "uncommon";
         $this->variantOf = "Troligan Armored Cruiser";
-        //$this->fighters = array("shuttles"=>2);
+        $this->fighters = array("flyers"=>2);
 
         // Ship system arguments: armor, health, power req, output
         $this->addPrimarySystem(new Reactor(7, 23, 0, 0));

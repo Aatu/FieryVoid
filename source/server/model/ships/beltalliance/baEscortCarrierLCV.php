@@ -12,6 +12,7 @@ class BAEscortCarrierLCV extends HeavyCombatVessel{
 			$this->variantOf = "BA Escort Carrier";
         $this->occurence = "common";
         $this->fighters = array("LCVs"=>2, "heavy"=>12); //"heavy" are external racks
+        $this->variantOf = 'NONE';
 
         $this->isd = 2235;
         
