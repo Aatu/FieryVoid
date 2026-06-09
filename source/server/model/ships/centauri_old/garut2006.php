@@ -39,7 +39,7 @@ class Garut2006 extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 25, 0, 0)); 
         $this->addPrimarySystem(new ElintScanner(5, 30, 6, 10));
         $this->addPrimarySystem(new Engine(5, 36, 0, 12, 3));
-	$this->addPrimarySystem(new Hangar(5, 8));
+	$this->addPrimarySystem(new Hangar(5, 8, 2));
 	$this->addPrimarySystem(new AssaultLaser(4, 6, 4, 0, 360));
 	$this->addPrimarySystem(new LightParticleBeamShip(3, 2, 1, 0, 360));
         

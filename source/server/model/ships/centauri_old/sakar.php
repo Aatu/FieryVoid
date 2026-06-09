@@ -27,7 +27,7 @@ class Sakar extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(5, 4));
+		$this->addPrimarySystem(new Hangar(5, 4, 2));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
