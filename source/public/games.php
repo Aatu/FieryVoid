@@ -130,8 +130,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Hangar Operations (Beta)</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
         <li><strong>Hangar Refinements</strong> - Improvements/fixes to hangar systems so they match their B5W properties, huge thanks to Nato for providing the info needed to correct these!</li>  
-        <li><strong>Fighter Rails</strong> - Fighter Rails now available to use on ships equipped with them, see FAQ for details.</li>                           
-        <li><strong>Polaren Confederacy</strong> - Geoff's added more functionality updates to the Nexus Polaren (Thanks also to Lunara, Tyrel, and Abraxas!).</li>  
+        <li><strong>LCV and Fighter Rails</strong> - LCV and Fighter Rails now available to use on ships equipped with them, see FAQ for details.</li>                           
+        <li><strong>Replay Speed Setting</strong> - You can now adjust the speed that the combat Replay's animates. <li>  
         <li><strong>Escalation Wars</strong> -  Breaching pods added to Escalation factions, plus four new ships, the Chouka ballistic mine, and Star Fortress added!</li>                                                                                       
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
