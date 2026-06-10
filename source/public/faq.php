@@ -678,11 +678,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click Unit - Select it (if yours) and open controls.</li>
                     <li>Right-click Weapon - Select all identical weapons (e.g., all fighter guns).</li>
                     <li>Right-click Power Buttons - Toggle On/Off all identical systems.</li>
+                    <li>Right-click Electronic Warfare (EW) Add Button - Sets that EW type to the max available amount (Note- long press on touchscreen).</li>
+                    <li>Right-click Electronic Warfare (EW) Remove Button - Sets that EW type to zero (Note- long press on touchscreen).</li>                      
                     <li>Right-click Firing Mode - Change fire mode on all similar undeclared weapons.</li>
                     <li>Right-click Defensive Fire - Enable defensive fire on all similar undeclared weapons.</li>
                     <li>Right-click Cancel Move - Cancel all current moves for the unit.</li>
                     <li>Right-click Cancel Firing Order - Cancel firing orders for all similar weapons.</li>
                     <li>Right-click Move Forward - Move forward using all remaining movement.</li>
+                    <li>Richt-click + or - Jink Buttons - Sets jinking levels to maximum allowed or 0 respectively (Note- long press on touchscreen).                    
                 </ul>
             </li>
             <br>
@@ -695,18 +698,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                     <li>Right-click on + and - Movement Icons -  Will set the speed of the ship to maximum (Speed 10) or the minimum (Speed 0) in a single click.</li>                        
                 </ul>
             </li>
-            <br>            
-            <li><b>During Initial Orders Phase:</b>
-                <ul class="circle-list">
-                    <li>Right-clicking Electronic Warfare (EW) Add Button - Sets that EW type to the max available amount (Note- long press on touchscreen).</li>
-                    <li>Right-clicking Electronic Warfare (EW) Remove Button - Sets that EW type to zero (Note- long press on touchscreen).</li>                    
-                </ul>
-            </li>  
-            <li><b>During Mvoement Orders Phase:</b>
-                <ul class="circle-list">
-                    <li>Right-clicking + or - Jinking Buttons - Sets jinking levels to maximum allowed or 0 respectively (Note- long press on touchscreen).</li>
-                </ul>
-            </li>                                                 
+            <br>                                                        
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
