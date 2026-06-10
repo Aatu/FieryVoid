@@ -7,7 +7,7 @@ class KastanDullknife extends MediumShip{
         $this->pointCost = 150;
         $this->faction = "Escalation Wars Support Units";
         $this->phpclass = "KastanDullknife";
-        $this->imagePath = "img/ships/EscalationWars/KastanDullknife.png";
+        $this->imagePath = "img/ships/EscalationWars/KastanDullKnife.png";
         $this->shipClass = "Kastan Dullknife Priority Freighter";
 //			$this->variantOf = "Battleknife";
 //			$this->occurence = "common";

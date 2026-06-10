@@ -33,6 +33,7 @@ class ShadowDestroyerHunter extends MediumShip{
 		
 		//$this->fighters = array("normal"=>12);
 		$this->notes = "Atmospheric capable";//even largest Shadow ships are atmospheric capable
+	    $this->notes .= '<br>For All Alone in the Night campaign';
 		
 		Enhancements::nonstandardEnhancementSet($this, 'ShadowShip');
 	    
