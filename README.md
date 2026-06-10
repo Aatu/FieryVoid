@@ -14,6 +14,24 @@ Make sure you have the following installed on your machine:
 - Docker and Docker Compose
 - Node.js and Yarn (for client-side frontend bundling) - Primarily Yarn.
 
+### Installing Node.js and Yarn
+
+Docker runs the server (Nginx/PHP/MariaDB), but the client-side JS bundling (`yarn build` / `yarn watch:legacy`) runs on your host machine, so Node.js and Yarn need to be installed locally.
+
+1. Install Node.js (this also installs npm). Use the current LTS release.
+   - Windows: download the LTS installer from https://nodejs.org/, or run `winget install OpenJS.NodeJS.LTS`
+   - macOS: `brew install node`
+   - Linux: use your distro's package manager (e.g. `sudo apt install nodejs npm`) or https://github.com/nvm-sh/nvm
+
+2. Enable Yarn. Modern Node.js ships with Corepack, which is the recommended way to get Yarn — no separate install needed:
+
+   corepack enable
+   corepack prepare yarn@stable --activate
+
+   (Alternatively, the classic global install still works: `npm install -g yarn`.)
+
+3. Verify both are available by running `node -v` and `yarn -v` in a terminal. Once they report versions you're ready for the "Setup Client-Side Development (Yarn)" step below.
+
 1. Build and Start the Environment
 Open a terminal in the project root folder (c:\FV_env\FieryVoid) and run:
 
