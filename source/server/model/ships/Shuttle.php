@@ -78,7 +78,11 @@ class Shuttle extends FighterFlight
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
             case 'Narn Regime':
-                return array('img/ships/ShuttleNarn.png', 'img/ships/ShuttleNarn_large.png');                    
+                return array('img/ships/ShuttleNarn.png', 'img/ships/ShuttleNarn_large.png'); 
+            case 'Orieni Imperium':
+                return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');
+            case 'Raiders':
+                return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
             default:
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
