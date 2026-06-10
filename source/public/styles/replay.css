@@ -65,7 +65,7 @@
    Rewind run at this speed. Sized smaller than the transport glyphs and given a
    fixed width so the rate digit changing doesn't shift the surrounding buttons. */
 #replayUI .replay-buttons button#speed {
-    font-size: 22px;
+    font-size: 30px;
     min-width: 2.4em;
     vertical-align: middle;
 }
@@ -144,7 +144,7 @@
     }
 
     #replayUI .replay-buttons button#speed {
-        font-size: 14px;
+        font-size: 24px;
     }
 
     #replayUI.active .replay-active {
