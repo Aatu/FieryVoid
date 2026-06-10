@@ -9,7 +9,8 @@ class Vyshesh extends MediumShip{
         $this->phpclass = "Vyshesh";
         $this->imagePath = "img/ships/VreeVymish.png";
         $this->shipClass = "Vree Vyshesh Free Trader";
-  	    $this->canvasSize = 100;        
+  	    $this->canvasSize = 100;  
+		$this->fighters = array("cargo shuttles"=>2); 		      
 	    
 	    $this->isd = 2172;
 
@@ -30,7 +31,7 @@ class Vyshesh extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 6, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 6, 2, 3));
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 3));
-		$this->addPrimarySystem(new Hangar(2, 2));
+		$this->addPrimarySystem(new Hangar(2, 2, 1));
 		$this->addPrimarySystem(new CargoBay(1, 25));		
 		$this->addPrimarySystem(new GraviticThruster(2, 10, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(2, 10, 0, 6, 4));

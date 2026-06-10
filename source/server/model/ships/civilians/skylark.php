@@ -1,5 +1,5 @@
 <?php
-class Skylark extends MediumShip{
+class Skylark extends LCV{
 	/*approximated as MCV, no EW restrictions*/
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);

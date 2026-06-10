@@ -61,6 +61,15 @@
     color: #496791;
 }
 
+/* Speed button: cycles 1×/2×/4×/8× and shows the current rate. Both Play and
+   Rewind run at this speed. Sized smaller than the transport glyphs and given a
+   fixed width so the rate digit changing doesn't shift the surrounding buttons. */
+#replayUI .replay-buttons button#speed {
+    font-size: 22px;
+    min-width: 2.4em;
+    vertical-align: middle;
+}
+
 #replayUI .replay-container {
     display: flex;
     flex-direction: row;
@@ -132,6 +141,10 @@
 
     #replayUI .replay-buttons button {
         font-size: 24px;
+    }
+
+    #replayUI .replay-buttons button#speed {
+        font-size: 14px;
     }
 
     #replayUI.active .replay-active {

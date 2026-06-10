@@ -28,7 +28,7 @@ class ProviderFreighter extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 8, 2, 3));
         $this->addPrimarySystem(new Engine(4, 10, 0, 6, 3));
-	$this->addPrimarySystem(new Hangar(4, 2));
+	$this->addPrimarySystem(new Hangar(4, 2, 1));
 	$this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 360));
 	$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));

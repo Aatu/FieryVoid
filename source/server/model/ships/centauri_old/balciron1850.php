@@ -26,7 +26,7 @@ class Balciron1850 extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 14, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 15, 3, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 5, 4));
         

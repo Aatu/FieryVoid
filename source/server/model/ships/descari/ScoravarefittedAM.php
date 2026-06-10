@@ -46,7 +46,10 @@ class ScoravarefittedAM extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 18, 4, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new Hangar(5, 26, 12));
-		$this->addPrimarySystem(new Hangar(2, 6, 6));		
+		//Heavy/normal-fighter bay: 6 boxes for a full 6-flight. Flag it
+		//excludeFromDefaultShuttles so the ship's 2 leftover default shuttles
+		//pile into the 26-box medium bay instead of blocking a box here.
+		$this->addPrimarySystem(new Hangar(2, 6, 6, 0, 'fighters', array(), true));
         
         $this->addFrontSystem(new LightPlasmaBolter(2, 0, 0, 300, 60));
         $this->addFrontSystem(new LightPlasmaBolter(2, 0, 0, 300, 60));       

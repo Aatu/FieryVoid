@@ -12,7 +12,7 @@ class Baroon extends LCV{
         $this->canvasSize = 100;
         $this->agile = true;
 
-	$this->hangarRequired = ''; //no hangar required!
+	//$this->hangarRequired = ''; //no hangar required!
 	$this->notes = "Does not require hangar."; //it SHOULD require hangar originally, but this means Usuuth couldn't bring LCVs to pickup battle... and they need them, badly.
 	    //so - assuming they fight on their own turf (no other reasonable option by background ;) ) - LCVs could be available; they're allowed as a balance change (and making them able to actuallly bring a legal fleet of reasonable size!)
 	    

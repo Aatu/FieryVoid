@@ -293,6 +293,10 @@ window.ShipTooltip = function () {
             if (firstFighter && shipManager.criticals.hasCritical(firstFighter, "LaunchedThisTurn")) {
                 toDisplay += '<span style="color:cyan;">Just Launched</span>; ';
             }
+        } else if (shipManager.criticals.hasCriticalInAnySystem(ship, "LCVLaunchedThisTurn")) {
+            //LCV Rails: an LCV launched from a rail carries LCVLaunchedThisTurn on
+            //its CnC (the -50 init that turn). Show the same cyan "Just Launched".
+            toDisplay += '<span style="color:cyan;">Just Launched</span>; ';
         }
         if (shipManager.criticals.hasCriticalInAnySystem(ship, "HangarOperations")) {
             toDisplay += '<span style="color:cyan;">Hangar Operations</span>; ';
@@ -348,8 +352,17 @@ window.ShipTooltip = function () {
             var speed = shipManager.movement.getSpeed(ship);
             var baseTurnCost = shipManager.movement.getTurnCost(ship);
             if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33;
-            var turncost = Math.ceil(speed * baseTurnCost);
-            var turnDelayCost = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
+            //LCV Rails: each docked LCV adds +1 thrust to this turn's turn cost AND
+            //turn delay (a flat surcharge on the per-turn value, NOT the rate shown
+            //in parens). Matches the movement engine's getDockedLcvTurnSurcharge.
+            var lcvTurnSurcharge = shipManager.movement.getDockedLcvTurnSurcharge(ship);
+            //Turn cost is never less than 1 (matches the movement engine's
+            //Math.max(1, ...) / speed-0 = 1-thrust rule); the tooltip previously
+            //showed 0 at speed 0 even though a turn there actually costs 1. Turn
+            //DELAY is genuinely 0 at speed 0 (a stationary ship has no delay), so
+            //it is not clamped.
+            var turncost = Math.max(1, Math.ceil(speed * baseTurnCost)) + lcvTurnSurcharge;
+            var turnDelayCost = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship)) + lcvTurnSurcharge;
 
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Roll cost: ' + ship.rollcost, ship.flight !== true);
             this.addEntryElement('Pivot cost: ' + ship.pivotcost + ' Combat pivot cost: ' + Math.ceil(ship.pivotcost * 1.5), ship.flight === true);

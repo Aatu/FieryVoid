@@ -12,6 +12,7 @@ class CargoTug extends MediumShip{
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		$this->isd = 2195;
+		$this->fighters = array("cargo shuttles"=>1);		
         
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
@@ -26,7 +27,7 @@ class CargoTug extends MediumShip{
         $this->addPrimarySystem(new Reactor(2, 3, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 6, 1, 1));
         $this->addPrimarySystem(new Engine(2, 18, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(2, 1));
+		$this->addPrimarySystem(new Hangar(2, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 6, 3));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 6, 4));
 		

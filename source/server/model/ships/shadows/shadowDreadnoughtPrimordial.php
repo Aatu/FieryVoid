@@ -90,6 +90,9 @@ class ShadowDreadnoughtPrimordial extends MediumShip{
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 5, 8));
         $this->addPrimarySystem(new Hangar(5, 12, 12));
+		$hangar = new Hangar(5, 12, 12);
+		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
+		$this->addPrimarySystem($hangar);			
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
 		

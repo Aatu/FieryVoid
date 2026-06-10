@@ -27,7 +27,7 @@ class WhiteStarCmd extends MediumShip{
         $this->pivotcost = 1;
         $this->iniativebonus = 14 *5; //+1 compared to vanilla
         $this->isd = 2260;
-        //$this->fighters = array("shuttles"=>2);
+        $this->fighters = array("flyers"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 20, 0, -7));
         $this->addPrimarySystem(new CnC(5, 18, 0, 0));//+2 compared to vanilla

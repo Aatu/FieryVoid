@@ -36,7 +36,7 @@ class Worthus extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Scanner(6, 24, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 24, 4, 8));
 		//4 Hangars from between sections, plus small PRIMARY hangar for shuttles - I make them into one PRIMARY hangar with extra armor
-		$this->addPrimarySystem(new Hangar(7, 28));
+		$this->addPrimarySystem(new Hangar(7, 4));
 		//2 all-around Imperial Lasers on PRIMARY, plus four 90-degrees from between outer sections
         	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 0, 90));
         	$this->addPrimarySystem(new ImperialLaser(5, 8, 5, 90, 180));
@@ -68,6 +68,10 @@ class Worthus extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 270;
 			$cargoBay->endArc = 90;
 			$this->addFrontSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 270;
+			$hangar->endArc = 90;
+			$this->addFrontSystem($hangar);			
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 270;
 			$subReactor->endArc = 90;
@@ -84,6 +88,10 @@ class Worthus extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 90;
 			$cargoBay->endArc = 270;
 			$this->addAftSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 90;
+			$hangar->endArc = 270;
+			$this->addAftSystem($hangar);				
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 90;
 			$subReactor->endArc = 270;
@@ -100,6 +108,10 @@ class Worthus extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 180;
 			$cargoBay->endArc = 360;
 			$this->addLeftSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 180;
+			$hangar->endArc = 360;
+			$this->addLeftSystem($hangar);					
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 180;
 			$subReactor->endArc = 360;
@@ -117,6 +129,10 @@ class Worthus extends SmallStarBaseFourSections{
 			$cargoBay->startArc = 0;
 			$cargoBay->endArc = 180;
 			$this->addRightSystem($cargoBay);
+			$hangar = new Hangar(5, 6);
+			$hangar->startArc = 0;
+			$hangar->endArc = 180;
+			$this->addRightSystem($hangar);						
 			$subReactor = new SubReactorUniversal(5, 25, 0, 0);
 			$subReactor->startArc = 0;
 			$subReactor->endArc = 180;

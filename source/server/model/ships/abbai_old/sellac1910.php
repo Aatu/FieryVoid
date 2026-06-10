@@ -12,6 +12,7 @@ class Sellac1910 extends MediumShip{
 			$this->occurence = "common";
 			$this->variantOf = 'Abbai Sellac Freighter';
         $this->canvasSize = 200;
+		$this->fighters = array("cargo shuttles"=>2); 		
 	    
 		$this->isd = 1910;
         

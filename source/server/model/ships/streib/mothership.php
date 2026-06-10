@@ -32,7 +32,7 @@ class Mothership extends BaseShip{
         $this->addPrimarySystem(new CargoBay(7, 12));
 
 		$this->addFrontSystem(new TractorBeam(6, 4, 0, 0));
-        $this->addFrontSystem(new Hangar(7, 9, 0));
+        $this->addFrontSystem(new Hangar(7, 9, 6));
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));	
         $this->addFrontSystem(new EMWaveDisruptor(6, 8, 5, 240, 60));

@@ -10,7 +10,7 @@ class Decurion extends BaseShip{
         $this->imagePath = "img/ships/centurion.png";
         $this->shipClass = "Decurion Assault Cruiser";
         $this->variantOf = "Centurion Attack Cruiser";
-        $this->fighters = array("assault shuttles"=>24, "Breaching Pods" => 4); //2x12, side hangars
+        $this->fighters = array("assault shuttles"=>24, "Breaching Pods" => 2); //2x12, side hangars
         $this->isd = 2213;
         
         $this->forwardDefense = 15;

@@ -9,9 +9,14 @@ window.ReplayPhaseStrategy = function () {
         this.currentPhase = null;
         this.replayTurn = null;
         this.replayPhase = null;
-        this.allBallistics = null;  //New variable added so that ballisticLineIcons can be rendered during Replay - DK 12/24 
+        this.allBallistics = null;  //New variable added so that ballisticLineIcons can be rendered during Replay - DK 12/24
 
         this.loading = false;
+
+        // Replay playback speed (1×/2×/4×/8×), shared by both Play and Rewind.
+        // Cycled by the Speed button; persists across play/pause/direction
+        // changes so the user's chosen speed sticks for the whole replay.
+        this.replaySpeed = 1;
     }
 
     ReplayPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -103,15 +108,17 @@ window.ReplayPhaseStrategy = function () {
 
     ReplayPhaseStrategy.prototype.createReplayUI = function (gamedata) {
         this.replayUI = new ReplayUI(true, {
-            play: activateButton.bind(this, "play"),
+            play: playDirection.bind(this, true),
             pause: activateButton.bind(this, "pause"),
-            back: activateButton.bind(this, "back"),
+            back: playDirection.bind(this, false),
+            changeSpeed: changeSpeed.bind(this),
             turnForward: turnForward.bind(this),
             turnBack: turnBack.bind(this),
             endReplay: requestPlayableGamedata.bind(this),
             toMovementPhase: toMovementPhase.bind(this),
             toFiringPhase: toFiringPhase.bind(this)
         }).activate();
+        this.replayUI.setSpeed(this.replaySpeed);
     };
 
     ReplayPhaseStrategy.prototype.render = function (coordinateConverter, scene, zoom) {
@@ -284,6 +291,45 @@ window.ReplayPhaseStrategy = function () {
     function activatePause() {
         this.replayUI.activateButton("#pause");
         this.animationStrategy.pause();
+    }
+
+    // Selectable replay speeds, cycled by the Speed button.
+    var REPLAY_SPEEDS = [1, 2, 4, 8];
+
+    // Play (forward=true) and Rewind (forward=false). Both run at the current
+    // replaySpeed; speedMultiplier 1 is identical to the old play()/back().
+    function playDirection(forward) {
+        if (this.loading) {
+            return;
+        }
+
+        // Resuming forward motion clears any printed combat log so the live
+        // replay log isn't drawn over the static print (matches old play()).
+        if (forward) {
+            window.combatLog.showCurrent();
+        }
+
+        this.replayUI.activateButton(forward ? "#play" : "#back");
+        this.animationStrategy.fastSeek(this.replaySpeed, forward);
+    }
+
+    // Cycle 1×→2×→4×→8×→1×. The chosen speed sticks; if motion is already
+    // running it's re-applied live in the current direction, otherwise it just
+    // takes effect on the next Play/Rewind.
+    function changeSpeed() {
+        if (this.loading) {
+            return;
+        }
+
+        var idx = REPLAY_SPEEDS.indexOf(this.replaySpeed);
+        this.replaySpeed = REPLAY_SPEEDS[(idx + 1) % REPLAY_SPEEDS.length];
+        this.replayUI.setSpeed(this.replaySpeed);
+
+        // Apply immediately to in-progress playback (paused playback picks the
+        // new speed up when Play/Rewind is next pressed).
+        if (this.animationStrategy && !this.animationStrategy.isPaused()) {
+            this.animationStrategy.fastSeek(this.replaySpeed, !this.animationStrategy.goingBack);
+        }
     }
 
     function getInitialReplayTurn() {

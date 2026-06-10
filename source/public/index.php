@@ -35,7 +35,7 @@
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
   		<link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
         <link href="styles/reg.css" rel="stylesheet" type="text/css">
-		<script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+		<script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
 <!--		<script src="client/helper.js"></script>-->
 	</head>
 	<body class="login-background">

@@ -815,6 +815,8 @@ window.shipManager = {
             //hex occupancy so the carrier can move back to the original dock
             //hex without the (invisible) flight blocking placement.
             if (ship2.pendingDeployDock) continue;
+            //LCV Rails: an LCV queued to deploy-dock is likewise off the board.
+            if (ship2.pendingLcvDeployDock) continue;
 
             //Let's allow ships that deploy on later turns to deploy on same hex as existing units - DK
             // NO LONGER REQUIRED - Overridden by explicit isBlocked rules in Deployment Phase.
@@ -1020,6 +1022,8 @@ window.shipManager = {
         //board — its icon should be hidden until either the dock is cancelled or the
         //next reload (which sets ship.removed via the persisted hangarUsage snapshot).
         if (ship.pendingDeployDock) return true;
+        //LCV Rails: an LCV queued to deploy-dock onto a rail likewise isn't on the board.
+        if (ship.pendingLcvDeployDock) return true;
         return false;
     },
 

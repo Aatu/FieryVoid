@@ -13,7 +13,7 @@ class MinbariOrbitalHanger extends SmallStarBaseFourSections{
 		$this->variantOf = "Minbari Civilian Base";
 		$this->imagePath = "img/ships/MinbariCivBase.png";
 		$this->canvasSize = 200;
-		$this->fighters = array("heavy"=>30); 
+		$this->fighters = array("heavy"=>30, "flyers"=>4); 
 
 		$this->shipSizeClass = 3; 
 		$this->iniativebonus = -200; //no voluntary movement anyway

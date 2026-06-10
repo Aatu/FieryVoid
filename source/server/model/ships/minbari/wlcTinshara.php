@@ -20,8 +20,8 @@ class wlcTinshara extends HeavyCombatVessel{
         $this->iniativebonus = 35;
         $this->isd = 1869;
         $this->variantOf = "Tinashi War Frigate";
-        $this->unofficial = 'S'; //it's custom, but not very far from standard - and greatly enhances options for early Minbari
-        //$this->fighters = array();
+        $this->unofficial = true; //it's custom, but not very far from standard - and greatly enhances options for early Minbari
+        $this->fighters = array("flyers"=>2);
 		
 		$this->notes = 'ALTERNATE UNIVERSE - unit designed for "In ancient times" campaign';
 

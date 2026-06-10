@@ -13,6 +13,7 @@ class Arcismur extends BaseShip{
 		$this->canvasSize = 170; //img has 200px per side
         $this->shipSizeClass = 3;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>4);         
 
 	    $this->isd = 2212;
         
@@ -30,7 +31,7 @@ class Arcismur extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 11, 3, 5));
         $this->addPrimarySystem(new Engine(4, 13, 0, 10, 4));
-        $this->addPrimarySystem(new Hangar(4, 4));
+        $this->addPrimarySystem(new Hangar(4, 4, 1));
 		$this->addPrimarySystem(new CargoBay(4, 40));
   
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

@@ -14,7 +14,8 @@ class Lias extends BaseShip{
 //        $this->shipSizeClass = 3;
 		$this->isd = 2053;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-        
+		$this->fighters = array("cargo shuttles"=>5); 
+
         $this->forwardDefense = 14;
         $this->sideDefense = 15;
         
@@ -28,7 +29,7 @@ class Lias extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 9, 3, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 8, 4));	
-		$this->addPrimarySystem(new Hangar(5, 5));	
+		$this->addPrimarySystem(new Hangar(5, 5, 1));	
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
