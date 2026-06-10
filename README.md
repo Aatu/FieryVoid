@@ -77,6 +77,10 @@ If you need to run server-side scripts (like to generate new staticship files af
 docker-compose exec php bash
 
 Then navigate to /usr/src/current and run 'php generateStaticShipFile.php'
+e.g. 
+cd...
+cd current
+php generateStaticShipFile.php
 
 5. Troubleshooting / Clean Rebuild
 If your containers get out of sync or you need to cleanly force a rebuild of the environment, use:
