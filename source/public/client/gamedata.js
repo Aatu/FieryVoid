@@ -147,6 +147,8 @@ window.gamedata = {
             //they're going into a hangar, not onto the map, so auto-selecting them
             //in deployment would be misleading.
             if (ship.pendingDeployDock) continue;
+            //LCV Rails: skip LCVs queued to deploy-dock onto a rail.
+            if (ship.pendingLcvDeployDock) continue;
 
             if (gamedata.isMyShip(ship) && !ship.mine) {
                 return ship;
@@ -1597,11 +1599,21 @@ getActiveShipName: function getActiveShipName() {
 
             //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
+            // Observers (not in the game) colour the initiative number by team
+            // instead of the mine/ally/enemy scheme.
+            var teamColorCss = "";
+            if (!gamedata.isPlayerInGame()) {
+                var iniRgb = gamedata.getTeamColorRGB(ships[i].team);
+                teamColorCss = "color:rgb(" + Math.round(iniRgb[0]) + "," + Math.round(iniRgb[1]) + "," + Math.round(iniRgb[2]) + ");";
+            }
+
             var td = document.createElement("td");
             td.className = "iniOrder";
             td.innerHTML = shipManager.getIniativeOrder(ships[i]);
 
-            if (gamedata.isMyShip(ships[i])) {
+            if (teamColorCss) {
+                td.style.cssText += teamColorCss;
+            } else if (gamedata.isMyShip(ships[i])) {
                 td.classList.add("iniMyShip");
             } else if (gamedata.isMyorMyTeamShip(ships[i])) {
                 td.classList.add("iniAllyShip");

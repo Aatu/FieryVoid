@@ -12,6 +12,11 @@ window.AnimationStrategy = function () {
         this.shipIconContainer = shipIcons;
         this.turn = turn;
         this.goingBack = false;
+        // Replay fast-forward / rewind: scales how fast totalAnimationTime
+        // advances each frame. 1 = normal speed. Applied to the already
+        // sanitised currentDeltaTime (see updateTotalAnimationTime), so the
+        // >1000ms audio-spam guard in updateDeltaTime is preserved.
+        this.speedMultiplier = 1;
     }
 
     AnimationStrategy.prototype.activate = function () {
@@ -40,20 +45,47 @@ window.AnimationStrategy = function () {
     AnimationStrategy.prototype.back = function () {
         this.goingBack = true;
         this.paused = false;
+        this.speedMultiplier = 1;
+        this.lastAnimationTime = 0; // Re-baseline after an idle gap (see play()).
     };
 
     AnimationStrategy.prototype.play = function () {
         this.paused = false;
         this.goingBack = false;
+        this.speedMultiplier = 1;
+        // Idle render-loop gating: the loop stops calling render() while the board
+        // is static, so lastAnimationTime can be stale by an arbitrary gap when an
+        // animation (re)starts. Clear it so updateDeltaTime re-baselines on the
+        // first frame (delta 0) instead of fast-forwarding totalAnimationTime by
+        // the whole idle gap — which skipped projectile travel straight to impact.
+        this.lastAnimationTime = 0;
     };
 
     AnimationStrategy.prototype.pause = function () {
         this.paused = true;
         this.goingBack = false;
+        this.speedMultiplier = 1;
+    };
+
+    // Replay fast-forward / rewind. forward=false rewinds. multiplier is the
+    // playback rate (e.g. 2/4/8). multiplier 1 with forward true is identical
+    // to play(); with forward false identical to back().
+    AnimationStrategy.prototype.fastSeek = function (multiplier, forward) {
+        this.paused = false;
+        this.goingBack = !forward;
+        this.speedMultiplier = multiplier;
+        this.lastAnimationTime = 0; // Re-baseline after an idle gap (see play()).
     };
 
     AnimationStrategy.prototype.isPaused = function () {
         return this.paused;
+    };
+
+    // Idle render-loop gating: true while frames need to keep advancing.
+    // Active (non-paused) playback with at least one animation means the board
+    // is moving; a paused strategy or an empty animation list is static.
+    AnimationStrategy.prototype.isAnimating = function () {
+        return !this.paused && this.animations.length > 0;
     };
 
     AnimationStrategy.prototype.deactivate = function () {
@@ -104,10 +136,12 @@ window.AnimationStrategy = function () {
             return;
         }
 
+        var step = this.currentDeltaTime * this.speedMultiplier;
+
         if (this.goingBack) {
-            this.totalAnimationTime -= this.currentDeltaTime;
+            this.totalAnimationTime -= step;
         } else {
-            this.totalAnimationTime += this.currentDeltaTime;
+            this.totalAnimationTime += step;
         }
     }
 

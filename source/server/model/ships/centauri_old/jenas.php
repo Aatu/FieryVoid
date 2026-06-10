@@ -30,7 +30,7 @@ class Jenas extends MediumShip{
     $this->addPrimarySystem(new CnC(4, 9, 0, 0));
     $this->addPrimarySystem(new Scanner(4, 12, 2, 5));
     $this->addPrimarySystem(new Engine(3, 9, 0, 8, 2));
-    $this->addPrimarySystem(new Hangar(3, 1));
+    $this->addPrimarySystem(new Hangar(3, 1, 1));
     $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 3));
     $this->addPrimarySystem(new Thruster(2, 10, 0, 4, 4));
     $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));

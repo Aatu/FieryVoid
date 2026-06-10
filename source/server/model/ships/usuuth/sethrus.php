@@ -28,7 +28,7 @@ class Sethrus extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 15, 4, 6));
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(5, 1));
+        $this->addPrimarySystem(new Hangar(5, 1, 1));
         $this->addPrimarySystem(new Thruster(4, 9, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(4, 9, 0, 3, 4));
         

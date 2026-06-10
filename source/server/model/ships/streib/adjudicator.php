@@ -28,7 +28,7 @@ class Adjudicator extends BaseShip{
          
         $this->addPrimarySystem(new Reactor(9, 18, 0, 0));
         $this->addPrimarySystem(new TractorBeam(7, 4, 0, 0));
-        $this->addPrimarySystem(new Hangar(7, 2, 0));
+        $this->addPrimarySystem(new Hangar(7, 2, 2));
         
         $this->addFrontSystem(new GraviticThruster(9, 7, 0, 6, 1));	
         $this->addFrontSystem(new ImprovedBlastLaser(7, 10, 8, 300, 60));

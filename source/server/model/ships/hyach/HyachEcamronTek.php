@@ -12,6 +12,7 @@ class HyachEcamronTek extends MediumShip{
 		$this->canvasSize = 100;
         $this->gravitic = true;
         $this->isd = 2213;
+		$this->fighters = array("cargo shuttles"=>2); 		
 
 		$this->forwardDefense = 14;
 		$this->sideDefense = 15;

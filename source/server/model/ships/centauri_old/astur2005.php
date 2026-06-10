@@ -31,7 +31,7 @@ class Astur2005 extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 4));
 		$this->addPrimarySystem(new JumpEngine(5, 20, 3, 20));
-		$this->addPrimarySystem(new Hangar(5, 5));
+		$this->addPrimarySystem(new Hangar(5, 5, 2));
 		$this->addPrimarySystem(new CargoBay(4, 16));
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));

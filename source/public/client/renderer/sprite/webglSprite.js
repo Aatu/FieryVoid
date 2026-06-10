@@ -162,13 +162,31 @@ window.webglSprite = function () {
                     };
 
                     window.textureQueue.push(loadTask);
-                    processQueue();
+                    // Defer the kickoff out of the synchronous icon-build path.
+                    // Calling processQueue() inline here fires imageBitmapLoader.load()
+                    // for the first MAX_CONCURRENT unique images *during* create(),
+                    // which blocked first paint (~13ms locally / ~75ms at 132 ships
+                    // per ?perf profiling — it was ~45% of all create() time).
+                    // A macrotask lets the whole icon-build loop finish first; the
+                    // task is already queued, so loads still start a tick later via
+                    // the shared window.textureQueue. processQueue drains that shared
+                    // queue, so a single deferred pump picks up every ship's task
+                    // enqueued in the same synchronous burst.
+                    setTimeout(processQueue, 0);
                 });
             }
 
             loadedTextures[image].then(texture => {
                 setTimeout(() => {
                     this.uniforms.spriteTexture.value = texture;
+                    // Textures resolve asynchronously, long after the render-loop
+                    // budget from page load may have drained. Without a kick the
+                    // newly-textured sprite wouldn't paint until the next input
+                    // (idle render-loop gating in webglScene). Safe-guarded: the
+                    // scene may not exist yet for sprites built before init.
+                    if (window.webglScene && window.webglScene.requestRender) {
+                        window.webglScene.requestRender();
+                    }
                 }, 0);
             });
         }

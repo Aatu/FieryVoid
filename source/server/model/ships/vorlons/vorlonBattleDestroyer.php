@@ -39,7 +39,7 @@ class VorlonBattleDestroyer extends HeavyCombatVessel{
 		$scanner = new Scanner(6, 16, 0, 12);//Vorlon Scanners do not need power - base systems are included in zero hull running costs
 		$scanner->markAdvanced();
 		$this->addPrimarySystem($scanner);			
-		$this->addPrimarySystem(new Hangar(4, 2, 0));
+		$this->addPrimarySystem(new Hangar(4, 2, 2));
 		$this->addPrimarySystem(new Engine(6, 17, 0, 12, 3));
         $this->addPrimarySystem(new SelfRepair(5, 6, 4)); //armor, structure, output
 		$AAC = $this->createAdaptiveArmorController(5, 2, 2); //$AAtotal, $AApertype, $AApreallocated

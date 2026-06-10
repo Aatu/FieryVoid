@@ -28,7 +28,7 @@ class Aluin extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 28, 4, 12));
         $this->addPrimarySystem(new Engine(6, 23, 0, 10, 5));
-        $this->addPrimarySystem(new Hangar(5, 3));
+        $this->addPrimarySystem(new Hangar(5, 3, 1));
         
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
         $this->addFrontSystem(new DestabilizerBeam(4, 10, 8, 300, 60));

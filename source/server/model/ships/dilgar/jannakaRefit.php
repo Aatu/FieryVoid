@@ -35,7 +35,7 @@ class JannakaRefit extends MediumShip{
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
-        $this->addFrontSystem(new Hangar(2, 1));
+        $this->addFrontSystem(new Hangar(2, 1, 1));
         $this->addFrontSystem(new MediumBolter(2, 8, 4, 240, 360));
         $this->addFrontSystem(new MediumBolter(2, 8, 4, 0, 120));
 

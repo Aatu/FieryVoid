@@ -11,6 +11,7 @@ class Arcismus extends BaseShip{
 		$this->canvasSize = 170; //img has 200px per side
         $this->shipSizeClass = 3;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>4);         
 
 	    $this->isd = 2242;
         
@@ -28,7 +29,7 @@ class Arcismus extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 11, 3, 6));
         $this->addPrimarySystem(new Engine(4, 13, 0, 10, 4));
-        $this->addPrimarySystem(new Hangar(4, 4));
+        $this->addPrimarySystem(new Hangar(4, 4, 1));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 3, 32));
 		$this->addPrimarySystem(new CargoBay(4, 20));
   

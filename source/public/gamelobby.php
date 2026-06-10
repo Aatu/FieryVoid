@@ -96,9 +96,13 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
         <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">          
         <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
-        <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
-        <script src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
-        <script src="https://code.jquery.com/ui/1.14.2/jquery-ui.min.js"></script>
+        <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party
+             TLS). Both kept SYNCHRONOUS: the lobby's synchronous client/*.js scripts (and
+             debug-mode shipwindow.js) run during parse and expect $.fn.draggable present,
+             so jQuery-UI must not defer here. assetManager.js has no jQuery dep, so it defers. -->
+        <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
+        <script defer src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
+        <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-ui-1.14.2.min.js'); ?>"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">        
 		
 		<!-- replaced by php include below

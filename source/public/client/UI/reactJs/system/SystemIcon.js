@@ -202,6 +202,21 @@ class SystemIcon extends React.Component {
             }
         }
 
+        // LCV Rails: clicking an own LCV-rail icon during the Firing Phase opens
+        // the LCV launch dialog when it holds a launchable LCV. (Docking is driven
+        // from the LCV's own "Enter Hangar" button / the carrier's Recover button.)
+        if (gamedata.isMyShip(ship)
+            && (system.name === 'dockingCollar' || system.isLCVRail)
+            && gamedata.gamephase === 3
+            && !shipManager.movement.isRolling(ship)
+            && !(shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== 'no')
+            && typeof window.lcvRailLaunchable === 'function'
+            && window.lcvRailLaunchable(ship, system)
+            && window.confirm && typeof window.confirm.lcvLaunch === 'function') {
+            window.confirm.lcvLaunch(ship);
+            return;
+        }
+
         if (gamedata.isMyShip(ship)) {
             webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.currentTarget, showMenu: true });
         } else {
@@ -417,10 +432,14 @@ const getBackgroundImage = (system) => {
 
 const hasCriticals = (system) => shipManager.criticals.hasCriticalsIcon(system)
 
-//Colour the healthbar cyan rather than orange when HangarOperations (a benign
-//-20 init penalty on the CnC) is the only critical lighting it up. Mirrors the
-//forInfo-exclusion of hasCriticalsIcon above.
-const hasOnlyHangarOps = (system) => shipManager.criticals.hasOnlyCritical(system, 'HangarOperations', true)
+//Colour the healthbar cyan rather than orange when the only critical lighting it
+//up is a benign initiative penalty: HangarOperations (-20 on a carrier CnC) or
+//LCVLaunchedThisTurn (-10 on a launched LCV's CnC). Mirrors the forInfo-exclusion
+//of hasCriticalsIcon above. Both are checked so an LCV that just launched shows
+//cyan, not alarming orange.
+const hasOnlyHangarOps = (system) =>
+    shipManager.criticals.hasOnlyCritical(system, 'HangarOperations', true)
+    || shipManager.criticals.hasOnlyCritical(system, 'LCVLaunchedThisTurn', true)
 
 const hasBorderHighlight = (ship, system) => shipManager.systems.hasBorderHighlight(ship, system);
 

@@ -30,7 +30,7 @@ class Maishan extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 20, 4, 10));
         $this->addPrimarySystem(new Engine(5, 16, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(4, 1));
+        $this->addPrimarySystem(new Hangar(4, 1, 1));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 360));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 0, 180));
         $this->addPrimarySystem(new GraviticThruster(5, 15, 0, 4, 3));

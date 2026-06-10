@@ -45,14 +45,14 @@ class Aurillia2010 extends BaseShip{
         $this->addAftSystem(new TacLaser(2, 5, 4, 90, 270));
         
 		$this->addLeftSystem(new Thruster(4, 12, 0, 4, 3));
-		$this->addLeftSystem(new Hangar(5, 12));
+		//$this->addLeftSystem(new Hangar(5, 12));
         $this->addLeftSystem(new AssaultLaser(4, 6, 4, 300, 60));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 240, 60));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         $this->addLeftSystem(new LightParticleBeamShip(3, 2, 1, 180, 360));
         
 		$this->addRightSystem(new Thruster(4, 12, 0, 4, 4));
-		$this->addRightSystem(new Hangar(5, 12));
+		//$this->addRightSystem(new Hangar(5, 12));
         $this->addRightSystem(new AssaultLaser(4, 6, 4, 300, 60));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 300, 120));
         $this->addRightSystem(new LightParticleBeamShip(3, 2, 1, 0, 180));

@@ -25,7 +25,7 @@ class Kutai extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 15, 5, 8));
         $this->addPrimarySystem(new Engine(6, 15, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(6, 1));
+        $this->addPrimarySystem(new Hangar(6, 1, 1));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 4, 4));
         

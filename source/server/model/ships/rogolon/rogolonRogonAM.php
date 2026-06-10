@@ -36,7 +36,7 @@ class RogolonRogonAM extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(4, 15, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(4, 3));
+		$this->addPrimarySystem(new Hangar(4, 3, 1));
         
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));

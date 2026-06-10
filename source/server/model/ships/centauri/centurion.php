@@ -29,7 +29,7 @@ class Centurion extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(7, 20, 4, 10));
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(7, 2));
+        $this->addPrimarySystem(new Hangar(7, 2, 1));
 
 
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));

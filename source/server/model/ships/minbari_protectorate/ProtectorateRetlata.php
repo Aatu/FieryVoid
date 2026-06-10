@@ -21,7 +21,7 @@ class ProtectorateRetlata extends HeavyCombatVessel{
         $this->iniativebonus = 15;
         $this->isd = 2006;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-        //$this->fighters = array("shuttles"=>2);
+        //$this->fighters = array("flyers"=>2); //Has Cargo Flyer, which are just flyers without a weapon.
 
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));
         $this->addPrimarySystem(new CargoBay(3, 35));
@@ -30,7 +30,7 @@ class ProtectorateRetlata extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(5, 16, 4, 8));
         $this->addPrimarySystem(new Engine(5, 28, 0, 14, 3));
         $this->addPrimarySystem(new TractorBeam(4, 10, 0, 0));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 4, 2));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 4));
         $this->addPrimarySystem(new CargoBay(3, 35));

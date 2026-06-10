@@ -47,6 +47,19 @@ class BaseShip {
     public $minesweeperbonus = 0;
     public $base = false;
     public $smallBase = false;
+    //LCV Rails: set true in addSystem() when a DockingCollar (LCV rail) is mounted.
+    //Very few ships carry LCV rails, so this flag lets the per-ship/per-turn LCV
+    //checks (getInitiativebonus penalty, stripForJson docked count, the carrier-
+    //destruction sweep) short-circuit on the overwhelming majority of ships
+    //without iterating their systems via HangarOps::shipHasLCVRail.
+    public $LCVCarrier = false;
+    //LCV Rails: per-request memo for the 2d10 rail-fragment roll a forced-launched
+    //LCV takes (rail/carrier destroyed). Set on the LCV ship in
+    //HangarOps::loadOrRollLCVFrag so both destruction handlers can't double-roll in
+    //one in-memory sweep. Transient (not persisted/serialized) — declared here so
+    //PHP 8.2+ doesn't deprecate the dynamic-property assignment.
+    public $lcvFragRolledTurn = null;
+    public $lcvFragRolledValue = 0;
 	public $nonRotating = false; //some bases do not rotate - this attribute is used in combination with $base or $smallBase
 	public $osat = false; //true if object is OSAT (this includes MicroSATs and mines)
 	public $mine = false;
@@ -210,6 +223,7 @@ class BaseShip {
 				//additional: ShadowPilotPain						
 			    $mod += -5*($CnC->hasCritical("ShadowPilotPain", $gamedata->turn));
 				$mod += -20*($CnC->hasCritical("HangarOperations", $gamedata->turn));
+				$mod += -50*($CnC->hasCritical("LCVLaunchedThisTurn", $gamedata->turn));
 			}
 		    if ($this instanceof FighterFlight){
 			    $firstFighter = $this->getSampleFighter();
@@ -278,23 +292,36 @@ class BaseShip {
 		$enginePresent = false;
 		$scannerPresent = false;
 		
+		//LCV Rails: a docked LCV is $removed (so isDestroyed() returns true) but is
+		//NOT actually destroyed — it's a full ship parked on a rail and should keep
+		//its full combat value while docked (it relaunches intact), like a carried
+		//parasite, not a wreck. Detect "removed-by-docking" (an LCV whose PRIMARY
+		//structure is undamaged) and skip the destroyed-ship zeroing below. A
+		//genuinely damage-destroyed LCV (primary structure gone) still zeroes.
+		$dockedLCV = false;
+		if ($this->removed
+			&& (($this instanceof LCV) || (isset($this->hangarRequired) && strtolower(trim((string)$this->hangarRequired)) === 'lcvs'))) {
+			$primaryStruct = $this->getStructureSystem(0);
+			$dockedLCV = !($primaryStruct && $primaryStruct->isDestroyed());
+		}
+
 		//destroyed ship gets no value UNLESS it successfully jumped to Hyperspace
-		if($this->isDestroyed()){
-            if(!$this instanceof FighterFlight && !$this->base && !$this->osat){            
+		if($this->isDestroyed() && !$dockedLCV){
+            if(!$this instanceof FighterFlight && !$this->base && !$this->osat){
                 $jumpEngine = $this->getSystemByName("JumpEngine");
-                // Check if the ship has a jump engine                
-                if ($jumpEngine) {                
+                // Check if the ship has a jump engine
+                if ($jumpEngine) {
                     //Check if it's jumped, instead of being destroyed.
-                    if($jumpEngine->hasJumped()){                   
-                        //Do NOT zero $effectiveValue if ship has jumped.               
-                        $effectiveValue = $jumpEngine->getCVBeforeJump();                    
+                    if($jumpEngine->hasJumped()){
+                        //Do NOT zero $effectiveValue if ship has jumped.
+                        $effectiveValue = $jumpEngine->getCVBeforeJump();
                         return $effectiveValue;
-                    }    
+                    }
                 }
-            }     
+            }
             //No jump engine, or hasn't jumped, set value to 0 as normal.
-            $effectiveValue = 0;               
-        } 
+            $effectiveValue = 0;
+        }
         
         if($this instanceof Mine && $this->spawned !== -1){
             //Mines which have been created by weapons, don't count towards Fleet Value
@@ -598,9 +625,13 @@ class BaseShip {
         $strippedShip->rolling = $this->rolling;
         $strippedShip->slotid = $this->slotid;
         if (isset($this->EW) && !empty($this->EW)) $strippedShip->EW = $this->EW; //Terrain/Mines don't have EW for example.
-        $strippedShip->movement = $this->movement; 
-        $strippedShip->faction = $this->faction; 
+        $strippedShip->movement = $this->movement;
+        $strippedShip->faction = $this->faction;
         $strippedShip->phpclass = $this->phpclass;
+        //LCV Rails: the client dock/recover UI gates on hangarRequired === 'LCVs'
+        //to route a whole-LCV dock down the LCV-rail path. Only emitted when set
+        //(empty for ordinary ships) to keep the payload lean.
+        if ($this->hangarRequired !== '') $strippedShip->hangarRequired = $this->hangarRequired;
         if ($this->skinDancing) $strippedShip->skinDancing = $this->skinDancing;
         if (!empty($this->hasAttached)) $strippedShip->hasAttached = $this->hasAttached;
         if (!empty($this->attached)) $strippedShip->attached = $this->attached;
@@ -640,10 +671,23 @@ class BaseShip {
 					$strippedShip->toHitBonus = $this->toHitBonus; 				
 				}
 				if ($specsUsed == 'Maneuvering'){
-					$strippedShip->turncost = $this->turncost; 				
-					$strippedShip->turndelaycost = $this->turndelaycost; 				
-				}					
+					$strippedShip->turncost = $this->turncost;
+					$strippedShip->turndelaycost = $this->turndelaycost;
+				}
 			}
+		}
+
+		//LCV Rails (B5W §10.1): each LCV docked on a rail makes the carrier less
+		//manoeuvrable — a turn/turn-delay this turn costs +1 THRUST per docked LCV
+		//(the ship's turncost/turndelaycost STATS are unchanged; only the per-turn
+		//thrust cost rises, e.g. a turn-cost-1 carrier at speed 5 with 4 docked LCVs
+		//pays 5+4=9 thrust). Send the docked count so the client movement engine can
+		//add it to the per-turn turn/turn-delay thrust cost. Omitted (0) when none
+		//docked to keep the payload lean. Gated on $LCVCarrier so the vast majority
+		//of ships skip the system scan entirely.
+		if ($this->LCVCarrier) {
+			$dockedLCVs = HangarOps::dockedLCVCount($this);
+			if ($dockedLCVs > 0) $strippedShip->dockedLCVs = $dockedLCVs;
 		}
 
         //Pass increased defence profile to front end directly.
@@ -674,10 +718,20 @@ class BaseShip {
                     
 
         public function getInitiativebonus($gamedata){
-            if($this instanceof Terrain) return 0;            
+            if($this instanceof Terrain) return 0;
             if($this instanceof Mine) return 0;
 
             $flagBridgeBonus = FlagBridge::getIniBonus($gamedata, $this);
+
+            //LCV Rails (B5W §10.1): a carrier with LCVs docked on rails is less
+            //responsive — -10 initiative per docked LCV. Folded into every return
+            //below (the faction early-returns bypass the default tail). Gated on the
+            //$LCVCarrier flag so every non-LCV-carrier ship (the vast majority) skips
+            //the docked-count scan entirely. FighterFlights never set the flag.
+            $lcvDockPenalty = 0;
+            if ($this->LCVCarrier) {
+                $lcvDockPenalty = 10 * HangarOps::dockedLCVCount($this, $gamedata);
+            }
 
             /*
             if($this->faction == "Abbai Matriarchate"){
@@ -705,13 +759,13 @@ class BaseShip {
                 return $this->doRaidersInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
             */   
-            //Pakmara have special Ini penalty 
+            //Pakmara have special Ini penalty
             if(($this->faction == "Pak'ma'ra Confederacy") && (!($this instanceof FighterFlight))	){
-                return $this->doPakmaraInitiativeBonus($gamedata);
+                return $this->doPakmaraInitiativeBonus($gamedata) - $lcvDockPenalty;
             }
 			//Polaren have speial initiative bonus
             if((($this->faction == "Nexus Polaren Confederacy (early)") || ($this->faction == "Nexus Polaren Confederacy (early)")) && (!($this instanceof FighterFlight))	){
-                return $this->doPolarenInitiativeBonus($gamedata);
+                return $this->doPolarenInitiativeBonus($gamedata) - $lcvDockPenalty;
             }
            /* 
 		   if($this->faction == "Hyach Gerontocracy"){
@@ -721,7 +775,7 @@ class BaseShip {
                 return $this->doGaimInitiativeBonus($gamedata) + $flagBridgeBonus;
             }
             */
-            return $this->iniativebonus + $flagBridgeBonus;
+            return $this->iniativebonus + $flagBridgeBonus - $lcvDockPenalty;
         }
         
 		/*
@@ -1104,9 +1158,13 @@ class BaseShip {
         $system->location = $loc;
         $system->setUnit($this);
 								 
-		$this->systems[$i] = $system;            
+		//LCV Rails: flag the ship as an LCV carrier the moment a DockingCollar is
+		//mounted, so the per-turn LCV checks can short-circuit (see $LCVCarrier).
+		if (!empty($system->isLCVRail)) $this->LCVCarrier = true;
 
-		
+		$this->systems[$i] = $system;
+
+
 		if ($system instanceof Structure){
 			$this->structures[$loc] = $system->id;
 		}else if(($system->startArc ==0)&&($system->endArc ==0) && !($system instanceof Bulkhead)){ //20.01.2025 - add arc equal to section arc, if not set explicitly. Bulkheads protect by location only - giving them a section arc makes the arc gate in getSystemProtectingFromDamage falsely filter them out for shots from outside that arc.
@@ -1238,7 +1296,7 @@ class BaseShip {
 					}
 					break;
                 case 5: //Terrain
-                        $this->notes .= 'Enormous Terrain';
+                        if($this->Enormous) $this->notes .= 'Enormous Terrain';
                         break;                        
 				default: //should not happen!
 					$this->notes .= 'Unit size not identified!';	

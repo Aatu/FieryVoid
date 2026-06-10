@@ -12,6 +12,7 @@ class CivilianTanker extends MediumShip{
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 		$this->isd = 2162;
+		$this->fighters = array("cargo shuttles"=>4); 		
         
         $this->forwardDefense = 13;
         $this->sideDefense = 14;
@@ -52,7 +53,7 @@ class CivilianTanker extends MediumShip{
 		
         $this->addAftSystem(new Thruster(2, 8, 0, 2, 2));
         $this->addAftSystem(new Thruster(2, 8, 0, 2, 2));
-        $this->addAftSystem(new Hangar(3, 4));
+        $this->addAftSystem(new Hangar(3, 4, 1));
         $this->addAftSystem(new Engine(3, 6, 0, 4, 4));
         $this->addAftSystem(new StdParticleBeam(2, 4, 2, 60, 300));
         $this->addAftSystem($cD);

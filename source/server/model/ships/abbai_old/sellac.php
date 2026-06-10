@@ -10,6 +10,7 @@ class Sellac extends MediumShip{
         $this->imagePath = "img/ships/AbbaiSellac.png";
         $this->shipClass = "Abbai Sellac Freighter";
         $this->canvasSize = 200;
+		$this->fighters = array("cargo shuttles"=>2); 			
 	    
 		$this->isd = 2000;
         

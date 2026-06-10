@@ -836,6 +836,17 @@ Design decision (confirmed with the user): hide in the in-game tooltip, keep as-
 
 **Files**: [systems.js](source/public/client/systems.js), [systemInfo.js](source/public/client/UI/systemInfo.js).
 
+**Follow-up (2026-06-07) — HANG_BP Breaching Pods rejected at deploy-dock ("carrier full"); landed on the map instead.** (gameID 4160, Urik'hal carrier)
+
+A Breaching Pod that deploy-docked fine in the client was rejected by the server on commit and started the game on the map in its `start` position. Trace: the deploy-dock resolves in `DeploymentGamePhase::process` → `generateIndividualNotes` → `HangarOps::performDeployStartDockFromOrders`, which runs on the **POST-side carrier** (rebuilt by `Manager::getShipsFromJSON`). That builder never calls `Enhancements::setEnhancements()`, so the POST-side ship's `$ship->fighters` is still the constructor default — empty for the Urik'hal, which declares no native fighters. `hangarAcceptsCategory($hangar, 'Breaching Pods', $postCarrier)` reads that empty declaration → returns false → no bay accepts the pod → "carrier full" fail note (DB note `19361: fail:873357:carrier full`). The Omega in the same game docked its Lampreys fine because it declares `fighters = ["normal"=>24]` in its constructor (survives the POST round-trip); only **enhancement-granted** capacity (HANG_BP, and by the same logic HANG_AS) was broken.
+
+Fix:
+- [HangarOps.php:3900-3913](source/server/model/systems/HangarOps.php#L3900-L3913) — `performDeployStartDockFromOrders` now resolves `$capabilityCarrier = $dbCarrier ?: $carrier` and uses it for both `hangarAcceptsCategory` checks. `$dbCarrier` is the gamedata-loaded ship (`getTacGamedata` → `onConstructed` → `setEnhancements` ran), so its `$fighters` correctly shows the enhancement-granted `"Breaching Pods"` slot. Capacity/occupancy math is unchanged — only the "does this bay accept this category" question consults the enhancement-applied declaration.
+
+Scope: the Fire-phase land/dock path (`processDockOrders` → `canShipReceive`) runs on gamedata ships in `criticals.php` and was never affected; the fix is limited to the deploy-start path. Same `$dbCarrier` fallback also covers HANG_AS carriers (identical latent bug).
+
+**Files**: [HangarOps.php](source/server/model/systems/HangarOps.php).
+
 ---
 
 ### Stage 13 — Lobby fleet-check polish & shuttle/fighter overflow rule ✓ COMPLETE
@@ -2328,3 +2339,409 @@ Significant helper duplication exists across three client files but was delibera
 - **`DeploymentDock.js`** — some of the same helpers exist a third time.
 
 These are candidates for a shared-helpers extraction PR once the feature has been stable in live games.
+
+---
+
+## Stage L (LCV Rails) — whole-ship dock/launch on DockingCollar — IMPLEMENTED 2026-06-04
+
+B5W "LCV Rails" (FV class `DockingCollar`). Unlike every prior stage, the docked
+unit is a **full `BaseShip`** (`LCV extends MediumShip`, `hangarRequired = 'LCVs'`),
+NOT a `FighterFlight`. The entire FighterFlight stash pipeline (`hangarUsage`
+occupancy, phpclass coalescing, escape buckets) is bypassed; LCV docking toggles
+the LCV's own ship row (`removed`/`spawned` + a deploy `MovementOrder`) and records
+the rail→LCV link in a per-rail `lcvDocked` note.
+
+### Model
+- `DockingCollar extends Hangar` + `public $isLCVRail = true` (single discriminator,
+  parallel to `$isCatapult`/`$isRail`). ctor → `parent::__construct($armour,$maxhealth,$output,0,'LCVs')`.
+  **Unlike FighterRail, an LCV rail is an ordinary targetable system with its own HP**
+  (baLCVCarrier gives it a hit-chart entry), so it is NOT excluded from combat value.
+- Capacity is 1 LCV per rail (boxes are HP). Enforced by the dock handler, not box math.
+- Excluded from the fighter pipeline at every entry point: `populateInitialHangarUsage`,
+  `getDefaultShuttles`, `primaryHangar`, `inferHangarType`, both `eligibleHangarsForLanding`
+  loops. (The fighter dialogs/gates all enumerate `'hangar'/'catapult'/'fighterRail'`,
+  so `'dockingCollar'` never leaks in.)
+
+### State persistence (Hangar class, baseSystems.php)
+- Per-rail `lcvDocked` note `{shipId, dockTurn, railDmgAtDock}` (null = empty),
+  snapshot-persisted in `generateIndividualNotes` (runs for alive AND destroyed
+  carriers — a cleared link must persist), reloaded in `onIndividualNotesLoaded`
+  where the LCV's `$removed` flag is re-applied. **`removed`/`spawned` are NOT DB
+  columns — they're re-derived from this note each load** (same model as fighter
+  `dockedFlightId`). Orders: `lcvDockOrder`/`lcvLaunchOrder` notes from client
+  `lcvDocks`/`lcvLaunches` payload keys (parsed in `doIndividualNotesTransfer`).
+
+### HangarOps handlers (all whole-ship, none touch hangarUsage)
+`collectLCVRails`, `shipHasLCVRail`, `lcvDockedOn`, `dockedLCVCount`, `isLCVUnit`,
+`lcvRemainingThrust` (server backstop), `canLCVDock`/`performLCVDock`,
+`canLCVLaunch`/`performLCVLaunch`, `processLCVDockOrders`/`processLCVLaunchOrders`
+(driven from the new `isLCVRail` branch in `Hangar::criticalPhaseEffects`),
+`applyLCVStructureDamage`, `reinitLaunchedShipSystems`, `applyLCVLaunchCrit`,
+`onLCVRailDestroyed` (forced launch + railDmg + 2d10), `processLCVCarrierDestruction`
+(Pass-3 sibling of `processCarrierDestructionEscapes`, wired into `criticals.php`),
+`loadOrRollLCVFrag` (2d10; replay-safe via cleared-`lcvDocked` idempotency, NOT a
+persisted roll — same idempotency as FighterRail escape).
+
+### Dock conditions (server-enforced hard gate, `canLCVDock`)
+carrier speed 0 · LCV ends in carrier's hex (`OffsetCoordinate::equals`) · matching
+heading · ≥1 thrust unspent (**client sends `thrustLeft` from `getRemainingEngineThrust`;
+server bounds-checks AND requires its own `lcvRemainingThrust` backstop ≥1**) · rail
+free + has launch/land budget. Launch inherits carrier facing (direction 0) + speed.
+
+### Penalties (FINAL values — see correction history in later sections)
+- **−10 initiative per docked LCV:** `getInitiativebonus` computes `$lcvDockPenalty`
+  (10 × dockedLCVCount) early and folds it into EVERY return (faction early-returns
+  bypass the default tail). Gated on the `$LCVCarrier` flag (perf). NB: `dockedLCVCount`
+  must NOT use `isDestroyed()` to exclude the occupant — a docked LCV is `$removed` so
+  isDestroyed() is true; it checks the LCV's PRIMARY structure instead.
+- **+1 turn cost & +1 turn delay per docked LCV — as a per-turn THRUST surcharge, NOT a
+  stat change.** The ship's `turncost`/`turndelaycost` STATS are unchanged; `stripForJson`
+  sends `ship.dockedLCVs` (count). Client `movement.js` `getDockedLcvTurnSurcharge(ship)`
+  adds a FLAT `+dockedLCVs` to the final turn-cost value at every `Math.ceil(speed*rate)`
+  site (incl. speed-0 + the requiredThrust builder) and to turn delay in `calculateTurndelay`
+  / `calculateTurndelayAtMove`. `ShipTooltip.js` mirrors it (and was fixed to show the
+  min-1 turn cost at speed 0). E.g. turn-cost-1 carrier at speed 5 + 4 docked LCVs = 9.
+- **−50 initiative on a launched LCV** (same as a launched fighter flight): `LCVLaunchedThisTurn`
+  crit (cricialClasses.php), stamped on the LCV's CnC by `applyLCVLaunchCrit`, applied in
+  `BaseShip::getIniativeMod`'s CnC block. Cyan "Just Launched" tooltip flag via
+  `hasCriticalInAnySystem`. **NEEDS hand-added autoload entry**
+  `'lcvlaunchedthisturn' => '/server/model/cricialClasses.php'`.
+- **Perf:** `BaseShip::$LCVCarrier` (set in `addSystem()` when a DockingCollar is mounted)
+  gates the per-turn LCV checks so non-LCV-carrier ships skip them with one boolean.
+
+### Damage rules (L6)
+- Landing on a damaged rail → LCV Structure damage = rail's sustained damage
+  (`performLCVDock`, persisted `DamageEntry` on the LCV's `getStructureSystem(0)`).
+- Destroyed occupied rail → forced launch + Structure damage = railDmg + 2d10 Matter
+  (`onLCVRailDestroyed`, fired from the `isLCVRail` branch in `criticalPhaseEffects`).
+- Carrier destroyed with docked LCVs → each LCV escapes (forced launch + railDmg + 2d10),
+  `processLCVCarrierDestruction` (LCVs aren't FighterFlights so the Stage-18 escape
+  pass skips them).
+
+### Client (L2/L5)
+- `DockingCollar` mirror `extends Hangar` with `isLCVRail`, own `doIndividualNotesTransfer`
+  (lcvDocks/lcvLaunches), own `refreshHangarTooltip` (0/1 readout). System `stripForJson`
+  ships `isLCVRail` + `lcvDocked` + pending LCV orders. `SystemIcon` benign-crit cyan
+  extended to `LCVLaunchedThisTurn`.
+- **Reused the existing fire-menu buttons (no new buttons, per user):** "Enter Hangar"
+  (`dockFlight`) now accepts an LCV via `isDockableUnit` → routes to `confirm.lcvDock`;
+  "Recover Flights" → `confirm.lcvRecover` when only LCVs receivable; "Launch Fighters"
+  → `confirm.lcvLaunch` when only LCV rails launchable. Both dock entry points (LCV side
+  + carrier side) per user. Clicking an own LCV-rail icon in Firing → `lcvLaunch`.
+- New minimal dialogs `confirm.lcvDock` / `lcvRecover` / `lcvLaunch` (one ship, one
+  rail, one click). New `window` helpers: `isLCVRailSystem`, `lcvRailFree`,
+  `lcvRailLaunchable`, `hasLaunchableLCVRail`, `hasLaunchableFighterHangar`,
+  `lcvRemainingThrust`, `findEligibleLCVRailsForDock`, `findEligibleLCVsForRecover`.
+
+### Files (final set across the whole stage)
+Server: `baseSystems.php` (DockingCollar class + Hangar lcvDocked state/notes/strip +
+criticalPhaseEffects branch + setSystemDataWindow + lcvDeployStarts parse), `HangarOps.php`
+(all LCV handlers + exclusion guards + processLcvDeployStartTransfer + collectQueuedDeployStartFlightIds
+LCV ids), `ShipClasses.php` (getInitiativebonus −10N gated on $LCVCarrier, stripForJson dockedLCVs
+count + hangarRequired, getIniativeMod −50, $LCVCarrier flag + addSystem set), `cricialClasses.php`
+(LCVLaunchedThisTurn −50), `criticals.php` (processLCVCarrierDestruction wiring), `DeploymentGamePhase`
+(unchanged — exemption flows through collectQueuedDeployStartFlightIds).
+Client: `baseSystems.js` (DockingCollar mirror + lcvDeployStarts + tooltip), `shipTooltipFireMenu.js`
+(button reuse + helpers), `confirm.js` (lcvDock/lcvRecover/lcvLaunch + deploy carrier picker +
+appendLcvRecoverSection/appendLcvLaunchSection), `SystemIcon.js` (click + cyan), `DeploymentDock.js`
+(LCV deploy-dock helpers + tooltip refresh), `DeploymentPhaseStrategy.js` (click interception +
+validation exemption), `PhaseStrategy.js` / `ships.js` / `gamedata.js` (pendingLcvDeployDock
+visibility skips), `SelectFromShips.js` (LCV DOCK-TO button), `movement.js` (turn-cost/delay thrust
+surcharge), `ShipTooltip.js` (turn-cost surcharge + speed-0 min-1 fix + "Just Launched"), `systems.js`
+(LCVs excluded from shuttle pool), `confirm.css` (centred header).
+
+### Verification status — COMMITTED 2026-06-04 (runtime-tested by user on game 4153)
+Dock/launch (firing + deploy-dock), penalties (−10N ini, +N turn-cost/delay thrust, −50 launch),
+fleet-list value for a docked LCV, landing-on-damaged-rail, destroyed-rail / carrier-death paths,
+and the $LCVCarrier perf gate all verified. Non-LCV Hangar Ops (fighters/catapults/fighter-rails)
+confirmed unaffected (StrikeCarrier + mixed BAEscortCarrierLCVRails regression checks). Legacy
+bundles were NOT committed (regenerated artifacts). Autoload entry still required (below).
+
+### Autoload (user must add — never edited here)
+`'lcvlaunchedthisturn' => '/server/model/cricialClasses.php',`
+(DockingCollar already had an autoload entry; it now extends Hangar in the same file,
+so no change needed there.)
+
+### Stage L — UI refinements (2026-06-04, post-first-test)
+
+Three UX fixes after first hands-on dock test:
+1. **`lcvDock` dialog now has an explicit "Dock this LCV" checkbox** (was a bare
+   carrier label with no confirm/un-declare control). Pre-checked when an order is
+   already queued for the LCV; OK clears-then-rewrites based on the checkbox so
+   unchecking un-declares and the carrier dropdown re-routes. New helpers
+   `window.lcvQueuedDockRail(lcv)` / `window.clearQueuedLcvDock(lcv)` (shipTooltipFireMenu.js).
+   The LCV's "Enter Hangar" button now stays visible while an order is queued
+   (`hasEligibleCarrierInHex` falls back to `lcvQueuedDockRail`) so it can be un-declared
+   from the LCV side even when no free rail remains.
+2. **LCV-rail tooltip "Stored Craft" line** — `DockingCollar.refreshHangarTooltip`
+   now writes `data["Stored Craft"]` with the LCV name + `(Recovering)` / `(Launching)`
+   projection (mirrors the fighter hangar line; rendered generically by SystemInfo.js).
+3. **Combined recover dialog** — `confirm.appendLcvRecoverSection(container, carrier)`
+   appends an LCV checkbox section (one row per eligible in-hex LCV, **self-committing**
+   on change — independent of the fighter OK allocation). Injected into BOTH the
+   fighter `hangarRecover` empty-flights branch AND the main flow, so a carrier with
+   fighters AND LCVs shows them together. `openHangarRecover` always routes to
+   `hangarRecover` now; `confirm.lcvRecover` kept as a thin standalone wrapper for the
+   LCV-rail icon click. Greedy free-rail assignment; over-subscription auto-unchecks
+   with an alert.
+
+### Stage L — recover/launch dialog polish (2026-06-04, second test pass)
+
+Two follow-ups after the combined-dialog test:
+1. **LCV recover checkboxes now commit ONLY on OK** (were self-committing on
+   change). `appendLcvRecoverSection` returns `{count, commit, hasOverflow}`; the
+   host dialog's OK handler calls `commit()` (and `hasOverflow()` to bail with an
+   alert when more LCVs are checked than free rails). Cancel discards. Wired into
+   all three hosts: standalone `lcvRecover`, the fighter `hangarRecover` empty-flights
+   branch, and its main flow (commit runs after the fighter allocation).
+2. **Live LCV-rail capacity pill strip** in both the recover and launch dialogs
+   (mirrors the fighter "Hangar capacity:" pills). Recover: each rail ticks 0/1 → 1/1
+   as a box is checked (greedy free-rail assignment for the projection). Launch: each
+   occupied rail ticks 1/1 → 0/1 as its launch box is checked. Pure display — rebuilt
+   by `recompute()` on every checkbox change; the actual writes still happen on OK.
+
+### Stage L — bug fixes from game 4153 test (2026-06-04, third test pass)
+
+1. **Docked LCV showed 0/200 in the fleet list.** Root cause: a docked LCV is
+   `$removed`, so `BaseShip::isDestroyed()` returns true (Stage-7 behaviour), and
+   `calculateCombatValue()` zeroes any destroyed ship. But a docked LCV is a full
+   ship parked on a rail that relaunches intact — it should keep its value (like a
+   carried parasite, not a wreck). Fix: `calculateCombatValue` now detects a
+   "docked LCV" (`$removed` + is an LCV/`hangarRequired==='LCVs'` + PRIMARY structure
+   NOT damage-destroyed) and skips the destroyed-ship zeroing. A genuinely
+   damage-destroyed LCV (primary structure gone) still zeroes. Verified:
+   `BALightGunboat` docked → CV 100 (was 0).
+2. **No launch option after a successful dock.** Root cause: the test carrier
+   (`BAEscortCarrierLCVRails`) has BOTH fighter bays/rails (launchable Starfox +
+   shuttles) AND LCV rails. `openHangarLaunch` only opened the LCV dialog when NO
+   fighter hangar was launchable, so the fighter dialog opened and the docked LCV
+   was invisible — same combining problem as recover. Fix: extracted
+   `confirm.appendLcvLaunchSection(container, carrier)` (deferred-commit + 1/1→0/1
+   pill strip, mirrors appendLcvRecoverSection) and injected it into
+   `hangarLaunchNoSplit` (commit runs in the fighter OK handler). The standalone
+   `lcvLaunch` is now a thin wrapper. So a carrier with both shows fighters AND LCVs
+   in one launch dialog; `openHangarLaunch` only opens the standalone LCV dialog when
+   there is no launchable fighter hangar at all.
+
+### Stage L — LCV dialog CSS alignment (2026-06-04)
+
+LCV dock/recover/launch sections now reuse the fighter dialog's confirm.css classes
+so they look identical:
+- **Launch** (appendLcvLaunchSection): `hangar-section-name` header + per-rail rows
+  using `multi-value-label` > `hangar-craft-name` + `multi-value-max` ("1 docked, max 1")
+  and a `0/1` number input styled `multiConfirmInput multi-value-input main-input launchSize`
+  (was a bare checkbox + pill strip).
+- **Recover** (appendLcvRecoverSection) + the LCV-side `lcvDock`: rows now use the
+  fighter recover pattern — `[checkbox] + multi-value-label > hangar-craft-name`
+  (was `<label><input></label>`). Recover keeps its live 0/1→1/1 capacity pill strip
+  (`hangarCapacityHeader`/`hangar-capacity-pill`, already styled in confirm.css).
+- Standalone `lcvRecover`/`lcvLaunch` dialogs now also carry the `hangarRecover` /
+  `hangarLaunch` root classes so they pick up the dialog-specific CSS (e.g. the
+  launch section-header row indent). All classes verified present in confirm.css.
+
+### Stage L — LCV dialog styling tweaks (2026-06-04, per user)
+
+- "LCV Rails" section header centred (`justify-content:center`) in both the launch
+  and recover sections (was right/space-between).
+- LCV launch row reverted to a CHECKBOX (each rail holds one LCV — a 0/1 number
+  input was overkill) and the redundant "(1 docked, max 1)" note dropped. Label is
+  just the LCV name (prefixed "LCV Rail N: " only when the carrier has >1 rail).
+
+### Stage L — LCV deployment-phase deploy-dock (2026-06-04)
+
+LCVs can't share a deploy hex with other ships, so the fighter "Deploy flights in
+hangar" flow doesn't apply. Instead an LCV deploy-docks DIRECTLY onto a free LCV
+rail: select the LCV, click an LCV-capable carrier (with a free rail), and pick
+"DOCK <LCV> TO <CARRIER> (N free rails)" in the SelectFromShips popup.
+
+State model (parallels the fighter deploy-dock):
+- `rail.pendingLcvDeployStartOrders : [{shipId}]`  client queue
+- `lcv.pendingLcvDeployDock : {carrierId, railId}`  client marker (hides the LCV
+  from the board + exempts it from the deploy position/commit gate)
+
+Client:
+- `DeploymentDock`: `carrierAcceptsLcvDeployDock` / `freeLcvDeployRailCount` /
+  `queueLcvDeployDock` / `unqueueLcvDeployDock` (exported). `lcvRailFreeForDeploy`
+  excludes destroyed / occupied / already-queued rails.
+- `SelectFromShips.create`: new LCV branch — one eligible carrier auto-queues,
+  several open `confirm.lcvDeployDockCarrierPicker`. Button shows free-rail count.
+- `pendingLcvDeployDock` added to every `pendingDeployDock` visibility/skip site
+  (ships.js isHidden + hex-occupancy, gamedata.js auto-select, PhaseStrategy.js
+  clickable-icon filter, DeploymentPhaseStrategy.js validateAllDeployment).
+- `DockingCollar.doIndividualNotesTransfer` ships `lcvDeployStarts:[{shipId}]`;
+  `refreshHangarTooltip` shows "(Deploying)".
+
+Server:
+- `Hangar::doIndividualNotesTransfer` parses `lcvDeployStarts` → public
+  `$pendingLcvDeployStartTransfer` (DockingCollar inherits the base method).
+- `generateIndividualNotes` calls `HangarOps::processLcvDeployStartTransfer` for an
+  LCV rail during Deployment: marks the LCV `removed` + sets the rail's `lcvDocked`;
+  the existing `lcvDocked` snapshot tail persists it (no new persistence path).
+- `collectQueuedDeployStartFlightIds` now also collects LCV deploy-dock ship ids,
+  so `DeploymentGamePhase::validateDeployment` exempts the deploy-docked LCV from
+  the "must have a deploy movement" check (it has no board position).
+- A later launch follows normal rail-launch rules (the -50 init that turn) — the
+  LCV simply "started docked". No special first-launch handling.
+
+All 2 PHP + 8 JS files lint clean; new HangarOps methods resolve at runtime.
+
+### Stage L — deploy-dock click interception + penalty corrections (2026-06-04)
+
+1. **Click interception fix.** Clicking an LCV-capable carrier with an LCV selected
+   during Deployment just SELECTED the carrier — the SelectFromShips popup (which
+   carries the DOCK-TO button) never opened, because `DeploymentPhaseStrategy.onShipClicked`
+   only shows the popup when the selected ship is a mine/flight (line ~175 gate) and an
+   LCV is neither. Added an LCV branch BEFORE that gate: when the selected ship is an LCV
+   (`hangarRequired==='lcvs'`) and the clicked different ship is a friendly carrier that
+   `DeploymentDock.carrierAcceptsLcvDeployDock`, call `showSelectFromShips([ship], payload)`
+   directly (bypassing the mine/flight gate AND the deploy-position check — a docking LCV
+   needs no board position).
+2. **Penalty corrections (user: I had them wrong).** Launch penalty is **-50** (same as a
+   launched fighter flight), not -10; per-docked-LCV initiative penalty is **-10**, not -2.
+   Fixed in `getIniativeMod` (LCVLaunchedThisTurn -50), `getInitiativebonus` (10×docked),
+   the `LCVLaunchedThisTurn` crit description, the rail tooltip text, HangarOps comments,
+   and the [[arch_lcv_rails]] / MEMORY.md notes.
+
+### Stage L — penalty model fixes (2026-06-04)
+
+1. **Docked-LCV initiative penalty wasn't applying.** Root cause: `dockedLCVCount`
+   excluded the docked LCV via `$lcv->isDestroyed()` — but a docked LCV is `$removed`,
+   so isDestroyed() returns true (the same removed→isDestroyed trap that zeroed the
+   fleet-list value). The count was always 0 → no penalty. Fixed: count an occupant
+   unless its PRIMARY structure is actually destroyed (a genuine wreck), not merely
+   removed. Penalty applies at the next initiative roll (`Manager::generateIniative`).
+2. **Turn cost / turn delay penalty is a per-turn THRUST surcharge, not a stat change.**
+   Per user: the ship's `turncost`/`turndelaycost` STATS must not change; instead each
+   docked LCV adds +1 thrust to THIS turn's turn cost and +1 to the turn delay (e.g. a
+   turn-cost-1 carrier at speed 5 with 4 docked LCVs pays 5+4=9). Removed the
+   `stripForJson` stat bump; now send `ship.dockedLCVs` (count) only. Client
+   `movement.js`: new `getDockedLcvTurnSurcharge(ship)` added as a FLAT surcharge to the
+   final turn-cost value at every `Math.ceil(speed*baseTurnCost)` site (incl. the
+   speed-0 case and the requiredThrust builder) and to turn delay in `calculateTurndelay`
+   + `calculateTurndelayAtMove`.
+3. **Penalty values corrected** (prior pass): launch -50 (not -10), docked -10/LCV (not -2).
+
+### Stage L — $LCVCarrier flag (perf, 2026-06-04)
+
+Very few ships mount LCV rails, but the per-turn LCV checks (getInitiativebonus
+penalty, stripForJson docked count, processLCVCarrierDestruction sweep) ran
+`HangarOps::shipHasLCVRail($ship)` — a full system-list scan — for EVERY ship.
+Added `public $LCVCarrier = false` on BaseShip, set true in `addSystem()` the moment
+a DockingCollar (`$system->isLCVRail`) is mounted (runs at construction AND POST-side
+reconstruction, since both go through the ctor → addSystem). The three hot call sites
+now gate on the `$LCVCarrier` boolean instead of scanning systems, so the vast
+majority of ships skip the LCV path with a single flag check. `shipHasLCVRail` /
+`collectLCVRails` remain for the genuine LCV-carrier paths. Server-only flag (client
+has its own per-system isLCVRailSystem checks; not serialized).
+
+### Stage L — deployment UX fixes + rail picker + labels (2026-06-05, test pass)
+
+First runtime test of the deployment-phase LCV flow surfaced three UX gaps (all
+client-only) plus one server crash, now fixed:
+
+1. **Un-dock a deploy-docked LCV without a page refresh.** The "Deploy Flights in
+   Hangar" button → `confirm.hangarDeployDock` handled only fighter flights. Added
+   `confirm.appendLcvDeployDockSection(container, carrier)` (mirrors
+   `appendLcvLaunchSection`): one pre-checked row per rail holding a pending
+   `pendingLcvDeployStartOrders`; unchecking + OK calls
+   `DeploymentDock.unqueueLcvDeployDock`. Folded into `hangarDeployDock` so the
+   dialog stays open for LCV-only carriers (empty-state now also checks
+   `lcvDeployRailCount`; fighter intro/capacity rows gated on `pending.length>0`).
+   `DeploymentDock.shipHasOpenableDockDialog` extended (`shipHasDeployDockedLcv`) so
+   a carrier with ONLY LCV rails still surfaces the button.
+   `unqueueLcvDeployDock` now SNAPS the released LCV to the carrier's current hex
+   (was: no re-deploy), mirroring fighter `unqueueDeployStartDock`.
+
+2. **Same-hex deploy block relaxed for LCVs** (smallest vessels, must co-locate with
+   the carrier). `selIsLcvUnit` exemption added to the isBlocked check in
+   `DeploymentPhaseStrategy.onHexClicked`, `SelectFromShips.create`, AND the
+   `onShipClicked` placed-ship popup gate (so clicking an occupied hex with an LCV
+   selected surfaces SelectFromShips with DEPLOY + cyan DOCK). The SelectFromShips
+   DEPLOY button now self-gates on new `window.validateDeploymentPositionForShip`
+   (uses `window._deploymentSprites`) because the LCV dock shortcut bypasses upstream
+   position validation.
+
+3. **Rail choice (Firing + Deployment).** Dock dialogs auto-picked `rails[0]`. Now one
+   radio row per FREE rail (mutually exclusive): `confirm.lcvDock` (firing) flattens
+   `findEligibleLCVRailsForDock` to per-rail; `confirm.lcvDeployDockCarrierPicker`
+   (deployment) enumerates `DeploymentDock.freeLcvDeployRails`; `queueLcvDeployDock`
+   got an optional `targetRail`. SelectFromShips auto-queues only when exactly ONE
+   free rail in the hex; else opens the picker. **Rail labels are now LOCATION-keyed**
+   via `window.lcvRailLabel(carrier, rail)` ("LCV Rail Forward 1", "LCV Rail Port",
+   "LCV Rail Starboard") — mirrors fighter `hangarLabelFor` location grouping
+   (0 Main/1 Forward/2 Aft/3,31,32 Port/4,41,42 Starboard) with LCV terms; trailing N
+   only when >1 rail shares a location. Used by every LCV dialog (dock/picker/un-dock/
+   launch/recover). Launch section keys off the FULL rail list so its label stays
+   correct despite `rails` being only the launchable subset.
+
+4. **Server crash on destroyed occupied rail (PHP 8.2 dynamic-property deprecation).**
+   `HangarOps::loadOrRollLCVFrag` set `$lcv->lcvFragRolledTurn/Value` on the LCV ship,
+   but those weren't declared → the registered error handler promoted the deprecation
+   to an `ErrorException`, aborting `onLCVRailDestroyed` mid-crit-resolution (trace:
+   FireGamePhase→Criticals→Hangar::criticalPhaseEffects). Fixed by declaring
+   `public $lcvFragRolledTurn = null; public $lcvFragRolledValue = 0;` on BaseShip
+   (next to `$LCVCarrier`). Same root cause / pattern as FighterRail's
+   `railCritLoadedTurn/Value`, which were already declared public — the general rule
+   (see [[arch_fighter_rails]] "Protected $structureSystem"): external static
+   coordinators like HangarOps must only touch DECLARED properties.
+
+### Stage L — firing-phase recover/launch dialog bugs (2026-06-05, test pass)
+
+Three carrier-side dialog bugs (all client-only, confirm.js + shipTooltipFireMenu.js):
+
+1. **Recover capacity pills mis-attributed a per-rail dock.** Docking an LCV to a
+   specific rail (e.g. Starboard) via the LCV's own dock menu, then opening the
+   carrier's recover dialog, showed that LCV occupying "Forward 1" — the recover
+   dialog re-assigned it greedily. `appendLcvRecoverSection` now builds
+   `pinnedRailByLcv` (lcvId→railId, from each rail's `pendingLcvDockOrders`): a
+   pinned LCV is excluded from `baseFreeRailIds`, the pill strip renders it on ITS
+   rail (`pinnedFill`, gated on the checkbox), and `commit` leaves a checked+pinned
+   LCV's order on its rail (only un-pinned checked LCVs are greedily assigned; only
+   unchecked OR un-pinned LCVs get `clearQueuedLcvDock`). Removed the now-dead
+   `railBaseOccupied` helper (its logic is inlined into the `baseFreeRailIds` filter).
+
+2. **Destroyed rails listed as 1/1.** The pill loop now renders `railDestroyed(rail)`
+   rails as "destroyed" (red), and destroyed rails are excluded from
+   `baseFreeRailIds` so nothing is ever assigned to them.
+
+3. **Launch menu listed a queued-but-not-docked LCV.** `lcvRailLaunchable` treated a
+   rail with a `pendingLcvDockOrders` as launchable — but you can't dock AND launch
+   in the same turn (server `canLCVLaunch` reads the COMMITTED `lcvDocked` link, set
+   only at end-of-turn dock resolution / reload). Fixed to require `lcvDocked` set
+   AND no pending dock order. Known pre-existing (NOT fixed, out of scope): a queued
+   LCV *launch* can't be un-declared from the launch dialog because `lcvRailLaunchable`
+   filters out rails with `pendingLcvLaunchOrders` (same as the original shape).
+
+### Per-hangar default-shuttle opt-out — `$excludeFromDefaultShuttles` (2026-06-06)
+
+**Fringe case.** ScoravarefittedAM has two location-0 (primary) hangars: a 26-box
+medium-fighter bay and a 6-box heavy/normal-fighter bay. `fighters = medium 24 +
+normal 6 = 30` declared against 32 boxes → **2 leftover default shuttles**. The
+distribution logic (`distributionHangars` + `pickHangarForShuttle` least-used) split
+those 2 shuttles 1+1 across the two primary bays, so a stray shuttle in the 6-box bay
+blocked a full 6-flight of heavy fighters from docking.
+
+**Fix (NOT a new exclusion class).** New Hangar constructor flag
+`$excludeFromDefaultShuttles` (7th positional arg, after `$spawnableClasses`) +
+public property of the same name. Unlike catapult/rail exclusion — which drops boxes
+from the pool **wholesale** so the leftover COUNT shrinks — a flagged bay's boxes
+**still count toward total capacity**, so `getDefaultShuttles` / `getTotalHangarCapacity`
+are untouched and the ship still gets its 2 shuttles. Only the *placement* steers
+away: the shuttles pile into the other hangar(s), leaving the flagged bay free.
+
+- Server: `HangarOps::excludesDefaultShuttles($hangar)` (catapult/rail short-circuit
+  to false, then reads the flag). `distributionHangars` drops flagged bays from the
+  eligible set FIRST (before primary/shuttle-only narrowing), guarded so an
+  all-flagged ship still places shuttles somewhere. `pickHangarForShuttle`'s overflow
+  fallback skips flagged bays too (so they get nothing even once eligible bays fill).
+- Client mirror (`systems.js`): `excludesDefaultShuttles` helper +
+  `getDefaultShuttleCompositionForHangar` gains an `anyEligible`/`eligible()` filter
+  feeding `hasPrimary`/`inSet`/`per[].excluded`, matching the server (incl. the
+  all-flagged guard and the overflow skip).
+- Serialized via Hangar `stripForJson` (`excludeFromDefaultShuttles` bool) so the
+  client lobby tooltip matches the in-game initial population.
+- Applied to ScoravarefittedAM's 6-box bay: `new Hangar(2, 6, 6, 0, 'fighters',
+  array(), true)`. Result: 26-box bay holds 24 medium + 2 shuttles (full); 6-box bay
+  holds a clean 6 heavy fighters.
+
+Not yet Docker-tested (no local PHP; user tests via Docker).
