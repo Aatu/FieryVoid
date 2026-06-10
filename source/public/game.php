@@ -72,7 +72,13 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
     <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
     <script defer src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
     <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-ui-1.14.2.min.js'); ?>"></script>
-    <script defer src="client/lib/three.min.js"></script>
+    <!-- Tree-shaken THREE r160 global shim (perf #5): replaces the 670KB vendored
+         three.min.js UMD with a ~500KB build of only the symbols FV uses, installed on
+         window.THREE so the legacy code + MeshLine are unchanged. Versioned (?v=mtime)
+         because it regenerates per build, like the legacy bundle. Must stay before
+         MeshLine + the legacy bundle (both read window.THREE); document order + defer
+         preserve that. -->
+    <script defer src="<?php echo AssetLoader::getAssetUrl('client/lib/three.shim.bundle.js'); ?>"></script>
     <script defer src="client/lib/THREE.MeshLine.js"></script>
     <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>"></script>
 	<!-- replaced by php include below

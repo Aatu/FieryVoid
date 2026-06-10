@@ -137,6 +137,23 @@ When uploading your branch to gitHub it's best not to include these files, as th
 Minification (from 3.6.2026):
 The bundler now depends on esbuild to minify the legacy bundles, (already present via Vite, so a normal yarn install covers it), and yarn watch:legacy intentionally produces un-minified output for debuggability while yarn build minifies.
 
+# THREE.js bundle (three.shim.bundle.js) — when to rebuild:
+
+(from 10.6.2026) THREE.js is no longer shipped as the full ~670KB vendored three.min.js. Instead, `scripts/build-three-shim.js` builds a slimmed, tree-shaken bundle (`client/lib/three.shim.bundle.js`, ~500KB) that contains ONLY the THREE features FV actually uses. It's installed onto the global `window.THREE` exactly like before, so none of the legacy client code had to change.
+
+The important thing for devs: the shim only includes the THREE classes/constants currently in use. The full list of what's included is the `import { ... } from 'three'` block at the top of `source/public/client/lib/three-global-shim.src.js` — that's your reference for "is this already available?".
+
+When you DO need to rebuild the THREE bundle:
+- You used a `THREE.Something` that has never been used in FV before (e.g. adding `THREE.Points` for a new particle effect). Add it in TWO places in `three-global-shim.src.js` — the `import { ... }` list AND the object that's assigned to `window.THREE` — then run `yarn build:three` (or any full `yarn build`). Until you do, that symbol will be `undefined` at runtime (it's a runtime error, NOT a build error — so test the feature in-game).
+- Someone bumps the `three` version in package.json (a separate, larger effort — re-test all weapon/FX visuals if so).
+
+When you do NOT need to rebuild it (i.e. almost all the time):
+- Normal work — ships, weapons, systems, game rules, tooltips, React UI, and any renderer/effect code that only uses THREE features already in the list — does NOT touch the THREE bundle. Just rebuild the legacy/UI bundle as usual (`yarn watch:legacy` / `yarn build`).
+
+When in doubt: just run `yarn build`. It runs all three steps in order (THREE shim → Vite/React → legacy bundle), so you can never end up with a stale THREE bundle by running the full build. The standalone `yarn build:three` is only there to save time when you KNOW the THREE bundle is the only thing that changed.
+
+(The old `client/lib/three.min.js` is now unused and can be deleted.)
+
 # Image Optimiser:
 
 Images are optimised on Web Server by navigating to https://fieryvoid.eu/game/source/public/mass_optimizer.php or https://fieryvoid.eu/testInstance/source/public/mass_optimizer.php
