@@ -153,8 +153,16 @@ window.ReplayPhaseStrategy = function () {
         this.replayUI.activateButton('#pause');
         resetAudio.call(this);
         window.combatLog.critsShown = {}; //Empty crits shown array
-        window.combatLog.critAnimations = {}; //Empty crit animations shown array                          
+        window.combatLog.critAnimations = {}; //Empty crit animations shown array
         this.animationStrategy.pause();
+        // Idle render-loop gating (perf #2): goToTime only sets the target time; the
+        // ships aren't repositioned until render() replays the animations to it. We then
+        // pause(), so isAnimating() is false and the loop won't paint until Play. Kick
+        // the render budget so the seek-to-phase shows immediately. A paused render draws
+        // the icons at the new time without advancing the clock.
+        if (window.webglScene && window.webglScene.requestRender) {
+            window.webglScene.requestRender();
+        }
     }
 
     function toFiringPhase() {
@@ -162,8 +170,13 @@ window.ReplayPhaseStrategy = function () {
         this.replayUI.activateButton('#pause');
         resetAudio.call(this);
         window.combatLog.critsShown = {}; //Empty crits shown array
-        window.combatLog.critAnimations = {}; //Empty crit animations shown array                               
+        window.combatLog.critAnimations = {}; //Empty crit animations shown array
         this.animationStrategy.pause();
+        // See toMovementPhase: kick the render budget so the seek-to-firing-phase paints
+        // immediately instead of waiting for Play to restart the animation loop.
+        if (window.webglScene && window.webglScene.requestRender) {
+            window.webglScene.requestRender();
+        }
     }
 
     //To reset audio when player clicks on Movement or Firing buttons in Replay, otherwise the sound only plays once.
