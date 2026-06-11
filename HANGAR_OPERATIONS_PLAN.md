@@ -3186,8 +3186,9 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
   beyond THAT ONE tendril hits a random system (armour-ignoring) on the dock turn; landed craft show
   cyan DOCKED in replay; killed fighters drop carrier Structure maxhealth by 1 each; replay the turn and
   confirm the same penetration system/amount (no re-roll).
-- **S-f — ✓ IMPLEMENTED 2026-06-11. Core Fighter Bomb DOCKER-TESTED (full + partial 6-fighter launch).
-  Multi-flight split + manual/auto dialog added after; NOT yet re-tested. Deploy-undock split to S-f.1.**
+- **S-f — ✓ COMPLETE 2026-06-11. Core Fighter Bomb DOCKER-TESTED (full + partial 6-fighter launch);
+  multi-flight split + manual/auto dialog + no-ini-penalty added after (NOT yet re-tested).
+  Deploy-undock (was S-f.1) CANCELLED by user — see below.**
   Fighter Bomb = a SEPARATE `ShadowFighterBomb extends Weapon` that bursts the carrier's
   held integrated fighters out at a TARGET HEX. NOT a Hangar trait (Weapon/Hangar are siblings).
 
@@ -3239,8 +3240,11 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
     hangar-direction offset), `registerLaunchedIntegratedFlight` (coupling baseline — same
     `shadowIntegratedState` note as bay launches), `drainBombPool` (per-flight pool drain — drops
     fully-consumed entries, retires any dockedFlightId fragment via `destroyAllFighters`, keeps a
-    remainder), `applyLaunchCrits` (LaunchedThisTurn −50 + carrier −20 idempotent), and a per-flight
-    `hangarLaunchEvent` note `id:phpclass:size:bomb`. Returns the FIRST flight id. Helpers:
+    remainder), and a per-flight `hangarLaunchEvent` note `id:phpclass:size:bomb`. **NO initiative
+    penalty (user 2026-06-11):** the bomb deliberately does NOT call `applyLaunchCrits` — no flight-side
+    `LaunchedThisTurn` (−50), no carrier-side `HangarOperations` (−20). The bombed fighters still can't
+    act until next turn (deploy MovementOrder spawn, not the crit). Fighter DOCKING keeps its
+    `HangarOperations` penalty (separate path, `applyHangarOperationsCrit` at the dock site — untouched). Returns the FIRST flight id. Helpers:
     `bombFlightSizeCap($phpclass)` (class limit: honors `$maxFlightSize`, else jink>9?12:9, try/catch
     probe) — the call site clamps it to `min(cap, $held)` so a bay holding fewer than the limit caps
     flights at its stock (ShadowCruiser 6→6); `resolveBombFlightSizes`, `drainBombPool`. Transport: `ShadowFighterBomb::fire` passes
@@ -3296,20 +3300,14 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
   Weapon name resolved by the client SystemFactory via `new window['ShadowFighterBomb']`, and the
   blueprint preloads via `$spawnableClasses`. **NB user runs yarn build / Docker test themselves.**
 
-- **S-f.1 — DEFERRED (deploy-time undock of integrated fighters):** At DEPLOYMENT the player may want
-  to pull integrated fighters OUT of the bay to start in space (the reverse of deploy-docking),
-  STILL structure-coupled (attached, can reabsorb) — same as bomb-launched. **Why it's not trivial
-  "reuse the release path":** the deploy-dock dialog's release path operates on FLIGHT SHIP objects
-  on the map that the player docks; integrated fighters at deploy are ANONYMOUS `hangarUsage` stash
-  entries with NO backing flight ship (auto-populated server-side from SHAD_FTRL), so they never
-  appear in the dialog's pending-flight list and have nothing to "un-check". Needs net-new work:
-  (1) enumerate held integrated stash entries as a new releasable-row type in `hangarDeployDock`
-  (with a count picker), and (2) a deploy-time sibling of `performBombLaunch` that spawns them out
-  at the carrier hex with coupling registered. The SystemIcon deployment branch already opens
-  `hangarDeployDock` for ShadowHangars (left enabled) so the hook is in place. Build after the core
-  bomb is Docker-verified. Two fighter populations to keep distinct: bought-as-UNITS (SHAD_CTRL
-  "uncontrolled", deploy to space normally, CANNOT dock a ShadowHangar) vs bought-as-ENHANCEMENT
-  (SHAD_FTRL, auto-start docked, this undock applies).
+- **S-f.1 — ✗ CANCELLED 2026-06-11 (user): deploy-time undock NOT wanted.** The player will NOT pull
+  integrated fighters out of the bay during Deployment; integrated fighters leave ONLY via the Fighter
+  Bomb. (The SystemIcon deployment branch still opens `hangarDeployDock` for ShadowHangars, which is a
+  harmless no-op there — nothing to undock — and is also the dock path for any non-integrated craft.)
+  Replaced by the **no-initiative-penalty** requirement, folded into S-f above (the bomb applies no
+  `LaunchedThisTurn`/`HangarOperations`; fighter docking keeps its penalty). With this, **Stage S is
+  feature-complete** (S-a…S-f); only Docker re-test of the post-test additions (multi-flight split +
+  no-ini-penalty) remains.
 
 ### S9. Risk register (Stage-S-specific)
 - **Carrier-death-by-fighter-pickoff** (S3) routes fighter death into structure

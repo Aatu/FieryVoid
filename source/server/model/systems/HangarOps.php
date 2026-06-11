@@ -2631,8 +2631,10 @@ class HangarOps {
 	 * ONLY way integrated fighters leave a ShadowHangar (ordinary bay launch is
 	 * disabled for ShadowHangars — see canLaunch). It bursts held integrated
 	 * fighters out at a TARGET HEX (not the carrier hex), sharing the carrier's
-	 * heading+speed, unable to act until next turn (the LaunchedThisTurn no-act
-	 * marker an ordinary launch applies).
+	 * heading+speed. They can't act until next turn (they're spawned via a deploy
+	 * MovementOrder), but — UNLIKE an ordinary launch — the bomb applies NO
+	 * initiative penalty: no flight-side LaunchedThisTurn (-50), no carrier-side
+	 * HangarOperations (-20) (user 2026-06-11). Fighter DOCKING keeps its penalty.
 	 *
 	 * Called from ShadowFighterBomb::fire ONCE PER FIRE ORDER on the live Fire-Phase
 	 * advance (replay-idempotent via the fire order's rolled>0 guard). A launch
@@ -2721,11 +2723,12 @@ class HangarOps {
 			//Drain $sz fighters for THIS flight from the held pool.
 			self::drainBombPool($hangar, $phpclass, $sz, $gamedata);
 
-			//Per-flight LaunchedThisTurn (-50, can't act this turn). The carrier -20 is
-			//idempotent per turn (applyHangarOperationsCrit), so applying it on every
-			//flight is harmless, but we only need it once — applyLaunchCrits handles both.
-			self::applyLaunchCrits($flight, $carrier, $gamedata, false);
-			$carrierCritApplied = true;
+			//Stage S (S-f, user 2026-06-11): a Fighter Bomb launch carries NO initiative
+			//penalty — NEITHER the flight-side LaunchedThisTurn (-50) NOR the carrier-side
+			//HangarOperations (-20). (Fighter DOCKING/landing keeps its penalty; that's a
+			//separate path. The bombed fighters still can't act until next turn — that comes
+			//from being spawned via a deploy MovementOrder, not from LaunchedThisTurn, which
+			//is purely the -50 ini hit.) So we deliberately do NOT call applyLaunchCrits here.
 
 			//Replay note per spawned flight (history render + coupling-baseline re-seed).
 			$note = new IndividualNote(

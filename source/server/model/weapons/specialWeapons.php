@@ -3636,8 +3636,10 @@ class VortexDisruptor extends Weapon{
  *    hex);
  *  - shares the ShadowHangar's pool (the bomb IS the bay's only launch path), so
  *    an empty bay (fighters lost on a previous turn) means the bomb cannot fire;
- *  - zero damage — the "effect" is the spawned flight (LaunchedThisTurn no-act,
- *    carrier heading/speed, integrated structure coupling registered).
+ *  - zero damage — the "effect" is the spawned flight (carrier heading/speed,
+ *    integrated structure coupling registered; can't act until next turn via the
+ *    deploy spawn). NO initiative penalty (no LaunchedThisTurn -50 / HangarOperations
+ *    -20) — unlike an ordinary launch (user 2026-06-11). Docking keeps its penalty.
  *
  * The spawn happens in fire() (Firing::fireWeapons → Firing::fire on the live
  * Fire-Phase advance). fire() is guarded by `if ($fire->rolled > 0) return;`, so
