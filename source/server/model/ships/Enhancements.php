@@ -692,32 +692,34 @@ class Enhancements{
 	  $enhID = 'SHAD_FTRL';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
 		  //find total hangar capacity
-		  $capacity = 0;
-		  foreach ($ship->fighters as $name => $count){
-			$capacity += $count;
-		  }
-		  if($capacity > 0){ //this ship can actually carry fighters!!
-			  $enhLimit = ceil($capacity);
-			  //Stage S: a ship with an integrated-fighter bay (ShadowHangar) BUYS its
-			  //fighters here — "integrated fighters are not free, paid at a fighter's
-			  //listed cost". Price = one ShadowMediumFighterFlight's per-craft cost
-			  //(900/6 = 150 CP). The bought count drives the integrated-fighter initial
-			  //population (HangarOps::populateInitialHangarUsage) and the per-fighter
-			  //structure-box marks (later S-stages) — NOT a static maxhealth reduction.
-			  //Legacy Shadow ships (plain Hangar) keep the original FREE option whose
-			  //count statically shaves PRIMARY Structure (applied in setEnhancementsShip).
-			  if (HangarOps::shipHasShadowHangar($ship)) {
-				  $enhName = 'Integrated Fighter';
-				  $enhPrice = 150;
-				  $enhPriceStep = 0;//Each fighter is 150pts, no increase per step.
-				  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);//costed option
-			  } else {
-				  $enhName = 'Spawn a Medium Fighter';
-				  $enhPrice = 0;
-				  $enhPriceStep = 0;
-				  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//not an enhancement!
-			  }
-		  }
+			if (HangarOps::shipHasShadowHangar($ship)) {		  
+				$capacity = 0;
+				foreach ($ship->fighters as $name => $count){
+					$capacity += $count;
+				}
+				if($capacity > 0){ //this ship can actually carry fighters!!
+					$enhLimit = ceil($capacity);
+					//Stage S: a ship with an integrated-fighter bay (ShadowHangar) BUYS its
+					//fighters here — "integrated fighters are not free, paid at a fighter's
+					//listed cost". Price = one ShadowMediumFighterFlight's per-craft cost
+					//(900/6 = 150 CP). The bought count drives the integrated-fighter initial
+					//population (HangarOps::populateInitialHangarUsage) and the per-fighter
+					//structure-box marks (later S-stages) — NOT a static maxhealth reduction.
+					//Legacy Shadow ships (plain Hangar) keep the original FREE option whose
+					//count statically shaves PRIMARY Structure (applied in setEnhancementsShip).
+					//if (HangarOps::shipHasShadowHangar($ship)) {
+						$enhName = 'Integrated Fighter';
+						$enhPrice = 150;
+						$enhPriceStep = 0;//Each fighter is 150pts, no increase per step.
+						$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//costed option
+					/*} else {
+						$enhName = 'Spawn a Medium Fighter';
+						$enhPrice = 0;
+						$enhPriceStep = 0;
+						$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//not an enhancement!
+					}*/
+				}
+			}	
 	  }
 	  
 	//Spark Curtain: CUSTOM/CAMPAIGN ballistic defense (2+boost) for Spark Field, cost: 40 + 10/Spark Field present, limit: 1
