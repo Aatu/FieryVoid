@@ -4013,6 +4013,8 @@ class FighterRail extends Hangar{
  */
 class ShadowHangar extends Hangar{
     public $isShadowHangar = true;   //single discriminator, parallel to $isCatapult / $isRail / $isLCVRail
+    public $isTargetable = false;
+    public $isPrimaryTargetable = false;
 
     // ($armour, $maxhealth = bay boxes, $output = launch+land budget,
     //  $direction = launch offset, $hangarType = the ship's fighter category)
