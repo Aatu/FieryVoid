@@ -37,13 +37,13 @@ class CraytanDelaRefit extends HeavyCombatVesselLeftRight{
       
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
-        $this->addLeftSystem(new Hangar(2, 2, 2));
+        $this->addLeftSystem(new Hangar(2, 2, 2, 5));
 		$this->addLeftSystem(new NexusACIDS(2, 6, 2, 180, 360));
 		$this->addLeftSystem(new CargoBay(2, 40));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
-        $this->addRightSystem(new Hangar(2, 2, 2));
+        $this->addRightSystem(new Hangar(2, 2, 2, 1));
 		$this->addRightSystem(new NexusACIDS(2, 6, 2, 0, 180));
 		$this->addRightSystem(new CargoBay(2, 40));
         

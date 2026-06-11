@@ -34,14 +34,14 @@ class CraytanSoren extends HeavyCombatVesselLeftRight{
       
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
-        $this->addLeftSystem(new Hangar(2, 1, 1));
+        $this->addLeftSystem(new Hangar(2, 1, 1, 5));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 240, 60));
 		$this->addLeftSystem(new NexusCIDS(2, 4, 2, 120, 300));
 		$this->addLeftSystem(new NexusHeavySentryGun(2, 7, 3, 300, 60));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
-        $this->addRightSystem(new Hangar(2, 1, 1));
+        $this->addRightSystem(new Hangar(2, 1, 1, 1));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 300, 120));
 		$this->addRightSystem(new NexusCIDS(2, 4, 2, 60, 240));
 		$this->addRightSystem(new NexusHeavySentryGun(2, 7, 3, 300, 60));
