@@ -2755,9 +2755,12 @@ window.confirm = {
             '</span></div>').appendTo(container);
 
         // Auto-split toggle (checked by default). Hidden when not splittable.
-        var autoRow = $('<div class="multi-value-row"></div>').appendTo(container);
-        var autoChk = $('<input type="checkbox" class="multiConfirmInput" checked style="margin-right:6px;">').appendTo(autoRow);
+        // bombAutoSplitRow packs the label + checkbox together on the left (the
+        // checkbox sits to the RIGHT of the text, snug) rather than the default
+        // space-between spread.
+        var autoRow = $('<div class="multi-value-row bombAutoSplitRow"></div>').appendTo(container);
         $('<span class="multi-value-label" style="font-style:normal;">Split Flights Automatically</span>').appendTo(autoRow);
+        var autoChk = $('<input type="checkbox" class="multiConfirmInput" checked>').appendTo(autoRow);
         if (!splittable) autoRow.hide();
 
         // --- AUTO section: single total input (also the sole input when not splittable) ---
@@ -2801,7 +2804,7 @@ window.confirm = {
             $('<span class="multi-value-label"><span class="multi-value-name bombFlightLabel">Flight</span> <span class="multi-value-max">(Max: ' + cap + ')</span></span>').appendTo(row);
             var inp = $('<input type="number" class="multi-value-input bombFlightInput" value="' + Math.max(0, parseInt(preset, 10) || 0) + '" min="0" max="' + cap + '">').appendTo(row);
             // Per-row remove (kept for ≥2 rows so the player can undo an extra flight).
-            var rm = $('<span class="bombRemoveFlight" title="Remove this flight" style="cursor:pointer;margin-left:8px;color:#FF8080;">✕</span>').appendTo(row);
+            var rm = $('<span class="bombRemoveFlight" title="Remove this flight">✕</span>').appendTo(row);
             rm.on("click", function () {
                 if (manualInputs.length <= 1) return;   //always keep at least one flight
                 var i = manualInputs.indexOf(inp);
@@ -2827,7 +2830,7 @@ window.confirm = {
         // "Add another flight" — appends a flight seeded with the remaining unallocated
         // fighters (capped). Disabled (greyed) when nothing's left to give it.
         var addRow = $('<div class="multi-value-row"></div>').appendTo(manualSection);
-        var addBtn = $('<span class="bombAddFlight" style="cursor:pointer;color:#9FE0FF;text-decoration:underline;">+ Add another flight</span>').appendTo(addRow);
+        var addBtn = $('<span class="bombAddFlight">+ Add another flight</span>').appendTo(addRow);
         function refreshAddState() {
             if (canAddFlight()) addBtn.css({ opacity: 1, 'pointer-events': 'auto' });
             else addBtn.css({ opacity: 0.4, 'pointer-events': 'none' });

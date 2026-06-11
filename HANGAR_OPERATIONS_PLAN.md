@@ -3214,7 +3214,9 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
       live "total/pool" readout). **"+ Add another flight"** appends a row (seeded with the remaining
       unallocated fighters, capped; disabled when none left) so the player can split into MORE/smaller
       flights than the minimum (24 → 6+6+6+6); each row has a ✕ to remove it (min one row kept). Client
-      emits ONE fire order PER non-zero flight (`shots = that flight's size`).
+      emits ONE fire order PER non-zero flight (`shots = that flight's size`). Dialog accents (Add link,
+      ✕, number-spinner arrows, auto-split checkbox) themed cobalt blue `#58c7e6` via `confirm.css`
+      `.shadowFighterBomb` rules (matches the hangar-confirm input blue; `accent-color` tints spinners).
   **No split-transport plumbing / no note dance / no order merge:** the combat log already GROUPS fire
   orders by shooter+weapon+firingMode+target (`combatLog.js groupByShipAndWeapon`), and every bomb
   order shares the same hex (targetid −1), so the N manual orders collapse into ONE "Fighter Bomb"
