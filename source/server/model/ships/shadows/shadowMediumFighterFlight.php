@@ -9,6 +9,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
 		$this->phpclass = "ShadowMediumFighterFlight";
 		$this->shipClass = "Medium Fighters";
 		$this->imagePath = "img/ships/ShadowFighter.png";
+		$this->variantOf = 'NONE';
 	    
 		$this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
