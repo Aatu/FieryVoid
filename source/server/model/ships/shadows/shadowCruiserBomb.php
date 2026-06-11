@@ -1,19 +1,18 @@
 <?php
-class ShadowCruiser extends MediumShip{
+class shadowCruiserBomb extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 		$this->pointCost = 2750;
 		$this->faction = "Shadow Association";
-        $this->phpclass = "ShadowCruiser";
+        $this->phpclass = "shadowCruiserBomb";
         $this->imagePath = "img/ships/ShadowCruiser.png";
         $this->shipClass = "Cruiser";
         $this->canvasSize = 200;
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
-		$this->variantOf = 'NONE';
        
         $this->forwardDefense = 16;
         $this->sideDefense = 15;
@@ -79,9 +78,13 @@ class ShadowCruiser extends MediumShip{
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 4, 8));
-		$hangar = new Hangar(5, 6, 6);
-		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
-		$this->addPrimarySystem($hangar);			
+		//Stage S: integrated-fighter bay (crit-immune; forms fighters from Structure).
+		//ShadowHangar keeps $name = 'hangar' so it flows through the standard fighter
+		//launch/dock UI. Swapped IN PLACE (same construction position → same system id)
+		//to avoid the positional-system-id trap on existing ShadowCruiser games.
+		$hangar = new ShadowHangar(5, 6, 6);
+		//$hangar->directions = array(0, 1, 5); //port + starboard launch bays — player picks per launch
+		$this->addPrimarySystem($hangar);
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
 		
@@ -172,7 +175,16 @@ class ShadowCruiser extends MediumShip{
        	   
 	    //Structure
         $this->addPrimarySystem(new Structure( 6, 40));
-		
+
+		//Stage S (S-f): Fighter Bomb — the integrated hangar's ONLY launch path.
+		//Bursts the ShadowHangar's held fighters out at a target hex (arc 300..60,
+		//range 10). A Weapon, NOT a Hangar (sibling classes), mounted ALONGSIDE the
+		//ShadowHangar above. Added LAST on purpose: system ids are construction-order
+		//positional, so appending after Structure keeps every existing system id
+		//stable on in-use ShadowCruiser games (the positional-system-id trap). Not
+		//on the hitChart — Shadow systems are untargetable anyway (set below).
+		$this->addPrimarySystem(new ShadowFighterBomb(5, 4, 0, 300, 60)); //armour, maxhealth, powerReq(0), startArc, endArc
+
 		/*systems on Shadow ships CANNOT be targeted by called shots!*/
 		$this->notes .= "<br>Cannot be targeted by called shots.";
 		foreach ($this->systems as $sys){
