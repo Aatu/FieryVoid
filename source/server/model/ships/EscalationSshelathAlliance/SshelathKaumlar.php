@@ -27,9 +27,9 @@ class SshelathKaumlar extends OSAT{
 
 
         //ammo magazine itself (AND its missile options)
-        $ammoMagazine = new AmmoMagazine(32); //pass magazine capacity - 60 rounds per launcher
+        $ammoMagazine = new AmmoMagazine(64); //pass magazine capacity - 60 rounds per launcher
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileD(), 32); //add full load of basic missiles
+        $ammoMagazine->addAmmoEntry(new AmmoMissileD(), 64); //add full load of basic missiles
 
         $this->addFrontSystem(new AmmoMissileRackO(2, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addFrontSystem(new AmmoMissileRackO(2, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
