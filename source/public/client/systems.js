@@ -648,7 +648,9 @@ shipManager.systems = {
         var hangars = [];
         for (var si in ship.systems) {
             var s = ship.systems[si];
-            if (s && s.name == "hangar" && !s.isCatapult) hangars.push(s);
+            //ShadowHangars (integrated-fighter bays) never hold default shuttles —
+            //excluded server-side in HangarOps too. Catapults already excluded here.
+            if (s && s.name == "hangar" && !s.isCatapult && !s.isShadowHangar) hangars.push(s);
         }
         if (hangars.length === 0) return [];
 

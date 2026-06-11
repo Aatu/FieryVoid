@@ -19,7 +19,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
 		*/
 		Enhancements::nonstandardEnhancementSet($this, 'ShadowFighter');
 		
-		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement (the latter for scenarios only).";
+		//$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement (the latter for scenarios only).";
 		
 		$this->forwardDefense = 7;
 		$this->sideDefense = 7;

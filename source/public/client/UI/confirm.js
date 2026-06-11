@@ -2302,6 +2302,9 @@ window.confirm = {
         for (var k in ship.systems) {
             var sys = ship.systems[k];
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) continue;
+            //Stage S (S-f): a ShadowHangar keeps name 'hangar' but never appears as a
+            //launch source — its fighters leave only via the Fighter Bomb weapon.
+            if (sys.isShadowHangar) continue;
             all.push(sys);
         }
         // Set of system ids referenced by any occupancy list on the ship.

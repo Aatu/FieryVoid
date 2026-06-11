@@ -155,6 +155,10 @@ window.ShipTooltipFireMenu = function () {
             //through the isCat branches into the normal budget gate below.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat)) continue;
+            //Stage S (S-f): a ShadowHangar (integrated-fighter bay) never offers the
+            //ordinary "Launch Fighters" button — its fighters leave ONLY via the
+            //Fighter Bomb weapon (a normal fireable weapon). Landing is unaffected.
+            if (sys.isShadowHangar) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
             //Stage 16.5: a cannotLaunch wreck (fighter destroyed landing on a
             //damaged catapult) occupies the bay but can never relaunch — it
@@ -895,6 +899,9 @@ window.hasLaunchableFighterHangar = function (carrier) {
     return carrier.systems.some(function (sys) {
         var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
         if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat)) return false;
+        //Stage S (S-f): ShadowHangars launch only via the Fighter Bomb weapon, not
+        //the ordinary launch dialog — exclude them here too (parallels hasLaunchableHangar).
+        if (sys.isShadowHangar) return false;
         if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) return false;
         if (!sys.hangarUsage.some(function (e) { return e && !e.cannotLaunch; })) return false;
         if (isCat) return true;

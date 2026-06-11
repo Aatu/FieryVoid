@@ -3865,6 +3865,9 @@ spl_autoload_register(
                 'dockedfighter' => '/server/model/cricialClasses.php',                 
                 'launchedthisturn' => '/server/model/cricialClasses.php',
                 'lcvlaunchedthisturn' => '/server/model/cricialClasses.php', 
+                'shadowhangar' => '/server/model/systems/baseSystems.php',
+                'shadowfightercutoff' => '/server/model/cricialClasses.php',  
+                'shadowfighterbomb' => '/server/model/weapons/specialWeapons.php',                             
 
                 'fighterrail' => '/server/model/systems/baseSystems.php',                
                 'flyer' => '/server/model/ships/Shuttle.php',

@@ -2979,6 +2979,32 @@ class Hangar extends ShipSystem{
 	//carrier's MAR_CONT enhancement on every load.
 	public $marinePoolSpent = 0;
 	private $lastSavedMarinePool = null;  //serialized snapshot of last persisted marinePoolSpent
+	//Stage S (S-d): integrated-fighter structure coupling. Only the PRIMARY
+	//ShadowHangar carries these (same primary-hangar pattern as reloadPoolSpent),
+	//persisted via the shadowIntegratedState note. $shadowAttached = integrated
+	//fighters still tethered to the carrier (held in bay + launched-and-alive, NOT
+	//cut off); $shadowCutOff = fighters severed by structure-box loss (fight on,
+	//can't land). $shadowLaunched = a MAP {flightId => lastKnownActiveCraftCount} of
+	//this carrier's integrated flights currently IN SPACE — the carrier's back-link
+	//to its own launched fighters, used by HangarOps::syncIntegratedStructureCoupling
+	//to detect per-turn COMBAT losses (Direction 2) by comparing each flight's current
+	//countActiveCraft against its stored baseline (the baseline is decremented, not
+	//treated as a loss, when craft reabsorb on landing — so docking isn't mistaken for
+	//combat death). Entries are pruned when a flight lands fully or dies. The invariant
+	//enforced each turn is carrier-remaining-structure >= $shadowAttached. Seeded from
+	//the SHAD_FTRL count (populateInitialHangarUsage). Non-ShadowHangar: unused.
+	public $shadowAttached = 0;
+	public $shadowCutOff   = 0;
+	public $shadowLaunched = array();      //{flightId => lastKnownActiveCraftCount} of integrated fighters in space
+	//Cumulative carrier-Structure boxes PERMANENTLY lost to attached-fighter deaths
+	//(B5W "the corresponding structure box is also lost (marked destroyed)"). Each
+	//loss is BOTH 1 point of structure damage AND a -1 to the Structure's maxhealth —
+	//so SelfRepair can never restore that box (it heals damage, but maxhealth is the
+	//ceiling). Persisted in shadowIntegratedState and RE-APPLIED to the carrier's
+	//Structure->maxhealth on load (maxhealth is a blueprint value rebuilt fresh each
+	//load, so the reduction must be replayed). onIndividualNotesLoaded applies it.
+	public $shadowStructLost = 0;
+	private $lastSavedShadowState = null;  //serialized snapshot of last persisted {attached,cutOff,launched,structLost}
 	//Stage 18: carrier-destruction escape roll. ONE-SHOT per carrier — set
 	//when HangarOps::processCarrierDestructionEscapes fires the d20 (or when
 	//a hangarEscapeRoll note is loaded). Only the PRIMARY hangar carries
@@ -3084,6 +3110,26 @@ class Hangar extends ShipSystem{
 				if ($spent < 0) $spent = 0;
 				$this->marinePoolSpent = $spent;
 				$this->lastSavedMarinePool = (string)$spent;
+			} else if ($note->notekey === 'shadowIntegratedState'){
+				//Stage S (S-d): integrated-fighter coupling {attached,cutOff,launchedIds}.
+				//Parallel to hangarOrdReserve — only the primary ShadowHangar persists
+				//this. Presence marks the state as initialised, so populateInitial...
+				//won't re-seed it on a mid-game reload.
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded)){
+					$this->shadowAttached = max(0, (int)($decoded['attached'] ?? 0));
+					$this->shadowCutOff   = max(0, (int)($decoded['cutOff']   ?? 0));
+					$map = (isset($decoded['launched']) && is_array($decoded['launched'])) ? $decoded['launched'] : array();
+					$clean = array();
+					foreach ($map as $fid => $cnt){ $clean[(int)$fid] = max(0, (int)$cnt); }
+					$this->shadowLaunched = $clean;
+					$this->shadowStructLost = max(0, (int)($decoded['structLost'] ?? 0));
+					$this->lastSavedShadowState = $note->notevalue;
+					//maxhealth reduction is applied ONCE after the loop (below) using the
+					//FINAL loaded value — NOT here, because the loop visits every
+					//shadowIntegratedState note (one per changed turn) and a per-note
+					//cumulative subtraction would over-reduce. Latest-wins on the value.
+				}
 			} else if ($note->notekey === 'hangarEscapeRoll'){
 				//Stage 18: d20 result + escapees from the moment this carrier
 				//was destroyed. Presence of this note is the one-shot gate
@@ -3127,6 +3173,23 @@ class Hangar extends ShipSystem{
 		//$gamedata->ships is numerically-indexed when loaded from DB; only
 		//getShipById() is reliable for looking up by ship id.
 		$ship = $this->getUnit();
+
+		//Stage S (S-d): RE-APPLY the permanent integrated-fighter structure-box loss,
+		//ONCE, using the final loaded $shadowStructLost. maxhealth is a blueprint value
+		//rebuilt fresh on every load, so the cumulative reduction must be replayed here.
+		//Applied once (after the note loop) so multiple shadowIntegratedState notes don't
+		//each subtract. Only the primary ShadowHangar carries the count; the matching
+		//per-box DamageEntries are persisted separately (replay-safe). This only lowers
+		//the ceiling so SelfRepair (heals damage, can't raise maxhealth) can't restore it.
+		//Structure::stripForJson sends the live maxhealth so the CLIENT matches on replay.
+		if ($ship && !empty($this->isShadowHangar) && (int)$this->shadowStructLost > 0
+			&& HangarOps::primaryShadowHangar($ship) === $this) {
+			$struct = $ship->getStructureSystem(0);
+			if ($struct){
+				$struct->maxhealth = max(0, (int)$struct->maxhealth - (int)$this->shadowStructLost);
+			}
+		}
+
 		//LCV Rails: restore the docked LCV's $removed flag (whole-ship dock).
 		if ($ship && !empty($this->isLCVRail) && is_array($this->lcvDocked)) {
 			$lcvId = (int)($this->lcvDocked['shipId'] ?? 0);
@@ -3369,6 +3432,34 @@ class Hangar extends ShipSystem{
 					'lcvDocked', 'LCV rail occupant', $currentLcv
 				);
 				$this->lastSavedLcvDocked = $currentLcv;
+			}
+		}
+
+		//Stage S (S-d): persist the integrated-fighter coupling counts {attached,cutOff}
+		//on the PRIMARY ShadowHangar (parallel to hangarOrdReserve, but OUTSIDE the
+		//!$destroyed guard — the final attached-fighter loss that destroys the carrier
+		//must record its terminal state for replay, like hangarUsage/lcvDocked do).
+		//POST-side reconstruction guard mirrors the pool notes: skip the spurious
+		//first-time "0/0" note that a rebuilt-from-JSON Hangar (lastSavedShadowState
+		//null, both counts 0) would otherwise write and clobber server state.
+		if (!empty($this->isShadowHangar) && HangarOps::primaryHangar($ship) === $this
+			&& !($this->lastSavedShadowState === null && (int)$this->shadowAttached === 0 && (int)$this->shadowCutOff === 0 && (int)$this->shadowStructLost === 0 && empty($this->shadowLaunched))) {
+			//Re-key the {id=>count} map with string keys so json_encode emits an object
+			//(not a list), and so it round-trips identically for change-detection.
+			$launchedOut = array();
+			foreach ((array)$this->shadowLaunched as $fid => $cnt){ $launchedOut[(string)(int)$fid] = (int)$cnt; }
+			$currentShadow = json_encode(array(
+				'attached'   => (int)$this->shadowAttached,
+				'cutOff'     => (int)$this->shadowCutOff,
+				'launched'   => (object)$launchedOut,
+				'structLost' => (int)$this->shadowStructLost,
+			));
+			if ($currentShadow !== $this->lastSavedShadowState){
+				$this->individualNotes[] = new IndividualNote(
+					-1, $gamedata->id, $gamedata->turn, $gamedata->phase, $ship->id, $this->id,
+					'shadowIntegratedState', 'Integrated fighter coupling', $currentShadow
+				);
+				$this->lastSavedShadowState = $currentShadow;
 			}
 		}
 
@@ -3659,6 +3750,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem->isCatapult = !empty($this->isCatapult);   //Stage 16: catapult discriminator (false for ordinary hangars)
 		$strippedSystem->isRail = !empty($this->isRail);           //Fighter Rails: rail discriminator (false for ordinary hangars/catapults)
 		$strippedSystem->isLCVRail = !empty($this->isLCVRail);     //LCV Rails: whole-ship dock discriminator (false for ordinary hangars)
+		$strippedSystem->isShadowHangar = !empty($this->isShadowHangar); //Stage S: integrated-fighter bay discriminator (false for ordinary hangars). $name stays 'hangar' so the launch/dock UI still applies; the client reads this flag for shuttle-pool exclusion / display.
 		$strippedSystem->excludeFromDefaultShuttles = !empty($this->excludeFromDefaultShuttles); //steers default shuttles away from this bay (boxes still count toward capacity)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
@@ -3895,6 +3987,60 @@ class FighterRail extends Hangar{
 }
 
 
+/* Shadow Integrated-Fighter Hangar (B5W "integrated fighters", FV Stage S).
+ *
+ * Certain advanced races (Shadows) don't STORE fighters in a bay — they form
+ * them out of their own Structure. A ShadowHangar is an ordinary Hangar in all
+ * the launch/land plumbing (it IS instanceof Hangar, so collectHangars and the
+ * launch/land pipeline pick it up), but with two Stage-S differences wired up
+ * here in S-a:
+ *
+ *   1. CRIT-IMMUNE. "Integrated fighter hangars do not suffer from critical
+ *      hits." testCritical is overridden to a no-op so box damage still lands
+ *      but no Hangar critical is ever rolled or applied.
+ *   2. NOT a default-shuttle bay. Shadows don't carry shuttles in it; the bay's
+ *      boxes hold integrated fighters (populated from the SHAD_FTRL enhCount in
+ *      S-b), so HangarOps partitions a ShadowHangar out of the shuttle pool the
+ *      same way it does catapults/rails — keyed on the $isShadowHangar flag.
+ *
+ * $isShadowHangar is the single discriminator the HangarOps call sites branch
+ * on, parallel to Catapult's $isCatapult, FighterRail's $isRail, and
+ * DockingCollar's $isLCVRail. The integrated-fighter mechanics proper
+ * (structure<->fighter coupling, land-and-reabsorb) arrive in later S-stages;
+ * S-a only adds the class, crit-immunity, and the discriminator/exclusions —
+ * NO behaviour change beyond crit-immunity (a ShadowCruiser bay already
+ * auto-filled 0 shuttles, so the shuttle-pool exclusion is a no-op there).
+ */
+class ShadowHangar extends Hangar{
+    public $isShadowHangar = true;   //single discriminator, parallel to $isCatapult / $isRail / $isLCVRail
+
+    // ($armour, $maxhealth = bay boxes, $output = launch+land budget,
+    //  $direction = launch offset, $hangarType = the ship's fighter category)
+    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters'){
+        //A ShadowHangar only ever forms/launches ShadowMediumFighterFlights, so bake
+        //that into spawnableClasses unconditionally — it's what game.php preloads as
+        //a blueprint so performLaunch can instantiate the flight (and the client can
+        //resolve its type for the launch dialog). Without it the bay would only carry
+        //the generic Shuttle/MinesweepingShuttle defaults and a launch resolves the
+        //wrong class. The base ctor merges this with those defaults.
+        parent::__construct($armour, $maxhealth, $output, $direction, $hangarType, array('ShadowMediumFighterFlight'));
+    }
+
+    //Crit-immunity: an integrated fighter hangar never suffers critical hits.
+    //Return the incoming crit list untouched — no d20 roll, no addCritical.
+    public function testCritical($ship, $gamedata, $crits, $add = 0){
+        return $crits;
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);   //inherit the standard Hangar capacity/Special block
+        $this->data["Special"] .= "<br>Integrated fighter hangar: does not suffer critical hits.";
+        $this->data["Special"] .= "<br>Cannot launch fighters using normal procedure, but may dock / reabsorb fighters to heal the, by passing their damage onto the ship.";
+        $this->data["Special"] .= "<br>See Faction-Tiers: Shadows for more details.";				
+    }
+}
+
+
 /* LCV Rail (B5W "LCV Rails") — docks/launches whole LCVs, NOT fighters.
  *
  * A DockingCollar is structurally a Hangar subclass (so it picks up the output
@@ -4108,14 +4254,26 @@ class Structure extends ShipSystem{
     public $name = "structure";
     public $displayName = "Structure";
 	private $isIndestructible = false;
-    
-	//Structure is last to be repaired, except purely cosmetic systems like Hanngars  
+
+	//Structure is last to be repaired, except purely cosmetic systems like Hanngars
 	public $repairPriority = 2;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
-    
+
     function __construct($armour, $maxhealth, $isIndestructible = false){
         parent::__construct($armour, $maxhealth, 0, 0);
 		$this->isIndestructible = $isIndestructible;
     }
+
+	//Stage S (S-d): the client reads maxhealth from the STATIC blueprint, not the
+	//per-instance JSON — so a server-side maxhealth reduction (integrated-fighter
+	//structure-box loss, applied in Hangar::onIndividualNotesLoaded) would desync
+	//the client's remaining-health/destruction math. Send the LIVE maxhealth so the
+	//client matches whenever boxes have been permanently lost. (Harmless for every
+	//other ship: it just re-sends the unchanged blueprint value.)
+	public function stripForJson(){
+		$strippedSystem = parent::stripForJson();
+		$strippedSystem->maxhealth = (int)$this->maxhealth;
+		return $strippedSystem;
+	}
 
 	//creates pre-tagged Outer Structure, with appropriate arc
 	//warning: has trouble working if Structure isn't directly called earlier! so be sure to create PRIMARY Structure before trying to go for any Outer ones :)

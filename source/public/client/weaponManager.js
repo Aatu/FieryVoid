@@ -2585,6 +2585,17 @@ window.weaponManager = {
                             splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
                         }
                         webglScene.customEvent('SystemDataChanged', { ship: selectedShip, system: weapon });
+                    } else if (weapon.name === 'ShadowFighterBomb') {
+                        //Stage S (S-f): the Fighter Bomb launches a player-chosen
+                        //number of held integrated fighters (1..remaining in the
+                        //ShadowHangar) at the target hex. Pop the standard numeric
+                        //count picker (confirm.askForMultipleValues), then create the
+                        //single fire order with shots = chosen count — the server
+                        //(performBombLaunch) clamps to the held pool and launches that
+                        //many. Async (callback), so we DON'T fall through to the
+                        //synchronous order build / toUnselect below.
+                        weaponManager.queueShadowFighterBombOrder(selectedShip, weapon, hexpos, type);
+                        continue;
                     } else {
 
                         weaponManager.removeFiringOrder(selectedShip, weapon);
@@ -2618,8 +2629,69 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
-        toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onHexTargeted - DK 01.25        
+        toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onHexTargeted - DK 01.25
         webglScene.customEvent('HexTargeted', { shooter: selectedShip, hexagon: hexpos })
+    },
+
+    // Stage S (S-f): held integrated-fighter count across a carrier's ShadowHangars
+    // — the Fighter Bomb's launchable pool. Sums ShadowMediumFighterFlight entries
+    // (skipping cannotLaunch wrecks) over every isShadowHangar bay. Mirrors the
+    // server pool sum in HangarOps::performBombLaunch.
+    shadowFighterBombPool: function shadowFighterBombPool(carrier) {
+        var pool = 0;
+        if (!carrier || !carrier.systems) return 0;
+        for (var i in carrier.systems) {
+            var sys = carrier.systems[i];
+            if (!sys || !sys.isShadowHangar || !Array.isArray(sys.hangarUsage)) continue;
+            sys.hangarUsage.forEach(function (e) {
+                if (!e || e.phpclass !== 'ShadowMediumFighterFlight' || e.cannotLaunch) return;
+                pool += parseInt(e.flightSize || 1, 10);
+            });
+        }
+        return pool;
+    },
+
+    // Stage S (S-f): pop the standard numeric count picker for a Fighter Bomb shot
+    // (1..remaining held fighters), then build the single hex fire order with
+    // shots = chosen count. The server (performBombLaunch) clamps to the live pool
+    // and launches that many at the target hex.
+    queueShadowFighterBombOrder: function queueShadowFighterBombOrder(carrier, weapon, hexpos, type) {
+        var pool = weaponManager.shadowFighterBombPool(carrier);
+        if (pool <= 0) {
+            confirm.warning("No integrated fighters left in the hangar to launch.");
+            return;
+        }
+
+        confirm.askForMultipleValues(
+            "Fighter Bomb: how many fighters to launch?",
+            [{ id: 'count', label: 'Fighters', max: pool, value: pool }],
+            function (results) {
+                var count = parseInt(results.count, 10);
+                if (isNaN(count) || count < 1) count = 1;
+                if (count > pool) count = pool;
+
+                weaponManager.removeFiringOrder(carrier, weapon);
+                var fireid = carrier.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+                weapon.fireOrders.push({
+                    id: fireid,
+                    type: type,
+                    shooterid: carrier.id,
+                    targetid: -1,
+                    weaponid: weapon.id,
+                    calledid: -1,
+                    turn: gamedata.turn,
+                    firingMode: weapon.firingMode,
+                    shots: count,                       //the chosen launch count
+                    x: hexpos.q,
+                    y: hexpos.r,
+                    damageclass: weapon.data["Weapon type"].toLowerCase()
+                });
+
+                weaponManager.unSelectWeapon(carrier, weapon);
+                webglScene.customEvent('SystemDataChanged', { ship: carrier, system: weapon });
+                webglScene.customEvent('HexTargeted', { shooter: carrier, hexagon: hexpos });
+            }
+        );
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {

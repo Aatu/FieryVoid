@@ -865,6 +865,22 @@ window.gamedata = {
 					}
 				}
 
+				//Stage S: integrated fighters (SHAD_FTRL) are BOUGHT as an enhancement,
+				//not deployed as separate flights — but per the rules they count toward
+				//the ship's fighter maximum. Consume one MEDIUM fighter-slot per bought
+				//integrated fighter (ShadowMediumFighterFlight is a medium craft) so a
+				//player can't buy 6 integrated fighters AND also deploy 6 separate Shadow
+				//fighters. The pools are aggregated in the totalFtrPresent vs
+				//totalHangarAvailable check below, so charging them to totalFtrM is exact
+				//even though the carrier declares its capacity as 'normal'.
+				for (var senh in lship.enhancementOptions) {
+					if (lship.enhancementOptions[senh][0] === "SHAD_FTRL") {
+						var shadFtrBought = lship.enhancementOptions[senh][2] || 0;
+						if (shadFtrBought > 0) totalFtrM += shadFtrBought;
+						break;
+					}
+				}
+
 				//Default shuttle slots auto-populate any leftover hangar capacity
 				//(see HangarOps::populateInitialHangarUsage step 3 on the server).
 				//Surface them as 'shuttles' capacity so armed-shuttle variants
@@ -932,8 +948,15 @@ window.gamedata = {
 						smallCraftSize = 'NOT RECOGNIZED';
 					}
 				}
+				//Stage S: separate Shadow fighter flights are scenario-only after the
+				//integrated-fighter patch and do NOT consume the fleet's fighter
+				//allowance (the carrier's integrated fighters already account for the
+				//hull's fighter maximum via SHAD_FTRL). Skip the hangar-space tally for
+				//them entirely; totalShips++ above still counts them as a unit present.
+				var isShadowFighterFlight = (lship.faction == "Shadow Association");
+
 				//now translate size into hangar space used...
-				if (smallCraftSize != '') {
+				if (smallCraftSize != '' && !isShadowFighterFlight) {
 					if (lship.customFtrName) {
 						specialFtrAmt = lship.flightSize / lship.unitSize;
 						specialFtrName = lship.customFtrName;

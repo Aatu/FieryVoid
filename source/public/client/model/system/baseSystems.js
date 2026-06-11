@@ -720,6 +720,16 @@ var FighterRail = function FighterRail(json, ship) {
 FighterRail.prototype = Object.create(Hangar.prototype);
 FighterRail.prototype.constructor = FighterRail;
 
+// Shadow integrated-fighter hangar (B5W "integrated fighters", FV Stage S): NO
+// client subclass. Unlike Catapult/FighterRail/DockingCollar, a ShadowHangar
+// keeps the base Hangar's $name = 'hangar' server-side so it still flows through
+// the standard fighter launch/dock/recover UI (every helper gates on
+// name === 'hangar'). systemFactory therefore instantiates a plain `Hangar`; the
+// isShadowHangar discriminator round-trips as a DATA property via the server's
+// Hangar::stripForJson and is read off the live Hangar instance where needed
+// (e.g. systems.js shuttle-pool exclusion). Crit-immunity is server-authoritative
+// (ShadowHangar::testCritical), so the client needs no behaviour here.
+
 var CargoBay = function CargoBay(json, ship) {
 	ShipSystem.call(this, json, ship);
 };

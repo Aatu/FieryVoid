@@ -3234,9 +3234,11 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
     real exposure). The dead `if ($firstBay->isShadowHangar) registerLaunchedIntegratedFlight` block
     in `launchAnonymousStash` was removed (firstBay can no longer be a ShadowHangar).
   - **Client:** `ShadowFighterBomb` weapon mirror in
-    [electromagnetic.js](source/public/client/model/weapon/electromagnetic.js) (thin `Electromagnetic`
-    subclass beside `VortexDisruptor`; hex-target firing UI is driven by the json blueprint fields —
-    no behaviour override). **Count picker** in `weaponManager.targetHex`: a `weapon.name ===
+    [special.js](source/public/client/model/weapon/special.js) (thin `Weapon` subclass; hex-target
+    firing UI is driven by the json blueprint fields — no behaviour override). NB it must sit in a
+    file whose parent class (`Weapon`) is already defined at parse time — a first cut in
+    electromagnetic.js extending `Electromagnetic` hit a load-order "not a constructor" crash in the
+    gamelobby bundle; moved to special.js extending `Weapon` directly. **Count picker** in `weaponManager.targetHex`: a `weapon.name ===
     'ShadowFighterBomb'` branch calls new `queueShadowFighterBombOrder` → reads the held pool
     (`shadowFighterBombPool`, sums isShadowHangar `hangarUsage`), pops `confirm.askForMultipleValues`
     (1..pool), and on OK builds the single hex fire order with `shots = chosen`. ShadowHangar excluded
