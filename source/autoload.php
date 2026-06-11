@@ -3867,7 +3867,9 @@ spl_autoload_register(
                 'lcvlaunchedthisturn' => '/server/model/cricialClasses.php', 
                 'shadowhangar' => '/server/model/systems/baseSystems.php',
                 'shadowfightercutoff' => '/server/model/cricialClasses.php',  
-                'shadowfighterbomb' => '/server/model/weapons/specialWeapons.php',                             
+                'shadowfighterbomb' => '/server/model/weapons/specialWeapons.php',  
+                'shadowcruiserbomb' => '/server/model/ships/shadows/shadowCruiserBomb.php',
+                                           
 
                 'fighterrail' => '/server/model/systems/baseSystems.php',                
                 'flyer' => '/server/model/ships/Shuttle.php',

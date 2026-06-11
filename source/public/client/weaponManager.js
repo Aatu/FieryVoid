@@ -2690,8 +2690,24 @@ window.weaponManager = {
                 weaponManager.unSelectWeapon(carrier, weapon);
                 webglScene.customEvent('SystemDataChanged', { ship: carrier, system: weapon });
                 webglScene.customEvent('HexTargeted', { shooter: carrier, hexagon: hexpos });
+                //Refresh the carrier's ShadowHangar tooltip(s) so their capacity line
+                //immediately shows "(Launching N)" from this bomb order (S-f).
+                weaponManager.refreshShadowHangarTooltips(carrier);
             }
         );
+    },
+
+    // Stage S (S-f): recompute + redraw the ShadowHangar tooltip(s) on a carrier so
+    // their projected "(Launching N)" capacity line reflects the current Fighter Bomb
+    // fire order (placed or cleared). Called after a bomb order changes.
+    refreshShadowHangarTooltips: function refreshShadowHangarTooltips(carrier) {
+        if (!carrier || !carrier.systems) return;
+        for (var i in carrier.systems) {
+            var sys = carrier.systems[i];
+            if (!sys || !sys.isShadowHangar) continue;
+            if (typeof sys.refreshHangarTooltip === 'function') sys.refreshHangarTooltip();
+            webglScene.customEvent('SystemDataChanged', { ship: carrier, system: sys });
+        }
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
@@ -2707,7 +2723,12 @@ window.weaponManager = {
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
-        if (gamedata.gamephase == 3 && ship.flight) webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
+        //Stage S (S-f): clearing a Fighter Bomb order frees its launching fighters —
+        //refresh the carrier's ShadowHangar tooltip(s) so their "(Launching N)" line
+        //disappears (the bomb order this method just removed no longer projects).
+        if (system.name === 'ShadowFighterBomb') weaponManager.refreshShadowHangarTooltips(ship);
+
+        if (gamedata.gamephase == 3 && ship.flight) webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots
     },
 
     removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {

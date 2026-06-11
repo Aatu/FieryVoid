@@ -3250,12 +3250,25 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
     on ShadowCruiser. Added LAST on purpose — system ids are construction-order positional, so
     appending after Structure keeps every existing system id stable on in-use ShadowCruiser games
     (the positional-system-id trap). Not on the hitChart (Shadow systems are untargetable anyway).
+  - **Tooltips (added 2026-06-11, post-test):** (1) the **ShadowHangar** capacity line shows
+    "(Launching N)" from a pending Fighter Bomb order, reusing the ordinary-hangar projection
+    machinery: `Hangar.refreshHangarTooltip` (baseSystems.js) gets an `isShadowHangar` block that
+    scans the ship for a same-turn `ShadowFighterBomb` fire order and feeds its `shots` into
+    `launchByClass` (so the capacity subtraction + "(Launching)" line render exactly as a normal
+    launch). `weaponManager.refreshShadowHangarTooltips(carrier)` re-runs it when a bomb order is
+    placed (in `queueShadowFighterBombOrder`) or cleared (in `removeFiringOrder`). (2) the **Fighter
+    Bomb's** own in-game tooltip (SystemInfo.js, reactJs) shows a "Fighters available: N" line =
+    `weaponManager.shadowFighterBombPool(ship)` (live count across the ship's ShadowHangars,
+    computed client-side because data[] isn't sent on live gamedata). NOT added to the lobby
+    tooltip (systemInfo.js) — pre-game the pool is empty (populated server-side at game start).
 
   **Files touched (S-f core):** server `specialWeapons.php` (new weapon, passes `shots` as count),
   `HangarOps.php` (`performBombLaunch` + `$count` param + launch-disable guards), `shadowCruiser.php`
-  (mount). Client `electromagnetic.js` (weapon mirror), `weaponManager.js` (count picker —
-  `queueShadowFighterBombOrder` + `shadowFighterBombPool`), `shipTooltipFireMenu.js` + `confirm.js` +
-  `SystemIcon.js` (hide ordinary launch for ShadowHangars). **autoload.php** — user added
+  (mount). Client `special.js` (weapon mirror — see load-order note above), `weaponManager.js` (count
+  picker `queueShadowFighterBombOrder` + `shadowFighterBombPool` + `refreshShadowHangarTooltips`),
+  `baseSystems.js` (ShadowHangar "(Launching N)" projection in `refreshHangarTooltip`), `SystemInfo.js`
+  (bomb "Fighters available" line), `shipTooltipFireMenu.js` + `confirm.js` + `SystemIcon.js` (hide
+  ordinary launch for ShadowHangars). **autoload.php** — user added
   `'shadowfighterbomb'` line (user edits autoload, never the assistant). The bomb's `$name` is a
   Weapon name resolved by the client SystemFactory via `new window['ShadowFighterBomb']`, and the
   blueprint preloads via `$spawnableClasses`. **NB user runs yarn build / Docker test themselves.**

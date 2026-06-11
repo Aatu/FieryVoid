@@ -95,6 +95,16 @@ class SystemInfo extends React.Component {
         var systemDisplayName = system.displayName;
         var firingModeDisplay = system.firingModes ? system.firingModes[system.firingMode] : null;
 
+        //Stage S (S-f): the Fighter Bomb draws from the ship's ShadowHangar pool; show
+        //the live count of integrated fighters available to launch (across all the
+        //ship's ShadowHangars). Computed client-side (like the hangar capacity line)
+        //because data[] isn't transmitted on live gamedata.
+        var shadowBombAvailable = null;
+        if (system.name === 'ShadowFighterBomb' && window.weaponManager
+            && typeof weaponManager.shadowFighterBombPool === 'function') {
+            shadowBombAvailable = weaponManager.shadowFighterBombPool(ship);
+        }
+
         let isUnrevealedMine = false;
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
@@ -118,6 +128,8 @@ class SystemInfo extends React.Component {
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
                 {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, system.data[key], 'data' + i)))}
+
+                {shadowBombAvailable !== null && getEntry('Fighters available', shadowBombAvailable)}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&
