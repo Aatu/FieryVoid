@@ -3186,19 +3186,36 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
   beyond THAT ONE tendril hits a random system (armour-ignoring) on the dock turn; landed craft show
   cyan DOCKED in replay; killed fighters drop carrier Structure maxhealth by 1 each; replay the turn and
   confirm the same penetration system/amount (no re-roll).
-- **S-f — ✓ IMPLEMENTED 2026-06-11 (core Fighter Bomb; NOT yet Docker-tested). Deploy-undock split out to S-f.1 (below).**
+- **S-f — ✓ IMPLEMENTED 2026-06-11. Core Fighter Bomb DOCKER-TESTED (full + partial 6-fighter launch).
+  Multi-flight split + manual/auto dialog added after; NOT yet re-tested. Deploy-undock split to S-f.1.**
   Fighter Bomb = a SEPARATE `ShadowFighterBomb extends Weapon` that bursts the carrier's
   held integrated fighters out at a TARGET HEX. NOT a Hangar trait (Weapon/Hangar are siblings).
 
   **KEY RULE CHANGE (user 2026-06-11) vs the original S4 spec:** once the Fighter Bomb exists,
   a ShadowHangar **does NOT launch via the ordinary bay path at all** — the Bomb is the bay's
   ONLY launch path. Landing/reabsorption (S-c/S-e) is unchanged (still uses the normal
-  hangar-output budget). The bomb is **player-count-selectable per shot** (user 2026-06-11 #2):
-  on hex-target it pops the standard numeric count picker (`confirm.askForMultipleValues`,
-  1..fighters-held), and launches that many at the hex — leaving the remainder docked for a
-  later bomb. (NOT output-capped: the count is bounded only by the held pool.) An empty bay
-  (fighters lost a previous turn) ⇒ the bomb cannot fire. Same-turn hangar destruction does NOT
-  stop the bomb (it fires simultaneously with incoming fire).
+  hangar-output budget). The bomb is **player-count-selectable per shot** (1..fighters-held),
+  bounded only by the held pool (NOT output-capped); the remainder stays docked for a later bomb.
+  An empty bay ⇒ the bomb cannot fire. Same-turn hangar destruction does NOT stop the bomb.
+
+  **MULTIPLE-FLIGHT SPLIT (user 2026-06-11):** a launch can exceed the flight-size cap, so a big
+  bomb spawns MULTIPLE flights, all stacked on the target hex. **Cap = min(class flight-size limit,
+  fighters currently HELD)** — the class limit is 9 (`ShadowMediumFighterFlight` jink 8), but a bay
+  holding fewer can't form a bigger flight, so ShadowCruiser (6 held) caps at 6, while the 24-bay
+  `ShadowBattleCruiserBomb` caps at 9 (24 → 9+9+6). The bomb dialog (`confirm.shadowFighterBomb`, replaces the old
+  `askForMultipleValues` picker) offers a **"Split Flights Automatically" checkbox** — but ONLY when
+  the launch can form >1 flight (`pool > cap`, i.e. pool > 9). When the whole pool fits one flight (≤9,
+  e.g. ShadowCruiser's 6) the checkbox + manual section are HIDDEN and the dialog is just a single
+  "Fighters to launch" count input.
+    - CHECKED (default): one Total input; the SERVER auto-splits into ceil(n/cap) flights (24 → 9+9+6).
+      Client emits ONE fire order (`shots = total`).
+    - UNCHECKED: per-flight inputs (each ≤ cap, pre-filled with an even split, live "total/pool"
+      readout); client emits ONE fire order PER non-zero flight (`shots = that flight's size`).
+  **No split-transport plumbing / no note dance / no order merge:** the combat log already GROUPS fire
+  orders by shooter+weapon+firingMode+target (`combatLog.js groupByShipAndWeapon`), and every bomb
+  order shares the same hex (targetid −1), so the N manual orders collapse into ONE "Fighter Bomb"
+  combat-log line for free. Each order's `fire()` spawns its own flight(s); pubnote kept terse
+  ("Fighter Bomb away.") since the grouped line concatenates them.
 
   **AS-BUILT:**
   - **`ShadowFighterBomb extends Weapon`** ([specialWeapons.php](source/server/model/weapons/specialWeapons.php),
@@ -3213,21 +3230,23 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
     guard ⇒ replay-idempotent with NO extra note (same self-persisting pattern as VortexDisruptor;
     NOT `beforeFiringOrderResolution`, which the ballistic mine launcher needs because ballistics
     resolve before the fire step).
-  - **`HangarOps::performBombLaunch($carrier, $spawnPos, $gamedata, $count = null)`** (new, right
-    after `performLaunch`). Locates `primaryShadowHangar`; held pool = SUM of held
-    `ShadowMediumFighterFlight` entries (skip `cannotLaunch` wrecks); bail null if 0. **burst =
-    min(held, $count)** ($count is the fire order's `shots`; <=0/null defaults to the whole pool).
-    Spawns ONE flight of that size via the existing `spawnLaunchedKFlight` primitive (reused — it
-    spawns at an arbitrary pos/heading/facing/speed) at the TARGET hex with carrier heading/facing/
-    speed (no hangar-direction offset). `registerLaunchedIntegratedFlight` (coupling baseline —
-    persists through the SAME `shadowIntegratedState` note as bay-launched integrated flights).
-    **Partial pool drain** — consumes `burst` worth in encounter order, dropping fully-consumed
-    entries (retiring any dockedFlightId fragment via `destroyAllFighters`) and keeping the remainder
-    on a partially-consumed entry (held entries are flightSize-1, so partial-on-one doesn't arise in
-    practice but is handled). Writes a `hangarLaunchEvent` note `id:phpclass:burst:bomb` (write-only
-    replay record, like `:resurrected`). `applyLaunchCrits` (LaunchedThisTurn -50 + carrier -20).
-    Transport: `ShadowFighterBomb::fire` passes `$fireOrder->shots` as `$count`; `shots` is a
-    first-class persisted FireOrder column, so the count round-trips with NO schema change.
+  - **`HangarOps::performBombLaunch($carrier, $spawnPos, $gamedata, $count = null, $flightSizes = null)`**
+    (new, right after `performLaunch`). Locates `primaryShadowHangar`; held pool = SUM of held
+    `ShadowMediumFighterFlight` entries (skip `cannotLaunch` wrecks); bail null if 0. Resolves a
+    per-flight SIZE LIST via `resolveBombFlightSizes` (auto-splits `$count` into ≤`bombFlightSizeCap`
+    chunks, or honors an explicit `$flightSizes`), then LOOPS: per size, `spawnLaunchedKFlight` (reused
+    primitive — arbitrary pos/heading/facing/speed) at the TARGET hex (carrier heading/facing/speed, no
+    hangar-direction offset), `registerLaunchedIntegratedFlight` (coupling baseline — same
+    `shadowIntegratedState` note as bay launches), `drainBombPool` (per-flight pool drain — drops
+    fully-consumed entries, retires any dockedFlightId fragment via `destroyAllFighters`, keeps a
+    remainder), `applyLaunchCrits` (LaunchedThisTurn −50 + carrier −20 idempotent), and a per-flight
+    `hangarLaunchEvent` note `id:phpclass:size:bomb`. Returns the FIRST flight id. Helpers:
+    `bombFlightSizeCap($phpclass)` (class limit: honors `$maxFlightSize`, else jink>9?12:9, try/catch
+    probe) — the call site clamps it to `min(cap, $held)` so a bay holding fewer than the limit caps
+    flights at its stock (ShadowCruiser 6→6); `resolveBombFlightSizes`, `drainBombPool`. Transport: `ShadowFighterBomb::fire` passes
+    `$fireOrder->shots` as `$count` per order; `shots` is a first-class persisted FireOrder column,
+    so each flight's size round-trips with NO schema change and NO note dance (`$flightSizes` is
+    supported but unused by the client — manual split rides one-order-per-flight instead).
   - **Ordinary launch DISABLED for ShadowHangars** — server `canLaunch` early-return; the anonymous
     (`launchAnonymousStash`) + docked (`findDockedEntry`) whole-flight launch paths now `continue`
     past `isShadowHangar` bays (the integrated entries are anonymous, so the anonymous path was the
@@ -3238,10 +3257,12 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
     firing UI is driven by the json blueprint fields — no behaviour override). NB it must sit in a
     file whose parent class (`Weapon`) is already defined at parse time — a first cut in
     electromagnetic.js extending `Electromagnetic` hit a load-order "not a constructor" crash in the
-    gamelobby bundle; moved to special.js extending `Weapon` directly. **Count picker** in `weaponManager.targetHex`: a `weapon.name ===
-    'ShadowFighterBomb'` branch calls new `queueShadowFighterBombOrder` → reads the held pool
-    (`shadowFighterBombPool`, sums isShadowHangar `hangarUsage`), pops `confirm.askForMultipleValues`
-    (1..pool), and on OK builds the single hex fire order with `shots = chosen`. ShadowHangar excluded
+    gamelobby bundle; moved to special.js extending `Weapon` directly. **Launch dialog** in `weaponManager.targetHex`: a `weapon.name ===
+    'ShadowFighterBomb'` branch calls `queueShadowFighterBombOrder` → reads the held pool
+    (`shadowFighterBombPool`, sums isShadowHangar `hangarUsage`) + cap (`shadowFighterBombFlightCap`),
+    pops `confirm.shadowFighterBomb` (total + "Split Flights Automatically" checkbox / manual per-flight
+    inputs ≤cap), and on OK emits ONE order (auto, `shots=total`) or ONE order per non-zero flight
+    (manual, `shots=size`). ShadowHangar excluded
     from EVERY launch-source entry point: `hasLaunchableHangar` + `hasLaunchableFighterHangar`
     (shipTooltipFireMenu.js), the `confirm.hangarLaunch` `all`-list (confirm.js), and the Firing-Phase
     branch of the hangar icon-click (SystemIcon.js — but the **deployment** branch still fires for
@@ -3262,12 +3283,14 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
     computed client-side because data[] isn't sent on live gamedata). NOT added to the lobby
     tooltip (systemInfo.js) — pre-game the pool is empty (populated server-side at game start).
 
-  **Files touched (S-f core):** server `specialWeapons.php` (new weapon, passes `shots` as count),
-  `HangarOps.php` (`performBombLaunch` + `$count` param + launch-disable guards), `shadowCruiser.php`
-  (mount). Client `special.js` (weapon mirror — see load-order note above), `weaponManager.js` (count
-  picker `queueShadowFighterBombOrder` + `shadowFighterBombPool` + `refreshShadowHangarTooltips`),
-  `baseSystems.js` (ShadowHangar "(Launching N)" projection in `refreshHangarTooltip`), `SystemInfo.js`
-  (bomb "Fighters available" line), `shipTooltipFireMenu.js` + `confirm.js` + `SystemIcon.js` (hide
+  **Files touched (S-f core):** server `specialWeapons.php` (new weapon, passes per-order `shots`),
+  `HangarOps.php` (`performBombLaunch` multi-flight split + `bombFlightSizeCap`/`resolveBombFlightSizes`/
+  `drainBombPool` + launch-disable guards), `shadowCruiser.php` (mount). Client `special.js` (weapon
+  mirror — see load-order note above), `weaponManager.js` (launch flow `queueShadowFighterBombOrder` +
+  `shadowFighterBombPool` + `shadowFighterBombFlightCap` + `refreshShadowHangarTooltips`), `confirm.js`
+  (`confirm.shadowFighterBomb` dialog + hide ShadowHangar from `hangarLaunch`), `baseSystems.js`
+  (ShadowHangar "(Launching N)" projection in `refreshHangarTooltip`), `SystemInfo.js` (bomb "Fighters
+  available" line), `shipTooltipFireMenu.js` + `SystemIcon.js` (hide
   ordinary launch for ShadowHangars). **autoload.php** — user added
   `'shadowfighterbomb'` line (user edits autoload, never the assistant). The bomb's `$name` is a
   Weapon name resolved by the client SystemFactory via `new window['ShadowFighterBomb']`, and the

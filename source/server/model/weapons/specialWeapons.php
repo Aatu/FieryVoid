@@ -3749,7 +3749,10 @@ class ShadowFighterBomb extends Weapon{
 
 		if ($flightId){
 			$fireOrder->shotshit = 1;
-			$fireOrder->pubnotes .= " Fighter Bomb: integrated fighters launched at " . $fireOrder->x . " " . $fireOrder->y . ".";
+			//Terse pubnote: in a manual split the combat log groups N same-hex bomb
+			//orders into ONE line and concatenates their pubnotes, so keep each short
+			//(the grouped line already reports the total shot count + target hex).
+			$fireOrder->pubnotes .= " Fighter Bomb launched.";
 		} else {
 			$fireOrder->pubnotes .= " Fighter Bomb: no integrated fighters available to launch.";
 		}

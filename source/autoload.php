@@ -3860,18 +3860,14 @@ spl_autoload_register(
 
 
 
-                //HANGER OPERATIONS CLASSESd
+                //HANGER OPERATIONS CLASSES
                 'hangarops' => '/server/model/systems/HangarOps.php',
                 'dockedfighter' => '/server/model/cricialClasses.php',                 
                 'launchedthisturn' => '/server/model/cricialClasses.php',
-                'lcvlaunchedthisturn' => '/server/model/cricialClasses.php', 
-                'shadowhangar' => '/server/model/systems/baseSystems.php',
-                'shadowfightercutoff' => '/server/model/cricialClasses.php',  
-                'shadowfighterbomb' => '/server/model/weapons/specialWeapons.php',  
-                'shadowcruiserbomb' => '/server/model/ships/shadows/shadowCruiserBomb.php',
-                                           
-
-                'fighterrail' => '/server/model/systems/baseSystems.php',                
+                'lcvlaunchedthisturn' => '/server/model/cricialClasses.php',                                           
+                'fighterrail' => '/server/model/systems/baseSystems.php', 
+                
+                //DEFAULT SHUTTLES
                 'flyer' => '/server/model/ships/Shuttle.php',
                 'flyerprotectorate' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
@@ -3962,7 +3958,25 @@ spl_autoload_register(
                 'sanctuarybaserails' => '/server/model/ships/raiders/SanctuaryBaseRails.php',   
                 'schoonerrails' => '/server/model/ships/raiders/schoonerRails.php',                   
                 'slooprails' => '/server/model/ships/raiders/SloopRails.php',                
-                'fessarails' => '/server/model/ships/balosian/fessaRails.php',                
+                'fessarails' => '/server/model/ships/balosian/fessaRails.php',
+                
+                //SHADOW FIGHTER BOMBS
+                'shadowhangar' => '/server/model/systems/baseSystems.php',
+                'shadowfightercutoff' => '/server/model/cricialClasses.php',  
+                'shadowfighterbomb' => '/server/model/weapons/specialWeapons.php',  
+				'shadowbattlecruiserbomb' => '/server/model/ships/shadows/shadowBattleCruiserBomb.php',
+				'shadowcarrierbomb' => '/server/model/ships/shadows/shadowCarrierBomb.php',
+				'shadowcarrierprimordialbomb' => '/server/model/ships/shadows/shadowCarrierPrimordialBomb.php',
+				'shadowcruiserbomb' => '/server/model/ships/shadows/shadowCruiserBomb.php',
+				'shadowcruiserprimordialbomb' => '/server/model/ships/shadows/shadowCruiserPrimordialBomb.php',
+				'shadowdestroyerbomb' => '/server/model/ships/shadows/shadowDestroyerBomb.php',
+				'shadowdestroyerscoutbomb' => '/server/model/ships/shadows/shadowDestroyerScoutBomb.php',
+				'shadowdestroyerstrikebomb' => '/server/model/ships/shadows/shadowDestroyerStrikeBomb.php',
+				'shadowdreadnoughtbomb' => '/server/model/ships/shadows/shadowDreadnoughtBomb.php',
+				'shadowdreadnoughtprimordialbomb' => '/server/model/ships/shadows/shadowDreadnoughtPrimordialBomb.php',
+				'shadowpatrolcruiserbomb' => '/server/model/ships/shadows/shadowPatrolCruiserBomb.php',
+				'shadowpatrolcruiserprimordialbomb' => '/server/model/ships/shadows/shadowPatrolCruiserPrimordialBomb.php',
+				'shadowregenbasebomb' => '/server/model/ships/shadows/shadowRegenBaseBomb.php',                
                 
 
 						//Satyra (Wolfgang campaign)

@@ -2627,33 +2627,36 @@ class HangarOps {
 
 	/* === Stage S (S-f): Fighter Bomb launch ================================ *
 	 *
-	 * The Fighter Bomb (a separate ShadowFighterBomb weapon — NOT a Hangar) is
-	 * the ONLY way integrated fighters leave a ShadowHangar (ordinary bay launch
-	 * is disabled for ShadowHangars — see canLaunch). It bursts the ENTIRE held
-	 * integrated-fighter pool out as ONE flight at a TARGET HEX (not the carrier
-	 * hex), sharing the carrier's heading+speed, unable to act until next turn
-	 * (the same LaunchedThisTurn no-act marker an ordinary launch applies).
+	 * The Fighter Bomb (a separate ShadowFighterBomb weapon — NOT a Hangar) is the
+	 * ONLY way integrated fighters leave a ShadowHangar (ordinary bay launch is
+	 * disabled for ShadowHangars — see canLaunch). It bursts held integrated
+	 * fighters out at a TARGET HEX (not the carrier hex), sharing the carrier's
+	 * heading+speed, unable to act until next turn (the LaunchedThisTurn no-act
+	 * marker an ordinary launch applies).
 	 *
-	 * Called from ShadowFighterBomb::beforeFiringOrderResolution on the live
-	 * Fire-Phase advance (prepareFiring runs once per turn there, NOT on replay
-	 * — same lifecycle as BallisticMineLauncher::createLoiteringMine). It spawns
-	 * a persisted ship row + a replay note; on reload the note re-establishes the
-	 * structure-coupling baseline (onIndividualNotesLoaded), so the burst is NOT
-	 * re-rolled/re-spawned.
+	 * Called from ShadowFighterBomb::fire ONCE PER FIRE ORDER on the live Fire-Phase
+	 * advance (replay-idempotent via the fire order's rolled>0 guard). A launch
+	 * larger than the flight-size cap (e.g. 24 fighters, max 9/flight) spawns
+	 * MULTIPLE flights, all stacked at the target hex.
 	 *
-	 * Returns the new flight id, or null if there was nothing to launch (no
-	 * surviving ShadowHangar, or the held pool is empty — e.g. all integrated
-	 * fighters were lost on a previous turn). A bomb that finds an empty pool
-	 * simply does nothing (the weapon "cannot fire" per the design).
+	 * SPLIT MODEL (no note transport — the client sends fire orders directly):
+	 *   - MANUAL split: the client emits ONE fire order PER flight the player chose,
+	 *     each with $shots = that flight's size (<=cap). Each fire() call passes that
+	 *     order's $shots as $count here, so this spawns ONE flight of that size. The
+	 *     combat log groups the same-hex orders into a single "Fighter Bomb" entry.
+	 *   - AUTO split: the client emits ONE fire order with $shots = total; this
+	 *     auto-splits $count into ceil(n/cap) flights of <=cap each (24 → 9+9+6).
+	 *   $flightSizes is an optional explicit list (not currently used by the client —
+	 *     manual split rides one-order-per-flight instead — but supported for callers
+	 *     that want to pass an exact partition in a single call).
 	 *
-	 * $spawnPos is the OffsetCoordinate of the target hex (from the bomb's fire
-	 * order x/y). $count is how many integrated fighters the player chose to
-	 * launch THIS shot (the fire order's $shots, set by the client count picker);
-	 * it is CLAMPED to the held pool, and <=0 / null means "the whole pool". A
-	 * partial launch leaves the remainder docked for a later bomb. The carrier-hex
-	 * spawn variant is performLaunch above.
+	 * Returns the FIRST spawned flight id, or null if nothing launched (no surviving
+	 * ShadowHangar, or the held pool is empty — e.g. all integrated fighters were lost
+	 * a previous turn; the bomb then "cannot fire"). $count is CLAMPED to the held
+	 * pool; <=0/null means "the whole remaining pool". A partial launch leaves the
+	 * remainder docked. The carrier-hex spawn variant is performLaunch above.
 	 */
-	public static function performBombLaunch($carrier, $spawnPos, $gamedata, $count = null){
+	public static function performBombLaunch($carrier, $spawnPos, $gamedata, $count = null, $flightSizes = null){
 		if (!($spawnPos instanceof OffsetCoordinate)) return null;
 
 		//Pool lives on the carrier's primary ShadowHangar (the same bay that holds
@@ -2676,39 +2679,131 @@ class HangarOps {
 		}
 		if ($held <= 0) return null;   //empty hangar — bomb cannot fire
 
-		//Burst = the player's chosen count, clamped to the held pool. <=0/null =
-		//"launch the whole pool" (defensive default; the client always sends a count).
-		$burst = ($count === null || (int)$count <= 0) ? $held : min($held, (int)$count);
+		//Resolve the per-flight size list. A bomb launch can exceed the flight-size
+		//cap (e.g. 24 fighters, max 9/flight), so it spawns MULTIPLE flights:
+		//  - explicit $flightSizes (manual split the player chose) — clamp each to the
+		//    cap and to the held pool, drop non-positive;
+		//  - else auto-split $count (<=0/null ⇒ whole pool) into ceil(n/cap) flights of
+		//    <=cap each (e.g. 24 → 9+9+6).
+		//Cap = min(class flight-size limit, fighters currently HELD) — a bay holding
+		//fewer than the limit (ShadowCruiser: 6) can never form a flight bigger than
+		//its stock, so the cap tracks the held pool (user 2026-06-11).
+		$cap = min(self::bombFlightSizeCap($phpclass), $held);
+		$sizes = self::resolveBombFlightSizes($flightSizes, $count, $held, $cap);
+		if (empty($sizes)) return null;
 
 		//Spawn geometry: TARGET hex, carrier heading/speed/facing. Unlike an
 		//ordinary launch there is no hangar-direction offset — the fighters just
-		//appear at the bombed hex pointing the way the carrier was pointing.
+		//appear (stacked) at the bombed hex pointing the way the carrier was pointing.
 		$lastMove = $carrier->getLastMovement();
 		if (!$lastMove) return null;
 		$heading = (int)$lastMove->heading;
 		$facing  = (((int)$lastMove->facing % 6) + 6) % 6;
 		$speed   = (int)$lastMove->speed;
 
-		$flightName = self::flightNameFor($phpclass, $carrier);
-		$flight = self::spawnLaunchedKFlight($phpclass, $burst, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, /*sourceDocked*/ $carrier, $gamedata);
-		if (!$flight) return null;
+		$firstId = null;
+		foreach ($sizes as $sz){
+			$sz = (int)$sz;
+			if ($sz <= 0) continue;
 
-		//Bombed fighters are integrated — they stay ATTACHED (their structure box is
-		//still marked) while in space, exactly like a bay-launched integrated flight.
-		//Register the flight id + active-craft baseline so syncIntegratedStructureCoupling
-		//tracks combat losses → +1 structure box and cut-off when structure drops.
-		self::registerLaunchedIntegratedFlight($carrier, $flight->id, (int)$flight->countActiveCraft($gamedata->turn));
+			$flightName = self::flightNameFor($phpclass, $carrier);
+			$flight = self::spawnLaunchedKFlight($phpclass, $sz, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, /*sourceDocked*/ $carrier, $gamedata);
+			if (!$flight) continue;
+			if ($firstId === null) $firstId = $flight->id;
 
-		//Drain $burst worth of integrated fighters (in encounter order). An entry
-		//consumed in full is dropped; a partially-consumed entry keeps its remainder
-		//(flightSize -= take) so unlaunched fighters stay docked for a later bomb.
-		//Any dockedFlightId fragment FULLY consumed is retired (destroyAllFighters)
-		//so it leaves no ghost row (mirrors a full extract in consumeStashesForLaunch).
-		//A dockedFlightId fragment only PARTIALLY consumed keeps its row + remainder —
-		//held integrated entries are flightSize-1 (one fighter each), so a partial
-		//take on a single entry doesn't arise in practice, but the remainder branch is
-		//kept correct for safety.
-		$remaining = $burst;
+			//Bombed fighters are integrated — they stay ATTACHED (their structure box is
+			//still marked) while in space, exactly like a bay-launched integrated flight.
+			//Register each flight's id + active-craft baseline so
+			//syncIntegratedStructureCoupling tracks combat losses → +1 structure box and
+			//cut-off when structure drops.
+			self::registerLaunchedIntegratedFlight($carrier, $flight->id, (int)$flight->countActiveCraft($gamedata->turn));
+
+			//Drain $sz fighters for THIS flight from the held pool.
+			self::drainBombPool($hangar, $phpclass, $sz, $gamedata);
+
+			//Per-flight LaunchedThisTurn (-50, can't act this turn). The carrier -20 is
+			//idempotent per turn (applyHangarOperationsCrit), so applying it on every
+			//flight is harmless, but we only need it once — applyLaunchCrits handles both.
+			self::applyLaunchCrits($flight, $carrier, $gamedata, false);
+			$carrierCritApplied = true;
+
+			//Replay note per spawned flight (history render + coupling-baseline re-seed).
+			$note = new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+				$carrier->id, $hangar->id,
+				'hangarLaunchEvent', 'Fighter Bomb launched',
+				$flight->id . ':' . $phpclass . ':' . $sz . ':bomb'
+			);
+			Manager::insertIndividualNote($note);
+		}
+
+		if ($firstId === null) return null;   //nothing actually spawned
+		return $firstId;
+	}
+
+	/* Max fighters per flight for a bomb-spawned class. Honors an explicitly-set
+	 * $maxFlightSize on the flight class; otherwise derives it from jinkinglimit
+	 * the same way the (commented) FighterFlight ctor rule would: >9 ⇒ 12 (light/
+	 * ultralight), else 9. ShadowMediumFighterFlight (jink 8) ⇒ 9. */
+	public static function bombFlightSizeCap($phpclass){
+		$cap = 9;
+		if (is_string($phpclass) && $phpclass !== '' && class_exists($phpclass)){
+			try {
+				$probe = new $phpclass(-1, -1, 'probe', 0);
+				$mfs = (int)($probe->maxFlightSize ?? 0);
+				if ($mfs > 0) return $mfs;
+				$jink = (int)($probe->jinkinglimit ?? 0);
+				$cap = ($jink > 9) ? 12 : 9;
+			} catch (\Throwable $ex) {
+				$cap = 9;   //defensive — never let a probe failure break firing
+			}
+		}
+		return max(1, $cap);
+	}
+
+	/* Build the per-flight size list for a bomb launch, each entry <= $cap and the
+	 * total <= $held. Prefers an explicit $flightSizes list (the manual split);
+	 * otherwise auto-splits $count (<=0/null ⇒ whole $held) into ceil(n/cap) flights
+	 * (e.g. 24, cap 9 ⇒ [9,9,6]). Any explicit entry over the cap is itself split. */
+	public static function resolveBombFlightSizes($flightSizes, $count, $held, $cap){
+		$cap = max(1, (int)$cap);
+		$held = max(0, (int)$held);
+		$out = array();
+
+		if (is_array($flightSizes) && !empty($flightSizes)){
+			$budget = $held;
+			foreach ($flightSizes as $s){
+				$s = (int)$s;
+				if ($s <= 0 || $budget <= 0) continue;
+				$s = min($s, $budget);
+				$budget -= $s;
+				//A manual entry larger than the cap is itself broken into <=cap chunks.
+				while ($s > 0){
+					$chunk = min($cap, $s);
+					$out[] = $chunk;
+					$s -= $chunk;
+				}
+			}
+			return $out;
+		}
+
+		//Auto-split path.
+		$total = ($count === null || (int)$count <= 0) ? $held : min($held, (int)$count);
+		while ($total > 0){
+			$chunk = min($cap, $total);
+			$out[] = $chunk;
+			$total -= $chunk;
+		}
+		return $out;
+	}
+
+	/* Remove $n integrated fighters of $phpclass from a ShadowHangar's held pool
+	 * (encounter order). Whole entries are dropped (retiring any backing fragment);
+	 * a partially-consumed entry keeps its remainder. Factored out of
+	 * performBombLaunch so a multi-flight bomb drains the pool per flight. */
+	private static function drainBombPool($hangar, $phpclass, $n, $gamedata){
+		$remaining = max(0, (int)$n);
+		if ($remaining <= 0 || !is_array($hangar->hangarUsage)) return;
 		$newUsage = array();
 		foreach ($hangar->hangarUsage as $e){
 			if ($remaining > 0 && ($e['phpclass'] ?? '') === $phpclass && empty($e['cannotLaunch'])){
@@ -2716,14 +2811,12 @@ class HangarOps {
 				$take = min($entrySize, $remaining);
 				$remaining -= $take;
 				if ($take >= $entrySize){
-					//Whole entry consumed → drop it; retire any backing fragment.
 					$fragId = (int)($e['dockedFlightId'] ?? 0);
 					if ($fragId > 0){
 						$frag = $gamedata->getShipById($fragId);
 						if ($frag instanceof FighterFlight) self::destroyAllFighters($frag, $gamedata);
 					}
 				} else {
-					//Partial: keep the remainder docked.
 					$e['flightSize'] = $entrySize - $take;
 					$newUsage[] = $e;
 				}
@@ -2732,26 +2825,6 @@ class HangarOps {
 			}
 		}
 		$hangar->hangarUsage = $newUsage;
-
-		//Replay note (tied to the carrier + bomb's hangar) so history can render
-		//the burst and onIndividualNotesLoaded can re-seed the coupling baseline.
-		$note = new IndividualNote(
-			-1,
-			$gamedata->id,
-			$gamedata->turn,
-			$gamedata->phase,
-			$carrier->id,
-			$hangar->id,
-			'hangarLaunchEvent',
-			'Fighter Bomb launched',
-			$flight->id . ':' . $phpclass . ':' . $burst . ':bomb'
-		);
-		Manager::insertIndividualNote($note);
-
-		//Same launch initiative penalty an ordinary integrated launch carries: the
-		//flight-side LaunchedThisTurn (-50, can't act this turn) + the carrier -20.
-		self::applyLaunchCrits($flight, $carrier, $gamedata, false);
-		return $flight->id;
 	}
 
 	/* Apply initiative-penalty criticals after a successful launch:

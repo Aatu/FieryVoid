@@ -2651,26 +2651,41 @@ window.weaponManager = {
         return pool;
     },
 
-    // Stage S (S-f): pop the standard numeric count picker for a Fighter Bomb shot
-    // (1..remaining held fighters), then build the single hex fire order with
-    // shots = chosen count. The server (performBombLaunch) clamps to the live pool
-    // and launches that many at the target hex.
+    // Stage S (S-f): max fighters per flight a Fighter Bomb can spawn. Mirrors the
+    // server HangarOps cap: min(class flight-size limit, fighters currently HELD).
+    // The class limit for the only bomb-launched class (ShadowMediumFighterFlight,
+    // jinking 8) is 9; clamped to $pool so a bay holding fewer (ShadowCruiser: 6)
+    // never offers a per-flight size bigger than its stock.
+    shadowFighterBombFlightCap: function shadowFighterBombFlightCap(carrier, pool) {
+        var classLimit = 9;
+        var p = parseInt(pool, 10);
+        if (!isNaN(p) && p > 0 && p < classLimit) return p;
+        return classLimit;
+    },
+
+    // Stage S (S-f): open the Fighter Bomb launch dialog (count + auto-split toggle /
+    // manual per-flight sizes), then emit the fire order(s) at the target hex. A launch
+    // bigger than the flight-size cap must spawn multiple flights:
+    //   - AUTO (checkbox on): ONE fire order with shots = total; the server splits it.
+    //   - MANUAL (checkbox off): ONE fire order PER chosen flight, shots = that size.
+    // The combat log groups the same-hex orders into one "Fighter Bomb" entry.
     queueShadowFighterBombOrder: function queueShadowFighterBombOrder(carrier, weapon, hexpos, type) {
         var pool = weaponManager.shadowFighterBombPool(carrier);
         if (pool <= 0) {
             confirm.warning("No integrated fighters left in the hangar to launch.");
             return;
         }
+        var cap = weaponManager.shadowFighterBombFlightCap(carrier, pool);
 
-        confirm.askForMultipleValues(
-            "Fighter Bomb: how many fighters to launch?",
-            [{ id: 'count', label: 'Fighters', max: pool, value: pool }],
-            function (results) {
-                var count = parseInt(results.count, 10);
-                if (isNaN(count) || count < 1) count = 1;
-                if (count > pool) count = pool;
+        confirm.shadowFighterBomb(carrier, pool, cap, function (result) {
+            var sizes = (result && Array.isArray(result.sizes)) ? result.sizes : [];
+            if (sizes.length === 0) return;
 
-                weaponManager.removeFiringOrder(carrier, weapon);
+            // Replace any prior bomb order(s) on this weapon, then emit one per flight.
+            weaponManager.removeFiringOrder(carrier, weapon);
+            sizes.forEach(function (sz) {
+                sz = parseInt(sz, 10);
+                if (isNaN(sz) || sz < 1) return;
                 var fireid = carrier.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
                 weapon.fireOrders.push({
                     id: fireid,
@@ -2681,20 +2696,20 @@ window.weaponManager = {
                     calledid: -1,
                     turn: gamedata.turn,
                     firingMode: weapon.firingMode,
-                    shots: count,                       //the chosen launch count
+                    shots: sz,                          //this flight's fighter count
                     x: hexpos.q,
                     y: hexpos.r,
                     damageclass: weapon.data["Weapon type"].toLowerCase()
                 });
+            });
 
-                weaponManager.unSelectWeapon(carrier, weapon);
-                webglScene.customEvent('SystemDataChanged', { ship: carrier, system: weapon });
-                webglScene.customEvent('HexTargeted', { shooter: carrier, hexagon: hexpos });
-                //Refresh the carrier's ShadowHangar tooltip(s) so their capacity line
-                //immediately shows "(Launching N)" from this bomb order (S-f).
-                weaponManager.refreshShadowHangarTooltips(carrier);
-            }
-        );
+            weaponManager.unSelectWeapon(carrier, weapon);
+            webglScene.customEvent('SystemDataChanged', { ship: carrier, system: weapon });
+            webglScene.customEvent('HexTargeted', { shooter: carrier, hexagon: hexpos });
+            //Refresh the carrier's ShadowHangar tooltip(s) so their capacity line
+            //immediately shows "(Launching N)" from this bomb order (S-f).
+            weaponManager.refreshShadowHangarTooltips(carrier);
+        });
     },
 
     // Stage S (S-f): recompute + redraw the ShadowHangar tooltip(s) on a carrier so
