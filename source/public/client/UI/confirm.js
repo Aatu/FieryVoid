@@ -2755,12 +2755,12 @@ window.confirm = {
             '</span></div>').appendTo(container);
 
         // Auto-split toggle (checked by default). Hidden when not splittable.
-        // bombAutoSplitRow packs the label + checkbox together on the left (the
-        // checkbox sits to the RIGHT of the text, snug) rather than the default
-        // space-between spread.
+        // bombAutoSplitRow packs the checkbox + label together and pushes the pair
+        // to the RIGHT edge (checkbox on the LEFT of the text, snug) rather than the
+        // default space-between spread.
         var autoRow = $('<div class="multi-value-row bombAutoSplitRow"></div>').appendTo(container);
-        $('<span class="multi-value-label" style="font-style:normal;">Split Flights Automatically</span>').appendTo(autoRow);
         var autoChk = $('<input type="checkbox" class="multiConfirmInput" checked>').appendTo(autoRow);
+        $('<span class="multi-value-label" style="font-style:normal;">Split Flights Automatically</span>').appendTo(autoRow);
         if (!splittable) autoRow.hide();
 
         // --- AUTO section: single total input (also the sole input when not splittable) ---
