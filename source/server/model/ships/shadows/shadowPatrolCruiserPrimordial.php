@@ -14,8 +14,7 @@ class ShadowPatrolCruiserPrimordial extends MediumShip{
         $this->canvasSize = 200;
 	    $this->isd = 'Primordial';
         $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
-		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial    
-		$this->variantOf = 'NONE';		
+		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial    	
 		
         $this->forwardDefense = 14;
         $this->sideDefense = 13;

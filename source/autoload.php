@@ -3969,14 +3969,9 @@ spl_autoload_register(
 				'shadowcarrierprimordialbomb' => '/server/model/ships/shadows/shadowCarrierPrimordialBomb.php',
 				'shadowcruiserbomb' => '/server/model/ships/shadows/shadowCruiserBomb.php',
 				'shadowcruiserprimordialbomb' => '/server/model/ships/shadows/shadowCruiserPrimordialBomb.php',
-				'shadowdestroyerbomb' => '/server/model/ships/shadows/shadowDestroyerBomb.php',
-				'shadowdestroyerscoutbomb' => '/server/model/ships/shadows/shadowDestroyerScoutBomb.php',
-				'shadowdestroyerstrikebomb' => '/server/model/ships/shadows/shadowDestroyerStrikeBomb.php',
 				'shadowdreadnoughtbomb' => '/server/model/ships/shadows/shadowDreadnoughtBomb.php',
 				'shadowdreadnoughtprimordialbomb' => '/server/model/ships/shadows/shadowDreadnoughtPrimordialBomb.php',
-				'shadowpatrolcruiserbomb' => '/server/model/ships/shadows/shadowPatrolCruiserBomb.php',
-				'shadowpatrolcruiserprimordialbomb' => '/server/model/ships/shadows/shadowPatrolCruiserPrimordialBomb.php',
-				'shadowregenbasebomb' => '/server/model/ships/shadows/shadowRegenBaseBomb.php',                
+				//'shadowregenbasebomb' => '/server/model/ships/shadows/shadowRegenBaseBomb.php',                
                 
 
 						//Satyra (Wolfgang campaign)

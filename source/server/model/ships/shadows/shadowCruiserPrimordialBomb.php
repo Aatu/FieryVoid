@@ -1,18 +1,20 @@
 <?php
-class shadowCruiserBomb extends MediumShip{
+class ShadowCruiserPrimordialBomb extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 2750;
+		$this->pointCost = round(2750*1.2+10*15);//Primordial: +20%; Additional Tendril: Tendril capacity * Diffuser output
 		$this->faction = "Shadow Association";
-        $this->phpclass = "shadowCruiserBomb";
+        $this->phpclass = "ShadowCruiserPrimordialBomb";
         $this->imagePath = "img/ships/ShadowCruiser.png";
-        $this->shipClass = "Cruiser";
+        $this->shipClass = "Cruiser (Primordial)";
+        $this->variantOf = "Cruiser";
         $this->canvasSize = 200;
-	    $this->isd = 'Ancient';
+	    $this->isd = 'Primordial';
+		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
-		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+		$this->variantOf = 'NONE';		
        
         $this->forwardDefense = 16;
         $this->sideDefense = 15;
@@ -78,16 +80,13 @@ class shadowCruiserBomb extends MediumShip{
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 4, 8));
-		//Stage S: integrated-fighter bay (crit-immune; forms fighters from Structure).
-		//ShadowHangar keeps $name = 'hangar' so it flows through the standard fighter
-		//launch/dock UI. Swapped IN PLACE (same construction position → same system id)
-		//to avoid the positional-system-id trap on existing ShadowCruiser games.
+		//$hangar = new Hangar(5, 6, 6);
 		$this->addPrimarySystem(new ShadowHangar(5, 6, 6));
 		//Stage S (S-f): Fighter Bomb — the integrated hangar's ONLY launch path.
 		//Bursts the ShadowHangar's held fighters out at a target hex (arc 300..60,
 		//range 10). A Weapon, NOT a Hangar (sibling classes), mounted ALONGSIDE the
-		//ShadowHangar above. Not on the hitChart — Shadow systems are untargetable anyway (set below).		
-		$this->addPrimarySystem(new ShadowFighterBomb(0, 1, 0, 300, 60)); //armour, maxhealth, powerReq(0), startArc, endArc		
+		//ShadowHangar above. Not on the hitChart — Shadow systems are untargetable anyway (set below).	
+		$this->addPrimarySystem(new ShadowFighterBomb(0, 1, 0, 300, 60)); //armour, maxhealth, powerReq(0), startArc, endArc	
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
 		
@@ -107,6 +106,9 @@ class shadowCruiserBomb extends MediumShip{
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
 		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
+		$diffuserPort->addTendril($tendril);
+		$this->addLeftSystem($tendril);
+		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
 		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
@@ -157,6 +159,9 @@ class shadowCruiserBomb extends MediumShip{
 		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
+		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+		$diffuserStbd->addTendril($tendril);
+		$this->addRightSystem($tendril);
         $this->addPrimarySystem($diffuserStbd);
 		
 		
@@ -165,7 +170,7 @@ class shadowCruiserBomb extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new MolecularSlicerBeamM(5, 0, 0, 300, 60));
+        $this->addFrontSystem(new MolecularSlicerBeamH(5, 0, 0, 300, 60));
         $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 300, 60));
         
 		
@@ -178,7 +183,7 @@ class shadowCruiserBomb extends MediumShip{
        	   
 	    //Structure
         $this->addPrimarySystem(new Structure( 6, 40));
-
+		
 		/*systems on Shadow ships CANNOT be targeted by called shots!*/
 		$this->notes .= "<br>Cannot be targeted by called shots.";
 		foreach ($this->systems as $sys){
@@ -193,7 +198,7 @@ class shadowCruiserBomb extends MediumShip{
 				9 => "0:Energy Diffuser",
 				11 => "2:BioThruster",
 				12 => "0:Self Repair",
-				13 => "1:Slicer Beam",
+				13 => "1:Heavy Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
@@ -206,7 +211,7 @@ class shadowCruiserBomb extends MediumShip{
 				9 => "0:Energy Diffuser",
 				11 => "2:BioThruster",
 				12 => "0:Self Repair",
-				13 => "1:Slicer Beam",
+				13 => "1:Heavy Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
@@ -219,7 +224,7 @@ class shadowCruiserBomb extends MediumShip{
 				9 => "0:Energy Diffuser",
 				11 => "2:BioThruster",
 				12 => "0:Self Repair",
-				13 => "1:Slicer Beam",
+				13 => "1:Heavy Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
@@ -234,4 +239,3 @@ class shadowCruiserBomb extends MediumShip{
 
 
 ?>
-

@@ -1,33 +1,36 @@
 <?php
-class shadowCruiserBomb extends MediumShip{
+class ShadowDreadnoughtBomb extends MediumShip{
     
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 2750;
+		$this->pointCost = 4250;
 		$this->faction = "Shadow Association";
-        $this->phpclass = "shadowCruiserBomb";
-        $this->imagePath = "img/ships/ShadowCruiser.png";
-        $this->shipClass = "Cruiser";
-        $this->canvasSize = 200;
-	    $this->isd = 'Ancient';
+        $this->phpclass = "ShadowDreadnoughtBomb";
+        $this->imagePath = "img/ships/ShadowDreadnought.png";
+        $this->shipClass = "Dreadnought";
+        $this->canvasSize = 265;
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+	    $this->isd = 'Ancient';
        
-        $this->forwardDefense = 16;
-        $this->sideDefense = 15;
+        $this->forwardDefense = 18;
+        $this->sideDefense = 17;
+	    
+        $this->limited = 33;
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         //$this->gravitic = true;
 		$this->advancedArmor = true;   
-        $this->turncost = 1;
-        $this->turndelaycost = 0.33;
-        $this->accelcost = 3;
-        $this->rollcost = 2;
-        $this->pivotcost = 2;
+        $this->turncost = 1.5;
+        $this->turndelaycost = 0.5;
+        $this->accelcost = 4;
+        $this->rollcost = 4;
+        $this->pivotcost = 4;
 		$this->iniativebonus = 2 *5;
 		
-		$this->fighters = array("normal"=>6);
+		
+		$this->fighters = array("normal"=>12);
 		$this->notes = "Atmospheric capable";//even largest Shadow ships are atmospheric capable
         
 		
@@ -44,27 +47,35 @@ class shadowCruiserBomb extends MediumShip{
 		//BioDrive - first so javascript routines can easily find biothrusters they'll be looking for a lot!
 		$bioDrive = new BioDrive(); //BioDrive just is, all parameters needed are calculated automatically
 		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
 		$bioDrive->addThruster($bioThruster);
 		$this->addAftSystem($bioThruster);
 		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
 		$bioDrive->addThruster($bioThruster);
 		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+	    
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
 		$bioDrive->addThruster($bioThruster);
 		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+	    
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
 		$bioDrive->addThruster($bioThruster);
 		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+	    
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
 		$bioDrive->addThruster($bioThruster);
 		$this->addAftSystem($bioThruster);
-		
-		$bioThruster = new BioThruster(5,8,3); //armour, health, output
+	    
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+	    
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
+		$bioDrive->addThruster($bioThruster);
+		$this->addAftSystem($bioThruster);
+	    
+		$bioThruster = new BioThruster(6,8,3); //armour, health, output
 		$bioDrive->addThruster($bioThruster);
 		$this->addAftSystem($bioThruster);
 		
@@ -72,89 +83,89 @@ class shadowCruiserBomb extends MediumShip{
 		
 		
         //Primary systems
-        $this->addPrimarySystem(new Reactor(6, 24, 0, 0));
-        $this->addPrimarySystem(new ShadowPilot(6, 12, 0, 0));
-		$scanner = new Scanner(6, 20, 4, 14);
+        $this->addPrimarySystem(new Reactor(6, 25, 0, 0));
+        $this->addPrimarySystem(new ShadowPilot(7, 18, 0, 0));
+		$scanner = new Scanner(6, 24, 5, 14);
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
-		$this->addPrimarySystem(new PhasingDrive(6, 20, 4, 8));
-		//Stage S: integrated-fighter bay (crit-immune; forms fighters from Structure).
-		//ShadowHangar keeps $name = 'hangar' so it flows through the standard fighter
-		//launch/dock UI. Swapped IN PLACE (same construction position → same system id)
-		//to avoid the positional-system-id trap on existing ShadowCruiser games.
-		$this->addPrimarySystem(new ShadowHangar(5, 6, 6));
+		$this->addPrimarySystem(new PhasingDrive(6, 20, 5, 8));
+        //$this->addPrimarySystem(new Hangar(5, 12,12));
+		$this->addPrimarySystem(new ShadowHangar(5, 12, 12));
 		//Stage S (S-f): Fighter Bomb — the integrated hangar's ONLY launch path.
 		//Bursts the ShadowHangar's held fighters out at a target hex (arc 300..60,
 		//range 10). A Weapon, NOT a Hangar (sibling classes), mounted ALONGSIDE the
-		//ShadowHangar above. Not on the hitChart — Shadow systems are untargetable anyway (set below).		
+		//ShadowHangar above. Added LAST on purpose: system ids are construction-order
+		//positional, so appending after Structure keeps every existing system id
+		//stable on in-use ShadowCruiser games (the positional-system-id trap). Not
+		//on the hitChart — Shadow systems are untargetable anyway (set below).		
 		$this->addPrimarySystem(new ShadowFighterBomb(0, 1, 0, 300, 60)); //armour, maxhealth, powerReq(0), startArc, endArc		
-        $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
-        $this->addPrimarySystem(new SelfRepair(3, 3, 2)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
+        $this->addPrimarySystem(new SelfRepair(3, 6, 4)); //armor, structure, output
 		
 		
 		//EnergyDiffuser		
-		$diffuserPort = new EnergyDiffuser(5, 21, 15, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserPort = new EnergyDiffuser(6, 28, 25, 180, 0);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$tendril=new DiffuserTendril(40,'L');//absorbtion capacity,side
+		$diffuserPort->addTendril($tendril);
+		$this->addLeftSystem($tendril);
 		$tendril=new DiffuserTendril(30,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(30,'L');//absorbtion capacity,side
+		$diffuserPort->addTendril($tendril);
+		$this->addLeftSystem($tendril);
+		$tendril=new DiffuserTendril(25,'L');//absorbtion capacity,side
+		$diffuserPort->addTendril($tendril);
+		$this->addLeftSystem($tendril);
+		$tendril=new DiffuserTendril(25,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
 		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(20,'L');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'L');//absorbtion capacity,side
 		$diffuserPort->addTendril($tendril);
 		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);
-		$tendril=new DiffuserTendril(10,'L');//absorbtion capacity,side
-		$diffuserPort->addTendril($tendril);
-		$this->addLeftSystem($tendril);
-        $this->addPrimarySystem($diffuserPort);
+        	$this->addPrimarySystem($diffuserPort);
 		
-		$diffuserStbd = new EnergyDiffuser(5, 21, 15, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$diffuserStbd = new EnergyDiffuser(6, 28, 25, 0, 180);//($armour, $maxhealth, $dissipation, $startArc, $endArc)
+		$tendril=new DiffuserTendril(40,'R');//absorbtion capacity,side
+		$diffuserStbd->addTendril($tendril);
+		$this->addRightSystem($tendril);
 		$tendril=new DiffuserTendril(30,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(30,'R');//absorbtion capacity,side
+		$diffuserStbd->addTendril($tendril);
+		$this->addRightSystem($tendril);
+		$tendril=new DiffuserTendril(25,'R');//absorbtion capacity,side
+		$diffuserStbd->addTendril($tendril);
+		$this->addRightSystem($tendril);
+		$tendril=new DiffuserTendril(25,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
 		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(20,'R');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
-		$diffuserStbd->addTendril($tendril);
-		$this->addRightSystem($tendril);
-		$tendril=new DiffuserTendril(10,'R');//absorbtion capacity,side
+		$tendril=new DiffuserTendril(15,'R');//absorbtion capacity,side
 		$diffuserStbd->addTendril($tendril);
 		$this->addRightSystem($tendril);
         $this->addPrimarySystem($diffuserStbd);
@@ -165,8 +176,10 @@ class shadowCruiserBomb extends MediumShip{
 		
 		
 		//weapons - Forward for visual reasons!
-        $this->addFrontSystem(new MolecularSlicerBeamM(5, 0, 0, 300, 60));
-        $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 300, 60));
+        $this->addFrontSystem(new MolecularSlicerBeamM(5, 0, 0, 240, 0));
+        $this->addFrontSystem(new MolecularSlicerBeamM(5, 0, 0, 0, 120));
+        $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 240, 0));
+        $this->addFrontSystem(new VortexDisruptor(5, 0, 0, 0, 120));
         
 		
 		//technical thrusters - unlimited, like for MCVs		
@@ -177,8 +190,8 @@ class shadowCruiserBomb extends MediumShip{
 
        	   
 	    //Structure
-        $this->addPrimarySystem(new Structure( 6, 40));
-
+        $this->addPrimarySystem(new Structure( 6, 72));
+		
 		/*systems on Shadow ships CANNOT be targeted by called shots!*/
 		$this->notes .= "<br>Cannot be targeted by called shots.";
 		foreach ($this->systems as $sys){
@@ -189,11 +202,11 @@ class shadowCruiserBomb extends MediumShip{
 	
 		$this->hitChart = array(
 			0=> array(
-				6 => "Structure",
-				9 => "0:Energy Diffuser",
-				11 => "2:BioThruster",
-				12 => "0:Self Repair",
-				13 => "1:Slicer Beam",
+				5 => "Structure",
+				7 => "0:Energy Diffuser",
+				9 => "2:BioThruster",
+				10 => "0:Self Repair",
+				12 => "1:Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
@@ -202,11 +215,11 @@ class shadowCruiserBomb extends MediumShip{
 				20 => "C&C", //the only difference between sections - outer 19-20 hits are rerolled on Primary table, which is the only chance to hit Pilot
 			),
 			1=> array(
-				6 => "Structure",
-				9 => "0:Energy Diffuser",
-				11 => "2:BioThruster",
-				12 => "0:Self Repair",
-				13 => "1:Slicer Beam",
+				5 => "Structure",
+				7 => "0:Energy Diffuser",
+				9 => "2:BioThruster",
+				10 => "0:Self Repair",
+				12 => "1:Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
@@ -215,11 +228,11 @@ class shadowCruiserBomb extends MediumShip{
 				20 => "Primary",
 			),
 			2=> array(
-				6 => "Structure",
-				9 => "0:Energy Diffuser",
-				11 => "2:BioThruster",
-				12 => "0:Self Repair",
-				13 => "1:Slicer Beam",
+				5 => "Structure",
+				7 => "0:Energy Diffuser",
+				9 => "2:BioThruster",
+				10 => "0:Self Repair",
+				12 => "1:Slicer Beam",
 				14 => "1:Vortex Disruptor",
 				15 => "0:Hangar",
 				16 => "0:Scanner",
@@ -234,4 +247,3 @@ class shadowCruiserBomb extends MediumShip{
 
 
 ?>
-

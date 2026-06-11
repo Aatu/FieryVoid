@@ -14,8 +14,7 @@ class ShadowPatrolCruiser extends MediumShip{
         $this->shipSizeClass = 2; //it's actually a HCV using MCV layout
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->forwardDefense = 14;
-        $this->sideDefense = 13;
-		$this->variantOf = 'NONE';		
+        $this->sideDefense = 13;	
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         //$this->gravitic = true;
