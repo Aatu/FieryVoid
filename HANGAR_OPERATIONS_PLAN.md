@@ -3210,8 +3210,11 @@ Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:
   "Fighters to launch" count input.
     - CHECKED (default): one Total input; the SERVER auto-splits into ceil(n/cap) flights (24 → 9+9+6).
       Client emits ONE fire order (`shots = total`).
-    - UNCHECKED: per-flight inputs (each ≤ cap, pre-filled with an even split, live "total/pool"
-      readout); client emits ONE fire order PER non-zero flight (`shots = that flight's size`).
+    - UNCHECKED: per-flight inputs (each ≤ cap, pre-filled with the minimum even split e.g. 9+9+6,
+      live "total/pool" readout). **"+ Add another flight"** appends a row (seeded with the remaining
+      unallocated fighters, capped; disabled when none left) so the player can split into MORE/smaller
+      flights than the minimum (24 → 6+6+6+6); each row has a ✕ to remove it (min one row kept). Client
+      emits ONE fire order PER non-zero flight (`shots = that flight's size`).
   **No split-transport plumbing / no note dance / no order merge:** the combat log already GROUPS fire
   orders by shooter+weapon+firingMode+target (`combatLog.js groupByShipAndWeapon`), and every bomb
   order shares the same hex (targetid −1), so the N manual orders collapse into ONE "Fighter Bomb"

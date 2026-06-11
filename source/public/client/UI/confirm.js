@@ -2772,32 +2772,80 @@ window.confirm = {
             if (v < 1 && $(this).val() !== "") $(this).val(1);
         });
 
-        // --- MANUAL section: one input per flight, pre-filled with an even-ish split ---
+        // --- MANUAL section: one input per flight, pre-filled with an even-ish split.
+        // The player may add MORE (smaller) flights than the minimum ceil(pool/cap):
+        // e.g. 24 starts as 9+9+6 but can become 6+6+6+6 via "Add another flight".
         var manualSection = $('<div class="bombManualSection" style="display:none;"></div>').appendTo(container);
         var manualRemaining = $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;"></span></div>').appendTo(manualSection);
+        var flightRowsHolder = $('<div class="bombFlightRows"></div>').appendTo(manualSection);
         var manualInputs = [];
-        var nFlights = Math.ceil(pool / cap);
-        var left = pool;
-        for (var f = 0; f < nFlights; f++) {
-            var preset = Math.min(cap, left);
-            left -= preset;
-            var row = $('<div class="multi-value-row"></div>').appendTo(manualSection);
-            $('<span class="multi-value-label"><span class="multi-value-name">Flight ' + (f + 1) + '</span> <span class="multi-value-max">(Max: ' + cap + ')</span></span>').appendTo(row);
-            var inp = $('<input type="number" class="multi-value-input bombFlightInput" value="' + preset + '" min="0" max="' + cap + '">').appendTo(row);
-            manualInputs.push(inp);
-        }
 
         function manualTotal() {
             var t = 0;
             manualInputs.forEach(function (i) { var v = parseInt(i.val(), 10); if (!isNaN(v) && v > 0) t += v; });
             return t;
         }
+        // Max flights = pool (each flight needs at least 1 fighter). An "extra" flight
+        // is only addable while some fighters remain unallocated (so it has something
+        // to launch) AND we're below that ceiling.
+        function canAddFlight() {
+            return manualInputs.length < pool && manualTotal() < pool;
+        }
+        function renumberRows() {
+            flightRowsHolder.find('.bombFlightLabel').each(function (idx) {
+                $(this).text('Flight ' + (idx + 1));
+            });
+        }
+        function addFlightRow(preset) {
+            var row = $('<div class="multi-value-row bombFlightRow"></div>').appendTo(flightRowsHolder);
+            $('<span class="multi-value-label"><span class="multi-value-name bombFlightLabel">Flight</span> <span class="multi-value-max">(Max: ' + cap + ')</span></span>').appendTo(row);
+            var inp = $('<input type="number" class="multi-value-input bombFlightInput" value="' + Math.max(0, parseInt(preset, 10) || 0) + '" min="0" max="' + cap + '">').appendTo(row);
+            // Per-row remove (kept for ≥2 rows so the player can undo an extra flight).
+            var rm = $('<span class="bombRemoveFlight" title="Remove this flight" style="cursor:pointer;margin-left:8px;color:#FF8080;">✕</span>').appendTo(row);
+            rm.on("click", function () {
+                if (manualInputs.length <= 1) return;   //always keep at least one flight
+                var i = manualInputs.indexOf(inp);
+                if (i !== -1) manualInputs.splice(i, 1);
+                row.remove();
+                renumberRows();
+                refreshManual();
+            });
+            manualInputs.push(inp);
+            renumberRows();
+            return inp;
+        }
+
+        // Initial rows = the minimum even split (9+9+6 for 24).
+        var left = pool;
+        var nFlights = Math.max(1, Math.ceil(pool / cap));
+        for (var f = 0; f < nFlights; f++) {
+            var preset = Math.min(cap, left);
+            left -= preset;
+            addFlightRow(preset);
+        }
+
+        // "Add another flight" — appends a flight seeded with the remaining unallocated
+        // fighters (capped). Disabled (greyed) when nothing's left to give it.
+        var addRow = $('<div class="multi-value-row"></div>').appendTo(manualSection);
+        var addBtn = $('<span class="bombAddFlight" style="cursor:pointer;color:#9FE0FF;text-decoration:underline;">+ Add another flight</span>').appendTo(addRow);
+        function refreshAddState() {
+            if (canAddFlight()) addBtn.css({ opacity: 1, 'pointer-events': 'auto' });
+            else addBtn.css({ opacity: 0.4, 'pointer-events': 'none' });
+        }
+        addBtn.on("click", function () {
+            if (!canAddFlight()) return;
+            var remaining = Math.max(0, pool - manualTotal());
+            addFlightRow(Math.min(cap, remaining));
+            refreshManual();
+        });
+
         function refreshManual() {
             var t = manualTotal();
             var over = t > pool;
             manualRemaining.find('.multi-value-label')
                 .text('Total selected: ' + t + ' / ' + pool + (over ? '  — too many!' : ''))
                 .css('color', over ? '#FF8080' : '');
+            refreshAddState();
         }
         manualSection.on("input change keyup", ".bombFlightInput", function () {
             var v = parseInt($(this).val(), 10);
