@@ -27,7 +27,7 @@ class Hastan extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 22, 4, 12));
         $this->addPrimarySystem(new Engine(6, 24, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
         $this->addPrimarySystem(new GraviticThruster(5, 15, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(5, 15, 0, 6, 4));
 

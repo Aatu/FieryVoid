@@ -454,6 +454,7 @@
     color: #58c7e6;
     text-shadow: 0 0 5px rgba(88, 199, 230, 0.5);
     border-bottom: 1px solid rgba(31, 111, 139, 0.6);
+    font-weight: bold;    
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-row:hover {

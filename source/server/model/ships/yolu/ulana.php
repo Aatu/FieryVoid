@@ -27,7 +27,7 @@ class Ulana extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 28, 4, 12));
         $this->addPrimarySystem(new Engine(7, 25, 0, 12, 6));
-        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Hangar(5, 4));
 
         $this->addFrontSystem(new GraviticThruster(5, 21, 0, 6, 1));
         $this->addFrontSystem(new MolecularDisruptor(4, 8, 6, 300, 60));

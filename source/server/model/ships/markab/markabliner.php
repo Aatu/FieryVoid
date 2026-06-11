@@ -28,7 +28,7 @@ class MarkabLiner extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 10, 3, 3));
         $this->addPrimarySystem(new Engine(3, 12, 0, 4, 2));
-		$this->addPrimarySystem(new Hangar(3, 4));
+		$this->addPrimarySystem(new Hangar(3, 4, 2));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 4, 4));
 		$this->addPrimarySystem(new CargoBay(3, 36));

@@ -2453,7 +2453,7 @@ class RammingAttack extends Weapon{
 		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
 	
 		//First let's check if any units moved through this Terrain unit and create appropriate fireOrders.		
-		if($shooter->isTerrain() && !$shooter->isDestroyed()){ //This userid denotes shooter unit is terrain e.g. Asteroids.
+		if($shooter->isTerrain() && !$shooter->isDestroyed() && $shooter->Enormous){ //Only Enormous terrain (asteroids/moons) collides; bases like shipyards/jumpgates do not.
 			$relevantShips = array();
 
 			//Make a list of relevant ships e.g. this ship and enemy fighters in the game.
@@ -7834,9 +7834,10 @@ class Marines extends Weapon implements SpecialAbility{
 		$rollMod = 0;
 		if($this->eliteMarines) $rollMod -= 1; //Elite Marines board more easily.
 
-		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" )	$rollMod += 1; //Certain factions defend harder! 
+		if($target->faction == "Narn Regime" || $target->faction == "Gaim Intelligence" || $target->faction == "Escalation Wars Sshel'ath Alliance")	$rollMod += 1; //Certain factions defend harder! 
 
 		if($shooter->faction == "Llort")  $rollMod -= 1; //Llort should get bonus to Rescue and Capture, but making them elite feels incorrect.  Have instead made it easier for their marines to board. 	
+		if($shooter->faction == "Escalation Wars Sshel'ath Alliance")  $rollMod -= 1; //Sshel'ath physiology makes it easier for their marines to board. 	
 		if($shooter->faction == "Yolu Confederation")  $rollMod -= 2; //Yolu have -2 to deliver marines.	
 						
 		$location = $fireOrder->chosenLocation ;

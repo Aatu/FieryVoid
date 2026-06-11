@@ -45,7 +45,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
   <link href="styles/confirm.css" rel="stylesheet" type="text/css">
   <link href="styles/ladder.css" rel="stylesheet" type="text/css">
-  <script src="https://code.jquery.com/jquery-4.0.0.min.js"></script>
+  <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
   <script src="client/games.js"></script>
   <script src="client/ajaxInterface.js"></script>
   <script src="client/player.js"></script>
@@ -64,6 +64,28 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     function loadFireList() {
       ajaxInterface.getFirePhaseGames();
     }
+
+    // BFCache restore freshness (games list page).
+    // games.php bakes its game list into the page at server-render time and
+    // parses it once on jQuery ready. That handler does not re-fire when the
+    // browser restores a frozen page from the back/forward cache (clicking back
+    // from a game, or session restore on startup), so the lists come back
+    // showing the stale render-time snapshot. There is no polling loop on this
+    // page (startPollingGames is a no-op), so nothing refreshes on its own.
+    // On a persisted restore: force one immediate fetch of the games list, and
+    // refresh the recent-activity panel too if it has already been populated.
+    window.addEventListener("pageshow", function (event) {
+      if (!event.persisted) return;                       // only BFCache restores
+      if (typeof ajaxInterface === "undefined") return;
+
+      ajaxInterface.submitingGames = false;               // a frozen in-flight XHR never completed
+      ajaxInterface.requestAllGames();                    // refresh YOUR GAMES + JOIN GAMES
+
+      var fireList = document.getElementById("fireList");
+      if (fireList && fireList.children.length > 0) {
+        ajaxInterface.getFirePhaseGames();                // refresh RECENT ACTIVITY if shown
+      }
+    });
   </script>
 </head>
 
@@ -87,6 +109,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <h3>Get Started</h3>
   <a href="./starterGuide.php" target="_blank" rel="noopener noreferrer">Starter Guide</a> | 
   <a href="https://www.youtube.com/playlist?list=PLTGKagm5KkMxB8oKBiIUeoBQTRYz2z0-3" target="_blank" rel="noopener noreferrer">Video Tutorials</a> | 
+  <a href="https://fieryvoidmogwaitools.netlify.app/" target="_blank" rel="noopener noreferrer">Tool Suite</a> | 
   <a href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Discord</a> | 
   <a href="https://www.facebook.com/groups/fieryvoid" target="_blank" rel="noopener noreferrer">Facebook</a>
 </div>
@@ -108,8 +131,8 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>Hangar Operations (Beta)</strong> - Fighter flights can now deploy, launch and land in ship hangars!  See the Fiery Void FAQ above for full details.</li>     
         <li><strong>Hangar Refinements</strong> - Improvements/fixes to hangar systems so they match their B5W properties, huge thanks to Nato for providing the info needed to correct these!</li>  
-        <li><strong>Fighter Rails</strong> - Fighter Rails now available to use on ships equipped with them, see FAQ for details.</li>                           
-        <li><strong>Polaren Confederacy</strong> - Geoff's added more functionality updates to the Nexus Polaren (Thanks also to Lunara, Tyrel, and Abraxas!).</li>  
+        <li><strong>LCV and Fighter Rails</strong> - LCV and Fighter Rails now available to use on ships equipped with them, see FAQ for details.</li>                           
+        <li><strong>Replay Speed Setting</strong> - You can now adjust the speed that the combat Replay's animates. </li>
         <li><strong>Escalation Wars</strong> -  Breaching pods added to Escalation factions, plus four new ships, the Chouka ballistic mine, and Star Fortress added!</li>                                                                                       
         <li><strong>General Fixes</strong> - Many smaller bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->

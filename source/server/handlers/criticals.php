@@ -120,6 +120,12 @@ class Criticals{
          * hangar, gating subsequent passes via Hangar->escapeRolled. */
         HangarOps::processCarrierDestructionEscapes($gamedata);
 
+        /* LCV Rails: a destroyed carrier's docked LCVs are full ships, not
+         * FighterFlights, so they are not handled by the escape pass above.
+         * Each docked LCV is treated as launched (escapes) and takes the rail's
+         * sustained damage + 2d10 fragments — same as a destroyed rail. */
+        HangarOps::processLCVCarrierDestruction($gamedata);
+
         return $crits;
     }
 

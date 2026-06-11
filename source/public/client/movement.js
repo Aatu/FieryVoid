@@ -28,6 +28,15 @@ shipManager.movement = {
         return Math.round(baseTurnDelayCost * 100) / 100;
     },
 
+    // LCV Rails (B5W §10.1): each LCV docked on a rail makes a turn/turn-delay cost
+    // +1 THRUST this turn (a FLAT surcharge on the final turn-cost/turn-delay value,
+    // NOT a change to the ship's turncost/turndelaycost rate). E.g. a turn-cost-1
+    // carrier at speed 5 normally pays ceil(5*1)=5 thrust to turn; with 4 LCVs
+    // docked it pays 5+4=9. The server sends ship.dockedLCVs (count) only when >0.
+    getDockedLcvTurnSurcharge: function getDockedLcvTurnSurcharge(ship) {
+        return (ship && ship.dockedLCVs) ? (parseInt(ship.dockedLCVs, 10) || 0) : 0;
+    },
+
     isManeuverBlockedByAttachment: function (ship) {
         if (ship.hasAttached && Object.keys(ship.hasAttached).length > 0) {
             for (var attachedId in ship.hasAttached) {
@@ -1226,6 +1235,7 @@ shipManager.movement = {
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
+        turncost += shipManager.movement.getDockedLcvTurnSurcharge(ship);//LCV Rails: +1 thrust/turn per docked LCV
 
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
@@ -2034,6 +2044,7 @@ shipManager.movement = {
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
+        turncost += shipManager.movement.getDockedLcvTurnSurcharge(ship);//LCV Rails: +1 thrust/turn per docked LCV
 
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
@@ -2156,6 +2167,7 @@ shipManager.movement = {
         //if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
         turncost = Math.max(1, turncost);//turn cost may never be less than 1!
+        turncost += shipManager.movement.getDockedLcvTurnSurcharge(ship);//LCV Rails: +1 thrust/turn per docked LCV
 
         if (shipManager.movement.getRemainingEngineThrust(ship) < turncost) {
             return false;
@@ -2296,6 +2308,10 @@ shipManager.movement = {
         var baseTurnCost = shipManager.movement.getTurnCost(ship);
         if (ship.submarine && shipManager.movement.isGoingBackwards(ship)) baseTurnCost = baseTurnCost * 1.33; //Subs have a weird rule about turning backwards.
         var turncost = Math.ceil(speed * baseTurnCost);
+        //LCV Rails: each docked LCV adds +1 thrust to this turn's cost (flat, on top
+        //of the maneuver cost). Flights never carry LCV rails, so 0 for them.
+        var lcvSurcharge = shipManager.movement.getDockedLcvTurnSurcharge(ship);
+        turncost += lcvSurcharge;
 
         var side, sideindex, rear, rearindex, any;
 
@@ -2306,7 +2322,7 @@ shipManager.movement = {
         }
 
         if (speed === 0) { //at speed 0 - cost is 1 thrust, and can be channeled through literally any thruster
-            return Array(1, 0, 0, 0, 0);
+            return Array(1 + lcvSurcharge, 0, 0, 0, 0);
         }
 
         if (ship.mindrider) {//Aug 2024 - Mindrider's have special thurster allocation rules
@@ -2426,6 +2442,9 @@ shipManager.movement = {
         var turndelay = 0;
         if (setMoveNo >= 0) {
             turndelay = Math.ceil(ship.movement[setMoveNo].speed * shipManager.movement.getTurnDelayCost(ship)); //delay at current speed - at least as many moves are required for turn delay to be satisfied
+            //LCV Rails: each docked LCV adds +1 to the required turn delay (only
+            //meaningful when a turn was actually made — gated by didTurn below).
+            turndelay += shipManager.movement.getDockedLcvTurnSurcharge(ship);
         } else {//before unit started to move there was no delay for certain
             turndelay = 0;
         }
@@ -2516,8 +2535,11 @@ shipManager.movement = {
         var turndelay = Math.ceil(speed * shipManager.movement.getTurnDelayCost(ship));
         if (ship.flight) return turndelay; //Marcin Sawicki: fighters are NOT exception to delay rules! But so far fighters cannot overthrust...
         turndelay -= shipManager.movement.calculateExtraThrustSpent(ship, movement);
-        //if (turndelay < 1) turndelay = 1; //Marcin Sawicki: I think this just adds turn delay after accel when delay is satisfied exactly...
         if (turndelay < 0) turndelay = 0; //Marcin Sawicki: just in case, no negative values
+        //LCV Rails: each docked LCV adds +1 to the turn delay (flat, on top of the
+        //base delay — the ship's turndelaycost rate is unchanged). Applied after the
+        //overthrust reduction + zero-clamp so it always extends the delay.
+        turndelay += shipManager.movement.getDockedLcvTurnSurcharge(ship);
         return turndelay;
     },
 

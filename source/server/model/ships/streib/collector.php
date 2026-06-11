@@ -51,7 +51,7 @@ class Collector extends BaseShip{
         $this->addLeftSystem(new EMWaveDisruptor(6, 8, 5, 180, 60));
 
         $this->addRightSystem(new GraviticThruster(9, 10, 0, 5, 4));  
-        $this->addRightSystem(new Hangar(8, 6, 0));
+        $this->addRightSystem(new Hangar(8, 6, 2, 1));
         $this->addRightSystem(new CnC(9, 12, 0, 0));
         $this->addRightSystem(new Scanner(9, 8, 5, 12));
         $this->addRightSystem(new CargoBay(9, 9));

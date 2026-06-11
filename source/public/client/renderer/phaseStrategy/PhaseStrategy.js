@@ -95,6 +95,12 @@ window.PhaseStrategy = function () {
         this.animationStrategy.render(coordinateConverter, scene, zoom);
     };
 
+    // Idle render-loop gating: delegates to the animation strategy so
+    // webglScene can keep rendering full frames only while animations play.
+    PhaseStrategy.prototype.isAnimating = function () {
+        return Boolean(this.animationStrategy && this.animationStrategy.isAnimating());
+    };
+
     PhaseStrategy.prototype.update = function (gamedata) {
         this.gamedata = gamedata;
         this.consumeGamedata();
@@ -718,6 +724,8 @@ window.PhaseStrategy = function () {
             //shouldBeHidden()-checks downstream — preventing other ships from
             //being deployed to the same hex.
             if (icon.ship && icon.ship.pendingDeployDock) return false;
+            //LCV Rails: same for an LCV queued to deploy-dock onto a rail.
+            if (icon.ship && icon.ship.pendingLcvDeployDock) return false;
             return true;
         });
     }
@@ -805,6 +813,14 @@ window.PhaseStrategy = function () {
                 }
                 this.ballisticIconContainer.updateLinesForShip(attachedShip, this.shipIconContainer);
             }
+        }
+
+        // Idle render-loop gating (perf #2): consumeMovement above mutates the icon's
+        // facing/position in the THREE scene outside the animation list, so we must kick
+        // the render budget or it won't paint until the next input. Surfaced by combat
+        // pivots in the Fire phase, where the icon didn't reface until the mouse moved.
+        if (window.webglScene && window.webglScene.requestRender) {
+            window.webglScene.requestRender();
         }
     };
 

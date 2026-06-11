@@ -46,7 +46,7 @@ class HermesAM extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 5));
         $this->addPrimarySystem(new Engine(4, 15, 0, 10, 2));
-        $this->addPrimarySystem(new Hangar(4, 10, 6));
+        $this->addPrimarySystem(new Hangar(4, 10, 2));
 		$this->addPrimarySystem(new CargoBay(4, 30));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));    

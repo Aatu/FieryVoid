@@ -12,8 +12,9 @@ class JonkurRefit extends MediumShip{
 			$this->variantOf = "Dilgar Jonkur Freighter";
 			$this->occurence = "common";
         $this->canvasSize = 100;
-        $this->isd = 2208;
+        $this->isd = 2228;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>2);         
         
         $this->forwardDefense = 11;
         $this->sideDefense = 16;
@@ -25,7 +26,7 @@ class JonkurRefit extends MediumShip{
         $this->pivotcost = 999;
         $this->iniativebonus = -20;
 
-        $this->addPrimarySystem(new ScatterPulsar(2, 4, 2, 0, 360));
+        $this->addPrimarySystem(new LightLaser(2, 4, 3, 0, 360));
         $this->addPrimarySystem(new Reactor(3, 12, 0, 0));
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 9, 1, 3));
@@ -35,7 +36,7 @@ class JonkurRefit extends MediumShip{
 
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 2, 1));
-        $this->addFrontSystem(new Hangar(2, 1));
+        $this->addFrontSystem(new Hangar(2, 1, 1));
         $this->addFrontSystem(new CargoBay(1, 25));
         $this->addFrontSystem(new CargoBay(1, 25));
 

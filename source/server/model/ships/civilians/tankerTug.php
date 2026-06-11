@@ -26,7 +26,7 @@ class TankerTug extends MediumShip{
 		$this->addPrimarySystem(new Reactor(2, 3, 0, 0));
 		$this->addPrimarySystem(new Scanner(2, 6, 1, 1));
 		$this->addPrimarySystem(new Engine(2, 18, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(2, 1));
+		$this->addPrimarySystem(new Hangar(2, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 6, 3));
 		$this->addPrimarySystem(new Thruster(2, 15, 0, 6, 4));
 

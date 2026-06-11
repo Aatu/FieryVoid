@@ -46,6 +46,22 @@ window.phaseDirector = function () {
         this.phaseStrategy.render(coordinateConverter, scene, zoom);
     };
 
+    // Idle render-loop gating: true while something on the board is moving
+    // (playing animations). webglScene uses this to decide whether the next
+    // frame needs a full render or can be skipped. Conservatively returns true
+    // if the strategy is missing the accessor.
+    phaseDirector.prototype.isAnimating = function () {
+        if (!this.phaseStrategy || this.phaseStrategy.inactive) {
+            return false;
+        }
+
+        if (typeof this.phaseStrategy.isAnimating !== 'function') {
+            return true;
+        }
+
+        return this.phaseStrategy.isAnimating();
+    };
+
     function resolvePhaseStrategy(gamedata, scene) {
         if (!gamedata.isPlayerInGame() || gamedata.replay || gamedata.status === "SURRENDERED" || gamedata.status === "FINISHED") {
             return activatePhaseStrategy.call(this, window.ReplayPhaseStrategy, gamedata, scene);

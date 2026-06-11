@@ -15,7 +15,7 @@ class KastanFlamebladeAM extends BaseShip{
 		$this->canvasSize = 175; //img has 200px per side
 		$this->unofficial = true;
 
-        $this->fighters = array("assault shuttles"=>12);
+        $this->fighters = array("assault shuttles"=>12, "Breaching Pods"=> 2);
 
 		$this->isd = 1908;
         

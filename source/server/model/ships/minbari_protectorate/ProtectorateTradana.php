@@ -22,13 +22,13 @@ class ProtectorateTradana extends MediumShip{
 		$this->iniativebonus = 65;
 		$this->isd = 2266;
 		$this->variantOf = "Torotha Assault Frigate";
-        //$this->fighters = array("shuttles"=>2);
+        $this->fighters = array("flyers"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 18, 0, 0));
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 4, 9));
         $this->addPrimarySystem(new Engine(5, 14, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 2));
 		$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 4, 3));
 		$this->addPrimarySystem(new GraviticThruster(4, 10, 0, 4, 4));
 

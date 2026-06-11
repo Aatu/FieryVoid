@@ -14,6 +14,8 @@ class SshelathUkanda extends MediumShip{
 		$this->unofficial = true;
         $this->canvasSize = 60;
 	    $this->isd = 1966;
+
+	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 11;
         $this->sideDefense = 11;

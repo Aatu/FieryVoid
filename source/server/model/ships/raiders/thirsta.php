@@ -16,7 +16,7 @@ class thirsta extends LCV{
         $this->sideDefense = 12;
 		
         $this->isd = 2001;
-        $this->hangarRequired = ''; //LCV-sized, but designed as cargo ship for interstellar trade - with less raw power, more independence
+        //$this->hangarRequired = ''; //LCV-sized, but designed as cargo ship for interstellar trade - with less raw power, more independence
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;

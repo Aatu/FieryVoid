@@ -21,7 +21,7 @@ class Thira extends LCV{
         $this->occurence = "common";
         $this->isd = 1955;
         //$this->variantOf = "Baroon Escort Cutter";
-        $this->hangarRequired = ''; //LCV-sized, but designed as cargo ship for interstellar trade - with less raw power, more independence
+        //$this->hangarRequired = ''; //LCV-sized, but designed as cargo ship for interstellar trade - with less raw power, more independence
         
         $this->turncost = 0.5;
         $this->turndelaycost = 0.5;
