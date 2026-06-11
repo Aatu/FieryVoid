@@ -14,6 +14,7 @@ class ShadowDreadnoughtPrimordial extends MediumShip{
 	    $this->isd = 'Primordial';
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
+		$this->variantOf = 'NONE';		
 	    
         $this->limited = 33;
        
@@ -89,7 +90,7 @@ class ShadowDreadnoughtPrimordial extends MediumShip{
 		$scanner->markAdvanced();
         $this->addPrimarySystem($scanner);
 		$this->addPrimarySystem(new PhasingDrive(6, 20, 5, 8));
-        //$this->addPrimarySystem(new Hangar(5, 12, 12));
+        $this->addPrimarySystem(new Hangar(5, 12, 12));
 		$hangar = new Hangar(5, 12, 12);
 		$hangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
 		$this->addPrimarySystem($hangar);			

@@ -15,6 +15,7 @@ class ShadowPatrolCruiser extends MediumShip{
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         $this->forwardDefense = 14;
         $this->sideDefense = 13;
+		$this->variantOf = 'NONE';		
         
 		$this->halfPhaseThrust = 6; //needed for half phasing; equal to thrust from two BioThrusters on a given ship
         //$this->gravitic = true;

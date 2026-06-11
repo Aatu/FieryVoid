@@ -13,6 +13,7 @@ class ShadowDestroyer extends MediumShip{
 	    $this->isd = 'Ancient';
         $this->shipSizeClass = 1; //it's actually an MCV :)
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+		$this->variantOf = 'NONE';		
         
         $this->forwardDefense = 13;
         $this->sideDefense = 13;
