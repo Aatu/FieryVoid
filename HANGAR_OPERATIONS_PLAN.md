@@ -3350,3 +3350,90 @@ bomb hex-pick (deferred sub-stage). Autoload (user): `shadowhangar`, `shadowfigh
    (Recommend deferred.)
 
 NOT yet implemented — plan only.
+
+---
+
+## Stage S — POST-RELEASE FIXES & MULTI-BAY (2026-06-12, Docker-verified by user unless noted)
+
+The integrated hull is `shadowCruiserBomb` (plain `ShadowCruiser` stays legacy plain-Hangar).
+A run of fixes after S-f went live, then the multi-bay variant `shadowRegenBaseBomb`. All
+server-side fixes are live on save; client-side needs **`yarn build`** (NB: the React tooltip
+lives in `UI.bundle.js`, built by the `vite build` step — `build:legacy` alone does NOT
+rebuild it; run full `yarn build`).
+
+### Fix 1 — Lobby maxHealth no longer shaved on taking SHAD_FTRL (✓ verified)
+`lobbyEnhancements.js` SHAD_FTRL case still ran `struct.maxhealth -= enhCount` (pre-Fighter-Bomb
+behaviour). Gated it on `!hasShadowHangar` (checks `s.name=='hangar' && s.isShadowHangar`), mirroring
+the server (`Enhancements.php:2358`). Integrated-fighter ships now only lose structure when a launched
+fighter is destroyed, never on selection.
+
+### Fix 2 — Structure-box launch cap (✓ verified)
+A carrier can't put more integrated fighters in space than it has structure boxes. `performBombLaunch`
+clamps the launchable pool to `freeBoxes = structRemaining − inSpaceAttached` (in-space summed from the
+PRIMARY ShadowHangar's `shadowLaunched`). Surplus stays held, re-launchable after SelfRepair; boxes
+bound to in-space fighters can't be reused. Client `weaponManager.shadowFighterBombPool` mirrors with a
+remaining-structure clamp (UX guard; server is authoritative).
+
+### Fix 3 — Phantom structure loss on launch (ROOT-CAUSE, ✓ verified)
+Launching shaved carrier structure (40→34 for 6). Cause: `DBManager` LAST_INSERT_ID via
+`mysqli_fetch_object` returns a **STRING**; `getShipById` uses strict `===`, so a just-spawned bomb
+flight was unfindable in the SAME advance → `syncIntegratedStructureCoupling` counted it as a combat
+loss → Direction 2 shaved structure. Fix: `(int)` cast in `Manager::insertSingleShip`. See memory
+[[arch_spawned_ship_string_id_trap]]. (Latent landmine: `getShipById`'s strict `===` — route new spawns
+through `insertSingleShip` or cast ids.)
+
+### Fix 4 — Cut-off ordering: HELD bay fighters cut first (✓ verified)
+Direction 1 cut off LAUNCHED-in-space fighters before held ones — a combat-damaged carrier that launched
+within its free-box cap wrongly saw its just-deployed fighters severed. Reversed the order in
+`syncIntegratedStructureCoupling`: shed HELD bay fighters first, then in-space only if the deficit isn't
+covered. (Data: game 4174 carrier 873392, struct 4 / 6 integrated, launched 4 → 2 LAUNCHED were cut off
+instead of the 2 held.)
+
+### Fix 5 — Cut-off fighters can't dock; mixed flight docks only its tethered craft (✓ verified)
+Was: `canShipReceive` REJECTED the whole flight if any fighter cut off (and the dock execution didn't
+exclude cut-off). Now: gate on `countAttachedFightersInFlight>0`; `performWholeFlightDock`/`performLand`
+clamp the dock to `dockableCount` (non-cut-off) and FORCE `$partial` when any cut-off remain (source
+flight survives in space carrying the remnant) + reabsorb via `$dockedUnit` (the fragment);
+`dockFighters` passes `excludeCutOff=true`; `dockAllFighters` skips cut-off. Client max-dock count
+excludes cut-off in `confirm.js` (countActiveCraftInFlight + ...Local) and `shipTooltipFireMenu.js`
+(countActiveInFlight).
+
+### Fix 6 — FleetList value attribution: value moves with the fighters (✓ verified)
+User decisions: "value moves with the fighters" + "reabsorbed = no row". Integrated fighters are paid by
+the carrier (SHAD_FTRL enhValue = count×150), but the fleet list values LAUNCHED ones on their own flight
+rows, so the carrier must drop on launch / rise on dock and reabsorbed craft must render NO row.
+- Server `ShipClasses::stripForJson` sends `integratedFighterCount` + `integratedFighterPerCraft` (via
+  new `HangarOps::integratedFighterPurchase`) on ShadowHangar carriers.
+- `fleetList.js`: `integratedFighterCarrierAdjust` = `(purchased − heldNow) × perCraft`, SUBTRACTED from
+  the carrier's base BEFORE the CV multiply; `dockedCraftStashValue` SKIPS `isShadowHangar` bays (enhValue
+  already covers them — was the double-count that showed 4550 vs 3650); `isFullyReabsorbedIntegratedFlight`
+  skips a flight with no craft still in space (cut-off counts as in-space) so a fully-docked flight doesn't
+  render a spurious "Destroyed" row.
+- Conserved: carrier = base + held×150; launched flight rows = pointCost×craft/6 = 150×craft.
+
+### MULTI-BAY — `shadowRegenBaseBomb` (4 arc-keyed ShadowHangars, ✓ verified)
+User chose: 4 Fighter Bombs (one per hangar) · per-bay pool, carrier-wide structure · each bomb's arc
+matches its hangar's directions. Linking is by INDEX (NOT positional ids — avoids
+[[arch_positional_system_id_trap]]): `ShadowHangar->bombGroupIndex` (0..3) pairs to
+`ShadowFighterBomb->bombHangarIndex` (6th ctor arg). New class only — legacy `shadowRegenBase` untouched.
+- `HangarOps::shadowHangarByGroupIndex($ship,$idx)` resolves the bay. `performBombLaunch(...,$bombHangarIndex)`:
+  null ⇒ primary (single-bay hulls unchanged); set ⇒ that bay only for held-pool read + `drainBombPool`.
+  The STRUCTURE-BOX cap (`inSpaceAttached`) and `registerLaunchedIntegratedFlight` stay CARRIER-WIDE on
+  the primary (one Structure binds all 24). `ShadowFighterBomb::fire` passes `$this->bombHangarIndex`.
+  Both props round-trip via stripForJson.
+- Blueprint: 4 `new ShadowHangar(5,6,6)` w/ bombGroupIndex 0..3 + original dirs; 4
+  `new ShadowFighterBomb(0,1,0,startArc,endArc,idx)` w/ arcs = each bay's 240° fan (side→deg map in file).
+  `fighters=array("normal"=>24)` ⇒ SHAD_FTRL limit 24, population fills 6/bay. Cost: 24×150 = 3600 enhValue
+  (vs the legacy base's free fighters — intentional, it's the integrated variant). **User adds autoload
+  `'shadowregenbasebomb'`.**
+- Client per-bay scoping: `weaponManager.shadowFighterBombPool(carrier, weapon, subtractPending)` — 2nd arg
+  scopes to weapon.bombHangarIndex's bay; 3rd arg (true, from SystemInfo.js tooltip) nets off this turn's
+  pending bomb orders so "Fighters available" drops on order (the DIALOG must NOT pass it — it replaces
+  prior orders, needs the full pre-order max). `baseSystems.js refreshHangarTooltip` "(Launching N)" line
+  counts only the bomb whose bombHangarIndex == this bay's bombGroupIndex. Fleet-value attribution already
+  multi-bay-safe (iterates all isShadowHangar bays).
+- **GOTCHA found during test:** "Fighters available" stuck at 6 was a STALE `UI.bundle.js` — the React
+  tooltip (SystemInfo.js) is built by `vite build`, separate from `build:legacy`. Run full `yarn build`.
+
+**Status:** Stage S feature-complete incl. multi-bay; all six fixes + multi-bay Docker-verified by user
+(games 4174/4175/4177). Full record in memory [[arch_shadow_integrated_fighters]].
