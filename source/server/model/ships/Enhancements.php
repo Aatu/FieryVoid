@@ -2358,7 +2358,7 @@ class Enhancements{
 						if (!HangarOps::shipHasShadowHangar($ship)) {
 							$struct = $ship->getStructureSystem(0);
 							if($struct){
-								$struct->maxhealth -= $enhCount;
+								//$struct->maxhealth -= $enhCount;
 							}
 						}
 						break;
