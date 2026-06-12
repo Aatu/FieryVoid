@@ -3693,8 +3693,9 @@ class ShadowFighterBomb extends Weapon{
 
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
-		$this->data["Special"]  = "Fighter Bomb: Launches the carrier's integrated fighters at a target hex.";
+		$this->data["Special"]  = "Used to launch integrated fighters at a target hex.";
 		$this->data["Special"] .= "<br>Targets a hex within range; fighters deploy there at the carrier's heading and speed next turn.";
+        $this->data["Special"] .= "<br>Technical system, cannot be damaged or destroyed.";			
 		//$this->data["Special"] .= "<br>This is the integrated hangar's ONLY way to launch fighters — it draws from the bay's held pool. If the bay is empty, the bomb cannot fire.";
 	}
 
