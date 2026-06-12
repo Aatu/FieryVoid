@@ -3971,6 +3971,7 @@ spl_autoload_register(
 				'shadowcruiserprimordialbomb' => '/server/model/ships/shadows/shadowCruiserPrimordialBomb.php',
 				'shadowdreadnoughtbomb' => '/server/model/ships/shadows/shadowDreadnoughtBomb.php',
 				'shadowdreadnoughtprimordialbomb' => '/server/model/ships/shadows/shadowDreadnoughtPrimordialBomb.php',
+				'shadowfighterautonomous' => '/server/model/ships/shadows/shadowFighterAutonomous.php',                
 				//'shadowregenbasebomb' => '/server/model/ships/shadows/shadowRegenBaseBomb.php',                
                 
 
