@@ -822,36 +822,43 @@ class HangarOps {
 		//Cut-off is PER-FIGHTER (not per-flight): with N integrated fighters in one
 		//flight, dropping structure from 6→2 must cut off 4 INDIVIDUAL fighters in that
 		//flight, each getting its own ShadowFighterCutOff crit (and its own CUT OFF badge).
-		//Order (user): launched-in-space fighters first, then held bay fighters.
+		//Order (user 2026-06): HELD bay fighters first, then launched-in-space fighters.
+		//Rationale: a fighter already deployed and under control should be the LAST to be
+		//severed; the surplus that the carrier never had the structure to control are the
+		//ones still sitting in the bay. (A combat-damaged carrier that launched up to its
+		//free-box cap therefore keeps every launched fighter; only the un-launchable held
+		//remainder is shed.) The earlier launched-first order cut off in-space fighters
+		//that had just deployed within their structure budget — visibly wrong.
 		$needCutOff = (int)$ph->shadowAttached - $structRemaining;
 		if ($needCutOff > 0){
-			//1a. Launched-in-space attached fighters first — distribute across flights'
-			//individual fighters. Each fighter cut off: attached--, cutOff++, and the
-			//flight's tracked baseline (shadowLaunched[fid]) drops so next sync doesn't
-			//mistake the now-cut-off fighter for a death.
-			foreach ($attachedFlights as $af){
-				if ($needCutOff <= 0) break;
-				$fid    = (int)$af['fid'];
-				$flight = $gamedata->getShipById($fid);
-				if (!($flight instanceof FighterFlight)) continue;
-				$cut = self::applyCutOffToFighters($flight, $needCutOff, $gamedata);
-				if ($cut > 0){
-					$ph->shadowAttached = max(0, (int)$ph->shadowAttached - $cut);
-					$ph->shadowCutOff   = (int)$ph->shadowCutOff + $cut;
-					$needCutOff -= $cut;
-					//Drop the cut-off fighters from this flight's attached baseline.
-					if (isset($ph->shadowLaunched[$fid])){
-						$ph->shadowLaunched[$fid] = max(0, (int)$ph->shadowLaunched[$fid] - $cut);
+			//1a. HELD bay integrated fighters first — remove from hangarUsage (their tether
+			//box is gone; nothing to fly, so no crit, just a vanished held fighter).
+			$removed = self::removeHeldIntegratedFighters($ship, $needCutOff, $gamedata);
+			$ph->shadowAttached = max(0, (int)$ph->shadowAttached - $removed);
+			$ph->shadowCutOff   = (int)$ph->shadowCutOff + $removed;
+			$needCutOff -= $removed;
+
+			//1b. Launched-in-space attached fighters only if the held pool didn't cover the
+			//deficit — distribute across flights' individual fighters. Each fighter cut off:
+			//attached--, cutOff++, and the flight's tracked baseline (shadowLaunched[fid])
+			//drops so next sync doesn't mistake the now-cut-off fighter for a death.
+			if ($needCutOff > 0){
+				foreach ($attachedFlights as $af){
+					if ($needCutOff <= 0) break;
+					$fid    = (int)$af['fid'];
+					$flight = $gamedata->getShipById($fid);
+					if (!($flight instanceof FighterFlight)) continue;
+					$cut = self::applyCutOffToFighters($flight, $needCutOff, $gamedata);
+					if ($cut > 0){
+						$ph->shadowAttached = max(0, (int)$ph->shadowAttached - $cut);
+						$ph->shadowCutOff   = (int)$ph->shadowCutOff + $cut;
+						$needCutOff -= $cut;
+						//Drop the cut-off fighters from this flight's attached baseline.
+						if (isset($ph->shadowLaunched[$fid])){
+							$ph->shadowLaunched[$fid] = max(0, (int)$ph->shadowLaunched[$fid] - $cut);
+						}
 					}
 				}
-			}
-			//1b. Held bay integrated fighters — remove from hangarUsage (their tether
-			//box is gone; nothing to fly, so no crit, just a vanished held fighter).
-			if ($needCutOff > 0){
-				$removed = self::removeHeldIntegratedFighters($ship, $needCutOff, $gamedata);
-				$ph->shadowAttached = max(0, (int)$ph->shadowAttached - $removed);
-				$ph->shadowCutOff   = (int)$ph->shadowCutOff + $removed;
-				$needCutOff -= $removed;
 			}
 			//Any residual $needCutOff (more boxes lost than fighters exist) just means the
 			//structure dropped below even the now-reduced attached count — fine, attached
@@ -3647,8 +3654,14 @@ class HangarOps {
 		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
 		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
 		//Stage S (S-d): a CUT-OFF integrated fighter has lost its structure tether and
-		//can NEVER land/reabsorb (B5W). Reject it from any hangar (incl. its own carrier).
-		if (self::isCutOffIntegratedFlight($flight)) { $reason = 'integrated fighter cut off — cannot land'; return false; }
+		//can NEVER land/reabsorb (B5W). A flight may hold a MIX of cut-off and still-
+		//tethered craft (Direction 1 cuts off per-fighter). We no longer reject the whole
+		//flight — instead the dock proceeds for the tethered (non-cut-off) craft only, and
+		//the dock execution + count clamps below exclude the cut-off ones. Only reject when
+		//there is NOTHING dockable left (every craft cut off / destroyed).
+		if (self::countAttachedFightersInFlight($flight, $gamedata->turn) <= 0) {
+			$reason = 'no tethered craft to land (all cut off)'; return false;
+		}
 		//Stage 16: a catapult recovers its fighter regardless of any damage it has
 		//sustained (even destroyed), so the destroyed-hangar gate is skipped for it.
 		$isCatapult = !empty($hangar->isCatapult);
@@ -3998,11 +4011,25 @@ class HangarOps {
 	public static function performWholeFlightDock($carrier, $flight, $count, $bays, $gamedata){
 		if (!($flight instanceof FighterFlight)) return 0;
 		if (empty($bays)) return 0;
+		//Stage S (S-d): cut-off integrated fighters can NEVER land — they are excluded
+		//from the dockable count and from the chosen-fighter selection below. For an
+		//ordinary (non-integrated) flight this equals countActiveCraft, so behaviour is
+		//unchanged. A flight that still holds cut-off craft after docking its tethered
+		//ones is treated as a PARTIAL dock (the flight ship stays in space carrying the
+		//cut-off remnant), never a full dock — so the still-flying cut-off craft aren't
+		//removed with the ship row.
+		$dockableCount = self::countAttachedFightersInFlight($flight, $gamedata->turn);
+		if ($dockableCount <= 0) return 0;
+		$hasCutOff = (self::countCutOffFighters($flight) > 0);
+		//Total non-destroyed craft (INCLUDING cut-off) — the denominator for splitting the
+		//flight's enhancement cost between the docked fragment and the space-side remnant,
+		//since cut-off craft still carry cost while flying.
 		$activeCount = $flight->countActiveCraft($gamedata->turn);
-		if ($activeCount <= 0) return 0;
 		$count = max(1, (int)$count);
-		if ($count > $activeCount) $count = $activeCount;
-		$partial = ($count < $activeCount);
+		if ($count > $dockableCount) $count = $dockableCount;
+		//Full dock only when every dockable craft lands AND none are cut off; otherwise
+		//partial so the source flight survives in space with the cut-off remnant.
+		$partial = ($count < $dockableCount) || $hasCutOff;
 
 		$category = self::trueSizeOf($flight);
 		//Fractional-safe per-craft box cost (ultralight 0.5, superheavy >1). Don't
@@ -4318,11 +4345,17 @@ class HangarOps {
 
 		//Clamp to whatever craft are still active in this flight (other dock
 		//orders processed earlier this turn may have already disengaged some).
-		$activeCount = $flight->countActiveCraft($gamedata->turn);
-		if ($activeCount <= 0) return 0;
-		if ($count > $activeCount) $count = $activeCount;
+		//Stage S (S-d): cut-off integrated fighters can never land, so the dock is
+		//clamped to the dockable (non-cut-off) count and a flight still carrying cut-off
+		//craft is forced PARTIAL (the source flight survives in space with the remnant).
+		//For ordinary flights dockableCount == countActiveCraft, so behaviour is unchanged.
+		$activeCount   = $flight->countActiveCraft($gamedata->turn);
+		$dockableCount = self::countAttachedFightersInFlight($flight, $gamedata->turn);
+		if ($dockableCount <= 0) return 0;
+		$hasCutOff = (self::countCutOffFighters($flight) > 0);
+		if ($count > $dockableCount) $count = $dockableCount;
 
-		$partial = ($count < $activeCount);
+		$partial = ($count < $dockableCount) || $hasCutOff;
 
 		//Bucket the entry under the flight's TRUE size, not the carrier-mapped
 		//category — this keeps the hangarUsage record accurate even when the
@@ -4350,9 +4383,12 @@ class HangarOps {
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
 		if ($bpc != 1) $entry['boxesPerCraft'] = $bpc;
 
+		$dockedUnit = null;   //Stage S: the FighterFlight that actually docked (full: the flight; partial: the fragment)
 		if ($partial) {
 			//Stage 10.3: priority-ordered dockFighters returns the actual
 			//Fighter objects chosen (most-damaged first, back-of-array tiebreak).
+			//Stage S (S-d): dockFighters excludes cut-off craft, so a mixed flight
+			//only ever lands its tethered fighters; the cut-off remnant stays in space.
 			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
 
 			//Stage 10.4: spawn a fragment FighterFlight holding the chosen
@@ -4362,6 +4398,7 @@ class HangarOps {
 			//all its preserved state. Pre-10.4 partial docks dropped damage
 			//state entirely on relaunch — fresh fighters spawned undamaged.
 			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $hangar, $gamedata);
+			$dockedUnit = $fragment;   //the docked portion is the fragment (remnant $flight stays in space)
 			if ($fragment) {
 				$entry['dockedFlightId'] = $fragment->id;
 				$entry['name']           = $fragment->name;     //"$sourceName - Detachment"
@@ -4381,17 +4418,20 @@ class HangarOps {
 			$entry['dockedFlightId'] = $flight->id;
 			$flight->removed = true;
 			$flight->removedTurn = $gamedata->turn;
+			$dockedUnit = $flight;
 		}
 
 		//Stage S (S-c): integrated-fighter REABSORPTION — same as performWholeFlightDock
 		//(this performLand path only runs for a jumping carrier's dock). Store a PRISTINE
 		//ANONYMOUS held entry (no dockedFlightId) so relaunch fresh-spawns an undamaged
-		//fighter, and retire the old removed flight row so it leaves no ghost.
+		//fighter, and retire the old removed flight row so it leaves no ghost. Operates on
+		//$dockedUnit (the fragment on a partial dock) so a cut-off remnant left on the
+		//source flight is NOT reabsorbed — it stays in space, still flying.
 		if (!empty($hangar->isShadowHangar)) {
 			//Stage S (S-e): reabsorb diffuser energy before retiring the landed flight.
-			self::applyDiffuserReabsorption($carrier, $flight, $gamedata);
+			self::applyDiffuserReabsorption($carrier, $dockedUnit, $gamedata);
 			//DOCKED (cyan) not DROPOUT — reabsorbed, not combat-disengaged.
-			self::dockAllFighters($flight, $gamedata);
+			if ($dockedUnit instanceof FighterFlight) self::dockAllFighters($dockedUnit, $gamedata);
 			unset($entry['dockedFlightId'], $entry['boxesPerCraft']);
 			$entry['phpclass']   = $flight->phpclass;
 			$entry['name']       = 'Integrated Fighter';
@@ -4984,13 +5024,17 @@ class HangarOps {
 	 * and crit history onto a freshly-spawned fragment FighterFlight so
 	 * partial-dock damage persists through the dock/relaunch cycle.
 	 */
-	private static function applyFighterStateCritical($flight, $count, $critClass, $gamedata){
+	private static function applyFighterStateCritical($flight, $count, $critClass, $gamedata, $excludeCutOff = false){
 		if ($count <= 0) return array();
 
 		$candidates = array();
 		foreach ($flight->systems as $idx => $fighter) {
 			if (!($fighter instanceof Fighter)) continue;
 			if ($fighter->isDestroyed($gamedata->turn)) continue;   //already disengaged/docked/destroyed
+			//Stage S (S-d): a cut-off integrated fighter can never land/reabsorb, so it is
+			//NOT a docking candidate (callers that dock pass $excludeCutOff=true). Combat
+			//disengagement does NOT exclude it — a cut-off craft can still drop out / die.
+			if ($excludeCutOff && self::isFighterCutOff($fighter)) continue;
 			$candidates[] = array(
 				'fighter' => $fighter,
 				'idx'     => $idx,
@@ -5024,7 +5068,7 @@ class HangarOps {
 	 * Returns the list of chosen Fighter objects (Stage 10.3 priority order).
 	 */
 	private static function dockFighters($flight, $count, $gamedata){
-		return self::applyFighterStateCritical($flight, $count, 'DockedFighter', $gamedata);
+		return self::applyFighterStateCritical($flight, $count, 'DockedFighter', $gamedata, /*excludeCutOff*/ true);
 	}
 
 	/* Disengage $count active fighters in $flight (combat disengagement,
@@ -5637,6 +5681,10 @@ class HangarOps {
 		foreach ($flight->systems as $f) {
 			if (!($f instanceof Fighter)) continue;
 			if ($f->isDestroyed($gamedata->turn)) continue;
+			//Stage S (S-d): never mark a cut-off integrated fighter as docked — it lost
+			//its structure tether and stays in space fighting (the partial-dock path keeps
+			//the source flight alive to carry it). Skipping it here leaves it on the board.
+			if (self::isFighterCutOff($f)) continue;
 			$crit = new DockedFighter(-1, $flight->id, $f->id, 'DockedFighter', $gamedata->turn);
 			$crit->updated = true;
 			$crit->newCrit = true;

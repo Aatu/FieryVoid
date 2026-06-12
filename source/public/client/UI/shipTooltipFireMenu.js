@@ -765,7 +765,12 @@ window.findEligibleFlightsForDocking = function (carrier) {
         if (!Array.isArray(flight.systems)) return 0;
         var n = 0;
         flight.systems.forEach(function (ftr) {
-            if (!shipManager.systems.isDestroyed(flight, ftr)) n++;
+            if (shipManager.systems.isDestroyed(flight, ftr)) return;
+            // Stage S (S-d): cut-off integrated fighters can never land/reabsorb, so they
+            // are not dockable — exclude them so recover-eligibility + capacity match the
+            // server (which docks only the tethered craft and leaves the cut-off remnant).
+            if (shipManager.criticals.isCutOffFighter(ftr)) return;
+            n++;
         });
         return n;
     }

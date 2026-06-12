@@ -3073,7 +3073,12 @@ window.confirm = {
             if (!Array.isArray(flight.systems)) return 0;
             var n = 0;
             flight.systems.forEach(function (ftr) {
-                if (!shipManager.systems.isDestroyed(flight, ftr)) n++;
+                if (shipManager.systems.isDestroyed(flight, ftr)) return;
+                // Stage S (S-d): a CUT OFF integrated fighter lost its structure tether and
+                // can never land/reabsorb, so it isn't dockable — exclude it from the max
+                // dock count (the server also refuses to dock cut-off craft).
+                if (shipManager.criticals.isCutOffFighter(ftr)) return;
+                n++;
             });
             return n;
         }
@@ -3627,7 +3632,11 @@ window.confirm = {
             if (!Array.isArray(flight.systems)) return 0;
             var n = 0;
             flight.systems.forEach(function (ftr) {
-                if (!shipManager.systems.isDestroyed(flight, ftr)) n++;
+                if (shipManager.systems.isDestroyed(flight, ftr)) return;
+                // Stage S (S-d): cut-off integrated fighters can't dock — exclude them so
+                // the bulk-recover dialog's capacity math matches what the server accepts.
+                if (shipManager.criticals.isCutOffFighter(ftr)) return;
+                n++;
             });
             return n;
         }
