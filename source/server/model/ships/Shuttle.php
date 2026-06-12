@@ -68,7 +68,9 @@ class Shuttle extends FighterFlight
         switch ($this->faction) {
             case 'Abbai Matriarchate':  
             case 'Abbai Matriarchate (WotCR)':    
-                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png');  
+                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png'); 
+            case 'Brakiri Syndicracy':
+                return array('img/ships/shuttleBrakiri.png', 'img/ships/shuttleBrakiri_large.png');                     
             case 'Centauri Republic':
             case 'Centauri Republic (WotCR)': 
                 return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
