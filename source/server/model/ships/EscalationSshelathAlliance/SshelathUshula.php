@@ -32,7 +32,7 @@ class SshelathUshula extends MediumShip{
         $this->addPrimarySystem(new CnC(6, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 9, 2, 4));
         $this->addPrimarySystem(new Engine(6, 9, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(4, 1, 1));
+        $this->addPrimarySystem(new Hangar(4, 1, 1, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(4, 10, 0, 3, 4));        
 
