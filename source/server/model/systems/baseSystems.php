@@ -4279,6 +4279,11 @@ class Structure extends ShipSystem{
 	//the client's remaining-health/destruction math. Send the LIVE maxhealth so the
 	//client matches whenever boxes have been permanently lost. (Harmless for every
 	//other ship: it just re-sends the unchanged blueprint value.)
+	//
+	//CANONICAL sender of live Structure maxhealth — unconditional and enhancement-
+	//agnostic, so it stays correct even if a future effect (not just SHAD_FTRL) lowers
+	//structure maxhealth. The old SHAD_FTRL case in Enhancements::addSystemEnhancementsForJSON
+	//that also sent it is now a no-op; don't re-add a maxhealth send there.
 	public function stripForJson(){
 		$strippedSystem = parent::stripForJson();
 		$strippedSystem->maxhealth = (int)$this->maxhealth;

@@ -2802,12 +2802,13 @@ class Enhancements{
 							break;	
 							
 
-						case 'SHAD_FTRL': //Shadow fighter launched: -1 Structure point for each launched fighter
-							if ($system instanceof Structure) { //Shadows ships have only one Structure
-								$strippedSystem->maxhealth = $system->maxhealth;
-							}
-							break;						
-					
+						case 'SHAD_FTRL': //Shadow fighter launched / integrated fighters
+							//Structure maxhealth is now sent UNCONDITIONALLY by Structure::stripForJson
+							//(baseSystems.php) — the canonical, enhancement-agnostic place to keep the
+							//client's live maxhealth in sync after an integrated-fighter structure-box
+							//loss. Re-sending it here too would be redundant, so this case is a no-op.
+							break;
+
 						case 'SPARK_CURT': //Spark Curtain - affects output of Spark Field
 							if($system instanceof SparkField){
 								$strippedSystem->output = $system->output;
