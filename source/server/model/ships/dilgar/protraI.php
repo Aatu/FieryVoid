@@ -31,7 +31,7 @@ class ProtraI extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 11, 0, 0));
         $this->addPrimarySystem(new ElintScanner(4, 20, 6, 11));
         $this->addPrimarySystem(new Engine(4, 9, 0, 5, 4));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         $this->addPrimarySystem(new JumpEngine(4, 10, 3, 36));
 
         $this->addFrontSystem(new MediumBolter(2, 8, 4, 240, 60));

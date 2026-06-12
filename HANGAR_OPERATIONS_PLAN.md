@@ -3435,5 +3435,34 @@ matches its hangar's directions. Linking is by INDEX (NOT positional ids — avo
 - **GOTCHA found during test:** "Fighters available" stuck at 6 was a STALE `UI.bundle.js` — the React
   tooltip (SystemInfo.js) is built by `vite build`, separate from `build:legacy`. Run full `yarn build`.
 
-**Status:** Stage S feature-complete incl. multi-bay; all six fixes + multi-bay Docker-verified by user
-(games 4174/4175/4177). Full record in memory [[arch_shadow_integrated_fighters]].
+### INTEGRATION REVIEW (2026-06-12) — Fighter Bomb vs the rest of Hangar Ops
+Full audit of every place the integrated-fighter / Fighter Bomb work touches shared Hangar Ops machinery.
+- **Verified SAFE (no behaviour change for non-Shadow flows):** the shared dock fns now use
+  `countAttachedFightersInFlight` (excludes cut-off) instead of `countActiveCraft` — IDENTICAL for any
+  non-Shadow flight (a FighterFlight's top-level `$systems` are exclusively Fighter objects; cut-off only
+  exists on integrated fighters), so `$partial`/enh-split reduce to the original. `dockFighters` excludes
+  cut-off; `disengageFighters` (combat dropout) does not. Ordinary launch can't reach a ShadowHangar
+  (guards at canLaunch/launchAnonymousStash/findDockedEntry/evictToFit/shuttle-pool). Coupling sync runs
+  ONCE (primary-bay gate); primaryHangar==primaryShadowHangar==bay0 on the multi-bay base so state is
+  read+persisted on the same bay. Bay-box eviction is a no-op (ShadowHangars untargetable+crit-immune).
+  serviceDockedFlights skips anonymous (no-dockedFlightId) integrated entries. Fleet-value helpers skip
+  only isShadowHangar bays (mix-safe). Remaining `countActiveCraft` call sites (escape enh-split,
+  deploy-start dock, partial-relaunch) are never dock gates for a cut-off-bearing integrated flight.
+- **FIXED — foreign flight could dock into a ShadowHangar** (pre-existing since S-c, more reachable with
+  the 4-bay base): a ShadowHangar keeps `$name='hangar'` so it passed `hangarAcceptsCategory` and was
+  offered as a dock target; the reabsorption branch (gated only on the BAY being a ShadowHangar) would
+  then reabsorb a foreign flight → corrupt held entry + bogus `decrementLaunchedIntegratedBaseline`.
+  Guards added: server `buildDockBays` skips ShadowHangar bays unless
+  `flight->phpclass==='ShadowMediumFighterFlight'`; both reabsorption branches (`performWholeFlightDock`
+  + `performLand`) now also require that phpclass; client `findEligibleCarriersForDock` + recover-dialog
+  mirror the exclusion (`shipTooltipFireMenu.js`).
+- **FIXED — integrated fighters die with the carrier (user call):** `buildEscapeCandidates` (Stage 18
+  carrier-destruction escape) now SKIPS every ShadowHangar bay — integrated fighters are formed from the
+  carrier's Structure, so held ones can't escape a dead carrier. They're still wiped by the post-roll
+  `hangarUsage=array()` clear and that empty snapshot persists via the destroyed-carrier note tail (no
+  ghost on reload). Launched/cut-off fighters in space (their own flight rows) are unaffected.
+
+**Status:** Stage S feature-complete incl. multi-bay; integration review done (2 fixes applied + rest
+verified safe). All six fixes + multi-bay Docker-verified by user (games 4174/4175/4177); the two
+integration-review fixes are server-side (live on save) + client guards (need yarn build), not yet
+separately Docker-tested. Full record in memory [[arch_shadow_integrated_fighters]].
