@@ -1412,7 +1412,8 @@ spl_autoload_register(
 				'choukatribunalmissilecruiserrefitam' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaTribunalMissileCruiserRefitAM.php',
 				'choukavengeancecruiser' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaVengeanceCruiser.php',
 				'choukawarprayergunship' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerGunship.php',
-				'choukawarprayerescort' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerEscort.php',
+//				'choukawarprayerescort' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerEscort.php',
+				'choukawarprayerminesweeper' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerMinesweeper.php',
 //				'choukawraithbladefighter' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWraithbladeFighter.php',
 				'choukawraithbladefighteram' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWraithbladeFighterAM.php',
 

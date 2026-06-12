@@ -43,7 +43,7 @@ class ChoukaSuppliantAuxiliaryCarrier extends MediumShip{
 		$this->addFrontSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addFrontSystem(new Thruster(2, 13, 0, 3, 1));
 
-		$this->addAftSystem(new Hangar(2, 12, 6));
+		$this->addAftSystem(new Hangar(2, 12, 6, 3));
 		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 180, 360));
 		$this->addAftSystem(new EWPointPlasmaGun(1, 3, 2, 0, 180));
         $this->addAftSystem(new Thruster(2, 18, 0, 6, 2));    
