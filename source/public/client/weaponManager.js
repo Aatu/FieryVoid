@@ -2648,6 +2648,18 @@ window.weaponManager = {
                 pool += parseInt(e.flightSize || 1, 10);
             });
         }
+        // Stage S (S-d): STRUCTURE-BOX cap. Each integrated fighter in space binds a
+        // marked structure box, so a carrier can never launch more than it has boxes
+        // for. Clamp the offered pool to remaining structure (a combat-reduced carrier
+        // with 4 structure but 6 held can only launch 4; the rest stay held until
+        // SelfRepair restores structure). The server (HangarOps::performBombLaunch)
+        // is the authoritative clamp — it also nets off fighters already in space; this
+        // is a UX guard so the dialog doesn't offer a launch that gets silently trimmed.
+        var struct = shipManager.systems.getStructureSystem(carrier, 0);
+        if (struct) {
+            var structRemaining = Math.max(0, parseInt(shipManager.systems.getRemainingHealth(struct), 10) || 0);
+            pool = Math.min(pool, structRemaining);
+        }
         return pool;
     },
 

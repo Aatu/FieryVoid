@@ -2681,6 +2681,31 @@ class HangarOps {
 		}
 		if ($held <= 0) return null;   //empty hangar — bomb cannot fire
 
+		//Stage S (S-d): STRUCTURE-BOX launch cap. Each integrated fighter in space is
+		//bound to a marked structure box (it "stays ATTACHED" — see registerLaunched...
+		//below); a carrier can therefore never have more fighters in space than it has
+		//structure boxes. A combat-reduced carrier (e.g. 4 structure but 6 held) can
+		//only launch as many as it has FREE boxes (remaining structure − fighters
+		//already in space); the surplus stays held and becomes launchable again only if
+		//SelfRepair later restores structure. The boxes already bound to in-space
+		//fighters can't be reused. We clamp the launchable pool to that free-box budget;
+		//resolveBombFlightSizes then honours it for both the manual-split and auto-split
+		//paths since both are bounded by $held.
+		$struct = $carrier->getStructureSystem(0);
+		$structRemaining = $struct ? max(0, (int)$struct->getRemainingHealth()) : 0;
+		$inSpaceAttached = 0;
+		if (is_array($hangar->shadowLaunched)){
+			foreach ($hangar->shadowLaunched as $fid => $baseline){
+				$flight = $gamedata->getShipById((int)$fid);
+				if ($flight instanceof FighterFlight){
+					$inSpaceAttached += self::countAttachedFightersInFlight($flight, $gamedata->turn);
+				}
+			}
+		}
+		$freeBoxes = max(0, $structRemaining - $inSpaceAttached);
+		$held = min($held, $freeBoxes);
+		if ($held <= 0) return null;   //no free structure boxes — nothing can launch yet
+
 		//Resolve the per-flight size list. A bomb launch can exceed the flight-size
 		//cap (e.g. 24 fighters, max 9/flight), so it spawns MULTIPLE flights:
 		//  - explicit $flightSizes (manual split the player chose) — clamp each to the
