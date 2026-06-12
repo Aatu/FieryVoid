@@ -1506,12 +1506,18 @@ class Manager{
 
     }
     
-    public static function insertSingleShip($gamedata, $ship, $userid){          
-		$id = self::$dbManager->submitShip($gamedata->id, $ship, $userid);
+    public static function insertSingleShip($gamedata, $ship, $userid){
+		//submitShip returns LAST_INSERT_ID() via mysqli_fetch_object, which yields a
+		//STRING. TacGamedata::getShipById compares $ship->id === $id with STRICT ===,
+		//so a string id on a freshly-spawned ship fails that lookup for the rest of the
+		//same advance (e.g. a Fighter Bomb flight spawned in fireWeapons is then unfindable
+		//in setCriticals, so syncIntegratedStructureCoupling mistakes it for a combat loss
+		//and shaves carrier structure). Cast to int so the in-memory id matches.
+		$id = (int)self::$dbManager->submitShip($gamedata->id, $ship, $userid);
 		$ship->id = $id;
 		$gamedata->ships[$id] = $ship;
 		return $id;
-    } 
+    }
     
     public static function insertSingleEnhancement($gameData, $id, $enhID, $enhNo, $enhName){
 		self::$dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);
