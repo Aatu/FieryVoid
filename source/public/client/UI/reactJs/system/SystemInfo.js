@@ -95,14 +95,18 @@ class SystemInfo extends React.Component {
         var systemDisplayName = system.displayName;
         var firingModeDisplay = system.firingModes ? system.firingModes[system.firingMode] : null;
 
-        //Stage S (S-f): the Fighter Bomb draws from the ship's ShadowHangar pool; show
-        //the live count of integrated fighters available to launch (across all the
-        //ship's ShadowHangars). Computed client-side (like the hangar capacity line)
-        //because data[] isn't transmitted on live gamedata.
+        //Stage S (S-f): the Fighter Bomb draws from a ShadowHangar pool; show the live
+        //count of integrated fighters available to launch. Passing `system` scopes the
+        //count to THIS bomb's own bay on a multi-bay hull (shadowRegenBaseBomb, via
+        //bombHangarIndex); on a single-bay hull it sums all ShadowHangars. Computed
+        //client-side (like the hangar capacity line) because data[] isn't transmitted live.
         var shadowBombAvailable = null;
         if (system.name === 'ShadowFighterBomb' && window.weaponManager
             && typeof weaponManager.shadowFighterBombPool === 'function') {
-            shadowBombAvailable = weaponManager.shadowFighterBombPool(ship);
+            //subtractPending=true: drop fighters already queued to launch this turn so the
+            //count updates the moment a launch is ordered (the held pool only shrinks on
+            //the server at turn resolution).
+            shadowBombAvailable = weaponManager.shadowFighterBombPool(ship, system, true);
         }
 
         let isUnrevealedMine = false;

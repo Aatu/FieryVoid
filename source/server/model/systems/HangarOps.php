@@ -605,6 +605,18 @@ class HangarOps {
 		return false;
 	}
 
+	/* Stage S (multi-bay): the ShadowHangar tagged with $bombGroupIndex == $index — the
+	 * bay served by the Fighter Bomb carrying the matching $bombHangarIndex. Used only by
+	 * multi-bay hulls (shadowRegenBaseBomb's 4 arc-keyed bays); single-bay hulls pass a
+	 * null index to performBombLaunch and never reach here. Returns null if no bay matches
+	 * (e.g. that bay was destroyed) so the bomb simply can't fire. */
+	public static function shadowHangarByGroupIndex($ship, $index){
+		foreach (self::collectShadowHangars($ship) as $h){
+			if (isset($h->bombGroupIndex) && (int)$h->bombGroupIndex === (int)$index) return $h;
+		}
+		return null;
+	}
+
 	/* Stage S (fleet-value attribution): the per-fighter CP cost of this ship's
 	 * integrated fighters (the SHAD_FTRL enhPrice) and the COUNT it bought. The
 	 * carrier's enhValue covers all of them at full strength; the fleet list values
@@ -2688,12 +2700,19 @@ class HangarOps {
 	 * pool; <=0/null means "the whole remaining pool". A partial launch leaves the
 	 * remainder docked. The carrier-hex spawn variant is performLaunch above.
 	 */
-	public static function performBombLaunch($carrier, $spawnPos, $gamedata, $count = null, $flightSizes = null){
+	public static function performBombLaunch($carrier, $spawnPos, $gamedata, $count = null, $flightSizes = null, $bombHangarIndex = null){
 		if (!($spawnPos instanceof OffsetCoordinate)) return null;
 
-		//Pool lives on the carrier's primary ShadowHangar (the same bay that holds
-		//+ persists the integrated-fighter hangarUsage and the coupling state).
-		$hangar = self::primaryShadowHangar($carrier);
+		//Which bay does this launch draw from?
+		//  - SINGLE-BAY hull (shadowCruiserBomb): $bombHangarIndex null → the primary
+		//    ShadowHangar, which also carries the coupling state + held pool.
+		//  - MULTI-BAY hull (shadowRegenBaseBomb): each Fighter Bomb passes its own
+		//    $bombHangarIndex → the matching ShadowHangar (bombGroupIndex). The bomb
+		//    launches/drains ONLY that bay's ≤6 fighters; the structure coupling stays
+		//    carrier-wide (read across all bays / registered on the primary) below.
+		$hangar = ($bombHangarIndex === null)
+			? self::primaryShadowHangar($carrier)
+			: self::shadowHangarByGroupIndex($carrier, (int)$bombHangarIndex);
 		if (!$hangar) return null;
 
 		//Held pool = all integrated fighters in the bay. Each held entry is a
@@ -2721,11 +2740,16 @@ class HangarOps {
 		//fighters can't be reused. We clamp the launchable pool to that free-box budget;
 		//resolveBombFlightSizes then honours it for both the manual-split and auto-split
 		//paths since both are bounded by $held.
+		//The structure-box cap is CARRIER-WIDE: one Structure binds every bay's fighters,
+		//so the in-space count is summed over the PRIMARY ShadowHangar's coupling map
+		//(shadowLaunched lives there, not on a per-bay $hangar). This caps a multi-bay
+		//base correctly — all bays' launched fighters compete for the same structure boxes.
 		$struct = $carrier->getStructureSystem(0);
 		$structRemaining = $struct ? max(0, (int)$struct->getRemainingHealth()) : 0;
+		$couplingHangar = self::primaryShadowHangar($carrier);
 		$inSpaceAttached = 0;
-		if (is_array($hangar->shadowLaunched)){
-			foreach ($hangar->shadowLaunched as $fid => $baseline){
+		if ($couplingHangar && is_array($couplingHangar->shadowLaunched)){
+			foreach ($couplingHangar->shadowLaunched as $fid => $baseline){
 				$flight = $gamedata->getShipById((int)$fid);
 				if ($flight instanceof FighterFlight){
 					$inSpaceAttached += self::countAttachedFightersInFlight($flight, $gamedata->turn);

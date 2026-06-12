@@ -3751,6 +3751,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem->isRail = !empty($this->isRail);           //Fighter Rails: rail discriminator (false for ordinary hangars/catapults)
 		$strippedSystem->isLCVRail = !empty($this->isLCVRail);     //LCV Rails: whole-ship dock discriminator (false for ordinary hangars)
 		$strippedSystem->isShadowHangar = !empty($this->isShadowHangar); //Stage S: integrated-fighter bay discriminator (false for ordinary hangars). $name stays 'hangar' so the launch/dock UI still applies; the client reads this flag for shuttle-pool exclusion / display.
+		if (isset($this->bombGroupIndex)) $strippedSystem->bombGroupIndex = (int)$this->bombGroupIndex; //Stage S multi-bay: pairs this bay to its own Fighter Bomb (client per-bay pool display)
 		$strippedSystem->excludeFromDefaultShuttles = !empty($this->excludeFromDefaultShuttles); //steers default shuttles away from this bay (boxes still count toward capacity)
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
@@ -4015,6 +4016,13 @@ class ShadowHangar extends Hangar{
     public $isShadowHangar = true;   //single discriminator, parallel to $isCatapult / $isRail / $isLCVRail
     public $isTargetable = false;
     public $isPrimaryTargetable = false;
+    //Stage S (multi-bay): on a carrier with SEVERAL ShadowHangars each served by its
+    //OWN Fighter Bomb (e.g. shadowRegenBaseBomb's 4 arc-keyed bays), this pairs the bay
+    //to its bomb. A ShadowFighterBomb with a matching $bombHangarIndex draws/drains ONLY
+    //this bay's held pool. null = unpaired (single-bay hulls like shadowCruiserBomb,
+    //where the bomb falls back to the primary ShadowHangar). The structure coupling stays
+    //carrier-wide regardless (one Structure binds every bay's fighters).
+    public $bombGroupIndex = null;
 
     // ($armour, $maxhealth = bay boxes, $output = launch+land budget,
     //  $direction = launch offset, $hangarType = the ship's fighter category)

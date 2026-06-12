@@ -483,9 +483,17 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	// machinery (capacity subtraction + the rendered line) ordinary hangars use.
 	if (this.isShadowHangar && this.ship && Array.isArray(this.ship.systems)) {
 		var bombLaunching = 0;
+		//Multi-bay (shadowRegenBaseBomb): count ONLY the Fighter Bomb that serves THIS bay
+		//(its bombHangarIndex == this bay's bombGroupIndex). Single-bay hull: bays/bombs
+		//carry no index, so every ShadowFighterBomb order counts (matches null == null).
+		var thisBayIndex = (this.bombGroupIndex !== undefined && this.bombGroupIndex !== null)
+			? parseInt(this.bombGroupIndex, 10) : null;
 		for (var bsi = 0; bsi < this.ship.systems.length; bsi++) {
 			var bsys = this.ship.systems[bsi];
 			if (!bsys || bsys.name !== 'ShadowFighterBomb' || !Array.isArray(bsys.fireOrders)) continue;
+			var bombIndex = (bsys.bombHangarIndex !== undefined && bsys.bombHangarIndex !== null)
+				? parseInt(bsys.bombHangarIndex, 10) : null;
+			if (thisBayIndex !== bombIndex) continue;   //a bomb only feeds its own bay's line
 			for (var bfi = 0; bfi < bsys.fireOrders.length; bfi++) {
 				var bfo = bsys.fireOrders[bfi];
 				if (!bfo) continue;

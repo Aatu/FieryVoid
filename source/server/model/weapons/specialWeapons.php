@@ -3684,11 +3684,25 @@ class ShadowFighterBomb extends Weapon{
 	//Self-repair: a hangar-adjacent system, low priority (matches VortexDisruptor).
 	public $repairPriority = 2;
 
-	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
+	//Stage S (multi-bay): which ShadowHangar this bomb serves. A carrier with SEVERAL
+	//arc-keyed bays (shadowRegenBaseBomb) gives each its own bomb; the bomb launches/drains
+	//ONLY the bay whose ShadowHangar->bombGroupIndex equals this. null = single-bay hull
+	//(shadowCruiserBomb) — performBombLaunch falls back to the primary ShadowHangar.
+	public $bombHangarIndex = null;
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $bombHangarIndex = null)
 	{
 		if ( $maxhealth == 0 ) $maxhealth = 4;
 		if ( $powerReq == 0 ) $powerReq = 0; //no power draw — it throws fighters, not energy
 		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		if ($bombHangarIndex !== null) $this->bombHangarIndex = (int)$bombHangarIndex;
+	}
+
+	//Round-trip the per-bay link so the client can size each bomb's pool to its own bay.
+	public function stripForJson() {
+		$strippedSystem = parent::stripForJson();
+		if (isset($this->bombHangarIndex)) $strippedSystem->bombHangarIndex = (int)$this->bombHangarIndex;
+		return $strippedSystem;
 	}
 
 	public function setSystemDataWindow($turn){
@@ -3748,7 +3762,8 @@ class ShadowFighterBomb extends Weapon{
 		$count = (int)$fireOrder->shots;
 
 		$spawnPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
-		$flightId = HangarOps::performBombLaunch($shooter, $spawnPos, $gamedata, $count);
+		//Multi-bay: launch ONLY from the bay this bomb serves (null ⇒ primary bay).
+		$flightId = HangarOps::performBombLaunch($shooter, $spawnPos, $gamedata, $count, null, $this->bombHangarIndex);
 
 		if ($flightId){
 			$fireOrder->shotshit = 1;

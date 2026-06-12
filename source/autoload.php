@@ -3972,7 +3972,7 @@ spl_autoload_register(
 				'shadowdreadnoughtbomb' => '/server/model/ships/shadows/shadowDreadnoughtBomb.php',
 				'shadowdreadnoughtprimordialbomb' => '/server/model/ships/shadows/shadowDreadnoughtPrimordialBomb.php',
 				'shadowfighterautonomous' => '/server/model/ships/shadows/shadowFighterAutonomous.php',                
-				//'shadowregenbasebomb' => '/server/model/ships/shadows/shadowRegenBaseBomb.php',                
+				'shadowregenbasebomb' => '/server/model/ships/shadows/shadowRegenBaseBomb.php',                
                 
 
 						//Satyra (Wolfgang campaign)

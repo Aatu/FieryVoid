@@ -2633,21 +2633,57 @@ window.weaponManager = {
         webglScene.customEvent('HexTargeted', { shooter: selectedShip, hexagon: hexpos })
     },
 
-    // Stage S (S-f): held integrated-fighter count across a carrier's ShadowHangars
-    // — the Fighter Bomb's launchable pool. Sums ShadowMediumFighterFlight entries
-    // (skipping cannotLaunch wrecks) over every isShadowHangar bay. Mirrors the
-    // server pool sum in HangarOps::performBombLaunch.
-    shadowFighterBombPool: function shadowFighterBombPool(carrier) {
+    // Stage S (S-f): held integrated-fighter count the Fighter Bomb can launch.
+    // Sums ShadowMediumFighterFlight entries (skipping cannotLaunch wrecks). Mirrors
+    // the server pool sum in HangarOps::performBombLaunch.
+    //
+    // MULTI-BAY (shadowRegenBaseBomb): pass the firing $weapon — when it carries a
+    // bombHangarIndex the pool is scoped to ITS bay only (the ShadowHangar whose
+    // bombGroupIndex matches), since each bomb launches just its own 6. SINGLE-BAY
+    // (shadowCruiserBomb): $weapon omitted / no index → sum across all ShadowHangars.
+    //
+    // $subtractPending (default false): when true, also nets off fighters already QUEUED
+    // to launch this turn (pending bomb fire orders on the relevant bay's bomb) so a
+    // DISPLAY like "Fighters available" drops immediately after a launch is queued. The
+    // launch DIALOG must NOT pass this — it replaces prior orders, so it needs the full
+    // pre-order pool as the max (otherwise re-editing an order double-discounts).
+    shadowFighterBombPool: function shadowFighterBombPool(carrier, weapon, subtractPending) {
         var pool = 0;
         if (!carrier || !carrier.systems) return 0;
+        var bayIndex = (weapon && weapon.bombHangarIndex !== undefined && weapon.bombHangarIndex !== null)
+            ? parseInt(weapon.bombHangarIndex, 10) : null;
         for (var i in carrier.systems) {
             var sys = carrier.systems[i];
             if (!sys || !sys.isShadowHangar || !Array.isArray(sys.hangarUsage)) continue;
+            // Scope to this bomb's own bay when a bombHangarIndex was given.
+            if (bayIndex !== null && parseInt(sys.bombGroupIndex, 10) !== bayIndex) continue;
             sys.hangarUsage.forEach(function (e) {
                 if (!e || e.phpclass !== 'ShadowMediumFighterFlight' || e.cannotLaunch) return;
                 pool += parseInt(e.flightSize || 1, 10);
             });
         }
+
+        // Net off fighters QUEUED to launch this turn so a display reflects the pending
+        // order immediately (the held hangarUsage above doesn't shrink until the turn
+        // resolves and the server drains it). Count each ShadowFighterBomb's pending
+        // shots, scoped to the same bay (its bombHangarIndex matches $weapon's, or both
+        // unindexed on a single-bay hull).
+        if (subtractPending) {
+            for (var j in carrier.systems) {
+                var bsys = carrier.systems[j];
+                if (!bsys || bsys.name !== 'ShadowFighterBomb' || !Array.isArray(bsys.fireOrders)) continue;
+                var bIdx = (bsys.bombHangarIndex !== undefined && bsys.bombHangarIndex !== null)
+                    ? parseInt(bsys.bombHangarIndex, 10) : null;
+                if (bIdx !== bayIndex) continue;   //a bomb only draws from its own bay
+                bsys.fireOrders.forEach(function (fo) {
+                    if (!fo) return;
+                    if (fo.turn != null && typeof gamedata !== 'undefined' && fo.turn != gamedata.turn) return;
+                    pool -= Math.max(0, parseInt(fo.shots || 0, 10));
+                });
+            }
+            pool = Math.max(0, pool);
+        }
+
         // Stage S (S-d): STRUCTURE-BOX cap. Each integrated fighter in space binds a
         // marked structure box, so a carrier can never launch more than it has boxes
         // for. Clamp the offered pool to remaining structure (a combat-reduced carrier
@@ -2682,9 +2718,10 @@ window.weaponManager = {
     //   - MANUAL (checkbox off): ONE fire order PER chosen flight, shots = that size.
     // The combat log groups the same-hex orders into one "Fighter Bomb" entry.
     queueShadowFighterBombOrder: function queueShadowFighterBombOrder(carrier, weapon, hexpos, type) {
-        var pool = weaponManager.shadowFighterBombPool(carrier);
+        //Multi-bay: scope the offered pool to THIS bomb's bay (weapon.bombHangarIndex).
+        var pool = weaponManager.shadowFighterBombPool(carrier, weapon);
         if (pool <= 0) {
-            confirm.warning("No integrated fighters left in the hangar to launch.");
+            confirm.warning("No integrated fighters left in this hangar to launch.");
             return;
         }
         var cap = weaponManager.shadowFighterBombFlightCap(carrier, pool);
