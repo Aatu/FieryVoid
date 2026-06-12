@@ -605,6 +605,29 @@ class HangarOps {
 		return false;
 	}
 
+	/* Stage S (fleet-value attribution): the per-fighter CP cost of this ship's
+	 * integrated fighters (the SHAD_FTRL enhPrice) and the COUNT it bought. The
+	 * carrier's enhValue covers all of them at full strength; the fleet list values
+	 * LAUNCHED integrated fighters on their own flight rows, so it must net the
+	 * launched ones off the carrier's value (and vice-versa on dock). Sending the
+	 * purchased count + per-craft cost lets the client do that math exactly without
+	 * re-deriving it from the opaque enhValue total (which may also fold in IMPR_SR).
+	 * Returns [count, perCraft]; count 0 when the ship bought none. */
+	public static function integratedFighterPurchase($ship){
+		$count = 0;
+		$perCraft = 150;   //SHAD_FTRL enhPrice (Enhancements::setEnhancementOptionsShip)
+		if (isset($ship->enhancementOptions) && is_array($ship->enhancementOptions)){
+			foreach ($ship->enhancementOptions as $opt){
+				if (($opt[0] ?? '') === 'SHAD_FTRL'){
+					$count = max(0, (int)($opt[2] ?? 0));
+					if (isset($opt[4]) && (int)$opt[4] > 0) $perCraft = (int)$opt[4];   //live price
+					break;
+				}
+			}
+		}
+		return array($count, $perCraft);
+	}
+
 	/* === Stage S (S-d): integrated-fighter structure coupling ============== */
 
 	/* The ShadowHangar that carries the coupling state ({attached,cutOff,launchedIds}).
