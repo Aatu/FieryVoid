@@ -4200,10 +4200,12 @@ class HangarOps {
 		//$flight stays flying) via destroyAllFighters → combatValue 0 → fleet-list
 		//hides it, no ghost. (S-e adds diffuser-energy reabsorption + excess
 		//penetration; S-d adds the per-fighter structure-box binding/freeing.)
-		if (!empty($primaryHangar->isShadowHangar)) {
+		if (!empty($primaryHangar->isShadowHangar) && $flight->phpclass === 'ShadowMediumFighterFlight') {
 			//Stage S (S-e): reabsorb the landing craft's stored diffuser energy into a
 			//carrier diffuser (excess penetrates) — BEFORE destroyAllFighters, while the
-			//$dockedUnit tendrils still hold their energy.
+			//$dockedUnit tendrils still hold their energy. Gated on the flight ACTUALLY being
+			//an integrated fighter (not just the bay being a ShadowHangar) so a foreign flight
+			//that somehow reached a ShadowHangar bay isn't reabsorbed / mis-tracked.
 			self::applyDiffuserReabsorption($carrier, $dockedUnit, $gamedata);
 			//Retire the landed unit as DOCKED (cyan), not DROPOUT — it reabsorbed, it
 			//didn't combat-disengage. dockAllFighters hides the removed row the same way.
@@ -4333,11 +4335,19 @@ class HangarOps {
 			$ordered[] = $h;
 		}
 
+		//Stage S: a ShadowHangar (integrated-fighter bay) accepts ONLY its own integrated
+		//fighters for docking — a foreign / non-integrated flight must never land there
+		//(it would wrongly trip the reabsorption branch in performWholeFlightDock and
+		//corrupt the bay's held pool). ShadowHangars keep $name='hangar' so they'd
+		//otherwise pass hangarAcceptsCategory like any medium bay.
+		$flightIsIntegrated = ($flight->phpclass === 'ShadowMediumFighterFlight');
+
 		$bays = array();
 		$boxesAvail = 0;
 		foreach ($ordered as $h){
 			if (!empty($h->isCatapult)) continue;
 			if ($h->isDestroyed()) continue;
+			if (!empty($h->isShadowHangar) && !$flightIsIntegrated) continue;   //integrated-only bay
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			//Respect the shared launch+land budget per bay. Budget is in CRAFT;
@@ -4474,8 +4484,10 @@ class HangarOps {
 		//fighter, and retire the old removed flight row so it leaves no ghost. Operates on
 		//$dockedUnit (the fragment on a partial dock) so a cut-off remnant left on the
 		//source flight is NOT reabsorbed — it stays in space, still flying.
-		if (!empty($hangar->isShadowHangar)) {
+		if (!empty($hangar->isShadowHangar) && $flight->phpclass === 'ShadowMediumFighterFlight') {
 			//Stage S (S-e): reabsorb diffuser energy before retiring the landed flight.
+			//Gated on the flight actually being an integrated fighter (not just the bay being
+			//a ShadowHangar) — a foreign flight that reached this bay isn't reabsorbed.
 			self::applyDiffuserReabsorption($carrier, $dockedUnit, $gamedata);
 			//DOCKED (cyan) not DROPOUT — reabsorbed, not combat-disengaged.
 			if ($dockedUnit instanceof FighterFlight) self::dockAllFighters($dockedUnit, $gamedata);
@@ -5997,6 +6009,12 @@ class HangarOps {
 		$virtuals = array();
 		foreach ($hangars as $hangar) {
 			if (!is_array($hangar->hangarUsage)) continue;
+			//Stage S: integrated fighters are FORMED FROM the carrier's Structure, so they
+			//cannot escape a dead carrier — they die with it. Exclude every ShadowHangar
+			//bay's held fighters from the escape pool entirely (user 2026-06-12). (Launched
+			//integrated fighters already in space are their own flight rows and are
+			//unaffected by the carrier's destruction; only the bay-held ones are dropped.)
+			if (!empty($hangar->isShadowHangar)) continue;
 			foreach ($hangar->hangarUsage as $entryIdx => $entry) {
 				if (!empty($entry['cannotLaunch'])) continue;
 				$phpclass = (string)($entry['phpclass'] ?? '');

@@ -368,6 +368,11 @@ window.findEligibleCarriersForDock = function (flight) {
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
 
+            // Stage S: a ShadowHangar (integrated-fighter bay) only accepts its own
+            // integrated fighters — never offer it as a dock target for a foreign /
+            // non-integrated flight (mirrors the server buildDockBays guard).
+            if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
+
             if (!hangarAcceptsCategory(sys.hangarType, category, ship)) return;
 
             // Heading gate (per-hangar): ordinary hangar → flight heading must
@@ -658,6 +663,9 @@ window.findEligibleFlightsForDocking = function (carrier) {
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
+            // Stage S: ShadowHangars only recover their own integrated fighters (mirrors
+            // the server buildDockBays guard) — never a foreign / non-integrated flight.
+            if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
             // Per-hangar heading gate.
