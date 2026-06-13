@@ -244,7 +244,12 @@ window.combatLog = {
                 var totaldam = 0;
                 var armour = 0;
                 var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.
-                var disengagedhtml = ""; //Fighters that dropped out (DisengagedFighter crit) this turn.
+                // Combined "Fighters disengaged / destroyed:" row. Collected as two
+                // lists of coloured name spans so disengaged (orange) always lists
+                // before destroyed (red) regardless of damage-entry processing order;
+                // joined with the header at emit time.
+                var disengagedFighters = [];
+                var destroyedFighters = [];
                 var damagehtml = "";
                 for (var a in damages[i].damages) {
 
@@ -274,21 +279,18 @@ window.combatLog = {
                         // path below — which keys its dedupe tracker on
                         // system.ship.id — can't handle them. A fighter that took
                         // enough damage to DROP OUT gets a DisengagedFighter crit
-                        // this turn; list those on their own "Fighters disengaged:"
-                        // line, deduped against the owning flight (d.shipid).
+                        // this turn; add it to the combined fighters list in ORANGE
+                        // (.critical), deduped against the owning flight (d.shipid).
+                        // Destroyed fighters get added in RED by the block below.
                         if (!system.ship) {
                             var droppedOut = shipManager.criticals.hasCriticalOnTurn(system, "DisengagedFighter", d.turn);
-                            if (droppedOut) {
-                                if (!combatLog.critsShown[d.shipid]?.includes(system.id)) {
-                                    var firstDrop = disengagedhtml.length == 0 ? " Fighters disengaged: " : ", ";
-                                    disengagedhtml += firstDrop + '<span class="critical">' + shipManager.systems.getDisplayName(system) + '</span>';
-                                }
+                            if (droppedOut && !combatLog.critsShown[d.shipid]?.includes(system.id)) {
+                                disengagedFighters.push('<span class="critical">' + shipManager.systems.getDisplayName(system) + '</span>');
+
                                 if (!combatLog.critsShown[d.shipid]) {
                                     combatLog.critsShown[d.shipid] = [];
                                 }
-                                if (!combatLog.critsShown[d.shipid].includes(system.id)) {
-                                    combatLog.critsShown[d.shipid].push(system.id);
-                                }
+                                combatLog.critsShown[d.shipid].push(system.id);
                             }
                             continue; //Fighter handled (or a non-dropout fighter crit); skip the ship-system path.
                         }
@@ -313,13 +315,18 @@ window.combatLog = {
                         continue;
                     }
 
+                    // Destroyed fighter craft (no .ship back-reference) join the
+                    // combined fighters list in RED (.damage), after the orange
+                    // disengaged names. Ship systems keep the "Systems destroyed:" list.
+                    if (!system.ship) {
+                        destroyedFighters.push('<span class="damage">' + shipManager.systems.getDisplayName(system) + '</span>');
+                        continue;
+                    }
+
                     var firstDam = "";
 
                     if (damagehtml.length == 0) {
-                        // Fighter craft have no .ship back-reference; a flight victim's
-                        // destroyed "systems" are all fighter craft, so label the list
-                        // "Fighters destroyed:" to match the "Fighters disengaged:" line.
-                        firstDam = system.ship ? " Systems destroyed: " : " Fighters destroyed: ";
+                        firstDam = " Systems destroyed: ";
                         comma = "";
                     }
 
@@ -338,8 +345,10 @@ window.combatLog = {
                     html += '<li>' + criticalshtml + '</li>';
                 }
 
-                if (disengagedhtml.length > 1) {
-                    html += '<li>' + disengagedhtml + '</li>';
+                // Disengaged (orange) first, then destroyed (red), in one row.
+                var fighterNames = disengagedFighters.concat(destroyedFighters);
+                if (fighterNames.length > 0) {
+                    html += '<li> Fighters disengaged / destroyed: ' + fighterNames.join(', ') + '</li>';
                 }
 
                 if (damagehtml.length > 1) {
