@@ -292,6 +292,24 @@ window.gamedata = {
         ];
     },
 
+    // Inline style for an observer's "active mover" IniGUI box, derived from the
+    // ship's team colour. Mirrors the .iniActive* CSS (border + translucent fill +
+    // glow) but keyed on team instead of mine/ally/enemy.
+    getIniActiveTeamStyle: function getIniActiveTeamStyle(team) {
+        var rgb = gamedata.getTeamColorRGB(team);
+        var r = Math.round(rgb[0]);
+        var g = Math.round(rgb[1]);
+        var b = Math.round(rgb[2]);
+        // Dark, desaturated fill (~22% of the team colour) so the team-coloured
+        // text stays readable, matching the dim backgrounds the class versions use.
+        var fillR = Math.round(r * 0.22);
+        var fillG = Math.round(g * 0.22);
+        var fillB = Math.round(b * 0.22);
+        return "border:1px solid rgb(" + r + "," + g + "," + b + ") !important;"
+            + "background-color:rgba(" + fillR + "," + fillG + "," + fillB + ",0.9) !important;"
+            + "box-shadow:0px 0px 3px rgb(" + r + "," + g + "," + b + ");";
+    },
+
     // Linear-space THREE.Color version of getTeamColorRGB, ready for sprite overlays.
     getTeamColor: function getTeamColor(team) {
         var rgb = gamedata.getTeamColorRGB(team);
@@ -1632,7 +1650,11 @@ getActiveShipName: function getActiveShipName() {
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
-                if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
+                if (active === true && teamColorCss) {
+                    // Observers: style the active-mover box from the ship's team colour
+                    // instead of the mine/ally/enemy iniActive* classes.
+                    td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                } else if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
                     td.classList.add("iniActiveMoved");
                 } else if (active === true && gamedata.isMyShip(ships[i])) {
                     td.classList.add("iniActive");
@@ -1643,7 +1665,11 @@ getActiveShipName: function getActiveShipName() {
                 }
             } else {
                 if (gamedata.getActiveShips().includes(ships[i])) {
-                    td.classList.add(gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy");
+                    if (teamColorCss) {
+                        td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                    } else {
+                        td.classList.add(gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy");
+                    }
                 }
             }
 
