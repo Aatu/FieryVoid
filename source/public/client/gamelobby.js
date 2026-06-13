@@ -616,73 +616,52 @@ window.gamedata = {
 			totalEnhancementsValue += lship.pointCostEnh;
 			var vLetter = gamedata.variantLetter(lship);
 			var hull = lship.variantOf;
-			var hullFound;
-			hullFound = false;
 			if (hull == "") hull = lship.shipClass; //ship is either base itself, or base is indicated in variantOf variable
+
+			// Item 5: find-or-create the hull row up front, then run ONE variant
+			// switch against it. Previously this was two near-identical switches
+			// (one for an existing shipTable row, one for a freshly-built one). A
+			// new row starts Total:1 and the switch bumps one variant counter, so
+			// existing-vs-new produce the same per-row tallies. hangarRequired is
+			// sticky (any hangar-requiring ship of the hull flips it true and it
+			// never resets); isFtr is only meaningful at creation. Behaviour —
+			// including the Item 10 fix (special variants increment THIS row's X
+			// and set specialVariantPresent) — is unchanged.
+			var hullRow = null;
 			for (var j in shipTable) {
-				var oHull = shipTable[j];
-				if (oHull.name == hull) {
-					hullFound = true;
-					oHull.Total++;
-					if (lship.hangarRequired != '') { //let's require sticking to hull limit if ANY ship of this hull requires it
-						oHull.hangarRequired = true;
-					}
-					switch (vLetter) {
-						case 'Q':
-							oHull.Q++;
-							totalR++;
-							uniqueShipPresent = true;
-							break;
-						case 'R':
-							oHull.R++;
-							totalR++;
-							break;
-						case 'U':
-							oHull.U++;
-							totalU++;
-							break;
-						case 'C':
-							oHull.C++;
-							break;
-						default:
-							//Item 10 fix: operate on the matched hull (oHull), not the
-							//hoisted nHull from a previous iteration, and flag the special
-							//variant the same way the new-hull path below does.
-							oHull.X++;
-							specialVariantPresent = true;
-					}
-				}
+				if (shipTable[j].name == hull) { hullRow = shipTable[j]; break; }
 			}
-			if (hullFound == false) {
-				var nHull = { name: hull, Total: 1, Q: 0, R: 0, U: 0, C: 0, X: 0, isFtr: false, hangarRequired: false };
-				if (lship.flight) {
-					nHull.isFtr = lship.flight;
-				}
-				if (lship.hangarRequired != '') {
-					nHull.hangarRequired = true;
-				}
-				switch (vLetter) {
-					case 'Q':
-						nHull.Q++;
-						totalR++; //Unique is treated more or less the same as Rare
-						uniqueShipPresent = true;
-						break;
-					case 'R':
-						nHull.R++;
-						totalR++;
-						break;
-					case 'U':
-						nHull.U++;
-						totalU++;
-						break;
-					case 'C':
-						nHull.C++;
-						break;
-					default:
-						nHull.X++;
-						specialVariantPresent = true;
-				}
-				shipTable.push(nHull);
+			if (hullRow === null) {
+				hullRow = { name: hull, Total: 0, Q: 0, R: 0, U: 0, C: 0, X: 0, isFtr: lship.flight ? lship.flight : false, hangarRequired: false };
+				shipTable.push(hullRow);
+			}
+			hullRow.Total++;
+			if (lship.hangarRequired != '') { //let's require sticking to hull limit if ANY ship of this hull requires it
+				hullRow.hangarRequired = true;
+			}
+			switch (vLetter) {
+				case 'Q':
+					hullRow.Q++;
+					totalR++; //Unique is treated more or less the same as Rare
+					uniqueShipPresent = true;
+					break;
+				case 'R':
+					hullRow.R++;
+					totalR++;
+					break;
+				case 'U':
+					hullRow.U++;
+					totalU++;
+					break;
+				case 'C':
+					hullRow.C++;
+					break;
+				default:
+					//Item 10 fix: special variants increment this hull row's X and
+					//flag specialVariantPresent (the old already-seen-hull path wrote
+					//the wrong object and skipped the flag).
+					hullRow.X++;
+					specialVariantPresent = true;
 			}
 			if (lship.factionAge > 2) {
 				ancientUnitPresent = true;
@@ -1324,63 +1303,39 @@ window.gamedata = {
 		}
 		checkResult += "<br>";
 
-		totalFtrCurr = totalFtrXL;
-		totalHangarCurr = (totalHangarH + totalHangarM + totalHangarL + hangarConversionNet) * 2 + totalHangarXL;
-		if (totalFtrCurr > 0 || totalHangarCurr > 0) { //do not show if there are no fighters/hangars in this segment
-			checkResult += " - Ultralight Fighters: " + totalFtrCurr;
-			checkResult += " (allowed up to " + totalHangarCurr + ")";
-			if ((totalFtrXL > 0) || (totalHangarXL > 0)) { //add disclaimer because sums will not add up straight.
-				checkResult += " <i>[Ultralights only require half a normal hangar slot]</i>";
+		// Item 9: the four per-size fighter rows (Ultralight → Light → Medium →
+		// Heavy) were four near-identical blocks differing only in label, the
+		// hangar-capacity formula, and the Ultralight-only "half a slot" note.
+		// Drive them from a table instead. Each row's hangar formula is captured
+		// at build time, so the figures — and the order — are identical. The loop
+		// leaves totalFtrCurr/totalHangarCurr holding the Heavy (last) row's
+		// values, matching the previous fall-through that later code relies on.
+		var fighterRows = [
+			{ label: "Ultralight Fighters", ftr: totalFtrXL,
+			  hangar: (totalHangarH + totalHangarM + totalHangarL + hangarConversionNet) * 2 + totalHangarXL,
+			  disclaimer: ((totalFtrXL > 0) || (totalHangarXL > 0)) ? " <i>[Ultralights only require half a normal hangar slot]</i>" : "" },
+			{ label: "Light Fighters", ftr: totalFtrL,
+			  hangar: totalHangarH + totalHangarM + totalHangarL + hangarConversionNet, disclaimer: "" },
+			{ label: "Medium Fighters", ftr: totalFtrM,
+			  hangar: totalHangarH + totalHangarM + hangarConversionNet, disclaimer: "" },
+			{ label: "Heavy Fighters", ftr: totalFtrH,
+			  hangar: totalHangarH + hangarConversionNet, disclaimer: "" }
+		];
+		for (var fr = 0; fr < fighterRows.length; fr++) {
+			totalFtrCurr = fighterRows[fr].ftr;
+			totalHangarCurr = fighterRows[fr].hangar;
+			if (totalFtrCurr > 0 || totalHangarCurr > 0) { //do not show if there are no fighters/hangars in this segment
+				checkResult += " - " + fighterRows[fr].label + ": " + totalFtrCurr;
+				checkResult += " (allowed up to " + totalHangarCurr + ")";
+				checkResult += fighterRows[fr].disclaimer; //empty for all but Ultralight
+				if (totalFtrCurr > totalHangarCurr) { //fighter total is not within limits
+					checkResult += R_TOOMANY;
+					problemFound = true;
+				} else {
+					checkResult += R_OK;
+				}
+				checkResult += "<br>";
 			}
-			if (totalFtrCurr > totalHangarCurr) { //fighter total is not within limits
-				checkResult += R_TOOMANY;
-				problemFound = true;
-			} else {
-				checkResult += R_OK;
-			}
-			checkResult += "<br>";
-		}
-
-		totalFtrCurr = totalFtrL;
-		totalHangarCurr = totalHangarH + totalHangarM + totalHangarL + hangarConversionNet;
-		if (totalFtrCurr > 0 || totalHangarCurr > 0) { //do not show if there are no fighters/hangars in this segment
-			checkResult += " - Light Fighters: " + totalFtrCurr;
-			checkResult += " (allowed up to " + totalHangarCurr + ")";
-			if (totalFtrCurr > totalHangarCurr) { //fighter total is not within limits
-				checkResult += R_TOOMANY;
-				problemFound = true;
-			} else {
-				checkResult += R_OK;
-			}
-			checkResult += "<br>";
-		}
-
-		totalFtrCurr = totalFtrM;
-		totalHangarCurr = totalHangarH + totalHangarM + hangarConversionNet;
-		if (totalFtrCurr > 0 || totalHangarCurr > 0) { //do not show if there are no fighters/hangars in this segment
-			checkResult += " - Medium Fighters: " + totalFtrCurr;
-			checkResult += " (allowed up to " + totalHangarCurr + ")";
-			if (totalFtrCurr > totalHangarCurr) { //fighter total is not within limits
-				checkResult += R_TOOMANY;
-				problemFound = true;
-			} else {
-				checkResult += R_OK;
-			}
-			checkResult += "<br>";
-		}
-
-		totalFtrCurr = totalFtrH;
-		totalHangarCurr = totalHangarH + hangarConversionNet;
-		if (totalFtrCurr > 0 || totalHangarCurr > 0) { //do not show if there are no fighters/hangars in this segment
-			checkResult += " - Heavy Fighters: " + totalFtrCurr;
-			checkResult += " (allowed up to " + totalHangarCurr + ")";
-			if (totalFtrCurr > totalHangarCurr) { //fighter total is not within limits
-				checkResult += R_TOOMANY;
-				problemFound = true;
-			} else {
-				checkResult += R_OK;
-			}
-			checkResult += "<br>";
 		}
 
 		//small flights (do not show if there aren't any!)
@@ -1403,57 +1358,25 @@ window.gamedata = {
 				checkResult += "<br>";
 				problemFound = true;
 			}else*/{ //calculate total amount and type of special fighters
-				var totalSpecialFighters = [];
-				specialFighters.sort();
-				var idx = 0;
-				while (specialFighters.length > 0) {
-					if (totalSpecialFighters.length == 0) {
-						totalSpecialFighters.push([specialFighters[0][0], specialFighters[0][1]]);
-						specialFighters.shift();
-					} else {
-						if (totalSpecialFighters[idx][0] == specialFighters[0][0]) {
-							var totalFighterName = totalSpecialFighters[idx][0];
-							var totalAmountToAdd = totalSpecialFighters[idx][1];
-							totalAmountToAdd += specialFighters[0][1];
-							totalSpecialFighters.pop();
-							totalSpecialFighters.push([totalFighterName, totalAmountToAdd]);
-							specialFighters.shift();
+				// Item 7: sum [name, amount] pairs by name. The originals did this
+				// with a sort + shift/pop/push + idx-cursor while-loop; this helper
+				// sorts the same way (Array.sort's default string coercion of each
+				// [name, amount] pair) and merges adjacent equal names, yielding the
+				// identical grouped array in the identical order.
+				var sumByName = function (pairs) {
+					pairs.sort();
+					var out = [];
+					for (var p = 0; p < pairs.length; p++) {
+						if (out.length > 0 && out[out.length - 1][0] == pairs[p][0]) {
+							out[out.length - 1][1] += pairs[p][1];
 						} else {
-							totalSpecialFighters.push([specialFighters[0][0], specialFighters[0][1]]);
-							specialFighters.shift();
-							idx++;
+							out.push([pairs[p][0], pairs[p][1]]);
 						}
 					}
-				}
-				//calculate total amount and type of special hangars
-				var totalSpecialHangars = [];
-				specialHangars.sort();
-				idx = 0;
-				while (specialHangars.length > 0) {
-					if (totalSpecialHangars.length == 0) {
-						totalSpecialHangars.push([specialHangars[0][0], specialHangars[0][1]]);
-						specialHangars.shift();
-					} else {
-						if (totalSpecialHangars[idx][0] == specialHangars[0][0]) {
-							var totalFighterName = totalSpecialHangars[idx][0];
-							var totalAmountToAdd = totalSpecialHangars[idx][1];
-							totalAmountToAdd += specialHangars[0][1];
-							totalSpecialHangars.pop();
-							totalSpecialHangars.push([totalFighterName, totalAmountToAdd]);
-							specialHangars.shift();
-						} else {
-							totalSpecialHangars.push([specialHangars[0][0], specialHangars[0][1]]);
-							specialHangars.shift();
-							idx++;
-						}
-					}
-				}
-				/*
-				console.log('Total Fighters');
-				console.table(totalSpecialFighters);
-				console.log('Total Hangars');
-				console.table(totalSpecialHangars);
-				*/
+					return out;
+				};
+				var totalSpecialFighters = sumByName(specialFighters);
+				var totalSpecialHangars = sumByName(specialHangars);
 				//determine if there is enough special hangars for each type of special fighter
 				for (i = 0; i < totalSpecialFighters.length; i++) {
 					var match = false;
