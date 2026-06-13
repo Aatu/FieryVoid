@@ -243,7 +243,8 @@ window.combatLog = {
                 var victim = damages[i].ship;
                 var totaldam = 0;
                 var armour = 0;
-                var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.                
+                var criticalshtml = ""; //Needs to be outside of damage block below to prevent overwriting.
+                var disengagedhtml = ""; //Fighters that dropped out (DisengagedFighter crit) this turn.
                 var damagehtml = "";
                 for (var a in damages[i].damages) {
 
@@ -268,11 +269,33 @@ window.combatLog = {
                     var hasCrit = shipManager.criticals.sufferedCritThisTurn(system, d.turn);
 
                     if (hasCrit && damageDone > 0) {
+                        // Fighter craft have no .ship back-reference (the Fighter
+                        // constructor never sets it), so the "System criticals:"
+                        // path below — which keys its dedupe tracker on
+                        // system.ship.id — can't handle them. A fighter that took
+                        // enough damage to DROP OUT gets a DisengagedFighter crit
+                        // this turn; list those on their own "Fighters disengaged:"
+                        // line, deduped against the owning flight (d.shipid).
+                        if (!system.ship) {
+                            var droppedOut = shipManager.criticals.hasCriticalOnTurn(system, "DisengagedFighter", d.turn);
+                            if (droppedOut) {
+                                if (!combatLog.critsShown[d.shipid]?.includes(system.id)) {
+                                    var firstDrop = disengagedhtml.length == 0 ? " Fighters disengaged: " : ", ";
+                                    disengagedhtml += firstDrop + '<span class="critical">' + shipManager.systems.getDisplayName(system) + '</span>';
+                                }
+                                if (!combatLog.critsShown[d.shipid]) {
+                                    combatLog.critsShown[d.shipid] = [];
+                                }
+                                if (!combatLog.critsShown[d.shipid].includes(system.id)) {
+                                    combatLog.critsShown[d.shipid].push(system.id);
+                                }
+                            }
+                            continue; //Fighter handled (or a non-dropout fighter crit); skip the ship-system path.
+                        }
                         if (criticalshtml.length == 0) {
                             firstCrit = " System criticals: ";
                             comma = "";
                         }
-                        if (!system.ship) continue; //Means it's a fighter, just ignore.
                         if (!combatLog.critsShown[system.ship.id]?.includes(system.id)) {
                             criticalshtml += firstCrit + '<span class="critical">' + comma + ' ' + shipManager.systems.getDisplayName(system) + '</span>';
                         }
@@ -310,6 +333,10 @@ window.combatLog = {
 
                 if (criticalshtml.length > 1) {
                     html += '<li>' + criticalshtml + '</li>';
+                }
+
+                if (disengagedhtml.length > 1) {
+                    html += '<li>' + disengagedhtml + '</li>';
                 }
 
                 if (damagehtml.length > 1) {
