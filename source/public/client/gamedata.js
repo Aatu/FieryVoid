@@ -1846,6 +1846,7 @@ getActiveShipName: function getActiveShipName() {
         gamedata.gameid = serverdata.id;
         gamedata.slots = serverdata.slots;
         gamedata.rules = serverdata.rules;
+        gamedata.name = serverdata.name;
         gamedata.description = serverdata.description;
 
         if (!gamedata.replay) {

@@ -436,9 +436,14 @@ window.declarations = {
 	//prepare text
     var newText = '';
     //start with header
-    newText = '<br><big><b><u>';
-    newText += 'GAME DESCRIPTION';
-    newText += '</b></u></big><br><br>';
+    newText = '<br>';	
+    //newText = '<br><big><b><u>';
+    //newText += 'GAME DESCRIPTION';
+    //newText += '</b></u></big><br><br>';
+    // Game name
+    if (gamedata.name) {
+        newText += '<span class="gameName">' + gamedata.name + '</span>';
+    }
     // Rules in play
 	newText += 'RULES OF ENGAGEMENT:';
     // Check if 'Desperate' exists in gamedata.rules and evaluate its value
