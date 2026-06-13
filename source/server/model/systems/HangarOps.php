@@ -478,34 +478,75 @@ class HangarOps {
 			}
 		}
 		if ($best !== null) return $best;
-		//Preferred set full — overflow to any remaining hangar in encounter
-		//order, but still skip $excludeFromDefaultShuttles bays so a flagged
-		//hangar never receives shuttles even once the eligible ones fill.
+		//Preferred set full — overflow to the LEAST-USED remaining eligible bay
+		//(see overflowHangars), so the spillover spreads evenly rather than
+		//piling into the first bay in encounter order. This is what turns the
+		//EA Babylon5 Refit's 4-shuttle overflow into 2+2 across its two primary
+		//fighter bays (8/2/2) instead of 4/0. Flagged ($excludeFromDefaultShuttles)
+		//bays are excluded from this set, so they never receive shuttles even once
+		//the eligible ones fill.
+		$best = null;
+		$bestUsage = PHP_INT_MAX;
+		foreach (self::overflowHangars($hangars) as $h){
+			if ((int)$h->maxhealth - self::occupiedBoxes($h) < $flightSize) continue;
+			$used = self::usageCountFor($h);
+			if ($used < $bestUsage){
+				$bestUsage = $used;
+				$best = $h;
+			}
+		}
+		return $best;
+	}
+
+	/* The set of bays the default-shuttle pool spills into once the preferred
+	 * (distributionHangars) set is full: every eligible bay that is NOT itself in
+	 * the distribution set. When a shuttle-only bay claims the pool, the overflow
+	 * set is the general fighter bays; when distribution is the primary set, the
+	 * overflow set is the non-primary (side) bays. $excludeFromDefaultShuttles
+	 * bays are never included. Used by pickHangarForShuttle's fallback and
+	 * fairShareCap so overflow spreads EVENLY across the remaining bays (e.g. the
+	 * Babylon5 Refit's 4 spill shuttles → 2+2 across its two primary fighter bays)
+	 * rather than piling into the first one. Mirrored client-side in systems.js. */
+	public static function overflowHangars($hangars){
+		$dist = self::distributionHangars($hangars);
+		$inDist = array();
+		foreach ($dist as $d) $inDist[spl_object_id($d)] = true;
+		$out = array();
 		foreach ($hangars as $h){
 			if (self::excludesDefaultShuttles($h)) continue;
-			if ((int)$h->maxhealth - self::occupiedBoxes($h) >= $flightSize) return $h;
+			if (isset($inDist[spl_object_id($h)])) continue;
+			$out[] = $h;
 		}
-		return null;
+		return $out;
 	}
 
 	/* The subset of $hangars the default-shuttle pool is distributed across
-	 * first: the primary-structure (location 0) hangars if the ship has any,
-	 * otherwise every hangar. Multiple primary hangars therefore share the pool
-	 * evenly (Pirocia's three → 2+2+2) while a single primary still takes the
-	 * whole pool; side hangars on a ship that has primaries get only overflow
-	 * once the primaries are full. Mirrored client-side in systems.js
-	 * getDefaultShuttleCompositionForHangar so lobby tooltips match the in-game
-	 * initial population.
+	 * first. Narrowing is applied in this order:
 	 *
-	 * Shuttle-only hangars: a few ships (Vree Xeecra/Xaarix/Vyreel) carry a
-	 * small dedicated shuttle bay (declared with hangarType 'shuttles') ALONGSIDE
-	 * larger general fighter bays on the SAME structure section. The intent is
-	 * that all default shuttles pile into the small bay, leaving the big bays free
-	 * for fighters. So if the candidate set contains any explicitly shuttle-tagged
-	 * hangar, narrow the distribution set to just those — the general bays then
-	 * receive default shuttles only as overflow (pickHangarForShuttle's fallback
-	 * loop), once the shuttle bays are full. Ships with no shuttle-tagged hangar
-	 * (the overwhelming majority) are unaffected. */
+	 *   1. Drop $excludeFromDefaultShuttles bays (see below).
+	 *   2. If any eligible bay is shuttle-only (hangarType 'shuttles'/
+	 *      'minesweeping shuttles'), the set is JUST those bays — regardless of
+	 *      which structure section they sit on.
+	 *   3. Otherwise, the primary-structure (location 0) hangars if the ship has
+	 *      any, else every eligible hangar.
+	 *
+	 * Multiple bays in the chosen set share the pool evenly (Pirocia's three
+	 * primaries → 2+2+2) while a lone bay takes the whole pool; bays NOT in the
+	 * set get only overflow once the set fills (overflowHangars + the least-used
+	 * picker in pickHangarForShuttle, so the spillover ALSO spreads evenly).
+	 * Mirrored client-side in systems.js getDefaultShuttleCompositionForHangar so
+	 * lobby tooltips match the in-game initial population.
+	 *
+	 * Shuttle-only bays: some ships carry a small dedicated shuttle bay
+	 * (hangarType 'shuttles') alongside larger general fighter bays — the Vree
+	 * Xeecra/Xaarix/Vyreel and Markab Kowart put it on the SAME (primary) section
+	 * as the fighter bays, while EA Babylon5 / Babylon5 Refit put it on the FRONT
+	 * section. Step 2 running BEFORE the primary narrowing is what lets the
+	 * front-section shuttle bay still claim the pool on the Babylon5 hulls; the
+	 * primary-co-located ships resolve to the same bay either way. The general
+	 * bays then receive default shuttles only as overflow once the shuttle bays
+	 * are full (Babylon5: 8/2; Refit: 8/2/2). Ships with no shuttle-tagged hangar
+	 * (the overwhelming majority) skip straight to step 3, unaffected. */
 	public static function distributionHangars($hangars){
 		//Hangars flagged $excludeFromDefaultShuttles (e.g. ScoravarefittedAM's
 		//dedicated heavy-fighter bay) are steered out of the default-shuttle
@@ -522,16 +563,29 @@ class HangarOps {
 		}
 		if (empty($eligible)) $eligible = $hangars;
 
+		//Shuttle-only narrowing takes precedence over the primary-section
+		//narrowing below: a dedicated shuttle bay wins the default-shuttle pool
+		//no matter which section it sits on. This matters for ships whose
+		//shuttle-only bay is NOT on the primary structure — e.g. EA Babylon5,
+		//whose 8-box 'shuttles' bay is a FRONT-section system while its big
+		//fighter bay is on the primary. If primary-narrowing ran first it would
+		//collapse the set to the (location-0) fighter bay and strand the front
+		//shuttle bay, dumping the whole pool into the fighter bay. The Vree
+		//(Xeecra/Xaarix/Vyreel) and Markab Kowart, whose shuttle-only bay already
+		//sits on the primary, are unaffected — they resolve to the same bay
+		//either way. General bays still receive overflow once the shuttle bays
+		//fill (pickHangarForShuttle's fallback loop).
+		$shuttleOnly = array();
+		foreach ($eligible as $h){
+			if (self::isShuttleOnlyHangar($h)) $shuttleOnly[] = $h;
+		}
+		if (!empty($shuttleOnly)) return $shuttleOnly;
+
 		$primary = array();
 		foreach ($eligible as $h){
 			if ((int)$h->location === 0) $primary[] = $h;
 		}
-		$set = !empty($primary) ? $primary : $eligible;
-		$shuttleOnly = array();
-		foreach ($set as $h){
-			if (self::isShuttleOnlyHangar($h)) $shuttleOnly[] = $h;
-		}
-		return !empty($shuttleOnly) ? $shuttleOnly : $set;
+		return !empty($primary) ? $primary : $eligible;
 	}
 
 	/* True when a hangar opts out of receiving default shuttles (Hangar
@@ -567,11 +621,23 @@ class HangarOps {
 	 * (a lone primary, or the last hangar still taking overflow) — it simply
 	 * takes the rest, preserving the historical single-hangar fill. Combined
 	 * with pickHangarForShuttle's least-used preference, this yields 2+2+2 across
-	 * Pirocia's three primary hangars and 3+3 across Marata's two side hangars. */
+	 * Pirocia's three primary hangars and 3+3 across Marata's two side hangars.
+	 *
+	 * Once the distribution set is full, the cap falls through to the OVERFLOW
+	 * set (overflowHangars) so spillover also rounds out evenly — e.g. the EA
+	 * Babylon5 Refit fills its front shuttle bay to 8, then the remaining 4 shuttles
+	 * spread 2+2 across its two primary fighter bays instead of 4+0. */
 	public static function fairShareCap($hangars, $remainingTotal){
 		$hangarsWithRoom = 0;
 		foreach (self::distributionHangars($hangars) as $h){
 			if ((int)$h->maxhealth - self::occupiedBoxes($h) > 0) $hangarsWithRoom++;
+		}
+		//Distribution set full — we're spilling into the overflow bays; cap by
+		//how many of THOSE still have room so the spillover spreads evenly.
+		if ($hangarsWithRoom === 0){
+			foreach (self::overflowHangars($hangars) as $h){
+				if ((int)$h->maxhealth - self::occupiedBoxes($h) > 0) $hangarsWithRoom++;
+			}
 		}
 		if ($hangarsWithRoom <= 1) return PHP_INT_MAX;
 		return (int)ceil($remainingTotal / $hangarsWithRoom);

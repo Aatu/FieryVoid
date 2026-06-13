@@ -675,45 +675,64 @@ shipManager.systems = {
         var eligible = function (hgr) {
             return anyEligible ? !shipManager.systems.excludesDefaultShuttles(hgr) : true;
         };
-        var hasPrimary = false;
-        for (var h = 0; h < hangars.length; h++) {
-            if (eligible(hangars[h]) && parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
-        }
-
-        //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if the
-        //distribution set contains any explicitly shuttle-tagged bay (hangarType
-        //'shuttles'/'minesweeping shuttles' — e.g. Vree Xeecra/Xaarix/Vyreel's
-        //small shuttle bay next to big fighter bays), the default-shuttle pool
-        //prefers those bays only, so the fighter bays stay free. The general bays
-        //still get overflow once the shuttle bays fill.
+        //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if any
+        //eligible bay is explicitly shuttle-tagged (hangarType 'shuttles'/
+        //'minesweeping shuttles' — e.g. Vree Xeecra/Xaarix/Vyreel's small shuttle
+        //bay next to big fighter bays, or EA Babylon5's front shuttle bay), the
+        //default-shuttle pool prefers those bays only, so the fighter bays stay
+        //free. The general bays still get overflow once the shuttle bays fill.
+        //
+        //This narrowing takes PRECEDENCE over the primary-section narrowing
+        //below (mirrors HangarOps::distributionHangars): a dedicated shuttle bay
+        //wins the pool no matter which section it sits on, so Babylon5's
+        //front-section ('shuttles') bay isn't stranded by the location-0 fighter
+        //bay. The Vree/Kowart, whose shuttle-only bay is already on the primary,
+        //resolve to the same bay either way.
         var isShuttleOnly = function (hgr) {
             if (hgr.isCatapult || hgr.isRail) return false;
             var t = ("" + (hgr.hangarType || "")).toLowerCase().trim();
             return t === "shuttles" || t === "minesweeping shuttles";
         };
+        var hasShuttleOnly = false;
+        for (var sh = 0; sh < hangars.length; sh++) {
+            if (eligible(hangars[sh]) && isShuttleOnly(hangars[sh])) { hasShuttleOnly = true; break; }
+        }
+
+        //Primary-section narrowing only applies when there's no shuttle-only bay
+        //to claim the pool: prefer the location-0 hangars if the ship has any
+        //eligible ones, else every eligible hangar.
+        var hasPrimary = false;
+        if (!hasShuttleOnly) {
+            for (var h = 0; h < hangars.length; h++) {
+                if (eligible(hangars[h]) && parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
+            }
+        }
         var inSet = function (hgr) {
             if (!eligible(hgr)) return false;
             return hasPrimary ? (parseInt(hgr.location, 10) === 0) : true;
         };
-        var hasShuttleOnly = false;
-        for (var sh = 0; sh < hangars.length; sh++) {
-            if (inSet(hangars[sh]) && isShuttleOnly(hangars[sh])) { hasShuttleOnly = true; break; }
-        }
 
         var per = [];
         for (var p = 0; p < hangars.length; p++) {
+            var isPref = hasShuttleOnly ? (eligible(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p]);
             per.push({
                 id: hangars[p].id,
                 max: parseInt(hangars[p].maxhealth, 10) || 0,
                 usage: 0,
                 rows: [],
                 excluded: !eligible(hangars[p]),
-                pref: hasShuttleOnly ? (inSet(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p])
+                pref: isPref,
+                //Overflow bays: eligible and NOT in the preferred distribution set
+                //(mirrors HangarOps::overflowHangars). The spillover spreads evenly
+                //across these once the preferred bays fill — e.g. Babylon5 Refit's
+                //4 spill shuttles → 2+2 across its two primary fighter bays.
+                overflow: eligible(hangars[p]) && !isPref
             });
         }
 
-        //Least-used hangar in the distribution set; overflow to any hangar with
-        //room (mirrors pickHangarForShuttle).
+        //Least-used hangar in the distribution set; once that's full, overflow to
+        //the LEAST-USED overflow bay so spillover spreads evenly (mirrors
+        //pickHangarForShuttle + overflowHangars).
         var pickIdx = function (flightSize) {
             var bestIdx = -1, bestUsage = Infinity;
             for (var i = 0; i < per.length; i++) {
@@ -722,22 +741,30 @@ shipManager.systems = {
                 if (per[i].usage < bestUsage) { bestUsage = per[i].usage; bestIdx = i; }
             }
             if (bestIdx !== -1) return bestIdx;
-            //Overflow: any hangar with room, but still skip excluded bays so a
-            //flagged hangar never receives shuttles even once the eligible ones
-            //fill (mirrors pickHangarForShuttle's guarded fallback loop).
+            //Overflow: least-used eligible non-pref bay (excluded bays never
+            //receive shuttles even once the preferred ones fill).
+            bestIdx = -1; bestUsage = Infinity;
             for (var j = 0; j < per.length; j++) {
-                if (per[j].excluded) continue;
-                if (per[j].max - per[j].usage >= flightSize) return j;
+                if (!per[j].overflow) continue;
+                if (per[j].max - per[j].usage < flightSize) continue;
+                if (per[j].usage < bestUsage) { bestUsage = per[j].usage; bestIdx = j; }
             }
-            return -1;
+            return bestIdx;
         };
 
         //Fair-share cap over the distribution-set hangars with room (mirrors
-        //fairShareCap): Infinity when only one remains so it takes the rest.
+        //fairShareCap): Infinity when only one remains so it takes the rest. Once
+        //the preferred set is full, fall through to the overflow bays so spillover
+        //also rounds out evenly.
         var fairCap = function (remaining) {
             var withRoom = 0;
             for (var i = 0; i < per.length; i++) {
                 if (per[i].pref && per[i].max - per[i].usage > 0) withRoom++;
+            }
+            if (withRoom === 0) {
+                for (var o = 0; o < per.length; o++) {
+                    if (per[o].overflow && per[o].max - per[o].usage > 0) withRoom++;
+                }
             }
             if (withRoom <= 1) return Infinity;
             return Math.ceil(remaining / withRoom);
