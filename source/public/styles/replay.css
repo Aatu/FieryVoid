@@ -61,13 +61,35 @@
     color: #496791;
 }
 
-/* Speed button: cycles 1×/2×/4×/8× and shows the current rate. Both Play and
-   Rewind run at this speed. Sized smaller than the transport glyphs and given a
-   fixed width so the rate digit changing doesn't shift the surrounding buttons. */
-#replayUI .replay-buttons button#speed {
+/* Speed control: −/+ buttons flanking a static rate readout. Both Play and
+   Rewind run at this rate; it sits left of the transport controls as a distinct
+   "setting" cluster. The ± buttons are smaller than the transport glyphs. */
+#replayUI .speed-control {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 8px;
+}
+
+#replayUI .replay-buttons .speed-control button#slower,
+#replayUI .replay-buttons .speed-control button#faster {
+    font-size: 40px;
+    line-height: 1;
+    margin: 0 2px;
+    padding: 0;
+}
+
+/* Fixed width so the rate digits changing (0.25× ↔ 8×) don't shift the
+   surrounding buttons. Highlighted (via .speed-control.active) off default. */
+#replayUI .speed-control .rate {
     font-size: 30px;
-    min-width: 2.4em;
-    vertical-align: middle;
+    min-width: 3.2em;
+    text-align: center;
+    color: #587e8d;
+}
+
+#replayUI .speed-control.active .rate {
+    text-shadow: white 0 0 10px, white 0 0 3px;
+    color: #deebff;
 }
 
 #replayUI .replay-container {
@@ -143,8 +165,14 @@
         font-size: 24px;
     }
 
-    #replayUI .replay-buttons button#speed {
-        font-size: 24px;
+    #replayUI .replay-buttons .speed-control button#slower,
+    #replayUI .replay-buttons .speed-control button#faster {
+        font-size: 18px;
+    }
+
+    #replayUI .speed-control .rate {
+        font-size: 13px;
+        min-width: 3em;
     }
 
     #replayUI.active .replay-active {
