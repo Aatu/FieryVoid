@@ -3466,3 +3466,50 @@ Full audit of every place the integrated-fighter / Fighter Bomb work touches sha
 verified safe). All six fixes + multi-bay Docker-verified by user (games 4174/4175/4177); the two
 integration-review fixes are server-side (live on save) + client guards (need yarn build), not yet
 separately Docker-tested. Full record in memory [[arch_shadow_integrated_fighters]].
+
+## Armed shuttles evict default shuttles (2026-06-13, Docker-verified by user, game 4178)
+
+**Problem.** Armed-shuttle variants (FighterFlights with `hangarRequired='shuttles'` — the Kor-Lyan
+`MerkulAM`/`MerkulArmedAM`, the civilian `genericArmedShuttle`, etc.) are bought in fleet selection and
+auto-deploy to space at turn 1 like any fighter. But `HangarOps::populateInitialHangarUsage` Step 2 still
+auto-filled the carrier's leftover hangar boxes with DEFAULT shuttles, so the player ended up with BOTH the
+bought armed shuttles AND a full pool of default shuttles. The lobby's `checkChoices()` (Stage 13) already
+accounts for armed shuttles against the same default-shuttle pool — the server didn't.
+
+**Fix (server-only — no lobby/bundle changes needed).** In `populateInitialHangarUsage`, before the Step-2
+leftover fill, subtract a per-carrier share of the player's bought-shuttle boxes:
+```php
+$leftover = $totalCapacity - $totalDeclared - $hangBpExtraDeclared;
+$leftover -= self::suppressDefaultShuttlesForArmed($ship, $gamedata, $leftover);
+```
+`suppressDefaultShuttlesForArmed($ship, $gamedata, $thisCarrierLeftover)` implements the **fleet-wide pool**
+model the user chose (mirrors lobby accounting): conceptually one pool of all the player's default-shuttle
+boxes, drained in `$gamedata->ships` order until the bought-shuttle count is consumed.
+- Counts bought-shuttle BOXES across the player's fleet (matched by `userid`+`slot`) via
+  `armedShuttleBoxesForFlight` = `ceil(flightSize / unitSize)` — **per craft, not per flight**. This was the
+  one bug found in testing: v1 counted `+= 1` per flight, so a flight of 6 evicted only 1 default shuttle.
+  The box math mirrors the lobby (`checkChoices`: `totalFtrOther += flightSize/unitSize`, [gamelobby.js](source/public/client/gamelobby.js)).
+- Apportions to THIS carrier's share **order-independently**: sums every EARLIER carrier's pre-suppression
+  leftover (`defaultShuttleLeftoverBoxes`, same capacity−declared−HANG_BP math with the catapult/rail/
+  LCV-rail/ShadowHangar exclusions) to find debt already absorbed; this carrier covers the rest, clamped to
+  its own leftover. Depends only on the stable ship order, not on which carrier's population runs first.
+- **Over-purchase** (more bought shuttles than default boxes in the fleet) just empties the pools and stops
+  at zero — the player's fleet-build mistake is accepted, never going negative (`checkChoices` is advisory,
+  not enforced).
+
+**Only runs at genuine turn-1 game start.** `populateInitialHangarUsage` is gated by `$usagePopulated`, which
+a mid-game reload sets from the `hangarUsage` note before this is reached — so every `hangarRequired='shuttles'`
+flight in the fleet is a real purchase here; no in-game launched/docked flights exist yet to mis-count.
+
+**Load-order dependency (verified).** `DBManager::getTacShips` runs `getFlightSize($gamedata)` (sets each
+flight's `flightSize` from the DB + re-`populate()`s) and loads enhancement options BEFORE
+`getSystemDataForShips` fires `onIndividualNotesLoaded → populateInitialHangarUsage`. So `flightSize` holds
+the real chosen value (e.g. 6, not the ctor default 1) and the HANG_BP read in `defaultShuttleLeftoverBoxes`
+is valid when the suppression runs.
+
+**Also fixed a legacy data bug:** `genericArmedShuttle` had `hangarRequired='assault shuttles'` (wrong pool);
+corrected to `'shuttles'`. This flows into the lobby check automatically (keyed off `hangarRequired`). The
+many `AS`-suffix ships that legitimately use `'assault shuttles'` were left untouched.
+
+New `HangarOps` helpers: `suppressDefaultShuttlesForArmed`, `isArmedShuttleFlight`,
+`armedShuttleBoxesForFlight`, `defaultShuttleLeftoverBoxes`.

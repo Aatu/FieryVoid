@@ -135,7 +135,19 @@ class HangarOps {
 			}
 		}
 
+		//Armed-shuttle purchases (FighterFlights with hangarRequired='shuttles' — the
+		//Kor-Lyan MerkulAM / MerkulArmedAM, genericArmedShuttle, etc.; NOT 'assault
+		//shuttles' / 'Breaching Pods', which own separate pools) are bought in fleet
+		//selection and deploy to space at turn 1 like any fighter — but the lobby's
+		//checkChoices() accounts for them against this same default-shuttle pool. So
+		//each bought armed shuttle must evict one default shuttle, or the carrier ends
+		//up with BOTH. The purchase is a fleet-wide total but this fill runs per-carrier;
+		//suppressDefaultShuttlesForArmed apportions the fleet-wide debt to THIS carrier's
+		//share (drained in ship order, matching the lobby's single-pool accounting).
+		//Over-purchase just empties the pool — the player's mistake is accepted, never
+		//going negative.
 		$leftover = $totalCapacity - $totalDeclared - $hangBpExtraDeclared;
+		$leftover -= self::suppressDefaultShuttlesForArmed($ship, $gamedata, $leftover);
 		if ($leftover > 0){
 			//Explicit "minesweeping shuttles" in $ship->fighters is the designer's
 			//authoritative MSW count — leftover falls through to the faction shuttle
@@ -261,6 +273,132 @@ class HangarOps {
 				}
 			}
 		}
+	}
+
+	/* How many default-shuttle boxes to SUPPRESS on $ship because the player
+	 * bought armed shuttles (FighterFlights with hangarRequired='shuttles').
+	 *
+	 * The purchase is a fleet-wide total but populateInitialHangarUsage fills
+	 * each carrier independently, so we apportion the fleet debt to THIS carrier's
+	 * share using the lobby's single-pool model: conceptually one pool of all the
+	 * player's default-shuttle boxes, drained in $gamedata->ships order until the
+	 * bought-shuttle count is consumed. Computed order-independently (depends only
+	 * on the stable ship order, not on which carrier's population runs first) by
+	 * summing the leftover-box capacity of every earlier carrier (same userid+slot)
+	 * to find how much debt they already absorbed; this carrier covers the rest, up
+	 * to its own leftover. Over-purchase just empties this (and prior) pools.
+	 *
+	 * Only runs at genuine turn-1 game start: populateInitialHangarUsage is gated
+	 * by $usagePopulated, which a mid-game reload sets from the hangarUsage note
+	 * before this is reached. So every hangarRequired='shuttles' flight in the
+	 * fleet is a real purchase here — no in-game launched/docked flights exist yet.
+	 *
+	 * $thisCarrierLeftover is the pre-suppression leftover already computed by the
+	 * caller (capacity − declared − HANG_BP) — reused so this carrier's share never
+	 * exceeds it and the two stay in lockstep.
+	 */
+	public static function suppressDefaultShuttlesForArmed($ship, $gamedata, $thisCarrierLeftover){
+		if ($thisCarrierLeftover <= 0) return 0;
+		if (!$gamedata || !isset($gamedata->ships) || !is_array($gamedata->ships)) return 0;
+
+		//Total armed-shuttle BOXES this PLAYER bought (matched by userid+slot, same
+		//as the carrier the bought flights share). A flight holds flightSize craft,
+		//each of which evicts one default shuttle — so the pool cost is the craft
+		//count, not 1 per flight. Mirrors the lobby's flightSize/unitSize box math
+		//(checkChoices: totalFtrOther += flightSize/unitSize), ceil'd to whole boxes.
+		$boughtBoxes = 0;
+		foreach ($gamedata->ships as $other){
+			if (!($other instanceof FighterFlight)) continue;
+			if (!self::isArmedShuttleFlight($other)) continue;
+			if ((int)$other->userid !== (int)$ship->userid) continue;
+			if ((int)$other->slot   !== (int)$ship->slot)   continue;
+			$boughtBoxes += self::armedShuttleBoxesForFlight($other);
+		}
+		if ($boughtBoxes <= 0) return 0;
+
+		//Debt already absorbed by carriers EARLIER in ship order (same player+slot):
+		//each such carrier's full leftover pool is consumed before this one's.
+		$absorbedByEarlier = 0;
+		foreach ($gamedata->ships as $other){
+			if ($other === $ship) break;   //stop at this carrier — only EARLIER ones count
+			if (!($other instanceof BaseShip)) continue;
+			if ($other instanceof FighterFlight) continue;   //flights aren't carriers
+			if ((int)$other->userid !== (int)$ship->userid) continue;
+			if ((int)$other->slot   !== (int)$ship->slot)   continue;
+			$absorbedByEarlier += self::defaultShuttleLeftoverBoxes($other);
+		}
+
+		$remainingDebt = $boughtBoxes - $absorbedByEarlier;
+		if ($remainingDebt <= 0) return 0;
+		return min($remainingDebt, $thisCarrierLeftover);
+	}
+
+	/* True for a bought armed-shuttle flight: a FighterFlight whose
+	 * hangarRequired is the 'shuttles' pool (Kor-Lyan MerkulAM / MerkulArmedAM,
+	 * genericArmedShuttle, etc.). 'assault shuttles' and 'Breaching Pods' draw
+	 * from their OWN pools and are excluded. */
+	public static function isArmedShuttleFlight($flight){
+		if (!isset($flight->hangarRequired)) return false;
+		return strtolower(trim((string)$flight->hangarRequired)) === 'shuttles';
+	}
+
+	/* Default-shuttle BOXES a bought armed-shuttle flight consumes from the pool.
+	 * One box per craft in the flight (flightSize/unitSize, ceil'd) — mirrors the
+	 * lobby's checkChoices() shuttle accounting so server and lobby agree. unitSize<1
+	 * craft cost more than one box each; the usual shuttle unitSize is 1 (one craft
+	 * per box). Falls back to the actual Fighter-subsystem count if flightSize is
+	 * unset, and floors at 1 so a present flight always costs at least one box. */
+	public static function armedShuttleBoxesForFlight($flight){
+		$craft = isset($flight->flightSize) ? (int)$flight->flightSize : 0;
+		if ($craft <= 0 && isset($flight->systems) && is_array($flight->systems)){
+			$craft = count($flight->systems);
+		}
+		if ($craft <= 0) $craft = 1;
+		$unitSize = (isset($flight->unitSize) && $flight->unitSize > 0) ? (float)$flight->unitSize : 1.0;
+		return (int)ceil($craft / $unitSize);
+	}
+
+	/* Leftover default-shuttle box capacity for a carrier, computed exactly as
+	 * populateInitialHangarUsage's Step-2 leftover (capacity − declared − HANG_BP),
+	 * with the same catapult / rail / LCV-rail / ShadowHangar exclusions. Used to
+	 * size each earlier carrier's pool when apportioning the armed-shuttle debt.
+	 * (getDefaultShuttles() is similar but omits the HANG_BP subtraction, so it
+	 * can't be reused for an exact match here.) */
+	public static function defaultShuttleLeftoverBoxes($carrier){
+		$hasCatapult = false;
+		$capacity = 0;
+		foreach (self::collectHangars($carrier) as $h){
+			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
+			if (!empty($h->isRail))     { continue; }
+			if (!empty($h->isLCVRail))  { continue; }
+			if (!empty($h->isShadowHangar)) { continue; }
+			$capacity += (int)$h->maxhealth;
+		}
+		if ($capacity <= 0) return 0;
+
+		$railCategories = self::railFighterCategories($carrier);
+		$declared = 0;
+		if (isset($carrier->fighters) && is_array($carrier->fighters)){
+			foreach ($carrier->fighters as $category => $count){
+				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
+				if (isset($railCategories[strtolower(trim((string)$category))])) continue;
+				if (strtolower(trim((string)$category)) === 'lcvs') continue;
+				$declared += self::shuttlePoolBoxesFor($category, (int)$count);
+			}
+		}
+
+		$hangBpExtra = 0;
+		if (isset($carrier->enhancementOptions) && is_array($carrier->enhancementOptions)){
+			foreach ($carrier->enhancementOptions as $opt){
+				if (($opt[0] ?? '') === 'HANG_BP' && (int)($opt[2] ?? 0) > 0){
+					$hangBpExtra = (int)$opt[2];
+					break;
+				}
+			}
+		}
+
+		$leftover = $capacity - $declared - $hangBpExtra;
+		return $leftover > 0 ? $leftover : 0;
 	}
 
 	/* Hangar boxes consumed by a given ship->fighters declaration. Per
