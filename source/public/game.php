@@ -3,6 +3,15 @@ $fv_start_timer = microtime(true);
 require_once 'global.php'; // ✅ Critical dependency
 session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 
+// Never let the browser cache this HTML document. It carries a player-specific,
+// point-in-time gamedata snapshot inlined into the page (gamedata.parseServerData
+// below). global.php calls session_cache_limiter('') which strips PHP's default
+// no-cache headers, so without this the browser is free to disk-cache the page
+// and replay a STALE copy on session restore (reopening tabs after a browser or
+// computer restart) — with no server round-trip and no pageshow.persisted signal
+// to trigger a client re-fetch. no-store forces a fresh fetch every time.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
 	$gameid = 1;
 	$thisplayer = -1;
 

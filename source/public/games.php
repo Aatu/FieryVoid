@@ -13,6 +13,12 @@ if (empty($_SESSION["user"])) {
     exit;
 }
 
+// Never cache this HTML document — it inlines a player-specific, point-in-time
+// games list ($games below). Without this the browser can disk-cache the page
+// and replay a stale copy on session restore (reopening tabs after a browser or
+// computer restart), with no server round-trip. no-store forces a fresh fetch.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
 // Fetch games for logged-in user
 // Fetch games for logged-in user
 $userid = (int)$_SESSION["user"];

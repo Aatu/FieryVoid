@@ -8,6 +8,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
     exit;
 }
 
+// Never cache this HTML document — it inlines a player-specific, point-in-time
+// lobby snapshot ($gamelobbydataJSON below). Without this the browser can
+// disk-cache the page and replay a stale copy on session restore (reopening tabs
+// after a browser or computer restart), with no server round-trip. no-store
+// forces a fresh fetch every time.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
 if (isset($_GET["leave"]) && isset($_GET["gameid"])){
     Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
     header('Location: games.php');
