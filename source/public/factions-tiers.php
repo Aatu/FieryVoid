@@ -745,9 +745,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="pakmara" >PAK'MA'RA CONFEDERACY</h4>
     <p>Pak'ma'ra ships are quick, with excellent thrust and engine power, but are not manoeuvrable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  
         Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.</p>            
+    <h5>Initiative Penalties</h5>
+        <li>The Pak'ma'ra find it hard to organise effectively and this is reflected in a fleet wide initiative penalty of -5 for every three ships in their fleet (rounding down).  
+            Fighter flights are not effected by this penalty and do not contribute to the number of ships for the purposes of calculating the penalty.</li>    
+    
     <h5>Plasma Batteries</h5>
         <ul>
-<li>System which stores but does not generate any new power.  
+        <li>System which stores but does not generate any new power.  
             Starts the game fully charged and the power stored can be used in the normal way during Initial Orders, it will show as a surplus in the Reactor system.  
             Providing they have power stored, Batteries can also be used in Firing Phase to provide extra power to Plasma Webs.</li>
         <li>Once depleted, the Batteries can be re-filled by commiting your Initial Orders with a power surplus in the Reactor.</li>
