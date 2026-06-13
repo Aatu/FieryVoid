@@ -316,7 +316,10 @@ window.combatLog = {
                     var firstDam = "";
 
                     if (damagehtml.length == 0) {
-                        firstDam = " Systems destroyed: ";
+                        // Fighter craft have no .ship back-reference; a flight victim's
+                        // destroyed "systems" are all fighter craft, so label the list
+                        // "Fighters destroyed:" to match the "Fighters disengaged:" line.
+                        firstDam = system.ship ? " Systems destroyed: " : " Fighters destroyed: ";
                         comma = "";
                     }
 
