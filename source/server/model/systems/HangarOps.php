@@ -445,7 +445,9 @@ class HangarOps {
 				//count in $ship->fighters becomes that many auto-filled CargoShuttle
 				//records via step 1; leftover hangar boxes go to the faction shuttle
 				//(or MinesweepingShuttle for minesweeper-bonus carriers) instead.
-				return 'MedicalShuttle';				
+				return 'MedicalShuttle';
+			case 'lifeboats':
+				return 'Lifeboat';					
 			default:
 				return null;
 		}
@@ -4250,7 +4252,7 @@ class HangarOps {
 		}
 
 		//Shuttles, minesweeping shuttles & cargo shuttles can use any combat-fighter slot per B5W §10.1.
-		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles' || $cat === 'medical shuttles') && isset($sizeRank[$hType])) {
+		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles' || $cat === 'medical shuttles' || $cat === 'lifeboats') && isset($sizeRank[$hType])) {
 			return true;
 		}
 

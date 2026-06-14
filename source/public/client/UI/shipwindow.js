@@ -431,7 +431,7 @@ window.shipWindowManager = {
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
-					} else if (i == "shuttles" || i == "minesweeping shuttles" || i == "cargo shuttles" || i == "medical shuttles") {
+					} else if (i == "shuttles" || i == "minesweeping shuttles" || i == "cargo shuttles" || i == "medical shuttles" || i == "lifeboats") {
 						//Auto-populated free shuttles — listed via getDefaultShuttleComposition below.
 						continue;
 					} else {

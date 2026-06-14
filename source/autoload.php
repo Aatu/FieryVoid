@@ -3874,6 +3874,7 @@ spl_autoload_register(
                 'cargoshuttle' => '/server/model/ships/Shuttle.php',                                
                 'shuttle' => '/server/model/ships/Shuttle.php',
                 'medicalshuttle' => '/server/model/ships/Shuttle.php',
+                'lifeboat' => '/server/model/ships/Shuttle.php',                
 
                 //FACTION DEFAULT SHUTTLES
                 'shuttleabbai' => '/server/model/ships/Shuttle.php',
@@ -3960,7 +3961,7 @@ spl_autoload_register(
                 'slooprails' => '/server/model/ships/raiders/SloopRails.php',                
                 'fessarails' => '/server/model/ships/balosian/fessaRails.php',
                 
-                //SHADOW FIGHTER BOMBS
+                //SHADOW FIGHTER BOMB CLASSES
                 'shadowhangar' => '/server/model/systems/baseSystems.php',
                 'shadowfightercutoff' => '/server/model/cricialClasses.php',  
                 'shadowfighterbomb' => '/server/model/weapons/specialWeapons.php',  
