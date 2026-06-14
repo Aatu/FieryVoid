@@ -3513,3 +3513,75 @@ many `AS`-suffix ships that legitimately use `'assault shuttles'` were left unto
 
 New `HangarOps` helpers: `suppressDefaultShuttlesForArmed`, `isArmedShuttleFlight`,
 `armedShuttleBoxesForFlight`, `defaultShuttleLeftoverBoxes`.
+
+---
+
+## Inadequate Hangars (Unreliable) — B5W trait on GromeGralacAM (2026-06-14, commit `c2cc326dd`)
+
+**Rule (B5W).** "Ships of this type include hangar bays not part of the vessel's original design. Using such
+hangars can be a dangerous undertaking." Any time a flight (or partial flight) **launches**, roll 1d6 for that
+flight — on a "1" the launch aborts this turn (it may try again next turn). When a flight **lands**, roll 1d6
+for **each fighter** — on a "1", score 1d6 damage on that fighter (ignoring armour). First fit: the
+`GromeGralacAM` (all 5 of its `Hangar` bays carry the trait); it's the only ship with the trait so far.
+
+**Data model.** New per-bay flag `Hangar::$inadequate = false` (baseSystems.php, beside
+`$excludeFromDefaultShuttles`). Set in the SCS via the capture-and-flag idiom
+(`$h = new Hangar(...); $h->inadequate = true; $this->addXSystem($h);`). Mirrored to the client in
+`Hangar::stripForJson` (`$strippedSystem->inadequate = ...`); SystemFactory's `Object.assign` auto-copies it
+onto the client model, so **no client constructor change** was needed. Tooltip "Special" text added in
+`Hangar::setSystemDataWindow` (ordinary-hangar branch); it reaches the client via the static blueprint (the
+client `refreshHangarTooltip` preserves `Special`, never sets it).
+
+**Hook sites (Stage-21 whole-flight path only — the live path; see the live-compat constraint).** NOT the
+legacy per-bay `processLaunchOrders`/`processDockOrders`:
+- **Launch abort** — `inadequateLaunchAborts($carrier, $bay, $phpclass, $size, $gamedata)` is called inside
+  **both** launch executors: `launchWholeFlight` (after validation, before the docked-ship resurrection /
+  budget charge) and `launchAnonymousStash` (after the budget check, keyed on the draining `$firstBay`). On a
+  "1" it writes a `hangarLaunchEvent` fail note + a combat-log FireOrder and returns true → caller bails. The
+  craft stay docked, **budget is NOT charged**, retry next turn. One roll per launch order ("for that flight").
+- **Landing damage** — `applyInadequateLandingDamage($flight, $bay, $wantCount, $carrier, $gamedata)` runs at
+  the **top of `performWholeFlightDock`**, keyed on the primary dock bay `$bays[0]['hangar']`. Applied FIRST,
+  before `countAttachedFightersInFlight` is read below, so any fighter destroyed bouncing off the bay drops
+  out of the dockable count automatically and **never occupies a stored box (box freed)** — the design choice
+  the user made (vs a `cannotLaunch` wreck). Selects the up-to-`$wantCount` landing fighters most-damaged-first
+  (matching `dockFighters` so a partial dock rolls for the craft that actually land); per fighter rolls 1d6,
+  and on a "1" applies a 1d6 armour-ignoring `DamageEntry` (`destroyed=true` when `dmgRoll >= remainingHealth`,
+  same lethal-DamageEntry shape the rail-crit kill uses).
+
+**Replay determinism (THE INVARIANT).** `Criticals::setCriticals` → `criticalPhaseEffects` re-runs and
+`Dice::d` is non-deterministic, so every roll routes through `nextInadequateRoll($hangar, $sides, $gamedata)`:
+the live advance rolls fresh, persists each roll as its own `hangarInadequateRoll` IndividualNote, and stamps
+a per-turn cache; a re-run consumes the cached rolls FIFO. Read-back is in `Hangar::onIndividualNotesLoaded`
+(rebuilds `inadequateLoadedRolls` from current-turn notes in id-ASC order). Same mechanism as FighterRail's
+`railCritRoll` (`railCritLoadedTurn`/`Value`), generalised to a multi-roll-per-turn queue. **If you add any new
+die roll to the hangar launch/dock path, route it through this queue or replays desync.**
+
+**Combat log.** `inadequateLogOrder($carrier, $label, $gamedata)` builds an artificial `FireOrder`
+(shooter = target = carrier, weapon = its `RammingAttack`, `addToDB=true`, `damageclass='InadequateHangar'`) —
+the self-ram convention used by ShipSystem marine missions / HangarOps `ShadowReabsorb`. Caller fills
+`->pubnotes`; landing damage aggregates all per-fighter lines into one FireOrder (lazy-created, first line no
+`<br>`). **`targetid` stays the carrier, NOT the damaged flight**, deliberately: the log's damage-detail `<ul>`
+links by `d.fireorderid` (our entries use -1, so the human-readable outcome rides in `pubnotes` instead), and
+`getAllFireOrdersForDisplayingAgainst(target)` would list the carrier's RammingAttack in the FLIGHT's
+incoming-fire panel if targetid pointed there. `'InadequateHangar'` was added to `weaponManager.js`
+`doShortLogText` `shortLogTypes` so the log emits ONLY the pubnotes (no spurious "firing RammingAttack… Chance
+to hit… shots hit"); `damageclass` round-trips through `tac_fireorder`. **(Client bundle rebuild required for
+the weaponManager.js change.)**
+
+**Integration review — no risk to existing methods.** Hooks short-circuit on `empty($bay->inadequate)` so
+every other carrier is byte-for-byte unaffected. Scoping is correct across the three dock entry points:
+`performWholeFlightDock` (normal Firing-Phase dock) is hooked; `performDeployStartDockFromOrders` (fighters
+START docked — not "landing") is correctly NOT hooked; `performLand` (jumping-carrier + catapult path) is not
+hooked (catapults are never inadequate). No double-application (`dockCoalesceDone`/`launchCoalesceDone` guard
+once-per-carrier). Landing damage applied before the dock-count read means destroyed fighters reduce
+`$dockableCount` and free boxes cleanly; the all-fighters-die edge case is the same state as a combat-wiped
+flight (no new ghost handling). `processCarrierDestructionEscapes` uses a separate spawn path, untouched.
+
+Files: baseSystems.php (`$inadequate` flag + `inadequateLoadedTurn`/`inadequateLoadedRolls` cache + strip +
+tooltip + note read-back), HangarOps.php (helpers `nextInadequateRoll`, `recordInadequateRoll`,
+`inadequateLogOrder`, `inadequateLaunchAborts`, `applyInadequateLandingDamage` + 3 hook sites),
+GromeGralacAM.php (5 flagged bays + `$notes`), weaponManager.js (`shortLogTypes` += `InadequateHangar`).
+
+**Verification status — COMMITTED 2026-06-14 (`c2cc326dd`).** All edited PHP files pass `php -l`; weaponManager.js
+passes `node --check`. Runtime/replay-scrub testing by the user pending (key check: scrub the replay back and
+forth on a Gralac launch/dock turn — the rolled outcomes must be stable).
