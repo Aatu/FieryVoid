@@ -235,6 +235,11 @@ class CargoShuttle extends Shuttle
         $this->freethrust = 3;        
     }
 
+    public function getImage()
+    {
+        return array('img/ships/shuttleCargo.png', 'img/ships/shuttleCargo_large.png');
+    }
+
     public function populate()
     {
         $current = count($this->systems);
