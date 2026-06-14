@@ -16,6 +16,7 @@ class GromeGralacAM extends BaseShip{
 		$this->canvasSize = 175; //img has 200px per side
 
 	    $this->notes = 'Antiquated Sensors (cannot be boosted)';
+	    $this->notes .= '<br>Inadequate Hangars';		
 
         $this->fighters = array("normal"=>54);
 
@@ -48,7 +49,9 @@ class GromeGralacAM extends BaseShip{
         $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 2, false, false)); //Armor, health, power, startarc, endarc, output, escort, base	
         $this->addPrimarySystem(new GromeTargetingArray(2, 0, 0, 0, 360, 2, false, false)); //Armor, health, power, startarc, endarc, output, escort, base
         $this->addPrimarySystem(new Engine(4, 28, 0, 8, 4));
-		$this->addPrimarySystem(new Hangar(2, 8));
+		$hangarP = new Hangar(2, 8);
+		$hangarP->inadequate = true; //Inadequate Hangars (Unreliable): see baseSystems Hangar::$inadequate
+		$this->addPrimarySystem($hangarP);
 		$this->addPrimarySystem(new JumpEngine(4, 20, 4, 36));
 		
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
@@ -70,8 +73,10 @@ class GromeGralacAM extends BaseShip{
         $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new GromeFlakCannon(2, 4, 2, 180, 360));
         $this->addLeftSystem(new Thruster(3, 15, 0, 4, 3));
-		$this->addLeftSystem(new Hangar(3, 12));
-		$this->addLeftSystem(new Hangar(3, 12));
+		$hangarL1 = new Hangar(3, 12); $hangarL1->inadequate = true; //Inadequate Hangars (Unreliable)
+		$this->addLeftSystem($hangarL1);
+		$hangarL2 = new Hangar(3, 12); $hangarL2->inadequate = true; //Inadequate Hangars (Unreliable)
+		$this->addLeftSystem($hangarL2);
         $this->addLeftSystem(new ConnectionStrut(4));
 
         $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
@@ -79,8 +84,10 @@ class GromeGralacAM extends BaseShip{
         $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new GromeFlakCannon(2, 4, 2, 0, 180));
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
-		$this->addRightSystem(new Hangar(3, 12));
-		$this->addRightSystem(new Hangar(3, 12));
+		$hangarR1 = new Hangar(3, 12); $hangarR1->inadequate = true; //Inadequate Hangars (Unreliable)
+		$this->addRightSystem($hangarR1);
+		$hangarR2 = new Hangar(3, 12); $hangarR2->inadequate = true; //Inadequate Hangars (Unreliable)
+		$this->addRightSystem($hangarR2);
         $this->addRightSystem(new ConnectionStrut(4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

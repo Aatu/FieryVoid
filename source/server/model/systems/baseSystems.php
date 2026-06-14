@@ -2950,6 +2950,16 @@ class Hangar extends ShipSystem{
 	//client-side in systems.js. Distinct from catapult/rail exclusion, which
 	//drops the boxes from the pool entirely.
 	public $excludeFromDefaultShuttles = false;
+	//B5W "Inadequate Hangars (Unreliable)": hangar bays not part of the vessel's
+	//original design. When true, every launch from this bay rolls 1d6 — a "1"
+	//aborts the whole launch this turn (retry next turn); and every fighter that
+	//LANDS rolls 1d6 — a "1" scores 1d6 damage on that fighter ignoring armour,
+	//destroying (and freeing the box of) any fighter it kills. Set on the bay in
+	//the ship's SCS (e.g. GromeGralacAM). Mirrored to the client via stripForJson.
+	//Replay-deterministic: the per-launch / per-fighter rolls are persisted in
+	//hangarInadequateRoll notes and read back in onIndividualNotesLoaded, the same
+	//pattern FighterRail's 1d20 crit uses (railCritRoll).
+	public $inadequate = false;
 	public $direction = 0;                //0..5 hex offset from carrier facing on launch (0 = same heading)
 	//Stage 8.5: optional list of allowed launch directions for hangars whose
 	//bays open onto multiple arcs (e.g. EA Hyperion: ports out either side, so
@@ -3018,6 +3028,15 @@ class Hangar extends ShipSystem{
 	public $escapeNames = array();
 	public $pendingLaunchOrder = null;    //decoded latest hangarLaunchOrder for this turn (set by onIndividualNotesLoaded)
 	public $pendingDockOrder = null;      //decoded latest hangarDockOrder for this turn (set by onIndividualNotesLoaded)
+
+	//B5W Inadequate Hangars replay-determinism cache. setCriticals re-runs on
+	//every replay scrub and Dice::d is non-deterministic, so each inadequate
+	//launch/land roll is persisted in a hangarInadequateRoll note and read back
+	//here on load. $inadequateLoadedTurn marks the turn the cache is valid for;
+	//$inadequateLoadedRolls is an ordered FIFO queue of the rolls taken that turn
+	//(consumed in the same order they were rolled). Mirrors railCritLoaded*.
+	public $inadequateLoadedTurn  = 0;
+	public $inadequateLoadedRolls = array();
 	private $pendingLaunchTransfer = null;//launch payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
 	private $pendingDockTransfer = null;  //dock payload received from client via doIndividualNotesTransfer; consumed in generateIndividualNotes
 
@@ -3093,6 +3112,18 @@ class Hangar extends ShipSystem{
 				//Latest dock order wins (notes are pre-sorted by id ASC above)
 				$decoded = json_decode($note->notevalue, true);
 				if (is_array($decoded)) $this->pendingDockOrder = $decoded;
+			} else if ($note->notekey === 'hangarInadequateRoll' && $note->turn == $gamedata->turn){
+				//B5W Inadequate Hangars: rebuild this turn's FIFO roll queue so a
+				//replay scrub reproduces the launch-abort / landing-damage rolls
+				//exactly (setCriticals re-runs and Dice::d is non-deterministic).
+				//Notes are pre-sorted by id ASC above, so appending here preserves
+				//the order the rolls were taken; nextInadequateRoll consumes them
+				//in the same order. Mirrors FighterRail's railCritRoll read-back.
+				$decoded = json_decode($note->notevalue, true);
+				if (is_array($decoded) && isset($decoded['roll'])){
+					$this->inadequateLoadedTurn    = (int)$gamedata->turn;
+					$this->inadequateLoadedRolls[] = (int)$decoded['roll'];
+				}
 			} else if ($note->notekey === 'hangarOrdReserve'){
 				//Stage 15: total reload points spent so far on this carrier.
 				//Only the primary (first) hangar persists this; secondary
@@ -3753,6 +3784,7 @@ class Hangar extends ShipSystem{
 		$strippedSystem->isShadowHangar = !empty($this->isShadowHangar); //Stage S: integrated-fighter bay discriminator (false for ordinary hangars). $name stays 'hangar' so the launch/dock UI still applies; the client reads this flag for shuttle-pool exclusion / display.
 		if (isset($this->bombGroupIndex)) $strippedSystem->bombGroupIndex = (int)$this->bombGroupIndex; //Stage S multi-bay: pairs this bay to its own Fighter Bomb (client per-bay pool display)
 		$strippedSystem->excludeFromDefaultShuttles = !empty($this->excludeFromDefaultShuttles); //steers default shuttles away from this bay (boxes still count toward capacity)
+		$strippedSystem->inadequate = !empty($this->inadequate); //Inadequate Hangars (Unreliable): client renders the trait + launch-abort/landing-damage outcomes
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;
@@ -3822,6 +3854,11 @@ class Hangar extends ShipSystem{
 			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
 		} else {
 			$this->data["Special"]  = "System responsible for launching and carrying docked fighter craft.";
+			if (!empty($this->inadequate)) {
+				//B5W Inadequate Hangars (Unreliable): bays not part of the original design.
+				$this->data["Special"] .= "<br>Inadequate Hangars (Unreliable): each launch rolls 1d6 — a 1 aborts the launch this turn (retry next turn).";
+				$this->data["Special"] .= "<br>Each landing fighter rolls 1d6 — a 1 scores 1d6 damage on it, ignoring armour.";
+			}
 			$this->data["Special"] .= "<br>Details of Hangar Operations can be found in Fiery Void FAQ.";
 			$this->data["Launch Rate"] = $this->output;
 		}

@@ -2608,6 +2608,177 @@ class HangarOps {
 		Manager::insertIndividualNote($note);
 	}
 
+	/* === B5W Inadequate Hangars (Unreliable) ============================= */
+
+	/* Replay-deterministic die roll for an inadequate hangar's launch-abort /
+	 * landing-damage checks. setCriticals re-runs on every replay scrub and
+	 * Dice::d is non-deterministic, so on the LIVE Fire Phase advance we roll
+	 * fresh, append the result to the hangar's running hangarInadequateRoll note
+	 * for this turn, and stamp the loaded cache; on a replay re-run we consume
+	 * the next roll from the cache loaded by Hangar::onIndividualNotesLoaded.
+	 * Rolls are consumed FIFO in the same order they were taken, so a turn's
+	 * launch and landing rolls reproduce exactly. Mirrors the FighterRail
+	 * railCritRoll mechanism, generalised to a multi-roll-per-turn queue. */
+	public static function nextInadequateRoll($hangar, $sides, $gamedata){
+		$turn = (int)$gamedata->turn;
+		//Replay path: a cache loaded for THIS turn means the rolls were already
+		//taken on the live advance — consume the next one in order.
+		if ((int)$hangar->inadequateLoadedTurn === $turn
+			&& is_array($hangar->inadequateLoadedRolls)
+			&& !empty($hangar->inadequateLoadedRolls)) {
+			return (int)array_shift($hangar->inadequateLoadedRolls);
+		}
+		//Live path: roll fresh and persist. The first live roll of the turn
+		//switches the cache out of "loaded" mode (stamp this turn, empty queue)
+		//so any stale loaded values can't be re-consumed.
+		if ((int)$hangar->inadequateLoadedTurn !== $turn) {
+			$hangar->inadequateLoadedTurn  = $turn;
+			$hangar->inadequateLoadedRolls = array();
+		}
+		$roll = Dice::d((int)$sides);
+		self::recordInadequateRoll($hangar, $roll, $gamedata);
+		return $roll;
+	}
+
+	/* Append one inadequate-hangar roll to this hangar's running per-turn note.
+	 * Each roll is its own note row (notekey 'hangarInadequateRoll'); on load
+	 * Hangar::onIndividualNotesLoaded gathers every note for the current turn
+	 * (ordered by id) back into inadequateLoadedRolls. Written ONLY from the live
+	 * setCriticals advance (same as recordRailCritRoll), so the POST-side
+	 * reconstruction clobber trap doesn't apply. */
+	private static function recordInadequateRoll($hangar, $roll, $gamedata){
+		$ship = $hangar->getUnit();
+		$shipId = $ship ? $ship->id : 0;
+		$payload = json_encode(array('roll' => (int)$roll, 'turn' => (int)$gamedata->turn));
+		$note = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$shipId,
+			$hangar->id,
+			'hangarInadequateRoll',
+			'Inadequate hangar roll',
+			$payload
+		);
+		Manager::insertIndividualNote($note);
+	}
+
+	/* Build the artificial FireOrder used to surface an inadequate-hangar event
+	 * in the combat log (launch abort or landing damage). Mirrors the self-ram
+	 * convention used by ShipSystem marine missions / HangarOps ShadowReabsorb:
+	 * shooter = target = the carrier, weapon = its RammingAttack. The caller fills
+	 * $fireOrder->pubnotes with the player-visible message. Returns null when the
+	 * carrier somehow has no RammingAttack (every ship normally does) — the event
+	 * still resolves mechanically, just without a log line. */
+	private static function inadequateLogOrder($carrier, $label, $gamedata){
+		$rammingSystem = $carrier->getSystemByName("RammingAttack");
+		if (!$rammingSystem) return null;
+		$fireOrder = new FireOrder(
+			-1, "normal", $carrier->id, $carrier->id,
+			$rammingSystem->id, -1, $gamedata->turn, 1,
+			100, 100, 1, 1, 0,
+			0, 0, $label, 10000
+		);
+		$fireOrder->addToDB = true;
+		$rammingSystem->fireOrders[] = $fireOrder;
+		return $fireOrder;
+	}
+
+	/* B5W Inadequate Hangars LAUNCH check. Called from the launch executors at the
+	 * point a launch is confirmed otherwise-legal but BEFORE any state mutation.
+	 * On an inadequate bay, rolls 1d6 "for that flight"; a "1" aborts the launch
+	 * this turn (the craft stay docked, the launch budget is NOT charged, and the
+	 * player may retry next turn). Records a launch-fail note (so the existing
+	 * hangar event log shows the abort) plus an artificial RammingAttack FireOrder
+	 * so the abort surfaces in the combat log. Returns true when the launch is
+	 * ABORTED (caller must bail), false when it may proceed. A non-inadequate bay
+	 * always returns false. */
+	public static function inadequateLaunchAborts($carrier, $bay, $phpclass, $size, $gamedata){
+		if (empty($bay->inadequate)) return false;
+		$roll = self::nextInadequateRoll($bay, 6, $gamedata);
+		if ($roll != 1) return false;
+
+		self::launchFailNote($carrier, $bay, $phpclass, (int)$size, 'inadequate hangar — launch aborted', $gamedata);
+		$label = self::flightNameFor($phpclass, $carrier);
+		$fo = self::inadequateLogOrder($carrier, 'InadequateHangar', $gamedata);
+		if ($fo) {
+			$fo->pubnotes .= " Inadequate Hangar: $label aborted its launch (rolled 1 on 1d6) and stays docked — it may try to launch again next turn.";
+		}
+		return true;
+	}
+
+	/* B5W Inadequate Hangars LANDING damage. "When a flight (or partial flight)
+	 * attempts to land, roll 1d6 for each fighter. If a 1 appears, score 1d6
+	 * damage on the fighter (ignoring armor)." Selects the (up to) $wantCount
+	 * fighters that will actually land — most-damaged first, matching dockFighters'
+	 * priority so the rolled craft are exactly the ones that land on a partial
+	 * dock — rolls 1d6 per fighter, and on a "1" applies a 1d6 armour-ignoring
+	 * DamageEntry. A hit that meets/exceeds the fighter's remaining health destroys
+	 * it (destroyed=true) so it drops out of the dockable count and its hangar box
+	 * is freed. Each outcome is appended to one RammingAttack FireOrder so the
+	 * landing damage surfaces in the combat log. Both rolls go through
+	 * nextInadequateRoll so a replay reproduces them exactly. Returns the number
+	 * of fighters destroyed on landing. */
+	public static function applyInadequateLandingDamage($flight, $bay, $wantCount, $carrier, $gamedata){
+		if (empty($bay->inadequate)) return 0;
+		if (!($flight instanceof FighterFlight)) return 0;
+
+		//Candidate landing fighters: live, attached (not cut off) craft, ordered
+		//most-damaged first to match dockFighters' selection (so a partial dock
+		//rolls for the same craft that actually land).
+		$candidates = array();
+		foreach ($flight->systems as $idx => $f) {
+			if (!($f instanceof Fighter)) continue;
+			if ($f->isDestroyed($gamedata->turn)) continue;
+			if (self::isFighterCutOff($f)) continue;   //cut-off integrated craft can't land
+			$candidates[] = array('fighter' => $f, 'idx' => $idx, 'damage' => (int)$f->getTotalDamage());
+		}
+		usort($candidates, function($a, $b){
+			if ($a['damage'] !== $b['damage']) return $b['damage'] - $a['damage'];
+			return $b['idx'] - $a['idx'];
+		});
+
+		$landing = max(1, (int)$wantCount);
+		if ($landing > count($candidates)) $landing = count($candidates);
+		if ($landing <= 0) return 0;
+
+		$label = self::flightNameFor($flight->phpclass, $carrier);
+		$fo = null;   //created lazily — only when something actually happens
+		$destroyed = 0;
+		for ($i = 0; $i < $landing; $i++) {
+			$f = $candidates[$i]['fighter'];
+			$landRoll = self::nextInadequateRoll($bay, 6, $gamedata);
+			if ($landRoll != 1) continue;
+
+			$dmgRoll = self::nextInadequateRoll($bay, 6, $gamedata);
+			$remaining = (int)$f->getRemainingHealth();
+			$isDestroyed = ($dmgRoll >= $remaining);
+			$applied = min($dmgRoll, max(1, $remaining));   //don't log more than it could take
+			$dmg = new DamageEntry(
+				-1, $flight->id, -1, $gamedata->turn, $f->id,
+				$applied, 0 /*armour ignored*/, 0, -1, $isDestroyed, false,
+				"Inadequate hangar landing", "InadequateHangar"
+			);
+			$dmg->updated = true;
+			$rammingSystem = $carrier->getSystemByName("RammingAttack");
+			if ($rammingSystem) { $dmg->shooterid = $carrier->id; $dmg->weaponid = $rammingSystem->id; }
+			$f->damage[] = $dmg;
+
+			if ($fo === null) $fo = self::inadequateLogOrder($carrier, 'InadequateHangar', $gamedata);
+			if ($fo) {
+				//Lead every line after the first with <br>; the first joins straight
+				//onto the combat-log entry text (no leading blank line under short-text).
+				$sep = ($fo->pubnotes === '') ? '' : '<br>';
+				$fo->pubnotes .= $isDestroyed
+					? "{$sep}Inadequate Hangar: a $label fighter bounced off an obstruction whilst landing ($applied damage) and was destroyed."
+					: "{$sep}Inadequate Hangar: a $label fighter took $applied damage bouncing off an obstruction while landing.";
+			}
+			if ($isDestroyed) $destroyed++;
+		}
+		return $destroyed;
+	}
+
 	/* === Stage 15: ordnance reload pool =================================== */
 
 	/* Total purchased reload-pool capacity for $carrier (read from the
@@ -3379,6 +3550,11 @@ class HangarOps {
 			return;
 		}
 
+		//B5W Inadequate Hangars: roll the 1d6 launch-abort once the launch is
+		//confirmed otherwise-legal. Keyed on the DRAINING bay ($firstBay) — that's
+		//the inadequate-flagged hangar the shuttles actually launch from.
+		if (self::inadequateLaunchAborts($carrier, $firstBay, $phpclass, $size, $gamedata)) return;
+
 		//Spawn geometry from the carrier's last move + the draining bay's direction.
 		$lastMove = $carrier->getLastMovement();
 		if (!$lastMove) return;
@@ -3554,6 +3730,12 @@ class HangarOps {
 
 		$lastMove = $carrier->getLastMovement();
 		if (!$lastMove) return null;
+
+		//B5W Inadequate Hangars: roll the 1d6 launch-abort AFTER the launch is
+		//confirmed otherwise-legal (so a "1" genuinely costs the turn) but before
+		//any docked-ship resurrection / budget charge. Keyed on the entry's bay.
+		if (self::inadequateLaunchAborts($carrier, $entryHangar, $phpclass, $size, $gamedata)) return null;
+
 		//Spawn geometry. Rails advertise per-launch direction; a multi-bay launch
 		//uses the override (validated) or the entry-hangar's static direction.
 		$effDir   = ($dirOverride !== null) ? (int)$dirOverride : (int)$entryHangar->direction;
@@ -4262,6 +4444,18 @@ class HangarOps {
 	public static function performWholeFlightDock($carrier, $flight, $count, $bays, $gamedata){
 		if (!($flight instanceof FighterFlight)) return 0;
 		if (empty($bays)) return 0;
+
+		//B5W Inadequate Hangars LANDING check. Applied FIRST — before the dockable
+		//count is read below — so any fighter destroyed bouncing off the bay drops
+		//out of countActiveCraft/dockFighters automatically and never occupies a
+		//stored box (the box is freed). Keyed on the PRIMARY docking bay (fill
+		//order, player's preferred bay first); on an inadequate bay each landing
+		//fighter rolls 1d6 and a "1" scores 1d6 damage ignoring armour.
+		$primaryDockBay = isset($bays[0]['hangar']) ? $bays[0]['hangar'] : null;
+		if ($primaryDockBay && !empty($primaryDockBay->inadequate)) {
+			self::applyInadequateLandingDamage($flight, $primaryDockBay, $count, $carrier, $gamedata);
+		}
+
 		//Stage S (S-d): cut-off integrated fighters can NEVER land — they are excluded
 		//from the dockable count and from the chosen-fighter selection below. For an
 		//ordinary (non-integrated) flight this equals countActiveCraft, so behaviour is
