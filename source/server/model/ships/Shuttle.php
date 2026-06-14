@@ -82,7 +82,9 @@ class Shuttle extends FighterFlight
             case 'Drazi Freehold (WotCR)':
                 return array('img/ships/shuttleDrazi.png', 'img/ships/shuttleDrazi_large.png');  
             case 'Gaim Intelligence':
-                return array('img/ships/shuttleGaim.png', 'img/ships/shuttleGaim_large.png');                                                                                                                  
+                return array('img/ships/shuttleGaim.png', 'img/ships/shuttleGaim_large.png');
+            case 'Grome Autocracy'; 
+                return array('img/ships/shuttleGrome.png', 'img/ships/shuttleGrome_large.png');                                                                                                                                 
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
