@@ -35,6 +35,8 @@ window.gamedata = {
 			case 'Balosian Underdwellers':
 				powerRating = 'Tier 2; Minor Faction';
 				break;
+			case 'Barada Imperium':
+				powerRating = 'Tier 2; Minor Custom Faction';
 			case 'Belt Alliance':
 				powerRating = 'Tier 2; Minor Faction';
 				break;

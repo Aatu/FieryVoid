@@ -1,18 +1,21 @@
 <?php
-class TorataGoltharCC extends BaseShip{
+class torataFatharPC extends BaseShip{
 
 	function __construct($id, $userid, $name,  $slot)
 	{
 		parent::__construct($id, $userid, $name,  $slot);
 
-		$this->pointCost = 600;
+		$this->pointCost = 525;
 		$this->faction = "Torata Regency";
-		$this->phpclass = "TorataGoltharCC";
+		$this->phpclass = "torataFatharPC";
 		$this->imagePath = "img/ships/TorataGolthar.png";
-		$this->shipClass = "Golthar Fast Cruiser";
+		$this->shipClass = "Fathar Plasma Cruiser";
 		$this->canvasSize = 260;
 		$this->shipSizeClass = 3;
-		$this->isd = 2257;
+		$this->isd = 2227;
+		$this->unofficial = true;
+		$this->occurence = "common";
+        $this->variantOf = 'Golthar Fast Cruiser';
 
 		$this->forwardDefense = 17;
 		$this->sideDefense = 15;
@@ -26,8 +29,8 @@ class TorataGoltharCC extends BaseShip{
 
 		$this->addPrimarySystem(new Reactor(5, 18, 0, 0));
 		$this->addPrimarySystem(new CnC(5, 16, 0, 0));
-		$this->addPrimarySystem(new Scanner(5, 18, 6, 8));
-		$this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
+		$this->addPrimarySystem(new Scanner(5, 18, 6, 7));
+		$this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 16, 4, 27));
 		$this->addPrimarySystem(new Hangar(5, 2, 1));
 		
@@ -38,16 +41,19 @@ class TorataGoltharCC extends BaseShip{
 		
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
-		$this->addAftSystem(new PentagonArray(3, 0, 0, 90, 270));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
+		$this->addAftSystem(new LightParticleBeamShip(2, 2, 1, 90, 270));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 10, 0, 3, 2));
 
-		$this->addLeftSystem(new LaserAccelerator(4, 0, 0, 270, 60));
-		$this->addLeftSystem(new PentagonArray(3, 0, 0, 240, 60));
+		$this->addLeftSystem(new PlasmaAccelerator(4, 10, 5, 270, 60));
+		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
+		$this->addLeftSystem(new LightParticleBeamShip(2, 2, 1, 240, 60));
 		$this->addLeftSystem(new Thruster(3, 15, 0, 6, 3));
 
-		$this->addRightSystem(new LaserAccelerator(4, 0, 0, 300, 90));
-		$this->addRightSystem(new PentagonArray(3, 0, 0, 300, 120));
+		$this->addRightSystem(new PlasmaAccelerator(4, 10, 5, 300, 90));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
+		$this->addRightSystem(new LightParticleBeamShip(2, 2, 1, 300, 120));
 		$this->addRightSystem(new Thruster(3, 15, 0, 6, 4));
 
 		//0:primary, 1:front, 2:rear, 3:left, 4:right;
