@@ -62,6 +62,7 @@ class Shuttle extends FighterFlight
      * Subclasses with their own art (or stat-different variants like Flyer)
      * may instead just set $this->faction in setShuttleDefaults and let
      * this switch pick the right files.
+     * You cna overwrite in shuttle class if you want to have a bespoke image, see CargoShuttle.
      */
     public function getImage()
     {
@@ -94,7 +95,7 @@ class Shuttle extends FighterFlight
                 return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');
             case 'Raiders':
                 return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
-            default:
+            default: //Also used by EA, Hurr etc.
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
     }
