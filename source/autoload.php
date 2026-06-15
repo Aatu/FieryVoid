@@ -1490,6 +1490,7 @@ spl_autoload_register(
 				'circasianshenna' => '/server/model/ships/EscalationCircasianEmpire/CircasianShenna.php',
 				'circasiansularascoutcarrier' => '/server/model/ships/EscalationCircasianEmpire/CircasianSularaScoutCarrier.php',
 				'circasianthracejumpcruiser' => '/server/model/ships/EscalationCircasianEmpire/CircasianThraceJumpcruiser.php',
+				'circasiantaryn' => '/server/model/ships/EscalationCircasianEmpire/CircasianTaryn.php',
 				'circasiantoltara' => '/server/model/ships/EscalationCircasianEmpire/CircasianToltara.php',
 				'circasiantormin' => '/server/model/ships/EscalationCircasianEmpire/CircasianTormin.php',
 				'circasiantorminbeta' => '/server/model/ships/EscalationCircasianEmpire/CircasianTorminBeta.php',
