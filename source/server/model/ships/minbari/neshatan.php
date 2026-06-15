@@ -29,7 +29,7 @@ class Neshatan extends BaseShip{
         $this->addPrimarySystem(new Scanner(6, 28, 4, 12));
         $this->addPrimarySystem(new Engine(6, 28, 0, 12, 4));
         $this->addPrimarySystem(new JumpEngine(5, 30, 4, 10));
-        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Hangar(5, 2, 2));
         $this->addPrimarySystem(new Jammer(4, 10, 5));
 
         // weapons arguments: armor, health, power, start arc, end arc

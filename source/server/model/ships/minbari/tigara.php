@@ -27,7 +27,7 @@ class Tigara extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 25, 4, 10));
         $this->addPrimarySystem(new Engine(6, 20, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(5, 8));
+        $this->addPrimarySystem(new Hangar(5, 8, 3));
         $this->addPrimarySystem(new Jammer(5, 10, 5));
 
         // weapons arguments: armor, health, power, start arc, end arc
