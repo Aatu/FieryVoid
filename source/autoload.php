@@ -1458,6 +1458,7 @@ spl_autoload_register(
 				'circasianistale' => '/server/model/ships/EscalationCircasianEmpire/CircasianIstale.php',
 				'circasianjagafighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianJagaFighter.php',
 				'circasianjagalltorpedofighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianJagallTorpedoFighter.php',
+				'circasianjenholen' => '/server/model/ships/EscalationCircasianEmpire/CircasianJenholen.php',
 				'circasiankalichar' => '/server/model/ships/EscalationCircasianEmpire/CircasianKalichar.php',
 				'circasiankatinbp' => '/server/model/ships/EscalationCircasianEmpire/CircasianKatinBP.php',
 				'circasiankolamfighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianKolamFighter.php',
