@@ -292,6 +292,40 @@ window.gamedata = {
         ];
     },
 
+    // Raw team colours are tuned for the 3D sprite overlays and read as too
+    // bright/neon against the dark IniGUI panel — noticeably richer than the
+    // muted CSS participant colours (green/#6091d2/red, #2ea86b/#6d95c5/#c65d4a).
+    // Darken them toward black for IniGUI use only, leaving sprites/combat log
+    // on the full-strength palette. Returns integer sRGB [r,g,b].
+    INI_TEAM_DARKEN: 0.65,
+    getIniTeamColorRGB: function getIniTeamColorRGB(team) {
+        var rgb = gamedata.getTeamColorRGB(team);
+        var f = gamedata.INI_TEAM_DARKEN;
+        return [
+            Math.round(rgb[0] * f),
+            Math.round(rgb[1] * f),
+            Math.round(rgb[2] * f)
+        ];
+    },
+
+    // Inline style for an observer's "active mover" IniGUI box, derived from the
+    // ship's team colour. Mirrors the .iniActive* CSS (border + translucent fill +
+    // glow) but keyed on team instead of mine/ally/enemy.
+    getIniActiveTeamStyle: function getIniActiveTeamStyle(team) {
+        var rgb = gamedata.getIniTeamColorRGB(team);
+        var r = rgb[0];
+        var g = rgb[1];
+        var b = rgb[2];
+        // Dark, desaturated fill (~22% of the team colour) so the team-coloured
+        // text stays readable, matching the dim backgrounds the class versions use.
+        var fillR = Math.round(r * 0.22);
+        var fillG = Math.round(g * 0.22);
+        var fillB = Math.round(b * 0.22);
+        return "border:1px solid rgb(" + r + "," + g + "," + b + ") !important;"
+            + "background-color:rgba(" + fillR + "," + fillG + "," + fillB + ",0.9) !important;"
+            + "box-shadow:0px 0px 3px rgb(" + r + "," + g + "," + b + ");";
+    },
+
     // Linear-space THREE.Color version of getTeamColorRGB, ready for sprite overlays.
     getTeamColor: function getTeamColor(team) {
         var rgb = gamedata.getTeamColorRGB(team);
@@ -1600,11 +1634,12 @@ getActiveShipName: function getActiveShipName() {
             //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
             // Observers (not in the game) colour the initiative number by team
-            // instead of the mine/ally/enemy scheme.
+            // instead of the mine/ally/enemy scheme. Use the IniGUI-darkened
+            // palette so it isn't brighter than the muted CSS participant colours.
             var teamColorCss = "";
             if (!gamedata.isPlayerInGame()) {
-                var iniRgb = gamedata.getTeamColorRGB(ships[i].team);
-                teamColorCss = "color:rgb(" + Math.round(iniRgb[0]) + "," + Math.round(iniRgb[1]) + "," + Math.round(iniRgb[2]) + ");";
+                var iniRgb = gamedata.getIniTeamColorRGB(ships[i].team);
+                teamColorCss = "color:rgb(" + iniRgb[0] + "," + iniRgb[1] + "," + iniRgb[2] + ");";
             }
 
             var td = document.createElement("td");
@@ -1632,7 +1667,11 @@ getActiveShipName: function getActiveShipName() {
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
-                if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
+                if (active === true && teamColorCss) {
+                    // Observers: style the active-mover box from the ship's team colour
+                    // instead of the mine/ally/enemy iniActive* classes.
+                    td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                } else if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
                     td.classList.add("iniActiveMoved");
                 } else if (active === true && gamedata.isMyShip(ships[i])) {
                     td.classList.add("iniActive");
@@ -1643,7 +1682,11 @@ getActiveShipName: function getActiveShipName() {
                 }
             } else {
                 if (gamedata.getActiveShips().includes(ships[i])) {
-                    td.classList.add(gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy");
+                    if (teamColorCss) {
+                        td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                    } else {
+                        td.classList.add(gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy");
+                    }
                 }
             }
 
@@ -1803,6 +1846,7 @@ getActiveShipName: function getActiveShipName() {
         gamedata.gameid = serverdata.id;
         gamedata.slots = serverdata.slots;
         gamedata.rules = serverdata.rules;
+        gamedata.name = serverdata.name;
         gamedata.description = serverdata.description;
 
         if (!gamedata.replay) {

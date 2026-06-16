@@ -2745,3 +2745,843 @@ away: the shuttles pile into the other hangar(s), leaving the flagged bay free.
   holds a clean 6 heavy fighters.
 
 Not yet Docker-tested (no local PHP; user tests via Docker).
+
+---
+
+## Stage S (Shadow Integrated Fighters / "Fighter Bomb") — PLAN (drafted 2026-06-10)
+
+B5W "integrated fighters" + the "Fighter Bomb" delivery: certain advanced races
+(Shadows) don't store fighters in a hangar — they form them out of their own
+**Structure**. A formed fighter marks one structure box; recovering it erases the
+mark; losing the box cuts the fighter off (can't land); losing an un-cut-off fighter
+destroys the box (can kill the carrier). This layers on the existing `Hangar` Ops
+pipeline via a new `ShadowHangar extends Hangar` subclass + a reworked `SHAD_FTRL`
+enhancement that **buys** integrated fighters (priced as fighters) and **populates
+`hangarUsage` at game start** — so they start docked in the ShadowHangar and launch
+through the ordinary HangarOps launch path.
+
+> Test container: gameID 3730 / a Shadow ship with a `ShadowHangar` (e.g. a
+> `ShadowCarrier` variant). Gate launching/coupling to safeGameID until S-final.
+
+### S0. Guiding constraints (Stage-S-specific)
+- **Don't touch live in-flight Shadow games.** Shadow fighters today auto-deploy to
+  space as separate `ShadowMediumFighterFlight` ships (lobby purchase + SHAD_CTRL
+  "uncontrolled" OR SHAD_FTRL count). The integrated path is OPT-IN per ship via the
+  presence of a `ShadowHangar` on the hull. A Shadow ship with a plain `Hangar`
+  behaves exactly as today.
+- **Positional system-id trap.** `ShadowHangar` must be a NEW phpclass, and on the
+  existing shadow hulls it REPLACES the existing `new Hangar(...)` at the SAME
+  construction position (same id) — swapping the class without moving the call keeps
+  ids stable. Do NOT reorder. (See [[arch_positional_system_id_trap]].)
+- **Structure coupling is replay-deterministic.** Box↔fighter marks must persist as
+  notes/DamageEntries, never as live-only state — the cut-off/destroyed outcome has
+  to survive a reload mid-game (same discipline as Stage 18 escape + rail crits).
+- **No bundle commits. Don't edit autoload (user adds `shadowhangar` entry).**
+
+### S1. Purchase model — rework `SHAD_FTRL` to BUY integrated fighters
+Today `SHAD_FTRL` ("Spawn a Medium Fighter") is **free** (`$enhPrice = 0`), limited to
+hangar capacity, and only reduces primary Structure `maxhealth` by `enhCount`
+(Enhancements.php:692, :2330). The rules say integrated fighters are NOT free — they
+cost a fighter's price. Rework:
+- **Price = one ShadowMediumFighterFlight's per-craft cost.** `ShadowMediumFighterFlight->pointCost = 150*6` → **150 CP per fighter** (the flight is 6).
+  Set `$enhPrice = 150`, `$enhPriceStep = 150`, `$enhLimit = ceil($capacity)` (unchanged
+  cap = hangar icon number). Flip the trailing `true` ("not an enhancement") handling
+  as needed so it's a real costed option. **Confirm 150 with the user** before coding —
+  it's the one externally-visible number.
+- **Keep the `-1 Structure maxhealth` per count? NO — reverse it.** Under integrated
+  rules a formed fighter MARKS (occupies) a box, it doesn't permanently shrink the
+  structure. The box is freed on recovery. So the structure penalty moves from a
+  static `maxhealth -=` to the dynamic mark/occupancy model (S3). Remove the
+  `maxhealth -= $enhCount` mutation (Enhancements.php:2330) for ShadowHangar ships;
+  the count instead drives initial `hangarUsage` population (S2). **Legacy Shadow
+  ships with a plain `Hangar` keep the old behaviour** — branch on whether the ship
+  has a ShadowHangar.
+
+### S2. Initial population — `enhCount` → `hangarUsage`
+`HangarOps::populateInitialHangarUsage` currently auto-fills shuttles + leftover
+capacity but explicitly does NOT auto-fill combat-fighter declarations (they
+auto-deploy to space). For a `ShadowHangar`, integrated fighters should start
+**docked in the ShadowHangar** (formed-but-held), so:
+- Read the carrier's `SHAD_FTRL` enhCount (same direct-read pattern as HANG_BP at
+  HangarOps.php:121-124, since `setEnhancements` runs after note hydration).
+- Push `enhCount` `ShadowMediumFighterFlight` craft into the ShadowHangar's
+  `hangarUsage` (as `flightSize`-1 entries or one sized entry — match how launch
+  expects to draw them; single-craft entries are simplest for the per-fighter
+  structure mark in S3). hangarType = the ShadowHangar's category (likely `'medium'`).
+- Each formed/held fighter marks one structure box (S3). Cap at `ceil($capacity)`
+  (the hangar icon max) — never exceed it even if enhCount somehow did.
+- This REPLACES the auto-shuttle fill for the ShadowHangar (Shadows don't carry
+  shuttles in it). Partition ShadowHangars out of the shuttle pool exactly like
+  catapults/rails (`isCatapult`/`isRail` precedent at HangarOps.php:54-58) via a new
+  `isShadowHangar` discriminator.
+
+### S3. Structure coupling (FULL — confirmed with user)
+The novel mechanic. A per-fighter ↔ per-structure-box binding:
+- **Form / mark:** when an integrated fighter exists (held OR launched), one
+  structure box is "marked" (occupied). Held fighters mark on initial population;
+  launched fighters keep their mark while in space.
+- **Box destroyed → fighter cut off:** if a marked structure box is destroyed in
+  combat, the bound fighter is CUT OFF — it can no longer land/reabsorb (survives &
+  fights, dies after scenario). Implement as a `ShadowFighterCutOff` flag/crit on the
+  flight (parallels `DisengagedFighter`/`SplitLaunchedFighter`), set from the
+  structure-damage path. A cut-off fighter is excluded from landing eligibility.
+- **Fighter lost (not cut off) → box destroyed:** if an un-cut-off integrated fighter
+  is destroyed, its bound structure box is marked destroyed (a `DamageEntry` on the
+  carrier's Structure). **If it was the last box → carrier destroyed.** This is the
+  rule that lets you kill a carrier by picking off its wounded fighters — so it MUST
+  route through the normal structure-destruction → ship-destruction check.
+- **Persistence:** the box↔fighter binding is a note on the ShadowHangar (e.g.
+  `shadowFighterBinding` = list of `{flightId/fighterId, structBoxIndex, cutOff}`),
+  snapshot-persisted like `hangarUsage`. Box destruction is a `DamageEntry` (replay-safe).
+  Cut-off is a flight crit (replay-safe). NO live-only state.
+- **Bookkeeping owner:** the PRIMARY ShadowHangar holds the binding list (same
+  "primary hangar carries pool state" pattern as `reloadPoolSpent`).
+- **Integrated fighters can't drop out / phase / jump** — already enforced on
+  `ShadowMediumFighterFlight` (`critRollMod = -100`). They CAN flee/disengage to be
+  recovered (so disengage ≠ cut-off; only box-destruction cuts off).
+
+### S4. Launch — the "Fighter Bomb" + ordinary launch
+Two launch flavours, both through `HangarOps::performLaunch`:
+- **Ordinary integrated launch:** same as a normal hangar launch from the
+  ShadowHangar (held fighter → space at carrier heading/speed, same-turn no-act via
+  the existing `LaunchedThisTurn` crit). The structure mark persists across launch.
+- **Fighter Bomb (B5W) — STRUCTURE DECIDED 2026-06-10 (user): a SEPARATE
+  `ShadowFighterBomb extends Weapon` system, NOT bolted onto the ShadowHangar.**
+  Rationale (user's finding): the Bomb is genuinely weapon-shaped — it fires in the
+  Weapons Fire step, has an ARC (startArc/endArc, e.g. 300→60 for the test hull), a
+  RANGE (≤10 hexes), no miss roll, and must be **player-selectable to target a hex in
+  the Firing Phase**. `Hangar` has none of that (no arc/range, not fire-selectable),
+  and `Weapon`/`Hangar` are SIBLING classes (both extend ShipSystem) so one system
+  can't be both. So the Bomb is its OWN system mounted ALONGSIDE the ShadowHangar.
+  - **Structural precedent: `BallisticMineLauncher extends Weapon`** ([missile.php:2301](source/server/model/weapons/missile.php#L2301))
+    — a Weapon that SPAWNS units (loitering/captor mines) at a target location during
+    the Fire step via `createLoiteringMine` (Manager::insertSingleShip + insertSingleMovement
+    + IndividualNote). The Bomb mirrors this exactly, spawning `ShadowMediumFighterFlight`s
+    at the target hex instead of mines. (Bomb is `ballistic`? — fires in the ballistic/
+    weapons step; confirm which gamephase gate to use, mines use phase 1.)
+  - **Shared pool:** the Bomb and the ShadowHangar draw from the SAME integrated-fighter
+    maximum ("cannot operate more than the listed maximum"). The Bomb must read/decrement
+    the ShadowHangar's `hangarUsage` (the held integrated-fighter count) so launching 3
+    via the bay and 3 via the bomb can't exceed the cap. Cross-system coordination:
+    `ShadowFighterBomb` locates the ship's ShadowHangar (HangarOps::collectShadowHangars)
+    and consumes held entries from it on fire.
+  - **Spawn geometry:** N fighters (≤ remaining pool) burst at the TARGET hex, all sharing
+    the carrier's heading+speed, can't act until next turn (same `LaunchedThisTurn`/deploy
+    pattern as an ordinary launch, but spawnPos = target hex not carrier hex).
+  - **Client:** the Bomb appears as a fireable weapon (arc fan, range, hex-target picker)
+    — reuse the standard weapon firing/targeting flow, NOT the hangar launch dialog.
+  - **STILL DEFERRED to S-f** (after S-d/S-e). Build the integrated-fighter core +
+    structure coupling + diffuser reabsorption first; add the Bomb weapon last.
+
+### S5. Recovery — land then reabsorb (FULL — confirmed with user)
+"Integrated hangars cannot recover fighters" = they don't use the hangar RELOAD/stash
+semantics; recovery is the normal fighter-landing procedure, then **reabsorption**:
+- Land via the standard HangarOps landing path INTO the ShadowHangar (it's still a
+  Hangar, so `eligibleHangarsForLanding` finds it). A CUT-OFF fighter is NOT eligible
+  to land (S3).
+- On land, immediately **reabsorb**: erase the structure mark (free/heal the box —
+  but only a box that was MARKED-occupied, never repair a combat-destroyed box),
+  **repair the fighter fully** (all damage cleared — it re-forms next turn fresh),
+  and **absorb the fighter's diffuser energy into one carrier `EnergyDiffuser`** of
+  choice; **excess penetrates as damage to a random system, ignoring armor**. The
+  diffuser-transfer + excess-penetration is the fiddly bit — reuse the existing
+  diffuser/`getSystemProtectingFromDamage` plumbing and the "ignore armor" damage
+  path. Can be reabsorbed → relaunched as soon as the following turn.
+- **Recommend:** land+free-box+repair in S-Phase-1; the diffuser-energy transfer +
+  random-system penetration as a small S-Phase-1.5 (it's self-contained).
+
+### S6. `ShadowHangar extends Hangar` — the class
+Mirror the Catapult/FighterRail/DockingCollar subclass pattern (baseSystems.php:3754+):
+- `public $isShadowHangar = true;` — single discriminator, parallel to
+  `$isCatapult`/`$isRail`/`$isLCVRail`. HangarOps call sites branch on the flag.
+- **Crit-immune:** "Integrated fighter hangars do not suffer from critical hits."
+  Override `criticalPhaseEffects` (and/or the crit-roll entry) so the ShadowHangar
+  takes box damage but never rolls/applies a critical. (Confirm exactly where crits
+  are generated for a Hangar — likely `setSystemDataArray`/the generic crit roll — and
+  short-circuit for `isShadowHangar`.)
+- ctor → `parent::__construct($armour, $maxhealth, $output, $direction, 'medium', ...)`
+  (or whatever category the ship's `$fighters` declares).
+- Excluded from the default-shuttle pool (S2). Included in `collectHangars`
+  (`instanceof Hangar`) so launch/land/escape pipelines pick it up automatically.
+- Client mirror in `baseSystems.js` (`ShadowHangar extends Hangar`, `isShadowHangar`),
+  `stripForJson` ships `isShadowHangar` + the binding state for tooltip/icon.
+
+### S7. Enhancement bookkeeping (`addShipEnhancementsForJSON` etc.)
+- `SHAD_FTRL` already has a `stripForJson`-side case (Enhancements.php:2776) restoring
+  `Structure->maxhealth` — that case becomes a no-op / is removed for ShadowHangar
+  ships once the static maxhealth mutation is gone (S1). Audit BOTH the
+  `setEnhancementsShip` apply (:2330) AND the strip restore (:2776) together.
+- Existing Shadow fighter flights keep SHAD_CTRL ("uncontrolled", -2 OB / -3(15) ini,
+  Enhancements.php:1819) as the scenario-only un-purchased path — unchanged.
+
+### S8. Stage breakdown (suggested commit cadence)
+- **S-a — ✓ IMPLEMENTED 2026-06-10 (not yet Docker-tested).** `ShadowHangar extends
+  Hangar` (baseSystems.php, after FighterRail): `$isShadowHangar = true` discriminator,
+  crit-immunity via `testCritical()` override → returns `$crits` untouched (no d20, no
+  addCritical), `setSystemDataWindow` appends a crit-immune Special line. **KEY DIVERGENCE
+  from Catapult/FighterRail/DockingCollar: ShadowHangar does NOT override `$name` — it
+  keeps the base `'hangar'`** so it flows through the standard fighter launch/dock/recover
+  UI (every client+server helper gates on `name === 'hangar'`). Consequence: the client
+  factory instantiates a PLAIN `Hangar` (`new window['Hangar']`, keyed off `$name`), so
+  **there is NO client subclass** — `isShadowHangar` round-trips as a DATA property via
+  `Hangar::stripForJson` (added alongside isCatapult/isRail/isLCVRail at baseSystems.php
+  ~3661) and is read off the live Hangar instance. Shuttle-pool exclusions added in
+  HangarOps (`populateInitialHangarUsage` ~54, capacity-sum ~1284, `inferHangarType` guard
+  ~1221) + client mirror (systems.js `getDefaultShuttleCompositionForHangar` ~651).
+  ShadowCruiser swapped `new Hangar(5,6,6)` → `new ShadowHangar(5,6,6)` IN PLACE (same
+  ctor position = same system id; positional-id-trap-safe). **No behaviour change beyond
+  crit-immunity** — ShadowCruiser's bay already auto-filled 0 shuttles (6 declared = 6
+  capacity → 0 leftover), so the shuttle-pool exclusion is a no-op there.
+  **Autoload (user must add):** `'shadowhangar' => '/server/model/systems/baseSystems.php',`.
+  Verify: load a ShadowCruiser game, confirm the Hangar renders/launches as before + the
+  "does not suffer critical hits" tooltip line, and that a Hangar crit roll never lands on it.
+- **S-b — ✓ IMPLEMENTED 2026-06-10 (not yet Docker-tested).** SHAD_FTRL reworked
+  (Enhancements.php): the lobby-option branch now splits on `HangarOps::shipHasShadowHangar($ship)`
+  — ShadowHangar ships get a COSTED "Integrated Fighter" option (price 150, step 150,
+  the `false` "is-enhancement" flag, limit `ceil($capacity)`); legacy plain-Hangar
+  Shadow ships keep the original FREE "Spawn a Medium Fighter" (price 0, `true`). The
+  apply-side (`setEnhancementsShip`) `Structure->maxhealth -= $enhCount` is now SKIPPED
+  for ShadowHangar ships (guarded by the same helper) — integrated fighters mark boxes
+  dynamically (S-d), they don't statically shrink Structure. The strip-restore
+  (`addShipEnhancementsForJSON` ~2798) is left as-is: it copies the live (unreduced)
+  maxhealth → harmless no-op for the integrated case. New helpers
+  `HangarOps::collectShadowHangars` / `shipHasShadowHangar`. Initial population
+  (`populateInitialHangarUsage`): ShadowHangars are partitioned into `$shadowHangars`
+  (out of the shuttle pool) and filled in a new **Step 3** with `enhCount` flightSize-1
+  `ShadowMediumFighterFlight` entries (name 'Integrated Fighter'), enhCount read off
+  `$ship->enhancementOptions[..][2]` (same load-time pattern as HANG_BP, since
+  `setEnhancements` runs after), capped at bay box capacity (`maxhealth - occupiedBoxes`).
+  `ShadowMediumFighterFlight` is unitSize 1 → 1 box/fighter, so 6 fill a 6-box bay.
+  **KNOWN GAP for verification / a later decision:** `gamelobby.js checkChoices` does
+  NOT reference SHAD_FTRL, so the integrated-fighter purchase is accounted purely as a
+  priced enhancement, INDEPENDENT of the `$ship->fighters` slot pool. A player could
+  therefore buy 6 integrated fighters AND still deploy 6 separate ShadowMediumFighterFlights
+  to space — a double-spend vs. the "can't operate more than the listed maximum" rule.
+  Enforcing the shared cap in the lobby is its own piece of work (deferred; flag to user).
+  Verify: integrated fighters start DOCKED in the ShadowHangar (capacity reads N/6),
+  lobby charges 150 each, Structure is NOT shaved, legacy Shadow hulls unchanged.
+- **S-c — ✓ CLEARED 2026-06-10 (Docker-verified: launch, damage, land, relaunch-undamaged + destroyed-craft count all confirmed by user).** Launch + land-and-reabsorb
+  (S4 first half + S5 first half), PLUS the lobby fighter-allowance accounting the user
+  requested. **Launch needs NO new code** — a held integrated-fighter entry launches via
+  the existing `performLaunch` new-spawn path (ShadowHangar keeps `$name='hangar'`, is in
+  collectHangars, and `hangarAcceptsCategory` accepts 'medium' into its universal
+  'fighters' bay because ShadowCruiser declares `normal:6`). **Land-and-reabsorb**
+  (`performLand` ShadowHangar branch): an integrated fighter is always a single craft
+  (flightSize-1) so a ShadowHangar land is always a FULL dock — instead of the
+  dockedFlightId/resurrect link (which would bring the SAME damaged flight back), we
+  `unset($entry['dockedFlightId'])` and store a PRISTINE held entry (phpclass + name
+  'Integrated Fighter' + flightSize). The damaged flight row stays `$removed` and is never
+  resurrected; the next launch spawns a brand-new undamaged fighter. `serviceDockedFlights`
+  skips it cleanly (it `continue`s on entries with no dockedFlightId), so no ammo-reload
+  weirdness. (S-e adds diffuser-energy reabsorption + excess penetration; S-d adds the
+  per-fighter structure-box binding/freeing.)
+  **Launch-class fix (2026-06-10, post-first-test):** first launch attempt spawned the
+  WRONG class ("tried to launch a ship") — the ShadowHangar's `spawnableClasses` carried
+  only the generic Shuttle/MinesweepingShuttle defaults, so `ShadowMediumFighterFlight`'s
+  blueprint was never preloaded by game.php (which iterates each system's `spawnableClasses`
+  into `window.staticShips`), and the client couldn't resolve the spawned flight's type.
+  Fix: the `ShadowHangar` ctor now passes `array('ShadowMediumFighterFlight')` as
+  `$spawnableClasses` UNCONDITIONALLY (a ShadowHangar only ever forms that one flight class;
+  the base ctor merges it with the shuttle defaults). No ship-file change needed. This also
+  covers the future Fighter Bomb (S-f), which launches the same flight class.
+  **Reabsorption fix (2026-06-10, post-test ×2): relaunched fighters kept their damage.**
+  Two wrong guesses before the real cause: (1) put reabsorption in `performLand` — but the
+  firing-phase LANDING path is `performWholeFlightDock` (Stage-21 coalescer), not performLand.
+  (2) Flagged the dock entry `reabsorbed` but kept its `dockedFlightId` and guarded
+  `resurrectDockedFlight`/`consumeStashesForLaunch` — but the firing-phase RELAUNCH path is
+  `processWholeFlightLaunches`→`launchWholeFlight`, which branches on the LAUNCH ORDER's
+  `dockedFlightId` (`$dfid>0` → docked-resurrect, `$dfid<=0` → `launchAnonymousStash`
+  fresh-spawn) and never touches `performLaunch`/`resurrectDockedFlight`. Because the docked
+  entry still had a `dockedFlightId`, the client order carried it, so launchWholeFlight's
+  FULL branch resurrected the SAME damaged flight (`$docked->removed=false`). **Final fix:**
+  the ShadowHangar dock branch in `performWholeFlightDock` (and `performLand`) now stores a
+  PRISTINE ANONYMOUS entry — `unset(dockedFlightId/occupancy/fragment/boxesPerCraft)`, set
+  phpclass/name/flightSize/hangarType — IDENTICAL in shape to the S-b initial-population
+  entries, so relaunch flows through `launchAnonymousStash`→fresh-spawn (the path the
+  initial fighters already launched through fine). The old removed flight is retired in place
+  via `destroyAllFighters` (combatValue→0, fleet-list hides it, no ghost). The earlier
+  `reabsorbed`-flag guards in resurrectDockedFlight/consumeStashesForLaunch were reverted
+  (no longer needed). (Damage-to-carrier transfer is S-e, not yet done.)
+  **Destroyed-craft correctness:** `$entry['flightSize'] = $count`, and `performWholeFlightDock`
+  clamps `$count` to `countActiveCraft` (non-destroyed only) — so a fighter killed in combat is
+  NOT stored and never relaunches (a 6-flight that lost 1 → docks 5 → relaunches 5, not 6). The
+  retire step destroys ONLY the docked unit (`$dockedUnit` = the whole flight on a full dock, or
+  just the docked FRAGMENT on a partial dock) — the N-K remnant left in space is untouched. The
+  first cut wrongly called `destroyAllFighters($flight)` in the partial case, which would have
+  killed the flying remnant; fixed by tracking `$dockedUnit`.
+  **Lobby accounting (gamelobby.js checkChoices — closes the S-b double-spend gap):**
+  (1) integrated fighters now CONSUME the fleet fighter allowance — the carrier `if`-branch
+  adds the SHAD_FTRL count to `totalFtrM` (one medium slot each; pools are aggregated in
+  the totalFtrPresent vs totalHangarAvailable check, so charging medium is exact even though
+  the hull declares `normal`). (2) Separate Shadow fighter flights (scenario-only after this
+  patch) are EXEMPTED from the allowance tally via an `isShadowFighterFlight`
+  (`faction == "Shadow Association"`) guard on the size-translation block — `totalShips++`
+  still counts them as a unit. (3) **SHAD_CTRL forced on** — its lobby-option default
+  `current` flipped 0→1 (Enhancements.php ~1566) so separate Shadow fighters are ALWAYS
+  Uncontrolled (no longer optional); limit stays 1. NB user corrected S-b `enhPriceStep`
+  0 (flat 150/fighter, not +150 cumulative). Verify: launch an integrated fighter, take
+  damage, land it, relaunch next turn UNDAMAGED; lobby caps integrated+separate at the hull
+  max; separate Shadow fighters cost 0 allowance + show Uncontrolled by default.
+- **S-d — ✓ COMPLETE & Docker-verified 2026-06-10 (user confirmed: cut-off, structure-loss,
+  per-fighter all working).** Count-based structure↔fighter coupling. FV reality forced
+  reinterpreting S3's per-fighter↔per-box binding: Structure is ONE box pool (maxhealth +
+  accumulated damage, no addressable boxes) and integrated fighters spawn FRESH each launch
+  (no stable per-fighter id). Invariant: **carrier remaining-structure ≥ attached count**.
+
+  **AS-BUILT (the authoritative description — supersedes the original design sketch below):**
+  - **State** lives on the PRIMARY ShadowHangar (baseSystems.php), persisted via the
+    `shadowIntegratedState` note (loaded in `onIndividualNotesLoaded`, saved in
+    `generateIndividualNotes` OUTSIDE the `!$destroyed` guard so terminal state records):
+    `{attached, cutOff, launched:{flightId=>baselineAttached}, structLost}`.
+    - `shadowAttached` = integrated fighters still TETHERED (held in bay + launched-and-alive-and-
+      not-cut-off). `shadowCutOff` = severed (fight on, can't land). Seeded in
+      `populateInitialHangarUsage` (attached = placed integrated fighters; persists at game start).
+    - `shadowLaunched` is a MAP `{flightId => last-known ATTACHED-fighter count}` — the carrier's
+      back-link to its own launched fighters (NO flight-side stamp/note needed). Per-flight
+      ATTACHED count (not total alive) so combat deaths, landings, and cut-offs are distinguished.
+    - `shadowStructLost` = cumulative structure boxes permanently destroyed by fighter deaths.
+  - **Engine `HangarOps::syncIntegratedStructureCoupling($ship,$gamedata)`** — runs once/carrier
+    from `onHangarCriticalPhase` (gated `primaryShadowHangar === $hangar` + `isFlowEnabled`, which
+    is currently always-true). Per turn:
+    1. Walk `shadowLaunched`. For each flight: `deaths = baselineAttached − countAttachedFightersInFlight`
+       (combat deaths only — landings decremented the baseline at dock time; new cut-offs apply
+       AFTER this loop, prior cut-offs were already removed from the baseline). Sum `lostAttached`.
+       Refresh the baseline to the current attached count; collect `$attachedFlights` (flights with
+       ≥1 attached craft) for Direction 1. Prune fully-gone flights.
+    2. **Direction 2 (runs FIRST so a death can cascade into a same-turn cut-off):** each lost
+       attached fighter PERMANENTLY destroys 1 structure box = **reduce `Structure->maxhealth` by 1
+       ONLY** (NOT a damage DamageEntry — that double-counts, since remaining = maxhealth − damage;
+       and SelfRepair heals damage but can't raise maxhealth, so the box stays gone). Track in
+       `shadowStructLost`; `attached -= lostAttached`. **Carrier death:** `Structure::isDestroyed`
+       fires only on a `destroyed=true` entry (NOT remaining≤0), so when the loss drives
+       `getRemainingHealth() ≤ 0` we write ONE `destroyed=true` DamageEntry to kill the carrier via
+       the normal fold.
+    3. Recompute `structRemaining`. **Direction 1:** if `structRemaining < attached`, cut off the
+       difference PER-FIGHTER (a flight of N can have any number cut off). Order (user): launched-
+       in-space first — `applyCutOffToFighters($flight,$count)` stamps a `ShadowFighterCutOff` crit
+       on up to $count individual living non-cut-off fighters (each its own crit + CUT OFF badge),
+       dropping each from the flight's baseline. Then held bay fighters via
+       `removeHeldIntegratedFighters` (no crit — nothing flying, just removed from hangarUsage).
+       `attached -= n; cutOff += n`.
+  - **Launch/land bookkeeping:** `registerLaunchedIntegratedFlight` (in `launchAnonymousStash` when
+    `firstBay->isShadowHangar`) seeds the baseline at launch. `decrementLaunchedIntegratedBaseline`
+    (in BOTH reabsorption branches) drops the landed count so a dock isn't read as a death.
+  - **maxhealth replay-safety:** maxhealth is a blueprint value rebuilt fresh each load, so
+    `shadowStructLost` is re-applied to `Structure->maxhealth` ONCE per load — AFTER the note loop
+    in `Hangar::onIndividualNotesLoaded` (the loop visits every per-turn note; a per-note
+    subtraction would over-reduce), gated to the primary ShadowHangar. AND `Structure::stripForJson`
+    now SENDS the live maxhealth (base stripForJson omits it → the client read it from the static
+    blueprint → desync). Notes load turn-bounded (`turn <= ?`), so a replay scrub to turn T loads
+    structLost-as-of-T and ships that turn's maxhealth. Replay-consistent end to end.
+  - **Crit:** new `ShadowFighterCutOff` (cricialClasses.php, "CUT OFF", permanent — `repairPriority 0`,
+    no turnend; lives on the FIGHTER, SelfRepair is a carrier system so can't reach it). Added to the
+    `copyFighterStateToTarget` skip-list (source-only). **Client:** `criticals.js isCutOffFighter`
+    + `FighterIcon.js` red **CUT OFF** badge on a LIVING fighter (per-fighter, so N fighters show N
+    badges; a dead cut-off fighter shows DESTROYED instead).
+  - **Landing gate:** `canShipReceive` rejects any flight with a `ShadowFighterCutOff` crit.
+  - **Self-repair raising structure does NOT un-cut-off:** cut-off is permanent (crit never clears);
+    Direction 1 has no re-attach branch; attached is monotonic-decreasing, cutOff monotonic-
+    increasing — rising structure just means fewer FUTURE cut-offs. (User verified the concern.)
+  - **Autoload (USER must add):** `'shadowfightercutoff' => '/server/model/cricialClasses.php'`.
+
+  **KNOWN LIMITATIONS / future refinements (none blocking S-e):**
+  - **Whole-flight landing rejection:** `canShipReceive` rejects the ENTIRE flight if ANY fighter
+    in it is cut off — so a cut-off fighter's still-attached flight-mates can't land while it
+    remains. Fine for the single-flight test hull; true partial-flight landing (land only the
+    attached fighters) is a future refinement.
+  - **Recover-dialog client exclusion deferred:** a cut-off flight may still appear selectable in
+    the recover dialog; the server rejects the land with a reason note (authoritative). Low priority.
+  - **Stale pre-S-d games** need their `shadowIntegratedState` note manually seeded (population is
+    gated after game start); fresh games seed automatically.
+
+  **Files touched (S-a→S-d):** server `Enhancements.php`, `baseSystems.php` (ShadowHangar class +
+  state fields + persistence + `Structure::stripForJson`), `HangarOps.php` (all the helpers + the
+  engine + seeding + launch/land bookkeeping), `cricialClasses.php` (ShadowFighterCutOff),
+  `shadowCruiser.php` (Hangar→ShadowHangar). Client: `criticals.js`, `FighterIcon.js`, `gamelobby.js`,
+  `systems.js`, `baseSystems.js`. (Bundles + autoload.php are user-side; not committed by us.)
+- **S-e — ✓ CLEARED 2026-06-11 (Docker-verified by user: single-tendril absorb, DOCKED label, maxhealth-on-death, AND penetration-to-random-system all confirmed working after the 4 post-test fixes below). Diffuser-energy reabsorption + excess→random-system penetration.**
+  SECOND HALF of land-and-reabsorb (S-c did the first half: free box + repair fighter). Rule (S5):
+  "Any energy contained in [the landing fighter's] diffusers must be absorbed into a single diffuser
+  of the carrier's choice, with any excess penetrating as damage to a random system, ignoring armor."
+
+  **AS-BUILT:** one private helper `HangarOps::applyDiffuserReabsorption($carrier, $dockedUnit, $gamedata)`,
+  called from BOTH ShadowHangar reabsorption branches — `performWholeFlightDock` (live landing) and
+  `performLand` (jumping-carrier) — **BEFORE** that branch's `destroyAllFighters($dockedUnit/$flight)`,
+  so the landed craft's damage + tendril energy are still readable. Gated by the existing
+  `isShadowHangar` branch (no extra scope guard needed). Steps:
+  1. **Read incoming energy = BOTH halves of the rule** ("any damage the fighter had when it landed,
+     AND any energy contained in its diffusers"): per landed Fighter, sum `getTotalDamage()` (the
+     fighter's accumulated armour/structure damage points) PLUS `getUsedCapacity()` over each of its
+     `DiffuserTendrilFtr`s (the diffuser charge). Distinct, additive sources — fighter damage is in
+     its DamageEntry stack, tendril energy is in `absorb` notes — so no double-count. (`$dockedUnit->systems`
+     = the Fighters; each `$fighter->systems` holds its 2 tendrils.) Destroyed fighters skipped (they
+     never docked). Bail if 0 (undamaged + empty diffuser, the common case).
+  2. **"Single diffuser of the carrier's choice" = a SINGLE TENDRIL (user 2026-06-11, post-test fix #1).**
+     Pick the carrier's single most-free live tendril across ALL its `EnergyDiffuser`s (the biggest
+     available sink) and fill ONLY that one via the **carrier-side** `DiffuserTendril::absorbDamage(
+     $carrier,$gamedata,$put)` — which writes a persisted `DamageEntry` (carrier tendrils store energy as
+     damage, NOT notes like the fighter `DiffuserTendrilFtr`), so it shows on the diffuser icon and
+     replays correctly. **NB the first cut filled the whole diffuser (all tendrils) — 46 incoming
+     vanished into two tendrils (30+16) with NO hull damage, because a ShadowCruiser diffuser holds 150
+     across 10 tendrils. Reading it as ONE tendril (overflow penetrates) matches in-combat `doProtect`,
+     which also commits a hit to one tendril, not the bank.** (Confirmed via game 4165 tac_damage:
+     systemid 14 got +30/−15, systemid 15 got +16, both `Tendril`/`Absorb!` — my own fill loop, NOT a
+     `doProtect` interception; the penetration DamageEntry is written DIRECTLY so it never re-enters the
+     firing/`getSystemProtectingFromDamage` path.)
+  3. **Excess → random carrier system via the ship's OWN `getHitSystem`, ignoring armor (post-test fix
+     #4).** The FIRST cut filtered `isTargetable && !isDestroyed` — but EVERY Shadow system is
+     `isTargetable=false` ("cannot be targeted by called shots", set in shadowCruiser.php ctor), so the
+     list was EMPTY and the penetration silently vanished (game 4167: 30 absorbed into the tendril, 12
+     excess LOST — no `ShadowReabsorb` row). FIX (user direction): a Shadow hull defines a `hitChart`
+     precisely so the engine can resolve a random internal hit; reuse the established self-ram convention
+     — shooter = target = the carrier, weapon = its `RammingAttack` (every ship has one), section 0 —
+     and call `$carrier->getHitSystem($carrier, $fireOrder, $rammingSystem, $gamedata, 0)`. That routes
+     through `getHitSystemByTable` (hitChart) for Shadow hulls and `getHitSystemByDice` for ordinary
+     ones. UNLIKE the marine WreakHavoc reroll we do NOT exclude Structure (a Structure hit is a valid
+     armour-ignoring outcome). Write an **armour-0** `DamageEntry` (`"ShadowReabsorb"`, "Diffuser
+     overflow", shooterid/weaponid = carrier/ramming) for the excess, CLAMPED to the target's remaining
+     health + `destroyed` flagged when it meets/exceeds (the single-system, no-cascade convention
+     `applyMarineDamage` uses — leftover overkill is NOT spilled into other systems). The d20 inside
+     getHitSystem rolls once on live advance and bakes into the persisted entry (no replay re-roll).
+
+  **Replay-determinism — NO roll-note needed (deliberate).** The dock branch runs ONCE in the live
+  Fire-Phase advance (`criticalPhaseEffects → processWholeFlightDocks → performWholeFlightDock`); the
+  resulting `DamageEntry`s (diffuser fill + penetration) are flagged `updated` and persisted via
+  `getNewDamages()→submitDamages`. A replay scrub does NOT re-run dock resolution (order already
+  consumed, flight already docked), so `Dice::d` never re-rolls — the persisted DamageEntry IS the
+  record. Same lifecycle as `applyCatapultLandingDamage` (also a roll-free, self-persisting landing
+  DamageEntry). The rail-crit roll-note exists ONLY because `onRailStructureDamage` re-runs on load;
+  the dock path doesn't, so the rail pattern was correctly NOT copied here.
+
+  **Files touched:** `HangarOps.php` only (helper `applyDiffuserReabsorption` + new retire helper
+  `dockAllFighters` + 2 call sites). No client/lobby/autoload change — purely server bookkeeping.
+
+  **POST-TEST FIXES (2026-06-11, after first Docker run on game 4165 — 6 launched, 2 killed t2, 4 docked t3):**
+  - **#1 single-tendril absorb (above):** overflow now penetrates instead of spilling across the bank.
+  - **#2 reabsorbed fighters showed DROPOUT, not DOCKED, in replay.** S-c retired the landed flight via
+    `destroyAllFighters` → stamps `DisengagedFighter` (= combat dropout). A reabsorbed fighter LANDED, so
+    it must read DOCKED. New `HangarOps::dockAllFighters` stamps `DockedFighter` instead (replaces
+    `destroyAllFighters` in BOTH Shadow branches). Still hides the old removed flight with no ghost —
+    `Fighter::isDestroyed` folds in `isDocked` exactly as `isDisengaged` (fighter.php), and `DockedFighter`
+    is already in the `copyFighterStateToTarget` source-only skip-list. Client `criticals.js isDockedFighter`
+    renders cyan DOCKED.
+  - **#3 destroyed fighters did NOT reduce carrier maxhealth — NOT an S-e bug, a STALE-DATA artifact.**
+    Game 4165 has NO `shadowIntegratedState` note at all (verified: only hangarUsage/launch/dock notes on
+    systemid 11). The S-d coupling needs `shadowLaunched` seeded at population + registered at launch
+    (`registerLaunchedIntegratedFlight`, only reachable via `launchAnonymousStash`); this game was
+    created/launched BEFORE the S-d code existed, so its turn-1 launch never recorded a baseline and
+    `syncIntegratedStructureCoupling` had nothing to detect the 2 deaths against. Confirmed the live launch
+    path is correct: integrated held entries are anonymous (no dockedFlightId), so `launchWholeFlight`
+    bails (`$dockedId<=0`) and they route through `launchAnonymousStash`→register. **A FRESH game seeds +
+    registers correctly** — re-test maxhealth-on-death in a new game, not 4165. (Matches the known S-d
+    limitation: pre-S-d games need the note manually seeded.)
+  - **#4 penetration vanished on the ShadowCruiser (fresh game 4167: 30 absorbed, 12 excess LOST).** The
+    `isTargetable` filter yielded an empty target list because ALL Shadow systems are `isTargetable=false`.
+    Fixed to resolve the target via the carrier's own `getHitSystem` (hitChart) using the self-ram
+    convention (see step 3 above). #1 and #2 (single-tendril + DOCKED) plus #3 (maxhealth-on-death)
+    were all CONFIRMED working in 4167; only the penetration write was still broken.
+
+  **Verify (Docker, FRESH game):** launch integrated fighters, take diffuser hits in space + some craft
+  damage, land them; the carrier's single most-free tendril fills by the absorbed amount, any excess
+  beyond THAT ONE tendril hits a random system (armour-ignoring) on the dock turn; landed craft show
+  cyan DOCKED in replay; killed fighters drop carrier Structure maxhealth by 1 each; replay the turn and
+  confirm the same penetration system/amount (no re-roll).
+- **S-f — ✓ COMPLETE 2026-06-11. Core Fighter Bomb DOCKER-TESTED (full + partial 6-fighter launch);
+  multi-flight split + manual/auto dialog + no-ini-penalty added after (NOT yet re-tested).
+  Deploy-undock (was S-f.1) CANCELLED by user — see below.**
+  Fighter Bomb = a SEPARATE `ShadowFighterBomb extends Weapon` that bursts the carrier's
+  held integrated fighters out at a TARGET HEX. NOT a Hangar trait (Weapon/Hangar are siblings).
+
+  **KEY RULE CHANGE (user 2026-06-11) vs the original S4 spec:** once the Fighter Bomb exists,
+  a ShadowHangar **does NOT launch via the ordinary bay path at all** — the Bomb is the bay's
+  ONLY launch path. Landing/reabsorption (S-c/S-e) is unchanged (still uses the normal
+  hangar-output budget). The bomb is **player-count-selectable per shot** (1..fighters-held),
+  bounded only by the held pool (NOT output-capped); the remainder stays docked for a later bomb.
+  An empty bay ⇒ the bomb cannot fire. Same-turn hangar destruction does NOT stop the bomb.
+
+  **MULTIPLE-FLIGHT SPLIT (user 2026-06-11):** a launch can exceed the flight-size cap, so a big
+  bomb spawns MULTIPLE flights, all stacked on the target hex. **Cap = min(class flight-size limit,
+  fighters currently HELD)** — the class limit is 9 (`ShadowMediumFighterFlight` jink 8), but a bay
+  holding fewer can't form a bigger flight, so ShadowCruiser (6 held) caps at 6, while the 24-bay
+  `ShadowBattleCruiserBomb` caps at 9 (24 → 9+9+6). The bomb dialog (`confirm.shadowFighterBomb`, replaces the old
+  `askForMultipleValues` picker) offers a **"Split Flights Automatically" checkbox** — but ONLY when
+  the launch can form >1 flight (`pool > cap`, i.e. pool > 9). When the whole pool fits one flight (≤9,
+  e.g. ShadowCruiser's 6) the checkbox + manual section are HIDDEN and the dialog is just a single
+  "Fighters to launch" count input.
+    - CHECKED (default): one Total input; the SERVER auto-splits into ceil(n/cap) flights (24 → 9+9+6).
+      Client emits ONE fire order (`shots = total`).
+    - UNCHECKED: per-flight inputs (each ≤ cap, pre-filled with the minimum even split e.g. 9+9+6,
+      live "total/pool" readout). **"+ Add another flight"** appends a row (seeded with the remaining
+      unallocated fighters, capped; disabled when none left) so the player can split into MORE/smaller
+      flights than the minimum (24 → 6+6+6+6); each row has a ✕ to remove it (min one row kept). Client
+      emits ONE fire order PER non-zero flight (`shots = that flight's size`). Dialog accents (Add link,
+      ✕, number-spinner arrows, auto-split checkbox) themed cobalt blue `#58c7e6` via `confirm.css`
+      `.shadowFighterBomb` rules (matches the hangar-confirm input blue; `accent-color` tints spinners).
+  **No split-transport plumbing / no note dance / no order merge:** the combat log already GROUPS fire
+  orders by shooter+weapon+firingMode+target (`combatLog.js groupByShipAndWeapon`), and every bomb
+  order shares the same hex (targetid −1), so the N manual orders collapse into ONE "Fighter Bomb"
+  combat-log line for free. Each order's `fire()` spawns its own flight(s); pubnote kept terse
+  ("Fighter Bomb away.") since the grouped line concatenates them.
+
+  **AS-BUILT:**
+  - **`ShadowFighterBomb extends Weapon`** ([specialWeapons.php](source/server/model/weapons/specialWeapons.php),
+    right after `VortexDisruptor` — the structural model, a non-ballistic hex-target zero-damage
+    Shadow weapon, NOT the BALLISTIC mine launcher). `$name='ShadowFighterBomb'`, `$hextarget=true`,
+    `$range=10`, `$ballistic=false`, `$loadingtime=0`, `powerReq=0`, arc from ctor (300→60 on the
+    Cruiser), `$spawnableClasses=['ShadowMediumFighterFlight']` (auto-preloads the blueprint via
+    game.php). Overrides: `getDamage/min/max`→0; `calculateHitBase`→needed=100 (skips the base
+    null-target "ERROR" branch); **`fire()`** does the whole effect → calls
+    `HangarOps::performBombLaunch($shooter, OffsetCoordinate(x,y), $gamedata)` and sets
+    `$fireOrder->rolled=1`. The `rolled=1` trips `Firing::fire`'s `if ($fire->rolled>0) return;`
+    guard ⇒ replay-idempotent with NO extra note (same self-persisting pattern as VortexDisruptor;
+    NOT `beforeFiringOrderResolution`, which the ballistic mine launcher needs because ballistics
+    resolve before the fire step).
+  - **`HangarOps::performBombLaunch($carrier, $spawnPos, $gamedata, $count = null, $flightSizes = null)`**
+    (new, right after `performLaunch`). Locates `primaryShadowHangar`; held pool = SUM of held
+    `ShadowMediumFighterFlight` entries (skip `cannotLaunch` wrecks); bail null if 0. Resolves a
+    per-flight SIZE LIST via `resolveBombFlightSizes` (auto-splits `$count` into ≤`bombFlightSizeCap`
+    chunks, or honors an explicit `$flightSizes`), then LOOPS: per size, `spawnLaunchedKFlight` (reused
+    primitive — arbitrary pos/heading/facing/speed) at the TARGET hex (carrier heading/facing/speed, no
+    hangar-direction offset), `registerLaunchedIntegratedFlight` (coupling baseline — same
+    `shadowIntegratedState` note as bay launches), `drainBombPool` (per-flight pool drain — drops
+    fully-consumed entries, retires any dockedFlightId fragment via `destroyAllFighters`, keeps a
+    remainder), and a per-flight `hangarLaunchEvent` note `id:phpclass:size:bomb`. **NO initiative
+    penalty (user 2026-06-11):** the bomb deliberately does NOT call `applyLaunchCrits` — no flight-side
+    `LaunchedThisTurn` (−50), no carrier-side `HangarOperations` (−20). The bombed fighters still can't
+    act until next turn (deploy MovementOrder spawn, not the crit). Fighter DOCKING keeps its
+    `HangarOperations` penalty (separate path, `applyHangarOperationsCrit` at the dock site — untouched). Returns the FIRST flight id. Helpers:
+    `bombFlightSizeCap($phpclass)` (class limit: honors `$maxFlightSize`, else jink>9?12:9, try/catch
+    probe) — the call site clamps it to `min(cap, $held)` so a bay holding fewer than the limit caps
+    flights at its stock (ShadowCruiser 6→6); `resolveBombFlightSizes`, `drainBombPool`. Transport: `ShadowFighterBomb::fire` passes
+    `$fireOrder->shots` as `$count` per order; `shots` is a first-class persisted FireOrder column,
+    so each flight's size round-trips with NO schema change and NO note dance (`$flightSizes` is
+    supported but unused by the client — manual split rides one-order-per-flight instead).
+  - **Ordinary launch DISABLED for ShadowHangars** — server `canLaunch` early-return; the anonymous
+    (`launchAnonymousStash`) + docked (`findDockedEntry`) whole-flight launch paths now `continue`
+    past `isShadowHangar` bays (the integrated entries are anonymous, so the anonymous path was the
+    real exposure). The dead `if ($firstBay->isShadowHangar) registerLaunchedIntegratedFlight` block
+    in `launchAnonymousStash` was removed (firstBay can no longer be a ShadowHangar).
+  - **Client:** `ShadowFighterBomb` weapon mirror in
+    [special.js](source/public/client/model/weapon/special.js) (thin `Weapon` subclass; hex-target
+    firing UI is driven by the json blueprint fields — no behaviour override). NB it must sit in a
+    file whose parent class (`Weapon`) is already defined at parse time — a first cut in
+    electromagnetic.js extending `Electromagnetic` hit a load-order "not a constructor" crash in the
+    gamelobby bundle; moved to special.js extending `Weapon` directly. **Launch dialog** in `weaponManager.targetHex`: a `weapon.name ===
+    'ShadowFighterBomb'` branch calls `queueShadowFighterBombOrder` → reads the held pool
+    (`shadowFighterBombPool`, sums isShadowHangar `hangarUsage`) + cap (`shadowFighterBombFlightCap`),
+    pops `confirm.shadowFighterBomb` (total + "Split Flights Automatically" checkbox / manual per-flight
+    inputs ≤cap), and on OK emits ONE order (auto, `shots=total`) or ONE order per non-zero flight
+    (manual, `shots=size`). ShadowHangar excluded
+    from EVERY launch-source entry point: `hasLaunchableHangar` + `hasLaunchableFighterHangar`
+    (shipTooltipFireMenu.js), the `confirm.hangarLaunch` `all`-list (confirm.js), and the Firing-Phase
+    branch of the hangar icon-click (SystemIcon.js — but the **deployment** branch still fires for
+    ShadowHangars, see S-f.1).
+  - **Test hull mount:** `new ShadowFighterBomb(5, 4, 0, 300, 60)` appended **after** the Structure
+    on ShadowCruiser. Added LAST on purpose — system ids are construction-order positional, so
+    appending after Structure keeps every existing system id stable on in-use ShadowCruiser games
+    (the positional-system-id trap). Not on the hitChart (Shadow systems are untargetable anyway).
+  - **Tooltips (added 2026-06-11, post-test):** (1) the **ShadowHangar** capacity line shows
+    "(Launching N)" from a pending Fighter Bomb order, reusing the ordinary-hangar projection
+    machinery: `Hangar.refreshHangarTooltip` (baseSystems.js) gets an `isShadowHangar` block that
+    scans the ship for a same-turn `ShadowFighterBomb` fire order and feeds its `shots` into
+    `launchByClass` (so the capacity subtraction + "(Launching)" line render exactly as a normal
+    launch). `weaponManager.refreshShadowHangarTooltips(carrier)` re-runs it when a bomb order is
+    placed (in `queueShadowFighterBombOrder`) or cleared (in `removeFiringOrder`). (2) the **Fighter
+    Bomb's** own in-game tooltip (SystemInfo.js, reactJs) shows a "Fighters available: N" line =
+    `weaponManager.shadowFighterBombPool(ship)` (live count across the ship's ShadowHangars,
+    computed client-side because data[] isn't sent on live gamedata). NOT added to the lobby
+    tooltip (systemInfo.js) — pre-game the pool is empty (populated server-side at game start).
+
+  **Files touched (S-f core):** server `specialWeapons.php` (new weapon, passes per-order `shots`),
+  `HangarOps.php` (`performBombLaunch` multi-flight split + `bombFlightSizeCap`/`resolveBombFlightSizes`/
+  `drainBombPool` + launch-disable guards), `shadowCruiser.php` (mount). Client `special.js` (weapon
+  mirror — see load-order note above), `weaponManager.js` (launch flow `queueShadowFighterBombOrder` +
+  `shadowFighterBombPool` + `shadowFighterBombFlightCap` + `refreshShadowHangarTooltips`), `confirm.js`
+  (`confirm.shadowFighterBomb` dialog + hide ShadowHangar from `hangarLaunch`), `baseSystems.js`
+  (ShadowHangar "(Launching N)" projection in `refreshHangarTooltip`), `SystemInfo.js` (bomb "Fighters
+  available" line), `shipTooltipFireMenu.js` + `SystemIcon.js` (hide
+  ordinary launch for ShadowHangars). **autoload.php** — user added
+  `'shadowfighterbomb'` line (user edits autoload, never the assistant). The bomb's `$name` is a
+  Weapon name resolved by the client SystemFactory via `new window['ShadowFighterBomb']`, and the
+  blueprint preloads via `$spawnableClasses`. **NB user runs yarn build / Docker test themselves.**
+
+- **S-f.1 — ✗ CANCELLED 2026-06-11 (user): deploy-time undock NOT wanted.** The player will NOT pull
+  integrated fighters out of the bay during Deployment; integrated fighters leave ONLY via the Fighter
+  Bomb. (The SystemIcon deployment branch still opens `hangarDeployDock` for ShadowHangars, which is a
+  harmless no-op there — nothing to undock — and is also the dock path for any non-integrated craft.)
+  Replaced by the **no-initiative-penalty** requirement, folded into S-f above (the bomb applies no
+  `LaunchedThisTurn`/`HangarOperations`; fighter docking keeps its penalty). With this, **Stage S is
+  feature-complete** (S-a…S-f); only Docker re-test of the post-test additions (multi-flight split +
+  no-ini-penalty) remains.
+
+### S9. Risk register (Stage-S-specific)
+- **Carrier-death-by-fighter-pickoff** (S3) routes fighter death into structure
+  destruction — make sure it can't infinite-loop (destroying the box that kills the
+  ship which destroys remaining fighters…). Single-pass, idempotent per fighter.
+- **enhCount vs hangar cap mismatch** — clamp population to `ceil($capacity)`; a player
+  buying more SHAD_FTRL than capacity must be rejected in the lobby (cap is already
+  `ceil($capacity)`), but double-guard server-side in S2.
+- **Legacy Shadow games** — any Shadow hull NOT converted to ShadowHangar must be
+  byte-for-byte unchanged. Keep the old free-SHAD_FTRL + maxhealth path alive behind
+  the `isShadowHangar` branch until all shadow hulls are migrated (separate decision).
+- **Diffuser excess penetration** (S5) ignoring armor — verify it uses the same
+  "ignore armor" path as other armor-piercing effects; don't hand-roll damage.
+
+### S10. Files (anticipated)
+Server: `Enhancements.php` (SHAD_FTRL rework: price + drop maxhealth mutation for
+ShadowHangar + strip audit), `baseSystems.php` (`ShadowHangar` class + crit-immunity +
+binding state/notes/strip + discriminator), `HangarOps.php` (population from enhCount,
+shuttle-pool exclusion, structure coupling handlers, land-reabsorb, optional bomb
+launch), the structure-damage / ship-destruction path (for fighter-lost→box and
+box-lost→cutoff — likely `ShipSystem.php`/`criticals.php`/structure handling),
+`cricialClasses.php` (`ShadowFighterCutOff` crit), one test shadow hull (`Hangar` →
+`ShadowHangar`). Client: `baseSystems.js` (`ShadowHangar` mirror + strip + tooltip),
+`SystemIcon.js` (crit-immune visual / cut-off marker), fire-menu + `confirm.js` for the
+bomb hex-pick (deferred sub-stage). Autoload (user): `shadowhangar`, `shadowfightercutoff`.
+
+### S11. Open questions for the user before coding
+1. **Price per integrated fighter = 150 CP** (ShadowMediumFighterFlight 900/6)? Or a
+   different listed cost?
+2. **Which hull(s) to convert first** to `ShadowHangar` for testing — a throwaway
+   variant, or `ShadowCarrier` directly?
+3. **Migrate ALL shadow hulls now, or only the test hull** (leaving the rest on the
+   legacy free-SHAD_FTRL path until later)?
+4. **Fighter Bomb (distant-hex burst): in scope now or deferred to S-Phase-2?**
+   (Recommend deferred.)
+
+NOT yet implemented — plan only.
+
+---
+
+## Stage S — POST-RELEASE FIXES & MULTI-BAY (2026-06-12, Docker-verified by user unless noted)
+
+The integrated hull is `shadowCruiserBomb` (plain `ShadowCruiser` stays legacy plain-Hangar).
+A run of fixes after S-f went live, then the multi-bay variant `shadowRegenBaseBomb`. All
+server-side fixes are live on save; client-side needs **`yarn build`** (NB: the React tooltip
+lives in `UI.bundle.js`, built by the `vite build` step — `build:legacy` alone does NOT
+rebuild it; run full `yarn build`).
+
+### Fix 1 — Lobby maxHealth no longer shaved on taking SHAD_FTRL (✓ verified)
+`lobbyEnhancements.js` SHAD_FTRL case still ran `struct.maxhealth -= enhCount` (pre-Fighter-Bomb
+behaviour). Gated it on `!hasShadowHangar` (checks `s.name=='hangar' && s.isShadowHangar`), mirroring
+the server (`Enhancements.php:2358`). Integrated-fighter ships now only lose structure when a launched
+fighter is destroyed, never on selection.
+
+### Fix 2 — Structure-box launch cap (✓ verified)
+A carrier can't put more integrated fighters in space than it has structure boxes. `performBombLaunch`
+clamps the launchable pool to `freeBoxes = structRemaining − inSpaceAttached` (in-space summed from the
+PRIMARY ShadowHangar's `shadowLaunched`). Surplus stays held, re-launchable after SelfRepair; boxes
+bound to in-space fighters can't be reused. Client `weaponManager.shadowFighterBombPool` mirrors with a
+remaining-structure clamp (UX guard; server is authoritative).
+
+### Fix 3 — Phantom structure loss on launch (ROOT-CAUSE, ✓ verified)
+Launching shaved carrier structure (40→34 for 6). Cause: `DBManager` LAST_INSERT_ID via
+`mysqli_fetch_object` returns a **STRING**; `getShipById` uses strict `===`, so a just-spawned bomb
+flight was unfindable in the SAME advance → `syncIntegratedStructureCoupling` counted it as a combat
+loss → Direction 2 shaved structure. Fix: `(int)` cast in `Manager::insertSingleShip`. See memory
+[[arch_spawned_ship_string_id_trap]]. (Latent landmine: `getShipById`'s strict `===` — route new spawns
+through `insertSingleShip` or cast ids.)
+
+### Fix 4 — Cut-off ordering: HELD bay fighters cut first (✓ verified)
+Direction 1 cut off LAUNCHED-in-space fighters before held ones — a combat-damaged carrier that launched
+within its free-box cap wrongly saw its just-deployed fighters severed. Reversed the order in
+`syncIntegratedStructureCoupling`: shed HELD bay fighters first, then in-space only if the deficit isn't
+covered. (Data: game 4174 carrier 873392, struct 4 / 6 integrated, launched 4 → 2 LAUNCHED were cut off
+instead of the 2 held.)
+
+### Fix 5 — Cut-off fighters can't dock; mixed flight docks only its tethered craft (✓ verified)
+Was: `canShipReceive` REJECTED the whole flight if any fighter cut off (and the dock execution didn't
+exclude cut-off). Now: gate on `countAttachedFightersInFlight>0`; `performWholeFlightDock`/`performLand`
+clamp the dock to `dockableCount` (non-cut-off) and FORCE `$partial` when any cut-off remain (source
+flight survives in space carrying the remnant) + reabsorb via `$dockedUnit` (the fragment);
+`dockFighters` passes `excludeCutOff=true`; `dockAllFighters` skips cut-off. Client max-dock count
+excludes cut-off in `confirm.js` (countActiveCraftInFlight + ...Local) and `shipTooltipFireMenu.js`
+(countActiveInFlight).
+
+### Fix 6 — FleetList value attribution: value moves with the fighters (✓ verified)
+User decisions: "value moves with the fighters" + "reabsorbed = no row". Integrated fighters are paid by
+the carrier (SHAD_FTRL enhValue = count×150), but the fleet list values LAUNCHED ones on their own flight
+rows, so the carrier must drop on launch / rise on dock and reabsorbed craft must render NO row.
+- Server `ShipClasses::stripForJson` sends `integratedFighterCount` + `integratedFighterPerCraft` (via
+  new `HangarOps::integratedFighterPurchase`) on ShadowHangar carriers.
+- `fleetList.js`: `integratedFighterCarrierAdjust` = `(purchased − heldNow) × perCraft`, SUBTRACTED from
+  the carrier's base BEFORE the CV multiply; `dockedCraftStashValue` SKIPS `isShadowHangar` bays (enhValue
+  already covers them — was the double-count that showed 4550 vs 3650); `isFullyReabsorbedIntegratedFlight`
+  skips a flight with no craft still in space (cut-off counts as in-space) so a fully-docked flight doesn't
+  render a spurious "Destroyed" row.
+- Conserved: carrier = base + held×150; launched flight rows = pointCost×craft/6 = 150×craft.
+
+### MULTI-BAY — `shadowRegenBaseBomb` (4 arc-keyed ShadowHangars, ✓ verified)
+User chose: 4 Fighter Bombs (one per hangar) · per-bay pool, carrier-wide structure · each bomb's arc
+matches its hangar's directions. Linking is by INDEX (NOT positional ids — avoids
+[[arch_positional_system_id_trap]]): `ShadowHangar->bombGroupIndex` (0..3) pairs to
+`ShadowFighterBomb->bombHangarIndex` (6th ctor arg). New class only — legacy `shadowRegenBase` untouched.
+- `HangarOps::shadowHangarByGroupIndex($ship,$idx)` resolves the bay. `performBombLaunch(...,$bombHangarIndex)`:
+  null ⇒ primary (single-bay hulls unchanged); set ⇒ that bay only for held-pool read + `drainBombPool`.
+  The STRUCTURE-BOX cap (`inSpaceAttached`) and `registerLaunchedIntegratedFlight` stay CARRIER-WIDE on
+  the primary (one Structure binds all 24). `ShadowFighterBomb::fire` passes `$this->bombHangarIndex`.
+  Both props round-trip via stripForJson.
+- Blueprint: 4 `new ShadowHangar(5,6,6)` w/ bombGroupIndex 0..3 + original dirs; 4
+  `new ShadowFighterBomb(0,1,0,startArc,endArc,idx)` w/ arcs = each bay's 240° fan (side→deg map in file).
+  `fighters=array("normal"=>24)` ⇒ SHAD_FTRL limit 24, population fills 6/bay. Cost: 24×150 = 3600 enhValue
+  (vs the legacy base's free fighters — intentional, it's the integrated variant). **User adds autoload
+  `'shadowregenbasebomb'`.**
+- Client per-bay scoping: `weaponManager.shadowFighterBombPool(carrier, weapon, subtractPending)` — 2nd arg
+  scopes to weapon.bombHangarIndex's bay; 3rd arg (true, from SystemInfo.js tooltip) nets off this turn's
+  pending bomb orders so "Fighters available" drops on order (the DIALOG must NOT pass it — it replaces
+  prior orders, needs the full pre-order max). `baseSystems.js refreshHangarTooltip` "(Launching N)" line
+  counts only the bomb whose bombHangarIndex == this bay's bombGroupIndex. Fleet-value attribution already
+  multi-bay-safe (iterates all isShadowHangar bays).
+- **GOTCHA found during test:** "Fighters available" stuck at 6 was a STALE `UI.bundle.js` — the React
+  tooltip (SystemInfo.js) is built by `vite build`, separate from `build:legacy`. Run full `yarn build`.
+
+### INTEGRATION REVIEW (2026-06-12) — Fighter Bomb vs the rest of Hangar Ops
+Full audit of every place the integrated-fighter / Fighter Bomb work touches shared Hangar Ops machinery.
+- **Verified SAFE (no behaviour change for non-Shadow flows):** the shared dock fns now use
+  `countAttachedFightersInFlight` (excludes cut-off) instead of `countActiveCraft` — IDENTICAL for any
+  non-Shadow flight (a FighterFlight's top-level `$systems` are exclusively Fighter objects; cut-off only
+  exists on integrated fighters), so `$partial`/enh-split reduce to the original. `dockFighters` excludes
+  cut-off; `disengageFighters` (combat dropout) does not. Ordinary launch can't reach a ShadowHangar
+  (guards at canLaunch/launchAnonymousStash/findDockedEntry/evictToFit/shuttle-pool). Coupling sync runs
+  ONCE (primary-bay gate); primaryHangar==primaryShadowHangar==bay0 on the multi-bay base so state is
+  read+persisted on the same bay. Bay-box eviction is a no-op (ShadowHangars untargetable+crit-immune).
+  serviceDockedFlights skips anonymous (no-dockedFlightId) integrated entries. Fleet-value helpers skip
+  only isShadowHangar bays (mix-safe). Remaining `countActiveCraft` call sites (escape enh-split,
+  deploy-start dock, partial-relaunch) are never dock gates for a cut-off-bearing integrated flight.
+- **FIXED — foreign flight could dock into a ShadowHangar** (pre-existing since S-c, more reachable with
+  the 4-bay base): a ShadowHangar keeps `$name='hangar'` so it passed `hangarAcceptsCategory` and was
+  offered as a dock target; the reabsorption branch (gated only on the BAY being a ShadowHangar) would
+  then reabsorb a foreign flight → corrupt held entry + bogus `decrementLaunchedIntegratedBaseline`.
+  Guards added: server `buildDockBays` skips ShadowHangar bays unless
+  `flight->phpclass==='ShadowMediumFighterFlight'`; both reabsorption branches (`performWholeFlightDock`
+  + `performLand`) now also require that phpclass; client `findEligibleCarriersForDock` + recover-dialog
+  mirror the exclusion (`shipTooltipFireMenu.js`).
+- **FIXED — integrated fighters die with the carrier (user call):** `buildEscapeCandidates` (Stage 18
+  carrier-destruction escape) now SKIPS every ShadowHangar bay — integrated fighters are formed from the
+  carrier's Structure, so held ones can't escape a dead carrier. They're still wiped by the post-roll
+  `hangarUsage=array()` clear and that empty snapshot persists via the destroyed-carrier note tail (no
+  ghost on reload). Launched/cut-off fighters in space (their own flight rows) are unaffected.
+
+**Status:** Stage S feature-complete incl. multi-bay; integration review done (2 fixes applied + rest
+verified safe). All six fixes + multi-bay Docker-verified by user (games 4174/4175/4177); the two
+integration-review fixes are server-side (live on save) + client guards (need yarn build), not yet
+separately Docker-tested. Full record in memory [[arch_shadow_integrated_fighters]].
+
+## Armed shuttles evict default shuttles (2026-06-13, Docker-verified by user, game 4178)
+
+**Problem.** Armed-shuttle variants (FighterFlights with `hangarRequired='shuttles'` — the Kor-Lyan
+`MerkulAM`/`MerkulArmedAM`, the civilian `genericArmedShuttle`, etc.) are bought in fleet selection and
+auto-deploy to space at turn 1 like any fighter. But `HangarOps::populateInitialHangarUsage` Step 2 still
+auto-filled the carrier's leftover hangar boxes with DEFAULT shuttles, so the player ended up with BOTH the
+bought armed shuttles AND a full pool of default shuttles. The lobby's `checkChoices()` (Stage 13) already
+accounts for armed shuttles against the same default-shuttle pool — the server didn't.
+
+**Fix (server-only — no lobby/bundle changes needed).** In `populateInitialHangarUsage`, before the Step-2
+leftover fill, subtract a per-carrier share of the player's bought-shuttle boxes:
+```php
+$leftover = $totalCapacity - $totalDeclared - $hangBpExtraDeclared;
+$leftover -= self::suppressDefaultShuttlesForArmed($ship, $gamedata, $leftover);
+```
+`suppressDefaultShuttlesForArmed($ship, $gamedata, $thisCarrierLeftover)` implements the **fleet-wide pool**
+model the user chose (mirrors lobby accounting): conceptually one pool of all the player's default-shuttle
+boxes, drained in `$gamedata->ships` order until the bought-shuttle count is consumed.
+- Counts bought-shuttle BOXES across the player's fleet (matched by `userid`+`slot`) via
+  `armedShuttleBoxesForFlight` = `ceil(flightSize / unitSize)` — **per craft, not per flight**. This was the
+  one bug found in testing: v1 counted `+= 1` per flight, so a flight of 6 evicted only 1 default shuttle.
+  The box math mirrors the lobby (`checkChoices`: `totalFtrOther += flightSize/unitSize`, [gamelobby.js](source/public/client/gamelobby.js)).
+- Apportions to THIS carrier's share **order-independently**: sums every EARLIER carrier's pre-suppression
+  leftover (`defaultShuttleLeftoverBoxes`, same capacity−declared−HANG_BP math with the catapult/rail/
+  LCV-rail/ShadowHangar exclusions) to find debt already absorbed; this carrier covers the rest, clamped to
+  its own leftover. Depends only on the stable ship order, not on which carrier's population runs first.
+- **Over-purchase** (more bought shuttles than default boxes in the fleet) just empties the pools and stops
+  at zero — the player's fleet-build mistake is accepted, never going negative (`checkChoices` is advisory,
+  not enforced).
+
+**Only runs at genuine turn-1 game start.** `populateInitialHangarUsage` is gated by `$usagePopulated`, which
+a mid-game reload sets from the `hangarUsage` note before this is reached — so every `hangarRequired='shuttles'`
+flight in the fleet is a real purchase here; no in-game launched/docked flights exist yet to mis-count.
+
+**Load-order dependency (verified).** `DBManager::getTacShips` runs `getFlightSize($gamedata)` (sets each
+flight's `flightSize` from the DB + re-`populate()`s) and loads enhancement options BEFORE
+`getSystemDataForShips` fires `onIndividualNotesLoaded → populateInitialHangarUsage`. So `flightSize` holds
+the real chosen value (e.g. 6, not the ctor default 1) and the HANG_BP read in `defaultShuttleLeftoverBoxes`
+is valid when the suppression runs.
+
+**Also fixed a legacy data bug:** `genericArmedShuttle` had `hangarRequired='assault shuttles'` (wrong pool);
+corrected to `'shuttles'`. This flows into the lobby check automatically (keyed off `hangarRequired`). The
+many `AS`-suffix ships that legitimately use `'assault shuttles'` were left untouched.
+
+New `HangarOps` helpers: `suppressDefaultShuttlesForArmed`, `isArmedShuttleFlight`,
+`armedShuttleBoxesForFlight`, `defaultShuttleLeftoverBoxes`.
+
+---
+
+## Inadequate Hangars (Unreliable) — B5W trait on GromeGralacAM (2026-06-14, commit `c2cc326dd`)
+
+**Rule (B5W).** "Ships of this type include hangar bays not part of the vessel's original design. Using such
+hangars can be a dangerous undertaking." Any time a flight (or partial flight) **launches**, roll 1d6 for that
+flight — on a "1" the launch aborts this turn (it may try again next turn). When a flight **lands**, roll 1d6
+for **each fighter** — on a "1", score 1d6 damage on that fighter (ignoring armour). First fit: the
+`GromeGralacAM` (all 5 of its `Hangar` bays carry the trait); it's the only ship with the trait so far.
+
+**Data model.** New per-bay flag `Hangar::$inadequate = false` (baseSystems.php, beside
+`$excludeFromDefaultShuttles`). Set in the SCS via the capture-and-flag idiom
+(`$h = new Hangar(...); $h->inadequate = true; $this->addXSystem($h);`). Mirrored to the client in
+`Hangar::stripForJson` (`$strippedSystem->inadequate = ...`); SystemFactory's `Object.assign` auto-copies it
+onto the client model, so **no client constructor change** was needed. Tooltip "Special" text added in
+`Hangar::setSystemDataWindow` (ordinary-hangar branch); it reaches the client via the static blueprint (the
+client `refreshHangarTooltip` preserves `Special`, never sets it).
+
+**Hook sites (Stage-21 whole-flight path only — the live path; see the live-compat constraint).** NOT the
+legacy per-bay `processLaunchOrders`/`processDockOrders`:
+- **Launch abort** — `inadequateLaunchAborts($carrier, $bay, $phpclass, $size, $gamedata)` is called inside
+  **both** launch executors: `launchWholeFlight` (after validation, before the docked-ship resurrection /
+  budget charge) and `launchAnonymousStash` (after the budget check, keyed on the draining `$firstBay`). On a
+  "1" it writes a `hangarLaunchEvent` fail note + a combat-log FireOrder and returns true → caller bails. The
+  craft stay docked, **budget is NOT charged**, retry next turn. One roll per launch order ("for that flight").
+- **Landing damage** — `applyInadequateLandingDamage($flight, $bay, $wantCount, $carrier, $gamedata)` runs at
+  the **top of `performWholeFlightDock`**, keyed on the primary dock bay `$bays[0]['hangar']`. Applied FIRST,
+  before `countAttachedFightersInFlight` is read below, so any fighter destroyed bouncing off the bay drops
+  out of the dockable count automatically and **never occupies a stored box (box freed)** — the design choice
+  the user made (vs a `cannotLaunch` wreck). Selects the up-to-`$wantCount` landing fighters most-damaged-first
+  (matching `dockFighters` so a partial dock rolls for the craft that actually land); per fighter rolls 1d6,
+  and on a "1" applies a 1d6 armour-ignoring `DamageEntry` (`destroyed=true` when `dmgRoll >= remainingHealth`,
+  same lethal-DamageEntry shape the rail-crit kill uses).
+
+**Replay determinism (THE INVARIANT).** `Criticals::setCriticals` → `criticalPhaseEffects` re-runs and
+`Dice::d` is non-deterministic, so every roll routes through `nextInadequateRoll($hangar, $sides, $gamedata)`:
+the live advance rolls fresh, persists each roll as its own `hangarInadequateRoll` IndividualNote, and stamps
+a per-turn cache; a re-run consumes the cached rolls FIFO. Read-back is in `Hangar::onIndividualNotesLoaded`
+(rebuilds `inadequateLoadedRolls` from current-turn notes in id-ASC order). Same mechanism as FighterRail's
+`railCritRoll` (`railCritLoadedTurn`/`Value`), generalised to a multi-roll-per-turn queue. **If you add any new
+die roll to the hangar launch/dock path, route it through this queue or replays desync.**
+
+**Combat log.** `inadequateLogOrder($carrier, $label, $gamedata)` builds an artificial `FireOrder`
+(shooter = target = carrier, weapon = its `RammingAttack`, `addToDB=true`, `damageclass='InadequateHangar'`) —
+the self-ram convention used by ShipSystem marine missions / HangarOps `ShadowReabsorb`. Caller fills
+`->pubnotes`; landing damage aggregates all per-fighter lines into one FireOrder (lazy-created, first line no
+`<br>`). **`targetid` stays the carrier, NOT the damaged flight**, deliberately: the log's damage-detail `<ul>`
+links by `d.fireorderid` (our entries use -1, so the human-readable outcome rides in `pubnotes` instead), and
+`getAllFireOrdersForDisplayingAgainst(target)` would list the carrier's RammingAttack in the FLIGHT's
+incoming-fire panel if targetid pointed there. `'InadequateHangar'` was added to `weaponManager.js`
+`doShortLogText` `shortLogTypes` so the log emits ONLY the pubnotes (no spurious "firing RammingAttack… Chance
+to hit… shots hit"); `damageclass` round-trips through `tac_fireorder`. **(Client bundle rebuild required for
+the weaponManager.js change.)**
+
+**Integration review — no risk to existing methods.** Hooks short-circuit on `empty($bay->inadequate)` so
+every other carrier is byte-for-byte unaffected. Scoping is correct across the three dock entry points:
+`performWholeFlightDock` (normal Firing-Phase dock) is hooked; `performDeployStartDockFromOrders` (fighters
+START docked — not "landing") is correctly NOT hooked; `performLand` (jumping-carrier + catapult path) is not
+hooked (catapults are never inadequate). No double-application (`dockCoalesceDone`/`launchCoalesceDone` guard
+once-per-carrier). Landing damage applied before the dock-count read means destroyed fighters reduce
+`$dockableCount` and free boxes cleanly; the all-fighters-die edge case is the same state as a combat-wiped
+flight (no new ghost handling). `processCarrierDestructionEscapes` uses a separate spawn path, untouched.
+
+Files: baseSystems.php (`$inadequate` flag + `inadequateLoadedTurn`/`inadequateLoadedRolls` cache + strip +
+tooltip + note read-back), HangarOps.php (helpers `nextInadequateRoll`, `recordInadequateRoll`,
+`inadequateLogOrder`, `inadequateLaunchAborts`, `applyInadequateLandingDamage` + 3 hook sites),
+GromeGralacAM.php (5 flagged bays + `$notes`), weaponManager.js (`shortLogTypes` += `InadequateHangar`).
+
+**Verification status — COMMITTED 2026-06-14 (`c2cc326dd`).** All edited PHP files pass `php -l`; weaponManager.js
+passes `node --check`. Runtime/replay-scrub testing by the user pending (key check: scrub the replay back and
+forth on a Gralac launch/dock turn — the rolled outcomes must be stable).

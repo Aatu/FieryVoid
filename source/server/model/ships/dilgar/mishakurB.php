@@ -51,19 +51,19 @@ class MishakurB extends BaseShip{
         $this->addAftSystem(new Thruster(3, 10, 0, 4, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Engine(3, 11, 0, 5, 3));
-        $this->addAftSystem(new Hangar(3, 12));
+        $this->addAftSystem(new Hangar(3, 12, 6, 3));
         $this->addAftSystem(new ScatterPulsar(1, 4, 2, 0, 240));
 
         $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 180, 60));
         $this->addLeftSystem(new ScatterPulsar(1, 4, 2, 180, 60));
         $this->addLeftSystem(new HeavyBolter(3, 10, 6, 300, 360));
-        $this->addLeftSystem(new Hangar(3, 24));
+        $this->addLeftSystem(new Hangar(3, 24, 12, 5));
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 
         $this->addRightSystem(new ScatterPulsar(1, 4, 2, 300, 180));
         $this->addRightSystem(new ScatterPulsar(1, 4, 2, 300, 180));
         $this->addRightSystem(new HeavyBolter(3, 10, 6, 0, 60));
-        $this->addRightSystem(new Hangar(3, 24));
+        $this->addRightSystem(new Hangar(3, 24, 12, 1));
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

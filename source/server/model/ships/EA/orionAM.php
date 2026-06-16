@@ -8,7 +8,7 @@ class OrionAM extends StarBaseSixSections{
 		//$this->faction = "Earth Alliance (defenses)";
         $this->faction = "Earth Alliance";       
 		$this->phpclass = "OrionAM";
-		$this->shipClass = "Orion Battle Station";
+		$this->shipClass = "Upgraded Orion Starbase (Epsilon)";
 		$this->fighters = array("heavy"=>36); 
 		$this->customFighter = array("Thunderbolt"=>36);		
 	    $this->notes = 'Thunderbolt capable.';

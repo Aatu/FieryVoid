@@ -42,7 +42,7 @@ class TargathCAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 21, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 9));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

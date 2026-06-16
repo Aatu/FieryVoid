@@ -31,7 +31,7 @@ class Babylon5 extends StarBaseSixSections{
 		$this->addPrimarySystem(new CnC(4, 27, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(4, 20, 4, 7));
 		$this->addPrimarySystem(new Scanner(4, 20, 4, 7));
-		$this->addPrimarySystem(new Hangar(4, 26));
+		$this->addPrimarySystem(new Hangar(4, 26, 12, 0, 'fighters'));
 		$this->addPrimarySystem(new CargoBay(4, 25));
 
 		//$this->addFrontSystem(new Hangar(3, 8));
@@ -40,7 +40,7 @@ class Babylon5 extends StarBaseSixSections{
 		$this->addFrontSystem(new InterceptorMkI(3, 4, 1, 300, 60));
 		$this->addFrontSystem(new StdParticleBeam(3, 4, 1, 300, 60));
 
-			$hangar = new Hangar(3, 8);
+			$hangar = new Hangar(3, 8, 1, 0, 'shuttles');
 			$hangar->startArc = 300;
 			$hangar->endArc = 60;
 			$this->addFrontSystem($hangar);		

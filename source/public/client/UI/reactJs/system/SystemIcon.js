@@ -185,6 +185,9 @@ class SystemIcon extends React.Component {
         // to the SystemClicked menu when no dialog is applicable so the player
         // still gets the info popup for empty/queued hangars.
         if (gamedata.isMyShip(ship) && (system.name === 'hangar' || system.name === 'catapult' || system.name === 'fighterRail')) {
+            //Stage S (S-f): the DEPLOYMENT dialog DOES apply to a ShadowHangar — the
+            //player may pull integrated fighters OUT of the bay to start in space
+            //(the reverse of deploy-docking; the dialog's release path handles it).
             if (gamedata.gamephase === -1
                 && window.DeploymentDock
                 && typeof window.DeploymentDock.shipHasOpenableDockDialog === 'function'
@@ -193,7 +196,11 @@ class SystemIcon extends React.Component {
                 window.confirm.hangarDeployDock(ship);
                 return;
             }
+            //Stage S (S-f): a ShadowHangar has NO Firing-Phase launch dialog — its
+            //fighters leave only via the Fighter Bomb weapon. Skip the launch branch
+            //(fall through to the info popup); ordinary hangars/catapults/rails keep it.
             if (gamedata.gamephase === 3
+                && !system.isShadowHangar
                 && !shipManager.movement.isRolling(ship)
                 && !(shipManager.movement.isPivoting && shipManager.movement.isPivoting(ship) !== 'no')
                 && window.confirm && typeof window.confirm.hangarLaunch === 'function') {

@@ -44,7 +44,7 @@ class MishakurDAM extends BaseShip{
         $this->addPrimarySystem(new FlagBridge(6, 30, 0, 3, 'Pentacan Formation', 9,  false, true, false, false));		        
         $this->addPrimarySystem(new Scanner(5, 20, 4, 10));
         $this->addPrimarySystem(new Engine(5, 18, 0, 9, 3));
-        $this->addPrimarySystem(new Hangar(4, 4));
+        $this->addPrimarySystem(new Hangar(4, 4, 2));
         $this->addPrimarySystem(new JumpEngine(5, 16, 4, 36));
 
         $this->addFrontSystem(new MediumLaser(3, 6, 5, 300, 60));

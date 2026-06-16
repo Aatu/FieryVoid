@@ -31,7 +31,7 @@ class JashakarE extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 11, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 4, 2));
-	$this->addPrimarySystem(new Hangar(2, 1));
+	$this->addPrimarySystem(new Hangar(2, 1, 1));
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
 	$this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));
 		

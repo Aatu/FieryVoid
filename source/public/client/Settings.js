@@ -14,6 +14,7 @@ window.Settings = (function () {
             ToggleHexNumbers: settings.ToggleHexNumbers || { keyCode: 72, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
             ToggleBackground: settings.ToggleBackground || { keyCode: 77, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
             ToggleSound: settings.ToggleSound || { keyCode: 83, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
+            TogglePlayPause: settings.TogglePlayPause || { keyCode: 32, shiftKey: false, altKey: false, ctrlKey: false, metaKey: false },
             ZoomLevelToStrategic: 0.2
         };
 
