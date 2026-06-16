@@ -3869,6 +3869,13 @@ spl_autoload_register(
                 'captorminenolaras' => '/server/model/ships/EscalationCircasianEmpire/captorMineNolaras.php',
                 'dewminelorun' => '/server/model/ships/EscalationCircasianEmpire/dewMineLorun.php',
 
+                //Escalation Wars Sshel'ath Mines - 6
+                'proxmineilvhassaa' => '/server/model/ships/EscalationSshelathAlliance/proxMineIlvhassaA.php', 
+                'proxmineilvhassab' => '/server/model/ships/EscalationSshelathAlliance/proxMineIlvhassaB.php', 
+                'captorminetarkahn' => '/server/model/ships/EscalationSshelathAlliance/captorMineTarkahn.php', 
+                'captormineruslika' => '/server/model/ships/EscalationSshelathAlliance/captorMineRuslika.php', 
+                'dewminesrata' => '/server/model/ships/EscalationSshelathAlliance/dewMineSrata.php', 
+                'dewminetorrok' => '/server/model/ships/EscalationSshelathAlliance/dewMineTorrok.php', 
 
 
 
