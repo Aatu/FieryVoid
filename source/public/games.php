@@ -132,7 +132,7 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
     </div>
 
     <div class="resources">
-      <h3>Latest Updates — May 2026</h3>
+      <h3>Latest Updates — June 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->
         <li><strong>The Barada Imperium</strong> - New custom faction that specializes in Particle Beam weaponry and Carriers.  Thanks to Lunara!</li>        
