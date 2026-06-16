@@ -39,8 +39,8 @@ class CircasianGallahCarrier extends HeavyCombatVessel{
 		$this->addFrontSystem(new LightParticleBeamShip(1, 2, 1, 300, 180));
                 
         $this->addAftSystem(new Thruster(2, 12, 0, 5, 2));
-		$this->addAftSystem(new Hangar(2, 6, 6));
-		$this->addAftSystem(new Hangar(2, 6, 6));
+		$this->addAftSystem(new Hangar(2, 6, 6, 5));
+		$this->addAftSystem(new Hangar(2, 6, 6, 1));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 360));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 0, 180));
         

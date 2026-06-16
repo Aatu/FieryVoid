@@ -8,13 +8,13 @@ class OrionDeltaAM extends StarBaseSixSections{
 		//$this->faction = "Earth Alliance (defenses)";
         $this->faction = "Earth Alliance";       
 		$this->phpclass = "OrionDeltaAM";
-		$this->shipClass = "Orion Battle Station (Delta)";
+		$this->shipClass = "Orion Starbase (Delta)";
 		$this->fighters = array("heavy"=>36);
 		$this->customFighter = array("Thunderbolt"=>36);			
 		$this->notes = 'Thunderbolt capable.'; 
 		
 		$this->occurence = "common";
-		$this->variantOf = 'Orion Battle Station';
+		$this->variantOf = 'Upgraded Orion Starbase (Epsilon)';
         $this->isd = 2240;
 
 		$this->shipSizeClass = 3;
@@ -63,7 +63,7 @@ class OrionDeltaAM extends StarBaseSixSections{
 		$this->addPrimarySystem(new CnC(6, 27, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(6, 16, 4, 6));
 		$this->addPrimarySystem(new Scanner(6, 16, 4, 6));
-		$this->addPrimarySystem(new Hangar(6, 6));
+		$this->addPrimarySystem(new Hangar(6, 6, 2));
 		$this->addPrimarySystem(new CargoBay(6, 48));
         $this->addPrimarySystem(new AmmoMissileRackB(6, 0, 0, 0, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addPrimarySystem(new AmmoMissileRackB(6, 0, 0, 0, 360, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

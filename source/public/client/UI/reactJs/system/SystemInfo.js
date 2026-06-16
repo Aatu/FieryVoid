@@ -95,6 +95,20 @@ class SystemInfo extends React.Component {
         var systemDisplayName = system.displayName;
         var firingModeDisplay = system.firingModes ? system.firingModes[system.firingMode] : null;
 
+        //Stage S (S-f): the Fighter Bomb draws from a ShadowHangar pool; show the live
+        //count of integrated fighters available to launch. Passing `system` scopes the
+        //count to THIS bomb's own bay on a multi-bay hull (shadowRegenBaseBomb, via
+        //bombHangarIndex); on a single-bay hull it sums all ShadowHangars. Computed
+        //client-side (like the hangar capacity line) because data[] isn't transmitted live.
+        var shadowBombAvailable = null;
+        if (system.name === 'ShadowFighterBomb' && window.weaponManager
+            && typeof weaponManager.shadowFighterBombPool === 'function') {
+            //subtractPending=true: drop fighters already queued to launch this turn so the
+            //count updates the moment a launch is ordered (the held pool only shrinks on
+            //the server at turn resolution).
+            shadowBombAvailable = weaponManager.shadowFighterBombPool(ship, system, true);
+        }
+
         let isUnrevealedMine = false;
         if (ship.mine) {
             var stealthSystem = shipManager.systems.getSystemByName(ship, "mineStealth");
@@ -118,6 +132,8 @@ class SystemInfo extends React.Component {
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
                 {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, system.data[key], 'data' + i)))}
+
+                {shadowBombAvailable !== null && getEntry('Fighters available', shadowBombAvailable)}
 
                 {Object.keys(specialEntry).length > 0 && <Entry key={`special-${reactKey++}`}><Header>Special: </Header>&nbsp;</Entry>}
                 {Object.keys(specialEntry).length > 0 &&

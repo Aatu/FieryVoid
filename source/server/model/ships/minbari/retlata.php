@@ -21,7 +21,7 @@ class Retlata extends HeavyCombatVessel{
         $this->iniativebonus = 15;
         $this->isd = 2006;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-        $this->fighters = array("flyers"=>2);
+        //$this->fighters = array("flyers"=>4);
 
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 180, 0));
         $this->addPrimarySystem(new CargoBay(3, 35));
@@ -31,7 +31,7 @@ class Retlata extends HeavyCombatVessel{
         $this->addPrimarySystem(new Engine(5, 28, 0, 14, 3));
         $this->addPrimarySystem(new Jammer(4, 8, 5));
         $this->addPrimarySystem(new TractorBeam(4, 10, 0, 0));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 4, 2));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 4));
         $this->addPrimarySystem(new CargoBay(3, 35));

@@ -155,6 +155,10 @@ window.ShipTooltipFireMenu = function () {
             //through the isCat branches into the normal budget gate below.
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat)) continue;
+            //Stage S (S-f): a ShadowHangar (integrated-fighter bay) never offers the
+            //ordinary "Launch Fighters" button — its fighters leave ONLY via the
+            //Fighter Bomb weapon (a normal fireable weapon). Landing is unaffected.
+            if (sys.isShadowHangar) continue;
             if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
             //Stage 16.5: a cannotLaunch wreck (fighter destroyed landing on a
             //damaged catapult) occupies the bay but can never relaunch — it
@@ -363,6 +367,11 @@ window.findEligibleCarriersForDock = function (flight) {
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
+
+            // Stage S: a ShadowHangar (integrated-fighter bay) only accepts its own
+            // integrated fighters — never offer it as a dock target for a foreign /
+            // non-integrated flight (mirrors the server buildDockBays guard).
+            if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
 
             if (!hangarAcceptsCategory(sys.hangarType, category, ship)) return;
 
@@ -654,6 +663,9 @@ window.findEligibleFlightsForDocking = function (carrier) {
             var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat))return;
             if (!isCat && shipManager.systems.isDestroyed(ship, sys)) return;
+            // Stage S: ShadowHangars only recover their own integrated fighters (mirrors
+            // the server buildDockBays guard) — never a foreign / non-integrated flight.
+            if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
             // Per-hangar heading gate.
@@ -761,7 +773,12 @@ window.findEligibleFlightsForDocking = function (carrier) {
         if (!Array.isArray(flight.systems)) return 0;
         var n = 0;
         flight.systems.forEach(function (ftr) {
-            if (!shipManager.systems.isDestroyed(flight, ftr)) n++;
+            if (shipManager.systems.isDestroyed(flight, ftr)) return;
+            // Stage S (S-d): cut-off integrated fighters can never land/reabsorb, so they
+            // are not dockable — exclude them so recover-eligibility + capacity match the
+            // server (which docks only the tethered craft and leaves the cut-off remnant).
+            if (shipManager.criticals.isCutOffFighter(ftr)) return;
+            n++;
         });
         return n;
     }
@@ -895,6 +912,9 @@ window.hasLaunchableFighterHangar = function (carrier) {
     return carrier.systems.some(function (sys) {
         var isCat = !!(sys && (sys.isCatapult || sys.name === 'catapult'));
         if (!sys || (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat)) return false;
+        //Stage S (S-f): ShadowHangars launch only via the Fighter Bomb weapon, not
+        //the ordinary launch dialog — exclude them here too (parallels hasLaunchableHangar).
+        if (sys.isShadowHangar) return false;
         if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) return false;
         if (!sys.hangarUsage.some(function (e) { return e && !e.cannotLaunch; })) return false;
         if (isCat) return true;

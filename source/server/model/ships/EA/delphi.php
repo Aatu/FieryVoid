@@ -29,7 +29,7 @@ class Delphi extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(5, 24, 6, 12));
         $this->addPrimarySystem(new Engine(5, 20, 0, 10, 3));
         $this->addPrimarySystem(new JumpEngine(5, 20, 5, 24));
-        $this->addPrimarySystem(new Hangar(4, 4));
+        $this->addPrimarySystem(new Hangar(4, 4, 2));
 
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 4, 1));

@@ -84,7 +84,7 @@ class Enhancements{
 	  
 		case 'ShadowFighter':
 			Enhancements::blockStandardEnhancements($unit);
-			$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
+			//$unit->enhancementOptionsEnabled[] = 'SHAD_CTRL';
 			break;	
 
 		case 'Terrain':
@@ -688,22 +688,39 @@ class Enhancements{
 		  }		  
 	  }	  
 
-	  //Shadow fighter launched: -1 PRIMARY Structure, limit: hangar capacity
+	  //Shadow fighter launched, limit: hangar capacity (= the hangar icon's fighter max)
 	  $enhID = 'SHAD_FTRL';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-		  $enhName = 'Spawn a Medium Fighter';
 		  //find total hangar capacity
-		  $capacity = 0;	  
-		  foreach ($ship->fighters as $name => $count){
-			$capacity += $count;
-		  }  
-		  if($capacity > 0){ //this ship can actually carry fighters!!
-			  $enhPrice = 0;	  
-			  $enhPriceStep = 0; 
-			  $enhLimit = ceil($capacity);	  
-			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//not an enhancement!
-		  }
-	  }	  
+			if (HangarOps::shipHasShadowHangar($ship)) {		  
+				$capacity = 0;
+				foreach ($ship->fighters as $name => $count){
+					$capacity += $count;
+				}
+				if($capacity > 0){ //this ship can actually carry fighters!!
+					$enhLimit = ceil($capacity);
+					//Stage S: a ship with an integrated-fighter bay (ShadowHangar) BUYS its
+					//fighters here — "integrated fighters are not free, paid at a fighter's
+					//listed cost". Price = one ShadowMediumFighterFlight's per-craft cost
+					//(900/6 = 150 CP). The bought count drives the integrated-fighter initial
+					//population (HangarOps::populateInitialHangarUsage) and the per-fighter
+					//structure-box marks (later S-stages) — NOT a static maxhealth reduction.
+					//Legacy Shadow ships (plain Hangar) keep the original FREE option whose
+					//count statically shaves PRIMARY Structure (applied in setEnhancementsShip).
+					//if (HangarOps::shipHasShadowHangar($ship)) {
+						$enhName = 'Integrated Fighter';
+						$enhPrice = 150;
+						$enhPriceStep = 0;//Each fighter is 150pts, no increase per step.
+						$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//costed option
+					/*} else {
+						$enhName = 'Spawn a Medium Fighter';
+						$enhPrice = 0;
+						$enhPriceStep = 0;
+						$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);//not an enhancement!
+					}*/
+				}
+			}	
+	  }
 	  
 	//Spark Curtain: CUSTOM/CAMPAIGN ballistic defense (2+boost) for Spark Field, cost: 40 + 10/Spark Field present, limit: 1
 	  $enhID = 'SPARK_CURT';
@@ -1548,14 +1565,19 @@ class Enhancements{
 	  }
 	  
 	  //Shadow fighter deployed without carrier control: -2 OB, -3(15) Ini, cost: 0, limit: 1
-	  $enhID = 'SHAD_CTRL';	  
+	  $enhID = 'SHAD_CTRL';
 	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
 		  $enhName = 'Uncontrolled Fighter';
-		  $enhLimit = 1;	
-		  $enhPrice = 0;	  
+		  $enhLimit = 1;
+		  $enhPrice = 0;
 		  $enhPriceStep = 0;
-		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true); //NOT an enhancement!
-	  }  
+		  //Stage S: after the integrated-fighter patch, separate Shadow fighters are
+		  //scenario-only and are ALWAYS deployed uncontrolled — it is no longer
+		  //optional. Default the current count to 1 (was 0) so SHAD_CTRL is applied
+		  //by default; limit stays 1 so it can't be stacked. (Carrier-controlled
+		  //Shadow fighters now come from the carrier's integrated bay, not here.)
+		  $flight->enhancementOptions[] = array($enhID, $enhName,1,$enhLimit, $enhPrice, $enhPriceStep,true); //NOT an enhancement!
+	  }
 	  
 	/* Vorlon Azure Skin Coloring:
 	Effect: +1 Shield rating, for all shields.
@@ -2328,11 +2350,18 @@ class Enhancements{
 						break;
 						
 					case 'SHAD_FTRL': //Shadow fighter launched: -1 Structure point for each launched fighter
-						$struct = $ship->getStructureSystem(0);
-						if($struct){
-							$struct->maxhealth -= $enhCount;
+						//Stage S: integrated-fighter (ShadowHangar) ships do NOT statically
+						//shave Structure — a formed fighter dynamically MARKS a box (freed on
+						//recovery), and the bought count instead seeds the bay's initial
+						//hangarUsage (HangarOps::populateInitialHangarUsage). Only the LEGACY
+						//plain-Hangar Shadow ships keep the static -1 maxhealth per count.
+						if (!HangarOps::shipHasShadowHangar($ship)) {
+							$struct = $ship->getStructureSystem(0);
+							if($struct){
+								//$struct->maxhealth -= $enhCount;
+							}
 						}
-						break;						
+						break;
 						
 					case 'SPARK_CURT': //Spark Curtain - direct effect is setting $output=$baseOutput for every Spark Field on board
 						foreach ($ship->systems as $system){
@@ -2773,12 +2802,13 @@ class Enhancements{
 							break;	
 							
 
-						case 'SHAD_FTRL': //Shadow fighter launched: -1 Structure point for each launched fighter
-							if ($system instanceof Structure) { //Shadows ships have only one Structure
-								$strippedSystem->maxhealth = $system->maxhealth;
-							}
-							break;						
-					
+						case 'SHAD_FTRL': //Shadow fighter launched / integrated fighters
+							//Structure maxhealth is now sent UNCONDITIONALLY by Structure::stripForJson
+							//(baseSystems.php) — the canonical, enhancement-agnostic place to keep the
+							//client's live maxhealth in sync after an integrated-fighter structure-box
+							//loss. Re-sending it here too would be redundant, so this case is a no-op.
+							break;
+
 						case 'SPARK_CURT': //Spark Curtain - affects output of Spark Field
 							if($system instanceof SparkField){
 								$strippedSystem->output = $system->output;

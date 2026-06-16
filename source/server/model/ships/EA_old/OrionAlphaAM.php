@@ -56,7 +56,7 @@ class OrionAlphaAM extends StarBaseSixSections{
 		$this->addPrimarySystem(new CnC(4, 27, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(4, 14, 4, 5));
 		$this->addPrimarySystem(new Scanner(4, 14, 4, 5));
-		$this->addPrimarySystem(new Hangar(4, 6));
+		$this->addPrimarySystem(new Hangar(4, 6, 2));
 		$this->addPrimarySystem(new CargoBay(4, 48));
 		$this->addPrimarySystem(new HeavyPlasma(4, 8, 5, 0, 360));
 		$this->addPrimarySystem(new HeavyPlasma(4, 8, 5, 0, 360));

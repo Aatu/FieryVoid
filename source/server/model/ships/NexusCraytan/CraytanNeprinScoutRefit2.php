@@ -38,14 +38,14 @@ class CraytanNeprinScoutRefit2 extends HeavyCombatVesselLeftRight{
         $this->addLeftSystem(new Thruster(2, 10, 0, 3, 3));
         $this->addLeftSystem(new ElintScanner(2, 8, 2, 2));
 		$this->addLeftSystem(new CargoBay(2, 12));
-        $this->addLeftSystem(new Hangar(2, 2, 2));
+        $this->addLeftSystem(new Hangar(2, 2, 2, 5));
 		$this->addLeftSystem(new NexusACIDS(2, 6, 2, 180, 360));
                 
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 2));
         $this->addRightSystem(new Thruster(2, 10, 0, 3, 4));
         $this->addRightSystem(new ElintScanner(2, 8, 2, 2));
 		$this->addRightSystem(new CargoBay(2, 12));
-        $this->addRightSystem(new Hangar(2, 2, 2));
+        $this->addRightSystem(new Hangar(2, 2, 2, 1));
 		$this->addRightSystem(new NexusACIDS(2, 6, 2, 0, 180));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

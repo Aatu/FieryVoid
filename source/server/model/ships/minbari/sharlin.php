@@ -31,7 +31,7 @@ class Sharlin extends BaseShip{
         $this->addPrimarySystem(new Scanner(6, 30, 4, 12));
         $this->addPrimarySystem(new Engine(6, 28, 0, 12, 4));
         $this->addPrimarySystem(new JumpEngine(5, 30, 4, 10));
-		$this->addPrimarySystem(new Hangar(5, 28));
+		$this->addPrimarySystem(new Hangar(5, 28, 12));
         $this->addPrimarySystem(new Jammer(4, 10, 5));
         $this->addPrimarySystem(new TractorBeam(5, 10, 0, 0));
 

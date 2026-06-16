@@ -43,7 +43,7 @@ class AthraskalaCAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 13, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
         $this->addPrimarySystem(new ReloadRack(4, 9));
 
 		$this->addFrontSystem(new AmmoMissileRackS(3, 0, 0, 300, 60, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

@@ -1412,7 +1412,8 @@ spl_autoload_register(
 				'choukatribunalmissilecruiserrefitam' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaTribunalMissileCruiserRefitAM.php',
 				'choukavengeancecruiser' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaVengeanceCruiser.php',
 				'choukawarprayergunship' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerGunship.php',
-				'choukawarprayerescort' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerEscort.php',
+//				'choukawarprayerescort' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerEscort.php',
+				'choukawarprayerminesweeper' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWarPrayerMinesweeper.php',
 //				'choukawraithbladefighter' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWraithbladeFighter.php',
 				'choukawraithbladefighteram' => '/server/model/ships/EscalationChoukaTheocracy/ChoukaWraithbladeFighterAM.php',
 
@@ -1457,6 +1458,7 @@ spl_autoload_register(
 				'circasianistale' => '/server/model/ships/EscalationCircasianEmpire/CircasianIstale.php',
 				'circasianjagafighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianJagaFighter.php',
 				'circasianjagalltorpedofighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianJagallTorpedoFighter.php',
+				'circasianjenholen' => '/server/model/ships/EscalationCircasianEmpire/CircasianJenholen.php',
 				'circasiankalichar' => '/server/model/ships/EscalationCircasianEmpire/CircasianKalichar.php',
 				'circasiankatinbp' => '/server/model/ships/EscalationCircasianEmpire/CircasianKatinBP.php',
 				'circasiankolamfighter' => '/server/model/ships/EscalationCircasianEmpire/CircasianKolamFighter.php',
@@ -1488,6 +1490,7 @@ spl_autoload_register(
 				'circasianshenna' => '/server/model/ships/EscalationCircasianEmpire/CircasianShenna.php',
 				'circasiansularascoutcarrier' => '/server/model/ships/EscalationCircasianEmpire/CircasianSularaScoutCarrier.php',
 				'circasianthracejumpcruiser' => '/server/model/ships/EscalationCircasianEmpire/CircasianThraceJumpcruiser.php',
+				'circasiantaryn' => '/server/model/ships/EscalationCircasianEmpire/CircasianTaryn.php',
 				'circasiantoltara' => '/server/model/ships/EscalationCircasianEmpire/CircasianToltara.php',
 				'circasiantormin' => '/server/model/ships/EscalationCircasianEmpire/CircasianTormin.php',
 				'circasiantorminbeta' => '/server/model/ships/EscalationCircasianEmpire/CircasianTorminBeta.php',
@@ -1603,7 +1606,10 @@ spl_autoload_register(
 				'sshelathtrovaltarefitam' => '/server/model/ships/EscalationSshelathAlliance/SshelathTrovaltaRefitAM.php',
 				'sshelathtrulvaka' => '/server/model/ships/EscalationSshelathAlliance/SshelathTrulvaka.php',
 				'sshelathukanda' => '/server/model/ships/EscalationSshelathAlliance/SshelathUkanda.php',
+				'sshelathukav' => '/server/model/ships/EscalationSshelathAlliance/SshelathUkav.php',
+				'sshelathusarra' => '/server/model/ships/EscalationSshelathAlliance/SshelathUsarra.php',
 				'sshelathushula' => '/server/model/ships/EscalationSshelathAlliance/SshelathUshula.php',
+				'sshelathvadikar' => '/server/model/ships/EscalationSshelathAlliance/SshelathVadikar.php',
 				'sshelathvahskal' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskal.php',
 				'sshelathvahskalrail' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskalRail.php',
 				'sshelathvahskalrefit' => '/server/model/ships/EscalationSshelathAlliance/SshelathVahskalRefit.php',
@@ -3857,22 +3863,37 @@ spl_autoload_register(
                 'spawncaptorminevb' => '/server/model/ships/EscalationChoukaTheocracy/spawnCaptorMineVB.php',	                                
                 'spawncaptorminevc' => '/server/model/ships/EscalationChoukaTheocracy/spawnCaptorMineVC.php',	                                
 
+                //Escalation Wars Circasian Mines - 4
+                'proxminestoka' => '/server/model/ships/EscalationCircasianEmpire/proxMineStoka.php', 
+                'proxmineraka' => '/server/model/ships/EscalationCircasianEmpire/proxMineRaka.php', 
+                'captorminenolaras' => '/server/model/ships/EscalationCircasianEmpire/captorMineNolaras.php',
+                'dewminelorun' => '/server/model/ships/EscalationCircasianEmpire/dewMineLorun.php',
+
+                //Escalation Wars Sshel'ath Mines - 6
+                'proxmineilvhassaa' => '/server/model/ships/EscalationSshelathAlliance/proxMineIlvhassaA.php', 
+                'proxmineilvhassab' => '/server/model/ships/EscalationSshelathAlliance/proxMineIlvhassaB.php', 
+                'captorminetarkahn' => '/server/model/ships/EscalationSshelathAlliance/captorMineTarkahn.php', 
+                'captormineruslika' => '/server/model/ships/EscalationSshelathAlliance/captorMineRuslika.php', 
+                'dewminesrata' => '/server/model/ships/EscalationSshelathAlliance/dewMineSrata.php', 
+                'dewminetorrok' => '/server/model/ships/EscalationSshelathAlliance/dewMineTorrok.php', 
 
 
 
-                //HANGER OPERATIONS CLASSESd
+                //HANGER OPERATIONS CLASSES
                 'hangarops' => '/server/model/systems/HangarOps.php',
                 'dockedfighter' => '/server/model/cricialClasses.php',                 
                 'launchedthisturn' => '/server/model/cricialClasses.php',
-                'lcvlaunchedthisturn' => '/server/model/cricialClasses.php', 
-
-                'fighterrail' => '/server/model/systems/baseSystems.php',                
+                'lcvlaunchedthisturn' => '/server/model/cricialClasses.php',                                           
+                'fighterrail' => '/server/model/systems/baseSystems.php', 
+                
+                //DEFAULT SHUTTLES
                 'flyer' => '/server/model/ships/Shuttle.php',
                 'flyerprotectorate' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttle' => '/server/model/ships/Shuttle.php',
                 'cargoshuttle' => '/server/model/ships/Shuttle.php',                                
                 'shuttle' => '/server/model/ships/Shuttle.php',
                 'medicalshuttle' => '/server/model/ships/Shuttle.php',
+                'lifeboat' => '/server/model/ships/Shuttle.php',                
 
                 //FACTION DEFAULT SHUTTLES
                 'shuttleabbai' => '/server/model/ships/Shuttle.php',
@@ -3957,7 +3978,21 @@ spl_autoload_register(
                 'sanctuarybaserails' => '/server/model/ships/raiders/SanctuaryBaseRails.php',   
                 'schoonerrails' => '/server/model/ships/raiders/schoonerRails.php',                   
                 'slooprails' => '/server/model/ships/raiders/SloopRails.php',                
-                'fessarails' => '/server/model/ships/balosian/fessaRails.php',                
+                'fessarails' => '/server/model/ships/balosian/fessaRails.php',
+                
+                //SHADOW FIGHTER BOMB CLASSES
+                'shadowhangar' => '/server/model/systems/baseSystems.php',
+                'shadowfightercutoff' => '/server/model/cricialClasses.php',  
+                'shadowfighterbomb' => '/server/model/weapons/specialWeapons.php',  
+				'shadowbattlecruiserbomb' => '/server/model/ships/shadows/shadowBattleCruiserBomb.php',
+				'shadowcarrierbomb' => '/server/model/ships/shadows/shadowCarrierBomb.php',
+				'shadowcarrierprimordialbomb' => '/server/model/ships/shadows/shadowCarrierPrimordialBomb.php',
+				'shadowcruiserbomb' => '/server/model/ships/shadows/shadowCruiserBomb.php',
+				'shadowcruiserprimordialbomb' => '/server/model/ships/shadows/shadowCruiserPrimordialBomb.php',
+				'shadowdreadnoughtbomb' => '/server/model/ships/shadows/shadowDreadnoughtBomb.php',
+				'shadowdreadnoughtprimordialbomb' => '/server/model/ships/shadows/shadowDreadnoughtPrimordialBomb.php',
+				'shadowfighterautonomous' => '/server/model/ships/shadows/shadowFighterAutonomous.php',                
+				'shadowregenbasebomb' => '/server/model/ships/shadows/shadowRegenBaseBomb.php',                
                 
 
 						//Satyra (Wolfgang campaign)
