@@ -373,6 +373,9 @@ window.findEligibleCarriersForDock = function (flight) {
             // non-integrated flight (mirrors the server buildDockBays guard).
             if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
 
+            // Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
+            if (!hangarAcceptsFighterClass(sys, flight)) return;
+
             if (!hangarAcceptsCategory(sys.hangarType, category, ship)) return;
 
             // Heading gate (per-hangar): ordinary hangar → flight heading must
@@ -503,6 +506,19 @@ window.findEligibleCarriersForDock = function (flight) {
             }
         });
         return Math.max(0, declared - used);
+    }
+
+    // Mirrors HangarOps::hangarAcceptsFighterClass (PHP). A hangar that declares
+    // a non-empty allowedFighterClasses list accepts ONLY flights whose phpclass
+    // is in it (e.g. the GaimSuom's Reska-only bays); an empty/absent list is a
+    // no-op. Keep in sync with the server helper so the dock/recover UI never
+    // offers a bay the server will reject.
+    function hangarAcceptsFighterClass(sys, theFlight) {
+        if (!sys) return false;
+        var allowed = sys.allowedFighterClasses;
+        if (!Array.isArray(allowed) || allowed.length === 0) return true;   //unrestricted bay
+        var cls = theFlight ? String(theFlight.phpclass) : '';
+        return allowed.indexOf(cls) !== -1;
     }
 
     // Mirrors HangarOps::hangarAcceptsCategory (PHP) — combat-fighter size
@@ -666,6 +682,8 @@ window.findEligibleFlightsForDocking = function (carrier) {
             // Stage S: ShadowHangars only recover their own integrated fighters (mirrors
             // the server buildDockBays guard) — never a foreign / non-integrated flight.
             if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
+            // Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
+            if (!hangarAcceptsFighterClass(sys, flight)) return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
             // Per-hangar heading gate.

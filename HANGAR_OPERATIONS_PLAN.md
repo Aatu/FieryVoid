@@ -3585,3 +3585,99 @@ GromeGralacAM.php (5 flagged bays + `$notes`), weaponManager.js (`shortLogTypes`
 **Verification status — COMMITTED 2026-06-14 (`c2cc326dd`).** All edited PHP files pass `php -l`; weaponManager.js
 passes `node --check`. Runtime/replay-scrub testing by the user pending (key check: scrub the replay back and
 forth on a Gralac launch/dock turn — the rolled outcomes must be stable).
+
+## Per-bay fighter-class allow-list — carrier-side fighter restriction (2026-06-16, Docker-verified by user, game 4182)
+
+**Goal.** Let a specific bay accept ONLY one fighter phpclass (first fit: `gaimSuom`'s AFT bay = `gaimReskaFighter`
+only). This is the CARRIER-driven inverse of `$customFtrName` (which is FIGHTER-driven: a special fighter that
+can only dock where a matching `$customFighter[name]` is declared). Neither `$customFighter` nor `hangarAcceptsCategory`
+could express "this bay rejects everything except class X" — `hangarAcceptsCategory` only ever reasons about size
+CATEGORY, never phpclass.
+
+**Data model.** New per-bay `Hangar::$allowedFighterClasses = array()` (baseSystems.php, beside `$inadequate`),
+set via a NEW trailing constructor arg (8th positional): `new Hangar($armour,$maxhealth,$output,$direction,$hangarType,
+$spawnableClasses,$excludeFromDefaultShuttles,$allowedFighterClasses)`. Empty = unrestricted (every existing ship +
+all Hangar subclasses unaffected — they pass ≤6 positional args). Re-indexed list of phpclass strings. Mirrored to
+the client in `Hangar::stripForJson` (`$strippedSystem->allowedFighterClasses = array_values(...)`); the client reads
+it straight off the deserialized system object (no systems.js field-copy whitelist).
+
+**The gate.** `HangarOps::hangarAcceptsFighterClass($hangar, $flight)` — empty list → true (no-op); else
+`in_array($flight->phpclass, $allowed, true)`. Called ALONGSIDE every `hangarAcceptsCategory` site so the restriction
+applies to BAY SELECTION (UI never lists a wrong-class bay) AND the final dock gates. **Six server sites:**
+`canShipReceive`, both `eligibleHangarsForLanding` scanners (exact + size-hierarchy), the `buildDockBays` whole-flight
+scanner, the deploy coalescer (`validateDeployBayOrders`'s bay loop), and `canDeployStartDock`. **Client mirrors:**
+`shipTooltipFireMenu.js` (dock + recover loops), `DeploymentDock.js` (3 sites: `firstFittingHangar`,
+`distributeFlightAcrossHangars`, `eligibleHangarsForFlight`).
+
+**Default-shuttle interaction (the non-obvious trap).** A class-restricted bay would otherwise get the auto-populated
+leftover default shuttle stuffed into it (`populateInitialHangarUsage` step 2), blocking the very fighters it's
+reserved for. Fix: extended `HangarOps::excludesDefaultShuttles` (and the systems.js mirror) — a bay with a non-empty
+`allowedFighterClasses` that names NO default-shuttle class is steered out of the shuttle pool (like
+`$excludeFromDefaultShuttles`). If the allow-list DOES include a shuttle class, the bay stays in the pool.
+
+**Design note (foot-gun, left as-is per user).** Only the restricted bay is exclusive; an UNRESTRICTED sibling bay
+still accepts the restricted craft too. So Reskas can fill the Suom's universal PRIMARY bay, squeezing out the medium
+Koist that can ONLY use the primary. User accepted this (player manages bay assignment). The clean fix if it bites
+later is the inverse deny-list (confine Reska to its own bay) — see Part-2 lazy-fill prioritization (2026-06-16) which
+addresses the auto-fill ordering instead.
+
+Files: baseSystems.php (`$allowedFighterClasses` + ctor arg + strip), HangarOps.php (`hangarAcceptsFighterClass` +
+6 gate calls + `excludesDefaultShuttles` extension), gaimSuom.php (aft bay), shipTooltipFireMenu.js + DeploymentDock.js
++ systems.js (client mirrors).
+
+### `inferHangarType` bug — `normal` + a specific size wrongly narrowed (ROOT CAUSE of "Koist can't dock in Suom")
+
+**Symptom (pre-existing, reproduced on LIVE without the allow-list).** A medium Koist flight could not deploy-dock
+into the `gaimSuom` (no DOCK row / "no hangar offered"), while a light Reska docked fine. Other carriers took Koist
+fine. Diagnosed by dumping the live client object: both Suom bays reported `hangarType:"light"` to the client even
+though `stripForJson` in isolation emitted `"fighters"`.
+
+**Root cause.** `HangarOps::inferHangarType` (called from `Hangar::beforeTurn`, which `ShipLoader::getShipsByClass`
+runs when building `window.staticShips` — the client builds ships by merging the static blueprint, so the wrong type
+reached the client). It collected only the SPECIFIC sizes (`heavy/medium/light/ultralight`) from `$ship->fighters`
+and **ignored `normal`**. For the Suom's `{normal:6, light:6}` it saw `light` as the lone size (`count===1`) and
+narrowed BOTH bays to `"light"` — which rejects a medium Koist by the size hierarchy (medium > light). Isolated
+repros missed it because they didn't call `beforeTurn`.
+
+**Fix.** `inferHangarType` now treats `normal` as a narrowing-BLOCKER: if `normal` is declared (the universal slot,
+accepts heavy-and-below), or the declaration is otherwise ambiguous (0 or >1 specific sizes), the bay STAYS universal
+(`"fighters"`). Only narrows when the ship declares EXACTLY ONE specific size and no `normal`. Single-size ships
+(`{medium:6}`→`medium`, `{light:12}`→`light`) and `normal`-only ships (stay `"fighters"`) are unchanged.
+
+**Safety audit (16 affected ships, all corrections, no regression).** Every ship declaring `normal` + a specific
+size: baEscortCarrier (×6, `{normal,heavy}`), brakiri devaskar/torsha/lykorai (`{normal,light}`), ScoravarefittedAM
+(`{medium,normal}`), Vree Xaarix (`{normal,ultralight}` — was being forced to `"ultralight"`, rejecting normal
+fighters!), wlcTigata, Providence, QomYominOoru rails, gaimSuom. All now have universal bays accepting all four combat
+sizes — correct, since each declares `normal`. Designer-tagged bays (Xaarix's `"shuttles"`) are NOT narrowed (the
+function only acts on `'fighters'`/`'normal'`/empty), so the shuttle-only tier is intact. `normal`-only and single-size
+ships (~200) completely unchanged.
+
+Files: HangarOps.php (`inferHangarType` — `$hasNormal` blocker). No client change (client consumes the server-narrowed
+`hangarType` from the static blueprint, regenerated live each `game.php` load — a reload picks up the fix).
+
+**Verification status — Docker-verified by user (game 4182), 2026-06-16.** Koist now deploy-docks into the Suom's
+primary bay; Reska still docks; aft bay stays Reska-only. Affected-ship audit run server-side (all 16 → universal bays
+accepting all sizes). NOT yet committed (legacy bundles must be rebuilt by the user's build, never committed by us).
+
+### Lazy-fill prioritization — reserved bays fill FIRST (2026-06-16, mitigates the foot-gun)
+
+**Problem.** Because an unrestricted sibling bay also accepts the restricted craft, a Reska could spill into the Suom's
+universal PRIMARY bay, squeezing out the medium Koist that can ONLY use the primary. **Fix:** in every AUTO-DISTRIBUTE
+fill path, a bay whose `allowedFighterClasses` SPECIFICALLY reserves the flight's class is filled before an unrestricted
+bay that merely accepts it — so a Reska takes its Reska-only aft bay first, leaving the primary for the Koist.
+
+**Helper.** `HangarOps::bayReservesFighterClass($hangar, $flight)` — true ONLY for a non-empty allow-list that contains
+the flight's phpclass (distinct from `hangarAcceptsFighterClass`, which is also true for unrestricted bays).
+`HangarOps::sortBaysReservedFirst($bays, $flight)` — stable partition, reserved bays first. Client mirror
+`bayReservesFighterClass` in DeploymentDock.js.
+
+**Sites (auto-distribute only; player-chosen/preferred bays keep their order):**
+- `buildDockBays` — sort the top-up TAIL reserved-first (preferred bays untouched).
+- `performDeployStartDockFromOrders` (deploy coalescer authoritative re-home) — same tail sort.
+- `eligibleHangarsForLanding` — stable partition of the final `$out` reserved-first (before the customFighter clamp).
+- Client `distributeFlightAcrossHangars` — reserved-first as the PRIMARY sort key, then biggest-free.
+- Client `firstFittingHangar` — two-pass (reserved bays, then the rest).
+- Firing-phase recover dialog (`shipTooltipFireMenu.js`) deliberately NOT changed — the player explicitly picks a bay there.
+
+**Verified server-side (game 4182 stub):** Reska(6) → aft(reserved) only; Reska(12) → aft first then primary overflow;
+Koist(6) → primary only (its sole option). `php -l` + `node --check` clean.

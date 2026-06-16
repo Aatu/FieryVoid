@@ -738,7 +738,19 @@ class HangarOps {
 	 * (excludesDefaultShuttles). */
 	public static function excludesDefaultShuttles($hangar){
 		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail)) return false;
-		return !empty($hangar->excludeFromDefaultShuttles);
+		if (!empty($hangar->excludeFromDefaultShuttles)) return true;
+		//A per-bay fighter-class allow-list that doesn't permit ANY default-shuttle
+		//class steers default shuttles away too — otherwise the auto-fill would pack
+		//the bay with shuttles the dock gate then forbids, blocking the very fighters
+		//the bay is reserved for (e.g. the Reska-only GaimSuom bays). If the allow-list
+		//DOES name a shuttle class, the bay is happy to hold shuttles, so don't exclude.
+		if (is_array($hangar->allowedFighterClasses) && !empty($hangar->allowedFighterClasses)){
+			foreach ($hangar->allowedFighterClasses as $cls){
+				if (self::isDefaultShuttleClass($cls)) return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/* True when a hangar was explicitly designated in its ship file as a
@@ -1844,10 +1856,22 @@ class HangarOps {
 
 		$sizes = array('heavy', 'medium', 'light', 'ultralight');
 		$declared = array();
+		$hasNormal = false;
 		foreach ($ship->fighters as $cat => $count){
 			$catLower = strtolower(trim((string)$cat));
+			//'normal' is the universal combat-fighter slot (accepts heavy and
+			//smaller). A ship that declares 'normal' alongside a specific size
+			//(e.g. gaimSuom's {normal:6, light:6}) is genuinely multi-category —
+			//narrowing every bay to the lone specific size ('light') would wrongly
+			//reject the larger fighters the 'normal' slots are meant to hold. Treat
+			//'normal' as a narrowing-blocker so such ships keep universal bays.
+			if ($catLower === 'normal') { $hasNormal = true; continue; }
 			if (in_array($catLower, $sizes, true)) $declared[] = $catLower;
 		}
+		//Stay universal when 'normal' is present (multi-size capable) or when the
+		//declaration is ambiguous (0 or >1 specific sizes). Only narrow when the
+		//ship declares EXACTLY ONE specific size and no universal 'normal' slots.
+		if ($hasNormal) return;
 		if (count($declared) !== 1) return;     //ambiguous — leave universal
 
 		$hangar->hangarType = $declared[0];
@@ -4164,6 +4188,8 @@ class HangarOps {
 		//declaration (Decurion-style multi-category).
 		$category = self::trueSizeOf($flight);
 		if (!self::hangarAcceptsCategory($hangar, $category, $carrier)) { $reason = 'hangar full'; return false; }
+		//Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
+		if (!self::hangarAcceptsFighterClass($hangar, $flight)) { $reason = 'wrong fighter class'; return false; }
 
 		if ($isCatapult) {
 			//Catapults count craft 1:1 (single-fighter rail).
@@ -4317,6 +4343,53 @@ class HangarOps {
 		return false;
 	}
 
+	/* Per-bay fighter-class allow-list gate. A hangar that declares a non-empty
+	 * $allowedFighterClasses accepts ONLY flights whose phpclass is in the list,
+	 * rejecting every other fighter even when it fits by size category (e.g. the
+	 * GaimSuom's bays take 'gaimReskaFighter' and nothing else). An empty list
+	 * (the default on every other hangar) is a no-op, so existing ships are
+	 * unaffected. This is the carrier-DRIVEN counterpart to $customFtrName
+	 * (which is fighter-driven). Called alongside hangarAcceptsCategory at every
+	 * bay-eligibility scan and dock gate so the exclusivity is honoured uniformly.
+	 */
+	public static function hangarAcceptsFighterClass($hangar, $flight){
+		if (!is_object($hangar)) return false;
+		$allowed = isset($hangar->allowedFighterClasses) ? $hangar->allowedFighterClasses : null;
+		if (!is_array($allowed) || empty($allowed)) return true;   //unrestricted bay
+		$cls = is_object($flight) ? (string)$flight->phpclass : '';
+		return in_array($cls, $allowed, true);
+	}
+
+	/* True when $hangar's allow-list SPECIFICALLY reserves $flight's phpclass
+	 * (a non-empty allowedFighterClasses that contains the class). Used to sort
+	 * fill order so a class-restricted bay is filled BEFORE an unrestricted bay
+	 * that could also hold the flight — e.g. a Reska prefers the gaimSuom's
+	 * Reska-only aft bay, leaving the universal primary bay free for the medium
+	 * Koist that can ONLY use it. Distinct from hangarAcceptsFighterClass, which
+	 * returns true for unrestricted bays too. */
+	public static function bayReservesFighterClass($hangar, $flight){
+		if (!is_object($hangar)) return false;
+		$allowed = isset($hangar->allowedFighterClasses) ? $hangar->allowedFighterClasses : null;
+		if (!is_array($allowed) || empty($allowed)) return false;   //unrestricted — not a reservation
+		$cls = is_object($flight) ? (string)$flight->phpclass : '';
+		return in_array($cls, $allowed, true);
+	}
+
+	/* Stable sort: bays whose allow-list SPECIFICALLY reserves $flight's class
+	 * come first (so they fill before unrestricted bays the flight could also
+	 * use), preserving the input order within each group. Operates on a plain
+	 * list of Hangar objects. */
+	public static function sortBaysReservedFirst($bays, $flight){
+		if (!is_array($bays) || count($bays) < 2) return $bays;
+		$reserved = array();
+		$other = array();
+		foreach ($bays as $h){
+			if (self::bayReservesFighterClass($h, $flight)) $reserved[] = $h;
+			else $other[] = $h;
+		}
+		return array_merge($reserved, $other);
+	}
+
 	/* Stage 10.6.2: per-ship customFighter cap remaining for $name on $carrier.
 	 *
 	 * A flight with $customFtrName != '' (e.g. Thunderbolt, Rutarian, Ok-chn)
@@ -4375,6 +4448,7 @@ class HangarOps {
 		foreach ($hangars as $h){
 			if (!empty($h->isLCVRail)) continue;   //LCV rails dock whole LCVs, never FighterFlights
 			if ($h->hangarType !== $category) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 			$isCat = !empty($h->isCatapult);
 			if (!$isCat && $h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
@@ -4392,11 +4466,26 @@ class HangarOps {
 			if (!empty($h->isLCVRail)) continue;                   //LCV rails dock whole LCVs, never FighterFlights
 			if ($h->hangarType === $category) continue;            //already considered above
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 			if ($h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
 			$capacity = min((int)floor($free / $bpc), $budget);
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
+		}
+
+		//Prioritise bays that SPECIFICALLY reserve this flight's class (allowedFighterClasses)
+		//ahead of unrestricted bays that merely accept it — so a Reska auto-lands in the Suom's
+		//Reska-only bay before consuming the universal primary the medium Koist needs. Stable
+		//partition preserves the exact-match-then-hierarchy ordering within each group.
+		if (count($out) > 1){
+			$reservedOut = array();
+			$otherOut = array();
+			foreach ($out as $entry){
+				if (self::bayReservesFighterClass($entry['hangar'], $flight)) $reservedOut[] = $entry;
+				else $otherOut[] = $entry;
+			}
+			$out = array_merge($reservedOut, $otherOut);
 		}
 
 		//Stage 10.6.2: clamp aggregate capacity to the carrier's remaining
@@ -4728,10 +4817,18 @@ class HangarOps {
 			if (!($h instanceof Hangar)) continue;
 			$ordered[] = $h; $seen[spl_object_hash($h)] = true;
 		}
-		//Then any other eligible bay on the carrier.
+		//Then any other eligible bay on the carrier — but with bays that SPECIFICALLY
+		//reserve this flight's class (allowedFighterClasses) pulled to the front of the
+		//top-up tail, so e.g. a Reska fills the Suom's Reska-only bay before spilling
+		//into the universal primary bay (leaving the primary free for a medium Koist
+		//that can ONLY use it). Player-preferred bays above are untouched.
+		$tail = array();
 		foreach (self::collectHangars($carrier) as $h){
 			if (!empty($h->isCatapult)) continue;
 			if (isset($seen[spl_object_hash($h)])) continue;
+			$tail[] = $h;
+		}
+		foreach (self::sortBaysReservedFirst($tail, $flight) as $h){
 			$ordered[] = $h;
 		}
 
@@ -4749,6 +4846,7 @@ class HangarOps {
 			if ($h->isDestroyed()) continue;
 			if (!empty($h->isShadowHangar) && !$flightIsIntegrated) continue;   //integrated-only bay
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			//Respect the shared launch+land budget per bay. Budget is in CRAFT;
 			//convert to its box-equivalent with the real (fractional) bpc so an
@@ -5215,11 +5313,19 @@ class HangarOps {
 			if (isset($seen[$k])) continue;
 			$seen[$k] = true; $ordered[] = $h;
 		}
+		//Top-up tail: bays that SPECIFICALLY reserve this flight's class first, so a
+		//Reska fills the Suom's Reska-only bay before spilling into the universal
+		//primary (keeping the primary free for the medium Koist). Player-chosen bays
+		//(above) keep their order.
+		$tail = array();
 		foreach (self::collectHangars($carrier) as $h){
 			$k = spl_object_hash($h);
 			if (isset($seen[$k])) continue;
 			if (!empty($h->isCatapult)) continue;
-			$seen[$k] = true; $ordered[] = $h;
+			$seen[$k] = true; $tail[] = $h;
+		}
+		foreach (self::sortBaysReservedFirst($tail, $flight) as $h){
+			$ordered[] = $h;
 		}
 
 		//Occupancy is tracked in WHOLE boxes per bay (every consumer reads
@@ -5236,6 +5342,7 @@ class HangarOps {
 			if (!empty($h->isCatapult)) continue;
 			if ($h->isDestroyed()) continue;
 			if (!self::hangarAcceptsCategory($h, $category, $capabilityCarrier)) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 
 			//TRUE free boxes for this bay = effective capacity − max(DB usage,
 			//POST-side this-pass usage). The POST-side bay accumulates entries the
@@ -5405,6 +5512,9 @@ class HangarOps {
 		//exactly like the Firing-Phase splitter (performLand).
 		$size = ($count === null) ? (int)$flight->flightSize : (int)$count;
 		if ($size <= 0) { $reason = 'flight has no craft'; return false; }
+
+		//Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
+		if (!self::hangarAcceptsFighterClass($hangar, $flight)) { $reason = 'wrong fighter class'; return false; }
 
 		$category = self::trueSizeOf($flight);
 		$free = self::freeBoxesByCategory($hangar, $category, $carrier);

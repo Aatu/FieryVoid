@@ -2960,6 +2960,16 @@ class Hangar extends ShipSystem{
 	//hangarInadequateRoll notes and read back in onIndividualNotesLoaded, the same
 	//pattern FighterRail's 1d20 crit uses (railCritRoll).
 	public $inadequate = false;
+	//Per-bay fighter-class allow-list. When non-empty, this hangar accepts ONLY
+	//FighterFlights whose phpclass is in the list — every other flight is rejected
+	//even if it would fit by size category. Empty (the default) = unrestricted,
+	//so existing ships are unaffected. Set via the constructor's trailing
+	//$allowedFighterClasses arg (e.g. GaimSuom's bays: array('gaimReskaFighter')).
+	//Carrier-DRIVEN exclusivity — the inverse of $customFtrName, which is fighter-
+	//driven. Honoured server-side by HangarOps::hangarAcceptsFighterClass at every
+	//bay-eligibility / dock gate, mirrored to the client via stripForJson and
+	//systems.js so the launch/dock UI never offers a bay the server will reject.
+	public $allowedFighterClasses = array();
 	public $direction = 0;                //0..5 hex offset from carrier facing on launch (0 = same heading)
 	//Stage 8.5: optional list of allowed launch directions for hangars whose
 	//bays open onto multiple arcs (e.g. EA Hyperion: ports out either side, so
@@ -3056,7 +3066,7 @@ class Hangar extends ShipSystem{
 	public $pendingDeployStartTransfer = null; //Stage 7: deployment-phase dock payload; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt docked flights from movement validation BEFORE notes are generated.
 	public $pendingLcvDeployStartTransfer = null; //LCV deploy-dock payload from client; consumed in generateIndividualNotes. Public so DeploymentGamePhase can exempt deploy-docked LCVs from movement validation.
 
-    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters',  $spawnableClasses = array(), $excludeFromDefaultShuttles = false){
+    function __construct($armour, $maxhealth, $output = null, $direction = 0, $hangarType = 'fighters',  $spawnableClasses = array(), $excludeFromDefaultShuttles = false, $allowedFighterClasses = array()){
 		if($output === null){ //if output is not explicitly indicated, assume it to be 6 per every full 6 boxes! (that's the msot typical capacity)
 			//$output = floor($maxhealth/6)*6;
 			$output = 6;
@@ -3071,6 +3081,9 @@ class Hangar extends ShipSystem{
 		}
 		$this->hangarType = $hangarType;
 		$this->excludeFromDefaultShuttles = (bool)$excludeFromDefaultShuttles;
+		//Per-bay fighter-class allow-list (empty = unrestricted). Stored as a
+		//re-indexed list of phpclass strings; gated by HangarOps::hangarAcceptsFighterClass.
+		$this->allowedFighterClasses = is_array($allowedFighterClasses) ? array_values($allowedFighterClasses) : array();
 		$this->direction = (int)$direction;
 		//Always include the generic shuttle classes — every hangar can launch
 		//shuttles per B5W §10.1, and these are faction-agnostic. Faction-specific
@@ -3785,6 +3798,7 @@ class Hangar extends ShipSystem{
 		if (isset($this->bombGroupIndex)) $strippedSystem->bombGroupIndex = (int)$this->bombGroupIndex; //Stage S multi-bay: pairs this bay to its own Fighter Bomb (client per-bay pool display)
 		$strippedSystem->excludeFromDefaultShuttles = !empty($this->excludeFromDefaultShuttles); //steers default shuttles away from this bay (boxes still count toward capacity)
 		$strippedSystem->inadequate = !empty($this->inadequate); //Inadequate Hangars (Unreliable): client renders the trait + launch-abort/landing-damage outcomes
+		$strippedSystem->allowedFighterClasses = is_array($this->allowedFighterClasses) ? array_values($this->allowedFighterClasses) : array(); //per-bay fighter-class allow-list (empty = unrestricted); client mirrors the dock/launch eligibility gate
 		$strippedSystem->hangarUsage = $this->hangarUsage;
 		$strippedSystem->launchedThisTurn = $this->launchedThisTurn;
 		$strippedSystem->landedThisTurn = $this->landedThisTurn;

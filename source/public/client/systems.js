@@ -451,7 +451,21 @@ shipManager.systems = {
     excludesDefaultShuttles: function excludesDefaultShuttles(hangar) {
         if (!hangar) return false;
         if (hangar.isCatapult || hangar.isRail || hangar.isLCVRail) return false;
-        return !!hangar.excludeFromDefaultShuttles;
+        if (hangar.excludeFromDefaultShuttles) return true;
+        //Mirror of the server: a per-bay fighter-class allow-list that doesn't
+        //permit any default-shuttle class steers default shuttles away, so the
+        //auto-fill never blocks the reserved fighter (e.g. Reska-only Suom bays).
+        //The full PHP subclass hierarchy isn't visible client-side, so match the
+        //known default-shuttle phpclasses by name.
+        var allowed = hangar.allowedFighterClasses;
+        if (Array.isArray(allowed) && allowed.length > 0) {
+            var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1 };
+            for (var i = 0; i < allowed.length; i++) {
+                if (shuttleClasses[allowed[i]]) return false;   //bay accepts a shuttle class, keep it in the pool
+            }
+            return true;
+        }
+        return false;
     },
 
     //Lowercased set of ship.fighters category keys (e.g. "light") that ride this
