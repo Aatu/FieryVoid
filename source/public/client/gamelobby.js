@@ -182,6 +182,9 @@ window.gamedata = {
 			case 'Yolu Confederation':
 				powerRating = 'Tier 1; Minor Faction';
 				break;
+			case 'Barada Imperium':
+				powerRating = 'Tier 3; Minor Custom faction';
+				break;
 			case 'BSG Colonials':
 				powerRating = 'Tier 2; Custom faction';
 				break;

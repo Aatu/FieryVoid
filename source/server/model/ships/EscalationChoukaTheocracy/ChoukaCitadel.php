@@ -24,6 +24,14 @@ class ChoukaCitadel extends StarBaseSixSections{
 		$this->imagePath = "img/ships/EscalationWars/ChoukaCitadel.png";
 		$this->canvasSize = 280; //Enormous Starbase
 
+        //ammo magazine itself (AND its missile options)
+        $ammoMagazine = new AmmoMagazine(320); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
+        $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
+        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 320); //add full load of basic missiles
+	    $this->enhancementOptionsEnabled[] = 'AMMO_A';//add enhancement options for other missiles - Class-A
+	    $this->enhancementOptionsEnabled[] = 'AMMO_C';//add enhancement options for other missiles - Class-C
+	    $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-H
+
 		$this->locations = array(41, 42, 2, 32, 31, 1);
 		$this->hitChart = array(			
 			0=> array(
@@ -44,7 +52,6 @@ class ChoukaCitadel extends StarBaseSixSections{
         $this->addPrimarySystem($cnc);
 
 		$this->addPrimarySystem(new Reactor(5, 30, 0, 0));
-		$this->addPrimarySystem(new ProtectedCnC(6, 50, 0, 0)); //instead of 2 5x15 C&C, make it 1 6x30
 		$this->addPrimarySystem(new Scanner(5, 20, 7, 7));
 		$this->addPrimarySystem(new Scanner(5, 20, 7, 7));
 		$this->addPrimarySystem(new Hangar(5, 21, 12));

@@ -28,7 +28,6 @@ class ChoukaHellfireAOSATAM extends OSAT{
         $ammoMagazine = new AmmoMagazine(12); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 12); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
 
         $this->addPrimarySystem(new OSATCnC(0, 1, 0, 0));		
         $this->addPrimarySystem(new Reactor(3, 6, 0, 0));

@@ -30,7 +30,6 @@ class ChoukaTempleStarbaseAM extends SmallStarBaseFourSections{
         $ammoMagazine = new AmmoMagazine(48); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
         $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 48); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
 
 		$this->addPrimarySystem(new Reactor(4, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(4, 24, 0, 0)); 
