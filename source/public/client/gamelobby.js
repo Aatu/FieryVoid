@@ -37,6 +37,7 @@ window.gamedata = {
 				break;
 			case 'Barada Imperium':
 				powerRating = 'Tier 2; Minor Custom Faction';
+				break;
 			case 'Belt Alliance':
 				powerRating = 'Tier 2; Minor Faction';
 				break;
