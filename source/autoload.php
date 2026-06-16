@@ -2529,6 +2529,11 @@ spl_autoload_register(
                 'toratazftrtuka' => '/server/model/ships/torata/torataZFtrTuka.php',
 				'toratazftrtralka' => '/server/model/ships/torata/torataZFtrTralka.php',
 			
+				//Custom Early Torata Ships
+				'toratafatharpc' => '/server/model/ships/torata/torataFatharPC.php',
+				'torataagnarlightcruiser' => '/server/model/ships/torata/torataAgnarLightCruiser.php',
+				'toratagoracff' => '/server/model/ships/torata/torataGoracFF.php',
+
 				//new batch for Balosians		
                 'moesarbase' => '/server/model/ships/balosian/moesarBase.php',
                 'lessaosat' => '/server/model/ships/balosian/lessaOSAT.php',
@@ -4074,6 +4079,16 @@ spl_autoload_register(
 						'zealotbgc' => '/server/model/ships/GreatCrusadeOrieni/zealotBGC.php',	
 						'zealotgc' => '/server/model/ships/GreatCrusadeOrieni/zealotGC.php',	
 
+						//Barada Imperium
+						'baradagomtucruiser' => '/server/model/ships/barada/baradaGomtuCruiser.php',
+						'baradagilazfleetcarrier' => '/server/model/ships/barada/baradaGilazFleetCarrier.php',
+						'baradabaroghmediumfighters' => '/server/model/ships/barada/baradaBaroghMediumFighters.php',
+						'baradafizurfastgunboat' => '/server/model/ships/barada/baradaFizurFastGunboat.php',
+						'baradajorivassaultcruiser' => '/server/model/ships/barada/baradaJorivAssaultCruiser.php',
+						'baradatomguscoutcruiser' => '/server/model/ships/barada/baradaTomguScoutCruiser.php',
+						'baradatrukdestroyer' => '/server/model/ships/barada/baradaTrukDestroyer.php',
+						'baradavalialightcruiser' => '/server/model/ships/barada/baradaValiaLightCruiser.php',
+						'baradakarovshuttle' => '/server/model/ships/barada/baradaKarovShuttle.php',
 
 
 
