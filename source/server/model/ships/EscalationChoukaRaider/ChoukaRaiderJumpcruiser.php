@@ -45,8 +45,8 @@ class ChoukaRaiderJumpcruiser extends BaseShip{
         $this->addAftSystem(new Thruster(1, 3, 0, 2, 2));
         $this->addAftSystem(new Thruster(1, 18, 0, 6, 2));
 		$this->addAftSystem(new JumpEngine(2, 10, 4, 36));
-		$this->addAftSystem(new Hangar(2, 6, 6));
-		$this->addAftSystem(new Hangar(2, 6, 6));
+		$this->addAftSystem(new Hangar(2, 6, 6, 4));
+		$this->addAftSystem(new Hangar(2, 6, 6, 2));
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 120, 300));
 		$this->addAftSystem(new EWPointPlasmaGun(2, 3, 2, 60, 240));
 

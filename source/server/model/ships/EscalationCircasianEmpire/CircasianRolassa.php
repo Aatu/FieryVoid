@@ -41,12 +41,14 @@ class CircasianRolassa extends HeavyCombatVessel{
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 240, 360));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 0, 120));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 0, 120));
-        $LCVRail = new Catapult(3, 8);
-        $LCVRail->displayName = "LCV Rail";
-        $this->addFrontSystem($LCVRail);
-        $LCVRail = new Catapult(3, 8);
-        $LCVRail->displayName = "LCV Rail";
-		$this->addFrontSystem($LCVRail);		
+		$this->addFrontSystem(new DockingCollar(3, 8));
+		$this->addFrontSystem(new DockingCollar(3, 8));
+//        $LCVRail = new Catapult(3, 8);
+//        $LCVRail->displayName = "LCV Rail";
+//        $this->addFrontSystem($LCVRail);
+//        $LCVRail = new Catapult(3, 8);
+//        $LCVRail->displayName = "LCV Rail";
+//		$this->addFrontSystem($LCVRail);		
 		                
         $this->addAftSystem(new Thruster(2, 15, 0, 8, 2));
         $this->addAftSystem(new LightLaser(1, 4, 3, 180, 360));
