@@ -35,6 +35,9 @@ window.gamedata = {
 			case 'Balosian Underdwellers':
 				powerRating = 'Tier 2; Minor Faction';
 				break;
+			case 'Barada Imperium':
+				powerRating = 'Tier 2; Minor Custom Faction';
+				break;
 			case 'Belt Alliance':
 				powerRating = 'Tier 2; Minor Faction';
 				break;
@@ -181,6 +184,9 @@ window.gamedata = {
 				break;
 			case 'Yolu Confederation':
 				powerRating = 'Tier 1; Minor Faction';
+				break;
+			case 'Barada Imperium':
+				powerRating = 'Tier 3; Minor Custom faction';
 				break;
 			case 'BSG Colonials':
 				powerRating = 'Tier 2; Custom faction';

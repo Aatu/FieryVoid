@@ -52,7 +52,7 @@ class CircasianKolanis extends BaseShip{
         $this->addLeftSystem(new ParticleCannon(3, 8, 7, 300, 0));
         $this->addLeftSystem(new Thruster(2, 15, 0, 4, 3));
 		$this->addLeftSystem(new CargoBay(2, 18));
-		$this->addLeftSystem(new Hangar(3, 6));
+		$this->addLeftSystem(new Hangar(3, 6, 6, 5));
 
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 0, 120));
 		$this->addRightSystem(new LightParticleBeamShip(1, 2, 1, 60, 180));
@@ -60,7 +60,7 @@ class CircasianKolanis extends BaseShip{
         $this->addRightSystem(new ParticleCannon(3, 8, 7, 0, 60));
         $this->addRightSystem(new Thruster(2, 15, 0, 4, 4));
 		$this->addRightSystem(new CargoBay(2, 18));
-		$this->addRightSystem(new Hangar(3, 6));
+		$this->addRightSystem(new Hangar(3, 6, 6, 1));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(3, 36));

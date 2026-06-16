@@ -12,7 +12,7 @@ $secret_phrase='molecular pulsar';
 // for EVERY active player and bloats the error log fast. Flip to true on the
 // local Docker or test server only while actively investigating, then back.
 // Validated working 2026-06-13 on the live test server (see arch_gamedata_polling_cache memory).
-if (!defined('FV_APCU_DEBUG')) define('FV_APCU_DEBUG', false);
+//if (!defined('FV_APCU_DEBUG')) define('FV_APCU_DEBUG', false);
 
 //Marcin - new public server (fieryvoid.eu/game/) configuration
 /*
