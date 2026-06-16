@@ -11,7 +11,7 @@ class TorataHeltakaCLogPods extends BaseShip{
 		$this->imagePath = "img/ships/TorataHeltaka.png";
 		$this->shipClass = "Heltaka Logistics Cruiser (w/Cargo Pods)";
 		$this->variantOf = "Heltaka Logistics Cruiser";
-		$this->canvasSize = 200;
+		$this->canvasSize = 250;
 		$this->shipSizeClass = 3;
 		$this->isd = 2256;
 		$this->fighters = array("cargo shuttles"=>4); 		
