@@ -60,7 +60,9 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
-        infowindow.informPhase(5000, function () { });
+        // No informPhase() here: the phase banner reports the live game phase, not
+        // the replayed one, and overlaps the ReplayUI. informPhase() is guarded
+        // against gamedata.replay anyway, but skip it outright on replay entry.
         // Observers are permanently in replay (see PhaseDirector.resolvePhaseStrategy),
         // so hiding the combat-log print buttons here would deny them the log entirely.
         // Hide them only for participants, who get them back on deactivate.
