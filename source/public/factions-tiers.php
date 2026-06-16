@@ -66,7 +66,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <li><a href="#minorfactions">MINOR FACTIONS</a>
            <ul class="sub-list">
                 <li><a href="#alacan">ALACAN REPUBLIC</a></li>
-                <li><a href="#balosian">BALOSIAN UNDERDWELLERS</a></li>                
+                <li><a href="#balosian">BALOSIAN UNDERDWELLERS</a></li>    
+                <li><a href="#barada">BARADA IMPERIUM (Unofficial)</a></li>                				
                 <li><a href="#beltalliance">BELT ALLIANCE</a></li>
                 <li><a href="#chlonas">CH'LONAS COOPERATIVE (Unofficial)</a></li>
                 <li><a href="#corillani">CORILLANI THEOCRACY</a></li>   
@@ -834,7 +835,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <p>No special rules or systems.</p>                    
     <a class="back-to-top" href="#top">↩ Back to Top</a>    
 
-
+    <h4 id="barada" >BARADA IMPERIUM</h4>
+    <p>Based on design by Alex Fulton, published in The Great Machine. They lack heavy weapon mounts, but in exchange field large arrays of light, standard and heavy particle beams. Their ships also make use of LCV rails and large hangars.</p>                    
+    <a class="back-to-top" href="#top">↩ Back to Top</a>    
+	
     <h4 id="chlonas" >CH'LONAS COOPERATIVE</h4>
     <p>Based on design by Charles "Danesti" Haught, published in BabCom. They don't possess any special technologies per se - although they have a few interesting weapons that use existing mechanics in atypical ways e.g. Matter Stream.</p>                        
     <a class="back-to-top" href="#top">↩ Back to Top</a> 
