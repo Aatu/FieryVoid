@@ -1868,6 +1868,7 @@ developer of said technologies were politically well connected or not.</p>
         <ul>
 <li>Abbai Matriarchate</li>
         <li>Balosian Underdwellers</li>
+		<li>Barada Imperium</li>
         <li>Belt Alliance</li>
         <li>Brakiri Syndicracy</li>
         <li>Cascor Commonwealth (with PV reevaluation)</li>
