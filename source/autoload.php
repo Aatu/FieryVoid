@@ -3863,6 +3863,12 @@ spl_autoload_register(
                 'spawncaptorminevb' => '/server/model/ships/EscalationChoukaTheocracy/spawnCaptorMineVB.php',	                                
                 'spawncaptorminevc' => '/server/model/ships/EscalationChoukaTheocracy/spawnCaptorMineVC.php',	                                
 
+                //Escalation Wars Circasian Mines - 4
+                'proxminestoka' => '/server/model/ships/EscalationCircasianEmpire/proxMineStoka.php', 
+                'proxmineraka' => '/server/model/ships/EscalationCircasianEmpire/proxMineRaka.php', 
+                'captorminenolaras' => '/server/model/ships/EscalationCircasianEmpire/captorMineNolaras.php',
+                'dewminelorun' => '/server/model/ships/EscalationCircasianEmpire/dewMineLorun.php',
+
 
 
 
