@@ -434,13 +434,39 @@ window.shipWindowManager = {
 				//Restricted bays are rare, so reservedByCat is empty for almost
 				//every ship; when it is, the loop below runs the original
 				//(pre-allow-list) generic rendering unchanged.
+				//getReservedFighterComposition returns one row PER restricted bay,
+				//so a ship with several identically-restricted bays (e.g. the Roka's
+				//two 3-Reska front bays) yields several rows for the same fighter.
+				//Merge rows that name the same fighter (keyed by phpclass) within a
+				//size category so the lobby shows a single "6 Reska Light Fighters"
+				//line instead of two "3 Reska Light Fighters" lines. Bays restricted
+				//to a DIFFERENT fighter in the same category keep their own row.
 				var reservedByCat = {};
 				if (shipManager.systems.shipHasRestrictedHangar(ship)) {
 					var reservedRows = shipManager.systems.getReservedFighterComposition(ship);
 					for (var rr = 0; rr < reservedRows.length; rr++) {
 						var rcat = reservedRows[rr].category;
 						if (!reservedByCat[rcat]) reservedByCat[rcat] = [];
-						reservedByCat[rcat].push(reservedRows[rr]);
+						var catRows = reservedByCat[rcat];
+						var merged = false;
+						for (var mr = 0; mr < catRows.length; mr++) {
+							if (catRows[mr].phpclass === reservedRows[rr].phpclass) {
+								catRows[mr].count += reservedRows[rr].count;
+								merged = true;
+								break;
+							}
+						}
+						//Clone the row before storing so summing into .count never
+						//mutates the shared system-derived objects (see the client
+						//shared-reference trap); a fresh object is safe to accumulate.
+						if (!merged) {
+							catRows.push({
+								category: reservedRows[rr].category,
+								phpclass: reservedRows[rr].phpclass,
+								displayName: reservedRows[rr].displayName,
+								count: reservedRows[rr].count
+							});
+						}
 					}
 				}
 
