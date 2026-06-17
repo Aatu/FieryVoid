@@ -11,6 +11,12 @@ window.infowindow = {
     },
 
     informPhase: function informPhase(timeout, callback) {
+        // The phase banner reports the live game phase, not the replayed one, and
+        // overlaps the ReplayUI, so suppress it entirely during replay.
+        if (gamedata.replay) {
+            return;
+        }
+
         infowindow.initInfo();
 
         var e = infowindow.infoElement;

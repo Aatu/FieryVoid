@@ -422,9 +422,81 @@ window.shipWindowManager = {
 
 		if (gamedata.turn == 0) {
 			if (ship.fighters.length != 0) {
+				//Per-bay fighter-class allow-list (arch_hangar_class_allowlist):
+				//a class-restricted bay reserves some of a size category's slots
+				//for a specific fighter (e.g. the Suom's aft bay reserves 6 of its
+				//6 "light" slots for Reska). List those reserved slots by the
+				//fighter's real name and subtract them from the generic size line,
+				//so "6 Light Fighters" becomes "6 Reska Light Fighters" (or splits
+				//into a reserved line + a smaller generic line on a mixed hull).
+				//Pure display — ship.fighters stays size-keyed and unchanged.
+				//
+				//Restricted bays are rare, so reservedByCat is empty for almost
+				//every ship; when it is, the loop below runs the original
+				//(pre-allow-list) generic rendering unchanged.
+				//getReservedFighterComposition returns one row PER restricted bay,
+				//so a ship with several identically-restricted bays (e.g. the Roka's
+				//two 3-Reska front bays) yields several rows for the same fighter.
+				//Merge rows that name the same fighter (keyed by phpclass) within a
+				//size category so the lobby shows a single "6 Reska Light Fighters"
+				//line instead of two "3 Reska Light Fighters" lines. Bays restricted
+				//to a DIFFERENT fighter in the same category keep their own row.
+				var reservedByCat = {};
+				if (shipManager.systems.shipHasRestrictedHangar(ship)) {
+					var reservedRows = shipManager.systems.getReservedFighterComposition(ship);
+					for (var rr = 0; rr < reservedRows.length; rr++) {
+						var rcat = reservedRows[rr].category;
+						if (!reservedByCat[rcat]) reservedByCat[rcat] = [];
+						var catRows = reservedByCat[rcat];
+						var merged = false;
+						for (var mr = 0; mr < catRows.length; mr++) {
+							if (catRows[mr].phpclass === reservedRows[rr].phpclass) {
+								catRows[mr].count += reservedRows[rr].count;
+								merged = true;
+								break;
+							}
+						}
+						//Clone the row before storing so summing into .count never
+						//mutates the shared system-derived objects (see the client
+						//shared-reference trap); a fresh object is safe to accumulate.
+						if (!merged) {
+							catRows.push({
+								category: reservedRows[rr].category,
+								phpclass: reservedRows[rr].phpclass,
+								displayName: reservedRows[rr].displayName,
+								count: reservedRows[rr].count
+							});
+						}
+					}
+				}
+
 				for (var i in ship.fighters) {
 					var amount = ship.fighters[i];
 					var capitalizedType = i.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+					//Emit reserved-fighter lines for this size category first, then
+					//show whatever generic capacity is left over. Clamp the reserved
+					//count to the declared amount so a designer mismatch can't make
+					//the generic line go negative.
+					var reservedHere = reservedByCat[i];
+					if (reservedHere && (i == "heavy" || i == "medium" || i == "light")) {
+						var remaining = amount;
+						for (var rh = 0; rh < reservedHere.length; rh++) {
+							var rCount = Math.min(reservedHere[rh].count, remaining);
+							if (rCount <= 0) continue;
+							//displayName is the fighter's own short name ("Reska");
+							//keep the size descriptor here so the lobby line reads
+							//"6 Reska Light Fighters" (the SystemInfo Type: line wants
+							//just "Reska", hence the size is appended at this site only).
+							notes.push("&nbsp;&nbsp;&nbsp;" + rCount + " " + reservedHere[rh].displayName + " " + capitalizedType + " Fighters");
+							remaining -= rCount;
+						}
+						if (remaining > 0) {
+							notes.push("&nbsp;&nbsp;&nbsp;" + remaining + " " + capitalizedType + " Fighters");
+						}
+						continue;
+					}
+
 					if (i == "normal") {
 						//skip description of kind of fighters
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " Fighters");

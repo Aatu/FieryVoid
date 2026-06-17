@@ -322,7 +322,9 @@ shipManager.systems = {
         var systems = Array();
 
         for (var i in ship.systems) {
-            if (ship.systems[i].location == location && ship.systems[i].name != "structure") systems.push(ship.systems[i]);
+            //hideInShipWindow: technical-only systems (e.g. InvulnerableThruster) are omitted from the
+            //icon grid. Purely cosmetic - thrust mechanics iterate ship.systems directly, not this list.
+            if (ship.systems[i].location == location && ship.systems[i].name != "structure" && !ship.systems[i].hideInShipWindow) systems.push(ship.systems[i]);
         }
 
         return systems;
@@ -451,7 +453,21 @@ shipManager.systems = {
     excludesDefaultShuttles: function excludesDefaultShuttles(hangar) {
         if (!hangar) return false;
         if (hangar.isCatapult || hangar.isRail || hangar.isLCVRail) return false;
-        return !!hangar.excludeFromDefaultShuttles;
+        if (hangar.excludeFromDefaultShuttles) return true;
+        //Mirror of the server: a per-bay fighter-class allow-list that doesn't
+        //permit any default-shuttle class steers default shuttles away, so the
+        //auto-fill never blocks the reserved fighter (e.g. Reska-only Suom bays).
+        //The full PHP subclass hierarchy isn't visible client-side, so match the
+        //known default-shuttle phpclasses by name.
+        var allowed = hangar.allowedFighterClasses;
+        if (Array.isArray(allowed) && allowed.length > 0) {
+            var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1 };
+            for (var i = 0; i < allowed.length; i++) {
+                if (shuttleClasses[allowed[i]]) return false;   //bay accepts a shuttle class, keep it in the pool
+            }
+            return true;
+        }
+        return false;
     },
 
     //Lowercased set of ship.fighters category keys (e.g. "light") that ride this
@@ -539,6 +555,134 @@ shipManager.systems = {
             if (system.location == 0) return system;
         }
         return firstHangar;
+    },
+
+    //Find a fighter-flight blueprint by phpclass from whatever client-side ship
+    //catalogue is populated. Two different catalogues exist depending on entry
+    //point — both are checked so the allow-list display works in BOTH contexts:
+    //  - In-game (game.php): window.staticShips, keyed faction -> phpclass ->
+    //    blueprint. A carrier's allowedFighterClasses are preloaded there even
+    //    when no such flight is deployed (game.php's Hangar preload loop).
+    //  - Lobby (gamelobby.php): window.staticShips is NOT populated; ships live
+    //    in gamedata.allShips[faction] as an array of Ship objects, loaded per
+    //    faction on demand. The carrier's faction is always already open (you're
+    //    looking at its ship window), so its reserved fighter is in the same
+    //    faction array.
+    //Returns the blueprint/Ship object or null when not yet loaded.
+    findFighterBlueprint: function findFighterBlueprint(phpclass) {
+        if (!phpclass) return null;
+        if (window.staticShips) {
+            for (var faction in window.staticShips) {
+                var bp = window.staticShips[faction] && window.staticShips[faction][phpclass];
+                if (bp) return bp;
+            }
+        }
+        if (window.gamedata && gamedata.allShips) {
+            for (var fac in gamedata.allShips) {
+                var list = gamedata.allShips[fac];
+                if (!Array.isArray(list)) continue;
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] && list[i].phpclass == phpclass) return list[i];
+                }
+            }
+        }
+        return null;
+    },
+
+    //Resolve a fighter-flight phpclass (e.g. "gaimReskaFighter") to a friendly
+    //display label. Prefer the sample fighter's own displayName ("Reska") — the
+    //craft inside the flight at systems[1], matching the server's
+    //getSampleFighter() and SystemInfo.js's flight-name display. Fall back to the
+    //flight's shipClass ("Reska Light flight") with a trailing " flight" stripped,
+    //then to the phpclass verbatim, so callers degrade gracefully whatever the
+    //blueprint shape (lobby Ship object: systems is an array; in-game JSON
+    //blueprint: systems is an object keyed by id).
+    //Used by the per-bay fighter-class allow-list display (Hangar systemInfo
+    //"Type:" line + the lobby ship-window fighter complement).
+    displayNameForFighterClass: function displayNameForFighterClass(phpclass) {
+        if (!phpclass) return "";
+        var bp = shipManager.systems.findFighterBlueprint(phpclass);
+        if (bp) {
+            //systems[1] is the sample craft in both shapes (object key "1" or
+            //array index 1). Guard the lazy getter / missing slot defensively.
+            var sample = bp.systems ? bp.systems[1] : null;
+            if (sample && sample.displayName) return String(sample.displayName);
+            if (bp.shipClass) return String(bp.shipClass).replace(/\s+flight$/i, "");
+        }
+        return phpclass;
+    },
+
+    //Classify a fighter-flight blueprint into a ship.fighters size category key
+    //("light"/"medium"/"heavy"/"ultralight" or an explicit hangarRequired).
+    //Mirrors the jinkinglimit classification in gamelobby.js checkChoices() so a
+    //reserved-fighter row lands on the same $fighters size slot the carrier
+    //declares (e.g. Reska jinkinglimit 10 -> "light", matching gaimSuom's
+    //fighters.light). Returns null when the class isn't loaded.
+    fighterSizeCategory: function fighterSizeCategory(phpclass) {
+        var bp = shipManager.systems.findFighterBlueprint(phpclass);
+        if (!bp) return null;
+        if (bp.hangarRequired && bp.hangarRequired != 'fighters') return String(bp.hangarRequired);
+        var jl = parseInt(bp.jinkinglimit || 0, 10);
+        if (jl >= 99) return 'ultralight';
+        if (jl >= 10) return 'light';
+        if (jl >= 8)  return 'medium';
+        if (jl >= 6)  return 'heavy';
+        return null;
+    },
+
+    //Per-bay fighter-class allow-list display (arch_hangar_class_allowlist): the
+    //reserved-fighter complement of a carrier, derived from its class-restricted
+    //hangars. Returns an array of {category, phpclass, displayName, count} where
+    //count is the bay's box capacity (1 box = 1 light/medium/heavy fighter; this
+    //display path doesn't carry ultralight/superheavy reservers today). Pure
+    //display: ship.fighters stays size-keyed and drives all accounting — this
+    //just lets the lobby ship window name the specific fighter a reserved bay
+    //will hold instead of the generic "N Light Fighters".
+    //Cheap pre-check: does this ship have ANY hangar bay with a non-empty
+    //allowedFighterClasses list? Restricted bays are rare in FV, so this lets the
+    //common case (no restricted bay) skip getReservedFighterComposition and its
+    //per-class blueprint lookups entirely. Result is memoised on the ship object
+    //(ships are rebuilt per faction-load, so the cache can't go stale) so a
+    //carrier's window can be reopened without re-walking systems each time.
+    shipHasRestrictedHangar: function shipHasRestrictedHangar(ship) {
+        if (!ship || !ship.systems) return false;
+        if (ship._hasRestrictedHangar !== undefined) return ship._hasRestrictedHangar;
+        var found = false;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && s.name == "hangar" && Array.isArray(s.allowedFighterClasses) && s.allowedFighterClasses.length > 0) {
+                found = true;
+                break;
+            }
+        }
+        ship._hasRestrictedHangar = found;
+        return found;
+    },
+
+    getReservedFighterComposition: function getReservedFighterComposition(ship) {
+        var rows = [];
+        if (!shipManager.systems.shipHasRestrictedHangar(ship)) return rows;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (!s || s.name != "hangar") continue;
+            if (s.isCatapult || s.isRail || s.isLCVRail || s.isShadowHangar) continue;
+            var allowed = s.allowedFighterClasses;
+            if (!Array.isArray(allowed) || allowed.length == 0) continue;
+            //One reserved row per bay, attributed to its first allowed class —
+            //first-fit bays each name exactly one fighter (e.g. the Suom's
+            //Reska-only aft bay). A multi-class allow-list (none today) would
+            //list the first; extend here if that case ever ships.
+            var phpclass = allowed[0];
+            var category = shipManager.systems.fighterSizeCategory(phpclass);
+            if (!category) continue;   //unknown size — leave the generic line intact
+            rows.push({
+                category: category,
+                phpclass: phpclass,
+                displayName: shipManager.systems.displayNameForFighterClass(phpclass),
+                count: parseInt(s.maxhealth || 0, 10)
+            });
+        }
+        return rows;
     },
 
     //Display label for a ship's auto-populated default shuttle. Mirrors

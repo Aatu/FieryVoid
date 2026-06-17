@@ -326,6 +326,24 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
+	// Per-bay fighter-class allow-list (arch_hangar_class_allowlist): a bay that
+	// declares allowedFighterClasses accepts ONLY those phpclasses, so its
+	// systemInfo "Type:" line should name that specific fighter rather than the
+	// generic "Fighters". The server stamps data["Type"] = ucwords(hangarType)
+	// on the static blueprint (setSystemDataWindow); we override it here client-
+	// side because data[] isn't transmitted live and this is where the rest of
+	// the hangar's live data is recomputed. LCV rails / catapults keep their own
+	// Type (they don't carry FighterFlights with this restriction).
+	if (!this.isLCVRail && Array.isArray(this.allowedFighterClasses) && this.allowedFighterClasses.length > 0
+		&& window.shipManager && shipManager.systems && shipManager.systems.displayNameForFighterClass) {
+		var allowedNames = [];
+		for (var ai = 0; ai < this.allowedFighterClasses.length; ai++) {
+			var nm = shipManager.systems.displayNameForFighterClass(this.allowedFighterClasses[ai]);
+			if (nm && allowedNames.indexOf(nm) === -1) allowedNames.push(nm);
+		}
+		if (allowedNames.length > 0) this.data["Type"] = allowedNames.join(", ");
+	}
+
 	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
 	// Assault Fighter et al.) needs more than one box each; a unitSize>1 ultralight
 	// (Zorth) packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5).

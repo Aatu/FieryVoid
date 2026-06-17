@@ -44,8 +44,10 @@ class gaimShamor extends BaseShip{
 		$this->addAftSystem(new Thruster(4, 13, 0, 5, 2));
 		$this->addAftSystem(new Thruster(4, 13, 0, 5, 2));
 		$this->addAftSystem(new TwinArray(2, 6, 2, 90, 270));
-		$this->addAftSystem(new Hangar(3, 6, 6, 3));
-		$this->addAftSystem(new Hangar(3, 6, 6, 3));
+		//$this->addAftSystem(new Hangar(3, 6, 6, 3));
+		//$this->addAftSystem(new Hangar(3, 6, 6, 3));
+		$this->addAftSystem(new Hangar(3, 6, 6, 3, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay
+		$this->addAftSystem(new Hangar(3, 6, 6, 3, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay			
 		$this->addAftSystem(new Bulkhead(0, 2));
 		$this->addAftSystem(new Bulkhead(0, 2));
 

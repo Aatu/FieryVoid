@@ -125,6 +125,17 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                     }
                     if ($system instanceof Hangar) {
                         $factionsWithHangars[$faction] = true;
+                        //Per-bay fighter-class allow-list (arch_hangar_class_allowlist):
+                        //preload the carrier's reserved fighter blueprint(s) so the client
+                        //can resolve the phpclass to a display name (Hangar SystemInfo
+                        //"Type:" line + lobby ship window) even when no such flight is
+                        //deployed yet. Without this the class is absent from staticShips
+                        //and the resolver falls back to showing the raw phpclass.
+                        if (!empty($system->allowedFighterClasses)) {
+                            foreach ($system->allowedFighterClasses as $cls) {
+                                $spawnableClasses[] = $cls;
+                            }
+                        }
                     }
                 }
             }

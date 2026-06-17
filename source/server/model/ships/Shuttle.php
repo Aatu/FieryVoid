@@ -85,7 +85,9 @@ class Shuttle extends FighterFlight
             case 'Gaim Intelligence':
                 return array('img/ships/shuttleGaim.png', 'img/ships/shuttleGaim_large.png');
             case 'Grome Autocracy'; 
-                return array('img/ships/shuttleGrome.png', 'img/ships/shuttleGrome_large.png');                                                                                                                                 
+                return array('img/ships/shuttleGrome.png', 'img/ships/shuttleGrome_large.png');
+            case 'Hyach Gerontocracy'; 
+                return array('img/ships/shuttleHyach.png', 'img/ships/shuttleHyach_large.png');                                                                                                                                                  
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
@@ -278,6 +280,11 @@ class MedicalShuttle extends Shuttle
         $this->freethrust = 3;        
     }
 
+    public function getImage()
+    {
+        return array('img/ships/shuttleMedical.png', 'img/ships/shuttleMedical_large.png');
+    }
+
     public function populate()
     {
         $current = count($this->systems);
@@ -313,6 +320,11 @@ class Lifeboat extends Shuttle
         $this->forwardDefense = 12;
         $this->sideDefense = 12;
         $this->freethrust = 1;        
+    }
+
+    public function getImage()
+    {
+        return array('img/ships/shuttleMedical.png', 'img/ships/shuttleMedical_large.png');
     }
 
     public function populate()
