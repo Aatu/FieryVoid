@@ -322,7 +322,9 @@ shipManager.systems = {
         var systems = Array();
 
         for (var i in ship.systems) {
-            if (ship.systems[i].location == location && ship.systems[i].name != "structure") systems.push(ship.systems[i]);
+            //hideInShipWindow: technical-only systems (e.g. InvulnerableThruster) are omitted from the
+            //icon grid. Purely cosmetic - thrust mechanics iterate ship.systems directly, not this list.
+            if (ship.systems[i].location == location && ship.systems[i].name != "structure" && !ship.systems[i].hideInShipWindow) systems.push(ship.systems[i]);
         }
 
         return systems;

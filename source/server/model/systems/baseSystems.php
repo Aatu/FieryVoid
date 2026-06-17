@@ -2781,8 +2781,9 @@ class Thruster extends ShipSystem{
 class InvulnerableThruster extends Thruster{
 	/*sometimes thruster is techically necessary, despite the fact that it shouldn't be there (eg. on LCVs)*/
 	/*this thruster will be almost impossible to damage :) (it should be out of hit table, too!)*/
-	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
+	public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isTargetable = false; //cannot be targeted ever!
+	public $hideInShipWindow = true; //purely technical (unlimited thrust, untargetable, no crits) → no icon needed in ship window
 	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value
 	
     function __construct($armour, $maxhealth, $powerReq, $output, $direction, $thrustused = 0 ){
