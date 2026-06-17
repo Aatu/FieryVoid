@@ -3681,3 +3681,51 @@ the flight's phpclass (distinct from `hangarAcceptsFighterClass`, which is also 
 
 **Verified server-side (game 4182 stub):** Reska(6) → aft(reserved) only; Reska(12) → aft first then primary overflow;
 Koist(6) → primary only (its sole option). `php -l` + `node --check` clean.
+
+### Client display: name the reserved fighter (2026-06-17, Docker-verified by user)
+
+Two presentation-only additions so a restricted bay shows WHICH fighter it reserves, instead of the generic "Fighters".
+**DISPLAY-ONLY — `$ship->fighters` stays SIZE-keyed (`light`/`medium`/…) and drives all accounting** (checkChoices size
+tallies, `HangarOps::populateInitialHangarUsage`, default-shuttle pool). Re-keying `$fighters` to a phpclass was considered
+and **rejected** — every consumer would have to map a phpclass back to its size class (high regression risk). These two
+features only relabel what's already computed.
+
+**Shared resolvers (client `systems.js`, `shipManager.systems`, loaded in BOTH game.php + gamelobby.php):**
+- `findFighterBlueprint(phpclass)` — the load-bearing helper. Looks up a fighter blueprint from whichever catalogue is
+  populated: `window.staticShips` (in-game) OR `gamedata.allShips[faction]` (lobby — `window.staticShips` is NEVER loaded
+  there; see the standalone "static ship info in the gamelobby screen" memory). Checking both makes the display work in
+  both contexts.
+- `displayNameForFighterClass(phpclass)` — prefers the SAMPLE fighter's own `displayName` (`bp.systems[1].displayName` =
+  "Reska", matching server `getSampleFighter()` + SystemInfo.js's flight-name display), falls back to the flight's
+  `shipClass` minus a trailing " flight" ("Reska Light"), then the raw phpclass. `systems` is keyed by id in BOTH blueprint
+  shapes, so `systems[1]` is uniform.
+- `fighterSizeCategory(phpclass)` — mirrors the gamelobby `checkChoices()` jinkinglimit→size buckets (≥10 light, ≥8 medium,
+  ≥6 heavy, ≥99 ultralight, else explicit `hangarRequired`) so a reserved row lands on the same `$fighters` size slot.
+- `shipHasRestrictedHangar(ship)` — cheap gate, memoised on `ship._hasRestrictedHangar` (transient, like `_originalFighters`/
+  `_initializingSystems`; ships are rebuilt per faction-load so the cache can't go stale). Restricted bays are RARE, so this
+  lets every normal ship skip `getReservedFighterComposition` and its blueprint lookups entirely.
+- `getReservedFighterComposition(ship)` — `{category,phpclass,displayName,count=bay maxhealth}` rows from the carrier's
+  restricted bays (one row per bay, first allowed class). Early-returns `[]` via `shipHasRestrictedHangar`.
+
+**(a) Hangar SystemInfo "Type:" line (in-game).** `Hangar.refreshHangarTooltip` (client `model/system/baseSystems.js`)
+overrides `data["Type"]` (server stamps `ucwords(hangarType)`="Fighters" on the static blueprint via `setSystemDataWindow`;
+client owns the live override since `data[]` isn't transmitted live — same as Capacity/Stored Craft) with the joined allowed
+fighter `displayName`s when `allowedFighterClasses` non-empty (LCV rails skipped). So the Suom's aft bay reads `Type: Reska`.
+React `SystemInfo.js` needed NO change — it iterates `Object.keys(system.data)`. **Gate:** the whole block is short-circuited
+by `allowedFighterClasses.length > 0`, so unrestricted bays are untouched.
+
+**(b) Lobby ship window (turn-0 fighter complement).** `UI/shipwindow.js` `gamedata.turn==0` block: for `heavy`/`medium`/`light`
+size lines, emits "N Reska Light Fighters" reserved lines (clamped to the declared amount) and shows only the leftover as the
+generic line. Size descriptor is appended HERE (not in the resolver) so the lobby reads "Reska Light Fighters" while the
+Type: line stays just "Reska". **Gate:** `shipHasRestrictedHangar(ship)` — `reservedByCat` stays `{}` for normal ships, which
+fall through to the ORIGINAL generic rendering unchanged.
+
+**Server preload (game.php).** The in-game `window.staticShips` builder only preloads classes actually deployed + weapon
+`$spawnableClasses`. A carrier's allowed fighter isn't deployed at lobby/buy time, so it was absent and the resolver fell back
+to the raw phpclass. Fix: the Hangar branch of the auto-discover loop now also pushes each bay's `allowedFighterClasses` into
+`$spawnableClasses` (gated by `!empty(...)`, de-duped via `array_unique` — zero cost for fleets with no restricted bay).
+NOT needed in the lobby (it uses `gamedata.allShips`, which already has the whole faction including the reserved fighter).
+
+**Verified (user, Docker):** Suom lobby window → "6 Fighters" (primary) + "6 Reska Light Fighters" (aft); Suom in-game hangar
+tooltip → `Type: Reska`. `node --check` clean on all three client files. Pre-existing Hangar UI confirmed byte-for-byte
+unchanged for every empty-allow-list bay (the only behavioural change is on ships that declare a restricted bay).
