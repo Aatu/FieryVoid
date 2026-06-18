@@ -438,6 +438,7 @@ spl_autoload_register(
                 'heron1940' => '/server/model/ships/drazi_old/heron1940.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
+                'hkjamming' => '/server/handlers/HkJamming.php',
                 'hkshininglight' => '/server/model/ships/orieni/hkShiningLight.php',
                 'hkshiningstar' => '/server/model/ships/orieni/hkShiningStar.php',
                 'hlpa' => '/server/model/weapons/customs.php',

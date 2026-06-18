@@ -3301,7 +3301,7 @@ window.weaponManager = {
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
             "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding",
-            "InadequateHangar"
+            "InadequateHangar", "HkJamming"
         ];
 
         return shortLogTypes.includes(fire.damageclass);

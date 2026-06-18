@@ -20,7 +20,8 @@ class HkShiningStar extends FighterFlight{
         $this->turncost = 0.33;
       
 		$this->hangarRequired = 'medium'; //for fleet check; HKs require medium fighter hangar space
-        $this->deploysInHangar = true;          
+        $this->deploysInHangar = true;
+        $this->remoteControl = true; //remotely controlled via HK Control Unit; can be disrupted by ELINT Jamming.
     	$this->iniativebonus = 6 *5;//no mistake, this is semi-autonomous unit without pilot - so its Ini is really low!
         $this->populate();     
         

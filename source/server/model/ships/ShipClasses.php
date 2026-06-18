@@ -230,6 +230,12 @@ class BaseShip {
 			    if ($firstFighter){
 			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);
 					$mod += -50* $firstFighter->hasCritical("LaunchedThisTurn", $gamedata->turn);
+					//HK Jamming: disruption crits land on the flight's sample fighter (flights have no CnC).
+					//ReducedIniativeOneTurn is -10 (=-2 tabletop) each; the table stacks up to ×2 for -4.
+					$mod += -10* $firstFighter->hasCritical("ReducedIniativeOneTurn", $gamedata->turn);
+					$mod += -10* $firstFighter->hasCritical("ReducedIniative", $gamedata->turn);
+					//Uncontrolled = -3 tabletop ini for the lost-control turn (-15 in FV d100 units).
+					$mod += -15* $firstFighter->hasCritical("Uncontrolled", $gamedata->turn);
 			    }
 		    }
             if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.            
@@ -1934,7 +1940,9 @@ class BaseShip {
     public function getOEWTargetNum($turn){
         $amount = 0;
         foreach ($this->EW as $EW){
-            if ( ($EW->type == "OEW" || ($EW->type == "CCEW" && $EW->amount>0)) && $EW->turn == $turn)
+            //JAM (Hunter-Killer Jamming) counts as OEW for the purpose of disrupting ELINT (DIST):
+            //each JAM allocation is a disruptable offensive-EW target slot, same as OEW.
+            if ( ($EW->type == "OEW" || $EW->type == "JAM" || ($EW->type == "CCEW" && $EW->amount>0)) && $EW->turn == $turn)
                 $amount++;
         }
 

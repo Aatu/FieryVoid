@@ -7,6 +7,7 @@ window.EWIconContainer = function () {
     var COLOR_OEW_DIST = new THREE.Color(255 / 255, 157 / 255, 0 / 255).convertSRGBToLinear();
     var COLOR_SDEW = new THREE.Color(109 / 255, 189 / 255, 255 / 255).convertSRGBToLinear();
     var COLOR_OEW_SOEW = new THREE.Color(1, 1, 1).convertSRGBToLinear();
+    var COLOR_JAM = new THREE.Color(210 / 255, 80 / 255, 255 / 255).convertSRGBToLinear(); //Hunter-Killer Jamming
 
     function EWIconContainer(coordinateConverter, scene, iconContainer) {
         this.ewIcons = [];
@@ -27,6 +28,7 @@ window.EWIconContainer = function () {
                 createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "DIST"), "DIST");
                 createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SDEW"), "SDEW");
                 createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SOEW"), "SOEW");
+                createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "JAM"), "JAM");
 
             }, this);
         }, this);
@@ -57,6 +59,7 @@ window.EWIconContainer = function () {
             createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "DIST"), "DIST");
             createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SDEW"), "SDEW");
             createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "SOEW"), "SOEW");
+            createOrUpdateOEW.call(this, ship, target, ew.getOffensiveEW(ship, target, "JAM"), "JAM");
         }, this);
 
         this.ewIcons = this.ewIcons.filter(function (icon) {
@@ -179,6 +182,8 @@ window.EWIconContainer = function () {
                 return COLOR_SDEW;
             case "SOEW":
                 return COLOR_OEW_SOEW;
+            case "JAM":
+                return COLOR_JAM;
         }
     }
 

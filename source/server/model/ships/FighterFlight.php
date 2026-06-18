@@ -46,7 +46,9 @@ class FighterFlight extends BaseShip
 	
 	public $customFtrName = ""; //to be filled if fighter has special hangar requirements - see Balvarix/Rutarian for usage
 	public $deploysInHangar = false; //Some fighters like HK's MUST deploy in Hangars
-    public $minesweeper = false;		
+    public $minesweeper = false;
+	public $remoteControl = false; //true for remotely-controlled flights (Orieni Hunter-Killers); enables ELINT Jamming disruption.
+		//Static blueprint property: travels to client via static-ship JSON, no stripForJson handling needed.
 
 
     public $canvasSize = 200;

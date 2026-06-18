@@ -7,6 +7,8 @@ class Criticals{
 
         $crits = array();
 
+        HkJamming::$alreadyResolved = false; //reset the once-per-advance guard for this resolution
+
         /* Hangar Ops Stage 10.1: two-pass split.
          *
          * The legacy single-pass loop interleaved testCritical (which on
@@ -125,6 +127,13 @@ class Criticals{
          * Each docked LCV is treated as launched (escapes) and takes the rail's
          * sustained damage + 2d10 fragments — same as a destroyed rail. */
         HangarOps::processLCVCarrierDestruction($gamedata);
+
+        /* HK Jamming: roll the ELINT-jamming disruption table for every jammed
+         * remote-controlled fighter flight (Orieni Hunter-Killers). Runs last so it
+         * sees final post-firing state (impact exemption reads this turn's ram) and
+         * post-dropout flight composition. Adds ReducedIniativeOneTurn / Uncontrolled /
+         * DisengagedFighter crits, which the caller persists via getUpdatedCriticals. */
+        HkJamming::resolveJamming($gamedata);
 
         return $crits;
     }
