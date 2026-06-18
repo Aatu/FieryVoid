@@ -414,6 +414,17 @@ shipManager.power = {
 		for (var s in ship.systems) {
 			var system = ship.systems[s];
 
+			//Some systems only know their true powerReq after initializationUpdate()
+			//runs (e.g. PowerCapacitor sets a NEGATIVE powerReq to inject its stored
+			//power into the reactor display; PlasmaBattery likewise). That init used to
+			//run eagerly for every system when the legacy ship status window was built
+			//at load. The window is now built lazily on first open (ShipIcon.createShipWindow),
+			//so for a never-opened ship the capacitor stays uninitialised and the reactor
+			//icon reads powerReq 0 — showing 0 available power until the player clicks a
+			//system. Initialise here so the displayed power is correct regardless of
+			//whether the window has ever been opened. initializeSystem() is idempotent.
+			system = shipManager.systems.initializeSystem(system);
+
 			/*temporary power down critical - may happen on C&C*/
 			if (system.displayName == "C&C") { //no point checking other systems
 				output -= shipManager.criticals.hasCritical(system, "tmppowerdown"); //Power output reduced
