@@ -3850,6 +3850,12 @@ spl_autoload_register(
 
                 'dewminehafkaa' => '/server/model/ships/balosian/dewMineHafkaA.php',                 
                 'dewmined2bal' => '/server/model/ships/balosian/dewMineD2Bal.php',  
+
+                //Corillani Mines - 4
+                'proxminepalfacorillani' => '/server/model/ships/corillani/proxMinePalfaCorillani.php',
+                'captorminetilorcorillani' => '/server/model/ships/corillani/captorMineTilorCorillani.php',                 
+                'dewminecoltucorillani' => '/server/model/ships/corillani/dewMineColtuCorillani.php', 
+                'dewminecorticorillani' => '/server/model/ships/corillani/dewMineCortiCorillani.php',                                  
                 
                 //Escalation Wars Chouka Mines - 10
                 'proxminechca' => '/server/model/ships/EscalationChoukaTheocracy/proxMineChCA.php', 
@@ -4012,6 +4018,7 @@ spl_autoload_register(
                         'mograte' => '/server/model/ships/HouseValheru/Mograte.php',
                         'octuran' => '/server/model/ships/HouseValheru/Octuran.php',
                         'phobos' => '/server/model/ships/HouseValheru/Phobos.php',
+                        'phoenician' => '/server/model/ships/HouseValheru/Phoenician.php',
                         'primo' => '/server/model/ships/HouseValheru/Primo.php',
                         'primosecundus' => '/server/model/ships/HouseValheru/PrimoSecundus.php',
                         'rizek' => '/server/model/ships/HouseValheru/Rizek.php',
