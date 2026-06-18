@@ -91,7 +91,9 @@ class Shuttle extends FighterFlight
             case 'Ipsha Baronies':
                 return array('img/ships/shuttleIpsha.png', 'img/ships/shuttleIpsha_large.png');
             case 'Kor-Lyan Kingdoms':
-                return array('img/ships/korlyanMerkul2.png', 'img/ships/korlyanMerkul_large2.png');                                    
+                return array('img/ships/korlyanMerkul2.png', 'img/ships/korlyanMerkul_large2.png'); 
+            case "Pak'ma'ra Confederacy":
+                return array('img/ships/shuttlePakmara.png', 'img/ships/shuttlePakmara_large.png');                                                       
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
