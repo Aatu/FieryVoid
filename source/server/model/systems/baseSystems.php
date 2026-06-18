@@ -4137,7 +4137,8 @@ class ShadowHangar extends Hangar{
 class DockingCollar extends Hangar{
     public $name = "dockingCollar";
     public $displayName = "LCV Rail";
-
+    public $iconPath = "DockingCollar.png";	
+	
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
     public $isLCVRail = true;   //single discriminator, parallel to $isCatapult / $isRail
