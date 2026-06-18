@@ -683,7 +683,7 @@ window.findEligibleFlightsForDocking = function (carrier) {
             // the server buildDockBays guard) — never a foreign / non-integrated flight.
             if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
             // Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
-            if (!hangarAcceptsFighterClass(sys, flight)) return;
+            if (!hangarAcceptsFighterClassRecover(sys, flight)) return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;
 
             // Per-hangar heading gate.
@@ -860,6 +860,20 @@ window.findEligibleFlightsForDocking = function (carrier) {
             return false;
         }
         return false;
+    }
+
+    // Mirrors HangarOps::hangarAcceptsFighterClass (PHP). Duplicated from the
+    // per-flight Dock helper of the same name — the two closures don't share
+    // scope (findEligibleCarriersForDock vs findEligibleFlightsForDocking), so
+    // each must carry its own copy. A bay with a non-empty allowedFighterClasses
+    // list accepts ONLY flights whose phpclass is in it; an empty/absent list is
+    // a no-op.
+    function hangarAcceptsFighterClassRecover(sys, theFlight) {
+        if (!sys) return false;
+        var allowed = sys.allowedFighterClasses;
+        if (!Array.isArray(allowed) || allowed.length === 0) return true;   //unrestricted bay
+        var cls = theFlight ? String(theFlight.phpclass) : '';
+        return allowed.indexOf(cls) !== -1;
     }
 
     function lowerKeysR(obj) {
