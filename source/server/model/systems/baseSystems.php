@@ -2009,12 +2009,13 @@ class ElintScanner extends Scanner implements SpecialAbility{
 	}else{
 		$this->data["Special"] .= '<br>';
 	}
-        $this->data["Special"] .= "Allows additional Sensor operations:";
-        $this->data["Special"] .= "<br> - SOEW: gives friendly ships half of ELINT ships' OEW bonus against targets. Targets must be within 30 hexes of ELINT at the moment of firing, friendly ships at both declaration and firing.  Requires line of sight to target and friendly ship at firing.";		     
-        $this->data["Special"] .= "<br> - SDEW: boosts target's DEW (by 1 for 2 points allocated). Range 30 hexes (at both declaration and firing).";		     
-        $this->data["Special"] .= "<br> - Blanket Protection: all friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated. Cannot combine with other ElInt activities.";		     
-        $this->data["Special"] .= "<br> - Disruption: Reduces target enemy ships' OEW and CCEW by 1 per 3 points allocated (split evenly between targets, CCEW being counted as one target; cannot bring OEW on a target below 0). Range 30 hexes (at both declaration and firing).";	
-		$this->data["Special"] .= "<br> - Detect Stealth: Increases stealth detection range of this ship by +2 per point of EW used.";	    
+        $this->data["Special"] .= "Allows additional Sensor operations (see FAQ for more details):";
+        $this->data["Special"] .= "<br> - SOEW: Friendly ships gain half of ELINT ships' OEW bonus against targets. Requires line of sight to and being within 30 hexes of target and friendly ship at declaration and firing.";		     
+        $this->data["Special"] .= "<br> - SDEW: Boosts target's DEW (by 1 for 2 points allocated). Range 30 hexes at declaration and firing.";		     
+        $this->data["Special"] .= "<br> - Blanket Protection: All friendly units within 20 hexes (incl. fighters) get +1 DEW per 4 points allocated. Cannot combine with other ELINT activities.";		     
+        $this->data["Special"] .= "<br> - Disruption: Reduce enemy ships' OEW / CCEW by 1 per 3 points allocated (split evenly, cannot bring OEW on a target below 0). Range 30 hexes at both declaration and firing.";	
+		$this->data["Special"] .= "<br> - Detect Stealth: Increases stealth detection range of this ship by +2 per point of EW.";
+		$this->data["Special"] .= "<br> - Jamming: Can try to jam remote controlled units e.g. Orieni HKs.";				    
 	}
 	/*
 	public function markImproved(){	parent::markImproved();   }
@@ -4138,7 +4139,7 @@ class DockingCollar extends Hangar{
     public $name = "dockingCollar";
     public $displayName = "LCV Rail";
     public $iconPath = "DockingCollar.png";	
-	
+
 	public $repairPriority = 1;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
 
     public $isLCVRail = true;   //single discriminator, parallel to $isCatapult / $isRail
