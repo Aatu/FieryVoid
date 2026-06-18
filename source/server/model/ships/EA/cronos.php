@@ -25,7 +25,7 @@ class Cronos extends HeavyCombatVessel{
 	$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 	$this->addPrimarySystem(new Scanner(5, 18, 5, 8));
 	$this->addPrimarySystem(new Engine(5, 18, 0, 9, 2));
-	$this->addPrimarySystem(new Hangar(5, 2));
+	$this->addPrimarySystem(new Hangar(5, 2, 1));
 	$this->addPrimarySystem(new Thruster(5, 15, 0, 5, 3));
 	$this->addPrimarySystem(new Thruster(5, 15, 0, 5, 4));
 	$this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 180, 0));

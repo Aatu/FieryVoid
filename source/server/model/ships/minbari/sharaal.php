@@ -31,7 +31,7 @@ class Sharaal extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 28, 4, 11));
         $this->addPrimarySystem(new Engine(5, 22, 0, 10, 4));
         $this->addPrimarySystem(new JumpEngine(5, 25, 4, 12));
-		$this->addPrimarySystem(new Hangar(5, 28));
+		$this->addPrimarySystem(new Hangar(5, 28, 12));
         $this->addPrimarySystem(new Jammer(4, 10, 5));
         $this->addPrimarySystem(new TractorBeam(5, 10, 0, 0));
 

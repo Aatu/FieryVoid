@@ -28,7 +28,7 @@ class TethysPolice extends MediumShip{
 		$this->addPrimarySystem(new CnC(4, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 3, 6));
 		$this->addPrimarySystem(new Engine(4, 11, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 2));
 		$this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
 

@@ -21,13 +21,13 @@ class Rolotha extends MediumShip{
 		$this->canvasSize = 115; 
 		$this->isd = 1990;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-        $this->fighters = array("flyers"=>2);
+        //$this->fighters = array("flyers"=>2);
 
         $this->addPrimarySystem(new Reactor(5, 17, 0, 4));
         $this->addPrimarySystem(new CnC(3, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 4, 5));
         $this->addPrimarySystem(new Engine(3, 11, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 2));
 		$this->addPrimarySystem(new GraviticThruster(4, 12, 0, 4, 3));
 		$this->addPrimarySystem(new GraviticThruster(4, 12, 0, 4, 4));
 		$this->addPrimarySystem(new TractorBeam(4, 10, 0, 0));

@@ -68,3 +68,17 @@
     font-style: normal;
     font-size: 15px;
 }
+
+.gameName {
+    display: block;
+    color: #57b6ec;
+    font-size: 15px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-align: left;
+    margin: 4px 0 12px 0;
+    padding-bottom: 6px;
+    text-decoration: underline;
+    /*border-bottom: 1px solid #3c5574;*/
+    text-shadow: 0 0 4px rgba(179, 65, 25, 0.5);
+}

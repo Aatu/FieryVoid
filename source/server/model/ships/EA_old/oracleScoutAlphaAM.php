@@ -38,7 +38,7 @@ class OracleScoutAlphaAM extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(4, 16, 4, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 6, 3));
         $this->addPrimarySystem(new JumpEngine(4, 20, 4, 30));
-		$this->addPrimarySystem(new Hangar(4, 3));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
 		$this->addPrimarySystem(new AmmoMissileRackO(3, 0, 0, 0, 360, $ammoMagazine, false));
 
 		$this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));

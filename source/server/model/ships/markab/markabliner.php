@@ -11,7 +11,8 @@ class MarkabLiner extends MediumShip{
         $this->shipClass = "Markab Liner";
         $this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-	    
+		$this->fighters = array("lifeboats"=>4); 
+
 	    $this->isd = 2120;
         
         $this->forwardDefense = 12;

@@ -35,8 +35,8 @@ class Babylon5Refit extends StarBaseSixSections{
 		$this->addPrimarySystem(new CnC(6, 27, 0, 0)); 
 		$this->addPrimarySystem(new Scanner(6, 20, 4, 8));
 		$this->addPrimarySystem(new Scanner(6, 20, 4, 8));
-		$this->addPrimarySystem(new Hangar(6, 26));
-		$this->addPrimarySystem(new Hangar(6, 26));
+		$this->addPrimarySystem(new Hangar(6, 26, 12));
+		$this->addPrimarySystem(new Hangar(6, 26, 12));
 		$this->addPrimarySystem(new CargoBay(6, 25));
 		$this->addPrimarySystem(new HeavyPulse(6, 6, 4, 0, 360));
 		$this->addPrimarySystem(new HeavyPulse(6, 6, 4, 0, 360));
@@ -53,7 +53,7 @@ class Babylon5Refit extends StarBaseSixSections{
 		$this->addFrontSystem(new StdParticleBeam(5, 4, 1, 300, 60));
 		$this->addFrontSystem(new StdParticleBeam(5, 4, 1, 300, 60));
 
-			$hangar = new Hangar(5, 8);
+			$hangar = new Hangar(5, 8, 1, 0, 'shuttles');
 			$hangar->startArc = 300;
 			$hangar->endArc = 60;
 			$this->addFrontSystem($hangar);		

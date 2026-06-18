@@ -35,7 +35,7 @@ class EpimetheusAlphaAM extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 4, 5));
         $this->addPrimarySystem(new Engine(4, 11, 0, 5, 4));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
         $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
         $this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));
 

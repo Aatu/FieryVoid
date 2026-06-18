@@ -814,6 +814,14 @@ window.PhaseStrategy = function () {
                 this.ballisticIconContainer.updateLinesForShip(attachedShip, this.shipIconContainer);
             }
         }
+
+        // Idle render-loop gating (perf #2): consumeMovement above mutates the icon's
+        // facing/position in the THREE scene outside the animation list, so we must kick
+        // the render budget or it won't paint until the next input. Surfaced by combat
+        // pivots in the Fire phase, where the icon didn't reface until the mouse moved.
+        if (window.webglScene && window.webglScene.requestRender) {
+            window.webglScene.requestRender();
+        }
     };
 
     PhaseStrategy.prototype.onShowAllEW = function (payload) {

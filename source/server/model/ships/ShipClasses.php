@@ -653,9 +653,22 @@ class BaseShip {
 		$strippedShip->pointCostEnh = $this->pointCostEnh;
 		
 		//unit enhancements
-		if($this->enhancementTooltip !== ''){ //enhancements exist!			
-			$strippedShip->enhancementTooltip = $this->enhancementTooltip; 
+		if($this->enhancementTooltip !== ''){ //enhancements exist!
+			$strippedShip->enhancementTooltip = $this->enhancementTooltip;
 			$strippedShip = Enhancements::addUnitEnhancementsForJSON($this, $strippedShip);//modifies $strippedShip  object
+		}
+
+		//Stage S (fleet-value attribution): for an integrated-fighter carrier, send the
+		//number of integrated fighters it BOUGHT and their per-craft CP cost. The carrier's
+		//enhValue covers all of them; the fleet list values LAUNCHED integrated fighters on
+		//their own flight rows, so it nets the launched ones off the carrier (and credits
+		//them back on dock). Held count is read client-side from the ShadowHangar hangarUsage.
+		if (HangarOps::shipHasShadowHangar($this)) {
+			list($intFtrCount, $intFtrPerCraft) = HangarOps::integratedFighterPurchase($this);
+			if ($intFtrCount > 0) {
+				$strippedShip->integratedFighterCount    = $intFtrCount;
+				$strippedShip->integratedFighterPerCraft = $intFtrPerCraft;
+			}
 		}
 
 		//Push Specialists updates to Ship variables when used

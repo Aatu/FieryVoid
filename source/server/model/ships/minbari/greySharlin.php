@@ -33,7 +33,7 @@ class GreySharlin extends BaseShip{
         $this->addPrimarySystem(new Scanner(6, 35, 4, 14));
         $this->addPrimarySystem(new Engine(6, 31, 0, 15, 4));
         $this->addPrimarySystem(new JumpEngine(6, 30, 4, 10));
-		$this->addPrimarySystem(new Hangar(6, 28));
+		$this->addPrimarySystem(new Hangar(6, 28, 12));
         $this->addPrimarySystem(new Jammer(6, 10, 5));
         $this->addPrimarySystem(new TractorBeam(6, 10, 0, 0));
 

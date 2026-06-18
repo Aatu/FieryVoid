@@ -496,10 +496,22 @@ window.lobbyEnhancements = {
 
 					case 'SHAD_FTRL':
 						if (!ship.ftrlEnh) {
-							let struct = shipManager.systems.getStructureSystem(ship, 0);
-							if (struct) {
-								struct.maxhealth -= enhCount;
-								ship.notes += "<br>" + enhCount + " fighter(s) spawned";
+							// Stage S: integrated-fighter (ShadowHangar) ships BUY their
+							// fighters here — structure is only lost dynamically when a
+							// fighter is destroyed (Fighter Bomb), NOT on selection.
+							// Mirrors the server gate (Enhancements::shipHasShadowHangar):
+							// only LEGACY plain-Hangar Shadow ships statically shave structure.
+							let hasShadowHangar = ship.systems.some(
+								(s) => s && s.name == "hangar" && s.isShadowHangar
+							);
+							if (hasShadowHangar) {
+								ship.notes += "<br>" + enhCount + " integrated fighter(s)";
+							} else {
+								let struct = shipManager.systems.getStructureSystem(ship, 0);
+								if (struct) {
+									struct.maxhealth -= enhCount;
+									ship.notes += "<br>" + enhCount + " fighter(s) spawned";
+								}
 							}
 						}
 						ship.ftrlEnh = true;

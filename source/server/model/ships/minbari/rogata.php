@@ -29,7 +29,7 @@ class Rogata extends HeavyCombatVessel{
         $this->addPrimarySystem(new Scanner(5, 16, 4, 8));
         $this->addPrimarySystem(new Engine(5, 28, 0, 14, 3));
         $this->addPrimarySystem(new Jammer(4, 8, 5));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 3));
         $this->addPrimarySystem(new GraviticThruster(4, 15, 0, 6, 4));
         $this->addPrimarySystem(new FusionCannon(3, 8, 1, 300, 60));

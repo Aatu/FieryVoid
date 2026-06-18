@@ -13,7 +13,8 @@ class CottenAlpha extends BaseShip{
 //			$this->canvasSize = 175; //img has 200px per side
  		$this->unofficial = 'S'; //HRT design released after AoG demise
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
-       
+		$this->fighters = array("cargo shuttles"=>12); 
+
         $this->isd = 2176;
 
         $this->forwardDefense = 16;
@@ -30,7 +31,7 @@ class CottenAlpha extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 16, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(4, 12));
+        $this->addPrimarySystem(new Hangar(4, 12, 12));
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 2, 1));

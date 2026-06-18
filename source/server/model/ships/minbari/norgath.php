@@ -47,7 +47,7 @@ class Norgath extends StarBaseSixSections{
         
 		$this->addPrimarySystem(new Scanner(8, 36, 4, 12));
 		$this->addPrimarySystem(new Scanner(8, 36, 4, 12));
-		$this->addPrimarySystem(new Hangar(8, 6));
+		$this->addPrimarySystem(new Hangar(8, 6, 2));
 		$this->addPrimarySystem(new Jammer(8, 8, 5));
 		$this->addPrimarySystem(new Jammer(8, 8, 5));
 		$this->addPrimarySystem(new TractorBeam(8, 4, 0, 0));

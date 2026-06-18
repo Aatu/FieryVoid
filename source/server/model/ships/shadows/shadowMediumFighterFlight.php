@@ -9,6 +9,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
 		$this->phpclass = "ShadowMediumFighterFlight";
 		$this->shipClass = "Medium Fighters";
 		$this->imagePath = "img/ships/ShadowFighter.png";
+		$this->variantOf = 'NONE'; //Cannot be bought from Fleet Selection, only spanwned by a ship.
 	    
 		$this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -19,7 +20,7 @@ class ShadowMediumFighterFlight extends FighterFlight{
 		*/
 		Enhancements::nonstandardEnhancementSet($this, 'ShadowFighter');
 		
-		$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement (the latter for scenarios only).";
+		//$this->notes = "Shadow fighters are integral part of their carriers. For every Shadow fighter included in fleet, appropriate carrier should take a level of Fighter Launched enhancement OR fighter should take Uncontrolled enhancement (the latter for scenarios only).";
 		
 		$this->forwardDefense = 7;
 		$this->sideDefense = 7;
