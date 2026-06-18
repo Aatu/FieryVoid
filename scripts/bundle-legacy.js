@@ -53,7 +53,10 @@ const bundles = [
         sourceFile: 'source/public/game.php',
         outputFile: 'source/public/client/game.legacy.bundle.js',
         excluded: [
-            'client/lib/three.min.js',
+            // three.shim.bundle.js (the tree-shaken THREE) is loaded via an
+            // AssetLoader::getAssetUrl() <?php> tag, which extractScriptSources already
+            // skips — so it never enters the legacy bundle. (The old vendored
+            // three.min.js literal lived here before perf #5.)
             'client/lib/THREE.MeshLine.js',
             'client/UI/reactJs/UI.bundle.js',
             'static/ships.js',

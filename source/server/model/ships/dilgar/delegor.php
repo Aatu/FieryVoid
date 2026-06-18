@@ -31,7 +31,7 @@ class Delegor extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 3, 0, 0));
         $this->addPrimarySystem(new Scanner(2, 4, 2, 3));
         $this->addPrimarySystem(new Engine(2, 5, 0, 2, 2));
-        $this->addPrimarySystem(new Hangar(2, 1));
+        $this->addPrimarySystem(new Hangar(2, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 6, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 6, 0, 3, 4));
 

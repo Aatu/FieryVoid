@@ -81,6 +81,19 @@ class SplitLaunchedFighter extends Critical{
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
 }
+
+//Stage S (S-d): an integrated (Shadow) fighter whose carrier-structure tether box was
+//destroyed in combat. It is SEVERED — keeps fighting but can never land/reabsorb (the
+//carrier has no box to receive it into). Permanent (repairPriority 0, no turnend).
+//Set by HangarOps::applyCutOffCrit; read by isCutOffIntegratedFlight (landing gate +
+//per-turn coupling). Marker only — no stat effect; carries a "CUT OFF" tooltip.
+class ShadowFighterCutOff extends Critical{
+    public $description = "CUT OFF";
+	public $repairPriority = 0;//severed permanently — never repaired
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
 	
 	
 

@@ -33,7 +33,8 @@ class ShipSystem {
     public $primary = false; //is this a core system?
     public $isPrimaryTargetable = false; //can this system be targeted by called shot if it's on PRIMARY?	
     public $isTargetable = true; //false means it cannot be targeted at all by called shots! - good for technical systems :)
-    
+    public $hideInShipWindow = false; //if true, system is omitted from ship-window icon grid (technical-only systems with no gameplay interaction)
+
     public $forceCriticalRoll = false; //true forces critical roll even if no damage was done
 	
     public $criticals = array();

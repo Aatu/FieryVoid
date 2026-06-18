@@ -30,7 +30,7 @@ class NovaMlpa extends BaseShip{
         $this->addPrimarySystem(new Scanner(6, 20, 4, 8));
         $this->addPrimarySystem(new Engine(6, 20, 0, 6, 3));
 		$this->addPrimarySystem(new JumpEngine(6, 20, 3, 24));
-		$this->addPrimarySystem(new Hangar(6, 26));
+		$this->addPrimarySystem(new Hangar(6, 26, 12));
         
     
         

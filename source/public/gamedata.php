@@ -22,17 +22,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     }
 }
 
-// APCu Fast Poll: Check if we can exit early without touching DB
+// APCu Fast Poll: Check if we can exit early without touching DB.
+// Must use the SAME prefix Manager writes last_update under (Manager::getCachePrefix(),
+// which includes the deploy-version suffix) — otherwise after a deploy this reads a
+// stale/absent key and the optimization silently stops working.
 if (function_exists('apcu_fetch') && isset($_GET['gameid']) && isset($_GET['last_time'])) {
-    require_once dirname(__DIR__) . '/server/varconfig.php';
-    $prefix = ($database_name ?? 'default') . '_';
+    $prefix = Manager::getCachePrefix();
     $gameid = $_GET['gameid'];
     $serverTime = apcu_fetch("{$prefix}game_{$gameid}_last_update");
-    if ($serverTime && $serverTime <= (float)$_GET['last_time']) {
-         //error_log("Gamedata: Fast Poll EXEMPT - " . $_SERVER['REMOTE_ADDR']);
+    // Treat "no newer data" with the same 1ms tolerance Manager uses when it
+    // compares timestamps (Manager::getTacGamedataJSON: abs(ts - timestamp) < 0.001).
+    // A bare <= here while Manager uses a tolerance window means a change landing
+    // within the same millisecond could be classified differently by the two paths.
+    if ($serverTime && $serverTime <= (float)$_GET['last_time'] + 0.001) {
+         Manager::apcuLog("FAST-POLL EXEMPT game=$gameid serverTime=$serverTime last_time={$_GET['last_time']}");
          echo "{}";
          exit;
     }
+    Manager::apcuLog("FAST-POLL MISS game=$gameid serverTime=" . var_export($serverTime, true) . " last_time={$_GET['last_time']} → full request");
 }
 
 try {

@@ -39,8 +39,10 @@ class gaimRalla extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 6, 1));
         $this->addFrontSystem(new LightPulse(2, 4, 2, 180, 60));
         $this->addFrontSystem(new LightPulse(2, 4, 2, 300, 180));
-        $this->addFrontSystem(new Hangar(0, 6));
-        $this->addFrontSystem(new Hangar(0, 6));
+        //$this->addFrontSystem(new Hangar(0, 6));
+        //$this->addFrontSystem(new Hangar(0, 6));
+		$this->addFrontSystem(new Hangar(0, 6, 6, 0, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay
+		$this->addFrontSystem(new Hangar(0, 6, 6, 0, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay				
 		$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
 		$this->addFrontSystem(new MediumPulse(3, 6, 3, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 3));

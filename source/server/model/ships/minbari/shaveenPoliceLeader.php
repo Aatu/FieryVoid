@@ -23,13 +23,13 @@ class ShaveenPoliceLeader extends MediumShip{
 		$this->iniativebonus = 75;
 		$this->isd = 2254;
 		$this->variantOf = "Shaveen Patrol Cutter";
-        //$this->fighters = array("shuttles"=>1);
+        $this->fighters = array("flyers"=>1);
 
         $this->addPrimarySystem(new Reactor(4, 13, 0, 0));
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 3, 9));
         $this->addPrimarySystem(new Engine(3, 13, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
 		$this->addPrimarySystem(new GraviticThruster(4, 12, 0, 4, 3));
 		$this->addPrimarySystem(new GraviticThruster(4, 12, 0, 4, 4));
         $this->addPrimarySystem(new Jammer(4, 8, 5));

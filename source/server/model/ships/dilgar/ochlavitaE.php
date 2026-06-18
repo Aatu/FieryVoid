@@ -28,7 +28,7 @@ class OchlavitaE extends HeavyCombatVessel{
 	$this->addPrimarySystem(new CnC(5, 15, 0, 0));
 	$this->addPrimarySystem(new Scanner(5, 12, 4, 8));
 	$this->addPrimarySystem(new Engine(5, 13, 0, 6, 2));
-	$this->addPrimarySystem(new Hangar(3, 2));
+	$this->addPrimarySystem(new Hangar(3, 2, 2));
 	$this->addPrimarySystem(new Thruster(3, 11, 0, 4, 3));
 	$this->addPrimarySystem(new Thruster(3, 11, 0, 4, 4));
 	  

@@ -32,7 +32,7 @@ class OracleScoutEpsilon extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(5, 16, 4, 7));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
         $this->addPrimarySystem(new JumpEngine(5, 20, 4, 24));
-		$this->addPrimarySystem(new Hangar(4, 8));
+		$this->addPrimarySystem(new Hangar(4, 4, 2));
 		$this->addPrimarySystem(new StdParticleBeam(3, 4, 1, 0, 360));
 
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

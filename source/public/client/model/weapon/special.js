@@ -1106,3 +1106,21 @@ GrapplingClaw.prototype.initializationUpdate = function() {
 
 	return this;
 };
+
+
+// Stage S (S-f): Shadow Fighter Bomb. A thin Weapon subclass — its hex-target
+// firing/targeting UI (arc fan, range, hex picker) is driven entirely by the
+// json blueprint fields (hextarget:true, range, startArc/endArc) the server
+// ships, so no behaviour override is needed here. The actual fighter burst is
+// resolved server-side (ShadowFighterBomb::fire → HangarOps::performBombLaunch).
+var ShadowFighterBomb = function ShadowFighterBomb(json, ship) {
+    Weapon.call(this, json, ship);
+};
+ShadowFighterBomb.prototype = Object.create(Weapon.prototype);
+ShadowFighterBomb.prototype.constructor = ShadowFighterBomb;
+
+// Friendly mode label in the fire menu (no enemy-facing reveal needed — the
+// burst is visible once fighters appear).
+ShadowFighterBomb.prototype.getModeNameForEnemy = function (fireOrder) {
+    return "Fighter Bomb";
+};

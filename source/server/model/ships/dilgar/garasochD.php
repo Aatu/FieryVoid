@@ -32,7 +32,7 @@ class GarasochD extends BaseShip{
         $this->addPrimarySystem(new FlagBridge(5, 25, 0, 2, 'Pentacan Formation', 9,  false, true, false, false));		                
         $this->addPrimarySystem(new Scanner(5, 14, 3, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(4, 28));
+        $this->addPrimarySystem(new Hangar(4, 28, 12));
         $this->addPrimarySystem(new JumpEngine(5, 16, 4, 36));
 
         $this->addFrontSystem(new HeavyBolter(4, 10, 6, 300, 60));

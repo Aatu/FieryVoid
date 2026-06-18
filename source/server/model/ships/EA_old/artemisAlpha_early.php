@@ -28,7 +28,7 @@ class ArtemisAlpha_early extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 2, 5));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 2));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(4, 11, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(4, 11, 0, 3, 4));
         $this->addPrimarySystem(new MediumPlasma(4, 5, 3, 240, 0));

@@ -45,6 +45,11 @@ function dockedCraftStashValue(ship) {
     for (var s = 0; s < ship.systems.length; s++) {
         var sys = ship.systems[s];
         if (!sys || !Array.isArray(sys.hangarUsage)) continue;
+        //Stage S: held integrated fighters (ShadowHangar bays) are NOT credited here —
+        //the carrier's enhValue already pays for the whole integrated complement, and
+        //the launched ones are netted off separately (see integratedFighterCarrierAdjust).
+        //Counting the held ones here too would double-credit the carrier.
+        if (sys.isShadowHangar) continue;
         for (var u = 0; u < sys.hangarUsage.length; u++) {
             var entry = sys.hangarUsage[u];
             if (!entry || entry.dockedFlightId) continue;
@@ -55,6 +60,74 @@ function dockedCraftStashValue(ship) {
         }
     }
     return Math.round(total);
+}
+
+//Stage S (fleet-value attribution): integrated Shadow fighters are PAID FOR by the
+//carrier (the SHAD_FTRL enhValue covers the whole complement), but once LAUNCHED each
+//is valued on its own flight row in the fleet list. To keep the fleet total honest and
+//make the carrier's value move with its fighters (drop on launch, rise on dock), we net
+//the LAUNCHED-OUT integrated fighters off the carrier's value here.
+//
+//  launchedOut = purchased (integratedFighterCount) - heldNow (anonymous ShadowHangar
+//                hangarUsage entries still in the bay)
+//  adjust      = launchedOut * perCraft   (subtracted from the carrier's value)
+//
+//No carrier<->flight linkage exists client-side, so we derive launchedOut from the gap
+//between what was bought and what's still docked — exact because every integrated fighter
+//is either held in a ShadowHangar bay or out as a flight row. Returns 0 for non-integrated
+//ships. The carrier's own value (base + enhValue) keeps the HELD fighters' share; the
+//launched flight rows (pointCost * craft/6 via activeFlightValue) carry the rest, so the
+//fleet total is conserved and reabsorbed fighters silently fold back into the carrier.
+function integratedFighterCarrierAdjust(ship) {
+    var purchased = parseInt(ship.integratedFighterCount || 0, 10);
+    if (purchased <= 0 || !Array.isArray(ship.systems)) return 0;
+    var perCraft = parseInt(ship.integratedFighterPerCraft || 0, 10);
+    if (perCraft <= 0) return 0;
+
+    //A destroyed (non-jumped) carrier already lost its bay; nothing to net off (its
+    //launched flights are valued on their own rows regardless).
+    var heldNow = 0;
+    if (!shipManager.isDestroyed(ship) || shipManager.hasJumpedNotDestroyed(ship)) {
+        for (var s = 0; s < ship.systems.length; s++) {
+            var sys = ship.systems[s];
+            if (!sys || !sys.isShadowHangar || !Array.isArray(sys.hangarUsage)) continue;
+            for (var u = 0; u < sys.hangarUsage.length; u++) {
+                var entry = sys.hangarUsage[u];
+                if (!entry || entry.phpclass !== 'ShadowMediumFighterFlight') continue;
+                if (entry.cannotLaunch) continue;   //wreck — no value
+                heldNow += parseInt(entry.flightSize || 1, 10);
+            }
+        }
+    }
+
+    var launchedOut = Math.max(0, purchased - heldNow);
+    return launchedOut * perCraft;
+}
+
+//Stage S: true when an integrated Shadow flight (ShadowMediumFighterFlight) has fully
+//reabsorbed into its carrier — i.e. it has NO craft still in space. A craft is "in space"
+//if it's neither destroyed nor docked/disengaged/split-launched. (A CUT OFF craft IS still
+//in space and flying, so a flight holding any cut-off fighter is NOT fully reabsorbed and
+//keeps its row.) When every craft has docked, the flight's value has folded back into the
+//carrier (integratedFighterCarrierAdjust credits the bay), so the row would only duplicate
+//— and, since docked craft read as destroyed, it would mislabel as "Destroyed".
+function isFullyReabsorbedIntegratedFlight(flight) {
+    if (!flight || flight.flight !== true || !Array.isArray(flight.systems)) return false;
+    //Integrated fighters only (ordinary flights keep their normal docked/destroyed rows).
+    if (flight.phpclass !== 'ShadowMediumFighterFlight') return false;
+    var anyInSpace = false;
+    for (var i = 0; i < flight.systems.length; i++) {
+        var ftr = flight.systems[i];
+        if (!ftr || !ftr.fighter) continue;
+        if (ftr.destroyed) continue;
+        if (shipManager.criticals.hasCritical(ftr, "DockedFighter")) continue;
+        if (shipManager.criticals.hasCritical(ftr, "DisengagedFighter")) continue;
+        if (shipManager.criticals.hasCritical(ftr, "SplitLaunchedFighter")) continue;
+        //Still flying (includes CUT OFF craft) — the flight stays on the board.
+        anyInSpace = true;
+        break;
+    }
+    return !anyInSpace;
 }
 
 //Hangar Ops Stage 21.7 (value follow-up): re-base the value of a flight that has
@@ -216,6 +289,13 @@ window.fleetListManager = {
             //flights (combatValue > 0) still render as "Docked" rows.
             if (ship.removed && ship.flight && (ship.combatValue === 0)) continue;
 
+            //Stage S: an integrated Shadow flight that has fully REABSORBED (every craft
+            //landed/docked, none still flying or cut off) is folded back into its carrier's
+            //value — it must NOT render its own row (it would otherwise show as "Destroyed"
+            //since all its fighters are docked-and-inactive but the source flight row may
+            //not be flagged removed). Skip when no craft remain in space (alive or cut off).
+            if (ship.flight && isFullyReabsorbedIntegratedFlight(ship)) continue;
+
             if (ship.userid == slot.playerid && ship.slot == slot.slot) {
                 if (ship.mine) {
                     if (ship.spawned != -1) continue; // Exclude spawned mines
@@ -298,6 +378,16 @@ window.fleetListManager = {
                 }
             }
             baseValue = Math.round(baseValue + (ship.pointCostEnh || 0) + (ship.pointCostEnh2 || 0));
+
+            //Stage S: net LAUNCHED integrated fighters off this carrier BEFORE applying its
+            //combat value — their worth now lives on their own flight rows (valued at their
+            //own CV), so the carrier's combat damage must NOT scale them. The carrier keeps
+            //only its HELD integrated fighters' share of enhValue; its value drops as they
+            //launch and rises as they reabsorb on dock. Subtract from the BASE so the CV
+            //multiply below applies only to the hull + retained complement.
+            var intAdjust = integratedFighterCarrierAdjust(ship);
+            if (intAdjust > 0) baseValue = Math.max(0, baseValue - intAdjust);
+
             var currValue = Math.round(baseValue * effectiveCV / 100);
 
             //Stage 9: carriers carry the point cost of any anonymous docked

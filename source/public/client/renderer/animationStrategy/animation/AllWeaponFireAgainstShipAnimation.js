@@ -154,7 +154,8 @@ window.AllWeaponFireAgainstShipAnimation = function () {
         }
 
         let destroyedNames = getSystemNamesDestroyed(incomingFire);
-        let criticalNames = getSystemNamesCriticals(incomingFire);
+        // Fighter dropouts ride the same orange 'crit' channel as system criticals.
+        let criticalNames = getSystemNamesCriticals(incomingFire).concat(getSystemNamesDisengaged(incomingFire));
 
         for (var i in criticalNames) {
             var crit = criticalNames[i];
@@ -516,6 +517,44 @@ window.AllWeaponFireAgainstShipAnimation = function () {
             if (!seen.has(key)) {
                 seen.add(key);
                 unique.push(crit);
+            }
+        }
+
+        return unique;
+    }
+
+    // Fighter dropouts. Fighter craft are subsystems of a FighterFlight and have
+    // no .ship back-reference, so getSystemNamesCriticals skips them. A craft that
+    // took enough damage to DROP OUT gets a DisengagedFighter crit this turn; surface
+    // those as orange floating text (same 'crit' channel as system criticals) keyed
+    // on the target flight (fireOrder.targetid) instead of the missing system.ship.id.
+    function getSystemNamesDisengaged(incomingFire) {
+        const turn = incomingFire.fireOrder.turn;
+        const flightid = incomingFire.fireOrder.targetid;
+
+        const dropouts = incomingFire.damagesCaused
+            .filter(damage =>
+                !damage.system.ship &&
+                shipManager.criticals.sufferedCritThisTurn(damage.system, turn) &&
+                shipManager.criticals.hasCriticalOnTurn(damage.system, "DisengagedFighter", turn)
+            )
+            .filter(damage => {
+                const shown = window.combatLog.critAnimations[flightid] || [];
+                return !shown.includes(damage.system.id);
+            })
+            .map(damage => ({
+                name: shipManager.systems.getDisplayName(damage.system),
+                shipid: flightid,
+                systemid: damage.system.id
+            }));
+
+        const unique = [];
+        const seen = new Set();
+        for (const drop of dropouts) {
+            const key = drop.shipid + "-" + drop.systemid;
+            if (!seen.has(key)) {
+                seen.add(key);
+                unique.push(drop);
             }
         }
 

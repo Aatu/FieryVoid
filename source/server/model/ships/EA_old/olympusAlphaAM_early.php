@@ -37,7 +37,7 @@ class OlympusAlphaAM_early extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 4, 5));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 4, 4));
         

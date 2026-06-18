@@ -14,6 +14,24 @@ Make sure you have the following installed on your machine:
 - Docker and Docker Compose
 - Node.js and Yarn (for client-side frontend bundling) - Primarily Yarn.
 
+### Installing Node.js and Yarn
+
+Docker runs the server (Nginx/PHP/MariaDB), but the client-side JS bundling (`yarn build` / `yarn watch:legacy`) runs on your host machine, so Node.js and Yarn need to be installed locally.
+
+1. Install Node.js (this also installs npm). Use the current LTS release.
+   - Windows: download the LTS installer from https://nodejs.org/, or run `winget install OpenJS.NodeJS.LTS`
+   - macOS: `brew install node`
+   - Linux: use your distro's package manager (e.g. `sudo apt install nodejs npm`) or https://github.com/nvm-sh/nvm
+
+2. Enable Yarn. Modern Node.js ships with Corepack, which is the recommended way to get Yarn — no separate install needed:
+
+   corepack enable
+   corepack prepare yarn@stable --activate
+
+   (Alternatively, the classic global install still works: `npm install -g yarn`.)
+
+3. Verify both are available by running `node -v` and `yarn -v` in a terminal. Once they report versions you're ready for the "Setup Client-Side Development (Yarn)" step below.
+
 1. Build and Start the Environment
 Open a terminal in the project root folder (c:\FV_env\FieryVoid) and run:
 
@@ -59,6 +77,10 @@ If you need to run server-side scripts (like to generate new staticship files af
 docker-compose exec php bash
 
 Then navigate to /usr/src/current and run 'php generateStaticShipFile.php'
+e.g. 
+cd...
+cd current
+php generateStaticShipFile.php
 
 5. Troubleshooting / Clean Rebuild
 If your containers get out of sync or you need to cleanly force a rebuild of the environment, use:
@@ -136,6 +158,23 @@ When uploading your branch to gitHub it's best not to include these files, as th
 
 Minification (from 3.6.2026):
 The bundler now depends on esbuild to minify the legacy bundles, (already present via Vite, so a normal yarn install covers it), and yarn watch:legacy intentionally produces un-minified output for debuggability while yarn build minifies.
+
+# THREE.js bundle (three.shim.bundle.js) — when to rebuild:
+
+(from 10.6.2026) THREE.js is no longer shipped as the full ~670KB vendored three.min.js. Instead, `scripts/build-three-shim.js` builds a slimmed, tree-shaken bundle (`client/lib/three.shim.bundle.js`, ~500KB) that contains ONLY the THREE features FV actually uses. It's installed onto the global `window.THREE` exactly like before, so none of the legacy client code had to change.
+
+The important thing for devs: the shim only includes the THREE classes/constants currently in use. The full list of what's included is the `import { ... } from 'three'` block at the top of `source/public/client/lib/three-global-shim.src.js` — that's your reference for "is this already available?".
+
+When you DO need to rebuild the THREE bundle:
+- You used a `THREE.Something` that has never been used in FV before (e.g. adding `THREE.Points` for a new particle effect). Add it in TWO places in `three-global-shim.src.js` — the `import { ... }` list AND the object that's assigned to `window.THREE` — then run `yarn build:three` (or any full `yarn build`). Until you do, that symbol will be `undefined` at runtime (it's a runtime error, NOT a build error — so test the feature in-game).
+- Someone bumps the `three` version in package.json (a separate, larger effort — re-test all weapon/FX visuals if so).
+
+When you do NOT need to rebuild it (i.e. almost all the time):
+- Normal work — ships, weapons, systems, game rules, tooltips, React UI, and any renderer/effect code that only uses THREE features already in the list — does NOT touch the THREE bundle. Just rebuild the legacy/UI bundle as usual (`yarn watch:legacy` / `yarn build`).
+
+When in doubt: just run `yarn build`. It runs all three steps in order (THREE shim → Vite/React → legacy bundle), so you can never end up with a stale THREE bundle by running the full build. The standalone `yarn build:three` is only there to save time when you KNOW the THREE bundle is the only thing that changed.
+
+(The old `client/lib/three.min.js` is now unused and can be deleted.)
 
 # Image Optimiser:
 

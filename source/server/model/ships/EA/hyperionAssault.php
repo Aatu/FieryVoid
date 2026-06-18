@@ -14,7 +14,7 @@ class HyperionAssault extends BaseShip{
         $this->variantOf = 'Hyperion Heavy Cruiser (Theta)';
         $this->isd = 2230;
         
-        $this->fighters = array("assault shuttles"=>12);
+        $this->fighters = array("assault shuttles"=>12, "Breaching Pods"=>2);
 
         $this->forwardDefense = 14;
         $this->sideDefense = 16;
@@ -30,7 +30,10 @@ class HyperionAssault extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(6, 16, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(4, 16, 2));
+
+	$hyperionHangar = new Hangar(5, 16, 2);
+	$hyperionHangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
+	$this->addPrimarySystem($hyperionHangar);        
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));

@@ -29,7 +29,7 @@ class TrathartiG extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 4, 9));
         $this->addPrimarySystem(new Engine(4, 13, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 2));
 
         $this->addFrontSystem(new ScatterPulsar(1, 4, 2, 240, 60));
         $this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 120));
