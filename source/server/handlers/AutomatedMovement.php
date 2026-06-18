@@ -277,6 +277,7 @@ class AutomatedMovement
         foreach ($gamedata->ships as $other) {
             if ($other->id === $ship->id) continue;
             if ($other->team === $ship->team) continue;
+            if ($other instanceof FighterFlight) continue;
             if ($other->isDestroyed()) continue;
             if ($other->isTerrain()) continue;
             if ($other->mine) continue;
