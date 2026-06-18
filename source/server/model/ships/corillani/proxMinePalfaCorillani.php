@@ -7,7 +7,7 @@ class proxMinePalfaCorillani extends Mine{
 		$this->pointCost = 12;
 		$this->faction = "Corillani Theocracy";
         $this->phpclass = "proxMinePalfaCorillani";
-        $this->imagePath = "img/ships/pakmaraMine.png";
+        $this->imagePath = "img/ships/corillaniMine.png";
         $this->shipClass = "Pal'fa Proximity Mine";
 		$this->occurence = "common";
 		//$this->variantOf = 'NONE';

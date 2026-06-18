@@ -7,7 +7,7 @@ class captorMineTilorCorillani extends Mine{
 		$this->pointCost = 18;
 		$this->faction = "Corillani Theocracy";
         $this->phpclass = "captorMineTilorCorillani";
-        $this->imagePath = "img/ships/pakmaraMine.png";
+        $this->imagePath = "img/ships/corillaniMine.png";
         $this->shipClass = "Ti'Lor Captor Mine";
 		$this->occurence = "common";
 		//$this->variantOf = 'NONE';

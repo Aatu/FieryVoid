@@ -7,7 +7,7 @@ class dewMineCortiCorillani extends Mine{
 		$this->pointCost = 32;
 		$this->faction = "Corillani Theocracy";
         $this->phpclass = "dewMineCortiCorillani";
-        $this->imagePath = "img/ships/pakmaraMine.png";
+        $this->imagePath = "img/ships/corillaniMine.png";
         $this->shipClass = "Cort'i DEW Mine";
 		$this->occurence = "common";
 		//$this->variantOf = "Type-BT DEW Mine";
