@@ -88,6 +88,8 @@ class Shuttle extends FighterFlight
                 return array('img/ships/shuttleGrome.png', 'img/ships/shuttleGrome_large.png');
             case 'Hyach Gerontocracy'; 
                 return array('img/ships/shuttleHyach.png', 'img/ships/shuttleHyach_large.png');                                                                                                                                                  
+            case 'Ipsha Baronies':
+                return array('img/ships/shuttleIpsha.png', 'img/ships/shuttleIpsha_large.png');                
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
