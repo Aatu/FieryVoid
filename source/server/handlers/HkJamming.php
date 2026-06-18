@@ -67,11 +67,13 @@ class HkJamming
 
         if ($totalJam < 1) return; //no jamming applied → no roll
 
-        //Impact exemption: "if the targeted H-K fight impacts its target, no EW
-        //allocated against it on that turn has any effect." A ram that connected
-        //this turn shows as a RammingAttack fire order with shotshit > 0 (firing
-        //has already resolved by the time setCriticals runs).
-        if (self::flightImpactedThisTurn($flight, $gamedata)) return;
+        //A ram impact does NOT suppress jamming. The original "no EW has effect if the
+        //H-K impacts its target" clause only means jamming can't PREVENT the ram itself —
+        //surviving fighters in the flight are still disrupted next turn. So we always roll
+        //UNLESS the whole flight is gone (nothing left to disrupt). Firing (including ram
+        //self-destruct) has already resolved by the time setCriticals runs, so
+        //countActiveCraft reflects the final post-ram composition.
+        if ($flight->countActiveCraft($gamedata->turn) < 1) return;
 
         //Replay-deterministic d20.
         $roll = self::nextJammingRoll($flight, $gamedata);
@@ -163,20 +165,6 @@ class HkJamming
         }
     }
 
-    /* True when the flight landed a ram this turn (impact exemption). Ramming has
-     * already resolved in Firing::fireWeapons before setCriticals, so a connecting
-     * ram shows as a RammingAttack fire order with shotshit > 0 for this turn. */
-    private static function flightImpactedThisTurn($flight, $gamedata)
-    {
-        foreach ($flight->getAllFireOrders($gamedata->turn) as $fire) {
-            if ($fire->turn != $gamedata->turn) continue;
-            $weapon = $flight->getSystemById($fire->weaponid);
-            if (!$weapon || empty($weapon->isRammingAttack)) continue;
-            if ($fire->shotshit > 0) return true;
-        }
-        return false;
-    }
-
     /* ---- Replay-deterministic roll (mirrors HangarOps inadequate-roll FIFO) ---- */
 
     private static function nextJammingRoll($flight, $gamedata)
@@ -217,7 +205,15 @@ class HkJamming
     }
 
     /* Surface the result in the combat log via the flight's RammingAttack system,
-     * the self-targeted convention used by marine missions / Inadequate Hangars. */
+     * the self-targeted convention used by marine missions / Inadequate Hangars.
+     *
+     * IMPORTANT: this is a TECHNICAL (informational) order — it deals no damage. It MUST
+     * have shotshit = 0 (and shots = 0). The HK's RammingAttack (weaponid) is shared with
+     * the fighters' ACTUAL rams on the same turn; submitDamages links damage with an
+     * unknown fireorderid by (shooterid, weaponid, turn, shotshit>0). If this order had
+     * shotshit>0 it would steal the ram self-destruct damage (it was wrongly showing 12/14
+     * damage on the jamming line). shotshit=0 excludes it from that lookup, so the damage
+     * attaches to the real ram order instead. pubnotes still displays regardless. */
     private static function logResult($flight, $desc, $rawRoll, $modified, $totalJam, $gamedata)
     {
         $rammingSystem = $flight->getSystemByName("RammingAttack");
@@ -226,7 +222,7 @@ class HkJamming
         $fireOrder = new FireOrder(
             -1, "normal", $flight->id, $flight->id,
             $rammingSystem->id, -1, $gamedata->turn, 1,
-            100, $rawRoll, 1, 1, 0,
+            0, $rawRoll, 0, 0, 0,
             0, 0, 'HkJamming', 10000
         );
         $jamMod = $totalJam - 1; //+1 per JAM point beyond the first

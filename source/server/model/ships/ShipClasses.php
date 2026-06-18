@@ -1454,15 +1454,24 @@ class BaseShip {
         
         public function getLastMovement(){
             $m = null;
-            
+
             if (!is_array($this->movement) || empty($this->movement))
                 return null;
-            
+
             foreach($this->movement as $elementKey => $move) {
                 $m = $move;
-            } 
-            
+            }
+
             return $m;
+        }
+
+        /* AutomatedMovement seam: describes how this unit should move when under server
+         * (non-player) control this turn. Default is straight-line 'drift'. Units with
+         * richer automated behaviour (future CPU ships; eventually Strategy-A seeking
+         * HKs) override this to return e.g. ['type'=>'seek','targetSize'=>..,'jink'=>2].
+         * Only consulted when AutomatedMovement::isUnderAutomatedControl() is true. */
+        public function getAutomatedMovementIntent($gamedata){
+            return array('type' => 'drift', 'jink' => 0);
         }
         
         public function getSpeed(){

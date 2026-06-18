@@ -55,7 +55,15 @@ class HkShiningStar extends FighterFlight{
         $iniBonus = parent::getInitiativebonus($gamedata);
 	$iniBonus += HkControlNode::getIniMod($this->userid,$gamedata);
         return $iniBonus;
-    }	
-    
+    }
+
+    /* When jamming severs control (Uncontrolled), the HK pursues the nearest enemy ship
+     * and rams it ('seek'). Jinks at its default level (2, fixed — no per-flight settings
+     * UI); jinking costs thrust (1/level). AutomatedMovement falls back to drift if no
+     * enemy is in play. */
+    public function getAutomatedMovementIntent($gamedata){
+        return array('type' => 'seek', 'jink' => 2);
+    }
+
 }
 ?>

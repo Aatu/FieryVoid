@@ -41,6 +41,7 @@ spl_autoload_register(
                 'antophearly' => '/server/model/ships/brakiri/antophEarly.php',
                 'antophupgrade' => '/server/model/ships/brakiri/antophUpgrade.php',
                 'aoe' => '/server/model/weapons/AoE.php',
+                'automatedmovement' => '/server/handlers/AutomatedMovement.php',
                 //'apollo' => '/server/model/ships/EA/apollo.php',
                 //'apollofull' => '/server/model/ships/EA/apolloFull.php',
                 'arcismus' => '/server/model/ships/narn/arcismus.php',
