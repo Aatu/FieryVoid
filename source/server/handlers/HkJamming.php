@@ -226,7 +226,7 @@ class HkJamming
             0, 0, 'HkJamming', 10000
         );
         $jamMod = $totalJam - 1; //+1 per JAM point beyond the first
-        $fireOrder->pubnotes = "<br>JAMMING: $totalJam Jamming point(s) applied. Rolled $rawRoll +$jamMod = $modified. Result: $desc.";
+        $fireOrder->pubnotes = "<br>JAMMING: $totalJam Jamming point(s) applied. Rolled $rawRoll + $jamMod = $modified. Result: $desc.";
         $fireOrder->addToDB = true;
         $rammingSystem->fireOrders[] = $fireOrder;
     }
