@@ -94,6 +94,7 @@ class Shuttle extends FighterFlight
             case 'Narn Regime':
                 return array('img/ships/ShuttleNarn.png', 'img/ships/ShuttleNarn_large.png'); 
             case 'Orieni Imperium':
+            case 'Great Crusade Orieni Imperium':
                 return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');
             case 'Raiders':
                 return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
@@ -1938,6 +1939,21 @@ class ShuttleSshelath extends Shuttle
     }
 }
 
+class ShuttleGCOrieni extends ShuttleOrieni
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleOrieni";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Centauri Republic";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
 
 
 
@@ -1997,3 +2013,4 @@ class MinesweepingShuttleCircasian extends ShuttleCircasian { protected function
 class MinesweepingShuttleKastan extends ShuttleKastan { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleKastan"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
 class MinesweepingShuttleBloodSwords extends ShuttleBloodSwords { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBloodSwords"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
 class MinesweepingShuttleSshelath extends ShuttleSshelath { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleSshelath"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleGCOrieni extends ShuttleGCOrieni { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleGCOrieni"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }

@@ -520,6 +520,7 @@ class HangarOps {
 		'Escalation Wars Kastan Monarchy' => 'ShuttleKastan',
 		'Escalation Wars Blood Sword Raiders' => 'ShuttleBloodSwords',
 		"Escalation Wars Sshel'ath Alliance" => 'ShuttleSshelath',
+		'Great Crusade Orieni Imperium'  => 'ShuttleGCOrieni',
 
 	);
 
