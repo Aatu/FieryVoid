@@ -10,7 +10,7 @@ class JaStat extends StarBaseFiveSections{
 		$this->faction = "Narn Regime";
 		$this->phpclass = "JaStat";
 		$this->shipClass = "Ja'Stat Warbase";
-		$this->fighters = array("heavy"=>36); 
+		$this->fighters = array("heavy"=>30); 
 	    $this->isd = 2243;
 
 		$this->shipSizeClass = 3;
