@@ -522,6 +522,7 @@ class HangarOps {
 		"Escalation Wars Sshel'ath Alliance" => 'ShuttleSshelath',
 		'Great Crusade Orieni Imperium'  => 'ShuttleGCOrieni',
 		'House Valheru' => 'ShuttleValheru',
+		'Barada Imperium' => 'ShuttleBarada',
 
 	);
 
