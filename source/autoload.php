@@ -3939,7 +3939,11 @@ spl_autoload_register(
                 'shuttlevorlons' => '/server/model/ships/Shuttle.php',                                              
                 'shuttlevree' => '/server/model/ships/Shuttle.php',
                 'shuttleyolu' => '/server/model/ships/Shuttle.php',
-                
+ 
+				//Custom Faction Default SHUTTLES
+                'shuttlecraytan' => '/server/model/ships/Shuttle.php',
+                'shuttlecraytanearly' => '/server/model/ships/Shuttle.php',
+ 
                 //MINESWEEPING VARIANTS OF DEFAULT SHUTTLES
                 'minesweepingshuttleabbai' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttlealacan' => '/server/model/ships/Shuttle.php',

@@ -1473,6 +1473,61 @@ class ShuttleYolu extends Shuttle
 }
 
 
+
+// Custom Faction Shuttles
+
+class ShuttleCraytan extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleCraytan";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Craytan Union";
+        $this->forwardDefense = 10;
+        $this->sideDefense = 10;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleCraytanEarly extends ShuttleCraytan
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleCraytan";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Craytan Union (early)";
+        $this->forwardDefense = 10;
+        $this->sideDefense = 10;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+
+
+
 /* === Faction minesweeping shuttle variants ===========================
  * Each extends its faction default shuttle (inheriting that faction's defence,
  * thrust, art and populate()) and layers on the minesweeping behaviour.
