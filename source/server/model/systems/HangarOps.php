@@ -521,6 +521,7 @@ class HangarOps {
 		'Escalation Wars Blood Sword Raiders' => 'ShuttleBloodSwords',
 		"Escalation Wars Sshel'ath Alliance" => 'ShuttleSshelath',
 		'Great Crusade Orieni Imperium'  => 'ShuttleGCOrieni',
+		'House Valheru' => 'ShuttleValheru',
 
 	);
 

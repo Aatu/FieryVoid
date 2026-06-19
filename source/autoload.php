@@ -3960,6 +3960,7 @@ spl_autoload_register(
                 'shuttlebloodswords' => '/server/model/ships/Shuttle.php',
                 'shuttlesshelath' => '/server/model/ships/Shuttle.php',
                 'shuttlegcorieni' => '/server/model/ships/Shuttle.php',
+                'shuttlegvalheru' => '/server/model/ships/Shuttle.php',
  
                 //MINESWEEPING VARIANTS OF DEFAULT SHUTTLES
                 'minesweepingshuttleabbai' => '/server/model/ships/Shuttle.php',
@@ -4016,6 +4017,7 @@ spl_autoload_register(
                 'minesweepingshuttlebloodswords' => '/server/model/ships/Shuttle.php',                                
                 'minesweepingshuttlesshelath' => '/server/model/ships/Shuttle.php',                                
                 'minesweepingshuttlegcorieni' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlevalheru' => '/server/model/ships/Shuttle.php',                                
 
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',

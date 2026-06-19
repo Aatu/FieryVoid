@@ -98,6 +98,8 @@ class Shuttle extends FighterFlight
                 return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');
             case 'Raiders':
                 return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
+            case 'House Valheru':
+                return array('img/ships/ShuttleValheru.png', 'img/ships/ShuttleValheru_large.png'); 
             default: //Also used by EA, Hurr etc.
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
@@ -1954,6 +1956,21 @@ class ShuttleGCOrieni extends ShuttleOrieni
     }
 }
 
+class ShuttleValheru extends ShuttleCent
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleSshelath";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Sshel'ath Alliance";
+        $this->forwardDefense = 8;
+        $this->sideDefense = 10;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
 
 
 
@@ -2014,3 +2031,4 @@ class MinesweepingShuttleKastan extends ShuttleKastan { protected function setSh
 class MinesweepingShuttleBloodSwords extends ShuttleBloodSwords { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBloodSwords"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
 class MinesweepingShuttleSshelath extends ShuttleSshelath { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleSshelath"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
 class MinesweepingShuttleGCOrieni extends ShuttleGCOrieni { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleGCOrieni"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleValheru extends ShuttleValheru { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleValheru"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }

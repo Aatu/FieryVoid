@@ -31,7 +31,7 @@ class Mograte extends MediumShip{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 8));
         $this->addPrimarySystem(new Engine(4, 11, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(4, 1));
+		$this->addPrimarySystem(new Hangar(4, 1, 1));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
 		$this->addPrimarySystem(new TwinArray(4, 6, 2, 0, 360));

@@ -32,7 +32,7 @@ class Balvarus extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(7, 16, 5, 8));
         $this->addPrimarySystem(new Engine(7, 20, 0, 10, 3));
-		$this->addPrimarySystem(new Hangar(6, 27));
+		$this->addPrimarySystem(new Hangar(6, 27, 12));
 		$this->addPrimarySystem(new JumpEngine(7, 18, 3, 16));
         
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 180, 0));
