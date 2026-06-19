@@ -371,6 +371,60 @@ window.gamedata = {
         window.webglScene.receiveGamedata(this);
     },
 
+    //True if a docked hangarUsage entry is a faction-default shuttle (Shuttle
+    //subclass / Flyer / MinesweepingShuttle) rather than a real fighter. Mirrors
+    //HangarOps::isDefaultShuttleClass + the shuttle-pool hangarTypes the server
+    //seats default shuttles under (populateInitialHangarUsage). The full PHP
+    //subclass hierarchy isn't visible client-side, so match the known default
+    //shuttle phpclasses by name (same set as systems.js excludesDefaultShuttles)
+    //and the default-shuttle pool hangarTypes.
+    isDefaultShuttleEntry: function isDefaultShuttleEntry(entry) {
+        if (!entry) return false;
+        var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1, "lifeboats":1 };
+        if (entry.phpclass && shuttleClasses[entry.phpclass]) return true;
+        var t = String(entry.hangarType || "").toLowerCase().trim();
+        if (t === "shuttles" || t === "minesweeping shuttles") return true;
+        return false;
+    },
+
+    //Firing-phase commit warning: true if this carrier still has launchable
+    //(non-default-shuttle) fighters sitting in a hangar that has launch capacity
+    //left this turn AND no launch already ordered on that bay. Mirrors the launch
+    //gate in shipTooltipFireMenu.js hasLaunchableHangar (catapult/rail/ShadowHangar
+    //handling, cannotLaunch wrecks, output budget) but additionally excludes
+    //default shuttles and bays the player has already queued a launch on.
+    shipHasUnlaunchedFighters: function shipHasUnlaunchedFighters(ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var sys = ship.systems[i];
+            if (!sys) continue;
+            var isCat = !!(sys.isCatapult || sys.name === 'catapult');
+            if (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat) continue;
+            //ShadowHangars launch only via the Fighter Bomb weapon — not the launch dialog.
+            if (sys.isShadowHangar) continue;
+            if (shipManager.systems.isDestroyed(ship, sys)) continue;
+            if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
+
+            //Any launchable craft that ISN'T a default shuttle?
+            var hasRealFighter = sys.hangarUsage.some(function (e) {
+                return e && !e.cannotLaunch && !gamedata.isDefaultShuttleEntry(e);
+            });
+            if (!hasRealFighter) continue;
+
+            //A launch already ordered on this bay means the player IS launching here.
+            if (Array.isArray(sys.pendingLaunchOrders) && sys.pendingLaunchOrders.length > 0) continue;
+
+            //Catapults launch regardless of output budget; ordinary hangars/rails
+            //need remaining launch+land budget this turn.
+            if (isCat) return true;
+            var output = parseInt(sys.output || 0, 10);
+            var used = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
+            if (used >= output) continue;
+            return true;
+        }
+        return false;
+    },
+
     onCommitClicked: function onCommitClicked(e) {
 
         if (gamedata.waiting == true) return;
@@ -451,7 +505,7 @@ window.gamedata = {
                     }
                 }
             }
-            confirm.confirm(html + "<br>Are you sure you wish to commit your orders?", gamedata.doCommit);
+            confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to commit your orders?</span>', gamedata.doCommit);
 
 
             // CHECK for NO EW
@@ -708,7 +762,7 @@ window.gamedata = {
                 }
                 html += "<br>";
             }
-            confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
+            confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR INITIAL ORDERS?</span>', gamedata.doCommit);
         }
 
         else if (gamedata.gamephase == 2) {
@@ -738,7 +792,7 @@ window.gamedata = {
             UI.shipMovement.hide();
 
             confirm.confirm(
-                html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
+                html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?</span>',
                 gamedata.doCommit,
                 function () {
                     UI.shipMovement.show();
@@ -823,7 +877,7 @@ window.gamedata = {
             }
 
             if (hasNoFO.length == 0 && hasSplitFO.length == 0) { //Has no ships with no fireOrders at all.
-                confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
                 if (hasNoFO.length > 0) {
@@ -845,7 +899,7 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
-                confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             }
         } else if (gamedata.gamephase == 3) {
             var myShips = [];
@@ -866,11 +920,19 @@ window.gamedata = {
 
             var hasNoFO = [];
             var hasSplitFO = [];
+            var notLaunchedFighters = []; //carriers with unlaunched non-shuttle fighters + launch capacity
 
             for (var ship in myShips) {
                 var fired = 0;
                 var hasReadyGuns = false;
                 var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
+
+                //Warn if this carrier still has launchable fighters (NOT default
+                //shuttles) sitting in a hangar with launch capacity left this turn.
+                if (gamedata.shipHasUnlaunchedFighters(myShips[ship])) {
+                    notLaunchedFighters.push(myShips[ship]);
+                }
+
                 if (!myShips[ship].flight) {
                     for (var i = 0; i < myShips[ship].systems.length; i++) {
                         var currWeapon = myShips[ship].systems[i];
@@ -924,8 +986,8 @@ window.gamedata = {
                 }
             }
 
-            if (hasNoFO.length == 0 && hasSplitFO.length == 0) { //Has no ships with no fireOrders at all.
-                confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+            if (hasNoFO.length == 0 && hasSplitFO.length == 0 && notLaunchedFighters.length == 0) { //No warnings at all.
+                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
                 if (hasNoFO.length > 0) {
@@ -947,9 +1009,21 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
+                if (notLaunchedFighters.length > 0) {
+                    if (html != '') html += "<br>";
+                    //Cobalt-blue header (matches the launch/dock confirm windows' #58c7e6)
+                    //so this warning reads as part of the hangar-operations family.
+                    html += '<span style="color:#58c7e6; ">';
+                    html += "The following ships have not launched fighters:";
+                    html += '</span><br>';
+                    for (var ship in notLaunchedFighters) {
+                        html += '<span class="ship-name">' + notLaunchedFighters[ship].name + ' (' + notLaunchedFighters[ship].shipClass + ')</span>';
+                        html += "<br>";
+                    }
+                }
                 //confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 confirm.confirm(
-                    html + "<br>Are you sure you wish to COMMIT YOUR FIRING ORDERS?",
+                    html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRING ORDERS?</span>',
                     gamedata.doCommit,
                     function () {
                         UI.shipMovement.show(); //To show combat pivot UI again on Cancel
@@ -957,14 +1031,14 @@ window.gamedata = {
                 );
             }
         } else if (gamedata.gamephase != 4) {
-            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+            confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR TURN?</span>', gamedata.doCommit);
             //            if (window.helper.autocomm!=true) {
             //	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
             //            } else {
             //            	gamedata.doCommit();
             //            }	
         } else {
-            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+            confirm.confirmOrSurrender('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR TURN?</span>', gamedata.doCommit, gamedata.onSurrenderClicked);
             //            if (window.helper.autocomm!=true) {
             //	            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
             //            } else {
