@@ -514,6 +514,12 @@ class HangarOps {
 		'Nexus Sal-bez Coalition' => 'ShuttleSalbez',
 		'Nexus Velrax Republic (early)' => 'ShuttleVelraxEarly',
 		'Nexus Velrax Republic' => 'ShuttleVelrax',
+		'Escalation Wars Chouka Theocracy' => 'ShuttleChouka',
+		'Escalation Wars Chouka Raider' => 'ShuttleChoukaRaider',
+		'Escalation Wars Circasian Empire' => 'ShuttleCircasian',
+		'Escalation Wars Kastan Monarchy' => 'ShuttleKastan',
+		'Escalation Wars Blood Sword Raiders' => 'ShuttleBloodSwords',
+		"Escalation Wars Sshel'ath Alliance" => 'ShuttleSshelath',
 
 	);
 

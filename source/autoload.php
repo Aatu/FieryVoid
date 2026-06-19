@@ -3953,6 +3953,12 @@ spl_autoload_register(
                 'shuttlesalbezearly' => '/server/model/ships/Shuttle.php',
                 'shuttlevelrax' => '/server/model/ships/Shuttle.php',
                 'shuttlevelraxearly' => '/server/model/ships/Shuttle.php',
+                'shuttlechouka' => '/server/model/ships/Shuttle.php',
+                'shuttlechoukaraider' => '/server/model/ships/Shuttle.php',
+                'shuttlecircasian' => '/server/model/ships/Shuttle.php',
+                'shuttlekastan' => '/server/model/ships/Shuttle.php',
+                'shuttlebloodswords' => '/server/model/ships/Shuttle.php',
+                'shuttlesshelath' => '/server/model/ships/Shuttle.php',
  
                 //MINESWEEPING VARIANTS OF DEFAULT SHUTTLES
                 'minesweepingshuttleabbai' => '/server/model/ships/Shuttle.php',
@@ -4002,6 +4008,12 @@ spl_autoload_register(
                 'minesweepingshuttlesalbezearly' => '/server/model/ships/Shuttle.php',                                
                 'minesweepingshuttlevelrax' => '/server/model/ships/Shuttle.php',                                
                 'minesweepingshuttlevelraxearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlechouka' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlechoukaraider' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlecircasian' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlekastan' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlebloodswords' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlesshelath' => '/server/model/ships/Shuttle.php',                                
 
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
