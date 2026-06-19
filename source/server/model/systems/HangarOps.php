@@ -501,7 +501,19 @@ class HangarOps {
 		'Usuuth Coalition'  => 'ShuttleUsuuth',	
 		'Vorlon Empire'  => 'ShuttleVorlons',									
 		'Vree Conglomerate'  => 'ShuttleVree',	
-		'Yolu Confederation'  => 'ShuttleYolu',								
+		'Yolu Confederation'  => 'ShuttleYolu',		
+		'Nexus Brixadii Clans (early)' => 'ShuttleBrixadiiEarly',
+		'Nexus Brixadii Clans' => 'ShuttleBrixadii',
+		'Nexus Dalithorn Commonwealth (early)' => 'ShuttleDalithornEarly',
+		'Nexus Dalithorn Commonwealth' => 'ShuttleDalithorn',
+		'Nexus Makar Federation (early)' => 'ShuttleMakarEarly',
+		'Nexus Makar Federation' => 'ShuttleMakar',
+		'Nexus Polaren Confederacy (early)' => 'ShuttlePolarenEarly',
+		'Nexus Polaren Confederacy' => 'ShuttlePolaren',
+		'Nexus Sal-bez Coalition (early)' => 'ShuttleSalbezEarly',
+		'Nexus Sal-bez Coalition' => 'ShuttleSalbez',
+		'Nexus Velrax Republic (early)' => 'ShuttleVelraxEarly',
+		'Nexus Velrax Republic' => 'ShuttleVelrax',
 
 	);
 

@@ -3941,8 +3941,18 @@ spl_autoload_register(
                 'shuttleyolu' => '/server/model/ships/Shuttle.php',
  
 				//Custom Faction Default SHUTTLES
-                'shuttlecraytan' => '/server/model/ships/Shuttle.php',
-                'shuttlecraytanearly' => '/server/model/ships/Shuttle.php',
+                'shuttlebrixadii' => '/server/model/ships/Shuttle.php',
+                'shuttlebrixadiiearly' => '/server/model/ships/Shuttle.php',
+                'shuttledalithorn' => '/server/model/ships/Shuttle.php',
+                'shuttledalithornearly' => '/server/model/ships/Shuttle.php',
+                'shuttlemakar' => '/server/model/ships/Shuttle.php',
+                'shuttlemakarearly' => '/server/model/ships/Shuttle.php',
+                'shuttlepolaren' => '/server/model/ships/Shuttle.php',
+                'shuttlepolarenearly' => '/server/model/ships/Shuttle.php',
+                'shuttlesalbez' => '/server/model/ships/Shuttle.php',
+                'shuttlesalbezearly' => '/server/model/ships/Shuttle.php',
+                'shuttlevelrax' => '/server/model/ships/Shuttle.php',
+                'shuttlevelraxearly' => '/server/model/ships/Shuttle.php',
  
                 //MINESWEEPING VARIANTS OF DEFAULT SHUTTLES
                 'minesweepingshuttleabbai' => '/server/model/ships/Shuttle.php',
@@ -3978,6 +3988,20 @@ spl_autoload_register(
                 'minesweepingshuttlevorlons' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttlevree' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttleyolu' => '/server/model/ships/Shuttle.php',                                
+
+				//Custom Faction Minesweeping Variants of Default Shuttles
+                'minesweepingshuttlebrixadii' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlebrixadiiearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttledalithorn' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttledalithornearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlemakar' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlemakarealy' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlepolaren' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlepolarenearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlesalbez' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlesalbezearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlevelrax' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlevelraxearly' => '/server/model/ships/Shuttle.php',                                
 
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
