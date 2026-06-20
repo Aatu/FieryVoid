@@ -257,7 +257,7 @@ class FighterIcon extends React.Component {
 
         return (
             <FighterIconContainer $docked={docked} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
-                <FadedContent $destroyed={destroyed} $img={fighter.iconPath}>
+                <FadedContent $destroyed={destroyed} $img={window.AssetManager.getSmartImagePath(fighter.iconPath)}>
                     <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
                     <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
                     <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)} $criticalsBenign={hasOnlyLaunchedThisTurn(fighter)} $docked={docked}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>
