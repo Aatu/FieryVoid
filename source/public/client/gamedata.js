@@ -553,7 +553,8 @@ window.gamedata = {
                                 }
                             }
                         } else if (myShips[ship].systems[syst].name == "adaptiveArmorController") {
-                            if (myShips[ship].systems[syst].canIncreaseAnything()) {
+                            if (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[syst])
+                                && myShips[ship].systems[syst].canIncreaseAnything(myShips[ship])) {
                                 notSetAA.push(myShips[ship]);
                             }
                         } else if (myShips[ship].systems[syst].name == "hyachComputer") {
@@ -636,7 +637,9 @@ window.gamedata = {
                                             hasReadyLaunchers = true;
                                         }
                                     } else if (currWeapon.name == "adaptiveArmorController") {
-                                        if (currWeapon.canIncreaseAnything()) {
+                                        //skip destroyed fighters - their unlocked AA can never be allocated
+                                        if (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i])
+                                            && currWeapon.canIncreaseAnything(myShips[ship])) {
                                             didNotSetAA = true;
                                         }
                                     }
