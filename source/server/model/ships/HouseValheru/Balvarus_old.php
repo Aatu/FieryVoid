@@ -5,13 +5,15 @@ class Balvarus extends BaseShip{
     function __construct($id, $userid, $name,  $movement){
         parent::__construct($id, $userid, $name,  $movement);
         
-	$this->pointCost = 650;
+	$this->pointCost = 625;
 	$this->faction = "House Valheru";
         $this->phpclass = "Balvarus";
         $this->imagePath = "img/ships/Balvarus3.png";
-        $this->shipClass = "Balvarus Fleet Carrier";
+        $this->shipClass = "Balvarus Assault Carrier";
+//    		$this->variantOf = "Balvarin Carrier";
+//    		$this->occurence = "rare";
         $this->shipSizeClass = 3;
-        $this->fighters = array("medium"=>24, "heavy"=>12, "LCVs"=>4);
+        $this->fighters = array("medium"=>24, "LCVs"=>4); //24 in main hangar, 2 LCVs per rail
 		$this->unofficial = true;
 	    $this->isd = 2239;
 
@@ -44,7 +46,6 @@ class Balvarus extends BaseShip{
 	
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 0));
 		$this->addLeftSystem(new GuardianArray(3, 4, 2, 180, 0));
-		$this->addLeftSystem(new Hangar(3, 6, 6));
         $LCVRail = new DockingCollar(3, 8, 2);
 			$LCVRail->displayName = "LCV Rail";        
 			$this->addLeftSystem($LCVRail);
@@ -54,7 +55,6 @@ class Balvarus extends BaseShip{
 		
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 180));
 		$this->addRightSystem(new GuardianArray(3, 4, 2, 0, 180));
-		$this->addRightSystem(new Hangar(3, 6, 6));
         $LCVRail = new DockingCollar(3, 8, 2);
 			$LCVRail->displayName = "LCV Rail";        
 			$this->addRightSystem($LCVRail);
@@ -94,7 +94,6 @@ class Balvarus extends BaseShip{
             ),
             3=> array( //Port
                     4 => "Thruster", //do not differentiate which thruster!
-					5 => "Hangar",
                     6 => "Guardian Array",
                     8 => "Twin Array",
                     10 => "LCV Rail",
@@ -104,7 +103,6 @@ class Balvarus extends BaseShip{
             ),
             4=> array( //Starboard
                     4 => "Thruster", //do not differentiate which thruster!
-					5 => "Hangar",
                     6 => "Guardian Array",
                     8 => "Twin Array",
                     10 => "LCV Rail",
