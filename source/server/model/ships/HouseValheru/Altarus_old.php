@@ -4,13 +4,15 @@ class Altarus extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 550;
+        $this->pointCost = 530;
         $this->faction = "House Valheru";
         $this->phpclass = "Altarus";
         $this->imagePath = "img/ships/Altarus4.png";
         $this->shipClass = "Altarus Light Carrier";
+//			$this->variantOf = "Altarian Destroyer";
+//			$this->occurence = "rare";
         $this->isd = 2150;
-        $this->fighters = array("medium"=>12, "heavy"=>6); 
+        $this->fighters = array("medium"=>12, "LCVs"=>2); //12 in main hangar, 1 LCV per rail
 		$this->unofficial = true;
 
 	    $this->notes = 'Common variant if part of a House Valheru only force.';
@@ -29,7 +31,7 @@ class Altarus extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 5, 8));
         $this->addPrimarySystem(new Engine(5, 12, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(5, 15, 6));
+        $this->addPrimarySystem(new Hangar(5, 14, 6));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(3, 10, 0, 4, 4));
         
@@ -37,13 +39,20 @@ class Altarus extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new BallisticTorpedo(4, 5, 6, 300, 60));
         $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
-		$this->addFrontSystem(new Hangar(4, 6, 6));
-		
+        $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
+		$LCVRail = new DockingCollar(3, 8);
+			$LCVRail->displayName = "LCV Rail";        
+			$this->addFrontSystem($LCVRail);
+   
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         $this->addAftSystem(new Thruster(4, 14, 0, 5, 2));
         $this->addAftSystem(new JumpEngine(3, 10, 3, 20));
         $this->addAftSystem(new BallisticTorpedo(4, 5, 6, 120, 240));
         $this->addAftSystem(new HeavyParticleBeam(3, 6, 2, 90, 270));
+        $this->addAftSystem(new HeavyParticleBeam(3, 6, 2, 90, 270));
+		$LCVRail = new DockingCollar(3, 8);
+			$LCVRail->displayName = "LCV Rail";        
+			$this->addAftSystem($LCVRail);
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));
@@ -61,16 +70,17 @@ class Altarus extends HeavyCombatVessel{
                     20 => "C&C",
                 ),
                 1=> array(
-                    4 => "Thruster",
-                    5 => "Hangar",
-                    7 => "Heavy Particle Beam",
-					9 => "Ballistic Torpedo",
+                    3 => "Thruster",
+                    6 => "LCV Rail",
+                    9 => "Heavy Particle Beam",
+					11 => "Ballistic Torpedo",
                     18 => "Structure",
                     20 => "Primary",
                 ),
                 2=> array(
                     4 => "Thruster",
-                    7 => "Heavy Particle Beam",
+                    6 => "LCV Rail",
+                    8 => "Heavy Particle Beam",
                     9 => "Jump Engine",
 					11 => "Ballistic Torpedo",
                     18 => "Structure",
