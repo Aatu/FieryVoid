@@ -593,3 +593,59 @@
     vertical-align: middle;
     cursor: pointer;
 }
+
+/* Stage S (S-f): "Split Flights Automatically" row — pack the checkbox + label
+   together (checkbox on the LEFT of the text, snug) and push the pair to the
+   RIGHT edge so it aligns with the other right-justified rows, instead of the
+   default .multi-value-row space-between spread that left a big gap between them. */
+.confirm.multi-value-confirm.shadowFighterBomb .bombAutoSplitRow {
+    justify-content: flex-end;
+}
+.confirm.multi-value-confirm.shadowFighterBomb .bombAutoSplitRow .multiConfirmInput {
+    margin-right: 10px;
+    /* base.css applies `position: relative; top: 2px` to every checkbox, nudging
+       it down out of line with the text. Keep position:relative (so `top` takes
+       effect — it's ignored on a static element) and zero the offset to sit level. */
+    position: relative;
+    top: 0;
+    vertical-align: middle;
+}
+.confirm.multi-value-confirm.shadowFighterBomb .bombAutoSplitRow .multi-value-label {
+    flex: 0 0 auto;
+    text-align: right;
+    margin-right: 0;
+}
+
+/* Stage S (S-f): Fighter Bomb dialog accents — keep the "Add another flight"
+   link, the per-flight remove ✕, the number-input spinner arrows, and the
+   auto-split checkbox in the window's cobalt-blue theme (#58c7e6, matching the
+   hangar-confirm input border/focus blue) instead of ad-hoc colours. */
+.confirm.multi-value-confirm.shadowFighterBomb .bombAddFlight {
+    cursor: pointer;
+    color: #58c7e6;
+    text-decoration: underline;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+.confirm.multi-value-confirm.shadowFighterBomb .bombAddFlight:hover {
+    color: #9fe6ff;
+    text-shadow: 0 0 6px rgba(88, 199, 230, 0.7);
+}
+
+.confirm.multi-value-confirm.shadowFighterBomb .bombRemoveFlight {
+    cursor: pointer;
+    margin-left: 8px;
+    color: #58c7e6;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+.confirm.multi-value-confirm.shadowFighterBomb .bombRemoveFlight:hover {
+    color: #9fe6ff;
+    text-shadow: 0 0 6px rgba(88, 199, 230, 0.7);
+}
+
+/* Tint the native number-input spinner arrows (and the auto-split checkbox) the
+   same blue. accent-color styles the spinners in Firefox + Chromium and the
+   checkbox tick across browsers. */
+.confirm.multi-value-confirm.shadowFighterBomb .multi-value-input,
+.confirm.multi-value-confirm.shadowFighterBomb input[type="checkbox"] {
+    accent-color: #58c7e6;
+}

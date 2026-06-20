@@ -3,6 +3,15 @@ $fv_start_timer = microtime(true);
 require_once 'global.php'; // ✅ Critical dependency
 session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
 
+// Never let the browser cache this HTML document. It carries a player-specific,
+// point-in-time gamedata snapshot inlined into the page (gamedata.parseServerData
+// below). global.php calls session_cache_limiter('') which strips PHP's default
+// no-cache headers, so without this the browser is free to disk-cache the page
+// and replay a STALE copy on session restore (reopening tabs after a browser or
+// computer restart) — with no server round-trip and no pageshow.persisted signal
+// to trigger a client re-fetch. no-store forces a fresh fetch every time.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
 	$gameid = 1;
 	$thisplayer = -1;
 
@@ -70,9 +79,19 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
          relying on defer/ready ordering (kept consistent with gamelobby.php). assetManager.js
          has no jQuery dep, so it defers. The big win here is self-hosting, not the defer. -->
     <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
+    <!-- Deploy-version cache-buster for images (see AssetManager.appendVersion). Plain
+         inline <script> runs at parse time, before the deferred assetManager.js, so the
+         global is guaranteed set first. Changes each deploy -> stale same-name art refetched. -->
+    <script>window.assetVersion = "<?php echo AssetLoader::getDeployVersion(); ?>";</script>
     <script defer src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
     <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-ui-1.14.2.min.js'); ?>"></script>
-    <script defer src="client/lib/three.min.js"></script>
+    <!-- Tree-shaken THREE r160 global shim (perf #5): replaces the 670KB vendored
+         three.min.js UMD with a ~500KB build of only the symbols FV uses, installed on
+         window.THREE so the legacy code + MeshLine are unchanged. Versioned (?v=mtime)
+         because it regenerates per build, like the legacy bundle. Must stay before
+         MeshLine + the legacy bundle (both read window.THREE); document order + defer
+         preserve that. -->
+    <script defer src="<?php echo AssetLoader::getAssetUrl('client/lib/three.shim.bundle.js'); ?>"></script>
     <script defer src="client/lib/THREE.MeshLine.js"></script>
     <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>"></script>
 	<!-- replaced by php include below
@@ -110,6 +129,17 @@ session_write_close(); // Prevent Session Locking (Spam Refresh Protection)
                     }
                     if ($system instanceof Hangar) {
                         $factionsWithHangars[$faction] = true;
+                        //Per-bay fighter-class allow-list (arch_hangar_class_allowlist):
+                        //preload the carrier's reserved fighter blueprint(s) so the client
+                        //can resolve the phpclass to a display name (Hangar SystemInfo
+                        //"Type:" line + lobby ship window) even when no such flight is
+                        //deployed yet. Without this the class is absent from staticShips
+                        //and the resolver falls back to showing the raw phpclass.
+                        if (!empty($system->allowedFighterClasses)) {
+                            foreach ($system->allowedFighterClasses as $cls) {
+                                $spawnableClasses[] = $cls;
+                            }
+                        }
                     }
                 }
             }

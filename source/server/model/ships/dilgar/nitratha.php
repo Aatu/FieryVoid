@@ -27,7 +27,7 @@ class Nitratha extends BaseShip{
         $this->addPrimarySystem(new FlagBridge(4, 21, 0, 1, 'Pentacan Formation', 9,  false, true, false, false));		                
         $this->addPrimarySystem(new Scanner(4, 12, 3, 7));
         $this->addPrimarySystem(new Engine(4, 9, 0, 5, 3));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 2));
         $this->addPrimarySystem(new JumpEngine(4, 21, 4, 36));
 
         $this->addFrontSystem(new HeavyPlasma(2, 8, 5, 300, 60));

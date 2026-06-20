@@ -31,8 +31,7 @@ class ChoukaReverenceMonitorAM extends BaseShip{
         //ammo magazine itself (AND its missile options)
         $ammoMagazine = new AmmoMagazine(32); //pass magazine capacity - 20 rounds per launcher, plus reload rack 80
         $this->addPrimarySystem($ammoMagazine); //fit to ship immediately
-        $ammoMagazine->addAmmoEntry(new AmmoMissileB(), 32); //add full load of basic missiles
-        $this->enhancementOptionsEnabled[] = 'AMMO_H';//add enhancement options for other missiles - Class-L
+        $ammoMagazine->addAmmoEntry(new AmmoMissileD(), 32); //add full load of basic missiles
         
         $this->addPrimarySystem(new Reactor(4, 25, 0, 0));
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));

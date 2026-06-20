@@ -11,6 +11,7 @@ class PassengerLiner extends HeavyCombatVessel{
         $this->shipClass = "Passenger Liner";
         $this->isd = 2198;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("lifeboats"=>8);         
         
         $this->forwardDefense = 13;
         $this->sideDefense = 16;

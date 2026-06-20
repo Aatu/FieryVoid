@@ -12,6 +12,7 @@ class shadowRegenBase extends OSAT{
         $this->shipClass = "Regeneration Outpost";
         $this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+		$this->variantOf = 'NONE';		
 
 	    $this->notes = 'Enormous Unit';
 		$this->notes .= '<br>Ignores Manoeuvre Hit Modifiers';			

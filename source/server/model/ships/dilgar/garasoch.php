@@ -29,7 +29,7 @@ class Garasoch extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 21, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 3, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(4, 52));
+        $this->addPrimarySystem(new Hangar(4, 52, 12));
         $this->addPrimarySystem(new JumpEngine(5, 16, 4, 36));
 
         $this->addFrontSystem(new EnergyPulsar(3, 6, 3, 300, 60));

@@ -28,7 +28,7 @@ class Targath extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 21, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 16, 4, 9));
         $this->addPrimarySystem(new Engine(5, 11, 0, 6, 3));
-        $this->addPrimarySystem(new Hangar(4, 26));
+        $this->addPrimarySystem(new Hangar(4, 26, 12));
 
         $this->addFrontSystem(new HeavyBolter(3, 10, 6, 300, 60));
         $this->addFrontSystem(new ScatterPulsar(1, 4, 2, 300, 60));

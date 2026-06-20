@@ -25,7 +25,18 @@ class Manager{
             self::$dbManager = new DBManager($database_host ?? "mariadb", 3306, $database_name, $database_user, $database_password);
     }
 
-    private static function getCachePrefix() {
+    // Lightweight APCu debug logger, gated on FV_APCU_DEBUG (defined local-only in
+    // varconfig.php). No-op on live. Prefixes a tag so the lines are greppable.
+    public static function apcuLog($msg) {
+        if (defined('FV_APCU_DEBUG') && FV_APCU_DEBUG) {
+            error_log('[APCu] ' . $msg);
+        }
+    }
+
+    // Public so other entry points (e.g. gamedata.php's APCu fast-poll) can build
+    // APCu keys with the exact same prefix — including the deploy-version suffix —
+    // rather than hardcoding "<db>_" and silently reading the wrong keys after a deploy.
+    public static function getCachePrefix() {
         global $database_name;
         // Use a safe fallback if for some reason db name is missing, though strictly it should be there.
         // Include the deploy version so a code patch automatically orphans all
@@ -423,7 +434,9 @@ class Manager{
     public static function touchGame($gameid) {
         $prefix = self::getCachePrefix();
         if (function_exists('apcu_store')) {
-            apcu_store($prefix . 'game_' . $gameid . '_last_update', microtime(true));
+            $ts = microtime(true);
+            apcu_store($prefix . 'game_' . $gameid . '_last_update', $ts);
+            self::apcuLog("TOUCH game=$gameid → last_update=$ts (invalidates cache) prefix=$prefix");
         }
     }
 
@@ -447,10 +460,10 @@ class Manager{
                  if (!$force) {
                      $cached = apcu_fetch($cacheKey);
                      if ($cached && isset($cached['ts']) && abs($cached['ts'] - $timestamp) < 0.001) {
-                         // Cache Hit!
-                         // error_log("Manager: JSON Cache HIT for Game $gameid User $userid");
+                         self::apcuLog("JSON HIT game=$gameid user=$userid ts=$timestamp");
                          return $cached['json'];
                      }
+                     self::apcuLog("JSON MISS game=$gameid user=$userid ts=$timestamp" . ($cached ? " (stale cached ts=" . ($cached['ts'] ?? 'n/a') . ")" : " (no entry)"));
                  }
             
                 // Lock to prevent stampede (User F5 spam)
@@ -476,6 +489,7 @@ class Manager{
     
                 if (!$force && $gdS->waiting && !$gdS->changed && $gdS->status != "LOBBY") {
                     if ($timestamp > 0) {
+                        self::apcuLog("NO-CHANGE game=$gameid user=$userid → {last_update:$timestamp}");
                         return json_encode(["last_update" => $timestamp]);
                     }
                     return "{}";
@@ -498,7 +512,7 @@ class Manager{
                 
                 // Store in Cache
                 if ($timestamp > 0 && function_exists('apcu_store') && $json) {
-                    // error_log("Manager: JSON Cache STORE/MISS for Game $gameid User $userid");
+                    self::apcuLog("JSON STORE game=$gameid user=$userid ts=$timestamp bytes=" . strlen($json));
                     apcu_store($cacheKey, ['ts' => $timestamp, 'json' => $json], 3600);
                 }
                 
@@ -1506,12 +1520,18 @@ class Manager{
 
     }
     
-    public static function insertSingleShip($gamedata, $ship, $userid){          
-		$id = self::$dbManager->submitShip($gamedata->id, $ship, $userid);
+    public static function insertSingleShip($gamedata, $ship, $userid){
+		//submitShip returns LAST_INSERT_ID() via mysqli_fetch_object, which yields a
+		//STRING. TacGamedata::getShipById compares $ship->id === $id with STRICT ===,
+		//so a string id on a freshly-spawned ship fails that lookup for the rest of the
+		//same advance (e.g. a Fighter Bomb flight spawned in fireWeapons is then unfindable
+		//in setCriticals, so syncIntegratedStructureCoupling mistakes it for a combat loss
+		//and shaves carrier structure). Cast to int so the in-memory id matches.
+		$id = (int)self::$dbManager->submitShip($gamedata->id, $ship, $userid);
 		$ship->id = $id;
 		$gamedata->ships[$id] = $ship;
 		return $id;
-    } 
+    }
     
     public static function insertSingleEnhancement($gameData, $id, $enhID, $enhNo, $enhName){
 		self::$dbManager->submitEnhancement($gameData->id, $id, $enhID, $enhNo, $enhName);

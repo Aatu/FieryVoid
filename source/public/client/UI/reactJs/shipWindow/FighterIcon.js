@@ -234,22 +234,30 @@ class FighterIcon extends React.Component {
         //damaged fighter fails its dropout roll (fighter.php::testCritical).
         //Render it as DROPOUT so the label matches the rulebook term.
         const droppedOut = !docked && !launched && shipManager.criticals.isDisengagedFighter(fighter);
+        //Stage S (S-d): a Shadow integrated fighter cut off from its carrier (tether
+        //structure-box destroyed) — STILL ALIVE and fighting, but can never land.
+        const cutOff = shipManager.criticals.isCutOffFighter(fighter);
 
-        //State-label precedence: DOCKED > LAUNCHED > DROPOUT > DESTROYED. Each is a
-        //"fighter not in the fight" condition; the departed-to-own-row states (DOCKED,
-        //LAUNCHED) take priority because a fighter in those states is also flagged
-        //destroyed server-side, so destroyed=true alone isn't enough info.
+        //State-label precedence: DOCKED > LAUNCHED > DROPOUT > DESTROYED for a fighter
+        //that has LEFT the flight (all flagged destroyed server-side). CUT OFF is
+        //different — the fighter is alive — so it renders on a LIVING fighter (and is
+        //superseded by the destroyed labels if it later dies and leaves).
         let overlay = null;
         if (destroyed) {
+            //A dead fighter shows its departure/death state. (A cut-off fighter that
+            //then dies is just DESTROYED — the CUT OFF badge is for LIVING cut-off craft.)
             if (docked)          overlay = <OverlayLabel $color="#00b8e6">DOCKED</OverlayLabel>;
             else if (launched)   overlay = <OverlayLabel $color="#00b8e6">SPLIT</OverlayLabel>;
             else if (droppedOut) overlay = <OverlayLabel $color="#ff8c00">DROPOUT</OverlayLabel>;
             else                 overlay = <OverlayLabel $color="#ff5252">DESTROYED</OverlayLabel>;
+        } else if (cutOff) {
+            //Living integrated fighter severed from its carrier — can fight, can't land.
+            overlay = <OverlayLabel $color="#ff5252">CUT OFF</OverlayLabel>;
         }
 
         return (
             <FighterIconContainer $docked={docked} onMouseOver={this.onSystemMouseOver.bind(this)} onMouseOut={this.onSystemMouseOut.bind(this)} onTouchStart={this.onFighterTouchStart.bind(this)} onTouchMove={this.onFighterTouchMove.bind(this)} onTouchEnd={this.onFighterTouchEnd.bind(this)} onTouchCancel={this.onFighterTouchCancel.bind(this)}>
-                <FadedContent $destroyed={destroyed} $img={fighter.iconPath}>
+                <FadedContent $destroyed={destroyed} $img={window.AssetManager.getSmartImagePath(fighter.iconPath)}>
                     <Container>{toIcons(ship, fighter, getFwdSystems(fighter), destroyed)}</Container>
                     <ContainerSystems>{toIcons(ship, fighter, getAftSystems(fighter), destroyed)}</ContainerSystems>
                     <HealthBar $health={getStructureLeft(ship, fighter)} $criticals={hasCriticals(fighter)} $criticalsBenign={hasOnlyLaunchedThisTurn(fighter)} $docked={docked}><HealthText>{fighter.maxhealth - damageManager.getDamage(ship, fighter)} / {fighter.maxhealth}</HealthText></HealthBar>

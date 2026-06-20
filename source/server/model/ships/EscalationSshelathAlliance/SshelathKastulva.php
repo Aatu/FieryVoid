@@ -32,7 +32,7 @@ class SshelathKastulva extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 6));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(4, 3, 3));
+		$this->addPrimarySystem(new Hangar(4, 3, 3, 3));
   
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 3, 1));

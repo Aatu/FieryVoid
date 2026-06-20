@@ -50,14 +50,16 @@ class gaimTocrat extends BaseShip{
 		$this->addLeftSystem(new Thruster(3, 13, 0, 4, 3));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 120, 360));
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
-		$this->addLeftSystem(new Hangar(3, 6, 6, 5));
+		//$this->addLeftSystem(new Hangar(3, 6, 6, 5));
+		$this->addLeftSystem(new Hangar(3, 6, 6, 5, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay		
 		$this->addLeftSystem(new Bulkhead(0, 3));
 		$this->addLeftSystem(new Bulkhead(0, 3));
 
 		$this->addRightSystem(new Thruster(3, 13, 0, 4, 4));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 0, 240));
 		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 180));
-		$this->addRightSystem(new Hangar(3, 6, 6, 2));
+		//$this->addRightSystem(new Hangar(3, 6, 6, 2));
+		$this->addRightSystem(new Hangar(3, 6, 6, 1, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay			
 		$this->addRightSystem(new Bulkhead(0, 3));
 		$this->addRightSystem(new Bulkhead(0, 3));
         

@@ -1,16 +1,16 @@
 #replayUI {
     pointer-events: auto;
-    border: 1px solid #587e8d;
+    border: 1px solid #3a8694;
     border-radius: 8px;
-    color: #deebff;
-    background-color: #0a3340;
+    color: #cdeef5;
+    background-color: #08323b;
     position: relative;
     margin-left: 10px;
     min-height: 25px;
     height: auto;
     padding-top: 7px;
     width: auto;
-    opacity: 0.85;
+    opacity: 0.92;
     box-shadow: 5px 5px 10px black;
     display: none;
     flex-direction: row;
@@ -36,15 +36,16 @@
     margin: 0 5px;
     background-color: transparent;
     border: none;
-    color: #deebff;
+    color: #cdeef5;
     font-size: 16px;
     text-transform: uppercase;
     cursor: pointer;
     text-shadow: black 0 0 10px, black 0 0 3px;
+    transition: color 0.15s ease, text-shadow 0.15s ease;
 }
 
 #replayUI button:hover {
-    text-shadow: #deebff 0 0 10px, #deebff 0 0 3px;
+    text-shadow: #7fe7f5 0 0 10px, #7fe7f5 0 0 3px;
 }
 
 #replayUI .selected-replay {
@@ -58,16 +59,61 @@
 
 #replayUI .replay-buttons button {
     font-size: 40px;
-    color: #496791;
+    /* Darker cyan than the speed accent (#3fa9b8) so the speed cluster still
+       reads as the brighter, distinct control. */
+    color: #2c8090;
+    /* Soft persistent glow on the dark base so the glyphs read as lit. */
+    text-shadow: black 0 0 10px, black 0 0 3px, #2c8090 0 0 12px;
 }
 
-/* Speed button: cycles 1×/2×/4×/8× and shows the current rate. Both Play and
-   Rewind run at this speed. Sized smaller than the transport glyphs and given a
-   fixed width so the rate digit changing doesn't shift the surrounding buttons. */
-#replayUI .replay-buttons button#speed {
-    font-size: 22px;
-    min-width: 2.4em;
-    vertical-align: middle;
+#replayUI .replay-buttons button:hover {
+    color: #8fdfeb;
+    text-shadow: #7fe7f5 0 0 12px, #7fe7f5 0 0 4px;
+}
+
+/* Speed control: −/+ buttons flanking a static rate readout. Both Play and
+   Rewind run at this rate; it sits left of the transport controls as a distinct
+   "setting" cluster. The ± buttons are smaller than the transport glyphs. */
+#replayUI .speed-control {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 8px;
+}
+
+/* Cyan/aqua accent: a complementary cool colour that pops against the
+   slate-blue transport buttons and marks the speed cluster as a separate
+   "setting". The selectors are specific enough to override the generic
+   .replay-buttons button colour/glow above. */
+#replayUI .replay-buttons .speed-control button#slower,
+#replayUI .replay-buttons .speed-control button#faster {
+    font-size: 40px;
+    line-height: 1;
+    margin: 0 2px;
+    padding: 0;
+    color: #49c4d4;
+    text-shadow: black 0 0 10px, black 0 0 3px, #3fa9b8 0 0 12px;
+}
+
+#replayUI .replay-buttons .speed-control button#slower:hover,
+#replayUI .replay-buttons .speed-control button#faster:hover {
+    color: #7fe7f5;
+    text-shadow: #7fe7f5 0 0 12px, #7fe7f5 0 0 4px;
+}
+
+/* Fixed width so the rate digits changing (0.25× ↔ 8×) don't shift the
+   surrounding buttons. Highlighted (via .speed-control.active) off default. */
+#replayUI .speed-control .rate {
+    font-size: 26px;
+    min-width: 2.8em;
+    text-align: center;
+    color: #49c4d4;
+    /*text-shadow: black 0 0 10px, black 0 0 3px, #3fa9b8 0 0 10px;*/
+    transition: color 0.15s ease, text-shadow 0.15s ease;
+}
+
+#replayUI .speed-control.active .rate {
+    color: #7fe7f5;
+    /*text-shadow: #7fe7f5 0 0 12px, #7fe7f5 0 0 4px;*/
 }
 
 #replayUI .replay-container {
@@ -96,8 +142,8 @@
     left: 50vw;
     transform: translateX(-50%);
     top: 5px;
-    background-color: #0a33407a;
-    /*border: 1px solid #496791a1;*/
+    background-color: #093943a6;
+    border: 1px solid #49c4d4;
     border-radius: 8px;
     box-shadow: 5px 5px 10px black;
     z-index: 10000;
@@ -107,9 +153,11 @@
     outline: none;
 }
 
-#replayUI button.active {
-    text-shadow: white 0 0 10px, white 0 0 3px;
-    color: #deebff;
+/* Running transport button (the active direction showing ❚❚): bright cyan glow
+   so it clearly reads as the live playback control. */
+#replayUI .replay-buttons button.active {
+    color: #d6f7fd;
+    text-shadow: #7fe7f5 0 0 14px, #d6f7fd 0 0 5px;
 }
 
 #replayUI.loading .replay-buttons {
@@ -143,8 +191,14 @@
         font-size: 24px;
     }
 
-    #replayUI .replay-buttons button#speed {
-        font-size: 14px;
+    #replayUI .replay-buttons .speed-control button#slower,
+    #replayUI .replay-buttons .speed-control button#faster {
+        font-size: 18px;
+    }
+
+    #replayUI .speed-control .rate {
+        font-size: 13px;
+        min-width: 3em;
     }
 
     #replayUI.active .replay-active {

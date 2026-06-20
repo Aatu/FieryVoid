@@ -152,7 +152,7 @@ window.flightWindowManager = {
 			var template = $("#systemtemplatecontainer .fighter");
 			var systemwindow = template.clone(true).appendTo(dest);
 
-			systemwindow.find(".icon").css("background-image", "url(" + fighter.iconPath + ")");
+			systemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath(fighter.iconPath) + ")");
 
 			systemwindow.addClass("fighter_" + fighter.id);
 			systemwindow.data("shipid", ship.id);
@@ -166,9 +166,9 @@ window.flightWindowManager = {
 				var _fightersystemwindow = template.clone(true).appendTo(dest);
 				_fightersystemwindow.wrap('<td/>');
 				if (fightersystem.iconPath) {
-					_fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/" + fightersystem.iconPath + ")");
+					_fightersystemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/" + fightersystem.iconPath) + ")");
 				} else {
-					_fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/" + fightersystem.name + ".png)");
+					_fightersystemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/" + fightersystem.name + ".png") + ")");
 				}
 				_fightersystemwindow.addClass(fightersystem.name);
 				_fightersystemwindow.addClass("system_" + fightersystem.id);
@@ -191,7 +191,7 @@ window.flightWindowManager = {
 		var template = $("#systemtemplatecontainer .heavyfighter");
 		var systemwindow = template.clone(true).appendTo(dest);
 
-		systemwindow.find(".icon").css("background-image", "url(" + fighter.iconPath + ")");
+		systemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath(fighter.iconPath) + ")");
 
 		systemwindow.addClass("heavyfighter_" + fighter.id);
 		systemwindow.data("shipid", ship.id);
@@ -206,9 +206,9 @@ window.flightWindowManager = {
 			fightersystemwindow.wrap('<td/>');
 
 			if (fightersystem.iconPath) {
-				fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/" + fightersystem.iconPath + ")");
+				fightersystemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/" + fightersystem.iconPath) + ")");
 			} else {
-				fightersystemwindow.find(".icon").css("background-image", "url(./img/systemicons/" + fightersystem.name + ".png)");
+				fightersystemwindow.find(".icon").css("background-image", "url(" + window.AssetManager.getSmartImagePath("./img/systemicons/" + fightersystem.name + ".png") + ")");
 			}
 
 			fightersystemwindow.addClass(fightersystem.name);

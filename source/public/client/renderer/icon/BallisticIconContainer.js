@@ -277,6 +277,7 @@ window.BallisticIconContainer = function () {
 				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },
 				'Priority - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
 				'Gravitic Mine': { type: 'hexGreen', text: 'Gravitic Mine', color: '#008000' },
+				'Fighter Bomb': { type: 'hexBlue', text: 'Fighter Bomb', color: '#00b8e6' },			
 			};
 
 			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)) {
@@ -525,6 +526,7 @@ window.BallisticIconContainer = function () {
 
 			const modeColorMap = {
 				'Shredder': 'blue',
+				'Fighter Bomb': 'blue',
 				'Defensive Plasma Web': 'green',
 				'Anti-Fighter Plasma Web': 'green',
 				'Transverse Jump': 'blue',

@@ -28,7 +28,9 @@ class HecateAlpha extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(6, 17, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(4, 8));
+        $hyperionHangar = new Hangar(4, 8, 8);
+        $hyperionHangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
+        $this->addPrimarySystem($hyperionHangar); 
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));

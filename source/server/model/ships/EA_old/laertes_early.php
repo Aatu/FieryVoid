@@ -26,7 +26,7 @@ class Laertes_early extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
-	$this->addPrimarySystem(new Hangar(3, 2));
+	$this->addPrimarySystem(new Hangar(3, 2, 1));
 	$this->addPrimarySystem(new Thruster(3, 8, 0, 2, 3));
 	$this->addPrimarySystem(new Thruster(3, 8, 0, 2, 4));
 		
