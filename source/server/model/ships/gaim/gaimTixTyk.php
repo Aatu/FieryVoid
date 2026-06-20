@@ -9,7 +9,6 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
         $this->phpclass = "gaimTixTyk";
         $this->imagePath = "img/ships/Tixtyk.png";
         $this->shipClass = "Tixtyk Line Destroyer";
-		$this->shipSizeClass = 3;
 		$this->fighters = array("light"=>6);        
         
 		$this->isd = 2266;

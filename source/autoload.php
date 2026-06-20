@@ -2844,6 +2844,7 @@ spl_autoload_register(
 				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
 				'gaimphotonbomb' => '/server/model/weapons/customs.php',
 				'gaimtixtyk' => '/server/model/ships/gaim/gaimTixTyk.php',				
+				'gaimshlexa' => '/server/model/ships/gaim/gaimShlexa.php',				
 
 				//Star Trek conversions
 				//weapons
