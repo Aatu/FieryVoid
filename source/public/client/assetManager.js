@@ -55,23 +55,43 @@ window.AssetManager = {
     },
 
     /**
+     * Appends the deploy-version cache-buster to an image URL.
+     *
+     * Image files are served with a 1-year immutable cache (see public/.htaccess),
+     * so when artwork is swapped under the SAME filename (e.g. re-skinned ship
+     * images) clients keep serving the stale copy until the cache expires. The JS
+     * bundles avoid this via a ?v=<mtime> query; images had no such buster.
+     *
+     * window.assetVersion is injected by game.php / gamelobby.php from
+     * AssetLoader::getDeployVersion() (the game-bundle mtime, which changes on every
+     * deploy). Appending it makes every image URL unique per deploy, so a redeploy
+     * forces a refetch while still allowing the year-long cache between deploys.
+     * Falls back to leaving the path untouched if no version is available.
+     */
+    appendVersion: function(path) {
+        var v = window.assetVersion;
+        if (!v) return path;
+        return path + (path.indexOf('?') === -1 ? '?' : '&') + 'v=' + v;
+    },
+
+    /**
      * Given an image path, returns the WebP version if supported.
      */
     getSmartImagePath: function(path) {
         if (!path || typeof path !== 'string') return path;
-        
+
         var cleanPath = path.split('?')[0];
 
         if (this.isWebpSupported()) {
             if (cleanPath.toLowerCase().endsWith('.png')) {
-                return path.replace('.png', '.webp');
+                return this.appendVersion(path.replace('.png', '.webp'));
             } else if (cleanPath.toLowerCase().endsWith('.jpg')) {
-                return path.replace('.jpg', '.webp');
+                return this.appendVersion(path.replace('.jpg', '.webp'));
             } else if (cleanPath.toLowerCase().endsWith('.jpeg')) {
-                return path.replace('.jpeg', '.webp');
+                return this.appendVersion(path.replace('.jpeg', '.webp'));
             }
         }
 
-        return path;
+        return this.appendVersion(path);
     }
 };

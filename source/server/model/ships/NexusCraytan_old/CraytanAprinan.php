@@ -43,7 +43,7 @@ class CraytanAprinan extends MediumShip{
 		$this->addAftSystem(new NexusCIDS(1, 4, 2, 0, 180));
         $this->addAftSystem(new Thruster(2, 8, 0, 2, 2));    
         $this->addAftSystem(new Thruster(2, 8, 0, 2, 2));    
-		$this->addAftSystem(new Hangar(0, 1, 1));
+		$this->addAftSystem(new Hangar(0, 1, 1, 3));
        
         $this->addPrimarySystem(new Structure(3, 36));
 

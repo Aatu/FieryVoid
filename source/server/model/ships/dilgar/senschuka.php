@@ -27,7 +27,7 @@ class Senschuka extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 3, 6));
         $this->addPrimarySystem(new Engine(3, 7, 0, 4, 2));
-        $this->addPrimarySystem(new Hangar(2, 2));
+        $this->addPrimarySystem(new Hangar(2, 2, 1));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 8, 0, 3, 4));
         $this->addPrimarySystem(new PlasmaTorch(1, 4, 2, 180, 360));

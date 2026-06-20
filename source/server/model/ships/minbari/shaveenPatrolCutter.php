@@ -27,7 +27,7 @@ class ShaveenPatrolCutter extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 3, 9));
         $this->addPrimarySystem(new Engine(3, 13, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(3, 1));
+		$this->addPrimarySystem(new Hangar(3, 1, 1));
 		$this->addPrimarySystem(new GraviticThruster(4, 12, 0, 4, 3));
 		$this->addPrimarySystem(new GraviticThruster(4, 12, 0, 4, 4));
         $this->addPrimarySystem(new Jammer(4, 8, 5));

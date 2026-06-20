@@ -746,9 +746,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="pakmara" >PAK'MA'RA CONFEDERACY</h4>
     <p>Pak'ma'ra ships are quick, with excellent thrust and engine power, but are not manoeuvrable.  They depend on a heavy armament of plasma-based weapons with wide firing arcs to win battles.  
         Their unique plasma battery systems allow them to store power for opportune moments whilst their plasma webs provide both defensive cover and close-range anti-fighter protection.</p>            
+    <h5>Initiative Penalties</h5>
+        <li>The Pak'ma'ra find it hard to organise effectively and this is reflected in a fleet wide initiative penalty of -5 for every three ships in their fleet (rounding down).  
+            Fighter flights are not effected by this penalty and do not contribute to the number of ships for the purposes of calculating the penalty.</li>    
+    
     <h5>Plasma Batteries</h5>
         <ul>
-<li>System which stores but does not generate any new power.  
+        <li>System which stores but does not generate any new power.  
             Starts the game fully charged and the power stored can be used in the normal way during Initial Orders, it will show as a surplus in the Reactor system.  
             Providing they have power stored, Batteries can also be used in Firing Phase to provide extra power to Plasma Webs.</li>
         <li>Once depleted, the Batteries can be re-filled by commiting your Initial Orders with a power surplus in the Reactor.</li>
@@ -1154,22 +1158,23 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </li> 
     <h5>Destroyer</h5>
         <ul>
-<li>By original design should have acceleration cost of 1.5, which is not possible in FV so has been set to 2 instead.</li>  
-    </ul>
-<h5>Shadow Fighters</h5>
+        <li>By original design should have acceleration cost of 1.5, which is not possible in FV so has been set to 2 instead.</li>  
+        </ul>
+<h5>Shadow Fighters & Fighter Bombs</h5>
         <ul>
-<li>Shadow fighters are semi-autonomous slivers made from the hull material of their carriers.</li> 
-        <li>For this reason when a Shadow fighter is purchased the Shadow player should either add 
-        a Fighter Launched enhancement to the ship that ‘spawned’ the fighter (reducing its structure by 1 point per fighter), 
-        or the fighter should have the Uncontrolled enhancement (a penalty for operating independently from the carrier - primarily for scenarios). The game will not force players to do so.</li>
-        <li>Also, controlled/uncontrolled status cannot change during the game, so if a carrier is later destroyed it will not affect fighters in any way as it would with Mindriders for example.</li>      
+        <li>Shadow fighters are semi-autonomous slivers made from the hull material of their carriers.</li>             
+        <li>Some Shadow carriers form their fighters internally and keep them held within the hull rather than parked in space. These integrated fighters are bought as an enhancement on the carrier, and the carrier can carry no more than its listed hangar capacity.</li>
+        <li>Such a carrier does not launch its fighters in the usual way. Instead it deploys them with a Fighter Bomb - a forward-arc weapon, selected and fired during the Firing Phase at a target hex within range. The held fighters deploy at that hex the following turn, sharing the carrier's heading and speed.</li>
+        <li>You choose how many fighters to commit per shot, up to the number currently held. If you launch more than a single flight can hold, the bomb forms several flights at the target hex. By default these are split for you (largest flights first), but you can instead set each flight's size by hand, and add extra flights so a large launch can be broken into smaller groups if you prefer.</li>
+        <li>Unlike an ordinary fighter launch, firing the Fighter Bomb carries no initiative penalty - neither on the launched fighters nor on the carrier. (Note - Recovering fighters still incurs the usual hangar-operations penalty.)</li>
+        <li>Integrated fighters return by landing on the carrier as normal, where they are reabsorbed back into the hull: their damage is repaired by the ship but this, plus any energy held in their diffusers, is drawn back into one of the carrier's own Energy Diffusers (with any excess penetrating to a random system), and they are ready to be lanched again from the following turn. An empty hangar - whether the fighters were spent or lost - leaves the Fighter Bomb with nothing to launch.</li>
         <li>Shadow fighters get a massive -100 dropout bonus  which means they'll pass all appropriate tests easily, 
             but can still be dropped out by weapons that explicitly cause dropouts without a test. Most weapons that do so are Electromagnetic in nature, and actually will be disregarded by Advanced Armor anyway. 
             But technically some Ancient weapons causing automatic dropouts might still affect a Shadow fighter. </li>
         <li>To take advantage of their resilience,through the combination of Energy Diffuser protection and dropout immunity, Shadow fighters have their own algorithm for hit allocation which will tend to spread damage among the flight more than usual.</li>
-        <li>Shadow fighters are equipped with an accelerator weapon, for this reason it will not be used for interception without explicit order to do so!</li>     
+        <li>Shadow fighters are equipped with an accelerator weapon, for this reason it will not be used for interception without explicit order to do so!</li>        
         </ul>
-<a class="back-to-top" href="#top">↩ Back to Top</a>     
+<a class="back-to-top" href="#top">↩ Back to Top</a>
     
     
     <h4 id="thirdspace" >THIRDSPACE</h4>

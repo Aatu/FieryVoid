@@ -8,6 +8,13 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false){
     exit;
 }
 
+// Never cache this HTML document — it inlines a player-specific, point-in-time
+// lobby snapshot ($gamelobbydataJSON below). Without this the browser can
+// disk-cache the page and replay a stale copy on session restore (reopening tabs
+// after a browser or computer restart), with no server round-trip. no-store
+// forces a fresh fetch every time.
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+
 if (isset($_GET["leave"]) && isset($_GET["gameid"])){
     Manager::leaveLobbySlot($_SESSION["user"], $_GET["gameid"]);
     header('Location: games.php');
@@ -101,6 +108,10 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
              debug-mode shipwindow.js) run during parse and expect $.fn.draggable present,
              so jQuery-UI must not defer here. assetManager.js has no jQuery dep, so it defers. -->
         <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
+        <!-- Deploy-version cache-buster for images (see AssetManager.appendVersion). Plain
+             inline <script> runs at parse time, before the deferred assetManager.js, so the
+             global is guaranteed set first. Changes each deploy -> stale same-name art refetched. -->
+        <script>window.assetVersion = "<?php echo AssetLoader::getDeployVersion(); ?>";</script>
         <script defer src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
         <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-ui-1.14.2.min.js'); ?>"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">        

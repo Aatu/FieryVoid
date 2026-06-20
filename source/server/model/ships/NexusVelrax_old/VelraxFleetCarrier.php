@@ -57,17 +57,17 @@ class VelraxFleetCarrier extends BaseShip{
 		$this->addLeftSystem(new NexusLaserSpear(3, 5, 3, 240, 360));
         $this->addLeftSystem(new NexusTwinIonGun(2, 4, 4, 240, 60));
         $this->addLeftSystem(new Thruster(3, 12, 0, 4, 3));
-		$this->addLeftSystem(new Hangar(2, 7, 6));
-		$this->addLeftSystem(new Hangar(2, 7, 6));
-		$this->addLeftSystem(new Hangar(2, 7, 6));
+		$this->addLeftSystem(new Hangar(2, 7, 6, 3));
+		$this->addLeftSystem(new Hangar(2, 7, 6, 3));
+		$this->addLeftSystem(new Hangar(2, 7, 6, 3));
 
 //		$this->addRightSystem(new PlasmaWaveTorpedo(3, 7, 4, 0, 120));
 		$this->addRightSystem(new NexusLaserSpear(3, 5, 3, 0, 120));
         $this->addRightSystem(new NexusTwinIonGun(2, 4, 4, 300, 120));
         $this->addRightSystem(new Thruster(3, 12, 0, 4, 4));
-		$this->addRightSystem(new Hangar(2, 7, 6));
-		$this->addRightSystem(new Hangar(2, 7, 6));
-		$this->addRightSystem(new Hangar(2, 7, 6));
+		$this->addRightSystem(new Hangar(2, 7, 6, 3));
+		$this->addRightSystem(new Hangar(2, 7, 6, 3));
+		$this->addRightSystem(new Hangar(2, 7, 6, 3));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure(4, 56));

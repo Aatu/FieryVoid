@@ -62,7 +62,7 @@ class KoratylAM extends StarBaseSixSections{
 
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
 		$this->addPrimarySystem(new Scanner(5, 20, 5, 8));
-		$this->addPrimarySystem(new Hangar(5, 4));
+		$this->addPrimarySystem(new Hangar(5, 4, 1));
 		$this->addPrimarySystem(new CargoBay(5, 25));
 		$this->addPrimarySystem(new HeavyBolter(5, 10, 6, 0, 360));
 		$this->addPrimarySystem(new HeavyBolter(5, 10, 6, 0, 360));

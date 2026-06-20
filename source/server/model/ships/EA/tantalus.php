@@ -11,7 +11,7 @@ class Tantalus  extends BaseShip{
         $this->shipClass = "Tantalus Assault Transport (Alpha)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 200;
-        $this->fighters = array("normal"=>12, "assault shuttles"=>24);
+        $this->fighters = array("normal"=>12, "assault shuttles"=>24, "Breaching Pods"=>4);
 		$this->customFighter = array("Thunderbolt"=>12);
 	    
         $this->limited = 33;
@@ -30,7 +30,7 @@ class Tantalus  extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 4, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 9, 4));
-        $this->addPrimarySystem(new Hangar(5, 42, 36));
+        $this->addPrimarySystem(new Hangar(5, 42, 6));
         $this->addPrimarySystem(new Quarters(5, 21));
         $this->addPrimarySystem(new Quarters(5, 21));
         $this->addPrimarySystem(new JumpEngine(5, 20, 3, 24));

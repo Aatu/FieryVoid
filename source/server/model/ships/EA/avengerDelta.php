@@ -29,7 +29,7 @@ class AvengerDelta extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(5, 18, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new JumpEngine(5, 20, 4, 24));
 
         $this->addFrontSystem(new LightPulse(2, 4, 2, 240, 0));
@@ -51,10 +51,10 @@ class AvengerDelta extends BaseShip{
         $this->addLeftSystem(new LightPulse(2, 4, 2, 180, 300));
         $this->addLeftSystem(new InterceptorMkII(2, 4, 2, 240, 0));
         $this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 300));
-        $this->addLeftSystem(new Hangar(3, 6));
-        $this->addLeftSystem(new Hangar(3, 6));
-        $this->addLeftSystem(new Hangar(3, 6));
-        $this->addLeftSystem(new Hangar(3, 6));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 5));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 5));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 4));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 4));
 
         $this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
         $this->addRightSystem(new MediumPulse(3, 6, 3, 0, 120));
@@ -62,10 +62,10 @@ class AvengerDelta extends BaseShip{
         $this->addRightSystem(new LightPulse(2, 4, 2, 60, 180));
         $this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 120));
         $this->addRightSystem(new InterceptorMkII(2, 4, 2, 60, 180));
-        $this->addRightSystem(new Hangar(3, 6));
-        $this->addRightSystem(new Hangar(3, 6));
-        $this->addRightSystem(new Hangar(3, 6));
-        $this->addRightSystem(new Hangar(3, 6));
+        $this->addRightSystem(new Hangar(3, 6, 6, 1));
+        $this->addRightSystem(new Hangar(3, 6, 6, 1));
+        $this->addRightSystem(new Hangar(3, 6, 6, 2));
+        $this->addRightSystem(new Hangar(3, 6, 6, 2));
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 40));

@@ -62,18 +62,32 @@ class Shuttle extends FighterFlight
      * Subclasses with their own art (or stat-different variants like Flyer)
      * may instead just set $this->faction in setShuttleDefaults and let
      * this switch pick the right files.
+     * You cna overwrite in shuttle class if you want to have a bespoke image, see CargoShuttle.
      */
     public function getImage()
     {
         switch ($this->faction) {
             case 'Abbai Matriarchate':  
             case 'Abbai Matriarchate (WotCR)':    
-                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png');  
+                return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png'); 
+            case 'Brakiri Syndicracy':
+                return array('img/ships/shuttleBrakiri.png', 'img/ships/shuttleBrakiri_large.png'); 
+            case 'Cascor Commonwealth':
+                return array('img/ships/shuttleCascor.png', 'img/ships/shuttleCascor_large.png');                                         
             case 'Centauri Republic':
             case 'Centauri Republic (WotCR)': 
                 return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
             case 'Dilgar Imperium': 
-                return array('img/ships/shuttleDilgar.png', 'img/ships/ShuttleDilgar_large.png');                                                                         
+                return array('img/ships/shuttleDilgar.png', 'img/ships/ShuttleDilgar_large.png');   
+            case 'Drazi Freehold':
+            case 'Drazi Freehold (WotCR)':
+                return array('img/ships/shuttleDrazi.png', 'img/ships/shuttleDrazi_large.png');  
+            case 'Gaim Intelligence':
+                return array('img/ships/shuttleGaim.png', 'img/ships/shuttleGaim_large.png');
+            case 'Grome Autocracy'; 
+                return array('img/ships/shuttleGrome.png', 'img/ships/shuttleGrome_large.png');
+            case 'Hyach Gerontocracy'; 
+                return array('img/ships/shuttleHyach.png', 'img/ships/shuttleHyach_large.png');                                                                                                                                                  
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
@@ -83,7 +97,7 @@ class Shuttle extends FighterFlight
                 return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');
             case 'Raiders':
                 return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
-            default:
+            default: //Also used by EA, Hurr etc.
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
     }
@@ -224,6 +238,11 @@ class CargoShuttle extends Shuttle
         $this->freethrust = 3;        
     }
 
+    public function getImage()
+    {
+        return array('img/ships/shuttleCargo.png', 'img/ships/shuttleCargo_large.png');
+    }
+
     public function populate()
     {
         $current = count($this->systems);
@@ -261,6 +280,11 @@ class MedicalShuttle extends Shuttle
         $this->freethrust = 3;        
     }
 
+    public function getImage()
+    {
+        return array('img/ships/shuttleMedical.png', 'img/ships/shuttleMedical_large.png');
+    }
+
     public function populate()
     {
         $current = count($this->systems);
@@ -270,6 +294,48 @@ class MedicalShuttle extends Shuttle
         for ($i = 0; $i < $toAdd; $i++) {
             $armour = array(0, 0, 0, 0);
             $fighter = new Fighter($this->phpclass, $armour, 13, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+
+}
+
+
+class Lifeboat extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "Lifeboat";
+        $this->shipClass = "Lifeboat";
+        $this->hangarRequired = 'lifeboats';
+        $this->faction = "Civilians";        
+        $this->offensivebonus = 0;
+        $this->forwardDefense = 12;
+        $this->sideDefense = 12;
+        $this->freethrust = 1;        
+    }
+
+    public function getImage()
+    {
+        return array('img/ships/shuttleMedical.png', 'img/ships/shuttleMedical_large.png');
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 14, $this->id);
             $fighter->displayName = $this->shipClass;
             $fighter->imagePath = $this->imagePath;
             $fighter->iconPath = $this->iconPath;

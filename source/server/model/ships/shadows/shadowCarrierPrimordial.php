@@ -14,6 +14,7 @@ class ShadowCarrierPrimordial extends MediumShip{
 	    $this->isd = 'Primordial';
         $this->shipSizeClass = 3; //it's actually a Capital ship using MCV layout
 		$this->factionAge = 4; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
+		$this->variantOf = 'NONE';		
        
         $this->forwardDefense = 16;
         $this->sideDefense = 15;

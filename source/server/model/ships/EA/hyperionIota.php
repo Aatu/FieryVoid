@@ -35,7 +35,7 @@ class HyperionIota extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 20, 4, 8));
         $this->addPrimarySystem(new Engine(6, 18, 0, 7, 4));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 2, 2));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
