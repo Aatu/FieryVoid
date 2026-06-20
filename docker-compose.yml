@@ -21,13 +21,7 @@ services:
       - bashhistory:/root/.bash_history_volume
     networks:
       - default
-    develop:
-      watch:
-        - action: sync
-          path: ./source
-          target: /usr/src/fieryvoid/source
-          ignore:
-            - node_modules/
+
 
   nginx:
     build:
