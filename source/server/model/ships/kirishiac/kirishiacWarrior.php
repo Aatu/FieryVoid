@@ -41,6 +41,7 @@ class kirishiacWarrior extends FighterFlight{
 			$fighter->imagePath = "img/ships/kirishiacWarrior2.png";
 			$fighter->iconPath = "img/ships/kirishiacWarrior_large2.png";
 			
+
 			
 			//$fighter->addFrontSystem(new GlancingRam(0, 360, 1));
 			
