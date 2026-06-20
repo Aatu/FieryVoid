@@ -104,7 +104,9 @@ class Shuttle extends FighterFlight
             case 'Raiders':
                 return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');
             case 'Torata Regency':
-                return array('img/ships/shuttleTorata.png', 'img/ships/shuttleTorata_large.png');                                                                         
+                return array('img/ships/shuttleTorata.png', 'img/ships/shuttleTorata_large.png');
+            case 'Vree Conglomerate':
+                return array('img/ships/VreeZeoth.png', 'img/ships/VreeZeoth_Large.png');                                                                                             
             default: //Also used by EA, Hurr etc.
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
