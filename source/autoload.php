@@ -3971,6 +3971,10 @@ spl_autoload_register(
                 'minesweepingshuttlevree' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttleyolu' => '/server/model/ships/Shuttle.php',                                
 
+                //Armed Shuttles
+                'armedshuttleea' => '/server/model/ships/EA/ArmedShuttleEA.php',
+                'armedmissileshuttleea' => '/server/model/ships/EA/ArmedMissileShuttleEA.php',                               
+
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
                 'baescortcarrierearlyrails' => '/server/model/ships/beltalliance/baEscortCarrierEarlyRails.php',
