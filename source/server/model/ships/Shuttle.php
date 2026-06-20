@@ -70,6 +70,8 @@ class Shuttle extends FighterFlight
             case 'Abbai Matriarchate':  
             case 'Abbai Matriarchate (WotCR)':    
                 return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png'); 
+            case 'Balosian Underdwellers':
+                return array('img/ships/shuttleBalosian.png', 'img/ships/shuttleBalosian_large.png');                     
             case 'Brakiri Syndicracy':
                 return array('img/ships/shuttleBrakiri.png', 'img/ships/shuttleBrakiri_large.png'); 
             case 'Cascor Commonwealth':
