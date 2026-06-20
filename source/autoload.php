@@ -4080,6 +4080,7 @@ spl_autoload_register(
 						'jara' => '/server/model/ships/HouseValheru/Jara.php',
 						'jarissa' => '/server/model/ships/HouseValheru/Jarissa.php',
 						'kitsune' => '/server/model/ships/HouseValheru/Kitsune.php',
+						'kitsuneharasser' => '/server/model/ships/HouseValheru/KitsuneHarasser.php',
 						'liana' => '/server/model/ships/HouseValheru/Liana.php',
                         'maximillian' => '/server/model/ships/HouseValheru/Maximillian.php',
                         'mograte' => '/server/model/ships/HouseValheru/Mograte.php',

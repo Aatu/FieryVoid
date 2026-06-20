@@ -4,7 +4,7 @@ class Phoenician extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 37*6;
+		$this->pointCost = 66*6;
         $this->faction = "House Valheru";
         $this->phpclass = "Phoenician";
         $this->shipClass = "Phoenician Assault Fighters";
@@ -13,8 +13,8 @@ class Phoenician extends FighterFlight{
         
         $this->forwardDefense = 9;
         $this->sideDefense = 8;
-        $this->freethrust = 9;
-        $this->offensivebonus = 3;
+        $this->freethrust = 10;
+        $this->offensivebonus = 5;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
         
@@ -30,8 +30,8 @@ class Phoenician extends FighterFlight{
 
         for ($i = 0; $i < $toAdd; $i++){
 			
-			$armour = array(2, 1, 1, 1);
-			$fighter = new Fighter("Phoenician", $armour, 12, $this->id);
+			$armour = array(3, 2, 3, 3);
+			$fighter = new Fighter("Phoenician", $armour, 13, $this->id);
 			$fighter->displayName = "Phoenician";
 			$fighter->imagePath = "img/ships/Phoenician.png";
 			$fighter->iconPath = "img/ships/Phoenician_large.png";
@@ -41,6 +41,7 @@ class Phoenician extends FighterFlight{
             		$largeGun->exclusive = true; 
             		$fighter->addFrontSystem($largeGun);			
 			
+            $fighter->addAftSystem(new FighterTorpedoLauncher(2, 330, 30));
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			
 			$this->addSystem($fighter);
