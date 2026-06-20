@@ -113,6 +113,11 @@ class Enhancements{
 
 			break;	  			
 	
+		case 'Shuttles':
+			Enhancements::blockStandardEnhancements($unit);
+				$unit->enhancementOptionsEnabled[] = 'MAKE_MINE';			
+			break;				
+			
 		case 'ThirdspaceShip':
 			Enhancements::blockStandardEnhancements($unit);
 			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';	
@@ -1531,9 +1536,28 @@ class Enhancements{
 	  if(!in_array($enhID, $flight->enhancementOptionsDisabled)){ //option is not disabled
 		  $enhName = 'Improved Thrust';
 		  $enhLimit = 1;	
-		  $enhPrice = max(1,$flight->freethrust+1);	  
+		  $enhPrice = max(1,$flight->freethrust+1);
 		  $enhPriceStep = 0;
 		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+	  }
+
+	  //Convert to Minesweeper: sets $minesweeper = true (full OB to mine detection).
+	  //Only offered to shuttle-type units ($hangarRequired === 'shuttles').
+	  //Cost (per craft in flight): 10pts or 20% of one craft's cost (round up),
+	  //whichever is higher. Flight pointCost is for the whole 6-craft flight, so
+	  //divide by 6 first (SuperHeavyFighter is a single-craft flight). Limit: 1
+	  $enhID = 'MAKE_MINE';
+	  if(in_array($enhID, $flight->enhancementOptionsEnabled)){ //option needs to be specifically enabled
+		  $enhName = 'Minesweeper Conversion';
+		  $enhLimit = 1;
+		  if($flight instanceof SuperHeavyFighter){//single-craft flight!
+			$perCraftCost = $flight->pointCost;
+		  }else{
+			$perCraftCost = $flight->pointCost / 6;
+		  }
+		  $enhPrice = max(10, (int)ceil($perCraftCost * 0.2));
+		  $enhPriceStep = 0;
+		  $flight->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 	  }
 
 	  //Navigator: missile guidance, +1(5) Ini, cost: 10, limit: 1
@@ -1826,6 +1850,9 @@ class Enhancements{
 						break;
 					case 'IMPR_THR': //Improved Thrust: +1 free thrust
 						$flight->freethrust += $enhCount;
+						break;
+					case 'MAKE_MINE': //Minesweeper Conversion: shuttle gains minesweeper flag
+						$flight->minesweeper = true;
 						break;
 					case 'NAVIGATOR': //Navigator: navigator flag - it activates appropriate segments of code
 						$flight->hasNavigator = true;
@@ -2587,8 +2614,16 @@ class Enhancements{
 								$strippedShip->freethrust = $ship->freethrust;
 							}
 							break;
-							
-						case 'NAVIGATOR': //Navigator: hasNavigator trait 
+
+						case 'MAKE_MINE': //Minesweeper Conversion: emit minesweeper flag so the
+										  //client (ew.js / ShipInfo / SystemInfo) reads full-OB mine detection.
+										  //Static blueprint says minesweeper=false, so the strip must override it.
+							if($ship instanceof FighterFlight){
+								$strippedShip->minesweeper = $ship->minesweeper;
+							}
+							break;
+
+						case 'NAVIGATOR': //Navigator: hasNavigator trait
 							if($ship instanceof FighterFlight){
 								$strippedShip->hasNavigator = $ship->hasNavigator;
 							}
