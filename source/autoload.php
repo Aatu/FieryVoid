@@ -3973,12 +3973,17 @@ spl_autoload_register(
                 'minesweepingshuttleyolu' => '/server/model/ships/Shuttle.php',                                
 
                 //Armed Shuttles
-                'armedshuttleea' => '/server/model/ships/EA/ArmedShuttleEA.php',
-                'armedmissileshuttleea' => '/server/model/ships/EA/ArmedMissileShuttleEA.php',
-                'armedshuttlenarn' => '/server/model/ships/narn/ArmedShuttleNarn.php',
+                'armedshuttlebrakiri' => '/server/model/ships/brakiri/ArmedShuttleBrakiri.php',
                 'armedshuttlecent' => '/server/model/ships/centauri/ArmedShuttleCent.php',
-
-                'armedshuttlellort' => '/server/model/ships/llort/ArmedShuttleLlort.php',                                                                                  
+                'armedshuttledrazi' => '/server/model/ships/drazi/ArmedShuttleDrazi.php',
+                'armoredshuttledrazi' => '/server/model/ships/drazi/ArmoredShuttleDrazi.php',                                  
+                'armedshuttleea' => '/server/model/ships/EA/ArmedShuttleEA.php',
+                'armedmissileshuttleea' => '/server/model/ships/EA/ArmedMissileShuttleEA.php',                
+                'armedshuttlegaim' => '/server/model/ships/gaim/ArmedShuttleGaim.php',                
+                'armedshuttlenarn' => '/server/model/ships/narn/ArmedShuttleNarn.php',
+                'armedshuttlellort' => '/server/model/ships/llort/ArmedShuttleLlort.php', 
+                'armedshuttlepakmara' => '/server/model/ships/pakmara/ArmedShuttlePakMaRa.php',                
+                'armedshuttlevree' => '/server/model/ships/vree/ArmedShuttleVree.php',                                                                                                      
 
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',

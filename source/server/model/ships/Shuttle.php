@@ -517,7 +517,8 @@ class ShuttleBrakiri extends Shuttle
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
         $this->freethrust = 3;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 9 * 5; 
+        $this->gravitic = true;                       
     }
 
     public function populate()
@@ -804,7 +805,7 @@ class ShuttleDrazi extends Shuttle
         $this->forwardDefense = 8;
         $this->sideDefense = 9;
         $this->freethrust = 4;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 11 * 5;             
     }
 
     public function populate()
@@ -1251,7 +1252,7 @@ class ShuttlePakMaRa extends Shuttle
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
         $this->freethrust = 6;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 8 * 5;          
     }
 
     public function populate()
@@ -1428,7 +1429,8 @@ class ShuttleVree extends Shuttle
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
         $this->freethrust = 4;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 9 * 5;   
+        $this->gravitic = true;                     
     }
 
     public function populate()

@@ -1853,7 +1853,7 @@ class Enhancements{
 						break;
 					case 'MAKE_MINE': //Minesweeper Conversion: shuttle gains minesweeper flag
 						$flight->minesweeper = true;
-						$flight->offensivebonus = 4;
+						if($flight->offensivebonus < 4) $flight->offensivebonus = 4;
 						break;
 					case 'NAVIGATOR': //Navigator: navigator flag - it activates appropriate segments of code
 						$flight->hasNavigator = true;
