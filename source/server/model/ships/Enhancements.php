@@ -1853,6 +1853,7 @@ class Enhancements{
 						break;
 					case 'MAKE_MINE': //Minesweeper Conversion: shuttle gains minesweeper flag
 						$flight->minesweeper = true;
+						$flight->offensivebonus = 4;
 						break;
 					case 'NAVIGATOR': //Navigator: navigator flag - it activates appropriate segments of code
 						$flight->hasNavigator = true;
@@ -2616,10 +2617,11 @@ class Enhancements{
 							break;
 
 						case 'MAKE_MINE': //Minesweeper Conversion: emit minesweeper flag so the
-										  //client (ew.js / ShipInfo / SystemInfo) reads full-OB mine detection.
+										  //client (ew.js / ShipInfo / SystemInfo) reads full-OB mine detection and improved OB.
 										  //Static blueprint says minesweeper=false, so the strip must override it.
 							if($ship instanceof FighterFlight){
 								$strippedShip->minesweeper = $ship->minesweeper;
+								$strippedShip->offensivebonus = $ship->offensivebonus;								
 							}
 							break;
 
