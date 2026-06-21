@@ -330,7 +330,7 @@ class Enhancements{
 		  $enhID = 'HANG_ORD';
 		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = 'Ballistic Ordnance Reserve';
-				$enhLimit = 200;            //practical ceiling — six AMMO_FH heavies (8 PV ea) on a 6-fighter heavy missile flight
+				$enhLimit = 2000;            //practical ceiling — six AMMO_FH heavies (8 PV ea) on a 6-fighter heavy missile flight
 				$enhPrice = 1;             //1 CP = 1 reload point
 				$enhPriceStep = 0;         //flat rate
 				$ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
