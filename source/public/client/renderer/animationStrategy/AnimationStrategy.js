@@ -1,5 +1,30 @@
 "use strict";
 
+// Current replay playback rate, published each frame by the active
+// AnimationStrategy.render and read by the sound effects when they fire so a
+// slowed/sped-up replay also slows/speeds its audio (tape-style pitch shift).
+// 1 = normal. Lives on window because the leaf effects are global singletons
+// that don't hold a reference to the strategy.
+window.replayPlaybackRate = 1;
+
+// Clamp to the range HTMLMediaElement.playbackRate accepts across browsers
+// (values outside ~[0.0625, 16] throw or are ignored). Our replay speeds
+// (0.25–8) are well inside this, but clamp defensively.
+window.applyReplayPlaybackRate = function (audio) {
+    if (!audio) {
+        return;
+    }
+    var rate = window.replayPlaybackRate || 1;
+    if (rate < 0.0625) rate = 0.0625;
+    if (rate > 16) rate = 16;
+    try {
+        audio.playbackRate = rate;
+    } catch (e) {
+        // Some browsers throw for out-of-range/unsupported rates; ignore and
+        // let the clip play at its natural speed.
+    }
+};
+
 window.AnimationStrategy = function () {
     function AnimationStrategy(shipIcons, turn) {
         this.shipIconContainer = null;
@@ -100,6 +125,10 @@ window.AnimationStrategy = function () {
     AnimationStrategy.prototype.render = function (coordinateConverter, scene, zoom) {
         updateDeltaTime.call(this, this.paused);
         updateTotalAnimationTime.call(this, this.paused);
+        // Publish the rate sounds should play at this frame. Effects only fire
+        // their clips while playing forward (not paused/back), so the rate is
+        // simply the current speedMultiplier.
+        window.replayPlaybackRate = this.speedMultiplier;
         this.animations.forEach(function (animation) {
             animation.render(new Date().getTime(), this.totalAnimationTime, this.lastAnimationTime, this.currentDeltaTime, zoom, this.goingBack, this.paused);
         }, this);

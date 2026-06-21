@@ -315,6 +315,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                 var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
                                 explosionSound.volume = pullSoundVolume;
                                 explosionSound.currentTime = 0;
+                                window.applyReplayPlaybackRate(explosionSound);
                                 explosionSound.play().catch(function () { });
                             }
                             this.playedPullSound = true;
@@ -394,6 +395,7 @@ window.AllWeaponFireAgainstShipAnimation = function () {
                                         var explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
                                         explosionSound.volume = soundVolume;
                                         explosionSound.currentTime = 0;
+                                        window.applyReplayPlaybackRate(explosionSound);
                                         explosionSound.play().catch(function() {});
                                     }
                                     this.playedImpactSound = true;
