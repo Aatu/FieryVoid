@@ -64,6 +64,8 @@ const System = styled.div`
             return '#4e6c91';
         } else if (props.$firing) {
             return '#e06f01'; //orange
+        } else if (props.$off) {
+            return '#852d2d'; //muted red - system deliberately switched OFF (e.g. grav shield dropped)
         } else if (props.$boosted) {
             return '#cca300'; //darkyellow
         } else if (props.$loading && props.$loadedAlternate) { //weapon not ready in current mode, but  alternate mode is ready
@@ -393,6 +395,7 @@ class SystemIcon extends React.Component {
                 $firing={isFiring(ship, system)}
                 $calledShot={isCalledShot(ship, system)}
                 $boosted={isBoosted(ship, system)}
+                $off={isOff(system)}
             >
                 <SystemText>{getText(ship, system)}</SystemText>
                 {(!fighter || hasCriticals(system)) && <HealthBar $scs={scs} $health={getStructureLeft(ship, system)} $criticals={hasCriticals(system)} $criticalsBenign={hasOnlyHangarOps(system)} />}
@@ -414,7 +417,10 @@ const isLoadedAlternate = (system) => system.weapon && weaponManager.isLoadedAlt
 
 const isOffline = (ship, system) => shipManager.power.isOffline(ship, system);
 
-const isBoosted = (ship, system) => shipManager.power.isBoosted(ship, system) || system.active;
+//A system whose active flag means "switched OFF" (e.g. grav shield dropped) shows the $off state,
+//not the boosted/yellow highlight.
+const isOff = (system) => system.activeMeansOff && system.active;
+const isBoosted = (ship, system) => shipManager.power.isBoosted(ship, system) || (system.active && !system.activeMeansOff);
 
 const getStructureLeft = (ship, system) => {
     if (system.name === 'ThirdspaceShield' || system.name === 'ThoughtShield') {

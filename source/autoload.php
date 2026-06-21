@@ -357,6 +357,7 @@ spl_autoload_register(
                 'ftrlellatb' => '/server/model/ships/llort/ftrLellatB.php',
                 'ftrleteerumas' => '/server/model/ships/llort/ftrLeteerumAS.php',
                 'ftrshield' => '/server/model/weapons/defensive.php',
+                'ftrgravshield' => '/server/model/weapons/defensive.php',                
                 'ftrurchin' => '/server/model/ships/ipsha/ftrUrchin.php',
                 'fusionagitator' => '/server/model/weapons/molecular.php',
                 'fusioncannon' => '/server/model/weapons/molecular.php',
