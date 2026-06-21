@@ -46,8 +46,8 @@ class BloodSwordRainingThunder extends HeavyCombatVessel{
       
         $this->addFrontSystem(new Thruster(2, 8, 0, 4, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 4, 1));
-		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
-		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
+		$this->addFrontSystem(new HeavyPlasma(3, 8, 5, 300, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 360));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 360));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 0, 120));
@@ -77,7 +77,7 @@ class BloodSwordRainingThunder extends HeavyCombatVessel{
             ),
             1=> array(
                     4 => "Thruster",
-                    6 => "Medium Plasma Cannoncher",
+                    6 => "Heavy Plasma Cannon",
 					9 => "Laser Bolt",
 					18 => "Structure",
                     20 => "Primary",

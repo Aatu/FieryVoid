@@ -37,8 +37,8 @@ class BloodSwordScythe extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 240, 360));
-		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 0, 120));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 0, 120));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
                 
