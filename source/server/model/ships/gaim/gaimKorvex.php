@@ -26,6 +26,27 @@ class gaimKorvex extends BaseShip{
 
 		$this->iniativebonus = 0;
 
+		// This unit has thrusters in non-traditional locations
+		// It has retro, main, and side thrusters on the port and starboard 
+		// It also has a retro in front and a main in aft
+		// Port thrusters
+		$t1l = new Thruster(4, 6, 0, 2, 1); // port retro
+		$t3l = new Thruster(5, 15, 0, 6, 3); // port side
+    	$t2l = new Thruster(3, 9, 0, 3, 2); // port main
+
+		//Starboard thrusters
+		$t1r = new Thruster(4, 6, 0, 2, 1); // starboard retro
+		$t4r = new Thruster(5, 15, 0, 6, 4); // starboard side
+		$t2r = new Thruster(3, 9, 0, 3, 2); // starboard main
+
+		//Actual placement of thrusters
+		$this->addFrontSystem($t1l);
+		$this->addLeftSystem($t3l);
+		$this->addAftSystem($t2l);
+		$this->addFrontSystem($t1r);
+		$this->addRightSystem($t4r);
+    	$this->addAftSystem($t2r);
+
 		$this->addPrimarySystem(new Reactor(5, 20, 0, 0));
 		$this->addPrimarySystem(new CnC(6, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(6, 20, 4, 9));
@@ -35,9 +56,7 @@ class gaimKorvex extends BaseShip{
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 300, 180));
 		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 60, 240));
 
-		$this->addFrontSystem(new Thruster(4, 9, 0, 2, 1));
-		$this->addFrontSystem(new Thruster(4, 9, 0, 2, 1));
-		$this->addFrontSystem(new Thruster(4, 9, 0, 2, 1));
+		$this->addFrontSystem(new Thruster(4, 6, 0, 2, 1));
 		$this->addFrontSystem(new Bulkhead(0, 3));
 		$this->addFrontSystem(new Bulkhead(0, 3));
 		$this->addFrontSystem(new ParticleConcentrator(5, 9, 7, 240, 360));
@@ -45,25 +64,18 @@ class gaimKorvex extends BaseShip{
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 240, 120));
 
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
-		$this->addAftSystem(new Thruster(4, 9, 0, 3, 2));
+		$this->addAftSystem(new Thruster(5, 9, 0, 6, 2));
 		$this->addAftSystem(new Hangar(4, 12, 6));
 		$this->addAftSystem(new Bulkhead(0, 3));
 		$this->addAftSystem(new Bulkhead(0, 3));
 		$this->addAftSystem(new JumpEngine(4, 20, 5, 20));
 		
-		$this->addLeftSystem(new Thruster(3, 9, 0, 3, 3));
-		$this->addLeftSystem(new Thruster(3, 9, 0, 3, 3));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new BattleLaser(5, 6, 6, 240, 360));
 		$this->addLeftSystem(new PacketTorpedo(5, 6, 5, 240, 360));
         $this->addLeftSystem(new TwinArray(3, 6, 2, 180, 60));
 
-		$this->addRightSystem(new Thruster(3, 9, 0, 3, 4));
-		$this->addRightSystem(new Thruster(3, 9, 0, 3, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new Bulkhead(0, 4));
 		$this->addRightSystem(new BattleLaser(4, 6, 6, 0, 120));
@@ -102,17 +114,21 @@ class gaimKorvex extends BaseShip{
                         20 => "Primary",
                 ),
                 3=> array(
-                        4 => "Thruster",
-                        6 => "Twin Array",
-						9 => "Packet Torpedo",
+                        2 => "1:Thruster",
+                        4 => "3:Thruster",
+                        6 => "2:Thruster",
+                        8 => "Twin Array",
+						10 => "Packet Torpedo",
 						12 => "Battle Laser",
                         18 => "Structure",
                         20 => "Primary",
                 ),
                 4=> array(
-                        4 => "Thruster",
-                        6 => "Twin Array",
-						9 => "Packet Torpedo",
+                        2 => "1:Thruster",
+                        4 => "4:Thruster",
+                        6 => "2:Thruster",
+                        8 => "Twin Array",
+						10 => "Packet Torpedo",
 						12 => "Battle Laser",
                         18 => "Structure",
                         20 => "Primary",

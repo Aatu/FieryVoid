@@ -4,7 +4,7 @@ class BloodSwordScythe extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 325;
+        $this->pointCost = 300;
         $this->faction = "Escalation Wars Blood Sword Raiders";
         $this->phpclass = "BloodSwordScythe";
         $this->imagePath = "img/ships/EscalationWars/BloodSwordScythe.png";
