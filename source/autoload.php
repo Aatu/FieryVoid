@@ -3976,7 +3976,9 @@ spl_autoload_register(
                 'armedshuttleea' => '/server/model/ships/EA/ArmedShuttleEA.php',
                 'armedmissileshuttleea' => '/server/model/ships/EA/ArmedMissileShuttleEA.php',
                 'armedshuttlenarn' => '/server/model/ships/narn/ArmedShuttleNarn.php',
-                'armedshuttlecent' => '/server/model/ships/centauri/ArmedShuttleCent.php',                                                                 
+                'armedshuttlecent' => '/server/model/ships/centauri/ArmedShuttleCent.php',
+
+                'armedshuttlellort' => '/server/model/ships/llort/ArmedShuttleLlort.php',                                                                                  
 
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
