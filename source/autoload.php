@@ -2798,6 +2798,7 @@ spl_autoload_register(
 				'antimattertorpedo' => '/server/model/weapons/antimatter.php',
 				'lightantiprotongun' => '/server/model/weapons/antimatter.php',
 				'ltantimattercannon' => '/server/model/weapons/antimatter.php',
+				'ltantimattercannonunreliable' => '/server/model/weapons/antimatter.php',                
 				'antimattershredder' => '/server/model/weapons/antimatter.php',
 				'xorr' => '/server/model/ships/vree/Xorr.php',
 				'vaarl' => '/server/model/ships/vree/Vaarl.php',
@@ -3983,7 +3984,8 @@ spl_autoload_register(
                 'armedshuttlenarn' => '/server/model/ships/narn/ArmedShuttleNarn.php',
                 'armedshuttlellort' => '/server/model/ships/llort/ArmedShuttleLlort.php', 
                 'armedshuttlepakmara' => '/server/model/ships/pakmara/ArmedShuttlePakMaRa.php',                
-                'armedshuttlevree' => '/server/model/ships/vree/ArmedShuttleVree.php',                                                                                                      
+                'armedshuttlevree' => '/server/model/ships/vree/ArmedShuttleVree.php',  
+                'armedshuttlevreecannon' => '/server/model/ships/vree/ArmedShuttleVreeCannon.php',                                                                                                                     
 
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
