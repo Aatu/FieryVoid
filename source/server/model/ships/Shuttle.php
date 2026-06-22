@@ -79,6 +79,8 @@ class Shuttle extends FighterFlight
             case 'Centauri Republic':
             case 'Centauri Republic (WotCR)': 
                 return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
+            case 'Corillani Theocracy':
+                return array('img/ships/shuttleCorillani.png', 'img/ships/shuttleCorillani_large.png');                     
             case 'Dilgar Imperium': 
                 return array('img/ships/shuttleDilgar.png', 'img/ships/ShuttleDilgar_large.png');   
             case 'Drazi Freehold':
