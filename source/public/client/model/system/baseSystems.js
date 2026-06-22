@@ -335,13 +335,11 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	// the hangar's live data is recomputed. LCV rails / catapults keep their own
 	// Type (they don't carry FighterFlights with this restriction).
 	if (!this.isLCVRail && Array.isArray(this.allowedFighterClasses) && this.allowedFighterClasses.length > 0
-		&& window.shipManager && shipManager.systems && shipManager.systems.displayNameForFighterClass) {
-		var allowedNames = [];
-		for (var ai = 0; ai < this.allowedFighterClasses.length; ai++) {
-			var nm = shipManager.systems.displayNameForFighterClass(this.allowedFighterClasses[ai]);
-			if (nm && allowedNames.indexOf(nm) === -1) allowedNames.push(nm);
-		}
-		if (allowedNames.length > 0) this.data["Type"] = allowedNames.join(", ");
+		&& window.shipManager && shipManager.systems && shipManager.systems.displayNameForAllowedClasses) {
+		//A multi-class bay shows its collective group name ("Hunter-Killer") rather
+		//than listing each class, matching the lobby ship-window complement line.
+		var allowedLabel = shipManager.systems.displayNameForAllowedClasses(this.allowedFighterClasses);
+		if (allowedLabel) this.data["Type"] = allowedLabel;
 	}
 
 	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon

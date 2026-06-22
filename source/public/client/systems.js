@@ -612,6 +612,41 @@ shipManager.systems = {
         return phpclass;
     },
 
+    //Friendly label for a bay's WHOLE allowedFighterClasses list. A single-class
+    //bay reads as that fighter's name ("Reska"). A multi-class bay would otherwise
+    //pick just the first class (misleading — it can hold the others too), so a
+    //known group of classes gets a collective name (e.g. the Orieni HK classes
+    //HkShiningLight + HkShiningStar → "Hunter-Killer"); any other multi-class set
+    //falls back to joining the individual display names with " / ". Keep the group
+    //table in sync with any new multi-class restricted bay.
+    displayNameForAllowedClasses: function displayNameForAllowedClasses(allowed) {
+        if (!Array.isArray(allowed) || allowed.length === 0) return "";
+        if (allowed.length === 1) return shipManager.systems.displayNameForFighterClass(allowed[0]);
+
+        //Named groups: an UNORDERED set of phpclasses → collective label. Matched
+        //when the bay's allow-list contains exactly the group's classes.
+        var groups = [
+            { classes: ["HkShiningLight", "HkShiningStar"], label: "Hunter-Killer" }
+        ];
+        for (var g = 0; g < groups.length; g++) {
+            var gc = groups[g].classes;
+            if (gc.length !== allowed.length) continue;
+            var allMatch = true;
+            for (var c = 0; c < gc.length; c++) {
+                if (allowed.indexOf(gc[c]) === -1) { allMatch = false; break; }
+            }
+            if (allMatch) return groups[g].label;
+        }
+
+        //Generic fallback: list each fighter's display name.
+        var names = [];
+        for (var i = 0; i < allowed.length; i++) {
+            var nm = shipManager.systems.displayNameForFighterClass(allowed[i]);
+            if (nm && names.indexOf(nm) === -1) names.push(nm);
+        }
+        return names.join(" / ");
+    },
+
     //Classify a fighter-flight blueprint into a ship.fighters size category key
     //("light"/"medium"/"heavy"/"ultralight" or an explicit hangarRequired).
     //Mirrors the jinkinglimit classification in gamelobby.js checkChoices() so a
@@ -668,18 +703,29 @@ shipManager.systems = {
             if (s.isCatapult || s.isRail || s.isLCVRail || s.isShadowHangar) continue;
             var allowed = s.allowedFighterClasses;
             if (!Array.isArray(allowed) || allowed.length == 0) continue;
-            //One reserved row per bay, attributed to its first allowed class —
-            //first-fit bays each name exactly one fighter (e.g. the Suom's
-            //Reska-only aft bay). A multi-class allow-list (none today) would
-            //list the first; extend here if that case ever ships.
+            //One reserved row per bay. A single-class bay names that fighter (e.g.
+            //the Suom's Reska-only aft bay). A MULTI-class bay names the whole
+            //allowed set via displayNameForAllowedClasses (e.g. the Orieni Penitent's
+            //HK bays → "Hunter-Killer"), so the window doesn't misleadingly pick just
+            //one of the classes it can hold. The size category comes from the first
+            //class (a multi-class group shares one category — the HK pair is medium).
             var phpclass = allowed[0];
             var category = shipManager.systems.fighterSizeCategory(phpclass);
             if (!category) continue;   //unknown size — leave the generic line intact
+            //Stable per-bay-shape merge key: identical multi-class bays (e.g. the
+            //Penitent's four HK arc bays) collapse to ONE window row. Using the
+            //sorted class list keeps the key independent of declaration order.
+            var mergeKey = allowed.slice().sort().join("+");
+            //A multi-class bay shows a standalone group label ("Hunter-Killer" →
+            //"24 Hunter-Killers"); the size descriptor is dropped because the group
+            //name already conveys the unit (and the underlying size is just a proxy
+            //slot). A single-class bay keeps the "N <Name> <Size> Fighters" format.
             rows.push({
                 category: category,
-                phpclass: phpclass,
-                displayName: shipManager.systems.displayNameForFighterClass(phpclass),
-                count: parseInt(s.maxhealth || 0, 10)
+                phpclass: mergeKey,
+                displayName: shipManager.systems.displayNameForAllowedClasses(allowed),
+                count: parseInt(s.maxhealth || 0, 10),
+                isGroup: allowed.length > 1
             });
         }
         return rows;
