@@ -526,7 +526,12 @@ window.mathlib = {
 		const spriteMaterial = new THREE.SpriteMaterial({ map: texture, transparent: true });
 		const sprite = new THREE.Sprite(spriteMaterial);
 		sprite.position.set(midX, midY, 501);
-		sprite.scale.set(30, 30, 1);
+		// Sprites scale with the orthographic frustum, so a fixed world-space
+		// scale shrinks on screen as you zoom out. Multiply by the current zoom
+		// (and clamp) so the number stays a readable size at any zoom level.
+		const zoom = (window.webglScene && window.webglScene.zoom) || 1;
+		const labelScale = 28 * Math.max(zoom, 1);
+		sprite.scale.set(labelScale, labelScale, 1);
 		window.LosSprite.add(sprite);
 
 		// === Helper for circular markers ===
