@@ -8,7 +8,7 @@ class Devout2002 extends MediumShip{
         $this->faction = "Orieni Imperium";
         $this->phpclass = "devout2002";
         $this->imagePath = "img/ships/obedient.png";
-        $this->shipClass = "Devout Escort Frigate (early)";
+        $this->shipClass = "Devout Escort Frigate (Early)";
         	$this->variantOf = "Obedient Patrol Frigate (2007)";
         $this->agile = true;
         $this->canvasSize = 100;
@@ -29,7 +29,7 @@ class Devout2002 extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 11, 2, 4));
         $this->addPrimarySystem(new Engine(3, 16, 0, 12, 2));
-        $this->addPrimarySystem(new Hangar(1, 1));
+        $this->addPrimarySystem(new Hangar(1, 1, 1));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 6, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 6, 4));        
         

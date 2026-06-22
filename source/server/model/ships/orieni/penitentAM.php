@@ -21,6 +21,7 @@ class penitentAM extends SmallStarBaseFourSections{
 		$this->forwardDefense = 22;
 		$this->sideDefense = 22;
 		$this->isd = 2007;
+		$this->notes = "Outer hangars can only hold Hunter-Killer drones";
 
 		/*replaced by TAGed versions!		
 		$this->addPrimarySystem(new Structure(5, 150)); //needs to be called first for some reason - static call apparently fails for the first time...
@@ -59,8 +60,8 @@ class penitentAM extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 44, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
-		$this->addPrimarySystem(new Hangar(5, 14));
-		$this->addPrimarySystem(new Hangar(5, 14));
+		$this->addPrimarySystem(new Hangar(5, 14, 6, 0, 'light')); //light-fighter bay (the 'light' half of $fighters)
+		$this->addPrimarySystem(new Hangar(5, 14, 6, 0, 'light')); //light-fighter bay (the 'light' half of $fighters)
         $this->addPrimarySystem(new HKControlNode(5, 30, 4, 4));
     	$this->addPrimarySystem(new HeavyLaserLance(5, 6, 4, 0, 360));
        	$this->addPrimarySystem(new HeavyLaserLance(5, 6, 4, 0, 360));
@@ -84,6 +85,7 @@ class penitentAM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addFrontSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 270;
@@ -111,6 +113,7 @@ class penitentAM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addAftSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 90;
@@ -138,6 +141,7 @@ class penitentAM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addLeftSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 180;
@@ -165,6 +169,7 @@ class penitentAM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addRightSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 0;

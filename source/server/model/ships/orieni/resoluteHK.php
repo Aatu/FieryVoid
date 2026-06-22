@@ -15,7 +15,7 @@ class resoluteHK extends MediumShip{
 	    $this->isd = 1802;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>6,"cargo shuttles"=>4);
         $this->notes = 'Carries 6 hunter-killers in pods. Note, no hunter-killer controller.';
         
         $this->forwardDefense = 15;
@@ -41,7 +41,7 @@ class resoluteHK extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 11, 2, 4));
         $this->addPrimarySystem(new Engine(3, 16, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(1, 4));
+		$this->addPrimarySystem(new Hangar(1, 4, 1));
 		$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(2, 13, 0, 4, 4));
 		

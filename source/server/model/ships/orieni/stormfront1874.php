@@ -8,7 +8,7 @@ class StormFront1874 extends MediumShip{
 		$this->faction = "Orieni Imperium";
         $this->phpclass = "StormFront1874";
         $this->imagePath = "img/ships/stormFront.png";
-        $this->shipClass = "Storm Front Missile Corvette (early)";
+        $this->shipClass = "Storm Front Missile Corvette (Early)";
 		//$this->variantOf = "Steadfast Escort Corvette";
 	        $this->variantOf = 'OBSOLETE'; //awaiting all games it's used in, then is to be removed from active ships list
  
@@ -33,7 +33,7 @@ class StormFront1874 extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 5));
         $this->addPrimarySystem(new Engine(3, 15, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(1, 1));
+		$this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 		
