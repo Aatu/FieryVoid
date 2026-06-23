@@ -7,7 +7,7 @@ class gaimTixTyk extends HeavyCombatVesselLeftRight{
 		$this->pointCost = 600;
 	    $this->faction = "Gaim Intelligence";
         $this->phpclass = "gaimTixTyk";
-        $this->imagePath = "img/ships/Tixtyk.png";
+        $this->imagePath = "img/ships/Tixtyk2.png";
         $this->shipClass = "Tixtyk Line Destroyer";
 		$this->fighters = array("light"=>6);        
         
