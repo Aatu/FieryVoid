@@ -9,7 +9,7 @@ class TorataDartocCA extends BaseShip{
 		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataDartocCA";
 		$this->imagePath = "img/ships/TorataGolthar.png";
-		$this->canvasSize = 260;
+		$this->canvasSize = 200;
 		$this->shipClass = "Dartoc Strike Cruiser";
 		$this->shipSizeClass = 3;
 		$this->variantOf = "Golthar Fast Cruiser";

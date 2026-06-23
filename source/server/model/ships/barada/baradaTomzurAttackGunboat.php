@@ -1,13 +1,15 @@
 <?php
-class baradaFizurFastGunboat extends LCV{
+class baradaTomzurAttackGunboat extends LCV{
 
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
 	$this->pointCost = 200;
     $this->faction = "Barada Imperium";
-	$this->phpclass = "baradaFizurFastGunboat";
-	$this->shipClass = "Fizur Fast Gunboat";
+	$this->phpclass = "baradaTomzurAttackGunboat";
+	$this->shipClass = "Tomzur Attack Gunboat";
+	$this->variantOf = "Fizur Fast Gunboat";
+        $this->occurence = "common";
 	$this->imagePath = "img/ships/baradaFizurFastGunboat.png";
 	$this->canvasSize = 120;
 	$this->agile = true;
@@ -15,7 +17,7 @@ class baradaFizurFastGunboat extends LCV{
 
 	$this->forwardDefense = 9;
 	$this->sideDefense = 11;
-	$this->isd = 2229;
+	$this->isd = 2230;
 
 	$this->turncost = 0.25;
 	$this->turndelaycost = 0.25;
@@ -39,7 +41,7 @@ class baradaFizurFastGunboat extends LCV{
 
 	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
     $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
-    $this->addFrontSystem(new TwinArray(2, 4, 1, 0, 360));
+    $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
 
 	$this->addPrimarySystem(new Structure(4, 30));
   
