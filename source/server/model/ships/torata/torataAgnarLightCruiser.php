@@ -10,7 +10,7 @@ class torataAgnarLightCruiser extends BaseShip{
 		$this->shipClass = "Agnar Light Cruiser";
 		$this->phpclass = "torataAgnarLightCruiser";
 		$this->imagePath = "img/ships/torataAgnar.png";
-		$this->canvasSize = 260;
+		$this->canvasSize = 200;
 		$this->shipSizeClass = 3;
 		$this->isd = 2219;
 		$this->unofficial = true;

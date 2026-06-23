@@ -9,7 +9,7 @@ class TorataClovantScout extends BaseShip{
 		$this->faction = "Torata Regency";
 		$this->phpclass = "TorataClovantScout";
 		$this->imagePath = "img/ships/TorataClovant.png";
-		$this->canvasSize = 280;
+		$this->canvasSize = 200;
 		$this->shipClass = "Clovant Medium Scout";
 		$this->limited = 33; //Limited Deployment
 		
