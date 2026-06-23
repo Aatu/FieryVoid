@@ -4161,6 +4161,7 @@ spl_autoload_register(
 						'baradagilazfleetcarrier' => '/server/model/ships/barada/baradaGilazFleetCarrier.php',
 						'baradabaroghmediumfighters' => '/server/model/ships/barada/baradaBaroghMediumFighters.php',
 						'baradafizurfastgunboat' => '/server/model/ships/barada/baradaFizurFastGunboat.php',
+						'baradatomzurattackgunboat' => '/server/model/ships/barada/baradaTomzurAttackGunboat.php',
 						'baradajorivassaultcruiser' => '/server/model/ships/barada/baradaJorivAssaultCruiser.php',
 						'baradatomguscoutcruiser' => '/server/model/ships/barada/baradaTomguScoutCruiser.php',
 						'baradatrukdestroyer' => '/server/model/ships/barada/baradaTrukDestroyer.php',

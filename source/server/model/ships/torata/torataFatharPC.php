@@ -10,7 +10,7 @@ class torataFatharPC extends BaseShip{
 		$this->phpclass = "torataFatharPC";
 		$this->imagePath = "img/ships/TorataGolthar.png";
 		$this->shipClass = "Fathar Plasma Cruiser";
-		$this->canvasSize = 260;
+		$this->canvasSize = 200;
 		$this->shipSizeClass = 3;
 		$this->isd = 2227;
 		$this->unofficial = true;
