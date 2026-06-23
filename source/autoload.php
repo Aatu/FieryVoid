@@ -1645,6 +1645,7 @@ spl_autoload_register(
 				'nexusminigun' => '/server/model/weapons/customNexus.php',
 				'nexusminigunftr' => '/server/model/weapons/customNexus.php',
 				'nexusrailgunaccelerator' => '/server/model/weapons/customNexus.php',
+//old				'nexussandcaster' => '/server/model/weapons/customNexus.php',
 				'nexussandcaster' => '/server/model/weapons/customNexus.php',
 				'nexusshattergun' => '/server/model/weapons/customNexus.php',
 				'nexusshattergunftr' => '/server/model/weapons/customNexus.php',
