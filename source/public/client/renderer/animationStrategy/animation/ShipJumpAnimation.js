@@ -38,6 +38,7 @@ window.ShipJumpAnimation = function () {
         // --- 🔊 Play sound once when jump starts ---
         if (!this.explosionTriggered && total >= this.time && gamedata.playAudio && !paused && !back) {
             this.sound.currentTime = 0;
+            window.applyReplayPlaybackRate(this.sound);
             this.sound.play().catch(() => {});
             this.explosionTriggered = true;
         }

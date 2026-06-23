@@ -35,23 +35,32 @@ class MovementGamePhase implements Phase
                 continue;
             }
 
-            // Submit a dummy "end" move so the ship has a completed movement order for this turn
-            $lastMove = $ship->getLastMovement();
-            $newMove = new MovementOrder(
-                null,
-                'end',
-                $lastMove->position,
-                0,
-                0,
-                $lastMove->speed,
-                $lastMove->heading,
-                $lastMove->facing,
-                false,
-                $gameData->turn,
-                0,
-                0
-            );
-            $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
+            // Units under server (non-player) control this turn — currently Uncontrolled
+            // Hunter-Killers (HK Jamming, drift) — have their movement generated here
+            // instead of the plain dummy "end". AutomatedMovement is the reusable seam
+            // for future CPU-controlled ships. isUnderAutomatedControl short-circuits on
+            // remoteControl, so ordinary ships fall straight through to the dummy "end".
+            if (AutomatedMovement::isUnderAutomatedControl($ship, $gameData)) {
+                AutomatedMovement::generateAndSubmit($ship, $gameData, $dbManager);
+            } else {
+                // Submit a dummy "end" move so the ship has a completed movement order for this turn
+                $lastMove = $ship->getLastMovement();
+                $newMove = new MovementOrder(
+                    null,
+                    'end',
+                    $lastMove->position,
+                    0,
+                    0,
+                    $lastMove->speed,
+                    $lastMove->heading,
+                    $lastMove->facing,
+                    false,
+                    $gameData->turn,
+                    0,
+                    0
+                );
+                $dbManager->submitMovement($gameData->id, $ship->id, $gameData->turn, [$newMove]);
+            }
 
             // Perform post-move stealth check for ships with that ability (e.g. Hyach, Torvalus)
             if ($ship->trueStealth) {
@@ -137,8 +146,17 @@ class MovementGamePhase implements Phase
 
 		$activeShips = $gameData->getMyActiveShips();
 		foreach ($ships as $ship) {
-			foreach ($activeShips as $activeShip) { 
+			foreach ($activeShips as $activeShip) {
 				if ($activeShip->id === $ship->id) {
+					// Units under server (non-player) control this turn — Uncontrolled
+					// Hunter-Killers — ignore any player-submitted movement; their move is
+					// generated server-side in advance(). Guards against a player moving an
+					// HK the client should have skipped (isMovementReady). Cheap-guarded on
+					// remoteControl inside isUnderAutomatedControl.
+					if (AutomatedMovement::isUnderAutomatedControl($activeShip, $gameData)) {
+						break;
+					}
+
 					// Check for detachment move in the submitted orders
 					$detachedMove = false;
 					foreach ($ship->movement as $move) {

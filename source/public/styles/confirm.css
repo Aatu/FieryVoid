@@ -195,14 +195,24 @@
 
 .confirm.error {
     /*border: 1px solid #defbff44; */
-    border: 2px solid #641b1b;
+    border: 3px solid #812323;
     color: #c94b1d;
     font-family: arial;
     font-size: 16px;
+    font-weight: bold;   
+    padding-top: 15px;     
 }
 
 .confirm.error .ship-name {
     color: rgba(255, 255, 255, 0.692);
+    font-weight: normal;
+}
+
+/* The "Are you sure you wish to COMMIT…" question line in the commit-confirm
+   dialogs (gamedata.js onCommitClicked). Bolded so the actual prompt stands
+   out from the warning text listing ships above it. */
+.confirm .commit-confirm-q {
+    font-weight: bold;
 }
 
 .confirm.warning {

@@ -43,7 +43,7 @@ class Paragon2003AM extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 30, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 30, 5, 8));
         $this->addPrimarySystem(new Engine(5, 30, 0, 8, 4));
-        $this->addPrimarySystem(new Hangar(5, 38, 12));
+        $this->addPrimarySystem(new Hangar(5, 37, 12));
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 24, 3, 3));
         $this->addPrimarySystem(new HeavyLaserLance(4, 6, 4, 0, 360));

@@ -11,7 +11,7 @@ class FlyerAssault extends FighterFlight{
         $this->shipClass = "Assault Flyers";
     	$this->imagePath = "img/ships/MinbariFlyer.png"; //need Minbari Flyer image!
         $this->isd = 1750;
-        
+		Enhancements::nonstandardEnhancementSet($this, 'Shuttles');        
 		
 		
         $this->forwardDefense = 9;

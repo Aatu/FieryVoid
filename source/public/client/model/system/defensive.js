@@ -283,6 +283,96 @@ FtrShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon
 	return shipManager.systems.getOutput(target, this);
 }
 
+/*
+	Grav Shield variant for the Abbai Kotha. May be "dropped" during Initial Orders (active = true)
+	to gain +2 thrust; whilst dropped the shield provides no defensive benefit. Toggle persistence
+	and flight-wide replication mirror FtrPetals.
+*/
+var FtrGravShield = function (json, ship) {
+	ShipSystem.call(this, json, ship);
+	this.defensiveType = "Shield";
+	this.activeMeansOff = true; //when active, the system is switched OFF (shield dropped) - drives a distinct icon state
+}
+FtrGravShield.prototype = Object.create(ShipSystem.prototype);
+FtrGravShield.prototype.constructor = FtrGravShield;
+
+//while dropped (active) the shield provides no defensive benefit
+FtrGravShield.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+	if (this.active) return 0;
+	return shipManager.systems.getOutput(target, this);
+}
+
+//Called from systemFactory.js (initializeOnLoad) so the flight's thrust/tooltip update on page load.
+FtrGravShield.prototype.initializationUpdate = function () {
+	var ship = this.ship;
+	var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.
+
+	if (this.active) {
+		this.outputDisplay = "OFF"; //shield dropped
+		//Incredibly specific here, but it avoids alot of issues trying to pass effects from server
+		if (flight && ship.name == "Kotha") {
+			flight.freethrust = 13; //11 base +2 thrust whilst shield dropped
+		}
+	} else {
+		this.outputDisplay = "-";
+		if (flight && ship.name == "Kotha") {
+			flight.freethrust = 11;
+		}
+	}
+
+	return this;
+}
+
+//Buttons are reversed vs FtrPetals: the shield is normally ON, so "Deactivate" drops it (active = true)
+//for +2 thrust and "Activate" raises it again (active = false).
+FtrGravShield.prototype.canActivate = function () {
+	if (gamedata.gamephase == 1 && this.active) return true; //raise shield (currently dropped)
+	return false;
+};
+
+FtrGravShield.prototype.canDeactivate = function () {
+	if (gamedata.gamephase == 1 && !this.active) return true; //drop shield (currently raised)
+	return false;
+};
+
+FtrGravShield.prototype.doActivate = function () { //raise the shield across the whole flight
+	this.setFlightDropped(false);
+};
+
+FtrGravShield.prototype.doDeactivate = function () { //drop the shield across the whole flight
+	this.setFlightDropped(true);
+};
+
+//Set the dropped state on every FtrGravShield in the flight (flight-wide toggle, like FtrPetals).
+FtrGravShield.prototype.setFlightDropped = function (dropped) {
+	var ship = this.ship;
+	var flight = gamedata.getShip(ship.flightid);//Need to convert to full ship info.
+	if (flight) {
+		for (var i in flight.systems) {
+			var system = flight.systems[i]; //The fighter
+			if (!shipManager.systems.isDestroyed(ship, flight.systems[i])) {
+				for (var j in system.systems) {
+					var fighterSystem = system.systems[j];	//The fighter's systems.
+					if (fighterSystem.name == "FtrGravShield") {
+						fighterSystem.active = dropped; //Set marker for notes.
+					}
+				}
+			}
+		}
+		webglScene.customEvent('SystemDataChanged', { ship: flight, system: this });
+	}
+};
+
+FtrGravShield.prototype.doIndividualNotesTransfer = function () {
+	if (gamedata.gamephase == 1) {
+		var active = this.active; //Was dropped this turn.
+		this.individualNotesTransfer = Array();
+		if (active) {
+			this.individualNotesTransfer.push(1);
+		}
+	}
+};
+
 var HeavyInterceptorBattery = function HeavyInterceptorBattery(json, ship) {
 	InterceptorMkI.call(this, json, ship);
 };

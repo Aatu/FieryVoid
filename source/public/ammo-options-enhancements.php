@@ -253,6 +253,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: </li>
         </ul>      
       </li>  
+      <li><strong>Minesweeper Conversion</strong>
+        <ul class="circle-list">
+            <li>Effect: Sets Offensives Bonus to 4, and gives shuttles the minesweeper property, allowing them to use full Offensive Bonus for mine detection.</li>
+            <li>Points Cost: 10 or 20% of craft cost, whichever is higher</li>
+            <li>Limit: 1</li>
+            <li>Notes: Shuttles only.</li>
+        </ul>      
+      </li>        
       <li><strong>Navigator</strong>
         <ul class="circle-list">
             <li>Effect: Navigator provides 360 degree missile guidance, +5 Initiative</li>

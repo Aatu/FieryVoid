@@ -37,6 +37,7 @@ window.ShipIcon = function () {
         this.weaponArcs = [];
         this.hidden = false;
         this.BDEWSprite = null;
+        this.MDEWSprite = null;
         this.shipHexagonSpritesMap = new Map();
         this.NotMovedSprite = null;
 
@@ -806,7 +807,7 @@ window.ShipIcon = function () {
 
         var borderMaterial = new THREE.MeshBasicMaterial({
             color: color,
-            opacity: 0.6,
+            opacity: 0.5,
             transparent: true,
             side: THREE.DoubleSide
         });
@@ -824,6 +825,88 @@ window.ShipIcon = function () {
     ShipIcon.prototype.hideBDEW = function () {
         this.mesh.remove(this.BDEWSprite);
         this.BDEWSprite = null;
+    };
+
+    // Mine Detection (MDEW) overlay. Mirrors showBDEW, but the detection range is
+    // variable: a mine is detected when Detect Mines EW > distance + mine signature,
+    // so the radius equals the ship's Detect Mines amount (in hexes) rather than the
+    // fixed 20-hex BDEW blanket. Uses a single base colour (#5e338a) for all ships.
+    ShipIcon.prototype.showMDEW = function () {
+        var MDEW = ew.getDetectMEW(this.ship);
+        if (!MDEW || this.MDEWSprite) {
+            return;
+        }
+
+        var hexDistance = window.coordinateConverter.getHexDistance();
+        var dis = (MDEW + 0.6) * hexDistance; //Extra 0.6 to cover the outermost hex visually - matches showBDEW
+
+        // Brightened a touch over BDEW (0.3 fill / solid border) so the purple reads clearly.
+        var color = new THREE.Color(0x5e338a).convertSRGBToLinear();
+
+        // Create a hexagon shape
+        var hexShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3; // 60-degree increments
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) {
+                hexShape.moveTo(x, y);
+            } else {
+                hexShape.lineTo(x, y);
+            }
+        }
+        hexShape.closePath();
+
+        var geometry = new THREE.ShapeGeometry(hexShape);
+        var material = new THREE.MeshBasicMaterial({ color: color, opacity: 0.4, transparent: true });
+        var hexagon = new THREE.Mesh(geometry, material);
+        hexagon.position.z = -1;
+
+        // Create a hexagon border with a solid (fully opaque) outline to define the boundaries
+        var borderShape = new THREE.Shape();
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = dis * Math.cos(angle);
+            let y = dis * Math.sin(angle);
+            if (i === 0) borderShape.moveTo(x, y);
+            else borderShape.lineTo(x, y);
+        }
+        borderShape.closePath();
+
+        var holePath = new THREE.Path();
+        var lineWidth = 4;
+        var innerDis = dis - lineWidth;
+        for (let i = 0; i < 6; i++) {
+            let angle = (i * Math.PI) / 3;
+            let x = innerDis * Math.cos(angle);
+            let y = innerDis * Math.sin(angle);
+            if (i === 0) holePath.moveTo(x, y);
+            else holePath.lineTo(x, y);
+        }
+        holePath.closePath();
+        borderShape.holes.push(holePath);
+
+        var colorBorder = new THREE.Color(0x8045ba).convertSRGBToLinear();        
+        var borderMaterial = new THREE.MeshBasicMaterial({
+            color: colorBorder,
+            opacity: 0.6,
+            transparent: true,
+            side: THREE.DoubleSide
+        });
+
+        var border = new THREE.Mesh(new THREE.ShapeGeometry(borderShape), borderMaterial);
+        hexagon.add(border);
+
+        this.mesh.add(hexagon);
+        this.MDEWSprite = hexagon;
+
+        return null;
+    };
+
+
+    ShipIcon.prototype.hideMDEW = function () {
+        this.mesh.remove(this.MDEWSprite);
+        this.MDEWSprite = null;
     };
 
     ShipIcon.prototype.showTargetedHexagonInArc = function (shooter, shooterIcon, system, size, color = null, opacity = null, lineWidth = 3) {

@@ -30,7 +30,7 @@ class zzunoffRonvar extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 18, 3, 7));
         $this->addPrimarySystem(new Engine(5, 16, 0, 12, 2));
-        $this->addPrimarySystem(new Hangar(4, 2));
+        $this->addPrimarySystem(new Hangar(4, 2, 2));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 3));
         $this->addPrimarySystem(new Thruster(4, 15, 0, 4, 4));
         

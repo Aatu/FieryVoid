@@ -122,7 +122,23 @@ shipManager.movement = {
             shipManager.isDestroyed(ship) ||
             gamedata.isTerrain(ship.shipSizeClass, ship.userid) ||
             (shipManager.getTurnDeployed(ship) > gamedata.turn) ||
+            shipManager.movement.isUncontrolled(ship) ||
             (Object.keys(ship.attached).length !== 0 && !ship.detached);
+    },
+
+    //HK Jamming: a remote-controlled flight that is Uncontrolled this turn is moved by
+    //the server (drift), so the player is never prompted for it (treated as movement-ready).
+    //Gated on remoteControl (very rare) so ordinary ships short-circuit immediately.
+    //Uncontrolled is a oneturn crit placed on turn T (effect T+1): match crit.turn+1 === turn.
+    isUncontrolled: function isUncontrolled(ship) {
+        if (!ship.remoteControl || !ship.flight) return false;
+        var firstFighter = shipManager.systems.getSystem(ship, 1);
+        if (!firstFighter || !firstFighter.criticals) return false;
+        for (var i in firstFighter.criticals) {
+            var crit = firstFighter.criticals[i];
+            if (crit.phpclass === "Uncontrolled" && (crit.turn + 1) === gamedata.turn) return true;
+        }
+        return false;
     },
 
     checkHasUncommitted: function checkHasUncommitted(ship) {

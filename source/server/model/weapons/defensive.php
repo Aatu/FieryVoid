@@ -732,10 +732,92 @@ class FtrShield extends Shield implements DefensiveSystem{
 		}else{
 			$this->data["Special"] .= "<br>";
 		}
-		$this->data["Special"] .= "Cannot fly under fighter shield."; 
+		$this->data["Special"] .= "Cannot fly under fighter shield.";
     }
-	
+
 } //endof class  FtrShield
+
+
+/*
+	Grav Shield variant that can be dropped during Initial Orders to gain +2 thrust.
+	While "open" (active == true) the shield is switched off, so its defensive -1 to-hit / -1 damage
+	benefit is lost - which is mechanically equivalent to the rulebook's -1 armour / +5% defence profile.
+	The +2 thrust is applied client-side (see FtrGravShield in defensive.js).
+	Toggle persistence mirrors FtrPetals.
+*/
+class FtrGravShield extends FtrShield{
+    public $name = "FtrGravShield";
+    public $displayName = "Grav Shield";
+    protected $active = false; //true = shield DROPPED/open (traded for thrust)
+    protected $initializeOnLoad = true; //run initializationUpdate() on page load so tooltips/thrust update immediately
+
+    public function isActive(){
+        return $this->active;
+    }
+
+    //while open, the shield provides no defensive benefit
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){
+        return $this->active ? 0 : $this->output;
+    }
+
+    public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){
+        return $this->active ? 0 : $this->output;
+    }
+
+    public function doIndividualNotesTransfer(){
+        //data received in variable individualNotesTransfer
+        if(is_array($this->individualNotesTransfer)){
+            foreach($this->individualNotesTransfer as $shieldChange){
+                if($shieldChange == 1){
+                    $this->active = true;
+                }else{
+                    $this->active = false;
+                }
+            }
+        }
+        $this->individualNotesTransfer = array(); //empty, just in case
+    }
+
+    public function generateIndividualNotes($gameData, $dbManager){ //dbManager is necessary for Initial phase only
+        $this->doIndividualNotesTransfer();
+        $ship = $this->getUnit();
+
+        switch($gameData->phase){
+            case 1:
+                if ($this->active) {
+                    $notekey = 'Open';
+                    $noteHuman = 'Grav shield dropped';
+                    $noteValue = 1;
+                    $this->individualNotes[] = new IndividualNote(-1,TacGamedata::$currentGameID,$gameData->turn,$gameData->phase,$ship->id,$this->id,$notekey,$noteHuman,$noteValue);//$id,$gameid,$turn,$phase,$shipid,$systemid,$notekey,$notekey_human,$notevalue
+                }
+            break;
+        }
+    }
+
+    public function onIndividualNotesLoaded($gamedata){
+        //Any note for the current turn means the shield was dropped this turn.
+        foreach ($this->individualNotes as $currNote){
+            if($currNote->turn == $gamedata->turn){
+                $this->active = true;
+            }
+        }
+        //and immediately delete notes themselves, they're no longer needed (memory only)
+        $this->individualNotes = array();
+    }
+
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+        $this->data["Special"] .= "<br>May be toggled off during Initial Orders to gain +2 Thrust; whilst off the shield provides no defensive benefit.";
+    }
+
+    public function stripForJson(){
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->active = $this->active;
+        $strippedSystem->initializeOnLoad = $this->initializeOnLoad;
+        return $strippedSystem;
+    }
+
+} //endof class  FtrGravShield
 
 class HeavyInterceptorBattery extends InterceptorMkI{
         public $name = "HeavyInterceptorBattery";

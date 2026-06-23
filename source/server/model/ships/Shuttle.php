@@ -70,6 +70,8 @@ class Shuttle extends FighterFlight
             case 'Abbai Matriarchate':  
             case 'Abbai Matriarchate (WotCR)':    
                 return array('img/ships/ShuttleAbbai.png', 'img/ships/ShuttleAbbai_large.png'); 
+            case 'Balosian Underdwellers':
+                return array('img/ships/shuttleBalosian.png', 'img/ships/shuttleBalosian_large.png');                     
             case 'Brakiri Syndicracy':
                 return array('img/ships/shuttleBrakiri.png', 'img/ships/shuttleBrakiri_large.png'); 
             case 'Cascor Commonwealth':
@@ -77,6 +79,8 @@ class Shuttle extends FighterFlight
             case 'Centauri Republic':
             case 'Centauri Republic (WotCR)': 
                 return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
+            case 'Corillani Theocracy':
+                return array('img/ships/shuttleCorillani.png', 'img/ships/shuttleCorillani_large.png');                     
             case 'Dilgar Imperium': 
                 return array('img/ships/shuttleDilgar.png', 'img/ships/ShuttleDilgar_large.png');   
             case 'Drazi Freehold':
@@ -88,6 +92,14 @@ class Shuttle extends FighterFlight
                 return array('img/ships/shuttleGrome.png', 'img/ships/shuttleGrome_large.png');
             case 'Hyach Gerontocracy'; 
                 return array('img/ships/shuttleHyach.png', 'img/ships/shuttleHyach_large.png');                                                                                                                                                  
+            case 'Ipsha Baronies':
+                return array('img/ships/shuttleIpsha.png', 'img/ships/shuttleIpsha_large.png');
+            case 'Kor-Lyan Kingdoms':
+                return array('img/ships/korlyanMerkul2.png', 'img/ships/korlyanMerkul_large2.png'); 
+            case 'Llort':
+                return array('img/ships/shuttleLlort.png', 'img/ships/shuttleLlort_large.png');                     
+            case "Pak'ma'ra Confederacy":
+                return array('img/ships/shuttlePakmara.png', 'img/ships/shuttlePakmara_large.png');                                                       
             case 'Minbari Federation':
             case 'Minbari Protectorate':
                 return array('img/ships/MinbariFlyer.png', 'img/ships/MinbariFlyer_Large.png');
@@ -96,7 +108,11 @@ class Shuttle extends FighterFlight
             case 'Orieni Imperium':
                 return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');
             case 'Raiders':
-                return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
+                return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');
+            case 'Torata Regency':
+                return array('img/ships/shuttleTorata.png', 'img/ships/shuttleTorata_large.png');
+            case 'Vree Conglomerate':
+                return array('img/ships/VreeZeoth.png', 'img/ships/VreeZeoth_Large.png');                                                                                             
             default: //Also used by EA, Hurr etc.
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
@@ -503,7 +519,8 @@ class ShuttleBrakiri extends Shuttle
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
         $this->freethrust = 3;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 9 * 5; 
+        $this->gravitic = true;                       
     }
 
     public function populate()
@@ -790,7 +807,7 @@ class ShuttleDrazi extends Shuttle
         $this->forwardDefense = 8;
         $this->sideDefense = 9;
         $this->freethrust = 4;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 11 * 5;             
     }
 
     public function populate()
@@ -1237,7 +1254,7 @@ class ShuttlePakMaRa extends Shuttle
         $this->forwardDefense = 9;
         $this->sideDefense = 9;
         $this->freethrust = 6;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 8 * 5;          
     }
 
     public function populate()
@@ -1414,7 +1431,8 @@ class ShuttleVree extends Shuttle
         $this->forwardDefense = 7;
         $this->sideDefense = 7;
         $this->freethrust = 4;
-        $this->iniativebonus = 9 * 5;             
+        $this->iniativebonus = 9 * 5;   
+        $this->gravitic = true;                     
     }
 
     public function populate()

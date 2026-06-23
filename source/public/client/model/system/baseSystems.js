@@ -335,13 +335,11 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	// the hangar's live data is recomputed. LCV rails / catapults keep their own
 	// Type (they don't carry FighterFlights with this restriction).
 	if (!this.isLCVRail && Array.isArray(this.allowedFighterClasses) && this.allowedFighterClasses.length > 0
-		&& window.shipManager && shipManager.systems && shipManager.systems.displayNameForFighterClass) {
-		var allowedNames = [];
-		for (var ai = 0; ai < this.allowedFighterClasses.length; ai++) {
-			var nm = shipManager.systems.displayNameForFighterClass(this.allowedFighterClasses[ai]);
-			if (nm && allowedNames.indexOf(nm) === -1) allowedNames.push(nm);
-		}
-		if (allowedNames.length > 0) this.data["Type"] = allowedNames.join(", ");
+		&& window.shipManager && shipManager.systems && shipManager.systems.displayNameForAllowedClasses) {
+		//A multi-class bay shows its collective group name ("Hunter-Killer") rather
+		//than listing each class, matching the lobby ship-window complement line.
+		var allowedLabel = shipManager.systems.displayNameForAllowedClasses(this.allowedFighterClasses);
+		if (allowedLabel) this.data["Type"] = allowedLabel;
 	}
 
 	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
@@ -1367,17 +1365,72 @@ AdaptiveArmorController.prototype.doIndividualNotesTransfer = function () { //pr
 	}
 	return true;
 };
-AdaptiveArmorController.prototype.canIncreaseAnything = function () { //returns true if any AA points can currently be allocated
+//Returns the list of damage types the player can actually act on for this controller:
+//unlocked types (availableAA) that are still carried by a currently-alive board unit
+//(or are already allocated/changed this turn). This is the SINGLE SOURCE OF TRUTH for both
+//the AA UI rows and the commit-time "unassigned AA" warning, so the two can never disagree.
+//`ship` is the owning unit (flight for fighter ACs), used only for friendly-fire filtering.
+AdaptiveArmorController.prototype.getRelevantArmorTypes = function (ship) {
+	if (!this.availableAA) return [];
+	ship = ship || this.ship;
+
+	var friendlyFire = gamedata.rules && gamedata.rules.friendlyFire === 1;
+	var relevantTypes = {};
+
+	//always include types we already allocated or changed this turn (player must keep seeing them)
+	for (var t in this.allocatedAA) {
+		if (this.allocatedAA[t] > 0) relevantTypes[t] = true;
+	}
+	for (var c in this.currchangedAA) {
+		if (this.currchangedAA[c] !== 0) relevantTypes[c] = true;
+	}
+
+	var collectWeaponClasses = function (sys) {
+		if (sys && sys.weaponClass) relevantTypes[sys.weaponClass] = true;
+	};
+
+	for (var i in gamedata.ships) {
+		var otherShip = gamedata.ships[i];
+		if (shipManager.isDestroyed(otherShip)) continue;
+		//if friendly fire is off, only enemy weapons can ever hit us - skip friendlies
+		if (!friendlyFire && ship && !gamedata.isEnemy(ship, otherShip)) continue;
+
+		if (otherShip.flight) {
+			for (var iFtr = 0; iFtr < otherShip.systems.length; iFtr++) {
+				var ftr = otherShip.systems[iFtr];
+				if (ftr) for (var iSys = 0; iSys < ftr.systems.length; iSys++) {
+					collectWeaponClasses(ftr.systems[iSys]);
+				}
+			}
+		} else {
+			for (var iSys2 = 0; iSys2 < otherShip.systems.length; iSys2++) {
+				collectWeaponClasses(otherShip.systems[iSys2]);
+			}
+		}
+	}
+
+	var result = [];
+	for (var type in this.availableAA) {
+		if (relevantTypes[type]) result.push(type);
+	}
+	result.sort();
+	return result;
+};
+
+AdaptiveArmorController.prototype.canIncreaseAnything = function (ship) { //returns true if any AA points can currently be allocated
+	//only consider types the player can actually act on (visible in the UI); otherwise the
+	//commit warning fires for unlocked-but-unreachable types and can never be cleared.
+	var relevantTypes = this.getRelevantArmorTypes(ship);
+	var savedCurrClass = this.currClass; //don't disturb the displayed selection
 	var toReturn = false;
-	var startingFrom = this.getCurrClass(); //so we know where we should stop checking
-	var lookingAt = startingFrom;
-	do {
+	for (var i = 0; i < relevantTypes.length; i++) {
+		this.setCurrDmgType(relevantTypes[i]);
 		if (this.canIncrease()) {
 			toReturn = true;
-		} else {
-			lookingAt = this.nextCurrClass();
+			break;
 		}
-	} while ((toReturn != true) && (lookingAt != startingFrom));
+	}
+	this.currClass = savedCurrClass;
 	return toReturn;
 };//endof AA Controller
 

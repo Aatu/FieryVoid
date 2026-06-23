@@ -386,14 +386,7 @@ class AntiprotonGun extends AntimatterWeapon{
         public $name = "LtAntimatterCannon";
         public $displayName = "Light Antimatter Cannon";
         public $animation = "bolt";
-        public $animationExplosionScale = 0.35; //this is borderline heavy weapon in its own right...
-        //public $animationColor = array(0, 184, 230);
-        //public $trailColor = array(0, 184, 230);
-        //public $projectilespeed = 11;
-       // public $animationWidth = 4;
-        //public $trailLength = 12;
-        //public $animationExplosionScale = 0.25;
-                
+        public $animationExplosionScale = 0.35; //this is borderline heavy weapon in its own right...               
         public $loadingtime = 2;
 		public $priority = 6;
 		public $shots = 1;		
@@ -418,6 +411,83 @@ class AntiprotonGun extends AntimatterWeapon{
         public function setMaxDamage(){     $this->maxDamage = 28 ;      }
 
 	}//end of class LtAntimatterCannon
+
+
+	class LtAntimatterCannonUnreliable extends LtAntimatterCannon{  //deliberately NOT extending AntimatterWeapon class uses regular calculations 
+		public $iconPath = "LightAntimatterCannon.png";
+        public $name = "LtAntimatterCannonUnreliable";
+        public $displayName = "Light Antimatter Cannon (Unreliable)";
+        public $animation = "bolt";
+        public $animationExplosionScale = 0.35; //this is borderline heavy weapon in its own right...                
+        public $loadingtime = 2;
+		public $priority = 6;
+		public $shots = 1;		
+            
+        public $rangePenalty = 2;
+        public $fireControl = array(0, 0, 0); // fighters, <=mediums, <=capitals 
+
+		public $damageType = "Standard"; 
+		public $weaponClass = "Antimatter"; 
+
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= 'Unreliable.  Deals 2 damage to own ship every time it fires.';
+        }		
+
+		public function criticalPhaseEffects($ship, $gamedata){
+			parent::criticalPhaseEffects($ship, $gamedata);
+
+			//Unreliable: if this cannon fired this turn, the firing shuttle (the Fighter
+			//this weapon is a sub-system of) takes 2 damage, ignoring armour.
+			//Runs once per fighter because Fighter::criticalPhaseEffects recurses into
+			//each fighter's own weapon instance, so $this is the per-shuttle copy.
+
+			//Only flights carry fighters; bail on anything else (and on a dead flight).
+			if (!($ship instanceof FighterFlight)) return;
+
+			//Did THIS shuttle's cannon fire this turn? getFireOrders() is per-instance,
+			//so a no-fire shuttle's cannon has no order and is skipped.
+			if (count($this->getFireOrders($gamedata->turn)) < 1) return;
+
+			//Find the parent Fighter (the shuttle this cannon is mounted on).
+			$shuttle = $ship->getFighterBySystem($this->id);
+			if (!$shuttle) return;
+			if ($shuttle->isDestroyed($gamedata->turn)) return; //already gone — nothing to damage
+
+			//Replay-determinism guard: criticalPhaseEffects re-runs on every advance/replay.
+			//If this turn's self-damage entry already exists on the shuttle, don't add a second.
+			foreach ($shuttle->damage as $existing) {
+				if ($existing->turn == $gamedata->turn && $existing->damageclass === "LtAntimatterUnreliable") {
+					return;
+				}
+			}
+
+			$remaining   = (int)$shuttle->getRemainingHealth();
+			$damageCaused = min(2, max(1, $remaining)); //don't log more than it could take
+			$isDestroyed  = (2 >= $remaining);
+
+			$dmg = new DamageEntry(
+				-1, $ship->id, -1, $gamedata->turn, $shuttle->id,
+				$damageCaused, 0 /*armour ignored*/, 0, -1, $isDestroyed, false,
+				"Unreliable cannon", "LtAntimatterUnreliable"
+			);
+			$dmg->updated = true;
+			//Self-ram convention so the entry has a shooter/weapon: the cannon damages its own shuttle.
+			$dmg->shooterid = $ship->id;
+			$dmg->weaponid  = $this->id;
+			$shuttle->damage[] = $dmg;
+		}
+        
+        public function getDamage($fireOrder){        return (Dice::d(10, 1) + 4) * 2;   }
+        public function setMinDamage(){     $this->minDamage = 10 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 28 ;      }
+
+	}//end of class LtAntimatterCannonUnreliable	
 
 
 	class AntimatterShredder extends AntimatterWeapon{        

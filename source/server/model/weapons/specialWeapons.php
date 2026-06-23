@@ -2734,7 +2734,8 @@ class RammingAttack extends Weapon{
 				// 1. Irregular Shape defined by hexOffsets
 				$move = $thisShip->getLastMovement();
 				$facing = $move ? $move->facing : 0;
-				
+
+				$occupiedHexes[] = $terrainPosition; // Center hex is always occupied; hexOffsets lists only the EXTRA hexes
 				foreach ($thisShip->hexOffsets as $offset) {
 					// Use accurate pixel-based rotation to get absolute hex position
 					$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $facing);
@@ -2905,6 +2906,7 @@ class RammingAttack extends Weapon{
 		//Build list of occupied hexes (mirrors checkForCollisions logic).
 		$occupiedHexes = [];
 		if (property_exists($terrain, 'hexOffsets') && !empty($terrain->hexOffsets)) {
+			$occupiedHexes[] = $terrainPosition; // Center hex is always occupied; hexOffsets lists only the EXTRA hexes
 			foreach ($terrain->hexOffsets as $offset) {
 				$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $terrainFacing);
 			}

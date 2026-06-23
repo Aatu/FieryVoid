@@ -8,7 +8,7 @@ class Vigilant1704AM extends BaseShip{
 		$this->faction = "Orieni Imperium";
         $this->phpclass = "Vigilant1704AM";
         $this->imagePath = "img/ships/vigilant.png";
-        $this->shipClass = "Vigilant Combat Support Ship (early)";
+        $this->shipClass = "Vigilant Combat Support Ship (Early)";
         $this->variantOf = "Vigilant Combat Support Ship";
 	    $this->isd = 1704;
         $this->shipSizeClass = 3;
@@ -43,7 +43,7 @@ class Vigilant1704AM extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 5, 6));//+4 minesweeping bonus
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
-        $this->addPrimarySystem(new Hangar(4, 14, 12));
+        $this->addPrimarySystem(new Hangar(4, 14, 6));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
         $this->addPrimarySystem(new HKControlNode(5, 12, 1, 1));
 		$this->addPrimarySystem(new AmmoMissileRackSO(5, 0, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

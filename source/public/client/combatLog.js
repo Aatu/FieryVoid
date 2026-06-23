@@ -138,15 +138,15 @@ window.combatLog = {
         }
 
         var fireColor = "";
-        if (!gamedata.isPlayerInGame()) {
+       // if (!gamedata.isPlayerInGame()) {
             // Observers: colour the FIRE: header by the shooter's team.
             var rgb = gamedata.getTeamColorRGB(ship.team);
             fireColor = "color:rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ");";
-        } else if (gamedata.isMyShip(ship)) {
-            fireColor = "color:limegreen;";
-        } else if (gamedata.isMyorMyTeamShip(ship)) {
-            fireColor = "color:#33adff;";
-        }
+        //} else if (gamedata.isMyShip(ship)) {
+        //    fireColor = "color:limegreen;";
+        //} else if (gamedata.isMyorMyTeamShip(ship)) {
+        //    fireColor = "color:#33adff;";
+        //}
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
@@ -194,7 +194,19 @@ window.combatLog = {
         }
 
         var targettext = "";
-        if (target) targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" >' + target.name + '</span>';
+        if (target) {
+            // Colour the attacked ship's name by its team (everyone, not just
+            // observers). Terrain has no meaningful team, so render it white.
+            // getTeamColorRGB guards against missing/0 team values.
+            var targetColor;
+            if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
+                targetColor = "color:#ffffff;";
+            } else {
+                var trgb = gamedata.getTeamColorRGB(target.team);
+                targetColor = "color:rgb(" + Math.round(trgb[0]) + "," + Math.round(trgb[1]) + "," + Math.round(trgb[2]) + ");";
+            }
+            targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" style="' + targetColor + '">' + target.name + '</span>';
+        }
 
         var shottext = "";
         //if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';

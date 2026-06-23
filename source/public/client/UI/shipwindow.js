@@ -464,7 +464,8 @@ window.shipWindowManager = {
 								category: reservedRows[rr].category,
 								phpclass: reservedRows[rr].phpclass,
 								displayName: reservedRows[rr].displayName,
-								count: reservedRows[rr].count
+								count: reservedRows[rr].count,
+								isGroup: reservedRows[rr].isGroup
 							});
 						}
 					}
@@ -484,11 +485,17 @@ window.shipWindowManager = {
 						for (var rh = 0; rh < reservedHere.length; rh++) {
 							var rCount = Math.min(reservedHere[rh].count, remaining);
 							if (rCount <= 0) continue;
-							//displayName is the fighter's own short name ("Reska");
-							//keep the size descriptor here so the lobby line reads
-							//"6 Reska Light Fighters" (the SystemInfo Type: line wants
-							//just "Reska", hence the size is appended at this site only).
-							notes.push("&nbsp;&nbsp;&nbsp;" + rCount + " " + reservedHere[rh].displayName + " " + capitalizedType + " Fighters");
+							//Single-class bay: displayName is the fighter's short name
+							//("Reska") and the size descriptor is appended, so the line
+							//reads "6 Reska Light Fighters". Multi-class bay: displayName
+							//is a standalone group label ("Hunter-Killer"); drop the size
+							//and pluralize → "24 Hunter-Killers" (the group name already
+							//conveys the unit, and the size is just a proxy slot).
+							if (reservedHere[rh].isGroup) {
+								notes.push("&nbsp;&nbsp;&nbsp;" + rCount + " " + reservedHere[rh].displayName + "s");
+							} else {
+								notes.push("&nbsp;&nbsp;&nbsp;" + rCount + " " + reservedHere[rh].displayName + " " + capitalizedType + " Fighters");
+							}
 							remaining -= rCount;
 						}
 						if (remaining > 0) {

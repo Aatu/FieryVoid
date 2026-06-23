@@ -29,7 +29,7 @@ class Gquonth extends BaseShip{
         $this->addPrimarySystem(new Scanner(6, 24, 5, 8));
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 3));
         $this->addPrimarySystem(new JumpEngine(6, 30, 3, 20));
-        $this->addPrimarySystem(new Hangar(6, 2));
+        $this->addPrimarySystem(new Hangar(6, 2, 2));
         
         $this->addFrontSystem(new HeavyLaser(4, 8, 6, 300, 60));        
         $this->addFrontSystem(new Thruster(5, 10, 0, 4, 1));

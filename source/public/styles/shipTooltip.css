@@ -60,6 +60,17 @@
 
 }
 
+/* Jamming (ELINT vs remote-controlled HK flights).  */
+.addJAM {
+    background-image: url("../img/addJAM.png");
+
+}
+
+.removeJAM {
+    background-image: url("../img/removeJAM.png");
+
+}
+
 .addSOEW {
     background-image: url("../img/addSOEW.png");
 

@@ -10,7 +10,7 @@ class Tortra extends FighterFlight{
         $this->shipClass = "Tortra Assault Shuttles";
         $this->imagePath = "img/ships/Tortra.png";
 		
-        $this->isd = 2250;
+        $this->isd = 2224;
         
         $this->forwardDefense = 10;
         $this->sideDefense = 10;

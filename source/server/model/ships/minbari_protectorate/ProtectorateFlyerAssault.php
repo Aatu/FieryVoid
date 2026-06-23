@@ -11,7 +11,8 @@ class ProtectorateFlyerAssault extends FighterFlight{
         $this->shipClass = "Assault Flyers";
     	$this->imagePath = "img/ships/MinbariFlyer.png";
         $this->isd = 1750; 
-		
+		Enhancements::nonstandardEnhancementSet($this, 'Shuttles');
+        		
         $this->forwardDefense = 9;
         $this->sideDefense = 7;
         $this->freethrust = 8;

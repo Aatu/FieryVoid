@@ -134,6 +134,7 @@ window.LaserEffect = function () {
                 this.laserSound = LaserEffect.cachedAudio.cloneNode(true);
                 this.laserSound.volume = this.soundVolume;
                 this.laserSound.currentTime = 0;
+                window.applyReplayPlaybackRate(this.laserSound);
                 this.laserSound.play().catch(() => { });
                 this.playedSound = true;
             } catch (e) {

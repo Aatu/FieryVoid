@@ -25,7 +25,7 @@ class Vengeful extends MediumShip{
 		$this->addPrimarySystem(new CnC(4, 14, 0, 0));
 		$this->addPrimarySystem(new Scanner(3, 12, 3, 6));
 		$this->addPrimarySystem(new Engine(3, 15, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(1, 1));
+		$this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));
 

@@ -104,6 +104,7 @@ window.BlinkEffect = function () {
                     const launchSound = BlinkEffect.cachedLaunchAudio.cloneNode(true);
                     launchSound.volume = this.soundVolume;
                     launchSound.currentTime = 0;
+                    window.applyReplayPlaybackRate(launchSound);
                     launchSound.play().catch(() => { });
                     this.playedLaunchSound = true;
                 } catch (e) {

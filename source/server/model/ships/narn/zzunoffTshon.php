@@ -10,7 +10,7 @@ class zzunoffTShon extends BaseShip{
         $this->phpclass = "zzunoffTShon";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "T'Shon Early Explorer";
-        //$this->fighters = array("normal"=>12); //12 Assault Shuttles in standared configuration
+        $this->fighters = array("assault shuttles"=>12); //12 Assault Shuttles in standared configuration
         
 
 	$this->occurence = "rare";
@@ -35,7 +35,7 @@ class zzunoffTShon extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(5, 24, 6, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 	$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
-	$this->addPrimarySystem(new Hangar(5, 14));
+	$this->addPrimarySystem(new Hangar(5, 14, 12));
         
 	//fwd
         $this->addFrontSystem(new TwinArray(2, 6, 2, 270, 90));

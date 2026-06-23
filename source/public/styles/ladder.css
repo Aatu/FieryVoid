@@ -21,6 +21,10 @@
     color: #DEEBFF;
 }
 
+.ladder-faq-link a {
+    color: #8bcaf2;
+}
+
 .close-ladder {
     color: #aaa;
     float: right;
