@@ -1645,6 +1645,7 @@ spl_autoload_register(
 				'nexusminigun' => '/server/model/weapons/customNexus.php',
 				'nexusminigunftr' => '/server/model/weapons/customNexus.php',
 				'nexusrailgunaccelerator' => '/server/model/weapons/customNexus.php',
+//old				'nexussandcaster' => '/server/model/weapons/customNexus.php',
 				'nexussandcaster' => '/server/model/weapons/customNexus.php',
 				'nexusshattergun' => '/server/model/weapons/customNexus.php',
 				'nexusshattergunftr' => '/server/model/weapons/customNexus.php',
@@ -2843,6 +2844,8 @@ spl_autoload_register(
 				'folshota' => '/server/model/ships/brakiri/folshotA.php',
 				'folshotaraider' => '/server/model/ships/brakiri_raiders/FolshotARaider.php',
 				'gaimphotonbomb' => '/server/model/weapons/customs.php',
+				'gaimkorvex' => '/server/model/ships/gaim/gaimKorvex.php',				
+				'gaimshlexa' => '/server/model/ships/gaim/gaimShlexa.php',				
 				'gaimtixtyk' => '/server/model/ships/gaim/gaimTixTyk.php',				
 
 				//Star Trek conversions
@@ -3534,6 +3537,8 @@ spl_autoload_register(
 				'hypergravitonblaster' => '/server/model/weapons/gravitic.php',								
 				'antigravitybeam' => '/server/model/weapons/gravitic.php',								
 				'medantigravitybeam' => '/server/model/weapons/gravitic.php',								
+//				'warriorram' => '/server/model/weapons/customDevelopment.php',								
+//				'directram' => '/server/model/weapons/customDevelopment.php',								
 
 //				'kirishiacconqueror' => '/server/model/ships/kirishiac/kirishiacConqueror.php',
 //				'kirishiackingship' => '/server/model/ships/kirishiac/kirishiacKingship.php',
@@ -3855,6 +3860,12 @@ spl_autoload_register(
 
                 'dewminehafkaa' => '/server/model/ships/balosian/dewMineHafkaA.php',                 
                 'dewmined2bal' => '/server/model/ships/balosian/dewMineD2Bal.php',  
+
+                //Corillani Mines - 4
+                'proxminepalfacorillani' => '/server/model/ships/corillani/proxMinePalfaCorillani.php',
+                'captorminetilorcorillani' => '/server/model/ships/corillani/captorMineTilorCorillani.php',                 
+                'dewminecoltucorillani' => '/server/model/ships/corillani/dewMineColtuCorillani.php', 
+                'dewminecorticorillani' => '/server/model/ships/corillani/dewMineCortiCorillani.php',                                  
                 
                 //Escalation Wars Chouka Mines - 10
                 'proxminechca' => '/server/model/ships/EscalationChoukaTheocracy/proxMineChCA.php', 
@@ -3933,7 +3944,30 @@ spl_autoload_register(
                 'shuttlevorlons' => '/server/model/ships/Shuttle.php',                                              
                 'shuttlevree' => '/server/model/ships/Shuttle.php',
                 'shuttleyolu' => '/server/model/ships/Shuttle.php',
-                
+ 
+				//Custom Faction Default SHUTTLES
+                'shuttlebrixadii' => '/server/model/ships/Shuttle.php',
+                'shuttlebrixadiiearly' => '/server/model/ships/Shuttle.php',
+                'shuttledalithorn' => '/server/model/ships/Shuttle.php',
+                'shuttledalithornearly' => '/server/model/ships/Shuttle.php',
+                'shuttlemakar' => '/server/model/ships/Shuttle.php',
+                'shuttlemakarearly' => '/server/model/ships/Shuttle.php',
+                'shuttlepolaren' => '/server/model/ships/Shuttle.php',
+                'shuttlepolarenearly' => '/server/model/ships/Shuttle.php',
+                'shuttlesalbez' => '/server/model/ships/Shuttle.php',
+                'shuttlesalbezearly' => '/server/model/ships/Shuttle.php',
+                'shuttlevelrax' => '/server/model/ships/Shuttle.php',
+                'shuttlevelraxearly' => '/server/model/ships/Shuttle.php',
+                'shuttlechouka' => '/server/model/ships/Shuttle.php',
+                'shuttlechoukaraider' => '/server/model/ships/Shuttle.php',
+                'shuttlecircasian' => '/server/model/ships/Shuttle.php',
+                'shuttlekastan' => '/server/model/ships/Shuttle.php',
+                'shuttlebloodswords' => '/server/model/ships/Shuttle.php',
+                'shuttlesshelath' => '/server/model/ships/Shuttle.php',
+                'shuttlegcorieni' => '/server/model/ships/Shuttle.php',
+                'shuttlegvalheru' => '/server/model/ships/Shuttle.php',
+                'shuttlegbarada' => '/server/model/ships/Shuttle.php',
+ 
                 //MINESWEEPING VARIANTS OF DEFAULT SHUTTLES
                 'minesweepingshuttleabbai' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttlealacan' => '/server/model/ships/Shuttle.php',
@@ -3968,6 +4002,29 @@ spl_autoload_register(
                 'minesweepingshuttlevorlons' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttlevree' => '/server/model/ships/Shuttle.php',
                 'minesweepingshuttleyolu' => '/server/model/ships/Shuttle.php',                                
+
+				//Custom Faction Minesweeping Variants of Default Shuttles
+                'minesweepingshuttlebrixadii' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlebrixadiiearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttledalithorn' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttledalithornearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlemakar' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlemakarealy' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlepolaren' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlepolarenearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlesalbez' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlesalbezearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlevelrax' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlevelraxearly' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlechouka' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlechoukaraider' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlecircasian' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlekastan' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlebloodswords' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlesshelath' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlegcorieni' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlevalheru' => '/server/model/ships/Shuttle.php',                                
+                'minesweepingshuttlebarada' => '/server/model/ships/Shuttle.php',                                
 
                 //New version of ships with Rails
                 'baescortcarrierrails' => '/server/model/ships/beltalliance/baEscortCarrierRails.php',
@@ -4028,11 +4085,13 @@ spl_autoload_register(
 						'jara' => '/server/model/ships/HouseValheru/Jara.php',
 						'jarissa' => '/server/model/ships/HouseValheru/Jarissa.php',
 						'kitsune' => '/server/model/ships/HouseValheru/Kitsune.php',
+						'kitsuneharasser' => '/server/model/ships/HouseValheru/KitsuneHarasser.php',
 						'liana' => '/server/model/ships/HouseValheru/Liana.php',
                         'maximillian' => '/server/model/ships/HouseValheru/Maximillian.php',
                         'mograte' => '/server/model/ships/HouseValheru/Mograte.php',
                         'octuran' => '/server/model/ships/HouseValheru/Octuran.php',
                         'phobos' => '/server/model/ships/HouseValheru/Phobos.php',
+                        'phoenician' => '/server/model/ships/HouseValheru/Phoenician.php',
                         'primo' => '/server/model/ships/HouseValheru/Primo.php',
                         'primosecundus' => '/server/model/ships/HouseValheru/PrimoSecundus.php',
                         'rizek' => '/server/model/ships/HouseValheru/Rizek.php',

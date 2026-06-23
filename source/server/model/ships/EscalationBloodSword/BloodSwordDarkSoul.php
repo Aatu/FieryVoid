@@ -32,28 +32,29 @@ class BloodSwordDarkSoul extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 15, 3, 6));
         $this->addPrimarySystem(new Engine(4, 18, 0, 12, 2));
+        $this->addPrimarySystem(new MediumPlasma(2, 5, 3, 0, 360));
 		$this->addPrimarySystem(new Hangar(4, 16, 6));
 		$this->addPrimarySystem(new JumpEngine(4, 15, 4, 24));
 		
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 13, 0, 4, 1));
-		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
+		$this->addFrontSystem(new EWDualLaserBolt(2, 6, 4, 240, 60));
 		$this->addFrontSystem(new HeavyPlasma(4, 8, 5, 300, 60));
-		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
+		$this->addFrontSystem(new EWDualLaserBolt(2, 6, 4, 300, 120));
 
         $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 6, 2));
-        $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
+        $this->addAftSystem(new EWDualLaserBolt(2, 6, 4, 90, 270));
         $this->addAftSystem(new MediumPlasma(2, 5, 3, 90, 270));
-        $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
+        $this->addAftSystem(new EWDualLaserBolt(2, 6, 4, 90, 270));
 
         $this->addLeftSystem(new EWRoyalLaser(3, 6, 4, 240, 360));
-        $this->addLeftSystem(new MediumPlasma(2, 5, 3, 180, 360));
+        $this->addLeftSystem(new HeavyPlasma(4, 8, 5, 180, 360));
 		$this->addLeftSystem(new CargoBay(3, 12));
         $this->addLeftSystem(new Thruster(3, 15, 0, 5, 3));
 		
         $this->addRightSystem(new EWRoyalLaser(3, 6, 4, 0, 120));
-        $this->addRightSystem(new MediumPlasma(2, 5, 3, 0, 180));
+        $this->addRightSystem(new HeavyPlasma(4, 8, 5, 0, 180));
 		$this->addRightSystem(new CargoBay(3, 12));
         $this->addRightSystem(new Thruster(3, 15, 0, 5, 4));
 
@@ -66,10 +67,11 @@ class BloodSwordDarkSoul extends BaseShip{
 		
 		$this->hitChart = array(
 			0=> array(
-					8 => "Structure",
+					9 => "Structure",
 					11 => "Jump Engine",
-					13 => "Scanner",
-					15 => "Engine",
+					12 => "Medium Plasma Cannon",
+					14 => "Scanner",
+					16 => "Engine",
 					17 => "Hangar",
 					19 => "Reactor",
 					20 => "C&C",
@@ -77,21 +79,21 @@ class BloodSwordDarkSoul extends BaseShip{
 			1=> array(
 					4 => "Thruster",
 					7 => "Heavy Plasma Cannon",
-					9 => "Laser Bolt",
+					9 => "Dual Laser Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			2=> array(
 					6 => "Thruster",
 					8 => "Medium Plasma Cannon",
-					10 => "Laser Bolt",
+					10 => "Dual Laser Bolt",
 					18 => "Structure",
 					20 => "Primary",
 			),
 			3=> array(
 					5 => "Thruster",
 					7 => "Royal Laser",
-					9 => "Medium Plasma Cannon",
+					9 => "Heavy Plasma Cannon",
 					10 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",
@@ -99,7 +101,7 @@ class BloodSwordDarkSoul extends BaseShip{
 			4=> array(
 					5 => "Thruster",
 					7 => "Royal Laser",
-					9 => "Medium Plasma Cannon",
+					9 => "Heavy Plasma Cannon",
 					10 => "Cargo Bay",
 					18 => "Structure",
 					20 => "Primary",

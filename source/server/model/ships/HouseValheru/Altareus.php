@@ -12,7 +12,7 @@ class Altareus extends HeavyCombatVessel{
 			$this->variantOf = "Altarus Light Carrier";
 			$this->occurence = "uncommon";
         $this->isd = 2150;
-        $this->fighters = array("assault shuttles"=>12, "LCVs"=>2); //12 breaching pods    
+        $this->fighters = array("assault shuttles"=>12, "LCVs"=>2);     
 		$this->unofficial = true;
 
 	    $this->notes = 'Common variant if part of a House Valheru only force.';

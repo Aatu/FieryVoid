@@ -34,9 +34,11 @@ class BloodSwordRazor extends MediumShip{
         $this->addPrimarySystem(new Thruster(2, 9, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 9, 0, 3, 4));        
         
-		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 360));
-        $this->addFrontSystem(new EWLaserBolt(2, 4, 2, 0, 120));
+		$this->addFrontSystem(new EWDualLaserBolt(2, 6, 4, 240, 60));
+//		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
         $this->addFrontSystem(new EWLaserBolt(1, 4, 2, 240, 120));
+ //       $this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
+        $this->addFrontSystem(new EWDualLaserBolt(2, 6, 4, 300, 120));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
         $this->addFrontSystem(new Thruster(2, 6, 0, 4, 1));
 	    
@@ -60,7 +62,8 @@ class BloodSwordRazor extends MediumShip{
 
 		1=> array(
 			5 => "Thruster",
-			9 => "Laser Bolt",
+			7 => "Laser Bolt",
+			10 => "Dual Laser Bolt",
 			17 => "Structure",
 			20 => "Primary",
 		),

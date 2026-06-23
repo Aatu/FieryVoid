@@ -94,9 +94,12 @@ class Shuttle extends FighterFlight
             case 'Narn Regime':
                 return array('img/ships/ShuttleNarn.png', 'img/ships/ShuttleNarn_large.png'); 
             case 'Orieni Imperium':
+            case 'Great Crusade Orieni Imperium':
                 return array('img/ships/shuttleOrieni.png', 'img/ships/shuttleOrieni_large.png');
             case 'Raiders':
                 return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
+            case 'House Valheru':
+                return array('img/ships/ShuttleValheru.png', 'img/ships/ShuttleValheru_large.png'); 
             default: //Also used by EA, Hurr etc.
                 return array('img/ships/shuttle.png', 'img/ships/shuttle_large.png');
         }
@@ -1473,6 +1476,538 @@ class ShuttleYolu extends Shuttle
 }
 
 
+
+// Custom Faction Shuttles
+
+class ShuttleBrixadii extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleBrixadii";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Brixadii Clans";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 10;
+        $this->freethrust = 6;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleBrixadiiEarly extends ShuttleBrixadii
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleBrixadiiEarly";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Brixadii Clans (early)";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 10;
+        $this->freethrust = 6;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttleDalithorn extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleDalithorn";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Dalithorn Commonwealth";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 8, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleDalithornEarly extends ShuttleDalithorn
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleDalithornEarly";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Dalithorn Commonwealth (early)";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttleMakar extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleMakar";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Makar Federation";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleMakarEarly extends ShuttleMakar
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleMakarEarly";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Makar Federation (early)";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttlePolaren extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttlePolaren";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Polaren Confederacy";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 11, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttlePolarenEarly extends ShuttlePolaren
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttlePolarenEarly";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Polaren Confederacy (early)";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttleSalbez extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleSalbez";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Sal-bez Coalition";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleSalbezEarly extends ShuttleSalbez
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleSalbezEarly";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Sal-bez Coalition (early)";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttleVelrax extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleVelrax";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Velrax Republic";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 11;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 11, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleVelraxEarly extends ShuttleVelrax
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleVelraxEarly";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Nexus Velrax Republic (early)";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 11;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttleChouka extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleChouka";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Chouka Theocracy";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 12, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleChoukaRaider extends ShuttleChouka
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleChoukaRaider";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Chouka Raider";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+}
+
+class ShuttleCircasian extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleCircasian";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Circasian Empire";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 10;
+        $this->freethrust = 5;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(0, 0, 0, 0);
+            $fighter = new Fighter($this->phpclass, $armour, 9, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleKastan extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleKastan";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Kastan Monarchy";
+        $this->forwardDefense = 10;
+        $this->sideDefense = 10;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 9, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleBloodSwords extends ShuttleKastan
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleBloodSwords";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Blood Sword Raiders";
+        $this->forwardDefense = 10;
+        $this->sideDefense = 10;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+}
+
+class ShuttleSshelath extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleSshelath";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Sshel'ath Alliance";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 14;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(1, 1, 1, 1);
+            $fighter = new Fighter($this->phpclass, $armour, 8, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+class ShuttleGCOrieni extends ShuttleOrieni
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleOrieni";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Centauri Republic";
+        $this->forwardDefense = 11;
+        $this->sideDefense = 11;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttleValheru extends ShuttleCent
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleSshelath";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Escalation Wars Sshel'ath Alliance";
+        $this->forwardDefense = 8;
+        $this->sideDefense = 10;
+        $this->freethrust = 4;
+        $this->iniativebonus = 9 * 5;             
+    }
+}
+
+class ShuttleBarada extends Shuttle
+{
+    protected function setShuttleDefaults()
+    {
+        parent::setShuttleDefaults();
+        $this->phpclass = "ShuttleBarada";
+        $this->shipClass = "Shuttle";
+        $this->faction = "Barada Imperium";
+        $this->forwardDefense = 9;
+        $this->sideDefense = 9;
+        $this->freethrust = 3;
+        $this->iniativebonus = 9 * 5;             
+    }
+
+    public function populate()
+    {
+        $current = count($this->systems);
+        $new = $this->flightSize;
+        $toAdd = $new - $current;
+
+        for ($i = 0; $i < $toAdd; $i++) {
+            $armour = array(2, 2, 2, 2);
+            $fighter = new Fighter($this->phpclass, $armour, 10, $this->id);
+            $fighter->displayName = $this->shipClass;
+            $fighter->imagePath = $this->imagePath;
+            $fighter->iconPath = $this->iconPath;
+            
+            $fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0));
+
+            $this->addSystem($fighter);
+        }
+    }
+}
+
+
+
+
 /* === Faction minesweeping shuttle variants ===========================
  * Each extends its faction default shuttle (inheriting that faction's defence,
  * thrust, art and populate()) and layers on the minesweeping behaviour.
@@ -1511,4 +2046,24 @@ class MinesweepingShuttleUsuuth extends ShuttleUsuuth { protected function setSh
 class MinesweepingShuttleVorlons extends ShuttleVorlons { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleVorlons"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
 class MinesweepingShuttleVree extends ShuttleVree { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleVree"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
 class MinesweepingShuttleYolu extends ShuttleYolu { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleYolu"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
-
+class MinesweepingShuttleBrixadii extends ShuttleBrixadii { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBrixadii"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleBrixadiiEarly extends ShuttleBrixadiiEarly { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBrixadiiEarly"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleDalithorn extends ShuttleDalithorn { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleDalithorn"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleDalithornEarly extends ShuttleDalithornEarly { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleDalithornEarly"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleMakar extends ShuttleMakar { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleMakar"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleMakarEarly extends ShuttleMakarEarly { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleMakarEarly"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttlePolaren extends ShuttlePolaren { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttlePolaren"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttlePolarenEarly extends ShuttlePolarenEarly { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttlePolarenEarly"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleSalbez extends ShuttleSalbez { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleSalbez"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleSalbezEarly extends ShuttleSalbezEarly { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleSalbezEarly"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleVelrax extends ShuttleVelrax { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleVelrax"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleVelraxEarly extends ShuttleVelraxEarly { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleVelraxEarly"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleChouka extends ShuttleChouka { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleChouka"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleChoukaRaider extends ShuttleChoukaRaider { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleChoukaRaider"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleCircasian extends ShuttleCircasian { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleCircasian"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleKastan extends ShuttleKastan { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleKastan"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleBloodSwords extends ShuttleBloodSwords { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBloodSwords"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleSshelath extends ShuttleSshelath { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleSshelath"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleGCOrieni extends ShuttleGCOrieni { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleGCOrieni"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleValheru extends ShuttleValheru { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleValheru"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
+class MinesweepingShuttleBarada extends ShuttleBarada { protected function setShuttleDefaults(){ parent::setShuttleDefaults(); $this->phpclass="MinesweepingShuttleBarada"; $this->shipClass="Minesweeping Shuttle"; $this->hangarRequired='minesweeping shuttles'; $this->offensivebonus=4; $this->minesweeper=true; } }
