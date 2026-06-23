@@ -11,6 +11,7 @@ class baradaFizurFastGunboat extends LCV{
 	$this->imagePath = "img/ships/baradaFizurFastGunboat.png";
 	$this->canvasSize = 120;
 	$this->agile = true;
+	$this->unofficial = true;
 
 	$this->forwardDefense = 9;
 	$this->sideDefense = 11;
@@ -36,9 +37,9 @@ class baradaFizurFastGunboat extends LCV{
 	$this->addPrimarySystem(new Engine(4, 13, 0, 8, 1));
 
 
-	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 270, 90));
-    $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 270, 90));
-    $this->addFrontSystem(new TwinArray(2, 4, 1, 0, 0, 360));
+	$this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
+    $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 270, 90));
+    $this->addFrontSystem(new TwinArray(2, 4, 1, 0, 360));
 
 	$this->addPrimarySystem(new Structure(4, 30));
   

@@ -15,7 +15,7 @@ class kirishiacWarriorTest extends FighterFlight{
         $this->forwardDefense = 8;
         $this->sideDefense = 8;
         $this->freethrust = 14;
-        $this->offensivebonus = 7;
+        $this->offensivebonus = 1;
         $this->jinkinglimit = 6;
         $this->turncost = 0.33;
 		
@@ -41,8 +41,11 @@ class kirishiacWarriorTest extends FighterFlight{
 			$fighter->imagePath = "img/ships/kirishiacWarrior2.png";
 			$fighter->iconPath = "img/ships/kirishiacWarrior_large2.png";
 			
-			
-			//$fighter->addFrontSystem(new WarriorRam(0, 360, 0));
+			$hitPenalty = 0;
+//			$fighter->addFrontSystem(new DirectRam(0, 360, 1));
+//			$fighter->addFrontSystem(new WarriorRam(0, 0, 360, 0, $hitPenalty, true, 0));
+			$fighter->addFrontSystem(new WarriorRam(true));  // True is to specify it is allowed to ram in all scenarios
+			$fighter->addFrontSystem(new DirectRam(true));  // True is to specify it is allowed to ram in all scenarios
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

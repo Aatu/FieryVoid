@@ -34,7 +34,7 @@ class Dargarian extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 20, 4, 9));
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 2));
-		$this->addPrimarySystem(new Hangar(6, 7));
+		$this->addPrimarySystem(new Hangar(6, 7, 6));
         $this->addPrimarySystem(new TwinArray(4, 6, 2, 90, 270));
 		
 //      $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));

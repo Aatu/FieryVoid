@@ -38,8 +38,8 @@ class baradaValiaLightCruiser extends BaseShip{
 		
         $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
         $this->addFrontSystem(new HeavyParticleBeam(3, 6, 2, 270, 90));
-        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 270, 90));
-        $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 0, 270, 90));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1,  270, 90));
+        $this->addFrontSystem(new StdParticleBeam(2, 4, 1,  270, 90));
 
 		$this->addFrontSystem(new Thruster(4, 6, 0, 2, 1));
 		$this->addFrontSystem(new Thruster(4, 6, 0, 2, 1));

@@ -87,3 +87,15 @@ var AncientParticleCutter = function AncientParticleCutter(json, ship) {
 };
 AncientParticleCutter.prototype = Object.create(Particle.prototype);
 AncientParticleCutter.prototype.constructor = AncientParticleCutter;
+
+var WarriorRam = function WarriorRam(json, ship) {
+    RammingAttack.call(this, json, ship);
+};
+WarriorRam.prototype = Object.create(Weapon.prototype);
+WarriorRam.prototype.constructor = WarriorRam;
+
+var DirectRam = function DirectRam(json, ship) {
+    RammingAttack.call(this, json, ship);
+};
+DirectRam.prototype = Object.create(Weapon.prototype);
+DirectRam.prototype.constructor = DirectRam;

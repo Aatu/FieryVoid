@@ -14,7 +14,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "styled-components": "^6.1.8",
-    "three": "0.160.1"
+    "three": "^0.160.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

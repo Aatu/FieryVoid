@@ -17,7 +17,7 @@ class baradaBaroghMediumFighters extends FighterFlight
 		$this->forwardDefense = 6;
 		$this->sideDefense = 6;
 		$this->freethrust = 11;
-		$this->offensivebonus = 6;
+		$this->offensivebonus = 4;
 		$this->jinkinglimit = 8;
 		$this->turncost = 0.33;
 		$this->unofficial = true;
