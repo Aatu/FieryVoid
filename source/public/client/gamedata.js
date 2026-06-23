@@ -261,7 +261,7 @@ window.gamedata = {
     // green ([160,250,100]) and is NOT kept in sync with this.
     teamBaseColors: [
         [50, 205, 50],   // 1 Green  (CSS limegreen)
-        [255, 40, 40],   // 2 Red    (== "enemy")
+        [255, 80, 80],   // 2 Red    (== "enemy")
         [51, 173, 255],  // 3 Blue   (== "ally")
         [255, 150, 40],  // 4 Orange
         [40, 230, 230],  // 5 Cyan
