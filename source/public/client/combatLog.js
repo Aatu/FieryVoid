@@ -194,7 +194,19 @@ window.combatLog = {
         }
 
         var targettext = "";
-        if (target) targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" >' + target.name + '</span>';
+        if (target) {
+            // Colour the attacked ship's name by its team (everyone, not just
+            // observers). Terrain has no meaningful team, so render it white.
+            // getTeamColorRGB guards against missing/0 team values.
+            var targetColor;
+            if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
+                targetColor = "color:#ffffff;";
+            } else {
+                var trgb = gamedata.getTeamColorRGB(target.team);
+                targetColor = "color:rgb(" + Math.round(trgb[0]) + "," + Math.round(trgb[1]) + "," + Math.round(trgb[2]) + ");";
+            }
+            targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" style="' + targetColor + '">' + target.name + '</span>';
+        }
 
         var shottext = "";
         //if (target) shottext = ', ' + shotshit + '/' + shots + ' shots hit' + intertext + '.';
