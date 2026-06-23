@@ -5422,7 +5422,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $loadingtime = 2;
 
         public $rangePenalty = 0.5;
-        public $fireControl = array(-4, 2, 3); // fighters, <mediums, <capitals
+        public $fireControl = array(0, 4, 4); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser";
@@ -5487,7 +5487,7 @@ class NexusHeavyAssaultCannonBattery extends Weapon{
         public $loadingtime = 1;
 
         public $rangePenalty = 1;
-        public $fireControl = array(2, 1, 1); // fighters, <mediums, <capitals
+        public $fireControl = array(4, 1, 1); // fighters, <mediums, <capitals
 
         public $damageType = "Standard"; 
         public $weaponClass = "Laser";
