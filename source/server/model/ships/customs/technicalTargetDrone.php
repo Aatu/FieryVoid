@@ -87,9 +87,10 @@ class technicalTargetDrone extends VreeCapital
 //        $this->addFrontSystem(new CombatTransporter(3, 4, 1, 270, 90, 8, false));	
 
 
-        $this->addFrontSystem(new NexusSandCaster(3, 4, 2, 270, 90));	
-        $this->addFrontSystem(new NexusSandCaster(3, 4, 2, 270, 90));	
-        $this->addFrontSystem(new NexusSandCaster(3, 4, 2, 270, 90));	
+        $this->addFrontSystem(new NexusLightMaser(3, 4, 2, 270, 90));	
+        $this->addFrontSystem(new NexusLightMaser(3, 4, 2, 270, 90));	
+        $this->addFrontSystem(new NexusLightMaser(3, 4, 2, 270, 90));	
+        $this->addFrontSystem(new NexusLightMaser(3, 4, 2, 270, 90));	
 
 
 /*

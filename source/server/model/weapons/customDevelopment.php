@@ -1184,6 +1184,10 @@ class AncientPlasmaArc extends PlasmaStream {
 
     }//endof AncientParticleCutter
 
+
+
+
+
 class WarriorRam extends RammingAttack {
 
 	public $name = "WarriorRam";
@@ -1200,6 +1204,8 @@ class WarriorRam extends RammingAttack {
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one. 
 
 	public $priority = 1;
+
+    public $noOverkill = true;		
 	
 	public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
       
@@ -1410,6 +1416,22 @@ class WarriorRam extends RammingAttack {
 		}
 	} //endof function fire
 
+	function __construct($designedToRam = true){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+//		$maxhealth = 1;
+//$powerReq = 0;
+//		if ($fcbonus != 0){
+//			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);
+//		}
+//		if ($designDamage > 0){ //most units calculate ramming factor on the fly, but some are specifically designed to ram and carry explosives to do so effectively - they have fixed ramming factor
+//			$this->designDamage = 	$designDamage;
+//		}
+//		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+//		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		$this->designedToRam = $designedToRam;
+//		$this->selfDestroy = $selfDestroy;
+	}
+
 	public function getRammingFactor(){
 		$dmg = 0;
 		return $dmg;
@@ -1452,7 +1474,7 @@ class DirectRam extends RammingAttack {
 
 	public $name = "DirectRam";
 	public $displayName = "Direct Ram";
-    public $iconPath = "GlancingRam.png";
+    public $iconPath = "DirectRam.png";
 	public $isTargetable = false; //cannot be targeted ever!
 	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - this is an ability rather than actual system
 	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
@@ -1464,6 +1486,10 @@ class DirectRam extends RammingAttack {
 	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one. 
 
 	public $priority = 1;
+
+    public $noOverkill = true;		
+	
+    public $exclusive = true;
 	
 	public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
       
@@ -1676,6 +1702,10 @@ class DirectRam extends RammingAttack {
 			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
 		}
 	} //endof function fire
+
+	function __construct($designedToRam = true){
+		$this->designedToRam = $designedToRam;
+	}
 
 	public function getRammingFactor(){
 		$dmg = 0;

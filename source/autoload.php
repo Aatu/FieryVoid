@@ -3537,6 +3537,8 @@ spl_autoload_register(
 				'hypergravitonblaster' => '/server/model/weapons/gravitic.php',								
 				'antigravitybeam' => '/server/model/weapons/gravitic.php',								
 				'medantigravitybeam' => '/server/model/weapons/gravitic.php',								
+//				'warriorram' => '/server/model/weapons/customDevelopment.php',								
+//				'directram' => '/server/model/weapons/customDevelopment.php',								
 
 //				'kirishiacconqueror' => '/server/model/ships/kirishiac/kirishiacConqueror.php',
 //				'kirishiackingship' => '/server/model/ships/kirishiac/kirishiacKingship.php',
