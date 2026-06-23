@@ -138,15 +138,15 @@ window.combatLog = {
         }
 
         var fireColor = "";
-        if (!gamedata.isPlayerInGame()) {
+       // if (!gamedata.isPlayerInGame()) {
             // Observers: colour the FIRE: header by the shooter's team.
             var rgb = gamedata.getTeamColorRGB(ship.team);
             fireColor = "color:rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ");";
-        } else if (gamedata.isMyShip(ship)) {
-            fireColor = "color:limegreen;";
-        } else if (gamedata.isMyorMyTeamShip(ship)) {
-            fireColor = "color:#33adff;";
-        }
+        //} else if (gamedata.isMyShip(ship)) {
+        //    fireColor = "color:limegreen;";
+        //} else if (gamedata.isMyorMyTeamShip(ship)) {
+        //    fireColor = "color:#33adff;";
+        //}
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
