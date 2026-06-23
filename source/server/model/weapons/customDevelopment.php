@@ -1188,6 +1188,567 @@ class AncientPlasmaArc extends PlasmaStream {
 
 
 
+class WarriorRam extends RammingAttack {
+
+	public $name = "WarriorRam";
+	public $displayName = "Warrior Ram";
+    public $iconPath = "GlancingRam.png";
+	public $isTargetable = false; //cannot be targeted ever!
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - this is an ability rather than actual system
+	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+	
+	//animation irrelevant really (range 0), but needs to be fast!
+	public $animation = "trail";
+	public $animationColor =  array(1, 1, 1);
+	public $animationExplosionScale = 0.1; //very small bolt; explosion itself is scaled by damage done anyway!
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one. 
+
+	public $priority = 1;
+
+    public $noOverkill = true;		
+	
+	public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
+      
+	public $loadingtime = 1;
+	public $intercept = 0;
+        
+	public $rangePenalty = 0; //no range penalty... HKs will add it though!
+	public $range = 0.1; //attacks units on same hex only; range = 0 is treated as unlimited
+
+	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+
+	public $firingModes = array(
+		1 => "Ramming"
+	);	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Matter"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	public $isRammingAttack = true;	
+	public $designedToRam = true;
+	private $selfDestroy = 0; //will successful attack destroy the ramming ship? Additional damage modifier
+	private $designDamage = 0;
+	private $damageModRolled = 0;
+
+	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
+	
+	protected $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
+
+	//preventing double ramming
+	private $alreadyRammed = array();
+	public function checkAlreadyRammed($targetID){
+		foreach($this->alreadyRammed as $rammedID) if ($rammedID == $targetID) return true;
+		return false;
+	}
+	public function setAlreadyRammed($targetID){
+		$this->alreadyRammed[] = $targetID;
+	}
+
+	public function setSystemDataWindow($turn){
+		$this->setMinDamage(); //just in case it's not set correctly in the beginning!
+		$this->setMaxDamage();
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "In this mode the Warrior Projectile attacks more cautiously.";  
+		if($this->designedToRam) {
+			$this->data["Special"] .= "<br>This unit is specifically designed for ramming and may do so in any scenario.";
+		}else{
+			$this->data["Special"] .= "<br>ONLY ALLOWED WHEN DESPERATE RULES APPLY, OR WITH OTHER PLAYER'S CONSENT";
+		}
+	}	
+
+	public function beforeFiringOrderResolution($gamedata){
+		$shooter = $this->getUnit();
+		$deployTurn = $shooter->getTurnDeployed($gamedata);
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
+
+		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
+
+		if($shooter->isDestroyed()) return; //destroyed unit does not ram
+		$targetList = $gamedata->getShipsInDistance($shooter);
+		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
+		foreach($targetList as $targetID=>$target){
+			if(!$target->Enormous) continue; //auto-ram Enormous units
+			if($targetID == $shooter->id) continue; //do not ram self
+			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
+			$deployTurn = $target->getTurnDeployed($gamedata);
+			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
+			//don’t repeat manual ramming order
+			$alreadyDeclared = false;
+			foreach ($alreadyFiringAt as $existingFiringOrder){
+				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
+			}
+			If($alreadyDeclared) continue;
+			//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already – auto-ram it!
+			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+			$fire = new FireOrder(-1, 'normal', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
+				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $this->weaponClass
+			);
+			$fire->addToDB = true;		
+			$this->fireOrders[] = $fire;
+			
+		}
+
+	} //endof public function beforeFiringOrderResolution
+	
+	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition){
+	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
+		$thisShip = $this->getUnit();
+	    return $collisiontargets;		
+	} //end of checkForCollisions()		
+
+	private function getTempBearing($shipPosition, $asteroidPosition, $ship, $facing){
+		$relativeBearing = 0;	
+		$oPos = mathlib::hexCoToPixel($shipPosition);//Convert to pixel format		
+		$tPos = mathlib::hexCoToPixel($asteroidPosition); //Convert to pixel format
+				
+		$compassHeading = mathlib::getCompassHeadingOfPoint($oPos, $tPos);//Get heading using pixel formats.
+        $relativeBearing =  Mathlib::addToDirection($compassHeading, -$facing);//relative bearing, compass - current facing.
+       
+        if( Movement::isRolled($ship) ){ //if ship is rolled, mirror relative bearing.  Not really needed, since arcs don't actually change.  
+            if( $relativeBearing !== 0 ) { //mirror of 0 is 0
+                $relativeBearing = 360-$relativeBearing;
+            }
+        }        
+
+		return round($relativeBearing);//Round and return!
+	}
+
+	private function getCollisionLocation($relativeBearing, $target) {
+		foreach ($target->getLocations() as $location) {
+			$min = $location["min"];
+			$max = $location["max"];
+			
+			// Normal range check
+			if ($min < $max && $relativeBearing >= $min && $relativeBearing < $max) {
+				return $location["loc"];
+			}
+			
+			// Wrap-around range check (e.g., 330-30)
+			if ($min > $max && ($relativeBearing >= $min || $relativeBearing < $max)) {
+				return $location["loc"];
+			}
+		}
+		
+		return 0; // Should not happen but return default if so.
+	} //endof getCollisionLocation()
+
+	public function calculateHitBase($gamedata, $fireOrder) {
+		parent::calculateHitBase($gamedata, $fireOrder);			
+	}
+
+	private function getRamHitLocation($ship, $gamedata, $shipPosition){	
+				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.			
+				// Now check other movements in the turn.
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+				$previousFacing = $startMove->getFacingAngle();	
+				$location = 0;		
+
+				foreach ($ship->movement as $shipMove) {
+					if ($shipMove->turn == $gamedata->turn) {
+			
+						// Only interested in moves where ship enters a NEW hex!
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+							// Check if the position matches the asteroids, e.g. zero distance.
+							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
+								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
+								$location = $this->getCollisionLocation($relativeBearing, $ship);
+								return $location; //Found the first one, just return.
+							}
+						}
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
+					}
+				}
+								
+				return $location;
+	}//endof getRamHitLocation()
+
+	public function fire($gamedata, $fireOrder){
+		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
+		$this->gamedata = $gamedata;
+		
+		//preventing double hit on the same target!
+		if($this->checkAlreadyRammed($fireOrder->targetid)){
+			$target = $gamedata->getShipById($fireOrder->targetid);		
+			if($fireOrder->damageclass != 'TerrainCrash' && !($target instanceof FighterFlight))	{//If a TerrainCrash on fighters, we won't several orders to go through, but only then.		
+				$fireOrder->shotshit = 0;
+				$fireOrder->needed = 0;
+				$fireOrder->rolled = 100;
+				$fireOrder->pubnotes .= "TECHNICAL MISS (this collision already happened!)\n";
+				return;
+			}	
+		}
+		
+		parent::fire($gamedata, $fireOrder);
+
+		if($fireOrder->shotshit > 0){
+			$pos = null;
+			//$shooter = $gamedata->getShipById($fireOrder->targetid);
+			$shooter = $this->unit; //technically this unit after all
+			$target = $this->unit;
+			$targetPos = $target->getHexPos();
+
+			$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+			$damage = $this->getReturnDamage($fireOrder);
+        		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
+			if($target instanceof FighterFlight){ //allocate exactly to firing fighter!
+				$ftr = $target->getFighterBySystem($this->id);
+				if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
+				$fireOrder->calledid = $ftr->id;
+			}
+
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+			if($fireOrder->id < 0 && $fireOrder->damageclass != 'TerrainCollision'){ //for automatic firing orders return damage will not be correctly assigned; create a virtual firing order for this damage to be displayed unless is a collision during movement.
+				$newFireOrder = new FireOrder(
+					-1, "normal", $shooter->id, $target->id,
+					$this->id, -1, $gamedata->turn, 1, 
+					100, 100, 1, 1, 0,
+					0,0,'AutoRam',10000
+				);				
+				$newFireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);								
+				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
+				$newFireOrder->addToDB = true;
+				$this->fireOrders[] = $newFireOrder;				
+			}
+			$fireOrder->calledid = -1; //just in case!
+			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
+		}
+	} //endof function fire
+
+	function __construct($designedToRam = true){
+		//maxhealth and power reqirement are fixed; left option to override with hand-written values
+//		$maxhealth = 1;
+//$powerReq = 0;
+//		if ($fcbonus != 0){
+//			$this->fireControl = array($fcbonus, $fcbonus, $fcbonus);
+//		}
+//		if ($designDamage > 0){ //most units calculate ramming factor on the fly, but some are specifically designed to ram and carry explosives to do so effectively - they have fixed ramming factor
+//			$this->designDamage = 	$designDamage;
+//		}
+//		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+//		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		$this->designedToRam = $designedToRam;
+//		$this->selfDestroy = $selfDestroy;
+	}
+
+	public function getRammingFactor(){
+		$dmg = 0;
+		return $dmg;
+	}
+
+	public function getDamage($fireOrder){ 
+		$shooter = $this->unit;
+		$gd = $this->gamedata;
+		$target = $gd->getShipById($fireOrder->targetid);
+
+		$roll = Dice::d(10,1);
+		$damage = $roll;
+		
+		return $damage;
+	}//endof function getDamage
+
+	public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
+		$damage = 0;
+		return $damage;					     
+	}
+
+	public function setMinDamage(){     $this->minDamage = 1 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+	
+}  //WarriorRam
+
+
+
+
+
+
+
+
+
+
+
+
+
+class DirectRam extends RammingAttack {
+
+	public $name = "DirectRam";
+	public $displayName = "Direct Ram";
+    public $iconPath = "DirectRam.png";
+	public $isTargetable = false; //cannot be targeted ever!
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - this is an ability rather than actual system
+	public $factionAge = 3;//Ancient weapon, which sometimes has consequences!
+	
+	//animation irrelevant really (range 0), but needs to be fast!
+	public $animation = "trail";
+	public $animationColor =  array(1, 1, 1);
+	public $animationExplosionScale = 0.1; //very small bolt; explosion itself is scaled by damage done anyway!
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one. 
+
+	public $priority = 1;
+
+    public $noOverkill = true;		
+	
+    public $exclusive = true;
+	
+	public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
+      
+	public $loadingtime = 1;
+	public $intercept = 0;
+        
+	public $rangePenalty = 0; //no range penalty... HKs will add it though!
+	public $range = 0.1; //attacks units on same hex only; range = 0 is treated as unlimited
+
+	public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+
+	public $firingModes = array(
+		1 => "Ramming"
+	);	
+	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+	public $weaponClass = "Matter"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+	public $isRammingAttack = true;	
+	public $designedToRam = true;
+	private $selfDestroy = 0; //will successful attack destroy the ramming ship? Additional damage modifier
+	private $designDamage = 0;
+	private $damageModRolled = 0;
+
+	private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
+	
+	protected $possibleCriticals = array(); //shouldn't be hit ever, but if it is, should not suffer any criticals
+
+	//preventing double ramming
+	private $alreadyRammed = array();
+	public function checkAlreadyRammed($targetID){
+		foreach($this->alreadyRammed as $rammedID) if ($rammedID == $targetID) return true;
+		return false;
+	}
+	public function setAlreadyRammed($targetID){
+		$this->alreadyRammed[] = $targetID;
+	}
+
+	public function setSystemDataWindow($turn){
+		$this->setMinDamage(); //just in case it's not set correctly in the beginning!
+		$this->setMaxDamage();
+		parent::setSystemDataWindow($turn);  
+		$this->data["Special"] = "The Warrior Projectile attempts to punch straight through.";  
+		$this->data["Special"] .= "<br>Damage equals total number or remaining structure boxes on the Warrior.";  
+		$this->data["Special"] .= "<br>If the system is not destroyed, the Warrior suffers two times the system's armor value.";  
+		$this->data["Special"] .= "<br>The Warrior also suffers a +4 drop out penalty.";  
+		if($this->designedToRam) {
+			$this->data["Special"] .= "<br>This unit is specifically designed for ramming and may do so in any scenario.";
+		}else{
+			$this->data["Special"] .= "<br>ONLY ALLOWED WHEN DESPERATE RULES APPLY, OR WITH OTHER PLAYER'S CONSENT";
+		}
+	}	
+
+	public function beforeFiringOrderResolution($gamedata){
+		$shooter = $this->getUnit();
+		$deployTurn = $shooter->getTurnDeployed($gamedata);
+		if($deployTurn > $gamedata->turn) return;  //Ship not deployed yet, don't ram anything!			
+
+		$this->gamedata = $gamedata;//fill gamedata variable, which might otherwise be left out!
+
+		if($shooter->isDestroyed()) return; //destroyed unit does not ram
+		$targetList = $gamedata->getShipsInDistance($shooter);
+		$alreadyFiringAt = $this->getFireOrders($gamedata->turn);
+		foreach($targetList as $targetID=>$target){
+			if(!$target->Enormous) continue; //auto-ram Enormous units
+			if($targetID == $shooter->id) continue; //do not ram self
+			if($target->isDestroyed()) continue; //destroyed unit does not ram... and neither is rammed
+			$deployTurn = $target->getTurnDeployed($gamedata);
+			if($deployTurn > $gamedata->turn) continue;  //Ship not deployed yet, don't ram it!			
+			//don’t repeat manual ramming order
+			$alreadyDeclared = false;
+			foreach ($alreadyFiringAt as $existingFiringOrder){
+				if($existingFiringOrder->targetid == $targetID) $alreadyDeclared = true;
+			}
+			If($alreadyDeclared) continue;
+			//unit on the same hex is Enormous, not self, not destroyed, has deployed and not being rammed by this unit already – auto-ram it!
+			$movementThisTurn = $shooter->getLastTurnMovement($gamedata->turn+1);
+			$fire = new FireOrder(-1, 'normal', $shooter->id, $targetID, $this->id, -1, $gamedata->turn,
+				1, 0, 0, 1, 0, 0, $movementThisTurn->position->q,  $movementThisTurn->position->r, $this->weaponClass
+			);
+			$fire->addToDB = true;		
+			$this->fireOrders[] = $fire;
+			
+		}
+
+	} //endof public function beforeFiringOrderResolution
+	
+	private function checkForCollisions($relevantShips, $gamedata, $terrainPosition){
+	    $collisiontargets = array(); // Initialize array for fighters to be fired at.	
+		$thisShip = $this->getUnit();
+	    return $collisiontargets;		
+	} //end of checkForCollisions()		
+
+	private function getTempBearing($shipPosition, $asteroidPosition, $ship, $facing){
+		$relativeBearing = 0;	
+		$oPos = mathlib::hexCoToPixel($shipPosition);//Convert to pixel format		
+		$tPos = mathlib::hexCoToPixel($asteroidPosition); //Convert to pixel format
+				
+		$compassHeading = mathlib::getCompassHeadingOfPoint($oPos, $tPos);//Get heading using pixel formats.
+        $relativeBearing =  Mathlib::addToDirection($compassHeading, -$facing);//relative bearing, compass - current facing.
+       
+        if( Movement::isRolled($ship) ){ //if ship is rolled, mirror relative bearing.  Not really needed, since arcs don't actually change.  
+            if( $relativeBearing !== 0 ) { //mirror of 0 is 0
+                $relativeBearing = 360-$relativeBearing;
+            }
+        }        
+
+		return round($relativeBearing);//Round and return!
+	}
+
+	private function getCollisionLocation($relativeBearing, $target) {
+		foreach ($target->getLocations() as $location) {
+			$min = $location["min"];
+			$max = $location["max"];
+			
+			// Normal range check
+			if ($min < $max && $relativeBearing >= $min && $relativeBearing < $max) {
+				return $location["loc"];
+			}
+			
+			// Wrap-around range check (e.g., 330-30)
+			if ($min > $max && ($relativeBearing >= $min || $relativeBearing < $max)) {
+				return $location["loc"];
+			}
+		}
+		
+		return 0; // Should not happen but return default if so.
+	} //endof getCollisionLocation()
+
+	public function calculateHitBase($gamedata, $fireOrder) {
+		parent::calculateHitBase($gamedata, $fireOrder);			
+	}
+
+	private function getRamHitLocation($ship, $gamedata, $shipPosition){	
+				if($ship->getSpeed() == 0) return 1; //Just return front location as standard if Ship is not moving.			
+				// Now check other movements in the turn.
+				$startMove = $ship->getLastTurnMovement($gamedata->turn);	//initialise as last move in previous turn, in case first move takes ship in asteroid.				
+				$previousPosition = $startMove->position; //This will change as we go through movements, but need to initialise as where the ship starts this turn.			 
+				$previousFacing = $startMove->getFacingAngle();	
+				$location = 0;		
+
+				foreach ($ship->movement as $shipMove) {
+					if ($shipMove->turn == $gamedata->turn) {
+			
+						// Only interested in moves where ship enters a NEW hex!
+						if ($shipMove->type == "move" || $shipMove->type == "slipleft" || $shipMove->type == "slipright") {					
+							// Check if the position matches the asteroids, e.g. zero distance.
+							if ($shipPosition->q == $shipMove->position->q && $shipPosition->r == $shipMove->position->r) {
+								$relativeBearing = $this->getTempBearing($previousPosition, $shipPosition, $ship, $previousFacing);
+								$location = $this->getCollisionLocation($relativeBearing, $ship);
+								return $location; //Found the first one, just return.
+							}
+						}
+						$previousPosition = $shipMove->position;
+						$previousFacing = $shipMove->getFacingAngle();
+					}
+				}
+								
+				return $location;
+	}//endof getRamHitLocation()
+
+	public function fire($gamedata, $fireOrder){
+		// If hit, firing unit itself suffers damage, too (based on ramming factor of target)!
+		$this->gamedata = $gamedata;
+		
+		//preventing double hit on the same target!
+		if($this->checkAlreadyRammed($fireOrder->targetid)){
+			$target = $gamedata->getShipById($fireOrder->targetid);		
+			if($fireOrder->damageclass != 'TerrainCrash' && !($target instanceof FighterFlight))	{//If a TerrainCrash on fighters, we won't several orders to go through, but only then.		
+				$fireOrder->shotshit = 0;
+				$fireOrder->needed = 0;
+				$fireOrder->rolled = 100;
+				$fireOrder->pubnotes .= "TECHNICAL MISS (this collision already happened!)\n";
+				return;
+			}	
+		}
+		
+		parent::fire($gamedata, $fireOrder);
+
+		if($fireOrder->shotshit > 0){
+			$pos = null;
+			//$shooter = $gamedata->getShipById($fireOrder->targetid);
+			$shooter = $this->unit; //technically this unit after all
+			$target = $this->unit;
+			$targetPos = $target->getHexPos();
+
+			$fireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);
+			$damage = $this->getReturnDamage($fireOrder);
+        		$damage = $this->getDamageMod($damage, $shooter, $target, $pos, $gamedata);
+        		$damage -= $target->getDamageMod($shooter, $pos, $gamedata->turn, $this);
+			if($target instanceof FighterFlight){ //allocate exactly to firing fighter!
+				$ftr = $target->getFighterBySystem($this->id);
+				if ($ftr->isDestroyed()) return; //do not allocate to already destroyed fighter!!! it would cause the game to randomly choose another one, which would be incorrect
+				$fireOrder->calledid = $ftr->id;
+			}
+
+			$this->damage($target, $shooter, $fireOrder,  $gamedata, $damage);
+			if($fireOrder->id < 0 && $fireOrder->damageclass != 'TerrainCollision'){ //for automatic firing orders return damage will not be correctly assigned; create a virtual firing order for this damage to be displayed unless is a collision during movement.
+				$newFireOrder = new FireOrder(
+					-1, "normal", $shooter->id, $target->id,
+					$this->id, -1, $gamedata->turn, 1, 
+					100, 100, 1, 1, 0,
+					0,0,'AutoRam',10000
+				);				
+				$newFireOrder->chosenLocation = $this->getRamHitLocation($target, $gamedata, $targetPos);								
+				if(!$this->checkAlreadyRammed($fireOrder->targetid)) $newFireOrder->pubnotes = " Automatic ramming - return damage.";
+				$newFireOrder->addToDB = true;
+				$this->fireOrders[] = $newFireOrder;				
+			}
+			$fireOrder->calledid = -1; //just in case!
+			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
+		}
+	} //endof function fire
+
+	function __construct($designedToRam = true){
+		$this->designedToRam = $designedToRam;
+	}
+
+	public function getRammingFactor(){
+		$dmg = 0;
+		return $dmg;
+	}
+
+	public function getDamage($fireOrder){ 
+		$shooter = $this->unit;
+		$gd = $this->gamedata;
+		$target = $gd->getShipById($fireOrder->targetid);
+
+
+		$flight = $this->getUnit();
+		$thisFighter = null; //initialize
+		
+		foreach ($flight->systems as $ftr) {
+			foreach ($ftr->systems as $ftrsys) {
+				if ($ftrsys->id == $this->id) {
+					$thisFighter = $ftr; //Found the correct fighter
+					break 2; //Skip both loops and go to the next fighter
+				}
+			}
+		}
+		
+		if ($thisFighter !== null) {
+			$damage = $thisFighter->getRemainingHealth();
+		}
+
+		return $damage;
+	} //endof function getDamage
+
+	public function getReturnDamage($fireOrder){    //damage that ramming unit suffers itself - using same modifier as actual attack! (already set)   
+		$damage = 0;
+		return $damage;					     
+	}
+
+	public function setMinDamage(){     $this->minDamage = 1 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 18 ;      }
+	
+}  //DirectRam
+
+
+
 
 
 

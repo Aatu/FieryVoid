@@ -16,7 +16,7 @@ class PolarenDrinev extends MediumShip{
         $this->agile = true;
 	    $this->isd = 1730;
 
-        $this->fighters = array("assault shuttles"=>1); //1 breaching pod  
+        $this->fighters = array("Breaching Pods"=>1);  
 	    $this->notes = 'Atmospheric capable';
         
         $this->forwardDefense = 12;

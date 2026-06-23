@@ -14,7 +14,7 @@ class PolarenGratherinRefit extends HeavyCombatVesselLeftRight{
 	    $this->isd = 2119;
         $this->canvasSize = 125;
 
-        $this->fighters = array("assault shuttles"=>1); //1 breaching pod    
+        $this->fighters = array("Breaching Pods"=>1);   
 
         $this->forwardDefense = 15;
         $this->sideDefense = 15;

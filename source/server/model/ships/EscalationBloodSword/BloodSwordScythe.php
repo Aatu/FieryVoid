@@ -4,7 +4,7 @@ class BloodSwordScythe extends HeavyCombatVessel{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-        $this->pointCost = 325;
+        $this->pointCost = 300;
         $this->faction = "Escalation Wars Blood Sword Raiders";
         $this->phpclass = "BloodSwordScythe";
         $this->imagePath = "img/ships/EscalationWars/BloodSwordScythe.png";
@@ -37,14 +37,15 @@ class BloodSwordScythe extends HeavyCombatVessel{
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 240, 360));
-		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 0, 120));
 		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 300, 60));
+		$this->addFrontSystem(new MediumPlasma(3, 5, 3, 0, 120));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 240, 60));
 		$this->addFrontSystem(new EWLaserBolt(2, 4, 2, 300, 120));
                 
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
         $this->addAftSystem(new Thruster(3, 15, 0, 5, 2));
         $this->addAftSystem(new Thruster(2, 6, 0, 2, 2));
+        $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
         $this->addAftSystem(new EWLaserBolt(2, 4, 2, 90, 270));
 		$this->addAftSystem(new CargoBay(2, 30));
 		$this->addAftSystem(new CargoBay(2, 30));

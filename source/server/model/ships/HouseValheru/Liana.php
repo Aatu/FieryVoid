@@ -28,7 +28,7 @@ class Liana extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 9, 3, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 8, 4));	
-		$this->addPrimarySystem(new Hangar(5, 5));	
+		$this->addPrimarySystem(new Hangar(5, 5, 3));	
         
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
         $this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

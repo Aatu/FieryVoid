@@ -1185,36 +1185,6 @@ var NexusLightRadCannon = function(json, ship)
 NexusLightRadCannon.prototype = Object.create( Weapon.prototype );
 NexusLightRadCannon.prototype.constructor = NexusLightRadCannon;
 
-var NexusSandCaster = function  NexusSandCaster(json, ship) {
-    Weapon.call(this, json, ship);
-};
-NexusSandCaster.prototype = Object.create(Weapon.prototype);
-NexusSandCaster.prototype.constructor =  NexusSandCaster;
-
-NexusSandCaster.prototype.hasMaxBoost = function () {
-    return this.maxBoostLevel;
-};
-
-NexusSandCaster.prototype.initializationUpdate = function () {
-    if(this.firingMode == 2){
-        const rangeCrit = shipManager.criticals.countCriticalOnTurn(this, "ReducedRangeValue", gamedata.turn);
-        if(rangeCrit > 0) this.range = 1;
-        this.data['Range'] = this.range;   
-    }    
-	return this;
-}	
-
-NexusSandCaster.prototype.clearBoost = function () {
-    for (var i in system.power) {
-        var power = system.power[i];
-        if (power.turn != gamedata.turn) continue;
-        if (power.type == 2) {
-            system.power.splice(i, 1);
-            return;
-        }
-    }
-};
-
 var LtPlasmaCannonFtr = function LtPlasmaCannonFtr(json, ship) {
     Weapon.call(this, json, ship);
 };
@@ -1227,6 +1197,11 @@ var NexusRailgunAccelerator = function NexusRailgunAccelerator(json, ship) {
 NexusRailgunAccelerator.prototype = Object.create(Matter.prototype);
 NexusRailgunAccelerator.prototype.constructor = NexusRailgunAccelerator;
 
+var NexusSandCaster = function NexusSandCaster(json, ship) {
+    Matter.call(this, json, ship);
+};
+NexusSandCaster.prototype = Object.create(Matter.prototype);
+NexusSandCaster.prototype.constructor = NexusSandCaster;
 
 
 

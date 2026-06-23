@@ -36,7 +36,7 @@ class Corvax extends BaseShip{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new ElintScanner(6, 20, 7, 13));
         $this->addPrimarySystem(new Engine(6, 16, 0, 8, 3));
-		$this->addPrimarySystem(new Hangar(6, 8));
+		$this->addPrimarySystem(new Hangar(6, 8, 6));
 		$this->addPrimarySystem(new GuardianArray(5, 4, 2, 0, 360));
         
         $this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
