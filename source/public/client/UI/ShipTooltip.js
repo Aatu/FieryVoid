@@ -129,6 +129,13 @@ window.ShipTooltip = function () {
                 iniDown = iniDown * 5;
                 this.addEntryElement("<i>Initiative temporarily lowered by <b>" + iniDown + "</b></i>", true);
             }
+            //HK Jamming: red UNCONTROLLED message on the turn the crit is in effect.
+            //Uncontrolled is a oneturn crit rolled on turn T (turnend = T+1); it is in
+            //effect on T+1, so show it when crit.turn + 1 === current turn. Gated on
+            //remoteControl (very rare) so ordinary flights skip the crit scan entirely.
+            if (ship.remoteControl && firstFighter && uncontrolledInEffect(firstFighter)) {
+                this.addEntryElement('<span style="color:red;"><b>Uncontrolled</b></span>', true);
+            }
         }
 
         if (ship.base && ship.movement[1]) {
@@ -514,6 +521,20 @@ window.ShipTooltip = function () {
 
         var rgb = gamedata.getTeamColorRGB(ship.team);
         return ' style="color:rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ');"';
+    }
+
+    // HK Jamming: true when the flight's sample fighter carries an Uncontrolled crit
+    // that is in effect THIS turn. Uncontrolled is a oneturn crit rolled on turn T
+    // (turnend = T+1) and active on T+1, so match crit.turn + 1 === current turn.
+    function uncontrolledInEffect(firstFighter) {
+        if (!firstFighter || !firstFighter.criticals) return false;
+        for (var i in firstFighter.criticals) {
+            var crit = firstFighter.criticals[i];
+            if (crit.phpclass === "Uncontrolled" && (crit.turn + 1) === gamedata.turn) {
+                return true;
+            }
+        }
+        return false;
     }
 
     return ShipTooltip;

@@ -3,17 +3,18 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "build": "vite build && yarn run build:legacy",
+    "build": "yarn run build:three && vite build && yarn run build:legacy",
+    "build:three": "node scripts/build-three-shim.js",
     "build:legacy": "node scripts/bundle-legacy.js",
     "watch": "vite build --watch",
-    "watch:legacy": "node scripts/watch-legacy.js",
-    "optimize-images": "node scripts/optimizeImages.mjs"
+    "watch:legacy": "node scripts/watch-legacy.js"
   },
   "dependencies": {
     "imagemin-svgo": "^12.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "styled-components": "^6.1.8"
+    "styled-components": "^6.1.8",
+    "three": "^0.160.1"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",

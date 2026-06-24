@@ -18,6 +18,9 @@ window.ShipTooltipInitialOrdersMenu = function () {
         { className: "removeMDEW", condition: [isSelf, enemyMines], action: removeMDEW, info: "Remove Mine Detection (right-click: clear)", supportsMaxClick: true },
         { className: "addDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, notMine, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST (right-click: max)", supportsMaxClick: true },
         { className: "removeDIST", condition: [notSelf, isEnemyEW, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasDIST], action: getRemoveOEW('DIST'), info: "Remove DIST (right-click: clear)", supportsMaxClick: true },
+        //Jamming: ELINT disrupts a remote-controlled fighter flight's command link (Orieni Hunter-Killers). Target IS a flight, so no notFlight gate.
+        { className: "addJAM", condition: [notSelf, isEnemyEW, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('JAM'), info: "Add Jamming (right-click: max)", supportsMaxClick: true },
+        { className: "removeJAM", condition: [notSelf, isElint, sourceNotFlight, targetIsRemoteControl, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck, hasJAM], action: getRemoveOEW('JAM'), info: "Remove Jamming (right-click: clear)", supportsMaxClick: true },
         //{ className: "addOEW", condition: [notSelf, sourceNotFlight], action: addOEW, info: "Add OEW" },
         //{ className: "removeOEW", condition: [notSelf, sourceNotFlight], action: removeOEW, info: "Remove OEW" },
         //{ className: "addDIST", condition: [notSelf, isElint, notFlight, isInElintDistance(30), doesNotHaveBDEW, advSensorsCheck], action: getAddOEW('DIST'), info: "Add DIST" },
@@ -214,6 +217,10 @@ window.ShipTooltipInitialOrdersMenu = function () {
         return (!this.targetedShip || !this.targetedShip.flight);
     }
 
+    function targetIsRemoteControl() {
+        return !!(this.targetedShip && this.targetedShip.remoteControl);
+    }
+
     function isInElintDistance(distance) {
         return function () {
             return ew.checkInELINTDistance(this.selectedShip, this.targetedShip, distance);
@@ -242,6 +249,7 @@ window.ShipTooltipInitialOrdersMenu = function () {
     function hasSOEW() { return ew.getEWByType("SOEW", this.selectedShip, this.targetedShip) > 0; }
     function hasBDEW() { return ew.getEWByType("BDEW", this.selectedShip) > 0; }
     function hasDIST() { return ew.getEWByType("DIST", this.selectedShip, this.targetedShip) > 0; }
+    function hasJAM() { return ew.getEWByType("JAM", this.selectedShip, this.targetedShip) > 0; }
     function hasDSEW() { return ew.getEWByType("Detect Stealth", this.selectedShip) > 0; }
 
     function advSensorsCheck() { /*check whether source ship has Advanced Sensors OR target ship does NOT have Advanced Sensors*/

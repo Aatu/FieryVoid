@@ -371,6 +371,9 @@ const sortIntoLocations = (ship) => {
     const locations = { 0: [], 1: [], 2: [], 3: [], 4: [], 5: [], 41: [], 42: [], 31: [], 32: [] };
 
     ship.systems.forEach((system) => {
+        //hideInShipWindow: technical-only systems (e.g. InvulnerableThruster) are omitted from the
+        //icon grid. Purely cosmetic - thrust mechanics iterate ship.systems directly, not this list.
+        if (system.hideInShipWindow) return;
         locations[system.location].push(system);
     });
 

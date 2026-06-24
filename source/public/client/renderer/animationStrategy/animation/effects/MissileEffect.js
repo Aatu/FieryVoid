@@ -101,6 +101,7 @@ window.MissileEffect = function () {
                 const launchSound = MissileEffect.cachedLaunchAudio.cloneNode(true);
                 launchSound.volume = this.soundVolume;
                 launchSound.currentTime = 0;
+                window.applyReplayPlaybackRate(launchSound);
                 launchSound.play().catch(() => { });
                 this.playedLaunchSound = true;
             } catch (e) {
@@ -113,6 +114,7 @@ window.MissileEffect = function () {
                 const impactSound = MissileEffect.cachedImpactAudio.cloneNode(true);
                 impactSound.volume = this.soundVolume;
                 impactSound.currentTime = 0;
+                window.applyReplayPlaybackRate(impactSound);
                 impactSound.play().catch(() => { });
                 this.playedImpactSound = true;
             } catch (e) {

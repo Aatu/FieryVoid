@@ -99,6 +99,7 @@ window.BoltEffect = function () {
                 const launchSound = BoltEffect.cachedLaunchAudio.cloneNode(true);
                 launchSound.volume = this.soundVolume;
                 launchSound.currentTime = 0;
+                window.applyReplayPlaybackRate(launchSound);
                 launchSound.play().catch(() => {});
                 this.playedLaunchSound = true;
             } catch (e) {
@@ -112,6 +113,7 @@ window.BoltEffect = function () {
                 const impactSound = BoltEffect.cachedImpactAudio.cloneNode(true);
                 impactSound.volume = this.soundVolume;
                 impactSound.currentTime = 0;
+                window.applyReplayPlaybackRate(impactSound);
                 impactSound.play().catch(() => {});
                 this.playedImpactSound = true;
             } catch (e) {

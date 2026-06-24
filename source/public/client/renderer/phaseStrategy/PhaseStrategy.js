@@ -502,6 +502,7 @@ window.PhaseStrategy = function () {
         this.showShipEW(ship);
         icon.showSideSprite(true);
         icon.showBDEW();
+        icon.showMDEW();
         icon.setHighlighted(true);
     };
 
@@ -840,6 +841,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(icon => {
             icon.hideEW();
             icon.hideBDEW();
+            icon.hideMDEW();
         });
 
         this.ewIconContainer.hide();
@@ -868,6 +870,7 @@ window.PhaseStrategy = function () {
                 this.ewIconContainer.showByShip(ship);
                 icon.showEW();
                 icon.showBDEW();
+                icon.showMDEW();
             }, this);
         }
     }

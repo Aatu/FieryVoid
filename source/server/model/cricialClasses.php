@@ -81,6 +81,19 @@ class SplitLaunchedFighter extends Critical{
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
     }
 }
+
+//Stage S (S-d): an integrated (Shadow) fighter whose carrier-structure tether box was
+//destroyed in combat. It is SEVERED — keeps fighting but can never land/reabsorb (the
+//carrier has no box to receive it into). Permanent (repairPriority 0, no turnend).
+//Set by HangarOps::applyCutOffCrit; read by isCutOffIntegratedFlight (landing gate +
+//per-turn coupling). Marker only — no stat effect; carries a "CUT OFF" tooltip.
+class ShadowFighterCutOff extends Critical{
+    public $description = "CUT OFF";
+	public $repairPriority = 0;//severed permanently — never repaired
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend);
+    }
+}
 	
 	
 
@@ -310,6 +323,22 @@ class ReducedIniativeOneTurn extends Critical{
 
 class ReducedIniative extends Critical{
     public $description = "-10 Initiative";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+        parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+/* HK Jamming: applied to a remote-controlled fighter flight (Orieni Hunter-Killer)
+ * whose command link was severed by ELINT Jamming (disruption roll 19+). The flight
+ * is "Uncontrolled" for ONE turn: the player loses control and (Strategy B) it drifts
+ * straight-line at a -3 initiative penalty. Placed on the flight's sample fighter
+ * (systems[1]) during the crit phase, in effect the FOLLOWING turn (oneturn semantics,
+ * matching the ReducedIniativeOneTurn that accompanies it). The -3 ini for the
+ * uncontrolled turn is carried by this crit's outputMod-independent read in
+ * BaseShip::getCommonIniModifiers. */
+class Uncontrolled extends Critical{
+    public $description = "UNCONTROLLED";
+    public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }

@@ -29,12 +29,15 @@ class CircasianCairn extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
         $this->addPrimarySystem(new Engine(3, 9, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(3, 26, 12));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 3));
         $this->addPrimarySystem(new Thruster(2, 10, 0, 3, 4));
       
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
         $this->addFrontSystem(new Thruster(2, 8, 0, 2, 1));
+		$cairnHangar = new Hangar(3, 26, 12);
+		$cairnHangar->directions = array(1, 5); //port + starboard launch bays — player picks per launch
+		$this->addFrontSystem($cairnHangar);
+//        $this->addFrontSystem(new Hangar(3, 26, 12));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 240, 360));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 240, 360));
 		$this->addFrontSystem(new EWRocketLauncher(1, 4, 1, 0, 120));
@@ -53,17 +56,17 @@ class CircasianCairn extends HeavyCombatVessel{
 		
         $this->hitChart = array(
             0=> array(
-                    8 => "Structure",
-                    11 => "Thruster",
-                    13 => "Scanner",
-                    15 => "Engine",
-					18 => "Hangar",
+                    10 => "Structure",
+                    13 => "Thruster",
+                    15 => "Scanner",
+                    17 => "Engine",
                     19 => "Reactor",
                     20 => "C&C",
             ),
             1=> array(
                     4 => "Thruster",
                     7 => "Rocket Launcher",
+					10 => "Hangar",
 					18 => "Structure",
                     20 => "Primary",
             ),

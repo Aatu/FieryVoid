@@ -30,7 +30,7 @@ class Primo extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(7, 20, 5, 9));
         $this->addPrimarySystem(new Engine(7, 18, 0, 12, 2));
-		$this->addPrimarySystem(new Hangar(7, 2));
+		$this->addPrimarySystem(new Hangar(7, 2, 2));
         
 		$this->addFrontSystem(new TwinArray(3, 6, 2, 270, 90));
         $this->addFrontSystem(new Thruster(6, 10, 0, 3, 1));

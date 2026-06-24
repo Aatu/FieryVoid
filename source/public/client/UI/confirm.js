@@ -2302,6 +2302,9 @@ window.confirm = {
         for (var k in ship.systems) {
             var sys = ship.systems[k];
             if (!sys || (sys.name !== 'hangar' && sys.name !== 'catapult' && sys.name !== 'fighterRail')) continue;
+            //Stage S (S-f): a ShadowHangar keeps name 'hangar' but never appears as a
+            //launch source — its fighters leave only via the Fighter Bomb weapon.
+            if (sys.isShadowHangar) continue;
             all.push(sys);
         }
         // Set of system ids referenced by any occupancy list on the ship.
@@ -2721,6 +2724,169 @@ window.confirm = {
     //   5. replaceDockOrdersForFlight rewrites every hangar in the map so an
     //      explicit zero clears a prior queued entry; Hangar.doIndividualNotesTransfer
     //      flushes updated pendingDockOrders into the {launches, docks} payload.
+    // Stage S (S-f): Fighter Bomb launch dialog. The player picks how many integrated
+    // fighters to bomb out at the target hex (1..pool). Because a launch can exceed the
+    // flight-size cap (9 for Shadow Mediums), it must become multiple flights:
+    //   - "Split Flights Automatically" CHECKED (default): one total; the server splits
+    //     it into <=cap flights (24 -> 9+9+6). Emits ONE fire order (shots = total).
+    //   - UNCHECKED: the player sets each flight's size (<=cap) via per-flight rows.
+    //     Emits ONE fire order PER non-zero flight (shots = that flight's size). The
+    //     combat log groups the same-hex orders into one "Fighter Bomb" line.
+    // callback receives { sizes: [n, ...] } — one entry per flight to spawn. In auto
+    // mode that's a single [total] (server does the split); in manual mode it's the
+    // player's per-flight list. weaponManager builds the fire order(s) from it.
+    shadowFighterBomb: function shadowFighterBomb(carrier, pool, cap, callback) {
+        pool = Math.max(0, parseInt(pool, 10) || 0);
+        cap  = Math.max(1, parseInt(cap, 10) || 9);
+        if (pool <= 0) { confirm.warning("No integrated fighters left in the hangar to launch."); return; }
+
+        var e = $('<div class="confirm error multi-value-confirm hangar-confirm shadowFighterBomb"><div class="ui"><div class="confirmok"></div><div class="confirmcancel"></div></div></div>');
+        $('<div class="multi-value-header">Fighter Bomb &mdash; launch from ' + carrier.name + '</div>').prependTo(e);
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.multi-value-header'));
+
+        // Splitting only matters when the pool can form MORE than one flight (pool >
+        // cap). Since cap = min(9, pool), that's only when pool > 9. Otherwise the whole
+        // launch is a single flight, so hide the toggle + manual section entirely and
+        // show just the total count input.
+        var splittable = pool > cap;
+
+        $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;">' +
+            pool + ' integrated fighters available.' + (splittable ? ' Max ' + cap + ' per flight.' : '') +
+            '</span></div>').appendTo(container);
+
+        // Auto-split toggle (checked by default). Hidden when not splittable.
+        // bombAutoSplitRow packs the checkbox + label together and pushes the pair
+        // to the RIGHT edge (checkbox on the LEFT of the text, snug) rather than the
+        // default space-between spread.
+        var autoRow = $('<div class="multi-value-row bombAutoSplitRow"></div>').appendTo(container);
+        var autoChk = $('<input type="checkbox" class="multiConfirmInput" checked>').appendTo(autoRow);
+        $('<span class="multi-value-label" style="font-style:normal;">Split Flights Automatically</span>').appendTo(autoRow);
+        if (!splittable) autoRow.hide();
+
+        // --- AUTO section: single total input (also the sole input when not splittable) ---
+        var autoSection = $('<div class="bombAutoSection"></div>').appendTo(container);
+        var autoRowIn = $('<div class="multi-value-row"></div>').appendTo(autoSection);
+        var autoLabel = splittable ? 'Total fighters' : 'Fighters to launch';
+        $('<span class="multi-value-label"><span class="multi-value-name">' + autoLabel + '</span> <span class="multi-value-max">(Max: ' + pool + ')</span></span>').appendTo(autoRowIn);
+        var autoInput = $('<input type="number" class="multi-value-input" value="' + pool + '" min="1" max="' + pool + '">').appendTo(autoRowIn);
+        autoInput.on("input change keyup", function () {
+            var v = parseInt($(this).val(), 10);
+            if (v > pool) $(this).val(pool);
+            if (v < 1 && $(this).val() !== "") $(this).val(1);
+        });
+
+        // --- MANUAL section: one input per flight, pre-filled with an even-ish split.
+        // The player may add MORE (smaller) flights than the minimum ceil(pool/cap):
+        // e.g. 24 starts as 9+9+6 but can become 6+6+6+6 via "Add another flight".
+        var manualSection = $('<div class="bombManualSection" style="display:none;"></div>').appendTo(container);
+        var manualRemaining = $('<div class="multi-value-row"><span class="multi-value-label" style="font-style:normal;"></span></div>').appendTo(manualSection);
+        var flightRowsHolder = $('<div class="bombFlightRows"></div>').appendTo(manualSection);
+        var manualInputs = [];
+
+        function manualTotal() {
+            var t = 0;
+            manualInputs.forEach(function (i) { var v = parseInt(i.val(), 10); if (!isNaN(v) && v > 0) t += v; });
+            return t;
+        }
+        // Max flights = pool (each flight needs at least 1 fighter). An "extra" flight
+        // is only addable while some fighters remain unallocated (so it has something
+        // to launch) AND we're below that ceiling.
+        function canAddFlight() {
+            return manualInputs.length < pool && manualTotal() < pool;
+        }
+        function renumberRows() {
+            flightRowsHolder.find('.bombFlightLabel').each(function (idx) {
+                $(this).text('Flight ' + (idx + 1));
+            });
+        }
+        function addFlightRow(preset) {
+            var row = $('<div class="multi-value-row bombFlightRow"></div>').appendTo(flightRowsHolder);
+            $('<span class="multi-value-label"><span class="multi-value-name bombFlightLabel">Flight</span> <span class="multi-value-max">(Max: ' + cap + ')</span></span>').appendTo(row);
+            var inp = $('<input type="number" class="multi-value-input bombFlightInput" value="' + Math.max(0, parseInt(preset, 10) || 0) + '" min="0" max="' + cap + '">').appendTo(row);
+            // Per-row remove (kept for ≥2 rows so the player can undo an extra flight).
+            var rm = $('<span class="bombRemoveFlight" title="Remove this flight">✕</span>').appendTo(row);
+            rm.on("click", function () {
+                if (manualInputs.length <= 1) return;   //always keep at least one flight
+                var i = manualInputs.indexOf(inp);
+                if (i !== -1) manualInputs.splice(i, 1);
+                row.remove();
+                renumberRows();
+                refreshManual();
+            });
+            manualInputs.push(inp);
+            renumberRows();
+            return inp;
+        }
+
+        // Initial rows = the minimum even split (9+9+6 for 24).
+        var left = pool;
+        var nFlights = Math.max(1, Math.ceil(pool / cap));
+        for (var f = 0; f < nFlights; f++) {
+            var preset = Math.min(cap, left);
+            left -= preset;
+            addFlightRow(preset);
+        }
+
+        // "Add another flight" — appends a flight seeded with the remaining unallocated
+        // fighters (capped). Disabled (greyed) when nothing's left to give it.
+        var addRow = $('<div class="multi-value-row"></div>').appendTo(manualSection);
+        var addBtn = $('<span class="bombAddFlight">+ Add another flight</span>').appendTo(addRow);
+        function refreshAddState() {
+            if (canAddFlight()) addBtn.css({ opacity: 1, 'pointer-events': 'auto' });
+            else addBtn.css({ opacity: 0.4, 'pointer-events': 'none' });
+        }
+        addBtn.on("click", function () {
+            if (!canAddFlight()) return;
+            var remaining = Math.max(0, pool - manualTotal());
+            addFlightRow(Math.min(cap, remaining));
+            refreshManual();
+        });
+
+        function refreshManual() {
+            var t = manualTotal();
+            var over = t > pool;
+            manualRemaining.find('.multi-value-label')
+                .text('Total selected: ' + t + ' / ' + pool + (over ? '  — too many!' : ''))
+                .css('color', over ? '#FF8080' : '');
+            refreshAddState();
+        }
+        manualSection.on("input change keyup", ".bombFlightInput", function () {
+            var v = parseInt($(this).val(), 10);
+            if (v > cap) $(this).val(cap);
+            if (v < 0 && $(this).val() !== "") $(this).val(0);
+            refreshManual();
+        });
+        refreshManual();
+
+        autoChk.on("change", function () {
+            if ($(this).is(":checked")) { autoSection.show(); manualSection.hide(); }
+            else { autoSection.hide(); manualSection.show(); refreshManual(); }
+        });
+
+        $(".confirmok", e).on("click", function () {
+            var sizes = [];
+            if (autoChk.is(":checked")) {
+                var total = parseInt(autoInput.val(), 10);
+                if (isNaN(total) || total < 1) total = 1;
+                if (total > pool) total = pool;
+                sizes = [total];   // server auto-splits this single total into <=cap flights
+            } else {
+                var t = manualTotal();
+                if (t > pool) { confirm.warning("That's more fighters than are available (" + pool + ")."); return; }
+                manualInputs.forEach(function (i) {
+                    var v = parseInt(i.val(), 10);
+                    if (!isNaN(v) && v > 0) sizes.push(Math.min(v, cap));
+                });
+                if (sizes.length === 0) { confirm.warning("Choose at least one fighter to launch."); return; }
+            }
+            $(".confirm").remove();
+            callback({ sizes: sizes });
+        });
+        $(".confirmcancel", e).on("click", function () { $(".confirm").remove(); });
+
+        e.appendTo("body").fadeIn(250);
+    },
+
     hangarDock: function hangarDock(flight) {
         if (!flight || !flight.flight) return;
         if (typeof window.findEligibleCarriersForDock !== 'function') return;
@@ -2907,7 +3073,12 @@ window.confirm = {
             if (!Array.isArray(flight.systems)) return 0;
             var n = 0;
             flight.systems.forEach(function (ftr) {
-                if (!shipManager.systems.isDestroyed(flight, ftr)) n++;
+                if (shipManager.systems.isDestroyed(flight, ftr)) return;
+                // Stage S (S-d): a CUT OFF integrated fighter lost its structure tether and
+                // can never land/reabsorb, so it isn't dockable — exclude it from the max
+                // dock count (the server also refuses to dock cut-off craft).
+                if (shipManager.criticals.isCutOffFighter(ftr)) return;
+                n++;
             });
             return n;
         }
@@ -3461,7 +3632,11 @@ window.confirm = {
             if (!Array.isArray(flight.systems)) return 0;
             var n = 0;
             flight.systems.forEach(function (ftr) {
-                if (!shipManager.systems.isDestroyed(flight, ftr)) n++;
+                if (shipManager.systems.isDestroyed(flight, ftr)) return;
+                // Stage S (S-d): cut-off integrated fighters can't dock — exclude them so
+                // the bulk-recover dialog's capacity math matches what the server accepts.
+                if (shipManager.criticals.isCutOffFighter(ftr)) return;
+                n++;
             });
             return n;
         }

@@ -335,13 +335,32 @@ window.webglScene = function () {
 
     webglScene.prototype.keyDown = function (event) {
         var action = window.Settings.matchEvent(event);
+        // Spacebar's defaults (page scroll, "clicking" the focused button) would
+        // fight the replay play/pause toggle — suppress them, but never while the
+        // user is typing in a form field.
+        if (action === "TogglePlayPause" && !isTypingTarget(event.target)) {
+            event.preventDefault();
+        }
         this.customEvent(action, { up: false });
     };
 
     webglScene.prototype.keyUp = function (event) {
         var action = window.Settings.matchEvent(event);
+        if (action === "TogglePlayPause" && !isTypingTarget(event.target)) {
+            event.preventDefault();
+        }
         this.customEvent(action, { up: true });
     };
+
+    // True when the key event originates from an editable field, so global
+    // shortcuts (e.g. spacebar play/pause) don't hijack normal typing.
+    function isTypingTarget(target) {
+        if (!target) {
+            return false;
+        }
+        var tag = (target.tagName || "").toUpperCase();
+        return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || target.isContentEditable;
+    }
 
     webglScene.prototype.mouseDown = function (event) {
         event.stopPropagation();

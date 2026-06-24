@@ -322,7 +322,9 @@ shipManager.systems = {
         var systems = Array();
 
         for (var i in ship.systems) {
-            if (ship.systems[i].location == location && ship.systems[i].name != "structure") systems.push(ship.systems[i]);
+            //hideInShipWindow: technical-only systems (e.g. InvulnerableThruster) are omitted from the
+            //icon grid. Purely cosmetic - thrust mechanics iterate ship.systems directly, not this list.
+            if (ship.systems[i].location == location && ship.systems[i].name != "structure" && !ship.systems[i].hideInShipWindow) systems.push(ship.systems[i]);
         }
 
         return systems;
@@ -451,7 +453,21 @@ shipManager.systems = {
     excludesDefaultShuttles: function excludesDefaultShuttles(hangar) {
         if (!hangar) return false;
         if (hangar.isCatapult || hangar.isRail || hangar.isLCVRail) return false;
-        return !!hangar.excludeFromDefaultShuttles;
+        if (hangar.excludeFromDefaultShuttles) return true;
+        //Mirror of the server: a per-bay fighter-class allow-list that doesn't
+        //permit any default-shuttle class steers default shuttles away, so the
+        //auto-fill never blocks the reserved fighter (e.g. Reska-only Suom bays).
+        //The full PHP subclass hierarchy isn't visible client-side, so match the
+        //known default-shuttle phpclasses by name.
+        var allowed = hangar.allowedFighterClasses;
+        if (Array.isArray(allowed) && allowed.length > 0) {
+            var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1 };
+            for (var i = 0; i < allowed.length; i++) {
+                if (shuttleClasses[allowed[i]]) return false;   //bay accepts a shuttle class, keep it in the pool
+            }
+            return true;
+        }
+        return false;
     },
 
     //Lowercased set of ship.fighters category keys (e.g. "light") that ride this
@@ -541,6 +557,180 @@ shipManager.systems = {
         return firstHangar;
     },
 
+    //Find a fighter-flight blueprint by phpclass from whatever client-side ship
+    //catalogue is populated. Two different catalogues exist depending on entry
+    //point — both are checked so the allow-list display works in BOTH contexts:
+    //  - In-game (game.php): window.staticShips, keyed faction -> phpclass ->
+    //    blueprint. A carrier's allowedFighterClasses are preloaded there even
+    //    when no such flight is deployed (game.php's Hangar preload loop).
+    //  - Lobby (gamelobby.php): window.staticShips is NOT populated; ships live
+    //    in gamedata.allShips[faction] as an array of Ship objects, loaded per
+    //    faction on demand. The carrier's faction is always already open (you're
+    //    looking at its ship window), so its reserved fighter is in the same
+    //    faction array.
+    //Returns the blueprint/Ship object or null when not yet loaded.
+    findFighterBlueprint: function findFighterBlueprint(phpclass) {
+        if (!phpclass) return null;
+        if (window.staticShips) {
+            for (var faction in window.staticShips) {
+                var bp = window.staticShips[faction] && window.staticShips[faction][phpclass];
+                if (bp) return bp;
+            }
+        }
+        if (window.gamedata && gamedata.allShips) {
+            for (var fac in gamedata.allShips) {
+                var list = gamedata.allShips[fac];
+                if (!Array.isArray(list)) continue;
+                for (var i = 0; i < list.length; i++) {
+                    if (list[i] && list[i].phpclass == phpclass) return list[i];
+                }
+            }
+        }
+        return null;
+    },
+
+    //Resolve a fighter-flight phpclass (e.g. "gaimReskaFighter") to a friendly
+    //display label. Prefer the sample fighter's own displayName ("Reska") — the
+    //craft inside the flight at systems[1], matching the server's
+    //getSampleFighter() and SystemInfo.js's flight-name display. Fall back to the
+    //flight's shipClass ("Reska Light flight") with a trailing " flight" stripped,
+    //then to the phpclass verbatim, so callers degrade gracefully whatever the
+    //blueprint shape (lobby Ship object: systems is an array; in-game JSON
+    //blueprint: systems is an object keyed by id).
+    //Used by the per-bay fighter-class allow-list display (Hangar systemInfo
+    //"Type:" line + the lobby ship-window fighter complement).
+    displayNameForFighterClass: function displayNameForFighterClass(phpclass) {
+        if (!phpclass) return "";
+        var bp = shipManager.systems.findFighterBlueprint(phpclass);
+        if (bp) {
+            //systems[1] is the sample craft in both shapes (object key "1" or
+            //array index 1). Guard the lazy getter / missing slot defensively.
+            var sample = bp.systems ? bp.systems[1] : null;
+            if (sample && sample.displayName) return String(sample.displayName);
+            if (bp.shipClass) return String(bp.shipClass).replace(/\s+flight$/i, "");
+        }
+        return phpclass;
+    },
+
+    //Friendly label for a bay's WHOLE allowedFighterClasses list. A single-class
+    //bay reads as that fighter's name ("Reska"). A multi-class bay would otherwise
+    //pick just the first class (misleading — it can hold the others too), so a
+    //known group of classes gets a collective name (e.g. the Orieni HK classes
+    //HkShiningLight + HkShiningStar → "Hunter-Killer"); any other multi-class set
+    //falls back to joining the individual display names with " / ". Keep the group
+    //table in sync with any new multi-class restricted bay.
+    displayNameForAllowedClasses: function displayNameForAllowedClasses(allowed) {
+        if (!Array.isArray(allowed) || allowed.length === 0) return "";
+        if (allowed.length === 1) return shipManager.systems.displayNameForFighterClass(allowed[0]);
+
+        //Named groups: an UNORDERED set of phpclasses → collective label. Matched
+        //when the bay's allow-list contains exactly the group's classes.
+        var groups = [
+            { classes: ["HkShiningLight", "HkShiningStar"], label: "Hunter-Killer" }
+        ];
+        for (var g = 0; g < groups.length; g++) {
+            var gc = groups[g].classes;
+            if (gc.length !== allowed.length) continue;
+            var allMatch = true;
+            for (var c = 0; c < gc.length; c++) {
+                if (allowed.indexOf(gc[c]) === -1) { allMatch = false; break; }
+            }
+            if (allMatch) return groups[g].label;
+        }
+
+        //Generic fallback: list each fighter's display name.
+        var names = [];
+        for (var i = 0; i < allowed.length; i++) {
+            var nm = shipManager.systems.displayNameForFighterClass(allowed[i]);
+            if (nm && names.indexOf(nm) === -1) names.push(nm);
+        }
+        return names.join(" / ");
+    },
+
+    //Classify a fighter-flight blueprint into a ship.fighters size category key
+    //("light"/"medium"/"heavy"/"ultralight" or an explicit hangarRequired).
+    //Mirrors the jinkinglimit classification in gamelobby.js checkChoices() so a
+    //reserved-fighter row lands on the same $fighters size slot the carrier
+    //declares (e.g. Reska jinkinglimit 10 -> "light", matching gaimSuom's
+    //fighters.light). Returns null when the class isn't loaded.
+    fighterSizeCategory: function fighterSizeCategory(phpclass) {
+        var bp = shipManager.systems.findFighterBlueprint(phpclass);
+        if (!bp) return null;
+        if (bp.hangarRequired && bp.hangarRequired != 'fighters') return String(bp.hangarRequired);
+        var jl = parseInt(bp.jinkinglimit || 0, 10);
+        if (jl >= 99) return 'ultralight';
+        if (jl >= 10) return 'light';
+        if (jl >= 8)  return 'medium';
+        if (jl >= 6)  return 'heavy';
+        return null;
+    },
+
+    //Per-bay fighter-class allow-list display (arch_hangar_class_allowlist): the
+    //reserved-fighter complement of a carrier, derived from its class-restricted
+    //hangars. Returns an array of {category, phpclass, displayName, count} where
+    //count is the bay's box capacity (1 box = 1 light/medium/heavy fighter; this
+    //display path doesn't carry ultralight/superheavy reservers today). Pure
+    //display: ship.fighters stays size-keyed and drives all accounting — this
+    //just lets the lobby ship window name the specific fighter a reserved bay
+    //will hold instead of the generic "N Light Fighters".
+    //Cheap pre-check: does this ship have ANY hangar bay with a non-empty
+    //allowedFighterClasses list? Restricted bays are rare in FV, so this lets the
+    //common case (no restricted bay) skip getReservedFighterComposition and its
+    //per-class blueprint lookups entirely. Result is memoised on the ship object
+    //(ships are rebuilt per faction-load, so the cache can't go stale) so a
+    //carrier's window can be reopened without re-walking systems each time.
+    shipHasRestrictedHangar: function shipHasRestrictedHangar(ship) {
+        if (!ship || !ship.systems) return false;
+        if (ship._hasRestrictedHangar !== undefined) return ship._hasRestrictedHangar;
+        var found = false;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (s && s.name == "hangar" && Array.isArray(s.allowedFighterClasses) && s.allowedFighterClasses.length > 0) {
+                found = true;
+                break;
+            }
+        }
+        ship._hasRestrictedHangar = found;
+        return found;
+    },
+
+    getReservedFighterComposition: function getReservedFighterComposition(ship) {
+        var rows = [];
+        if (!shipManager.systems.shipHasRestrictedHangar(ship)) return rows;
+        for (var i in ship.systems) {
+            var s = ship.systems[i];
+            if (!s || s.name != "hangar") continue;
+            if (s.isCatapult || s.isRail || s.isLCVRail || s.isShadowHangar) continue;
+            var allowed = s.allowedFighterClasses;
+            if (!Array.isArray(allowed) || allowed.length == 0) continue;
+            //One reserved row per bay. A single-class bay names that fighter (e.g.
+            //the Suom's Reska-only aft bay). A MULTI-class bay names the whole
+            //allowed set via displayNameForAllowedClasses (e.g. the Orieni Penitent's
+            //HK bays → "Hunter-Killer"), so the window doesn't misleadingly pick just
+            //one of the classes it can hold. The size category comes from the first
+            //class (a multi-class group shares one category — the HK pair is medium).
+            var phpclass = allowed[0];
+            var category = shipManager.systems.fighterSizeCategory(phpclass);
+            if (!category) continue;   //unknown size — leave the generic line intact
+            //Stable per-bay-shape merge key: identical multi-class bays (e.g. the
+            //Penitent's four HK arc bays) collapse to ONE window row. Using the
+            //sorted class list keeps the key independent of declaration order.
+            var mergeKey = allowed.slice().sort().join("+");
+            //A multi-class bay shows a standalone group label ("Hunter-Killer" →
+            //"24 Hunter-Killers"); the size descriptor is dropped because the group
+            //name already conveys the unit (and the underlying size is just a proxy
+            //slot). A single-class bay keeps the "N <Name> <Size> Fighters" format.
+            rows.push({
+                category: category,
+                phpclass: mergeKey,
+                displayName: shipManager.systems.displayNameForAllowedClasses(allowed),
+                count: parseInt(s.maxhealth || 0, 10),
+                isGroup: allowed.length > 1
+            });
+        }
+        return rows;
+    },
+
     //Display label for a ship's auto-populated default shuttle. Mirrors
     //HangarOps::factionShuttleClass on the server — extend this switch in
     //lockstep whenever a faction-specific default shuttle subclass is added
@@ -587,11 +777,13 @@ shipManager.systems = {
         var declaredMsw = parseInt(base["minesweeping shuttles"], 10) || 0;
         var declaredShuttle = parseInt(base["shuttles"], 10) || 0;
         var declaredCargo = parseInt(base["cargo shuttles"], 10) || 0;
-        var declaredMedical = parseInt(base["medical shuttles"], 10) || 0;                
+        var declaredMedical = parseInt(base["medical shuttles"], 10) || 0; 
+        var declaredLifeboats = parseInt(base["lifeboats"], 10) || 0;                           
         if (declaredMsw > 0) rows.push({ type: "Minesweeping Shuttles", count: declaredMsw });
         if (declaredShuttle > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: declaredShuttle });
         if (declaredCargo > 0) rows.push({ type: "Cargo Shuttles", count: declaredCargo });
-        if (declaredMedical > 0) rows.push({ type: "Medical Shuttles", count: declaredMedical });        
+        if (declaredMedical > 0) rows.push({ type: "Medical Shuttles", count: declaredMedical }); 
+        if (declaredLifeboats > 0) rows.push({ type: "Lifeboats", count: declaredLifeboats });                
 
         var pool = capacity - declared;
         if (pool <= 0) return rows;
@@ -648,7 +840,9 @@ shipManager.systems = {
         var hangars = [];
         for (var si in ship.systems) {
             var s = ship.systems[si];
-            if (s && s.name == "hangar" && !s.isCatapult) hangars.push(s);
+            //ShadowHangars (integrated-fighter bays) never hold default shuttles —
+            //excluded server-side in HangarOps too. Catapults already excluded here.
+            if (s && s.name == "hangar" && !s.isCatapult && !s.isShadowHangar) hangars.push(s);
         }
         if (hangars.length === 0) return [];
 
@@ -673,45 +867,64 @@ shipManager.systems = {
         var eligible = function (hgr) {
             return anyEligible ? !shipManager.systems.excludesDefaultShuttles(hgr) : true;
         };
-        var hasPrimary = false;
-        for (var h = 0; h < hangars.length; h++) {
-            if (eligible(hangars[h]) && parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
-        }
-
-        //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if the
-        //distribution set contains any explicitly shuttle-tagged bay (hangarType
-        //'shuttles'/'minesweeping shuttles' — e.g. Vree Xeecra/Xaarix/Vyreel's
-        //small shuttle bay next to big fighter bays), the default-shuttle pool
-        //prefers those bays only, so the fighter bays stay free. The general bays
-        //still get overflow once the shuttle bays fill.
+        //Shuttle-only narrowing (mirrors HangarOps::isShuttleOnlyHangar): if any
+        //eligible bay is explicitly shuttle-tagged (hangarType 'shuttles'/
+        //'minesweeping shuttles' — e.g. Vree Xeecra/Xaarix/Vyreel's small shuttle
+        //bay next to big fighter bays, or EA Babylon5's front shuttle bay), the
+        //default-shuttle pool prefers those bays only, so the fighter bays stay
+        //free. The general bays still get overflow once the shuttle bays fill.
+        //
+        //This narrowing takes PRECEDENCE over the primary-section narrowing
+        //below (mirrors HangarOps::distributionHangars): a dedicated shuttle bay
+        //wins the pool no matter which section it sits on, so Babylon5's
+        //front-section ('shuttles') bay isn't stranded by the location-0 fighter
+        //bay. The Vree/Kowart, whose shuttle-only bay is already on the primary,
+        //resolve to the same bay either way.
         var isShuttleOnly = function (hgr) {
             if (hgr.isCatapult || hgr.isRail) return false;
             var t = ("" + (hgr.hangarType || "")).toLowerCase().trim();
             return t === "shuttles" || t === "minesweeping shuttles";
         };
+        var hasShuttleOnly = false;
+        for (var sh = 0; sh < hangars.length; sh++) {
+            if (eligible(hangars[sh]) && isShuttleOnly(hangars[sh])) { hasShuttleOnly = true; break; }
+        }
+
+        //Primary-section narrowing only applies when there's no shuttle-only bay
+        //to claim the pool: prefer the location-0 hangars if the ship has any
+        //eligible ones, else every eligible hangar.
+        var hasPrimary = false;
+        if (!hasShuttleOnly) {
+            for (var h = 0; h < hangars.length; h++) {
+                if (eligible(hangars[h]) && parseInt(hangars[h].location, 10) === 0) { hasPrimary = true; break; }
+            }
+        }
         var inSet = function (hgr) {
             if (!eligible(hgr)) return false;
             return hasPrimary ? (parseInt(hgr.location, 10) === 0) : true;
         };
-        var hasShuttleOnly = false;
-        for (var sh = 0; sh < hangars.length; sh++) {
-            if (inSet(hangars[sh]) && isShuttleOnly(hangars[sh])) { hasShuttleOnly = true; break; }
-        }
 
         var per = [];
         for (var p = 0; p < hangars.length; p++) {
+            var isPref = hasShuttleOnly ? (eligible(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p]);
             per.push({
                 id: hangars[p].id,
                 max: parseInt(hangars[p].maxhealth, 10) || 0,
                 usage: 0,
                 rows: [],
                 excluded: !eligible(hangars[p]),
-                pref: hasShuttleOnly ? (inSet(hangars[p]) && isShuttleOnly(hangars[p])) : inSet(hangars[p])
+                pref: isPref,
+                //Overflow bays: eligible and NOT in the preferred distribution set
+                //(mirrors HangarOps::overflowHangars). The spillover spreads evenly
+                //across these once the preferred bays fill — e.g. Babylon5 Refit's
+                //4 spill shuttles → 2+2 across its two primary fighter bays.
+                overflow: eligible(hangars[p]) && !isPref
             });
         }
 
-        //Least-used hangar in the distribution set; overflow to any hangar with
-        //room (mirrors pickHangarForShuttle).
+        //Least-used hangar in the distribution set; once that's full, overflow to
+        //the LEAST-USED overflow bay so spillover spreads evenly (mirrors
+        //pickHangarForShuttle + overflowHangars).
         var pickIdx = function (flightSize) {
             var bestIdx = -1, bestUsage = Infinity;
             for (var i = 0; i < per.length; i++) {
@@ -720,22 +933,30 @@ shipManager.systems = {
                 if (per[i].usage < bestUsage) { bestUsage = per[i].usage; bestIdx = i; }
             }
             if (bestIdx !== -1) return bestIdx;
-            //Overflow: any hangar with room, but still skip excluded bays so a
-            //flagged hangar never receives shuttles even once the eligible ones
-            //fill (mirrors pickHangarForShuttle's guarded fallback loop).
+            //Overflow: least-used eligible non-pref bay (excluded bays never
+            //receive shuttles even once the preferred ones fill).
+            bestIdx = -1; bestUsage = Infinity;
             for (var j = 0; j < per.length; j++) {
-                if (per[j].excluded) continue;
-                if (per[j].max - per[j].usage >= flightSize) return j;
+                if (!per[j].overflow) continue;
+                if (per[j].max - per[j].usage < flightSize) continue;
+                if (per[j].usage < bestUsage) { bestUsage = per[j].usage; bestIdx = j; }
             }
-            return -1;
+            return bestIdx;
         };
 
         //Fair-share cap over the distribution-set hangars with room (mirrors
-        //fairShareCap): Infinity when only one remains so it takes the rest.
+        //fairShareCap): Infinity when only one remains so it takes the rest. Once
+        //the preferred set is full, fall through to the overflow bays so spillover
+        //also rounds out evenly.
         var fairCap = function (remaining) {
             var withRoom = 0;
             for (var i = 0; i < per.length; i++) {
                 if (per[i].pref && per[i].max - per[i].usage > 0) withRoom++;
+            }
+            if (withRoom === 0) {
+                for (var o = 0; o < per.length; o++) {
+                    if (per[o].overflow && per[o].max - per[o].usage > 0) withRoom++;
+                }
             }
             if (withRoom <= 1) return Infinity;
             return Math.ceil(remaining / withRoom);

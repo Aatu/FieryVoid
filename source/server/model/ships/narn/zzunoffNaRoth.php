@@ -32,7 +32,7 @@ class zzunoffNaRoth extends MediumShip{
         $this->addPrimarySystem(new CnC(6, 7, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 9, 2, 4));
         $this->addPrimarySystem(new Engine(5, 8, 0, 6, 4));
-		$this->addPrimarySystem(new Hangar(5, 1));
+		$this->addPrimarySystem(new Hangar(5, 1, 1));
 		$this->addPrimarySystem(new Thruster(5, 8, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(5, 8, 0, 3, 4));
 		

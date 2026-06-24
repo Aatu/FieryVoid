@@ -2,7 +2,8 @@
   <div class="modal-content ladder-modal-content">
     <span class="close-ladder">&times;</span>
     <h2>Online Ladder</h2>
-    
+    <p class="ladder-faq-link">You can learn about how the Online Ladder work <a href="/faq.php#ladder">here</a>.</p>
+
     <div class="ladder-flex-container">
         <div id="ladderStandingsPane" class="ladder-standings">
             <h3>Standings <div style="float:right;"><button id="btnRegisterLadder" class="btn-register-ladder" style="float:none;">Register for Ladder</button> <button id="btnRemoveAccount" class="btn-remove-account" style="float:none; margin-left: 10px; display: none;">Remove Account</button></div></h3>

@@ -13,6 +13,7 @@ class EskravatAM extends BaseShip{
         $this->shipSizeClass = 3;
         $this->isd = 2229;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>3);         
 
         $this->forwardDefense = 15;
         $this->sideDefense = 16;
@@ -41,7 +42,7 @@ class EskravatAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 13, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 4));
-        $this->addPrimarySystem(new Hangar(4, 3));
+        $this->addPrimarySystem(new Hangar(4, 3, 1));
         $this->addPrimarySystem(new ReloadRack(5, 9));
 
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));

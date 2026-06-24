@@ -254,11 +254,14 @@ window.gamedata = {
         }
     },
 
-    // Base team colours (sRGB 0-255), team 1..8. Teams 1-3 deliberately match the
-    // mine/enemy/ally colours used for participants so the two views stay consistent.
+    // Base team colours (sRGB 0-255), team 1..8. Teams 2-3 match the enemy/ally
+    // colours used for participants so the two views stay consistent. Team 1 uses
+    // CSS limegreen (== combat-log FIRE: "mine" green); note the participant
+    // "mine" ship-icon overlay in getShipOverlayColor is intentionally a lighter
+    // green ([160,250,100]) and is NOT kept in sync with this.
     teamBaseColors: [
-        [160, 250, 100], // 1 Green  (== "mine")
-        [255, 40, 40],   // 2 Red    (== "enemy")
+        [50, 205, 50],   // 1 Green  (CSS limegreen)
+        [255, 80, 80],   // 2 Red    (== "enemy")
         [51, 173, 255],  // 3 Blue   (== "ally")
         [255, 150, 40],  // 4 Orange
         [40, 230, 230],  // 5 Cyan
@@ -290,6 +293,40 @@ window.gamedata = {
             base[1] + (255 - base[1]) * lighten,
             base[2] + (255 - base[2]) * lighten
         ];
+    },
+
+    // Raw team colours are tuned for the 3D sprite overlays and read as too
+    // bright/neon against the dark IniGUI panel — noticeably richer than the
+    // muted CSS participant colours (green/#6091d2/red, #2ea86b/#6d95c5/#c65d4a).
+    // Darken them toward black for IniGUI use only, leaving sprites/combat log
+    // on the full-strength palette. Returns integer sRGB [r,g,b].
+    INI_TEAM_DARKEN: 0.65,
+    getIniTeamColorRGB: function getIniTeamColorRGB(team) {
+        var rgb = gamedata.getTeamColorRGB(team);
+        var f = gamedata.INI_TEAM_DARKEN;
+        return [
+            Math.round(rgb[0] * f),
+            Math.round(rgb[1] * f),
+            Math.round(rgb[2] * f)
+        ];
+    },
+
+    // Inline style for an observer's "active mover" IniGUI box, derived from the
+    // ship's team colour. Mirrors the .iniActive* CSS (border + translucent fill +
+    // glow) but keyed on team instead of mine/ally/enemy.
+    getIniActiveTeamStyle: function getIniActiveTeamStyle(team) {
+        var rgb = gamedata.getIniTeamColorRGB(team);
+        var r = rgb[0];
+        var g = rgb[1];
+        var b = rgb[2];
+        // Dark, desaturated fill (~22% of the team colour) so the team-coloured
+        // text stays readable, matching the dim backgrounds the class versions use.
+        var fillR = Math.round(r * 0.22);
+        var fillG = Math.round(g * 0.22);
+        var fillB = Math.round(b * 0.22);
+        return "border:1px solid rgb(" + r + "," + g + "," + b + ") !important;"
+            + "background-color:rgba(" + fillR + "," + fillG + "," + fillB + ",0.9) !important;"
+            + "box-shadow:0px 0px 3px rgb(" + r + "," + g + "," + b + ");";
     },
 
     // Linear-space THREE.Color version of getTeamColorRGB, ready for sprite overlays.
@@ -335,6 +372,60 @@ window.gamedata = {
         shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
         window.webglScene.receiveGamedata(this);
+    },
+
+    //True if a docked hangarUsage entry is a faction-default shuttle (Shuttle
+    //subclass / Flyer / MinesweepingShuttle) rather than a real fighter. Mirrors
+    //HangarOps::isDefaultShuttleClass + the shuttle-pool hangarTypes the server
+    //seats default shuttles under (populateInitialHangarUsage). The full PHP
+    //subclass hierarchy isn't visible client-side, so match the known default
+    //shuttle phpclasses by name (same set as systems.js excludesDefaultShuttles)
+    //and the default-shuttle pool hangarTypes.
+    isDefaultShuttleEntry: function isDefaultShuttleEntry(entry) {
+        if (!entry) return false;
+        var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1, "lifeboats":1 };
+        if (entry.phpclass && shuttleClasses[entry.phpclass]) return true;
+        var t = String(entry.hangarType || "").toLowerCase().trim();
+        if (t === "shuttles" || t === "minesweeping shuttles") return true;
+        return false;
+    },
+
+    //Firing-phase commit warning: true if this carrier still has launchable
+    //(non-default-shuttle) fighters sitting in a hangar that has launch capacity
+    //left this turn AND no launch already ordered on that bay. Mirrors the launch
+    //gate in shipTooltipFireMenu.js hasLaunchableHangar (catapult/rail/ShadowHangar
+    //handling, cannotLaunch wrecks, output budget) but additionally excludes
+    //default shuttles and bays the player has already queued a launch on.
+    shipHasUnlaunchedFighters: function shipHasUnlaunchedFighters(ship) {
+        if (!ship || !ship.systems) return false;
+        for (var i in ship.systems) {
+            var sys = ship.systems[i];
+            if (!sys) continue;
+            var isCat = !!(sys.isCatapult || sys.name === 'catapult');
+            if (sys.name !== 'hangar' && sys.name !== 'fighterRail' && !isCat) continue;
+            //ShadowHangars launch only via the Fighter Bomb weapon — not the launch dialog.
+            if (sys.isShadowHangar) continue;
+            if (shipManager.systems.isDestroyed(ship, sys)) continue;
+            if (!Array.isArray(sys.hangarUsage) || sys.hangarUsage.length === 0) continue;
+
+            //Any launchable craft that ISN'T a default shuttle?
+            var hasRealFighter = sys.hangarUsage.some(function (e) {
+                return e && !e.cannotLaunch && !gamedata.isDefaultShuttleEntry(e);
+            });
+            if (!hasRealFighter) continue;
+
+            //A launch already ordered on this bay means the player IS launching here.
+            if (Array.isArray(sys.pendingLaunchOrders) && sys.pendingLaunchOrders.length > 0) continue;
+
+            //Catapults launch regardless of output budget; ordinary hangars/rails
+            //need remaining launch+land budget this turn.
+            if (isCat) return true;
+            var output = parseInt(sys.output || 0, 10);
+            var used = parseInt(sys.launchedThisTurn || 0, 10) + parseInt(sys.landedThisTurn || 0, 10);
+            if (used >= output) continue;
+            return true;
+        }
+        return false;
     },
 
     onCommitClicked: function onCommitClicked(e) {
@@ -417,7 +508,7 @@ window.gamedata = {
                     }
                 }
             }
-            confirm.confirm(html + "<br>Are you sure you wish to commit your orders?", gamedata.doCommit);
+            confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to commit your orders?</span>', gamedata.doCommit);
 
 
             // CHECK for NO EW
@@ -465,7 +556,8 @@ window.gamedata = {
                                 }
                             }
                         } else if (myShips[ship].systems[syst].name == "adaptiveArmorController") {
-                            if (myShips[ship].systems[syst].canIncreaseAnything()) {
+                            if (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[syst])
+                                && myShips[ship].systems[syst].canIncreaseAnything(myShips[ship])) {
                                 notSetAA.push(myShips[ship]);
                             }
                         } else if (myShips[ship].systems[syst].name == "hyachComputer") {
@@ -548,7 +640,9 @@ window.gamedata = {
                                             hasReadyLaunchers = true;
                                         }
                                     } else if (currWeapon.name == "adaptiveArmorController") {
-                                        if (currWeapon.canIncreaseAnything()) {
+                                        //skip destroyed fighters - their unlocked AA can never be allocated
+                                        if (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i])
+                                            && currWeapon.canIncreaseAnything(myShips[ship])) {
                                             didNotSetAA = true;
                                         }
                                     }
@@ -674,7 +768,7 @@ window.gamedata = {
                 }
                 html += "<br>";
             }
-            confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR INITIAL ORDERS?", gamedata.doCommit);
+            confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR INITIAL ORDERS?</span>', gamedata.doCommit);
         }
 
         else if (gamedata.gamephase == 2) {
@@ -704,7 +798,7 @@ window.gamedata = {
             UI.shipMovement.hide();
 
             confirm.confirm(
-                html + "<br>Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?",
+                html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR MOVEMENT ORDERS?</span>',
                 gamedata.doCommit,
                 function () {
                     UI.shipMovement.show();
@@ -789,7 +883,7 @@ window.gamedata = {
             }
 
             if (hasNoFO.length == 0 && hasSplitFO.length == 0) { //Has no ships with no fireOrders at all.
-                confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
                 if (hasNoFO.length > 0) {
@@ -811,7 +905,7 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
-                confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+                confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             }
         } else if (gamedata.gamephase == 3) {
             var myShips = [];
@@ -832,11 +926,19 @@ window.gamedata = {
 
             var hasNoFO = [];
             var hasSplitFO = [];
+            var notLaunchedFighters = []; //carriers with unlaunched non-shuttle fighters + launch capacity
 
             for (var ship in myShips) {
                 var fired = 0;
                 var hasReadyGuns = false;
                 var hasShotsLeft = false; //For split shot weapons that might not have used al their shots.
+
+                //Warn if this carrier still has launchable fighters (NOT default
+                //shuttles) sitting in a hangar with launch capacity left this turn.
+                if (gamedata.shipHasUnlaunchedFighters(myShips[ship])) {
+                    notLaunchedFighters.push(myShips[ship]);
+                }
+
                 if (!myShips[ship].flight) {
                     for (var i = 0; i < myShips[ship].systems.length; i++) {
                         var currWeapon = myShips[ship].systems[i];
@@ -890,8 +992,8 @@ window.gamedata = {
                 }
             }
 
-            if (hasNoFO.length == 0 && hasSplitFO.length == 0) { //Has no ships with no fireOrders at all.
-                confirm.confirm("Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
+            if (hasNoFO.length == 0 && hasSplitFO.length == 0 && notLaunchedFighters.length == 0) { //No warnings at all.
+                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
                 if (hasNoFO.length > 0) {
@@ -913,9 +1015,21 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
+                if (notLaunchedFighters.length > 0) {
+                    if (html != '') html += "<br>";
+                    //Cobalt-blue header (matches the launch/dock confirm windows' #58c7e6)
+                    //so this warning reads as part of the hangar-operations family.
+                    html += '<span style="color:#58c7e6; ">';
+                    html += "The following ships have not launched fighters:";
+                    html += '</span><br>';
+                    for (var ship in notLaunchedFighters) {
+                        html += '<span class="ship-name">' + notLaunchedFighters[ship].name + ' (' + notLaunchedFighters[ship].shipClass + ')</span>';
+                        html += "<br>";
+                    }
+                }
                 //confirm.confirm(html + "<br>Are you sure you wish to COMMIT YOUR FIRE ORDERS?", gamedata.doCommit);
                 confirm.confirm(
-                    html + "<br>Are you sure you wish to COMMIT YOUR FIRING ORDERS?",
+                    html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRING ORDERS?</span>',
                     gamedata.doCommit,
                     function () {
                         UI.shipMovement.show(); //To show combat pivot UI again on Cancel
@@ -923,14 +1037,14 @@ window.gamedata = {
                 );
             }
         } else if (gamedata.gamephase != 4) {
-            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
+            confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR TURN?</span>', gamedata.doCommit);
             //            if (window.helper.autocomm!=true) {
             //	            confirm.confirm("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit);
             //            } else {
             //            	gamedata.doCommit();
             //            }	
         } else {
-            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
+            confirm.confirmOrSurrender('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR TURN?</span>', gamedata.doCommit, gamedata.onSurrenderClicked);
             //            if (window.helper.autocomm!=true) {
             //	            confirm.confirmOrSurrender("Are you sure you wish to COMMIT YOUR TURN?", gamedata.doCommit, gamedata.onSurrenderClicked);
             //            } else {
@@ -1600,11 +1714,12 @@ getActiveShipName: function getActiveShipName() {
             //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
             // Observers (not in the game) colour the initiative number by team
-            // instead of the mine/ally/enemy scheme.
+            // instead of the mine/ally/enemy scheme. Use the IniGUI-darkened
+            // palette so it isn't brighter than the muted CSS participant colours.
             var teamColorCss = "";
             if (!gamedata.isPlayerInGame()) {
-                var iniRgb = gamedata.getTeamColorRGB(ships[i].team);
-                teamColorCss = "color:rgb(" + Math.round(iniRgb[0]) + "," + Math.round(iniRgb[1]) + "," + Math.round(iniRgb[2]) + ");";
+                var iniRgb = gamedata.getIniTeamColorRGB(ships[i].team);
+                teamColorCss = "color:rgb(" + iniRgb[0] + "," + iniRgb[1] + "," + iniRgb[2] + ");";
             }
 
             var td = document.createElement("td");
@@ -1632,7 +1747,11 @@ getActiveShipName: function getActiveShipName() {
 
             var active = window.SimultaneousMovementRule.isActiveMovementShip(ships[i]);
             if (active !== null) {
-                if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
+                if (active === true && teamColorCss) {
+                    // Observers: style the active-mover box from the ship's team colour
+                    // instead of the mine/ally/enemy iniActive* classes.
+                    td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                } else if (active === true && gamedata.isMyShip(ships[i]) && shipManager.movement.isMovementReady(ships[i]) && shipManager.movement.hasDeletableMovements(ships[i])) {
                     td.classList.add("iniActiveMoved");
                 } else if (active === true && gamedata.isMyShip(ships[i])) {
                     td.classList.add("iniActive");
@@ -1643,7 +1762,11 @@ getActiveShipName: function getActiveShipName() {
                 }
             } else {
                 if (gamedata.getActiveShips().includes(ships[i])) {
-                    td.classList.add(gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy");
+                    if (teamColorCss) {
+                        td.style.cssText += gamedata.getIniActiveTeamStyle(ships[i].team);
+                    } else {
+                        td.classList.add(gamedata.isMyShip(ships[i]) ? "iniActive" : "iniActiveEnemy");
+                    }
                 }
             }
 
@@ -1803,6 +1926,7 @@ getActiveShipName: function getActiveShipName() {
         gamedata.gameid = serverdata.id;
         gamedata.slots = serverdata.slots;
         gamedata.rules = serverdata.rules;
+        gamedata.name = serverdata.name;
         gamedata.description = serverdata.description;
 
         if (!gamedata.replay) {

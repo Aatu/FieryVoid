@@ -34,7 +34,7 @@ class Poseidon extends BaseShip{
 		$this->addPrimarySystem(new FlagBridge(6, 24, 0, 1, 'EA Command Bonus', 60,  true, true, true, false, array("Earth Alliance", "Earth Alliance (Early)")));				
 		$this->addPrimarySystem(new Scanner(5, 20, 3, 8));
 		$this->addPrimarySystem(new Engine(6, 25, 0, 12, 3));
-		$this->addPrimarySystem(new Hangar(5, 2));
+		$this->addPrimarySystem(new Hangar(5, 4, 2));
 		$this->addPrimarySystem(new Jumpengine(5, 20, 4, 24));
 
 		$this->addFrontSystem(new MediumPulse(3, 6, 3, 240, 0));
@@ -60,10 +60,10 @@ class Poseidon extends BaseShip{
 		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 300));
 		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 180, 360));
 		$this->addLeftSystem(new InterceptorMkII(2, 4, 2, 240, 360));
-		$this->addLeftSystem(new Hangar(4, 12));
-		$this->addLeftSystem(new Hangar(4, 12));	
-		$this->addLeftSystem(new Hangar(4, 12));	
-		$this->addLeftSystem(new Hangar(4, 12));											
+		$this->addLeftSystem(new Hangar(4, 12, 12, 5));
+		$this->addLeftSystem(new Hangar(4, 12, 12, 5));	
+		$this->addLeftSystem(new Hangar(4, 12, 12, 4));	
+		$this->addLeftSystem(new Hangar(4, 12, 12, 4));											
 
 		$this->addRightSystem(new Thruster(3, 20, 0, 5, 4));
 		$this->addRightSystem(new StdParticleBeam(2, 4, 1, 0, 180));
@@ -71,10 +71,10 @@ class Poseidon extends BaseShip{
 		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 60, 180));
 		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 180));
 		$this->addRightSystem(new InterceptorMkII(2, 4, 2, 0, 120));
-		$this->addRightSystem(new Hangar(4, 12));
-		$this->addRightSystem(new Hangar(4, 12));	
-		$this->addRightSystem(new Hangar(4, 12));	
-		$this->addRightSystem(new Hangar(4, 12));	
+		$this->addRightSystem(new Hangar(4, 12, 12, 1));
+		$this->addRightSystem(new Hangar(4, 12, 12, 1));	
+		$this->addRightSystem(new Hangar(4, 12, 12, 2));	
+		$this->addRightSystem(new Hangar(4, 12, 12, 2));	
 		
 
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

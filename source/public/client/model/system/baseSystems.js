@@ -326,6 +326,22 @@ Hangar.prototype.refreshHangarTooltip = function () {
 	if (!this.data) this.data = {};
 	if (!Array.isArray(this.hangarUsage)) this.hangarUsage = [];
 
+	// Per-bay fighter-class allow-list (arch_hangar_class_allowlist): a bay that
+	// declares allowedFighterClasses accepts ONLY those phpclasses, so its
+	// systemInfo "Type:" line should name that specific fighter rather than the
+	// generic "Fighters". The server stamps data["Type"] = ucwords(hangarType)
+	// on the static blueprint (setSystemDataWindow); we override it here client-
+	// side because data[] isn't transmitted live and this is where the rest of
+	// the hangar's live data is recomputed. LCV rails / catapults keep their own
+	// Type (they don't carry FighterFlights with this restriction).
+	if (!this.isLCVRail && Array.isArray(this.allowedFighterClasses) && this.allowedFighterClasses.length > 0
+		&& window.shipManager && shipManager.systems && shipManager.systems.displayNameForAllowedClasses) {
+		//A multi-class bay shows its collective group name ("Hunter-Killer") rather
+		//than listing each class, matching the lobby ship-window complement line.
+		var allowedLabel = shipManager.systems.displayNameForAllowedClasses(this.allowedFighterClasses);
+		if (allowedLabel) this.data["Type"] = allowedLabel;
+	}
+
 	// Hangar boxes a single stored craft occupies. A unitSize<1 craft (Vorlon
 	// Assault Fighter et al.) needs more than one box each; a unitSize>1 ultralight
 	// (Zorth) packs several per box and costs a FRACTIONAL 1/unitSize boxes (0.5).
@@ -473,6 +489,51 @@ Hangar.prototype.refreshHangarTooltip = function () {
 			totalStored = Math.max(0, totalStored - launchSize * launchBpc);
 			if (!launchByClass[lphpclass]) launchByClass[lphpclass] = { name: launchDisplayName, count: 0 };
 			launchByClass[lphpclass].count += launchSize;
+		}
+	}
+
+	// Stage S (S-f): a ShadowHangar launches ONLY via the Fighter Bomb weapon, which
+	// creates a normal WEAPON fire order (not a pendingLaunchOrder), so the projection
+	// above never sees it. Detect a same-turn ShadowFighterBomb fire order on this ship
+	// and feed its launch count into launchByClass — that reuses the exact "(Launching)"
+	// machinery (capacity subtraction + the rendered line) ordinary hangars use.
+	if (this.isShadowHangar && this.ship && Array.isArray(this.ship.systems)) {
+		var bombLaunching = 0;
+		//Multi-bay (shadowRegenBaseBomb): count ONLY the Fighter Bomb that serves THIS bay
+		//(its bombHangarIndex == this bay's bombGroupIndex). Single-bay hull: bays/bombs
+		//carry no index, so every ShadowFighterBomb order counts (matches null == null).
+		var thisBayIndex = (this.bombGroupIndex !== undefined && this.bombGroupIndex !== null)
+			? parseInt(this.bombGroupIndex, 10) : null;
+		for (var bsi = 0; bsi < this.ship.systems.length; bsi++) {
+			var bsys = this.ship.systems[bsi];
+			if (!bsys || bsys.name !== 'ShadowFighterBomb' || !Array.isArray(bsys.fireOrders)) continue;
+			var bombIndex = (bsys.bombHangarIndex !== undefined && bsys.bombHangarIndex !== null)
+				? parseInt(bsys.bombHangarIndex, 10) : null;
+			if (thisBayIndex !== bombIndex) continue;   //a bomb only feeds its own bay's line
+			for (var bfi = 0; bfi < bsys.fireOrders.length; bfi++) {
+				var bfo = bsys.fireOrders[bfi];
+				if (!bfo) continue;
+				if (bfo.turn != null && gamedata && bfo.turn != gamedata.turn) continue;
+				bombLaunching += Math.max(0, parseInt(bfo.shots || 0, 10));
+			}
+		}
+		if (bombLaunching > 0) {
+			//Held integrated fighters are flightSize-1 ShadowMediumFighterFlights → 1 box each.
+			var bombName = 'Integrated Fighter';
+			for (var bhi = 0; bhi < this.hangarUsage.length; bhi++) {
+				if (this.hangarUsage[bhi] && this.hangarUsage[bhi].phpclass === 'ShadowMediumFighterFlight') {
+					bombName = this.hangarUsage[bhi].name || bombName;
+					break;
+				}
+			}
+			//Don't show more launching than is actually held in THIS bay (the bomb pool
+			//spans all the ship's ShadowHangars; clamp the per-bay line to this bay's stock).
+			var bombShown = Math.min(bombLaunching, Math.ceil(totalStored));
+			if (bombShown > 0) {
+				totalStored = Math.max(0, totalStored - bombShown);
+				if (!launchByClass['ShadowMediumFighterFlight']) launchByClass['ShadowMediumFighterFlight'] = { name: bombName, count: 0 };
+				launchByClass['ShadowMediumFighterFlight'].count += bombShown;
+			}
 		}
 	}
 
@@ -719,6 +780,16 @@ var FighterRail = function FighterRail(json, ship) {
 };
 FighterRail.prototype = Object.create(Hangar.prototype);
 FighterRail.prototype.constructor = FighterRail;
+
+// Shadow integrated-fighter hangar (B5W "integrated fighters", FV Stage S): NO
+// client subclass. Unlike Catapult/FighterRail/DockingCollar, a ShadowHangar
+// keeps the base Hangar's $name = 'hangar' server-side so it still flows through
+// the standard fighter launch/dock/recover UI (every helper gates on
+// name === 'hangar'). systemFactory therefore instantiates a plain `Hangar`; the
+// isShadowHangar discriminator round-trips as a DATA property via the server's
+// Hangar::stripForJson and is read off the live Hangar instance where needed
+// (e.g. systems.js shuttle-pool exclusion). Crit-immunity is server-authoritative
+// (ShadowHangar::testCritical), so the client needs no behaviour here.
 
 var CargoBay = function CargoBay(json, ship) {
 	ShipSystem.call(this, json, ship);
@@ -1294,17 +1365,72 @@ AdaptiveArmorController.prototype.doIndividualNotesTransfer = function () { //pr
 	}
 	return true;
 };
-AdaptiveArmorController.prototype.canIncreaseAnything = function () { //returns true if any AA points can currently be allocated
+//Returns the list of damage types the player can actually act on for this controller:
+//unlocked types (availableAA) that are still carried by a currently-alive board unit
+//(or are already allocated/changed this turn). This is the SINGLE SOURCE OF TRUTH for both
+//the AA UI rows and the commit-time "unassigned AA" warning, so the two can never disagree.
+//`ship` is the owning unit (flight for fighter ACs), used only for friendly-fire filtering.
+AdaptiveArmorController.prototype.getRelevantArmorTypes = function (ship) {
+	if (!this.availableAA) return [];
+	ship = ship || this.ship;
+
+	var friendlyFire = gamedata.rules && gamedata.rules.friendlyFire === 1;
+	var relevantTypes = {};
+
+	//always include types we already allocated or changed this turn (player must keep seeing them)
+	for (var t in this.allocatedAA) {
+		if (this.allocatedAA[t] > 0) relevantTypes[t] = true;
+	}
+	for (var c in this.currchangedAA) {
+		if (this.currchangedAA[c] !== 0) relevantTypes[c] = true;
+	}
+
+	var collectWeaponClasses = function (sys) {
+		if (sys && sys.weaponClass) relevantTypes[sys.weaponClass] = true;
+	};
+
+	for (var i in gamedata.ships) {
+		var otherShip = gamedata.ships[i];
+		if (shipManager.isDestroyed(otherShip)) continue;
+		//if friendly fire is off, only enemy weapons can ever hit us - skip friendlies
+		if (!friendlyFire && ship && !gamedata.isEnemy(ship, otherShip)) continue;
+
+		if (otherShip.flight) {
+			for (var iFtr = 0; iFtr < otherShip.systems.length; iFtr++) {
+				var ftr = otherShip.systems[iFtr];
+				if (ftr) for (var iSys = 0; iSys < ftr.systems.length; iSys++) {
+					collectWeaponClasses(ftr.systems[iSys]);
+				}
+			}
+		} else {
+			for (var iSys2 = 0; iSys2 < otherShip.systems.length; iSys2++) {
+				collectWeaponClasses(otherShip.systems[iSys2]);
+			}
+		}
+	}
+
+	var result = [];
+	for (var type in this.availableAA) {
+		if (relevantTypes[type]) result.push(type);
+	}
+	result.sort();
+	return result;
+};
+
+AdaptiveArmorController.prototype.canIncreaseAnything = function (ship) { //returns true if any AA points can currently be allocated
+	//only consider types the player can actually act on (visible in the UI); otherwise the
+	//commit warning fires for unlocked-but-unreachable types and can never be cleared.
+	var relevantTypes = this.getRelevantArmorTypes(ship);
+	var savedCurrClass = this.currClass; //don't disturb the displayed selection
 	var toReturn = false;
-	var startingFrom = this.getCurrClass(); //so we know where we should stop checking
-	var lookingAt = startingFrom;
-	do {
+	for (var i = 0; i < relevantTypes.length; i++) {
+		this.setCurrDmgType(relevantTypes[i]);
 		if (this.canIncrease()) {
 			toReturn = true;
-		} else {
-			lookingAt = this.nextCurrClass();
+			break;
 		}
-	} while ((toReturn != true) && (lookingAt != startingFrom));
+	}
+	this.currClass = savedCurrClass;
 	return toReturn;
 };//endof AA Controller
 

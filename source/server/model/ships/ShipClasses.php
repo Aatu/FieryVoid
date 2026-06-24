@@ -230,6 +230,12 @@ class BaseShip {
 			    if ($firstFighter){
 			    	$mod += -5* $firstFighter->hasCritical("tmpinidown", $gamedata->turn);
 					$mod += -50* $firstFighter->hasCritical("LaunchedThisTurn", $gamedata->turn);
+					//HK Jamming: disruption crits land on the flight's sample fighter (flights have no CnC).
+					//ReducedIniativeOneTurn is -10 (=-2 tabletop) each; the table stacks up to ×2 for -4.
+					$mod += -10* $firstFighter->hasCritical("ReducedIniativeOneTurn", $gamedata->turn);
+					$mod += -10* $firstFighter->hasCritical("ReducedIniative", $gamedata->turn);
+					//Uncontrolled = -3 tabletop ini for the lost-control turn (-15 in FV d100 units).
+					$mod += -15* $firstFighter->hasCritical("Uncontrolled", $gamedata->turn);
 			    }
 		    }
             if (!empty($this->attached)) $mod += -10;//Attached Pods get -10 to Iniative as if just launched.            
@@ -653,9 +659,22 @@ class BaseShip {
 		$strippedShip->pointCostEnh = $this->pointCostEnh;
 		
 		//unit enhancements
-		if($this->enhancementTooltip !== ''){ //enhancements exist!			
-			$strippedShip->enhancementTooltip = $this->enhancementTooltip; 
+		if($this->enhancementTooltip !== ''){ //enhancements exist!
+			$strippedShip->enhancementTooltip = $this->enhancementTooltip;
 			$strippedShip = Enhancements::addUnitEnhancementsForJSON($this, $strippedShip);//modifies $strippedShip  object
+		}
+
+		//Stage S (fleet-value attribution): for an integrated-fighter carrier, send the
+		//number of integrated fighters it BOUGHT and their per-craft CP cost. The carrier's
+		//enhValue covers all of them; the fleet list values LAUNCHED integrated fighters on
+		//their own flight rows, so it nets the launched ones off the carrier (and credits
+		//them back on dock). Held count is read client-side from the ShadowHangar hangarUsage.
+		if (HangarOps::shipHasShadowHangar($this)) {
+			list($intFtrCount, $intFtrPerCraft) = HangarOps::integratedFighterPurchase($this);
+			if ($intFtrCount > 0) {
+				$strippedShip->integratedFighterCount    = $intFtrCount;
+				$strippedShip->integratedFighterPerCraft = $intFtrPerCraft;
+			}
 		}
 
 		//Push Specialists updates to Ship variables when used
@@ -1435,15 +1454,24 @@ class BaseShip {
         
         public function getLastMovement(){
             $m = null;
-            
+
             if (!is_array($this->movement) || empty($this->movement))
                 return null;
-            
+
             foreach($this->movement as $elementKey => $move) {
                 $m = $move;
-            } 
-            
+            }
+
             return $m;
+        }
+
+        /* AutomatedMovement seam: describes how this unit should move when under server
+         * (non-player) control this turn. Default is straight-line 'drift'. Units with
+         * richer automated behaviour (future CPU ships; eventually Strategy-A seeking
+         * HKs) override this to return e.g. ['type'=>'seek','targetSize'=>..,'jink'=>2].
+         * Only consulted when AutomatedMovement::isUnderAutomatedControl() is true. */
+        public function getAutomatedMovementIntent($gamedata){
+            return array('type' => 'drift', 'jink' => 0);
         }
         
         public function getSpeed(){
@@ -1921,7 +1949,9 @@ class BaseShip {
     public function getOEWTargetNum($turn){
         $amount = 0;
         foreach ($this->EW as $EW){
-            if ( ($EW->type == "OEW" || ($EW->type == "CCEW" && $EW->amount>0)) && $EW->turn == $turn)
+            //JAM (Hunter-Killer Jamming) counts as OEW for the purpose of disrupting ELINT (DIST):
+            //each JAM allocation is a disruptable offensive-EW target slot, same as OEW.
+            if ( ($EW->type == "OEW" || $EW->type == "JAM" || ($EW->type == "CCEW" && $EW->amount>0)) && $EW->turn == $turn)
                 $amount++;
         }
 

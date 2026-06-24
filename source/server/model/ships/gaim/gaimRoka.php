@@ -38,8 +38,10 @@ class gaimRoka extends MediumShip{
         $this->addFrontSystem(new Thruster(3, 8, 0, 6, 1));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(2, 6, 2, 300, 180));
-        $this->addFrontSystem(new Hangar(0, 3, 3));
-        $this->addFrontSystem(new Hangar(0, 3, 3));
+        //$this->addFrontSystem(new Hangar(0, 3, 3));
+        //$this->addFrontSystem(new Hangar(0, 3, 3));
+		$this->addFrontSystem(new Hangar(0, 3, 3, 0, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay
+		$this->addFrontSystem(new Hangar(0, 3, 3, 0, 'fighters', array(), false, array('gaimReskaFighter'))); //Reska-only bay				
 		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new PacketTorpedo(3, 6, 5, 300, 60));
 		$this->addFrontSystem(new Bulkhead(0, 3));

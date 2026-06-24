@@ -45,7 +45,7 @@ class SagittariusAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 16, 3, 6));
         $this->addPrimarySystem(new Engine(5, 16, 0, 8, 3));
-        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
         $this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 

@@ -5,14 +5,15 @@ class genericArmedShuttle extends FighterFlight{
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
-		$this->pointCost = 24*6;
+		$this->pointCost = 20*6;
 		$this->faction = "Civilians";
         $this->phpclass = "genericArmedShuttle";
         $this->shipClass = "Armed Shuttles";
-		$this->imagePath = "img/ships/LlortLeteerum.png"; //more appropriate image needed
+		$this->imagePath = "img/ships/shuttle.png"; //more appropriate image needed
         $this->isd = 2160;
         
-		$this->notes = "Usually housed in common shuttle bays (not mentioned in FV). Most ships can take a pair if they have to.";
+		//$this->notes = "Usually housed in common shuttle bays (not mentioned in FV). Most ships can take a pair if they have to.";
+		Enhancements::nonstandardEnhancementSet($this, 'Shuttles');        
 		
         $this->forwardDefense = 8;
         $this->sideDefense = 10;
@@ -22,8 +23,9 @@ class genericArmedShuttle extends FighterFlight{
         $this->pivotcost = 2; //shuttles have pivot cost higher
         $this->turncost = 0.33;
         
-		$this->hangarRequired = 'assault shuttles'; //for fleet check
+		$this->hangarRequired = 'shuttles'; //for fleet check - draws from the default-shuttle pool
 		$this->iniativebonus = 9*5;
+		$this->dropOutBonus = 2;         
       
         $this->populate();
     }
@@ -38,8 +40,8 @@ class genericArmedShuttle extends FighterFlight{
 			$armour = array(1, 1, 1, 1);
 			$fighter = new Fighter("genericArmedShuttle", $armour, 10, $this->id);
 			$fighter->displayName = "Armed Shuttle";
-			$fighter->imagePath = "img/ships/LlortLeteerum.png";
-			$fighter->iconPath = "img/ships/LlortLeteerum_Large.png";
+			$fighter->imagePath = "img/ships/shuttle.png";
+			$fighter->iconPath = "img/ships/shuttle_large.png";
 			
 			
 			$fighter->addFrontSystem(new PairedParticleGun(330, 30, 2, 1)); //1 gun d6+2

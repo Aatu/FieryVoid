@@ -12,7 +12,8 @@ class Liner extends BaseShip{
         $this->shipSizeClass = 3;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
         $this->isd = 2247;
-        
+		$this->fighters = array("lifeboats"=>8);         
+
         $this->forwardDefense = 19;
         $this->sideDefense = 19;
         

@@ -18,10 +18,13 @@ window.ReplayUI = function () {
         + '        </div>\n'
         + '        <div class="replay-container replay-buttons">\n'
         + '            <button id="turnBack" title="Previous turn">❚◀</button>\n'
-        + '            <button id="back" title="Rewind">◀</button>\n'
-        + '            <button id="speed" title="Change speed"><span class="rate">1×</span></button>\n'          
-        + '            <button id="pause" title="Pause">❚❚</button>\n'
-        + '            <button id="play" title="Play">▶</button>\n'
+        + '            <button id="back" title="Rewind"><span class="glyph">◀</span></button>\n'
+        + '            <span class="speed-control">\n'
+        + '                <button id="slower" title="Slower">−</button>\n'
+        + '                <span class="rate">1×</span>\n'
+        + '                <button id="faster" title="Faster">+</button>\n'
+        + '            </span>\n'
+        + '            <button id="playPause" title="Play"><span class="glyph">▶</span></button>\n'
         + '            <button id="turnForward" title="Next turn">▶❚</button>\n'
         + '        </div>\n'
         + '        <div class="replay-container loading-indicator">\n'
@@ -36,10 +39,10 @@ window.ReplayUI = function () {
         if (!callbacks) {
             callbacks = {};
         }
-        this.play = callbacks.play || function () { };
+        this.playPause = callbacks.playPause || function () { };
         this.back = callbacks.back || function () { };
-        this.pause = callbacks.pause || function () { };
-        this.changeSpeed = callbacks.changeSpeed || function () { };
+        this.slower = callbacks.slower || function () { };
+        this.faster = callbacks.faster || function () { };
         this.turnForward = callbacks.turnForward || function () { };
         this.turnBack = callbacks.turnBack || function () { };
         this.endReplay = callbacks.endReplay || function () { };
@@ -60,10 +63,10 @@ window.ReplayUI = function () {
         $("#replayUI #activateReplay").on("click", this.startReplay.bind(this));
         $("#replayUI #deactivateReplay").on("click", this.endReplay);
 
-        jQuery("#replayUI #play").on("click", this.play);
-        jQuery("#replayUI #pause").on("click", this.pause);
+        jQuery("#replayUI #playPause").on("click", this.playPause);
         jQuery("#replayUI #back").on("click", this.back);
-        jQuery("#replayUI #speed").on("click", this.changeSpeed);
+        jQuery("#replayUI #slower").on("click", this.slower);
+        jQuery("#replayUI #faster").on("click", this.faster);
         jQuery("#replayUI #turnForward").on("click", this.turnForward);
         jQuery("#replayUI #turnBack").on("click", this.turnBack);
         jQuery("#replayUI #toMovement").on("click", this.toMovementPhase);
@@ -96,21 +99,35 @@ window.ReplayUI = function () {
         jQuery("#replayUI .selected-replay", this.element).html('Turn ' + turn);
     };
 
-    ReplayUI.prototype.activateButton = function (name) {
-        // Highlight only the transport buttons (play/pause/rewind). The speed
-        // button is a persistent setting, not a transport state, so it keeps
-        // its own active styling and is excluded from this reset.
-        jQuery(".replay-buttons button").not("#speed").removeClass("active");
-        jQuery(name).addClass("active");
+    // Pause appears in place of whichever direction is currently running: the
+    // active direction button swaps its glyph to ❚❚ (and acts as the pause
+    // control), while the other keeps its normal direction glyph. This is the
+    // single source of truth for both transport buttons' glyph, tooltip and
+    // active highlight; the strategy calls it on every play/pause/seek/done.
+    //   state: "forward" (playing forward), "rewind" (playing back), "paused".
+    ReplayUI.prototype.setTransportState = function (state) {
+        var rewind = jQuery("#replayUI #back", this.element);
+        var play = jQuery("#replayUI #playPause", this.element);
+
+        var rewinding = state === "rewind";
+        var forward = state === "forward";
+
+        jQuery(".glyph", rewind).text(rewinding ? "❚❚" : "◀");
+        rewind.attr("title", rewinding ? "Pause" : "Rewind");
+        rewind.toggleClass("active", rewinding);
+
+        jQuery(".glyph", play).text(forward ? "❚❚" : "▶");
+        play.attr("title", forward ? "Pause" : "Play");
+        play.toggleClass("active", forward);
     };
 
-    // Update the speed button's label to the current playback multiplier.
+    // Update the rate readout to the current playback multiplier.
     // Applies to whichever direction (play/rewind) is currently active.
     ReplayUI.prototype.setSpeed = function (multiplier) {
-        jQuery("#replayUI #speed .rate", this.element).text(multiplier + "×");
-        // Subtle highlight while running faster than normal so it's clear the
+        jQuery("#replayUI .rate", this.element).text(multiplier + "×");
+        // Subtle highlight while running off the default rate so it's clear the
         // setting is non-default.
-        jQuery("#replayUI #speed", this.element).toggleClass("active", multiplier !== 1);
+        jQuery("#replayUI .speed-control", this.element).toggleClass("active", multiplier !== 1);
     };
 
     return ReplayUI;

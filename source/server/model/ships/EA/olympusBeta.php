@@ -28,7 +28,7 @@ class OlympusBeta extends HeavyCombatVessel{
         $this->addPrimarySystem(new CnC(6, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 14, 4, 6));
         $this->addPrimarySystem(new Engine(5, 15, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(5, 2));
+        $this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 3));
         $this->addPrimarySystem(new Thruster(3, 13, 0, 5, 4));
         

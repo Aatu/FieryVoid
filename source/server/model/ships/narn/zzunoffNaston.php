@@ -11,7 +11,7 @@ class zzunoffNaSton extends BaseShip{
         $this->phpclass = "zzunoffNaSton";
         $this->imagePath = "img/ships/tloth.png";
         $this->shipClass = "Na'Ston Explorer";
-        //$this->fighters = array("normal"=>12);//12 cargo shuttles by default
+		$this->fighters = array("cargo shuttles"=>12); 
         
 
 	//$this->occurence = "rare";
@@ -38,7 +38,7 @@ class zzunoffNaSton extends BaseShip{
         $this->addPrimarySystem(new ElintScanner(5, 24, 6, 8));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 3));
 		$this->addPrimarySystem(new JumpEngine(5, 24, 3, 20));
-		$this->addPrimarySystem(new Hangar(5, 14));
+		$this->addPrimarySystem(new Hangar(5, 14, 12));
         $this->addPrimarySystem(new CargoBay(2, 50));
         
 	//fwd

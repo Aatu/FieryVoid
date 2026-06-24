@@ -150,6 +150,14 @@ window.shipManager.criticals = {
     //own row" — used by the fleet list to re-base a remnant's value past them.
     isSplitLaunchedFighter: function (fighter) {
         return Boolean(shipManager.criticals.hasCritical(fighter, "SplitLaunchedFighter"));
+    },
+
+    //Stage S (S-d): a Shadow integrated fighter SEVERED from its carrier — its
+    //structure-tether box was destroyed, so it can never land/reabsorb. UNLIKE the
+    //departed-to-own-row states above, a cut-off fighter is STILL ALIVE and fighting;
+    //it renders a persistent red "CUT OFF" marker (not gated on destroyed).
+    isCutOffFighter: function (fighter) {
+        return Boolean(shipManager.criticals.hasCritical(fighter, "ShadowFighterCutOff"));
     }
 
 };

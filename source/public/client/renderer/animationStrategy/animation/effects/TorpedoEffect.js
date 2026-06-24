@@ -103,6 +103,7 @@ window.TorpedoEffect = function () {
                 const launchSound = TorpedoEffect.cachedLaunchAudio.cloneNode(true);
                 launchSound.volume = this.soundVolume;
                 launchSound.currentTime = 0;
+                window.applyReplayPlaybackRate(launchSound);
                 launchSound.play().catch(() => { });
                 this.playedLaunchSound = true;
             } catch (e) {
@@ -117,6 +118,7 @@ window.TorpedoEffect = function () {
                 const explosionSound = TorpedoEffect.cachedExplosionAudio.cloneNode(true);
                 explosionSound.volume = this.soundVolume;
                 explosionSound.currentTime = 0;
+                window.applyReplayPlaybackRate(explosionSound);
                 explosionSound.play().catch(() => { });
                 this.playedImpactSound = true;
             } catch (e) {

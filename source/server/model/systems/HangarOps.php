@@ -51,10 +51,12 @@ class HangarOps {
 		//$ship->fighters keys (e.g. 'light') that ride this ship's rails.
 		$hasCatapult   = false;
 		$shuttleHangars = array();
+		$shadowHangars  = array();   //Stage S: integrated-fighter bays — filled from SHAD_FTRL enhCount, not the shuttle pool
 		foreach ($hangars as $h){
 			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
 			if (!empty($h->isRail))     { continue; }
 			if (!empty($h->isLCVRail))  { continue; }   //LCV rails hold whole LCVs, never default shuttles
+			if (!empty($h->isShadowHangar)) { $shadowHangars[] = $h; continue; }   //integrated-fighter bay — populated from enhCount below
 			$shuttleHangars[] = $h;
 		}
 		$railCategories = self::railFighterCategories($ship);
@@ -133,7 +135,19 @@ class HangarOps {
 			}
 		}
 
+		//Armed-shuttle purchases (FighterFlights with hangarRequired='shuttles' — the
+		//Kor-Lyan MerkulAM / MerkulArmedAM, genericArmedShuttle, etc.; NOT 'assault
+		//shuttles' / 'Breaching Pods', which own separate pools) are bought in fleet
+		//selection and deploy to space at turn 1 like any fighter — but the lobby's
+		//checkChoices() accounts for them against this same default-shuttle pool. So
+		//each bought armed shuttle must evict one default shuttle, or the carrier ends
+		//up with BOTH. The purchase is a fleet-wide total but this fill runs per-carrier;
+		//suppressDefaultShuttlesForArmed apportions the fleet-wide debt to THIS carrier's
+		//share (drained in ship order, matching the lobby's single-pool accounting).
+		//Over-purchase just empties the pool — the player's mistake is accepted, never
+		//going negative.
 		$leftover = $totalCapacity - $totalDeclared - $hangBpExtraDeclared;
+		$leftover -= self::suppressDefaultShuttlesForArmed($ship, $gamedata, $leftover);
 		if ($leftover > 0){
 			//Explicit "minesweeping shuttles" in $ship->fighters is the designer's
 			//authoritative MSW count — leftover falls through to the faction shuttle
@@ -199,6 +213,192 @@ class HangarOps {
 				$count -= $take;
 			}
 		}
+
+		//Step 3 (Stage S): integrated-fighter (ShadowHangar) bays start FULL of the
+		//fighters the carrier BOUGHT via the SHAD_FTRL enhancement. Unlike ordinary
+		//combat fighters (which auto-deploy to space at turn 1), integrated fighters
+		//are formed from the carrier's Structure and begin DOCKED in the ShadowHangar,
+		//launching through the normal HangarOps launch path. Each integrated fighter
+		//is ONE craft (a flightSize-1 ShadowMediumFighterFlight) so it can bind 1:1 to
+		//a structure box in later S-stages.
+		//
+		//enhCount is read directly off $ship->enhancementOptions (same as HANG_BP
+		//above) because Enhancements::setEnhancementsShip runs AFTER this load-time
+		//population. Capped at the bay's box capacity (= the hangar icon's fighter
+		//max); the lobby already limits SHAD_FTRL to ceil(capacity), so this is a
+		//server-side double-guard.
+		if (!empty($shadowHangars)) {
+			$shadFtrCount = 0;
+			if (isset($ship->enhancementOptions) && is_array($ship->enhancementOptions)) {
+				foreach ($ship->enhancementOptions as $opt) {
+					if (($opt[0] ?? '') === 'SHAD_FTRL') {
+						$shadFtrCount = max(0, (int)($opt[2] ?? 0));
+						break;
+					}
+				}
+			}
+			$remaining = $shadFtrCount;
+			$placed = 0;
+			foreach ($shadowHangars as $sh) {
+				if ($remaining <= 0) break;
+				$free = (int)$sh->maxhealth - self::occupiedBoxes($sh);
+				$take = min($remaining, max(0, $free));
+				for ($i = 0; $i < $take; $i++) {
+					$sh->hangarUsage[] = array(
+						'phpclass'   => 'ShadowMediumFighterFlight',
+						'name'       => 'Integrated Fighter',
+						'flightSize' => 1,
+						'hangarType' => $sh->hangarType,
+					);
+				}
+				$remaining -= $take;
+				$placed += $take;
+			}
+
+			//Stage S (S-d): seed the structure-coupling state on the PRIMARY ShadowHangar.
+			//Every placed integrated fighter starts ATTACHED (a marked structure box);
+			//none are cut off yet. This only runs at genuine game start (population is
+			//gated by $usagePopulated, which a mid-game reload sets from the hangarUsage
+			//note before we get here), so it never clobbers a persisted shadowIntegratedState.
+			if ($placed > 0) {
+				$primaryShadow = null;
+				foreach ($shadowHangars as $sh) { $primaryShadow = $sh; break; }
+				//Prefer the ship's true primary hangar if it's a ShadowHangar (matches the
+				//primary-only persistence in generateIndividualNotes); else the first bay.
+				$primary = self::primaryHangar($ship);
+				if ($primary instanceof Hangar && !empty($primary->isShadowHangar)) $primaryShadow = $primary;
+				if ($primaryShadow) {
+					$primaryShadow->shadowAttached = $placed;
+					$primaryShadow->shadowCutOff   = 0;
+				}
+			}
+		}
+	}
+
+	/* How many default-shuttle boxes to SUPPRESS on $ship because the player
+	 * bought armed shuttles (FighterFlights with hangarRequired='shuttles').
+	 *
+	 * The purchase is a fleet-wide total but populateInitialHangarUsage fills
+	 * each carrier independently, so we apportion the fleet debt to THIS carrier's
+	 * share using the lobby's single-pool model: conceptually one pool of all the
+	 * player's default-shuttle boxes, drained in $gamedata->ships order until the
+	 * bought-shuttle count is consumed. Computed order-independently (depends only
+	 * on the stable ship order, not on which carrier's population runs first) by
+	 * summing the leftover-box capacity of every earlier carrier (same userid+slot)
+	 * to find how much debt they already absorbed; this carrier covers the rest, up
+	 * to its own leftover. Over-purchase just empties this (and prior) pools.
+	 *
+	 * Only runs at genuine turn-1 game start: populateInitialHangarUsage is gated
+	 * by $usagePopulated, which a mid-game reload sets from the hangarUsage note
+	 * before this is reached. So every hangarRequired='shuttles' flight in the
+	 * fleet is a real purchase here — no in-game launched/docked flights exist yet.
+	 *
+	 * $thisCarrierLeftover is the pre-suppression leftover already computed by the
+	 * caller (capacity − declared − HANG_BP) — reused so this carrier's share never
+	 * exceeds it and the two stay in lockstep.
+	 */
+	public static function suppressDefaultShuttlesForArmed($ship, $gamedata, $thisCarrierLeftover){
+		if ($thisCarrierLeftover <= 0) return 0;
+		if (!$gamedata || !isset($gamedata->ships) || !is_array($gamedata->ships)) return 0;
+
+		//Total armed-shuttle BOXES this PLAYER bought (matched by userid+slot, same
+		//as the carrier the bought flights share). A flight holds flightSize craft,
+		//each of which evicts one default shuttle — so the pool cost is the craft
+		//count, not 1 per flight. Mirrors the lobby's flightSize/unitSize box math
+		//(checkChoices: totalFtrOther += flightSize/unitSize), ceil'd to whole boxes.
+		$boughtBoxes = 0;
+		foreach ($gamedata->ships as $other){
+			if (!($other instanceof FighterFlight)) continue;
+			if (!self::isArmedShuttleFlight($other)) continue;
+			if ((int)$other->userid !== (int)$ship->userid) continue;
+			if ((int)$other->slot   !== (int)$ship->slot)   continue;
+			$boughtBoxes += self::armedShuttleBoxesForFlight($other);
+		}
+		if ($boughtBoxes <= 0) return 0;
+
+		//Debt already absorbed by carriers EARLIER in ship order (same player+slot):
+		//each such carrier's full leftover pool is consumed before this one's.
+		$absorbedByEarlier = 0;
+		foreach ($gamedata->ships as $other){
+			if ($other === $ship) break;   //stop at this carrier — only EARLIER ones count
+			if (!($other instanceof BaseShip)) continue;
+			if ($other instanceof FighterFlight) continue;   //flights aren't carriers
+			if ((int)$other->userid !== (int)$ship->userid) continue;
+			if ((int)$other->slot   !== (int)$ship->slot)   continue;
+			$absorbedByEarlier += self::defaultShuttleLeftoverBoxes($other);
+		}
+
+		$remainingDebt = $boughtBoxes - $absorbedByEarlier;
+		if ($remainingDebt <= 0) return 0;
+		return min($remainingDebt, $thisCarrierLeftover);
+	}
+
+	/* True for a bought armed-shuttle flight: a FighterFlight whose
+	 * hangarRequired is the 'shuttles' pool (Kor-Lyan MerkulAM / MerkulArmedAM,
+	 * genericArmedShuttle, etc.). 'assault shuttles' and 'Breaching Pods' draw
+	 * from their OWN pools and are excluded. */
+	public static function isArmedShuttleFlight($flight){
+		if (!isset($flight->hangarRequired)) return false;
+		return strtolower(trim((string)$flight->hangarRequired)) === 'shuttles';
+	}
+
+	/* Default-shuttle BOXES a bought armed-shuttle flight consumes from the pool.
+	 * One box per craft in the flight (flightSize/unitSize, ceil'd) — mirrors the
+	 * lobby's checkChoices() shuttle accounting so server and lobby agree. unitSize<1
+	 * craft cost more than one box each; the usual shuttle unitSize is 1 (one craft
+	 * per box). Falls back to the actual Fighter-subsystem count if flightSize is
+	 * unset, and floors at 1 so a present flight always costs at least one box. */
+	public static function armedShuttleBoxesForFlight($flight){
+		$craft = isset($flight->flightSize) ? (int)$flight->flightSize : 0;
+		if ($craft <= 0 && isset($flight->systems) && is_array($flight->systems)){
+			$craft = count($flight->systems);
+		}
+		if ($craft <= 0) $craft = 1;
+		$unitSize = (isset($flight->unitSize) && $flight->unitSize > 0) ? (float)$flight->unitSize : 1.0;
+		return (int)ceil($craft / $unitSize);
+	}
+
+	/* Leftover default-shuttle box capacity for a carrier, computed exactly as
+	 * populateInitialHangarUsage's Step-2 leftover (capacity − declared − HANG_BP),
+	 * with the same catapult / rail / LCV-rail / ShadowHangar exclusions. Used to
+	 * size each earlier carrier's pool when apportioning the armed-shuttle debt.
+	 * (getDefaultShuttles() is similar but omits the HANG_BP subtraction, so it
+	 * can't be reused for an exact match here.) */
+	public static function defaultShuttleLeftoverBoxes($carrier){
+		$hasCatapult = false;
+		$capacity = 0;
+		foreach (self::collectHangars($carrier) as $h){
+			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
+			if (!empty($h->isRail))     { continue; }
+			if (!empty($h->isLCVRail))  { continue; }
+			if (!empty($h->isShadowHangar)) { continue; }
+			$capacity += (int)$h->maxhealth;
+		}
+		if ($capacity <= 0) return 0;
+
+		$railCategories = self::railFighterCategories($carrier);
+		$declared = 0;
+		if (isset($carrier->fighters) && is_array($carrier->fighters)){
+			foreach ($carrier->fighters as $category => $count){
+				if ($hasCatapult && strtolower(trim((string)$category)) === 'superheavy') continue;
+				if (isset($railCategories[strtolower(trim((string)$category))])) continue;
+				if (strtolower(trim((string)$category)) === 'lcvs') continue;
+				$declared += self::shuttlePoolBoxesFor($category, (int)$count);
+			}
+		}
+
+		$hangBpExtra = 0;
+		if (isset($carrier->enhancementOptions) && is_array($carrier->enhancementOptions)){
+			foreach ($carrier->enhancementOptions as $opt){
+				if (($opt[0] ?? '') === 'HANG_BP' && (int)($opt[2] ?? 0) > 0){
+					$hangBpExtra = (int)$opt[2];
+					break;
+				}
+			}
+		}
+
+		$leftover = $capacity - $declared - $hangBpExtra;
+		return $leftover > 0 ? $leftover : 0;
 	}
 
 	/* Hangar boxes consumed by a given ship->fighters declaration. Per
@@ -245,7 +445,9 @@ class HangarOps {
 				//count in $ship->fighters becomes that many auto-filled CargoShuttle
 				//records via step 1; leftover hangar boxes go to the faction shuttle
 				//(or MinesweepingShuttle for minesweeper-bonus carriers) instead.
-				return 'MedicalShuttle';				
+				return 'MedicalShuttle';
+			case 'lifeboats':
+				return 'Lifeboat';					
 			default:
 				return null;
 		}
@@ -299,7 +501,28 @@ class HangarOps {
 		'Usuuth Coalition'  => 'ShuttleUsuuth',	
 		'Vorlon Empire'  => 'ShuttleVorlons',									
 		'Vree Conglomerate'  => 'ShuttleVree',	
-		'Yolu Confederation'  => 'ShuttleYolu',								
+		'Yolu Confederation'  => 'ShuttleYolu',		
+		'Nexus Brixadii Clans (early)' => 'ShuttleBrixadiiEarly',
+		'Nexus Brixadii Clans' => 'ShuttleBrixadii',
+		'Nexus Dalithorn Commonwealth (early)' => 'ShuttleDalithornEarly',
+		'Nexus Dalithorn Commonwealth' => 'ShuttleDalithorn',
+		'Nexus Makar Federation (early)' => 'ShuttleMakarEarly',
+		'Nexus Makar Federation' => 'ShuttleMakar',
+		'Nexus Polaren Confederacy (early)' => 'ShuttlePolarenEarly',
+		'Nexus Polaren Confederacy' => 'ShuttlePolaren',
+		'Nexus Sal-bez Coalition (early)' => 'ShuttleSalbezEarly',
+		'Nexus Sal-bez Coalition' => 'ShuttleSalbez',
+		'Nexus Velrax Republic (early)' => 'ShuttleVelraxEarly',
+		'Nexus Velrax Republic' => 'ShuttleVelrax',
+		'Escalation Wars Chouka Theocracy' => 'ShuttleChouka',
+		'Escalation Wars Chouka Raider' => 'ShuttleChoukaRaider',
+		'Escalation Wars Circasian Empire' => 'ShuttleCircasian',
+		'Escalation Wars Kastan Monarchy' => 'ShuttleKastan',
+		'Escalation Wars Blood Sword Raiders' => 'ShuttleBloodSwords',
+		"Escalation Wars Sshel'ath Alliance" => 'ShuttleSshelath',
+		'Great Crusade Orieni Imperium'  => 'ShuttleGCOrieni',
+		'House Valheru' => 'ShuttleValheru',
+		'Barada Imperium' => 'ShuttleBarada',
 
 	);
 
@@ -416,34 +639,75 @@ class HangarOps {
 			}
 		}
 		if ($best !== null) return $best;
-		//Preferred set full — overflow to any remaining hangar in encounter
-		//order, but still skip $excludeFromDefaultShuttles bays so a flagged
-		//hangar never receives shuttles even once the eligible ones fill.
+		//Preferred set full — overflow to the LEAST-USED remaining eligible bay
+		//(see overflowHangars), so the spillover spreads evenly rather than
+		//piling into the first bay in encounter order. This is what turns the
+		//EA Babylon5 Refit's 4-shuttle overflow into 2+2 across its two primary
+		//fighter bays (8/2/2) instead of 4/0. Flagged ($excludeFromDefaultShuttles)
+		//bays are excluded from this set, so they never receive shuttles even once
+		//the eligible ones fill.
+		$best = null;
+		$bestUsage = PHP_INT_MAX;
+		foreach (self::overflowHangars($hangars) as $h){
+			if ((int)$h->maxhealth - self::occupiedBoxes($h) < $flightSize) continue;
+			$used = self::usageCountFor($h);
+			if ($used < $bestUsage){
+				$bestUsage = $used;
+				$best = $h;
+			}
+		}
+		return $best;
+	}
+
+	/* The set of bays the default-shuttle pool spills into once the preferred
+	 * (distributionHangars) set is full: every eligible bay that is NOT itself in
+	 * the distribution set. When a shuttle-only bay claims the pool, the overflow
+	 * set is the general fighter bays; when distribution is the primary set, the
+	 * overflow set is the non-primary (side) bays. $excludeFromDefaultShuttles
+	 * bays are never included. Used by pickHangarForShuttle's fallback and
+	 * fairShareCap so overflow spreads EVENLY across the remaining bays (e.g. the
+	 * Babylon5 Refit's 4 spill shuttles → 2+2 across its two primary fighter bays)
+	 * rather than piling into the first one. Mirrored client-side in systems.js. */
+	public static function overflowHangars($hangars){
+		$dist = self::distributionHangars($hangars);
+		$inDist = array();
+		foreach ($dist as $d) $inDist[spl_object_id($d)] = true;
+		$out = array();
 		foreach ($hangars as $h){
 			if (self::excludesDefaultShuttles($h)) continue;
-			if ((int)$h->maxhealth - self::occupiedBoxes($h) >= $flightSize) return $h;
+			if (isset($inDist[spl_object_id($h)])) continue;
+			$out[] = $h;
 		}
-		return null;
+		return $out;
 	}
 
 	/* The subset of $hangars the default-shuttle pool is distributed across
-	 * first: the primary-structure (location 0) hangars if the ship has any,
-	 * otherwise every hangar. Multiple primary hangars therefore share the pool
-	 * evenly (Pirocia's three → 2+2+2) while a single primary still takes the
-	 * whole pool; side hangars on a ship that has primaries get only overflow
-	 * once the primaries are full. Mirrored client-side in systems.js
-	 * getDefaultShuttleCompositionForHangar so lobby tooltips match the in-game
-	 * initial population.
+	 * first. Narrowing is applied in this order:
 	 *
-	 * Shuttle-only hangars: a few ships (Vree Xeecra/Xaarix/Vyreel) carry a
-	 * small dedicated shuttle bay (declared with hangarType 'shuttles') ALONGSIDE
-	 * larger general fighter bays on the SAME structure section. The intent is
-	 * that all default shuttles pile into the small bay, leaving the big bays free
-	 * for fighters. So if the candidate set contains any explicitly shuttle-tagged
-	 * hangar, narrow the distribution set to just those — the general bays then
-	 * receive default shuttles only as overflow (pickHangarForShuttle's fallback
-	 * loop), once the shuttle bays are full. Ships with no shuttle-tagged hangar
-	 * (the overwhelming majority) are unaffected. */
+	 *   1. Drop $excludeFromDefaultShuttles bays (see below).
+	 *   2. If any eligible bay is shuttle-only (hangarType 'shuttles'/
+	 *      'minesweeping shuttles'), the set is JUST those bays — regardless of
+	 *      which structure section they sit on.
+	 *   3. Otherwise, the primary-structure (location 0) hangars if the ship has
+	 *      any, else every eligible hangar.
+	 *
+	 * Multiple bays in the chosen set share the pool evenly (Pirocia's three
+	 * primaries → 2+2+2) while a lone bay takes the whole pool; bays NOT in the
+	 * set get only overflow once the set fills (overflowHangars + the least-used
+	 * picker in pickHangarForShuttle, so the spillover ALSO spreads evenly).
+	 * Mirrored client-side in systems.js getDefaultShuttleCompositionForHangar so
+	 * lobby tooltips match the in-game initial population.
+	 *
+	 * Shuttle-only bays: some ships carry a small dedicated shuttle bay
+	 * (hangarType 'shuttles') alongside larger general fighter bays — the Vree
+	 * Xeecra/Xaarix/Vyreel and Markab Kowart put it on the SAME (primary) section
+	 * as the fighter bays, while EA Babylon5 / Babylon5 Refit put it on the FRONT
+	 * section. Step 2 running BEFORE the primary narrowing is what lets the
+	 * front-section shuttle bay still claim the pool on the Babylon5 hulls; the
+	 * primary-co-located ships resolve to the same bay either way. The general
+	 * bays then receive default shuttles only as overflow once the shuttle bays
+	 * are full (Babylon5: 8/2; Refit: 8/2/2). Ships with no shuttle-tagged hangar
+	 * (the overwhelming majority) skip straight to step 3, unaffected. */
 	public static function distributionHangars($hangars){
 		//Hangars flagged $excludeFromDefaultShuttles (e.g. ScoravarefittedAM's
 		//dedicated heavy-fighter bay) are steered out of the default-shuttle
@@ -460,16 +724,29 @@ class HangarOps {
 		}
 		if (empty($eligible)) $eligible = $hangars;
 
+		//Shuttle-only narrowing takes precedence over the primary-section
+		//narrowing below: a dedicated shuttle bay wins the default-shuttle pool
+		//no matter which section it sits on. This matters for ships whose
+		//shuttle-only bay is NOT on the primary structure — e.g. EA Babylon5,
+		//whose 8-box 'shuttles' bay is a FRONT-section system while its big
+		//fighter bay is on the primary. If primary-narrowing ran first it would
+		//collapse the set to the (location-0) fighter bay and strand the front
+		//shuttle bay, dumping the whole pool into the fighter bay. The Vree
+		//(Xeecra/Xaarix/Vyreel) and Markab Kowart, whose shuttle-only bay already
+		//sits on the primary, are unaffected — they resolve to the same bay
+		//either way. General bays still receive overflow once the shuttle bays
+		//fill (pickHangarForShuttle's fallback loop).
+		$shuttleOnly = array();
+		foreach ($eligible as $h){
+			if (self::isShuttleOnlyHangar($h)) $shuttleOnly[] = $h;
+		}
+		if (!empty($shuttleOnly)) return $shuttleOnly;
+
 		$primary = array();
 		foreach ($eligible as $h){
 			if ((int)$h->location === 0) $primary[] = $h;
 		}
-		$set = !empty($primary) ? $primary : $eligible;
-		$shuttleOnly = array();
-		foreach ($set as $h){
-			if (self::isShuttleOnlyHangar($h)) $shuttleOnly[] = $h;
-		}
-		return !empty($shuttleOnly) ? $shuttleOnly : $set;
+		return !empty($primary) ? $primary : $eligible;
 	}
 
 	/* True when a hangar opts out of receiving default shuttles (Hangar
@@ -482,7 +759,19 @@ class HangarOps {
 	 * (excludesDefaultShuttles). */
 	public static function excludesDefaultShuttles($hangar){
 		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail)) return false;
-		return !empty($hangar->excludeFromDefaultShuttles);
+		if (!empty($hangar->excludeFromDefaultShuttles)) return true;
+		//A per-bay fighter-class allow-list that doesn't permit ANY default-shuttle
+		//class steers default shuttles away too — otherwise the auto-fill would pack
+		//the bay with shuttles the dock gate then forbids, blocking the very fighters
+		//the bay is reserved for (e.g. the Reska-only GaimSuom bays). If the allow-list
+		//DOES name a shuttle class, the bay is happy to hold shuttles, so don't exclude.
+		if (is_array($hangar->allowedFighterClasses) && !empty($hangar->allowedFighterClasses)){
+			foreach ($hangar->allowedFighterClasses as $cls){
+				if (self::isDefaultShuttleClass($cls)) return false;
+			}
+			return true;
+		}
+		return false;
 	}
 
 	/* True when a hangar was explicitly designated in its ship file as a
@@ -505,11 +794,23 @@ class HangarOps {
 	 * (a lone primary, or the last hangar still taking overflow) — it simply
 	 * takes the rest, preserving the historical single-hangar fill. Combined
 	 * with pickHangarForShuttle's least-used preference, this yields 2+2+2 across
-	 * Pirocia's three primary hangars and 3+3 across Marata's two side hangars. */
+	 * Pirocia's three primary hangars and 3+3 across Marata's two side hangars.
+	 *
+	 * Once the distribution set is full, the cap falls through to the OVERFLOW
+	 * set (overflowHangars) so spillover also rounds out evenly — e.g. the EA
+	 * Babylon5 Refit fills its front shuttle bay to 8, then the remaining 4 shuttles
+	 * spread 2+2 across its two primary fighter bays instead of 4+0. */
 	public static function fairShareCap($hangars, $remainingTotal){
 		$hangarsWithRoom = 0;
 		foreach (self::distributionHangars($hangars) as $h){
 			if ((int)$h->maxhealth - self::occupiedBoxes($h) > 0) $hangarsWithRoom++;
+		}
+		//Distribution set full — we're spilling into the overflow bays; cap by
+		//how many of THOSE still have room so the spillover spreads evenly.
+		if ($hangarsWithRoom === 0){
+			foreach (self::overflowHangars($hangars) as $h){
+				if ((int)$h->maxhealth - self::occupiedBoxes($h) > 0) $hangarsWithRoom++;
+			}
 		}
 		if ($hangarsWithRoom <= 1) return PHP_INT_MAX;
 		return (int)ceil($remainingTotal / $hangarsWithRoom);
@@ -523,6 +824,351 @@ class HangarOps {
 			if ($sys instanceof Hangar) $hangars[] = $sys;
 		}
 		return $hangars;
+	}
+
+	/* Stage S: just the ShadowHangar (integrated-fighter bay) instances on a
+	 * ship — a subset of collectHangars (ShadowHangar extends Hangar). */
+	public static function collectShadowHangars($ship){
+		$out = array();
+		foreach (self::collectHangars($ship) as $h){
+			if (!empty($h->isShadowHangar)) $out[] = $h;
+		}
+		return $out;
+	}
+
+	/* Stage S: true when the ship carries any integrated-fighter (ShadowHangar)
+	 * bay. Drives the SHAD_FTRL repricing + structure-mutation branch in
+	 * Enhancements and the integrated-fighter initial population below. */
+	public static function shipHasShadowHangar($ship){
+		foreach (self::collectShadowHangars($ship) as $h) return true;
+		return false;
+	}
+
+	/* Stage S (multi-bay): the ShadowHangar tagged with $bombGroupIndex == $index — the
+	 * bay served by the Fighter Bomb carrying the matching $bombHangarIndex. Used only by
+	 * multi-bay hulls (shadowRegenBaseBomb's 4 arc-keyed bays); single-bay hulls pass a
+	 * null index to performBombLaunch and never reach here. Returns null if no bay matches
+	 * (e.g. that bay was destroyed) so the bomb simply can't fire. */
+	public static function shadowHangarByGroupIndex($ship, $index){
+		foreach (self::collectShadowHangars($ship) as $h){
+			if (isset($h->bombGroupIndex) && (int)$h->bombGroupIndex === (int)$index) return $h;
+		}
+		return null;
+	}
+
+	/* Stage S (fleet-value attribution): the per-fighter CP cost of this ship's
+	 * integrated fighters (the SHAD_FTRL enhPrice) and the COUNT it bought. The
+	 * carrier's enhValue covers all of them at full strength; the fleet list values
+	 * LAUNCHED integrated fighters on their own flight rows, so it must net the
+	 * launched ones off the carrier's value (and vice-versa on dock). Sending the
+	 * purchased count + per-craft cost lets the client do that math exactly without
+	 * re-deriving it from the opaque enhValue total (which may also fold in IMPR_SR).
+	 * Returns [count, perCraft]; count 0 when the ship bought none. */
+	public static function integratedFighterPurchase($ship){
+		$count = 0;
+		$perCraft = 150;   //SHAD_FTRL enhPrice (Enhancements::setEnhancementOptionsShip)
+		if (isset($ship->enhancementOptions) && is_array($ship->enhancementOptions)){
+			foreach ($ship->enhancementOptions as $opt){
+				if (($opt[0] ?? '') === 'SHAD_FTRL'){
+					$count = max(0, (int)($opt[2] ?? 0));
+					if (isset($opt[4]) && (int)$opt[4] > 0) $perCraft = (int)$opt[4];   //live price
+					break;
+				}
+			}
+		}
+		return array($count, $perCraft);
+	}
+
+	/* === Stage S (S-d): integrated-fighter structure coupling ============== */
+
+	/* The ShadowHangar that carries the coupling state ({attached,cutOff,launchedIds}).
+	 * Prefers the ship's true primaryHangar if it's a ShadowHangar (matches the
+	 * primary-only persistence in generateIndividualNotes); else the first ShadowHangar.
+	 * Returns null if the ship has no ShadowHangar. */
+	public static function primaryShadowHangar($ship){
+		$primary = self::primaryHangar($ship);
+		if ($primary instanceof Hangar && !empty($primary->isShadowHangar)) return $primary;
+		foreach (self::collectShadowHangars($ship) as $h) return $h;
+		return null;
+	}
+
+	/* Register a freshly-launched integrated flight on the carrier's primary
+	 * ShadowHangar so the per-turn coupling sync can track it. Stores the flight's
+	 * ATTACHED-craft count as the baseline (at launch every craft is attached + alive,
+	 * so this equals active-craft count). syncIntegratedStructureCoupling compares this
+	 * baseline against the flight's CURRENT attached count to detect combat deaths.
+	 * Idempotent; re-registering refreshes the baseline. */
+	public static function registerLaunchedIntegratedFlight($carrier, $flightId, $activeCount = null){
+		$ph = self::primaryShadowHangar($carrier);
+		if (!$ph) return;
+		$flightId = (int)$flightId;
+		if ($flightId <= 0) return;
+		if (!is_array($ph->shadowLaunched)) $ph->shadowLaunched = array();
+		if ($activeCount === null) $activeCount = 1;
+		$ph->shadowLaunched[$flightId] = max(0, (int)$activeCount);
+	}
+
+	/* Reduce a launched integrated flight's tracked baseline by $n (craft that LANDED
+	 * and reabsorbed — NOT a combat loss). When the baseline hits 0 the entry is
+	 * dropped (the whole flight landed). Keeps syncIntegratedStructureCoupling from
+	 * mistaking a dock for a death. $attached is unchanged (reabsorbed = still tethered). */
+	public static function decrementLaunchedIntegratedBaseline($carrier, $flightId, $n){
+		$ph = self::primaryShadowHangar($carrier);
+		if (!$ph || !is_array($ph->shadowLaunched)) return;
+		$flightId = (int)$flightId;
+		if (!isset($ph->shadowLaunched[$flightId])) return;
+		$ph->shadowLaunched[$flightId] = max(0, (int)$ph->shadowLaunched[$flightId] - max(0, (int)$n));
+		if ($ph->shadowLaunched[$flightId] <= 0) unset($ph->shadowLaunched[$flightId]);
+	}
+
+	/* True if a SPECIFIC fighter carries the ShadowFighterCutOff marker (severed
+	 * from its carrier — fights on, can never land). Cut-off is PER-FIGHTER: a flight
+	 * of N integrated fighters can have any number 0..N cut off independently. */
+	public static function isFighterCutOff($fighter){
+		if (!($fighter instanceof Fighter)) return false;
+		foreach ($fighter->criticals as $c){
+			if ($c->phpclass === 'ShadowFighterCutOff') return true;
+		}
+		return false;
+	}
+
+	/* True if a flight has ANY cut-off fighter. Used by the landing gate to reject a
+	 * flight that still holds a cut-off craft (its landable craft are handled per the
+	 * dialog; the conservative server gate blocks the whole order if any are cut off). */
+	public static function isCutOffIntegratedFlight($flight){
+		if (!($flight instanceof FighterFlight)) return false;
+		foreach ($flight->systems as $f){
+			if (self::isFighterCutOff($f)) return true;
+		}
+		return false;
+	}
+
+	/* Count cut-off fighters in a flight (living or not — a cut-off marker persists). */
+	public static function countCutOffFighters($flight){
+		$n = 0;
+		if (!($flight instanceof FighterFlight)) return 0;
+		foreach ($flight->systems as $f){
+			if (self::isFighterCutOff($f)) $n++;
+		}
+		return $n;
+	}
+
+	/* Count LIVING, NOT-cut-off fighters in a flight — the craft still TETHERED to the
+	 * carrier (their structure box is intact). These are the ones whose death damages
+	 * the carrier (Direction 2) and the pool Direction 1 cuts off from. */
+	public static function countAttachedFightersInFlight($flight, $turn){
+		$n = 0;
+		if (!($flight instanceof FighterFlight)) return 0;
+		foreach ($flight->systems as $f){
+			if (!($f instanceof Fighter)) continue;
+			if ($f->isDestroyed($turn)) continue;
+			if (self::isFighterCutOff($f)) continue;
+			$n++;
+		}
+		return $n;
+	}
+
+	/* Stamp ShadowFighterCutOff on up to $count LIVING, not-yet-cut-off fighters
+	 * INSIDE a flight (cut-off is per-fighter — a flight of N integrated fighters can
+	 * have any number cut off). Returns how many were actually stamped. Replay-safe
+	 * (like applyLaunchCrits' LaunchedThisTurn). */
+	private static function applyCutOffToFighters($flight, $count, $gamedata){
+		if (!($flight instanceof FighterFlight) || $count <= 0) return 0;
+		$done = 0;
+		foreach ($flight->systems as $f){
+			if ($done >= $count) break;
+			if (!($f instanceof Fighter)) continue;
+			if ($f->isDestroyed($gamedata->turn)) continue;
+			if (self::isFighterCutOff($f)) continue;   //already cut off — skip
+			$crit = new ShadowFighterCutOff(-1, $flight->id, $f->id, 'ShadowFighterCutOff', $gamedata->turn);
+			$crit->updated = true;
+			$crit->newCrit = true;
+			$f->criticals[] = $crit;
+			$done++;
+		}
+		return $done;
+	}
+
+	/* The per-turn coupling engine. Runs once per carrier (from the primary
+	 * ShadowHangar's onHangarCriticalPhase) and enforces the invariant
+	 *   carrier-remaining-structure >= attached.
+	 *
+	 * Order matters (S9): Direction 2 (fighter-loss → structure box) runs FIRST so
+	 * a fighter death can cascade into a same-turn cut-off via Direction 1.
+	 *
+	 * Replay-safe: all outcomes are persisted state. attached/cutOff live in the
+	 * shadowIntegratedState note; structure box loss is a DamageEntry; cut-off is a
+	 * flight crit. On a replay scrub the counts reload from the note (not recomputed
+	 * from scratch), and this method only applies the DELTA since last turn — it is
+	 * idempotent because landed/dead flight ids are pruned from shadowLaunched and
+	 * the structure damage / cut-off crit it writes are change-detected downstream. */
+	public static function syncIntegratedStructureCoupling($ship, $gamedata){
+		$ph = self::primaryShadowHangar($ship);
+		if (!$ph) return;
+		if ($ship->isDestroyed()) return;   //carrier already gone — nothing to couple
+
+		//Walk the launched-baseline map {flightId => lastKnownATTACHEDCount}. Cut-off is
+		//PER-FIGHTER: a single flight can hold both attached (tethered) and cut-off craft.
+		//The baseline stores each flight's ATTACHED count from last sync; the shortfall
+		//vs its CURRENT attached count = attached fighters that DIED in combat this turn
+		//(landings already decremented the baseline; cut-offs are excluded because a
+		//cut-off fighter is no longer attached). Those drive Direction 2. Rebuild the map
+		//with refreshed attached counts, and remember each flight's id + spare capacity
+		//for Direction 1's per-fighter cut-off distribution.
+		$attachedFlights = array();   //[{fid, attachedNow}] flights with ≥1 attached craft, fill order
+		$lostAttached    = 0;         //attached integrated craft that died this turn (Direction 2)
+		$newLaunched     = array();
+		foreach ((array)$ph->shadowLaunched as $fid => $baselineAttached){
+			$fid = (int)$fid; $baselineAttached = max(0, (int)$baselineAttached);
+			$flight = $gamedata->getShipById($fid);
+			if (!($flight instanceof FighterFlight)){
+				//Ship row gone entirely — its whole remaining attached baseline is a loss.
+				$lostAttached += $baselineAttached;
+				continue;
+			}
+			$attachedNow = self::countAttachedFightersInFlight($flight, $gamedata->turn);
+			//Combat deaths since last sync = baselineAttached − attachedNow. This is
+			//correct because at THIS point in the loop no NEW cut-offs exist yet (Direction
+			//1 applies them AFTER this loop), and PRIOR cut-offs were already removed from
+			//the baseline by the sync that created them. So the only way attachedNow can be
+			//below the baseline here is a craft DYING. (Landings also lower the baseline, but
+			//via decrementLaunchedIntegratedBaseline at dock time, not here.)
+			$cutOffNow = self::countCutOffFighters($flight);
+			$deaths = max(0, $baselineAttached - $attachedNow);
+			$lostAttached += $deaths;
+			if ($attachedNow > 0){
+				$newLaunched[$fid] = $attachedNow;
+				$attachedFlights[] = array('fid' => $fid, 'attached' => $attachedNow);
+			} elseif ($cutOffNow > 0) {
+				//No attached craft left, but cut-off craft remain in space — keep tracking
+				//the flight id (baseline 0) so a later sync still sees it, but it's not in
+				//$attachedFlights (nothing to cut off / lose from it).
+				$newLaunched[$fid] = 0;
+			}
+			//else: flight fully gone → pruned (omitted from $newLaunched).
+		}
+		$ph->shadowLaunched = $newLaunched;
+
+		//---- Direction 2: each lost ATTACHED integrated fighter destroys 1 structure box.
+		//Per B5W the box is "marked destroyed" (PERMANENT). We model this by REDUCING the
+		//Structure's maxhealth by 1 per loss — and NOTHING ELSE. Because
+		//getRemainingHealth = maxhealth - totalDamage, lowering maxhealth by N already
+		//drops remaining health by N (e.g. 40→38 max, 0 damage → 38/38 remaining). Adding
+		//a separate damage DamageEntry on top would DOUBLE-count (38 max − 2 dmg = 36 —
+		//the bug this replaced). SelfRepair heals damage but can't raise maxhealth, so the
+		//box is gone for good. The cumulative reduction is tracked in $ph->shadowStructLost
+		//(persisted in shadowIntegratedState, re-applied on every load since maxhealth
+		//rebuilds fresh from the blueprint).
+		//
+		//Carrier death: Structure::isDestroyed only fires on a destroyed=true DamageEntry
+		//(NOT on remaining<=0), so when the LAST box is consumed (maxhealth hits 0) we must
+		//write ONE destroyed=true entry to actually kill the carrier via the normal fold.
+		if ($lostAttached > 0){
+			$struct = $ship->getStructureSystem(0);
+			if ($struct){
+				$applicable = min($lostAttached, (int)$struct->maxhealth);   //can't lose more boxes than exist
+				$struct->maxhealth = max(0, (int)$struct->maxhealth - $applicable);
+				$ph->shadowStructLost = (int)$ph->shadowStructLost + $applicable;
+
+				//Carrier death when NO structure remains — checked on REMAINING health
+				//(maxhealth - existing combat damage), not maxhealth alone, so a box loss
+				//that pushes an already-damaged structure to 0 also kills the carrier.
+				if ((int)$struct->getRemainingHealth() <= 0){
+					$dmg = new DamageEntry(
+						-1, $ship->id, -1, $gamedata->turn, $struct->id,
+						0 /*damage*/, 0 /*armour*/, 0 /*shields*/, -1 /*fireorderid*/,
+						true /*destroyed — last box consumed, carrier dies*/, false /*undestroyed*/,
+						"Carrier lost its last integrated-fighter structure box", "Integrated", -1, -1
+					);
+					$dmg->updated = true;
+					$struct->damage[] = $dmg;
+				}
+			}
+			$ph->shadowAttached = max(0, (int)$ph->shadowAttached - $lostAttached);
+		}
+
+		//Recompute remaining structure AFTER Direction 2's damage so a fighter-loss
+		//can cascade into a same-turn cut-off.
+		$struct = $ship->getStructureSystem(0);
+		$structRemaining = $struct ? max(0, (int)$struct->getRemainingHealth()) : 0;
+
+		//---- Direction 1: if remaining structure < attached, cut off the difference.
+		//Cut-off is PER-FIGHTER (not per-flight): with N integrated fighters in one
+		//flight, dropping structure from 6→2 must cut off 4 INDIVIDUAL fighters in that
+		//flight, each getting its own ShadowFighterCutOff crit (and its own CUT OFF badge).
+		//Order (user 2026-06): HELD bay fighters first, then launched-in-space fighters.
+		//Rationale: a fighter already deployed and under control should be the LAST to be
+		//severed; the surplus that the carrier never had the structure to control are the
+		//ones still sitting in the bay. (A combat-damaged carrier that launched up to its
+		//free-box cap therefore keeps every launched fighter; only the un-launchable held
+		//remainder is shed.) The earlier launched-first order cut off in-space fighters
+		//that had just deployed within their structure budget — visibly wrong.
+		$needCutOff = (int)$ph->shadowAttached - $structRemaining;
+		if ($needCutOff > 0){
+			//1a. HELD bay integrated fighters first — remove from hangarUsage (their tether
+			//box is gone; nothing to fly, so no crit, just a vanished held fighter).
+			$removed = self::removeHeldIntegratedFighters($ship, $needCutOff, $gamedata);
+			$ph->shadowAttached = max(0, (int)$ph->shadowAttached - $removed);
+			$ph->shadowCutOff   = (int)$ph->shadowCutOff + $removed;
+			$needCutOff -= $removed;
+
+			//1b. Launched-in-space attached fighters only if the held pool didn't cover the
+			//deficit — distribute across flights' individual fighters. Each fighter cut off:
+			//attached--, cutOff++, and the flight's tracked baseline (shadowLaunched[fid])
+			//drops so next sync doesn't mistake the now-cut-off fighter for a death.
+			if ($needCutOff > 0){
+				foreach ($attachedFlights as $af){
+					if ($needCutOff <= 0) break;
+					$fid    = (int)$af['fid'];
+					$flight = $gamedata->getShipById($fid);
+					if (!($flight instanceof FighterFlight)) continue;
+					$cut = self::applyCutOffToFighters($flight, $needCutOff, $gamedata);
+					if ($cut > 0){
+						$ph->shadowAttached = max(0, (int)$ph->shadowAttached - $cut);
+						$ph->shadowCutOff   = (int)$ph->shadowCutOff + $cut;
+						$needCutOff -= $cut;
+						//Drop the cut-off fighters from this flight's attached baseline.
+						if (isset($ph->shadowLaunched[$fid])){
+							$ph->shadowLaunched[$fid] = max(0, (int)$ph->shadowLaunched[$fid] - $cut);
+						}
+					}
+				}
+			}
+			//Any residual $needCutOff (more boxes lost than fighters exist) just means the
+			//structure dropped below even the now-reduced attached count — fine, attached
+			//can't go negative and the invariant still holds.
+		}
+	}
+
+	/* Remove up to $count held (in-bay) integrated fighters from the ship's
+	 * ShadowHangar(s) — used by Direction 1 when structure loss cuts off more
+	 * fighters than are launched. Returns how many were actually removed. */
+	private static function removeHeldIntegratedFighters($ship, $count, $gamedata){
+		$count = (int)$count;
+		if ($count <= 0) return 0;
+		$removed = 0;
+		foreach (self::collectShadowHangars($ship) as $sh){
+			if ($removed >= $count) break;
+			if (!is_array($sh->hangarUsage)) continue;
+			$newUsage = array();
+			foreach ($sh->hangarUsage as $entry){
+				$cls = (string)($entry['phpclass'] ?? '');
+				$isHeldIntegrated = ($cls === 'ShadowMediumFighterFlight')
+					&& (int)($entry['dockedFlightId'] ?? 0) <= 0;
+				if ($isHeldIntegrated && $removed < $count){
+					$sz = (int)($entry['flightSize'] ?? 1);
+					$take = min($sz, $count - $removed);
+					$removed += $take;
+					$sz -= $take;
+					if ($sz > 0){ $entry['flightSize'] = $sz; $newUsage[] = $entry; }
+					//emptied → dropped
+				} else {
+					$newUsage[] = $entry;
+				}
+			}
+			$sh->hangarUsage = $newUsage;
+		}
+		return $removed;
 	}
 
 	/* Fighter Rails: just the FighterRail instances on a ship (a subset of
@@ -1220,7 +1866,7 @@ class HangarOps {
 		//explicit category from the ship file (load-bearing for launch/dock
 		//eligibility) — leave them untouched too. LCV Rails are fixed at 'LCVs'
 		//(whole-ship dock, not a fighter category) — never narrow them either.
-		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail)) return;
+		if (!empty($hangar->isCatapult) || !empty($hangar->isRail) || !empty($hangar->isLCVRail) || !empty($hangar->isShadowHangar)) return;
 		$hType = strtolower(trim((string)$hangar->hangarType));
 		//Only narrow universal slots. Anything specific (medium, heavy, shuttles,
 		//assault shuttles, BPods, custom 'Raiders', etc.) was an intentional
@@ -1231,10 +1877,22 @@ class HangarOps {
 
 		$sizes = array('heavy', 'medium', 'light', 'ultralight');
 		$declared = array();
+		$hasNormal = false;
 		foreach ($ship->fighters as $cat => $count){
 			$catLower = strtolower(trim((string)$cat));
+			//'normal' is the universal combat-fighter slot (accepts heavy and
+			//smaller). A ship that declares 'normal' alongside a specific size
+			//(e.g. gaimSuom's {normal:6, light:6}) is genuinely multi-category —
+			//narrowing every bay to the lone specific size ('light') would wrongly
+			//reject the larger fighters the 'normal' slots are meant to hold. Treat
+			//'normal' as a narrowing-blocker so such ships keep universal bays.
+			if ($catLower === 'normal') { $hasNormal = true; continue; }
 			if (in_array($catLower, $sizes, true)) $declared[] = $catLower;
 		}
+		//Stay universal when 'normal' is present (multi-size capable) or when the
+		//declaration is ambiguous (0 or >1 specific sizes). Only narrow when the
+		//ship declares EXACTLY ONE specific size and no universal 'normal' slots.
+		if ($hasNormal) return;
 		if (count($declared) !== 1) return;     //ambiguous — leave universal
 
 		$hangar->hangarType = $declared[0];
@@ -1283,6 +1941,7 @@ class HangarOps {
 			if (!empty($h->isCatapult)) { $hasCatapult = true; continue; }
 			if (!empty($h->isRail))     { continue; }   //rail boxes are structure HP, not shuttle pool
 			if (!empty($h->isLCVRail))  { continue; }   //LCV rails hold whole LCVs, not the shuttle pool
+			if (!empty($h->isShadowHangar)) { continue; }   //integrated-fighter bay — not the shuttle pool
 			$capacity += (int)$h->maxhealth;
 		}
 		if ($capacity <= 0) {
@@ -1438,6 +2097,17 @@ class HangarOps {
 			}
 			$hangar->hangarUsage = array();
 			return 0;
+		}
+
+		//Stage S (S-d): run the integrated-fighter ↔ carrier-Structure coupling ONCE
+		//per carrier (only from the primary ShadowHangar) each turn. Gated to flow-
+		//enabled games (safeGameID) until verified. This is independent of the bay-
+		//eviction below: the coupling is to the carrier's STRUCTURE system, while the
+		//eviction below handles damage to the ShadowHangar bay's OWN boxes.
+		if (!empty($hangar->isShadowHangar)
+			&& self::primaryShadowHangar($ship) === $hangar
+			&& self::isFlowEnabled($gamedata->id)) {
+			self::syncIntegratedStructureCoupling($ship, $gamedata);
 		}
 
 		$remaining = (int)$hangar->getRemainingHealth();
@@ -1985,6 +2655,177 @@ class HangarOps {
 		Manager::insertIndividualNote($note);
 	}
 
+	/* === B5W Inadequate Hangars (Unreliable) ============================= */
+
+	/* Replay-deterministic die roll for an inadequate hangar's launch-abort /
+	 * landing-damage checks. setCriticals re-runs on every replay scrub and
+	 * Dice::d is non-deterministic, so on the LIVE Fire Phase advance we roll
+	 * fresh, append the result to the hangar's running hangarInadequateRoll note
+	 * for this turn, and stamp the loaded cache; on a replay re-run we consume
+	 * the next roll from the cache loaded by Hangar::onIndividualNotesLoaded.
+	 * Rolls are consumed FIFO in the same order they were taken, so a turn's
+	 * launch and landing rolls reproduce exactly. Mirrors the FighterRail
+	 * railCritRoll mechanism, generalised to a multi-roll-per-turn queue. */
+	public static function nextInadequateRoll($hangar, $sides, $gamedata){
+		$turn = (int)$gamedata->turn;
+		//Replay path: a cache loaded for THIS turn means the rolls were already
+		//taken on the live advance — consume the next one in order.
+		if ((int)$hangar->inadequateLoadedTurn === $turn
+			&& is_array($hangar->inadequateLoadedRolls)
+			&& !empty($hangar->inadequateLoadedRolls)) {
+			return (int)array_shift($hangar->inadequateLoadedRolls);
+		}
+		//Live path: roll fresh and persist. The first live roll of the turn
+		//switches the cache out of "loaded" mode (stamp this turn, empty queue)
+		//so any stale loaded values can't be re-consumed.
+		if ((int)$hangar->inadequateLoadedTurn !== $turn) {
+			$hangar->inadequateLoadedTurn  = $turn;
+			$hangar->inadequateLoadedRolls = array();
+		}
+		$roll = Dice::d((int)$sides);
+		self::recordInadequateRoll($hangar, $roll, $gamedata);
+		return $roll;
+	}
+
+	/* Append one inadequate-hangar roll to this hangar's running per-turn note.
+	 * Each roll is its own note row (notekey 'hangarInadequateRoll'); on load
+	 * Hangar::onIndividualNotesLoaded gathers every note for the current turn
+	 * (ordered by id) back into inadequateLoadedRolls. Written ONLY from the live
+	 * setCriticals advance (same as recordRailCritRoll), so the POST-side
+	 * reconstruction clobber trap doesn't apply. */
+	private static function recordInadequateRoll($hangar, $roll, $gamedata){
+		$ship = $hangar->getUnit();
+		$shipId = $ship ? $ship->id : 0;
+		$payload = json_encode(array('roll' => (int)$roll, 'turn' => (int)$gamedata->turn));
+		$note = new IndividualNote(
+			-1,
+			$gamedata->id,
+			$gamedata->turn,
+			$gamedata->phase,
+			$shipId,
+			$hangar->id,
+			'hangarInadequateRoll',
+			'Inadequate hangar roll',
+			$payload
+		);
+		Manager::insertIndividualNote($note);
+	}
+
+	/* Build the artificial FireOrder used to surface an inadequate-hangar event
+	 * in the combat log (launch abort or landing damage). Mirrors the self-ram
+	 * convention used by ShipSystem marine missions / HangarOps ShadowReabsorb:
+	 * shooter = target = the carrier, weapon = its RammingAttack. The caller fills
+	 * $fireOrder->pubnotes with the player-visible message. Returns null when the
+	 * carrier somehow has no RammingAttack (every ship normally does) — the event
+	 * still resolves mechanically, just without a log line. */
+	private static function inadequateLogOrder($carrier, $label, $gamedata){
+		$rammingSystem = $carrier->getSystemByName("RammingAttack");
+		if (!$rammingSystem) return null;
+		$fireOrder = new FireOrder(
+			-1, "normal", $carrier->id, $carrier->id,
+			$rammingSystem->id, -1, $gamedata->turn, 1,
+			100, 100, 1, 1, 0,
+			0, 0, $label, 10000
+		);
+		$fireOrder->addToDB = true;
+		$rammingSystem->fireOrders[] = $fireOrder;
+		return $fireOrder;
+	}
+
+	/* B5W Inadequate Hangars LAUNCH check. Called from the launch executors at the
+	 * point a launch is confirmed otherwise-legal but BEFORE any state mutation.
+	 * On an inadequate bay, rolls 1d6 "for that flight"; a "1" aborts the launch
+	 * this turn (the craft stay docked, the launch budget is NOT charged, and the
+	 * player may retry next turn). Records a launch-fail note (so the existing
+	 * hangar event log shows the abort) plus an artificial RammingAttack FireOrder
+	 * so the abort surfaces in the combat log. Returns true when the launch is
+	 * ABORTED (caller must bail), false when it may proceed. A non-inadequate bay
+	 * always returns false. */
+	public static function inadequateLaunchAborts($carrier, $bay, $phpclass, $size, $gamedata){
+		if (empty($bay->inadequate)) return false;
+		$roll = self::nextInadequateRoll($bay, 6, $gamedata);
+		if ($roll != 1) return false;
+
+		self::launchFailNote($carrier, $bay, $phpclass, (int)$size, 'inadequate hangar — launch aborted', $gamedata);
+		$label = self::flightNameFor($phpclass, $carrier);
+		$fo = self::inadequateLogOrder($carrier, 'InadequateHangar', $gamedata);
+		if ($fo) {
+			$fo->pubnotes .= " Inadequate Hangar: $label aborted its launch (rolled 1 on 1d6) and stays docked — it may try to launch again next turn.";
+		}
+		return true;
+	}
+
+	/* B5W Inadequate Hangars LANDING damage. "When a flight (or partial flight)
+	 * attempts to land, roll 1d6 for each fighter. If a 1 appears, score 1d6
+	 * damage on the fighter (ignoring armor)." Selects the (up to) $wantCount
+	 * fighters that will actually land — most-damaged first, matching dockFighters'
+	 * priority so the rolled craft are exactly the ones that land on a partial
+	 * dock — rolls 1d6 per fighter, and on a "1" applies a 1d6 armour-ignoring
+	 * DamageEntry. A hit that meets/exceeds the fighter's remaining health destroys
+	 * it (destroyed=true) so it drops out of the dockable count and its hangar box
+	 * is freed. Each outcome is appended to one RammingAttack FireOrder so the
+	 * landing damage surfaces in the combat log. Both rolls go through
+	 * nextInadequateRoll so a replay reproduces them exactly. Returns the number
+	 * of fighters destroyed on landing. */
+	public static function applyInadequateLandingDamage($flight, $bay, $wantCount, $carrier, $gamedata){
+		if (empty($bay->inadequate)) return 0;
+		if (!($flight instanceof FighterFlight)) return 0;
+
+		//Candidate landing fighters: live, attached (not cut off) craft, ordered
+		//most-damaged first to match dockFighters' selection (so a partial dock
+		//rolls for the same craft that actually land).
+		$candidates = array();
+		foreach ($flight->systems as $idx => $f) {
+			if (!($f instanceof Fighter)) continue;
+			if ($f->isDestroyed($gamedata->turn)) continue;
+			if (self::isFighterCutOff($f)) continue;   //cut-off integrated craft can't land
+			$candidates[] = array('fighter' => $f, 'idx' => $idx, 'damage' => (int)$f->getTotalDamage());
+		}
+		usort($candidates, function($a, $b){
+			if ($a['damage'] !== $b['damage']) return $b['damage'] - $a['damage'];
+			return $b['idx'] - $a['idx'];
+		});
+
+		$landing = max(1, (int)$wantCount);
+		if ($landing > count($candidates)) $landing = count($candidates);
+		if ($landing <= 0) return 0;
+
+		$label = self::flightNameFor($flight->phpclass, $carrier);
+		$fo = null;   //created lazily — only when something actually happens
+		$destroyed = 0;
+		for ($i = 0; $i < $landing; $i++) {
+			$f = $candidates[$i]['fighter'];
+			$landRoll = self::nextInadequateRoll($bay, 6, $gamedata);
+			if ($landRoll != 1) continue;
+
+			$dmgRoll = self::nextInadequateRoll($bay, 6, $gamedata);
+			$remaining = (int)$f->getRemainingHealth();
+			$isDestroyed = ($dmgRoll >= $remaining);
+			$applied = min($dmgRoll, max(1, $remaining));   //don't log more than it could take
+			$dmg = new DamageEntry(
+				-1, $flight->id, -1, $gamedata->turn, $f->id,
+				$applied, 0 /*armour ignored*/, 0, -1, $isDestroyed, false,
+				"Inadequate hangar landing", "InadequateHangar"
+			);
+			$dmg->updated = true;
+			$rammingSystem = $carrier->getSystemByName("RammingAttack");
+			if ($rammingSystem) { $dmg->shooterid = $carrier->id; $dmg->weaponid = $rammingSystem->id; }
+			$f->damage[] = $dmg;
+
+			if ($fo === null) $fo = self::inadequateLogOrder($carrier, 'InadequateHangar', $gamedata);
+			if ($fo) {
+				//Lead every line after the first with <br>; the first joins straight
+				//onto the combat-log entry text (no leading blank line under short-text).
+				$sep = ($fo->pubnotes === '') ? '' : '<br>';
+				$fo->pubnotes .= $isDestroyed
+					? "{$sep}Inadequate Hangar: a $label fighter bounced off an obstruction whilst landing ($applied damage) and was destroyed."
+					: "{$sep}Inadequate Hangar: a $label fighter took $applied damage bouncing off an obstruction while landing.";
+			}
+			if ($isDestroyed) $destroyed++;
+		}
+		return $destroyed;
+	}
+
 	/* === Stage 15: ordnance reload pool =================================== */
 
 	/* Total purchased reload-pool capacity for $carrier (read from the
@@ -2248,6 +3089,248 @@ class HangarOps {
 		return $shipid;
 	}
 
+	/* === Stage S (S-f): Fighter Bomb launch ================================ *
+	 *
+	 * The Fighter Bomb (a separate ShadowFighterBomb weapon — NOT a Hangar) is the
+	 * ONLY way integrated fighters leave a ShadowHangar (ordinary bay launch is
+	 * disabled for ShadowHangars — see canLaunch). It bursts held integrated
+	 * fighters out at a TARGET HEX (not the carrier hex), sharing the carrier's
+	 * heading+speed. They can't act until next turn (they're spawned via a deploy
+	 * MovementOrder), but — UNLIKE an ordinary launch — the bomb applies NO
+	 * initiative penalty: no flight-side LaunchedThisTurn (-50), no carrier-side
+	 * HangarOperations (-20) (user 2026-06-11). Fighter DOCKING keeps its penalty.
+	 *
+	 * Called from ShadowFighterBomb::fire ONCE PER FIRE ORDER on the live Fire-Phase
+	 * advance (replay-idempotent via the fire order's rolled>0 guard). A launch
+	 * larger than the flight-size cap (e.g. 24 fighters, max 9/flight) spawns
+	 * MULTIPLE flights, all stacked at the target hex.
+	 *
+	 * SPLIT MODEL (no note transport — the client sends fire orders directly):
+	 *   - MANUAL split: the client emits ONE fire order PER flight the player chose,
+	 *     each with $shots = that flight's size (<=cap). Each fire() call passes that
+	 *     order's $shots as $count here, so this spawns ONE flight of that size. The
+	 *     combat log groups the same-hex orders into a single "Fighter Bomb" entry.
+	 *   - AUTO split: the client emits ONE fire order with $shots = total; this
+	 *     auto-splits $count into ceil(n/cap) flights of <=cap each (24 → 9+9+6).
+	 *   $flightSizes is an optional explicit list (not currently used by the client —
+	 *     manual split rides one-order-per-flight instead — but supported for callers
+	 *     that want to pass an exact partition in a single call).
+	 *
+	 * Returns the FIRST spawned flight id, or null if nothing launched (no surviving
+	 * ShadowHangar, or the held pool is empty — e.g. all integrated fighters were lost
+	 * a previous turn; the bomb then "cannot fire"). $count is CLAMPED to the held
+	 * pool; <=0/null means "the whole remaining pool". A partial launch leaves the
+	 * remainder docked. The carrier-hex spawn variant is performLaunch above.
+	 */
+	public static function performBombLaunch($carrier, $spawnPos, $gamedata, $count = null, $flightSizes = null, $bombHangarIndex = null){
+		if (!($spawnPos instanceof OffsetCoordinate)) return null;
+
+		//Which bay does this launch draw from?
+		//  - SINGLE-BAY hull (shadowCruiserBomb): $bombHangarIndex null → the primary
+		//    ShadowHangar, which also carries the coupling state + held pool.
+		//  - MULTI-BAY hull (shadowRegenBaseBomb): each Fighter Bomb passes its own
+		//    $bombHangarIndex → the matching ShadowHangar (bombGroupIndex). The bomb
+		//    launches/drains ONLY that bay's ≤6 fighters; the structure coupling stays
+		//    carrier-wide (read across all bays / registered on the primary) below.
+		$hangar = ($bombHangarIndex === null)
+			? self::primaryShadowHangar($carrier)
+			: self::shadowHangarByGroupIndex($carrier, (int)$bombHangarIndex);
+		if (!$hangar) return null;
+
+		//Held pool = all integrated fighters in the bay. Each held entry is a
+		//flightSize-1 ShadowMediumFighterFlight (see populateInitialHangarUsage); a
+		//wreck (cannotLaunch) never contributes. dockedFlightId-linked entries DO
+		//count — a reabsorbed-then-rebombed fighter is fully repaired and launchable.
+		$phpclass = 'ShadowMediumFighterFlight';
+		$held = 0;
+		if (is_array($hangar->hangarUsage)){
+			foreach ($hangar->hangarUsage as $e){
+				if (($e['phpclass'] ?? '') !== $phpclass) continue;
+				if (!empty($e['cannotLaunch'])) continue;
+				$held += (int)($e['flightSize'] ?? 1);
+			}
+		}
+		if ($held <= 0) return null;   //empty hangar — bomb cannot fire
+
+		//Stage S (S-d): STRUCTURE-BOX launch cap. Each integrated fighter in space is
+		//bound to a marked structure box (it "stays ATTACHED" — see registerLaunched...
+		//below); a carrier can therefore never have more fighters in space than it has
+		//structure boxes. A combat-reduced carrier (e.g. 4 structure but 6 held) can
+		//only launch as many as it has FREE boxes (remaining structure − fighters
+		//already in space); the surplus stays held and becomes launchable again only if
+		//SelfRepair later restores structure. The boxes already bound to in-space
+		//fighters can't be reused. We clamp the launchable pool to that free-box budget;
+		//resolveBombFlightSizes then honours it for both the manual-split and auto-split
+		//paths since both are bounded by $held.
+		//The structure-box cap is CARRIER-WIDE: one Structure binds every bay's fighters,
+		//so the in-space count is summed over the PRIMARY ShadowHangar's coupling map
+		//(shadowLaunched lives there, not on a per-bay $hangar). This caps a multi-bay
+		//base correctly — all bays' launched fighters compete for the same structure boxes.
+		$struct = $carrier->getStructureSystem(0);
+		$structRemaining = $struct ? max(0, (int)$struct->getRemainingHealth()) : 0;
+		$couplingHangar = self::primaryShadowHangar($carrier);
+		$inSpaceAttached = 0;
+		if ($couplingHangar && is_array($couplingHangar->shadowLaunched)){
+			foreach ($couplingHangar->shadowLaunched as $fid => $baseline){
+				$flight = $gamedata->getShipById((int)$fid);
+				if ($flight instanceof FighterFlight){
+					$inSpaceAttached += self::countAttachedFightersInFlight($flight, $gamedata->turn);
+				}
+			}
+		}
+		$freeBoxes = max(0, $structRemaining - $inSpaceAttached);
+		$held = min($held, $freeBoxes);
+		if ($held <= 0) return null;   //no free structure boxes — nothing can launch yet
+
+		//Resolve the per-flight size list. A bomb launch can exceed the flight-size
+		//cap (e.g. 24 fighters, max 9/flight), so it spawns MULTIPLE flights:
+		//  - explicit $flightSizes (manual split the player chose) — clamp each to the
+		//    cap and to the held pool, drop non-positive;
+		//  - else auto-split $count (<=0/null ⇒ whole pool) into ceil(n/cap) flights of
+		//    <=cap each (e.g. 24 → 9+9+6).
+		//Cap = min(class flight-size limit, fighters currently HELD) — a bay holding
+		//fewer than the limit (ShadowCruiser: 6) can never form a flight bigger than
+		//its stock, so the cap tracks the held pool (user 2026-06-11).
+		$cap = min(self::bombFlightSizeCap($phpclass), $held);
+		$sizes = self::resolveBombFlightSizes($flightSizes, $count, $held, $cap);
+		if (empty($sizes)) return null;
+
+		//Spawn geometry: TARGET hex, carrier heading/speed/facing. Unlike an
+		//ordinary launch there is no hangar-direction offset — the fighters just
+		//appear (stacked) at the bombed hex pointing the way the carrier was pointing.
+		$lastMove = $carrier->getLastMovement();
+		if (!$lastMove) return null;
+		$heading = (int)$lastMove->heading;
+		$facing  = (((int)$lastMove->facing % 6) + 6) % 6;
+		$speed   = (int)$lastMove->speed;
+
+		$firstId = null;
+		foreach ($sizes as $sz){
+			$sz = (int)$sz;
+			if ($sz <= 0) continue;
+
+			$flightName = self::flightNameFor($phpclass, $carrier);
+			$flight = self::spawnLaunchedKFlight($phpclass, $sz, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, /*sourceDocked*/ $carrier, $gamedata);
+			if (!$flight) continue;
+			if ($firstId === null) $firstId = $flight->id;
+
+			//Bombed fighters are integrated — they stay ATTACHED (their structure box is
+			//still marked) while in space, exactly like a bay-launched integrated flight.
+			//Register each flight's id + active-craft baseline so
+			//syncIntegratedStructureCoupling tracks combat losses → +1 structure box and
+			//cut-off when structure drops.
+			self::registerLaunchedIntegratedFlight($carrier, $flight->id, (int)$flight->countActiveCraft($gamedata->turn));
+
+			//Drain $sz fighters for THIS flight from the held pool.
+			self::drainBombPool($hangar, $phpclass, $sz, $gamedata);
+
+			//Stage S (S-f, user 2026-06-11): a Fighter Bomb launch carries NO initiative
+			//penalty — NEITHER the flight-side LaunchedThisTurn (-50) NOR the carrier-side
+			//HangarOperations (-20). (Fighter DOCKING/landing keeps its penalty; that's a
+			//separate path. The bombed fighters still can't act until next turn — that comes
+			//from being spawned via a deploy MovementOrder, not from LaunchedThisTurn, which
+			//is purely the -50 ini hit.) So we deliberately do NOT call applyLaunchCrits here.
+
+			//Replay note per spawned flight (history render + coupling-baseline re-seed).
+			$note = new IndividualNote(
+				-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+				$carrier->id, $hangar->id,
+				'hangarLaunchEvent', 'Fighter Bomb launched',
+				$flight->id . ':' . $phpclass . ':' . $sz . ':bomb'
+			);
+			Manager::insertIndividualNote($note);
+		}
+
+		if ($firstId === null) return null;   //nothing actually spawned
+		return $firstId;
+	}
+
+	/* Max fighters per flight for a bomb-spawned class. Honors an explicitly-set
+	 * $maxFlightSize on the flight class; otherwise derives it from jinkinglimit
+	 * the same way the (commented) FighterFlight ctor rule would: >9 ⇒ 12 (light/
+	 * ultralight), else 9. ShadowMediumFighterFlight (jink 8) ⇒ 9. */
+	public static function bombFlightSizeCap($phpclass){
+		$cap = 9;
+		if (is_string($phpclass) && $phpclass !== '' && class_exists($phpclass)){
+			try {
+				$probe = new $phpclass(-1, -1, 'probe', 0);
+				$mfs = (int)($probe->maxFlightSize ?? 0);
+				if ($mfs > 0) return $mfs;
+				$jink = (int)($probe->jinkinglimit ?? 0);
+				$cap = ($jink > 9) ? 12 : 9;
+			} catch (\Throwable $ex) {
+				$cap = 9;   //defensive — never let a probe failure break firing
+			}
+		}
+		return max(1, $cap);
+	}
+
+	/* Build the per-flight size list for a bomb launch, each entry <= $cap and the
+	 * total <= $held. Prefers an explicit $flightSizes list (the manual split);
+	 * otherwise auto-splits $count (<=0/null ⇒ whole $held) into ceil(n/cap) flights
+	 * (e.g. 24, cap 9 ⇒ [9,9,6]). Any explicit entry over the cap is itself split. */
+	public static function resolveBombFlightSizes($flightSizes, $count, $held, $cap){
+		$cap = max(1, (int)$cap);
+		$held = max(0, (int)$held);
+		$out = array();
+
+		if (is_array($flightSizes) && !empty($flightSizes)){
+			$budget = $held;
+			foreach ($flightSizes as $s){
+				$s = (int)$s;
+				if ($s <= 0 || $budget <= 0) continue;
+				$s = min($s, $budget);
+				$budget -= $s;
+				//A manual entry larger than the cap is itself broken into <=cap chunks.
+				while ($s > 0){
+					$chunk = min($cap, $s);
+					$out[] = $chunk;
+					$s -= $chunk;
+				}
+			}
+			return $out;
+		}
+
+		//Auto-split path.
+		$total = ($count === null || (int)$count <= 0) ? $held : min($held, (int)$count);
+		while ($total > 0){
+			$chunk = min($cap, $total);
+			$out[] = $chunk;
+			$total -= $chunk;
+		}
+		return $out;
+	}
+
+	/* Remove $n integrated fighters of $phpclass from a ShadowHangar's held pool
+	 * (encounter order). Whole entries are dropped (retiring any backing fragment);
+	 * a partially-consumed entry keeps its remainder. Factored out of
+	 * performBombLaunch so a multi-flight bomb drains the pool per flight. */
+	private static function drainBombPool($hangar, $phpclass, $n, $gamedata){
+		$remaining = max(0, (int)$n);
+		if ($remaining <= 0 || !is_array($hangar->hangarUsage)) return;
+		$newUsage = array();
+		foreach ($hangar->hangarUsage as $e){
+			if ($remaining > 0 && ($e['phpclass'] ?? '') === $phpclass && empty($e['cannotLaunch'])){
+				$entrySize = (int)($e['flightSize'] ?? 1);
+				$take = min($entrySize, $remaining);
+				$remaining -= $take;
+				if ($take >= $entrySize){
+					$fragId = (int)($e['dockedFlightId'] ?? 0);
+					if ($fragId > 0){
+						$frag = $gamedata->getShipById($fragId);
+						if ($frag instanceof FighterFlight) self::destroyAllFighters($frag, $gamedata);
+					}
+				} else {
+					$e['flightSize'] = $entrySize - $take;
+					$newUsage[] = $e;
+				}
+			} else {
+				$newUsage[] = $e;
+			}
+		}
+		$hangar->hangarUsage = $newUsage;
+	}
+
 	/* Apply initiative-penalty criticals after a successful launch:
 	 * - LaunchedThisTurn (-50 ini) on the new flight's first fighter
 	 * - HangarOperations (-20 ini) on the carrier's CnC (via shared helper)
@@ -2482,8 +3565,13 @@ class HangarOps {
 		$size = max(1, (int)$size);
 
 		//Total available anonymous craft of this phpclass + first holding bay.
+		//Stage S (S-f): ShadowHangar bays are EXCLUDED — integrated fighters launch
+		//only via the Fighter Bomb (performBombLaunch), never this ordinary path. A
+		//stray/forged launch order for ShadowMediumFighterFlight therefore finds no
+		//eligible bay and fails cleanly below.
 		$avail = 0; $firstBay = null;
 		foreach (self::collectHangars($carrier) as $h){
+			if (!empty($h->isShadowHangar)) continue;
 			if (!is_array($h->hangarUsage)) continue;
 			foreach ($h->hangarUsage as $e){
 				if (($e['phpclass'] ?? '') !== $phpclass) continue;
@@ -2509,6 +3597,11 @@ class HangarOps {
 			return;
 		}
 
+		//B5W Inadequate Hangars: roll the 1d6 launch-abort once the launch is
+		//confirmed otherwise-legal. Keyed on the DRAINING bay ($firstBay) — that's
+		//the inadequate-flagged hangar the shuttles actually launch from.
+		if (self::inadequateLaunchAborts($carrier, $firstBay, $phpclass, $size, $gamedata)) return;
+
 		//Spawn geometry from the carrier's last move + the draining bay's direction.
 		$lastMove = $carrier->getLastMovement();
 		if (!$lastMove) return;
@@ -2522,11 +3615,17 @@ class HangarOps {
 		$flight = self::spawnLaunchedKFlight($phpclass, $size, $flightName, $carrier, $spawnPos, $heading, $facing, $speed, /*sourceDocked*/ $carrier, $gamedata);
 		if (!$flight) return;
 
+		//Stage S (S-f): integrated fighters never reach this ordinary path (ShadowHangar
+		//bays are excluded from $avail above), so there is NO ShadowHangar coupling
+		//registration here — that lives solely in performBombLaunch now.
+
 		//Decrement $size from anonymous entries (in encounter order), dropping
-		//emptied ones. Charge budget on the bays drained.
+		//emptied ones. Charge budget on the bays drained. ShadowHangar bays are
+		//skipped (their integrated fighters drain only via the Fighter Bomb).
 		$remaining = $size;
 		foreach (self::collectHangars($carrier) as $h){
 			if ($remaining <= 0) break;
+			if (!empty($h->isShadowHangar)) continue;
 			if (!is_array($h->hangarUsage)) continue;
 			$newUsage = array();
 			foreach ($h->hangarUsage as $e){
@@ -2563,6 +3662,10 @@ class HangarOps {
 	 * $phpclass (legacy order with no id). Returns {hangar, entry, idx} or null. */
 	public static function findDockedEntry($carrier, $dfid, $phpclass){
 		foreach (self::collectHangars($carrier) as $h){
+			//Stage S (S-f): a ShadowHangar's held fighters never launch via the
+			//ordinary docked-flight path — skip its bay so an integrated entry can't
+			//be drained by a stray launch order (Fighter Bomb is the only exit).
+			if (!empty($h->isShadowHangar)) continue;
 			if (!is_array($h->hangarUsage)) continue;
 			foreach ($h->hangarUsage as $idx => $entry){
 				if (($entry['phpclass'] ?? '') !== $phpclass) continue;
@@ -2674,6 +3777,12 @@ class HangarOps {
 
 		$lastMove = $carrier->getLastMovement();
 		if (!$lastMove) return null;
+
+		//B5W Inadequate Hangars: roll the 1d6 launch-abort AFTER the launch is
+		//confirmed otherwise-legal (so a "1" genuinely costs the turn) but before
+		//any docked-ship resurrection / budget charge. Keyed on the entry's bay.
+		if (self::inadequateLaunchAborts($carrier, $entryHangar, $phpclass, $size, $gamedata)) return null;
+
 		//Spawn geometry. Rails advertise per-launch direction; a multi-bay launch
 		//uses the override (validated) or the entry-hangar's static direction.
 		$effDir   = ($dirOverride !== null) ? (int)$dirOverride : (int)$entryHangar->direction;
@@ -2970,6 +4079,11 @@ class HangarOps {
 	public static function canLaunch($hangar, $carrier, $phpclass, $size, $gamedata, &$reason = null){
 		$size = (int)$size;
 		if ($size <= 0) { $reason = 'invalid size'; return false; }
+		//Stage S (S-f): a ShadowHangar (integrated-fighter bay) does NOT launch via
+		//the ordinary bay path — its fighters leave ONLY through the Fighter Bomb
+		//weapon (performBombLaunch). Landing/reabsorption is unaffected (that path
+		//does not go through canLaunch). Reject any ordinary launch order outright.
+		if (!empty($hangar->isShadowHangar)) { $reason = 'integrated bay — launches only via Fighter Bomb'; return false; }
 		//Stage 16: a catapult launches its fighter regardless of any damage it has
 		//sustained (even when destroyed), so the destroyed-hangar gate is skipped.
 		$isCatapult = !empty($hangar->isCatapult);
@@ -3019,6 +4133,15 @@ class HangarOps {
 	public static function canShipReceive($hangar, $carrier, $flight, $count, $gamedata, &$reason = null){
 		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
 		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
+		//Stage S (S-d): a CUT-OFF integrated fighter has lost its structure tether and
+		//can NEVER land/reabsorb (B5W). A flight may hold a MIX of cut-off and still-
+		//tethered craft (Direction 1 cuts off per-fighter). We no longer reject the whole
+		//flight — instead the dock proceeds for the tethered (non-cut-off) craft only, and
+		//the dock execution + count clamps below exclude the cut-off ones. Only reject when
+		//there is NOTHING dockable left (every craft cut off / destroyed).
+		if (self::countAttachedFightersInFlight($flight, $gamedata->turn) <= 0) {
+			$reason = 'no tethered craft to land (all cut off)'; return false;
+		}
 		//Stage 16: a catapult recovers its fighter regardless of any damage it has
 		//sustained (even destroyed), so the destroyed-hangar gate is skipped for it.
 		$isCatapult = !empty($hangar->isCatapult);
@@ -3086,6 +4209,8 @@ class HangarOps {
 		//declaration (Decurion-style multi-category).
 		$category = self::trueSizeOf($flight);
 		if (!self::hangarAcceptsCategory($hangar, $category, $carrier)) { $reason = 'hangar full'; return false; }
+		//Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
+		if (!self::hangarAcceptsFighterClass($hangar, $flight)) { $reason = 'wrong fighter class'; return false; }
 
 		if ($isCatapult) {
 			//Catapults count craft 1:1 (single-fighter rail).
@@ -3174,7 +4299,7 @@ class HangarOps {
 		}
 
 		//Shuttles, minesweeping shuttles & cargo shuttles can use any combat-fighter slot per B5W §10.1.
-		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles' || $cat === 'medical shuttles') && isset($sizeRank[$hType])) {
+		if (($cat === 'shuttles' || $cat === 'minesweeping shuttles' || $cat === 'cargo shuttles' || $cat === 'medical shuttles' || $cat === 'lifeboats') && isset($sizeRank[$hType])) {
 			return true;
 		}
 
@@ -3239,6 +4364,53 @@ class HangarOps {
 		return false;
 	}
 
+	/* Per-bay fighter-class allow-list gate. A hangar that declares a non-empty
+	 * $allowedFighterClasses accepts ONLY flights whose phpclass is in the list,
+	 * rejecting every other fighter even when it fits by size category (e.g. the
+	 * GaimSuom's bays take 'gaimReskaFighter' and nothing else). An empty list
+	 * (the default on every other hangar) is a no-op, so existing ships are
+	 * unaffected. This is the carrier-DRIVEN counterpart to $customFtrName
+	 * (which is fighter-driven). Called alongside hangarAcceptsCategory at every
+	 * bay-eligibility scan and dock gate so the exclusivity is honoured uniformly.
+	 */
+	public static function hangarAcceptsFighterClass($hangar, $flight){
+		if (!is_object($hangar)) return false;
+		$allowed = isset($hangar->allowedFighterClasses) ? $hangar->allowedFighterClasses : null;
+		if (!is_array($allowed) || empty($allowed)) return true;   //unrestricted bay
+		$cls = is_object($flight) ? (string)$flight->phpclass : '';
+		return in_array($cls, $allowed, true);
+	}
+
+	/* True when $hangar's allow-list SPECIFICALLY reserves $flight's phpclass
+	 * (a non-empty allowedFighterClasses that contains the class). Used to sort
+	 * fill order so a class-restricted bay is filled BEFORE an unrestricted bay
+	 * that could also hold the flight — e.g. a Reska prefers the gaimSuom's
+	 * Reska-only aft bay, leaving the universal primary bay free for the medium
+	 * Koist that can ONLY use it. Distinct from hangarAcceptsFighterClass, which
+	 * returns true for unrestricted bays too. */
+	public static function bayReservesFighterClass($hangar, $flight){
+		if (!is_object($hangar)) return false;
+		$allowed = isset($hangar->allowedFighterClasses) ? $hangar->allowedFighterClasses : null;
+		if (!is_array($allowed) || empty($allowed)) return false;   //unrestricted — not a reservation
+		$cls = is_object($flight) ? (string)$flight->phpclass : '';
+		return in_array($cls, $allowed, true);
+	}
+
+	/* Stable sort: bays whose allow-list SPECIFICALLY reserves $flight's class
+	 * come first (so they fill before unrestricted bays the flight could also
+	 * use), preserving the input order within each group. Operates on a plain
+	 * list of Hangar objects. */
+	public static function sortBaysReservedFirst($bays, $flight){
+		if (!is_array($bays) || count($bays) < 2) return $bays;
+		$reserved = array();
+		$other = array();
+		foreach ($bays as $h){
+			if (self::bayReservesFighterClass($h, $flight)) $reserved[] = $h;
+			else $other[] = $h;
+		}
+		return array_merge($reserved, $other);
+	}
+
 	/* Stage 10.6.2: per-ship customFighter cap remaining for $name on $carrier.
 	 *
 	 * A flight with $customFtrName != '' (e.g. Thunderbolt, Rutarian, Ok-chn)
@@ -3297,6 +4469,7 @@ class HangarOps {
 		foreach ($hangars as $h){
 			if (!empty($h->isLCVRail)) continue;   //LCV rails dock whole LCVs, never FighterFlights
 			if ($h->hangarType !== $category) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 			$isCat = !empty($h->isCatapult);
 			if (!$isCat && $h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
@@ -3314,11 +4487,26 @@ class HangarOps {
 			if (!empty($h->isLCVRail)) continue;                   //LCV rails dock whole LCVs, never FighterFlights
 			if ($h->hangarType === $category) continue;            //already considered above
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 			if ($h->isDestroyed()) continue;
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			$budget = max(0, (int)$h->output - ((int)$h->launchedThisTurn + (int)$h->landedThisTurn));
 			$capacity = min((int)floor($free / $bpc), $budget);
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
+		}
+
+		//Prioritise bays that SPECIFICALLY reserve this flight's class (allowedFighterClasses)
+		//ahead of unrestricted bays that merely accept it — so a Reska auto-lands in the Suom's
+		//Reska-only bay before consuming the universal primary the medium Koist needs. Stable
+		//partition preserves the exact-match-then-hierarchy ordering within each group.
+		if (count($out) > 1){
+			$reservedOut = array();
+			$otherOut = array();
+			foreach ($out as $entry){
+				if (self::bayReservesFighterClass($entry['hangar'], $flight)) $reservedOut[] = $entry;
+				else $otherOut[] = $entry;
+			}
+			$out = array_merge($reservedOut, $otherOut);
 		}
 
 		//Stage 10.6.2: clamp aggregate capacity to the carrier's remaining
@@ -3368,11 +4556,37 @@ class HangarOps {
 	public static function performWholeFlightDock($carrier, $flight, $count, $bays, $gamedata){
 		if (!($flight instanceof FighterFlight)) return 0;
 		if (empty($bays)) return 0;
+
+		//B5W Inadequate Hangars LANDING check. Applied FIRST — before the dockable
+		//count is read below — so any fighter destroyed bouncing off the bay drops
+		//out of countActiveCraft/dockFighters automatically and never occupies a
+		//stored box (the box is freed). Keyed on the PRIMARY docking bay (fill
+		//order, player's preferred bay first); on an inadequate bay each landing
+		//fighter rolls 1d6 and a "1" scores 1d6 damage ignoring armour.
+		$primaryDockBay = isset($bays[0]['hangar']) ? $bays[0]['hangar'] : null;
+		if ($primaryDockBay && !empty($primaryDockBay->inadequate)) {
+			self::applyInadequateLandingDamage($flight, $primaryDockBay, $count, $carrier, $gamedata);
+		}
+
+		//Stage S (S-d): cut-off integrated fighters can NEVER land — they are excluded
+		//from the dockable count and from the chosen-fighter selection below. For an
+		//ordinary (non-integrated) flight this equals countActiveCraft, so behaviour is
+		//unchanged. A flight that still holds cut-off craft after docking its tethered
+		//ones is treated as a PARTIAL dock (the flight ship stays in space carrying the
+		//cut-off remnant), never a full dock — so the still-flying cut-off craft aren't
+		//removed with the ship row.
+		$dockableCount = self::countAttachedFightersInFlight($flight, $gamedata->turn);
+		if ($dockableCount <= 0) return 0;
+		$hasCutOff = (self::countCutOffFighters($flight) > 0);
+		//Total non-destroyed craft (INCLUDING cut-off) — the denominator for splitting the
+		//flight's enhancement cost between the docked fragment and the space-side remnant,
+		//since cut-off craft still carry cost while flying.
 		$activeCount = $flight->countActiveCraft($gamedata->turn);
-		if ($activeCount <= 0) return 0;
 		$count = max(1, (int)$count);
-		if ($count > $activeCount) $count = $activeCount;
-		$partial = ($count < $activeCount);
+		if ($count > $dockableCount) $count = $dockableCount;
+		//Full dock only when every dockable craft lands AND none are cut off; otherwise
+		//partial so the source flight survives in space with the cut-off remnant.
+		$partial = ($count < $dockableCount) || $hasCutOff;
 
 		$category = self::trueSizeOf($flight);
 		//Fractional-safe per-craft box cost (ultralight 0.5, superheavy >1). Don't
@@ -3419,6 +4633,7 @@ class HangarOps {
 		//untouched (the entry's boxes are simply counted on its own hangar).
 		if (count($occupancy) > 1) $entry['occupancy'] = $occupancy;
 
+		$dockedUnit = null;   //Stage S: the FighterFlight that actually docked (full: the flight; partial: the fragment)
 		if ($partial){
 			//Partial: the docked fighters leave the source flight (it keeps its
 			//N-K remnant in space). Spawn a fragment FighterFlight holding the
@@ -3435,6 +4650,7 @@ class HangarOps {
 			//credited for craft that now have their own row.
 			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
 			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $primaryHangar, $gamedata);
+			$dockedUnit = $fragment;   //Stage S: the docked portion is the fragment (remnant $flight stays in space)
 			if ($fragment){
 				$entry['dockedFlightId'] = $fragment->id;
 				$entry['name']           = $fragment->name;   //"<source> - Split"
@@ -3476,6 +4692,45 @@ class HangarOps {
 			$entry['dockedFlightId'] = $flight->id;
 			$flight->removed = true;
 			$flight->removedTurn = $gamedata->turn;
+			$dockedUnit = $flight;   //Stage S: the docked portion is the whole flight
+		}
+
+		//Stage S (S-c): integrated-fighter REABSORPTION. An integrated fighter that
+		//lands is reabsorbed into the carrier's Structure and re-formed fresh — "any
+		//damage the fighter had when it landed is repaired", and it "can be launched
+		//again as soon as the following turn". So the stored entry must be a PRISTINE
+		//ANONYMOUS held record (NO dockedFlightId) — identical in shape to the S-b
+		//initial-population entries — so the next launch goes through the fresh-spawn
+		//(launchAnonymousStash) path, NOT the docked-resurrect path that would bring
+		//the SAME damaged flight back. $entry['flightSize'] is $count = the SURVIVING
+		//craft that actually docked (performWholeFlightDock clamps $count to
+		//countActiveCraft, so a fighter destroyed by combat is NOT stored and won't
+		//relaunch). Retire ONLY the docked unit ($dockedUnit = the whole flight on a
+		//full dock, or just the docked FRAGMENT on a partial dock — the N-K remnant
+		//$flight stays flying) via destroyAllFighters → combatValue 0 → fleet-list
+		//hides it, no ghost. (S-e adds diffuser-energy reabsorption + excess
+		//penetration; S-d adds the per-fighter structure-box binding/freeing.)
+		if (!empty($primaryHangar->isShadowHangar) && $flight->phpclass === 'ShadowMediumFighterFlight') {
+			//Stage S (S-e): reabsorb the landing craft's stored diffuser energy into a
+			//carrier diffuser (excess penetrates) — BEFORE destroyAllFighters, while the
+			//$dockedUnit tendrils still hold their energy. Gated on the flight ACTUALLY being
+			//an integrated fighter (not just the bay being a ShadowHangar) so a foreign flight
+			//that somehow reached a ShadowHangar bay isn't reabsorbed / mis-tracked.
+			self::applyDiffuserReabsorption($carrier, $dockedUnit, $gamedata);
+			//Retire the landed unit as DOCKED (cyan), not DROPOUT — it reabsorbed, it
+			//didn't combat-disengage. dockAllFighters hides the removed row the same way.
+			if ($dockedUnit instanceof FighterFlight) self::dockAllFighters($dockedUnit, $gamedata);
+			unset($entry['dockedFlightId'], $entry['occupancy'], $entry['fragment'], $entry['boxesPerCraft']);
+			$entry['phpclass']   = $flight->phpclass;
+			$entry['name']       = 'Integrated Fighter';
+			$entry['flightSize'] = $count;
+			$entry['hangarType'] = $primaryHangar->hangarType;
+			//Stage S (S-d): the $count craft that landed REABSORBED — decrement the
+			//launched baseline for $flight->id (the source flight, whether the whole
+			//flight on a full dock or the remnant on a partial) so the per-turn coupling
+			//sync does NOT mistake the dock for a combat death. attached is unchanged
+			//(reabsorbed fighters are still tethered, now held in the bay).
+			self::decrementLaunchedIntegratedBaseline($carrier, $flight->id, $count);
 		}
 
 		$primaryHangar->hangarUsage[] = $entry;
@@ -3583,19 +4838,36 @@ class HangarOps {
 			if (!($h instanceof Hangar)) continue;
 			$ordered[] = $h; $seen[spl_object_hash($h)] = true;
 		}
-		//Then any other eligible bay on the carrier.
+		//Then any other eligible bay on the carrier — but with bays that SPECIFICALLY
+		//reserve this flight's class (allowedFighterClasses) pulled to the front of the
+		//top-up tail, so e.g. a Reska fills the Suom's Reska-only bay before spilling
+		//into the universal primary bay (leaving the primary free for a medium Koist
+		//that can ONLY use it). Player-preferred bays above are untouched.
+		$tail = array();
 		foreach (self::collectHangars($carrier) as $h){
 			if (!empty($h->isCatapult)) continue;
 			if (isset($seen[spl_object_hash($h)])) continue;
+			$tail[] = $h;
+		}
+		foreach (self::sortBaysReservedFirst($tail, $flight) as $h){
 			$ordered[] = $h;
 		}
+
+		//Stage S: a ShadowHangar (integrated-fighter bay) accepts ONLY its own integrated
+		//fighters for docking — a foreign / non-integrated flight must never land there
+		//(it would wrongly trip the reabsorption branch in performWholeFlightDock and
+		//corrupt the bay's held pool). ShadowHangars keep $name='hangar' so they'd
+		//otherwise pass hangarAcceptsCategory like any medium bay.
+		$flightIsIntegrated = ($flight->phpclass === 'ShadowMediumFighterFlight');
 
 		$bays = array();
 		$boxesAvail = 0;
 		foreach ($ordered as $h){
 			if (!empty($h->isCatapult)) continue;
 			if ($h->isDestroyed()) continue;
+			if (!empty($h->isShadowHangar) && !$flightIsIntegrated) continue;   //integrated-only bay
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 			$free = self::freeBoxesByCategory($h, $category, $carrier);
 			//Respect the shared launch+land budget per bay. Budget is in CRAFT;
 			//convert to its box-equivalent with the real (fractional) bpc so an
@@ -3649,11 +4921,17 @@ class HangarOps {
 
 		//Clamp to whatever craft are still active in this flight (other dock
 		//orders processed earlier this turn may have already disengaged some).
-		$activeCount = $flight->countActiveCraft($gamedata->turn);
-		if ($activeCount <= 0) return 0;
-		if ($count > $activeCount) $count = $activeCount;
+		//Stage S (S-d): cut-off integrated fighters can never land, so the dock is
+		//clamped to the dockable (non-cut-off) count and a flight still carrying cut-off
+		//craft is forced PARTIAL (the source flight survives in space with the remnant).
+		//For ordinary flights dockableCount == countActiveCraft, so behaviour is unchanged.
+		$activeCount   = $flight->countActiveCraft($gamedata->turn);
+		$dockableCount = self::countAttachedFightersInFlight($flight, $gamedata->turn);
+		if ($dockableCount <= 0) return 0;
+		$hasCutOff = (self::countCutOffFighters($flight) > 0);
+		if ($count > $dockableCount) $count = $dockableCount;
 
-		$partial = ($count < $activeCount);
+		$partial = ($count < $dockableCount) || $hasCutOff;
 
 		//Bucket the entry under the flight's TRUE size, not the carrier-mapped
 		//category — this keeps the hangarUsage record accurate even when the
@@ -3681,9 +4959,12 @@ class HangarOps {
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
 		if ($bpc != 1) $entry['boxesPerCraft'] = $bpc;
 
+		$dockedUnit = null;   //Stage S: the FighterFlight that actually docked (full: the flight; partial: the fragment)
 		if ($partial) {
 			//Stage 10.3: priority-ordered dockFighters returns the actual
 			//Fighter objects chosen (most-damaged first, back-of-array tiebreak).
+			//Stage S (S-d): dockFighters excludes cut-off craft, so a mixed flight
+			//only ever lands its tethered fighters; the cut-off remnant stays in space.
 			$chosenFighters = self::dockFighters($flight, $count, $gamedata);
 
 			//Stage 10.4: spawn a fragment FighterFlight holding the chosen
@@ -3693,6 +4974,7 @@ class HangarOps {
 			//all its preserved state. Pre-10.4 partial docks dropped damage
 			//state entirely on relaunch — fresh fighters spawned undamaged.
 			$fragment = self::spawnFragmentFlight($flight, $chosenFighters, $carrier, $hangar, $gamedata);
+			$dockedUnit = $fragment;   //the docked portion is the fragment (remnant $flight stays in space)
 			if ($fragment) {
 				$entry['dockedFlightId'] = $fragment->id;
 				$entry['name']           = $fragment->name;     //"$sourceName - Detachment"
@@ -3712,6 +4994,29 @@ class HangarOps {
 			$entry['dockedFlightId'] = $flight->id;
 			$flight->removed = true;
 			$flight->removedTurn = $gamedata->turn;
+			$dockedUnit = $flight;
+		}
+
+		//Stage S (S-c): integrated-fighter REABSORPTION — same as performWholeFlightDock
+		//(this performLand path only runs for a jumping carrier's dock). Store a PRISTINE
+		//ANONYMOUS held entry (no dockedFlightId) so relaunch fresh-spawns an undamaged
+		//fighter, and retire the old removed flight row so it leaves no ghost. Operates on
+		//$dockedUnit (the fragment on a partial dock) so a cut-off remnant left on the
+		//source flight is NOT reabsorbed — it stays in space, still flying.
+		if (!empty($hangar->isShadowHangar) && $flight->phpclass === 'ShadowMediumFighterFlight') {
+			//Stage S (S-e): reabsorb diffuser energy before retiring the landed flight.
+			//Gated on the flight actually being an integrated fighter (not just the bay being
+			//a ShadowHangar) — a foreign flight that reached this bay isn't reabsorbed.
+			self::applyDiffuserReabsorption($carrier, $dockedUnit, $gamedata);
+			//DOCKED (cyan) not DROPOUT — reabsorbed, not combat-disengaged.
+			if ($dockedUnit instanceof FighterFlight) self::dockAllFighters($dockedUnit, $gamedata);
+			unset($entry['dockedFlightId'], $entry['boxesPerCraft']);
+			$entry['phpclass']   = $flight->phpclass;
+			$entry['name']       = 'Integrated Fighter';
+			$entry['flightSize'] = $count;
+			$entry['hangarType'] = $hangar->hangarType;
+			//Stage S (S-d): reabsorbed craft are not a combat loss — decrement baseline.
+			self::decrementLaunchedIntegratedBaseline($carrier, $flight->id, $count);
 		}
 
 		//Stage 16.5: landing on a DAMAGED catapult deals damage to the recovered
@@ -3785,6 +5090,116 @@ class HangarOps {
 			if (!$destroyed) $allDestroyed = false;
 		}
 		return $damagedAny && $allDestroyed;
+	}
+
+	/* Stage S (S-e): diffuser-energy reabsorption on an integrated-fighter landing.
+	 * Second half of land-and-reabsorb (S-c did box-free + fighter-repair). B5W S5:
+	 * "Any energy contained in [the landing fighter's] diffusers must be absorbed into
+	 * a single diffuser of the carrier's choice, with any excess penetrating as damage
+	 * to a random system, ignoring armor."
+	 *
+	 * $dockedUnit is the craft that actually landed (the whole FighterFlight on a full
+	 * dock, the docked fragment on a partial) — the SAME object S-c retires via
+	 * destroyAllFighters. Call this BEFORE that retire so the tendrils' stored energy
+	 * is still readable. ShadowHangar-only; the caller gates on $primaryHangar->isShadowHangar.
+	 *
+	 *  1. Sum getUsedCapacity() across every DiffuserTendrilFtr on the landed craft.
+	 *  2. "Carrier's choice" = AUTO most-free-capacity carrier EnergyDiffuser (user
+	 *     2026-06-11). Fill its tendrils largest-first (codebase convention) via the
+	 *     carrier-side DiffuserTendril::absorbDamage — a persisted DamageEntry, the same
+	 *     mechanism a hit uses, so it shows on the diffuser and is replay-safe.
+	 *  3. Excess (energy beyond the chosen diffuser's free tendril capacity) penetrates
+	 *     as damage to ONE random targetable carrier system, IGNORING ARMOR (armour 0
+	 *     DamageEntry, same as the catapult-landing / S-d structure entries). The roll
+	 *     runs once here in the live Fire-Phase dock resolution and is baked into the
+	 *     persisted DamageEntry (collected by getNewDamages → submitDamages); the dock
+	 *     branch does NOT re-run on a replay scrub, so no separate roll-note is needed
+	 *     (cf. the catapult-landing damage, which persists the same way).
+	 */
+	private static function applyDiffuserReabsorption($carrier, $dockedUnit, $gamedata){
+		if (!($dockedUnit instanceof FighterFlight)) return;
+
+		//1. Energy the landing craft brings into the carrier (B5W S5): BOTH "any damage
+		//the fighter had when it landed" (the Fighter's accumulated damage points) AND
+		//"any energy contained in its diffusers" (its tendrils' stored capacity). They're
+		//distinct, additive sources — the fighter's own armour/structure damage lives in
+		//its DamageEntry stack (getTotalDamage), the diffuser charge lives in the
+		//DiffuserTendrilFtr `absorb` notes (getUsedCapacity) — so no double-count.
+		$incoming = 0;
+		foreach ($dockedUnit->systems as $fighter){
+			if (!($fighter instanceof Fighter)) continue;
+			if ($fighter->isDestroyed($gamedata->turn)) continue;   //destroyed craft don't reabsorb (it never docked)
+			$incoming += (int)$fighter->getTotalDamage();           //damage the fighter had when it landed
+			foreach ($fighter->systems as $sub){
+				if ($sub instanceof DiffuserTendrilFtr){
+					$incoming += (int)$sub->getUsedCapacity();       //energy stored in its diffuser
+				}
+			}
+		}
+		if ($incoming <= 0) return;   //undamaged + empty diffuser — common case, bail cheap
+
+		//2. "Absorbed into a SINGLE diffuser of the carrier's choice" — read as a SINGLE
+		//TENDRIL (the diffuser's absorbing segment), user 2026-06-11: pick the carrier's
+		//single most-free live tendril across all its EnergyDiffusers (the "carrier's
+		//choice" = the biggest available sink) and fill ONLY that one. The rest penetrates
+		//— overflow is NOT spread across the diffuser's other tendrils (that's what made
+		//46 vanish into two tendrils with no hull damage in the first cut). Mirrors the
+		//in-combat doProtect, which also commits a hit to ONE tendril, not the whole bank.
+		$bestTendril = null;
+		$bestFree    = 0;
+		foreach ($carrier->systems as $sys){
+			if (!($sys instanceof EnergyDiffuser)) continue;
+			if ($sys->isDestroyed()) continue;
+			foreach ($sys->tendrils as $tendril){
+				if ($tendril->isDestroyed()) continue;
+				$free = (int)$tendril->getRemainingCapacity();
+				if ($free > $bestFree){ $bestFree = $free; $bestTendril = $tendril; }
+			}
+		}
+
+		$remaining = $incoming;
+		if ($bestTendril !== null && $bestFree > 0){
+			$put = min($remaining, $bestFree);
+			$bestTendril->absorbDamage($carrier, $gamedata, $put);   //+DamageEntry, persisted
+			$remaining -= $put;
+		}
+
+		//3. Excess (beyond that one tendril) penetrates to ONE random carrier system,
+		//ignoring armor. Pick the target via the carrier's OWN getHitSystem so a Shadow
+		//hull resolves it through its hitChart — every Shadow system is isTargetable=false
+		//("cannot be targeted by called shots"), so a plain isTargetable filter yields an
+		//EMPTY list and the penetration silently vanished (game 4167: 30 absorbed, 12 lost).
+		//Reuse the established self-ram convention (cf. ShipSystem WreakHavoc / baseSystems
+		//ramming): shooter = target = the carrier itself, weapon = its RammingAttack (every
+		//ship has one), section 0 (Primary). Unlike the marine reroll we do NOT exclude
+		//Structure — a Structure hit is a legitimate armour-ignoring random-system outcome.
+		if ($remaining <= 0) return;
+
+		$rammingSystem = $carrier->getSystemByName("RammingAttack");
+		if (!$rammingSystem) return;   //no weapon to model the hit — vent harmlessly
+		$fireOrder = new FireOrder(
+			-1, "normal", $carrier->id, $carrier->id,
+			$rammingSystem->id, -1, $gamedata->turn, 1,
+			100, 100, 1, 1, 0,
+			0, 0, "ShadowReabsorb", 10000
+		);
+		$target = $carrier->getHitSystem($carrier, $fireOrder, $rammingSystem, $gamedata, 0);
+		if (!$target) return;
+
+		//Clamp to the target's remaining health and flag destroyed when the overflow
+		//meets/exceeds it — the same single-system, no-cascade convention applyMarineDamage
+		//uses for internal effects (we don't spill leftover overkill into other systems).
+		$maxDamage     = (int)$target->getRemainingHealth();
+		$damageCaused  = min((int)$remaining, $maxDamage);
+		$systemDestroyed = ((int)$remaining >= $maxDamage);
+		$entry = new DamageEntry(
+			-1, $carrier->id, -1, $gamedata->turn, $target->id,
+			$damageCaused, 0, 0, -1, $systemDestroyed, false, "Diffuser overflow", "ShadowReabsorb"
+		);
+		$entry->updated      = true;
+		$entry->shooterid    = $carrier->id;
+		$entry->weaponid     = $rammingSystem->id;
+		$target->damage[]    = $entry;
 	}
 
 	/* === Stage 7: deployment-phase dock ================================== */
@@ -3919,11 +5334,19 @@ class HangarOps {
 			if (isset($seen[$k])) continue;
 			$seen[$k] = true; $ordered[] = $h;
 		}
+		//Top-up tail: bays that SPECIFICALLY reserve this flight's class first, so a
+		//Reska fills the Suom's Reska-only bay before spilling into the universal
+		//primary (keeping the primary free for the medium Koist). Player-chosen bays
+		//(above) keep their order.
+		$tail = array();
 		foreach (self::collectHangars($carrier) as $h){
 			$k = spl_object_hash($h);
 			if (isset($seen[$k])) continue;
 			if (!empty($h->isCatapult)) continue;
-			$seen[$k] = true; $ordered[] = $h;
+			$seen[$k] = true; $tail[] = $h;
+		}
+		foreach (self::sortBaysReservedFirst($tail, $flight) as $h){
+			$ordered[] = $h;
 		}
 
 		//Occupancy is tracked in WHOLE boxes per bay (every consumer reads
@@ -3940,6 +5363,7 @@ class HangarOps {
 			if (!empty($h->isCatapult)) continue;
 			if ($h->isDestroyed()) continue;
 			if (!self::hangarAcceptsCategory($h, $category, $capabilityCarrier)) continue;
+			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 
 			//TRUE free boxes for this bay = effective capacity − max(DB usage,
 			//POST-side this-pass usage). The POST-side bay accumulates entries the
@@ -4110,6 +5534,9 @@ class HangarOps {
 		$size = ($count === null) ? (int)$flight->flightSize : (int)$count;
 		if ($size <= 0) { $reason = 'flight has no craft'; return false; }
 
+		//Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
+		if (!self::hangarAcceptsFighterClass($hangar, $flight)) { $reason = 'wrong fighter class'; return false; }
+
 		$category = self::trueSizeOf($flight);
 		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
 		//unitSize<1 craft need more than one box each (see boxesPerCraftForClass);
@@ -4187,13 +5614,17 @@ class HangarOps {
 	 * and crit history onto a freshly-spawned fragment FighterFlight so
 	 * partial-dock damage persists through the dock/relaunch cycle.
 	 */
-	private static function applyFighterStateCritical($flight, $count, $critClass, $gamedata){
+	private static function applyFighterStateCritical($flight, $count, $critClass, $gamedata, $excludeCutOff = false){
 		if ($count <= 0) return array();
 
 		$candidates = array();
 		foreach ($flight->systems as $idx => $fighter) {
 			if (!($fighter instanceof Fighter)) continue;
 			if ($fighter->isDestroyed($gamedata->turn)) continue;   //already disengaged/docked/destroyed
+			//Stage S (S-d): a cut-off integrated fighter can never land/reabsorb, so it is
+			//NOT a docking candidate (callers that dock pass $excludeCutOff=true). Combat
+			//disengagement does NOT exclude it — a cut-off craft can still drop out / die.
+			if ($excludeCutOff && self::isFighterCutOff($fighter)) continue;
 			$candidates[] = array(
 				'fighter' => $fighter,
 				'idx'     => $idx,
@@ -4227,7 +5658,7 @@ class HangarOps {
 	 * Returns the list of chosen Fighter objects (Stage 10.3 priority order).
 	 */
 	private static function dockFighters($flight, $count, $gamedata){
-		return self::applyFighterStateCritical($flight, $count, 'DockedFighter', $gamedata);
+		return self::applyFighterStateCritical($flight, $count, 'DockedFighter', $gamedata, /*excludeCutOff*/ true);
 	}
 
 	/* Disengage $count active fighters in $flight (combat disengagement,
@@ -4416,6 +5847,7 @@ class HangarOps {
 			'DockedFighter'        => true, //dock state marker, source-only
 			'SplitLaunchedFighter' => true, //partial-launch split marker, source-only
 			'LaunchedThisTurn'     => true, //initiative penalty, turn-specific event
+			'ShadowFighterCutOff'  => true, //Stage S: cut-off marker, source-only (a cut-off fighter never copies forward)
 		);
 		foreach ($sourceFighter->criticals as $crit) {
 			if (isset($skipPhpclasses[$crit->phpclass])) continue;
@@ -4829,6 +6261,27 @@ class HangarOps {
 		}
 	}
 
+	/* Stage S (S-c/S-e): retire a REABSORBED integrated-fighter flight. Identical in
+	 * effect to destroyAllFighters (every fighter is marked inactive so the old removed
+	 * flight row leaves no ghost — Fighter::isDestroyed folds in DockedFighter exactly
+	 * as it does DisengagedFighter), but stamps DockedFighter so the replay renders the
+	 * landed craft as cyan DOCKED, not DROPOUT — a reabsorbed fighter LANDED, it didn't
+	 * disengage from combat. Mirrors dockFighters' marker choice for the ordinary path. */
+	private static function dockAllFighters($flight, $gamedata){
+		foreach ($flight->systems as $f) {
+			if (!($f instanceof Fighter)) continue;
+			if ($f->isDestroyed($gamedata->turn)) continue;
+			//Stage S (S-d): never mark a cut-off integrated fighter as docked — it lost
+			//its structure tether and stays in space fighting (the partial-dock path keeps
+			//the source flight alive to carry it). Skipping it here leaves it on the board.
+			if (self::isFighterCutOff($f)) continue;
+			$crit = new DockedFighter(-1, $flight->id, $f->id, 'DockedFighter', $gamedata->turn);
+			$crit->updated = true;
+			$crit->newCrit = true;
+			$f->criticals[] = $crit;
+		}
+	}
+
 	/* End-of-turn: walks $hangar->pendingDockOrders, validates each, and lands
 	 * eligible flights. Failed entries are dropped with a 'hangarDockEvent'
 	 * note recording the reason — players see this in replay.
@@ -5087,6 +6540,12 @@ class HangarOps {
 		$virtuals = array();
 		foreach ($hangars as $hangar) {
 			if (!is_array($hangar->hangarUsage)) continue;
+			//Stage S: integrated fighters are FORMED FROM the carrier's Structure, so they
+			//cannot escape a dead carrier — they die with it. Exclude every ShadowHangar
+			//bay's held fighters from the escape pool entirely (user 2026-06-12). (Launched
+			//integrated fighters already in space are their own flight rows and are
+			//unaffected by the carrier's destruction; only the bay-held ones are dropped.)
+			if (!empty($hangar->isShadowHangar)) continue;
 			foreach ($hangar->hangarUsage as $entryIdx => $entry) {
 				if (!empty($entry['cannotLaunch'])) continue;
 				$phpclass = (string)($entry['phpclass'] ?? '');

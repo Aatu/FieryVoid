@@ -2734,7 +2734,8 @@ class RammingAttack extends Weapon{
 				// 1. Irregular Shape defined by hexOffsets
 				$move = $thisShip->getLastMovement();
 				$facing = $move ? $move->facing : 0;
-				
+
+				$occupiedHexes[] = $terrainPosition; // Center hex is always occupied; hexOffsets lists only the EXTRA hexes
 				foreach ($thisShip->hexOffsets as $offset) {
 					// Use accurate pixel-based rotation to get absolute hex position
 					$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $facing);
@@ -2905,6 +2906,7 @@ class RammingAttack extends Weapon{
 		//Build list of occupied hexes (mirrors checkForCollisions logic).
 		$occupiedHexes = [];
 		if (property_exists($terrain, 'hexOffsets') && !empty($terrain->hexOffsets)) {
+			$occupiedHexes[] = $terrainPosition; // Center hex is always occupied; hexOffsets lists only the EXTRA hexes
 			foreach ($terrain->hexOffsets as $offset) {
 				$occupiedHexes[] = Mathlib::getRotatedHex($terrainPosition, $offset, $terrainFacing);
 			}
@@ -3611,8 +3613,171 @@ class VortexDisruptor extends Weapon{
 	public function getDamage($fireOrder){       return 0; /*no actual damage, just disruption of vortex which is narrative only*/  }
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
 	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
-	
+
 }//endof class VortexDisruptor
+
+
+/* Stage S (S-f): Shadow Fighter Bomb (B5W Kitchen Sink "Fighter Bomb").
+ *
+ * An integrated-fighter carrier (ShadowHangar) cannot launch fighters from its
+ * bay the ordinary way; instead it BOMBS them out as a weapon — a burst of its
+ * held integrated fighters appears at a chosen hex, ready to fight from there.
+ *
+ * Structurally this is a Weapon (NOT a Hangar — Weapon/Hangar are sibling
+ * ShipSystem subclasses, and the Bomb is genuinely weapon-shaped: an arc, a
+ * range, fire-selectable in the Firing Phase, targets a hex). It mirrors
+ * BallisticMineLauncher: a Weapon that SPAWNS units at a target hex during the
+ * Fire step (beforeFiringOrderResolution), here ShadowMediumFighterFlights
+ * instead of mines, drawn from the ship's ShadowHangar held pool.
+ *
+ * Behaviour (locked with user 2026-06-11):
+ *  - bursts the ENTIRE held pool (output is the bay's capacity, e.g. 6) as ONE
+ *    flight at the target hex — HangarOps::performBombLaunch caps it to what's
+ *    actually held;
+ *  - PURE HEX, no miss roll / no deviation (fighters always appear at the picked
+ *    hex);
+ *  - shares the ShadowHangar's pool (the bomb IS the bay's only launch path), so
+ *    an empty bay (fighters lost on a previous turn) means the bomb cannot fire;
+ *  - zero damage — the "effect" is the spawned flight (carrier heading/speed,
+ *    integrated structure coupling registered; can't act until next turn via the
+ *    deploy spawn). NO initiative penalty (no LaunchedThisTurn -50 / HangarOperations
+ *    -20) — unlike an ordinary launch (user 2026-06-11). Docking keeps its penalty.
+ *
+ * The spawn happens in fire() (Firing::fireWeapons → Firing::fire on the live
+ * Fire-Phase advance). fire() is guarded by `if ($fire->rolled > 0) return;`, so
+ * setting $fireOrder->rolled in fire() makes the burst idempotent on replay —
+ * the same self-persisting-effect pattern VortexDisruptor uses (it too is a
+ * non-ballistic hex weapon whose whole effect lives in fire(), unlike the
+ * BALLISTIC mine launcher which must spawn in beforeFiringOrderResolution
+ * because ballistics resolve before the fire step). The burst is performed once
+ * and persisted (ship row + 'Fighter Bomb launched' note); replay reads it back.
+ */
+class ShadowFighterBomb extends Weapon{
+	public $name = "ShadowFighterBomb";
+	public $displayName = "Fighter Bomb";
+	public $iconPath = "FighterBomb.png"; //placeholder shadow-weapon icon until art exists
+
+	// Auto-discovered by game.php to preload the flight blueprint into staticShips
+	// so the client has its full definition when the bomb spawns a flight mid-game.
+	public $spawnableClasses = array('ShadowMediumFighterFlight');
+
+	public $damageType = "Standard"; //irrelevant — bomb does no damage
+	public $weaponClass = "Ballistic";
+	public $hextarget = true;        //targets a hex, not a unit
+	public $hidetarget = false;
+	public $ballistic = false;       //resolved as a hex-fire effect, not a ballistic shot
+	public $uninterceptable = true;
+	public $doNotIntercept = true;
+	public $priority = 1;
+	public $factionAge = 3;          //Ancient
+
+	public $range = 10;              //≤10 hexes (B5W example for the test hull)
+	public $loadingtime = 1;         //ready every turn (bay-limited, not charge-limited)
+
+	public $animation = "ball";
+	public $animationColor = array(160, 60, 200);
+	public $animationExplosionScale = 0.5;
+	public $animationExplosionType = "AoE";
+
+	public $firingModes = array(
+		1 => "Fighter Bomb"
+	);
+
+	//Self-repair: a hangar-adjacent system, low priority (matches VortexDisruptor).
+	public $repairPriority = 2;
+
+	//Stage S (multi-bay): which ShadowHangar this bomb serves. A carrier with SEVERAL
+	//arc-keyed bays (shadowRegenBaseBomb) gives each its own bomb; the bomb launches/drains
+	//ONLY the bay whose ShadowHangar->bombGroupIndex equals this. null = single-bay hull
+	//(shadowCruiserBomb) — performBombLaunch falls back to the primary ShadowHangar.
+	public $bombHangarIndex = null;
+
+	function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $bombHangarIndex = null)
+	{
+		if ( $maxhealth == 0 ) $maxhealth = 4;
+		if ( $powerReq == 0 ) $powerReq = 0; //no power draw — it throws fighters, not energy
+		parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+		if ($bombHangarIndex !== null) $this->bombHangarIndex = (int)$bombHangarIndex;
+	}
+
+	//Round-trip the per-bay link so the client can size each bomb's pool to its own bay.
+	public function stripForJson() {
+		$strippedSystem = parent::stripForJson();
+		if (isset($this->bombHangarIndex)) $strippedSystem->bombHangarIndex = (int)$this->bombHangarIndex;
+		return $strippedSystem;
+	}
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		$this->data["Special"]  = "Used to launch integrated fighters at a target hex.";
+		$this->data["Special"] .= "<br>Targets a hex within range; fighters deploy there at the carrier's heading and speed next turn.";
+        $this->data["Special"] .= "<br>Technical system, cannot be damaged or destroyed.";			
+		//$this->data["Special"] .= "<br>This is the integrated hangar's ONLY way to launch fighters — it draws from the bay's held pool. If the bay is empty, the bomb cannot fire.";
+	}
+
+	public function getDamage($fireOrder){ return 0; }
+	public function setMinDamage(){ $this->minDamage = 0; }
+	public function setMaxDamage(){ $this->maxDamage = 0; }
+
+	/* Hex order has no target ship, so the base calculateHitBase would fall into
+	 * its null-target "auto-miss + ERROR pubnote" branch. Override (like Vortex
+	 * Disruptor) to mark it an automatic success — the bomb never misses; whether
+	 * fighters actually launch is decided in fire() by the held-pool check. */
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		$fireOrder->needed = 100;   //always "hits" (d100); range/arc enforced client-side
+		$fireOrder->updated = true;
+	}
+
+	/* The whole effect: burst the carrier's held integrated fighters out at the
+	 * ordered hex. No hit roll, no damage. Setting $fireOrder->rolled trips the
+	 * `if ($fire->rolled > 0) return;` guard in Firing::fire so a replay scrub
+	 * never re-spawns (the persisted ship row + note ARE the record). Mirrors
+	 * VortexDisruptor's self-persisting, roll-once-on-live-advance fire(). */
+	public function fire($gamedata, $fireOrder)
+	{
+		$this->changeFiringMode($fireOrder->firingMode);
+
+		//A hex-target order may arrive bound to a ship (targetid != -1) if the
+		//player clicked a unit; resolve it to that unit's hex (same correction the
+		//mine launcher + Vortex Disruptor apply).
+		if ($fireOrder->targetid != -1){
+			$targetship = $gamedata->getShipById($fireOrder->targetid);
+			if ($targetship){
+				$tp = $targetship->getHexPos();
+				$fireOrder->x = $tp->q;
+				$fireOrder->y = $tp->r;
+			}
+			$fireOrder->targetid = -1;
+			$fireOrder->calledid = -1;
+		}
+
+		$fireOrder->rolled = 1;   //trip the no-re-fire guard; bomb never "misses"
+		$fireOrder->updated = true;
+
+		$shooter = $gamedata->getShipById($fireOrder->shooterid);
+		if (!$shooter) return;
+
+		//$fireOrder->shots carries the player's chosen launch count (set by the
+		//client hex-target count picker, clamped there to the held pool). 0/absent
+		//falls back to the whole pool inside performBombLaunch.
+		$count = (int)$fireOrder->shots;
+
+		$spawnPos = new OffsetCoordinate($fireOrder->x, $fireOrder->y);
+		//Multi-bay: launch ONLY from the bay this bomb serves (null ⇒ primary bay).
+		$flightId = HangarOps::performBombLaunch($shooter, $spawnPos, $gamedata, $count, null, $this->bombHangarIndex);
+
+		if ($flightId){
+			$fireOrder->shotshit = 1;
+			//Terse pubnote: in a manual split the combat log groups N same-hex bomb
+			//orders into ONE line and concatenates their pubnotes, so keep each short
+			//(the grouped line already reports the total shot count + target hex).
+			$fireOrder->pubnotes .= " Fighter Bomb launched.";
+		} else {
+			$fireOrder->pubnotes .= " Fighter Bomb: no integrated fighters available to launch.";
+		}
+	} //endof function fire
+}//endof class ShadowFighterBomb
 
 
 

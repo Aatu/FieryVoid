@@ -15,6 +15,7 @@ class ChoukaWarPrayerEscort extends MediumShip{
         $this->agile = true;
         $this->canvasSize = 75;
 	    $this->isd = 1960;
+        $this->minesweeperbonus = 2;
         
         $this->forwardDefense = 11;
         $this->sideDefense = 13;

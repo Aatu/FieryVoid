@@ -231,11 +231,19 @@ window.DeploymentDock = (function () {
     function firstFittingHangar(hangars, flight, carrier) {
         var cat = categoryForFlight(flight);
         var size = parseInt(flight.flightSize, 10) || 1;
-        for (var i = 0; i < hangars.length; i++) {
-            var h = hangars[i];
-            if (!hangarAcceptsCategory(h.hangar.hangarType, cat, carrier)) continue;
-            //h.free is in boxes; a unitSize<1 flight needs size × per-craft boxes.
-            if (h.free >= craftBoxesInHangar(h.hangar, size, flight.unitSize)) return h.hangar;
+        //Two passes: bays that SPECIFICALLY reserve this flight's class first (so a
+        //Reska takes the Suom's Reska-only bay before the universal primary), then
+        //the rest in their original order.
+        for (var pass = 0; pass < 2; pass++) {
+            for (var i = 0; i < hangars.length; i++) {
+                var h = hangars[i];
+                var reserved = bayReservesFighterClass(h.hangar, flight);
+                if (pass === 0 ? !reserved : reserved) continue;   //pass 0 = reserved only; pass 1 = the rest
+                if (!hangarAcceptsCategory(h.hangar.hangarType, cat, carrier)) continue;
+                if (!hangarAcceptsFighterClass(h.hangar, flight)) continue;   //per-bay class allow-list
+                //h.free is in boxes; a unitSize<1 flight needs size × per-craft boxes.
+                if (h.free >= craftBoxesInHangar(h.hangar, size, flight.unitSize)) return h.hangar;
+            }
         }
         return null;
     }
@@ -256,6 +264,29 @@ window.DeploymentDock = (function () {
             return 'medium';
         }
         return req;
+    }
+
+    // Mirrors HangarOps::hangarAcceptsFighterClass (PHP). A hangar that declares
+    // a non-empty allowedFighterClasses list accepts ONLY flights whose phpclass
+    // is in it (e.g. the GaimSuom's Reska-only bays); empty/absent = unrestricted.
+    function hangarAcceptsFighterClass(sys, flight) {
+        if (!sys) return false;
+        var allowed = sys.allowedFighterClasses;
+        if (!Array.isArray(allowed) || allowed.length === 0) return true;   //unrestricted bay
+        var cls = flight ? String(flight.phpclass) : '';
+        return allowed.indexOf(cls) !== -1;
+    }
+
+    // Mirrors HangarOps::bayReservesFighterClass (PHP). True only when the bay
+    // SPECIFICALLY reserves this flight's class (non-empty allow-list containing
+    // it) — used to sort fill order so a Reska fills the Suom's Reska-only bay
+    // before spilling into the universal primary that the medium Koist needs.
+    function bayReservesFighterClass(sys, flight) {
+        if (!sys) return false;
+        var allowed = sys.allowedFighterClasses;
+        if (!Array.isArray(allowed) || allowed.length === 0) return false;   //unrestricted — not a reservation
+        var cls = flight ? String(flight.phpclass) : '';
+        return allowed.indexOf(cls) !== -1;
     }
 
     // Mirrors HangarOps::hangarAcceptsCategory (PHP). See shipTooltipFireMenu.js.
@@ -334,11 +365,19 @@ window.DeploymentDock = (function () {
         var remaining = parseInt(flight.flightSize, 10) || 1;
 
         var hangars = collectUsableHangars(carrier, reclaimFlightId).filter(function (h) {
-            return hangarAcceptsCategory(h.hangar.hangarType, cat, carrier);
+            return hangarAcceptsCategory(h.hangar.hangarType, cat, carrier) &&
+                   hangarAcceptsFighterClass(h.hangar, flight);   //per-bay class allow-list
         });
-        //Biggest free first so we use the fewest bays (and prefer the 6-box rail
-        //before the 3-box ones). Ties keep encounter order.
-        hangars.sort(function (a, b) { return b.free - a.free; });
+        //Fill order: bays that SPECIFICALLY reserve this flight's class first (so a
+        //Reska fills the Suom's Reska-only bay before spilling into the universal
+        //primary the medium Koist needs), THEN biggest free first (fewest bays —
+        //prefer the 6-box rail before the 3-box ones). Ties keep encounter order.
+        hangars.sort(function (a, b) {
+            var ra = bayReservesFighterClass(a.hangar, flight) ? 1 : 0;
+            var rb = bayReservesFighterClass(b.hangar, flight) ? 1 : 0;
+            if (ra !== rb) return rb - ra;        //reserved bays first
+            return b.free - a.free;
+        });
 
         var plan = [];
         for (var i = 0; i < hangars.length && remaining > 0; i++) {
@@ -491,6 +530,7 @@ window.DeploymentDock = (function () {
             if (!sys || !isDockHangar(sys)) return;
             if (shipManager.systems.isDestroyed(carrier, sys)) return;
             if (!hangarAcceptsCategory(sys.hangarType, category, carrier)) return;
+            if (!hangarAcceptsFighterClass(sys, flight)) return;   //per-bay class allow-list
 
             //Compute free boxes — but reclaim THIS flight's own queued entry
             //so re-edit doesn't think the hangar is full. (Catapult → 1 slot.)

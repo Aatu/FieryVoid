@@ -16,7 +16,7 @@ class PolarenLymadaRefit extends BaseShipNoAft{
 		$this->unofficial = true;
 		$this->isd = 2121;
          
-        $this->fighters = array("assault shuttles"=>2); //2 breaching pods    
+        $this->fighters = array("Breaching Pods"=>2); 
 		
         $this->forwardDefense = 15;
         $this->sideDefense = 17;

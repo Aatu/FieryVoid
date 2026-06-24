@@ -28,7 +28,7 @@ class AvengerBeta extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 20, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 3, 5));
         $this->addPrimarySystem(new Engine(4, 12, 0, 6, 4));
-    	$this->addPrimarySystem(new Hangar(5, 2));
+    	$this->addPrimarySystem(new Hangar(5, 2, 1));
         $this->addPrimarySystem(new JumpEngine(4, 20, 4, 24));
 		
         $this->addFrontSystem(new LightPlasma(2, 4, 2, 240, 0));
@@ -50,10 +50,10 @@ class AvengerBeta extends BaseShip{
         $this->addLeftSystem(new LightPlasma(2, 4, 2, 180, 300));
         $this->addLeftSystem(new InterceptorMkI(2, 4, 1, 240, 0));
         $this->addLeftSystem(new InterceptorMkI(2, 4, 1, 180, 300));
-        $this->addLeftSystem(new Hangar(3, 6));
-        $this->addLeftSystem(new Hangar(3, 6));
-        $this->addLeftSystem(new Hangar(3, 6));
-        $this->addLeftSystem(new Hangar(3, 6));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 5));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 5));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 4));
+        $this->addLeftSystem(new Hangar(3, 6, 6, 4));
 		
     	$this->addRightSystem(new Thruster(3, 15, 0, 4, 4));
     	$this->addRightSystem(new MediumPlasma(3, 5, 3, 0, 120));
@@ -61,10 +61,10 @@ class AvengerBeta extends BaseShip{
         $this->addRightSystem(new LightPlasma(2, 4, 2, 60, 180));
         $this->addRightSystem(new InterceptorMkI(2, 4, 1, 0, 120));
         $this->addRightSystem(new InterceptorMkI(2, 4, 1, 60, 180));
-        $this->addRightSystem(new Hangar(3, 6));
-        $this->addRightSystem(new Hangar(3, 6));
-        $this->addRightSystem(new Hangar(3, 6));
-        $this->addRightSystem(new Hangar(3, 6));
+        $this->addRightSystem(new Hangar(3, 6, 6, 1));
+        $this->addRightSystem(new Hangar(3, 6, 6, 1));
+        $this->addRightSystem(new Hangar(3, 6, 6, 2));
+        $this->addRightSystem(new Hangar(3, 6, 6, 2));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 40));

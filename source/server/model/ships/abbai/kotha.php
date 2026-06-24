@@ -34,8 +34,8 @@ class Kotha extends FighterFlight{
             $fighter->iconPath = "img/ships/AbbaiKotha_Large.png";
             $fighter->addFrontSystem(new PairedParticleGun(330, 30, 1));
 
-       	    //Grav Shield Level 1
-            $fighter->addAftSystem(new FtrShield(1, 0, 360));
+       	    //Grav Shield Level 1 (may be dropped during Initial Orders for +2 thrust)
+            $fighter->addAftSystem(new FtrGravShield(1, 0, 360));
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

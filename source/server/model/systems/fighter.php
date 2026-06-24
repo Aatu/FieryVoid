@@ -25,6 +25,15 @@
 		//Same reset-on-load semantics as missileRackReloadedTurn.
 		public $marinesReloadedTurn = null;
 
+		//HK Jamming: replay-deterministic disruption roll. On the live Fire Phase
+		//advance HkJamming rolls a d20 once per flight and persists it as a
+		//hkJammingRoll note on this (sample) fighter; on a replay re-run
+		//onIndividualNotesLoaded reads it back into jammingLoadedTurn/Value so the
+		//table result reproduces exactly. Only systems[1] (the sample fighter) of a
+		//remoteControl flight ever carries these.
+		public $jammingLoadedTurn  = 0;
+		public $jammingLoadedValue = 0;
+
 
 		public $possibleCriticals = array();
 		
@@ -34,11 +43,28 @@
 		
 		function __construct($name, $armour, $maxhealth, $flight){
 			parent::__construct($armour, $maxhealth, 0, 0 );
-			
+
                     $this->name = $name;
                     $this->flightid = $flight;
-			
-			
+
+
+		}
+
+		/* HK Jamming: read back this turn's persisted disruption roll (if any) so a
+		 * replay scrub reproduces the table result exactly — setCriticals re-runs and
+		 * Dice::d is non-deterministic. Mirrors HangarOps' railCritRoll/inadequateRoll
+		 * read-back. Then defer to the base hook (which clears individualNotes). */
+		public function onIndividualNotesLoaded($gamedata){
+			foreach ($this->individualNotes as $note){
+				if ($note->notekey === 'hkJammingRoll' && $note->turn == $gamedata->turn){
+					$decoded = json_decode($note->notevalue, true);
+					if (is_array($decoded) && isset($decoded['roll'])){
+						$this->jammingLoadedTurn  = (int)$gamedata->turn;
+						$this->jammingLoadedValue = (int)$decoded['roll'];
+					}
+				}
+			}
+			parent::onIndividualNotesLoaded($gamedata);
 		}
 
 		public function stripForJson() {

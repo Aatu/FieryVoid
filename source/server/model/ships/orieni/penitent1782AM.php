@@ -61,8 +61,8 @@ class penitent1782AM extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Reactor(5, 44, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 7));
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 7));
-		$this->addPrimarySystem(new Hangar(5, 14));
-		$this->addPrimarySystem(new Hangar(5, 14));
+		$this->addPrimarySystem(new Hangar(5, 14, 6, 0, 'light')); //light-fighter bay (the 'light' half of $fighters)
+		$this->addPrimarySystem(new Hangar(5, 14, 6, 0, 'light')); //light-fighter bay (the 'light' half of $fighters)
         $this->addPrimarySystem(new HKControlNode(5, 30, 3, 4));
      	$this->addPrimarySystem(new LaserLance(5, 6, 4, 0, 360));
        	$this->addPrimarySystem(new LaserLance(5, 6, 4, 0, 360));
@@ -72,6 +72,7 @@ class penitent1782AM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 270;
 			$hangar->endArc = 90;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addFrontSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 270;
@@ -113,6 +114,7 @@ class penitent1782AM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 90;
 			$hangar->endArc = 270;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addAftSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 90;
@@ -140,6 +142,7 @@ class penitent1782AM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 180;
 			$hangar->endArc = 360;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addLeftSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 180;
@@ -167,6 +170,7 @@ class penitent1782AM extends SmallStarBaseFourSections{
 			$hangar = new Hangar(5, 6);
 			$hangar->startArc = 0;
 			$hangar->endArc = 180;
+			$hangar->allowedFighterClasses = array('HkShiningLight', 'HkShiningStar'); //arc bay: HK-only
 			$this->addRightSystem($hangar);
 			$cargoBay = new CargoBay(5, 25);
 			$cargoBay->startArc = 0;

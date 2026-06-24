@@ -50,6 +50,7 @@ window.WaitingPhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(icon => {
             icon.hideEW();
             icon.hideBDEW();
+            icon.hideMDEW();
         });
         
         this.ewIconContainer.hide();

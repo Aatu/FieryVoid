@@ -2585,6 +2585,17 @@ window.weaponManager = {
                             splitTargeted.push(weapon); //Not finished, to be added to toUnselect aray at correct time below. 	  
                         }
                         webglScene.customEvent('SystemDataChanged', { ship: selectedShip, system: weapon });
+                    } else if (weapon.name === 'ShadowFighterBomb') {
+                        //Stage S (S-f): the Fighter Bomb launches a player-chosen
+                        //number of held integrated fighters (1..remaining in the
+                        //ShadowHangar) at the target hex. Pop the standard numeric
+                        //count picker (confirm.askForMultipleValues), then create the
+                        //single fire order with shots = chosen count — the server
+                        //(performBombLaunch) clamps to the held pool and launches that
+                        //many. Async (callback), so we DON'T fall through to the
+                        //synchronous order build / toUnselect below.
+                        weaponManager.queueShadowFighterBombOrder(selectedShip, weapon, hexpos, type);
+                        continue;
                     } else {
 
                         weaponManager.removeFiringOrder(selectedShip, weapon);
@@ -2618,8 +2629,149 @@ window.weaponManager = {
             weaponManager.unSelectWeapon(selectedShip, toUnselect[i]);
         }
 
-        toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onHexTargeted - DK 01.25        
+        toUnselect.push(...splitTargeted); //We don't want to unselect, but want these weapons passed to onHexTargeted - DK 01.25
         webglScene.customEvent('HexTargeted', { shooter: selectedShip, hexagon: hexpos })
+    },
+
+    // Stage S (S-f): held integrated-fighter count the Fighter Bomb can launch.
+    // Sums ShadowMediumFighterFlight entries (skipping cannotLaunch wrecks). Mirrors
+    // the server pool sum in HangarOps::performBombLaunch.
+    //
+    // MULTI-BAY (shadowRegenBaseBomb): pass the firing $weapon — when it carries a
+    // bombHangarIndex the pool is scoped to ITS bay only (the ShadowHangar whose
+    // bombGroupIndex matches), since each bomb launches just its own 6. SINGLE-BAY
+    // (shadowCruiserBomb): $weapon omitted / no index → sum across all ShadowHangars.
+    //
+    // $subtractPending (default false): when true, also nets off fighters already QUEUED
+    // to launch this turn (pending bomb fire orders on the relevant bay's bomb) so a
+    // DISPLAY like "Fighters available" drops immediately after a launch is queued. The
+    // launch DIALOG must NOT pass this — it replaces prior orders, so it needs the full
+    // pre-order pool as the max (otherwise re-editing an order double-discounts).
+    shadowFighterBombPool: function shadowFighterBombPool(carrier, weapon, subtractPending) {
+        var pool = 0;
+        if (!carrier || !carrier.systems) return 0;
+        var bayIndex = (weapon && weapon.bombHangarIndex !== undefined && weapon.bombHangarIndex !== null)
+            ? parseInt(weapon.bombHangarIndex, 10) : null;
+        for (var i in carrier.systems) {
+            var sys = carrier.systems[i];
+            if (!sys || !sys.isShadowHangar || !Array.isArray(sys.hangarUsage)) continue;
+            // Scope to this bomb's own bay when a bombHangarIndex was given.
+            if (bayIndex !== null && parseInt(sys.bombGroupIndex, 10) !== bayIndex) continue;
+            sys.hangarUsage.forEach(function (e) {
+                if (!e || e.phpclass !== 'ShadowMediumFighterFlight' || e.cannotLaunch) return;
+                pool += parseInt(e.flightSize || 1, 10);
+            });
+        }
+
+        // Net off fighters QUEUED to launch this turn so a display reflects the pending
+        // order immediately (the held hangarUsage above doesn't shrink until the turn
+        // resolves and the server drains it). Count each ShadowFighterBomb's pending
+        // shots, scoped to the same bay (its bombHangarIndex matches $weapon's, or both
+        // unindexed on a single-bay hull).
+        if (subtractPending) {
+            for (var j in carrier.systems) {
+                var bsys = carrier.systems[j];
+                if (!bsys || bsys.name !== 'ShadowFighterBomb' || !Array.isArray(bsys.fireOrders)) continue;
+                var bIdx = (bsys.bombHangarIndex !== undefined && bsys.bombHangarIndex !== null)
+                    ? parseInt(bsys.bombHangarIndex, 10) : null;
+                if (bIdx !== bayIndex) continue;   //a bomb only draws from its own bay
+                bsys.fireOrders.forEach(function (fo) {
+                    if (!fo) return;
+                    if (fo.turn != null && typeof gamedata !== 'undefined' && fo.turn != gamedata.turn) return;
+                    pool -= Math.max(0, parseInt(fo.shots || 0, 10));
+                });
+            }
+            pool = Math.max(0, pool);
+        }
+
+        // Stage S (S-d): STRUCTURE-BOX cap. Each integrated fighter in space binds a
+        // marked structure box, so a carrier can never launch more than it has boxes
+        // for. Clamp the offered pool to remaining structure (a combat-reduced carrier
+        // with 4 structure but 6 held can only launch 4; the rest stay held until
+        // SelfRepair restores structure). The server (HangarOps::performBombLaunch)
+        // is the authoritative clamp — it also nets off fighters already in space; this
+        // is a UX guard so the dialog doesn't offer a launch that gets silently trimmed.
+        var struct = shipManager.systems.getStructureSystem(carrier, 0);
+        if (struct) {
+            var structRemaining = Math.max(0, parseInt(shipManager.systems.getRemainingHealth(struct), 10) || 0);
+            pool = Math.min(pool, structRemaining);
+        }
+        return pool;
+    },
+
+    // Stage S (S-f): max fighters per flight a Fighter Bomb can spawn. Mirrors the
+    // server HangarOps cap: min(class flight-size limit, fighters currently HELD).
+    // The class limit for the only bomb-launched class (ShadowMediumFighterFlight,
+    // jinking 8) is 9; clamped to $pool so a bay holding fewer (ShadowCruiser: 6)
+    // never offers a per-flight size bigger than its stock.
+    shadowFighterBombFlightCap: function shadowFighterBombFlightCap(carrier, pool) {
+        var classLimit = 9;
+        var p = parseInt(pool, 10);
+        if (!isNaN(p) && p > 0 && p < classLimit) return p;
+        return classLimit;
+    },
+
+    // Stage S (S-f): open the Fighter Bomb launch dialog (count + auto-split toggle /
+    // manual per-flight sizes), then emit the fire order(s) at the target hex. A launch
+    // bigger than the flight-size cap must spawn multiple flights:
+    //   - AUTO (checkbox on): ONE fire order with shots = total; the server splits it.
+    //   - MANUAL (checkbox off): ONE fire order PER chosen flight, shots = that size.
+    // The combat log groups the same-hex orders into one "Fighter Bomb" entry.
+    queueShadowFighterBombOrder: function queueShadowFighterBombOrder(carrier, weapon, hexpos, type) {
+        //Multi-bay: scope the offered pool to THIS bomb's bay (weapon.bombHangarIndex).
+        var pool = weaponManager.shadowFighterBombPool(carrier, weapon);
+        if (pool <= 0) {
+            confirm.warning("No integrated fighters left in this hangar to launch.");
+            return;
+        }
+        var cap = weaponManager.shadowFighterBombFlightCap(carrier, pool);
+
+        confirm.shadowFighterBomb(carrier, pool, cap, function (result) {
+            var sizes = (result && Array.isArray(result.sizes)) ? result.sizes : [];
+            if (sizes.length === 0) return;
+
+            // Replace any prior bomb order(s) on this weapon, then emit one per flight.
+            weaponManager.removeFiringOrder(carrier, weapon);
+            sizes.forEach(function (sz) {
+                sz = parseInt(sz, 10);
+                if (isNaN(sz) || sz < 1) return;
+                var fireid = carrier.id + "_" + weapon.id + "_" + (weapon.fireOrders.length + 1);
+                weapon.fireOrders.push({
+                    id: fireid,
+                    type: type,
+                    shooterid: carrier.id,
+                    targetid: -1,
+                    weaponid: weapon.id,
+                    calledid: -1,
+                    turn: gamedata.turn,
+                    firingMode: weapon.firingMode,
+                    shots: sz,                          //this flight's fighter count
+                    x: hexpos.q,
+                    y: hexpos.r,
+                    damageclass: weapon.data["Weapon type"].toLowerCase()
+                });
+            });
+
+            weaponManager.unSelectWeapon(carrier, weapon);
+            webglScene.customEvent('SystemDataChanged', { ship: carrier, system: weapon });
+            webglScene.customEvent('HexTargeted', { shooter: carrier, hexagon: hexpos });
+            //Refresh the carrier's ShadowHangar tooltip(s) so their capacity line
+            //immediately shows "(Launching N)" from this bomb order (S-f).
+            weaponManager.refreshShadowHangarTooltips(carrier);
+        });
+    },
+
+    // Stage S (S-f): recompute + redraw the ShadowHangar tooltip(s) on a carrier so
+    // their projected "(Launching N)" capacity line reflects the current Fighter Bomb
+    // fire order (placed or cleared). Called after a bomb order changes.
+    refreshShadowHangarTooltips: function refreshShadowHangarTooltips(carrier) {
+        if (!carrier || !carrier.systems) return;
+        for (var i in carrier.systems) {
+            var sys = carrier.systems[i];
+            if (!sys || !sys.isShadowHangar) continue;
+            if (typeof sys.refreshHangarTooltip === 'function') sys.refreshHangarTooltip();
+            webglScene.customEvent('SystemDataChanged', { ship: carrier, system: sys });
+        }
     },
 
     removeFiringOrder: function removeFiringOrder(ship, system) {
@@ -2635,7 +2787,12 @@ window.weaponManager = {
 
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
-        if (gamedata.gamephase == 3 && ship.flight) webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots       
+        //Stage S (S-f): clearing a Fighter Bomb order frees its launching fighters —
+        //refresh the carrier's ShadowHangar tooltip(s) so their "(Launching N)" line
+        //disappears (the bomb order this method just removed no longer projects).
+        if (system.name === 'ShadowFighterBomb') weaponManager.refreshShadowHangarTooltips(ship);
+
+        if (gamedata.gamephase == 3 && ship.flight) webglScene.customEvent("ShipMovementChanged", { ship: ship }); //Redraw movement for Combat Pivots
     },
 
     removeFiringOrderMulti: function removeFiringOrderMulti(ship, system, target = null, button = false) {
@@ -3143,7 +3300,8 @@ window.weaponManager = {
         const shortLogTypes = [
             "HyperspaceJump", "JumpFailure", "SelfDestruct", "ContainmentBreach",
             "Reactor", "Sabotage", "WreakHavoc", "Capture", "Rescue", "LimpetBore",
-            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding"
+            "MagazineExplosion", "NoHangar", "TerrainCollision", "HalfPhase", "TranverseCrit", "Boarding",
+            "InadequateHangar", "HkJamming"
         ];
 
         return shortLogTypes.includes(fire.damageclass);

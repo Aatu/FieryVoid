@@ -253,6 +253,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: </li>
         </ul>      
       </li>  
+      <li><strong>Minesweeper Conversion</strong>
+        <ul class="circle-list">
+            <li>Effect: Sets Offensives Bonus to 4, and gives shuttles the minesweeper property, allowing them to use full Offensive Bonus for mine detection.</li>
+            <li>Points Cost: 10 or 20% of craft cost, whichever is higher</li>
+            <li>Limit: 1</li>
+            <li>Notes: Shuttles only.</li>
+        </ul>      
+      </li>        
       <li><strong>Navigator</strong>
         <ul class="circle-list">
             <li>Effect: Navigator provides 360 degree missile guidance, +5 Initiative</li>
@@ -436,23 +444,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>      
           </li>        
 
-        <li><strong>Launched Fighter</strong>
+        <li><strong>Integrated Fighter</strong>
             <ul class="circle-list">
-                <li>Effect: N/A </li>
-                <li>Points Cost: 0pts</li>
-                <li>Limit: Equal to number of fighters ship can launch</li>
-                <li>Notes: Not an actual enhancement - used to denote ship has launched a fighter (and reduces ship's Structure by 1).</li>            
-            </ul>      
+                <li>Effect: Purchases an integrated Shadow Medium Fighter for this ship. </li>
+                <li>Points Cost: 150pts</li>
+                <li>Limit: Equal to number of fighters the ship can carry.</li>
+           </ul>      
           </li>  
-
-        <li><strong>Uncontrolled Fighter</strong>
-            <ul class="circle-list">
-                <li>Effect: -2 Offensive Bonus, -15 Initiative</li>
-                <li>Points Cost: 0</li>
-                <li>Limit: 1</li>
-                <li>Notes: Not an actual enhancement - used to denote fighter does not have corresponding 'Launched Fighter' enhancement on a Shadow ship.</li>            
-            </ul>      
-        </li>        
+      
       </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>
 

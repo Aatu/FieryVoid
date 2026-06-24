@@ -72,6 +72,7 @@ window.ShipDestroyedAnimation = function () {
         try {
             const explosionSound = ShipDestroyedAnimation.cachedAudio.cloneNode(true);
             explosionSound.currentTime = 0;
+            window.applyReplayPlaybackRate(explosionSound);
             explosionSound.play().catch(() => { });
         } catch (e) {
             console.warn("Explosion sound playback failed:", e);

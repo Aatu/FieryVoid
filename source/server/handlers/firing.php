@@ -830,8 +830,12 @@ public static function firePreFiringWeapons($gamedata){
         foreach ($gamedata->ships as $ship){
             foreach ($ship->systems as $system){
                 $system->beforeFiringOrderResolution($gamedata);
-            }   
+            }
         }
+
+        //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
+        //(no player to submit the ram order). Done before ram orders are gathered below.
+        AutomatedMovement::createAutomatedRamOrders($gamedata);
 
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){

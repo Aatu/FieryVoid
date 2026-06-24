@@ -36,7 +36,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
            <ul class="sub-list">
                 <li><a href="#boarding">Boarding Actions</a></li>
                 <li><a href="#called">Called Shots</a></li>
-                <li><a href="#delayed">Delayed Deployment</a></li>                
+                <li><a href="#delayed">Delayed Deployment</a></li>
+                <li><a href="#elint">ELINT &amp; Electronic Warfare</a></li>
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#escorts">Fighter Escorts</a></li>
                 <li><a href="#hangar">Hangar Operations</a></li>
@@ -252,6 +253,61 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             Ships cannot jump into hexes occupied by terrain or Enormous units, so make sure you make the Deployment Zone large enough!</li>
             <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists, Vorlon Adaptive Armor) will set these systems on the turn they deploy instead.</li>
             <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later.</li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+        <h3 id="elint" >ELINT &amp; Electronic Warfare</h3>
+        <ul>
+            <li>Every ship with a working Scanner generates Electronic Warfare (EW) points each turn, allocated during the Initial Orders phase.  
+                Dedicated <b>ELINT vessels</b> (those carrying an <b>ELINT Scanner</b>) can perform a number of additional, longer-ranged sensor operations on top of the standard EW functions available to any ship.</li>
+            <li>To allocate EW, select your ship and click on an enemy or friendly unit to bring up the relevant EW buttons, then use the Add / Remove buttons (remember right-click sets a function to maximum or zero — see Hot Keys).  EW lines are drawn on the map and can be toggled with the W / X / Y keys.</li>
+            <br>
+
+            <li><b>Standard EW functions (any ship with a Scanner):</b>
+                <ul class="circle-list">
+                    <li><b>Offensive EW (OEW):</b> A target lock on a single enemy unit that improves your fire control against it (reducing range and tracking penalties).  Allocate more points for a stronger lock.</li>
+                    <li><b>Defensive EW (DEW):</b> Lowers your own ship's defensive profile, making you harder to hit.  Any EW left unallocated at the end of Initial Orders is automatically applied as DEW.</li>
+                    <li><b>Close Combat EW (CCEW):</b> Provides a lock on <em>all</em> enemy fighters within 10 hexes at once.  Counts as a single OEW target for the purposes of being disrupted.</li>
+                    <li><b>Mine Detection:</b> Only when mines are present, see <a href="#mines">Mines</a> for full details.</li>                   
+                </ul>
+            <br>
+
+            <li><b>ELINT-exclusive functions (require an ELINT Scanner):</b>  Most of these operate at a 30 hex range and this is checked when declared (Initial Orders) and at the moment of firing, 
+            so a target that moves out of range, or a line of sight that becomes blocked, can cause the support to lapse.
+                <ul class="circle-list">
+                    <li><b>Supported OEW (SOEW):</b> Lends a friendly ship half of the ELINT's offensive lock against a chosen target.  The target must be within 30 hexes of the ELINT at the moment of firing, and the supported friendly ship within 30 hexes at both declaration and firing.  Requires line of sight from the ELINT to both the target and the supported ship.  Fighter flights receive only half the usual benefit.</li>
+                    <li><b>Supported DEW (SDEW):</b> Boosts a friendly ship's defensive EW by 1 for every 2 points allocated.  Range 30 hexes, checked at both declaration and firing.</li>
+                    <li><b>Blanket Protection (BDEW):</b> Grants <em>all</em> friendly units within 20 hexes (fighters included) +1 DEW for every 4 points allocated.  Blanket Protection cannot be combined with any other ELINT activity on the same ship that turn.</li>
+                    <li><b>Disruption (DIST):</b> Degrades an enemy's sensors — reduces a target enemy ship's OEW and CCEW by 1 for every 3 points allocated.  The reduction is split evenly between that ship's offensive locks (CCEW counts as one lock), and it cannot push a lock below 0.  Range 30 hexes, checked at both declaration and firing.</li>
+                    <li><b>Detect Stealth:</b> Increases this ship's stealth-detection range by +2 hexes per point allocated.  This option only appears when the enemy has stealth-capable ships in the game (see <a href="#stealth">Stealth Ships</a>).</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Jamming (JAM) &mdash; disrupting Hunter-Killers:</b>  ELINT vessels can also jam the command-link guidance of enemy <b>remotely-controlled fighter flights</b> &mdash; such as the Orieni <em>Shining Star</em> Hunter-Killers.
+                <ul class="circle-list">
+                    <li>During Initial Orders, select your ELINT ship and click on an enemy Hunter-Killer flight to bring up the <b>Add / Remove Jamming</b> buttons.  Jamming may only be applied to remote-controlled flights, and the flight must be within <b>30 hexes</b> of the ELINT.</li>
+                    <li>Jamming costs <b>1 EW point</b> per point applied , and count as offensive EW for the purposes of <em>being</em> disrupted by an enemy ELINT's DIST.</li>
+                    <li>The disruption is resolved during the Critical Hits phase.  Each jammed flight rolls a d20, with a <b>+1 modifier for every point of Jamming beyond the first</b>, on the following table:</li>
+                    <li><strong>JAMMING TABLE (D20 + 1 per extra point):</strong>
+                        <ul class="circle-list">
+                            <li>1&ndash;14 &ndash; No effect.</li>
+                            <li>15&ndash;16 &ndash; &minus;-10 Initiative next turn.</li>
+                            <li>17&ndash;18 &ndash; &minus;-20 Initiative next turn.</li>
+                            <li>19&ndash;20 &ndash; <b>Control Lost</b> for one turn (the flight becomes Uncontrolled), plus &minus;-20 Initiative.</li>
+                            <li>21 &ndash; Control Lost plus &minus;-10 Initiative, and <b>1 Hunter-Killer drops out</b> of the flight.</li>
+                            <li>22+ &ndash; Control Lost plus &minus;-10 Initiative, and <b>2 Hunter-Killers drop out</b>.</li>
+                        </ul>
+                    </li>
+                    <li><b>Uncontrolled flights:</b> While Control is lost, the player can no longer steer the flight.  Instead, it operates semi-autonomously: it suffers an additional -15 Initiative penalty, jinks defensively for 2, and steers toward the nearest enemy ship, attempting to <b>ram</b> it if it reaches the same hex.  
+                    An Uncontrolled flight is shown with a red <i>UNCONTROLLED</i> note in its tooltip.</li>
+                    <li>Jamming cannot prevent a Hunter-Killer from completing a ram &mdash; but any surviving fighters in the flight are still disrupted as normal on following turn that the jamming is applied.  
+                        A jamming roll is only skipped if the entire flight has already been destroyed.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Advanced &amp; Improved Sensors:</b> Some factions field ships with upgraded sensors.  <em>Improved Sensors</em> halve the effectiveness of enemy Jammers.  <em>Advanced Sensors</em> ignore Jammers entirely, and also ignore enemy Blanket Protection, SDEW and Disruption, as well as defensive systems that lower a target's profile (shields, E-Web, etc.).</li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 
@@ -472,18 +528,17 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
         <h3 id="ladder" >Online Ladder</h3>
         <ul>
-            <li>The purpose of the Online Ladder in Fiery Void is primarily to help players create well-balanced, interesting games, as well as provide some bragging rights along the way.  
+            <li>The Online Ladder in Fiery Void is primarily aimed at helping players create well-balanced, interesting games, as well as provide some bragging rights along the way.  
                 It works similar to a handicap in golf, whereby the difference in ratings between players is added as a % bonus to the lower rated player.  
                 So if there was a difference of 5 rating, then the lower-rated player gets 5% extra points!</li>
             <li>To set-up a Ladder game, create a game as usual and tick the Ladder Game checkbox. You’ll see the ‘View Ladder’ button next to this option, 
-                and it allows you to see current ratings and even calculate the points difference that should apply against a particular player / populate the team slots with these values.</li>
+                this allows you to see current ratings and even calculate the points difference that should apply against a particular player / populate the team slots with these values.</li>
             <li>Alternatively you can set up an open Ladder game without using this feature and just set points values in team slots in the usual way.  
-                When a player takes the other slot in the game their points will be adjusted automatically. 
-                Alternatively you can set up an open Ladder game without using this feature and just set points values in team slots in the usual way.  
-                When a player takes the other slot in the game their points will be adjusted automatically.  Either way, decide on the specifics for the game (Points, Map; Standard vs Simultaneous Movement, etc.) and then click Create Game.  
+                When a player takes the other slot in the game their points will be adjusted automatically.</li>
+            <li>Either way, decide on the specifics for the game (Points, Map; Standard vs Simultaneous Movement, etc.) and then click Create Game.  
                 Note, Ladder games are competitive matches so only two players can take part, and only one slot is allowed per team. </li>
-            <li>When the game ends and one player surrendering (and at least one turn has been played), the winner will have their ranking increased by 1 on the Ladder, and the loser has their ranking reduced by 1.  
-            You can review your own and other players' match history by clicking 'View Ladder' on the Fiery Void Home Page and then clicking on their name.</li>                                              
+            <li>When the game ends and one player surrenders (with at least one whole turn being played), the winner will have their ranking increased by one on the Ladder, and the loser has their ranking reduced by the same amount.  
+            You can view players' match history form the last three months, including your own, by clicking 'View Ladder' on the Fiery Void Home Page and then clicking on their name.</li>                                              
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

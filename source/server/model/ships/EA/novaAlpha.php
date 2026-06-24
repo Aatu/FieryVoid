@@ -32,7 +32,7 @@ class NovaAlpha extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 16, 4, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 6, 4));
 		$this->addPrimarySystem(new JumpEngine(5, 20, 3, 24));
-		$this->addPrimarySystem(new Hangar(5, 26));
+		$this->addPrimarySystem(new Hangar(5, 26, 12));
                 
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 240, 60));
         $this->addFrontSystem(new InterceptorMkI(2, 4, 1, 300, 120));

@@ -13,10 +13,16 @@ window.ReplayPhaseStrategy = function () {
 
         this.loading = false;
 
-        // Replay playback speed (1×/2×/4×/8×), shared by both Play and Rewind.
-        // Cycled by the Speed button; persists across play/pause/direction
-        // changes so the user's chosen speed sticks for the whole replay.
+        // Replay playback speed, shared by both Play and Rewind. Adjusted by the
+        // −/+ Speed buttons (clamped to the REPLAY_SPEEDS range); persists across
+        // play/pause/direction changes so the user's chosen speed sticks for the
+        // whole replay.
         this.replaySpeed = 1;
+
+        // Direction the spacebar resumes in. AnimationStrategy.pause() discards
+        // goingBack, so we remember the last running direction here: spacebar
+        // pause records it, spacebar play replays in it (defaults to forward).
+        this.lastDirectionForward = true;
     }
 
     ReplayPhaseStrategy.prototype = Object.create(window.PhaseStrategy.prototype);
@@ -54,7 +60,9 @@ window.ReplayPhaseStrategy = function () {
         this.showAppropriateHighlight();
         this.showAppropriateEW();
 
-        infowindow.informPhase(5000, function () { });
+        // No informPhase() here: the phase banner reports the live game phase, not
+        // the replayed one, and overlaps the ReplayUI. informPhase() is guarded
+        // against gamedata.replay anyway, but skip it outright on replay entry.
         // Observers are permanently in replay (see PhaseDirector.resolvePhaseStrategy),
         // so hiding the combat-log print buttons here would deny them the log entirely.
         // Hide them only for participants, who get them back on deactivate.
@@ -108,10 +116,10 @@ window.ReplayPhaseStrategy = function () {
 
     ReplayPhaseStrategy.prototype.createReplayUI = function (gamedata) {
         this.replayUI = new ReplayUI(true, {
-            play: playDirection.bind(this, true),
-            pause: activateButton.bind(this, "pause"),
-            back: playDirection.bind(this, false),
-            changeSpeed: changeSpeed.bind(this),
+            playPause: toggleDirection.bind(this, true),
+            back: toggleDirection.bind(this, false),
+            slower: adjustSpeed.bind(this, -1),
+            faster: adjustSpeed.bind(this, 1),
             turnForward: turnForward.bind(this),
             turnBack: turnBack.bind(this),
             endReplay: requestPlayableGamedata.bind(this),
@@ -133,6 +141,7 @@ window.ReplayPhaseStrategy = function () {
         this.shipIconContainer.getArray().forEach(icon => {
             icon.hideEW();
             icon.hideBDEW();
+            icon.hideMDEW();
         });
 
         this.ewIconContainer.hide();
@@ -150,11 +159,12 @@ window.ReplayPhaseStrategy = function () {
 
     function toMovementPhase() {
         this.animationStrategy.toMovementPhase();
-        this.replayUI.activateButton('#pause');
         resetAudio.call(this);
         window.combatLog.critsShown = {}; //Empty crits shown array
         window.combatLog.critAnimations = {}; //Empty crit animations shown array
         this.animationStrategy.pause();
+        this.lastDirectionForward = true; // Seeked to a phase start: resume forward.
+        syncPlayPause.call(this);
         // Idle render-loop gating (perf #2): goToTime only sets the target time; the
         // ships aren't repositioned until render() replays the animations to it. We then
         // pause(), so isAnimating() is false and the loop won't paint until Play. Kick
@@ -167,11 +177,12 @@ window.ReplayPhaseStrategy = function () {
 
     function toFiringPhase() {
         this.animationStrategy.toFiringPhase();
-        this.replayUI.activateButton('#pause');
         resetAudio.call(this);
         window.combatLog.critsShown = {}; //Empty crits shown array
         window.combatLog.critAnimations = {}; //Empty crit animations shown array
         this.animationStrategy.pause();
+        this.lastDirectionForward = true; // Seeked to a phase start: resume forward.
+        syncPlayPause.call(this);
         // See toMovementPhase: kick the render budget so the seek-to-firing-phase paints
         // immediately instead of waiting for Play to restart the animation loop.
         if (window.webglScene && window.webglScene.requestRender) {
@@ -248,6 +259,13 @@ window.ReplayPhaseStrategy = function () {
     }
 
 
+    // Spacebar toggles replay play/pause (see Settings.TogglePlayPause). Only the
+    // ReplayPhaseStrategy handles it, so the key is inert outside replay.
+    ReplayPhaseStrategy.prototype.onTogglePlayPause = function (payload) {
+        if (payload.up) return; // Fire once on keydown, not on key hold / keyup.
+        togglePlayPause.call(this);
+    };
+
     ReplayPhaseStrategy.prototype.onToggleSound = function (payload) {
         if (payload.up) return; // Prevent repeats
 
@@ -284,30 +302,31 @@ window.ReplayPhaseStrategy = function () {
         }
     }
 
-    function activateButton(action, event) {
+    function activatePause() {
+        this.animationStrategy.pause();
+        // syncPlayPause repaints both transport buttons to their paused glyphs.
+        syncPlayPause.call(this);
+    }
 
-        if (this.loading) {
+    // Mirror the transport buttons onto the live animation state: Pause (❚❚)
+    // appears in place of whichever direction is running (rewind/forward), or
+    // both show their normal glyphs when paused/stopped. Call this after every
+    // transition that can start or stop playback.
+    function syncPlayPause() {
+        if (!this.replayUI || !this.animationStrategy) {
             return;
         }
-
-        // Starting playback: clear any printed combat log so the live replay log
-        // (written to #log) doesn't render over the top of the static print (#LogActual).
-        if (action === "play") {
-            window.combatLog.showCurrent();
+        var state = "paused";
+        if (!this.animationStrategy.isPaused()) {
+            state = this.animationStrategy.goingBack ? "rewind" : "forward";
         }
-
-        this.replayUI.activateButton(event.target);
-
-        this.animationStrategy[action]();
+        this.replayUI.setTransportState(state);
     }
 
-    function activatePause() {
-        this.replayUI.activateButton("#pause");
-        this.animationStrategy.pause();
-    }
-
-    // Selectable replay speeds, cycled by the Speed button.
-    var REPLAY_SPEEDS = [1, 2, 4, 8];
+    // Selectable replay speeds, adjusted by the −/+ Speed buttons. Ordered
+    // slowest→fastest; 1× is the default. Both Play and Rewind use the chosen
+    // rate (multiplier <1 slows playback, >1 speeds it up).
+    var REPLAY_SPEEDS = [0.25, 0.5, 1, 2, 4, 8];
 
     // Play (forward=true) and Rewind (forward=false). Both run at the current
     // replaySpeed; speedMultiplier 1 is identical to the old play()/back().
@@ -322,20 +341,63 @@ window.ReplayPhaseStrategy = function () {
             window.combatLog.showCurrent();
         }
 
-        this.replayUI.activateButton(forward ? "#play" : "#back");
+        // Remember the direction so the spacebar resumes the way it was last
+        // moving (AnimationStrategy.pause() forgets it — see lastDirectionForward).
+        this.lastDirectionForward = forward;
         this.animationStrategy.fastSeek(this.replaySpeed, forward);
+        syncPlayPause.call(this); // Repaints the active direction button as Pause.
     }
 
-    // Cycle 1×→2×→4×→8×→1×. The chosen speed sticks; if motion is already
+    // Per-button toggle: Pause appears in place of the active direction, so the
+    // Play button pauses while playing forward and the Rewind button pauses
+    // while rewinding. Pressing a direction button that isn't the active one
+    // starts playback that way.
+    function toggleDirection(forward) {
+        if (this.loading) {
+            return;
+        }
+
+        var running = this.animationStrategy && !this.animationStrategy.isPaused();
+        var thisDirection = running && this.animationStrategy.goingBack === !forward;
+
+        if (thisDirection) {
+            activatePause.call(this);
+        } else {
+            playDirection.call(this, forward);
+        }
+    }
+
+    // Spacebar toggle: pause if anything is running (either direction),
+    // otherwise resume playback in the last direction it was moving (forward by
+    // default), so pausing a rewind and hitting space again keeps rewinding.
+    function togglePlayPause() {
+        if (this.loading) {
+            return;
+        }
+
+        if (this.animationStrategy && !this.animationStrategy.isPaused()) {
+            activatePause.call(this);
+        } else {
+            playDirection.call(this, this.lastDirectionForward);
+        }
+    }
+
+    // Step the speed one notch slower (direction -1) or faster (+1), clamped to
+    // the REPLAY_SPEEDS range. The chosen speed sticks; if motion is already
     // running it's re-applied live in the current direction, otherwise it just
     // takes effect on the next Play/Rewind.
-    function changeSpeed() {
+    function adjustSpeed(direction) {
         if (this.loading) {
             return;
         }
 
         var idx = REPLAY_SPEEDS.indexOf(this.replaySpeed);
-        this.replaySpeed = REPLAY_SPEEDS[(idx + 1) % REPLAY_SPEEDS.length];
+        var next = idx + direction;
+        if (next < 0 || next >= REPLAY_SPEEDS.length) {
+            return; // Already at the slowest / fastest setting.
+        }
+
+        this.replaySpeed = REPLAY_SPEEDS[next];
         this.replayUI.setSpeed(this.replaySpeed);
 
         // Apply immediately to in-progress playback (paused playback picks the
@@ -365,6 +427,7 @@ window.ReplayPhaseStrategy = function () {
 
         clearCombatLogs();
         this.replayTurn--;
+        this.lastDirectionForward = true; // Jumped to a new turn: resume forward.
         activatePause.call(this);
         requestReplayGamedata.call(this);
     }
@@ -376,6 +439,7 @@ window.ReplayPhaseStrategy = function () {
 
         clearCombatLogs();
         this.replayTurn++;
+        this.lastDirectionForward = true; // Jumped to a new turn: resume forward.
         activatePause.call(this);
         requestReplayGamedata.call(this);
     }

@@ -8,7 +8,7 @@ class Steadfast1780 extends MediumShip{
 		$this->faction = "Orieni Imperium";
         $this->phpclass = "Steadfast1780";
         $this->imagePath = "img/ships/steadfast.png";
-        $this->shipClass = "Steadfast Escort Corvette (early)";	    
+        $this->shipClass = "Steadfast Escort Corvette (Early)";	    
         $this->variantOf = "Steadfast Escort Corvette";
 	    $this->isd = 1780;
         $this->agile = true;
@@ -29,7 +29,7 @@ class Steadfast1780 extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 3, 5));
         $this->addPrimarySystem(new Engine(3, 15, 0, 10, 2));
-		$this->addPrimarySystem(new Hangar(1, 1));
+		$this->addPrimarySystem(new Hangar(1, 1, 1));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 3));
 		$this->addPrimarySystem(new Thruster(2, 10, 0, 5, 4));        
 		
