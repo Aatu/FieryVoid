@@ -7,7 +7,7 @@ class ArmedMissileShuttleEA extends FighterFlight{
         $this->pointCost = 20 * 6;
         $this->faction = "Earth Alliance";
         $this->phpclass = "ArmedMissileShuttleEA";
-        $this->shipClass = "Armed Shuttles";
+        $this->shipClass = "Armed Shuttles (Missile)";
         $this->imagePath = "img/ships/shuttle.png";
         $this->isd = 2200;
         $this->variantOf = 'Armed Shuttles';
