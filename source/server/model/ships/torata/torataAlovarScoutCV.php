@@ -11,7 +11,7 @@ class TorataAlovarScoutCV extends BaseShip{
 		$this->imagePath = "img/ships/TorataClovant.png";
 		$this->shipClass = "Alovar Scout Carrier";
 		$this->limited = 33;
-		$this->canvasSize = 280;
+		$this->canvasSize = 200;
 		$this->shipSizeClass = 3;
 		$this->variantOf = "Clovant Medium Scout";
 		$this->occurence = "common";
