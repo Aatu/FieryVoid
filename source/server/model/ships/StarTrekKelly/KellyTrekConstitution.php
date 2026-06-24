@@ -36,7 +36,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 	$impulseDrive = new TrekImpulseDrive(4,24,0,0,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
 		
   
-	$projection = new TrekShieldProjectionKelly(2, 24, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjectionKelly(2, 60, 6, 270, 90, 'F');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 270, 90, 'F'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
@@ -59,7 +59,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 	$impulseDrive->addThruster($warpNacelle);
 	$this->addAftSystem($warpNacelle);
 		
-	$projection = new TrekShieldProjectionKelly(2, 24, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
+	$projection = new TrekShieldProjectionKelly(2, 60, 6, 90, 270, 'A');//parameters: $armor, $maxhealth, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projector = new TrekShieldProjector(1, 6, 2, 2, 90, 270, 'A'); //parameters: $armor, $maxhealth, $power used, $rating, $arc from/to - F/A/L/R suggests whether to use left or right graphics
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
