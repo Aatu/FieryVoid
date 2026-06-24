@@ -38,7 +38,7 @@ class Commune1983 extends MediumShip{
         $this->addFrontSystem(new LaserLance(2, 6, 4, 240, 60));
         $this->addFrontSystem(new LaserLance(2, 6, 4, 300, 120));
         $this->addFrontSystem(new OrieniGatlingRG(1, 4, 1, 240, 120));
-        $this->addFrontSystem(new HKControlNode(5, 12, 1, 1));       
+        $this->addFrontSystem(new HKControlNodeOrieni(5, 12, 1, 1));       
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
              

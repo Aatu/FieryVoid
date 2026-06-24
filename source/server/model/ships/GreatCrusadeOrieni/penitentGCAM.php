@@ -62,7 +62,7 @@ class penitentGCAM extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
 		$this->addPrimarySystem(new Hangar(5, 14, 6));
 		$this->addPrimarySystem(new Hangar(5, 14, 6));
-        $this->addPrimarySystem(new HKControlNode(5, 30, 4, 4));
+        $this->addPrimarySystem(new HKControlNodeOrieni(5, 30, 4, 4));
     	$this->addPrimarySystem(new WarLance(5, 9, 6, 0, 360));
        	$this->addPrimarySystem(new WarLance(5, 9, 6, 0, 360));
        	$this->addPrimarySystem(new WarLance(5, 9, 6, 0, 360));

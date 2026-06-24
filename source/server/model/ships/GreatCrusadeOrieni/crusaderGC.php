@@ -33,7 +33,7 @@ class crusaderGC extends BaseShip{
         $this->addPrimarySystem(new Scanner(5, 25, 4, 7));
         $this->addPrimarySystem(new Engine(5, 25, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(4, 38, 24));
-        $this->addPrimarySystem(new HKControlNode(5, 24, 4, 4));
+        $this->addPrimarySystem(new HKControlNodeOrieni(5, 24, 4, 4));
               
         $this->addFrontSystem(new WarLance(3, 9, 6, 240, 60));
         $this->addFrontSystem(new WarLance(3, 9, 6, 300, 120));

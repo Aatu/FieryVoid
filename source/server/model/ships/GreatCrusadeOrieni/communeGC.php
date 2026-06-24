@@ -37,7 +37,7 @@ class communeGC extends MediumShip{
         $this->addFrontSystem(new ImpRapidGatling(2, 4, 2, 240, 120));
         $this->addFrontSystem(new LightLaserLance(3, 6, 5, 240, 60));
         $this->addFrontSystem(new LightLaserLance(3, 6, 5, 300, 120));        
-        $this->addFrontSystem(new HKControlNode(5, 12, 1, 1));       
+        $this->addFrontSystem(new HKControlNodeOrieni(5, 12, 1, 1));       
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(3, 8, 0, 3, 1));
       

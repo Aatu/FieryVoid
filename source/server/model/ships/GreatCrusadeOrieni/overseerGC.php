@@ -33,7 +33,7 @@ class overseerGC extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(4, 8, 6));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
-        $this->addPrimarySystem(new HKControlNode(5, 12, 4, 4));
+        $this->addPrimarySystem(new HKControlNodeOrieni(5, 12, 4, 4));
         $this->addPrimarySystem(new WarLance(4, 9, 6, 0, 360));
         
         $this->addFrontSystem(new Thruster(3, 12, 0, 3, 1));
