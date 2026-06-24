@@ -18,14 +18,23 @@ class DeploymentGamePhase implements Phase
             if($ship->trueStealth) $ship->checkStealth($gameData); //Extra check needed at start of turn for Stealth ships like Torvalus.
         }
 
-        //Checks for late-deploying slots to see if next phases skipped - DK 
+        //Checks for late-deploying slots to see if next phases skipped - DK
         foreach($gameData->slots as $slot){
             $minTurnDeploy = $gameData->getMinTurnDeployedSlot($slot->slot, $slot->depavailable);
             if($minTurnDeploy > $gameData->turn || ($slot->surrendered !== null && $slot->surrendered <= $gameData->turn)){ //Entire slot deploys after current turn or has Surrendered.
                 //Set lastphase, and lastTurn to skip Initial Orders on this turn
-                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn);                
-            }     
-        } 
+                $dbManager->updatePlayerSlotPhase($gameData->id, $slot->playerid, $slot->slot, 1, $gameData->turn);
+            }
+        }
+
+        /* Orieni HK Control Node shortfall at deployment: an HK forced onto the map (no
+         * hangar space) is uncontrolled on its FIRST turn, but that turn has no preceding
+         * crit phase, so the fire-phase resolver (which applies the penalty NEXT turn) would
+         * miss it. Apply the Uncontrolled crit in effect THIS turn for map-deployed HKs that
+         * exceed node capacity, then persist the new crits. */
+        HkControlNodeOrieni::$deploymentShortfallResolved = false; //reset once-per-advance guard
+        HkControlNodeOrieni::resolveDeploymentShortfall($gameData);
+        $dbManager->submitCriticals($gameData->id, $gameData->getUpdatedCriticals(), $gameData->turn);
     }
 
     public function process(TacGamedata $gameData, DBManager $dbManager, Array $ships)
