@@ -500,3 +500,14 @@ MicroJumpSystem.prototype.isPosOnSpecialArc = function (shooter, target) {
 
     return false;
 };
+
+var TrekShieldProjectionKelly = function TrekShieldProjectionKelly(json, ship) {
+    ShipSystem.call(this, json, ship);
+    this.defensiveType = "none";
+};
+TrekShieldProjectionKelly.prototype = Object.create(ShipSystem.prototype);
+TrekShieldProjectionKelly.prototype.constructor = TrekShieldProjectionKelly;
+TrekShieldProjectionKelly.prototype.getDefensiveHitChangeMod = function (target, shooter, weapon) {
+    //this is made to be a shield just to display arc visually, no actual protection
+    return 0;
+};

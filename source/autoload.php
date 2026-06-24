@@ -4168,7 +4168,8 @@ spl_autoload_register(
 						'baradavalialightcruiser' => '/server/model/ships/barada/baradaValiaLightCruiser.php',
 						'baradakarovshuttle' => '/server/model/ships/barada/baradaKarovShuttle.php',
 
-
+                //Kelly's Star Trek
+                'kellytrekconstitution' => '/server/model/ships/StarTrekKelly/KellyTrekConstitution.php',
 
 
 
