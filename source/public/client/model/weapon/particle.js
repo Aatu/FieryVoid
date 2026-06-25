@@ -30,7 +30,7 @@ TwinArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 
     var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
 
-    if (this.firingMode == 2 && this.fireOrders.length > 1) return;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return; //one split shot per gun (guns is reduced by GunLost crits).
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -79,7 +79,7 @@ TwinArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 };
 
 TwinArray.prototype.checkFinished = function () {
-    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true; //one split shot per gun (guns is reduced by GunLost crits).
     return false;
 };
 

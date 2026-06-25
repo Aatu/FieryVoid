@@ -373,6 +373,17 @@ class ReducedDamage extends Critical{
     }
 }
 
+//Twin Array special crit (roll 20+): one of the two guns is destroyed (-1 gun).
+//Applied in TwinArray::effectCriticals (reduces $guns); two of these destroys the
+//whole weapon (handled in TwinArray::criticalPhaseEffects). Permanent - can't repair.
+class GunLost extends Critical{
+    public $description = "Gun Lost";
+	public $repairPriority = 0;//Can't repair.
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
 //Antimatter has special ReducedRange critical
 class ReducedRangeAntimatter extends Critical{
     public $description = "Range penalty increased";//increase range by 3

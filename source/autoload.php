@@ -711,6 +711,7 @@ spl_autoload_register(
                 'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
                 'garut' => '/server/model/ships/centauri_old/garut.php',
                 'garut2006' => '/server/model/ships/centauri_old/garut2006.php',
+                'gunlost' => '/server/model/cricialClasses.php',                
                 'optine' => '/server/model/ships/centauri_old/optine.php',
                 'optine1966' => '/server/model/ships/centauri_old/optine1966.php',
                 'optine2005' => '/server/model/ships/centauri_old/optine2005.php',
