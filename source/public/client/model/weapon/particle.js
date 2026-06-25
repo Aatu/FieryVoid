@@ -107,10 +107,10 @@ QuadArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
             // All guns already fired → retarget one gun by removing oldest fireorder.
             this.fireOrders.splice(0, 1);
         }
-    } 
+    }
     */
 
-    if (this.firingMode == 2 && this.fireOrders.length > 3) return;
+    if (this.firingMode == 5 && this.fireOrders.length >= this.guns) return; //one split shot per gun (guns is reduced by GunLost crits).
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -159,7 +159,7 @@ QuadArray.prototype.doMultipleFireOrders = function (shooter, target, system) {
 };
 
 QuadArray.prototype.checkFinished = function () {
-    if (this.firingMode == 5 && this.fireOrders.length > 3) return true;
+    if (this.firingMode == 5 && this.fireOrders.length >= this.guns) return true; //one split shot per gun (guns is reduced by GunLost crits).
     return false;
 };
 
