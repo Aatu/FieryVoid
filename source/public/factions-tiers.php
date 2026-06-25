@@ -276,14 +276,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
      A peculiar faction in many ways as it can both feel oppressive to play against due to their damage potential, but also difficult to win with if you are not experienced with them.   
     </p>        
         <h5>Hunter-Killer (HK) Drones</h5>
-            <ul>
-<li>Orieni long-range weapon of choice, and probably their most outstanding feature. They're essentially large missiles with a degree of control, using fighter rules and attacking by ramming enemies.</li>
-            <li> Hunter-Killers are controlled by Control Nodes on Orieni ships. If there is insufficient control HKs can operate autonomously, which this limits their performance by applying a significant Initiative penalty.
-            This loss of control is exercised proportionally - e.g. if there are 12 HKs on map and only 6 can be fully controlled, then all 12 receive half the penalties., but no other penalties. 
-            In addition, HKs must deploy in hangars at the start of the game.    
-            </li>
+        <ul>
+            <li>Orieni long-range weapon of choice, and probably their most outstanding feature. They're essentially large missiles with a degree of control, using fighter rules and attacking by ramming enemies. Note - HKs must deploy in hangars at the start of the game.</li>
+            <li> Hunter-Killers are controlled by Control Nodes on Orieni ships, these sytems can control a flight of HKs per point of output in system display. If there is insufficient control HKs can operate autonomously, but will suffer from the Uncontrolled critical effect.  
+                This means they will move towards the closest enemy ship and automatially try to ram it if possible.  The will also jink for two levels automatically, and suffer from -15 Iniative whilst Uncontrolled.</li>
             <li>When attempting to ram enemies, Hunter-Killers receive a penalty to their hit chance based on their own speed (the faster they are moving, the worse this). 
-            Note - As ramming attacks happen before other firing, HKs that achieved ramming distance cannot be shot down before they attempt to ram.
+            As ramming attacks happen before other firing, HKs that achieved ramming distance cannot be shot down before they attempt to ram.
             </li>                        
         </ul>
 <h5>Light Gatling Railgun</h5>
