@@ -1240,7 +1240,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h5>Shading Field</h5>
         <ul>
 <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
-        </ul>
+        
 <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
                 <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
@@ -1272,7 +1272,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
 <li>This weapons fires in a special Pre-Firing phase, which will occur between Movement and Firing phases providing the Transverse Drive is fully charged.  
             During this phase simply select a hex up to 3 hexes on a straight line to the selected ship and then commit your orders.  The ship will attempt a Transverse Jump before the Firing phase.</li>
-        </ul>
+        
 <li>When attempting a Transverse Jump a number of things will then happen depending a d20 roll: 
             <ul class="circle-list">
                 <li>1-16 - The jump is successful and the Torvalus ship teleports to the new hex.</li>
