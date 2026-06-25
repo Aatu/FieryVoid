@@ -342,7 +342,7 @@ class AutomatedMovement
      * Player HKs ram via player-submitted fire orders; this is the no-player path.
      * Cheap-guarded on remoteControl so the scan skips ordinary ships immediately.
      * --------------------------------------------------------------------------- */
-    public static function createAutomatedRamOrders($gamedata)
+    public static function createAutomatedRamOrders($gamedata, $dbManager = null)
     {
         foreach ($gamedata->ships as $flight) {
             if (empty($flight->remoteControl)) continue;
@@ -378,6 +378,19 @@ class AutomatedMovement
                     $fireOrder->pubnotes = "<br>Uncontrolled Hunter-Killers ram " . $enemy->name . "!";
                     $firstRam = false;
                 }
+
+                // Persist NOW so the order has a real DB id BEFORE fireWeapons resolves it.
+                // The ram's return damage lands on the firing fighter and its DamageEntry
+                // captures $fireOrder->id; without a real id here that id is -1 and the
+                // fighter's destruction never links to a combat-log row (unlike a player ram,
+                // which was persisted in a prior request and already carries its id). Clearing
+                // addToDB stops FireGamePhase's later submitFireorders re-inserting a duplicate.
+                // mysqli_insert_id is already int, but cast defensively - see the string-id trap.
+                if ($dbManager) {
+                    $fireOrder->id = (int)$dbManager->submitSingleFireorder($gamedata->id, $fireOrder);
+                    $fireOrder->addToDB = false;
+                }
+
                 $ram->fireOrders[] = $fireOrder;
             }
         }

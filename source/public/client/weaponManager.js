@@ -2229,10 +2229,21 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.      
+        if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
         if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
+
+        //Uncontrolled-flight block. A remote-controlled Hunter-Killer flight whose command
+        //link is severed (node shortfall or ELINT jamming) is driven entirely by the server -
+        //it moves itself (drift/seek) and auto-rams a co-located enemy. The player has no
+        //control, so declaring fire for it only produces a spurious DOUBLE attack (the server
+        //rejects it in Firing::validateFireOrders anyway). Warn and block at declaration so the
+        //player gets immediate feedback instead of a silently-dropped order.
+        if (shipManager.movement.isUncontrolled(selectedShip)) {
+            confirm.warning("This Hunter-Killer flight is UNCONTROLLED - It cannot be given fire orders.");
+            return;
+        }
 
         //Check for skin-dancing ships, these can't be targeted unless the shooter is also skin-dancing on same target, they also have their own rules about firing.
         if (gamedata.gamephase == 3) {
