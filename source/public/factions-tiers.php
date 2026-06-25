@@ -1222,10 +1222,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="torvalus" >TORVALUS SPECULATORS</h4>
     <p>The Torvalus are known for their highly advanced stealth technology as well as their love for making cosmic gambles. Below is a list of systems used by the Torvalus, with short description of effect and any notable design differences from their original tabletop versions.</p>    
     <h5>Laser Weaponry</h5>
-        <ul>
-<li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
+    <ul>
+    <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
         </ul>
-<h5>Hangar Requirements</h5>
+    <h5>Hangar Requirements</h5>
         <li>The Torvalus ships don't have hangars and therefore do not need to meet the normal 50% hangar requirement when building their fleet. 
             Instead their Stiletto Drones simply operate independently but are immune to dropout whilst a ship with control capacity (and functioning CnC) is present.        
             In scenarios where a certain percentage of fighters ARE required, use the following numbers as control/hangar capacity:
@@ -1237,18 +1237,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </li>    
     <h5>Shading Field</h5>
         <ul>
-<li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
+            <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
         
-<li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
+            <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
                 <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
                 <li>Shading Mode - During Deployment and Pre-Turn Order phases the Shading Field can be activated to make its vessel 'Shaded' that turn.  
                     Whilst Shaded the vessel retains the Jammer effect, doubles the EM shield rating to on its defence profile and, if it is more than 15 hexes away from all enemy units, it becomes invisible to opponents.
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
             </ul>
-        </li>         
+            </li>
+        </ul>
         <ul>
-<li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
+        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.
             This can also be toggled on and off during Deployment and Pre-Turn Order phases like the ship version, but does not provide the Jammer effect in either mode.  
             In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
     </ul>
@@ -1280,6 +1281,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>20 - The jump is unsuccessful, the ship does not move the Transverse Drive system has to roll for a critical hit.</li>                                                     
             </ul>
         </li>
+        </ul>
         <ul>
 <li>When a ship makes a transverse jump it puts a strain on the Jump Drive (a separate system), and so a ship can suffer a catastrophic failure (e.g be destroyed) if the Jump Engine has sustained damage in the battle.
             The chance of this failure is the % of the Jump Drive's health that has been lost.
