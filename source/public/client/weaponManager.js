@@ -1026,8 +1026,16 @@ window.weaponManager = {
         pushIfNonZero('targetJinking',   'Target Jinking',  -shipManager.movement.getJinking(target));
         pushIfNonZero('fireControl',     'Fire Control',     weaponManager.getFireControl(target, weapon));
 
+        //HK Targeting: penalty per hex the ramming unit moved this turn (speed == hexes moved).
+        //Normally the class' own rangePenalty (-1/3); worsens to -1/2 when the flight is UNCONTROLLED
+        //(command link severed). Gated to the three Orieni Hunter-Killer classes - mirrors calculateHitBaseRam.
         var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));
-        pushIfNonZero('range',           'Range',           -(weapon.rangePenalty * ownSpeed));
+        var hkClasses = ['HkShiningStar', 'HkShiningLight', 'hkBlazingStarGC'];
+        var hkRangePenalty = weapon.rangePenalty;
+        if (hkClasses.indexOf(shooter.phpclass) !== -1 && shipManager.movement.isUncontrolled(shooter)) {
+            hkRangePenalty = 0.5; //-1/2 hexes when uncontrolled
+        }
+        pushIfNonZero('range',           'Targeting',    -(hkRangePenalty * ownSpeed));
 
         var sum = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
         var hitChance = Math.round(sum * 5); //d20 -> d100

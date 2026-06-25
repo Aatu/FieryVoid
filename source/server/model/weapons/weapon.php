@@ -1190,8 +1190,20 @@ public function getStartLoading()
 		$hitChance += $this->fireControl[$target->getFireControlIndex()];
 
 		//range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
-		$ownSpeed = abs($shooter->getSpeed()); 
-		$speedPenalty = $this->rangePenalty * $ownSpeed;
+		//The Orieni Hunter-Killers take a "HK Targeting" penalty per hex moved this turn to reach the
+		//ramming hex (speed == hexes moved). Normally -1/3 (each class' own rangePenalty); when the flight
+		//is UNCONTROLLED (command link severed - node shortfall or ELINT jamming) it worsens to -1/2,
+		//reflecting the loss of the control node's firing-solution computers. Gated to the three HK classes.
+		$ownSpeed = abs($shooter->getSpeed());
+		$rangePenalty = $this->rangePenalty;
+		$hkClasses = array("HkShiningStar", "HkShiningLight", "hkBlazingStarGC");
+		if (in_array($shooter->phpclass, $hkClasses, true)){
+			$sample = $shooter->getSampleFighter();
+			if ($sample && $sample->hasCritical("Uncontrolled", $gamedata->turn) > 0){
+				$rangePenalty = 0.5; //-1/2 hexes when uncontrolled
+			}
+		}
+		$speedPenalty = $rangePenalty * $ownSpeed;
 		$hitChance -= $speedPenalty;
 		
 		$hitChance = round($hitChance * 5); //convert d20->d100
