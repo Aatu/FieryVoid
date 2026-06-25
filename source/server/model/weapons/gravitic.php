@@ -1320,7 +1320,7 @@ class HypergravitonBlaster extends Weapon {
     	public $weaponClass = "Gravitic";
 		public $fireingModes = array(1=>"Raking");
     	
-		protected $thrustBoosted = true;//Variable FRont End looks for to use thrust as boost. 
+		protected $thrustBoosted = true;//Variable Front End looks for to use thrust as boost. 
 	    protected $thrustPerBoost = 6; //Variable showing how much thrust is used per boost.
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc)
@@ -1338,9 +1338,8 @@ class HypergravitonBlaster extends Weapon {
         public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
 			$this->data["Special"] = "20-point rakes.";
-			$this->data["Special"] .= "<br>May apply thrust to boost damage output.";
-			$this->data["Special"] .= "<br>Every 6 thrust applied adds 10 damage.";
-			$this->data["Special"] .= "<br>Can fire accelerated ROF for less damage.";
+			$this->data["Special"] .= "<br>May apply 6 thrust to boost damage by 10 during Intitial Orders.";
+			$this->data["Special"] .= "<br>Can fire accelerated for less damage.";
 			$this->data["Special"] .= "<br> - 1 turn: 5d10+40";
 			$this->data["Special"] .= "<br> - 2 turns: 10d10+80";
             
