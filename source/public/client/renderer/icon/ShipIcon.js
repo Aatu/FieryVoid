@@ -257,8 +257,11 @@ window.ShipIcon = function () {
                 this.NotMovedSprite.hide();
             }
         }
-
-        this.selected = value;
+        // NOTE: deliberately does NOT touch this.selected. "Not moved" is a
+        // movement-phase status flag, not selection. Setting this.selected here
+        // falsely marked every un-moved ship as selected, so on mobile
+        // (pointer: coarse) the setHighlighted(false) path triggered by tapping
+        // an empty hex would reveal all their facing/heading arrows at once.
     };
 
     // Selection/side circle args. Participants get the friend/foe type; observers
