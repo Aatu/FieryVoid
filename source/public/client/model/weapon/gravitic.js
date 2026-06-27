@@ -549,7 +549,11 @@ HypergravitonBlaster.prototype.doSpecialTargeting = function (shooter, target, s
 
     var notes = "HBT";
     for (var c in candidates) {
-        notes += "|" + candidates[c].id + ":0";
+        //STAGE 5 TEMP: until the HBlasterList checkboxes exist (Stage 4), hardcode the
+        //transferOnStructure flag = 1 for HCV+ (sizeClass>=2) so the structure-block transfer
+        //path can be tested; smaller units stay destruction-only (flag 0).
+        var structFlag = (candidates[c].shipSizeClass >= 2) ? 1 : 0;
+        notes += "|" + candidates[c].id + ":" + structFlag;
     }
 
     var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);

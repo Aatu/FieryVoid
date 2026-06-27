@@ -1378,6 +1378,24 @@ class HypergravitonBlaster extends Weapon {
          */
         public $transferQueue = array(); //ordered list of ['shipid'=>int,'transferOnStructure'=>bool] for the current shot
 
+        //One Blaster per ship may transfer damage per turn (the ship can't optimise more than
+        //one beam at once). Keyed "shipid|turn" -> weaponid that claimed the transfer. Static so
+        //all Blasters on the same ship see the same claim during a single firing resolution.
+        protected static $transferClaimedByShipTurn = array();
+
+        /* Returns true if THIS Blaster may transfer this turn: true if no Blaster on the ship has
+         * claimed yet, or if this same weapon already holds the claim (so a multi-hop chain by the
+         * same weapon keeps working). False if a DIFFERENT Blaster on the ship already transferred. */
+        protected function claimTransferForTurn($shooter, $gamedata)
+        {
+            $key = $shooter->id . '|' . $gamedata->turn;
+            if (!isset(self::$transferClaimedByShipTurn[$key])) {
+                self::$transferClaimedByShipTurn[$key] = $this->id;
+                return true;
+            }
+            return self::$transferClaimedByShipTurn[$key] === $this->id;
+        }
+
         public function beforeFiringOrderResolution($gamedata)
         {
             $this->transferQueue = array();
@@ -1406,12 +1424,6 @@ class HypergravitonBlaster extends Weapon {
                 //(Note: calculateHitBase later OVERWRITES notes with its hit-calc breakdown,
                 // so anything written here is for in-flight use only and won't persist.)
                 $order->notes = '';
-
-                //STAGE 2 TEMP: dump the parsed queue to the server log so the round-trip can be
-                //verified (in-memory transferQueue isn't persisted). Remove once Stage 3 lands.
-                Debug::log("HBlaster beforeFiringOrderResolution: shooter {$this->unit->id} weapon {$this->id} "
-                    . "parsed " . count($this->transferQueue) . " transfer target(s): "
-                    . json_encode($this->transferQueue));
             }
         }
 
@@ -1484,69 +1496,60 @@ class HypergravitonBlaster extends Weapon {
          */
         protected function resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize)
         {
-            $queueIndex   = 0;
+            $queueIndex    = 0;
             $currentTarget = $target;
             $currentOrder  = $fireOrder; //the live fire order whose damage entries we attribute rakes to
 
-            //Non-ballistic Blaster: no launch position; section chosen as in base damage().
-            $launchPos = null;
-
             while ($damageRemaining > 0 && $currentTarget != null && !$currentTarget->isDestroyed()) {
 
-                //Resolve the section to hit on the current victim (mirrors base damage()).
-                $tmpLocation = $currentOrder->chosenLocation;
-                if (!($tmpLocation > 0)) {
-                    $tmpLocation = $currentTarget->getHitSection($shooter, $currentOrder->turn);
+                //Rake the current victim until it's destroyed, a structure-block transfer is
+                //triggered, or we run out of damage. Returns the stop reason; $damageRemaining
+                //is updated by reference.
+                $stop = $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize);
+
+                if ($stop === 'outOfDamage') {
+                    break;
+                }
+                //stop is 'destroyed' or 'structure' - either way a transfer may be attempted.
+
+                //The transfer guard: only one Blaster per ship may transfer per turn.
+                if (!$this->claimTransferForTurn($shooter, $gamedata)) {
+                    //Another Blaster on this ship already transferred. We can't transfer; if the
+                    //current victim survived a structure transfer, pour the remainder back into it.
+                    if ($stop === 'structure') {
+                        $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize, true);
+                    }
+                    break;
                 }
 
-                //Snapshot the section's structure-block state before this rake.
-                $sectionStructure = $currentTarget->getStructureSystem($tmpLocation);
-                $structureWasAlive = $sectionStructure != null && !$sectionStructure->isDestroyed();
-
-                //Apply one rake (armor pierced is tracked on $currentOrder->armorIgnored).
-                $rake = min($damageRemaining, $rakeSize);
-                $system = $currentTarget->getHitSystem($shooter, $currentOrder, $this, $gamedata, $tmpLocation);
-                $this->doDamage($currentTarget, $shooter, $system, $rake, $currentOrder, $launchPos, $gamedata, false, $tmpLocation);
-                $damageRemaining -= $rake;
-
-                //Did this rake open up a transfer opportunity?
-                $targetDestroyed   = $currentTarget->isDestroyed();
-                $structureDestroyed = $structureWasAlive
-                    && $sectionStructure != null && $sectionStructure->isDestroyed();
-
-                $flag = $this->getTransferFlagForShip($currentTarget->id);
-                $structureTransferAllowed = $structureDestroyed
-                    && $flag
-                    && $currentTarget->shipSizeClass >= 2;
-
-                if (!$targetDestroyed && !$structureTransferAllowed) {
-                    continue; //keep raking the current victim
-                }
-
-                //A transfer is warranted. Need a fresh victim, the transfer-cost rake, and damage to spend.
-                //If we can't actually transfer (no damage / no target left), the remainder either
-                //keeps raking the current victim (if it survived a structure-block transfer) or is
-                //simply lost as overkill (if the current victim is already destroyed).
-                $damageRemaining -= $rakeSize; //the 20 points lost while transferring
+                //A transfer costs one rake's worth of damage.
+                $damageRemaining -= $rakeSize;
                 if ($damageRemaining < $rakeSize) {
-                    if (!$targetDestroyed) continue; //structure transfer but no spare damage - keep raking current
-                    break; //current victim dead and nothing useful left
+                    //Not enough to transfer. If the current victim survived a structure transfer,
+                    //pour the remainder back into it; if it's dead, the rest is lost.
+                    if ($stop === 'structure') {
+                        $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize, true);
+                    }
+                    break;
                 }
 
-                $nextTarget = $this->getNextTransferTarget($gamedata, $queueIndex);
+                $nextTarget = $this->getNextTransferTarget($gamedata, $queueIndex, $shooter, $currentTarget);
                 if ($nextTarget == null) {
-                    //Queue exhausted: refund the transfer-cost rake and, if the current victim
-                    //still lives, keep raking it; otherwise stop.
+                    //No legal next target (queue exhausted, or none within 1 hex + in arc):
+                    //refund the transfer-cost rake; pour remainder into the
+                    //current victim if it still lives, else stop.
                     $damageRemaining += $rakeSize;
-                    if (!$targetDestroyed) continue;
+                    if ($stop === 'structure') {
+                        $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize, true);
+                    }
                     break;
                 }
 
                 //Build a synthetic fire order for the new victim (combat-log clarity).
                 $transferOrder = $this->buildTransferFireOrder($shooter, $nextTarget, $fireOrder, $gamedata);
+                $transferOrder->needed -= $transferOrder->totalIntercept;
 
                 //Roll to hit the new victim, re-rolling on misses until it hits or runs dry.
-                $transferOrder->needed -= $transferOrder->totalIntercept;
                 $attempts = 0;
                 $transferHit = $this->rollToHitWithRakeReroll($gamedata, $transferOrder, $nextTarget, $damageRemaining, $rakeSize, false, $attempts);
                 $transferOrder->shots = max(1, $attempts);
@@ -1559,10 +1562,95 @@ class HypergravitonBlaster extends Weapon {
                 $nextTarget->clearVreeHitSectionChoice($shooter->id, $transferOrder);
                 $transferOrder->pubnotes .= "<br>Hypergraviton Blaster beam loses 20 damage and transfers to " . $nextTarget->name . ".";
 
-                //Continue the rake loop on the new victim, attributing damage to its own order.
+                //Continue on the new victim, attributing damage to its own order.
                 $currentTarget = $nextTarget;
                 $currentOrder  = $transferOrder;
             }
+        }
+
+        /* Rakes a single victim one 20-pt rake at a time and stops, returning WHY it stopped:
+         *   'destroyed'   - the whole unit was destroyed by a rake (transfer may follow)
+         *   'structure'   - a structure block was destroyed and that target opted in to
+         *                   structure-transfer (HCV+) - a voluntary transfer may follow
+         *   'outOfDamage' - the volley ran out before either of the above
+         * $damageRemaining is decremented by reference.
+         *
+         * Fighter flights are handled specially (rakeFighterFlight): each fighter gets its own
+         * to-hit roll, with the standard re-roll-on-miss, until the whole flight is destroyed.
+         *
+         * $noTransfer=true forces it to simply rake until destroyed/out-of-damage WITHOUT
+         * reporting a structure-transfer opportunity (used to dump leftover damage when no
+         * transfer is possible).
+         */
+        protected function rakeOneVictim($shooter, $victim, $order, $gamedata, &$damageRemaining, $rakeSize, $noTransfer = false)
+        {
+            if ($victim instanceof FighterFlight) {
+                return $this->rakeFighterFlight($shooter, $victim, $order, $gamedata, $damageRemaining, $rakeSize);
+            }
+
+            $launchPos = null; //non-ballistic Blaster
+
+            while ($damageRemaining > 0 && !$victim->isDestroyed()) {
+                $tmpLocation = $order->chosenLocation;
+                if (!($tmpLocation > 0)) {
+                    $tmpLocation = $victim->getHitSection($shooter, $order->turn);
+                }
+
+                $sectionStructure  = $victim->getStructureSystem($tmpLocation);
+                $structureWasAlive = $sectionStructure != null && !$sectionStructure->isDestroyed();
+
+                $rake   = min($damageRemaining, $rakeSize);
+                $system = $victim->getHitSystem($shooter, $order, $this, $gamedata, $tmpLocation);
+                $this->doDamage($victim, $shooter, $system, $rake, $order, $launchPos, $gamedata, false, $tmpLocation);
+                $damageRemaining -= $rake;
+
+                if ($victim->isDestroyed()) {
+                    return 'destroyed';
+                }
+
+                if (!$noTransfer) {
+                    $structureDestroyed = $structureWasAlive
+                        && $sectionStructure != null && $sectionStructure->isDestroyed();
+                    if ($structureDestroyed
+                        && $this->getTransferFlagForShip($victim->id)
+                        && $victim->shipSizeClass >= 2) {
+                        return 'structure';
+                    }
+                }
+            }
+
+            return 'outOfDamage';
+        }
+
+        /* Rakes a fighter flight, giving EACH fighter its own to-hit roll (with the standard
+         * re-roll-on-miss, -20 per miss) until the entire flight is destroyed or the volley
+         * runs dry. Returns 'destroyed' (whole flight gone) or 'outOfDamage'. */
+        protected function rakeFighterFlight($shooter, $flight, $order, $gamedata, &$damageRemaining, $rakeSize)
+        {
+            $launchPos = null;
+
+            while ($damageRemaining >= $rakeSize && !$flight->isDestroyed()) {
+                //Pick the next living fighter (getHitSystem returns a non-destroyed one).
+                $fighter = $flight->getHitSystem($shooter, $order, $this, $gamedata, null);
+                if ($fighter == null || $fighter->isDestroyed()) {
+                    break; //nothing left to shoot at
+                }
+
+                //Fresh roll for this fighter, re-rolling on misses until it hits or damage runs dry.
+                $attempts = 0;
+                $hit = $this->rollToHitWithRakeReroll($gamedata, $order, $flight, $damageRemaining, $rakeSize, false, $attempts);
+                if (!$hit) {
+                    return 'outOfDamage';
+                }
+
+                //One rake destroys the fighter (fighters are tiny); apply it.
+                $rake = min($damageRemaining, $rakeSize);
+                $flight->clearVreeHitSectionChoice($shooter->id, $order);
+                $this->doDamage($flight, $shooter, $fighter, $rake, $order, $launchPos, $gamedata, false, null);
+                $damageRemaining -= $rake;
+            }
+
+            return $flight->isDestroyed() ? 'destroyed' : 'outOfDamage';
         }
 
         /* Returns the transferOnStructure flag for a given ship id from the parsed queue
@@ -1578,8 +1666,14 @@ class HypergravitonBlaster extends Weapon {
         }
 
         /* Pulls the next still-valid transfer target from the queue, advancing $queueIndex
-         * (by reference) past skipped/invalid entries. Returns the Ship or null. */
-        protected function getNextTransferTarget($gamedata, &$queueIndex)
+         * (by reference) past skipped/invalid entries. Returns the Ship or null.
+         *
+         * The beam may only transfer to a unit within ONE HEX of the PREVIOUS recipient
+         * ($fromVictim) and IN ARC of the weapon (evaluated from the shooter, "at the time of
+         * firing"). A candidate failing either gate is skipped (a later queue entry may still be
+         * a legal hop), so the player's ordered list is honoured as a preference within the
+         * geometric constraints. */
+        protected function getNextTransferTarget($gamedata, &$queueIndex, $shooter, $fromVictim)
         {
             while ($queueIndex < count($this->transferQueue)) {
                 $entry = $this->transferQueue[$queueIndex];
@@ -1587,9 +1681,28 @@ class HypergravitonBlaster extends Weapon {
                 $candidate = $gamedata->getShipById($entry['shipid']);
                 if ($candidate == null) continue;
                 if ($candidate->isDestroyed()) continue;
+                if (!$this->isLegalTransferTarget($shooter, $fromVictim, $candidate)) continue;
                 return $candidate;
             }
             return null;
+        }
+
+        /* A transfer hop is legal only if the candidate is within 1 hex of the previous
+         * recipient AND in the weapon's firing arc (relative to the shooter). */
+        protected function isLegalTransferTarget($shooter, $fromVictim, $candidate)
+        {
+            //Within one hex of the previous recipient.
+            if (mathlib::getDistanceHex($fromVictim, $candidate) > 1) {
+                return false;
+            }
+
+            //In arc of the weapon (measured from the shooter, as at time of firing).
+            $relativeBearing = $shooter->getBearingOnUnit($candidate);
+            if (!mathlib::isInArc($relativeBearing, $this->startArc, $this->endArc)) {
+                return false;
+            }
+
+            return true;
         }
 
         /* Creates and registers a synthetic addToDB fire order for a transfer victim, so the
