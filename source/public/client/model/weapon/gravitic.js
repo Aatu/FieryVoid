@@ -524,6 +524,19 @@ HypergravitonBlaster.prototype.initBoostableInfo = function () {
             shipManager.power.unsetBoost(null, this);
         }
     }
+
+	switch (this.turnsloaded) {
+		case 1:
+			this.data["Damage"] = '45 - 90';
+			break;
+		case 2:
+			this.data["Damage"] = '90 - 180';
+			break;
+		default:
+			this.data["Damage"] = '45 - 90';
+			break;
+	}    
+
     return this;
 };
 

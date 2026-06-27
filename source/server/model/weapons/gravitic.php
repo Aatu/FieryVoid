@@ -1318,7 +1318,7 @@ class HypergravitonBlaster extends Weapon {
 		public $raking = 20;
 		public $damageType = 'Raking'; 
     	public $weaponClass = "Gravitic";
-		public $fireingModes = array(1=>"Raking");
+		public $firingModes = array(1=>"Raking");
     	
 		protected $thrustBoosted = true;//Variable Front End looks for to use thrust as boost. 
 	    protected $thrustPerBoost = 6; //Variable showing how much thrust is used per boost.
@@ -1342,9 +1342,120 @@ class HypergravitonBlaster extends Weapon {
 			$this->data["Special"] .= "<br>Can fire accelerated for less damage.";
 			$this->data["Special"] .= "<br> - 1 turn: 5d10+40";
 			$this->data["Special"] .= "<br> - 2 turns: 10d10+80";
-            
+			$this->data["Special"] .= "<br>On a miss, subtracts 20 damage and re-rolls to hit until it hits or runs out of damage.";
+
             parent::setSystemDataWindow($turn);
-        } 
+        }
+
+        /* STAGE 1 - Miss re-roll.
+         * The Hypergraviton Blaster determines its full volley damage UP FRONT (per
+         * rules), then rolls to hit. On a miss it subtracts one 20-point rake from the
+         * remaining damage and rolls again, repeating until it hits or has less than a
+         * full rake left. Whatever damage survives that process is what actually rakes
+         * the target.
+         *
+         * We override fire() instead of letting the base single-roll routine run, because
+         * the base fire() rolls once and (on hit) calls beforeDamage()->getDamage() which
+         * re-rolls the damage dice. Here we must roll the damage ONCE and decrement it as
+         * rakes are consumed by misses, so we drive our own roll loop and call damage()
+         * directly with the pre-rolled, decremented amount.
+         *
+         * $this->firstShotMissed is recorded for later stages (a missed FIRST shot bars
+         * any target transfer for the rest of the volley).
+         */
+        public $firstShotMissed = false; //set true if the opening to-hit roll missed - blocks transfer in later stages
+
+        public function fire($gamedata, $fireOrder)
+        {
+            $shooter = $gamedata->getShipById($fireOrder->shooterid);
+            $target  = $gamedata->getShipById($fireOrder->targetid);
+
+            //No valid target (e.g. a hex-targeted order leaking through): fall back to base handling.
+            if ($target == null) {
+                parent::fire($gamedata, $fireOrder);
+                return;
+            }
+
+            //Mirror base fire(): apply interception to the needed number first.
+            $fireOrder->needed -= $fireOrder->totalIntercept;
+            $fireOrder->notes .= "Interception: " . $fireOrder->totalIntercept
+                . " sources:" . $fireOrder->numInterceptors
+                . ", final to hit: " . $fireOrder->needed . "\n";
+
+            $pos = null; //let damage routines work out the source position (correct at range 0)
+            if ($this->ballistic) {
+                $pos = $this->getFiringHex($gamedata, $fireOrder);
+            }
+
+            //Determine the full volley damage ONCE, before rolling to hit.
+            $damageRemaining = $this->getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+            $rakeSize        = $this->getRakeSize();
+
+            $this->firstShotMissed = false;
+            $attempts = 0; //number of to-hit rolls made (filled by reference) - used for the X/Y combat-log display
+            $hit = $this->rollToHitWithRakeReroll($gamedata, $fireOrder, $target, $damageRemaining, $rakeSize, true, $attempts);
+
+            if ($hit) {
+                //Apply whatever damage survived the re-roll process as a normal raking hit.
+                $fireOrder->shotshit++;
+                $target->clearVreeHitSectionChoice($shooter->id, $fireOrder);
+                $this->damage($target, $shooter, $fireOrder, $gamedata, $damageRemaining);
+            }
+
+            //Report each to-hit attempt as a "shot" so the combat log shows hits/attempts
+            //(e.g. 1/3 for a hit on the third roll) instead of a misleading 1/1.
+            $fireOrder->shots = max(1, $attempts);
+
+            //Bookkeeping identical to base fire() so combat log / downstream code stay happy.
+            $fireOrder->rolled = max(1, $fireOrder->rolled);
+            TacGamedata::$lastFiringResolutionNo++;
+            $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;
+        } //endof fire
+
+        /* Rolls to hit, applying the miss-re-roll procedure.
+         * On each miss, one rake's worth of damage is removed from $damageRemaining
+         * (passed by reference) and we roll again, so long as a full rake still remains.
+         * Returns true on a hit, false if the volley ran out of damage without hitting.
+         * $isFirstShot only matters for setting $this->firstShotMissed (later stages).
+         * $attempts is filled (by reference) with the number of to-hit rolls actually made.
+         */
+        protected function rollToHitWithRakeReroll($gamedata, $fireOrder, $target, &$damageRemaining, $rakeSize, $isFirstShot = false, &$attempts = 0)
+        {
+            $needed   = $fireOrder->needed;
+            $attempts = 0;
+
+            while ($damageRemaining >= $rakeSize) {
+                $attempts++;
+                $rolled = Dice::d(100);
+                $fireOrder->rolled = $rolled; //last roll wins, as in base fire()
+
+                $fireOrder->notes .= " FIRING SHOT (attempt $attempts): rolled: $rolled, needed: $needed, damage left: $damageRemaining\n";
+
+                //Mirror base fire(): a roll landing in the interception band counts as intercepted.
+                if ($rolled > $needed && $rolled <= $needed + $fireOrder->totalIntercept) {
+                    $fireOrder->intercepted += 1;
+                }
+
+                if ($rolled <= $needed) {
+                    return true; //hit - $damageRemaining is what gets dealt
+                }
+
+                //Miss: record first-shot miss, drop a rake, and (if enough damage remains) roll again.
+                if ($isFirstShot && $attempts == 1) {
+                    $this->firstShotMissed = true;
+                }
+
+                $damageRemaining -= $rakeSize;
+                if ($damageRemaining < $rakeSize) {
+                    $fireOrder->notes .= " Missed and insufficient damage remains to re-roll (left: $damageRemaining).\n";
+                    $fireOrder->pubnotes .= "<br>Missed; out of damage to re-roll.";
+                    break;
+                }
+                $fireOrder->pubnotes .= "<br>Missed; -20 damage and re-rolling.";
+            }
+
+            return false;
+        }
 
         protected function getBoostLevel($turn){
             $boostLevel = 0;
