@@ -1400,6 +1400,13 @@ class Manager{
                             $fo["y"] ?? 0,
                             $fo["damageclass"] ?? null
                         );
+                        //Carry the client-supplied notes through. The FireOrder ctor doesn't
+                        //take notes, and weapons that need to pass custom per-shot data to
+                        //server-side resolution (e.g. Hypergraviton Blaster transfer-target
+                        //list) encode it here. Safe: server-side notes writes happen later
+                        //during firing resolution as appends/overwrites; nothing reads the
+                        //incoming client notes value except weapons that opt in.
+                        $fireOrder->notes = $fo["notes"] ?? "";
                         if ($sys) {
                             $fires[] = $fireOrder;
                         }

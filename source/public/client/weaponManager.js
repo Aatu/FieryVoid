@@ -400,7 +400,7 @@ window.weaponManager = {
                 if (gamedata.gamephase != 3 && !w.ballistic && !w.preFires) return false;
                 if (gamedata.gamephase != 1 && w.ballistic) return false;
                 if (gamedata.gamephase != 5 && w.preFires) return false;
-                if (weaponManager.hasFiringOrder(ship, w) && !w.canSplitShots) return false;
+                if (weaponManager.hasFiringOrder(ship, w) && !w.canSplitShots && !w.hasSpecialTargeting) return false;
                 return true;
             });
 
@@ -428,7 +428,7 @@ window.weaponManager = {
                 if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) continue; //improper at this moment
                 if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
                 if (gamedata.gamephase != 5 && system.preFires) continue;	//improper at this moment                
-                if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots) continue;//already declared, do not touch it!
+                if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots && !system.hasSpecialTargeting) continue;//already declared, do not touch it! (special-targeting weapons may be re-clicked to edit)
 
                 if (currentWasSelected) {//unselect
                     if (weaponManager.isSelectedWeapon(system)) weaponManager.unSelectWeapon(ship, system);
@@ -2368,7 +2368,18 @@ window.weaponManager = {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
-                    if (weapon.canSplitShots) {
+                    if (weapon.hasSpecialTargeting) {
+                        //Weapons that need a bespoke targeting flow (e.g. Hypergraviton Blaster's
+                        //transfer-target ordering window) handle their own fire-order creation in
+                        //doSpecialTargeting. They declare a plain single normal/raking fire order,
+                        //so they deliberately bypass the canSplitShots machinery (ballistic icons,
+                        //split menus, etc.). Only unselect if an order was actually declared.
+                        var declared = weapon.doSpecialTargeting(selectedShip, ship, system);
+                        if (declared) {
+                            toUnselect.push(weapon);
+                            webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+                        }
+                    } else if (weapon.canSplitShots) {
                         var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
 

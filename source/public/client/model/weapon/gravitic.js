@@ -507,9 +507,74 @@ HypergravitonBeam.prototype.clearBoost = function () {
 
 var HypergravitonBlaster = function HypergravitonBlaster(json, ship) {
     Gravitic.call(this, json, ship);
+    this.hasSpecialTargeting = true; //route target selection through doSpecialTargeting (transfer-target UI hook)
 };
 HypergravitonBlaster.prototype = Object.create(Gravitic.prototype);
 HypergravitonBlaster.prototype.constructor = HypergravitonBlaster;
+
+/* STAGE 2 (temporary, hardcoded) - transfer-target carrier round-trip test.
+ * Declares ONE plain normal/raking fire order against the chosen target (so it behaves
+ * exactly like an ordinary Blaster shot to the rest of the client), but encodes an
+ * ordered transfer-target list into the notes field as:
+ *   HBT|<shipid>:<transferOnStructure 0|1>|<shipid>:<flag>|...
+ * For now the list is auto-built from every OTHER enemy ship, sorted by shipSizeClass
+ * descending, flag 0. Stage 4 replaces this with the HBlasterList React window so the
+ * player can order the list and tick per-ship checkboxes. The server-side
+ * beforeFiringOrderResolution parses + clears this notes payload.
+ *
+ * Reached via the hasSpecialTargeting divert in weaponManager.targetShip(), which also
+ * permits the weapon to be re-clicked after declaring (to edit the list) - so we replace
+ * any existing order rather than stacking a second one.
+ */
+HypergravitonBlaster.prototype.doSpecialTargeting = function (shooter, target, system) {
+    var calledid = -1; //raking weapon, no called shots
+    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+    if (chance < 1) return false; //no declaration made
+
+    //Replace any prior declaration (re-click to re-target / re-order).
+    weaponManager.removeFiringOrder(shooter, this);
+
+    //Build the hardcoded transfer queue: every other enemy ship, biggest first.
+    var candidates = [];
+    for (var i in gamedata.ships) {
+        var candidate = gamedata.ships[i];
+        if (candidate.id === target.id) continue;
+        if (candidate.destroyed) continue;
+        if (!gamedata.isEnemy(shooter, candidate)) continue;
+        candidates.push(candidate);
+    }
+    candidates.sort(function (a, b) {
+        return (b.shipSizeClass || 0) - (a.shipSizeClass || 0);
+    });
+
+    var notes = "HBT";
+    for (var c in candidates) {
+        notes += "|" + candidates[c].id + ":0";
+    }
+
+    var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+    var damageClass = this.data["Weapon type"] ? this.data["Weapon type"].toLowerCase() : 'raking';
+    var fire = {
+        id: fireid,
+        type: 'normal',
+        shooterid: shooter.id,
+        targetid: target.id,
+        weaponid: this.id,
+        calledid: calledid,
+        turn: gamedata.turn,
+        firingMode: this.firingMode,
+        shots: 1,
+        x: "null",
+        y: "null",
+        damageclass: damageClass,
+        chance: chance,
+        hitmod: 0,
+        notes: notes
+    };
+
+    this.fireOrders.push(fire);
+    return true; //order declared
+};
 
 HypergravitonBlaster.prototype.initBoostableInfo = function () {
     // Needed because it can change during initial phase

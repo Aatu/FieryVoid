@@ -1365,6 +1365,56 @@ class HypergravitonBlaster extends Weapon {
          */
         public $firstShotMissed = false; //set true if the opening to-hit roll missed - blocks transfer in later stages
 
+        /* STAGE 2 - transfer-target carrier.
+         * The client encodes the player's ordered transfer-target list into the fire
+         * order's notes field as:  HBT|<shipid>:<transferOnStructure 0|1>|<shipid>:<flag>|...
+         * The leading HBT marks our format. transferOnStructure=1 means "also transfer
+         * when this target merely loses a structure block" (HCV+); 0 means "only transfer
+         * once this target is wholly destroyed".
+         *
+         * beforeFiringOrderResolution (called in firing.php before fireWeapons) parses that
+         * string into $this->transferQueue, then CLEARS notes so the stored fire order ends
+         * up holding only the human-readable firing log, not the encoded payload.
+         */
+        public $transferQueue = array(); //ordered list of ['shipid'=>int,'transferOnStructure'=>bool] for the current shot
+
+        public function beforeFiringOrderResolution($gamedata)
+        {
+            $this->transferQueue = array();
+
+            foreach ($this->getFireOrders($gamedata->turn) as $order) {
+                if ($order->turn != $gamedata->turn) continue;
+                if (empty($order->notes)) continue;
+                if (strpos($order->notes, 'HBT|') !== 0) continue; //not our encoded format
+
+                $segments = explode('|', $order->notes);
+                array_shift($segments); //drop the leading 'HBT'
+
+                foreach ($segments as $seg) {
+                    if ($seg === '') continue;
+                    $parts = explode(':', $seg);
+                    $shipid = (int)$parts[0];
+                    $flag   = isset($parts[1]) ? ((int)$parts[1] === 1) : false;
+                    if ($shipid <= 0) continue;
+                    $this->transferQueue[] = array(
+                        'shipid' => $shipid,
+                        'transferOnStructure' => $flag,
+                    );
+                }
+
+                //Clear the encoded payload so it never reaches the firing log / DB as gibberish.
+                //(Note: calculateHitBase later OVERWRITES notes with its hit-calc breakdown,
+                // so anything written here is for in-flight use only and won't persist.)
+                $order->notes = '';
+
+                //STAGE 2 TEMP: dump the parsed queue to the server log so the round-trip can be
+                //verified (in-memory transferQueue isn't persisted). Remove once Stage 3 lands.
+                Debug::log("HBlaster beforeFiringOrderResolution: shooter {$this->unit->id} weapon {$this->id} "
+                    . "parsed " . count($this->transferQueue) . " transfer target(s): "
+                    . json_encode($this->transferQueue));
+            }
+        }
+
         public function fire($gamedata, $fireOrder)
         {
             $shooter = $gamedata->getShipById($fireOrder->shooterid);
@@ -1396,10 +1446,17 @@ class HypergravitonBlaster extends Weapon {
             $hit = $this->rollToHitWithRakeReroll($gamedata, $fireOrder, $target, $damageRemaining, $rakeSize, true, $attempts);
 
             if ($hit) {
-                //Apply whatever damage survived the re-roll process as a normal raking hit.
+                //Apply whatever damage survived the re-roll process. If a transfer queue was
+                //supplied (and the first shot didn't miss), use the transfer-aware raking loop;
+                //otherwise fall back to the base raking behaviour exactly.
                 $fireOrder->shotshit++;
                 $target->clearVreeHitSectionChoice($shooter->id, $fireOrder);
-                $this->damage($target, $shooter, $fireOrder, $gamedata, $damageRemaining);
+
+                if (!empty($this->transferQueue) && !$this->firstShotMissed) {
+                    $this->resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize);
+                } else {
+                    $this->damage($target, $shooter, $fireOrder, $gamedata, $damageRemaining);
+                }
             }
 
             //Report each to-hit attempt as a "shot" so the combat log shows hits/attempts
@@ -1411,6 +1468,149 @@ class HypergravitonBlaster extends Weapon {
             TacGamedata::$lastFiringResolutionNo++;
             $fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;
         } //endof fire
+
+        /* STAGE 3 - transfer-aware raking.
+         * Rakes $damageRemaining into $target one 20-pt rake at a time. After each rake it
+         * checks whether the beam should jump to the next queued target:
+         *   - the target is wholly destroyed, OR
+         *   - the section's structure block was just destroyed AND that target's
+         *     transferOnStructure flag is set AND the target is HCV+ (shipSizeClass>=2).
+         * On a transfer: subtract one rake (the transfer cost), pull the next queue entry,
+         * roll to hit it with the standard re-roll-on-miss procedure, and (on a hit) continue
+         * raking the new victim. A failed transfer keeps re-rolling the SAME new target until
+         * it hits or the volley runs dry (per design decision 2026-06-27). Each victim after
+         * the first gets its own synthetic addToDB FireOrder so the combat log reads as a
+         * sequence of distinct shots.
+         */
+        protected function resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize)
+        {
+            $queueIndex   = 0;
+            $currentTarget = $target;
+            $currentOrder  = $fireOrder; //the live fire order whose damage entries we attribute rakes to
+
+            //Non-ballistic Blaster: no launch position; section chosen as in base damage().
+            $launchPos = null;
+
+            while ($damageRemaining > 0 && $currentTarget != null && !$currentTarget->isDestroyed()) {
+
+                //Resolve the section to hit on the current victim (mirrors base damage()).
+                $tmpLocation = $currentOrder->chosenLocation;
+                if (!($tmpLocation > 0)) {
+                    $tmpLocation = $currentTarget->getHitSection($shooter, $currentOrder->turn);
+                }
+
+                //Snapshot the section's structure-block state before this rake.
+                $sectionStructure = $currentTarget->getStructureSystem($tmpLocation);
+                $structureWasAlive = $sectionStructure != null && !$sectionStructure->isDestroyed();
+
+                //Apply one rake (armor pierced is tracked on $currentOrder->armorIgnored).
+                $rake = min($damageRemaining, $rakeSize);
+                $system = $currentTarget->getHitSystem($shooter, $currentOrder, $this, $gamedata, $tmpLocation);
+                $this->doDamage($currentTarget, $shooter, $system, $rake, $currentOrder, $launchPos, $gamedata, false, $tmpLocation);
+                $damageRemaining -= $rake;
+
+                //Did this rake open up a transfer opportunity?
+                $targetDestroyed   = $currentTarget->isDestroyed();
+                $structureDestroyed = $structureWasAlive
+                    && $sectionStructure != null && $sectionStructure->isDestroyed();
+
+                $flag = $this->getTransferFlagForShip($currentTarget->id);
+                $structureTransferAllowed = $structureDestroyed
+                    && $flag
+                    && $currentTarget->shipSizeClass >= 2;
+
+                if (!$targetDestroyed && !$structureTransferAllowed) {
+                    continue; //keep raking the current victim
+                }
+
+                //A transfer is warranted. Need a fresh victim, the transfer-cost rake, and damage to spend.
+                //If we can't actually transfer (no damage / no target left), the remainder either
+                //keeps raking the current victim (if it survived a structure-block transfer) or is
+                //simply lost as overkill (if the current victim is already destroyed).
+                $damageRemaining -= $rakeSize; //the 20 points lost while transferring
+                if ($damageRemaining < $rakeSize) {
+                    if (!$targetDestroyed) continue; //structure transfer but no spare damage - keep raking current
+                    break; //current victim dead and nothing useful left
+                }
+
+                $nextTarget = $this->getNextTransferTarget($gamedata, $queueIndex);
+                if ($nextTarget == null) {
+                    //Queue exhausted: refund the transfer-cost rake and, if the current victim
+                    //still lives, keep raking it; otherwise stop.
+                    $damageRemaining += $rakeSize;
+                    if (!$targetDestroyed) continue;
+                    break;
+                }
+
+                //Build a synthetic fire order for the new victim (combat-log clarity).
+                $transferOrder = $this->buildTransferFireOrder($shooter, $nextTarget, $fireOrder, $gamedata);
+
+                //Roll to hit the new victim, re-rolling on misses until it hits or runs dry.
+                $transferOrder->needed -= $transferOrder->totalIntercept;
+                $attempts = 0;
+                $transferHit = $this->rollToHitWithRakeReroll($gamedata, $transferOrder, $nextTarget, $damageRemaining, $rakeSize, false, $attempts);
+                $transferOrder->shots = max(1, $attempts);
+
+                if (!$transferHit) {
+                    break; //missed and out of damage
+                }
+
+                $transferOrder->shotshit++;
+                $nextTarget->clearVreeHitSectionChoice($shooter->id, $transferOrder);
+                $transferOrder->pubnotes .= "<br>Hypergraviton Blaster beam loses 20 damage and transfers to " . $nextTarget->name . ".";
+
+                //Continue the rake loop on the new victim, attributing damage to its own order.
+                $currentTarget = $nextTarget;
+                $currentOrder  = $transferOrder;
+            }
+        }
+
+        /* Returns the transferOnStructure flag for a given ship id from the parsed queue
+         * (false if the ship isn't in the queue). */
+        protected function getTransferFlagForShip($shipid)
+        {
+            foreach ($this->transferQueue as $entry) {
+                if ($entry['shipid'] == $shipid) {
+                    return !empty($entry['transferOnStructure']);
+                }
+            }
+            return false;
+        }
+
+        /* Pulls the next still-valid transfer target from the queue, advancing $queueIndex
+         * (by reference) past skipped/invalid entries. Returns the Ship or null. */
+        protected function getNextTransferTarget($gamedata, &$queueIndex)
+        {
+            while ($queueIndex < count($this->transferQueue)) {
+                $entry = $this->transferQueue[$queueIndex];
+                $queueIndex++;
+                $candidate = $gamedata->getShipById($entry['shipid']);
+                if ($candidate == null) continue;
+                if ($candidate->isDestroyed()) continue;
+                return $candidate;
+            }
+            return null;
+        }
+
+        /* Creates and registers a synthetic addToDB fire order for a transfer victim, so the
+         * transfer shot appears as its own line in the combat log. Hit chance is computed via
+         * the standard calculateHitBase against the new target. */
+        protected function buildTransferFireOrder($shooter, $newTarget, $originalOrder, $gamedata)
+        {
+            $transferOrder = new FireOrder(
+                -1, "normal", $shooter->id, $newTarget->id, $this->id, -1,
+                $gamedata->turn, $this->firingMode, 0, 0, 1, 0, 0, 0, 0,
+                $originalOrder->damageclass
+            );
+            $transferOrder->addToDB = true;
+            $transferOrder->pubnotes = " Transferred Hypergraviton Blaster shot.";
+            $this->fireOrders[] = $transferOrder;
+
+            //Compute hit chance against the new victim (sets $transferOrder->needed).
+            $this->calculateHitBase($gamedata, $transferOrder);
+
+            return $transferOrder;
+        }
 
         /* Rolls to hit, applying the miss-re-roll procedure.
          * On each miss, one rake's worth of damage is removed from $damageRemaining
