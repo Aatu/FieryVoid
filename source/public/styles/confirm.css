@@ -659,3 +659,183 @@
 .confirm.multi-value-confirm.shadowFighterBomb input[type="checkbox"] {
     accent-color: #58c7e6;
 }
+
+/* === Hypergraviton Blaster transfer-target window (Stage 4) ===============
+   Bronze theme, layered on .multi-value-confirm for the row/layout structure
+   but overriding the purple palette. This window does NOT carry the
+   hangar-confirm class (that's the cyan hangar theme). Selector specificity
+   (0,2,0) matches the base .multi-value-confirm, and these rules come later in
+   the file so they win. */
+.confirm.multi-value-confirm.hBlasterTransfer {
+    background: #1a1206;                  /* dark bronze-brown */
+    border: 3px solid #b08d57;            /* bronze */
+    box-shadow: 0 0 10px rgba(176, 141, 87, 0.4);
+    color: #e6d3b0;                       /* warm parchment body text */
+    min-width: 420px;
+    max-width: min(640px, calc(100% - 16px));
+    /* Reserve room so the window grows to its content + the button bar rather
+       than clipping when only a few rows are listed. */
+    min-height: auto;
+    height: auto;
+    padding-bottom: 12px;
+}
+
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-header {
+    color: #e8c98a;                       /* warm gold */
+    text-shadow: 0 0 5px rgba(176, 141, 87, 0.5);
+    border-bottom: 1px solid rgba(176, 141, 87, 0.5);
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+/* Subheader instruction line under the title. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterSubheader {
+    color: #c9b285;
+    font-size: 12px;
+    font-style: italic;
+    text-align: center;
+    margin: 3px 0 10px 0;
+}
+
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-label,
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-max {
+    color: #e6d3b0;
+}
+
+.confirm.multi-value-confirm.hBlasterTransfer .hangar-craft-name {
+    color: #f0deb8;
+    font-weight: bold;
+}
+
+/* Draggable candidate rows: the WHOLE row is the drag handle, so show a grab
+   cursor and a bronze hover. Fixed-column layout so order#, name and the
+   checkbox line up vertically across every row. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow {
+    cursor: grab;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow:active {
+    cursor: grabbing;
+}
+/* Order number — fixed-width column so names start at the same x. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterOrderNo {
+    flex: 0 0 22px;
+    text-align: right;
+    color: #e6d3b0;
+    opacity: 0.8;
+    font-size: 13px;
+}
+/* Ship name — flexes to fill, LEFT-justified so all names line up vertically. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterName {
+    flex: 1 1 auto;
+    text-align: left;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-row:hover {
+    background: rgba(176, 141, 87, 0.12);
+    border-color: #b08d57;
+}
+/* jQuery-UI sortable placeholder (the gap shown where the row will drop). */
+.confirm.multi-value-confirm.hBlasterTransfer .ui-sortable-placeholder {
+    visibility: visible !important;
+    background: rgba(176, 141, 87, 0.15);
+    border: 1px dashed #b08d57;
+    border-radius: 4px;
+    height: 30px;
+}
+
+/* "transfer on structure loss" checkbox + label — fixed-width right column so
+   every row's checkbox sits at the same x (vertical alignment). */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructLabel {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #d8c49a;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructChk {
+    accent-color: #b08d57;
+    cursor: pointer;
+    margin: 0;
+}
+/* Sub-HCV rows: the checkbox is shown but greyed + disabled (size class < 2
+   can only transfer on outright destruction). */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructLabel.disabled {
+    color: #7d6e50;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructChk:disabled {
+    cursor: not-allowed;
+}
+
+/* --- Button bar: in-flow flex row (real height) so it reserves space below
+   the list rather than overlapping it (the absolutely-positioned default .ui
+   buttons were the cause of the too-short window). --- */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterButtons {
+    position: static;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 4px 0 0 0;
+    padding-top: 10px;
+    border-top: 1px solid rgba(176, 141, 87, 0.4);
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterBtn {
+    /* Equal-width: each button takes an equal share of the bar. */
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 160px;
+    border-radius: 5px;
+    font-family: arial;
+    font-size: 13px;                      /* slightly smaller than the 16px default option buttons */
+    font-weight: bold;
+    cursor: pointer;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+/* Lighter/pastel palette to complement the bronze window. Muted sage-green,
+   dusty steel-blue, dusty rose — softer than saturated primaries. */
+/* Pastel fills with DARKER (un-lightened) borders that ground each button. */
+/* Confirm List — pastel sage green. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterConfirm {
+    background-color: #4f7a5a;
+    border-color: #2e4a36;
+    color: #eafaee;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterConfirm:hover {
+    background-color: #5e8e69;
+    box-shadow: 0 0 8px rgba(124, 171, 135, 0.55);
+}
+/* Fire Normally — dusty steel blue. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterFireNormal {
+    background-color: #46647f;
+    border-color: #283b4b;
+    color: #eef6fc;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterFireNormal:hover {
+    background-color: #547695;
+    box-shadow: 0 0 8px rgba(127, 160, 189, 0.55);
+}
+/* Cancel Shot — dusty rose / muted red. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterCancel {
+    background-color: #8a4a4a;
+    border-color: #532b2b;
+    color: #fbeaea;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterCancel:hover {
+    background-color: #9e5a5a;
+    box-shadow: 0 0 8px rgba(189, 128, 128, 0.55);
+}

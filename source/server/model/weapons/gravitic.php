@@ -1533,7 +1533,7 @@ class HypergravitonBlaster extends Weapon {
                     break;
                 }
 
-                $nextTarget = $this->getNextTransferTarget($gamedata, $queueIndex, $shooter, $currentTarget);
+                $nextTarget = $this->getNextTransferTarget($gamedata, $queueIndex, $shooter, $currentTarget, $target->id);
                 if ($nextTarget == null) {
                     //No legal next target (queue exhausted, or none within 1 hex + in arc):
                     //refund the transfer-cost rake; pour remainder into the
@@ -1672,12 +1672,17 @@ class HypergravitonBlaster extends Weapon {
          * ($fromVictim) and IN ARC of the weapon (evaluated from the shooter, "at the time of
          * firing"). A candidate failing either gate is skipped (a later queue entry may still be
          * a legal hop), so the player's ordered list is honoured as a preference within the
-         * geometric constraints. */
-        protected function getNextTransferTarget($gamedata, &$queueIndex, $shooter, $fromVictim)
+         * geometric constraints.
+         *
+         * $initialTargetId is the fire order's own target. Since Stage-4 the queue's FIRST
+         * entry is the initial target (carried only so getTransferFlagForShip can read its
+         * structure-loss flag) — it is NOT a transfer hop, so skip it here. */
+        protected function getNextTransferTarget($gamedata, &$queueIndex, $shooter, $fromVictim, $initialTargetId = null)
         {
             while ($queueIndex < count($this->transferQueue)) {
                 $entry = $this->transferQueue[$queueIndex];
                 $queueIndex++;
+                if ($initialTargetId !== null && (int)$entry['shipid'] === (int)$initialTargetId) continue; //never hop to the initial target
                 $candidate = $gamedata->getShipById($entry['shipid']);
                 if ($candidate == null) continue;
                 if ($candidate->isDestroyed()) continue;

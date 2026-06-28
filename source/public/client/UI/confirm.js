@@ -4284,6 +4284,224 @@ window.confirm = {
             // and the deployment list reflects "this is going to a hangar."
             flight.pendingDeployDock = { carrierId: parseInt(carrier.id, 10), hangarId: parseInt(hangar.id, 10) };
         }
+    },
+
+    // === Hypergraviton Blaster Stage 4: transfer-target ordering window ===
+    //
+    // Lets the player order the transfer-target list (drag rows) and tick
+    // "transfer on structure loss" per HCV+ (shipSizeClass >= 2) target, then
+    // confirm-with-list / fire-normal / cancel-shot.
+    //
+    // The INITIAL target is pinned as row #1 (not draggable — the beam always
+    // starts there) but DOES get its own structure checkbox; its flag is carried
+    // to the server alongside the queue (see gravitic.js declareTransferShot and
+    // the server getNextTransferTarget which skips the initial target as a hop).
+    //
+    // The window is a UX front-end: the SERVER is authoritative for the per-hop
+    // range/arc geometry (isLegalTransferTarget, Stage 5b). We pre-filter
+    // candidates to enemy ships within 1 hex of the INITIAL target and in arc so
+    // the list is the set of plausible first hops; a candidate the server later
+    // rejects per-hop is simply skipped.
+    //
+    // preselect (optional, for re-opening an existing order):
+    //   { queue: [{shipid, transferOnStructure}], initialOnStructure: bool }
+    // restores the saved row order + checkbox states. Any current candidate not
+    // in the saved queue is appended (default order); a saved id no longer a
+    // valid candidate is dropped.
+    //
+    // callback signature:
+    //   callback({ queue: [{shipid, transferOnStructure}],
+    //              initialOnStructure: bool, cancelled: bool })
+    // cancelled === true means "Cancel Shot" (the caller removes any fire order).
+    hBlasterTransferList: function hBlasterTransferList(shooter, weapon, initialTarget, callback, preselect) {
+        function isHcvPlus(ship) {
+            return (parseInt(ship.shipSizeClass, 10) || 0) >= 2;
+        }
+
+        // Build the candidate pool: enemy ships (not the initial target, not
+        // destroyed) within 1 hex of the initial target and in the weapon's arc.
+        var candidates = [];
+        for (var key in gamedata.ships) {
+            var c = gamedata.ships[key];
+            if (!c || c.id === initialTarget.id) continue;
+            if (c.destroyed || (typeof shipManager !== 'undefined' && shipManager.isDestroyed && shipManager.isDestroyed(c))) continue;
+            if (!gamedata.isEnemy(shooter, c)) continue;
+            var dist = parseFloat(mathlib.getDistanceBetweenShipsInHex(initialTarget, c));
+            if (isNaN(dist) || dist > 1) continue;                       // within 1 hex of initial target
+            if (!weaponManager.isOnWeaponArc(shooter, c, weapon)) continue; // in the Blaster's arc
+            candidates.push(c);
+        }
+        candidates.sort(function (a, b) {
+            return (parseInt(b.shipSizeClass, 10) || 0) - (parseInt(a.shipSizeClass, 10) || 0);
+        });
+
+        // Apply a saved order/flags from preselect.queue: pull saved candidates
+        // first (in saved order), then append any remaining new candidates.
+        var savedQueue = (preselect && Array.isArray(preselect.queue)) ? preselect.queue : [];
+        var byId = {};
+        candidates.forEach(function (c) { byId[parseInt(c.id, 10)] = c; });
+        var ordered = [];
+        var taken = {};
+        savedQueue.forEach(function (q) {
+            var c = byId[parseInt(q.shipid, 10)];
+            if (!c || taken[c.id]) return;
+            taken[c.id] = true;
+            ordered.push({ ship: c, transferOnStructure: !!q.transferOnStructure });
+        });
+        candidates.forEach(function (c) {
+            if (taken[c.id]) return;
+            ordered.push({ ship: c, transferOnStructure: false });
+        });
+
+        // Working model. rows[0] is the pinned initial target (isInitial); the
+        // rest are the draggable transfer queue. Its structure flag seeds from
+        // preselect.initialOnStructure when re-opening.
+        var initialRow = {
+            ship: initialTarget,
+            isInitial: true,
+            transferOnStructure: !!(preselect && preselect.initialOnStructure)
+        };
+        var rows = [initialRow].concat(ordered);
+
+        // Three equal-width text buttons in an in-flow bar (CSS gives the bar a
+        // real height so it reserves space rather than overlapping the list):
+        //   Confirm List (green) | Fire Normally (blue) | Cancel Shot (red)
+        var e = $('<div class="confirm multi-value-confirm hBlasterTransfer"></div>');
+        $('<div class="multi-value-header">Hypergraviton Blaster &mdash; Transfer Target List</div>').prependTo(e);
+        $('<div class="hBlasterSubheader">(Drag units below into the order you wish the weapon to target)</div>').insertAfter(e.find('.multi-value-header'));
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.hBlasterSubheader'));
+        var buttonBar = $('<div class="ui hBlasterButtons">' +
+            '<div class="hBlasterBtn hBlasterConfirm" title="Confirm with this transfer list">Confirm List</div>' +
+            '<div class="hBlasterBtn hBlasterFireNormal" title="Fire normally (no transfer)">Fire Normally</div>' +
+            '<div class="hBlasterBtn hBlasterCancel" title="Cancel the shot and remove the fire order">Cancel Shot</div>' +
+            '</div>').appendTo(e);
+
+        var listHolder = $('<div class="hBlasterList"></div>').appendTo(container);
+
+        // Re-derive rows[] from current DOM order. rows[0] is always the pinned
+        // initial row (it's a .hBlasterRow but excluded from sortable items, so
+        // it never leaves DOM position 0); the rest follow in dragged order.
+        function syncRowsFromDom() {
+            var reordered = [];
+            listHolder.children('.hBlasterRow').each(function () {
+                var rd = $(this).data('hbRow');
+                if (rd) reordered.push(rd);
+            });
+            if (reordered.length === rows.length) rows = reordered;
+        }
+
+        // In-place order-number refresh after a drag (avoid a full re-render that
+        // would tear down the sortable mid-drag).
+        function renumberRows() {
+            listHolder.children('.hBlasterRow').each(function (i) {
+                $(this).find('.hBlasterOrderNo').text((i + 1) + '.');
+            });
+        }
+
+        function makeRow(rd, idx) {
+            var row = $('<div class="multi-value-row hBlasterRow' + (rd.isInitial ? ' hBlasterInitial' : '') + '"></div>');
+            row.data('hbRow', rd);
+
+            // Fixed-width column structure so order#, name and checkbox line up
+            // vertically across every row:
+            //   [order#] [name (flex, left-justified)] [structure checkbox]
+            $('<span class="hBlasterOrderNo">' + (idx + 1) + '.</span>').appendTo(row);
+            $('<span class="hBlasterName hangar-craft-name">' + rd.ship.name + '</span>').appendTo(row);
+
+            // Every row shows the "transfer on structure loss" checkbox so they all
+            // sit in the same column. HCV+ (shipSizeClass >= 2) targets — incl. the
+            // pinned initial target — can tick it; smaller targets only transfer on
+            // outright destruction (server gates structure transfer on
+            // shipSizeClass >= 2), so theirs is greyed out + disabled.
+            var canStruct = isHcvPlus(rd.ship);
+            var lbl = $('<label class="hBlasterStructLabel' + (canStruct ? '' : ' disabled') + '" title="' +
+                (canStruct
+                    ? 'Transfer remaining damage when a structure block is destroyed, instead of only when the ship is destroyed.'
+                    : 'Only available against units of size class 2 or larger; smaller targets transfer only when destroyed outright.') +
+                '"></label>');
+            var chk = $('<input type="checkbox" class="multiConfirmInput hBlasterStructChk">');
+            chk.prop('checked', canStruct && !!rd.transferOnStructure);
+            chk.prop('disabled', !canStruct);
+            if (canStruct) {
+                chk.on('change', function () { rd.transferOnStructure = $(this).is(':checked'); });
+            }
+            // Label depends on whether the box is usable: HCV+ rows can opt into
+            // structure-loss transfer ("Transfer on structure loss"); sub-HCV rows
+            // are stuck at destruction-only (greyed box → "On ship destruction only").
+            var labelText = canStruct ? 'Transfer on structure loss' : 'On ship destruction only';
+            lbl.append(chk).append('<span>' + labelText + '</span>');
+            row.append(lbl);
+            return row;
+        }
+
+        function renderRows() {
+            if (listHolder.sortable && listHolder.sortable('instance')) {
+                listHolder.sortable('destroy');
+            }
+            listHolder.empty();
+
+            rows.forEach(function (rd, idx) {
+                listHolder.append(makeRow(rd, idx));
+            });
+
+            if (rows.length <= 1) {
+                $('<div class="multi-value-row hBlasterEmptyNote"><span class="multi-value-label" style="font-style:normal;">No eligible transfer targets within 1 hex of ' +
+                    initialTarget.name + '.</span></div>').appendTo(listHolder);
+            }
+
+            // Drag-to-reorder the transfer rows. The WHOLE row is the handle;
+            // `items` excludes the pinned initial row, and `cancel` excludes the
+            // structure checkbox/label so toggling it doesn't start a drag.
+            if (typeof listHolder.sortable === 'function') {
+                listHolder.sortable({
+                    items: '> .hBlasterRow:not(.hBlasterInitial)',
+                    cancel: '.hBlasterStructChk, .hBlasterStructLabel',
+                    axis: 'y',
+                    containment: 'parent',
+                    tolerance: 'pointer',
+                    update: function () {
+                        syncRowsFromDom();
+                        renumberRows();
+                    }
+                });
+            }
+        }
+        renderRows();
+
+        // Split rows[] into the pinned initial target's flag + the transfer queue
+        // (rows[1..]) for the callback.
+        function buildResult(cancelled) {
+            var queue = [];
+            var initialOnStructure = false;
+            rows.forEach(function (rd) {
+                if (rd.isInitial) { initialOnStructure = !!rd.transferOnStructure; return; }
+                queue.push({ shipid: parseInt(rd.ship.id, 10), transferOnStructure: !!rd.transferOnStructure });
+            });
+            return { queue: queue, initialOnStructure: initialOnStructure, cancelled: !!cancelled };
+        }
+
+        $('.hBlasterConfirm', buttonBar).on('click', function () {
+            var result = buildResult(false);
+            $('.confirm').remove();
+            callback(result);
+        });
+        $('.hBlasterFireNormal', buttonBar).on('click', function () {
+            // Truly normal shot: no transfer queue AND no initial structure flag —
+            // an ordinary Blaster fire order against the initial target only.
+            $('.confirm').remove();
+            callback({ queue: [], initialOnStructure: false, cancelled: false });
+        });
+        $('.hBlasterCancel', buttonBar).on('click', function () {
+            $('.confirm').remove();
+            callback({ queue: [], initialOnStructure: false, cancelled: true });
+        });
+
+        e.appendTo('body').fadeIn(250);
+        // Window draggable via the header (jQuery-UI loaded for ship/flight
+        // windows). The transfer ROWS are independently drag-to-reorder above.
+        if (typeof e.draggable === 'function') {
+            e.draggable({ handle: '.multi-value-header', containment: 'window' });
+        }
     }
 
 };
