@@ -4466,8 +4466,7 @@ window.confirm = {
                 listHolder.append(makeRow(rd, idx));
             });
             if (rows.length <= 1) {
-                $('<div class="multi-value-row hBlasterEmptyNote"><span class="multi-value-label" style="font-style:normal;">No eligible transfer targets within 1 hex of ' +
-                    initialTarget.name + '.</span></div>').appendTo(listHolder);
+                $('<div class="multi-value-row hBlasterEmptyNote"><span class="multi-value-label" style="font-style:normal;">No eligible transfer targets within 1 hex!</span></div>').appendTo(listHolder);
             }
         }
         renderRows();

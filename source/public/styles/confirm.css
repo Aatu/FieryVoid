@@ -721,6 +721,7 @@
 .confirm.multi-value-confirm.hBlasterTransfer .multi-value-label,
 .confirm.multi-value-confirm.hBlasterTransfer .multi-value-max {
     color: #e6d3b0;
+    margin: 5px;  
 }
 
 .confirm.multi-value-confirm.hBlasterTransfer .hangar-craft-name {
@@ -798,6 +799,18 @@
 .confirm.multi-value-confirm.hBlasterTransfer .multi-value-row:hover {
     background: rgba(176, 141, 87, 0.12);
     border-color: #b08d57;
+}
+
+/* "No eligible transfer targets" placeholder row. Its label inherits the generic
+   .multi-value-label styling (flex:1; text-align:right; margin-right:15px), which fills
+   the row and right-justifies the text. Centre the row and, more importantly, override
+   the label so the message sits in the middle of the row. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterEmptyNote {
+    justify-content: center;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterEmptyNote .multi-value-label {
+    text-align: center;
+    margin-right: 0;
 }
 
 /* "transfer on structure loss" checkbox + label — fixed-width right column so
