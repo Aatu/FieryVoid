@@ -818,17 +818,24 @@ HypergravitonBlaster.prototype.initBoostableInfo = function () {
  * transfer fire order (a declared order whose notes encode a non-empty transfer
  * queue). Runs on every system-data refresh via systems.initializeSystem. */
 HypergravitonBlaster.prototype.initializationUpdate = function () {
-    var fire = (this.ship && window.weaponManager)
+    if(gamedata.gamephase !== -2){
+        var fire = (this.ship && window.weaponManager)
         ? weaponManager.getFiringOrder(this.ship, this)
         : null;
 
-    if (fire && HypergravitonBlaster.isTransferOrder(fire)) {
-        var preselect = this.parseTransferNotes(fire.notes, fire.targetid);
-        var count = preselect ? preselect.queue.length : 0;
-        this.data["Transfer Shot"] = count + (count === 1 ? " target" : " targets");
-    } else {
-        delete this.data["Transfer Shot"];
-    }
+        if (fire && HypergravitonBlaster.isTransferOrder(fire)) {
+            //Count ALL targets the player sees in the confirm window: the pinned
+            //initial target (always present) PLUS each transfer hop in the queue.
+            //parseTransferNotes peels the initial target out into initialOnStructure,
+            //so queue.length is just the hops — add 1 for the initial target so this
+            //matches the window's row count (e.g. window shows 4 rows -> "4 targets").
+            var preselect = this.parseTransferNotes(fire.notes, fire.targetid);
+            var count = (preselect ? preselect.queue.length : 0) + 1;
+            this.data["Transfer Shot"] = count + (count === 1 ? " target" : " targets");
+        } else {
+            delete this.data["Transfer Shot"];
+        }
+    }    
 
     return this;
 };

@@ -1455,19 +1455,32 @@ class HypergravitonBlaster extends Weapon {
 
             $this->firstShotMissed = false;
             $attempts = 0; //number of to-hit rolls made (filled by reference) - used for the X/Y combat-log display
-            $hit = $this->rollToHitWithRakeReroll($gamedata, $fireOrder, $target, $damageRemaining, $rakeSize, true, $attempts);
 
-            if ($hit) {
-                //Apply whatever damage survived the re-roll process. If a transfer queue was
-                //supplied (and the first shot didn't miss), use the transfer-aware raking loop;
-                //otherwise fall back to the base raking behaviour exactly.
-                $fireOrder->shotshit++;
-                $target->clearVreeHitSectionChoice($shooter->id, $fireOrder);
+            //If the original target is ALREADY destroyed (killed by other fire that resolved
+            //before this Blaster) and we hold a transfer queue, don't roll to hit a corpse:
+            //skip the opening shot entirely and go straight to the transfer flow, which will
+            //hop to the next legal queued target. There's no opening shot to "miss", so the
+            //first-shot-miss transfer bar does not apply here.
+            $targetAlreadyDead = $target->isDestroyed();
 
-                if (!empty($this->transferQueue) && !$this->firstShotMissed) {
-                    $this->resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize);
-                } else {
-                    $this->damage($target, $shooter, $fireOrder, $gamedata, $damageRemaining);
+            if ($targetAlreadyDead && !empty($this->transferQueue)) {
+                $fireOrder->shots = 1;
+                $this->resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize);
+            } else {
+                $hit = $this->rollToHitWithRakeReroll($gamedata, $fireOrder, $target, $damageRemaining, $rakeSize, true, $attempts);
+
+                if ($hit) {
+                    //Apply whatever damage survived the re-roll process. If a transfer queue was
+                    //supplied (and the first shot didn't miss), use the transfer-aware raking loop;
+                    //otherwise fall back to the base raking behaviour exactly.
+                    $fireOrder->shotshit++;
+                    $target->clearVreeHitSectionChoice($shooter->id, $fireOrder);
+
+                    if (!empty($this->transferQueue) && !$this->firstShotMissed) {
+                        $this->resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize);
+                    } else {
+                        $this->damage($target, $shooter, $fireOrder, $gamedata, $damageRemaining);
+                    }
                 }
             }
 
@@ -1500,50 +1513,65 @@ class HypergravitonBlaster extends Weapon {
             $currentTarget = $target;
             $currentOrder  = $fireOrder; //the live fire order whose damage entries we attribute rakes to
 
-            while ($damageRemaining > 0 && $currentTarget != null && !$currentTarget->isDestroyed()) {
+            while ($damageRemaining > 0 && $currentTarget != null) {
 
-                //Rake the current victim until it's destroyed, a structure-block transfer is
-                //triggered, or we run out of damage. Returns the stop reason; $damageRemaining
-                //is updated by reference.
-                $stop = $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize);
+                if ($currentTarget->isDestroyed()) {
+                    //The current victim is ALREADY destroyed - either it was killed by other fire
+                    //before this Blaster resolved (initial target), or a prior rake/transfer left it
+                    //dead. Don't waste rakes on a corpse: treat it as a 'destroyed' stop and try to
+                    //transfer straight on to the next queued target.
+                    $stop = 'destroyed';
+                } else {
+                    //Rake the current victim until it's destroyed, a structure-block transfer is
+                    //triggered, or we run out of damage. Returns the stop reason; $damageRemaining
+                    //is updated by reference.
+                    $stop = $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize);
+                }
 
                 if ($stop === 'outOfDamage') {
                     break;
                 }
-                //stop is 'destroyed' or 'structure' - either way a transfer may be attempted.
+                //stop is 'destroyed' or 'structure' - either way a transfer MAY be attempted,
+                //provided we can pay the transfer cost AND there's a legal next target.
 
-                //The transfer guard: only one Blaster per ship may transfer per turn.
-                if (!$this->claimTransferForTurn($shooter, $gamedata)) {
-                    //Another Blaster on this ship already transferred. We can't transfer; if the
-                    //current victim survived a structure transfer, pour the remainder back into it.
-                    if ($stop === 'structure') {
+                //TEMP-HBT2: transfer-attempt trace (stop reason + leftover damage at the condition).
+                Debug::log("TEMP-HBT2 xfer: shooter=" . $shooter->id . " weapon=" . $this->id
+                    . " fromVictim=" . $currentTarget->id . " fromDestroyed=" . ($currentTarget->isDestroyed() ? 1 : 0)
+                    . " stop=" . $stop . " dmgRemaining=" . $damageRemaining);
+
+                //Can we transfer? It costs one FULL rake (20) to make the jump, and we must have
+                //at least 1 point left over to actually deliver - i.e. STRICTLY MORE than 20 must
+                //remain. There must also be a legal next target, and this ship's one transfer slot
+                //must be free (one Blaster per ship per turn).
+                //
+                //Order matters: confirm affordability AND a legal target FIRST, and only THEN take
+                //the one-per-ship claim. Claiming before we know a transfer can happen would burn
+                //the ship's single transfer slot on a Blaster that didn't actually transfer, wrongly
+                //blocking another Blaster on the same ship that could.
+                $canAfford = $damageRemaining > $rakeSize;
+                $nextTarget = $canAfford
+                    ? $this->getNextTransferTarget($gamedata, $queueIndex, $shooter, $currentTarget, $target->id)
+                    : null;
+                $claimOk = ($nextTarget != null) && $this->claimTransferForTurn($shooter, $gamedata);
+
+                if ($nextTarget == null || !$claimOk) {
+                    //Can't transfer (too little damage left, no legal target, or the slot is taken).
+                    //Per the rule, the final leftover rake is simply applied to the CURRENT target
+                    //(wasted if it's already destroyed - raking a corpse is a no-op). noTransfer=true
+                    //so it just dumps the remainder without re-triggering a structure transfer.
+                    Debug::log("TEMP-HBT2 noXfer: weapon=" . $this->id . " canAfford=" . ($canAfford ? 1 : 0)
+                        . " haveTarget=" . ($nextTarget != null ? 1 : 0) . " claimOk=" . ($claimOk ? 1 : 0)
+                        . " dmgRemaining=" . $damageRemaining); //TEMP-HBT2
+                    if (!$currentTarget->isDestroyed() && $damageRemaining > 0) {
                         $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize, true);
                     }
                     break;
                 }
 
-                //A transfer costs one rake's worth of damage.
+                //Affordable + a legal target: pay the 20-pt cost. Whatever remains (a full or
+                //partial rake) is carried over and dealt to the next target.
                 $damageRemaining -= $rakeSize;
-                if ($damageRemaining < $rakeSize) {
-                    //Not enough to transfer. If the current victim survived a structure transfer,
-                    //pour the remainder back into it; if it's dead, the rest is lost.
-                    if ($stop === 'structure') {
-                        $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize, true);
-                    }
-                    break;
-                }
-
-                $nextTarget = $this->getNextTransferTarget($gamedata, $queueIndex, $shooter, $currentTarget, $target->id);
-                if ($nextTarget == null) {
-                    //No legal next target (queue exhausted, or none within 1 hex + in arc):
-                    //refund the transfer-cost rake; pour remainder into the
-                    //current victim if it still lives, else stop.
-                    $damageRemaining += $rakeSize;
-                    if ($stop === 'structure') {
-                        $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize, true);
-                    }
-                    break;
-                }
+                Debug::log("TEMP-HBT2 postCost: weapon=" . $this->id . " dmgRemaining=" . $damageRemaining . " -> " . $nextTarget->id); //TEMP-HBT2
 
                 //Build a synthetic fire order for the new victim (combat-log clarity).
                 $transferOrder = $this->buildTransferFireOrder($shooter, $nextTarget, $fireOrder, $gamedata);
@@ -1629,7 +1657,7 @@ class HypergravitonBlaster extends Weapon {
         {
             $launchPos = null;
 
-            while ($damageRemaining >= $rakeSize && !$flight->isDestroyed()) {
+            while ($damageRemaining > 0 && !$flight->isDestroyed()) {
                 //Pick the next living fighter (getHitSystem returns a non-destroyed one).
                 $fighter = $flight->getHitSystem($shooter, $order, $this, $gamedata, null);
                 if ($fighter == null || $fighter->isDestroyed()) {
@@ -1682,13 +1710,23 @@ class HypergravitonBlaster extends Weapon {
             while ($queueIndex < count($this->transferQueue)) {
                 $entry = $this->transferQueue[$queueIndex];
                 $queueIndex++;
-                if ($initialTargetId !== null && (int)$entry['shipid'] === (int)$initialTargetId) continue; //never hop to the initial target
+                if ($initialTargetId !== null && (int)$entry['shipid'] === (int)$initialTargetId) {
+                    Debug::log("TEMP-HBT2 next: skip initial candidate=" . $entry['shipid']); //TEMP-HBT2
+                    continue; //never hop to the initial target
+                }
                 $candidate = $gamedata->getShipById($entry['shipid']);
-                if ($candidate == null) continue;
-                if ($candidate->isDestroyed()) continue;
+                if ($candidate == null) { Debug::log("TEMP-HBT2 next: candidate=" . $entry['shipid'] . " NOT FOUND"); continue; } //TEMP-HBT2
+                if ($candidate->isDestroyed()) { Debug::log("TEMP-HBT2 next: candidate=" . $candidate->id . " DESTROYED"); continue; } //TEMP-HBT2
+                //TEMP-HBT2: geometry detail.
+                $dist = mathlib::getDistanceHex($fromVictim, $candidate);
+                $bearing = $shooter->getBearingOnUnit($candidate);
+                $inArc = mathlib::isInArc($bearing, $this->startArc, $this->endArc);
+                Debug::log("TEMP-HBT2 next: candidate=" . $candidate->id . " distFromVictim=" . $dist
+                    . " bearing=" . $bearing . " arc=[" . $this->startArc . "," . $this->endArc . "] inArc=" . ($inArc ? 1 : 0));
                 if (!$this->isLegalTransferTarget($shooter, $fromVictim, $candidate)) continue;
                 return $candidate;
             }
+            Debug::log("TEMP-HBT2 next: NO LEGAL TARGET (queue exhausted)"); //TEMP-HBT2
             return null;
         }
 
@@ -1721,7 +1759,7 @@ class HypergravitonBlaster extends Weapon {
                 $originalOrder->damageclass
             );
             $transferOrder->addToDB = true;
-            $transferOrder->pubnotes = " Transferred Hypergraviton Blaster shot.";
+            //$transferOrder->pubnotes = " Transferred Hypergraviton Blaster shot.";
             $this->fireOrders[] = $transferOrder;
 
             //Compute hit chance against the new victim (sets $transferOrder->needed).
@@ -1731,8 +1769,10 @@ class HypergravitonBlaster extends Weapon {
         }
 
         /* Rolls to hit, applying the miss-re-roll procedure.
-         * On each miss, one rake's worth of damage is removed from $damageRemaining
-         * (passed by reference) and we roll again, so long as a full rake still remains.
+         * A to-hit roll is attempted whenever ANY damage remains (even a final partial rake
+         * of fewer than 20 points). On a miss, one full rake (20) is removed and we re-roll
+         * if anything is still left; a partial rake that misses simply ends the attempt.
+         * On a hit, whatever $damageRemaining holds (full or partial) is what gets dealt.
          * Returns true on a hit, false if the volley ran out of damage without hitting.
          * $isFirstShot only matters for setting $this->firstShotMissed (later stages).
          * $attempts is filled (by reference) with the number of to-hit rolls actually made.
@@ -1742,7 +1782,7 @@ class HypergravitonBlaster extends Weapon {
             $needed   = $fireOrder->needed;
             $attempts = 0;
 
-            while ($damageRemaining >= $rakeSize) {
+            while ($damageRemaining > 0) {
                 $attempts++;
                 $rolled = Dice::d(100);
                 $fireOrder->rolled = $rolled; //last roll wins, as in base fire()
@@ -1755,17 +1795,18 @@ class HypergravitonBlaster extends Weapon {
                 }
 
                 if ($rolled <= $needed) {
-                    return true; //hit - $damageRemaining is what gets dealt
+                    return true; //hit - $damageRemaining is what gets dealt (may be a partial rake)
                 }
 
-                //Miss: record first-shot miss, drop a rake, and (if enough damage remains) roll again.
+                //Miss: record first-shot miss, drop a full rake, and re-roll if anything remains.
                 if ($isFirstShot && $attempts == 1) {
                     $this->firstShotMissed = true;
                 }
 
                 $damageRemaining -= $rakeSize;
-                if ($damageRemaining < $rakeSize) {
-                    $fireOrder->notes .= " Missed and insufficient damage remains to re-roll (left: $damageRemaining).\n";
+                if ($damageRemaining <= 0) {
+                    $damageRemaining = 0;
+                    $fireOrder->notes .= " Missed and no damage remains to re-roll.\n";
                     $fireOrder->pubnotes .= "<br>Missed; out of damage to re-roll.";
                     break;
                 }

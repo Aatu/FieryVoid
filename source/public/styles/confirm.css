@@ -793,6 +793,7 @@
     color: #cdbf9a;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
+    margin-left: 10px;
 }
 .confirm.multi-value-confirm.hBlasterTransfer .multi-value-row:hover {
     background: rgba(176, 141, 87, 0.12);
@@ -800,9 +801,11 @@
 }
 
 /* "transfer on structure loss" checkbox + label — fixed-width right column so
-   every row's checkbox sits at the same x (vertical alignment). */
+   every row's checkbox sits at the same x (vertical alignment). The label is a
+   fixed width (not flex:auto) so its left edge — and therefore the checkbox
+   column inside it — lands at the same x regardless of the row's text. */
 .confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructLabel {
-    flex: 0 0 auto;
+    flex: 0 0 150px;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -810,6 +813,18 @@
     color: #d8c49a;
     cursor: pointer;
     white-space: nowrap;
+}
+/* Fixed-width checkbox sub-column: the checkbox always sits at the same x, and
+   the text that follows always starts at the same x — so "On structure loss" and
+   "Ship destruction only" rows stay vertically aligned with each other. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructBox {
+    flex: 0 0 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructText {
+    flex: 1 1 auto;
 }
 .confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructChk {
     accent-color: #b08d57;

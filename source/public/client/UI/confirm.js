@@ -4447,8 +4447,14 @@ window.confirm = {
             // Label depends on whether the box is usable: HCV+ rows can opt into
             // structure-loss transfer ("Transfer on structure loss"); sub-HCV rows
             // are stuck at destruction-only (greyed box → "On ship destruction only").
+            // The checkbox and the text are wrapped in separate fixed-width spans so
+            // the checkbox always sits at the same x and the text always starts at
+            // the same x across every row — otherwise the differing label widths
+            // ("On structure loss" vs "Ship destruction only") would shift the
+            // checkbox column and break the vertical alignment.
             var labelText = canStruct ? 'On structure loss' : 'Ship destruction only';
-            lbl.append(chk).append('<span>' + labelText + '</span>');
+            lbl.append($('<span class="hBlasterStructBox"></span>').append(chk));
+            lbl.append('<span class="hBlasterStructText">' + labelText + '</span>');
             row.append(lbl);
 
             return row;
