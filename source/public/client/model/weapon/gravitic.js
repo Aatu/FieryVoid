@@ -534,13 +534,96 @@ HypergravitonBlaster.prototype.constructor = HypergravitonBlaster;
  * declaration); the window callback declares the order via declareTransferShot and then
  * replicates the post-declaration UI refresh the synchronous targetShip() path would do.
  */
+/* Returns true if a fire order's notes encode a NON-EMPTY transfer queue (i.e. the order
+ * actually carries transfer hops beyond the initial target). "HBT|<initial>:<flag>" alone
+ * (initial target only, no hops) is NOT a transfer for slot-ownership purposes. */
+HypergravitonBlaster.isTransferOrder = function (fire) {
+    if (!fire || !fire.notes || fire.notes.indexOf('HBT') !== 0) return false;
+    var segs = fire.notes.split('|');
+    //segs[0]='HBT', segs[1]=initial target; a transfer queue needs at least segs[2].
+    for (var i = 2; i < segs.length; i++) {
+        if (segs[i] !== '') return true;
+    }
+    return false;
+};
+
+/* The OTHER Hypergraviton Blaster on $shooter (not $this) that currently holds the
+ * transfer "slot" (a fire order with a non-empty transfer queue), or null. Mirrors the
+ * server rule that only one Blaster per ship may transfer per turn. */
+HypergravitonBlaster.prototype.getOtherTransferringBlaster = function (shooter) {
+    if (!shooter || !shooter.systems) return null;
+    for (var i in shooter.systems) {
+        var sys = shooter.systems[i];
+        if (!sys || sys === this) continue;
+        if (!(sys instanceof HypergravitonBlaster)) continue;
+        var fire = weaponManager.getFiringOrder(shooter, sys);
+        if (HypergravitonBlaster.isTransferOrder(fire)) return sys;
+    }
+    return null;
+};
+
+/* Scenario A (multiple Blasters selected at once, then target a ship): only ONE Blaster
+ * may carry a transfer list, so only the BEST-loaded selected Blaster gets the window;
+ * the rest fire normally. Returns true if $this is that best-loaded selected Blaster.
+ * Only Blasters that can actually hit $target (in arc + range) are considered, so a more-
+ * loaded Blaster that can't bear on this target doesn't steal the slot from one that can.
+ * Priority: highest turnsloaded wins (a 2-turn-loaded beam beats a 1-turn one); ties
+ * break on system id (stable/deterministic). */
+HypergravitonBlaster.prototype.isPreferredSelectedBlaster = function (shooter, target) {
+    var selected = gamedata.selectedSystems || [];
+    var best = null;
+    for (var i = 0; i < selected.length; i++) {
+        var w = selected[i];
+        if (!(w instanceof HypergravitonBlaster)) continue;
+        if (w.ship && shooter && w.ship.id !== shooter.id) continue; //only this ship's selected Blasters
+        //Only Blasters that can fire on this target compete for the transfer slot.
+        if (target && !(weaponManager.isOnWeaponArc(shooter, target, w) && weaponManager.checkIsInRange(shooter, target, w))) continue;
+        if (best === null) { best = w; continue; }
+        var wLoad = parseInt(w.turnsloaded, 10) || 0;
+        var bLoad = parseInt(best.turnsloaded, 10) || 0;
+        if (wLoad > bLoad || (wLoad === bLoad && parseInt(w.id, 10) < parseInt(best.id, 10))) {
+            best = w;
+        }
+    }
+    return best === null || best === this;
+};
+
 HypergravitonBlaster.prototype.doSpecialTargeting = function (shooter, target, system) {
     var calledid = -1; //raking weapon, no called shots
     var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
     if (chance < 1) return false; //no declaration made
 
-    this.openTransferWindow(shooter, target, chance, null);
+    //Scenario A: several Blasters selected together. Only the best-loaded one opens the
+    //transfer window; the others fire a plain shot. (Also guards against stacking multiple
+    //modals: if a transfer window is already open this targeting action, fire normally.)
+    var aWindowIsOpen = (typeof $ === 'function') && $('.hBlasterTransfer').length > 0;
+    if (aWindowIsOpen || !this.isPreferredSelectedBlaster(shooter, target)) {
+        this.declareTransferShot(shooter, target, chance, [], false);
+        return false;
+    }
+
+    //Scenario B: another Blaster on this ship already holds the transfer slot. Open the
+    //window in "locked" mode (banner + Confirm List disabled — fire-normally/cancel only).
+    var holder = this.getOtherTransferringBlaster(shooter);
+    var lockInfo = holder ? { locked: true, holderName: this.blasterDisplayName(shooter, holder) } : null;
+
+    this.openTransferWindow(shooter, target, chance, null, lockInfo);
     return false; //declaration (if any) happens asynchronously inside the callback
+};
+
+/* A short human label for a Blaster on $shooter, used in the "slot taken" banner.
+ * Prefers the system's displayName/name + a location word; falls back to "another Blaster". */
+HypergravitonBlaster.prototype.blasterDisplayName = function (shooter, blaster) {
+    if (!blaster) return 'another Blaster';
+    var loc = '';
+    switch (parseInt(blaster.location, 10)) {
+        case 1: loc = 'Front '; break;
+        case 2: loc = 'Aft '; break;
+        case 3: case 31: case 32: loc = 'Port '; break;
+        case 4: case 41: case 42: loc = 'Starboard '; break;
+        default: loc = '';
+    }
+    return loc + 'Hypergraviton Blaster';
 };
 
 /* Re-opens the transfer window for an ALREADY-DECLARED Blaster order (player clicked the
@@ -558,27 +641,36 @@ HypergravitonBlaster.prototype.reopenSpecialTargeting = function (shooter) {
         ? fire.chance
         : window.weaponManager.calculateHitChange(shooter, target, this, -1).hitChance;
 
+    //If ANOTHER Blaster now holds the transfer slot, re-open locked (transfer disabled).
+    var holder = this.getOtherTransferringBlaster(shooter);
+    var lockInfo = holder ? { locked: true, holderName: this.blasterDisplayName(shooter, holder) } : null;
+
     var preselect = this.parseTransferNotes(fire.notes, target.id);
-    this.openTransferWindow(shooter, target, chance, preselect);
+    this.openTransferWindow(shooter, target, chance, preselect, lockInfo);
     return true;
 };
 
 /* Shared window-open + callback wiring for both first-declare and re-open. preselect is
- * null on a fresh declaration, or { queue, initialOnStructure } when re-editing. */
-HypergravitonBlaster.prototype.openTransferWindow = function (shooter, target, chance, preselect) {
+ * null on a fresh declaration, or { queue, initialOnStructure } when re-editing. lockInfo
+ * is null normally, or { locked:true, holderName } when another Blaster on the ship holds
+ * the transfer slot (window opens with Confirm List disabled). */
+HypergravitonBlaster.prototype.openTransferWindow = function (shooter, target, chance, preselect, lockInfo) {
     var self = this;
     if (window.confirm && typeof window.confirm.hBlasterTransferList === 'function') {
         window.confirm.hBlasterTransferList(shooter, this, target, function (result) {
             if (result.cancelled) {
-                //"Cancel Shot": remove any existing order via the normal process + refresh.
+                //"Cancel Shot": remove any existing order + refresh, but only UNSELECT the
+                //weapon if there actually was an order (so cancelling a never-declared shot
+                //leaves the weapon selected for the player to retry).
+                var hadOrder = !!weaponManager.getFiringOrder(shooter, self);
                 weaponManager.removeFiringOrder(shooter, self);
-                weaponManager.unSelectWeapon(shooter, self);
+                if (hadOrder) weaponManager.unSelectWeapon(shooter, self);
                 webglScene.customEvent('SystemDataChanged', { ship: shooter, system: self });
                 webglScene.customEvent('ShipTargeted', { shooter: shooter, target: target, weapons: [self] });
                 return;
             }
             self.declareTransferShot(shooter, target, chance, result.queue, result.initialOnStructure);
-        }, preselect);
+        }, preselect, lockInfo);
     } else {
         //Fallback (window unavailable): declare a plain no-transfer shot so the
         //weapon still fires rather than silently doing nothing.

@@ -4313,7 +4313,13 @@ window.confirm = {
     //   callback({ queue: [{shipid, transferOnStructure}],
     //              initialOnStructure: bool, cancelled: bool })
     // cancelled === true means "Cancel Shot" (the caller removes any fire order).
-    hBlasterTransferList: function hBlasterTransferList(shooter, weapon, initialTarget, callback, preselect) {
+    //
+    // lockInfo (optional): { locked: true, holderName: <string> } when another Blaster on
+    // the ship already holds the one-per-turn transfer slot. The window then opens in a
+    // read-only "transfer locked" mode: a banner names the holder, the rows/checkboxes are
+    // disabled, and only "Fire Normally" / "Cancel Shot" are available (Confirm List off).
+    hBlasterTransferList: function hBlasterTransferList(shooter, weapon, initialTarget, callback, preselect, lockInfo) {
+        var transferLocked = !!(lockInfo && lockInfo.locked);
         function isHcvPlus(ship) {
             return (parseInt(ship.shipSizeClass, 10) || 0) >= 2;
         }
@@ -4366,12 +4372,22 @@ window.confirm = {
         // Three equal-width text buttons in an in-flow bar (CSS gives the bar a
         // real height so it reserves space rather than overlapping the list):
         //   Confirm List (green) | Fire Normally (blue) | Cancel Shot (red)
-        var e = $('<div class="confirm multi-value-confirm hBlasterTransfer"></div>');
+        var e = $('<div class="confirm multi-value-confirm hBlasterTransfer' + (transferLocked ? ' hBlasterLocked' : '') + '"></div>');
         $('<div class="multi-value-header">Hypergraviton Blaster &mdash; Transfer Target List</div>').prependTo(e);
-        $('<div class="hBlasterSubheader">(Drag units below into the order you wish the weapon to target)</div>').insertAfter(e.find('.multi-value-header'));
-        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find('.hBlasterSubheader'));
+        // When locked, a warning banner replaces the drag instruction.
+        if (transferLocked) {
+            var holderName = (lockInfo && lockInfo.holderName) ? lockInfo.holderName : 'Another Blaster';
+            $('<div class="hBlasterLockBanner">⚠ ' + holderName + ' already holds this ship’s transfer slot this turn. Only one Hypergraviton Blaster per ship can transfer — this one can only fire normally.</div>').insertAfter(e.find('.multi-value-header'));
+        } else {
+            $('<div class="hBlasterSubheader">(Drag units below into the order you wish the weapon to target)</div>').insertAfter(e.find('.multi-value-header'));
+        }
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find(transferLocked ? '.hBlasterLockBanner' : '.hBlasterSubheader'));
+        // Confirm List is hidden when locked (transfer not allowed for this Blaster).
+        var confirmBtnHtml = transferLocked
+            ? ''
+            : '<div class="hBlasterBtn hBlasterConfirm" title="Confirm with this transfer list">Confirm List</div>';
         var buttonBar = $('<div class="ui hBlasterButtons">' +
-            '<div class="hBlasterBtn hBlasterConfirm" title="Confirm with this transfer list">Confirm List</div>' +
+            confirmBtnHtml +
             '<div class="hBlasterBtn hBlasterFireNormal" title="Fire normally (no transfer)">Fire Normally</div>' +
             '<div class="hBlasterBtn hBlasterCancel" title="Cancel the shot and remove the fire order">Cancel Shot</div>' +
             '</div>').appendTo(e);
@@ -4413,7 +4429,9 @@ window.confirm = {
             // pinned initial target — can tick it; smaller targets only transfer on
             // outright destruction (server gates structure transfer on
             // shipSizeClass >= 2), so theirs is greyed out + disabled.
-            var canStruct = isHcvPlus(rd.ship);
+            //When the transfer slot is locked (another Blaster holds it), the whole
+            //row is read-only: no checkbox is usable.
+            var canStruct = isHcvPlus(rd.ship) && !transferLocked;
             var lbl = $('<label class="hBlasterStructLabel' + (canStruct ? '' : ' disabled') + '" title="' +
                 (canStruct
                     ? 'Transfer remaining damage when a structure block is destroyed, instead of only when the ship is destroyed.'
@@ -4451,8 +4469,9 @@ window.confirm = {
 
             // Drag-to-reorder the transfer rows. The WHOLE row is the handle;
             // `items` excludes the pinned initial row, and `cancel` excludes the
-            // structure checkbox/label so toggling it doesn't start a drag.
-            if (typeof listHolder.sortable === 'function') {
+            // structure checkbox/label so toggling it doesn't start a drag. Skipped
+            // entirely when locked (the list is read-only / informational).
+            if (!transferLocked && typeof listHolder.sortable === 'function') {
                 listHolder.sortable({
                     items: '> .hBlasterRow:not(.hBlasterInitial)',
                     cancel: '.hBlasterStructChk, .hBlasterStructLabel',
@@ -4480,6 +4499,7 @@ window.confirm = {
             return { queue: queue, initialOnStructure: initialOnStructure, cancelled: !!cancelled };
         }
 
+        // Confirm List exists only when NOT locked.
         $('.hBlasterConfirm', buttonBar).on('click', function () {
             var result = buildResult(false);
             $('.confirm').remove();
@@ -4496,12 +4516,10 @@ window.confirm = {
             callback({ queue: [], initialOnStructure: false, cancelled: true });
         });
 
+        // The window is centred via CSS transform; jQuery-UI .draggable() fights
+        // that transform and makes dragging jump, so the window is intentionally
+        // NOT draggable. The transfer ROWS are still drag-to-reorder above.
         e.appendTo('body').fadeIn(250);
-        // Window draggable via the header (jQuery-UI loaded for ship/flight
-        // windows). The transfer ROWS are independently drag-to-reorder above.
-        if (typeof e.draggable === 'function') {
-            e.draggable({ handle: '.multi-value-header', containment: 'window' });
-        }
     }
 
 };

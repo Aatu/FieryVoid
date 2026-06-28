@@ -697,6 +697,26 @@
     margin: 3px 0 10px 0;
 }
 
+/* Warning banner shown when another Blaster already holds the ship's transfer
+   slot (this window is then read-only / fire-normally only). Muted amber on a
+   dark amber wash so it reads as a caution without clashing with the bronze. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterLockBanner {
+    color: #f0c674;
+    background: rgba(120, 80, 20, 0.25);
+    border: 1px solid rgba(176, 141, 87, 0.6);
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    padding: 7px 10px;
+    margin: 6px 0 10px 0;
+    line-height: 1.35;
+}
+/* Locked rows read as informational — dim them slightly. */
+.confirm.multi-value-confirm.hBlasterTransfer.hBlasterLocked .hBlasterRow {
+    cursor: default;
+    opacity: 0.85;
+}
+
 .confirm.multi-value-confirm.hBlasterTransfer .multi-value-label,
 .confirm.multi-value-confirm.hBlasterTransfer .multi-value-max {
     color: #e6d3b0;
