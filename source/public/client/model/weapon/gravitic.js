@@ -788,28 +788,36 @@ HypergravitonBlaster.prototype.declareTransferShot = function (shooter, target, 
 HypergravitonBlaster.prototype.initBoostableInfo = function () {
     // Needed because it can change during initial phase
     // because of adding extra power.
-
-    if (window.weaponManager.isLoaded(this)) {
-
-    } else {
+    if(gamedata.gamephase !== -2){
         var count = shipManager.power.getBoost(this);
+        
+        if (window.weaponManager.isLoaded(this)) {
 
-        for (var i = 0; i < count; i++) {
-            shipManager.power.unsetBoost(null, this);
+        } else {
+            for (var i = 0; i < count; i++) {
+                shipManager.power.unsetBoost(null, this);
+            }
         }
-    }
 
-	switch (this.turnsloaded) {
-		case 1:
-			this.data["Damage"] = '45 - 90';
-			break;
-		case 2:
-			this.data["Damage"] = '90 - 180';
-			break;
-		default:
-			this.data["Damage"] = '45 - 90';
-			break;
-	}
+        var minDamage = 90;
+        var maxDamage = 180;
+
+        switch (this.turnsloaded) {
+            case 1:
+                minDamage = 45 + count*10;
+                maxDamage = 90 + count*10;
+                break;
+            case 2:
+                minDamage = 90 + count*10;
+                maxDamage = 180 + count*10;
+                break;
+            default:
+                minDamage = 45 + count*10;
+                maxDamage = 90 + count*10;
+                break;
+        }
+        this.data["Damage"] = '' + minDamage + ' - ' + maxDamage +'';
+    }
 
     return this;
 };
