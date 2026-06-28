@@ -1599,6 +1599,17 @@ getActiveShipName: function getActiveShipName() {
         }
     },
 
+    // Number of distinct teams in the game (two = a classic two-sided match,
+    // including 2v2 etc). Used to decide whether a relative mine/enemy colour
+    // scheme is unambiguous (only meaningful with exactly two sides).
+    getDistinctTeamCount: function getDistinctTeamCount() {
+        var teams = {};
+        for (var i in gamedata.slots) {
+            teams[gamedata.slots[i].team] = true;
+        }
+        return Object.keys(teams).length;
+    },
+
     hasSlotSurrendered: function hasSlotSurrendered(slotid) {
         var slot = playerManager.getSlotById(slotid);
 

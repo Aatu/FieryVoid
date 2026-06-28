@@ -137,16 +137,25 @@ window.combatLog = {
             if (fire.pubnotes) notes += fire.pubnotes + " ";
         }
 
+        // The FIRE: header is coloured RELATIVE to the viewer (keyed on the
+        // shooter): participants see mine=green / ally=blue / enemy=red, so a
+        // 2-player team-2 reviewer still sees their own fleet green. Observers
+        // (not in the game) have no mine/ally/enemy, so they fall back to the
+        // absolute per-team palette. Terrain shooters are neutral white.
+        // (Ship NAMES, by contrast, use the absolute team colour below.)
         var fireColor = "";
-       // if (!gamedata.isPlayerInGame()) {
-            // Observers: colour the FIRE: header by the shooter's team.
+        if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) {
+            fireColor = "color:#ffffff;";
+        } else if (!gamedata.isPlayerInGame()) {
             var rgb = gamedata.getTeamColorRGB(ship.team);
             fireColor = "color:rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ");";
-        //} else if (gamedata.isMyShip(ship)) {
-        //    fireColor = "color:limegreen;";
-        //} else if (gamedata.isMyorMyTeamShip(ship)) {
-        //    fireColor = "color:#33adff;";
-        //}
+        } else if (gamedata.isMyShip(ship)) {
+            fireColor = "color:rgb(50,205,50);";   // green (mine)
+        } else if (gamedata.isMyorMyTeamShip(ship)) {
+            fireColor = "color:rgb(51,173,255);";  // blue (ally)
+        } else {
+            fireColor = "color:rgb(255,80,80);";   // red (enemy)
+        }
 
         var html = '<div class="logentry fire-' + orders[0].id + '"><span class="logheader fire" style="' + fireColor + '">FIRE: </span><span>';
         html += '<span class="shiplink" data-id="' + ship.id + '" >' + ship.name + '</span>';
@@ -195,17 +204,24 @@ window.combatLog = {
 
         var targettext = "";
         if (target) {
-            // Colour the attacked ship's name by its team (everyone, not just
-            // observers). Terrain has no meaningful team, so render it white.
-            // getTeamColorRGB guards against missing/0 team values.
+            // Colour the attacked ship's name. Terrain has no meaningful team, so
+            // render it white. In a two-sided participant game the absolute team
+            // palette is ambiguous (your fleet could be "red"), so use a RELATIVE
+            // mine=green / enemy=red scheme instead. All other cases (multiplayer
+            // participant, observer) keep the absolute per-team palette so each
+            // specific ship is identifiable. getTeamColorRGB guards bad team values.
             var targetColor;
             if (gamedata.isTerrain(target.shipSizeClass, target.userid)) {
                 targetColor = "color:#ffffff;";
+            } else if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) {
+                targetColor = gamedata.isMyorMyTeamShip(target)
+                    ? "color:rgb(50,205,50);"   // green (mine/ally)
+                    : "color:rgb(255,80,80);";  // red (enemy)
             } else {
                 var trgb = gamedata.getTeamColorRGB(target.team);
                 targetColor = "color:rgb(" + Math.round(trgb[0]) + "," + Math.round(trgb[1]) + "," + Math.round(trgb[2]) + ");";
             }
-            targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" style="' + targetColor + '">' + target.name + '</span>';
+            targettext = '<span> at </span><span class="shiplink target" data-id="' + target.id + '" style="' + targetColor + 'font-weight:normal;">' + target.name + '</span>';
         }
 
         var shottext = "";
