@@ -643,13 +643,19 @@ HypergravitonBlaster.prototype.blasterDisplayName = function (shooter, blaster) 
     return loc + 'Hypergraviton Blaster';
 };
 
-/* Re-opens the transfer window for an ALREADY-DECLARED Blaster order (player clicked the
+/* Re-opens the transfer window for an ALREADY-DECLARED TRANSFER order (player clicked the
  * system icon to edit). Reads the existing fire order, parses its notes back into the
  * saved order + checkbox states, and re-opens seeded from the same initial target.
- * Returns true if a window was opened (caller should then stop / not toggle selection). */
+ * Returns true if a window was opened (caller should then stop / not toggle selection).
+ * Returns FALSE when the existing order is a plain (non-transfer) shot, so the caller
+ * falls through to the normal workflow (re-click removes the order / shows the info menu). */
 HypergravitonBlaster.prototype.reopenSpecialTargeting = function (shooter) {
     var fire = weaponManager.getFiringOrder(shooter, this);
     if (!fire) return false;
+
+    //Only re-open the transfer window for an actual transfer order; a plain Blaster
+    //shot uses the normal click workflow.
+    if (!HypergravitonBlaster.isTransferOrder(fire)) return false;
 
     var target = gamedata.getShip(fire.targetid);
     if (!target) return false;
@@ -661,6 +667,13 @@ HypergravitonBlaster.prototype.reopenSpecialTargeting = function (shooter) {
     //If ANOTHER Blaster now holds the transfer slot, re-open locked (transfer disabled).
     var holder = this.getOtherTransferringBlaster(shooter);
     var lockInfo = holder ? { locked: true, holderName: this.blasterDisplayName(shooter, holder) } : null;
+
+    //Select the weapon while its window is open (clicking the icon to edit is a
+    //"select + edit" action). Declaring an order will unselect it again; cancelling
+    //leaves it selected so the player can retarget. Mirrors normal icon-click select.
+    if (!weaponManager.isSelectedWeapon(this)) {
+        weaponManager.selectWeapon(shooter, this);
+    }
 
     var preselect = this.parseTransferNotes(fire.notes, target.id);
     this.openTransferWindow(shooter, target, chance, preselect, lockInfo);
@@ -677,12 +690,12 @@ HypergravitonBlaster.prototype.openTransferWindow = function (shooter, target, c
     if (window.confirm && typeof window.confirm.hBlasterTransferList === 'function') {
         window.confirm.hBlasterTransferList(shooter, this, target, function (result) {
             if (result.cancelled) {
-                //"Cancel Shot": remove any existing order + refresh, but only UNSELECT the
-                //weapon if there actually was an order (so cancelling a never-declared shot
-                //leaves the weapon selected for the player to retry).
-                var hadOrder = !!weaponManager.getFiringOrder(shooter, self);
+                //"Cancel Shot": remove any existing order and leave the weapon SELECTED so
+                //the player can retarget immediately. The weapon is (re)selected when the
+                //window is opened from the system icon (reopenSpecialTargeting), so we just
+                //remove the order here without unselecting — matching the normal
+                //remove-fire-order pathway (removeFiringOrder never unselects).
                 weaponManager.removeFiringOrder(shooter, self);
-                if (hadOrder) weaponManager.unSelectWeapon(shooter, self);
                 webglScene.customEvent('SystemDataChanged', { ship: shooter, system: self });
                 webglScene.customEvent('ShipTargeted', { shooter: shooter, target: target, weapons: [self] });
                 return;
@@ -796,7 +809,26 @@ HypergravitonBlaster.prototype.initBoostableInfo = function () {
 		default:
 			this.data["Damage"] = '45 - 90';
 			break;
-	}    
+	}
+
+    return this;
+};
+
+/* Surfaces a "Transfer Shot" row in the system info menu when this Blaster holds a
+ * transfer fire order (a declared order whose notes encode a non-empty transfer
+ * queue). Runs on every system-data refresh via systems.initializeSystem. */
+HypergravitonBlaster.prototype.initializationUpdate = function () {
+    var fire = (this.ship && window.weaponManager)
+        ? weaponManager.getFiringOrder(this.ship, this)
+        : null;
+
+    if (fire && HypergravitonBlaster.isTransferOrder(fire)) {
+        var preselect = this.parseTransferNotes(fire.notes, fire.targetid);
+        var count = preselect ? preselect.queue.length : 0;
+        this.data["Transfer Shot"] = count + (count === 1 ? " target" : " targets");
+    } else {
+        delete this.data["Transfer Shot"];
+    }
 
     return this;
 };
