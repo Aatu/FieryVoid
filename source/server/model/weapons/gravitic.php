@@ -1534,11 +1534,6 @@ class HypergravitonBlaster extends Weapon {
                 //stop is 'destroyed' or 'structure' - either way a transfer MAY be attempted,
                 //provided we can pay the transfer cost AND there's a legal next target.
 
-                //TEMP-HBT2: transfer-attempt trace (stop reason + leftover damage at the condition).
-                Debug::log("TEMP-HBT2 xfer: shooter=" . $shooter->id . " weapon=" . $this->id
-                    . " fromVictim=" . $currentTarget->id . " fromDestroyed=" . ($currentTarget->isDestroyed() ? 1 : 0)
-                    . " stop=" . $stop . " dmgRemaining=" . $damageRemaining);
-
                 //Can we transfer? It costs one FULL rake (20) to make the jump, and we must have
                 //at least 1 point left over to actually deliver - i.e. STRICTLY MORE than 20 must
                 //remain. There must also be a legal next target, and this ship's one transfer slot
@@ -1559,9 +1554,6 @@ class HypergravitonBlaster extends Weapon {
                     //Per the rule, the final leftover rake is simply applied to the CURRENT target
                     //(wasted if it's already destroyed - raking a corpse is a no-op). noTransfer=true
                     //so it just dumps the remainder without re-triggering a structure transfer.
-                    Debug::log("TEMP-HBT2 noXfer: weapon=" . $this->id . " canAfford=" . ($canAfford ? 1 : 0)
-                        . " haveTarget=" . ($nextTarget != null ? 1 : 0) . " claimOk=" . ($claimOk ? 1 : 0)
-                        . " dmgRemaining=" . $damageRemaining); //TEMP-HBT2
                     if (!$currentTarget->isDestroyed() && $damageRemaining > 0) {
                         $this->rakeOneVictim($shooter, $currentTarget, $currentOrder, $gamedata, $damageRemaining, $rakeSize, true);
                     }
@@ -1571,7 +1563,6 @@ class HypergravitonBlaster extends Weapon {
                 //Affordable + a legal target: pay the 20-pt cost. Whatever remains (a full or
                 //partial rake) is carried over and dealt to the next target.
                 $damageRemaining -= $rakeSize;
-                Debug::log("TEMP-HBT2 postCost: weapon=" . $this->id . " dmgRemaining=" . $damageRemaining . " -> " . $nextTarget->id); //TEMP-HBT2
 
                 //Build a synthetic fire order for the new victim (combat-log clarity).
                 $transferOrder = $this->buildTransferFireOrder($shooter, $nextTarget, $fireOrder, $gamedata);
@@ -1710,23 +1701,13 @@ class HypergravitonBlaster extends Weapon {
             while ($queueIndex < count($this->transferQueue)) {
                 $entry = $this->transferQueue[$queueIndex];
                 $queueIndex++;
-                if ($initialTargetId !== null && (int)$entry['shipid'] === (int)$initialTargetId) {
-                    Debug::log("TEMP-HBT2 next: skip initial candidate=" . $entry['shipid']); //TEMP-HBT2
-                    continue; //never hop to the initial target
-                }
+                if ($initialTargetId !== null && (int)$entry['shipid'] === (int)$initialTargetId) continue; //never hop to the initial target
                 $candidate = $gamedata->getShipById($entry['shipid']);
-                if ($candidate == null) { Debug::log("TEMP-HBT2 next: candidate=" . $entry['shipid'] . " NOT FOUND"); continue; } //TEMP-HBT2
-                if ($candidate->isDestroyed()) { Debug::log("TEMP-HBT2 next: candidate=" . $candidate->id . " DESTROYED"); continue; } //TEMP-HBT2
-                //TEMP-HBT2: geometry detail.
-                $dist = mathlib::getDistanceHex($fromVictim, $candidate);
-                $bearing = $shooter->getBearingOnUnit($candidate);
-                $inArc = mathlib::isInArc($bearing, $this->startArc, $this->endArc);
-                Debug::log("TEMP-HBT2 next: candidate=" . $candidate->id . " distFromVictim=" . $dist
-                    . " bearing=" . $bearing . " arc=[" . $this->startArc . "," . $this->endArc . "] inArc=" . ($inArc ? 1 : 0));
+                if ($candidate == null) continue;
+                if ($candidate->isDestroyed()) continue;
                 if (!$this->isLegalTransferTarget($shooter, $fromVictim, $candidate)) continue;
                 return $candidate;
             }
-            Debug::log("TEMP-HBT2 next: NO LEGAL TARGET (queue exhausted)"); //TEMP-HBT2
             return null;
         }
 
