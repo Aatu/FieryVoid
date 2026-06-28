@@ -607,8 +607,25 @@ HypergravitonBlaster.prototype.doSpecialTargeting = function (shooter, target, s
     var holder = this.getOtherTransferringBlaster(shooter);
     var lockInfo = holder ? { locked: true, holderName: this.blasterDisplayName(shooter, holder) } : null;
 
-    this.openTransferWindow(shooter, target, chance, null, lockInfo);
+    //Scenario A disambiguation: when MORE THAN ONE Blaster on this ship is selected,
+    //show this window's weapon id in the header so the player knows which Blaster it's for.
+    var opts = (this.countSelectedBlasters(shooter) > 1) ? { showWeaponId: true } : null;
+
+    this.openTransferWindow(shooter, target, chance, null, lockInfo, opts);
     return false; //declaration (if any) happens asynchronously inside the callback
+};
+
+/* Count of HypergravitonBlasters on $shooter currently in gamedata.selectedSystems. */
+HypergravitonBlaster.prototype.countSelectedBlasters = function (shooter) {
+    var selected = gamedata.selectedSystems || [];
+    var n = 0;
+    for (var i = 0; i < selected.length; i++) {
+        var w = selected[i];
+        if (!(w instanceof HypergravitonBlaster)) continue;
+        if (w.ship && shooter && w.ship.id !== shooter.id) continue;
+        n++;
+    }
+    return n;
 };
 
 /* A short human label for a Blaster on $shooter, used in the "slot taken" banner.
@@ -653,8 +670,9 @@ HypergravitonBlaster.prototype.reopenSpecialTargeting = function (shooter) {
 /* Shared window-open + callback wiring for both first-declare and re-open. preselect is
  * null on a fresh declaration, or { queue, initialOnStructure } when re-editing. lockInfo
  * is null normally, or { locked:true, holderName } when another Blaster on the ship holds
- * the transfer slot (window opens with Confirm List disabled). */
-HypergravitonBlaster.prototype.openTransferWindow = function (shooter, target, chance, preselect, lockInfo) {
+ * the transfer slot (window opens with Confirm List disabled). opts is null normally, or
+ * { showWeaponId:true } to append "(ID: X)" to the header (Scenario A disambiguation). */
+HypergravitonBlaster.prototype.openTransferWindow = function (shooter, target, chance, preselect, lockInfo, opts) {
     var self = this;
     if (window.confirm && typeof window.confirm.hBlasterTransferList === 'function') {
         window.confirm.hBlasterTransferList(shooter, this, target, function (result) {
@@ -670,7 +688,7 @@ HypergravitonBlaster.prototype.openTransferWindow = function (shooter, target, c
                 return;
             }
             self.declareTransferShot(shooter, target, chance, result.queue, result.initialOnStructure);
-        }, preselect, lockInfo);
+        }, preselect, lockInfo, opts);
     } else {
         //Fallback (window unavailable): declare a plain no-transfer shot so the
         //weapon still fires rather than silently doing nothing.

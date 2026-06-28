@@ -4318,10 +4318,25 @@ window.confirm = {
     // the ship already holds the one-per-turn transfer slot. The window then opens in a
     // read-only "transfer locked" mode: a banner names the holder, the rows/checkboxes are
     // disabled, and only "Fire Normally" / "Cancel Shot" are available (Confirm List off).
-    hBlasterTransferList: function hBlasterTransferList(shooter, weapon, initialTarget, callback, preselect, lockInfo) {
+    //
+    // opts (optional): { showWeaponId: true } appends "(ID: <weapon.id>)" to the header so
+    // the player can tell which Blaster this window is for (Scenario A: multiple Blasters
+    // selected at once).
+    hBlasterTransferList: function hBlasterTransferList(shooter, weapon, initialTarget, callback, preselect, lockInfo, opts) {
         var transferLocked = !!(lockInfo && lockInfo.locked);
+        var showWeaponId = !!(opts && opts.showWeaponId);
         function isHcvPlus(ship) {
             return (parseInt(ship.shipSizeClass, 10) || 0) >= 2;
+        }
+        // Rounded hit chance for this Blaster vs a target (raking → no called shot,
+        // calledid -1). Same calc the fire order uses. NOT capped at 100 — intercept
+        // and other factors can push the raw chance above 100%, and the player wants
+        // the true unmodified value. Only floored at 0 (a negative % reads oddly).
+        function hitChancePct(ship) {
+            var r = weaponManager.calculateHitChange(shooter, ship, weapon, -1);
+            var pct = (r && typeof r === 'object') ? r.hitChance : r;
+            pct = Math.round(parseFloat(pct) || 0);
+            return Math.max(0, pct);
         }
 
         // Build the candidate pool: enemy ships (not the initial target, not
@@ -4373,7 +4388,8 @@ window.confirm = {
         // real height so it reserves space rather than overlapping the list):
         //   Confirm List (green) | Fire Normally (blue) | Cancel Shot (red)
         var e = $('<div class="confirm multi-value-confirm hBlasterTransfer' + (transferLocked ? ' hBlasterLocked' : '') + '"></div>');
-        $('<div class="multi-value-header">Hypergraviton Blaster &mdash; Transfer Target List</div>').prependTo(e);
+        var headerIdSuffix = (showWeaponId && weapon && weapon.id != null) ? ' (ID: ' + weapon.id + ')' : '';
+        $('<div class="multi-value-header">Hypergraviton Blaster' + headerIdSuffix + ' &mdash; Transfer Target List</div>').prependTo(e);
         // When locked, a warning banner replaces the drag instruction.
         if (transferLocked) {
             var holderName = (lockInfo && lockInfo.holderName) ? lockInfo.holderName : 'Another Blaster';
@@ -4394,35 +4410,20 @@ window.confirm = {
 
         var listHolder = $('<div class="hBlasterList"></div>').appendTo(container);
 
-        // Re-derive rows[] from current DOM order. rows[0] is always the pinned
-        // initial row (it's a .hBlasterRow but excluded from sortable items, so
-        // it never leaves DOM position 0); the rest follow in dragged order.
-        function syncRowsFromDom() {
-            var reordered = [];
-            listHolder.children('.hBlasterRow').each(function () {
-                var rd = $(this).data('hbRow');
-                if (rd) reordered.push(rd);
-            });
-            if (reordered.length === rows.length) rows = reordered;
-        }
-
-        // In-place order-number refresh after a drag (avoid a full re-render that
-        // would tear down the sortable mid-drag).
-        function renumberRows() {
-            listHolder.children('.hBlasterRow').each(function (i) {
-                $(this).find('.hBlasterOrderNo').text((i + 1) + '.');
-            });
-        }
-
         function makeRow(rd, idx) {
             var row = $('<div class="multi-value-row hBlasterRow' + (rd.isInitial ? ' hBlasterInitial' : '') + '"></div>');
             row.data('hbRow', rd);
 
-            // Fixed-width column structure so order#, name and checkbox line up
-            // vertically across every row:
-            //   [order#] [name (flex, left-justified)] [structure checkbox]
+            // Fixed-width column structure so order#, name, hit% and checkbox line
+            // up vertically across every row:
+            //   [order#] [name (flex, left-justified)] [hit %] [structure checkbox]
             $('<span class="hBlasterOrderNo">' + (idx + 1) + '.</span>').appendTo(row);
             $('<span class="hBlasterName hangar-craft-name">' + rd.ship.name + '</span>').appendTo(row);
+
+            // Hit chance vs this target (same calc the fire order uses). Fixed-width
+            // so it doesn't disturb the name/checkbox alignment. Shown in brackets;
+            // not capped, so values can exceed 100%.
+            $('<span class="hBlasterHitChance" title="Chance to hit this target">' + hitChancePct(rd.ship) + '%</span>').appendTo(row);
 
             // Every row shows the "transfer on structure loss" checkbox so they all
             // sit in the same column. HCV+ (shipSizeClass >= 2) targets — incl. the
@@ -4446,46 +4447,137 @@ window.confirm = {
             // Label depends on whether the box is usable: HCV+ rows can opt into
             // structure-loss transfer ("Transfer on structure loss"); sub-HCV rows
             // are stuck at destruction-only (greyed box → "On ship destruction only").
-            var labelText = canStruct ? 'Transfer on structure loss' : 'On ship destruction only';
+            var labelText = canStruct ? 'On structure loss' : 'Ship destruction only';
             lbl.append(chk).append('<span>' + labelText + '</span>');
             row.append(lbl);
+
+            // Pointer-based drag-to-reorder (mouse + touch + pen via Pointer Events;
+            // jQuery-UI sortable was mouse-only and felt janky). The pinned initial
+            // row and the locked (read-only) mode are never draggable.
+            if (!rd.isInitial && !transferLocked) {
+                row[0].addEventListener('pointerdown', function (ev) { beginDrag(ev, row[0]); });
+            }
             return row;
         }
 
         function renderRows() {
-            if (listHolder.sortable && listHolder.sortable('instance')) {
-                listHolder.sortable('destroy');
-            }
             listHolder.empty();
-
             rows.forEach(function (rd, idx) {
                 listHolder.append(makeRow(rd, idx));
             });
-
             if (rows.length <= 1) {
                 $('<div class="multi-value-row hBlasterEmptyNote"><span class="multi-value-label" style="font-style:normal;">No eligible transfer targets within 1 hex of ' +
                     initialTarget.name + '.</span></div>').appendTo(listHolder);
             }
-
-            // Drag-to-reorder the transfer rows. The WHOLE row is the handle;
-            // `items` excludes the pinned initial row, and `cancel` excludes the
-            // structure checkbox/label so toggling it doesn't start a drag. Skipped
-            // entirely when locked (the list is read-only / informational).
-            if (!transferLocked && typeof listHolder.sortable === 'function') {
-                listHolder.sortable({
-                    items: '> .hBlasterRow:not(.hBlasterInitial)',
-                    cancel: '.hBlasterStructChk, .hBlasterStructLabel',
-                    axis: 'y',
-                    containment: 'parent',
-                    tolerance: 'pointer',
-                    update: function () {
-                        syncRowsFromDom();
-                        renumberRows();
-                    }
-                });
-            }
         }
         renderRows();
+
+        // ---- Pointer-based drag-to-reorder (mouse + touch + pen) --------------
+        // Replaces jQuery-UI sortable (mouse-only + janky). The SAME DOM element is
+        // dragged throughout (no rebuild, so pointer capture is never lost): it
+        // follows the pointer via translateY, and when its centre crosses a
+        // neighbour we physically move it in the DOM (insertBefore/After) and
+        // re-baseline its transform so it stays under the pointer. The pinned
+        // initial row (index 0) is a fixed top boundary.
+        var drag = null;   // active-drag state, or null
+        function beginDrag(ev, rowEl) {
+            if (transferLocked) return;
+            //Don't start a drag from the checkbox / its label (let it toggle).
+            if (ev.target && ev.target.closest && ev.target.closest('.hBlasterStructLabel')) return;
+            if (ev.button != null && ev.button !== 0) return;   //primary button / touch only
+
+            var startRd = $(rowEl).data('hbRow');
+            if (!startRd || startRd.isInitial) return;
+
+            drag = {
+                rowEl: rowEl,
+                pointerId: ev.pointerId,
+                pointerStartY: ev.clientY,   //pointer Y when the element last took its baseline
+                started: false               //true once past the move threshold
+            };
+            try { rowEl.setPointerCapture(ev.pointerId); } catch (e) {}
+            rowEl.addEventListener('pointermove', onDragMove);
+            rowEl.addEventListener('pointerup', endDrag);
+            rowEl.addEventListener('pointercancel', endDrag);
+        }
+
+        function onDragMove(ev) {
+            if (!drag || ev.pointerId !== drag.pointerId) return;
+            var dy = ev.clientY - drag.pointerStartY;
+
+            //Small threshold so a tap/click isn't treated as a drag.
+            if (!drag.started) {
+                if (Math.abs(dy) < 4) return;
+                drag.started = true;
+                $(drag.rowEl).addClass('hBlasterDragging');
+            }
+            ev.preventDefault();
+
+            drag.rowEl.style.transform = 'translateY(' + dy + 'px)';
+
+            //Has the dragged row's visual centre crossed a neighbour's centre?
+            var draggedRd = $(drag.rowEl).data('hbRow');
+            var curIdx = rows.indexOf(draggedRd);
+            if (curIdx < 0) return;
+            var dragMid = drag.rowEl.getBoundingClientRect();
+            dragMid = dragMid.top + dragMid.height / 2;
+
+            //Move UP — swap with the previous transfer row (never above index 1).
+            if (curIdx > 1) {
+                var prevEl = listHolder.children('.hBlasterRow').eq(curIdx - 1)[0];
+                if (prevEl) {
+                    var pr = prevEl.getBoundingClientRect();
+                    if (dragMid < pr.top + pr.height / 2) {
+                        rows.splice(curIdx, 1);
+                        rows.splice(curIdx - 1, 0, draggedRd);
+                        drag.rowEl.parentNode.insertBefore(drag.rowEl, prevEl);
+                        rebaselineDrag(ev);
+                        return;
+                    }
+                }
+            }
+            //Move DOWN — swap with the next transfer row.
+            if (curIdx < rows.length - 1) {
+                var nextEl = listHolder.children('.hBlasterRow').eq(curIdx + 1)[0];
+                if (nextEl) {
+                    var nr = nextEl.getBoundingClientRect();
+                    if (dragMid > nr.top + nr.height / 2) {
+                        rows.splice(curIdx, 1);
+                        rows.splice(curIdx + 1, 0, draggedRd);
+                        drag.rowEl.parentNode.insertBefore(drag.rowEl, nextEl.nextSibling);
+                        rebaselineDrag(ev);
+                        return;
+                    }
+                }
+            }
+        }
+
+        //After the dragged element is moved to a new DOM slot, reset its transform
+        //baseline so it stays exactly under the pointer (its natural layout position
+        //jumped by one row height). Order numbers are refreshed in place.
+        function rebaselineDrag(ev) {
+            drag.rowEl.style.transform = '';                 //natural position in new slot
+            var rect = drag.rowEl.getBoundingClientRect();
+            var naturalMid = rect.top + rect.height / 2;
+            var dy = ev.clientY - naturalMid;
+            drag.pointerStartY = ev.clientY - dy;            //so subsequent dy stays consistent
+            drag.rowEl.style.transform = 'translateY(' + dy + 'px)';
+            listHolder.children('.hBlasterRow').each(function (i) {
+                $(this).find('.hBlasterOrderNo').text((i + 1) + '.');
+            });
+        }
+
+        function endDrag(ev) {
+            if (!drag) return;
+            var rowEl = drag.rowEl;
+            rowEl.removeEventListener('pointermove', onDragMove);
+            rowEl.removeEventListener('pointerup', endDrag);
+            rowEl.removeEventListener('pointercancel', endDrag);
+            try { rowEl.releasePointerCapture(drag.pointerId); } catch (e) {}
+            rowEl.style.transform = '';
+            $(rowEl).removeClass('hBlasterDragging');
+            drag = null;
+        }
 
         // Split rows[] into the pinned initial target's flag + the transfer queue
         // (rows[1..]) for the callback.
