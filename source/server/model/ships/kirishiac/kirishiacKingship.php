@@ -45,7 +45,7 @@ class kirishiacKingship extends BaseShip{
 		
 		$this->addAftSystem(new HypergravitonBlaster(7, 30, 15, 120, 240));
 		$this->addAftSystem(new AntigravityBeam(6, 6, 3, 90, 270));
-		$this->addAftSystem(new HypergravitonBlaster(7, 30, 15, 300, 60));
+		$this->addAftSystem(new HypergravitonBlaster(7, 30, 15, 60, 180));
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
         $this->addAftSystem(new GraviticThruster(7, 15, 0, 4, 2));
