@@ -1342,7 +1342,8 @@ class HypergravitonBlaster extends Weapon {
 			$this->data["Special"] .= "<br>Can fire accelerated for less damage.";
 			$this->data["Special"] .= "<br> - 1 turn: 5d10+40";
 			$this->data["Special"] .= "<br> - 2 turns: 10d10+80";
-			$this->data["Special"] .= "<br>On a miss, subtracts 20 damage and re-rolls to hit until it hits or runs out of damage.";
+			$this->data["Special"] .= "<br>Can target multiple enemy units on a single turn, use Target Transfer List menu to build a chain of potential targets.";            
+			$this->data["Special"] .= "<br>On a miss or transfer, weapon subtracts 20 damage and re-rolls to hit until it hits or runs out of damage.";
 
             parent::setSystemDataWindow($turn);
         }
