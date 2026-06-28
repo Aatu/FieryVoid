@@ -10,6 +10,7 @@ class Felucca extends MediumShip{
         $this->imagePath = "img/ships/fastFreighter.png"; 
         $this->shipClass = "Felucca";
         $this->canvasSize = 100;
+		$this->fighters = array("cargo shuttles"=>2); 		
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
@@ -32,7 +33,7 @@ class Felucca extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 5, 0, 0));
         $this->addPrimarySystem(new Engine(4, 20, 0, 15, 3));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 5));
-        $this->addPrimarySystem(new Hangar(3, 2));
+        $this->addPrimarySystem(new Hangar(3, 2, 1));
     	$this->addPrimarySystem(new Thruster(4, 15, 0, 7, 3));
     	$this->addPrimarySystem(new Thruster(4, 15, 0, 7, 4));
     	$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));

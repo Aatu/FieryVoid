@@ -33,7 +33,7 @@ class Pinnace extends MediumShip{
         $this->addPrimarySystem(new CnC(3, 5, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 10, 2, 4));
         $this->addPrimarySystem(new Engine(4, 6, 0, 4, 2));
-		$this->addPrimarySystem(new Hangar(2, 4));
+		$this->addPrimarySystem(new Hangar(2, 4, 1));
 		$this->addPrimarySystem(new TwinArray(2, 6, 2, 0, 360));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 3));
 		$this->addPrimarySystem(new Thruster(3, 10, 0, 2, 4));

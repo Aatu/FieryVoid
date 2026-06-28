@@ -9,6 +9,7 @@ class IMLArmedTransportAM extends HeavyCombatVesselLeftRight{
         $this->phpclass = "IMLArmedTransportAM";
         $this->imagePath = "img/ships/RaiderIMLTransport.png";
         $this->shipClass = "IML Armed Transport";
+		$this->fighters = array("cargo shuttles"=>6);         
         
 		$this->notes = 'Used only by the Independent Mercenaries League';
 		$this->isd = 2234;
@@ -39,7 +40,7 @@ class IMLArmedTransportAM extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(6, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(6, 12, 5, 6));
         $this->addPrimarySystem(new Engine(6, 14, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(6, 6));
+        $this->addPrimarySystem(new Hangar(6, 6, 2));
         $this->addAftSystem(new GraviticThruster(5, 15, 0, 6, 1));
         $this->addAftSystem(new GraviticThruster(5, 18, 0, 10, 2));
         $this->addAftSystem(new GraviticCannon(4, 6, 5, 90, 270));
