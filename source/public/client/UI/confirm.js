@@ -4451,12 +4451,6 @@ window.confirm = {
             lbl.append(chk).append('<span>' + labelText + '</span>');
             row.append(lbl);
 
-            // Pointer-based drag-to-reorder (mouse + touch + pen via Pointer Events;
-            // jQuery-UI sortable was mouse-only and felt janky). The pinned initial
-            // row and the locked (read-only) mode are never draggable.
-            if (!rd.isInitial && !transferLocked) {
-                row[0].addEventListener('pointerdown', function (ev) { beginDrag(ev, row[0]); });
-            }
             return row;
         }
 
@@ -4474,20 +4468,36 @@ window.confirm = {
 
         // ---- Pointer-based drag-to-reorder (mouse + touch + pen) --------------
         // Replaces jQuery-UI sortable (mouse-only + janky). The SAME DOM element is
-        // dragged throughout (no rebuild, so pointer capture is never lost): it
-        // follows the pointer via translateY, and when its centre crosses a
-        // neighbour we physically move it in the DOM (insertBefore/After) and
-        // re-baseline its transform so it stays under the pointer. The pinned
-        // initial row (index 0) is a fixed top boundary.
+        // dragged throughout: it follows the pointer via translateY, and when its
+        // centre crosses a neighbour we physically move it in the DOM
+        // (insertBefore/After) and re-baseline its transform so it stays under the
+        // pointer. The pinned initial row (index 0) is a fixed top boundary.
+        //
+        // pointerdown is DELEGATED on listHolder (one live listener, regardless of
+        // rows being re-parented mid-drag) — a per-row listener combined with a
+        // re-parent left a stale gesture state that swallowed the next pointerdown
+        // (the "have to click twice to drag again" bug). The move/up listeners live
+        // on WINDOW for the drag's duration and we do NOT use setPointerCapture
+        // (capturing a re-parented element is the same trap). touch-action:none on
+        // the row stops touch-scroll; preventDefault on pointerdown stops the
+        // synthetic mouse/click chain that can poison the next gesture.
         var drag = null;   // active-drag state, or null
-        function beginDrag(ev, rowEl) {
+        listHolder[0].addEventListener('pointerdown', function (ev) {
             if (transferLocked) return;
+            if (ev.button != null && ev.button !== 0) return;             //primary button / touch only
+            if (!ev.target || !ev.target.closest) return;
             //Don't start a drag from the checkbox / its label (let it toggle).
-            if (ev.target && ev.target.closest && ev.target.closest('.hBlasterStructLabel')) return;
-            if (ev.button != null && ev.button !== 0) return;   //primary button / touch only
-
+            if (ev.target.closest('.hBlasterStructLabel')) return;
+            var rowEl = ev.target.closest('.hBlasterRow');
+            if (!rowEl || rowEl.parentNode !== listHolder[0]) return;
             var startRd = $(rowEl).data('hbRow');
             if (!startRd || startRd.isInitial) return;
+            beginDrag(ev, rowEl);
+        });
+
+        function beginDrag(ev, rowEl) {
+            //Defensive: clear any drag that somehow didn't end (stale listeners).
+            if (drag) endDrag();
 
             drag = {
                 rowEl: rowEl,
@@ -4495,10 +4505,10 @@ window.confirm = {
                 pointerStartY: ev.clientY,   //pointer Y when the element last took its baseline
                 started: false               //true once past the move threshold
             };
-            try { rowEl.setPointerCapture(ev.pointerId); } catch (e) {}
-            rowEl.addEventListener('pointermove', onDragMove);
-            rowEl.addEventListener('pointerup', endDrag);
-            rowEl.addEventListener('pointercancel', endDrag);
+            ev.preventDefault();             //suppress text-selection + synthetic click chain
+            window.addEventListener('pointermove', onDragMove);
+            window.addEventListener('pointerup', endDrag);
+            window.addEventListener('pointercancel', endDrag);
         }
 
         function onDragMove(ev) {
@@ -4569,13 +4579,12 @@ window.confirm = {
 
         function endDrag(ev) {
             if (!drag) return;
-            var rowEl = drag.rowEl;
-            rowEl.removeEventListener('pointermove', onDragMove);
-            rowEl.removeEventListener('pointerup', endDrag);
-            rowEl.removeEventListener('pointercancel', endDrag);
-            try { rowEl.releasePointerCapture(drag.pointerId); } catch (e) {}
-            rowEl.style.transform = '';
-            $(rowEl).removeClass('hBlasterDragging');
+            if (ev && ev.pointerId != null && ev.pointerId !== drag.pointerId) return;  //ignore other pointers
+            window.removeEventListener('pointermove', onDragMove);
+            window.removeEventListener('pointerup', endDrag);
+            window.removeEventListener('pointercancel', endDrag);
+            drag.rowEl.style.transform = '';
+            $(drag.rowEl).removeClass('hBlasterDragging');
             drag = null;
         }
 
