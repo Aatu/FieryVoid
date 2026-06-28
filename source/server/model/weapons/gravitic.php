@@ -1463,9 +1463,29 @@ class HypergravitonBlaster extends Weapon {
             //first-shot-miss transfer bar does not apply here.
             $targetAlreadyDead = $target->isDestroyed();
 
+            //A fighter-flight target is handled by the per-fighter rake routine, which gives
+            //each fighter its own to-hit roll and tallies $fireOrder->shots/shotshit itself
+            //(so the combat log reads e.g. 3/3 when three fighters die, not 1/1). It also drives
+            //firstShotMissed off its very first roll, then transfers if a queue is present and the
+            //flight is wiped out. We must NOT also run the single opening roll / shotshit++ below,
+            //or the count would double up.
+            $isFlightTarget = ($target instanceof FighterFlight);
+
             if ($targetAlreadyDead && !empty($this->transferQueue)) {
                 $fireOrder->shots = 1;
                 $this->resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize);
+            } else if ($isFlightTarget && !$targetAlreadyDead) {
+                //rakeFighterFlight owns the to-hit rolls AND the shots/shotshit tally for the flight.
+                //Zero the constructor defaults (shots=1, shotshit=0) first so its per-fighter
+                //increments produce an accurate count (e.g. 3/3) rather than an off-by-one (4/3).
+                $fireOrder->shots = 0;
+                $fireOrder->shotshit = 0;
+                $stop = $this->rakeFighterFlight($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize);
+                //If the whole flight was destroyed and a transfer queue is present (and the opening
+                //fighter wasn't a first-shot miss), carry the surviving damage on down the list.
+                if ($stop === 'destroyed' && !empty($this->transferQueue) && !$this->firstShotMissed) {
+                    $this->resolveRakingWithTransfer($shooter, $target, $fireOrder, $gamedata, $damageRemaining, $rakeSize);
+                }
             } else {
                 $hit = $this->rollToHitWithRakeReroll($gamedata, $fireOrder, $target, $damageRemaining, $rakeSize, true, $attempts);
 
@@ -1482,11 +1502,12 @@ class HypergravitonBlaster extends Weapon {
                         $this->damage($target, $shooter, $fireOrder, $gamedata, $damageRemaining);
                     }
                 }
-            }
 
-            //Report each to-hit attempt as a "shot" so the combat log shows hits/attempts
-            //(e.g. 1/3 for a hit on the third roll) instead of a misleading 1/1.
-            $fireOrder->shots = max(1, $attempts);
+                //Report each to-hit attempt as a "shot" so the combat log shows hits/attempts
+                //(e.g. 1/3 for a hit on the third roll) instead of a misleading 1/1. (Flights set
+                //their own shots inside rakeFighterFlight, so this only covers the ship path.)
+                $fireOrder->shots = max(1, $attempts);
+            }
 
             //Bookkeeping identical to base fire() so combat log / downstream code stay happy.
             $fireOrder->rolled = max(1, $fireOrder->rolled);
@@ -1567,19 +1588,28 @@ class HypergravitonBlaster extends Weapon {
                 //Build a synthetic fire order for the new victim (combat-log clarity).
                 $transferOrder = $this->buildTransferFireOrder($shooter, $nextTarget, $fireOrder, $gamedata);
                 $transferOrder->needed -= $transferOrder->totalIntercept;
-
-                //Roll to hit the new victim, re-rolling on misses until it hits or runs dry.
-                $attempts = 0;
-                $transferHit = $this->rollToHitWithRakeReroll($gamedata, $transferOrder, $nextTarget, $damageRemaining, $rakeSize, false, $attempts);
-                $transferOrder->shots = max(1, $attempts);
-
-                if (!$transferHit) {
-                    break; //missed and out of damage
-                }
-
-                $transferOrder->shotshit++;
-                $nextTarget->clearVreeHitSectionChoice($shooter->id, $transferOrder);
                 $transferOrder->pubnotes .= "<br>Hypergraviton Blaster beam loses 20 damage and transfers to " . $nextTarget->name . ".";
+
+                if ($nextTarget instanceof FighterFlight) {
+                    //A flight hop is resolved per-fighter by rakeOneVictim/rakeFighterFlight on the
+                    //next loop pass, which owns the to-hit rolls and the shots/shotshit tally. Don't
+                    //do a unit-level to-hit roll here, or the first fighter would be counted twice.
+                    //Zero the constructor defaults so rakeFighterFlight's count is accurate.
+                    $transferOrder->shots = 0;
+                    $transferOrder->shotshit = 0;
+                } else {
+                    //Ship hop: one unit-level to-hit roll (with re-roll), counted as one shot.
+                    $attempts = 0;
+                    $transferHit = $this->rollToHitWithRakeReroll($gamedata, $transferOrder, $nextTarget, $damageRemaining, $rakeSize, false, $attempts);
+                    $transferOrder->shots = max(1, $attempts);
+
+                    if (!$transferHit) {
+                        break; //missed and out of damage
+                    }
+
+                    $transferOrder->shotshit++;
+                    $nextTarget->clearVreeHitSectionChoice($shooter->id, $transferOrder);
+                }
 
                 //Continue on the new victim, attributing damage to its own order.
                 $currentTarget = $nextTarget;
@@ -1604,7 +1634,8 @@ class HypergravitonBlaster extends Weapon {
         protected function rakeOneVictim($shooter, $victim, $order, $gamedata, &$damageRemaining, $rakeSize, $noTransfer = false)
         {
             if ($victim instanceof FighterFlight) {
-                return $this->rakeFighterFlight($shooter, $victim, $order, $gamedata, $damageRemaining, $rakeSize);
+                //A flight reached as a transfer hop is never the volley's opening shot.
+                return $this->rakeFighterFlight($shooter, $victim, $order, $gamedata, $damageRemaining, $rakeSize, false);
             }
 
             $launchPos = null; //non-ballistic Blaster
@@ -1643,10 +1674,17 @@ class HypergravitonBlaster extends Weapon {
 
         /* Rakes a fighter flight, giving EACH fighter its own to-hit roll (with the standard
          * re-roll-on-miss, -20 per miss) until the entire flight is destroyed or the volley
-         * runs dry. Returns 'destroyed' (whole flight gone) or 'outOfDamage'. */
-        protected function rakeFighterFlight($shooter, $flight, $order, $gamedata, &$damageRemaining, $rakeSize)
+         * runs dry. Returns 'destroyed' (whole flight gone) or 'outOfDamage'.
+         *
+         * This routine OWNS the combat-log tally for a flight target: every to-hit attempt adds
+         * to $order->shots and every fighter killed adds to $order->shotshit, so the log reads
+         * e.g. 3/3 when three fighters die (rather than a misleading 1/1 from a single increment
+         * in fire()). $isOpeningShot=true means this routine's very first roll is the volley's
+         * opening shot, so a first-roll miss must set firstShotMissed (which bars transfer). */
+        protected function rakeFighterFlight($shooter, $flight, $order, $gamedata, &$damageRemaining, $rakeSize, $isOpeningShot = true)
         {
             $launchPos = null;
+            $firstRoll = $isOpeningShot;
 
             while ($damageRemaining > 0 && !$flight->isDestroyed()) {
                 //Pick the next living fighter (getHitSystem returns a non-destroyed one).
@@ -1656,17 +1694,23 @@ class HypergravitonBlaster extends Weapon {
                 }
 
                 //Fresh roll for this fighter, re-rolling on misses until it hits or damage runs dry.
+                //Each fighter's whole re-roll sequence is reported as ONE shot in the combat log
+                //(consistent with the ship path, where a hit-on-the-3rd-reroll is still 1 shot).
                 $attempts = 0;
-                $hit = $this->rollToHitWithRakeReroll($gamedata, $order, $flight, $damageRemaining, $rakeSize, false, $attempts);
+                $hit = $this->rollToHitWithRakeReroll($gamedata, $order, $flight, $damageRemaining, $rakeSize, $firstRoll, $attempts);
+                $order->shots += max(1, $attempts);
+                $firstRoll = false;
+
                 if (!$hit) {
                     return 'outOfDamage';
                 }
 
-                //One rake destroys the fighter (fighters are tiny); apply it.
+                //One rake destroys the fighter (fighters are tiny); apply it and count the hit.
                 $rake = min($damageRemaining, $rakeSize);
                 $flight->clearVreeHitSectionChoice($shooter->id, $order);
                 $this->doDamage($flight, $shooter, $fighter, $rake, $order, $launchPos, $gamedata, false, null);
                 $damageRemaining -= $rake;
+                $order->shotshit++;
             }
 
             return $flight->isDestroyed() ? 'destroyed' : 'outOfDamage';
