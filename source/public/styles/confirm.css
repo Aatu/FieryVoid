@@ -729,20 +729,19 @@
     font-weight: bold;
 }
 
-/* Draggable candidate rows: the WHOLE row is the drag handle, so show a grab
-   cursor and a bronze hover. Fixed-column layout so order#, name and the
-   checkbox line up vertically across every row. touch-action:none lets a
-   touch-drag work without the page scrolling/zooming under the finger. */
+/* Chain + available rows. Fixed-column layout so order#, name, hit% and the
+   checkbox line up vertically across every row. The chain is no longer drag-
+   reordered (it's built one hop at a time), so locked rows are static; only the
+   clickable "available next target" rows (.hBlasterAvailRow) get a pointer
+   cursor + click affordance. touch-action:none is retained so the dormant drag
+   engine still behaves if a future weapon re-enables it. */
 .confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow {
-    cursor: grab;
+    cursor: default;
     display: flex;
     align-items: center;
     gap: 8px;
     touch-action: none;
     transition: background 0.15s ease;
-}
-.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow:active {
-    cursor: grabbing;
 }
 /* The pinned initial row is not draggable, and is shaded so it reads as
    locked in place above the reorderable transfer list. */
@@ -794,7 +793,7 @@
     color: #cdbf9a;
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
-    margin-left: 10px;
+    margin-left: 25px;
 }
 .confirm.multi-value-confirm.hBlasterTransfer .multi-value-row:hover {
     background: rgba(176, 141, 87, 0.12);
@@ -813,6 +812,69 @@
     margin-right: 0;
 }
 
+/* Section labels separating the locked-in chain from the available-next list. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterSectionLabel {
+    color: #e8c98a;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 8px 0 4px 0;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(176, 141, 87, 0.35);
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailLabel {
+    margin-top: 5px;
+}
+
+/* Available-next rows are CLICKABLE (lock the ship in as the next hop). Pointer
+   cursor + a brighter bronze hover than the static chain rows so it reads as an
+   action. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailRow {
+    cursor: pointer;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailRow:hover {
+    background: rgba(176, 141, 87, 0.20);
+    border-color: #b08d57;
+}
+/* The "Lock in »" hint sits in the right column (where the chain rows show their
+   structure checkbox), brightening on row hover. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterLockInHint {
+    flex: 0 0 150px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: bold;
+    color: #c9b285;
+    white-space: nowrap;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailRow:hover .hBlasterLockInHint {
+    color: #f0deb8;
+}
+
+/* "✕ Remove" control on the last locked hop. Sits after the structure checkbox;
+   a spacer of the same width is rendered on rows that don't have it so the
+   checkbox column stays aligned down the chain. Muted rose so it reads as a
+   "back out" action without shouting. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRemove {
+    flex: 0 0 66px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: bold;
+    color: #c98a8a;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 6px;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRemove:hover {
+    color: #f0b0b0;
+    text-shadow: 0 0 5px rgba(200, 120, 120, 0.5);
+}
+/* Invisible placeholder keeping the column width on rows without a Remove. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRemoveSpacer {
+    cursor: default;
+    visibility: hidden;
+}
+
 /* "transfer on structure loss" checkbox + label — fixed-width right column so
    every row's checkbox sits at the same x (vertical alignment). The label is a
    fixed width (not flex:auto) so its left edge — and therefore the checkbox
@@ -829,15 +891,18 @@
 }
 /* Fixed-width checkbox sub-column: the checkbox always sits at the same x, and
    the text that follows always starts at the same x — so "On structure loss" and
-   "Ship destruction only" rows stay vertically aligned with each other. */
+   "Ship destruction only" rows stay vertically aligned with each other. Sized to
+   the checkbox itself (left-justified) so the label text sits right beside it
+   rather than across a wide centred gap. */
 .confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructBox {
-    flex: 0 0 16px;
+    flex: 0 0 14px;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
 }
+/* Text hugs the checkbox (no flex-stretch) so the gap is just the label's 4px. */
 .confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructText {
-    flex: 1 1 auto;
+    flex: 0 1 auto;
 }
 .confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructChk {
     accent-color: #b08d57;
