@@ -32,7 +32,7 @@ class tfsmonitor extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 13, 4, 8));
         $this->addPrimarySystem(new Engine(5, 11, 0, 8, 2));
-        $this->addPrimarySystem(new Hangar(4, 8));
+        $this->addPrimarySystem(new Hangar(4, 8, 6));
   
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 13, 0, 4, 1));        
