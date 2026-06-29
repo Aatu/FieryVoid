@@ -84,19 +84,23 @@ function integratedFighterCarrierAdjust(ship) {
     var perCraft = parseInt(ship.integratedFighterPerCraft || 0, 10);
     if (perCraft <= 0) return 0;
 
-    //A destroyed (non-jumped) carrier already lost its bay; nothing to net off (its
-    //launched flights are valued on their own rows regardless).
+    //Count the integrated fighters STILL HELD in the carrier's ShadowHangar bays.
+    //We count regardless of destroyed/jumped state: integrated fighters that were
+    //still aboard when the carrier died (or jumped) went down/away WITH THE SHIP —
+    //they were paid for via the carrier's enhValue and their CP belongs on the
+    //carrier's row, NOT netted off as "launched". The server preserves these held
+    //entries through destruction (processCarrierDestructionEscapes exempts
+    //ShadowHangars from the wreck wipe), so heldNow stays accurate and a destroyed
+    //base with 3 fighters aboard reads 10,450 not 10,000.
     var heldNow = 0;
-    if (!shipManager.isDestroyed(ship) || shipManager.hasJumpedNotDestroyed(ship)) {
-        for (var s = 0; s < ship.systems.length; s++) {
-            var sys = ship.systems[s];
-            if (!sys || !sys.isShadowHangar || !Array.isArray(sys.hangarUsage)) continue;
-            for (var u = 0; u < sys.hangarUsage.length; u++) {
-                var entry = sys.hangarUsage[u];
-                if (!entry || entry.phpclass !== 'ShadowMediumFighterFlight') continue;
-                if (entry.cannotLaunch) continue;   //wreck — no value
-                heldNow += parseInt(entry.flightSize || 1, 10);
-            }
+    for (var s = 0; s < ship.systems.length; s++) {
+        var sys = ship.systems[s];
+        if (!sys || !sys.isShadowHangar || !Array.isArray(sys.hangarUsage)) continue;
+        for (var u = 0; u < sys.hangarUsage.length; u++) {
+            var entry = sys.hangarUsage[u];
+            if (!entry || entry.phpclass !== 'ShadowMediumFighterFlight') continue;
+            if (entry.cannotLaunch) continue;   //wreck — no value
+            heldNow += parseInt(entry.flightSize || 1, 10);
         }
     }
 
