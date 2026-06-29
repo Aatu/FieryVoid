@@ -416,7 +416,13 @@ window.confirm = {
         // Calculate the enhancement cost
         var enhPrice = $(this).data('enhPrice');
         var enhPriceStep = $(this).data('enhPriceStep');
-        var enhCost = (value > 0) ? (value * enhPrice) + ((value - 1) * enhPriceStep) : 0;
+        // Cost grows as an arithmetic series: each level i (0-based) costs
+        // enhPrice + i*enhPriceStep. The old closed form charged only ONE step
+        // total beyond the base, capping the per-level increment after level 2.
+        var enhCost = 0;
+        for (let i = 0; i < value; i++) {
+            enhCost += enhPrice + (i * enhPriceStep);
+        }
         $(this).data('enhCost', enhCost);
 
         // Trigger any necessary cost update function
