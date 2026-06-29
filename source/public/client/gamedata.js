@@ -886,11 +886,11 @@ window.gamedata = {
             }
 
             if (hasNoFO.length == 0 && hasSplitFO.length == 0) { //Has no ships with no fireOrders at all.
-                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
+                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR PRE-FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
                 if (hasNoFO.length > 0) {
-                    html += "You have not assigned any fire orders for the following ships: ";
+                    html += "You have not assigned any pre-fire orders for the following ships: ";
                     html += "<br>";
                     for (var ship in hasNoFO) {
                         //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
@@ -908,7 +908,7 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
-                confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
+                confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR PRE-FIRE ORDERS?</span>', gamedata.doCommit);
             }
         } else if (gamedata.gamephase == 3) {
             var myShips = [];
