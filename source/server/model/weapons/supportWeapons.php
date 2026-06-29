@@ -1314,8 +1314,260 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
         $strippedSystem->loadingtime = $this->loadingtime;	//With certain crits this can change for this weapon!													                                        
         return $strippedSystem;
 	}	
-
-
 }	
+
+
+class GraviticAugmenter extends Weapon{
+	public $name = "GraviticAugmenter";
+	public $displayName = "Gravitic Augmenter";
+	public $iconPath = "GraviticAugmenter.png";
+
+	public $damageType = "Raking"; //To prevent called shots
+	public $weaponClass = "Support";
+
+	public $uninterceptable = true; 
+	public $doNotIntercept = true;
+	public $priority = 1;
+		
+    public $useOEW = false;
+    public $useOEWArray = array(1=> false, 2=>false, 3=>true);
+	public $noLockPenalty = false;   				
+	public $noLockPenaltyArray = array(1=> false, 2=>false, 3=>true);        
+	public $loadingtime = 1;	
+    public $fireControl = array(0, 5, 6); // fighters, <mediums, <capitals 	
+		
+	public $animation = "ball";
+	public $animationArray = array(1 => "ball", 2=> "bolt", 3=> "bolt");		
+    public $animationColor = array(99, 255, 00);	
+	public $noProjectile = true; //Marker for front end to make projectile invisible for weapons that shouldn't have one.
+	public $noProjectileArray = array(1 => true, 2=> false, 3=> false); 	 		
+	//public $output = 0;
+	//public $outputDisplay = ''; //if not empty - overrides default on-icon display text		
+	public $animationExplosionScale = 0.4; //single hex explosion
+	public $animationExplosionScaleArray = array(1 => 3, 2=> 0.4, 3=> 0.4);	
+	public $repairPriority = 4;		
+    //public $boostable = true; //can be boosted for additional effect
+	//public $boostEfficiency = 15; //cost to boost by 1
+    //public $maxBoostLevel = 3; //maximum boost allowed - just technical limitation, rules dont set any maximum; 20 seems close enough to "unlimited" :)		
+ 
+	public $firingModes = array(
+			1 => "Matter Weapon Enhancemen",
+			2 => "Warrior Enhancement",
+			3 => "Gravity Shifting",					
+		);
+
+    public $rangePenalty = 0;
+    public $rangePenaltyArray = array(1 => 0, 2=> 0, 3=> 0.5);		
+    public $range = 20;
+    public $canOffLine = true;    
+	protected $autoHit = true;//To show 100% hit chance in front end.
+	protected $autoHitArray = array(1 => true, 2=> true, 3=> false); To show 100% hit chance in front end.	
+	public $autoFireOnly = true; //this weapon cannot manually fire by player at a target, just activated
+	public $autoFireOnlyArray = array(1 => true, 2=> false, 3=> false);	
+	protected $canTargetAllies = false; //To allow front end to target allies.
+	protected $canTargetAlliesArray = array(1 => false, 2=> true, 3=> true); //To allow front end to target allies.
+
+	public $hextarget = true;
+	public $hextargetArray = array(1 => true, 2=> false, 3=> false);
+	public $preFires = true;	
+	//public $canSplitShots = true;	
+	//protected $multiModeSplit = true;
+
+	//These private variables are used to track fire orders, and firings to prevent Combat Log spam
+	//private	$orderThisTurn = array(); //For Combat Logs entries
+	private $rotationDirection = 0; //Prevent multiple firings at same ship for same mode.	
+	private $rotationAmount = 0; //Prevent multiple firings at same ship for same mode.	
+	public static $alreadyAugmented = array(); 
+	private static $alreadyShifted = array();		
+	 
+    function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		if ( $maxhealth == 0 ) $maxhealth = 12;
+        if ( $powerReq == 0 ) $powerReq = 7;                           
+        parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        $this->startArc = $startArc;       	
+        $this->endArc = $endArc;
+        //$this->output = $output;
+ 		//$this->outputDisplay = $output;         
+    }
+
+		    		
+    public function setSystemDataWindow($turn){
+        parent::setSystemDataWindow($turn);
+		$this->data["Special"] = "Has three different firing modes used to support allies and disrupt enemies.";
+		$this->data["Special"] .= "<br>Firing modes and their effect are summarised below:";		 										 
+	}	
+
+
+	public function beforeFiringOrderResolution($gamedata)
+	{
+		if ($this->isDestroyed($gamedata->turn)) return;
+		if ($this->isOfflineOnTurn($gamedata->turn)) return;
+
+		$ship = $this->getUnit();
+		$deployTurn = $ship->getTurnDeployed($gamedata);
+		if ($deployTurn > $gamedata->turn) return; // Ship not deployed yet
+
+		$weaponFiringOrders = $this->getFireOrders($gamedata->turn);
+		if (empty($weaponFiringOrders)) return; // No fire orders
+
+		foreach ($weaponFiringOrders as $fireOrder) {
+
+			switch ($fireOrder->firingMode) {
+
+				case 1: //Matter weapon enhancement
+
+					break;
+
+				case 2: //Warrior Enhancement
+
+					break;
+
+				case 3: //Gravitiy shifting
+					//Need to capture amount and direction of rotation here from fireOrder notes in $this->toRotate.
+					break;
+
+				default:
+					continue 2; // skip to next fire order safely
+			}
+		}
+	} // end of beforeFiringOrderResolution 
+
+		
+	public function calculateHitBase($gamedata, $fireOrder)
+	{
+		switch ($fireOrder->firingMode) {
+
+			case 1: //Matter weapon enhancement
+				$fireOrder->needed = 100; //always true
+				$fireOrder->updated = true;	
+			break;
+
+			case 2: //Warrior Enhancement
+
+				if (isset(GraviticAugmenter::$alreadyAugmented[$fireOrder->targetid])){
+					$fireOrder->needed = 0;
+					$fireOrder->updated = true; 
+					$fireOrder->pubnotes = "<br>Warrior flight has already been affected by a Gravitic Augmenter.";                         
+					return; //target already engaged by a previous Gravitic Shifter
+				}
+				
+				GraviticAugmenter::$alreadyAugmented[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
+
+				$fireOrder->needed = 100; //always true
+				$fireOrder->updated = true;	
+			break;
+
+			case 3: //Gravitiy shifting
+				if (isset(GraviticAugmenter::$alreadyShifted[$fireOrder->targetid])){
+					$fireOrder->needed = 0;
+					$fireOrder->updated = true; 
+					$fireOrder->pubnotes = "<br>Ship has already been affected by a Gravitic Augmenter.";                         
+					return; //target already engaged by a previous Gravitic Shifter
+				}
+					
+				parent::calculateHitBase($gamedata, $fireOrder);
+				
+				GraviticAugmenter::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
+
+				$target = $gamedata->getShipById($fireOrder->targetid);
+
+				if($target->gravitic || $target->factionAge >= 3){ 
+					$fireOrder->needed -= 15; //-15% to hit gravitic and/or Ancient targets. 
+				}    
+			break;
+
+			default:
+				return; // skip to next fire order safely
+		}		
+	}
+
+	public function fire($gamedata, $fireOrder)
+	{
+
+		if ($fireOrder->firingMode == 1) {
+			// Matter Weapon enhancement firing modes (auto-hit, no roll)
+			$fireOrder->rolled = 1;
+			$fireOrder->shotshit = 1;
+			TacGamedata::$lastFiringResolutionNo++;
+			$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;
+		} else if ($fireOrder->firingMode == 2) {
+			// Warrior enhancement firing modes (auto-hit, no roll)
+			$fireOrder->rolled = 1;
+			$fireOrder->shotshit = 1;
+			TacGamedata::$lastFiringResolutionNo++;
+			$fireOrder->resolutionOrder = TacGamedata::$lastFiringResolutionNo;
+		}else {
+			// Normal firing handled by parent for firing Mode 3
+			parent::fire($gamedata, $fireOrder);
+		}
+
+	}
+
+	
+ 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+        if($fireOrder->firingMode !== 3) return; //Not gravitic shifting mode.
+ 		if ($ship->Enormous) return; //No effect on Enormous units
+        if ($ship instanceof Mine){
+            $fireOrder->pubnotes = "<br>Mines are not affected by Gravitic Augmenters.";
+            return; //No point.                         
+        } 
+
+		$lastMove = $ship->getLastMovement();
+        $newFacing = $lastMove->facing; //Initialise as current facing.
+        $newHeading = $lastMove->heading; //Initialise as current heading. 
+		$rotateDirection = 1;
+
+		if($this->$rotationDirection !== 0){ //1 is clockwise, 2 is anti-clockwise, 0 is an error
+			$rotationAmount = $this->rotationAmount; 				
+		}
+		
+		$rotationAmount = 1; //Between 1-2 depending on whether target will rotate 60 or 120 degrees.
+		
+		if(!$ship->gravitic && $this->rotationAmount !== 0){ //Gravitic ships can only be rotated 60 degrees
+			$rotationAmount = $this->rotationAmount; 				
+		}
+
+        if($rotateDirection == 1){ //clockwise
+            $newFacing = MathLib::addToHexFacing($lastMove->facing , $rotationAmount);
+            $newHeading = MathLib::addToHexFacing($lastMove->heading , $rotationAmount);
+        }else{
+            $newFacing = MathLib::addToHexFacing($lastMove->facing , -$rotationAmount);
+            $newHeading = MathLib::addToHexFacing($lastMove->heading , -$rotationAmount);                      
+        }
+		
+		//Create new movement order for target.
+        $shift = new MovementOrder(null, "prefire", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $newHeading, $newFacing, false, $gamedata->turn, $fireOrder->id, 0);
+
+        if($fireOrder->firingMode == 1){
+            $direction = "clockwise";
+        }else{
+            $direction = "anti-clockwise";      
+        }        
+
+        if($fireOrder->shotshit > 0){
+            $fireOrder->pubnotes = "<br>Ship has been forced to turn 60 degrees " . $direction . " by a Gravitic Shifter.";                       
+        }   
+		//Add shifted movement order to database and in-memory movement array
+		//so subsequent prefire weapons see the updated heading/facing.
+		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);
+		$ship->setMovement($shift);	
+    }    
+
+	public function getDamage($fireOrder){       return 0;   } //no actual damage
+	public function setMinDamage(){     $this->minDamage = 0 ;      }
+	public function setMaxDamage(){     $this->maxDamage = 0 ;      }
+
+    public function stripForJson() {
+        $strippedSystem = parent::stripForJson();    
+        $strippedSystem->autoHit = $this->autoHit; 		
+        $strippedSystem->canTargetAllies = $this->canTargetAllies;
+        $strippedSystem->canTargetAlliesArray = $this->canTargetAlliesArray;
+        //$strippedSystem->noProjectileArray = $this->noProjectileArray;							                                        
+        return $strippedSystem;
+	}	
+	
+	
+}//endof GraviticAugmenter
+
 
 ?>

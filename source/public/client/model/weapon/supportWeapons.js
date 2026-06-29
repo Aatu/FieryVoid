@@ -398,3 +398,54 @@ TransverseDrive.prototype.isPosOnSpecialArc = function (shooter, target) {
     }
     return false;
 };
+
+
+var GraviticAugmenter = function GraviticAugmenter(json, ship) {
+    Weapon.call(this, json, ship); 
+};
+GraviticAugmenter.prototype = Object.create(Weapon.prototype);
+GraviticAugmenter.prototype.constructor = GraviticAugmenter;
+
+GraviticAugmenter.prototype.initBoostableInfo = function() {
+
+	return this;
+};
+
+GraviticAugmenter.prototype.canActivate = function () { 
+	if(gamedata.gamephase == 3 && (this.firingMode == 1)){
+		return true;	
+	}
+	return false; 
+};  
+
+
+//This creates Fire Orders for Mode 1.
+GraviticAugmenter.prototype.doActivate = function () { 
+
+		var ship = this.ship;
+		var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+		var position = shipManager.getShipPosition(ship);			
+
+		var fire = {
+			id: fireid,
+			type: 'normal',
+			shooterid: ship.id,
+			targetid: -1,
+			weaponid: this.id,
+			calledid: -1,
+			turn: gamedata.turn,
+			firingMode: this.firingMode,
+			shots: this.defaultShots,
+			x: position.q,
+			y: position.r,
+			damageclass: 'MatterAugment',
+			chance: 100,
+			hitmod: 0,
+			notes: "" //Used to identify split targeting.
+		};
+				
+		// Push to arrays / fire orders
+		this.fireOrders.push(fire);
+};   
+//Need to find a way to insert notes in firing Mode 3 order so we know the direction of rotation and amount rotated.
+
