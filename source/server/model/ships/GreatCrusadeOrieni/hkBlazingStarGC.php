@@ -60,6 +60,14 @@ class hkBlazingStarGC extends FighterFlight{
 		$iniBonus += HkControlNodeOrieni::getIniMod($this->userid,$gamedata, $this); //Applies -50 on Turn 1 if deployed outside hangar.
         return $iniBonus;
     }
-    
+
+    /* When jamming severs control (Uncontrolled), the HK pursues the nearest enemy ship
+     * and rams it ('seek'). Jinks at its default level (2, fixed — no per-flight settings
+     * UI); jinking costs thrust (1/level). AutomatedMovement falls back to drift if no
+     * enemy is in play. */
+    public function getAutomatedMovementIntent($gamedata){
+        return array('type' => 'seek', 'jink' => 2);
+    }    
+
 }
 ?>
