@@ -66,6 +66,15 @@ class Enhancements{
   public static function nonstandardEnhancementSet($unit, $setName){
 	switch($setName) {
 
+		case 'KirshiacFighter':
+			Enhancements::blockStandardEnhancements($unit);
+			break;	
+	
+		case 'KirshiacShip':
+			Enhancements::blockStandardEnhancements($unit);
+			$unit->enhancementOptionsEnabled[] = 'IMPR_SR';		
+			break;
+
 		case 'MindriderFighter':
 			Enhancements::blockStandardEnhancements($unit);
 			break;	
