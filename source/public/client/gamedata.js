@@ -189,7 +189,10 @@ window.gamedata = {
     },
 
     getMyActiveShips: function getMyActiveShips() {
-        return gamedata.getActiveShips().filter(ship => gamedata.isMyShip(ship) && !ship.mine);
+        //Uncontrolled (HK-jammed) remote-controlled flights are moved by the server (drift),
+        //so exclude them here the way mines/terrain are excluded from getActiveShips: the player
+        //must never get the movement UI / become the active ship for one. Gated on remoteControl.
+        return gamedata.getActiveShips().filter(ship => gamedata.isMyShip(ship) && !ship.mine && !shipManager.movement.isUncontrolled(ship));
     },
 
     getShip: function getShip(id) {
