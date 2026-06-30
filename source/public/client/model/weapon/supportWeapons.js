@@ -412,7 +412,7 @@ GraviticAugmenter.prototype.initBoostableInfo = function() {
 };
 
 GraviticAugmenter.prototype.canActivate = function () { 
-	if(gamedata.gamephase == 3 && (this.firingMode == 1)){
+	if(gamedata.gamephase == 1 && this.firingMode == 1){
 		return true;	
 	}
 	return false; 
