@@ -407,12 +407,17 @@ GraviticAugmenter.prototype = Object.create(Weapon.prototype);
 GraviticAugmenter.prototype.constructor = GraviticAugmenter;
 
 GraviticAugmenter.prototype.initBoostableInfo = function() {
+	return this;
+};
 
+GraviticAugmenter.prototype.initializationUpdate = function() {
+	//Guard against other firing modes behaving like ballistic.  Only firing mode 2 needs to target a unit in Initial Orders
+	if(this.firingMode !== 2) this.ballistic = false; 
 	return this;
 };
 
 GraviticAugmenter.prototype.canActivate = function () { 
-	if(gamedata.gamephase == 1 && this.firingMode == 1){
+	if(gamedata.gamephase == 1 && (this.firingMode == 1 || this.firingMode == 2)){
 		return true;	
 	}
 	return false; 
@@ -421,14 +426,14 @@ GraviticAugmenter.prototype.canActivate = function () {
 
 //This creates Fire Orders for Mode 1.
 GraviticAugmenter.prototype.doActivate = function () { 
-
+	if(this.firingMode = 1){
 		var ship = this.ship;
 		var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
 		var position = shipManager.getShipPosition(ship);			
 
 		var fire = {
 			id: fireid,
-			type: 'normal',
+			type: 'ballistic',
 			shooterid: ship.id,
 			targetid: -1,
 			weaponid: this.id,
@@ -446,6 +451,13 @@ GraviticAugmenter.prototype.doActivate = function () {
 				
 		// Push to arrays / fire orders
 		this.fireOrders.push(fire);
+	}else if(this.firingMode = 2){
+		//add method here to make weapon ballistic and select a Warrior flight.
+		this.ballistic = true; //Mark ballistic true to allow targeting.
+		gamedata.selectedSytems.push(this);	//Selected	
+	}else{
+		return;
+	}	
 };   
 //Need to find a way to insert notes in firing Mode 3 order so we know the direction of rotation and amount rotated.
 

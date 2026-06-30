@@ -1397,7 +1397,7 @@ class GraviticAugmenter extends Weapon{
 		$this->data["Special"] .= "<br>Firing modes and their effect are summarised below:";		 										 
 	}	
 
-
+	/*				
 	public function beforeFiringOrderResolution($gamedata)
 	{
 		if ($this->isDestroyed($gamedata->turn)) return;
@@ -1431,10 +1431,162 @@ class GraviticAugmenter extends Weapon{
 			}
 		}
 	} // end of beforeFiringOrderResolution 
+	*/				
 
+	public function onIndividualNotesLoaded($gamedata){
+		if ($this->isDestroyed($gamedata->turn)) return;
+		if ($this->isOfflineOnTurn($gamedata->turn)) return;
+		$ship = $this->getUnit();
+		if($ship->getTurnDeployed($gameData) > $gameData->turn) continue;	
+
+		$weaponFiringOrders = $this->getFireOrders($gamedata->turn);
+		if (empty($weaponFiringOrders)) return; // No fire orders
+
+		foreach ($weaponFiringOrders as $fireOrder) {
+
+			switch ($fireOrder->firingMode) {
+
+				case 1: //Matter weapon enhancement
+					$this->doMatterEnhancement($gamedata);
+					break;
+
+				case 2: //Warrior Enhancement
+					$this->doWarriorEnhancement($gamedata, $fireOrder);
+					break;
+
+				default:
+					continue; // skip to next fire order safely
+			}
+		}
+
+	}
 		
-	public function calculateHitBase($gamedata, $fireOrder)
-	{
+	private function doMatterEnhancement($gamedata){
+		
+		//We need to check all ships in Augmenter arc and range.  Search them for Matter weapons, and them make adjustments to Fire Control
+		foreach($gamedata->ships as $otherShip){
+			if($otherShip->isTerrain()) continue; //Ignore terrain like asteroids.
+			if($otherShip->mine) continue; //Ignore mines
+			if($otherShip->isDestroyed()) continue; //Destryoed
+			if($otherShip->getTurnDeployed($gameData) > $gameData->turn) continue;	
+						
+			if($otherShip->team == $ship->team){ //Increase fire controls
+							
+				if($otherShip instanceof FighterFlight){
+					foreach($otherShip->systems as $fighter){
+						foreach($fighter->systems as $system){
+							if($system instance of Weapon){
+							$mod = 3;
+							if($system->ballistic) $mod = 6;								
+								if($system->weaponClass == "Matter"){
+									$system->fireControl[0] += $mod;
+									$system->fireControl[1] += $mod;
+									$system->fireControl[2] += $mod;
+												
+									foreach($system->fireControlArray as $fireControl){
+										$fireControl[0] += $mod;
+										$fireControl[1] += $mod;
+										$fireControl[2] += $mod;																										
+									}
+								}
+							}
+						}
+					}
+				}else{ //Ships
+					foreach($otherShip->systems as $system){
+						if($system instance of Weapon){
+							$mod = 3;
+							if($system->ballistic) $mod = 6;							
+							if($system->weaponClass == "Matter"){
+								$system->fireControl[0] += $mod;
+								$system->fireControl[1] += $mod;
+								$system->fireControl[2] += $mod;
+												
+								foreach($system->fireControlArray as $fireControl){
+									$fireControl[0] += $mod;
+									$fireControl[1] += $mod;
+									$fireControl[2] += $mod;																										
+								}
+							}
+						}		
+					}
+				}
+			}else{ //Decrease fire controls for enemies
+				if($otherShip instanceof FighterFlight){
+					foreach($otherShip->systems as $fighter){
+						foreach($fighter->systems as $system){
+							if($system instance of Weapon){
+							$mod = 3;
+							if($system->ballistic) $mod = 6;								
+								if($system->weaponClass == "Matter"){
+									$system->fireControl[0] -= $mod;
+									$system->fireControl[1] -= $mod;
+									$system->fireControl[2] -= $mod;
+											
+									foreach($system->fireControlArray as $fireControl){
+										$fireControl[0] -= $mod;
+										$fireControl[1] -= $mod;
+										$fireControl[2] -= $mod;																										
+									}
+								}
+							}
+						}
+					}
+				}else{ //Ships
+					foreach($otherShip->systems as $system){
+						if($system instance of Weapon){
+							$mod = 3;
+							if($system->ballistic) $mod = 6;
+							if($system->weaponClass == "Matter"){
+								$system->fireControl[0] -= $mod;
+								$system->fireControl[1] -= $mod;
+								$system->fireControl[2] -= $mod;
+												
+								foreach($system->fireControlArray as $fireControl){
+									$fireControl[0] -= $mod;
+									$fireControl[1] -= $mod;
+									$fireControl[2] -= $mod;																										
+								}
+							}
+						}		
+					}
+				}
+			}
+		}
+
+	} //endof doMatterEnhancement				
+
+
+	private function doWarriorEnhancement($gamedata, $fireOrder){
+		$warrior = $gamedata->getShipById($fireOrder->targetid);
+		
+		$warrior->freeThrust +=3;
+		$warrior->offensivebonus +=3;
+		$warrior->dropOutBonus -= 4; 
+		
+		if($gamedata->phase == 2){
+			//We have to add 3 levels of free jinking, but only once at start of Movement Phase.
+			foreach($warrior->movement as $move){
+				if($move->turn !== $gamedata->turn) continue;
+				if($move->value == 'Augment') return; //Already done, finish Warrior enhancements here.			
+			}
+
+			$lastMove = $warrior->getLastMovement();
+			$freeJink = new MovementOrder(null, "jink", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $lastMove->facing, $lastMove->heading, false, $gamedata->turn, 'Augment', 0);
+			$NoOfJinks = 3;		
+			
+			while($NoOfJinks > 0){
+				Manager::insertSingleMovement($gamedata->id, $ship->id, $freeJink);
+				$ship->setMovement($freeJink);		
+				$NoOfJinks--;							
+			}	
+		}			
+
+	} //endof doWarriorEnhancement		
+
+
+	public function calculateHitBase($gamedata, $fireOrder){
+
 		switch ($fireOrder->firingMode) {
 
 			case 1: //Matter weapon enhancement
@@ -1464,7 +1616,9 @@ class GraviticAugmenter extends Weapon{
 					$fireOrder->pubnotes = "<br>Ship has already been affected by a Gravitic Augmenter.";                         
 					return; //target already engaged by a previous Gravitic Shifter
 				}
-					
+
+				//We need to extract the rotationDirection and rotationAmount from fireOrder->notes somehow before it's overwritten.				
+
 				parent::calculateHitBase($gamedata, $fireOrder);
 				
 				GraviticAugmenter::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
@@ -1481,8 +1635,7 @@ class GraviticAugmenter extends Weapon{
 		}		
 	}
 
-	public function fire($gamedata, $fireOrder)
-	{
+	public function fire($gamedata, $fireOrder){
 
 		if ($fireOrder->firingMode == 1) {
 			// Matter Weapon enhancement firing modes (auto-hit, no roll)
@@ -1515,14 +1668,13 @@ class GraviticAugmenter extends Weapon{
 		$lastMove = $ship->getLastMovement();
         $newFacing = $lastMove->facing; //Initialise as current facing.
         $newHeading = $lastMove->heading; //Initialise as current heading. 
-		$rotateDirection = 1;
 
+		$rotateDirection = 1;
 		if($this->$rotationDirection !== 0){ //1 is clockwise, 2 is anti-clockwise, 0 is an error
-			$rotationAmount = $this->rotationAmount; 				
+			$rotationDirection = $this->rotationDirection; 				
 		}
 		
 		$rotationAmount = 1; //Between 1-2 depending on whether target will rotate 60 or 120 degrees.
-		
 		if(!$ship->gravitic && $this->rotationAmount !== 0){ //Gravitic ships can only be rotated 60 degrees
 			$rotationAmount = $this->rotationAmount; 				
 		}
