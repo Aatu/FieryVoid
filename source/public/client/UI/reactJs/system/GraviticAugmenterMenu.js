@@ -267,18 +267,17 @@ class GraviticAugmenterMenu extends Component {
 
         return (
             <Container>
-                <Header>Gravity Shift Rotation</Header>
+                <Header>Gravity Shift Settings</Header>
                 <Row>
                     <RowLabel>Clockwise</RowLabel>
                     <ActionButton onClick={() => this.setRotation(1, 1)} $active={isSel(1, 1)}>60&deg;</ActionButton>
                     <ActionButton onClick={() => this.setRotation(1, 2)} $active={isSel(1, 2)}>120&deg;</ActionButton>
                 </Row>
                 <Row>
-                    <RowLabel>Anti-CW</RowLabel>
+                    <RowLabel>Anti-Clockwise</RowLabel>
                     <ActionButton onClick={() => this.setRotation(2, 1)} $active={isSel(2, 1)}>60&deg;</ActionButton>
                     <ActionButton onClick={() => this.setRotation(2, 2)} $active={isSel(2, 2)}>120&deg;</ActionButton>
                 </Row>
-                <SubLabel>120&deg; is reduced to 60&deg; against gravitic / Ancient ships.</SubLabel>
             </Container>
         );
     }

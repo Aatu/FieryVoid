@@ -1317,14 +1317,25 @@ class TransverseDrive extends Weapon implements SpecialAbility, DefensiveSystem{
 }	
 
 
-class GraviticAugmenter extends Weapon{
+class GraviticAugmenter extends Weapon  implements SpecialAbility{
 	public $name = "GraviticAugmenter";
 	public $displayName = "Gravitic Augmenter";
 	public $iconPath = "GraviticAugmenter.png";
 
-	public $damageType = "Raking"; //To prevent called shots
+	//"Standard" (not "Raking") so the 0-damage Mode-3 shot still reaches onDamagedSystem to rotate
+	//the target - the Raking damage branch skips doDamage()/onDamagedSystem at 0 damage. Matches the
+	//proven GraviticShifter. A "called shot" is meaningless here (0 damage; the whole ship rotates
+	//regardless of which system is clicked), so allowing it via Standard is harmless.
+	public $damageType = "Standard";
 	public $weaponClass = "Support";
-
+	//Modes 1 & 2 are support buffs (Support class). Mode 3 (Gravity Shifting) is a disruptive
+	//attack aimed at ENEMY ships, so it is NOT Support: the client's targetShip() blocks Support
+	//weapons from targeting enemies (weaponManager "stop players supporting enemies" gate). Classing
+	//Mode 3 as Gravitic exempts it from that gate (Gravitic also renders green, like Support, so the
+	//animation is unchanged; it does 0 damage so armour/damage-class use of weaponClass is moot).
+	public $weaponClassArray = array(1 => "Support", 2 => "Support", 3 => "Gravitic");
+	public $specialAbilities = array("PreFiring", "alliedEW");
+	public $specialAbilityValue = true; //so it is actually recognized as special ability!  
 	public $uninterceptable = true; 
 	public $doNotIntercept = true;
 	public $priority = 1;
@@ -1389,12 +1400,17 @@ class GraviticAugmenter extends Weapon{
  		//$this->outputDisplay = $output;         
     }
 
+	public function getSpecialAbilityValue($args){
+		return $this->specialAbilityValue;
+	}	
 		    		
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
-		$this->data["Special"] = "Has three different firing modes used to support allies and disrupt enemies.";
-		$this->data["Special"] .= "<br>Firing modes and their effect are summarised below:";		 										 
-	}	
+		$this->data["Special"] = "May use one of the three Firing modes listed below per turn:";
+		$this->data["Special"] .= "<br> - Matter Weapon Enhancement (Initial Orders): Boosts fire control of friendly matter weapons in arc/range by +3 (+6 if ballistic), and degrades enemy matter weapons by the same amount. Cumulative.";
+		$this->data["Special"] .= "<br> - Warrior Enhancement (Initial Orders): Grants a Warrior flight +3 free thrust, +3 offensive bonus, -4 dropout, and 3 free jink levels. Not cumulative.";
+		$this->data["Special"] .= "<br> - Gravity Shifting (Pre-Firing): Rotates a target ship's facing up to 120 degrees (60 degrees max against Gravtiic targets). Only ONE Augmenter may shift a given ship per turn. No effect on Enormous units or Mines.";
+	}
 
 	/* Mode 3 carries the player's chosen rotation in the fire order notes as "GA|<dir>|<amt>"
 	 * (dir: 1=clockwise, 2=anti-clockwise; amt: 1=60deg, 2=120deg). calculateHitBase overwrites
@@ -1544,8 +1560,13 @@ class GraviticAugmenter extends Weapon{
 		//loads, and a numeric value is indistinguishable from a player's manual jinks - so we
 		//keep it transient and re-add fresh each load (the $alreadyAugmented static guards
 		//against a second Augmenter stacking it within the same request).
+		//forced=true marks these as an Augmenter minimum the player MAY NOT remove during
+		//their own movement phase (client canJink/doJink skip forced jinks); it also serialises
+		//to the client (public MovementOrder prop). The DB has no 'forced' column so a persisted
+		//jink can never carry it - this flag only ever rides the transient Augmenter jink.
 		$lastMove = $warrior->getLastMovement();
 		$freeJink = new MovementOrder(null, "jink", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, 3, 0);
+		$freeJink->forced = true;
 		$warrior->setMovement($freeJink); //in-memory only; no Manager::insertSingleMovement.
 
 	} //endof doWarriorEnhancement
@@ -1624,6 +1645,11 @@ class GraviticAugmenter extends Weapon{
 	}
 
 	
+	/* Rotate the target one or two facings on a Mode-3 hit (direction/amount parsed earlier in
+	 * beforePreFiringOrderResolution). Uses onDamagedSystem exactly like the proven GraviticShifter:
+	 * it does 0 damage but damageType is "Standard", so the damage pipeline's standard branch calls
+	 * doDamage() (and thus onDamagedSystem) once even at 0 damage. (A "Raking" damageType would skip
+	 * this - its `while ($damage > 0)` loop never runs at 0 damage.) */
  	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
         if($fireOrder->firingMode != 3) return; //Not gravitic shifting mode.
  		if ($ship->Enormous) return; //No effect on Enormous units

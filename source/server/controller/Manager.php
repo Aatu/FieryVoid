@@ -1315,7 +1315,12 @@ class Manager{
                     );
                     $movement->requiredThrust = $move["requiredThrust"] ?? 0;
                     $movement->assignedThrust = $move["assignedThrust"] ?? 0;
-    
+                    //Carry the 'forced' flag through the POST (Gravitic Augmenter free jinks are
+                    //marked forced=true). submitMovement skips forced moves so they never persist -
+                    //they are re-added transiently every load. Without this whitelist the flag is
+                    //lost and the free jink would be written to the DB, doubling next load.
+                    $movement->forced = $move["forced"] ?? false;
+
                     $movements[$i] = $movement;
                 }
             }

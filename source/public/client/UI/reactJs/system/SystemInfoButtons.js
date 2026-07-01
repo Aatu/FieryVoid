@@ -673,6 +673,9 @@ const canAApropagate = (ship, system) => canAA(ship, system) && system.canPropag
 //adjust the rotation; the standard remove button handles cancellation alongside it.
 const canGraviticAugmenter = (ship, system) => system.name === 'GraviticAugmenter' && gamedata.isMyShip(ship) &&
 	!shipManager.power.isOffline(ship, system) &&
+	//A spent & locked Augmenter (already committed a Mode 1/2 order in Initial Orders) is done for
+	//the turn — don't re-offer its green menu (e.g. "Engage Gravity Shifting") in Pre-Firing.
+	!(typeof system.isSpentLocked === 'function' && system.isSpentLocked()) &&
 	((gamedata.gamephase === 1 && !weaponManager.hasFiringOrder(ship, system)) ||
 	 (gamedata.gamephase === 5));
 
@@ -778,7 +781,11 @@ const canAddShots = (ship, system) => system.weapon && system.canChangeShots && 
 const canReduceShots = (ship, system) => system.weapon && system.canChangeShots && weaponManager.hasFiringOrder(ship, system) && weaponManager.getFiringOrder(ship, system).shots > 1;
 
 const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasOrderForMode(system) && system.canSplitShots;
-const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system);
+//A "spent & locked" Gravitic Augmenter (order committed, outside its declaration phase) must not
+//offer a remove button — e.g. its ballistic Mode 1/2 order reads as active in the Firing phase via
+//hasFiringOrder's phase-3 branch, but Initial-Orders support cannot be un-fired mid-turn.
+const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system)
+	&& !(typeof system.isSpentLocked === 'function' && system.isSpentLocked());
 
 //The Gravitic Augmenter cycles its own modes inside its green menu, so it opts out of the
 //generic firing-mode selector grid.

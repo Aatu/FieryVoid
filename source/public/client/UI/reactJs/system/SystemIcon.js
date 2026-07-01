@@ -169,7 +169,16 @@ class SystemIcon extends React.Component {
             }
         }
 
-        if (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires)) {
+        //Gravitic Augmenter "spent & locked": once it has committed its order for the turn, it is
+        //non-interactive outside that order's declaration phase (see GraviticAugmenter.isSpentLocked).
+        //Skip the select/target workflow entirely but fall through so the read-only info popup still
+        //opens. Guards the phase-3 case where the ballistic Mode 1/2 order would otherwise be treated
+        //as an active firing order (offering a remove button and orange highlight).
+        var spentLockedAugmenter = system.weapon
+            && typeof system.isSpentLocked === 'function' && system.isSpentLocked();
+
+        if (!spentLockedAugmenter
+            && (system.weapon && (gamedata.gamephase === 3 && !system.ballistic && !system.preFires) || (gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires))) {
             //cannoct SELECT weapon when unit is adrift though!
             if (!shipManager.isAdrift(ship)) {
                 if (gamedata.isMyShip(ship)) {
@@ -414,14 +423,22 @@ class SystemIcon extends React.Component {
     }
 }
 
-const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system);
+//A "spent & locked" Gravitic Augmenter shows the spent (dimmed) look, not the active-firing orange
+//border — its committed order is not being fired/edited in the current phase (see isSpentLocked).
+const isFiring = (ship, system) => weaponManager.hasFiringOrder(ship, system)
+    && !(typeof system.isSpentLocked === 'function' && system.isSpentLocked());
 
 const isCalledShot = (ship, system) => {
     if (!system.weapon || !weaponManager.hasFiringOrder(ship, system)) return false;
     return weaponManager.getCalledShotInfo(ship, system) !== null;
 };
 
-const isLoading = (system) => system.weapon && !weaponManager.isLoaded(system);
+//The Gravitic Augmenter reads as "spent" (dimmed) once it has committed its order for the turn and
+//we're outside that order's declaration phase — see GraviticAugmenter.isSpentLocked. This is a
+//display-only signal, so it must NOT go through turnsloaded (which would break firing eligibility).
+const isLoading = (system) => system.weapon
+    && (!weaponManager.isLoaded(system)
+        || (typeof system.isSpentLocked === 'function' && system.isSpentLocked()));
 
 const isLoadedAlternate = (system) => system.weapon && weaponManager.isLoadedAlternate(system);
 
@@ -472,6 +489,12 @@ const getText = (ship, system) => {
     if (system.outputDisplay != '') { //some systems have very specific visual output, rather than generic
         return system.outputDisplay;
     } else if (system.weapon) {
+
+        //Spent & locked Gravitic Augmenter: order committed, not fireable this phase — show a spent
+        //tick rather than a misleading load counter or crosshair (the icon is dimmed via isLoading).
+        if (typeof system.isSpentLocked === 'function' && system.isSpentLocked()) {
+            return "✓"; // ✓
+        }
 
         const firing = weaponManager.hasFiringOrder(ship, system);
 
