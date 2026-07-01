@@ -86,6 +86,7 @@ class Weapon extends ShipSystem
     public $normalload = 0;
     public $alwaysoverloading = false;
     public $autoFireOnly = false; //ture for weapons that should never be fired manually
+    public $autoFireOnlyArray = array(); //per-mode override of autoFireOnly (applied in changeFiringMode)
     public $overloadturns = 0;
     public $overloadshots = 0;
     public $extraoverloadshots = 0;

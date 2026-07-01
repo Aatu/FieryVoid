@@ -335,6 +335,11 @@ window.weaponManager = {
 
         if (weapon.autoFireOnly) return; //this is auto-fire only weapon, should not be fired manually!
 
+        //Spent & locked Gravitic Augmenter: already committed its order for the turn and is outside
+        //that order's declaration phase — block re-selection from every path (icon click, select-all,
+        //right-click) at this single chokepoint.
+        if (typeof weapon.isSpentLocked === 'function' && weapon.isSpentLocked()) return;
+
 
         if (ship.shipSizeClass < 0) {
             for (var i = 0; i < ship.systems.length; i++) {
