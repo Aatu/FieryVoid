@@ -30,7 +30,7 @@ class Dragonship extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 12, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 12, 4, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
-        $this->addPrimarySystem(new Hangar(5, 14));
+        $this->addPrimarySystem(new Hangar(5, 14, 6));
         $this->addPrimarySystem(new CargoBay(5, 12));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
   

@@ -337,7 +337,7 @@ class ReducedIniative extends Critical{
  * uncontrolled turn is carried by this crit's outputMod-independent read in
  * BaseShip::getCommonIniModifiers. */
 class Uncontrolled extends Critical{
-    public $description = "UNCONTROLLED";
+    public $description = "Uncontrolled!";
     public $oneturn = true;
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
         parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
@@ -368,6 +368,17 @@ class ReducedRange extends Critical{
 
 class ReducedDamage extends Critical{
     public $description = "Damage reduced";
+    function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
+            parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
+    }
+}
+
+//Twin Array special crit (roll 20+): one of the two guns is destroyed (-1 gun).
+//Applied in TwinArray::effectCriticals (reduces $guns); two of these destroys the
+//whole weapon (handled in TwinArray::criticalPhaseEffects). Permanent - can't repair.
+class GunLost extends Critical{
+    public $description = "Gun Lost";
+	public $repairPriority = 0;//Can't repair.
     function __construct($id, $shipid, $systemid, $phpclass, $turn, $turnend = 0){
             parent::__construct($id, $shipid, $systemid, $phpclass, $turn, $turnend );
     }

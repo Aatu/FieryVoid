@@ -34,7 +34,7 @@ class AssaultSloop extends MediumShip{
         $this->addPrimarySystem(new Reactor(3, 15, 0, 0));
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 12, 4, 5));
-        $this->addPrimarySystem(new Hangar(3, 6));
+        $this->addPrimarySystem(new Hangar(3, 6, 2));
     	$this->addPrimarySystem(new GrapplingClaw(5, 0, 0, 300, 60, 5, false));
     	$this->addPrimarySystem(new GrapplingClaw(5, 0, 0, 300, 60, 5, false));
     	$this->addPrimarySystem(new Thruster(3, 10, 0, 3, 3));

@@ -659,3 +659,326 @@
 .confirm.multi-value-confirm.shadowFighterBomb input[type="checkbox"] {
     accent-color: #58c7e6;
 }
+
+/* === Hypergraviton Blaster transfer-target window (Stage 4) ===============
+   Bronze theme, layered on .multi-value-confirm for the row/layout structure
+   but overriding the purple palette. This window does NOT carry the
+   hangar-confirm class (that's the cyan hangar theme). Selector specificity
+   (0,2,0) matches the base .multi-value-confirm, and these rules come later in
+   the file so they win. */
+.confirm.multi-value-confirm.hBlasterTransfer {
+    background: #1a1206;                  /* dark bronze-brown */
+    border: 3px solid #b08d57;            /* bronze */
+    box-shadow: 0 0 10px rgba(176, 141, 87, 0.4);
+    color: #e6d3b0;                       /* warm parchment body text */
+    min-width: 420px;
+    max-width: min(640px, calc(100% - 16px));
+    /* Reserve room so the window grows to its content + the button bar rather
+       than clipping when only a few rows are listed. */
+    min-height: auto;
+    height: auto;
+    padding-bottom: 12px;
+}
+
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-header {
+    color: #e8c98a;                       /* warm gold */
+    text-shadow: 0 0 5px rgba(176, 141, 87, 0.5);
+    border-bottom: 1px solid rgba(176, 141, 87, 0.5);
+    font-weight: bold;
+    margin-bottom: 5px;
+    padding-bottom: 5px;    
+}
+
+/* Subheader instruction line under the title. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterSubheader {
+    color: #c9b285;
+    font-size: 12px;
+    font-style: italic;
+    text-align: center;
+    margin: 3px 0 10px 0;
+}
+
+/* Warning banner shown when another Blaster already holds the ship's transfer
+   slot (this window is then read-only / fire-normally only). Muted amber on a
+   dark amber wash so it reads as a caution without clashing with the bronze. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterLockBanner {
+    color: #f0c674;
+    background: rgba(120, 80, 20, 0.25);
+    border: 1px solid rgba(176, 141, 87, 0.6);
+    border-radius: 4px;
+    font-size: 12px;
+    text-align: center;
+    padding: 7px 10px;
+    margin: 6px 0 10px 0;
+    line-height: 1.35;
+}
+/* Locked rows read as informational — dim them slightly. */
+.confirm.multi-value-confirm.hBlasterTransfer.hBlasterLocked .hBlasterRow {
+    cursor: default;
+    opacity: 0.85;
+}
+
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-label,
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-max {
+    color: #e6d3b0;
+    margin: 5px;  
+}
+
+.confirm.multi-value-confirm.hBlasterTransfer .hangar-craft-name {
+    color: #f0deb8;
+    font-weight: bold;
+}
+
+/* Chain + available rows. Fixed-column layout so order#, name, hit% and the
+   checkbox line up vertically across every row. The chain is no longer drag-
+   reordered (it's built one hop at a time), so locked rows are static; only the
+   clickable "available next target" rows (.hBlasterAvailRow) get a pointer
+   cursor + click affordance. touch-action:none is retained so the dormant drag
+   engine still behaves if a future weapon re-enables it. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow {
+    cursor: default;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    touch-action: none;
+    transition: background 0.15s ease;
+}
+/* The pinned initial row is not draggable, and is shaded so it reads as
+   locked in place above the reorderable transfer list. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow.hBlasterInitial {
+    cursor: default;
+    touch-action: auto;
+    background: rgba(176, 141, 87, 0.22);
+    border-color: rgba(176, 141, 87, 0.55);
+    border-left: 3px solid #b08d57;
+}
+/* Keep the locked shading even on hover (don't let the generic row:hover wash it out). */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow.hBlasterInitial:hover {
+    background: rgba(176, 141, 87, 0.26);
+}
+/* The row currently being dragged: lifts above the others, tracks the pointer
+   1:1 (no transition on its own transform), and casts a soft shadow. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRow.hBlasterDragging {
+    cursor: grabbing;
+    z-index: 10;
+    position: relative;
+    transition: none;
+    background: rgba(176, 141, 87, 0.22);
+    border-color: #b08d57;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.5);
+}
+/* Order number — fixed-width column so names start at the same x. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterOrderNo {
+    flex: 0 0 22px;
+    text-align: right;
+    color: #e6d3b0;
+    opacity: 0.8;
+    font-size: 13px;
+}
+/* Ship name — flexes to fill, LEFT-justified so all names line up vertically. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterName {
+    flex: 1 1 auto;
+    text-align: left;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+/* Hit chance — fixed-width column, right-aligned, so it sits between the name and
+   the checkbox without disturbing the vertical alignment of either. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterHitChance {
+    flex: 0 0 54px;
+    text-align: left;
+    font-size: 12px;
+    color: #cdbf9a;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    margin-left: 25px;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .multi-value-row:hover {
+    background: rgba(176, 141, 87, 0.12);
+    border-color: #b08d57;
+}
+
+/* "No eligible transfer targets" placeholder row. Its label inherits the generic
+   .multi-value-label styling (flex:1; text-align:right; margin-right:15px), which fills
+   the row and right-justifies the text. Centre the row and, more importantly, override
+   the label so the message sits in the middle of the row. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterEmptyNote {
+    justify-content: center;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterEmptyNote .multi-value-label {
+    text-align: center;
+    margin-right: 0;
+}
+
+/* Section labels separating the locked-in chain from the available-next list. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterSectionLabel {
+    color: #e8c98a;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin: 8px 0 4px 0;
+    padding-bottom: 3px;
+    border-bottom: 1px solid rgba(176, 141, 87, 0.35);
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailLabel {
+    margin-top: 5px;
+}
+
+/* Available-next rows are CLICKABLE (lock the ship in as the next hop). Pointer
+   cursor + a brighter bronze hover than the static chain rows so it reads as an
+   action. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailRow {
+    cursor: pointer;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailRow:hover {
+    background: rgba(176, 141, 87, 0.20);
+    border-color: #b08d57;
+}
+/* The "Lock in »" hint sits in the right column (where the chain rows show their
+   structure checkbox), brightening on row hover. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterLockInHint {
+    flex: 0 0 150px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: bold;
+    color: #c9b285;
+    white-space: nowrap;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterAvailRow:hover .hBlasterLockInHint {
+    color: #f0deb8;
+}
+
+/* "✕ Remove" control on the last locked hop. Sits after the structure checkbox;
+   a spacer of the same width is rendered on rows that don't have it so the
+   checkbox column stays aligned down the chain. Muted rose so it reads as a
+   "back out" action without shouting. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRemove {
+    flex: 0 0 66px;
+    text-align: right;
+    font-size: 11px;
+    font-weight: bold;
+    color: #c98a8a;
+    cursor: pointer;
+    white-space: nowrap;
+    margin-left: 6px;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRemove:hover {
+    color: #f0b0b0;
+    text-shadow: 0 0 5px rgba(200, 120, 120, 0.5);
+}
+/* Invisible placeholder keeping the column width on rows without a Remove. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterRemoveSpacer {
+    cursor: default;
+    visibility: hidden;
+}
+
+/* "transfer on structure loss" checkbox + label — fixed-width right column so
+   every row's checkbox sits at the same x (vertical alignment). The label is a
+   fixed width (not flex:auto) so its left edge — and therefore the checkbox
+   column inside it — lands at the same x regardless of the row's text. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructLabel {
+    flex: 0 0 150px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #d8c49a;
+    cursor: pointer;
+    white-space: nowrap;
+}
+/* Fixed-width checkbox sub-column: the checkbox always sits at the same x, and
+   the text that follows always starts at the same x — so "On structure loss" and
+   "Ship destruction only" rows stay vertically aligned with each other. Sized to
+   the checkbox itself (left-justified) so the label text sits right beside it
+   rather than across a wide centred gap. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructBox {
+    flex: 0 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
+/* Text hugs the checkbox (no flex-stretch) so the gap is just the label's 4px. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructText {
+    flex: 0 1 auto;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructChk {
+    accent-color: #b08d57;
+    cursor: pointer;
+    margin: 0;
+}
+/* Sub-HCV rows: the checkbox is shown but greyed + disabled (size class < 2
+   can only transfer on outright destruction). */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructLabel.disabled {
+    color: #7d6e50;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterStructChk:disabled {
+    cursor: not-allowed;
+}
+
+/* --- Button bar: in-flow flex row (real height) so it reserves space below
+   the list rather than overlapping it (the absolutely-positioned default .ui
+   buttons were the cause of the too-short window). --- */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterButtons {
+    position: static;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 4px 0 0 0;
+    padding-top: 10px;
+    border-top: 1px solid rgba(176, 141, 87, 0.4);
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterBtn {
+    /* Equal-width: each button takes an equal share of the bar. */
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 160px;
+    border-radius: 5px;
+    font-family: arial;
+    font-size: 13px;                      /* slightly smaller than the 16px default option buttons */
+    font-weight: bold;
+    cursor: pointer;
+    height: 28px;
+    line-height: 28px;
+    text-align: center;
+    padding: 0 10px;
+    border: 1px solid transparent;
+    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+/* Lighter/pastel palette to complement the bronze window. Muted sage-green,
+   dusty steel-blue, dusty rose — softer than saturated primaries. */
+/* Pastel fills with DARKER (un-lightened) borders that ground each button. */
+/* Confirm List — pastel sage green. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterConfirm {
+    background-color: #4f7a5a;
+    border-color: #2e4a36;
+    color: #eafaee;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterConfirm:hover {
+    background-color: #5e8e69;
+    box-shadow: 0 0 8px rgba(124, 171, 135, 0.55);
+}
+/* Fire Normally — dusty steel blue. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterFireNormal {
+    background-color: #46647f;
+    border-color: #283b4b;
+    color: #eef6fc;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterFireNormal:hover {
+    background-color: #547695;
+    box-shadow: 0 0 8px rgba(127, 160, 189, 0.55);
+}
+/* Cancel Shot — dusty rose / muted red. */
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterCancel {
+    background-color: #8a4a4a;
+    border-color: #532b2b;
+    color: #fbeaea;
+}
+.confirm.multi-value-confirm.hBlasterTransfer .hBlasterCancel:hover {
+    background-color: #9e5a5a;
+    box-shadow: 0 0 8px rgba(189, 128, 128, 0.55);
+}

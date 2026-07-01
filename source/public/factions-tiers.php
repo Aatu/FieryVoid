@@ -276,14 +276,12 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
      A peculiar faction in many ways as it can both feel oppressive to play against due to their damage potential, but also difficult to win with if you are not experienced with them.   
     </p>        
         <h5>Hunter-Killer (HK) Drones</h5>
-            <ul>
-<li>Orieni long-range weapon of choice, and probably their most outstanding feature. They're essentially large missiles with a degree of control, using fighter rules and attacking by ramming enemies.</li>
-            <li> Hunter-Killers are controlled by Control Nodes on Orieni ships. If there is insufficient control HKs can operate autonomously, which this limits their performance by applying a significant Initiative penalty.
-            This loss of control is exercised proportionally - e.g. if there are 12 HKs on map and only 6 can be fully controlled, then all 12 receive half the penalties., but no other penalties. 
-            In addition, HKs must deploy in hangars at the start of the game.    
-            </li>
+        <ul>
+            <li>Orieni long-range weapon of choice, and probably their most outstanding feature. They're essentially large missiles with a degree of control, using fighter rules and attacking by ramming enemies. Note - HKs must deploy in hangars at the start of the game.</li>
+            <li> Hunter-Killers are controlled by Control Nodes on Orieni ships, these sytems can control a flight of HKs per point of output in system display. If there is insufficient control HKs can operate autonomously, but will suffer from the Uncontrolled critical effect.  
+                This means they will move towards the closest enemy ship and automatially try to ram it if possible.  The will also jink for two levels automatically, and suffer from -15 Iniative whilst Uncontrolled.</li>
             <li>When attempting to ram enemies, Hunter-Killers receive a penalty to their hit chance based on their own speed (the faster they are moving, the worse this). 
-            Note - As ramming attacks happen before other firing, HKs that achieved ramming distance cannot be shot down before they attempt to ram.
+            As ramming attacks happen before other firing, HKs that achieved ramming distance cannot be shot down before they attempt to ram.
             </li>                        
         </ul>
 <h5>Light Gatling Railgun</h5>
@@ -1224,10 +1222,10 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
     <h4 id="torvalus" >TORVALUS SPECULATORS</h4>
     <p>The Torvalus are known for their highly advanced stealth technology as well as their love for making cosmic gambles. Below is a list of systems used by the Torvalus, with short description of effect and any notable design differences from their original tabletop versions.</p>    
     <h5>Laser Weaponry</h5>
-        <ul>
-<li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
+    <ul>
+    <li>Torvalus weaponry is entirely Laser-based, making it uninterceptable.  Whilst these weapons do not have an particularly unusual abilities per se, their high damage, flexibility and low cooldowns makes them very effective.</li>
         </ul>
-<h5>Hangar Requirements</h5>
+    <h5>Hangar Requirements</h5>
         <li>The Torvalus ships don't have hangars and therefore do not need to meet the normal 50% hangar requirement when building their fleet. 
             Instead their Stiletto Drones simply operate independently but are immune to dropout whilst a ship with control capacity (and functioning CnC) is present.        
             In scenarios where a certain percentage of fighters ARE required, use the following numbers as control/hangar capacity:
@@ -1239,18 +1237,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </li>    
     <h5>Shading Field</h5>
         <ul>
-<li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
-        </ul>
-<li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
+            <li>The Shading Field operates the same as the Minbari's Jammer system (e.g. prevents weapons locks even when targeted with OEW), including against other Ancients as well as Younger Races.</li>
+        
+            <li>In addition the Shading Field has two states, Normal Mode and Shading Mode, which are described below:
             <ul class="circle-list">
                 <li>Normal Mode- the Shading Field provides a 4-point EM Shield in all directions, which operates the same as Vorlon shields, but cannot be flown under by fighters.</li>
                 <li>Shading Mode - During Deployment and Pre-Turn Order phases the Shading Field can be activated to make its vessel 'Shaded' that turn.  
                     Whilst Shaded the vessel retains the Jammer effect, doubles the EM shield rating to on its defence profile and, if it is more than 15 hexes away from all enemy units, it becomes invisible to opponents.
                     However, on a turn when a Torvalus ship is Shaded it will not be able to fire any of its weapons.</li> 
             </ul>
-        </li>         
+            </li>
+        </ul>
         <ul>
-<li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.  
+        <li>Torvalus Stiletto Fighters have a smaller version of the Shading Field equipped.
             This can also be toggled on and off during Deployment and Pre-Turn Order phases like the ship version, but does not provide the Jammer effect in either mode.  
             In Shading Mode it reduces the profile of the fighter flight (by 15) and cannot be detected from more that 15 hexes away like ships.</li>         
     </ul>
@@ -1272,7 +1271,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
 <li>This weapons fires in a special Pre-Firing phase, which will occur between Movement and Firing phases providing the Transverse Drive is fully charged.  
             During this phase simply select a hex up to 3 hexes on a straight line to the selected ship and then commit your orders.  The ship will attempt a Transverse Jump before the Firing phase.</li>
-        </ul>
+        
 <li>When attempting a Transverse Jump a number of things will then happen depending a d20 roll: 
             <ul class="circle-list">
                 <li>1-16 - The jump is successful and the Torvalus ship teleports to the new hex.</li>
@@ -1282,6 +1281,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li>20 - The jump is unsuccessful, the ship does not move the Transverse Drive system has to roll for a critical hit.</li>                                                     
             </ul>
         </li>
+        </ul>
         <ul>
 <li>When a ship makes a transverse jump it puts a strain on the Jump Drive (a separate system), and so a ship can suffer a catastrophic failure (e.g be destroyed) if the Jump Engine has sustained damage in the battle.
             The chance of this failure is the % of the Jump Drive's health that has been lost.

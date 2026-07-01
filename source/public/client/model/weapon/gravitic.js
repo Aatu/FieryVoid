@@ -507,23 +507,344 @@ HypergravitonBeam.prototype.clearBoost = function () {
 
 var HypergravitonBlaster = function HypergravitonBlaster(json, ship) {
     Gravitic.call(this, json, ship);
+    this.hasSpecialTargeting = true; //route target selection through doSpecialTargeting (transfer-target UI hook)
 };
 HypergravitonBlaster.prototype = Object.create(Gravitic.prototype);
 HypergravitonBlaster.prototype.constructor = HypergravitonBlaster;
 
+/* STAGE 4 - HBlasterList transfer-target ordering window.
+ * Declares ONE plain normal/raking fire order against the chosen target (so it behaves
+ * exactly like an ordinary Blaster shot to the rest of the client), but encodes the
+ * INITIAL target + the ordered transfer-target list into the notes field as:
+ *   HBT|<initialId>:<initialFlag>|<transferId>:<flag>|<transferId>:<flag>|...
+ * The FIRST entry is always the initial target (so its structure-loss flag reaches the
+ * server via getTransferFlagForShip); the server's getNextTransferTarget skips the fire
+ * order's own targetid so the initial target is never consumed as a transfer hop. The
+ * remaining entries are the player-ordered transfer queue. flag = transferOnStructure.
+ *
+ * The list + per-ship structure flags come from the confirm.hBlasterTransferList window.
+ * The server-side beforeFiringOrderResolution parses + clears this notes payload, and is
+ * authoritative for the per-hop range/arc geometry (isLegalTransferTarget, Stage 5b).
+ *
+ * Reached via the hasSpecialTargeting divert in weaponManager.targetShip() (first click)
+ * or via reopenSpecialTargeting() (clicking the system icon when an order already exists,
+ * to edit the list). Either way we replace any existing order rather than stacking one.
+ *
+ * The window is asynchronous, so doSpecialTargeting returns false (no synchronous
+ * declaration); the window callback declares the order via declareTransferShot and then
+ * replicates the post-declaration UI refresh the synchronous targetShip() path would do.
+ */
+/* Returns true if a fire order's notes encode a NON-EMPTY transfer queue (i.e. the order
+ * actually carries transfer hops beyond the initial target). "HBT|<initial>:<flag>" alone
+ * (initial target only, no hops) is NOT a transfer for slot-ownership purposes. */
+HypergravitonBlaster.isTransferOrder = function (fire) {
+    if (!fire || !fire.notes || fire.notes.indexOf('HBT') !== 0) return false;
+    var segs = fire.notes.split('|');
+    //segs[0]='HBT', segs[1]=initial target; a transfer queue needs at least segs[2].
+    for (var i = 2; i < segs.length; i++) {
+        if (segs[i] !== '') return true;
+    }
+    return false;
+};
+
+/* The OTHER Hypergraviton Blaster on $shooter (not $this) that currently holds the
+ * transfer "slot" (a fire order with a non-empty transfer queue), or null. Mirrors the
+ * server rule that only one Blaster per ship may transfer per turn. */
+HypergravitonBlaster.prototype.getOtherTransferringBlaster = function (shooter) {
+    if (!shooter || !shooter.systems) return null;
+    for (var i in shooter.systems) {
+        var sys = shooter.systems[i];
+        if (!sys || sys === this) continue;
+        if (!(sys instanceof HypergravitonBlaster)) continue;
+        var fire = weaponManager.getFiringOrder(shooter, sys);
+        if (HypergravitonBlaster.isTransferOrder(fire)) return sys;
+    }
+    return null;
+};
+
+/* Scenario A (multiple Blasters selected at once, then target a ship): only ONE Blaster
+ * may carry a transfer list, so only the BEST-loaded selected Blaster gets the window;
+ * the rest fire normally. Returns true if $this is that best-loaded selected Blaster.
+ * Only Blasters that can actually hit $target (in arc + range) are considered, so a more-
+ * loaded Blaster that can't bear on this target doesn't steal the slot from one that can.
+ * Priority: highest turnsloaded wins (a 2-turn-loaded beam beats a 1-turn one); ties
+ * break on system id (stable/deterministic). */
+HypergravitonBlaster.prototype.isPreferredSelectedBlaster = function (shooter, target) {
+    var selected = gamedata.selectedSystems || [];
+    var best = null;
+    for (var i = 0; i < selected.length; i++) {
+        var w = selected[i];
+        if (!(w instanceof HypergravitonBlaster)) continue;
+        if (w.ship && shooter && w.ship.id !== shooter.id) continue; //only this ship's selected Blasters
+        //Only Blasters that can fire on this target compete for the transfer slot.
+        if (target && !(weaponManager.isOnWeaponArc(shooter, target, w) && weaponManager.checkIsInRange(shooter, target, w))) continue;
+        if (best === null) { best = w; continue; }
+        var wLoad = parseInt(w.turnsloaded, 10) || 0;
+        var bLoad = parseInt(best.turnsloaded, 10) || 0;
+        if (wLoad > bLoad || (wLoad === bLoad && parseInt(w.id, 10) < parseInt(best.id, 10))) {
+            best = w;
+        }
+    }
+    return best === null || best === this;
+};
+
+HypergravitonBlaster.prototype.doSpecialTargeting = function (shooter, target, system) {
+    var calledid = -1; //raking weapon, no called shots
+    var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+    if (chance < 1) return false; //no declaration made
+
+    //Scenario A: several Blasters selected together. Only the best-loaded one opens the
+    //transfer window; the others fire a plain shot. (Also guards against stacking multiple
+    //modals: if a transfer window is already open this targeting action, fire normally.)
+    var aWindowIsOpen = (typeof $ === 'function') && $('.hBlasterTransfer').length > 0;
+    if (aWindowIsOpen || !this.isPreferredSelectedBlaster(shooter, target)) {
+        this.declareTransferShot(shooter, target, chance, [], false);
+        return false;
+    }
+
+    //Scenario B: another Blaster on this ship already holds the transfer slot. Open the
+    //window in "locked" mode (banner + Confirm List disabled — fire-normally/cancel only).
+    var holder = this.getOtherTransferringBlaster(shooter);
+    var lockInfo = holder ? { locked: true, holderName: this.blasterDisplayName(shooter, holder) } : null;
+
+    //Scenario A disambiguation: when MORE THAN ONE Blaster on this ship is selected,
+    //show this window's weapon id in the header so the player knows which Blaster it's for.
+    var opts = (this.countSelectedBlasters(shooter) > 1) ? { showWeaponId: true } : null;
+
+    this.openTransferWindow(shooter, target, chance, null, lockInfo, opts);
+    return false; //declaration (if any) happens asynchronously inside the callback
+};
+
+/* Count of HypergravitonBlasters on $shooter currently in gamedata.selectedSystems. */
+HypergravitonBlaster.prototype.countSelectedBlasters = function (shooter) {
+    var selected = gamedata.selectedSystems || [];
+    var n = 0;
+    for (var i = 0; i < selected.length; i++) {
+        var w = selected[i];
+        if (!(w instanceof HypergravitonBlaster)) continue;
+        if (w.ship && shooter && w.ship.id !== shooter.id) continue;
+        n++;
+    }
+    return n;
+};
+
+/* A short human label for a Blaster on $shooter, used in the "slot taken" banner.
+ * Prefers the system's displayName/name + a location word; falls back to "another Blaster". */
+HypergravitonBlaster.prototype.blasterDisplayName = function (shooter, blaster) {
+    if (!blaster) return 'another Blaster';
+    var loc = '';
+    switch (parseInt(blaster.location, 10)) {
+        case 1: loc = 'Front '; break;
+        case 2: loc = 'Aft '; break;
+        case 3: case 31: case 32: loc = 'Port '; break;
+        case 4: case 41: case 42: loc = 'Starboard '; break;
+        default: loc = '';
+    }
+    return loc + 'Hypergraviton Blaster';
+};
+
+/* Re-opens the transfer window for an ALREADY-DECLARED TRANSFER order (player clicked the
+ * system icon to edit). Reads the existing fire order, parses its notes back into the
+ * saved order + checkbox states, and re-opens seeded from the same initial target.
+ * Returns true if a window was opened (caller should then stop / not toggle selection).
+ * Returns FALSE when the existing order is a plain (non-transfer) shot, so the caller
+ * falls through to the normal workflow (re-click removes the order / shows the info menu). */
+HypergravitonBlaster.prototype.reopenSpecialTargeting = function (shooter) {
+    var fire = weaponManager.getFiringOrder(shooter, this);
+    if (!fire) return false;
+
+    //Only re-open the transfer window for an actual transfer order; a plain Blaster
+    //shot uses the normal click workflow.
+    if (!HypergravitonBlaster.isTransferOrder(fire)) return false;
+
+    var target = gamedata.getShip(fire.targetid);
+    if (!target) return false;
+
+    var chance = (typeof fire.chance !== 'undefined' && fire.chance !== null)
+        ? fire.chance
+        : window.weaponManager.calculateHitChange(shooter, target, this, -1).hitChance;
+
+    //If ANOTHER Blaster now holds the transfer slot, re-open locked (transfer disabled).
+    var holder = this.getOtherTransferringBlaster(shooter);
+    var lockInfo = holder ? { locked: true, holderName: this.blasterDisplayName(shooter, holder) } : null;
+
+    //Select the weapon while its window is open (clicking the icon to edit is a
+    //"select + edit" action). Declaring an order will unselect it again; cancelling
+    //leaves it selected so the player can retarget. Mirrors normal icon-click select.
+    if (!weaponManager.isSelectedWeapon(this)) {
+        weaponManager.selectWeapon(shooter, this);
+    }
+
+    var preselect = this.parseTransferNotes(fire.notes, target.id);
+    this.openTransferWindow(shooter, target, chance, preselect, lockInfo);
+    return true;
+};
+
+/* Shared window-open + callback wiring for both first-declare and re-open. preselect is
+ * null on a fresh declaration, or { queue, initialOnStructure } when re-editing. lockInfo
+ * is null normally, or { locked:true, holderName } when another Blaster on the ship holds
+ * the transfer slot (window opens with Confirm List disabled). opts is null normally, or
+ * { showWeaponId:true } to append "(ID: X)" to the header (Scenario A disambiguation). */
+HypergravitonBlaster.prototype.openTransferWindow = function (shooter, target, chance, preselect, lockInfo, opts) {
+    var self = this;
+    if (window.confirm && typeof window.confirm.hBlasterTransferList === 'function') {
+        window.confirm.hBlasterTransferList(shooter, this, target, function (result) {
+            if (result.cancelled) {
+                //"Cancel Shot": remove any existing order and leave the weapon SELECTED so
+                //the player can retarget immediately. The weapon is (re)selected when the
+                //window is opened from the system icon (reopenSpecialTargeting), so we just
+                //remove the order here without unselecting — matching the normal
+                //remove-fire-order pathway (removeFiringOrder never unselects).
+                weaponManager.removeFiringOrder(shooter, self);
+                webglScene.customEvent('SystemDataChanged', { ship: shooter, system: self });
+                webglScene.customEvent('ShipTargeted', { shooter: shooter, target: target, weapons: [self] });
+                return;
+            }
+            self.declareTransferShot(shooter, target, chance, result.queue, result.initialOnStructure);
+        }, preselect, lockInfo, opts);
+    } else {
+        //Fallback (window unavailable): declare a plain no-transfer shot so the
+        //weapon still fires rather than silently doing nothing.
+        this.declareTransferShot(shooter, target, chance, [], false);
+    }
+};
+
+/* Parses an "HBT|initialId:flag|transferId:flag|..." notes string back into the window's
+ * preselect shape: { queue:[{shipid,transferOnStructure}], initialOnStructure }. The first
+ * entry (matching initialTargetId) becomes initialOnStructure; the rest become the queue.
+ * Returns null if the notes aren't our format (so the window opens with fresh defaults). */
+HypergravitonBlaster.prototype.parseTransferNotes = function (notes, initialTargetId) {
+    if (!notes || notes.indexOf('HBT') !== 0) return null;
+    var segments = notes.split('|');
+    segments.shift(); //drop leading 'HBT'
+
+    var result = { queue: [], initialOnStructure: false };
+    for (var i = 0; i < segments.length; i++) {
+        if (segments[i] === '') continue;
+        var parts = segments[i].split(':');
+        var shipid = parseInt(parts[0], 10);
+        var flag = (parts.length > 1) && (parseInt(parts[1], 10) === 1);
+        if (!shipid) continue;
+        if (shipid === parseInt(initialTargetId, 10)) {
+            result.initialOnStructure = flag;
+        } else {
+            result.queue.push({ shipid: shipid, transferOnStructure: flag });
+        }
+    }
+    return result;
+};
+
+/* Builds + declares the Blaster's single normal/raking fire order against $target,
+ * encoding the initial target's structure flag + the ordered transfer queue into notes,
+ * then refreshes the targeting UI exactly as the synchronous targetShip() path does.
+ * queue = [{ shipid, transferOnStructure }, ...] (transfer hops, already ordered).
+ * initialOnStructure = the initial target's own "transfer on structure loss" flag.
+ */
+HypergravitonBlaster.prototype.declareTransferShot = function (shooter, target, chance, queue, initialOnStructure) {
+    var calledid = -1; //raking weapon, no called shots
+
+    //Replace any prior declaration (re-click to re-target / re-order).
+    weaponManager.removeFiringOrder(shooter, this);
+
+    //Initial target first (so its flag reaches getTransferFlagForShip; the server skips
+    //it as a transfer hop), then the player-ordered transfer queue.
+    var notes = "HBT|" + parseInt(target.id, 10) + ":" + (initialOnStructure ? 1 : 0);
+    if (Array.isArray(queue)) {
+        for (var i = 0; i < queue.length; i++) {
+            var flag = queue[i].transferOnStructure ? 1 : 0;
+            notes += "|" + parseInt(queue[i].shipid, 10) + ":" + flag;
+        }
+    }
+
+    var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+    var damageClass = this.data["Weapon type"] ? this.data["Weapon type"].toLowerCase() : 'raking';
+    var fire = {
+        id: fireid,
+        type: 'normal',
+        shooterid: shooter.id,
+        targetid: target.id,
+        weaponid: this.id,
+        calledid: calledid,
+        turn: gamedata.turn,
+        firingMode: this.firingMode,
+        shots: 1,
+        x: "null",
+        y: "null",
+        damageclass: damageClass,
+        chance: chance,
+        hitmod: 0,
+        notes: notes
+    };
+
+    this.fireOrders.push(fire);
+
+    //Mirror the post-declaration refresh from weaponManager.targetShip(): unselect
+    //the weapon and notify the UI so the order's sprite/weapon-list/tooltip update.
+    weaponManager.unSelectWeapon(shooter, this);
+    webglScene.customEvent('SystemDataChanged', { ship: shooter, system: this });
+    webglScene.customEvent('ShipTargeted', { shooter: shooter, target: target, weapons: [this] });
+};
+
 HypergravitonBlaster.prototype.initBoostableInfo = function () {
     // Needed because it can change during initial phase
     // because of adding extra power.
-
-    if (window.weaponManager.isLoaded(this)) {
-
-    } else {
+    if(gamedata.gamephase !== -2){
         var count = shipManager.power.getBoost(this);
+        
+        if (window.weaponManager.isLoaded(this)) {
 
-        for (var i = 0; i < count; i++) {
-            shipManager.power.unsetBoost(null, this);
+        } else {
+            for (var i = 0; i < count; i++) {
+                shipManager.power.unsetBoost(null, this);
+            }
         }
+
+        var minDamage = 90;
+        var maxDamage = 180;
+
+        switch (this.turnsloaded) {
+            case 1:
+                minDamage = 45 + count*10;
+                maxDamage = 90 + count*10;
+                break;
+            case 2:
+                minDamage = 90 + count*10;
+                maxDamage = 180 + count*10;
+                break;
+            default:
+                minDamage = 45 + count*10;
+                maxDamage = 90 + count*10;
+                break;
+        }
+        this.data["Damage"] = '' + minDamage + ' - ' + maxDamage +'';
     }
+
+    return this;
+};
+
+/* Surfaces a "Transfer Shot" row in the system info menu when this Blaster holds a
+ * transfer fire order (a declared order whose notes encode a non-empty transfer
+ * queue). Runs on every system-data refresh via systems.initializeSystem. */
+HypergravitonBlaster.prototype.initializationUpdate = function () {
+    if(gamedata.gamephase !== -2){
+        var fire = (this.ship && window.weaponManager)
+        ? weaponManager.getFiringOrder(this.ship, this)
+        : null;
+
+        if (fire && HypergravitonBlaster.isTransferOrder(fire)) {
+            //Count ALL targets the player sees in the confirm window: the pinned
+            //initial target (always present) PLUS each transfer hop in the queue.
+            //parseTransferNotes peels the initial target out into initialOnStructure,
+            //so queue.length is just the hops — add 1 for the initial target so this
+            //matches the window's row count (e.g. window shows 4 rows -> "4 targets").
+            var preselect = this.parseTransferNotes(fire.notes, fire.targetid);
+            var count = (preselect ? preselect.queue.length : 0) + 1;
+            this.data["Transfer Shot"] = count + (count === 1 ? " target" : " targets");
+        } else {
+            delete this.data["Transfer Shot"];
+        }
+    }    
+
     return this;
 };
 

@@ -13,6 +13,7 @@ import SystemActivation from "./SystemActivation";
 import SystemPowerSettings from "./SystemPowerSettings";
 import MineSettingsList from "./MineSettingsList";
 import ProximityMineSettingsList from "./ProximityMineSettingsList";
+import GraviticAugmenterMenu from "./GraviticAugmenterMenu";
 
 const Container = styled.div`
     display: flex;
@@ -596,6 +597,8 @@ class SystemInfoButtons extends React.Component {
 				{canMineSettings(ship, system) && <MineSettingsList system={system} ship={ship} />}
 				{canProxMineSettings(ship, system) && <ProximityMineSettingsList system={system} ship={ship} />}
 
+				{canGraviticAugmenter(ship, system) && <GraviticAugmenterMenu system={system} ship={ship} />}
+
 
 				{(canTSShield(ship, system) || canTSShieldGen(ship, system)) && <ShieldGeneratorList system={system} ship={ship} />}
 				{/*
@@ -662,6 +665,17 @@ const canAAdecrease = (ship, system) => canAA(ship, system) && system.canDecreas
 const canAApropagate = (ship, system) => canAA(ship, system) && system.canPropagate() != '';
 */
 
+//Gravitic Augmenter's own green menu (handles its own mode-cycling + activation/targeting):
+// modes 1 & 2 in Initial Orders (phase 1), mode 3 rotation menu in Pre-Firing (phase 5).
+//Modes 1 & 2 (Initial Orders): once an order exists the green menu hides and the standard
+//"remove fire order" button (canRemoveFireOrder) handles cancellation.
+//Mode 3 (Pre-Firing): the green menu stays visible after targeting so the player can still
+//adjust the rotation; the standard remove button handles cancellation alongside it.
+const canGraviticAugmenter = (ship, system) => system.name === 'GraviticAugmenter' && gamedata.isMyShip(ship) &&
+	!shipManager.power.isOffline(ship, system) &&
+	((gamedata.gamephase === 1 && !weaponManager.hasFiringOrder(ship, system)) ||
+	 (gamedata.gamephase === 5));
+
 const canMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn - 1) && (system.name == 'CaptorMine' || system.name == 'MineControllerDEW');
 
 const canProxMineSettings = (ship, system) => (gamedata.gamephase === -1) && (ship.mine) && (ship.spawned == -1 && gamedata.turn == 1 || ship.spawned == gamedata.turn - 1) && (system.name == 'ProximityMine');
@@ -720,7 +734,7 @@ export const canDoAnything = (ship, system) => canOffline(ship, system) || canOn
 	|| canSelfIntercept(ship, system) || canRemIntercept(ship, system) || canAA(ship, system) || canBFCP(ship, system) || canSpec(ship, system) || canTSShield(ship, system)
 	|| canThoughtShield(ship, system) || canTSShieldGen(ship, system) || canThoughtShieldGen(ship, system)
 	|| canSelfRepairList(ship, system) || canActivate(ship, system) || canDeactivate(ship, system) || canPowerCapacitor(ship, system) || canSystemActivation(ship, system) || canSelectAllWeapons(ship, system)
-	|| canMineSettings(ship, system) || canProxMineSettings(ship, system);
+	|| canMineSettings(ship, system) || canProxMineSettings(ship, system) || canGraviticAugmenter(ship, system);
 
 const canOffline = (ship, system) => gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !shipManager.power.getBoost(system) && !weaponManager.hasFiringOrder(ship, system);
 
@@ -766,7 +780,9 @@ const canReduceShots = (ship, system) => system.weapon && system.canChangeShots 
 const canRemoveFireOrderMulti = (ship, system) => system.weapon && weaponManager.hasOrderForMode(system) && system.canSplitShots;
 const canRemoveFireOrder = (ship, system) => system.weapon && weaponManager.hasFiringOrder(ship, system);
 
-const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
+//The Gravitic Augmenter cycles its own modes inside its green menu, so it opts out of the
+//generic firing-mode selector grid.
+const canChangeFiringMode = (ship, system) => system.weapon && !ship.mine && system.name !== 'GraviticAugmenter' && ((gamedata.gamephase === 1 && system.ballistic) || (gamedata.gamephase === 5 && system.preFires) || (gamedata.gamephase === 3 && !system.ballistic && !system.preFires)) && (!weaponManager.hasFiringOrder(ship, system) || system.multiModeSplit) && (Object.keys(system.firingModes).length > 1);
 
 //can declare eligibility for interception: charged, recharge time >1 turn, intercept rating >0, no firing order
 const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSelfInterceptSingle(ship, system);
@@ -775,8 +791,9 @@ const canSelfIntercept = (ship, system) => system.weapon && weaponManager.canSel
 //button to peel off one of several orders.
 const canRemIntercept = (ship, system) => system.weapon && system.canSplitShots && weaponManager.canRemInterceptSingle(ship, system);
 
-const canActivate = (ship, system) => system.canActivate && typeof system.canActivate === 'function' && system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
-const canDeactivate = (ship, system) => system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor';
+//GraviticAugmenter excluded: its Activate/Deactivate lives in its own green menu, not the generic SystemActivation box.
+const canActivate = (ship, system) => system.canActivate && typeof system.canActivate === 'function' && system.canActivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor' && system.name !== 'GraviticAugmenter'; //Used to manually fire weapons/systems that don't need to target e.g. Second Sight/Thoughwave
+const canDeactivate = (ship, system) => system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate() && system.name !== 'powerCapacitor' && system.name !== 'PowerCapacitor' && system.name !== 'GraviticAugmenter';
 
 const canPowerCapacitor = (ship, system) => {
 	if (system.name === 'powerCapacitor' || system.name === 'PowerCapacitor') {
@@ -795,6 +812,7 @@ export const canSystemPowerSettings = (ship, system) => {
 
 export const canSystemActivation = (ship, system) => {
 	if (canPowerCapacitor(ship, system)) return false;//power capacitor is handled by its own component
+	if (system.name === 'GraviticAugmenter') return false;//handled by its own green menu, not the generic activation box
 
 	if (system.canActivate && typeof system.canActivate === 'function' && system.canActivate()) return true;
 	if (system.canDeactivate && typeof system.canDeactivate === 'function' && system.canDeactivate()) return true;
@@ -808,6 +826,7 @@ export const hasStyledMenu = (ship, system) => {
 		canSpec(ship, system) ||
 		canMineSettings(ship, system) ||
 		canProxMineSettings(ship, system) ||
+		canGraviticAugmenter(ship, system) ||
 		(canTSShield(ship, system) || canTSShieldGen(ship, system)) ||
 		(canThoughtShield(ship, system) || canThoughtShieldGen(ship, system)) ||
 		canSelfRepairList(ship, system) ||

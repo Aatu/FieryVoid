@@ -65,6 +65,7 @@ class Weapon extends ShipSystem
     public $distanceRangeArray = array();
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
     public $fireControlArray = array();
+    public $isModified = false; //generic "this system was changed mid-game, force it to serialize" flag (e.g. Gravitic Augmenter Mode 1 alters fireControl); each class decides WHAT to send in stripForJson.
 
 
     public $loadingtime = 1;
@@ -172,6 +173,7 @@ class Weapon extends ShipSystem
     public $exclusive = false; //for fighter guns - exclusive weapon can't bve fired together with others
 
     public $useOEW = true;
+    public $useOEWArray = array();    
     public $calledShotMod = -8;
 	public $calledShotModArray = array();     
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -364,7 +366,16 @@ class Weapon extends ShipSystem
         if (isset($this->fireControlArray) && !empty($this->fireControlArray) && !isset($strippedSystem->fireControlArray)) {
             $strippedSystem->fireControlArray = $this->fireControlArray;
         }
-			
+
+        //A system altered this weapon's fire control mid-game (e.g. Gravitic Augmenter Mode 1).
+        //Force-send the modified values so the client hit chance reflects them (the client Ship
+        //ctor copies JSON fireControl over the static blueprint value).
+        if ($this->isModified) {
+            $strippedSystem->fireControl = $this->fireControl;
+            if (!empty($this->fireControlArray)) $strippedSystem->fireControlArray = $this->fireControlArray;
+            $strippedSystem->isModified = $this->isModified;
+        }
+
 		}
         return $strippedSystem;
     }
@@ -1190,8 +1201,20 @@ public function getStartLoading()
 		$hitChance += $this->fireControl[$target->getFireControlIndex()];
 
 		//range penalty - based on ramming units' speed (typical ramming has no range penalty, but HKs do!
-		$ownSpeed = abs($shooter->getSpeed()); 
-		$speedPenalty = $this->rangePenalty * $ownSpeed;
+		//The Orieni Hunter-Killers take a "HK Targeting" penalty per hex moved this turn to reach the
+		//ramming hex (speed == hexes moved). Normally -1/3 (each class' own rangePenalty); when the flight
+		//is UNCONTROLLED (command link severed - node shortfall or ELINT jamming) it worsens to -1/2,
+		//reflecting the loss of the control node's firing-solution computers. Gated to the three HK classes.
+		$ownSpeed = abs($shooter->getSpeed());
+		$rangePenalty = $this->rangePenalty;
+		$hkClasses = array("HkShiningStar", "HkShiningLight", "hkBlazingStarGC");
+		if (in_array($shooter->phpclass, $hkClasses, true)){
+			$sample = $shooter->getSampleFighter();
+			if ($sample && $sample->hasCritical("Uncontrolled", $gamedata->turn) > 0){
+				$rangePenalty = 0.5; //-1/2 hexes when uncontrolled
+			}
+		}
+		$speedPenalty = $rangePenalty * $ownSpeed;
 		$hitChance -= $speedPenalty;
 		
 		$hitChance = round($hitChance * 5); //convert d20->d100

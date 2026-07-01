@@ -45,7 +45,7 @@ class skywatch1810AM extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 3, 5));
 		$this->addAftSystem(new Thruster(4, 14, 0, 0, 2));
-        $this->addPrimarySystem(new HKControlNode(4, 12, 1, 1));
+        $this->addPrimarySystem(new HKControlNodeOrieni(4, 12, 1, 1));
 		
 		$this->addFrontSystem(new AmmoMissileRackSO(5, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackSO(5, 0, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

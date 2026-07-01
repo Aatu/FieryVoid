@@ -113,10 +113,24 @@ class FighterFlight extends BaseShip
 	} //endOf function calculateCombatValue
 	
 
+    //Generic "this flight was changed mid-game, force it to serialize" flag. Set true by
+    //Gravitic Augmenter Mode 2 (Warrior Enhancement) so the buffed offensivebonus / freethrust
+    /// dropOutBonus reach the client (they're normally blueprint-only values from staticShips).
+    public $isModified = false;
+
     public function stripForJson() {
         $strippedShip = parent::stripForJson();
 
         $strippedShip->flightSize = $this->flightSize;
+
+        //Only emit the buffed combat stats when a system has modified them, so the
+        //client overrides its static blueprint values (Ship ctor copies JSON over static).
+        if ($this->isModified) {
+            $strippedShip->offensivebonus = $this->offensivebonus;
+            $strippedShip->freethrust = $this->freethrust;
+            $strippedShip->dropOutBonus = $this->dropOutBonus;
+            $strippedShip->isModified = $this->isModified;
+        }
 
         return $strippedShip;
     }
@@ -138,6 +152,13 @@ class FighterFlight extends BaseShip
     public function getDropOutBonus()
     {
         return $this->dropOutBonus;
+    }
+
+    /* Adjusts the protected dropout bonus from outside the class (e.g. Gravitic Augmenter's
+     * Warrior Enhancement applies -4). Negative values lower the dropout threshold. */
+    public function addDropOutBonus($amount)
+    {
+        $this->dropOutBonus += $amount;
     }
 
     public function getSpecialDropout()

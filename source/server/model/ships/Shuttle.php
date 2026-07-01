@@ -80,7 +80,9 @@ class Shuttle extends FighterFlight
             case 'Centauri Republic (WotCR)': 
                 return array('img/ships/ShuttleCent.png', 'img/ships/ShuttleCent_large.png'); 
             case 'Corillani Theocracy':
-                return array('img/ships/shuttleCorillani.png', 'img/ships/shuttleCorillani_large.png');                     
+                return array('img/ships/shuttleCorillani.png', 'img/ships/shuttleCorillani_large.png');
+            case 'Descari Committees':
+                return array('img/ships/shuttleDescari.png', 'img/ships/shuttleDescari_large.png');                                       
             case 'Dilgar Imperium': 
                 return array('img/ships/shuttleDilgar.png', 'img/ships/ShuttleDilgar_large.png');   
             case 'Drazi Freehold':
@@ -113,8 +115,7 @@ class Shuttle extends FighterFlight
             case 'Torata Regency':
                 return array('img/ships/shuttleTorata.png', 'img/ships/shuttleTorata_large.png');
             case 'Vree Conglomerate':
-                return array('img/ships/VreeZeoth.png', 'img/ships/VreeZeoth_Large.png');                                                                                             
-                return array('img/ships/shuttleRaiders.png', 'img/ships/shuttleRaider_large.png');                                                     
+                return array('img/ships/VreeZeoth.png', 'img/ships/VreeZeoth_Large.png');                                                                                                                                                 
             case 'House Valheru':
                 return array('img/ships/ShuttleValheru.png', 'img/ships/ShuttleValheru_large.png'); 
             default: //Also used by EA, Hurr etc.

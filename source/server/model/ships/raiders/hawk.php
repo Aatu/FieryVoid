@@ -34,7 +34,7 @@ class Hawk extends MediumShipLeftRight{
 		$this->addAftSystem(new Thruster(2, 11, 0, 6, 2));
 		$this->addPrimarySystem(new Scanner(4, 8, 3, 4));
 		$this->addPrimarySystem(new Engine(4, 10, 0, 6, 3));
-		$this->addPrimarySystem(new Hangar(2, 1));
+		$this->addPrimarySystem(new Hangar(2, 1, 1));
 		$this->addPrimarySystem(new Reactor(4, 8, 0, 0));
 		
 		$this->addLeftSystem(new Thruster(3, 8, 0, 2, 3));

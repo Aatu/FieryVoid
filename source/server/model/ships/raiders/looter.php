@@ -32,7 +32,7 @@ class Looter extends BaseShip{
         $this->addPrimarySystem(new Reactor(4, 16, 0, 0));
         $this->addPrimarySystem(new CnC(5, 15, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 3, 4));
-        $this->addPrimarySystem(new Hangar(3, 13));
+        $this->addPrimarySystem(new Hangar(3, 13, 6));
 		$this->addPrimarySystem(new JumpEngine(4, 12, 3, 40));
 		
         $this->addFrontSystem(new Thruster(3, 6, 0, 2, 1));

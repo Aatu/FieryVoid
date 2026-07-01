@@ -121,7 +121,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
             <li>Many factions have access to Breaching Pods and Grappling Claws, which come equipped with marines that can undertake boarding actions.  
                 During Fleet Selection, one pod can be purchased for every medium ship or HCV with hangar capacity for medium fighters, heavy fighter or assault shuttles, 
-                two for every capital ship with these hangars, and four for enormous units or bases.  Assault ships (i.e., those vessels containing ‘Assault’ in their name) can carry double these allowances
+                two for every capital ship with these hangars, and four for enormous units or bases.  <br>Assault ships (i.e., those vessels containing ‘Assault’ in their name) can carry double these allowances
                 providing they have the hangar space to permit it.</li>
             <br>              
             <li>In battle, Pods can attempt to attach to enemy ships in the same hex and deliver Marines to undertake a selection of missions (Capture Ship, Sabotage and Rescue) during the Firing Phase.</li>

@@ -12,7 +12,7 @@ class Uidace extends BaseShip{
 //        $this->shipSizeClass = 3;
 		$this->canvasSize = 175;
 			$this->limited = 10;
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>12, "cargo shuttles"=>4);
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
@@ -35,7 +35,7 @@ class Uidace extends BaseShip{
         $this->addPrimarySystem(new CnC(4, 16, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
         $this->addPrimarySystem(new Engine(4, 14, 0, 10, 3));
-        $this->addPrimarySystem(new Hangar(4, 16));
+        $this->addPrimarySystem(new Hangar(4, 16, 6));
   
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));
         $this->addFrontSystem(new Thruster(3, 10, 0, 4, 1));

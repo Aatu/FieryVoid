@@ -440,6 +440,7 @@ spl_autoload_register(
                 'heron1940' => '/server/model/ships/drazi_old/heron1940.php',
                 'hightemplar' => '/server/model/ships/orieni/hightemplar.php',
                 'hkcontrolnode' => '/server/model/systems/baseSystems.php',
+                'hkcontrolnodeorieni' => '/server/model/systems/baseSystems.php',
                 'hkjamming' => '/server/handlers/HkJamming.php',
                 'hkshininglight' => '/server/model/ships/orieni/hkShiningLight.php',
                 'hkshiningstar' => '/server/model/ships/orieni/hkShiningStar.php',
@@ -710,6 +711,7 @@ spl_autoload_register(
                 'omegagamma' => '/server/model/ships/EA/omegaGamma.php',
                 'garut' => '/server/model/ships/centauri_old/garut.php',
                 'garut2006' => '/server/model/ships/centauri_old/garut2006.php',
+                'gunlost' => '/server/model/cricialClasses.php',                
                 'optine' => '/server/model/ships/centauri_old/optine.php',
                 'optine1966' => '/server/model/ships/centauri_old/optine1966.php',
                 'optine2005' => '/server/model/ships/centauri_old/optine2005.php',
@@ -1135,6 +1137,7 @@ spl_autoload_register(
                 'turlisk' => '/server/model/ships/llort/turlisk.php',
                 'twinarray' => '/server/model/weapons/particle.php',
                 'unreliabletwinarray' => '/server/model/weapons/particle.php',
+                'uncontrolled' => '/server/model/cricialClasses.php',
                 'typeerror' => '/server/lib/random_compat-2.0.2/lib/error_polyfill.php',
                 'udran' => '/server/model/ships/yolu/udran.php',
                 'uidace' => '/server/model/ships/raiders/uidace.php',
@@ -3540,14 +3543,16 @@ spl_autoload_register(
 				'hypergravitonbeam' => '/server/model/weapons/gravitic.php',								
 				'hypergravitonblaster' => '/server/model/weapons/gravitic.php',								
 				'antigravitybeam' => '/server/model/weapons/gravitic.php',								
-				'medantigravitybeam' => '/server/model/weapons/gravitic.php',								
+				'medantigravitybeam' => '/server/model/weapons/gravitic.php',
+                'graviticaugmenter' => '/server/model/weapons/supportWeapons.php',                								
 //				'warriorram' => '/server/model/weapons/customDevelopment.php',								
 //				'directram' => '/server/model/weapons/customDevelopment.php',								
 
 //				'kirishiacconqueror' => '/server/model/ships/kirishiac/kirishiacConqueror.php',
-//				'kirishiackingship' => '/server/model/ships/kirishiac/kirishiacKingship.php',
-//				'kirishiaclordship' => '/server/model/ships/kirishiac/kirishiacLordship.php',
-//				'kirishiacwarrior' => '/server/model/ships/kirishiac/kirishiacWarrior.php',
+				'kirishiackingship' => '/server/model/ships/kirishiac/kirishiacKingship.php',
+				'kirishiaclordship' => '/server/model/ships/kirishiac/kirishiacLordship.php',
+				'kirishiacmastership' => '/server/model/ships/kirishiac/kirishiacMastership.php',                
+				'kirishiacwarrior' => '/server/model/ships/kirishiac/kirishiacWarrior.php',
 //				'kirishiacwarriortest' => '/server/model/ships/kirishiac/kirishiacWarriorTest.php',
 
 
@@ -4168,7 +4173,8 @@ spl_autoload_register(
 						'baradavalialightcruiser' => '/server/model/ships/barada/baradaValiaLightCruiser.php',
 						'baradakarovshuttle' => '/server/model/ships/barada/baradaKarovShuttle.php',
 
-
+                //Kelly's Star Trek
+                'kellytrekconstitution' => '/server/model/ships/StarTrekKelly/KellyTrekConstitution.php',
 
 
 

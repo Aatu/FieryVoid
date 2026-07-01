@@ -32,7 +32,7 @@ class JYDTethysOmega extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 9, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 14, 4, 7));
         $this->addPrimarySystem(new Engine(4, 11, 0, 8, 2));
-		$this->addPrimarySystem(new Hangar(4, 2));
+		$this->addPrimarySystem(new Hangar(4, 2, 2));
 		$this->addPrimarySystem(new Thruster(3, 15, 0, 4, 3));
 		$this->addPrimarySystem(new Thruster(3, 15, 0, 4, 4));
 		

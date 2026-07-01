@@ -31,7 +31,7 @@ class tfsblockaderunner extends HeavyCombatVesselLeftRight{
         $this->addPrimarySystem(new CnC(5, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(4, 12, 4, 6));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
-        $this->addPrimarySystem(new Hangar(4, 1));
+        $this->addPrimarySystem(new Hangar(4, 1, 1));
 		$this->addPrimarySystem(new CargoBay(4, 32));
         $this->addAftSystem(new Thruster(4, 15, 0, 6, 1));
         $this->addAftSystem(new Thruster(5, 21, 0, 12, 2));

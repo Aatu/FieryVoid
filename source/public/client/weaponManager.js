@@ -400,7 +400,7 @@ window.weaponManager = {
                 if (gamedata.gamephase != 3 && !w.ballistic && !w.preFires) return false;
                 if (gamedata.gamephase != 1 && w.ballistic) return false;
                 if (gamedata.gamephase != 5 && w.preFires) return false;
-                if (weaponManager.hasFiringOrder(ship, w) && !w.canSplitShots) return false;
+                if (weaponManager.hasFiringOrder(ship, w) && !w.canSplitShots && !w.hasSpecialTargeting) return false;
                 return true;
             });
 
@@ -428,7 +428,7 @@ window.weaponManager = {
                 if (gamedata.gamephase != 3 && !system.ballistic && !system.preFires) continue; //improper at this moment
                 if (gamedata.gamephase != 1 && system.ballistic) continue;	//improper at this moment
                 if (gamedata.gamephase != 5 && system.preFires) continue;	//improper at this moment                
-                if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots) continue;//already declared, do not touch it!
+                if (weaponManager.hasFiringOrder(ship, system) && !system.canSplitShots && !system.hasSpecialTargeting) continue;//already declared, do not touch it! (special-targeting weapons may be re-clicked to edit)
 
                 if (currentWasSelected) {//unselect
                     if (weaponManager.isSelectedWeapon(system)) weaponManager.unSelectWeapon(ship, system);
@@ -1026,8 +1026,16 @@ window.weaponManager = {
         pushIfNonZero('targetJinking',   'Target Jinking',  -shipManager.movement.getJinking(target));
         pushIfNonZero('fireControl',     'Fire Control',     weaponManager.getFireControl(target, weapon));
 
+        //HK Targeting: penalty per hex the ramming unit moved this turn (speed == hexes moved).
+        //Normally the class' own rangePenalty (-1/3); worsens to -1/2 when the flight is UNCONTROLLED
+        //(command link severed). Gated to the three Orieni Hunter-Killer classes - mirrors calculateHitBaseRam.
         var ownSpeed = Math.abs(shipManager.movement.getSpeed(shooter));
-        pushIfNonZero('range',           'Range',           -(weapon.rangePenalty * ownSpeed));
+        var hkClasses = ['HkShiningStar', 'HkShiningLight', 'hkBlazingStarGC'];
+        var hkRangePenalty = weapon.rangePenalty;
+        if (hkClasses.indexOf(shooter.phpclass) !== -1 && shipManager.movement.isUncontrolled(shooter)) {
+            hkRangePenalty = 0.5; //-1/2 hexes when uncontrolled
+        }
+        pushIfNonZero('range',           'Targeting',    -(hkRangePenalty * ownSpeed));
 
         var sum = modifiers.reduce(function (s, m) { return s + m.value; }, 0);
         var hitChance = Math.round(sum * 5); //d20 -> d100
@@ -1878,6 +1886,9 @@ window.weaponManager = {
 
 
     getFireControl: function getFireControl(target, weapon) {
+        //NB: Gravitic Augmenter Mode 1 modifies fireControl SERVER-SIDE and force-sends the
+        //altered value via weapon.php stripForJson (the generic isModified flag), so the values
+        //here already include the augmenter mod — no client-side mirror needed.
         if (target.shipSizeClass > 1) {
             return weapon.fireControl[2];
         }
@@ -2221,10 +2232,21 @@ window.weaponManager = {
         debug && console.log("weaponManager target ship", ship, system);
 
         if (shipManager.isDestroyed(selectedShip)) return;
-        if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.      
+        if (selectedShip.mine && ship.mine) return;  //Mine can't shoot mines.
         if (ship.Huge > 0) return; //Do not allow targeting of large muti-hex terrain.
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
         if (weaponManager.isHidden(selectedShip)) return; //Block invisible ships from firing where appropriate.
+
+        //Uncontrolled-flight block. A remote-controlled Hunter-Killer flight whose command
+        //link is severed (node shortfall or ELINT jamming) is driven entirely by the server -
+        //it moves itself (drift/seek) and auto-rams a co-located enemy. The player has no
+        //control, so declaring fire for it only produces a spurious DOUBLE attack (the server
+        //rejects it in Firing::validateFireOrders anyway). Warn and block at declaration so the
+        //player gets immediate feedback instead of a silently-dropped order.
+        if (shipManager.movement.isUncontrolled(selectedShip)) {
+            confirm.warning("This Hunter-Killer flight is UNCONTROLLED - It cannot be given fire orders.");
+            return;
+        }
 
         //Check for skin-dancing ships, these can't be targeted unless the shooter is also skin-dancing on same target, they also have their own rules about firing.
         if (gamedata.gamephase == 3) {
@@ -2349,7 +2371,18 @@ window.weaponManager = {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
-                    if (weapon.canSplitShots) {
+                    if (weapon.hasSpecialTargeting) {
+                        //Weapons that need a bespoke targeting flow (e.g. Hypergraviton Blaster's
+                        //transfer-target ordering window) handle their own fire-order creation in
+                        //doSpecialTargeting. They declare a plain single normal/raking fire order,
+                        //so they deliberately bypass the canSplitShots machinery (ballistic icons,
+                        //split menus, etc.). Only unselect if an order was actually declared.
+                        var declared = weapon.doSpecialTargeting(selectedShip, ship, system);
+                        if (declared) {
+                            toUnselect.push(weapon);
+                            webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
+                        }
+                    } else if (weapon.canSplitShots) {
                         var fire = weapon.doMultipleFireOrders(selectedShip, ship, system);
                         if (!Array.isArray(fire)) fire = fire ? [fire] : []; // Ensure fire is an array or an empty one                       
 
@@ -2405,6 +2438,9 @@ window.weaponManager = {
                                 damageclass: damageClass,
                                 chance: chance
                             };
+                            //Hook for weapons that need to stamp custom per-shot data onto the
+                            //order at creation (e.g. Gravitic Augmenter Mode 3 rotation notes).
+                            if (typeof weapon.onFireOrderCreated === 'function') weapon.onFireOrderCreated(fire);
                             weapon.fireOrders.push(fire);
                             toUnselect.push(weapon);
                         }

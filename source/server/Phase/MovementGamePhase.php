@@ -41,7 +41,13 @@ class MovementGamePhase implements Phase
             // for future CPU-controlled ships. isUnderAutomatedControl short-circuits on
             // remoteControl, so ordinary ships fall straight through to the dummy "end".
             if (AutomatedMovement::isUnderAutomatedControl($ship, $gameData)) {
-                AutomatedMovement::generateAndSubmit($ship, $gameData, $dbManager);
+                // Normally generated in process() when the player commits this ship's ini
+                // grouping; this is the fallback (e.g. nobody had a grouping to commit, or a
+                // unit that became automated late). isMovementAlreadySubmitted prevents a
+                // duplicate when process() already produced the move.
+                if (!$dbManager->isMovementAlreadySubmitted($gameData->id, $ship->id, $gameData->turn)) {
+                    AutomatedMovement::generateAndSubmit($ship, $gameData, $dbManager);
+                }
             } else {
                 // Submit a dummy "end" move so the ship has a completed movement order for this turn
                 $lastMove = $ship->getLastMovement();
@@ -149,11 +155,16 @@ class MovementGamePhase implements Phase
 			foreach ($activeShips as $activeShip) {
 				if ($activeShip->id === $ship->id) {
 					// Units under server (non-player) control this turn — Uncontrolled
-					// Hunter-Killers — ignore any player-submitted movement; their move is
-					// generated server-side in advance(). Guards against a player moving an
-					// HK the client should have skipped (isMovementReady). Cheap-guarded on
-					// remoteControl inside isUnderAutomatedControl.
+					// Hunter-Killers — ignore any player-submitted movement and instead
+					// generate their move HERE, when the player commits the movement phase for
+					// this ship's ini grouping. This makes the drift visible to opponents who
+					// plot afterward (instead of deferring to advance() at phase end). Guarded on
+					// isMovementAlreadySubmitted so a re-submit / advance() fallback can't duplicate.
+					// Cheap-guarded on remoteControl inside isUnderAutomatedControl.
 					if (AutomatedMovement::isUnderAutomatedControl($activeShip, $gameData)) {
+						if (!$dbManager->isMovementAlreadySubmitted($gameData->id, $activeShip->id, $gameData->turn)) {
+							AutomatedMovement::generateAndSubmit($activeShip, $gameData, $dbManager);
+						}
 						break;
 					}
 

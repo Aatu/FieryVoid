@@ -6485,7 +6485,19 @@ class HangarOps {
 			//to clutter the post-destruction picture per the user's call).
 			//Clears even when nothing escaped so the destroyed carrier's row
 			//doesn't keep stale stash data dangling.
+			//
+			//Stage S (fleet-value): a ShadowHangar bay is EXEMPT from the wipe.
+			//Integrated fighters are formed from the carrier's Structure and were
+			//PAID FOR via the carrier's enhValue, so the ones still aboard at
+			//destruction went DOWN WITH THE SHIP — their combat value belongs on
+			//the destroyed carrier's fleet-list row (it must NOT be netted off as
+			//"launched"). Keeping their held hangarUsage records lets the client's
+			//integratedFighterCarrierAdjust count them as held, so the destroyed
+			//row keeps their CP (e.g. a base with 3 fighters aboard reads 10,450
+			//not 10,000). They were already excluded from the escape pool
+			//(buildEscapeCandidates), so they spawn nothing — they're value-only.
 			foreach ($hangars as $h) {
+				if (!empty($h->isShadowHangar)) continue;
 				$h->hangarUsage = array();
 			}
 

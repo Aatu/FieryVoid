@@ -3537,4 +3537,161 @@ class MicroJumpSystem extends Weapon implements SpecialAbility{
 
 }	
 
+
+class TrekShieldProjectionKelly extends TrekShieldProjection{
+public $name = "TrekShieldProjection";
+    public $displayName = "Shield Projection";
+    public $primary = true;
+	public $isPrimaryTargetable = false; //shouldn't be targetable at all, in fact!
+	public $isTargetable = false; //cannot be targeted ever!
+    public $iconPath = "TrekShieldProjectionF.png"; //overridden anyway - to indicate proper direction
+	public $isCloaked = false;
+	protected $doCountForCombatValue = false; //don't count when estimating remaining combat value - shields are overloaded and regenerating all the time, do not represent permanent loss of combat ability
+    
+	protected $possibleCriticals = array(); //no criticals possible
+	
+	//Shield Projections cannot be repaired at all!
+	public $repairPriority = 0;//priority at which system is repaired (by self repair system); higher = sooner, default 4; 0 indicates that system cannot be repaired
+
+	private $projectorList = array();
+	
+	
+    public function setCritical($critical, $turn = 0){ //do nothing, shield projection should not receive any criticals
+    }
+	
+    public function getDefensiveHitChangeMod($target, $shooter, $pos, $turn, $weapon){ //no defensive hit chance change
+            return 0;
+    }
+	public function getDefensiveDamageMod($target, $shooter, $pos, $turn, $weapon){ //no shield-like damage reduction
+		return 0;
+	}
+    private function checkIsFighterUnderShield($target, $shooter, $weapon){ //no flying under shield
+        return false;
+    }
+	
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);  
+
+		$absorb = $this->output - $this->armour;
+		$this->data["Special"] = "Defensive system which absorbs damage from incoming shots before they damage ship hull.";
+		$this->data["Special"] .= "<br>Can absorb up to " . $absorb . " damage points per hit after projection armour is applied, ";
+		$this->data["Special"] .= "<br>Protects from every separate impact (e.g. every rake!) separately.";
+		//$this->data["Special"] .= "<br>Projection armour cannot absorb more than half of any impact.";
+		$this->data["Special"] .= "<br>System's structure represents damage capacity. If it is reduced to zero system will cease to function.";
+		$this->data["Special"] .= "<br>Can't be destroyed unless associated structure block is also destroyed.";
+		$this->data["Special"] .= "<br>This is NOT a shield as far as any shield-related interactions go.";
+		
+		$this->outputDisplay = $this->armour . '/' . $absorb . '/' . $this->getRemainingCapacity();//override on-icon display default
+	}	
+	
+	public function getRemainingCapacity(){
+		return $this->getRemainingHealth();
+	}
+	
+	public function getUsedCapacity(){
+		return $this->getTotalDamage();
+	}
+	
+	public function absorbDamage($ship,$gamedata,$value){ //or dissipate, with negative value
+		$damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $value, 0, 0, -1, false, false, "Absorb/Regenerate!", "TrekShieldProjection");
+		$damageEntry->updated = true;
+		$this->damage[] = $damageEntry;
+	}
+	
+	
+	
+	//decision whether this system can protect from damage - value used only for choosing strongest shield to balance load.
+	public function doesProtectFromDamage($expectedDmg, $systemProtected = null, $damageWasDealt = false, $inflictingShots = 1, $isUnderShield = false) {
+		$ship = $this->getUnit(); //GTS
+		if($damageWasDealt || $isUnderShield) return 0; //does not protect from overkill damage, just first impact. Also does not protect from internal damage.
+		if($ship->isCloaked) return 0; //shield is not active when cloaked    GTS
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$protectionValue = 0;
+		if($remainingCapacity>0){
+			$protectionValue = ($remainingCapacity / $inflictingShots) + $this->armour; //distribute capacity over shots
+		}
+		return $protectionValue;
+	}
+	//actual protection
+	public function doProtect($gamedata, $fireOrder, $target, $shooter, $weapon, $systemProtected, $effectiveDamage,$effectiveArmor){ //hook for actual effect of protection - return modified values of damage and armor that should be used in further calculations
+
+		$ship = $this->getUnit(); //GTS
+		if($ship->isCloaked) return 0; //shield is not active when cloaked    GTS
+
+		$returnValues=array('dmg'=>$effectiveDamage, 'armor'=>$effectiveArmor);
+		$damageToAbsorb=$effectiveDamage; //shield works BEFORE armor
+		$damageAbsorbed=0;
+		
+		if($damageToAbsorb<=0) return $returnValues; //nothing to absorb
+		
+		$remainingCapacity = $this->getRemainingCapacity();
+		$absorbedDamage = 0;
+		
+		if($remainingCapacity>0) { //else projection does not protect
+			$absorbedFreely = 0;
+			//first, armor takes part
+			//$absorbedFreely = min($this->armour, (floor($damageToAbsorb/2)));
+			$absorbedFreely = $this->armour; //This version CAN absorb more than half of any imapct, so just deduct armour.			
+			$damageToAbsorb += -$absorbedFreely;
+			//next, actual absorbtion
+			$absorbedDamage = min($this->output - $this->armour, $remainingCapacity, $damageToAbsorb ); //no more than output (modified by already accounted for armor); no more than remaining capacity; no more than damage incoming
+			$damageToAbsorb += -$absorbedDamage;
+			if($absorbedDamage>0){ //mark!
+				$this->absorbDamage($target,$gamedata,$absorbedDamage);
+			}
+			$returnValues['dmg'] = $damageToAbsorb;
+			$returnValues['armor'] = min($damageToAbsorb, $returnValues['armor']);
+		}
+		
+		return $returnValues;
+	} //endof function doProtect
+	    
+	function addProjector($projector){
+		if($projector) $this->projectorList[] = $projector;
+	}
+	
+	//effects that happen in Critical phase (after criticals are rolled) - replenishment from active projectors 
+	public function criticalPhaseEffects($ship, $gamedata){
+		
+		parent::criticalPhaseEffects($ship, $gamedata);//Call parent to apply effects like Limpet Bore.
+					
+		if($this->isDestroyed()) return; //destroyed system does not work... but other critical phase effects may work even if destroyed!
+		
+		$activeProjectors = 0;
+		$projectorOutput = 0;
+		$toReplenish = 0;
+		
+		foreach($this->projectorList as $projector){
+			if ( ($projector->isDestroyed($gamedata->turn))
+			     || ($projector->isOfflineOnTurn($gamedata->turn))
+			) continue;
+			$activeProjectors++;
+			$projectorOutput += $projector->getOutputOnTurn($gamedata->turn);
+		}
+		/*after all - shield will NOT fall!
+		if($activeProjectors <= 0){ //no active projectors - shield is falling!
+			$toReplenish = -$this->getRemainingCapacity();	
+			*/
+		if($activeProjectors > 0){ //active projectors present - reinforce shield!
+			$toReplenish = min($projectorOutput,$this->getUsedCapacity());		
+		}
+		
+		if($toReplenish != 0){ //something changes!
+			$this->absorbDamage($ship,$gamedata,-$toReplenish);
+		}
+	} //endof function criticalPhaseEffects
+	
+	public function stripForJson() {
+        $strippedSystem = parent::stripForJson();
+
+		$strippedSystem->outputDisplay = $this->outputDisplay;
+		
+        return $strippedSystem;
+	}
+}//endof class TrekShieldProjectionKelly
+
+
+
 ?>

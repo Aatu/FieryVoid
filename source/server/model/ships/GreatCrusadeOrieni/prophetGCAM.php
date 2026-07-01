@@ -44,7 +44,7 @@ class prophetGCAM extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 30, 0, 8, 4));
         $this->addPrimarySystem(new Hangar(5, 38, 12));
         $this->addPrimarySystem(new JumpEngine(5, 40, 6, 25));
-        $this->addPrimarySystem(new HKControlNode(5, 24, 3, 3));
+        $this->addPrimarySystem(new HKControlNodeOrieni(5, 24, 3, 3));
         
 		$this->addFrontSystem(new AmmoMissileRackL(5, 6, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackL(5, 6, 0, 270, 90, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

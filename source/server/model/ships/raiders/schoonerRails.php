@@ -61,7 +61,7 @@ class SchoonerRails extends MediumShip{
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 180, 0));
 		$this->addFrontSystem(new LightLaser(2, 4, 3, 0, 180));
 
-		$this->addAftSystem(new Hangar(3, 4));
+		$this->addAftSystem(new Hangar(3, 4, 1));
 		$this->addAftSystem(new Engine(3, 9, 0, 6, 4));
 		$this->addAftSystem(new StdParticleBeam(2, 4, 1, 60, 300));
 		$this->addAftSystem(new Thruster(2, 8, 0, 3, 2));

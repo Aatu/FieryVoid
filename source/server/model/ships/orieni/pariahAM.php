@@ -43,7 +43,7 @@ class PariahAM extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 25, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 25, 4, 7));
         $this->addPrimarySystem(new Engine(5, 25, 0, 8, 4));
-        $this->addPrimarySystem(new HKControlNode(5, 12, 1, 1));
+        $this->addPrimarySystem(new HKControlNodeOrieni(5, 12, 1, 1));
         $this->addPrimarySystem(new Hangar(4, 15, 6));        
            
         $this->addFrontSystem(new HeavyLaserLance(2, 6, 4, 240, 60));

@@ -173,6 +173,16 @@ class SystemIcon extends React.Component {
             //cannoct SELECT weapon when unit is adrift though!
             if (!shipManager.isAdrift(ship)) {
                 if (gamedata.isMyShip(ship)) {
+                    //Special-targeting weapons (Hypergraviton Blaster) with an existing
+                    //TRANSFER fire order re-open their transfer-target window on icon click
+                    //so the player can edit the list/order. reopenSpecialTargeting returns
+                    //false for a plain (non-transfer) order, so those fall through to the
+                    //normal select/unselect workflow.
+                    if (system.hasSpecialTargeting
+                        && typeof system.reopenSpecialTargeting === 'function'
+                        && weaponManager.hasFiringOrder(ship, system)) {
+                        if (system.reopenSpecialTargeting(ship)) return;
+                    }
                     if (weaponManager.isSelectedWeapon(system)) {
                         weaponManager.unSelectWeapon(ship, system);
                     } else {
