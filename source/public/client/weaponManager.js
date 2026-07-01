@@ -1886,6 +1886,9 @@ window.weaponManager = {
 
 
     getFireControl: function getFireControl(target, weapon) {
+        //NB: Gravitic Augmenter Mode 1 modifies fireControl SERVER-SIDE and force-sends the
+        //altered value via weapon.php stripForJson (the generic isModified flag), so the values
+        //here already include the augmenter mod — no client-side mirror needed.
         if (target.shipSizeClass > 1) {
             return weapon.fireControl[2];
         }
@@ -2435,6 +2438,9 @@ window.weaponManager = {
                                 damageclass: damageClass,
                                 chance: chance
                             };
+                            //Hook for weapons that need to stamp custom per-shot data onto the
+                            //order at creation (e.g. Gravitic Augmenter Mode 3 rotation notes).
+                            if (typeof weapon.onFireOrderCreated === 'function') weapon.onFireOrderCreated(fire);
                             weapon.fireOrders.push(fire);
                             toUnselect.push(weapon);
                         }

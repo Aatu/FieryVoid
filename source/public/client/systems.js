@@ -183,6 +183,14 @@ shipManager.systems = {
             system.range = system.missileArray[system.firingMode].range + system.rangeMod;
         }
 
+        //When a system altered this weapon's fire control mid-game (e.g. Gravitic Augmenter
+        //Mode 1, flagged server-side via the generic isModified flag), the systemInfo tooltip
+        //"Fire control" string is normally only rebuilt on a firing-mode change. Rebuild it here
+        //on every load so the modified value shows. Server force-sends the modified fireControl.
+        if (system.isModified && system.weapon && typeof system.translateFCtoD100txt === 'function') {
+            system.data["Fire control (fighter/med/cap)"] = system.translateFCtoD100txt(system.fireControl);
+        }
+
         return system;
     },
 

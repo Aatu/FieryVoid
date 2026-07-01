@@ -65,6 +65,7 @@ class Weapon extends ShipSystem
     public $distanceRangeArray = array();
     public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
     public $fireControlArray = array();
+    public $isModified = false; //generic "this system was changed mid-game, force it to serialize" flag (e.g. Gravitic Augmenter Mode 1 alters fireControl); each class decides WHAT to send in stripForJson.
 
 
     public $loadingtime = 1;
@@ -365,7 +366,16 @@ class Weapon extends ShipSystem
         if (isset($this->fireControlArray) && !empty($this->fireControlArray) && !isset($strippedSystem->fireControlArray)) {
             $strippedSystem->fireControlArray = $this->fireControlArray;
         }
-			
+
+        //A system altered this weapon's fire control mid-game (e.g. Gravitic Augmenter Mode 1).
+        //Force-send the modified values so the client hit chance reflects them (the client Ship
+        //ctor copies JSON fireControl over the static blueprint value).
+        if ($this->isModified) {
+            $strippedSystem->fireControl = $this->fireControl;
+            if (!empty($this->fireControlArray)) $strippedSystem->fireControlArray = $this->fireControlArray;
+            $strippedSystem->isModified = $this->isModified;
+        }
+
 		}
         return $strippedSystem;
     }

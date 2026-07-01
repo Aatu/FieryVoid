@@ -411,53 +411,113 @@ GraviticAugmenter.prototype.initBoostableInfo = function() {
 };
 
 GraviticAugmenter.prototype.initializationUpdate = function() {
-	//Guard against other firing modes behaving like ballistic.  Only firing mode 2 needs to target a unit in Initial Orders
-	if(this.firingMode !== 2) this.ballistic = false; 
+	//Modes 1 & 2 both fire in Initial Orders, so both are ballistic (Mode 1 self-activates
+	//with no target, Mode 2 targets a friendly Warrior flight). Flagging Mode 1 ballistic is
+	//also what lets weaponManager.hasFiringOrder/canOffline recognise its order (their phase
+	//gate keys off system.ballistic). Mode 3 is a Pre-Firing prefire weapon instead.
+
+	if(gamedata.gamephase == 5) this.firingMode = 3;
+
+	this.ballistic = (this.firingMode == 1 || this.firingMode == 2);
+	this.preFires  = (this.firingMode == 3);
+
+	//Mode 3 rotation defaults, used by the React menu + fire-order encoding.
+	if (typeof this.rotationDirection === 'undefined') this.rotationDirection = 1; //1 = clockwise
+	if (typeof this.rotationAmount === 'undefined') this.rotationAmount = 1;       //1 = 60deg
+
+	//Fired-state icon: hasFiringOrder() only reports true in the phase the weapon can fire
+	//(phase 1 for ballistic, 5 for prefire), so from Movement phase on the augmenter wouldn't
+	//look fired. Like a spent ballistic, once it has an order AND we're past Initial Orders we
+	//report turnsloaded=0 so weaponManager.isLoaded()==false and the icon shows the
+	//reloading/spent overlay. Scoped to phase != 1 so Initial-Orders targeting/activation
+	//(which needs the weapon to read as loaded) is unaffected. Real loading restores next turn.
+	if (gamedata.gamephase != 1) {
+		var hasOrder = this.fireOrders && this.fireOrders.some(function (fo) {
+			return fo.weaponid == this.id && fo.turn == gamedata.turn && !fo.rolled;
+		}, this);
+		if (hasOrder) this.turnsloaded = 0;
+	}
+
 	return this;
 };
 
-GraviticAugmenter.prototype.canActivate = function () { 
-	if(gamedata.gamephase == 1 && (this.firingMode == 1 || this.firingMode == 2)){
-		return true;	
+//Mode 1 uses the green menu's Activate/Deactivate toggle (creates the non-targeted ballistic order).
+GraviticAugmenter.prototype.canActivate = function () {
+	return (gamedata.gamephase == 1 && this.firingMode == 1 && this.fireOrders.length === 0);
+};
+
+GraviticAugmenter.prototype.canDeactivate = function () {
+	return (gamedata.gamephase == 1 && this.firingMode == 1 && this.fireOrders.length > 0);
+};
+
+//Mode 1: create the non-targeted ballistic "Matter Augment" order (no target ship).
+GraviticAugmenter.prototype.doActivate = function () {
+	if (this.firingMode != 1) return;
+	if (this.fireOrders.length > 0) return; //already active
+
+	var ship = this.ship;
+	var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+	var position = shipManager.getShipPosition(ship);
+
+	var fire = {
+		id: fireid,
+		type: 'ballistic',
+		shooterid: ship.id,
+		targetid: -1,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: this.firingMode,
+		shots: this.defaultShots,
+		x: position.q,
+		y: position.r,
+		damageclass: 'support',
+		chance: 100,
+		hitmod: 0,
+		notes: ""
+	};
+
+	this.fireOrders.push(fire);
+
+	//Once the order exists the green menu hides and the standard remove-fire-order button
+	//takes over, so unselect the weapon (mirrors how targetShip unselects after declaring).
+	if (weaponManager.isSelectedWeapon(this)) {
+		weaponManager.unSelectWeapon(this.ship, this);
 	}
-	return false; 
-};  
+};
 
+//Mode 1: remove the Matter Augment order (the green menu's Deactivate).
+GraviticAugmenter.prototype.doDeactivate = function () {
+	if (this.firingMode != 1) return;
+	weaponManager.removeFiringOrder(this.ship, this);
+};
 
-//This creates Fire Orders for Mode 1.
-GraviticAugmenter.prototype.doActivate = function () { 
-	if(this.firingMode = 1){
-		var ship = this.ship;
-		var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
-		var position = shipManager.getShipPosition(ship);			
+/* Mode 3 (Gravity Shifting): the React menu sets the chosen direction (1=CW, 2=ACW) and
+ * amount (1=60deg, 2=120deg) on the system. We encode them into the fire order's notes as
+ * "GA|<dir>|<amt>" so the server (beforeFiringOrderResolution) can read them before
+ * calculateHitBase overwrites the field. Mirrors the Hypergraviton Blaster notes pattern. */
+GraviticAugmenter.prototype.getRotationNotes = function () {
+	var dir = (this.rotationDirection == 2) ? 2 : 1;
+	var amt = (this.rotationAmount == 2) ? 2 : 1;
+	return "GA|" + dir + "|" + amt;
+};
 
-		var fire = {
-			id: fireid,
-			type: 'ballistic',
-			shooterid: ship.id,
-			targetid: -1,
-			weaponid: this.id,
-			calledid: -1,
-			turn: gamedata.turn,
-			firingMode: this.firingMode,
-			shots: this.defaultShots,
-			x: position.q,
-			y: position.r,
-			damageclass: 'MatterAugment',
-			chance: 100,
-			hitmod: 0,
-			notes: "" //Used to identify split targeting.
-		};
-				
-		// Push to arrays / fire orders
-		this.fireOrders.push(fire);
-	}else if(this.firingMode = 2){
-		//add method here to make weapon ballistic and select a Warrior flight.
-		this.ballistic = true; //Mark ballistic true to allow targeting.
-		gamedata.selectedSytems.push(this);	//Selected	
-	}else{
-		return;
-	}	
-};   
-//Need to find a way to insert notes in firing Mode 3 order so we know the direction of rotation and amount rotated.
+/* Called by the React menu after the player picks a new rotation while a Mode 3 order is
+ * already declared, so the live order's notes stay in sync with the menu selection. */
+GraviticAugmenter.prototype.updateRotationNotes = function () {
+	for (var i = 0; i < this.fireOrders.length; i++) {
+		if (this.fireOrders[i].firingMode == 3) {
+			this.fireOrders[i].notes = this.getRotationNotes();
+		}
+	}
+};
+
+/* Stamp the rotation notes onto the Mode 3 prefire order at creation time. weaponManager's
+ * generic targetShip() builds the order; this hook lets us inject our notes payload. */
+GraviticAugmenter.prototype.onFireOrderCreated = function (fire) {
+	if (this.firingMode == 3 && fire) {
+		fire.notes = this.getRotationNotes();
+	}
+	return fire;
+};
 

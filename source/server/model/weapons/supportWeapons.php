@@ -1351,9 +1351,9 @@ class GraviticAugmenter extends Weapon{
     //public $maxBoostLevel = 3; //maximum boost allowed - just technical limitation, rules dont set any maximum; 20 seems close enough to "unlimited" :)		
  
 	public $firingModes = array(
-			1 => "Matter Weapon Enhancemen",
+			1 => "Matter Weapon Enhancement",
 			2 => "Warrior Enhancement",
-			3 => "Gravity Shifting",					
+			3 => "Gravity Shifting",
 		);
 
     public $rangePenalty = 0;
@@ -1361,7 +1361,7 @@ class GraviticAugmenter extends Weapon{
     public $range = 20;
     public $canOffLine = true;    
 	protected $autoHit = true;//To show 100% hit chance in front end.
-	protected $autoHitArray = array(1 => true, 2=> true, 3=> false); To show 100% hit chance in front end.	
+	protected $autoHitArray = array(1 => true, 2=> true, 3=> false); //Mode 3 is a real roll, not auto-hit.
 	public $autoFireOnly = true; //this weapon cannot manually fire by player at a target, just activated
 	public $autoFireOnlyArray = array(1 => true, 2=> false, 3=> false);	
 	protected $canTargetAllies = false; //To allow front end to target allies.
@@ -1373,12 +1373,11 @@ class GraviticAugmenter extends Weapon{
 	//public $canSplitShots = true;	
 	//protected $multiModeSplit = true;
 
-	//These private variables are used to track fire orders, and firings to prevent Combat Log spam
-	//private	$orderThisTurn = array(); //For Combat Logs entries
-	private $rotationDirection = 0; //Prevent multiple firings at same ship for same mode.	
-	private $rotationAmount = 0; //Prevent multiple firings at same ship for same mode.	
-	public static $alreadyAugmented = array(); 
-	private static $alreadyShifted = array();		
+	//Mode 3 rotation, read from fire-order notes in beforeFiringOrderResolution, applied in onDamagedSystem.
+	private $rotationDirection = 1; //1 = clockwise, 2 = anti-clockwise
+	private $rotationAmount = 1;    //1 = 60deg (one facing), 2 = 120deg (two facings)
+	public static $alreadyAugmented = array();  //Mode 2: a warrior flight may only be enhanced once per turn.
+	private static $alreadyShifted = array();    //Mode 3: a ship may only be gravity-shifted once per turn.
 	 
     function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
 		if ( $maxhealth == 0 ) $maxhealth = 12;
@@ -1397,8 +1396,11 @@ class GraviticAugmenter extends Weapon{
 		$this->data["Special"] .= "<br>Firing modes and their effect are summarised below:";		 										 
 	}	
 
-	/*				
-	public function beforeFiringOrderResolution($gamedata)
+	/* Mode 3 carries the player's chosen rotation in the fire order notes as "GA|<dir>|<amt>"
+	 * (dir: 1=clockwise, 2=anti-clockwise; amt: 1=60deg, 2=120deg). calculateHitBase overwrites
+	 * the notes field with hit-resolution text, so we must read it here FIRST (this runs before
+	 * calculateHitBase) and stash it in private vars for onDamagedSystem to apply. */
+	public function beforePreFiringOrderResolution($gamedata)
 	{
 		if ($this->isDestroyed($gamedata->turn)) return;
 		if ($this->isOfflineOnTurn($gamedata->turn)) return;
@@ -1411,33 +1413,27 @@ class GraviticAugmenter extends Weapon{
 		if (empty($weaponFiringOrders)) return; // No fire orders
 
 		foreach ($weaponFiringOrders as $fireOrder) {
+			if ($fireOrder->firingMode != 3) continue; //Only Gravity Shifting carries rotation notes.
 
-			switch ($fireOrder->firingMode) {
-
-				case 1: //Matter weapon enhancement
-
-					break;
-
-				case 2: //Warrior Enhancement
-
-					break;
-
-				case 3: //Gravitiy shifting
-					//Need to capture amount and direction of rotation here from fireOrder notes in $this->toRotate.
-					break;
-
-				default:
-					continue 2; // skip to next fire order safely
-			}
+			$this->parseRotationNotes($fireOrder->notes);
+			break; //one Gravity Shifting order per Augmenter per turn
 		}
-	} // end of beforeFiringOrderResolution 
-	*/				
+	} // end of beforeFiringOrderResolution
+
+	/* Parses "GA|<dir>|<amt>" into $this->rotationDirection / $this->rotationAmount.
+	 * Leaves the defaults (1 = clockwise, 1 = 60deg) if the notes aren't our format. */
+	private function parseRotationNotes($notes){
+		if (!$notes || strpos($notes, 'GA|') !== 0) return;
+		$parts = explode('|', $notes); // ['GA', dir, amt]
+		if (isset($parts[1])) $this->rotationDirection = (int)$parts[1];
+		if (isset($parts[2])) $this->rotationAmount    = (int)$parts[2];
+	}
 
 	public function onIndividualNotesLoaded($gamedata){
 		if ($this->isDestroyed($gamedata->turn)) return;
 		if ($this->isOfflineOnTurn($gamedata->turn)) return;
 		$ship = $this->getUnit();
-		if($ship->getTurnDeployed($gameData) > $gameData->turn) continue;	
+		if($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
 
 		$weaponFiringOrders = $this->getFireOrders($gamedata->turn);
 		if (empty($weaponFiringOrders)) return; // No fire orders
@@ -1447,7 +1443,7 @@ class GraviticAugmenter extends Weapon{
 			switch ($fireOrder->firingMode) {
 
 				case 1: //Matter weapon enhancement
-					$this->doMatterEnhancement($gamedata);
+					$this->doMatterEnhancement($gamedata, $ship);
 					break;
 
 				case 2: //Warrior Enhancement
@@ -1455,134 +1451,104 @@ class GraviticAugmenter extends Weapon{
 					break;
 
 				default:
-					continue; // skip to next fire order safely
+					break; // Mode 3 (Gravity Shifting) is resolved via the normal fire pipeline.
 			}
 		}
 
 	}
-		
-	private function doMatterEnhancement($gamedata){
-		
-		//We need to check all ships in Augmenter arc and range.  Search them for Matter weapons, and them make adjustments to Fire Control
+
+	/* Returns the fire-control modifier this Augmenter applies to $otherShip's matter weapons:
+	 * +/-3 normally, +/-6 for ballistic matter weapons, 0 if the ship is out of arc/range or
+	 * not a valid target. Positive for friendly units, negative for enemies. Shared by the
+	 * server effect (doMatterEnhancement) and exposed for client mirroring. */
+	private function isShipInMatterAugmentRange($gamedata, $otherShip, $ship){
+		if($otherShip->isTerrain()) return false;
+		if($otherShip->mine) return false;
+		if($otherShip->isDestroyed()) return false;
+		if($otherShip->getTurnDeployed($gamedata) > $gamedata->turn) return false;
+
+		//Arc + range gate from the Augmenter's hull, using this weapon's arc and max range.
+		$bearing = $ship->getBearingOnUnit($otherShip);
+		if(!Mathlib::isInArc($bearing, $this->startArc, $this->endArc)) return false;
+		if(Mathlib::getDistanceHex($ship, $otherShip) > $this->range) return false;
+
+		return true;
+	}
+
+	private function doMatterEnhancement($gamedata, $ship){
+
+		//Check every ship in the Augmenter's arc and range; boost friendly matter weapons'
+		//fire control and degrade enemy matter weapons' fire control.
 		foreach($gamedata->ships as $otherShip){
-			if($otherShip->isTerrain()) continue; //Ignore terrain like asteroids.
-			if($otherShip->mine) continue; //Ignore mines
-			if($otherShip->isDestroyed()) continue; //Destryoed
-			if($otherShip->getTurnDeployed($gameData) > $gameData->turn) continue;	
-						
-			if($otherShip->team == $ship->team){ //Increase fire controls
-							
-				if($otherShip instanceof FighterFlight){
-					foreach($otherShip->systems as $fighter){
-						foreach($fighter->systems as $system){
-							if($system instance of Weapon){
-							$mod = 3;
-							if($system->ballistic) $mod = 6;								
-								if($system->weaponClass == "Matter"){
-									$system->fireControl[0] += $mod;
-									$system->fireControl[1] += $mod;
-									$system->fireControl[2] += $mod;
-												
-									foreach($system->fireControlArray as $fireControl){
-										$fireControl[0] += $mod;
-										$fireControl[1] += $mod;
-										$fireControl[2] += $mod;																										
-									}
-								}
-							}
-						}
-					}
-				}else{ //Ships
-					foreach($otherShip->systems as $system){
-						if($system instance of Weapon){
-							$mod = 3;
-							if($system->ballistic) $mod = 6;							
-							if($system->weaponClass == "Matter"){
-								$system->fireControl[0] += $mod;
-								$system->fireControl[1] += $mod;
-								$system->fireControl[2] += $mod;
-												
-								foreach($system->fireControlArray as $fireControl){
-									$fireControl[0] += $mod;
-									$fireControl[1] += $mod;
-									$fireControl[2] += $mod;																										
-								}
-							}
-						}		
-					}
+			if(!$this->isShipInMatterAugmentRange($gamedata, $otherShip, $ship)) continue;
+
+			//Friendly units get the bonus, enemies get the penalty (sign of $mod).
+			$sign = ($otherShip->team == $ship->team) ? 1 : -1;
+
+			if($otherShip instanceof FighterFlight){
+				foreach($otherShip->systems as $fighter){
+					$this->applyMatterModToSystems($fighter->systems, $sign);
 				}
-			}else{ //Decrease fire controls for enemies
-				if($otherShip instanceof FighterFlight){
-					foreach($otherShip->systems as $fighter){
-						foreach($fighter->systems as $system){
-							if($system instance of Weapon){
-							$mod = 3;
-							if($system->ballistic) $mod = 6;								
-								if($system->weaponClass == "Matter"){
-									$system->fireControl[0] -= $mod;
-									$system->fireControl[1] -= $mod;
-									$system->fireControl[2] -= $mod;
-											
-									foreach($system->fireControlArray as $fireControl){
-										$fireControl[0] -= $mod;
-										$fireControl[1] -= $mod;
-										$fireControl[2] -= $mod;																										
-									}
-								}
-							}
-						}
-					}
-				}else{ //Ships
-					foreach($otherShip->systems as $system){
-						if($system instance of Weapon){
-							$mod = 3;
-							if($system->ballistic) $mod = 6;
-							if($system->weaponClass == "Matter"){
-								$system->fireControl[0] -= $mod;
-								$system->fireControl[1] -= $mod;
-								$system->fireControl[2] -= $mod;
-												
-								foreach($system->fireControlArray as $fireControl){
-									$fireControl[0] -= $mod;
-									$fireControl[1] -= $mod;
-									$fireControl[2] -= $mod;																										
-								}
-							}
-						}		
-					}
-				}
+			}else{ //Ships
+				$this->applyMatterModToSystems($otherShip->systems, $sign);
 			}
 		}
 
-	} //endof doMatterEnhancement				
+	} //endof doMatterEnhancement
+
+	/* Applies the +/-3 (or +/-6 ballistic) fire-control mod to every matter Weapon in the
+	 * supplied systems list. fireControlArray entries are mutated BY REFERENCE so the per-mode
+	 * arrays actually change (a plain foreach copy would be silently discarded). */
+	private function applyMatterModToSystems($systems, $sign){
+		foreach($systems as $system){
+			if(!($system instanceof Weapon)) continue;
+			if($system->weaponClass !== "Matter") continue;
+
+			$mod = $sign * ($system->ballistic ? 6 : 3);
+
+			$system->fireControl[0] += $mod;
+			$system->fireControl[1] += $mod;
+			$system->fireControl[2] += $mod;
+			$system->isModified = true; //force stripForJson to send the altered FC to the client.
+
+			if(!empty($system->fireControlArray)){
+				foreach($system->fireControlArray as &$fireControl){ //by-reference: mutate the real array
+					$fireControl[0] += $mod;
+					$fireControl[1] += $mod;
+					$fireControl[2] += $mod;
+				}
+				unset($fireControl); //break the reference left dangling by foreach
+			}
+		}
+	} //endof applyMatterModToSystems
 
 
 	private function doWarriorEnhancement($gamedata, $fireOrder){
 		$warrior = $gamedata->getShipById($fireOrder->targetid);
-		
-		$warrior->freeThrust +=3;
-		$warrior->offensivebonus +=3;
-		$warrior->dropOutBonus -= 4; 
-		
-		if($gamedata->phase == 2){
-			//We have to add 3 levels of free jinking, but only once at start of Movement Phase.
-			foreach($warrior->movement as $move){
-				if($move->turn !== $gamedata->turn) continue;
-				if($move->value == 'Augment') return; //Already done, finish Warrior enhancements here.			
-			}
+		if(!$warrior) return;
 
-			$lastMove = $warrior->getLastMovement();
-			$freeJink = new MovementOrder(null, "jink", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $lastMove->facing, $lastMove->heading, false, $gamedata->turn, 'Augment', 0);
-			$NoOfJinks = 3;		
-			
-			while($NoOfJinks > 0){
-				Manager::insertSingleMovement($gamedata->id, $ship->id, $freeJink);
-				$ship->setMovement($freeJink);		
-				$NoOfJinks--;							
-			}	
-		}			
+		//Not cumulative with other Gravitic Augmenters - only the FIRST to claim this flight applies.
+		if (isset(GraviticAugmenter::$alreadyAugmented[$warrior->id])) return;
+		GraviticAugmenter::$alreadyAugmented[$warrior->id] = true;
 
-	} //endof doWarriorEnhancement		
+		$warrior->freethrust    += 3;  //NB: property is 'freethrust' (lowercase t) on FighterFlight.
+		$warrior->offensivebonus += 3;
+		$warrior->addDropOutBonus(-4); //dropOutBonus is protected; use the setter on FighterFlight.
+		$warrior->isModified = true;   //so stripForJson sends these buffed stats to the client.
+
+		//3 levels of free jinking. Applied TRANSIENTLY (in-memory only, every load) - NOT
+		//persisted to tac_shipmovement - exactly like the FC mod and the stat buffs above.
+		//A single value=3 jink: both Movement::getJinking (server) and the client getJinking
+		//sum value, and the client jink display reads that sum, so one order shows "3" and
+		//counts 3 toward the jink limit. Persisting it would need a marker to dedup across
+		//loads, and a numeric value is indistinguishable from a player's manual jinks - so we
+		//keep it transient and re-add fresh each load (the $alreadyAugmented static guards
+		//against a second Augmenter stacking it within the same request).
+		$lastMove = $warrior->getLastMovement();
+		$freeJink = new MovementOrder(null, "jink", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $lastMove->heading, $lastMove->facing, false, $gamedata->turn, 3, 0);
+		$warrior->setMovement($freeJink); //in-memory only; no Manager::insertSingleMovement.
+
+	} //endof doWarriorEnhancement
 
 
 	public function calculateHitBase($gamedata, $fireOrder){
@@ -1609,18 +1575,19 @@ class GraviticAugmenter extends Weapon{
 				$fireOrder->updated = true;	
 			break;
 
-			case 3: //Gravitiy shifting
+			case 3: //Gravity shifting
 				if (isset(GraviticAugmenter::$alreadyShifted[$fireOrder->targetid])){
 					$fireOrder->needed = 0;
-					$fireOrder->updated = true; 
-					$fireOrder->pubnotes = "<br>Ship has already been affected by a Gravitic Augmenter.";                         
-					return; //target already engaged by a previous Gravitic Shifter
+					$fireOrder->updated = true;
+					$fireOrder->pubnotes = "<br>Ship has already been affected by a Gravitic Augmenter.";
+					return; //target already engaged by a previous Gravitic Augmenter
 				}
 
-				//We need to extract the rotationDirection and rotationAmount from fireOrder->notes somehow before it's overwritten.				
-
+				//Rotation direction/amount were already read from $fireOrder->notes in
+				//beforeFiringOrderResolution; parent::calculateHitBase now overwrites notes
+				//with hit-resolution text, which is fine.
 				parent::calculateHitBase($gamedata, $fireOrder);
-				
+
 				GraviticAugmenter::$alreadyShifted[$fireOrder->targetid] = true; //Mark that a shot has been attempted against ship.
 
 				$target = $gamedata->getShipById($fireOrder->targetid);
@@ -1658,52 +1625,46 @@ class GraviticAugmenter extends Weapon{
 
 	
  	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
-        if($fireOrder->firingMode !== 3) return; //Not gravitic shifting mode.
+        if($fireOrder->firingMode != 3) return; //Not gravitic shifting mode.
  		if ($ship->Enormous) return; //No effect on Enormous units
         if ($ship instanceof Mine){
             $fireOrder->pubnotes = "<br>Mines are not affected by Gravitic Augmenters.";
-            return; //No point.                         
-        } 
+            return; //No point.
+        }
 
 		$lastMove = $ship->getLastMovement();
-        $newFacing = $lastMove->facing; //Initialise as current facing.
-        $newHeading = $lastMove->heading; //Initialise as current heading. 
 
-		$rotateDirection = 1;
-		if($this->$rotationDirection !== 0){ //1 is clockwise, 2 is anti-clockwise, 0 is an error
-			$rotationDirection = $this->rotationDirection; 				
-		}
-		
-		$rotationAmount = 1; //Between 1-2 depending on whether target will rotate 60 or 120 degrees.
-		if(!$ship->gravitic && $this->rotationAmount !== 0){ //Gravitic ships can only be rotated 60 degrees
-			$rotationAmount = $this->rotationAmount; 				
+		//Direction + amount were parsed from the fire-order notes in beforeFiringOrderResolution.
+		$rotationDirection = ($this->rotationDirection == 2) ? 2 : 1; //default clockwise
+		$rotationAmount    = ($this->rotationAmount == 2) ? 2 : 1;    //default 60 degrees
+
+		//Ships WITH gravitic drives (or Ancient) can only be turned a single 60deg facing.
+		if($ship->gravitic || $ship->factionAge >= 3){
+			$rotationAmount = 1;
 		}
 
-        if($rotateDirection == 1){ //clockwise
+        if($rotationDirection == 1){ //clockwise
             $newFacing = MathLib::addToHexFacing($lastMove->facing , $rotationAmount);
             $newHeading = MathLib::addToHexFacing($lastMove->heading , $rotationAmount);
-        }else{
+        }else{                       //anti-clockwise
             $newFacing = MathLib::addToHexFacing($lastMove->facing , -$rotationAmount);
-            $newHeading = MathLib::addToHexFacing($lastMove->heading , -$rotationAmount);                      
+            $newHeading = MathLib::addToHexFacing($lastMove->heading , -$rotationAmount);
         }
-		
+
 		//Create new movement order for target.
         $shift = new MovementOrder(null, "prefire", new OffsetCoordinate($lastMove->position->q, $lastMove->position->r), 0, 0, $lastMove->speed, $newHeading, $newFacing, false, $gamedata->turn, $fireOrder->id, 0);
 
-        if($fireOrder->firingMode == 1){
-            $direction = "clockwise";
-        }else{
-            $direction = "anti-clockwise";      
-        }        
+        $direction = ($rotationDirection == 1) ? "clockwise" : "anti-clockwise";
+        $degrees   = ($rotationAmount == 2) ? 120 : 60;
 
         if($fireOrder->shotshit > 0){
-            $fireOrder->pubnotes = "<br>Ship has been forced to turn 60 degrees " . $direction . " by a Gravitic Shifter.";                       
-        }   
+            $fireOrder->pubnotes = "<br>Ship has been forced to turn " . $degrees . " degrees " . $direction . " by a Gravitic Augmenter.";
+        }
 		//Add shifted movement order to database and in-memory movement array
 		//so subsequent prefire weapons see the updated heading/facing.
 		Manager::insertSingleMovement($gamedata->id, $ship->id, $shift);
-		$ship->setMovement($shift);	
-    }    
+		$ship->setMovement($shift);
+    }
 
 	public function getDamage($fireOrder){       return 0;   } //no actual damage
 	public function setMinDamage(){     $this->minDamage = 0 ;      }
