@@ -348,7 +348,7 @@ window.BallisticIconContainer = function () {
 						break;
 					case 'support':
 						targetType = 'hexGreen';
-						iconImage = './img/allySupport.png';
+						//iconImage = './img/allySupport.png';
 						break;
 				}
 			}

@@ -744,9 +744,15 @@ class TacGamedata {
                     unset($system->fireOrders[$i]);
                 }
 
-                if ($fire->turn == $this->turn && $weapon->preFires && $this->phase == 5){                        
+                //Hide a pre-firing order during Pre-Firing (the client re-creates it live in this
+                //phase). Must key off the ORDER's type, not just $weapon->preFires: a dual-nature
+                //weapon (Gravitic Augmenter) has preFires=true but also carries BALLISTIC Mode 1/2
+                //orders declared in Initial Orders — those are NOT pre-firing orders and must survive
+                //phase 5 (they only resolve in Firing). A normal pre-firing weapon's orders are all
+                //type 'prefiring', so this extra guard is a no-op for them.
+                if ($fire->turn == $this->turn && $weapon->preFires && $this->phase == 5 && $fire->type == 'prefiring'){
                     unset($system->fireOrders[$i]);
-                }                
+                }
                
 				$weapon->changeFiringMode($fire->firingMode); //Select the current mode so the correct variables are considered, important for Stealth missile.                
 

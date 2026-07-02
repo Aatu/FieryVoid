@@ -202,10 +202,14 @@ window.MovementPhaseStrategy = function () {
             return !shipManager.movement.isMovementReady(ship) && !shipManager.isDestroyed(ship);
         }).pop();
 
+        if (!ship) {
+            ship = gamedata.getMyActiveShips().pop();
+        }
+
+        //getMyActiveShips can be empty (e.g. the only active ship is an Uncontrolled HK,
+        //which the server drifts and which is excluded there) - don't select a ghost ship.
         if (ship) {
             this.setSelectedShip(ship);
-        } else {
-            this.setSelectedShip(gamedata.getMyActiveShips().pop())
         }
     };
 

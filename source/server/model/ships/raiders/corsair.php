@@ -30,7 +30,7 @@ class Corsair extends MediumShip{
         $this->addPrimarySystem(new CnC(4, 8, 0, 0));
         $this->addPrimarySystem(new Scanner(3, 8, 2, 4));
         $this->addPrimarySystem(new Engine(3, 10, 0, 6, 2));
-		$this->addPrimarySystem(new Hangar(2, 1));
+		$this->addPrimarySystem(new Hangar(2, 1, 1));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 3));
 		$this->addPrimarySystem(new Thruster(3, 9, 0, 3, 4));
 		        		

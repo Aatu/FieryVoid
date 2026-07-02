@@ -13,7 +13,7 @@ class JYDLias extends BaseShip{
 			$this->occurence = "unique";
         $this->variantOf = "NONE";			
 
-        $this->fighters = array("light"=>12);
+        $this->fighters = array("light"=>12, "cargo shuttles"=>3);
 	    
 		$this->notes = 'Used only by the Junkyard Dogs';
 		$this->notes .= '<br>Only one exists';
@@ -34,7 +34,7 @@ class JYDLias extends BaseShip{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 5, 7));
 		$this->addPrimarySystem(new Engine(5, 23, 0, 10, 4));
-		$this->addPrimarySystem(new Hangar(5, 3));
+		$this->addPrimarySystem(new Hangar(5, 3, 1));
 
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));
 		$this->addFrontSystem(new Thruster(4, 10, 0, 3, 1));

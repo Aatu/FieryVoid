@@ -62,7 +62,7 @@ class penitentAM extends SmallStarBaseFourSections{
 		$this->addPrimarySystem(new Scanner(5, 28, 4, 8));
 		$this->addPrimarySystem(new Hangar(5, 14, 6, 0, 'light')); //light-fighter bay (the 'light' half of $fighters)
 		$this->addPrimarySystem(new Hangar(5, 14, 6, 0, 'light')); //light-fighter bay (the 'light' half of $fighters)
-        $this->addPrimarySystem(new HKControlNode(5, 30, 4, 4));
+        $this->addPrimarySystem(new HKControlNodeOrieni(5, 30, 4, 4));
     	$this->addPrimarySystem(new HeavyLaserLance(5, 6, 4, 0, 360));
        	$this->addPrimarySystem(new HeavyLaserLance(5, 6, 4, 0, 360));
        	$this->addPrimarySystem(new HeavyLaserLance(5, 6, 4, 0, 360));

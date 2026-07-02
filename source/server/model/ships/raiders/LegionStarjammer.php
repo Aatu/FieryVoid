@@ -35,7 +35,7 @@ class LegionStarjammer extends BaseShip{
 		$this->addPrimarySystem(new FlagBridge(5, 16, 0, 1, 'ISL Command Bonus', 5,  true, true, true, false));				
         $this->addPrimarySystem(new Scanner(5, 17, 5, 7));
         $this->addPrimarySystem(new Engine(5, 20, 0, 12, 2));
-        $this->addPrimarySystem(new Hangar(5, 14));
+        $this->addPrimarySystem(new Hangar(5, 14, 6));
         $this->addPrimarySystem(new JumpEngine(5, 15, 4, 24));
   
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));

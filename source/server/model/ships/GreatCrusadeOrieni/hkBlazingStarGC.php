@@ -20,6 +20,7 @@ class hkBlazingStarGC extends FighterFlight{
         $this->offensivebonus = 3;
         $this->jinkinglimit = 4;
         $this->turncost = 0.33;
+        $this->maxFlightSize = 6; //To match HK nodes only controlling up to 6 craft per flight.        
         
 		$this->hangarRequired = 'medium'; //for fleet check; HKs require medium fighter hangar space
         $this->deploysInHangar = true;        	
@@ -28,7 +29,7 @@ class hkBlazingStarGC extends FighterFlight{
         
         $this->populate();     
         
-        HkControlNode::addHKFlight($this);
+        HkControlNodeOrieni::addHKFlight($this);
     }
     
     public function populate(){
@@ -56,9 +57,17 @@ class hkBlazingStarGC extends FighterFlight{
     
     public function getInitiativebonus($gamedata){
         $iniBonus = parent::getInitiativebonus($gamedata);
-	$iniBonus += HkControlNode::getIniMod($this->userid,$gamedata);
+		$iniBonus += HkControlNodeOrieni::getIniMod($this->userid,$gamedata, $this); //Applies -50 on Turn 1 if deployed outside hangar.
         return $iniBonus;
-    }	
-    
+    }
+
+    /* When jamming severs control (Uncontrolled), the HK pursues the nearest enemy ship
+     * and rams it ('seek'). Jinks at its default level (2, fixed — no per-flight settings
+     * UI); jinking costs thrust (1/level). AutomatedMovement falls back to drift if no
+     * enemy is in play. */
+    public function getAutomatedMovementIntent($gamedata){
+        return array('type' => 'seek', 'jink' => 2);
+    }    
+
 }
 ?>

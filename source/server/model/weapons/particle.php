@@ -191,16 +191,21 @@
 
         public $loadingtime = 1;
         public $guns = 2;
+        protected $originalGuns = 2; //starting number of guns, before any GunLost crits; used to gate the "both guns lost = destroyed" check
         public $priority = 4;
 
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
+        //Twin Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
+        //one of the two guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
+        protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
+
         public $firingModes = array( 1 => "Normal", 2=> "Split");
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
-        public $canSplitShotsArray = array(1=>false, 2=>true );          
-        public $startArcArray = array(); 
-        public $endArcArray = array();        
+        public $canSplitShotsArray = array(1=>false, 2=>true );
+        public $startArcArray = array();
+        public $endArcArray = array();
         protected $splitArcs = false; //Used to tell Front End that weapon has 2 or more separate arcs, passed manually via stripForJson()
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $startArc2 = null, $endArc2 = null){
@@ -226,11 +231,38 @@
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
 
+        //Each GunLost critical destroys one of the two guns, so the Twin Array fires one
+        //less shot for each. Runs via onConstructed (and setSystemDataWindow), translating
+        //the GunLost crits into the actual reduced $guns count used when fire orders are built.
+        public function effectCriticals(){
+            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc.
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            $this->guns = max(0, $this->originalGuns - $gunsLost);
+        }
+
+        //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
+        //Runs in Pass 2 of the crit phase (after Pass 1 has added all GunLost crits), so two
+        //GunLost crits scored the same turn are both seen here.
+        public function criticalPhaseEffects($ship, $gamedata){
+            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase.
+
+            if($this->isDestroyed()) return;//already destroyed - also guards replay re-runs from adding a duplicate destroy entry.
+
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
+                $damageCaused = $this->getRemainingHealth();
+                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
+                $damageEntry->updated = true;
+                $this->damage[] = $damageEntry;
+            }
+        }
+
     public function stripForJson() {
-        $strippedSystem = parent::stripForJson();    
-        $strippedSystem->splitArcs = $this->splitArcs;        						                                        
+        $strippedSystem = parent::stripForJson();
+        $strippedSystem->splitArcs = $this->splitArcs;
+        if ($this->guns != $this->originalGuns) $strippedSystem->guns = $this->guns;//send reduced gun count (GunLost crit) so the client shows the right Split shot count.
         return $strippedSystem;
-	}	            
+	}
 
     }
 
@@ -1552,15 +1584,21 @@
 
         public $loadingtime = 1;
         public $guns = 4;
+        protected $originalGuns = 4; //starting number of guns, before any GunLost crits; used to gate the "all guns lost = destroyed" check
         public $rangePenalty = 2;
         public $fireControl = array(6, 5, 4); // fighters, <mediums, <capitals
 
         public $firingModes = array(1=>'4Quad', 2=>'3Triple', 3=>'2Dual', 4=>'1Single', 5=>'Split');
 
         public $canSplitShots = false; //Allows Firing Mode 2 to split shots.
-        public $canSplitShotsArray = array(1=>false, 2=>false, 3=>false, 4=>false, 5=>true  );          
+        public $canSplitShotsArray = array(1=>false, 2=>false, 3=>false, 4=>false, 5=>true  );
         public $gunsArray = array(1=>4,2=>3,3=>2,4=>1,5=>4);
-	    
+        protected $originalGunsArray = array(1=>4,2=>3,3=>2,4=>1,5=>4); //pristine per-mode gun counts; GunLost crits cap gunsArray against this
+
+        //Quad Array uses the standard weapon crit chart PLUS a special 20+ result (GunLost):
+        //one of the four guns is destroyed. 25+ adds GunLost on top of ReducedRange+ReducedDamage.
+        protected $possibleCriticals = array(14 => "ReducedRange", 19 => "ReducedDamage", 20 => "GunLost", 25 => array("ReducedRange", "ReducedDamage", "GunLost"));
+
 	    private $firedThisTurn = false; //to avoid re-rolling criticals!
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
@@ -1580,11 +1618,24 @@
             $this->data["Special"] .= '<br>If three or four shots are fired, gains May Overheat critical(s) next turn.';    
             $this->data["Special"] .= "<br>When weapon May Overheat, firing offensively causes a critical roll."; 
             $this->data["Special"] .= "<br>This roll has +2 modifier for evey shot fired in current turn, and single -2 if only one 'May Overheat' critical effect.";  
-            $this->data["Special"] .= "<br>Dual or Single shots do not cause overheating the following turn, nor will defensive fire unless 'Split' firing mode was used.";                               
+            $this->data["Special"] .= "<br>Dual or Single shots do not cause overheating the following turn, nor will defensive fire unless 'Split' firing mode was used.";
+        }
+
+        //Each GunLost critical destroys one of the four guns, capping how many shots ANY firing
+        //mode can fire. Caps every gunsArray entry at (originalGuns - gunsLost); modes that already
+        //fire fewer than the cap are unaffected. Runs via onConstructed (and setSystemDataWindow);
+        //parent::effectCriticals re-derives $guns from the (now capped) gunsArray for the current mode.
+        public function effectCriticals(){
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            $maxGuns = max(0, $this->originalGuns - $gunsLost);
+            foreach ($this->originalGunsArray as $mode => $modeGuns){
+                $this->gunsArray[$mode] = min($modeGuns, $maxGuns);
+            }
+            parent::effectCriticals();//apply ReducedRange/ReducedDamage etc. + changeFiringMode -> sets $guns from capped gunsArray.
         }
 
 	//Fire function for Quad Array
-	public function fire($gamedata, $fireOrder){ 
+	public function fire($gamedata, $fireOrder){
 	// If fires 3 or 4 shots, Quad Array might overheat next turn. Make a crit roll taking into account number of shots fired this turn and last.
 	 
 		parent::fire($gamedata, $fireOrder);
@@ -1608,10 +1659,22 @@
 
 		}//end of function Fire
 
-    public function criticalPhaseEffects($ship, $gamedata) { 
-            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase        
+    public function criticalPhaseEffects($ship, $gamedata) {
+            parent::criticalPhaseEffects($ship, $gamedata);//Some critical effects like Limpet Bore might destroy weapon in this phase
 
             if($this->isDestroyed()) return;//Quad Array is destroyed, no further action.
+
+            //If every gun has been destroyed by GunLost crits, the whole weapon is destroyed.
+            //Runs in Pass 2 of the crit phase (after Pass 1 added all GunLost crits), so multiple
+            //GunLost crits scored the same turn are all seen here.
+            $gunsLost = $this->hasCritical("GunLost", false);//count GunLost crits in effect up to the current turn
+            if($gunsLost >= $this->originalGuns){//all guns gone - destroy the weapon.
+                $damageCaused = $this->getRemainingHealth();
+                $damageEntry = new DamageEntry(-1, $ship->id, -1, $gamedata->turn, $this->id, $damageCaused, 0, 0, -1, true, false, "", "GunLost");
+                $damageEntry->updated = true;
+                $this->damage[] = $damageEntry;
+                return;//destroyed this turn - skip overheat bookkeeping.
+            }
 
 			$shotsThisTurn = count($this->getFireOrders($gamedata->turn)); //How many offensive & defensive shots were fired this turn?
 
@@ -1640,6 +1703,15 @@
         public function getDamage($fireOrder){        return Dice::d(10)+4;   }
         public function setMinDamage(){     $this->minDamage = 5 ;      }
         public function setMaxDamage(){     $this->maxDamage = 14 ;      }
+
+        public function stripForJson() {
+            $strippedSystem = parent::stripForJson();
+            if ($this->gunsArray != $this->originalGunsArray) {
+                $strippedSystem->gunsArray = $this->gunsArray;//send capped per-mode gun counts (GunLost crit) so the client fires/displays the right shot count.
+                $strippedSystem->guns = $this->guns;//also send the current-mode count - the client only re-derives guns from gunsArray on a mode change, not at load.
+            }
+            return $strippedSystem;
+        }
 
     } //endof class QuadArray
 	

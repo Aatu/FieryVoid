@@ -266,6 +266,9 @@ window.gamedata = {
 			case 'BSG Cylons':
 				powerRating = 'Tier 2; Custom faction, Playtest';
 				break;
+			case 'Star Trek (Kelly)':
+				powerRating = 'Tier 1; Custom faction';
+				break;				
 			case 'ZStarTrek (TOS) Federation':
 				powerRating = 'Tier 2; Custom faction';
 				break;

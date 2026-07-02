@@ -42,7 +42,7 @@ class skywatchGCAM extends OSAT
 		$this->addPrimarySystem(new Reactor(4, 16, 0, 0));
 		$this->addPrimarySystem(new Scanner(4, 12, 3, 8));
 		$this->addAftSystem(new Thruster(4, 14, 0, 0, 2));
-        $this->addPrimarySystem(new HKControlNode(4, 12, 1, 1));
+        $this->addPrimarySystem(new HKControlNodeOrieni(4, 12, 1, 1));
 		
 		$this->addFrontSystem(new AmmoMissileRackB(5, 9, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
 		$this->addFrontSystem(new AmmoMissileRackB(5, 9, 0, 270, 90, $ammoMagazine, true)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base

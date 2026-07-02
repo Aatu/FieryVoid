@@ -225,12 +225,15 @@ shipManager.movement = {
 
     canJink: function canJink(ship, accel) {
         if (gamedata.gamephase != 2) return false;
-        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!          
+        if (Object.keys(ship.attached).length !== 0 && !ship.detached) return false; //Is attached to something!
         if (!ship.flight && ship.jinkinglimit <= 0) return false;
         if (accel == 0) return true;
         if (accel > 0 && shipManager.movement.getRemainingEngineThrust(ship) <= 0) return false; //only adding jink costs thrust; reducing refunds it
         var jinking = shipManager.movement.getJinking(ship);
-        if (jinking + accel > ship.jinkinglimit || jinking + accel < 0) return false;
+        //Gravitic Augmenter grants forced jink levels (marked forced=true) that the player
+        //may not remove: a reduction cannot take the total below that forced floor.
+        var floor = shipManager.movement.getForcedJinking(ship);
+        if (jinking + accel > ship.jinkinglimit || jinking + accel < floor) return false;
         return true;
     },
 
@@ -241,6 +244,19 @@ shipManager.movement = {
             if (move.turn != gamedata.turn) continue;
 
             if (move.type == "jink") j += move.value;
+        }
+        return j;
+    },
+
+    //Sum of jink levels the player cannot remove this turn (Gravitic Augmenter forced jinks,
+    //marked forced=true server-side). Acts as the lower bound for reducing jinking.
+    getForcedJinking: function getForcedJinking(ship) {
+        var j = 0;
+        for (var i in ship.movement) {
+            var move = ship.movement[i];
+            if (move.turn != gamedata.turn) continue;
+
+            if (move.type == "jink" && move.forced) j += move.value;
         }
         return j;
     },
@@ -263,7 +279,8 @@ shipManager.movement = {
                 var move = ship.movement[i];
                 if (move.turn != gamedata.turn) continue;
 
-                if (move.type == "jink") {
+                //Never remove a forced jink (Gravitic Augmenter minimum) - only the player's own.
+                if (move.type == "jink" && !move.forced) {
                     ship.movement.splice(i, 1);
                     break;
                 }

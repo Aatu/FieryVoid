@@ -1315,7 +1315,12 @@ class Manager{
                     );
                     $movement->requiredThrust = $move["requiredThrust"] ?? 0;
                     $movement->assignedThrust = $move["assignedThrust"] ?? 0;
-    
+                    //Carry the 'forced' flag through the POST (Gravitic Augmenter free jinks are
+                    //marked forced=true). submitMovement skips forced moves so they never persist -
+                    //they are re-added transiently every load. Without this whitelist the flag is
+                    //lost and the free jink would be written to the DB, doubling next load.
+                    $movement->forced = $move["forced"] ?? false;
+
                     $movements[$i] = $movement;
                 }
             }
@@ -1400,6 +1405,13 @@ class Manager{
                             $fo["y"] ?? 0,
                             $fo["damageclass"] ?? null
                         );
+                        //Carry the client-supplied notes through. The FireOrder ctor doesn't
+                        //take notes, and weapons that need to pass custom per-shot data to
+                        //server-side resolution (e.g. Hypergraviton Blaster transfer-target
+                        //list) encode it here. Safe: server-side notes writes happen later
+                        //during firing resolution as appends/overwrites; nothing reads the
+                        //incoming client notes value except weapons that opt in.
+                        $fireOrder->notes = $fo["notes"] ?? "";
                         if ($sys) {
                             $fires[] = $fireOrder;
                         }

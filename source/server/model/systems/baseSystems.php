@@ -4670,11 +4670,11 @@ class HkControlNode extends ShipSystem{
 		$howPartial = HkControlNode::getUncontrolledMod($playerID,$gamedata);
 		$iniModifier = HkControlNode::$fullIniPenalty*$howPartial;
 		    
-		/* //No long required as Hangars Operations now exist
-		if($gamedata->turn<=2){ //HKs should start in hangars; instead, they will get additional Ini penalty on turn 1 and 2
+
+		if($gamedata->turn < 2){ //HKs should start in hangars; if they don't, apply additional Ini penalty on turn 1
 			$iniModifier+=HkControlNode::$fullIniPenalty;
 		}		
-		*/
+		
 
 		$iniModifier = floor($iniModifier);
 		return $iniModifier;
@@ -4689,6 +4689,283 @@ class HkControlNode extends ShipSystem{
     }	    
 		    
 } //endof class HkControlNode
+
+
+/* Orieni HK Control Node.
+ *
+ * Same role as the base HkControlNode (commands remote-controlled Hunter-Killer flights),
+ * but a DIFFERENT shortfall mechanic. Where the base class (used by NexusMakar) applies a
+ * graduated, fleet-wide Initiative penalty via getIniMod(), the Orieni node instead makes
+ * the EXCESS flights fully UNCONTROLLED for one turn - the same critical the ELINT JAM
+ * disruption applies (-15 ini, read by BaseShip::getCommonIniModifiers). This unifies the
+ * node-shortfall path with the new HK Jamming "Uncontrolled" effect.
+ *
+ * Keeps its OWN static node/flight lists so Orieni registration is fully separate from the
+ * base NexusMakar lists - the two factions' shortfall logic never mix.
+ *
+ * Extends ShipSystem directly (NOT HkControlNode): the two share only a few display
+ * properties while all behaviour differs, so subclassing bought nothing but coupling (it
+ * forced an array_pop of the base node list in the ctor to undo the parent's registration,
+ * and dragged in the unused proportional getIniMod path). $name is kept identical to the base
+ * ("hkControlNode") so the client renders it with the existing icon/handling - no new client
+ * subclass needed.
+ *
+ * Capacity is counted in WHOLE FLIGHTS: one point of output controls one standard flight up to 6 craft.
+ */
+class HkControlNodeOrieni extends ShipSystem{
+	//Display properties mirror HkControlNode so it looks/behaves identically to the player.
+	public $name = "hkControlNode";
+	public $displayName = "HK Control Node";
+	public $primary = true;
+
+	protected $possibleCriticals = array( //simplified from B5Wars! (same table as HkControlNode)
+		15=>"OutputReduced1",
+		21=>"OutputReduced2",
+	);
+
+	public static $alreadyCleared = false;
+	public static $nodeList = array(); //Orieni control nodes in game
+	public static $hkList = array();   //Orieni HK flights in game
+
+	/* One-shot per advance: guards resolveNodeShortfall against running more than once
+	 * within a single setCriticals (which re-runs on replay). */
+	public static $shortfallResolved = false;
+
+	/* Separate one-shot guard for the deployment-time resolver (different phase/request
+	 * from the fire-phase resolver; kept independent so neither can suppress the other). */
+	public static $deploymentShortfallResolved = false;
+
+	function __construct($armour, $maxhealth, $powerReq, $output){
+		parent::__construct($armour, $maxhealth, $powerReq, $output);
+		HkControlNodeOrieni::$nodeList[] = $this;
+	}
+
+	/*to be called by every Orieni HK flight after creation*/
+	public static function addHKFlight($HKflight){
+		HkControlNodeOrieni::$hkList[] = $HKflight;
+	}
+
+	//inactive entries (from other gamedata) might have slipped by... clear them out!
+	public static function clearLists($gamedata){
+		HkControlNodeOrieni::$alreadyCleared = true;
+		$tmpArray = array();
+		foreach(HkControlNodeOrieni::$nodeList as $curr){
+			$shp = $curr->getUnit();
+			if ($gamedata->shipBelongs($shp)) $tmpArray[] = $curr;
+		}
+		HkControlNodeOrieni::$nodeList = $tmpArray;
+		$tmpArray = array();
+		foreach(HkControlNodeOrieni::$hkList as $curr){
+			if ($gamedata->shipBelongs($curr)) $tmpArray[] = $curr;
+		}
+		HkControlNodeOrieni::$hkList = $tmpArray;
+	}//endof function clearLists
+
+	/* How many WHOLE HK flights this player can control, based on active control-node
+	 * output. One point of output controls one standard flight. */
+	private static function getControllableFlights($playerID, $turn){
+		$capacity = 0;
+		foreach(HkControlNodeOrieni::$nodeList as $currNode){
+			if ( ($currNode->isDestroyed($turn))
+			     || ($currNode->isOfflineOnTurn($turn))
+			    ){ continue; }//if controller system is destroyed or offline, no effect
+			$shp = $currNode->getUnit();
+			if ($shp->userid == $playerID) $capacity += $currNode->getOutput();
+		}
+		return $capacity; //in WHOLE flights (1 output = 1 flight controlled)
+	}
+
+	/* HK Control Node shortfall -> Uncontrolled.
+	 *
+	 * When a player has more active Orieni HK flights than their control nodes can command,
+	 * the excess flights go Uncontrolled for ONE turn - the same critical the ELINT JAM
+	 * disruption applies. The crit is placed on each affected flight's sample fighter during
+	 * the crit phase, taking effect next turn (oneturn semantics -> -15 ini read by
+	 * BaseShip::getCommonIniModifiers, exactly when the old proportional penalty used to land).
+	 *
+	 * Called from the tail of Criticals::setCriticals, AFTER HkJamming::resolveJamming.
+	 *
+	 * The penalty is RECOMPUTED from scratch every turn over the whole on-map HK roster and
+	 * re-stamped on the tail-excess: a node shortfall is a standing condition, so the flight
+	 * must stay Uncontrolled for as long as it persists, not just the turn it first appears.
+	 * This is the key reason we do NOT skip a flight merely because it is Uncontrolled THIS
+	 * turn - that earlier exclusion (intended only to drop Jamming victims from the count) was
+	 * also dropping the resolver's OWN node-shortfall victims, so the crit applied once (or by
+	 * the deployment resolver on the deploy turn) and then silently lapsed the following turn.
+	 * Counting an already-Uncontrolled flight is harmless: a Jamming crit is keyed to turn T
+	 * (effect T only) while the node crit we stamp here is keyed to T (effect T+1), so they
+	 * never collide on the same turn, and a jammed flight that is still node-short next turn
+	 * SHOULD remain Uncontrolled regardless of whether the jamming wears off.
+	 *
+	 * Deterministic (no dice) so no replay roll-FIFO is needed, but the added crits must
+	 * persist via getUpdatedCriticals (updated/newCrit), and the resolver is guarded to run
+	 * once per advance so re-entry / replay does not stack duplicate Uncontrolled crits.
+	 */
+	public static function resolveNodeShortfall($gamedata){
+		if (HkControlNodeOrieni::$shortfallResolved) return;
+		HkControlNodeOrieni::$shortfallResolved = true;
+
+		if(!HkControlNodeOrieni::$alreadyCleared) HkControlNodeOrieni::clearLists($gamedata); //drop any inactive entries
+
+		$turn = $gamedata->turn; //control is exercised THIS turn; crit takes effect (oneturn) NEXT turn
+
+		//Bucket EVERY on-map HK flight that demands control, by owner.
+		//Excluded:
+		// - DOCKED flights (Hangar Ops: removed = true): in a hangar, not on the map, so
+		//   they need no Control Node. This also covers a flight that DOCKED this turn
+		//   (removed set this turn) - it is in the bay next turn, so it shouldn't count.
+		//   Checked explicitly (not via isDestroyed) so the intent survives any future
+		//   change to the removed -> isDestroyed coupling.
+		// - DESTROYED flights / flights with no live craft left.
+		//NOT excluded: a flight already Uncontrolled this turn (e.g. from Jamming, or from the
+		//deployment-turn resolver). It is deliberately still counted and eligible for re-crit so
+		//the node-shortfall penalty RENEWS every turn the shortfall stands - see the method
+		//header for why this is safe (the two Uncontrolled crits never key to the same turn).
+		//INCLUDED: a flight LAUNCHED this turn. Hangar launch (HangarOps::process*Launches,
+		//run in Pass 2 of setCriticals) spawns it as a fresh, non-removed FighterFlight whose
+		//constructor re-registers it on $hkList, and resolveNodeShortfall runs at the tail of
+		//setCriticals - after that - so a just-launched HK is on the map next turn and correctly
+		//demands a Control Node now.
+		$flightsByPlayer = array();
+		foreach(HkControlNodeOrieni::$hkList as $hkFlight){
+			if (!empty($hkFlight->removed)) continue; //docked (incl. docked this turn) - in hangar, no node needed
+			if ($hkFlight->isDestroyed()) continue;
+			if ($hkFlight->countActiveCraft($turn) < 1) continue;
+			$flightsByPlayer[$hkFlight->userid][] = $hkFlight;
+		}
+
+		foreach($flightsByPlayer as $playerID => $flights){
+			$capacity = HkControlNodeOrieni::getControllableFlights($playerID, $turn);
+			$shortfall = count($flights) - $capacity;
+			if ($shortfall <= 0) continue; //all flights covered
+
+			//Mark flights Uncontrolled from the TAIL of the list until the shortfall is met.
+			//Effect lands NEXT turn (control was exercised this turn).
+			for ($i = count($flights) - 1; $i >= 0 && $shortfall > 0; $i--){
+				HkControlNodeOrieni::markUncontrolled($flights[$i], $gamedata, $gamedata->turn + 1);
+				$shortfall--;
+			}
+		}
+	}//endof function resolveNodeShortfall
+
+	/* Deployment-time shortfall -> Uncontrolled IN EFFECT THIS TURN.
+	 *
+	 * The fire-phase resolveNodeShortfall only ever applies the penalty prospectively
+	 * (resolved end-of-turn, in effect next turn) - which is correct for hangar-launched
+	 * HKs. But an HK that DEPLOYS ONTO THE MAP (no hangar space - the rules expect HKs to
+	 * start docked) is active and uncontrolled on its FIRST turn, and that turn has no
+	 * preceding crit phase, so the prospective penalty would miss it. This closes that gap:
+	 * for every Orieni HK flight whose deployment turn IS the current turn and which is on
+	 * the map (not docked), if the player's nodes can't command the whole on-map HK roster,
+	 * the excess (tail-first) gets an Uncontrolled crit in effect THIS turn.
+	 *
+	 * Generalised to any first-on-map turn, not just turn 1 (covers late-deploying slots).
+	 *
+	 * Called once from DeploymentGamePhase::advance; persisted via submitCriticals there.
+	 * Guarded by the same once-per-advance flag as the fire-phase resolver.
+	 */
+	public static function resolveDeploymentShortfall($gamedata){
+		if (HkControlNodeOrieni::$deploymentShortfallResolved) return;
+		HkControlNodeOrieni::$deploymentShortfallResolved = true;
+
+		if(!HkControlNodeOrieni::$alreadyCleared) HkControlNodeOrieni::clearLists($gamedata);
+
+		$turn = $gamedata->turn;
+
+		//All on-map HK flights demand control. Split into "deployed this turn" (eligible for
+		//the this-turn crit) and "already on the map from a prior turn" (already handled by the
+		//previous fire phase's resolver - counted for capacity but NOT re-crit here).
+		$onMapByPlayer  = array(); //all on-map flights (for capacity accounting)
+		$newByPlayer    = array(); //subset deployed THIS turn, on the map (eligible for this-turn crit)
+		foreach(HkControlNodeOrieni::$hkList as $hkFlight){
+			if (empty($hkFlight->remoteControl)) continue; //only remote-controlled HKs are affected
+			if (!empty($hkFlight->removed)) continue;       //docked - in a hangar, needs no node
+			if ($hkFlight->isDestroyed()) continue;
+			if ($hkFlight->countActiveCraft($turn) < 1) continue;
+			$sample = $hkFlight->getSampleFighter();
+			if ($sample && $sample->hasCritical("Uncontrolled", $turn)) continue; //already uncontrolled this turn
+
+			$onMapByPlayer[$hkFlight->userid][] = $hkFlight;
+			if ($hkFlight->getTurnDeployed($gamedata) == $turn){
+				$newByPlayer[$hkFlight->userid][] = $hkFlight;
+			}
+		}
+
+		foreach($newByPlayer as $playerID => $newFlights){
+			$capacity   = HkControlNodeOrieni::getControllableFlights($playerID, $turn);
+			$onMap      = $onMapByPlayer[$playerID];
+			$shortfall  = count($onMap) - $capacity;
+			if ($shortfall <= 0) continue; //whole on-map roster is covered
+
+			//Assign the shortfall to the newly-deployed flights tail-first. We only crit the
+			//new arrivals (prior-turn flights already got their this-turn crit last fire phase);
+			//cap the count at the number of new flights so we never over-apply.
+			$toCrit = min($shortfall, count($newFlights));
+			for ($i = count($newFlights) - 1; $i >= 0 && $toCrit > 0; $i--){
+				HkControlNodeOrieni::markUncontrolled($newFlights[$i], $gamedata, $turn); //in effect THIS turn
+				$toCrit--;
+			}
+		}
+	}//endof function resolveDeploymentShortfall
+
+	/* Apply an Uncontrolled crit to a flight's sample fighter (flights have no CnC;
+	 * getCommonIniModifiers reads flight ini crits from the sample fighter). Mirrors
+	 * HkJamming::addCrit so both paths converge on the same crit + persistence convention.
+	 *
+	 * Uncontrolled is a ONETURN crit: hasCritical("Uncontrolled", $T) is true when
+	 * crit->turn + 1 == $T. So to take effect on $effectTurn the crit is keyed to
+	 * $effectTurn - 1. The fire-phase resolver passes effectTurn = turn+1 (penalty lands
+	 * next turn); the deployment resolver passes effectTurn = turn (a freshly map-deployed
+	 * HK that never saw a crit phase is uncontrolled on its FIRST turn). */
+	private static function markUncontrolled($flight, $gamedata, $effectTurn){
+		$sample = $flight->getSampleFighter();
+		if (!$sample) return;
+
+		$critTurn = $effectTurn - 1; //oneturn crit takes effect on critTurn + 1 = $effectTurn
+		$crit = new Uncontrolled(-1, $flight->id, $sample->id, "Uncontrolled", $critTurn);
+		$crit->updated = true;
+		$crit->newCrit = true; //force save even though it takes effect a turn after its key turn
+		$sample->criticals[] = $crit;
+
+		//Surface it in the combat log via the flight's RammingAttack system - the
+		//self-targeted, zero-damage convention used by HkJamming / marine missions.
+		$rammingSystem = $flight->getSystemByName("RammingAttack");
+		if (!$rammingSystem) return;
+
+		$when = ($effectTurn > $gamedata->turn) ? "next turn" : "this turn";
+		$fireOrder = new FireOrder(
+			-1, "normal", $flight->id, $flight->id,
+			$rammingSystem->id, -1, $gamedata->turn, 1,
+			0, 0, 0, 0, 0,
+			0, 0, 'HkControl', 10000
+		);
+		$fireOrder->pubnotes = "<br>HK CONTROL: Insufficient Control Nodes - flight is UNCONTROLLED (-15 Initiative) $when.";
+		$fireOrder->addToDB = true;
+		$rammingSystem->fireOrders[] = $fireOrder;
+	}//endof function markUncontrolled
+
+	public function setSystemDataWindow($turn){
+		parent::setSystemDataWindow($turn);
+		//override the base (proportional-penalty) text with the Orieni Uncontrolled behaviour
+		$this->data["Special"] = "Controls one Hunter-Killer flight per point of output.";
+		$this->data["Special"] .= "<br>If there are not enough Control Nodes to command all deployed Hunter-Killer flights,<br>the excess flights become UNCONTROLLED (-15 Initiative) on the following turn.";
+		$this->data["Special"] .= "<br>A flight already made Uncontrolled (e.g. by ELINT Jamming) does not require a Control Node while uncontrolled.";
+		$this->data["Special"] .= "<br>Any Initiative changes are effective on NEXT TURN.";
+	}
+
+	public static function getIniMod($playerID,$gamedata, $ship){
+	    $iniModifier = 0;
+
+		$depTurn = $ship->getTurnDeployed($gamedata);
+
+		if($depTurn == $gamedata->turn){ //HKs should start in hangars; if they don't, apply additional Ini penalty on deploy turn
+			$iniModifier -=50;
+		}		
+
+		return $iniModifier;
+	}//endof function getIniMod	
+
+} //endof class HkControlNodeOrieni
 
 
 class HyachComputer extends ShipSystem implements SpecialAbility{

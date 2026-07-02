@@ -1573,6 +1573,13 @@ class DBManager
                 if ($movement->type == "start" || $movement->turn != $turn)
                     continue;
 
+                //Transient forced JINKS (Gravitic Augmenter free jinks) are re-added in-memory
+                //every load and must never be written to the DB, or they would accumulate.
+                //Only jinks: forced pivots (pivotleft/right, rotateLeft/right) are real committed
+                //moves that DO persist through this path.
+                if ($movement->type == "jink" && !empty($movement->forced))
+                    continue;
+
                 $preturn = ($movement->preturn) ? 1 : 0;
 
                 if ($acceptPreturn == false && $preturn)

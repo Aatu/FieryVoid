@@ -396,6 +396,20 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
             });
 
 
+            // ✅ Default the "Show Custom" checkbox on if customs are explicitly
+            // allowed in the scenario description, or this is a fleet-test lobby.
+            (function () {
+                var description = lobbyData.description || "";
+                var customsAllowed = /CUSTOM FACTIONS \/ UNITS:\s*Allowed/i.test(description)
+                var isFleetTest = !!(gamedata.rules && gamedata.rules.fleetTest);
+                if (customsAllowed || isFleetTest) {
+                    // Set checked + show the dropdown without triggering the change
+                    // handler, so the "not allowed" warning never fires on load.
+                    $('#toggleCustom').prop('checked', true);
+                    $('#customDropdown').show();
+                }
+            })();
+
             // ✅ Initial call
             updateTierFilter();
 

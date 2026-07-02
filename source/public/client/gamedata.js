@@ -189,7 +189,10 @@ window.gamedata = {
     },
 
     getMyActiveShips: function getMyActiveShips() {
-        return gamedata.getActiveShips().filter(ship => gamedata.isMyShip(ship) && !ship.mine);
+        //Uncontrolled (HK-jammed) remote-controlled flights are moved by the server (drift),
+        //so exclude them here the way mines/terrain are excluded from getActiveShips: the player
+        //must never get the movement UI / become the active ship for one. Gated on remoteControl.
+        return gamedata.getActiveShips().filter(ship => gamedata.isMyShip(ship) && !ship.mine && !shipManager.movement.isUncontrolled(ship));
     },
 
     getShip: function getShip(id) {
@@ -883,11 +886,11 @@ window.gamedata = {
             }
 
             if (hasNoFO.length == 0 && hasSplitFO.length == 0) { //Has no ships with no fireOrders at all.
-                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
+                confirm.confirm('<span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR PRE-FIRE ORDERS?</span>', gamedata.doCommit);
             } else {
                 var html = '';
                 if (hasNoFO.length > 0) {
-                    html += "You have not assigned any fire orders for the following ships: ";
+                    html += "You have not assigned any pre-fire orders for the following ships: ";
                     html += "<br>";
                     for (var ship in hasNoFO) {
                         //html += hasNoFO[ship].name + " (" + hasNoFO[ship].shipClass + ")";
@@ -905,7 +908,7 @@ window.gamedata = {
                         html += "<br>";
                     }
                 }
-                confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR FIRE ORDERS?</span>', gamedata.doCommit);
+                confirm.confirm(html + '<br><span class="commit-confirm-q">Are you sure you wish to COMMIT YOUR PRE-FIRE ORDERS?</span>', gamedata.doCommit);
             }
         } else if (gamedata.gamephase == 3) {
             var myShips = [];
@@ -1597,6 +1600,17 @@ getActiveShipName: function getActiveShipName() {
             var slot = gamedata.slots[i];
             if (slot.playerid == gamedata.thisplayer) return slot.slot;
         }
+    },
+
+    // Number of distinct teams in the game (two = a classic two-sided match,
+    // including 2v2 etc). Used to decide whether a relative mine/enemy colour
+    // scheme is unambiguous (only meaningful with exactly two sides).
+    getDistinctTeamCount: function getDistinctTeamCount() {
+        var teams = {};
+        for (var i in gamedata.slots) {
+            teams[gamedata.slots[i].team] = true;
+        }
+        return Object.keys(teams).length;
     },
 
     hasSlotSurrendered: function hasSlotSurrendered(slotid) {

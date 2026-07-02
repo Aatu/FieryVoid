@@ -31,6 +31,24 @@ class Firing
                 continue;
 
             $shooter = $gamedata->getShipById($fire->shooterid);
+
+            //Uncontrolled-flight guard. A remote-controlled Hunter-Killer flight whose
+            //command link is severed (node shortfall or ELINT jamming) is driven entirely
+            //by the server: AutomatedMovement moves it (drift/seek) and, if it ends co-located
+            //with an enemy, createAutomatedRamOrders generates its ram. The player has no
+            //control, so any fire order they managed to submit for it is spurious and would
+            //DOUBLE the attack (player order + automated order) - exactly the 12-fire-order /
+            //broken-return-damage bug on uncontrolled HK rams. Reject it before it reaches the
+            //DB. Same detach + ->rejected convention as the corrupt-order path below.
+            if ($shooter && self::isShooterUncontrolled($shooter, $gamedata)) {
+                $fire->rejected = true;
+                Debug::log("validateFireOrders: rejecting player fire order for UNCONTROLLED flight "
+                    . "(game {$gamedata->id}, shooter {$fire->shooterid}, weaponid {$fire->weaponid}, "
+                    . "type {$fire->type}) - server drives uncontrolled flights.");
+                self::detachFireOrder($shooter, $fire);
+                continue;
+            }
+
             $weapon = $shooter ? $shooter->getSystemById($fire->weaponid) : null;
 
             if ($weapon instanceof Weapon)
@@ -55,6 +73,21 @@ class Firing
         }
 
         return true;
+    }
+
+    /* True when $shooter is a remote-controlled flight that is Uncontrolled THIS turn
+     * (command link severed - node shortfall or ELINT jamming), so the server drives it
+     * and any player fire order for it is spurious. Mirrors AutomatedMovement::isUncontrolled:
+     * Uncontrolled is a oneturn crit on the sample fighter placed on turn T (effect T+1),
+     * and hasCritical's oneturn handling matches it on the effect turn. Cheap-guarded on
+     * remoteControl so ordinary ships short-circuit immediately. */
+    private static function isShooterUncontrolled($shooter, $gamedata)
+    {
+        if (empty($shooter->remoteControl)) return false;
+        if (!($shooter instanceof FighterFlight)) return false;
+        $sample = $shooter->getSampleFighter();
+        if (!$sample) return false;
+        return $sample->hasCritical("Uncontrolled", $gamedata->turn) > 0;
     }
 
     /* Remove a specific FireOrder object from any system (or fighter subsystem)
@@ -825,7 +858,7 @@ public static function firePreFiringWeapons($gamedata){
 
 
     /*Marcin Sawicki: count hit chances for starting fire phase fire*/
-    public static function prepareFiring($gamedata){
+    public static function prepareFiring($gamedata, $dbManager = null){
 	//additional call for weapons needing extra preparation
         foreach ($gamedata->ships as $ship){
             foreach ($ship->systems as $system){
@@ -835,7 +868,11 @@ public static function firePreFiringWeapons($gamedata){
 
         //Uncontrolled Hunter-Killers that ended movement co-located with an enemy ram it
         //(no player to submit the ram order). Done before ram orders are gathered below.
-        AutomatedMovement::createAutomatedRamOrders($gamedata);
+        //$dbManager is threaded through so each automated ram FireOrder is persisted
+        //IMMEDIATELY (real DB id) before fireWeapons resolves it - otherwise its return-damage
+        //DamageEntry captures the in-memory id (-1) and the firing fighter's destruction never
+        //links to a combat-log row (the controlled/player-submitted ram already has a real id).
+        AutomatedMovement::createAutomatedRamOrders($gamedata, $dbManager);
 
         $ambiguousFireOrders  = array();
         foreach ($gamedata->ships as $ship){

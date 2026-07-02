@@ -54,13 +54,13 @@ class Galleas extends BaseShip{
 			//$temp6->displayName = "Main Thruster";
 		
 		$this->addLeftSystem(new TwinArray(3, 6, 2, 240, 60));
-		$this->addLeftSystem(new Hangar(2, 6));
+		$this->addLeftSystem(new Hangar(2, 6, 3));
 		$this->addFrontSystem($temp1);
 		$this->addLeftSystem($temp2);
 		$this->addAftSystem($temp3);
 		
 		$this->addRightSystem(new TwinArray(3, 6, 2, 300, 120));
-		$this->addRightSystem(new Hangar(2, 6));
+		$this->addRightSystem(new Hangar(2, 6, 3));
 		$this->addFrontSystem($temp4);
 		$this->addRightSystem($temp5);
 		$this->addAftSystem($temp6);

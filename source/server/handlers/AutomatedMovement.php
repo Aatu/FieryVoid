@@ -166,23 +166,34 @@ class AutomatedMovement
         $jink = max(0, min($jink, $thrustTotal));
         $thrustAfterJink = $thrustTotal - $jink;
 
-        // 2. Accel/decel: half of the post-jink thrust, applied toward closing the gap.
-        $accelBudget = intdiv($thrustAfterJink, 2);
+        // 2. Accel/decel POOL: the rules cap acceleration OR deceleration at half the
+        //    thrust remaining after jinking. This single pool funds BOTH the initial
+        //    accel toward the target AND any reactive deceleration used to avoid terrain,
+        //    so an uncontrolled HK is never more agile than a controlled one.
+        $accelPool   = intdiv($thrustAfterJink, 2);
         $startSpeed  = (int)$lastMove->speed;
         $targetCube  = $target->getHexPos()->toCube();
         $startCube   = $lastMove->position->toCube();
         $gap         = $startCube->distanceTo($targetCube);
 
-        // Want enough speed to reach the target this turn, but no more (overshoot wastes
-        // the ram). Clamp the change to the accel budget and to a sane 0..speedCap range.
-        $desiredSpeed = max(0, min($gap, self::SPEED_CAP));
+        // Initial accel/decel toward the target. We want enough speed to REACH it, plus a
+        // small DETOUR margin so that routing AROUND terrain (which lengthens the path) still
+        // arrives on the target hex instead of stranding the unit a hex short. Surplus speed
+        // is harmless: the route halts on the target hex (reached-target stop below) and the
+        // remaining speed is shed there. Also capped at the MANEUVER speed — the fastest the
+        // unit can fly while still affording the turns needed to keep aiming. Turn cost grows
+        // with speed (ceil(speed*turncost)), so an HK that bolts to full speed cannot steer
+        // and flies straight past / into terrain. Drawn from the accel pool.
+        $maneuverCap  = self::maneuverSpeedCap($thrustAfterJink, $ship->turncost);
+        $desiredSpeed = max(0, min($gap + self::DETOUR_MARGIN, $maneuverCap, self::SPEED_CAP));
         $speedDelta   = $desiredSpeed - $startSpeed;
-        if ($speedDelta >  $accelBudget) $speedDelta =  $accelBudget;
-        if ($speedDelta < -$accelBudget) $speedDelta = -$accelBudget;
+        if ($speedDelta >  $accelPool) $speedDelta =  $accelPool;
+        if ($speedDelta < -$accelPool) $speedDelta = -$accelPool;
         $newSpeed     = max(0, $startSpeed + $speedDelta);
+        $accelPool   -= abs($speedDelta);            // remaining pool available for decel-to-avoid
         $accelSpent   = abs($speedDelta);
 
-        // 3. Remaining thrust is for turning.
+        // 3. Turning pool: whatever thrust is left after jink + initial accel.
         $turnThrust = $thrustAfterJink - $accelSpent;
 
         $moves   = array();
@@ -190,62 +201,133 @@ class AutomatedMovement
         $facing  = $heading; // flights keep facing == heading
         $pos     = $lastMove->position;
         $iniative = $ship->iniative;
+        $slipUsedDir = 0; // 0 none, +1 right, -1 left — only one slip direction per turn
 
-        // Acceleration order (one combined 'speedchange'); thrust = abs(delta).
+        // Initial acceleration order (one combined 'speedchange'); thrust = abs(delta).
         if ($speedDelta !== 0) {
-            $accel = new MovementOrder(
-                null, 'speedchange', $pos, 0, 0,
-                $newSpeed, $heading, $facing,
-                false, $gamedata->turn, $speedDelta, $iniative
-            );
-            $accel->requiredThrust = array($accelSpent, 0, 0, 0, 0);
-            $accel->assignedThrust = array($accelSpent, 0, 0, 0, 0);
-            $moves[] = $accel;
+            $moves[] = self::speedChangeOrder($pos, $newSpeed, $heading, $facing, $speedDelta, $gamedata, $iniative);
         }
 
-        // Walk the route: `newSpeed` hexes, turning toward the target as thrust allows.
+        // Walk the route up to `newSpeed` hexes. Per hex, in priority order:
+        //   (a) turn toward the target (paid from turn pool),
+        //   (b) if the next hex is terrain: slip aside into a clear hex (1 thrust),
+        //   (c) else decelerate just enough to stop short (paid from the accel pool),
+        //   (d) else collide — proceed into the terrain hex (handled by the ram pipeline).
+        $movedHexes = 0;
+        $lastWasSlip = false; // a slip needs an intervening 'move' before the next slip
         for ($step = 0; $step < $newSpeed; $step++) {
-            // Turn toward the target before moving (greedy: as many single-side turns as
-            // afford and as needed to face the best direction). Bounded to 3 single-side
-            // turns (max rotation to any of 6 directions) as defensive insurance.
-            $desiredDir = self::bestDirectionToward($pos, $target, $gamedata);
-            $turnGuard = 0;
-            while ($heading !== $desiredDir && $turnGuard < 3) {
-                $turnGuard++;
-                $turnCost = self::turnCost($ship, $newSpeed);
-                if ($turnCost > $turnThrust) break; // out of turning thrust
-                $right = self::turnSideToward($heading, $desiredDir); // +1 right, -1 left
-                $heading = Mathlib::addToHexFacing($heading, $right);
-                $facing  = $heading;
-                $turnThrust -= $turnCost;
+            $curDist = self::hexDist($pos, $target);
 
-                $turn = new MovementOrder(
-                    null, ($right > 0 ? 'turnright' : 'turnleft'), $pos, 0, 0,
-                    $newSpeed, $heading, $facing,
-                    false, $gamedata->turn, 0, $iniative
-                );
-                $turn->requiredThrust = array($turnCost, 0, 0, 0, 0);
-                $turn->assignedThrust = array($turnCost, 0, 0, 0, 0);
-                $moves[] = $turn;
-
-                // Re-evaluate the best direction from the (unchanged) hex after turning.
-                $desiredDir = self::bestDirectionToward($pos, $target, $gamedata);
+            // REACHED the target's hex — STOP here so we ram it (otherwise the next move
+            // would slide straight back OUT of the hex, leaving us adjacent). Shed leftover
+            // speed (the detour margin / surplus): a 'speedchange' for as much as the accel
+            // pool affords, and `finalSpeed` is pinned to the hexes actually travelled below,
+            // so the recorded end-speed always matches the real distance moved.
+            if ($curDist == 0) {
+                $overspeed = $newSpeed - $movedHexes;
+                if ($overspeed > 0 && $accelPool > 0) {
+                    $decel     = min($accelPool, $overspeed);
+                    $accelPool -= $decel;
+                    $newSpeed  -= $decel;
+                    $moves[]    = self::speedChangeOrder($pos, $newSpeed, $heading, $facing, -$decel, $gamedata, $iniative);
+                }
+                break;
             }
 
-            // Move one hex along the (possibly updated) heading.
+            // ROUTE travel: aim at the best UNBLOCKED, PROGRESSING direction (routes around
+            // terrain), biased toward the true bearing so the unit doesn't slide sideways.
+            // routeDir is null when no unblocked neighbour gets strictly closer.
+            $routeDir = self::bestProgressingDir($pos, $target, $curDist, $gamedata, $heading);
+            if ($routeDir !== null) {
+                self::turnHeadingToward($routeDir, $ship, $newSpeed, $pos, $heading, $facing, $turnThrust, $moves, $gamedata, $iniative);
+                $nextPos = self::advanceHex($pos, $heading, 1);
+                // Heading now faces the routed direction; take the step only if it makes
+                // STRICT progress (and is clear). Equal-distance lateral steps are left to the
+                // slip/commit paths below so we never burn speed sliding past the target.
+                if (!self::isHexBlocked($nextPos, $gamedata) && self::hexDist($nextPos, $target) < $curDist) {
+                    $pos = $nextPos;
+                    $movedHexes++;
+                    $lastWasSlip = false;
+                    $moves[] = self::moveOrder($pos, $newSpeed, $heading, $facing, $gamedata, $iniative);
+                    continue;
+                }
+            }
+
+            // SLIP: dodge sideways into a clear, progressing hex without changing heading.
+            $slip = self::tryFindSlip($pos, $heading, $slipUsedDir, $lastWasSlip, $turnThrust, $target, $curDist, $gamedata);
+            if ($slip !== null) {
+                list($slipRight, $slipPos) = $slip;
+                $slipUsedDir = $slipRight;            // lock the slip direction for the turn
+                $turnThrust -= 1;                     // flight slip costs 1 thrust
+                $pos = $slipPos;
+                $movedHexes++;
+                $lastWasSlip = true;
+                $moves[] = self::slipOrder($pos, $newSpeed, $heading, $facing, $slipRight, $gamedata, $iniative);
+                continue;
+            }
+
+            // LATERAL ESCAPE: there's no strictly-closer step and no slip, but the true
+            // bearing runs INTO terrain (the target sits behind/in a terrain pocket). Rather
+            // than ram the terrain, step sideways to an EQUAL-distance clear hex to escape the
+            // local minimum; from there a progressing route usually opens up next hex. This is
+            // what stops an HK ploughing into an asteroid that merely sits between it and the
+            // target. Only triggers when the bearing hex is actually blocked (open targets are
+            // handled by the route/slip paths above).
+            $bearingDir  = self::bestRawDir($pos, $target);
+            $bearingHex  = self::advanceHex($pos, $bearingDir, 1);
+            if (self::isHexBlocked($bearingHex, $gamedata)) {
+                $lateralDir = self::bestLateralDir($pos, $target, $curDist, $gamedata, $heading);
+                if ($lateralDir !== null) {
+                    self::turnHeadingToward($lateralDir, $ship, $newSpeed, $pos, $heading, $facing, $turnThrust, $moves, $gamedata, $iniative);
+                    $nextPos = self::advanceHex($pos, $heading, 1);
+                    if (!self::isHexBlocked($nextPos, $gamedata)) {
+                        $pos = $nextPos;
+                        $movedHexes++;
+                        $lastWasSlip = false;
+                        $moves[] = self::moveOrder($pos, $newSpeed, $heading, $facing, $gamedata, $iniative);
+                        continue;
+                    }
+                }
+            }
+
+            // COMMITTED: can't route, slip, or escape laterally toward the target without
+            // hitting terrain. Aim at the target's true bearing (into the terrain), decelerate
+            // as much as the accel pool allows (rules' half-thrust cap — reduces the collision
+            // / may end short), then keep moving. A collision does NOT stop the unit; the move
+            // order passing through the terrain hex is what the RammingAttack pipeline picks up.
+            $targetDir = self::bestRawDir($pos, $target);
+            self::turnHeadingToward($targetDir, $ship, $newSpeed, $pos, $heading, $facing, $turnThrust, $moves, $gamedata, $iniative);
+
+            if ($accelPool > 0) {
+                $decel = min($accelPool, $newSpeed - $movedHexes); // floor at hexes already moved
+                if ($decel > 0) {
+                    $accelPool -= $decel;
+                    $newSpeed  -= $decel;
+                    $moves[] = self::speedChangeOrder($pos, $newSpeed, $heading, $facing, -$decel, $gamedata, $iniative);
+                }
+            }
+
+            // If decel brought speed down to the hexes already moved, the route ends here
+            // (short of the terrain). Otherwise advance one hex toward the target — through
+            // the terrain if unavoidable — and continue seeking from the new hex.
+            if ($movedHexes >= $newSpeed) break;
+
             $pos = self::advanceHex($pos, $heading, 1);
-            $move = new MovementOrder(
-                null, 'move', $pos, 0, 0,
-                $newSpeed, $heading, $facing,
-                false, $gamedata->turn, 0, $iniative
-            );
-            $moves[] = $move;
+            $movedHexes++;
+            $lastWasSlip = false;
+            $moves[] = self::moveOrder($pos, $newSpeed, $heading, $facing, $gamedata, $iniative);
         }
+
+        // End-speed is the number of hexes actually travelled this turn (a flight's speed ==
+        // its move count). This matters when the reached-target stop broke the route early
+        // with surplus speed the accel pool couldn't fully shed: record the real distance so
+        // next turn starts from a truthful speed rather than the un-spent desiredSpeed.
+        $finalSpeed = $movedHexes;
 
         // Terminal 'end' at the final hex.
         $end = new MovementOrder(
             null, 'end', $pos, 0, 0,
-            $newSpeed, $heading, $facing,
+            $finalSpeed, $heading, $facing,
             false, $gamedata->turn, 0, $iniative
         );
         $moves[] = $end;
@@ -255,7 +337,7 @@ class AutomatedMovement
         for ($i = 0; $i < $jink; $i++) {
             $jinkMove = new MovementOrder(
                 null, 'jink', $pos, 0, 0,
-                $newSpeed, $heading, $facing,
+                $finalSpeed, $heading, $facing,
                 false, $gamedata->turn, 1, $iniative
             );
             $jinkMove->requiredThrust = array(1, 0, 0, 0, 0);
@@ -292,9 +374,81 @@ class AutomatedMovement
         return $best;
     }
 
-    /* The hex-direction (0-5) FROM $pos whose neighbour is closest to the target hex —
-     * i.e. the heading that most reduces distance to the target. Greedy aim primitive. */
-    private static function bestDirectionToward($pos, $target, $gamedata)
+    /* The hex-direction (0-5) FROM $pos whose neighbour is UNBLOCKED and gets strictly
+     * closer to the target than $curDist — i.e. a terrain-free step that makes progress.
+     * Returns null when no unblocked neighbour makes progress (walled in / past the target).
+     *
+     * Among the directions that tie on resulting distance, prefer the one closest to the
+     * TRUE BEARING to the target, then the one closest to the CURRENT heading (cheaper — no
+     * turn). Without this bearing bias the old code took the first qualifying direction by
+     * index (0..5), which on a hex grid is often a diagonal that slides the unit sideways
+     * past the target at constant range — the lateral "fly-by" that made HKs look erratic. */
+    private static function bestProgressingDir($pos, $target, $curDist, $gamedata, $heading = 0)
+    {
+        $targetCube = $target->getHexPos()->toCube();
+        $fromCube   = (($pos instanceof OffsetCoordinate) ? $pos : new OffsetCoordinate($pos))->toCube();
+        $bearing    = self::bestRawDir($pos, $target); // direction of the true bearing
+
+        $bestDir   = null;
+        $bestScore = PHP_INT_MAX;
+        for ($dir = 0; $dir < 6; $dir++) {
+            $neighbour = $fromCube->moveToDirection($dir);
+            if (self::isHexBlocked($neighbour->toOffset(), $gamedata)) continue;
+            $dist = $neighbour->distanceTo($targetCube);
+            if ($dist >= $curDist) continue; // strict progress only
+
+            $bearGap = self::facingGap($dir, $bearing);
+            $headGap = self::facingGap($dir, $heading);
+            $score   = $dist * 100 + $bearGap * 10 + $headGap;
+            if ($score < $bestScore) {
+                $bestScore = $score;
+                $bestDir   = $dir;
+            }
+        }
+        return $bestDir;
+    }
+
+    /* Like bestProgressingDir but accepts an unblocked neighbour at EQUAL distance (not just
+     * strictly closer) — a sideways step that doesn't lose ground. Used by the lateral-escape
+     * to break out of a terrain pocket where every strictly-closer hex is blocked. Same
+     * bearing/heading tie-break. Returns null if even an equal-distance clear step doesn't
+     * exist (truly walled in). */
+    private static function bestLateralDir($pos, $target, $curDist, $gamedata, $heading = 0)
+    {
+        $targetCube = $target->getHexPos()->toCube();
+        $fromCube   = (($pos instanceof OffsetCoordinate) ? $pos : new OffsetCoordinate($pos))->toCube();
+        $bearing    = self::bestRawDir($pos, $target);
+
+        $bestDir   = null;
+        $bestScore = PHP_INT_MAX;
+        for ($dir = 0; $dir < 6; $dir++) {
+            $neighbour = $fromCube->moveToDirection($dir);
+            if (self::isHexBlocked($neighbour->toOffset(), $gamedata)) continue;
+            $dist = $neighbour->distanceTo($targetCube);
+            if ($dist > $curDist) continue; // never move FURTHER from the target
+
+            $bearGap = self::facingGap($dir, $bearing);
+            $headGap = self::facingGap($dir, $heading);
+            $score   = $dist * 100 + $bearGap * 10 + $headGap;
+            if ($score < $bestScore) {
+                $bestScore = $score;
+                $bestDir   = $dir;
+            }
+        }
+        return $bestDir;
+    }
+
+    /* Smallest number of hex-sides between two facings (0..3). */
+    private static function facingGap($a, $b)
+    {
+        $diff = abs($a - $b) % 6;
+        return min($diff, 6 - $diff);
+    }
+
+    /* The hex-direction (0-5) toward the target IGNORING terrain — the true bearing. Used
+     * when the HK is committed to ploughing through (no clear progressing route). Always
+     * returns a direction (never null). */
+    private static function bestRawDir($pos, $target)
     {
         $targetCube = $target->getHexPos()->toCube();
         $fromCube   = (($pos instanceof OffsetCoordinate) ? $pos : new OffsetCoordinate($pos))->toCube();
@@ -302,14 +456,47 @@ class AutomatedMovement
         $bestDir = 0;
         $bestDist = PHP_INT_MAX;
         for ($dir = 0; $dir < 6; $dir++) {
-            $neighbour = $fromCube->moveToDirection($dir);
-            $dist = $neighbour->distanceTo($targetCube);
+            $dist = $fromCube->moveToDirection($dir)->distanceTo($targetCube);
             if ($dist < $bestDist) {
                 $bestDist = $dist;
                 $bestDir = $dir;
             }
         }
         return $bestDir;
+    }
+
+    /* Rotate $heading toward $desiredDir by emitting up to 3 single-side turn orders,
+     * paying turn cost from $turnThrust and stopping when out of thrust. Mutates $heading,
+     * $facing, $turnThrust and appends to $moves (all by reference). */
+    private static function turnHeadingToward($desiredDir, $ship, $speed, $pos, &$heading, &$facing, &$turnThrust, &$moves, $gamedata, $iniative)
+    {
+        $guard = 0;
+        while ($heading !== $desiredDir && $guard < 3) {
+            $guard++;
+            $turnCost = self::turnCost($ship, $speed);
+            if ($turnCost > $turnThrust) break; // out of turning thrust
+            $right = self::turnSideToward($heading, $desiredDir);
+            $heading = Mathlib::addToHexFacing($heading, $right);
+            $facing  = $heading;
+            $turnThrust -= $turnCost;
+            $moves[] = self::turnOrder($pos, $speed, $heading, $facing, $right, $turnCost, $gamedata, $iniative);
+        }
+    }
+
+    /* True when $pos is a terrain / Enormous-unit hex (in $gamedata->blockedHexes).
+     * blockedHexes entries are OffsetCoordinate objects (see TacGamedata::setBlockedHexes,
+     * populated in onConstructed → available during the movement advance). */
+    private static function isHexBlocked($pos, $gamedata)
+    {
+        if (empty($gamedata->blockedHexes)) return false;
+        $q = ($pos instanceof OffsetCoordinate) ? $pos->q : $pos['q'];
+        $r = ($pos instanceof OffsetCoordinate) ? $pos->r : $pos['r'];
+        foreach ($gamedata->blockedHexes as $hex) {
+            $hq = ($hex instanceof OffsetCoordinate) ? $hex->q : $hex['q'];
+            $hr = ($hex instanceof OffsetCoordinate) ? $hex->r : $hex['r'];
+            if ($hq == $q && $hr == $r) return true;
+        }
+        return false;
     }
 
     /* Shortest rotation side from $heading to $desired: +1 (right/CW) or -1 (left/CCW).
@@ -328,6 +515,105 @@ class AutomatedMovement
         return max(1, $cost);
     }
 
+    /* The fastest speed at which the unit can still steer toward its target. Because a turn
+     * costs ceil(speed * turncost) thrust, a high-speed flight cannot afford to turn and
+     * just barrels in a straight line — past the target or into terrain. We reserve HALF the
+     * post-jink thrust for turning and pick the highest speed (within [MANEUVER_FLOOR, cap])
+     * whose single-turn cost fits that reserve, so the unit can correct its heading at least
+     * once en route. The other half of the thrust funds the accel itself. */
+    private static function maneuverSpeedCap($thrustAfterJink, $turncost)
+    {
+        if ($turncost <= 0) return self::SPEED_CAP; // no turn cost — never speed-limited
+        $turnReserve = intdiv($thrustAfterJink, 2);
+        for ($s = self::MANEUVER_CAP; $s >= self::MANEUVER_FLOOR; $s--) {
+            $cost = max(1, (int)ceil($s * $turncost));
+            if ($cost <= $turnReserve) return $s;
+        }
+        return self::MANEUVER_FLOOR;
+    }
+
+    const MANEUVER_FLOOR = 3;  // never throttle pursuit below this (still closes the gap)
+    const MANEUVER_CAP   = 6;  // never auto-fly faster than this while seeking
+    const DETOUR_MARGIN  = 2;  // extra closing speed so routing AROUND terrain still arrives
+
+    /* Try to slip sideways out of a terrain-blocked path. A slip moves to the hex one
+     * step clockwise (slipright, heading+1) or counter-clockwise (slipleft, heading-1)
+     * of the current heading WITHOUT changing heading/facing — useful for dodging
+     * terrain. Flight slip costs 1 thrust (drawn from the turn pool here).
+     *
+     * Rules honoured (movement.js canSlip):
+     *   - Only ONE slip DIRECTION per turn: once the HK has slipped left it may not slip
+     *     right this turn, and vice versa ($slipUsedDir locks it; 0 = none yet).
+     *   - The destination hex must itself be clear of terrain (no point dodging into more).
+     *
+     * Returns [right, destPos] for the chosen slip (right = +1 slipright / -1 slipleft),
+     * or null when no legal, terrain-clearing slip is available (or no thrust for it).
+     * When both directions are open, prefers the one that ends nearer the target. */
+    private static function tryFindSlip($pos, $heading, $slipUsedDir, $lastWasSlip, $turnThrust, $target, $curDist, $gamedata)
+    {
+        if ($turnThrust < 1) return null;  // flight slip costs 1 thrust
+        if ($lastWasSlip)    return null;  // a 'move' must separate consecutive slips
+
+        $candidates = array();
+        if ($slipUsedDir >= 0) $candidates[] = 1;  // slipright allowed unless we've slipped left
+        if ($slipUsedDir <= 0) $candidates[] = -1; // slipleft  allowed unless we've slipped right
+
+        $best = null;
+        $bestDist = $curDist; // only accept a slip that doesn't move FURTHER from target
+        foreach ($candidates as $right) {
+            $slipHeading = Mathlib::addToHexFacing($heading, $right);
+            $dest = self::advanceHex($pos, $slipHeading, 1);
+            if (self::isHexBlocked($dest, $gamedata)) continue; // would just hit other terrain
+            $d = self::hexDist($dest, $target);
+            if ($d <= $bestDist) {                              // closer (or equal) to target
+                $bestDist = $d;
+                $best = array($right, $dest);
+            }
+        }
+        return $best;
+    }
+
+    /* Hex distance between an OffsetCoordinate/position and a ship target. */
+    private static function hexDist($pos, $target)
+    {
+        $from = (($pos instanceof OffsetCoordinate) ? $pos : new OffsetCoordinate($pos))->toCube();
+        return $from->distanceTo($target->getHexPos()->toCube());
+    }
+
+    /* MovementOrder builders — keep the walk readable. All carry assignedThrust in slot 0
+     * (flight thrust is undirected) so getRemainingEngineThrust accounts for them. */
+    private static function speedChangeOrder($pos, $speed, $heading, $facing, $delta, $gamedata, $iniative)
+    {
+        $order = new MovementOrder(null, 'speedchange', $pos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, $delta, $iniative);
+        $cost = abs($delta);
+        $order->requiredThrust = array($cost, 0, 0, 0, 0);
+        $order->assignedThrust = array($cost, 0, 0, 0, 0);
+        return $order;
+    }
+
+    private static function turnOrder($pos, $speed, $heading, $facing, $right, $cost, $gamedata, $iniative)
+    {
+        $type = ($right > 0) ? 'turnright' : 'turnleft';
+        $order = new MovementOrder(null, $type, $pos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, $iniative);
+        $order->requiredThrust = array($cost, 0, 0, 0, 0);
+        $order->assignedThrust = array($cost, 0, 0, 0, 0);
+        return $order;
+    }
+
+    private static function moveOrder($pos, $speed, $heading, $facing, $gamedata, $iniative)
+    {
+        return new MovementOrder(null, 'move', $pos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, $iniative);
+    }
+
+    private static function slipOrder($pos, $speed, $heading, $facing, $right, $gamedata, $iniative)
+    {
+        $type = ($right > 0) ? 'slipright' : 'slipleft';
+        $order = new MovementOrder(null, $type, $pos, 0, 0, $speed, $heading, $facing, false, $gamedata->turn, 0, $iniative);
+        $order->requiredThrust = array(1, 0, 0, 0, 0);
+        $order->assignedThrust = array(1, 0, 0, 0, 0);
+        return $order;
+    }
+
     /* ---------------------------------------------------------------------------
      * AUTO-RAM: an Uncontrolled HK that ended its (seek) movement in the SAME hex as
      * an enemy ship rams it. Ramming is range 0 only (RammingAttack range 0.1). Called
@@ -342,7 +628,7 @@ class AutomatedMovement
      * Player HKs ram via player-submitted fire orders; this is the no-player path.
      * Cheap-guarded on remoteControl so the scan skips ordinary ships immediately.
      * --------------------------------------------------------------------------- */
-    public static function createAutomatedRamOrders($gamedata)
+    public static function createAutomatedRamOrders($gamedata, $dbManager = null)
     {
         foreach ($gamedata->ships as $flight) {
             if (empty($flight->remoteControl)) continue;
@@ -378,6 +664,19 @@ class AutomatedMovement
                     $fireOrder->pubnotes = "<br>Uncontrolled Hunter-Killers ram " . $enemy->name . "!";
                     $firstRam = false;
                 }
+
+                // Persist NOW so the order has a real DB id BEFORE fireWeapons resolves it.
+                // The ram's return damage lands on the firing fighter and its DamageEntry
+                // captures $fireOrder->id; without a real id here that id is -1 and the
+                // fighter's destruction never links to a combat-log row (unlike a player ram,
+                // which was persisted in a prior request and already carries its id). Clearing
+                // addToDB stops FireGamePhase's later submitFireorders re-inserting a duplicate.
+                // mysqli_insert_id is already int, but cast defensively - see the string-id trap.
+                if ($dbManager) {
+                    $fireOrder->id = (int)$dbManager->submitSingleFireorder($gamedata->id, $fireOrder);
+                    $fireOrder->addToDB = false;
+                }
+
                 $ram->fireOrders[] = $fireOrder;
             }
         }

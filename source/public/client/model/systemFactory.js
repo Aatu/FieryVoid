@@ -85,16 +85,37 @@ window.SystemFactory = (function () {
             if (staticSystem && staticSystem.ship) { // This is a live instance, not just a blueprint
                 var stateful = [
                     'damage', 'criticals', 'power', 'sustainedTarget',
-                    'turnsloadedArray', 'overloadturns', 'overloadshots', 
+                    'turnsloadedArray', 'overloadturns', 'overloadshots',
                     'extraoverloadshots', 'extraoverloadshotsArray', 'fireControlArray'
                 ];
-                
+
                 stateful.forEach(function(key) {
                     delete base[key];
                 });
             }
 
+            //When the server flags a system as modified mid-game (isModified; e.g. Gravitic
+            //Augmenter Mode 1 alters fireControl), its JSON carries a per-instance fireControl.
+            //Drop the merged-in fireControl from base so the JSON value is the SOLE source -
+            //otherwise this weapon would share the static blueprint's (or a prior live
+            //instance's) fireControl array reference, bleeding the modified value onto every
+            //same-phpclass weapon.
+            if (systemJson.isModified) {
+                delete base.fireControl;
+            }
+
             var args = Object.assign(base, systemJson);
+
+            //The `data` object (tooltip key/values) comes from the shared static blueprint when
+            //the server doesn't send a per-instance copy, so it's shared BY REFERENCE across all
+            //same-phpclass weapons. Any per-instance mutation of data (e.g. rebuilding the "Fire
+            //control" string for an augmenter-modified weapon, or a Targeting Computer's accuracy
+            //bump) would then bleed onto every sibling weapon's tooltip. Give each weapon its own
+            //shallow copy so tooltip mutations stay local.
+            if (args.data && typeof args.data === 'object') {
+                args.data = Object.assign({}, args.data);
+            }
+
             var system = new window[name](args, ship);
 
             return system;

@@ -1151,8 +1151,14 @@ class BaseShip {
     {         
         $readyToFire = false;
         foreach($this->systems as $system){
-            if($system instanceof Weapon){                
-                if($system->preFires && ($system->turnsloaded >= $system->loadingtime) && !$system->autoFireOnly){ //ready to fire!
+            if($system instanceof Weapon){
+                //A multi-mode weapon (e.g. Gravitic Augmenter) leaves its scalar autoFireOnly at the
+                //default-mode value here, because no fire order has been submitted yet to trigger a
+                //changeFiringMode(). If ANY mode in autoFireOnlyArray is player-fireable, the weapon can
+                //still legitimately want the pre-fire phase, so treat it as manually-fireable in that case.
+                $manuallyFireable = !$system->autoFireOnly
+                    || (!empty($system->autoFireOnlyArray) && in_array(false, $system->autoFireOnlyArray, true));
+                if($system->preFires && ($system->turnsloaded >= $system->loadingtime) && $manuallyFireable){ //ready to fire!
                     //Separate check for Prox Mines here.              
                     if($system instanceof ProximityMine){
                         if($this->commandControl && !$system->checkForPreFiringTargets($this, $gamedata)) continue; //No targets in range, don't trigger preFire phase.

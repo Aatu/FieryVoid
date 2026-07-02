@@ -15,13 +15,42 @@ window.ShipIconContainer = function () {
     function setShips(ships) {
         ships.forEach(function (ship) {
             if (!this.hasIcon(ship.id)) {
-                this.iconsAsObject[ship.id] = createIcon(ship, this.scene);
+                var icon = createIcon(ship, this.scene);
+                this.iconsAsObject[ship.id] = icon;
+                // New icons are born with the default zoom uniforms (overlayAlpha 0,
+                // scale 1). The zoom-derived overlay tint / small-zoom scale are only
+                // ever applied by onZoomEvent, which fires on zoom *changes* — so a
+                // ship spawned mid-game (Shadow Fighter Bomb, spawned captor mines,
+                // etc.) shows no overlay colour until the next zoom. Apply the current
+                // zoom to the fresh icon immediately so it matches the others.
+                applyZoomToIcon.call(this, icon, getCurrentZoom());
             } else {
                 this.iconsAsObject[ship.id].consumeShipdata(ship);
             }
         }, this);
 
         buildShipArray.call(this);
+    }
+
+    function getCurrentZoom() {
+        return (window.webglScene && typeof window.webglScene.zoom === 'number')
+            ? window.webglScene.zoom
+            : 1;
+    }
+
+    // Single source of truth for the per-zoom icon uniforms, shared by onZoomEvent
+    // (all icons) and setShips (a single freshly-created icon).
+    function applyZoomToIcon(icon, zoom) {
+        if (zoom <= 0.5) {
+            var newzoom = 2 * zoom;
+            icon.setScale(newzoom, newzoom);
+        }
+
+        var alpha = zoom > 2 ? zoom - 2 : 0;
+        if (alpha > 1) {
+            alpha = 1;
+        }
+        icon.setOverlayColorAlpha(alpha);
     }
 
     ShipIconContainer.prototype.getByShip = function (ship) {
@@ -41,20 +70,9 @@ window.ShipIconContainer = function () {
 
     ShipIconContainer.prototype.onZoomEvent = function (payload) {
         var zoom = payload.zoom;
-        if (zoom <= 0.5) {
-            var newzoom = 2 * zoom;
-            this.iconsAsArray.forEach(function (icon) {
-                icon.setScale(newzoom, newzoom);
-            });
-        }
-
-        var alpha = zoom > 2 ? zoom - 2 : 0;
-        if (alpha > 1) {
-            alpha = 1;
-        }
         this.iconsAsArray.forEach(function (icon) {
-            icon.setOverlayColorAlpha(alpha);
-        });
+            applyZoomToIcon.call(this, icon, zoom);
+        }, this);
     };
 
     ShipIconContainer.prototype.getArray = function () {

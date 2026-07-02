@@ -32,7 +32,7 @@ class Skiff extends MediumShip{
         $this->addPrimarySystem(new Engine(4, 11, 0, 6, 4));
         $this->addPrimarySystem(new CargoBay(3, 20));
         $this->addPrimarySystem(new CargoBay(3, 20));
-        $this->addPrimarySystem(new Hangar(2, 4));
+        $this->addPrimarySystem(new Hangar(2, 4, 2));
     	$this->addPrimarySystem(new Thruster(4, 13, 0, 4, 3));
     	$this->addPrimarySystem(new Thruster(4, 13, 0, 4, 4));
     	$this->addPrimarySystem(new LightParticleBeamShip(2, 2, 1, 0, 360));

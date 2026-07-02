@@ -398,3 +398,166 @@ TransverseDrive.prototype.isPosOnSpecialArc = function (shooter, target) {
     }
     return false;
 };
+
+
+var GraviticAugmenter = function GraviticAugmenter(json, ship) {
+    Weapon.call(this, json, ship); 
+};
+GraviticAugmenter.prototype = Object.create(Weapon.prototype);
+GraviticAugmenter.prototype.constructor = GraviticAugmenter;
+
+GraviticAugmenter.prototype.initBoostableInfo = function() {
+	return this;
+};
+
+GraviticAugmenter.prototype.initializationUpdate = function() {
+	//Modes 1 & 2 both fire in Initial Orders, so both are ballistic (Mode 1 self-activates
+	//with no target, Mode 2 targets a friendly Warrior flight). Flagging Mode 1 ballistic is
+	//also what lets weaponManager.hasFiringOrder/canOffline recognise its order (their phase
+	//gate keys off system.ballistic). Mode 3 is a Pre-Firing prefire weapon instead.
+
+	//Pre-Firing is Mode 3's phase, so default an Augmenter to Mode 3 here — BUT only if it hasn't
+	//already committed an order this turn. A weapon that fired Mode 1/2 in Initial Orders must STAY
+	//in the mode it fired: flipping it to 3 makes its committed order's mode disagree with the
+	//weapon, which breaks the spent-locked detection (and would wrongly offer the Gravity-Shift menu
+	//on an already-spent weapon). getOrderThisTurn is defined below but hoisted (prototype method).
+	if (gamedata.gamephase == 5) {
+		var committed = this.getOrderThisTurn();
+		if (committed) {
+			this.firingMode = committed.firingMode; //keep the mode it actually fired
+		} else {
+			this.firingMode = 3;
+		}
+	}
+
+	//We set this.firingMode directly (not via setFiringMode), so the per-mode flags that live in
+	//the *Array properties are NOT re-derived for the new mode. Re-run updateFiringModeData() so
+	//autoFireOnly / hextarget / canTargetAllies etc. all match the current mode. Without this they
+	//keep the Mode-1 defaults, and Mode 3 (Gravity Shifting) breaks in two ways:
+	//  - autoFireOnly stays true, so weaponManager.selectWeapon() bails at its
+	//    `if (weapon.autoFireOnly) return;` guard and the weapon can't be selected to pick a target.
+	//  - hextarget stays true, so the Pre-Firing strategy treats it as a hex weapon and a click on
+	//    the enemy ship never routes to weaponManager.targetShip().
+	//The Augmenter has no ballisticArray/preFiresArray/turnsloadedArray, so this call leaves
+	//ballistic/preFires/turnsloaded untouched (we set those explicitly below).
+	this.updateFiringModeData();
+
+	this.ballistic = (this.firingMode == 1 || this.firingMode == 2);
+	this.preFires  = (this.firingMode == 3);
+
+	//Mode 3 rotation defaults, used by the React menu + fire-order encoding.
+	if (typeof this.rotationDirection === 'undefined') this.rotationDirection = 1; //1 = clockwise
+	if (typeof this.rotationAmount === 'undefined') this.rotationAmount = 1;       //1 = 60deg
+
+	return this;
+};
+
+//Returns this Augmenter's live (unrolled, this-turn) fire order, or null. Non-destructive display
+//predicate — do NOT clobber turnsloaded to signal "spent" (that corrupts real load state: once
+//zeroed it never restores, so removing the order strands the weapon at 0/1 and unfireable).
+GraviticAugmenter.prototype.getOrderThisTurn = function () {
+	//Use for-in (like weaponManager.hasFiringOrder), NOT a length-indexed loop: fireOrders can be a
+	//plain object (from JSON) rather than a JS array, in which case .length is undefined and an
+	//indexed loop silently finds nothing.
+	for (var i in this.fireOrders) {
+		var fo = this.fireOrders[i];
+		if (fo.weaponid == this.id && fo.turn == gamedata.turn && !fo.rolled) return fo;
+	}
+	return null;
+};
+
+//"Spent & locked": once the weapon has committed its order for the turn, it should read as spent
+//(dimmed) and be non-interactive in EVERY phase except the one where the order is still being
+//declared/edited. We key off the ORDER's own `type` (set at creation and never rewritten):
+//  - 'prefiring' => Mode 3, declared in Pre-Firing (phase 5)
+//  - anything else ('ballistic') => Mode 1/2, declared in Initial Orders (phase 1)
+//`type` is more robust than firingMode here because the weapon's firingMode is force-flipped in
+//phase 5; the order's type is immutable. So a committed order is spent-locked whenever we're OUTSIDE
+//its declaration phase (Movement/Firing for a Mode 1/2 order; Firing for a Mode 3 order).
+GraviticAugmenter.prototype.isSpentLocked = function () {
+	var order = this.getOrderThisTurn();
+	if (!order) return false;
+	var declarationPhase = (order.type === 'prefiring') ? 5 : 1;
+	return gamedata.gamephase != declarationPhase;
+};
+
+//Mode 1 uses the green menu's Activate/Deactivate toggle (creates the non-targeted ballistic order).
+GraviticAugmenter.prototype.canActivate = function () {
+	return (gamedata.gamephase == 1 && this.firingMode == 1 && this.fireOrders.length === 0);
+};
+
+GraviticAugmenter.prototype.canDeactivate = function () {
+	return (gamedata.gamephase == 1 && this.firingMode == 1 && this.fireOrders.length > 0);
+};
+
+//Mode 1: create the non-targeted ballistic "Matter Augment" order (no target ship).
+GraviticAugmenter.prototype.doActivate = function () {
+	if (this.firingMode != 1) return;
+	if (this.fireOrders.length > 0) return; //already active
+
+	var ship = this.ship;
+	var fireid = ship.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+	var position = shipManager.getShipPosition(ship);
+
+	var fire = {
+		id: fireid,
+		type: 'ballistic',
+		shooterid: ship.id,
+		targetid: -1,
+		weaponid: this.id,
+		calledid: -1,
+		turn: gamedata.turn,
+		firingMode: this.firingMode,
+		shots: this.defaultShots,
+		x: position.q,
+		y: position.r,
+		damageclass: 'support',
+		chance: 100,
+		hitmod: 0,
+		notes: ""
+	};
+
+	this.fireOrders.push(fire);
+
+	//Once the order exists the green menu hides and the standard remove-fire-order button
+	//takes over, so unselect the weapon (mirrors how targetShip unselects after declaring).
+	if (weaponManager.isSelectedWeapon(this)) {
+		weaponManager.unSelectWeapon(this.ship, this);
+	}
+};
+
+//Mode 1: remove the Matter Augment order (the green menu's Deactivate).
+GraviticAugmenter.prototype.doDeactivate = function () {
+	if (this.firingMode != 1) return;
+	weaponManager.removeFiringOrder(this.ship, this);
+};
+
+/* Mode 3 (Gravity Shifting): the React menu sets the chosen direction (1=CW, 2=ACW) and
+ * amount (1=60deg, 2=120deg) on the system. We encode them into the fire order's notes as
+ * "GA|<dir>|<amt>" so the server (beforeFiringOrderResolution) can read them before
+ * calculateHitBase overwrites the field. Mirrors the Hypergraviton Blaster notes pattern. */
+GraviticAugmenter.prototype.getRotationNotes = function () {
+	var dir = (this.rotationDirection == 2) ? 2 : 1;
+	var amt = (this.rotationAmount == 2) ? 2 : 1;
+	return "GA|" + dir + "|" + amt;
+};
+
+/* Called by the React menu after the player picks a new rotation while a Mode 3 order is
+ * already declared, so the live order's notes stay in sync with the menu selection. */
+GraviticAugmenter.prototype.updateRotationNotes = function () {
+	for (var i = 0; i < this.fireOrders.length; i++) {
+		if (this.fireOrders[i].firingMode == 3) {
+			this.fireOrders[i].notes = this.getRotationNotes();
+		}
+	}
+};
+
+/* Stamp the rotation notes onto the Mode 3 prefire order at creation time. weaponManager's
+ * generic targetShip() builds the order; this hook lets us inject our notes payload. */
+GraviticAugmenter.prototype.onFireOrderCreated = function (fire) {
+	if (this.firingMode == 3 && fire) {
+		fire.notes = this.getRotationNotes();
+	}
+	return fire;
+};
+

@@ -42,7 +42,7 @@ class vigilantGCAM extends BaseShip{
         $this->addPrimarySystem(new Engine(5, 25, 0, 9, 4));
         $this->addPrimarySystem(new Hangar(4, 14, 6));
         $this->addPrimarySystem(new JumpEngine(5, 30, 6, 25));
-        $this->addPrimarySystem(new HKControlNode(5, 12, 1, 1));
+        $this->addPrimarySystem(new HKControlNodeOrieni(5, 12, 1, 1));
 		$this->addPrimarySystem(new AmmoMissileRackL(5, 6, 0, 0, 360, $ammoMagazine, false)); //$armour, $health (0=auto), $power (0=auto), $startArc, $endArc, $magazine, $base
         $this->addPrimarySystem(new ReloadRack(6, 9));
         

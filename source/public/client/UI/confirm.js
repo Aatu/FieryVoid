@@ -416,7 +416,13 @@ window.confirm = {
         // Calculate the enhancement cost
         var enhPrice = $(this).data('enhPrice');
         var enhPriceStep = $(this).data('enhPriceStep');
-        var enhCost = (value > 0) ? (value * enhPrice) + ((value - 1) * enhPriceStep) : 0;
+        // Cost grows as an arithmetic series: each level i (0-based) costs
+        // enhPrice + i*enhPriceStep. The old closed form charged only ONE step
+        // total beyond the base, capping the per-level increment after level 2.
+        var enhCost = 0;
+        for (let i = 0; i < value; i++) {
+            enhCost += enhPrice + (i * enhPriceStep);
+        }
         $(this).data('enhCost', enhCost);
 
         // Trigger any necessary cost update function
@@ -4284,6 +4290,438 @@ window.confirm = {
             // and the deployment list reflects "this is going to a hangar."
             flight.pendingDeployDock = { carrierId: parseInt(carrier.id, 10), hangarId: parseInt(hangar.id, 10) };
         }
+    },
+
+    // === Hypergraviton Blaster Stage 4: transfer-CHAIN building window ===
+    //
+    // The transfer list is a CHAIN, not a flat pool: each hop must be within 1 hex
+    // of the PREVIOUS recipient (and in the weapon's arc), exactly as the server
+    // resolves it (isLegalTransferTarget walks the queue checking each entry
+    // against $fromVictim — the last victim, NOT the initial target). So the player
+    // builds the list one hop at a time:
+    //   - The top "chain" section lists the locked-in targets in order. Row #1 is
+    //     the pinned initial target (the beam always starts there). The LAST locked
+    //     hop has a "✕ Remove" control so the player can back up and re-route; the
+    //     initial target can never be removed.
+    //   - The bottom "available next targets" section lists the enemy ships within
+    //     1 hex of the CURRENT ANCHOR (the last row in the chain) and in arc.
+    //     Clicking one locks it in as the next hop and re-computes the section from
+    //     the new anchor. A ship may appear again even if already in the chain
+    //     (intended: A->B->A->B ping-pong is legal). When nothing is reachable the
+    //     "No available targets within 1 hex" placeholder shows instead.
+    // Every locked row (incl. the initial target) keeps its own "transfer on
+    // structure loss" checkbox for HCV+ (shipSizeClass >= 2) targets; sub-HCV rows
+    // show it greyed (destruction-only). Then confirm-with-list / fire-normal /
+    // cancel-shot.
+    //
+    // The initial target's structure flag is carried to the server alongside the
+    // queue (see gravitic.js declareTransferShot and the server getNextTransferTarget
+    // which skips the initial target as a hop).
+    //
+    // The window is a UX front-end: the SERVER is authoritative for the per-hop
+    // range/arc geometry (isLegalTransferTarget, Stage 5b). The client mirrors that
+    // geometry (mathlib.getDistanceBetweenShipsInHex + weaponManager.isOnWeaponArc,
+    // same primitives the server uses) so the list it offers is the legal set; a
+    // candidate the server later rejects per-hop (e.g. a unit that moved) is simply
+    // skipped server-side.
+    //
+    // preselect (optional, for re-opening an existing order):
+    //   { queue: [{shipid, transferOnStructure}], initialOnStructure: bool }
+    // is REPLAYED as a chain: each saved hop is re-locked in order as long as it is
+    // still a legal step from its predecessor. A saved hop that is no longer legal
+    // (target moved/died) ends the replay there; the player rebuilds from the last
+    // valid anchor. The initial target's saved flag restores too.
+    //
+    // callback signature:
+    //   callback({ queue: [{shipid, transferOnStructure}],
+    //              initialOnStructure: bool, cancelled: bool })
+    // cancelled === true means "Cancel Shot" (the caller removes any fire order).
+    //
+    // lockInfo (optional): { locked: true, holderName: <string> } when another Blaster on
+    // the ship already holds the one-per-turn transfer slot. The window then opens in a
+    // read-only "transfer locked" mode: a banner names the holder, the rows/checkboxes are
+    // disabled, and only "Fire Normally" / "Cancel Shot" are available (Confirm List off).
+    //
+    // opts (optional): { showWeaponId: true } appends "(ID: <weapon.id>)" to the header so
+    // the player can tell which Blaster this window is for (Scenario A: multiple Blasters
+    // selected at once).
+    hBlasterTransferList: function hBlasterTransferList(shooter, weapon, initialTarget, callback, preselect, lockInfo, opts) {
+        var transferLocked = !!(lockInfo && lockInfo.locked);
+        var showWeaponId = !!(opts && opts.showWeaponId);
+        function isHcvPlus(ship) {
+            return (parseInt(ship.shipSizeClass, 10) || 0) >= 2;
+        }
+        // Rounded hit chance for this Blaster vs a target (raking → no called shot,
+        // calledid -1). Same calc the fire order uses. NOT capped at 100 — intercept
+        // and other factors can push the raw chance above 100%, and the player wants
+        // the true unmodified value. Only floored at 0 (a negative % reads oddly).
+        function hitChancePct(ship) {
+            var r = weaponManager.calculateHitChange(shooter, ship, weapon, -1);
+            var pct = (r && typeof r === 'object') ? r.hitChance : r;
+            pct = Math.round(parseFloat(pct) || 0);
+            return Math.max(0, pct);
+        }
+
+        // getReachable(anchor): enemy ships (not destroyed) within 1 hex of the
+        // given anchor unit AND in the weapon's arc, sorted by size class desc.
+        // This is the set of legal NEXT hops from `anchor`. The anchor ITSELF is
+        // excluded (a hop can't target the ship it's transferring FROM), but a ship
+        // earlier in the chain is NOT excluded — re-targeting it is legal
+        // (A->B->A->B). Other filters: alive, enemy, in-range-of-anchor, in-arc.
+        function getReachable(anchor) {
+            var out = [];
+            for (var key in gamedata.ships) {
+                var c = gamedata.ships[key];
+                if (!c) continue;
+                if (c.id === anchor.id) continue;                            // not the anchor itself
+                if (c.destroyed || (typeof shipManager !== 'undefined' && shipManager.isDestroyed && shipManager.isDestroyed(c))) continue;
+                if (!gamedata.isEnemy(shooter, c)) continue;
+                var dist = parseFloat(mathlib.getDistanceBetweenShipsInHex(anchor, c));
+                if (isNaN(dist) || dist > 1) continue;                       // within 1 hex of the anchor
+                if (!weaponManager.isOnWeaponArc(shooter, c, weapon)) continue; // in the Blaster's arc
+                out.push(c);
+            }
+            out.sort(function (a, b) {
+                return (parseInt(b.shipSizeClass, 10) || 0) - (parseInt(a.shipSizeClass, 10) || 0);
+            });
+            return out;
+        }
+
+        // Working model = the locked-in CHAIN. rows[0] is the pinned initial target
+        // (isInitial); each subsequent row is a locked-in hop, in order. The current
+        // ANCHOR for the "available next" list is always the LAST row's ship.
+        var initialRow = {
+            ship: initialTarget,
+            isInitial: true,
+            transferOnStructure: !!(preselect && preselect.initialOnStructure)
+        };
+        var rows = [initialRow];
+
+        // Replay a saved queue (re-opening an order) as a chain: re-lock each saved
+        // hop in order, but only while it remains a legal step from its predecessor.
+        // A saved hop that is no longer reachable ends the replay (the player rebuilds
+        // from there). Repeats are allowed, so we match by id against the live ships.
+        var savedQueue = (preselect && Array.isArray(preselect.queue)) ? preselect.queue : [];
+        for (var sq = 0; sq < savedQueue.length; sq++) {
+            var anchor = rows[rows.length - 1].ship;
+            var legal = getReachable(anchor);
+            var match = null;
+            for (var li = 0; li < legal.length; li++) {
+                if (parseInt(legal[li].id, 10) === parseInt(savedQueue[sq].shipid, 10)) { match = legal[li]; break; }
+            }
+            if (!match) break;   // chain breaks here — stop replaying further saved hops.
+            rows.push({ ship: match, transferOnStructure: !!savedQueue[sq].transferOnStructure });
+        }
+
+        // Three equal-width text buttons in an in-flow bar (CSS gives the bar a
+        // real height so it reserves space rather than overlapping the list):
+        //   Confirm List (green) | Fire Normally (blue) | Cancel Shot (red)
+        var e = $('<div class="confirm multi-value-confirm hBlasterTransfer' + (transferLocked ? ' hBlasterLocked' : '') + '"></div>');
+        var headerIdSuffix = (showWeaponId && weapon && weapon.id != null) ? ' (ID: ' + weapon.id + ')' : '';
+        $('<div class="multi-value-header">Hypergraviton Blaster' + headerIdSuffix + ' &mdash; Transfer Target List</div>').prependTo(e);
+        // When locked, a warning banner replaces the instruction.
+        if (transferLocked) {
+            var holderName = (lockInfo && lockInfo.holderName) ? lockInfo.holderName : 'Another Blaster';
+            $('<div class="hBlasterLockBanner">⚠ ' + holderName + ' already holds this ship’s transfer slot this turn. Only one Hypergraviton Blaster per ship can transfer — this one can only fire normally.</div>').insertAfter(e.find('.multi-value-header'));
+        } else {
+            $('<div class="hBlasterSubheader">(Lock in each target in turn — every hop must be within 1 hex of the previous one)</div>').insertAfter(e.find('.multi-value-header'));
+        }
+        var container = $('<div class="multi-value-container"></div>').insertAfter(e.find(transferLocked ? '.hBlasterLockBanner' : '.hBlasterSubheader'));
+        // Confirm List is hidden when locked (transfer not allowed for this Blaster).
+        var confirmBtnHtml = transferLocked
+            ? ''
+            : '<div class="hBlasterBtn hBlasterConfirm" title="Confirm with this transfer list">Confirm List</div>';
+        var buttonBar = $('<div class="ui hBlasterButtons">' +
+            confirmBtnHtml +
+            '<div class="hBlasterBtn hBlasterFireNormal" title="Fire normally (no transfer)">Fire Normally</div>' +
+            '<div class="hBlasterBtn hBlasterCancel" title="Cancel the shot and remove the fire order">Cancel Shot</div>' +
+            '</div>').appendTo(e);
+
+        // The window has two stacked sections inside the container:
+        //   1. the locked-in CHAIN (initial target + committed hops, in order)
+        //   2. the AVAILABLE next targets reachable from the chain's current anchor
+        // Section 2 is hidden when the slot is locked (no transfer permitted).
+        $('<div class="hBlasterSectionLabel hBlasterChainLabel">Transfer chain</div>').appendTo(container);
+        var listHolder = $('<div class="hBlasterList"></div>').appendTo(container);
+        var availLabel = transferLocked ? $() : $('<div class="hBlasterSectionLabel hBlasterAvailLabel">Available next targets</div>').appendTo(container);
+        var availHolder = transferLocked ? $() : $('<div class="hBlasterList hBlasterAvailList"></div>').appendTo(container);
+
+        function makeRow(rd, idx) {
+            var row = $('<div class="multi-value-row hBlasterRow' + (rd.isInitial ? ' hBlasterInitial' : '') + '"></div>');
+            row.data('hbRow', rd);
+
+            // Fixed-width column structure so order#, name, hit% and checkbox line
+            // up vertically across every row:
+            //   [order#] [name (flex, left-justified)] [hit %] [structure checkbox]
+            $('<span class="hBlasterOrderNo">' + (idx + 1) + '.</span>').appendTo(row);
+            $('<span class="hBlasterName hangar-craft-name">' + rd.ship.name + '</span>').appendTo(row);
+
+            // Hit chance vs this target (same calc the fire order uses). Fixed-width
+            // so it doesn't disturb the name/checkbox alignment. Shown in brackets;
+            // not capped, so values can exceed 100%.
+            $('<span class="hBlasterHitChance" title="Chance to hit this target">' + hitChancePct(rd.ship) + '%</span>').appendTo(row);
+
+            // Every row shows the "transfer on structure loss" checkbox so they all
+            // sit in the same column. HCV+ (shipSizeClass >= 2) targets — incl. the
+            // pinned initial target — can tick it; smaller targets only transfer on
+            // outright destruction (server gates structure transfer on
+            // shipSizeClass >= 2), so theirs is greyed out + disabled.
+            //When the transfer slot is locked (another Blaster holds it), the whole
+            //row is read-only: no checkbox is usable.
+            var canStruct = isHcvPlus(rd.ship) && !transferLocked;
+            var lbl = $('<label class="hBlasterStructLabel' + (canStruct ? '' : ' disabled') + '" title="' +
+                (canStruct
+                    ? 'Transfer remaining damage when a structure block is destroyed, instead of only when the ship is destroyed.'
+                    : 'Only available against units of size class 2 or larger; smaller targets transfer only when destroyed outright.') +
+                '"></label>');
+            var chk = $('<input type="checkbox" class="multiConfirmInput hBlasterStructChk">');
+            chk.prop('checked', canStruct && !!rd.transferOnStructure);
+            chk.prop('disabled', !canStruct);
+            if (canStruct) {
+                chk.on('change', function () { rd.transferOnStructure = $(this).is(':checked'); });
+            }
+            // Label depends on whether the box is usable: HCV+ rows can opt into
+            // structure-loss transfer ("Transfer on structure loss"); sub-HCV rows
+            // are stuck at destruction-only (greyed box → "On ship destruction only").
+            // The checkbox and the text are wrapped in separate fixed-width spans so
+            // the checkbox always sits at the same x and the text always starts at
+            // the same x across every row — otherwise the differing label widths
+            // ("On structure loss" vs "Ship destruction only") would shift the
+            // checkbox column and break the vertical alignment.
+            var labelText = canStruct ? 'Transfer on structure loss' : 'Ship destruction only';
+            lbl.append($('<span class="hBlasterStructBox"></span>').append(chk));
+            lbl.append('<span class="hBlasterStructText">' + labelText + '</span>');
+            row.append(lbl);
+
+            // Only the LAST locked hop (not the initial target, not when locked) gets
+            // a Remove control, so the player can back up one hop and re-route. The
+            // initial target can never be removed (the beam always starts there).
+            if (!rd.isInitial && !transferLocked && idx === rows.length - 1) {
+                $('<span class="hBlasterRemove" title="Remove this hop and re-route from the previous target">✕ Remove</span>')
+                    .appendTo(row)
+                    .on('click', function (ev) {
+                        ev.stopPropagation();
+                        rows.pop();
+                        renderRows();
+                    });
+            } else {
+                // Spacer so the Remove column reserves space on every row and the
+                // checkbox column stays vertically aligned across the chain.
+                $('<span class="hBlasterRemove hBlasterRemoveSpacer"></span>').appendTo(row);
+            }
+
+            return row;
+        }
+
+        // Builds a clickable "available next target" row. Clicking it locks the ship
+        // in as the next hop (default structure flag off) and re-renders from the new
+        // anchor. The structure flag is set afterwards via the chain row's checkbox.
+        function makeAvailRow(ship) {
+            var row = $('<div class="multi-value-row hBlasterRow hBlasterAvailRow" title="Lock in as the next transfer target"></div>');
+            $('<span class="hBlasterOrderNo">+</span>').appendTo(row);
+            $('<span class="hBlasterName hangar-craft-name">' + ship.name + '</span>').appendTo(row);
+            $('<span class="hBlasterHitChance" title="Chance to hit this target">' + hitChancePct(ship) + '%</span>').appendTo(row);
+            $('<span class="hBlasterLockInHint">Lock in &raquo;</span>').appendTo(row);
+            // Reserve the Remove-column width so name/hit% stay aligned with the
+            // chain rows above (which carry an "✕ Remove" / spacer in that column).
+            $('<span class="hBlasterRemove hBlasterRemoveSpacer"></span>').appendTo(row);
+            row.on('click', function () {
+                rows.push({ ship: ship, transferOnStructure: false });
+                renderRows();
+            });
+            return row;
+        }
+
+        function renderRows() {
+            // --- Section 1: the locked-in chain ---
+            listHolder.empty();
+            rows.forEach(function (rd, idx) {
+                listHolder.append(makeRow(rd, idx));
+            });
+
+            if (transferLocked) return;  // no available-targets section when locked
+
+            // --- Section 2: available next hops from the current anchor (last row) ---
+            availHolder.empty();
+            var anchor = rows[rows.length - 1].ship;
+            var reachable = getReachable(anchor);
+            if (reachable.length === 0) {
+                $('<div class="multi-value-row hBlasterEmptyNote"><span class="multi-value-label" style="font-style:normal;">No available targets within 1 hex!</span></div>').appendTo(availHolder);
+            } else {
+                reachable.forEach(function (ship) {
+                    availHolder.append(makeAvailRow(ship));
+                });
+            }
+        }
+        renderRows();
+
+        // ---- Pointer-based drag-to-reorder (mouse + touch + pen) --------------
+        // NOTE: the Hypergraviton Blaster no longer reorders by dragging — the
+        // transfer list is a CHAIN built one hop at a time (click to lock in,
+        // "✕ Remove" to back up), because each hop's legal next targets depend on
+        // the previous recipient and can't be expressed as a free reorder. The
+        // self-contained Pointer-Events drag engine below is left INTACT (and
+        // DORMANT — its pointerdown listener is intentionally not attached) so it
+        // can be reused by a future weapon that does want free drag-reordering of a
+        // flat list. To re-enable it for such a window, attach the pointerdown
+        // listener shown (commented) below to that window's stable list container.
+        //
+        // How it works (when enabled): the SAME DOM element is dragged throughout —
+        // it follows the pointer via translateY, and when its centre crosses a
+        // neighbour we physically move it in the DOM (insertBefore/After) and
+        // re-baseline its transform so it stays under the pointer. The pinned
+        // initial row (index 0) is a fixed top boundary. pointerdown is DELEGATED on
+        // the stable container (one live listener, regardless of rows being
+        // re-parented mid-drag) — a per-row listener combined with a re-parent left
+        // a stale gesture state that swallowed the next pointerdown (the "have to
+        // click twice to drag again" bug). The move/up listeners live on WINDOW for
+        // the drag's duration and we do NOT use setPointerCapture (capturing a
+        // re-parented element is the same trap). touch-action:none on the row stops
+        // touch-scroll; preventDefault on pointerdown stops the synthetic
+        // mouse/click chain that can poison the next gesture.
+        var drag = null;   // active-drag state, or null
+        // DORMANT — to re-enable drag-reorder, uncomment this listener attachment:
+        // listHolder[0].addEventListener('pointerdown', onListPointerDown);
+        function onListPointerDown(ev) {
+            if (transferLocked) return;
+            if (ev.button != null && ev.button !== 0) return;             //primary button / touch only
+            if (!ev.target || !ev.target.closest) return;
+            //Don't start a drag from the checkbox / its label (let it toggle).
+            if (ev.target.closest('.hBlasterStructLabel')) return;
+            var rowEl = ev.target.closest('.hBlasterRow');
+            if (!rowEl || rowEl.parentNode !== listHolder[0]) return;
+            var startRd = $(rowEl).data('hbRow');
+            if (!startRd || startRd.isInitial) return;
+            beginDrag(ev, rowEl);
+        }
+
+        function beginDrag(ev, rowEl) {
+            //Defensive: clear any drag that somehow didn't end (stale listeners).
+            if (drag) endDrag();
+
+            drag = {
+                rowEl: rowEl,
+                pointerId: ev.pointerId,
+                pointerStartY: ev.clientY,   //pointer Y when the element last took its baseline
+                started: false               //true once past the move threshold
+            };
+            ev.preventDefault();             //suppress text-selection + synthetic click chain
+            window.addEventListener('pointermove', onDragMove);
+            window.addEventListener('pointerup', endDrag);
+            window.addEventListener('pointercancel', endDrag);
+        }
+
+        function onDragMove(ev) {
+            if (!drag || ev.pointerId !== drag.pointerId) return;
+            var dy = ev.clientY - drag.pointerStartY;
+
+            //Small threshold so a tap/click isn't treated as a drag.
+            if (!drag.started) {
+                if (Math.abs(dy) < 4) return;
+                drag.started = true;
+                $(drag.rowEl).addClass('hBlasterDragging');
+            }
+            ev.preventDefault();
+
+            drag.rowEl.style.transform = 'translateY(' + dy + 'px)';
+
+            //Has the dragged row's visual centre crossed a neighbour's centre?
+            var draggedRd = $(drag.rowEl).data('hbRow');
+            var curIdx = rows.indexOf(draggedRd);
+            if (curIdx < 0) return;
+            var dragMid = drag.rowEl.getBoundingClientRect();
+            dragMid = dragMid.top + dragMid.height / 2;
+
+            //Move UP — swap with the previous transfer row (never above index 1).
+            if (curIdx > 1) {
+                var prevEl = listHolder.children('.hBlasterRow').eq(curIdx - 1)[0];
+                if (prevEl) {
+                    var pr = prevEl.getBoundingClientRect();
+                    if (dragMid < pr.top + pr.height / 2) {
+                        rows.splice(curIdx, 1);
+                        rows.splice(curIdx - 1, 0, draggedRd);
+                        drag.rowEl.parentNode.insertBefore(drag.rowEl, prevEl);
+                        rebaselineDrag(ev);
+                        return;
+                    }
+                }
+            }
+            //Move DOWN — swap with the next transfer row.
+            if (curIdx < rows.length - 1) {
+                var nextEl = listHolder.children('.hBlasterRow').eq(curIdx + 1)[0];
+                if (nextEl) {
+                    var nr = nextEl.getBoundingClientRect();
+                    if (dragMid > nr.top + nr.height / 2) {
+                        rows.splice(curIdx, 1);
+                        rows.splice(curIdx + 1, 0, draggedRd);
+                        drag.rowEl.parentNode.insertBefore(drag.rowEl, nextEl.nextSibling);
+                        rebaselineDrag(ev);
+                        return;
+                    }
+                }
+            }
+        }
+
+        //After the dragged element is moved to a new DOM slot, reset its transform
+        //baseline so it stays exactly under the pointer (its natural layout position
+        //jumped by one row height). Order numbers are refreshed in place.
+        function rebaselineDrag(ev) {
+            drag.rowEl.style.transform = '';                 //natural position in new slot
+            var rect = drag.rowEl.getBoundingClientRect();
+            var naturalMid = rect.top + rect.height / 2;
+            var dy = ev.clientY - naturalMid;
+            drag.pointerStartY = ev.clientY - dy;            //so subsequent dy stays consistent
+            drag.rowEl.style.transform = 'translateY(' + dy + 'px)';
+            listHolder.children('.hBlasterRow').each(function (i) {
+                $(this).find('.hBlasterOrderNo').text((i + 1) + '.');
+            });
+        }
+
+        function endDrag(ev) {
+            if (!drag) return;
+            if (ev && ev.pointerId != null && ev.pointerId !== drag.pointerId) return;  //ignore other pointers
+            window.removeEventListener('pointermove', onDragMove);
+            window.removeEventListener('pointerup', endDrag);
+            window.removeEventListener('pointercancel', endDrag);
+            drag.rowEl.style.transform = '';
+            $(drag.rowEl).removeClass('hBlasterDragging');
+            drag = null;
+        }
+
+        // Split rows[] into the pinned initial target's flag + the transfer queue
+        // (rows[1..]) for the callback.
+        function buildResult(cancelled) {
+            var queue = [];
+            var initialOnStructure = false;
+            rows.forEach(function (rd) {
+                if (rd.isInitial) { initialOnStructure = !!rd.transferOnStructure; return; }
+                queue.push({ shipid: parseInt(rd.ship.id, 10), transferOnStructure: !!rd.transferOnStructure });
+            });
+            return { queue: queue, initialOnStructure: initialOnStructure, cancelled: !!cancelled };
+        }
+
+        // Confirm List exists only when NOT locked.
+        $('.hBlasterConfirm', buttonBar).on('click', function () {
+            var result = buildResult(false);
+            $('.confirm').remove();
+            callback(result);
+        });
+        $('.hBlasterFireNormal', buttonBar).on('click', function () {
+            // Truly normal shot: no transfer queue AND no initial structure flag —
+            // an ordinary Blaster fire order against the initial target only.
+            $('.confirm').remove();
+            callback({ queue: [], initialOnStructure: false, cancelled: false });
+        });
+        $('.hBlasterCancel', buttonBar).on('click', function () {
+            $('.confirm').remove();
+            callback({ queue: [], initialOnStructure: false, cancelled: true });
+        });
+
+        // The window is centred via CSS transform; jQuery-UI .draggable() fights
+        // that transform and makes dragging jump, so the window is intentionally
+        // NOT draggable. The transfer list is built by click-to-lock-in (the row
+        // drag engine above is dormant — see its note).
+        e.appendTo('body').fadeIn(250);
     }
 
 };

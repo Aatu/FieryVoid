@@ -11,7 +11,7 @@ class Aspar extends HeavyCombatVessel{
         $this->imagePath = "img/ships/RaiderAspar.png"; //need to change
         $this->shipClass = "Aspar Corvette";
         $this->occurence = "common";
-        $this->fighters = array("normal"=>6);
+        $this->fighters = array("normal"=>6, "cargo shuttles"=>3);
         
 		$this->notes = "Generic raider unit.";
 		$this->notes .= "<br> ";
@@ -60,9 +60,9 @@ class Aspar extends HeavyCombatVessel{
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 180, 300));
         $this->addAftSystem(new LightParticleBeamShip(1, 2, 1, 60, 180));
         $this->addAftSystem(new LightLaser(2, 4, 3, 90, 270));
-        $this->addAftSystem(new Hangar(3, 3));
-        $this->addAftSystem(new Hangar(3, 3));
-        $this->addAftSystem(new Hangar(3, 3));
+        $this->addAftSystem(new Hangar(3, 3, 3, 0, 'fighters', array(), true));
+        $this->addAftSystem(new Hangar(3, 3, 1));
+        $this->addAftSystem(new Hangar(3, 3, 3, 0, 'fighters', array(), true));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 3, 32));

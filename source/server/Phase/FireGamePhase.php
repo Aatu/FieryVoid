@@ -12,7 +12,7 @@ class FireGamePhase implements Phase
         $dbManager->updateGamedata($gameData);
 
         $servergamedata = $dbManager->getTacGamedata($gameData->forPlayer, $gameData->id);
-        Firing::prepareFiring($servergamedata); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
+        Firing::prepareFiring($servergamedata, $dbManager); //Marcin Sawicki, October 2017: new approach: calculate base hit chance first!
         Firing::automateIntercept($servergamedata);
         Firing::fireWeapons($servergamedata);
         Criticals::setCriticals($servergamedata);
