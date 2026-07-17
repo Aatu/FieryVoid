@@ -469,7 +469,7 @@ shipManager.systems = {
         //known default-shuttle phpclasses by name.
         var allowed = hangar.allowedFighterClasses;
         if (Array.isArray(allowed) && allowed.length > 0) {
-            var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1 };
+            var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Lifeboat": 1, "PresidentialShuttle": 1, "EmperorsYacht": 1, "Flyer": 1, "FlyerProtectorate": 1 };
             for (var i = 0; i < allowed.length; i++) {
                 if (shuttleClasses[allowed[i]]) return false;   //bay accepts a shuttle class, keep it in the pool
             }
@@ -786,12 +786,17 @@ shipManager.systems = {
         var declaredShuttle = parseInt(base["shuttles"], 10) || 0;
         var declaredCargo = parseInt(base["cargo shuttles"], 10) || 0;
         var declaredMedical = parseInt(base["medical shuttles"], 10) || 0; 
-        var declaredLifeboats = parseInt(base["lifeboats"], 10) || 0;                           
+        var declaredLifeboats = parseInt(base["lifeboats"], 10) || 0;  
+        var declaredPresidents = parseInt(base["presidential shuttle"], 10) || 0; 
+        var declaredYachts = parseInt(base["yacht"], 10) || 0;              
+
         if (declaredMsw > 0) rows.push({ type: "Minesweeping Shuttles", count: declaredMsw });
         if (declaredShuttle > 0) rows.push({ type: shipManager.systems.factionDefaultShuttleLabel(ship), count: declaredShuttle });
         if (declaredCargo > 0) rows.push({ type: "Cargo Shuttles", count: declaredCargo });
         if (declaredMedical > 0) rows.push({ type: "Medical Shuttles", count: declaredMedical }); 
         if (declaredLifeboats > 0) rows.push({ type: "Lifeboats", count: declaredLifeboats });                
+        if (declaredPresidents > 0) rows.push({ type: "Presidential Shuttles", count: declaredPresidents }); 
+        if (declaredYachts > 0) rows.push({ type: "Yacht", count: declaredYachts });                  
 
         var pool = capacity - declared;
         if (pool <= 0) return rows;
@@ -1152,6 +1157,23 @@ shipManager.systems = {
                 }
             }
         }
+
+        // Check CnC critical effects (most important first)
+        if (system instanceof Shield) {
+            const shieldCrits = shipManager.criticals.countCriticalOnTurn(system, "DamageReductionReduced", gamedata.turn);
+           if(shieldCrits > 0){
+                let paramTotal = 0; //sum of `param` across in-effect crits of this type (param-sum crits)
+                for(var i in system.criticals){ 
+                    paramTotal += parseInt(system.criticals[i].param, 10) || 0; 
+                }    
+
+                if(paramTotal >= system.output){
+                    return 'Red';
+                }else{
+                    return 'Orange';
+                }              
+           } 
+        }        
 
         // Check critical effects for the current system
         const allCrits = shipManager.criticals.getAllCriticals(system, gamedata.turn);

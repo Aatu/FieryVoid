@@ -13,6 +13,7 @@ class ChoukaCovenantMinelayer extends BaseShip{
 		$this->canvasSize = 160; //img has 200px per side
 		$this->unofficial = true;
         $this->limited = 10;
+		$this->variantOf = 'OBSOLETE';		
 
 		$this->isd = 1957;
         

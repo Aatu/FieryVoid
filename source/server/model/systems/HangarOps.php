@@ -430,7 +430,7 @@ class HangarOps {
 		$normalized = strtolower(trim((string)$category));
 		switch ($normalized) {
 			case 'shuttles':
-				return self::factionShuttleClass($ship);
+				return self::factionShuttleClass($ship);				
 			case 'minesweeping shuttles':
 				//return 'MinesweepingShuttle';
 				return self::factionMinesweepingShuttleClass($ship);				
@@ -440,14 +440,18 @@ class HangarOps {
 				//records via step 1; leftover hangar boxes go to the faction shuttle
 				//(or MinesweepingShuttle for minesweeper-bonus carriers) instead.
 				return 'CargoShuttle';
+			case 'lifeboats':
+				return 'Lifeboat';					
 			case 'medical shuttles':
 				//Opt-in only: never auto-populates leftover capacity. Declared
 				//count in $ship->fighters becomes that many auto-filled CargoShuttle
 				//records via step 1; leftover hangar boxes go to the faction shuttle
 				//(or MinesweepingShuttle for minesweeper-bonus carriers) instead.
 				return 'MedicalShuttle';
-			case 'lifeboats':
-				return 'Lifeboat';					
+			case 'presidential shuttle':
+				return 'PresidentialShuttle';
+			case 'yacht':
+				return 'EmperorsYacht';													
 			default:
 				return null;
 		}
@@ -601,9 +605,17 @@ class HangarOps {
 			case 'CargoShuttle':
 				return 'Cargo Shuttle';
 			case 'Flyer':
-				return 'Flyer';
+				return 'Cargo Flyer';
 			case 'FlyerProtectorate':
-				return 'Flyer';
+				return 'Cargo Flyer';
+			case 'MedicalShuttle':
+				return 'Medical Shuttle';
+			case 'Lifeboat':
+				return 'Lifeboat';
+			case 'PresidentialShuttle':
+				return 'Presidential Shuttle';
+			case 'EmperorsYacht':
+				return 'Yacht';
 			case 'Shuttle':
 			default:
 				return 'Shuttle';
@@ -966,6 +978,38 @@ class HangarOps {
 			$n++;
 		}
 		return $n;
+	}
+
+	/* Total Fighter systems in a flight, ALIVE or not (destroyed, dropped-out,
+	 * damaged — every craft the flight was built with). For a regenerating
+	 * Warrior flight this is the "full potential size" a hangar must reserve so
+	 * every craft can be regrown after the dwell. NOT the same as flightSize on a
+	 * fragment (which is a subset) — this counts the actual roster objects. */
+	public static function fighterRosterCount($flight){
+		$n = 0;
+		if (!($flight instanceof FighterFlight)) return 0;
+		foreach ($flight->systems as $f){
+			if ($f instanceof Fighter) $n++;
+		}
+		return $n;
+	}
+
+	/* True if $flight's class regenerates while docked (Kirishiac Warrior). Such a
+	 * flight docks WHOLE only (no partial) and reserves boxes for its full roster
+	 * so destroyed craft have room to regrow. Central predicate so the dock
+	 * validation, the entry sizing, and the regen sweep all agree. */
+	public static function isDockRegenFlight($flight){
+		return ($flight instanceof FighterFlight) && ((int)($flight->dockRegeneration ?? 0) > 0);
+	}
+
+	/* Box footprint a dock of $flight must reserve. For an ordinary flight this is
+	 * just $dockingCount craft; for a regenerating flight it's the FULL roster
+	 * (alive + destroyed + dropout) so post-dwell regeneration always has room —
+	 * the hangar reserves the flight's whole potential size up front. Returned in
+	 * CRAFT (caller multiplies by bpc). */
+	public static function dockReservationCraft($flight, $dockingCount){
+		if (self::isDockRegenFlight($flight)) return self::fighterRosterCount($flight);
+		return max(1, (int)$dockingCount);
 	}
 
 	/* Stamp ShadowFighterCutOff on up to $count LIVING, not-yet-cut-off fighters
@@ -1876,8 +1920,20 @@ class HangarOps {
 		if (!isset($ship->fighters) || !is_array($ship->fighters) || empty($ship->fighters)) return;
 
 		$sizes = array('heavy', 'medium', 'light', 'ultralight');
+		//Categories a narrowed SIZE bay still accepts (shuttle family + BPs) via the
+		//hierarchy/shuttle rules in hangarAcceptsCategory — declaring one of these
+		//alongside a lone size does NOT make the bay genuinely multi-category, so it
+		//must NOT block narrowing (e.g. {light:6, shuttles:4} still narrows to light).
+		$sizeBayCompatible = array('shuttles', 'minesweeping shuttles', 'cargo shuttles',
+			'medical shuttles', 'lifeboats', 'assault shuttles', 'breaching pods');
+		//Categories that live on DEDICATED systems, never in this bay: superheavy
+		//rides the catapult, LCVs ride DockingCollar rails. Declaring one alongside
+		//a lone size (Stormfalcon {light:12, superheavy:1}) must not keep the real
+		//hangar universal — treat them like the shuttle family and skip them.
+		$dedicatedSystemCategories = array('superheavy', 'lcvs');
 		$declared = array();
 		$hasNormal = false;
+		$hasCustomCombat = false;
 		foreach ($ship->fighters as $cat => $count){
 			$catLower = strtolower(trim((string)$cat));
 			//'normal' is the universal combat-fighter slot (accepts heavy and
@@ -1887,12 +1943,23 @@ class HangarOps {
 			//reject the larger fighters the 'normal' slots are meant to hold. Treat
 			//'normal' as a narrowing-blocker so such ships keep universal bays.
 			if ($catLower === 'normal') { $hasNormal = true; continue; }
-			if (in_array($catLower, $sizes, true)) $declared[] = $catLower;
+			if (in_array($catLower, $sizes, true)) { $declared[] = $catLower; continue; }
+			if (in_array($catLower, $sizeBayCompatible, true)) continue;
+			if (in_array($catLower, $dedicatedSystemCategories, true)) continue;   //catapult / LCV rail cargo — not this bay's
+			//Any OTHER declared category is a CUSTOM COMBAT category (e.g.
+			//'Hunter-Killers', 'Raiders') that a narrowed size bay would REJECT
+			//(hangarAcceptsCategory('light','hunter-killers') is false). A ship that
+			//mixes a size with such a category (VigilantHKAM's {light:6,
+			//Hunter-Killers:6} single bay) is genuinely multi-category — narrowing to
+			//the lone size would strand the custom-category flights. Block narrowing.
+			$hasCustomCombat = true;
 		}
-		//Stay universal when 'normal' is present (multi-size capable) or when the
-		//declaration is ambiguous (0 or >1 specific sizes). Only narrow when the
-		//ship declares EXACTLY ONE specific size and no universal 'normal' slots.
+		//Stay universal when 'normal' is present (multi-size capable), when a custom
+		//combat category shares the bay, or when the declaration is ambiguous (0 or
+		//>1 specific sizes). Only narrow when the ship declares EXACTLY ONE specific
+		//size and no universal 'normal' / custom-combat slots.
 		if ($hasNormal) return;
+		if ($hasCustomCombat) return;
 		if (count($declared) !== 1) return;     //ambiguous — leave universal
 
 		$hangar->hangarType = $declared[0];
@@ -2046,7 +2113,7 @@ class HangarOps {
 		//if ($phpclass === 'MinesweepingShuttle') return 20;
 		if (self::isMinesweepingShuttleClass($phpclass)) return 20;		
 		if (stripos($phpclass, 'shuttle') !== false) return 10;
-		if ($phpclass === 'Flyer' || $phpclass === 'FlyerProtectorate') return 10;
+		if (self::isDefaultShuttleClass($phpclass)) return 10;
 		if (class_exists($phpclass)) {
 			try {
 				$probe = new $phpclass(0, 0, '', 0);
@@ -2167,6 +2234,186 @@ class HangarOps {
 					$sys->whileDocked($flight, $carrier, $hangar, $gamedata);
 				}
 			}
+		}
+	}
+
+	/* === Kirishiac Warrior regeneration (dock N full turns → full strength) === */
+
+	/* True when $flight actually has something for the docked-regeneration dwell
+	 * to restore: a destroyed or dropped-out craft (Fighter::isDestroyed folds the
+	 * DisengagedFighter dropout in) or any net damage on a living craft. Both dock
+	 * paths gate the regenTurn stamp on this — a PRISTINE flight (e.g. every
+	 * deployment-phase dock) must not carry a dwell clock, or the hangar tooltip
+	 * reads "Regenerating — complete end of turn N" for five turns with nothing to
+	 * regenerate (2026-07-12 fix). Mechanically the stamp was harmless (the sweep
+	 * healed nothing); this is a display-truthfulness gate at the source. */
+	public static function flightNeedsRegeneration($flight){
+		if (!($flight instanceof FighterFlight)) return false;
+		if (!is_array($flight->systems)) return false;
+		foreach ($flight->systems as $f){
+			if (!($f instanceof Fighter)) continue;
+			if ($f->isDestroyed()) return true;          //destroyed or dropped-out craft to regrow
+			if ($f->getTotalDamage() > 0) return true;   //living craft carrying damage to heal
+		}
+		return false;
+	}
+
+	/* Carrier-level sweep (once per carrier per turn, same first-bay-triggers-all
+	 * pattern as the dock/launch coalescers). A docked flight whose stash entry
+	 * carries a regenTurn stamp (performWholeFlightDock, from the flight class's
+	 * $dockRegeneration) is restored to FULL strength — destroyed craft regrown,
+	 * all damage healed — once the current turn reaches that stamp:
+	 *   docked end of turn T, dwell N → regenerates in the end-of-turn processing
+	 *   of turn T+N, AFTER docks and BEFORE launches, so a launch ordered on T+N
+	 *   itself carries the freshly-regenerated flight out (it spent turns
+	 *   T+1..T+N fully aboard). Launching EARLIER simply drops the entry (and its
+	 *   stamp) unregenerated — no partial benefit, matching the B5W rule.
+	 *
+	 * Scope & guards:
+	 *  - Only dockedFlightId-linked entries (a real docked ship). On a PARTIAL
+	 *    dock only the docked fragment regenerates; craft that stayed in space
+	 *    with the remnant (including its destroyed members) are not aboard and
+	 *    never regrow.
+	 *  - Needs >=1 undestroyed craft still aboard at completion (a bay-eviction
+	 *    can kill the whole docked complement mid-dwell; nothing regrows from
+	 *    nothing). Craft that LEFT the flight (dropout / partial-dock / split-
+	 *    launch markers, cut-off integrated fighters) are excluded entirely.
+	 *  - Regrown craft claim hangar boxes like any docked craft: revivals are
+	 *    capped by the FREE boxes on the entry's own bay(s) at completion time,
+	 *    and the entry's flightSize/occupancy grow to match.
+	 *
+	 * Replay-safe & deterministic (no dice): healing is a negative DamageEntry
+	 * with undestroyed=true — the exact self-persisting mechanism SelfRepair
+	 * uses (client damage.js already honours undestroyed entries) — and runs
+	 * only in the live Fire Phase advance; replays re-read the persisted
+	 * entries. One-shot per dock cycle via $entry['regenerated']. */
+	public static function applyDockedRegeneration($carrier, $gamedata){
+		//Cheap faction gate FIRST — before the once-per-carrier guard is even set.
+		//Only Kirishiac craft (Warrior projectiles) regenerate while docked, and a
+		//Warrior can only dock in a Kirishiac carrier's hangar (they deploy with
+		//Kirishiac fleets), so a non-Kirishiac carrier can NEVER hold a regenTurn-
+		//stamped entry. This skips collectHangars + the per-bay/per-entry walk for
+		//every other carrier in the game, every turn. If a second faction ever
+		//gains a $dockRegeneration flight, widen this to an allow-list (or drop it
+		//and let the per-entry regenTurn check below carry the cost).
+		if ($carrier->faction !== 'Kirishiac Lords') return;
+
+		if (!empty($carrier->dockRegenSweepDone)) return;
+		$carrier->dockRegenSweepDone = true;
+		if ($carrier->isDestroyed()) return;   //dead carrier: Stage 18 escape owns its bays
+
+		foreach (self::collectHangars($carrier) as $hangar){
+			//Catapults/LCV rails/ShadowHangars never hold a regen-stamped entry
+			//(catapults dock via performLand, LCVs aren't FighterFlights, Shadow
+			//bays hold anonymous pristine entries) — skip defensively.
+			if (!empty($hangar->isCatapult) || !empty($hangar->isLCVRail) || !empty($hangar->isShadowHangar)) continue;
+			if ($hangar->isDestroyed() || empty($hangar->hangarUsage)) continue;
+
+			foreach ($hangar->hangarUsage as $idx => $entry){
+				if (empty($entry['regenTurn']) || !empty($entry['regenerated'])) continue;
+				if (!empty($entry['cannotLaunch'])) continue;
+				if ($gamedata->turn < (int)$entry['regenTurn']) continue;
+				$flightId = (int)($entry['dockedFlightId'] ?? 0);
+				if ($flightId <= 0) continue;
+				$flight = $gamedata->getShipById($flightId);
+				if (!($flight instanceof FighterFlight)) continue;
+				if (!$flight->removed) continue;   //not docked any more — stale entry, leave it alone
+
+				//B5W: at least one undestroyed craft must remain for the flight to regenerate.
+				if (self::countAttachedFightersInFlight($flight, $gamedata->turn) <= 0) continue;
+
+				//Boxes for the FULL roster were reserved at dock (dockReservationCraft),
+				//so every destroyed craft already has held space to regrow into — no
+				//box-cap math and no occupancy growth needed here. The only way a craft
+				//can be missing its reserved slot is a bay eviction that destroyed
+				//boxes below the reservation; a craft with no surviving box can't
+				//regrow, so cap revivals at the reserved-and-still-live box count.
+				$bpc = self::boxesPerCraftForEntry($entry);
+				if ($bpc <= 0) $bpc = 1;
+				$bays = self::occupancyBaysFor($entry, $carrier);
+				if (empty($bays)) $bays = array(array('hangar' => $hangar, 'boxes' => self::boxesForEntry($entry)));
+				//How many craft-slots this entry's reserved boxes still support after
+				//any bay damage (min of reserved boxes vs the bay's surviving capacity).
+				$slotsAvailable = 0;
+				foreach ($bays as $b){
+					$h = $b['hangar'];
+					$reservedBoxes = (int)($b['boxes'] ?? 0);
+					$surviving = min($reservedBoxes, max(0, (int)$h->getRemainingHealth()));
+					$slotsAvailable += (int)floor($surviving / $bpc);
+				}
+
+				$oldSize = (int)($entry['flightSize'] ?? 0);
+				$revived = 0;
+				$healed = 0;
+				//Live craft (heal-only) always keep their slot; destroyed craft regrow
+				//only while slots remain. Count the currently-alive craft first so the
+				//revive budget is (slotsAvailable - alive).
+				$aliveNow = self::countAttachedFightersInFlight($flight, $gamedata->turn);
+				$reviveCap = max(0, $slotsAvailable - $aliveNow);
+				foreach ($flight->systems as $f){
+					if (!($f instanceof Fighter)) continue;
+					//A regenerating flight docks WHOLE and stays whole, so every craft
+					//in the roster is aboard — destroyed, DROPPED-OUT (disengaged), and
+					//damaged all regenerate (per user: dropout craft regrow too). The
+					//only genuinely-gone states are cut-off (integrated only, never a
+					//Warrior) and docked/split (partial ops, which a regen flight can't
+					//do) — guarded defensively.
+					if (self::isFighterCutOff($f)) continue;
+					if ($f->isDocked($gamedata->turn) || $f->isSplitLaunched($gamedata->turn)) continue;
+					$destroyed = $f->isDestroyed();   //true for destroyed AND dropped-out (isDisengaged folds in)
+					if ($destroyed && $revived >= $reviveCap) continue;   //no reserved slot survived to regrow this one
+					//Heal the full NET damage (unclamped — getRemainingHealth floors at 0,
+					//which would leave overkill residue behind on a destroyed craft).
+					$missing = $f->getTotalDamage();
+					if (!$destroyed && $missing <= 0) continue;   //already pristine
+					$heal = new DamageEntry(-1, $flight->id, -1, $gamedata->turn, $f->id, -$missing, 0, 0, -1, false, true, 'Regenerated while docked', 'WarriorRegeneration');
+					$heal->updated = true;
+					$f->damage[] = $heal;
+					//A destroyed/dropped-out craft that clears its damage may still carry
+					//the DisengagedFighter crit; strip it so the revived craft rejoins the
+					//flight cleanly (isDestroyed no longer trips on the stale dropout crit).
+					if ($destroyed) { self::clearDropoutCrit($f, $gamedata->turn); $revived++; }
+					else $healed++;
+				}
+
+				//flightSize = live craft after regen (drives launch size + fleet value);
+				//the reserved occupancy boxes are unchanged (space was held all along).
+				if ($revived > 0){
+					$hangar->hangarUsage[$idx]['flightSize'] = $oldSize + $revived;
+				}
+				$hangar->hangarUsage[$idx]['regenerated'] = $gamedata->turn;
+
+				if (($revived + $healed) > 0){
+					$note = new IndividualNote(
+						-1, $gamedata->id, $gamedata->turn, $gamedata->phase,
+						$carrier->id, $hangar->id,
+						'hangarRegenEvent', 'Docked flight regenerated',
+						$flight->id . ':' . ($entry['phpclass'] ?? '') . ':' . $revived . ':' . $healed
+					);
+					Manager::insertIndividualNote($note);
+				}
+			}
+		}
+	}
+
+	/* End any DisengagedFighter (combat dropout) critical on a fighter that has just
+	 * been regenerated while docked, so the revived craft rejoins its flight cleanly
+	 * (isDestroyed no longer folds in a stale dropout). Uses the same turnend + forceModify
+	 * mechanism SelfRepair/repairCritical uses: setting turnend = current turn makes
+	 * hasCritical() return false for every LATER turn, and forceModify persists that
+	 * turnend to tac_critical (the only field the modify path writes). inEffect=false
+	 * clears it for the rest of THIS request too (rendering + the same-turn relaunch).
+	 * Only touches DisengagedFighter — a regen flight can't be docked/split/cut-off. */
+	private static function clearDropoutCrit($fighter, $turn){
+		if (!($fighter instanceof Fighter) || !is_array($fighter->criticals)) return;
+		foreach ($fighter->criticals as $crit){
+			if ($crit->phpclass !== 'DisengagedFighter') continue;
+			if (!$crit->inEffect) continue;
+			if ($crit->turnend > 0 && $crit->turnend < $turn) continue;   //already ended
+			$crit->turnend = $turn;
+			$crit->inEffect = false;
+			$crit->forceModify = true;   //persist the turnend (only meaningful for a crit already in the DB)
+			$crit->updated = true;
 		}
 	}
 
@@ -3186,13 +3433,16 @@ class HangarOps {
 		//cap (e.g. 24 fighters, max 9/flight), so it spawns MULTIPLE flights:
 		//  - explicit $flightSizes (manual split the player chose) — clamp each to the
 		//    cap and to the held pool, drop non-positive;
-		//  - else auto-split $count (<=0/null ⇒ whole pool) into ceil(n/cap) flights of
-		//    <=cap each (e.g. 24 → 9+9+6).
+		//  - else auto-split $count (<=0/null ⇒ whole pool) into chunks of the preferred
+		//    auto-split size, trailing remainder last (e.g. 24 → 6+6+6+6, 15 → 6+6+3).
 		//Cap = min(class flight-size limit, fighters currently HELD) — a bay holding
 		//fewer than the limit (ShadowCruiser: 6) can never form a flight bigger than
-		//its stock, so the cap tracks the held pool (user 2026-06-11).
-		$cap = min(self::bombFlightSizeCap($phpclass), $held);
-		$sizes = self::resolveBombFlightSizes($flightSizes, $count, $held, $cap);
+		//its stock, so the cap tracks the held pool (user 2026-06-11). The auto-split
+		//CHUNK (6, user 2026-07-09) is the DEFAULT grouping, distinct from the cap (9):
+		//a manual override may still form flights up to the cap.
+		$cap   = min(self::bombFlightSizeCap($phpclass), $held);
+		$chunk = min(self::bombAutoSplitChunk(), $held);
+		$sizes = self::resolveBombFlightSizes($flightSizes, $count, $held, $cap, $chunk);
 		if (empty($sizes)) return null;
 
 		//Spawn geometry: TARGET hex, carrier heading/speed/facing. Unlike an
@@ -3265,13 +3515,25 @@ class HangarOps {
 		return max(1, $cap);
 	}
 
+	/* Preferred per-flight fighter count for the AUTOMATIC split (user 2026-07-09).
+	 * Distinct from bombFlightSizeCap: the cap (9) is the hard rules ceiling a MANUAL
+	 * override may reach, while the auto-split groups fighters into flights of 6 with a
+	 * trailing remainder (12 → 6+6, 15 → 6+6+3, 7 → 6+1, ≤6 → one flight). */
+	public static function bombAutoSplitChunk(){
+		return 6;
+	}
+
 	/* Build the per-flight size list for a bomb launch, each entry <= $cap and the
 	 * total <= $held. Prefers an explicit $flightSizes list (the manual split);
-	 * otherwise auto-splits $count (<=0/null ⇒ whole $held) into ceil(n/cap) flights
-	 * (e.g. 24, cap 9 ⇒ [9,9,6]). Any explicit entry over the cap is itself split. */
-	public static function resolveBombFlightSizes($flightSizes, $count, $held, $cap){
+	 * otherwise auto-splits $count (<=0/null ⇒ whole $held) into flights of $chunk
+	 * (the preferred auto-split size, default = $cap) with the remainder trailing last
+	 * (e.g. 15, chunk 6 ⇒ [6,6,3]). Any explicit MANUAL entry over the cap is itself
+	 * broken into <=cap pieces (manual honours the cap, not the smaller auto chunk). */
+	public static function resolveBombFlightSizes($flightSizes, $count, $held, $cap, $chunk = null){
 		$cap = max(1, (int)$cap);
 		$held = max(0, (int)$held);
+		//Auto-split chunk defaults to the cap (old behaviour) when not supplied.
+		$chunk = ($chunk === null) ? $cap : max(1, (int)$chunk);
 		$out = array();
 
 		if (is_array($flightSizes) && !empty($flightSizes)){
@@ -3283,20 +3545,20 @@ class HangarOps {
 				$budget -= $s;
 				//A manual entry larger than the cap is itself broken into <=cap chunks.
 				while ($s > 0){
-					$chunk = min($cap, $s);
-					$out[] = $chunk;
-					$s -= $chunk;
+					$piece = min($cap, $s);
+					$out[] = $piece;
+					$s -= $piece;
 				}
 			}
 			return $out;
 		}
 
-		//Auto-split path.
+		//Auto-split path — group into $chunk-sized flights, remainder trailing.
 		$total = ($count === null || (int)$count <= 0) ? $held : min($held, (int)$count);
 		while ($total > 0){
-			$chunk = min($cap, $total);
-			$out[] = $chunk;
-			$total -= $chunk;
+			$piece = min($chunk, $total);
+			$out[] = $piece;
+			$total -= $piece;
 		}
 		return $out;
 	}
@@ -4245,6 +4507,14 @@ class HangarOps {
 			if ($remaining < $count) { $reason = 'customFighter cap exceeded'; return false; }
 		}
 
+		//Per-carrier CUSTOM COMBAT category cap (e.g. Hunter-Killers). A universal
+		//bay pools this category's craft with light fighters / AS in the same boxes,
+		//but $ship->fighters caps how many of THIS category may dock (Prophet: 18 HK
+		//even though the 37-box bay could physically hold more). No-op (PHP_INT_MAX)
+		//for size / shuttle-family categories, which share via the box hierarchy.
+		$catRemaining = self::categoryCapRemaining($carrier, $category);
+		if ($catRemaining < $count) { $reason = 'fighter category cap exceeded'; return false; }
+
 		return true;
 	}
 
@@ -4356,6 +4626,20 @@ class HangarOps {
 				return false;
 			}
 
+			//Categories bound to DEDICATED systems never ride a universal fighter
+			//bay: 'superheavy' lives in the catapult, 'lcvs' on DockingCollar rails.
+			//Without this the Stormfalcon's {light:12, superheavy:1} declaration
+			//would let its 14-box hangar soak the Sky Serpent through the custom-
+			//category door below (2026-07-12 fix — the SHF must go to the catapult).
+			if ($cat === 'superheavy' || $cat === 'lcvs') return false;
+
+			//Custom combat category (e.g. 'Hunter-Killers', 'Raiders'): a universal
+			//bay accepts it when the ship's $fighters declares that exact category
+			//(VigilantHKAM's {light:6, Hunter-Killers:6} bay accepts both light
+			//fighters and HKs). The per-bay allowedFighterClasses gate still enforces
+			//WHICH phpclasses may actually dock, so this only opens the category door.
+			if (!empty($declared[$cat])) return true;
+
 			//Other custom names need explicit exact-match (typed hangar) or a
 			//customFighter declaration (gated separately by Stage 10.6.2).
 			return false;
@@ -4396,16 +4680,41 @@ class HangarOps {
 		return in_array($cls, $allowed, true);
 	}
 
-	/* Stable sort: bays whose allow-list SPECIFICALLY reserves $flight's class
-	 * come first (so they fill before unrestricted bays the flight could also
-	 * use), preserving the input order within each group. Operates on a plain
-	 * list of Hangar objects. */
+	/* True when $hangar is SPECIFICALLY reserved for $flight — either by its
+	 * phpclass allow-list (bayReservesFighterClass) OR by an EXACT hangarType
+	 * category match (a bay typed 'ultralight' is reserved for ultralight flights,
+	 * a 'Breaching Pods' bay for BP flights). This is the auto-fill PRIORITY
+	 * predicate: a reserved bay fills ahead of a universal bay that merely accepts
+	 * the flight via the size hierarchy — so an ultralight flight prefers the
+	 * Qoricc's dedicated aft 'ultralight' bay before spilling into the universal
+	 * primary, mirroring how a Reska prefers the gaimSuom's Reska-only bay.
+	 *
+	 * "Exact" is deliberate: a 'light' bay ACCEPTS ultralights (size hierarchy)
+	 * but does NOT reserve them — only a bay whose type equals the flight's own
+	 * category is a reservation. Universal 'fighters'/'normal' bays reserve
+	 * nothing. This only affects ORDERING among bays that already accept the
+	 * flight; it never changes eligibility. */
+	public static function bayReservesFlight($hangar, $flight){
+		if (!is_object($hangar)) return false;
+		if (self::bayReservesFighterClass($hangar, $flight)) return true;   //phpclass allow-list reservation
+		//Exact hangarType category match. Skip universal types and structural
+		//bays (catapults are fixed 'superheavy', which DOES exact-match a
+		//superheavy flight — desirable, the SHF prefers its catapult).
+		$hType = strtolower(trim((string)$hangar->hangarType));
+		if ($hType === '' || $hType === 'fighters' || $hType === 'normal') return false;
+		return $hType === strtolower(trim((string)self::trueSizeOf($flight)));
+	}
+
+	/* Stable sort: bays SPECIFICALLY reserved for $flight (bayReservesFlight —
+	 * phpclass allow-list OR exact hangarType match) come first, so they fill
+	 * before universal bays that merely accept the flight, preserving input
+	 * order within each group. Operates on a plain list of Hangar objects. */
 	public static function sortBaysReservedFirst($bays, $flight){
 		if (!is_array($bays) || count($bays) < 2) return $bays;
 		$reserved = array();
 		$other = array();
 		foreach ($bays as $h){
-			if (self::bayReservesFighterClass($h, $flight)) $reserved[] = $h;
+			if (self::bayReservesFlight($h, $flight)) $reserved[] = $h;
 			else $other[] = $h;
 		}
 		return array_merge($reserved, $other);
@@ -4443,6 +4752,60 @@ class HangarOps {
 			foreach ($h->hangarUsage as $entry){
 				if (!isset($entry['customFtrName'])) continue;
 				if ($entry['customFtrName'] !== $name) continue;
+				$used += (int)($entry['flightSize'] ?? 1);
+			}
+		}
+		return max(0, $declared - $used);
+	}
+
+	/* True when $category is a CUSTOM COMBAT category — one that the fleet-builder
+	 * (gamelobby checkChoices) routes through its ISOLATED totalHangarOther pool
+	 * (matched strictly by name against totalFtrOther), NOT through the shared
+	 * size hierarchy (light/medium/…) or the shuttle/BP families. Currently the
+	 * only live example is Orieni 'Hunter-Killers'. Such a category gets its own
+	 * hard per-carrier cap from $ship->fighters[$category] (see categoryCapRemaining),
+	 * rather than borrowing free boxes from the bay's other categories.
+	 * Mirrors the size/shuttle-family exclusion in inferHangarType. */
+	public static function isCustomCombatCategory($category){
+		$cat = strtolower(trim((string)$category));
+		if ($cat === '') return false;
+		static $shared = array(
+			'heavy', 'medium', 'light', 'ultralight', 'normal',       //size hierarchy
+			'shuttles', 'minesweeping shuttles', 'cargo shuttles',    //shuttle family
+			'medical shuttles', 'lifeboats', 'assault shuttles', 'breaching pods',
+			'superheavy', 'lcvs',                                     //catapult / LCV rail
+		);
+		return !in_array($cat, $shared, true);
+	}
+
+	/* Per-carrier cap remaining for a CUSTOM COMBAT category (e.g. 'Hunter-Killers')
+	 * on $carrier. The cap is $ship->fighters[$category] shared across ALL the
+	 * carrier's hangars (a universal bay pools light + HK + AS in the same 37 boxes,
+	 * but may hold no more HKs than the ship declares). "Used" is the sum of
+	 * flightSize across every hangarUsage entry on every hangar whose stamped
+	 * hangarType matches $category. Returns PHP_INT_MAX for non-custom categories
+	 * (no gate) and 0 when the carrier declares no capacity for that category.
+	 *
+	 * This is the category-level analogue of customFighterRemaining (which caps by
+	 * $customFtrName). HK flights carry NO customFtrName — they're gated purely by
+	 * their hangarRequired category — so this closes the gap where a universal bay
+	 * would otherwise let HKs spill into the light-fighter box space. */
+	public static function categoryCapRemaining($carrier, $category){
+		if (!self::isCustomCombatCategory($category)) return PHP_INT_MAX;
+		$cat = strtolower(trim((string)$category));
+		$declared = 0;
+		if (isset($carrier->fighters) && is_array($carrier->fighters)){
+			foreach ($carrier->fighters as $k => $v){
+				if (strtolower(trim((string)$k)) === $cat){ $declared = (int)$v; break; }
+			}
+		}
+		if ($declared <= 0) return 0;
+
+		$used = 0;
+		foreach (self::collectHangars($carrier) as $h){
+			if (!is_array($h->hangarUsage)) continue;
+			foreach ($h->hangarUsage as $entry){
+				if (strtolower(trim((string)($entry['hangarType'] ?? ''))) !== $cat) continue;
 				$used += (int)($entry['flightSize'] ?? 1);
 			}
 		}
@@ -4495,15 +4858,17 @@ class HangarOps {
 			if ($capacity > 0) $out[] = array('hangar' => $h, 'capacity' => $capacity);
 		}
 
-		//Prioritise bays that SPECIFICALLY reserve this flight's class (allowedFighterClasses)
-		//ahead of unrestricted bays that merely accept it — so a Reska auto-lands in the Suom's
-		//Reska-only bay before consuming the universal primary the medium Koist needs. Stable
-		//partition preserves the exact-match-then-hierarchy ordering within each group.
+		//Prioritise bays SPECIFICALLY reserved for this flight — by phpclass allow-list
+		//OR exact hangarType match (bayReservesFlight) — ahead of universal bays that
+		//merely accept it: a Reska auto-lands in the Suom's Reska-only bay, and an
+		//ultralight flight auto-lands in the Qoricc's dedicated 'ultralight' bay, before
+		//consuming the universal primary. Stable partition preserves the exact-match-
+		//then-hierarchy ordering within each group.
 		if (count($out) > 1){
 			$reservedOut = array();
 			$otherOut = array();
 			foreach ($out as $entry){
-				if (self::bayReservesFighterClass($entry['hangar'], $flight)) $reservedOut[] = $entry;
+				if (self::bayReservesFlight($entry['hangar'], $flight)) $reservedOut[] = $entry;
 				else $otherOut[] = $entry;
 			}
 			$out = array_merge($reservedOut, $otherOut);
@@ -4584,9 +4949,19 @@ class HangarOps {
 		$activeCount = $flight->countActiveCraft($gamedata->turn);
 		$count = max(1, (int)$count);
 		if ($count > $dockableCount) $count = $dockableCount;
+
+		//Kirishiac Warrior regeneration: a regenerating flight docks WHOLE ONLY —
+		//never a partial. Force $count to the full dockable roster and reserve boxes
+		//for the FULL roster (alive + destroyed) so post-dwell regeneration has room.
+		//Warriors aren't integrated fighters, so $hasCutOff is always false here; the
+		//whole flight ship (with its destroyed members) is what docks and later
+		//regrows, so it's always a full dock.
+		$isRegenFlight = self::isDockRegenFlight($flight);
+		if ($isRegenFlight) $count = $dockableCount;
+
 		//Full dock only when every dockable craft lands AND none are cut off; otherwise
 		//partial so the source flight survives in space with the cut-off remnant.
-		$partial = ($count < $dockableCount) || $hasCutOff;
+		$partial = (!$isRegenFlight) && (($count < $dockableCount) || $hasCutOff);
 
 		$category = self::trueSizeOf($flight);
 		//Fractional-safe per-craft box cost (ultralight 0.5, superheavy >1). Don't
@@ -4594,13 +4969,22 @@ class HangarOps {
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
 		if ($bpc <= 0) $bpc = 1;
 
+		//Boxes to RESERVE. A regenerating flight reserves its full roster (so
+		//destroyed craft can regrow into held space); every other flight reserves
+		//exactly the craft it docks. Distribution below places this many box-slots
+		//even though only $count live craft occupy them right now.
+		$reserveCraft = self::dockReservationCraft($flight, $count);
+
 		//Distribute craft across the bays in fill order (primary first), reserving
 		//WHOLE boxes per bay (occupancy boxes are read as ints everywhere). Each bay
 		//takes min(craft-that-fit, remaining) where craft-that-fit = floor(freeBoxes /
 		//bpc); its reserved boxes is ceil(craftHere * bpc) so an odd ultralight count
-		//rounds its half-box up to a whole reserved box.
+		//rounds its half-box up to a whole reserved box. For a regen flight
+		//$reserveCraft is the FULL roster, so this reserves boxes for craft that are
+		//currently destroyed (they hold their space until they regrow); the live
+		//$count that actually occupy a slot right now is <= $reserveCraft.
 		$occupancy = array();
-		$remaining = $count;   //craft still to place
+		$remaining = $reserveCraft;   //craft-slots still to place (full roster for regen)
 		$primaryHangar = null;
 		foreach ($bays as $b){
 			if ($remaining <= 0) break;
@@ -4631,7 +5015,27 @@ class HangarOps {
 		//Stage 21: occupancy is only recorded for true multi-bay docks; a
 		//single-bay dock leaves it off so legacy readers + the common path are
 		//untouched (the entry's boxes are simply counted on its own hangar).
-		if (count($occupancy) > 1) $entry['occupancy'] = $occupancy;
+		//EXCEPTION — a regen flight ALWAYS records occupancy (even single-bay) so
+		//its reserved full-roster boxes are accounted explicitly: flightSize stays
+		//the live docked count (drives launch size + fleet value), while occupancy
+		//holds the space for the destroyed craft that will regrow. Without this a
+		//single-bay regen entry's footprint would be flightSize*bpc (live count
+		//only) and the reserved regen boxes would read as free.
+		if (count($occupancy) > 1 || ($isRegenFlight && count($occupancy) >= 1)) $entry['occupancy'] = $occupancy;
+
+		//Kirishiac Warrior regeneration: a flight whose class regenerates while
+		//docked (FighterFlight::$dockRegeneration = N full turns) gets the end-of-
+		//turn at which its dwell completes stamped on the entry; the carrier-level
+		//sweep (applyDockedRegeneration) fires on it. The B5W "at least one
+		//undestroyed Warrior at the moment it docks" requirement is enforced by the
+		//dock itself: $dockableCount above uses the ABSOLUTE current destroyed
+		//state (Fighter::isDestroyed ignores the turn bound), and this runs AFTER
+		//Firing::fireWeapons in the advance — so a flight whose last craft died to
+		//enemy fire in this very firing phase never docks at all (returned 0 above).
+		//A PRISTINE flight gets NO dwell clock — nothing to regenerate, and the
+		//stamp would show a misleading "Regenerating" tooltip for N turns.
+		$regenAfter = (int)($flight->dockRegeneration ?? 0);
+		if ($regenAfter > 0 && self::flightNeedsRegeneration($flight)) $entry['regenTurn'] = $gamedata->turn + $regenAfter;
 
 		$dockedUnit = null;   //Stage S: the FighterFlight that actually docked (full: the flight; partial: the fragment)
 		if ($partial){
@@ -4821,7 +5225,13 @@ class HangarOps {
 		//boxes) would be mis-priced as 24 boxes and rejected on a 12-box hangar.
 		$bpc = self::boxesPerCraftForClass($flight->phpclass);
 		if ($bpc <= 0) $bpc = 1;
-		$boxesNeeded = max(1, (int)$count) * $bpc;   //fractional for ultralights
+		//A regenerating flight (Warrior) docks WHOLE only and reserves boxes for its
+		//FULL roster (alive + destroyed + dropout) so post-dwell regeneration always
+		//has room. $count is ignored for the reservation — the whole flight lands as
+		//one unit and the hangar holds space for every craft it could regrow. For an
+		//ordinary flight this is just $count craft (unchanged).
+		$reserveCraft = self::dockReservationCraft($flight, $count);
+		$boxesNeeded = max(1, (int)ceil($reserveCraft * $bpc));   //fractional for ultralights
 
 		//Validate basic eligibility (hex/heading/speed/pivot/customcap) once via
 		//canShipReceive against the carrier's best bay — it short-circuits the
@@ -5310,6 +5720,13 @@ class HangarOps {
 		if ($bpc <= 0) $bpc = 1;
 		$category = self::trueSizeOf($flight);
 
+		//Stage S: an integrated-fighter bay (ShadowHangar keeps $name='hangar', so it
+		//passes hangarAcceptsCategory like any medium bay) accepts ONLY its own
+		//integrated fighters — a foreign flight deploy-docked there could never launch
+		//(canLaunch blocks integrated bays; they launch only via the Fighter Bomb).
+		//Mirrors the buildDockBays gate on the firing-phase dock path.
+		$flightIsIntegrated = ($flight->phpclass === 'ShadowMediumFighterFlight');
+
 		//hangarAcceptsCategory reads the carrier's $fighters declaration to decide
 		//whether a universal ('fighters'/'normal') bay accepts a category it can't
 		//infer from hangarType alone (Breaching Pods, Assault Shuttles, custom). But
@@ -5342,7 +5759,9 @@ class HangarOps {
 		foreach (self::collectHangars($carrier) as $h){
 			$k = spl_object_hash($h);
 			if (isset($seen[$k])) continue;
-			if (!empty($h->isCatapult)) continue;
+			//Catapults join the candidate list too (2026-07-12): they're the ONLY
+			//valid home for a superheavy deploy-dock, and hangarAcceptsCategory in
+			//the placement loop keeps every other category out of them.
 			$seen[$k] = true; $tail[] = $h;
 		}
 		foreach (self::sortBaysReservedFirst($tail, $flight) as $h){
@@ -5360,8 +5779,14 @@ class HangarOps {
 		$remaining = $activeCount;   //craft still to place
 		foreach ($ordered as $h){
 			if ($remaining <= 0) break;
-			if (!empty($h->isCatapult)) continue;
-			if ($h->isDestroyed()) continue;
+			//Stage 16 (2026-07-12): a catapult IS a valid deploy-dock target for its
+			//'superheavy' category — it holds ONE craft, counts craft 1:1 (exempt
+			//from the box multiplier) and operates regardless of its own damage,
+			//mirroring eligibleHangarsForLanding. hangarAcceptsCategory keeps every
+			//other category out (a catapult's hangarType is fixed at 'superheavy').
+			$isCat = !empty($h->isCatapult);
+			if (!$isCat && $h->isDestroyed()) continue;
+			if (!empty($h->isShadowHangar) && !$flightIsIntegrated) continue;   //integrated-only bay (see above)
 			if (!self::hangarAcceptsCategory($h, $category, $capabilityCarrier)) continue;
 			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 
@@ -5380,7 +5805,9 @@ class HangarOps {
 			}
 			$postUsed = 0;
 			if (is_array($h->hangarUsage)){
-				foreach ($h->hangarUsage as $e){ $postUsed += self::boxesForEntry($e); }
+				//Catapults count stored craft 1:1 (mirrors usageCountFor's catapult
+				//branch); ordinary bays charge the per-craft box cost.
+				foreach ($h->hangarUsage as $e){ $postUsed += $isCat ? (int)($e['flightSize'] ?? 1) : self::boxesForEntry($e); }
 			}
 			//Free WHOLE boxes in this bay = capacity − existing usage rounded UP (a
 			//partly-filled box can't be shared with this flight on the deploy path).
@@ -5388,10 +5815,12 @@ class HangarOps {
 			if ($free <= 0) continue;
 			//Craft that fit in those whole boxes, then the whole boxes they actually
 			//reserve (ceil so an odd ultralight count rounds its half-box up).
-			$craftFit = (int)floor($free / $bpc);
+			//Catapult: craft 1:1, exempt from the box multiplier — otherwise a
+			//unitSize<1 superheavy (2 boxes/craft) could never fit its single slot.
+			$craftFit = $isCat ? $free : (int)floor($free / $bpc);
 			$craftHere = min($remaining, $craftFit);
 			if ($craftHere <= 0) continue;
-			$boxesHere = (int)ceil($craftHere * $bpc);
+			$boxesHere = $isCat ? $craftHere : (int)ceil($craftHere * $bpc);
 			$occupancy[] = array('systemId' => (int)$h->id, 'boxes' => $boxesHere);
 			$remaining -= $craftHere;
 		}
@@ -5441,7 +5870,22 @@ class HangarOps {
 		);
 		if (!empty($flight->customFtrName)) $entry['customFtrName'] = $flight->customFtrName;
 		if ($bpc != 1) $entry['boxesPerCraft'] = $bpc;   //stamp fractional (0.5) and >1 alike; 1 stays lean
-		if (count($occupancy) > 1) $entry['occupancy'] = $occupancy;
+		//A regen flight always records occupancy (mirrors performWholeFlightDock) so
+		//its reserved boxes are explicit even single-bay; a deploy-docked fresh flight
+		//is at full roster, so $activeCount already equals the reservation.
+		//The lean no-occupancy shape is ONLY valid when the single occupancy bay IS
+		//the entry host — every reader charges a no-occupancy entry's boxes to the
+		//bay holding it. When the re-home placed the flight on a DIFFERENT single bay
+		//than the client's preferred host (ordered bay full/ineligible), the list
+		//must be stamped or the host bay mis-reports the boxes (2026-07-12 fix).
+		$singleOnHost = (count($occupancy) === 1 && (int)$occupancy[0]['systemId'] === (int)$preferredPrimary->id);
+		if (!$singleOnHost || self::isDockRegenFlight($flight)) $entry['occupancy'] = $occupancy;
+		//Regen dwell clock — only when the flight actually has damage/losses to
+		//regenerate. A deployment-phase dock is virtually always PRISTINE; stamping
+		//it anyway made the hangar tooltip read "Regenerating — complete end of
+		//turn N" for the whole dwell with nothing to heal (2026-07-12 fix).
+		$regenAfter = (int)($flight->dockRegeneration ?? 0);
+		if ($regenAfter > 0 && self::flightNeedsRegeneration($flight)) $entry['regenTurn'] = $gamedata->turn + $regenAfter;
 
 		$flight->removed = true;
 		$flight->removedTurn = $gamedata->turn;
@@ -5499,6 +5943,12 @@ class HangarOps {
 			if ($remaining < $activeCount) { $reason = 'customFighter cap exceeded'; return false; }
 		}
 
+		//Custom combat category cap (e.g. Hunter-Killers), shared across bays,
+		//against the whole-flight count — the Prophet's 37-box bay pools HK with
+		//light fighters but holds no more HKs than $ship->fighters declares.
+		$catRemaining = self::categoryCapRemaining($carrier, self::trueSizeOf($flight));
+		if ($catRemaining < $activeCount) { $reason = 'fighter category cap exceeded'; return false; }
+
 		//Per-BAY capacity is NOT checked here — performDeployStartDockFromOrders is
 		//server-authoritative: it re-homes the whole flight across bays using TRUE
 		//(DB-side) free boxes, drops full/incompatible bays, tops up elsewhere, and
@@ -5507,55 +5957,10 @@ class HangarOps {
 		return true;
 	}
 
-	public static function canDeployStartDock($hangar, $carrier, $flight, $gamedata, &$reason = null, $count = null){
-		if (!$flight instanceof FighterFlight) { $reason = 'not a flight'; return false; }
-		if ($flight->removed || $flight->isDestroyed()) { $reason = 'flight already removed'; return false; }
-		if ($hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
-		if ($carrier->isDestroyed() || $carrier->removed) { $reason = 'carrier not in play'; return false; }
-
-		if ((int)$flight->slot !== (int)$carrier->slot) { $reason = 'slot mismatch'; return false; }
-		if ((int)$flight->userid !== (int)$carrier->userid) { $reason = 'owner mismatch'; return false; }
-
-		if ($flight->getTurnDeployed($gamedata) != $gamedata->turn) {
-			$reason = 'flight not deploying this turn'; return false;
-		}
-		//Carrier must ALSO be deploying this turn — fighters arriving on
-		//turn N can only dock into ships also arriving on turn N. Previously
-		//-deployed carriers are off-limits to late reinforcements.
-		if ($carrier->getTurnDeployed($gamedata) != $gamedata->turn) {
-			$reason = 'carrier not deploying this turn'; return false;
-		}
-
-		//$count is the number of craft this hangar will take. NULL = the whole
-		//flight (legacy single-hangar dock). A multi-hangar auto-distribute
-		//(rails: a 9-flight spread across a 6-box + 3-box rail) passes the
-		//per-hangar slice — partial deploy-docks split the flight into fragments
-		//exactly like the Firing-Phase splitter (performLand).
-		$size = ($count === null) ? (int)$flight->flightSize : (int)$count;
-		if ($size <= 0) { $reason = 'flight has no craft'; return false; }
-
-		//Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
-		if (!self::hangarAcceptsFighterClass($hangar, $flight)) { $reason = 'wrong fighter class'; return false; }
-
-		$category = self::trueSizeOf($flight);
-		$free = self::freeBoxesByCategory($hangar, $category, $carrier);
-		//unitSize<1 craft need more than one box each (see boxesPerCraftForClass);
-		//catapults are exempt (single-fighter rail, counts craft 1:1).
-		$boxesNeeded = !empty($hangar->isCatapult) ? $size : $size * self::boxesPerCraftForClass($flight->phpclass);
-		if ($free < $boxesNeeded) { $reason = 'hangar full'; return false; }
-
-		//Stage 10.6.2: per-ship customFighter cap. Checked against the per-hangar
-		//slice; the aggregate across hangars is bounded by the cap because each
-		//slice consumes from the same shared remaining (entries stamped as they
-		//are written within this processing pass).
-		$customName = isset($flight->customFtrName) ? (string)$flight->customFtrName : '';
-		if ($customName !== '') {
-			$remaining = self::customFighterRemaining($carrier, $customName);
-			if ($remaining < $size) { $reason = 'customFighter cap exceeded'; return false; }
-		}
-
-		return true;
-	}
+	/* (Tier-1/3 cleanup 2026-07-12: the old per-bay canDeployStartDock — the
+	 * legacy single-bay deploy-dock validator — was removed as dead code; no
+	 * callers remained. Deploy-dock validation is validateDeployBayOrders above
+	 * + the server-authoritative re-home in performDeployStartDockFromOrders.) */
 
 	/* (Stage 21: the old per-bay performDeployStartDock — which re-distributed
 	 * boxes server-side and, pre-21.1, split into fragments — was replaced by the

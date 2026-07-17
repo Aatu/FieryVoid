@@ -49,6 +49,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#ancients">Ancients</a></li>
                 <li><a href="#drazi">Drazi Freehold</a></li>                
                 <li><a href="#ipsha">Ipsha Baronies</a></li>
+                <li><a href="#kirishiaclords">Kirishiac Lords</a></li>                
                 <li><a href="#markab">Markab Theocracy</a></li>
                 <li><a href="#mindriders">The Mindriders</a></li>                  
                 <li><a href="#shadows">Shadow Association</a></li>
@@ -408,6 +409,19 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         </li>       
       </ul>
     <a class="back-to-top" href="#top">↩ Back to Top</a>      
+
+   <h4 id="kirishiaclords" style="margin-top: 15px;">Kirishiac Lords:</h4>
+      <ul>
+        <li><strong>Improved Gravitic Converters</strong>
+            <ul class="circle-list">
+                <li>Effect: it only costs 4 thrust to boost the damage of the ships Hypergraviton Blaster.</li>
+                <li>Points Cost: 150pts + 50pts per Hypergraviton Blaster</li>
+                <li>Limit: 1</li>
+            </ul>      
+        </li> 
+      </ul>
+    <a class="back-to-top" href="#top">↩ Back to Top</a>      
+
 
     <h4 id="markab" style="margin-top: 15px;">Markab Theocracy:</h4>
       <ul>

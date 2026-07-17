@@ -218,20 +218,29 @@ class AutomatedMovement
         for ($step = 0; $step < $newSpeed; $step++) {
             $curDist = self::hexDist($pos, $target);
 
-            // REACHED the target's hex — STOP here so we ram it (otherwise the next move
-            // would slide straight back OUT of the hex, leaving us adjacent). Shed leftover
-            // speed (the detour margin / surplus): a 'speedchange' for as much as the accel
-            // pool affords, and `finalSpeed` is pinned to the hexes actually travelled below,
-            // so the recorded end-speed always matches the real distance moved.
+            // REACHED the target's hex. To STOP here and ram it we must shed ALL leftover
+            // speed (the detour margin / surplus) down to the hexes already travelled —
+            // otherwise the flight is still moving and the next hex slides it straight back
+            // OUT of the target. Deceleration is NOT free: it is drawn from the accel pool
+            // (the rules' half-thrust cap), so a flight that arrived far too fast physically
+            // cannot brake to a halt on the hex. Only break (stop-and-ram) when the pool can
+            // pay the whole overspeed; otherwise fall through and keep flying, overshooting
+            // the target legally — exactly what a real flight would be forced to do, and the
+            // ram simply doesn't connect this turn (createAutomatedRamOrders fires only on a
+            // co-located FINAL position). This closes the free-stop where a co-located HK
+            // could brake from full speed to 0 for nothing.
             if ($curDist == 0) {
                 $overspeed = $newSpeed - $movedHexes;
-                if ($overspeed > 0 && $accelPool > 0) {
-                    $decel     = min($accelPool, $overspeed);
+                $decel     = ($overspeed > 0) ? min($accelPool, $overspeed) : 0;
+                if ($decel > 0) {
                     $accelPool -= $decel;
                     $newSpeed  -= $decel;
                     $moves[]    = self::speedChangeOrder($pos, $newSpeed, $heading, $facing, -$decel, $gamedata, $iniative);
+                    $overspeed -= $decel;
                 }
-                break;
+                if ($overspeed <= 0) break; // fully stopped on the target — ram lands
+                // else: un-sheddable surplus remains; do not break — continue below and
+                // overshoot rather than teleport to a halt.
             }
 
             // ROUTE travel: aim at the best UNBLOCKED, PROGRESSING direction (routes around
@@ -351,7 +360,17 @@ class AutomatedMovement
     const SPEED_CAP = 20; // sanity clamp on auto-pilot speed (well above any real flight)
 
     /* Nearest non-destroyed enemy SHIP (not terrain, not another flight/mine) to this
-     * unit, by hex distance from the unit's current position. Null if none. */
+     * unit, by EFFECTIVE hex distance from the unit's current position. Null if none.
+     *
+     * Effective distance = real distance + an UNCERTAINTY handicap for enemies that
+     * have not completed this turn's movement. An unmoved enemy's hex is last turn's
+     * data — it will likely vacate (the live failure was an HK parking at speed 0 on an
+     * unmoved ship's hex, only for it to fly away before the ram) — and how far its
+     * real end-of-turn hex can differ from what we see is roughly its current speed,
+     * so that speed IS the handicap. Already-moved enemies and immobile bases have
+     * final positions and compete at plain distance. Mirrors B5W initiative (moving
+     * later means reacting to those who already moved) without blindly ignoring a
+     * genuinely close slow threat. */
     private static function findNearestEnemy($ship, $gamedata)
     {
         $best = null;
@@ -365,13 +384,38 @@ class AutomatedMovement
             if ($other->mine) continue;
             if ($other->getTurnDeployed($gamedata) > $gamedata->turn) continue;
 
-            $dist = Mathlib::getDistanceHex($ship, $other);
+            $dist = Mathlib::getDistanceHex($ship, $other)
+                  + self::positionUncertainty($other, $ship, $gamedata);
             if ($dist < $bestDist) {
                 $bestDist = $dist;
                 $best = $other;
             }
         }
         return $best;
+    }
+
+    /* How far $other's real end-of-turn hex may end up from where the seek sees it now:
+     * 0 when its position is already FINAL for this turn, else its current speed (the
+     * plausible displacement of a ship that still gets to move; a parked unmoved ship
+     * scores 0 — staying put is its most likely outcome). Position is final when:
+     *   - it is an immobile unit (base/OSAT) — those never receive movement rows during
+     *     the phase but cannot go anywhere either;
+     *   - it has a non-preturn movement row for the current turn, i.e. it has moved
+     *     (dummy 'end' rows for non-movers are only written at phase end in advance(),
+     *     so mid-phase only real movers match);
+     *   - EXCEPT in Simultaneous-movement (initiativeCategories) games, where ships in
+     *     the HK's OWN ini bracket plot "simultaneously": whether a same-bracket
+     *     enemy's commit has reached the DB yet depends purely on click order, so it
+     *     stays untrusted (deterministic + fair). Lower brackets are guaranteed
+     *     complete when the HK's bracket is active; higher brackets have no rows yet. */
+    private static function positionUncertainty($other, $hk, $gamedata)
+    {
+        if ($other->base || $other->smallBase) return 0;
+        if ($other->getLastTurnMoved() >= $gamedata->turn
+            && !($gamedata->rules->hasRuleName('initiativeCategories') && $other->iniative == $hk->iniative)) {
+            return 0;
+        }
+        return max(0, (int)$other->getSpeed());
     }
 
     /* The hex-direction (0-5) FROM $pos whose neighbour is UNBLOCKED and gets strictly

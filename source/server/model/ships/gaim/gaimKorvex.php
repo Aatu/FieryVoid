@@ -52,9 +52,8 @@ class gaimKorvex extends BaseShip{
 		$this->addPrimarySystem(new Scanner(6, 20, 4, 9));
 		$this->addPrimarySystem(new Engine(5, 12, 0, 12, 4));
 		$this->addPrimarySystem(new Hangar(5, 4, 2));
-		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 180, 360));
-		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 300, 180));
-		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 60, 240));
+		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
+		$this->addPrimarySystem(new StdParticleBeam(2, 4, 1, 0, 360));
 
 		$this->addFrontSystem(new Thruster(4, 6, 0, 2, 1));
 		$this->addFrontSystem(new Bulkhead(0, 3));
@@ -69,6 +68,7 @@ class gaimKorvex extends BaseShip{
 		$this->addAftSystem(new Bulkhead(0, 3));
 		$this->addAftSystem(new Bulkhead(0, 3));
 		$this->addAftSystem(new JumpEngine(4, 20, 5, 20));
+        $this->addAftSystem(new TwinArray(3, 6, 2, 60, 300));
 		
 		$this->addLeftSystem(new Bulkhead(0, 4));
 		$this->addLeftSystem(new Bulkhead(0, 4));
@@ -107,7 +107,8 @@ class gaimKorvex extends BaseShip{
                         20 => "Primary",
                 ),
                 2=> array(
-                        8 => "Thruster",
+                        6 => "Thruster",
+						8 => "Twin Array",
                         10 => "Hangar",
 						12 => "Jumpe Engine",
                         18 => "Structure",

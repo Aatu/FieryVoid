@@ -2314,7 +2314,7 @@ A dead-code sweep performed before the first live-server deploy. Three files cha
 
 **Docstring updates:** `populateInitialHangarUsage` steps renumbered (old Step 2 → Step 1, old Step 3 → Step 2). Added note that Stage 7 deploy-dock uses the `pendingDeployStartTransfer` path, not the removed Step 1. Updated cross-references in `getDefaultShuttles` docstring ("step 3" → "step 2").
 
-Note: `syncSourceFlightsOnLaunch` and `removeFromHangarUsage` were already marked dead (per Stage 10.5 implementation notes) and are left in place pending burn-in. They are candidates for a second cleanup pass after a few live games.
+Note: `syncSourceFlightsOnLaunch` and `removeFromHangarUsage` were already marked dead (per Stage 10.5 implementation notes) and were left in place pending burn-in. **They have since been removed** — the Stage 21 occupancy launch path replaced them; only comment references remain in HangarOps.php (verified 2026-07-12).
 
 ### baseSystems.php — commented-out Stored Craft block removed (minor)
 
@@ -2330,7 +2330,7 @@ Note: `syncSourceFlightsOnLaunch` and `removeFromHangarUsage` were already marke
 
 Replaced with an 8-line breadcrumb comment documenting that the canonical implementation is in `DeploymentDock.js`.
 
-### Flagged for a future refactor (not done)
+### Flagged for a future refactor (DONE 2026-07-12 — see "Tier-1/2/3 cleanup passes" below)
 
 Significant helper duplication exists across three client files but was deliberately deferred — it is cosmetic, not a correctness issue, and is better addressed as a separate PR after live testing:
 
@@ -2338,7 +2338,44 @@ Significant helper duplication exists across three client files but was delibera
 - **`shipTooltipFireMenu.js`** — `categoryForFlight`/`categoryForFlightRecover`, `hangarAcceptsCategory`/`hangarAcceptsCategoryRecover`, `customFighterRemainingFor`/`customFighterRemainingForRecover`, `lowerKeys`/`lowerKeysR` each duplicated between the `findEligibleCarriersForDock` and `findEligibleFlightsForDocking` closures.
 - **`DeploymentDock.js`** — some of the same helpers exist a third time.
 
-These are candidates for a shared-helpers extraction PR once the feature has been stable in live games.
+These were candidates for a shared-helpers extraction PR once the feature had been stable in live games — implemented as Tier 2 below.
+
+### Tier-1/2/3 cleanup passes (2026-07-12) ✓ ALL THREE APPLIED
+
+A post-completion review of the whole Hangar Ops workflow (all client + server surfaces) sorted findings into three tiers; all three were implemented the same day.
+
+**Tier 1 — dead code / zero-risk ([DeploymentDock.js](source/public/client/renderer/phaseStrategy/DeploymentDock.js), [gamedata.js](source/public/client/gamedata.js)):**
+
+| Item | Change |
+|---|---|
+| `firstFittingHangar` | Removed — defined + exported but never called anywhere (superseded by `distributeFlightAcrossHangars`). |
+| `findPendingFlightsForCarrier` alias | Wrapper deleted; `collectPendingFlightsForSlot` renamed to the public name confirm.js calls. |
+| Internal-only exports | `collectUsableHangars`, `collectAllHangars`, `collectPendingFlightsForSlot`, `firstFittingHangar` dropped from the `window.DeploymentDock` export map (no external callers; remaining functions still used inside the IIFE). |
+| Duplicate tooltip walk | The identical walk-every-hangar block in `refreshDeploymentUIForDeployStart` (step 3) and `refreshFiringHangarTooltips` (step 2) extracted to a single `window.refreshAllHangarTooltips()`. |
+| `HangarOps::canDeployStartDock` | Removed (Tier-3 sweep) — the legacy single-bay deploy-dock validator had NO callers; validation is `validateDeployBayOrders` + the server-authoritative re-home in `performDeployStartDockFromOrders`. Tombstone comment left in place. |
+| gamedata.js | "commiting yor orders" typo → "your". |
+
+**Tier 2 — shared-helpers extraction (the refactor flagged above — DONE).** New file [hangarShared.js](source/public/client/hangarShared.js) defines `window.HangarShared`: the single client mirror of the HangarOps PHP gates — `isDockHangar`, `isCatapultSys`, `effectiveHangarBoxes`, `boxesPerCraftFromUnitSize`/`boxesPerCraftForEntry`, `entryBoxesInHangar`/`craftBoxesInHangar`, `categoryForFlight`, `hangarAcceptsCategory` (+`lowerKeys`), `hangarAcceptsFighterClass`, `bayReservesFighterClass`, `isCustomCombatCategory`, `hangarLabelFor`/`hangarLabelByIdFor`. Loaded by BOTH pages before every consumer (game.php: before the phaseStrategy block; gamelobby.php: before confirm.js — the bundler scrapes tags in order, so bundle order matches). Rewired:
+
+- **DeploymentDock.js** — all pure-copy bodies deleted; aliased at IIFE top (`var HS = window.HangarShared; …`). Impure deploy-specific helpers (`customFighterRemainingFor`, `categoryCapRemainingFor`, `hangarFreeBoxes`) stay local.
+- **shipTooltipFireMenu.js** — Dock + Recover closure copies become one-line delegates (function-declaration form kept: they're called before the closure body's later statements would run, so `var` bindings would be TDZ-unsafe there); `lowerKeys`/`lowerKeysR` deleted; `window.hangarBoxesPerCraftFromUnitSize`/`ForEntry` now assigned from HangarShared (window names kept — outside callers use them).
+- **confirm.js** — both inline lambda clusters (firing dock ~3160, deploy dock ~3925) replaced with HangarShared aliases; the firing dialog KEEPS its extended occupancy-aware `entryBoxesIn` and regen-aware 4-arg `craftBoxesIn` (they're dialog-specific, only their internals delegate). Both 2-arg `hangarLabelFor`/`hangarLabelByIdFor` copies became delegates. The LAUNCH dialog's stateful sequential labeller is a DIFFERENT shape and was left alone.
+- **baseSystems.js** keeps its nested `boxesPerCraftOf` ON PURPOSE — model files stay self-contained.
+
+**Tier 3 — mirror-drift fixes (each a small behavior change, all applied):**
+
+| Fix | Where |
+|---|---|
+| `eligibleHangarsForFlight` charged other flights' multi-bay queued orders at full `flightSize` per bay → replaced its inline free-box block with `hangarFreeBoxes(sys, flightId)`, which uses the per-bay `count` slice. No longer over-reserves sibling bays after an auto-distribute. | DeploymentDock.js |
+| `customFighterRemainingFor` got the same `o.count \|\| flightSize` fix its sibling `categoryCapRemainingFor` already had; ditto the deploy dialog's `baseFreeByHangar` pending-order charge. | DeploymentDock.js, confirm.js |
+| The four cap helpers (`categoryCapRemainingFor`/`customFighterRemainingFor` + Recover twins) filtered `sys.name === 'hangar'` only — blind to catapults/fighter rails, unlike the server's `collectHangars` (`instanceof Hangar`). Now `HangarShared.isDockHangar`. | shipTooltipFireMenu.js |
+| ShadowHangar was unguarded on the DEPLOY-dock path (its `hangarType` is plain `'fighters'`, no allow-list — a non-integrated flight deploy-docked there could never launch). Added the `isShadowHangar && phpclass !== 'ShadowMediumFighterFlight'` gate to `eligibleHangarsForFlight` + `distributeFlightAcrossHangars` (client) and the `performDeployStartDockFromOrders` re-home loop (server), mirroring the existing firing-phase `buildDockBays` gate. | DeploymentDock.js, HangarOps.php |
+
+**Verification:** `node --check` clean on hangarShared.js / DeploymentDock.js / shipTooltipFireMenu.js / confirm.js / gamedata.js; `php -l` clean on HangarOps.php; grep sweeps confirm exactly one canonical body per helper (everything else delegates) and zero references to removed names. **Replay harness: full corpus 164 games PASS** after the server changes. Bundles regenerate via `yarn watch:legacy` / deploy as usual (new script tag = new file in both bundles automatically).
+
+### Launch-dialog label polish (2026-07-12, user-reported)
+
+Two `hangarLaunch` row-label inconsistencies fixed in [confirm.js](source/public/client/UI/confirm.js): (1) docked-flight rows said "(N docked, max M)" where M = min(flightSize, class cap) — it IGNORED the bay's launch budget ("max 12" on a 0/6-budget bay), and the anonymous-stash rows' snapshot max went stale as other rows spent budget. All "max" text removed from rows — the bay header's LIVE "launch budget: X/Y" readout plus the `updateBudgets` over-budget rollback are the real constraint (the input's HTML `max` attr keeps its craft-count clamp). (2) Count display standardised to the "Nx Name" prefix on ALL row types: docked flights ("12x Razarik…", keeping the "(across N bays)" note), anonymous stash ("2x Shuttle (Main Hangar)" — bay name kept since rows aren't nested under their bay header), and catapults (now "1x Name (Catapult)" instead of "Catapult: Name (max 1)"). The per-flight DOCK splitter's "(free: X, max: Y)" was left alone — its max is the live budget-aware `hardCap`, which is accurate.
 
 ---
 
@@ -3729,3 +3766,403 @@ NOT needed in the lobby (it uses `gamedata.allShips`, which already has the whol
 **Verified (user, Docker):** Suom lobby window → "6 Fighters" (primary) + "6 Reska Light Fighters" (aft); Suom in-game hangar
 tooltip → `Type: Reska`. `node --check` clean on all three client files. Pre-existing Hangar UI confirmed byte-for-byte
 unchanged for every empty-allow-list bay (the only behavioural change is on ships that declare a restricted bay).
+
+---
+
+## Kirishiac Warrior docked regeneration — ✓ COMPLETE (2026-07-05, Docker-verified game 4220)
+
+**B5W rule:** a partially damaged flight of Warrior projectiles lands on a ship, spends **5 full turns**
+aboard, and launches again **fully regenerated** (destroyed + dropped-out craft regrown, all damage healed).
+At least one undestroyed Warrior must remain at the moment it docks. Launching before the dwell completes
+forfeits regeneration ENTIRELY (all-or-nothing). Docks **WHOLE ONLY** — no partial — and the hangar reserves
+the flight's **full potential roster** so destroyed craft have room to regrow.
+
+Verified in game 4220 (base behaviour) + all refinements smoke-tested. Generic mechanism keyed on
+`FighterFlight::$dockRegeneration`; only `kirishiacWarrior` opts in (= 5). **No autoload change, no DB change.**
+
+### Model
+- **`FighterFlight::$dockRegeneration = 0`** (kirishiacWarrior = 5) — full turns docked → full regeneration.
+- **Central predicates** (HangarOps): `isDockRegenFlight($flight)` (`$dockRegeneration > 0`),
+  `fighterRosterCount($flight)` (every Fighter object, alive OR destroyed = the flight's built size),
+  `dockReservationCraft($flight,$dockingCount)` (regen → full roster; else → dockingCount).
+- **Dock stamp** (`performWholeFlightDock`): a regen flight is forced to a **full dock** (`$count =
+  dockableCount`, `$partial = false`, never a "- Split" fragment), reserves box-slots for the **full roster**
+  in the occupancy loop, and **always records occupancy** (even single-bay) so the boxes held for currently-
+  destroyed craft are explicit. The entry gets **`regenTurn = dockedTurn + N`**; `flightSize` stays the LIVE
+  docked count (drives launch size + fleet value). The "≥1 undestroyed at dock" rule is enforced by the dock
+  itself: `$dockableCount` uses ABSOLUTE destroyed state (`Fighter::isDestroyed` ignores the turn bound) and
+  docks resolve AFTER `Firing::fireWeapons`, so a flight whose last Warrior died that firing phase never docks.
+- **Full-roster reservation + reject-if-no-room** (`buildDockBays`): reserves `dockReservationCraft × bpc`
+  boxes. A regen flight can only dock if the carrier's combined free bays hold its FULL roster — else the dock
+  is **rejected** (flight stays in space). Carrier-wide: the Mastership spreads a flight across its bays, so a
+  reject only fires when total free < roster.
+- **Deploy-phase dock** (`performDeployStartDockFromOrders`) also stamps `regenTurn` + always-occupancy (a
+  fresh deploy-docked flight is at full roster, so the reservation is already satisfied; harmless — an
+  undamaged flight regenerates nothing).
+
+### Regen sweep — `HangarOps::applyDockedRegeneration($carrier, $gamedata)`
+Carrier-level, once per carrier per turn (transient guard `BaseShip::$dockRegenSweepDone`). Called from
+`Hangar::criticalPhaseEffects` in BOTH branches (rail + ordinary), **after `serviceDockedFlights`, before
+`processWholeFlightLaunches`** — NOT behind the rail half-cadence gate (regrowth is biological, not airlock
+throughput).
+- **Perf gate:** FIRST line is `if ($carrier->faction !== 'Kirishiac Lords') return;` (before the
+  once-per-carrier guard) — only Kirishiac craft regenerate and a Warrior can only dock a Kirishiac hull, so
+  no other carrier can hold a `regenTurn` entry. Skips `collectHangars` + the walk for every other carrier
+  every turn. Widen to a faction allow-list if a 2nd faction ever gains `$dockRegeneration`.
+- **Regeneration** (per regen-due entry: `regenTurn` set, `regenerated` absent, `dockedFlightId`-linked,
+  flight still `removed`, `turn >= regenTurn`, ≥1 undestroyed aboard):
+  - Heal = **negative `DamageEntry` with `undestroyed=true`** (SelfRepair's mechanism; client
+    `damage.js getTurnDestroyed` already honours it → revived craft render alive, no client damage change).
+  - Heal the **UNCLAMPED `getTotalDamage()`** — NOT `maxhealth − getRemainingHealth()`, which floors at 0
+    and leaves overkill residue on a revived craft.
+  - **Destroyed, dropped-out (disengaged), AND damaged all regrow.** A regen flight docks whole and stays
+    whole, so every craft is aboard. Dropouts: `clearDropoutCrit($fighter,$turn)` ends the `DisengagedFighter`
+    critical (`turnend = turn` + `forceModify` + `inEffect=false` — SelfRepair/repairCritical mechanism,
+    persists turnend to `tac_critical`) so the revived craft rejoins cleanly. Only `DockedFighter` /
+    `SplitLaunchedFighter` / cut-off stay excluded (states a regen flight can't be in).
+  - **Box cap** derives from the entry's own reserved occupancy boxes that SURVIVED bay damage
+    (`min(reservedBoxes, bay remaining health)` per bay) — a mid-dwell bay eviction still limits regrowth to
+    surviving reserved slots. No occupancy growth on revive (space was held at dock); only `flightSize` grows
+    to the new live count.
+  - One-shot via `$entry['regenerated'] = turn`. Persistence is free (entry fields ride the `hangarUsage`
+    snapshot note; heal entries self-persist via `getNewDamages` → `submitDamages`, which iterates ALL ships
+    incl. removed). Writes a `hangarRegenEvent` IndividualNote (flightid:phpclass:revived:healed). Replay-safe:
+    sweep runs only in the live Fire advance; replays re-read persisted entries.
+
+### Timing
+Docked end of turn T → aboard for all of T+1…T+5 → regenerates in the END-OF-TURN processing of T+5, BEFORE
+launch resolution. A launch ordered ON T+5 carries the regenerated flight out (deploys/acts T+6); launching
+T+1…T+4 drops the entry unregenerated. Stricter ruling ("earliest regenerated launch is T+6") = stamp `+N+1`.
+
+### Client (needs `yarn watch:legacy`)
+- **Tooltip** (`baseSystems.js refreshHangarTooltip`): stored-craft line suffix `(Regenerating — complete end
+  of turn N)` while pending, `(Regenerated)` after; folded into the bucket key so it never merges with a
+  non-regen same-class line.
+- **Whole-flight + reservation-visible dialogs.** `window.flightRegeneratesWhileDocked` +
+  `window.flightFullRosterCount` (shipTooltipFireMenu.js) drive:
+  - **Enter Hangar** (`confirm.hangarDock`): header "must dock as a whole", a dedicated row "Reserves N hangar
+    slots (full flight of N — destroyed craft regrow after 5 turns docked)", and rejects an under-allocation.
+  - **Recover fighters** (`confirm.hangarRecover`): each regen row label gains "— reserves N slots (regenerates
+    docked)"; the live capacity pill (`computePerHangarUsage`) shows **6/6** (adds roster−allocated once).
+  - Eligibility gates (`findEligibleCarriersForDock`, `findEligibleFlightsForDocking`) require the carrier /
+    bay to hold the FULL roster, matching the server reject.
+  - Capacity math made occupancy/roster-aware: `hangarUsedBoxesOnBay` (fire-menu) + `entryBoxesIn` /
+    `craftBoxesIn` (confirm) read a committed regen entry's reserved occupancy (a mid-dwell docked Warrior
+    holds 6, not its live 4) and inflate a queued regen order to the roster. Mirrors server `usageCountFor` +
+    `foreignOccupancyBoxesOn`. Server is authoritative regardless — the client is UX + not offering a dock the
+    server would reject.
+
+### Files
+- `FighterFlight.php` (`$dockRegeneration`), `kirishiac/kirishiacWarrior.php` (= 5),
+  `ShipClasses.php` (`$dockRegenSweepDone` guard)
+- `systems/HangarOps.php` — predicates + `buildDockBays` reservation + `performWholeFlightDock` (whole-flight +
+  roster occupancy + regenTurn) + `applyDockedRegeneration` + `clearDropoutCrit` + deploy-dock stamp
+- `systems/baseSystems.php` — 2 sweep call sites in `Hangar::criticalPhaseEffects`
+- Client: `model/system/baseSystems.js` (tooltip), `UI/shipTooltipFireMenu.js` (predicates + eligibility +
+  `hangarUsedBoxesOnBay`), `UI/confirm.js` (both dialogs: whole-flight guard, reservation labels, pill,
+  occupancy-aware capacity)
+
+### Verification
+- **Warrior regen smoke test** `c:\tmp\warrior_regen_test.php` (FakeDB via `Manager::setDBManager` + stub
+  gamedata): **30/30** — regenTurn stamp; whole-flight forced (partial request docks all alive); full-roster
+  reservation (6 boxes for 4 alive, occupancy always present); carrier-wide reject when roster won't fit; two
+  4-of-6 Warriors over-booking a 6-box carrier (first reserves 6, second rejected); revive destroyed + dropout
+  + heal at T+5 (overkill cleared, dropout crit cleared, flightSize grows); idempotent re-run; box clamp under
+  bay damage; all-dead-aboard → no regen.
+- **Blast-radius regression** `c:\tmp\blast_radius_test.php` (AuroraStarfury + Poseidon): **15/15** — every
+  shared function inert for ordinary flights. New helpers return pre-existing values; a normal dock has NO
+  occupancy / NO regenTurn / `flightSize` = docked count (byte-identical); `applyDockedRegeneration` leaves an
+  ordinary carrier untouched (faction + regenTurn gates); the `buildDockBays` `ceil` change is provably
+  identical (`$boxesAvail` integer, `a >= f ⟺ a >= ceil(f)`). Client regen blocks are all
+  `flightRegeneratesWhileDocked`-gated; the one non-gated change (occupancy-aware box counting in the two dock
+  dialogs) is a CORRECTNESS FIX aligning them with the already-occupancy-aware tooltip + server, affecting only
+  the rare multi-bay split-dock case (single-bay normal path unchanged).
+- (Trailing mysqli fatal in both test outputs is the FakeDB destructor artifact, after the summary — not the
+  feature.)
+
+### Remaining (user)
+`yarn watch:legacy` (client edits) + regenerate static ship JSON (`php generateStaticShipFile.php`) so
+`kirishiacWarrior.dockRegeneration = 5` reaches `window.staticShips` (ship-level props aren't default-stripped,
+so it flows automatically once regenerated).
+
+## Orieni Hunter-Killer hangars — mixed size + custom-combat category in one bay (2026-07-09)
+
+Follow-on to the [`inferHangarType` bug] and [Per-bay fighter-class allow-list] sections above. The Orieni HK
+support ships (Vigilant/Prophet/Benevolent/Paragon/Penitent/Pariah/Resolute families, 19 blueprints) are the FIRST
+ships to declare a SIZE category and a CUSTOM combat category in the SAME hangar — e.g. VigilantHKAM
+`{light:6, Hunter-Killers:6}` (single `'fighters'` bay, `allowedFighterClasses`=[HK classes + Templar light
+fighters]), Prophet `{light:12, Hunter-Killers:18, assault shuttles:6}` (single 37-box `'fighters'` bay, no
+allow-list). HK flights (`HkShiningLight`/`HkShiningStar`) set `hangarRequired='Hunter-Killers'` (a CATEGORY) and
+carry NO `customFtrName`, so the Stage-10.6.2 customFighter machinery didn't apply. Three coupled defects surfaced,
+fixed in order:
+
+### Defect 1 — `inferHangarType` narrowed the mixed bay to the lone size (HKs became undockable)
+`inferHangarType` collected only sizes and IGNORED any custom key, so `{light:6, Hunter-Killers:6}` saw
+`$declared=['light']` → narrowed the bay to `'light'` (which serialized to the client). Then
+`hangarAcceptsCategory('light','hunter-killers')` is false → the `deploysInHangar` check
+(`DeploymentDock.eligibleHangarsForFlight`) found NO fitting hangar and let the HKs deploy free OUTSIDE the hangar
+(wrong). Forcing `light` to accept made HKs slot in only because the allow-list contained the HK classes.
+
+**Fix.** `inferHangarType` now treats any category that is NOT a size / `normal` / shuttle-family
+(`shuttles`/`minesweeping shuttles`/`cargo shuttles`/`medical shuttles`/`lifeboats`/`assault shuttles`/
+`breaching pods` — the set a narrowed SIZE bay still accepts via the hierarchy/shuttle rules) as a
+CUSTOM-COMBAT narrowing-BLOCKER (`$hasCustomCombat`), exactly like `normal`. A ship mixing a size with a custom
+combat category keeps its universal `'fighters'` bay. Regression-safe: `{light,shuttles}` still narrows to `light`
+(shuttles ride any bay), gaimSuom `{normal,light}` stays universal (existing `normal` blocker), lone-size
+(`{medium:6}`) still narrows.
+
+### Defect 2 — universal `'fighters'` bay had no accept-path for a declared custom category
+Even un-narrowed, the universal-slot branch of `hangarAcceptsCategory` handled sizes/AS/BP but fell through to
+`return false` for a custom category like `'Hunter-Killers'`.
+
+**Fix.** Added, in the `'fighters'`/`'normal'` branch WITH ship context, after the size/AS/BP handlers:
+`if (!empty($declared[$cat])) return true;` — a universal bay accepts a custom category when the ship's
+`$ship->fighters` declares that exact category. The per-bay `allowedFighterClasses` gate still enforces WHICH
+phpclasses actually dock (category door vs class door, ANDed). The no-ship-context fallback still rejects custom
+categories (conservative). Placed inside the universal branch only — typed bays (exact-match at top) and catapults
+(`superheavy`, rejected upstream) are untouched.
+
+### Defect 3 — no per-carrier CAP on the custom category (24 HKs in an 18-HK Prophet; 12 in a 6-HK Benevolent)
+Once Defect 2 opened the door, capacity was gated only by total BOXES (24 HK boxes < 37-box Prophet bay), never by
+the declared HK count. The fleet-builder (`gamelobby.checkChoices`) already treats such a category as its OWN
+isolated pool: custom cats route through `totalHangarOther` (space) vs `totalFtrOther` (flights), matched STRICTLY
+by name (~line 1428) — NOT the shared size hierarchy. So the declared count IS meant to be a hard cap.
+
+**Fix — a category-level twin of `customFighterRemaining`:**
+- `HangarOps::isCustomCombatCategory($cat)` — true when `$cat` is NOT in the shared set (sizes ∪ `normal` ∪
+  shuttle-family ∪ `superheavy`/`lcvs`). Currently matches `Hunter-Killers`, `flyers`, `shuttlecraft`, `raiders`,
+  `fighter squadrons`, etc.
+- `HangarOps::categoryCapRemaining($carrier, $cat)` — `PHP_INT_MAX` for shared cats (no gate); else
+  `$ship->fighters[$cat]` − Σ `flightSize` of `hangarUsage` entries stamped `hangarType==$cat` across ALL bays; 0
+  if undeclared. (Usage entries stamp `hangarType`=`trueSizeOf` category at `perform*Dock`.)
+- Wired into EVERY dock gate alongside the customFighter line: `canShipReceive` (firing), `validateDeployBayOrders`
+  (deploy whole-flight, vs `activeCount`), `canDeployStartDock` (deploy per-bay slice). The deploy coalescer appends
+  each flight's entry on the SAME `$carrier` before the next flight's validate → the running cap holds across
+  multiple flights committed in one pass.
+
+HK `maxFlightSize=6`, so an 18-cap = exactly 3 flights: the 4th flight sees remaining 0 < 6 and is rejected/not
+offered.
+
+### Client mirrors (needs `yarn watch:legacy`)
+- `DeploymentDock.js`: `isCustomCombatCategory` + `categoryCapRemainingFor`; gate in `eligibleHangarsForFlight`
+  (whole-flight) AND — the one that actually mattered — in **`distributeFlightAcrossHangars`** (the real
+  auto-queue/pack path; `eligibleHangarsForFlight` is only the doCommit gate + dialog dropdown, so a new dock
+  constraint must go in BOTH). Pending-order tally uses `o.count || f.flightSize` (multi-bay orders carry a per-bay
+  count).
+- `shipTooltipFireMenu.js`: both closures — Dock (`categoryCapRemainingFor` + a new shared `clampHangarsToCap`
+  helper that both the category and customFighter caps now use) and Recover (`categoryCapRemainingForRecover`,
+  whole-flight gate). All three client `isCustomCombatCategory` shared-lists are byte-identical and match the server.
+
+### Verification
+- **Extracted-logic PHP harnesses**: `inferHangarType`+`hangarAcceptsCategory` 13/13; `categoryCapRemaining`
+  12/12 (empty Prophet=18, `light` uncapped, 12 docked→6, 18 docked→0 blocks 19th, light dock doesn't touch HK
+  remaining, undeclared carrier=0).
+- **Live DB (getTacGamedata)**: game 4232 Benevolent `{light:6,HK:6}` bay stays `'fighters'`, empty HK cap=6,
+  `canDeployStartDock` allows flight 1 & rejects flight 2 (`fighter category cap exceeded`); game 4231 Prophet caps
+  at exactly 18 (3 flights, 4th rejected). Both games were at turn 1 / phase −1 with NO individual notes → the
+  over-cap dock the user saw was purely a CLIENT queue state (Defect 3's client half); the server would have
+  dropped the excess on commit, so no persisted state was ever corruptible.
+
+### Blast-radius audit (2026-07-09) — scanned all 147 blueprints with a custom-combat key
+**31 ships change behavior, 116 unchanged; every change is a fix or intended, none a regression.** All 31 flips are
+"universal bay stopped narrowing to a lone size → stays `'fighters'`": the ship's own custom-category flights now
+dock (capped) and its size fighters still dock uncapped.
+- 17 Orieni HK ships — the intended targets.
+- 6 Minbari `{heavy/…, flyers:N}` (nergell, norgath, civilian base, orbital hangar, protectorate variants) — bay
+  previously narrowed to the size, which **rejected flyers entirely**. Now flyers dock (capped) + heavy still docks.
+  Per user's B5W clarification: Minbari have dedicated FLYER SLOTS (flyers bought separately); only `cargoFlyers`
+  act as default shuttles. So this is a FIX. (Ships with `normal`, e.g. Sharlin `{normal:24, flyers:4}` — 43
+  flyer-carriers — were already universal via the `normal` blocker; `inferHangarType` is a no-op for them and only
+  the accept-path/cap newly apply, as intended.)
+- 5 Trek `{size, Shuttlecraft:N}` — same fix.
+- 2 Sshelath (`SshelathVulshara` + 2018) declare `"mediuem"` — a PRE-EXISTING TYPO for `"medium"` (already broken;
+  my change doesn't worsen the light-fighter path). **User: fix the typo to `"medium"`?** (not yet changed)
+- 1 `customs/VariableHangarSize.php` (test fixture) — heavy+superheavy still work.
+- **NOT affected**: Drakh raiders / weapon platforms (auto-deploying SHFs, `superheavy=true`, no `deploysInHangar`;
+  their catapults are typed `superheavy` and `hangarAcceptsCategory('superheavy','Raiders')` was already false — my
+  cap sits behind an already-closed gate); catapults/rails (`inferHangarType` skips them); typed hangars (no ship
+  uses a typed custom bay — only `fighters`/`light`/`shuttles`/`assault shuttles` appear as explicit args); size
+  fighters (never capped — `categoryCapRemaining` returns INT_MAX for shared cats).
+
+### Files
+- `HangarOps.php` — `inferHangarType` (`$hasCustomCombat` blocker), `hangarAcceptsCategory` (custom-cat accept),
+  new `isCustomCombatCategory` + `categoryCapRemaining`, cap wired into `canShipReceive` / `validateDeployBayOrders`
+  / `canDeployStartDock`.
+- `DeploymentDock.js`, `shipTooltipFireMenu.js` — client mirrors (see above).
+
+### Remaining (user)
+`yarn watch:legacy` (client edits) + Docker test in games 4231/4232. Optional: fix the `"mediuem"` typo in the two
+Sshelath Vulshara files. NOT committed (legacy bundles rebuilt by the user's build, never committed by us).
+
+## Five niche-bug fix round (2026-07-12, user report; test game 4240)
+
+User reported five issues after the T1/Stage-2-3 cleanup; investigation traced #1 to the 2026-07-09 HK
+custom-category work (not the cleanup), #2 to the multi-bay auto-distribute era, #3–#5 to display/stamp logic.
+Verified: `c:\tmp\hangar_fixes_test.php` in-container harness (31/31) + node mirror-parity on hangarShared (8/8).
+
+### #1 — Superheavy deploy-docked into the Stormfalcon's 14-box hangar instead of its catapult
+TWO coupled causes, both from the 2026-07-09 HK round: (a) `inferHangarType` treated the declared `superheavy`
+key as a custom-combat narrowing-blocker, so `{light:12, superheavy:1}` kept the bay universal `'fighters'`
+(pre-07-09 it narrowed to `light`); (b) the new universal-bay custom-category door (`declared[$cat]`) then
+accepted `'superheavy'`. The deploy auto-queue picks biggest-free-first → the 14-box hangar won over the 1-slot
+catapult (DB game 4240 ship 876169: SkySerpentAM entry on systemid 5 = the Hangar). Fixes:
+- `inferHangarType`: `superheavy`/`lcvs` are **dedicated-system categories** (catapult / LCV rail) — skipped like
+  the shuttle family, never narrowing-blockers. Stormfalcon's bay narrows to `light` again. Enumerated every
+  `$fighters` declaration containing superheavy: all flips restore pre-07-09 behavior (multi-size and `normal`
+  carriers keep universal bays via the other blockers; no `lcvs` key appears in any `$fighters` declaration —
+  that guard is defensive).
+- `hangarAcceptsCategory` (PHP + hangarShared.js): universal branch REFUSES `'superheavy'`/`'lcvs'` outright,
+  before the custom-category door — belt for ships that stay universal (`{normal, superheavy}`, multi-size).
+- `performDeployStartDockFromOrders`: **catapults are now valid deploy-dock targets** — the re-home previously
+  skipped them entirely (so even a correctly-ordered catapult dock would fail-note). Catapults count craft 1:1
+  (exempt from the box multiplier), use `effectiveCapacity()` = 1, and ignore their own damage (mirrors
+  `eligibleHangarsForLanding`). `hangarAcceptsCategory` keeps every other category out of them (T25).
+
+### #1b (adjacent, found during the fix) — lean no-occupancy entry mis-hosted on re-home
+The deploy re-home writes the entry on `$preferredPrimary` (the bay whose snapshot is pending) but places boxes
+wherever they fit. When the ordered bay is refused/full and the flight re-homes to ONE other bay, the old
+`count($occupancy) > 1` condition skipped the occupancy stamp — and every reader charges a no-occupancy entry's
+boxes to its HOST bay (the wrong one). Now the lean shape is used only when the single occupancy bay IS the host
+(`$singleOnHost`); regen flights stamp always, as before. (T21–T23: stale hangar-order for the SHF re-homes to
+the catapult, entry hosted on the hangar WITH `occupancy:[{catapult,1}]`, `usageCountFor(hangar)` stays 2.)
+KNOWN EDGE (accepted): a catapult occupied only via a foreign-hosted occupancy entry reads empty to
+`usageCountFor`'s catapult branch (it ignores occupancy) — reachable only through a stale/hostile client order
+on a multi-SHF ship, and current catapult carriers dock one SHF per catapult so live play can't hit it.
+
+### #2 — Thunderbolt/Rutarian (`customFtrName`) deploy-docked into any size-fitting carrier
+`eligibleHangarsForFlight` had the Stage-10.6.2 `customFighterRemainingFor` gate but the ACTUAL queue path —
+`distributeFlightAcrossHangars`, used by every deploy-dock button — did not (same lesson as the 07-09 HK §5a
+fix: a dock constraint must live in the shared packer). Server `validateDeployBayOrders` already rejected the
+commit (so the observed bug was client-side UI, plus a nasty limbo: the rejected flight ended up removed
+client-side but unplaced server-side). Added the customFighter gate at the top of the packer, own-flight
+reservations reclaimable. Firing-phase paths were already gated (unchanged).
+
+### #3 — Recover Flights dialog allocated recovering fighters onto FULL rails
+`confirm.hangarRecover`'s `baseFreeByHangar` summed only each bay's OWN `hangarUsage` entries. A multi-bay
+docked flight is ONE entry on its host bay whose `occupancy` places boxes on SIBLING bays (game 4240: Delta-V
+#13 ×12 hosted on rail 12, occupancy `[(12,6),(15,6)]`) — rail 15 read as empty, so the dialog allocated 6 of
+the 9 recovering fighters onto the full rail (screenshot: "Fighter Rail 5: 6/6" yellow), wrote a dock order the
+projection then couldn't render (only one "(Recovering)" line; per-flight dialog showed 3), while the server's
+occupancy-aware re-home docked all 9 correctly. Fix: `baseFreeByHangar` now uses `window.hangarUsedBoxesOnBay`
+(the same foreign-occupancy-aware accounting the eligibility path already used), with the old sum as a fallback
+when the helper isn't loaded. Pills, `distributeFlightAcrossBays`, the overflow guard, and the tooltip
+projection all read the fixed map, so allocation + "(Recovering)" lines + Enter-Hangar presets now agree.
+
+### #4 — Pristine Warrior Projectiles showed "(Regenerating — complete end of turn N)"
+Both dock paths stamped `regenTurn` unconditionally for a `$dockRegeneration` class ("harmless — the sweep heals
+nothing"), but the tooltip renders the stamp as a 5-turn "Regenerating" status on flights with nothing to
+regenerate (deploy-docks are virtually always pristine). Fixes:
+- Server: new `HangarOps::flightNeedsRegeneration($flight)` (any destroyed/dropped-out craft — `isDestroyed`
+  folds `DisengagedFighter` in — or net damage on a living craft); both `performWholeFlightDock` and
+  `performDeployStartDockFromOrders` stamp `regenTurn` only when true (T26–T30: pristine no stamp, damaged
+  stamps turn+5; occupancy/full-roster reservation unaffected — keyed on `isDockRegenFlight`, not the stamp).
+- Client (`baseSystems.js refreshHangarTooltip`): the `Regenerating` marker renders only when
+  `dockedFlightNeedsRegen(entry.dockedFlightId)` (mirror of the PHP helper via shipManager damage/crit reads;
+  fail-OPEN on unresolvable flights) — covers entries stamped before this fix in in-flight games (4240's two
+  Warriors). "(Regenerated)" rendering unchanged.
+
+### #5 — Enter-Hangar rows showed "max:" = flight size (already in the header)
+`confirm.hangarDock` row label `(free: X, max: Y)` → `(capacity: X)` — the hangar's current capacity in craft
+for this flight (own queued docks reclaimable). The input's live max attribute (hardCap/remaining clamp) is
+unchanged.
+
+### Files
+- `HangarOps.php` — `inferHangarType`, `hangarAcceptsCategory`, `performDeployStartDockFromOrders` (catapults +
+  `$singleOnHost` occupancy stamp), new `flightNeedsRegeneration`, `performWholeFlightDock` stamp gate.
+- `hangarShared.js` — `hangarAcceptsCategory` superheavy/lcvs refusal (single client mirror; all per-file
+  helpers delegate here).
+- `DeploymentDock.js` — customFighter gate in `distributeFlightAcrossHangars`.
+- `confirm.js` — `hangarRecover` occupancy-aware `baseFreeByHangar`; `hangarDock` capacity label.
+- `baseSystems.js` — `dockedFlightNeedsRegen` + regen-marker gating in `refreshHangarTooltip`.
+
+### Remaining (user)
+`yarn watch:legacy` (5 client files) + Docker re-test in game 4240 (or fresh): SHF → catapult at deployment;
+Rutarian offered only on Daragn-class carriers; Recover Flights pills/allocation on the StrikeCarrier; Warrior
+tooltip clean when pristine (in 4240 the old stamps clear at their regenTurn); Enter-Hangar capacity label.
+
+## Follow-up refinements (2026-07-12, same session)
+
+### Recover Flights — hide bays with no room
+`confirm.hangarRecover recomputeCapacity`: the "Available Hangar Capacity" pill strip now SKIPS a bay whose
+`cap <= 0` AND `used <= 0` (a rail already full of committed fighters) — listing a full "6/6" rail cluttered the
+readout and misled players into thinking it was a valid target. A bay the dialog is actively filling (`used > 0`)
+always stays visible (so it doesn't vanish mid-interaction and an overfill still flags red). Empty state now reads
+"all bays full" instead of "none".
+
+### Typed-hangar reservation ordering — `bayReservesFlight`
+User wanted an ultralight flight to prefer the Qoricc's dedicated aft `'ultralight'` bay before the universal
+primary (a bespoke ship config: `new Hangar(4, 6, 6, 2, 'ultralight', array(), true)` — 5th arg types the bay,
+7th excludes it from the default-shuttle auto-fill). The firing-phase LANDING path already did exact-category-
+match-first (`eligibleHangarsForLanding`'s two-loop structure), but the deployment auto-distribute + the
+landing/re-home REORDER passes only recognised the phpclass `allowedFighterClasses` reservation. Generalised the
+"reserved bays fill first" concept: new `HangarOps::bayReservesFlight($hangar, $flight)` = the phpclass allow-list
+arm (`bayReservesFighterClass`) OR an **exact** `hangarType` category match (`hangarType === trueSizeOf(flight)`).
+"Exact" is deliberate — a `'light'` bay ACCEPTS ultralights via the hierarchy but does NOT reserve them; universal
+`'fighters'`/`'normal'` reserve nothing; a catapult (`'superheavy'`) reserves a superheavy flight (desirable). It
+affects ORDERING ONLY, never eligibility. Routed the three server reorder sites (`eligibleHangarsForLanding`
+partition, `sortBaysReservedFirst` used by `buildDockBays` + `performDeployStartDockFromOrders`) and the client
+deploy packer (`DeploymentDock.distributeFlightAcrossHangars` sort) through it; client mirror `bayReservesFlight`
+in `hangarShared.js`. Verified: PHP 8/8 (real Qoricc: ultra→aft first, medium can't use aft, catapult regression)
++ node parity 8/8. **NOT changed: a global "primary-section-first" tiebreak.** The user also asked for primary
+(location 0) before non-primary as a secondary order, but (a) the reservation-first change already delivers the
+Qoricc case, and (b) a global primary-first tiebreak would override the deploy packer's deliberate biggest-free-
+first rail ordering for EVERY ship — too broad for the benefit. Left as-is pending a concrete case that needs it.
+
+### Files (follow-up)
+- `confirm.js` — `hangarRecover` full-bay hide.
+- `HangarOps.php` — new `bayReservesFlight`; three reorder sites routed through it.
+- `hangarShared.js` — `bayReservesFlight` client mirror + export.
+- `DeploymentDock.js` — `distributeFlightAcrossHangars` sort uses `bayReservesFlight`.
+- `cascor/qoricc.php` — aft `Hangar(4, 6, 6, 2, 'ultralight', array(), true)` (positional-id caveat: new games only).
+
+### Remaining (user, follow-up)
+`yarn watch:legacy` (confirm.js, hangarShared.js, DeploymentDock.js) + Docker test the Qoricc: aft bay empty at
+deploy, ultralights auto-land aft-first, mediums use primary only, full rails hidden in Recover Flights.
+
+## Launch dialog — "Split" default-shuttle launches into multiple flights (2026-07-13)
+
+Per-row **Split** checkbox on the Launch Fighters dialog (`confirm.hangarLaunchNoSplit`) that launches the selected
+DEFAULT SHUTTLES as several separate flights instead of one combined flight (e.g. 2 shuttles → 2×1 rather than
+1×2). Checked → the single count row expands to a sub-panel of per-flight inputs with a "+ Add another flight"
+link and a per-flight remove ✕ (same interaction model as the Shadow Fighter Bomb splitter). Scoped to shuttles
+for now; real fighters keep the single-flight row.
+
+**Client-only — no server change.** Each anonymous `{phpclass,size}` launch order already becomes exactly ONE
+flight via `HangarOps::launchAnonymousStash` (called once per order in `processWholeFlightLaunches`), and the
+server's `launches` list is NOT deduped by phpclass (`baseSystems.php doIndividualNotesTransfer` sanitise loop
+keeps every entry; the whole list round-trips as one `hangarLaunchOrder` note). So the dialog just emits N orders
+on the same bay → N flights. Launch budget aggregates correctly because each `launchAnonymousStash` call
+increments `launchedThisTurn` (order-independent since the client never lets the split total exceed budget).
+
+Gates (all must hold to show the checkbox): `gamedata.isDefaultShuttleEntry(entry)` true, bay box-cap
+(`hangar.maxhealth`) > 1, stash count ≥ 2, row max ≥ 2. Split flights STILL share the bay launch budget — the
+sub-input sum is clamped to `budgetHeadroom()` (remaining bay budget after every other row's charge).
+
+Implementation: split rows keep the (now readonly, `.launchSplitLocked`) main input synced to the sub-input sum
+via `syncMain()`, so the existing `tallyCharges`/`updateBudgets` budget machinery — which reads `rowTotal(rd)` —
+works unchanged. The OK handler fans a split-active row out into one order per positive sub-input; a non-split row
+still emits its single aggregate order. Removing the LAST split row unchecks Split (folds back to a single
+editable flight holding the remaining total).
+
+Known limitation: re-opening the dialog after a split shows the summed count in ONE unsplit row (checkbox
+unchecked) — `presetFor` sums all matching orders. Acceptable; mirrors the Fighter Bomb dialog not persisting its
+checkbox state.
+
+### Styling notes (row layout)
+- The Split checkbox + "Split" label + count input sit together in the row's right-hand flex group; the ✕ stays
+  on the RIGHT of each split input.
+- Vertical centring within a row is left entirely to the row's `align-items:center` — NO per-element
+  `position:relative;top` / `vertical-align` nudges (they knock a child off the shared centre-line). The lone
+  override is `top:0` on the checkbox to cancel the global `input[type=checkbox]{top:2px}`; `line-height:1` on the
+  "Split" label and the ✕ keeps their text boxes tight so they centre cleanly.
+
+### Files
+- `confirm.js` — `hangarLaunchNoSplit`: `isDefaultShuttle` per anon group, Split checkbox + sub-panel wiring
+  (`addSplitRow`/`splitSum`/`budgetHeadroom`/`syncMain`), `rowTotal` helper, split-aware `tallyCharges`/
+  `updateBudgets`, order fan-out in the OK handler.
+- `confirm.css` — `.launchSplit*` styling (checkbox/label/panel/add-link/remove-✕/locked-input).
+
+### Remaining (user)
+`yarn watch:legacy` (confirm.js) + Docker test: a carrier with 2+ default shuttles in a >1-box bay shows the Split
+box; splitting into e.g. 1+1 launches two separate 1-shuttle flights next turn; budget readout blocks over-launch;
+✕ on the last split row unchecks Split. Real-fighter rows show no Split box.

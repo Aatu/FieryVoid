@@ -81,6 +81,13 @@ EMShield.prototype.initializationUpdate = function () {
 	return this;
 };
 
+var AlphaShadingField = function AlphaShadingField(json, ship) {
+	EMShield.call(this, json, ship);
+	this.defensiveType = "Shield";
+};
+AlphaShadingField.prototype = Object.create(EMShield.prototype);
+AlphaShadingField.prototype.constructor = AlphaShadingField;
+
 var GraviticShield = function GraviticShield(json, ship) {
 	Shield.call(this, json, ship);
 	this.defensiveType = "Shield";

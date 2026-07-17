@@ -771,6 +771,7 @@ class SensorSpearFtr extends Weapon{
     }	
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 
 		$effectSensors = Dice::d(3,1);//strength of effect: 1d3
@@ -848,6 +849,7 @@ class SensorSpikeFtr extends Weapon{
     }	
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 
 		$effectSensors = Dice::d(6,1);//strength of effect: 1d6
@@ -927,6 +929,7 @@ class CommJammerFtr extends Weapon{
     }	
     
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 		
 		$effectIni = Dice::d(6,1);//strength of effect: 1d6
@@ -1408,6 +1411,7 @@ class BSGHypergunVA extends Pulse{
         }
         
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
 		switch($this->firingMode){
 			case 1:
 				break;
@@ -1557,6 +1561,7 @@ class BSGHypergunVA extends Pulse{
         }
         
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
 		switch($this->firingMode){
 			case 1:
 				break;
@@ -1716,6 +1721,7 @@ class BSGHypergunVA extends Pulse{
         }
         
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
 		switch($this->firingMode){
 			case 1:
 				break;
@@ -1919,6 +1925,7 @@ class BSGHypergunVA extends Pulse{
 */
 
 	protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);		
 
 		if (WeaponEM::isTargetEMResistant($ship,$system)) return; //no effect on Advanced Armor
 

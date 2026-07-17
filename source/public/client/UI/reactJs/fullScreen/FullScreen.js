@@ -48,11 +48,14 @@ const MainButton = styled(ContainerRounded)`
     border-top: none;
     ${Clickable}
 
-    @media (max-width: 765px) {
+    /* Shrink on narrow phones (portrait) AND short landscape phones — a phone
+       held sideways is wider than 765px, so also match on short viewport height. */
+    @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         width: 30px;
         height: 30px;
         right: 40px;
-        font-size: 20px;
+        /* "FS" sized to sit comfortably inside the 30px box (was 20px, too large). */
+        font-size: 16px;
     }
 `;
 

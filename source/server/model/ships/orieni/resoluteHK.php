@@ -15,7 +15,7 @@ class resoluteHK extends MediumShip{
 	    $this->isd = 1802;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
-        $this->fighters = array("normal"=>6,"cargo shuttles"=>4);
+        $this->fighters = array("Hunter-Killers"=>6,"cargo shuttles"=>4);
         $this->notes = 'Carries 6 hunter-killers in pods. Note, no hunter-killer controller.';
         
         $this->forwardDefense = 15;

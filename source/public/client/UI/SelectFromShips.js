@@ -361,12 +361,16 @@ window.SelectFromShips = function () {
         return gamedata.isTerrain(ship.shipSizeClass, ship.userid) ? 'terrain' : (gamedata.isMyShip(ship) ? 'mine' : (gamedata.isMyorMyTeamShip(ship) ? 'ally' : 'enemy'))
     }
 
-    // Observers (not in the game) colour each ship name by its team instead of
-    // the mine/ally/enemy scheme. Returns an inline style attribute, or '' for
-    // participants and terrain (which keep their existing class-based colour).
+    // Inline name colour, mirroring the unified team-colour rule (see
+    // gamedata.getFleetHeaderColorRGB / ShipTooltip.getNameStyle):
+    //   - Terrain: neutral — keep the CSS 'terrain' class, no override.
+    //   - 2-team participant: relative mine/ally/enemy — keep the CSS class from
+    //     getAllyClass, so your fleet reads green.
+    //   - Observer OR 3+-team participant: absolute per-team palette inline, so
+    //     each team is identifiable rather than collapsing to ally/enemy.
     function getTeamColorStyle(ship) {
-        if (gamedata.isPlayerInGame()) return '';
         if (gamedata.isTerrain(ship.shipSizeClass, ship.userid)) return '';
+        if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) return '';
         var rgb = gamedata.getTeamColorRGB(ship.team);
         return ' style="color:rgb(' + Math.round(rgb[0]) + ',' + Math.round(rgb[1]) + ',' + Math.round(rgb[2]) + ');"';
     }

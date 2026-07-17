@@ -12,6 +12,7 @@ class Pillum extends BaseShip{
         $this->shipSizeClass = 3;
         $this->fighters = array("Normal"=>12);
         $this->limited = 33; //Restricted Deployment
+		$this->variantOf = 'NONE';	//In development? 		
         
 		$this->notes = "Used only by Centauri Privateers";
 //		$this->notes .= "<br> ";

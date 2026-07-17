@@ -944,6 +944,12 @@ window.ajaxInterface = {
     successRequest: function successRequest(data) {
         ajaxInterface.submiting = false;
         if (data && data.error) {
+            // "Omitting required data" is what the server returns for a gameid-less
+            // request (e.g. a stray poll during a page restore before gamedata is
+            // ready). It's not a real error worth interrupting the user for — the
+            // next poll cycle will refetch once a gameid exists. Ignore quietly.
+            if (data.error === "Omitting required data") return;
+
             window.confirm.exception(data, function () { });
             gamedata.waiting = false;
             return;
@@ -1064,6 +1070,13 @@ window.ajaxInterface = {
     },
 
     requestGamedata: function requestGamedata() {
+        // No gameid means gamedata was never parsed (e.g. an error/empty baked
+        // snapshot, or a restore firing before the inline parse ran). Firing the
+        // fetch anyway sends gameid-less request that the server answers with
+        // {"error":"Omitting required data"} — surfaced to the user as a bogus
+        // "SERVER ERROR" popup. Nothing useful to fetch without a gameid, so skip.
+        if (!gamedata.gameid) return;
+
         const now = Date.now();
         const lastRequest = parseInt(localStorage.getItem('fv_lastTacGamedataRequest')) || 0;
 

@@ -20,7 +20,7 @@ class Caccar extends FighterFlight{
         $this->accelcost = 2;
         $this->turncost = 0.33;
         
-		//$this->unitSize = 2;//Unlike larger fighters, ultralights are small enough to be packed into hangars at twice the normal rates.
+		$this->unitSize = 2;//Unlike larger fighters, ultralights are small enough to be packed into hangars at twice the normal rates.
 		///...but this is general rule, not Caccar-specific. Fleet checker itself will cover it.
 
     	$this->iniativebonus = 20 *5;//ultralight fighter base should be 22, but apparently Caccar designer decided otherwise (or forgot ;) )

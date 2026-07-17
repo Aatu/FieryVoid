@@ -40,13 +40,16 @@ class MovementGamePhase implements Phase
             // instead of the plain dummy "end". AutomatedMovement is the reusable seam
             // for future CPU-controlled ships. isUnderAutomatedControl short-circuits on
             // remoteControl, so ordinary ships fall straight through to the dummy "end".
-            if (AutomatedMovement::isUnderAutomatedControl($ship, $gameData)) {
+            if (AutomatedMovement::isUnderAutomatedControl($ship, $latestgameData)) {
                 // Normally generated in process() when the player commits this ship's ini
                 // grouping; this is the fallback (e.g. nobody had a grouping to commit, or a
                 // unit that became automated late). isMovementAlreadySubmitted prevents a
-                // duplicate when process() already produced the move.
+                // duplicate when process() already produced the move. Pass $latestgameData
+                // (reloaded above to include this turn's submitted moves) so the seek's
+                // findNearestEnemy scans up-to-date enemy positions rather than the stale
+                // pre-phase $gameData snapshot.
                 if (!$dbManager->isMovementAlreadySubmitted($gameData->id, $ship->id, $gameData->turn)) {
-                    AutomatedMovement::generateAndSubmit($ship, $gameData, $dbManager);
+                    AutomatedMovement::generateAndSubmit($ship, $latestgameData, $dbManager);
                 }
             } else {
                 // Submit a dummy "end" move so the ship has a completed movement order for this turn
@@ -167,6 +170,20 @@ class MovementGamePhase implements Phase
 						}
 						break;
 					}
+
+					// Authoritative server-side thrust validation. The client normally
+					// blocks committing an underpaid maneuver, but a tampered/buggy client
+					// can POST one anyway (the server otherwise trusts submitted movement
+					// wholesale). Drop any illegal maneuver (and its now-invalid downstream
+					// moves) before persisting. We validate the SUBMITTED moves against the
+					// AUTHORITATIVE ship (correct system/damage state, incl. destroyed
+					// thrusters): temporarily point the active ship at the submitted
+					// movement so orientation-dependent checks (pivots) see the plotted
+					// path, run the validator, then keep only the sanitised result.
+					$activeShipMovementBackup = $activeShip->movement;
+					$activeShip->movement = $ship->movement;
+					$ship->movement = Movement::validateThrustPayment($activeShip, $gameData->turn);
+					$activeShip->movement = $activeShipMovementBackup;
 
 					// Check for detachment move in the submitted orders
 					$detachedMove = false;

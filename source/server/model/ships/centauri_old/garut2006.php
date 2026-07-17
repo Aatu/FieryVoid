@@ -23,10 +23,10 @@ class Garut2006 extends BaseShip{
         $this->Enormous = true;
         $this->forwardDefense = 19;
         $this->sideDefense = 20;
-	$this->iniativebonus = 0;
+		$this->iniativebonus = 0;
 
-        $this->imagePath = "img/ships/sakar.png";
-	
+        $this->imagePath = "img/ships/centauriGarut.png";
+		$this->canvasSize = 300;		
 
 
         $this->turncost = 2;

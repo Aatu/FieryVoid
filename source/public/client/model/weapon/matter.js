@@ -107,3 +107,15 @@ var SniperCannon = function SniperCannon(json, ship) {
 };
 SniperCannon.prototype = Object.create(Matter.prototype);
 SniperCannon.prototype.constructor = SniperCannon;
+
+var GlancingRam = function GlancingRam(json, ship) {
+    Matter.call(this, json, ship);
+};
+GlancingRam.prototype = Object.create(Matter.prototype);
+GlancingRam.prototype.constructor = GlancingRam;
+
+var WarriorRam = function WarriorRam(json, ship) {
+    Matter.call(this, json, ship);
+};
+WarriorRam.prototype = Object.create(Matter.prototype);
+WarriorRam.prototype.constructor = WarriorRam;

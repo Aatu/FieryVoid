@@ -28,7 +28,7 @@ class Decurion extends BaseShip{
         $this->addPrimarySystem(new CnC(7, 18, 0, 0));
         $this->addPrimarySystem(new Scanner(7, 20, 4, 10));
         $this->addPrimarySystem(new Engine(6, 20, 0, 12, 3));
-        $this->addPrimarySystem(new Hangar(7, 4));
+        $this->addPrimarySystem(new Hangar(7, 4, 1, 0, 'Breaching Pods'));
 
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
         $this->addFrontSystem(new TwinArray(3, 6, 2, 180, 60));
@@ -43,12 +43,12 @@ class Decurion extends BaseShip{
         $this->addAftSystem(new Thruster(5, 14, 0, 6, 2));
 
         $this->addLeftSystem(new GuardianArray(2, 4, 2, 180, 0));
-        $this->addLeftSystem(new Hangar(5, 12));
+        $this->addLeftSystem(new Hangar(5, 12, 6));
         $this->addLeftSystem(new Thruster(5, 15, 0, 5, 3));
 
         $this->addRightSystem(new GuardianArray(2, 4, 2, 0, 180));
         $this->addRightSystem(new Thruster(5, 15, 0, 5, 4));
-        $this->addRightSystem(new Hangar(5, 12));
+        $this->addRightSystem(new Hangar(5, 12, 6));
         
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 6, 44));

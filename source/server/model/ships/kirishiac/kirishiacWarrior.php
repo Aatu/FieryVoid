@@ -8,7 +8,7 @@ class kirishiacWarrior extends FighterFlight{
 		$this->faction = "Kirishiac Lords";
         $this->phpclass = "kirishiacWarrior";
         $this->shipClass = "Warrior Projectile";
-		$this->imagePath = "img/ships/kirishiacWarrior2.png";
+		$this->imagePath = "img/ships/kirishiacWarrior.png";
 	    $this->isd = 'Ancient';
 		$this->factionAge = 3; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
         
@@ -22,7 +22,14 @@ class kirishiacWarrior extends FighterFlight{
         $this->gravitic = true;
 		$this->advancedArmor = true;   
 		$this->hardAdvancedArmor = true;   
-        
+
+        $this->dropOutBonus = 0;
+
+		//A partially damaged Warrior flight that lands on a ship and spends 5 full
+		//turns aboard launches again fully regenerated (needs >=1 undestroyed
+		//Warrior at the moment it docks). Handled by HangarOps::applyDockedRegeneration.
+		$this->dockRegeneration = 5;
+
 		$this->iniativebonus = 90;
         $this->populate();
     }
@@ -38,12 +45,11 @@ class kirishiacWarrior extends FighterFlight{
 			$armour = array(6, 6, 6, 6);
 			$fighter = new Fighter("kirishiacWarrior", $armour, 18, $this->id);
 			$fighter->displayName = "Warrior";
-			$fighter->imagePath = "img/ships/kirishiacWarrior2.png";
-			$fighter->iconPath = "img/ships/kirishiacWarrior_large2.png";
-			
-
-			
-			//$fighter->addFrontSystem(new GlancingRam(0, 360, 1));
+			$fighter->imagePath = "img/ships/kirishiacWarrior.png";
+			$fighter->iconPath = "img/ships/kirishiacWarrior_large.png";
+ 			
+			$fighter->addFrontSystem(new GlancingRam(0, 360));
+			$fighter->addFrontSystem(new WarriorRam(0, 360));
 			
 			$fighter->addAftSystem(new RammingAttack(0, 0, 360, $fighter->getRammingFactor(), 0)); //ramming attack
 			

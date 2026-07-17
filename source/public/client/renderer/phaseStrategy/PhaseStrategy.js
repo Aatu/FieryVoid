@@ -104,9 +104,29 @@ window.PhaseStrategy = function () {
     PhaseStrategy.prototype.update = function (gamedata) {
         this.gamedata = gamedata;
         this.consumeGamedata();
+        //this.refreshModifiedShips(); //Fix was actually server side, so comment this out for now in case sueful later - DK.
         this.ewIconContainer.hide();
         this.ballisticIconContainer.show();
     };
+
+    /*// A same-phase poll (this.update, as opposed to a phase-change activate()) refreshes ship
+    // icons/EW/ballistics/movement via consumeGamedata, but NOT a ship's movement glyphs unless it
+    // is selected, nor the predicted hit-chance in the weapon list / system-info tooltip. When the
+    // server sends a ship flagged isModified - a buff applied at LOAD to ANOTHER ship (Gravitic
+    // Augmenter Mode 2 gives a Warrior +OB/+thrust and 3 forced jink; stripForJson emits the buffed
+    // stats + the transient forced jink), those changes silently fail to show until the phase flips
+    // or the user clicks the ship / refreshes. Poke the existing re-render hooks for each modified
+    // ship so its jink/thrust display and everyone's hit-chance against it update in place. Cheap:
+    // isModified is set on a handful of buffed flights only, so the loop is a no-op almost always.
+    PhaseStrategy.prototype.refreshModifiedShips = function () {
+        for (var i in this.gamedata.ships) {
+            var ship = this.gamedata.ships[i];
+            if (!ship || !ship.isModified) continue;
+
+            this.onShipMovementChanged({ ship: ship });   // jink/thrust glyphs + ballistic lines
+            PhaseStrategy.prototype.onSystemDataChanged.call(this, { ship: ship }); // predicted hit chance
+        }
+    };*/
 
     PhaseStrategy.prototype.activate = function (shipIcons, ewIconContainer, ballisticIconContainer, gamedata, webglScene, shipWindowManager, doneCallback) {
         this.shipIconContainer = shipIcons;

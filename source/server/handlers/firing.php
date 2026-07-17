@@ -396,6 +396,9 @@ class Firing
         if ($weapon->isOfflineOnTurn($gd->turn)) {
             return false;
         }
+        if ($weapon->stowed) { //Antigravity Beam on a docked Kirishiac Orbital - non-operational
+            return false;
+        }
 
         // not loaded yet
         if ($weapon->getTurnsloaded() < $weapon->getLoadingTime()) {

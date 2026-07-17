@@ -67,6 +67,12 @@ BallisticTorpedo.prototype.checkFinished = function () {
     return false;
 };
 
+var PhasedGraviticTorpedo = function PhasedGraviticTorpedo(json, ship) {
+    BallisticTorpedo.call(this, json, ship);
+};
+PhasedGraviticTorpedo.prototype = Object.create(BallisticTorpedo.prototype);
+PhasedGraviticTorpedo.prototype.constructor = PhasedGraviticTorpedo;
+
 var IonTorpedo = function IonTorpedo(json, ship) {
     Torpedo.call(this, json, ship);
 };
@@ -195,6 +201,4 @@ FlexPacketTorpedo.prototype.doIndividualNotesTransfer = function () { //prepare 
 	return toReturn;
  
 };
-
-
 

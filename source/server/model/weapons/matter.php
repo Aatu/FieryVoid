@@ -947,6 +947,177 @@ class UltraMatterCannon extends Matter{
     } //endof class SniperCannon
 
 
+	/* Kirishiac Weapon */
+	class GlancingRam extends Matter{
+
+        public $trailColor = array(206, 206, 83);
+        public $name = "GlancingRam";
+        public $displayName = "Glancing Ram";
+		public $iconPath = "GlancingRam.png";
+	    public $animation = "ball";
+		
+		public $factionAge = 3; //Ancient weapon, which sometimes has consequences!
+        public $loadingtime = 1;
+		public $shots = 1;
+        public $priority = 1;
+
+		public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
+
+		public $intercept = 0; //cannot intercept
+        
+		public $rangePenalty = 0; //no range penalty
+		public $range = 0.1; //attacks units on same hex only; range = 0 is treated as unlimited
+        public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
+
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+		public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+		public function getDamage($fireOrder){        return Dice::d(10, 1);  }
+        public function setMinDamage(){     $this->minDamage = 1 ;      }
+        public function setMaxDamage(){     $this->maxDamage = 10 ;      }
+		
+	}// endof GlancingRam
+
+
+	/* Kirishiac Weapon */
+	class WarriorRam extends Matter{
+
+        public $trailColor = array(206, 206, 83);
+        public $name = "WarriorRam";
+        public $displayName = "Warrior Ram";
+		public $iconPath = "DirectRam.png";
+	    public $animation = "ball";
+        public $lastCalculatedDamage = null;		
+		public $factionAge = 3; //Ancient weapon, which sometimes has consequences!
+        public $loadingtime = 1;
+		public $shots = 1;
+        public $priority = 1;
+
+		public $doNotIntercept = true; //unit hurls itself at the enemy - this cannot be intercepted!
+		public $exclusive = true;
+
+		public $intercept = 0; //cannot intercept
+		private $gamedata = null; //gamedata is needed in places normally unavailable - this variable will be filled before any calculations happen!
+
+		public $rangePenalty = 0; //no range penalty
+		public $range = 0.1; //attacks units on same hex only; range = 0 is treated as unlimited
+        public $fireControl = array(null, 0, 0); // fighters, <mediums, <capitals
+
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+		public $weaponClass = "Matter"; //MANDATORY (first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!
+
+
+
+private function findThisFighter() {
+    return $this->getParentFighter();
+}
+
+
+public function setSystemDataWindow($turn){
+    $thisFighter = $this->getParentFighter();
+    if ($thisFighter !== null) {
+        $this->lastCalculatedDamage = $thisFighter->getRemainingHealth();
+    }
+    $this->setMinDamage();
+    $this->setMaxDamage();
+    parent::setSystemDataWindow($turn);
+    $this->data["Special"] = "The Warrior Projectile attempts to punch straight through the target.";
+    $this->data["Special"] .= "<br>Damage equals total number or remaining structure boxes on the Warrior.";
+    $this->data["Special"] .= "<br>If the system is not destroyed, the Warrior suffers two times the system's armor value.";
+    $this->data["Special"] .= "<br>The Warrior also suffers a +4 drop out penalty.";
+    $this->data["Special"] .= "<br>Cannot be used on fighters.";
+}
+
+		function __construct($startArc, $endArc, $nrOfShots = 1){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+
+public function fire($gamedata, $fireOrder){
+    $this->gamedata = $gamedata;
+    parent::fire($gamedata, $fireOrder);
+}
+
+
+
+
+
+public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){
+
+        $warrior = $this->getParentFighter(); //The fighter this weapon belongs to.
+
+		//$pos = mathlib::hexCoToPixel($this->getFiringHex($gamedata, $fireOrder));
+		//$adaptive = $system->getArmourAdaptive($gamedata->getShipById($fireOrder->targetid), $gamedata->getShipById($fireOrder->shooterid), $this->weaponClass = "Matter", $pos); // Need to get any adaptive armor values set to matter too!
+        //$base = $system->getArmourBase($gamedata->getShipById($fireOrder->targetid), $gamedata->getShipById($fireOrder->shooterid), $this->weaponClass = "Particle", $pos);  // Need to change the weapon class to particle so the returned armor value isn't zero
+        
+        //$armour = $base + $adaptive;  
+
+        // To Geoff - Warrior recoil needs the target system's RAW armour value (the armour the
+        // projectile punched through), NOT the Matter-adjusted 0 the damage pipeline uses.
+        // getArmourComplete = getArmourBase + getArmourAdaptive; the $dmgClass arg is inert
+        // for the base value (base armour ignores class; Matter-zeroing lives in weapon.php),
+        // so passing $weaponClass is fine and the old "Particle trick" was never necessary.
+        // Estimation-only path: excludes ArmorReduced crits / advanced-armour / raking mods - intentional here.
+        $armour = $system->getArmourComplete($ship, $warrior, $this->weaponClass);
+
+        //Warrior only takes recoil if the system it hit survived.
+        if ($warrior !== null && !$system->isDestroyed($gamedata->turn)){
+            //Warrior suffers 2x the punched-through system's armour value.
+            $warriorFlight = $this->getUnit();
+            $maxDamage = $warrior->getRemainingHealth();
+            $damageCaused = min((2 * $armour) - 6, $maxDamage); //Don't cause more damage than the warrior has left. Also, the -6 is to account for the Warrior's armor. Currently a jury-rigged fix
+
+            if ($damageCaused > 0){
+                $destroyed = $damageCaused >= $maxDamage;
+                $damageEntry = new DamageEntry(-1, $warriorFlight->id, -1, $gamedata->turn, $warrior->id, $damageCaused, 0, 0, -1, $destroyed, false, "", "Warrior");
+                $damageEntry->updated = true;
+                $warrior->damage[] = $damageEntry;
+				
+				$warrior->forceCriticalRoll = true;
+				$warrior->critRollMod += 4;							
+            }
+        }
+
+        parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);
+    }
+
+
+public function getDamage($fireOrder) {
+    $gd = $this->gamedata;
+    $target = $gd->getShipById($fireOrder->targetid);
+
+    $thisFighter = $this->getParentFighter();
+
+    $damage = 0;
+    if ($thisFighter !== null) {
+        $damage = $thisFighter->getRemainingHealth();
+        $this->lastCalculatedDamage = $damage; // store it
+    }
+    return $damage;
+}
+
+
+        public function setMinDamage(){     $this->minDamage = 1 ;      }
+//       public function setMaxDamage(){     $this->maxDamage = $thisFighter->getRemainingHealth() ;      }
+
+
+
+public function setMaxDamage() {
+    $this->maxDamage = ($this->lastCalculatedDamage !== null) 
+        ? $this->lastCalculatedDamage 
+        : $this->maxhealth;
+}
+
+
+		
+	}// endof WarriorRam
+
+
+
+
 
 
 	

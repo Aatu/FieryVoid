@@ -2046,6 +2046,7 @@ class TractingRodHandler {
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
 		$system->critRollMod += 4;
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	        
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 2);   }
@@ -2101,6 +2102,7 @@ class TractingRodHandler {
 			$system->addCritical($ship->id, "ForcedOfflineOneTurn", $gamedata);
 		}
 		$system->critRollMod += 3;
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	        
 	}
 		
         public function getDamage($fireOrder){        return Dice::d(10, 5);   }
@@ -2474,6 +2476,7 @@ class EWFlakBattery extends Weapon {
         
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 			$system->critRollMod += 3;
+		    parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	            
 		} //endof function onDamagedSystem
 
     public function setSystemDataWindow($turn) {
@@ -2520,6 +2523,7 @@ class EWFlakBattery extends Weapon {
         
 		protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //really no matter what exactly was hit!
 			$system->critRollMod += 4;
+		    parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	            
 		} //endof function onDamagedSystem
 
     public function setSystemDataWindow($turn) {

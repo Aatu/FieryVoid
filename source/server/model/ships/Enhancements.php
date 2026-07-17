@@ -240,7 +240,27 @@ class Enhancements{
 			  $enhLimit = 1;	  
 			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,true);
 		  }
-	  }	 
+	  }
+
+	  //Improved Blaster Thrust: reduces the thrust needed to boost each
+	  //Hypergraviton Blaster to 4 (from 6). Only offered on ships that actually
+	  //mount a Blaster. Cost: 150 + 50 per Blaster on the ship.
+	  $enhID = 'HBLAST_THR';
+	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
+		  $enhName = 'Improved Gravitic Converters';
+		  $count = 0;
+		  foreach ($ship->systems as $system){
+			if ($system instanceof HypergravitonBlaster){
+				$count++;
+			}
+		  }
+		  if($count > 0){ //ship is actually equipped with a Hypergraviton Blaster(s)
+			  $enhPrice = 150 + (50 * $count);
+			  $enhPriceStep = 0;
+			  $enhLimit = 1;
+			  $ship->enhancementOptions[] = array($enhID, $enhName,0,$enhLimit, $enhPrice, $enhPriceStep,false);
+		  }
+	  }
 
 
 	  //To convert Assault Shuttles hangar slots to Fighter Slots
@@ -2043,13 +2063,21 @@ class Enhancements{
 					case 'GUNSIGHT'://Split fire: allows Particle Repeaters to split their shots.
 						foreach ($ship->systems as $system){
 							if ($system instanceof ParticleRepeater){
-								$damageTaken = $system->maxhealth - ($system->getRemainingHealth()); //Check for damge taken.    
-								if($damageTaken > 0) break; //Lose gunsights if even 1 point of damage taken.								
+								$damageTaken = $system->maxhealth - ($system->getRemainingHealth()); //Check for damge taken.
+								if($damageTaken > 0) break; //Lose gunsights if even 1 point of damage taken.
 								$system->specialHitChanceCalculation = true;
 								$system->canSplitShots = true;
 							}
 						}
-						break;	
+						break;
+
+					case 'HBLAST_THR'://Improved Blaster Thrust: lower each Hypergraviton Blaster's boost cost to 4 thrust.
+						foreach ($ship->systems as $system){
+							if ($system instanceof HypergravitonBlaster){
+								$system->setThrustPerBoost(4);
+							}
+						}
+						break;
 
 					case 'HANG_F'://Hangar Conversion of AS slot to (Heavy) Fighter slot.
 						//Mirror of gamelobby.js shipProfile.slots tracking. Mutating

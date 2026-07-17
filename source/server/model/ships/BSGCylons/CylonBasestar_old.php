@@ -10,7 +10,8 @@ class CylonBasestar_old extends SixSidedShip{
 		$this->shipClass = "Cylon Basestar";
 		$this->fighters = array("heavy"=>48); 
 		$this->isd = 1980;
-		$this->locations = array(41, 42, 2, 32, 31, 1);		
+		$this->locations = array(41, 42, 2, 32, 31, 1);	
+		$this->variantOf = 'OBSOLETE';	        	
 
 		$this->unofficial = true;
 

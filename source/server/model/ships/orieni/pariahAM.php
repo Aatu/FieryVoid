@@ -14,7 +14,7 @@ class PariahAM extends BaseShip{
 	    $this->isd = 2009;
 	    
         $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>24, "medium"=>12); //PRIMARY hangar for 12 fighters (can hold HKs) and side hangards for 12 light fighters each
+        $this->fighters = array("light"=>24, "Hunter-Killers"=>12); //PRIMARY hangar for 12 fighters (can hold HKs) and side hangards for 12 light fighters each
         $this->canvasSize = 200;
 		
         $this->forwardDefense = 19;

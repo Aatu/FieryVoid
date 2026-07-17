@@ -12,7 +12,7 @@ class penitentAM extends SmallStarBaseFourSections{
 		$this->shipClass = "Penitent Station";
 		$this->imagePath = "img/ships/penitent.png";
 		$this->canvasSize = 280; 
-		$this->fighters = array("light"=>24, "medium"=>24); 
+		$this->fighters = array("light"=>24, "Hunter-Killers"=>24); 
 		$this->shipSizeClass = 3; 
 		$this->Enormous = true; 
 		$this->iniativebonus = -200; //no voluntary movement anyway

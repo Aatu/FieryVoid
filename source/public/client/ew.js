@@ -570,11 +570,24 @@ window.ew = {
         if (target.faction == "Torvalus Speculators") {
             if (target.flight) return 0; //Torvalus fighters do not get Jammer effect.
             var shadingField = shipManager.systems.getSystemByName(target, "ShadingField");
-            if (!shipManager.systems.isDestroyed(target, shadingField) && !shipManager.power.isOffline(target, shadingField)) {
-                return 1; //Not destroyed or offline
-            } else {
-                return 0; //Destroyed or offline
-            }
+            if (shadingField){
+                if(!shipManager.systems.isDestroyed(target, shadingField) && !shipManager.power.isOffline(target, shadingField)) {
+                    return 1; //Not destroyed or offline
+                } else {
+                    return 0; //Destroyed or offline
+                }
+            }else{
+                var alphaShadingField = shipManager.systems.getSystemByName(target, "AlphaShadingField");
+                if (alphaShadingField){
+                    if(shooter.factionAge <= 2 && !shipManager.systems.isDestroyed(target, alphaShadingField) && !shipManager.power.isOffline(target, alphaShadingField)) {
+                        return 1; //Not destroyed or offline
+                    } else {
+                        return 0; //Destroyed or offline
+                    }                    
+                }else{
+                    return 0;
+                }                
+            }    
         }
 
         if (shooter.faction != target.faction) { //in-faction units ignore jammer (but not stealth!)

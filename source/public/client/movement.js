@@ -118,12 +118,24 @@ shipManager.movement = {
     },
 
     isMovementReady: function isMovementReady(ship) {
-        return shipManager.movement.getRemainingMovement(ship) == 0 ||
-            shipManager.isDestroyed(ship) ||
+        // Exempt cases are always "ready" regardless of any plotted moves: they are
+        // moved by the server, cannot move, or have not deployed yet.
+        if (shipManager.isDestroyed(ship) ||
             gamedata.isTerrain(ship.shipSizeClass, ship.userid) ||
             (shipManager.getTurnDeployed(ship) > gamedata.turn) ||
             shipManager.movement.isUncontrolled(ship) ||
-            (Object.keys(ship.attached).length !== 0 && !ship.detached);
+            (Object.keys(ship.attached).length !== 0 && !ship.detached)) {
+            return true;
+        }
+
+        // Otherwise the ship is ready only when it has used all its movement AND has
+        // no uncommitted maneuver left dangling. A turn/pivot/roll whose required
+        // thrust cannot be satisfied (e.g. its thrusters are destroyed) stays
+        // uncommitted, and must block the Commit button so an unpayable maneuver can
+        // never be submitted - the player sees the unmet requirement (with the
+        // destroyed thruster icons) and has to delete the illegal maneuver first.
+        return shipManager.movement.getRemainingMovement(ship) == 0 &&
+            !shipManager.movement.checkHasUncommitted(ship);
     },
 
     //HK Jamming: a remote-controlled flight that is Uncontrolled this turn is moved by
@@ -209,7 +221,7 @@ shipManager.movement = {
             if (movement.value != accel && movement.heading == curheading || movement.value == accel && movement.heading != curheading) {
                 // adjust the current turn delay if the new speed changes the turn delay
                 var oldspeed = shipManager.movement.getSpeed(ship);
-                console.log("I am going to delete ", movement)
+                //console.log("I am going to delete ", movement)
                 shipManager.movement.revertAutoThrust(ship);
                 ship.movement.splice(ship.movement.length - 1, 1);
                 var speed = shipManager.movement.getSpeed(ship);

@@ -16,7 +16,7 @@ class SshelathVulshara2018 extends BaseShip{
 		$this->unofficial = true;
 
 		$this->isd = 2018;
-		$this->fighters = array("mediuem"=>12, "light"=>6);
+		$this->fighters = array("medium"=>12, "light"=>6);
 
         $this->forwardDefense = 16;
         $this->sideDefense = 17;

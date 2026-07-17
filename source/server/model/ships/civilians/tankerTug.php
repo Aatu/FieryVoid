@@ -7,7 +7,7 @@ class TankerTug extends MediumShip{
 		$this->pointCost = 102;
 		$this->faction = "Civilians";
 		$this->phpclass = "TankerTug";
-		$this->imagePath = "img/ships/civilianFreighter.png"; //need to change
+		$this->imagePath = "img/ships/civilianTug.png"; 
 		$this->shipClass = "Tanker Tug";
 		$this->canvasSize = 100;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup

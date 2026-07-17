@@ -2912,6 +2912,7 @@ class GromeHvyRailgun extends Weapon{
 					}					
 				break;				
 			}
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);            
 			
 	} //endof function onDamagedSystem
 

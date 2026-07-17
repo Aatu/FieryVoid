@@ -92,18 +92,63 @@
         public $animation = "trail";
 
         public $priority = 5;
-        
-        public $grouping = 20;
-		
-		public $canSplitShots = true;  
-    	public $calledShotMod = 0; //Cannot make called shots against ships anyway, but shouldn't get modifier when we specificy specific fighters		      
+
+		//Saturation Mode (ships only): torpedoes fired at the same ship are merged into ONE fire order
+		//by beforeFiringOrderResolution, then resolved as a single Pulse-type volley - one to-hit roll,
+		//one interception, and every $grouping points the shot beats its needed number lands another
+		//torpedo (base 1 + floor(margin/3)), capped by the number fired at that target. Fighter targets
+		//are NOT saturated: they keep one torpedo per fighter (see fire() below).
+        public $damageType = 'Pulse';
+        public $grouping = 20; //+1 per 20%
+        public $maxpulses = 6; //upper bound (matches max held torpedoes); real per-order cap set in fire()
+        public $maxpulsesArray = array();
+
+		public $canSplitShots = true;
+    	public $calledShotMod = 0; //Cannot make called shots against ships anyway, but shouldn't get modifier when we specificy specific fighters
 //        public $canChangeShots = true; //No longer needed.
 
-        
+
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-            
+
         }
+
+
+		/*Saturation Mode resolution. Ships: a merged fire order carries $fireOrder->shots torpedoes at
+		one target; cap the Pulse volley at that count and let Weapon::fire() do one roll + one
+		interception for the whole volley. Fighters: torpedoes are aimed one-per-fighter (own calledid),
+		so resolve those in plain Standard mode - each torpedo is its own hit on its own fighter, no
+		saturation bonus.*/
+		public function fire($gamedata, $fireOrder){
+			$target = $gamedata->getShipById($fireOrder->targetid);
+			if ($target instanceof FighterFlight){ //individual targeting - one torpedo, one fighter
+				$savedType = $this->damageType;
+				$this->damageType = 'Standard'; //bypass the Pulse volley path in Weapon::fire()
+				parent::fire($gamedata, $fireOrder);
+				$this->damageType = $savedType;
+				return;
+			}
+			$this->maxpulses = max(1, (int)$fireOrder->shots); //this order's torpedo count is the cap
+			parent::fire($gamedata, $fireOrder);
+		}
+
+		//base number of torpedoes that land on a hit: the shot hit at all, so at least one
+		protected function getPulses($turn){
+			return 1;
+		}
+
+		//every $grouping (=3) points the shot beats its needed number lands an extra torpedo
+		protected function getExtraPulses($needed, $rolled){
+			return floor(($needed - $rolled) / $this->grouping);
+		}
+
+		public function rollPulses($turn, $needed, $rolled){
+			$pulses = $this->getPulses($turn);
+			$pulses += $this->getExtraPulses($needed, $rolled);
+			$pulses = min($pulses, $this->maxpulses); //no more than torpedoes fired at this target
+			$pulses = max($pulses, 1); //we only get here on a hit, so at least one lands
+			return $pulses;
+		}
 
       
         public function firedOnTurn($turn){  
@@ -229,11 +274,8 @@
 			}
 
 			$this->data["Special"] .= "Can fire at multiple targets, providing it has enough shots available.";
-			$this->data["Special"] .= "<br>To do so, select weapon and target as many enemies as you wish following the normal rules for targeting, then deselect weapon.";
-			$this->data["Special"] .= "<br>To fire multiple torpedoes at the same target from the same launcher requires selecting the target multiple times.";	
-			$this->data["Special"] .= "<br>Multiple torpedoes from the same launcher against the same ship will be combined into a single Pulse attack with a 20% grouping bonus (Saturation Mode).";	
-			$this->data["Special"] .= "<br>Against enemy fighters flights, each torpedo will always attack a different fighter, providing there is an appropirate target available.";
-			$this->data["Special"] .= "<br>If there are more torpedoes than fighters, excess munitions are lost.";		
+			$this->data["Special"] .= "<br>Multiple torpedoes from the same launcher against the same ship are combined into a single volley with ONE to-hit roll (Saturation Mode): the shot lands one torpedo, plus one more for every 3 points it beats the needed number by (up to the number fired). Interception is rolled once for the whole volley.";
+			$this->data["Special"] .= "<br>Against enemy fighters flights, torpedoes always attack a different fighter. If there are more torpedoes than fighters, excess munitions are lost.";
 		}
 	
 	        
@@ -257,103 +299,222 @@
     } //endof class BallisticTorpedo
 
 
-/*
-   //Old Version of Ballistic Torpedo without split shots
-    class BallisticTorpedo extends Torpedo{
+//Kirishiac Torpedo that can split shots like Ballistic Torp
+ class PhasedGraviticTorpedo extends BallisticTorpedo{
     
-        public $name = "ballisticTorpedo";
-        public $displayName = "Ballistic Torpedo";
-        public $range = 25;
+        public $name = "phasedGraviticTorpedo";
+        public $displayName = "Phased Gravitic Torpedo";
+        public $range = 50;
         public $loadingtime = 1;
-        public $shots = 6;
+        public $shots = 9;
         public $defaultShots = 1;
-        public $normalload = 6;
-        
-        public $fireControl = array(0, 3, 4); // fighters, <mediums, <capitals 
-        
+        public $normalload = 9;
+        public $grouping = 15; //+1 per 15%        
+        public $fireControl = array(3, 4, 5); // fighters, <mediums, <capitals
+
         public $trailColor = array(141, 240, 255);
         public $animation = "trail";
-		/*
-        public $animationColor = array(227, 148, 55);
-        public $animationExplosionScale = 0.25;
-        public $projectilespeed = 12;
-        public $animationWidth = 4;
-        public $trailLength = 40;
-		*//*
+
         public $priority = 5;
-        
-        public $grouping = 20;
-        
-        public $canChangeShots = true;
 
-        
-        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+		//Pulse machinery (damageType='Pulse', getPulses/getExtraPulses/rollPulses) is inherited from
+		//BallisticTorpedo. Unlike BallisticTorpedo, this launcher ALWAYS saturates - fighter flights get
+		//the same single-roll pulse volley as ships (see beforeFiringOrderResolution + fire() below).
+		//It also holds more torpedoes (9 vs 6).
+        public $maxpulses = 9; //upper bound (matches max held torpedoes); real per-order cap set in fire()
+
+		public $canSplitShots = true;
+    	public $calledShotMod = 0; //Cannot make called shots against ships anyway, but shouldn't get modifier when we specificy specific fighters
+
+		private $pairing = null;	//Which Heavy Orbital is it paired with? (null on standalone mounts)
+		public $linkedOrbital = null; //set by KirishiacOrbital::addOrbitalWeapon - null on standalone mounts
+		private $rolledMod = 0; //Captures reduction of damage reduction per torpedo 
+		public $weaponClass = "Gravitic";
+
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc, $pairing = null){
+            $this->pairing = $pairing;
+            if ($pairing !== null) $this->displayName = 'Phased Gravitic Torpedo ' . $pairing;
             parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
-            
         }
 
-		//Need to overwrite to with a counter for each fireOrder and return counter instead.        
-        public function firedOnTurn($turn){            
-            foreach ($this->fireOrders as $fire){
-                if ($fire->weaponid == $this->id && $fire->turn == $turn){
-                    return  $fire->shots;
-                }
-            }
-            return 0;
-        }
-        
-        public function calculateLoading(TacGamedata $gamedata)
-        {
-            $loading = new WeaponLoading($this->turnsloaded, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
-            $shotsfired = $this->firedOnTurn(TacGamedata::$currentTurn);
-            if (TacGamedata::$currentPhase == 2)
-            {
-                if  
-                ( $this->isOfflineOnTurn(TacGamedata::$currentTurn) )
-                {
-                    $loading = new WeaponLoading(0, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
-                }
-                else if ($shotsfired)
-                {
-                    $newloading = $this->turnsloaded-$shotsfired;
-                    if ($newloading < 0)
-                        $newloading = 0;
 
-                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
-                }
-            }
-            else if (TacGamedata::$currentPhase == 1)
-            {
-                $newloading = $this->turnsloaded+1;
-                if ($newloading > $this->getNormalLoad())
-                    $newloading = $this->getNormalLoad();
+		/*This weapon saturates fighter flights too (unlike BallisticTorpedo, which splits torpedoes
+		one-per-fighter). So merge ALL torpedoes aimed at the same target - ship OR flight - into one
+		fire order, summing shots, and leave calledid = -1 so a flight is hit by the standard Pulse
+		distribution (getHitSystem picks fighters as a normal pulse would).*/
+		public function beforeFiringOrderResolution($gamedata) {
+			$turn = $gamedata->turn;
+			$mergedOrders = [];
+			foreach ($this->fireOrders as $fire) {
+				if ($fire->weaponid != $this->id || $fire->turn != $turn) continue;
+				$targetId = $fire->targetid;
+				if (!isset($mergedOrders[$targetId])) {
+					$mergedOrders[$targetId] = $fire; //first order at this target becomes the carrier
+				} else {
+					$mergedOrders[$targetId]->shots += $fire->shots; //fold the rest of the torpedoes in
+				}
+			}
+			$this->fireOrders = array_values($mergedOrders);
+		}//endof beforeFiringOrderResolution()
 
-                $loading = new WeaponLoading($newloading, 0, 0, 0, $this->getLoadingTime(), $this->firingMode);
-            }
 
-            return $loading;
-        }
+		/*Always a saturation volley - no fighter->Standard branch. The merged order carries every
+		torpedo aimed at this target; cap the pulse count at that and let Weapon::fire() do the single
+		to-hit roll and single interception.*/
+		public function fire($gamedata, $fireOrder){
+			$this->rolledMod = 0; //reset each shot.			
+			$this->maxpulses = max(1, (int)$fireOrder->shots); //this order's torpedo count is the cap
+			Weapon::fire($gamedata, $fireOrder);
+		}
+
+
+		/*paired-launcher overkill: while the Heavy Orbital is deployed, excess damage passes into
+		the Orbital's structure; if the Orbital is already gone the excess is lost. While DOCKED
+		the launcher is still hittable (docked sub-chart) but the orbital is part of the hull, so
+		overkill follows the normal ship flow (section = combined Structure). Standalone mounts
+		behave normally. Mirrors HypergravitonBeam::getOverkillDestination.*/
+		public function getOverkillDestination($target){
+			if ($this->linkedOrbital === null) return null; //standalone mount - normal flow
+			if ($this->linkedOrbital->activeEffective) return null; //docked - overkill returns to the ship (combined Structure)
+			if ($this->linkedOrbital->isDestroyed() || ($this->linkedOrbital->getRemainingHealth() == 0)) return false; //orbital gone - overkill lost
+			return $this->linkedOrbital;
+		}
+
+		/*a Heavy Orbital's launcher normally stays OPERATIONAL while docked (with its stowed arcs);
+		this guard only fires if a paired launcher was never given stowed arcs in the blueprint*/
+		public function calculateHitBase($gamedata, $fireOrder){
+			if ($this->stowed && $this->stowedArcStart === null){
+				$fireOrder->needed = 0;
+				$fireOrder->shotshit = 0;
+				$fireOrder->pubnotes .= " Launcher is stowed (Orbital docked) - cannot fire.";
+				$fireOrder->updated = true;
+				return;
+			}
+			parent::calculateHitBase($gamedata, $fireOrder);
+		}
+
+		public function setSystemDataWindow($turn){
+			//parent (BallisticTorpedo) already appends the Saturation-Mode + fighter-targeting lines;
+			//only add the paired-Orbital specifics here.
+			parent::setSystemDataWindow($turn);
+			if ($this->linkedOrbital !== null){
+				$this->data["Special"] .= "<br>Mounted on " . $this->linkedOrbital->displayName . ": cannot be targeted by called shots; overkill passes to the Orbital.";
+				if ($this->stowedArcStart !== null){
+					$this->data["Special"] .= "<br>Remains operational while the Orbital is docked, with a reduced arc (" . $this->stowedArcStart . ".." . $this->stowedArcEnd . " - the Arc line above always shows the arc currently in effect). May be powered down only while docked.";
+				}
+			}
+		}
+	  
         
-        public function onConstructed($ship, $turn, $phase){
-            parent::onConstructed($ship, $turn, $phase);
-            $this->shots = $this->turnsloaded;
-        }        
-        
-        public function getDamage($fireOrder){        return Dice::d(10,2);   }
-        public function setMinDamage(){     $this->minDamage = 2;       }
-        public function setMaxDamage(){     $this->maxDamage = 20;      }
+		/*Phasing (crit-banking) is NOT done here any more - shieldInteractionDamage is called for EVERY
+		in-arc shield during damage-mod calculation, so banking here double-hit overlapping-arc shields
+		(game 4223 turn 3: a 330-degree hit banked crits on BOTH the F and L shields, when only L
+		absorbed). Banking now happens once per torpedo in getFinalDamage(), against the single shield
+		that actually absorbs/reduces. Here we only REPORT the shield's current reduction - which already
+		reflects the crit just banked (getDefensiveDamageMod sums the params), so return it unchanged.*/
+		public function shieldInteractionDamage($target, $shooter, $pos, $turn, $shield, $mod) {
+			// younger races: absorption ignored entirely (house rule: EMShields still work)
+			if ($target->factionAge <= 2 && !$shield instanceof EMShield) return 0;
+			return $mod;
+		}
+
+		/*Bank the per-torpedo phasing crit ONCE, on the single shield that actually protects this hit,
+		then let the normal damage flow run (it re-reads the crit live, so this shot's reduction already
+		reflects it). Runs once per pulse.*/
+		protected function getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder)
+		{
+			$this->applyPhasing($target, $shooter, $pos, $gamedata);
+			return parent::getFinalDamage($shooter, $target, $pos, $gamedata, $fireOrder);
+		}
+
+		//Pick the one shield this hit will actually use and bank a single rolled crit on it.
+		private function applyPhasing($target, $shooter, $pos, $gamedata){
+			$turn = $gamedata->turn;
+
+			$shield = $this->getPhasingShield($target, $shooter, $pos, $turn);
+			if ($shield === null) return; //no shield protects this hit
+
+			// cap: base absorption pool for projection shields (not reflected in a damage mod), else the
+			// shield's live damage reduction (what's left to remove).
+			if ($shield instanceof ThoughtShield || $shield instanceof ThirdspaceShield){
+				$cap = $shield->getEffectiveBaseRating($turn);
+			} else {
+				$cap = max(0, $shield->getDefensiveDamageMod($target, $shooter, $pos, $turn, $this));
+			}
+			$amount = min(Dice::d(10, 1), (int)$cap);
+			$this->bankReduction($shield, $target, $amount);
+		}
+
+		//The single shield that protects this hit: the capacity-pool absorber if any (Thought/Thirdspace),
+		//otherwise the in-arc EM Shield with the greatest current damage reduction. Null if none applies.
+		private function getPhasingShield($target, $shooter, $pos, $turn){
+			//Younger races: the torpedo IGNORES non-EM shield absorption entirely (rules) - so it never
+			//phases a capacity-pool projection shield on a younger-race ship; only EM Shields (house rule)
+			//are still affected. (In practice projection shields only appear on Primordial/Ancient hulls.)
+			$youngerRace = ($target->factionAge <= 2);
+
+			//1) capacity-pool absorber (getSystemProtectingFromDamage picks exactly one)
+			if (!$youngerRace){
+				$protector = $target->getSystemProtectingFromDamage($shooter, $pos, $turn, $this, null, 0, false);
+				if ($protector instanceof ThoughtShield || $protector instanceof ThirdspaceShield){
+					return $protector;
+				}
+			}
+
+			//2) EM Shields: lock onto ONE in-arc EM Shield for the whole volley and only ever phase that
+			//one (never spill to another overlapping EM Shield, even after it reaches 0). Deterministic
+			//first-in-arc pick (by construction order) so every torpedo in the volley agrees. Overlapping
+			//EM Shields reduce by the same amount and getDamageMod takes the max, so which of the equal
+			//ones we pick doesn't change the damage - only where the permanent crit lands.
+			$bearing = ($pos !== null) ? $target->getBearingOnPos($pos) : $target->getBearingOnUnit($shooter);
+			foreach ($target->systems as $sys){
+				if (!($sys instanceof EMShield)) continue;
+				if ($sys->isDestroyed($turn-1) || $sys->isOfflineOnTurn($turn)) continue;
+				if (is_int($sys->startArc) && is_int($sys->endArc)){
+					if (!mathlib::isInArc($bearing, $sys->startArc, $sys->endArc)) continue;
+				}
+				return $sys; //first in-arc EM Shield - stable across the volley
+			}
+			return null;
+		}
+
+		//Banks ONE permanent DamageReductionReduced critical carrying $amount in its param (not $amount
+		//separate crits). No crit is added if $amount <= 0 (the shield is already phased to zero).
+		private function bankReduction($shield, $target, $amount){
+			$amount = (int)$amount;
+			if ($amount <= 0) return; //already reduced to 0 - do not apply any further crits
+			$crit = new DamageReductionReduced(-1, $target->id, $shield->id, 'DamageReductionReduced', TacGamedata::$currentTurn, 0, false, $amount);
+			$crit->updated = true;
+			$shield->criticals[] = $crit;
+		}
+
+//        public function getDamage($fireOrder){        return Dice::d(10,2);   }
+        public function getDamage($fireOrder){        return 20;   } //flat 20 per torpedo for this test run
+        public function setMinDamage(){     $this->minDamage = 20;   } //match flat getDamage (was 2, for Dice::d(10,2))
+        public function setMaxDamage(){     $this->maxDamage = 20;     }
     
 		public function stripForJson()
 		{
 			$strippedSystem = parent::stripForJson();
 			$strippedSystem->maxVariableShots = $this->turnsloaded;
+			if ($this->linkedOrbital !== null){ //paired with a Heavy Orbital - dynamic state the client needs on every load
+				$strippedSystem->stowed = (bool)$this->stowed;
+				$strippedSystem->powerLocked = !$this->stowed; //deployed launcher cannot be powered down (client Off-button gate)
+				$strippedSystem->isTargetable = $this->isTargetable;
+				$strippedSystem->repairPriority = $this->repairPriority;
+				$strippedSystem->privateRepairOnly = $this->privateRepairOnly; //deployed Heavy Orbital weapon: excluded from the ship-wide SelfRepair list (only the orbital's on-board SR)
+				$strippedSystem->startArc = $this->startArc; //live arcs - reduced set while docked (applyStowedArcs)
+				$strippedSystem->endArc = $this->endArc;
+				$strippedSystem->stowedArcStart = $this->stowedArcStart; //non-null = operational while stowed (client fire/arc gates)
+				$strippedSystem->stowedArcEnd = $this->stowedArcEnd;
+				if ($this->structureHomeLocation !== null) $strippedSystem->structureHomeLocation = $this->structureHomeLocation;
+			}
 			return $strippedSystem;
-		}     
-    
-    
-    } //endof class BallisticTorpedo
-    
-*/    
+		}
+
+
+    } //endof class PhasedGraviticTorpedo
+
 
 
     class PlasmaWaveTorpedo extends Torpedo{
@@ -533,7 +694,8 @@ class PsionicTorpedo extends Torpedo{ //Powerful Thirdspace weapon that detonate
             $armour = $armour-4;
             return $armour;
 		}elseif ($system->hardAdvancedArmor){
-			return (($armor/2)+2);
+            $armour = parent::getSystemArmourBase($target, $system, $gamedata, $fireOrder, $pos);            
+			return (($armour/2)+2);
 		}else{					
 			return 0;
         }
@@ -851,7 +1013,7 @@ class LimpetBoreTorpedo extends Torpedo{
 				}		
 				
 			}
-			
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);			
 	}//endof onDamagedSystem() 	
 		
 		
@@ -1013,6 +1175,10 @@ class LimpetBoreTorpedoBase extends LimpetBoreTorpedo{
     
     }//endof class FlexPacketTorpedo
     
+	
+
+	
+	
     
     
 ?>

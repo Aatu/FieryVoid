@@ -88,14 +88,74 @@ var AncientParticleCutter = function AncientParticleCutter(json, ship) {
 AncientParticleCutter.prototype = Object.create(Particle.prototype);
 AncientParticleCutter.prototype.constructor = AncientParticleCutter;
 
-var WarriorRam = function WarriorRam(json, ship) {
-    RammingAttack.call(this, json, ship);
+var NeutronBlaster = function NeutronBlaster(json, ship) {
+    Weapon.call(this, json, ship);
 };
-WarriorRam.prototype = Object.create(Weapon.prototype);
-WarriorRam.prototype.constructor = WarriorRam;
+NeutronBlaster.prototype = Object.create(Weapon.prototype);
+NeutronBlaster.prototype.constructor = NeutronBlaster;
 
-var DirectRam = function DirectRam(json, ship) {
-    RammingAttack.call(this, json, ship);
+NeutronBlaster.prototype.initializationUpdate = function () {
+    if (this.firingMode == 2) {
+        this.data["Shots Remaining"] = this.guns - this.fireOrders.length;
+    } else {
+        delete this.data["Shots Remaining"];
+    }
+    return this;
 };
-DirectRam.prototype = Object.create(Weapon.prototype);
-DirectRam.prototype.constructor = DirectRam;
+
+NeutronBlaster.prototype.doMultipleFireOrders = function (shooter, target, system) {
+
+    var shotsOnTarget = 1; //we're only ever allocating one shot at a time for this weapon.
+    /*
+    if (this.fireOrders.length > 0) {
+        if (this.fireOrders.length >= this.guns) {
+            // All guns already fired → retarget one gun by removing oldest fireorder.
+            this.fireOrders.splice(0, 1);
+        }
+    } 
+    */
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return;
+
+    var fireOrdersArray = []; // Store multiple fire orders
+
+    for (var s = 0; s < shotsOnTarget; s++) {
+        var fireid = shooter.id + "_" + this.id + "_" + (this.fireOrders.length + 1);
+        var calledid = -1; //Raking, cannot called shot.       
+
+        var chance = window.weaponManager.calculateHitChange(shooter, target, this, calledid).hitChance;
+        if (chance < 1) continue;
+
+        var fire = {
+            id: fireid,
+            type: 'normal',
+            shooterid: shooter.id,
+            targetid: target.id,
+            weaponid: this.id,
+            calledid: calledid,
+            turn: gamedata.turn,
+            firingMode: this.firingMode,
+            shots: 1,
+            x: "null",
+            y: "null",
+            damageclass: 'Sweeping',
+            chance: chance,
+            hitmod: 0,
+            notes: "Split"
+        };
+
+        fireOrdersArray.push(fire); // Store each fire order
+    }
+
+    return fireOrdersArray; // Return all fire orders
+};
+
+NeutronBlaster.prototype.checkFinished = function () {
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true;
+    return false;
+};
+
+var PlasmaDriver = function PlasmaDriver(json, ship) {
+    Weapon.call(this, json, ship);
+};
+PlasmaDriver.prototype = Object.create(Weapon.prototype);
+PlasmaDriver.prototype.constructor = PlasmaDriver;

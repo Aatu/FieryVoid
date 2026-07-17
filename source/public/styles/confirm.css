@@ -475,7 +475,8 @@
 .confirm.multi-value-confirm.hangar-confirm .multi-value-label,
 .confirm.multi-value-confirm.hangar-confirm .multi-value-max {
     color: #C9F0FF;
-    margin-right: 10px;       
+    margin-right: 10px;
+    font-weight: normal;           
 }
 
 .confirm.multi-value-confirm.hangar-confirm .multi-value-name {
@@ -508,6 +509,72 @@
    flat (one carrier-hangar or one flight per row) and don't need it. */
 .confirm.multi-value-confirm.hangar-confirm.hangarLaunch .hangar-craft-name {
     margin-left: 18px;
+}
+
+/* Launch dialog "Split" option (default shuttles only) — an inline checkbox +
+   label sitting just left of the count input, plus a sub-panel of per-flight
+   inputs revealed when it's checked. Themed to match the cobalt-blue hangar
+   dialog accents (mirrors the Fighter Bomb split controls). */
+/* The shuttle row centres its children with the row's `align-items:center`;
+   don't add per-element `top`/`vertical-align` nudges (they knock a child off
+   the shared centre-line). The one override needed is zeroing the global
+   `input[type=checkbox]{top:2px}` so the tick sits on the same line as the
+   label + input; `line-height:1` on the text keeps its box tight to the glyph
+   so it centres cleanly too. */
+.confirm.multi-value-confirm.hangarLaunch .launchSplitChk {
+    position: relative;
+    top: 0;
+    margin: 0 4px 0 0;
+    accent-color: #58c7e6;
+    cursor: pointer;
+}
+.confirm.multi-value-confirm.hangarLaunch .launchSplitLabel {
+    margin-right: 10px;
+    font-style: normal;
+    color: #9fb8c8;
+    cursor: pointer;
+    user-select: none;
+    font-weight: normal;
+    line-height: 1;
+}
+.confirm.multi-value-confirm.hangarLaunch .launchSplitLocked {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+/* Sub-panel: indent its flight rows under the shuttle row they belong to. */
+.confirm.multi-value-confirm.hangarLaunch .launchSplitPanel .launchSplitFlightLabel {
+    margin-left: 34px;
+}
+.confirm.multi-value-confirm.hangarLaunch .launchSplitInput {
+    accent-color: #58c7e6;
+}
+/* Push the "+ Add another flight" link to the right edge (the row's default
+   space-between would otherwise strand its single child on the left). */
+.confirm.multi-value-confirm.hangarLaunch .launchSplitAddRow {
+    justify-content: flex-end;
+}
+.confirm.multi-value-confirm.hangarLaunch .launchSplitAddFlight {
+    cursor: pointer;
+    color: #58c7e6;
+    text-decoration: underline;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+    font-weight: normal;
+    font-size: 14px;
+}
+.confirm.multi-value-confirm.hangarLaunch .launchSplitAddFlight:hover {
+    color: #9fe6ff;
+    text-shadow: 0 0 6px rgba(88, 199, 230, 0.7);
+}
+.confirm.multi-value-confirm.hangarLaunch .launchSplitRemove {
+    cursor: pointer;
+    margin-left: 8px;
+    color: #58c7e6;
+    line-height: 1;
+    transition: color 0.2s ease, text-shadow 0.2s ease;
+}
+.confirm.multi-value-confirm.hangarLaunch .launchSplitRemove:hover {
+    color: #9fe6ff;
+    text-shadow: 0 0 6px rgba(88, 199, 230, 0.7);
 }
 
 /* Hangar capacity readout in the Deployment Dock dialog. Each per-hangar

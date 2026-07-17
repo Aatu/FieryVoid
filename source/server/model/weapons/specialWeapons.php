@@ -6333,7 +6333,7 @@ class PsionicConcentrator extends Weapon{
             );
 
     public $fireControl = array(6, 2, 2); // fighters, <mediums, <capitals 
-    public $fireControlArray = array( 1=>array(6, 2, 2), 2=>array(1, 4, 5), 3=>array(null, 3, 7), 4=>array(6, 2, 2), 5=>array(1, 4, 5));
+    public $fireControlArray = array( 1=>array(4, 3, 3), 2=>array(2, 4, 4), 3=>array(null, 4, 6), 4=>array(4, 3, 3), 5=>array(2, 4, 4));
 
     public $rangePenalty = 0.5;
     public $rangePenaltyArray = array( 1=>0.5, 2=>1, 3=>2, 4=>0.5, 5=>1,);
@@ -7638,7 +7638,7 @@ class PulsarMine extends Weapon{
 	public function setSystemDataWindow($turn){
 		parent::setSystemDataWindow($turn);
 		$this->data["Special"] = 'Automatically attacks up to 18 enemy fighters who were within 2 hexes of this ship during their Movement Phase (and were in arc)';
-		$this->data["Special"] .= '<br>Attacks are generated during the Firing Phase as normal.';	
+		$this->data["Special"] .= '<br>Attacks are generated after movement but before the Firing Phase.';	
 		$this->data["Special"] .= '<br>Cannot be manually targeted.';													
 	}	
 

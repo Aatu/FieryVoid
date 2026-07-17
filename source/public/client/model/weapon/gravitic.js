@@ -887,7 +887,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
         }
     } 
     */
-    if (this.firingMode == 2 && this.fireOrders.length > 1) return;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -923,7 +923,7 @@ MedAntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, s
 };
 
 MedAntigravityBeam.prototype.checkFinished = function () {
-    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true;
     return false;
 };
 
@@ -953,7 +953,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
         }
     } 
     */
-    if (this.firingMode == 2 && this.fireOrders.length > 2) return;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return;
 
     var fireOrdersArray = []; // Store multiple fire orders
 
@@ -989,7 +989,7 @@ AntigravityBeam.prototype.doMultipleFireOrders = function (shooter, target, syst
 };
 
 AntigravityBeam.prototype.checkFinished = function () {
-    if (this.firingMode == 2 && this.fireOrders.length > 1) return true;
+    if (this.firingMode == 2 && this.fireOrders.length >= this.guns) return true;
     return false;
 };
 

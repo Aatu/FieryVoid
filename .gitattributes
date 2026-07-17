@@ -1,1 +1,5 @@
 *.sh text eol=lf
+# phpab-generated class map (and its frozen pre-generator copy) stay LF so
+# fvbuild.ps1 -Check can byte-compare a fresh generation against the checkout
+source/autoload.php text eol=lf
+source/autoload_old.php text eol=lf

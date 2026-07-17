@@ -245,7 +245,8 @@ class SystemPowerSettings extends Component {
 
     canOffline() {
         const { ship, system } = this.props;
-        return gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !shipManager.power.isOffline(ship, system) && !weaponManager.hasFiringOrder(ship, system);
+        //powerLocked: system may not be voluntarily powered down right now (Antigravity Beam while its Kirishiac Orbital is deployed)
+        return gamedata.gamephase === 1 && (system.canOffLine || system.powerReq > 0) && !system.powerLocked && !shipManager.power.isOffline(ship, system) && !weaponManager.hasFiringOrder(ship, system);
     }
 
     canOnline() {

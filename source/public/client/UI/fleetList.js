@@ -275,9 +275,15 @@ window.fleetListManager = {
 
         var teamName = "TEAM " + slot.team;
 
+        // Colour ONLY the "TEAM X" label to match the combat-log scheme:
+        // observers (and 3+-team participants) get the absolute per-team palette;
+        // 2-team participants get relative mine=green / ally=blue / enemy=red.
+        // Player name + points keep their default colour for now.
+        var headerColorStyle = "color:" + gamedata.getFleetHeaderColorRGB(slot) + ";";
+
         // Set the fleet list header
         fleetlistentry.find(".fleetheader").html(
-            "<span class='headername'>" + teamName + " - </span><span class='playername'>" + slot.playername + "</span>"
+            "<span class='headername' style='" + headerColorStyle + "'>" + teamName + " - </span><span class='playername'>" + slot.playername + "</span>"
         );
 
         var mineGroups = {};
@@ -511,9 +517,10 @@ window.fleetListManager = {
         var deploys = "";
         if (slot.depavailable > gamedata.turn) deploys = "<span style='color: #00b8e6'>[Deploys on Turn " + slot.depavailable + "]&nbsp;</span>";
 
-        // Update fleet header with value totals
+        // Update fleet header with value totals (re-apply the team colour — this
+        // rebuild replaces the header HTML set above).
         fleetlistentry.find(".fleetheader").html(
-            deploys + "<span class='headername'>" + teamName + " - </span>" +
+            deploys + "<span class='headername' style='" + headerColorStyle + "'>" + teamName + " - </span>" +
             "<span class='playername'>" + slot.playername +
             ": " + totalCurrValue + " / " + totalBaseValue + " CP" +
             "<span class='turnTaken'>" + turnTaken + "</span>"

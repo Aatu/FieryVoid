@@ -1776,8 +1776,8 @@ class TrekIon extends Weapon{
 	
 	
     protected function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder){ //make vulnerable to next critical
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);	
 		if ($system->advancedArmor) return;
-//		if ($system->hardAdvancedArmor) return;  // Hardened Advanced Armor - GTS
 		
       $dmg = $damage - $armour;
       if($dmg<=0) return; //no damage was actually done
@@ -1789,6 +1789,7 @@ class TrekIon extends Weapon{
 	      $dmg--;
 	      $system->critRollMod++;
       }
+  
     }	
 	
 	
@@ -3691,6 +3692,122 @@ public $name = "TrekShieldProjection";
         return $strippedSystem;
 	}
 }//endof class TrekShieldProjectionKelly
+
+
+//New version of Phaser so it can be adjusteted in KellyTrek without affecting existing Trek units
+class TrekPhaserKelly extends TrekPhaser{
+		public $name = "TrekPhaser";
+        public $displayName = "Type 6 Phaser";
+        public $iconPath = "TrekPhaserM.png"; 
+        //public $animationExplosionScale = 0.3;
+
+        public $raking = 10;
+        
+        public $intercept = 2;
+	    public $priority = 7; //heavy Raking - they are light Raking technically, but among Federation weapons they're heavier ones
+		public $priorityAF = 6; //count as moderately strong vs fighters
+		
+        public $loadingtime = 1;
+		public $normalload = 2;
+		
+        public $rangePenalty = 0.3; //1.5 per hex.
+        public $fireControl = array(3, 3, 3);
+
+        public $damageType = "Raking";
+		public $weaponClass = "Particle";
+		public $firingModes = array( 1 => "Raking");
+		public $uninterceptable = true;
+
+	 	public function getInterceptRating($turn){
+			return 2;
+		}
+
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);   
+		if (!isset($this->data["Special"])) {
+			$this->data["Special"] = '';
+		}else{
+			$this->data["Special"] .= '<br>';
+		}
+			$this->data["Special"] .= "Can fire accelerated ROF for less damage:";  
+			$this->data["Special"] .= "<br> - 1 turn: 1d10+4"; 
+			$this->data["Special"] .= "<br> - 2 turns: 2d10+14"; 
+		}
+	
+		public function getDamage($fireOrder){
+        	switch($this->turnsloaded){
+            	case 0:
+            	case 1:
+                	return Dice::d(10)+4;
+			    	break;
+            	default:
+                	return Dice::d(10,2)+14;
+			    	break;
+        	}
+		}
+
+ 		public function setMinDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->minDamage = 5 ;
+                    break;
+                default:
+                    $this->minDamage = 16 ;  
+                    break;
+            }
+		}
+             
+        public function setMaxDamage(){
+            switch($this->turnsloaded){
+                case 1:
+                    $this->maxDamage = 14 ;
+                    break;
+                default:
+                    $this->maxDamage = 34 ;  
+                    break;
+            }
+		}
+
+}//end of class TrekPhaserKelly
+
+//New version of Photon Torp so it can be adjusteted in KellyTrek without affecting existing Trek units
+class TrekPhotonTorpKelly extends TrekPhotonTorp{
+        public $name = "TrekPhotonTorp";
+        public $displayName = "Photon Torpedo";
+		public $iconPath = "TrekPhotonicTorpedo.png";
+        public $range = 40;
+		public $distanceRange = 60;
+        
+        public $loadingtime = 2; // 1 turn
+        public $rangePenalty = 0;
+        public $fireControl = array(1, 1, 2); // fighters, <mediums, <capitals; INCLUDES BOTH LAUNCHER AND MISSILE DATA!
+	    
+		public $priority = 5; //Standard Medium weapon; maybe even heavy...
+	    
+		public $firingMode = 'Ballistic'; //firing mode - just a name essentially
+		public $damageType = "Standard"; //MANDATORY (first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!
+    	public $weaponClass = "Ballistic"; //should be Ballistic and Matter, but FV does not allow that. Instead decrease advanced armor encountered by 2 points (if any) (usually system does that, but it will account for Ballistic and not Matter)
+	 
+        
+        public function setSystemDataWindow($turn){
+            parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= 'Benefits from offensive EW.';			
+        }
+        
+    public function getDamage($fireOrder){ 		
+		//return Dice::d(6, 3)+6; 
+		return 20;  
+	}
+
+        public function setMinDamage(){     $this->minDamage = 20;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+		
+}//endof TrekPhotonTorpKelly
 
 
 

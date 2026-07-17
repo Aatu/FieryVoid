@@ -56,7 +56,7 @@ class Mothership extends BaseShip{
         $this->addLeftSystem(new GraviticThruster(8, 13, 0, 5, 4));
 		$this->addLeftSystem(new TractorBeam(6, 4, 0, 0));
         $this->addLeftSystem(new CargoBay(7, 15));
-        $this->addLeftSystem(new Hangar(7, 9, 0));
+        $this->addLeftSystem(new Hangar(7, 8, 0));
         $this->addLeftSystem(new EMWaveDisruptor(6, 8, 5, 180, 60));
         $this->addLeftSystem(new HeavyBurstBeam(7, 9, 8, 240, 360)); 
 	            

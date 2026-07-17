@@ -2562,7 +2562,14 @@ class DBManager
 		
 		//get individual notes for systems - optimization: single query
         $allNotes = $this->getIndividualNotesForGame($gamedata, $fetchTurn);
-        
+
+		//Clear the Gravitic Augmenter's per-LOAD dedup guards before the onIndividualNotesLoaded sweep.
+		//They dedup multiple Augmenters buffing/shifting the same target within THIS load, but must not
+		//survive into a later load in the same request (one request loads gamedata more than once, e.g.
+		//advanceGameState then FireGamePhase::advance) - otherwise the second load skips the buff and a
+		//shot at the Warrior resolves without its jink. Guarded so it's a no-op if the class isn't loaded.
+		if (class_exists('GraviticAugmenter')) GraviticAugmenter::resetPerLoadState();
+
 		foreach ($gamedata->ships as $ship){
             $shipNotes = isset($allNotes[$ship->id]) ? $allNotes[$ship->id] : array();
             
@@ -3009,6 +3016,15 @@ class DBManager
 
     }
 
+    /* ============== LEGACY AUTH (pre 2026-07-10) — kept for emergency rollback ==============
+       Replaced by the password_hash() implementations below. Old storage format was MySQL
+       PASSWORD() ('*' + 40 hex chars); new format is bcrypt ($2y$...).
+       ⚠️ ROLLBACK WARNING: the new code transparently rewrites a player's hash to bcrypt on
+       their first successful login. This legacy code CANNOT verify bcrypt hashes — so simply
+       uncommenting it after the new code has been live will LOCK OUT every account that logged
+       in since the deploy. A real rollback needs this code AND the pre-deploy player-table
+       backup restored together.
+
     public function registerPlayer($username, $password)
     {
         $username = htmlspecialchars($username);
@@ -3024,7 +3040,7 @@ class DBManager
         }
 
         if ($stmt = $this->connection->prepare("
-            INSERT INTO 
+            INSERT INTO
                 player
             VALUES
             (
@@ -3060,9 +3076,9 @@ class DBManager
         }
 
         if ($stmt = $this->connection->prepare("
-            UPDATE 
+            UPDATE
                 player
-            SET 
+            SET
             	password = password(?)
             WHERE
             	username = ?
@@ -3116,6 +3132,146 @@ class DBManager
         }
 
         return array('id' => $id, 'access' => $access);
+    }
+    ============================== END LEGACY AUTH ============================== */
+
+
+    public function registerPlayer($username, $password)
+    {
+        $username = htmlspecialchars($username);
+        $username = $this->DBEscape($username);
+
+        $exists = false;
+        if ($stmt = $this->connection->prepare(
+            "SELECT id FROM player WHERE username = ?")) {
+            $stmt->bind_param('s', $username);
+            $stmt->execute();
+            $stmt->bind_result($id);
+            if ($stmt->fetch())
+                $exists = true;
+            $stmt->close();
+        }
+        if ($exists) {
+            return false;
+        }
+
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        if ($stmt = $this->connection->prepare("
+            INSERT INTO
+                player
+            VALUES
+            (
+                null,
+                ?,
+                ?,
+                1
+            );
+            ")) {
+            $stmt->bind_param('ss', $username, $hash);
+            $stmt->execute();
+            $stmt->close();
+        }
+
+        return true;
+    }
+
+
+    public function changePassword($username, $passwordold, $passwordnew) //change password for a given account
+    {
+        $row = $this->getPlayerAuthRow($username);
+        if (!$row || !$this->verifyPlayerPassword($passwordold, $row['hash'])) {
+            return false;
+        }
+
+        $this->storePlayerPassword($row['id'], $passwordnew);
+
+        return true;
+    }
+
+
+    public function authenticatePlayer($username, $password)
+    {
+        try {
+            $row = $this->getPlayerAuthRow($username);
+
+            if (!$row)
+                return 'USER_NOT_FOUND';
+
+            if (!$this->verifyPlayerPassword($password, $row['hash']))
+                return 'WRONG_PASSWORD';
+
+            //Transparent upgrade: rewrite legacy MySQL PASSWORD() hashes (and any
+            //outdated password_hash format) using the raw password on successful login.
+            if (password_needs_rehash($row['hash'], PASSWORD_DEFAULT))
+                $this->storePlayerPassword($row['id'], $password);
+
+        } catch (Exception $e) {
+            throw $e;
+        }
+
+        return array('id' => $row['id'], 'access' => $row['access']);
+    }
+
+
+    private function getPlayerAuthRow($username)
+    {
+        $row = null;
+        if ($stmt = $this->connection->prepare(
+            "SELECT id, accesslevel, password FROM player WHERE username = ?")) {
+
+            $stmt->bind_param('s', $username);
+            $stmt->execute();
+            $stmt->bind_result($id, $access, $hash);
+            if ($stmt->fetch())
+                $row = array('id' => $id, 'access' => $access, 'hash' => $hash);
+            $stmt->close();
+        }
+        return $row;
+    }
+
+
+    //Emulates MySQL/MariaDB PASSWORD() — the pre-2026 storage format ('*' + 40 hex chars).
+    private function legacyMysqlPassword($password)
+    {
+        return '*' . strtoupper(sha1(sha1($password, true)));
+    }
+
+
+    //Check a password against the stored hash: password_hash format first, then the
+    //legacy MySQL PASSWORD() format. Legacy hashes were created from inconsistently
+    //transformed input (registration hashed DBEscape(htmlspecialchars($pass)), password
+    //change hashed htmlspecialchars($pass), login checked the raw string), so all three
+    //variants are accepted — this also rescues accounts whose special-character
+    //passwords could never match at login.
+    private function verifyPlayerPassword($password, $storedHash)
+    {
+        if (password_verify($password, $storedHash))
+            return true;
+
+        $legacyCandidates = array(
+            $password,
+            htmlspecialchars($password),
+            $this->DBEscape(htmlspecialchars($password)),
+        );
+        foreach ($legacyCandidates as $candidate) {
+            if (hash_equals($storedHash, $this->legacyMysqlPassword($candidate)))
+                return true;
+        }
+
+        return false;
+    }
+
+
+    private function storePlayerPassword($playerid, $password)
+    {
+        $hash = password_hash($password, PASSWORD_DEFAULT);
+        if ($stmt = $this->connection->prepare(
+            "UPDATE player SET password = ? WHERE id = ?")) {
+
+            $stmt->bind_param('si', $hash, $playerid);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
 
     public function releaseGameSubmitLock($gameid)

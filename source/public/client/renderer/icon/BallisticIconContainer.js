@@ -512,7 +512,9 @@ window.BallisticIconContainer = function () {
 		// Override for special launcher hex logic
 		if (weapon?.hasSpecialLaunchHexCalculation) {
 			if (ballistic.damageclass === 'Targeter') {
-				type = 'yellow';
+				// Keep the team-based colour (yellow for own team, orange for enemy)
+				// already set above rather than forcing yellow for everyone.
+				type = gamedata.isMyOrTeamOneShip(shooter) ? 'yellow' : 'orange';
 			} else {
 				const launcherHex = weaponManager.getFiringHex(shooter, weapon);
 				launchPosition = this.coordinateConverter.fromHexToGame(launcherHex);

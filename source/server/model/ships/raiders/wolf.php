@@ -27,7 +27,7 @@ class Wolf extends MediumShip{
         $this->rollcost = 999;
         $this->pivotcost = 999;
     	$this->iniativebonus = 0;
-    	$this->fighters = array("light"=>6);
+    	$this->fighters = array("light"=>6, "cargo shuttles"=>2);
     	 
         $this->addPrimarySystem(new Reactor(4, 9, 0, 0));
         $this->addPrimarySystem(new Engine(4, 12, 0, 8, 3));

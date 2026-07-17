@@ -11,6 +11,7 @@ class DtarnGunboat extends LCV{
 	$this->imagePath = "img/ships/trakk.png";
 	$this->canvasSize = 110;
 	$this->agile = true;
+	$this->variantOf = 'OBSOLETE';		
 
 	$this->forwardDefense = 9;
 	$this->sideDefense = 11;

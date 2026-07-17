@@ -172,7 +172,12 @@
     display: flex;
 }
 
-@media only screen and (max-width: 765px) {
+/* Narrow phones (portrait) OR short landscape phones. A phone held sideways
+   reports a viewport WIDTH above 765px, so it would otherwise show the replay
+   UI at full desktop size; key off the short viewport HEIGHT too so it matches
+   portrait sizing in landscape. */
+@media only screen and (max-width: 765px),
+       only screen and (max-height: 500px) and (orientation: landscape) {
     #replayUI {
         font-size: 12px;
         min-height: 21px;

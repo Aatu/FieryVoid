@@ -12,7 +12,7 @@ class Benevolent1791AM extends BaseShip{
         $this->variantOf = "Benevolent Heavy Scout";
 	    $this->isd = 1791;
         $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>6, "medium"=>6);
+        $this->fighters = array("light"=>6, "Hunter-Killers"=>6);
         $this->canvasSize = 200;
 		
         $this->forwardDefense = 16;

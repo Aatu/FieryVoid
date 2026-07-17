@@ -42,8 +42,8 @@ class Nesacc extends BaseShip{
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 8, 0, 3, 2));
         $this->addAftSystem(new JumpEngine(4, 16, 4, 24));
-        $this->addAftSystem(new Hangar(4, 6));
-        $this->addAftSystem(new Hangar(4, 6));
+        $this->addAftSystem(new Hangar(4, 6, 6));
+        $this->addAftSystem(new Hangar(4, 6, 6));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 300));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 240));
         

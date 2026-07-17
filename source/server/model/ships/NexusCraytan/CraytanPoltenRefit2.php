@@ -9,6 +9,7 @@ class CraytanPoltenRefit2 extends FighterFlight{
         $this->phpclass = "CraytanPoltenRefit2";
         $this->shipClass = "Polten Assault Shuttles (2123)";
 	    $this->imagePath = "img/ships/Nexus/craytan_polten.png";
+		$this->variantOf = 'NONE';	//In development? 	        
 
 	    $this->isd = 2123;
 		$this->unofficial = true;

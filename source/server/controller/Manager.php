@@ -1441,6 +1441,12 @@ class Manager{
                                     $fo["y"] ?? 0,
                                     $fo["damageclass"] ?? null
                                 );
+                                //Carry client-supplied notes through the FIGHTER branch too (the
+                                //main-ship branch already does this). MinorThoughtPulsar encodes its
+                                //free thrust allocation as "MTP|hit|shots|dmg" here; read in
+                                //beforeFiringOrderResolution. Safe: server-side notes are written later
+                                //during firing resolution; nothing reads incoming notes except opt-in weapons.
+                                $fireOrder->notes = $fo["notes"] ?? "";
                                 $fires[] = $fireOrder;
                             }
     

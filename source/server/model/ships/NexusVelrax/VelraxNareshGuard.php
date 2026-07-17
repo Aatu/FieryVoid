@@ -13,6 +13,7 @@ class VelraxNareshGuard extends BaseShip{
 		$this->canvasSize = 150; //img has 200px per side
 		$this->limited = 33;
 		$this->unofficial = true;
+		$this->variantOf = 'NONE';	//In development? 			
 
         $this->fighters = array("light"=>36, "heavy"=>12);
 

@@ -1,13 +1,13 @@
 <?php
-class Ore extends BaseShip{
+class OreBarge extends BaseShip{
     //I'm implimenting this one without a hit chart because we will need a subfunction to pass hits to primary for the cargo bay
     function __construct($id, $userid, $name,  $slot){
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 250;
-        $this->faction = "Civilian";
-        $this->phpclass = "Ore Barge";
-        $this->imagePath = "img/ships/battlewagon.png"; //need to change
+        $this->faction = "Civilians";
+        $this->phpclass = "OreBarge";
+        $this->imagePath = "img/ships/OreBarge.png"; //need to change
         $this->shipClass = "Ore Barge";
         $this->shipSizeClass = 3;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup

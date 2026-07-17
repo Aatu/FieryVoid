@@ -11,8 +11,11 @@ tail -n 0 -f /usr/local/var/log/php-errors.log &
 # Initial files
 rsync -a --delete --exclude-from /usr/src/current/.dockerignore /usr/src/current/ /usr/src/fieryvoid
 
-# Composer
-bash -c "php composer.phar selfupdate; php composer.phar install --no-progress --no-suggest; vendor/bin/phpab -e autoload.php -o source/autoload.php source" &
+# Composer (vendor holds phpab only). Deliberately NOT regenerating
+# source/autoload.php here: the committed map is authoritative, so local
+# testing exercises exactly what will be deployed. Regenerate explicitly
+# with ./autoload.sh (or scripts\fvbuild.ps1) - see AUTOLOAD_GENERATOR_PLAN.md.
+bash -c "php composer.phar selfupdate; php composer.phar install --no-progress --no-suggest" &
 
 php-fpm &
 

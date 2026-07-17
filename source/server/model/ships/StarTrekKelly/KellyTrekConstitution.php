@@ -6,31 +6,31 @@ class KellyTrekConstitution extends HeavyCombatVessel{
         
 	$this->pointCost = 500;
 	$this->faction = "Star Trek (Kelly)";
-        $this->phpclass = "KellyTrekConstitution";
-        $this->imagePath = "img/ships/StarTrek/Constitution.png";
-        $this->shipClass = "Constitution Light Cruiser";
+    $this->phpclass = "KellyTrekConstitution";
+    $this->imagePath = "img/ships/StarTrek/Constitution.png";
+    $this->shipClass = "Constitution Light Cruiser";
 
 	$this->unofficial = true;
-	    $this->isd = 'please fill!';
+    $this->isd = 'please fill!';
 
 
 	$this->fighters = array("Shuttlecraft"=>6);
-		$this->customFighter = array("Human small craft"=>6); //can deploy small craft with Human crew
+	$this->customFighter = array("Human small craft"=>6); //can deploy small craft with Human crew
         
-        $this->forwardDefense = 13;
-        $this->sideDefense = 15;
+    $this->forwardDefense = 13;
+    $this->sideDefense = 15;
  
-        $this->gravitic = true;       
-        $this->turncost = 0.66;
-        $this->turndelaycost = 0.5;
-        $this->accelcost = 2;
-        $this->rollcost = 2;
-        $this->pivotcost = 2;
+    $this->gravitic = true;       
+    $this->turncost = 0.66;
+    $this->turndelaycost = 0.5;
+    $this->accelcost = 2;
+    $this->rollcost = 2;
+    $this->pivotcost = 2;
 	$this->iniativebonus = 7 *5; //deliberate +1 as Constitution is smaller than a typical HCV
 		
 	$this->addPrimarySystem(new CnC(4, 10, 0, 0));
-        $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
-        $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
+    $this->addPrimarySystem(new Reactor(4, 20, 0, 0));
+    $this->addPrimarySystem(new Scanner(4, 12, 6, 6));
 	$this->addPrimarySystem(new Hangar(3, 6, 6));
 
 	$impulseDrive = new TrekImpulseDrive(4,24,0,0,3); //Impulse Drive is an engine in its own right, in addition to serving as hub for Nacelle output: $armour, $maxhealth, $powerReq, $output, $boostEfficiency
@@ -44,11 +44,11 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addFrontSystem($projector);
 	$this->addFrontSystem($projection);
-	$this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
-        $this->addFrontSystem(new TrekPhotonTorp(3, 0, 0, 270, 90));
-	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 240, 60));
-	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 270, 90));
-	$this->addFrontSystem(new TrekPhaser(3, 0, 0, 300, 120));
+	$this->addFrontSystem(new TrekPhotonTorpKelly(3, 0, 0, 270, 90));
+    $this->addFrontSystem(new TrekPhotonTorpKelly(3, 0, 0, 270, 90));
+	$this->addFrontSystem(new TrekPhaserKelly(3, 0, 0, 240, 60));
+	$this->addFrontSystem(new TrekPhaserKelly(3, 0, 0, 270, 90));
+	$this->addFrontSystem(new TrekPhaserKelly(3, 0, 0, 300, 120));
 	$this->addFrontSystem(new SWTractorBeam(2,0,360,1));
 
 	$warpNacelle = new TrekWarpDrive(4, 24, 0, 4); //armor, structure, power usage, impulse output
@@ -67,7 +67,7 @@ class KellyTrekConstitution extends HeavyCombatVessel{
 		$projection->addProjector($projector);
 		$this->addAftSystem($projector);
 	$this->addAftSystem($projection);
-	$this->addAftSystem(new TrekPhaser(3, 0, 0, 120, 240));
+	$this->addAftSystem(new TrekPhaserKelly(3, 0, 0, 120, 240));
 	//$this->addAftSystem(new SWTractorBeam(2,120,240,1));
 
 		

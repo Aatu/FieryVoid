@@ -25,8 +25,8 @@ class TechnicalTestbed extends MediumShip{
         $this->trueStealth = true;
         $this->canPreOrder = true;
 
-		$this->advancedArmor = true;   
-		$this->hardAdvancedArmor = true;   
+//		$this->advancedArmor = true;   
+//		$this->hardAdvancedArmor = true;   
         
          
         $this->addPrimarySystem(new Reactor(6, 20, 0, 0));
@@ -53,9 +53,9 @@ class TechnicalTestbed extends MediumShip{
         $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
         $this->addFrontSystem(new Thruster(6, 8, 0, 3, 1));
 		
+        $this->addFrontSystem(new AncientPlasmaArc(2, 5, 4, 240, 0));
         $this->addFrontSystem(new MediumPulse(2, 6, 3, 240, 0));
-        $this->addFrontSystem(new MediumPulse(2, 6, 3, 240, 0));
-        $this->addFrontSystem(new MediumPulse(2, 6, 3, 0, 120));
+        $this->addFrontSystem(new AncientPlasmaArc(2, 5, 4, 240, 0));
         $this->addFrontSystem(new MediumPulse(2, 6, 3, 0, 120));
 		
         $this->addFrontSystem(new InterceptorMkI(1, 4, 1, 270, 90));
@@ -75,7 +75,7 @@ class TechnicalTestbed extends MediumShip{
         
 	    
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
-        $this->addFrontSystem(new Structure( 8, 48));
+        $this->addFrontSystem(new Structure( 5, 48));
         $this->addAftSystem(new Structure( 6, 500));
         $this->addPrimarySystem(new Structure( 6, 50));
         
@@ -91,12 +91,14 @@ class TechnicalTestbed extends MediumShip{
                         20 => "C&C",
                 ),
                 1=> array(
-                        3 => "Thruster",
+						20 => "Structure",
+/*                        3 => "Thruster",
                         5 => "Medium Pulse Cannon",
                         7 => "Railgun",
                         9 => "Interceptor MK I",
                         18 => "Structure",
                         20 => "Primary",
+*/
                 ),
                 2=> array(
 						20 => "Structure",

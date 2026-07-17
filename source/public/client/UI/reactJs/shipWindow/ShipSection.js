@@ -7,6 +7,9 @@ const ShipSectionContainer = styled.div`
     flex-wrap: wrap-reverse;
     width: ${props => {
         if (props.$isTerrain) return '125px';
+        //inside a six-sided SideStack the stack owns the 30% column width; the section
+        //fills it (width auto + default flex stretch)
+        if (props.$inStack) return 'auto';
         switch (props.location) {
             case 1:
             case 0:
@@ -15,7 +18,7 @@ const ShipSectionContainer = styled.div`
             default:
                 return '30%'
         }
-    }};	
+    }};
     align-items: end;	
     justify-content: space-around;
     overflow: hidden;
@@ -79,12 +82,12 @@ const StructureContainer = styled.div`
 
 class ShipSection extends React.Component {
     render() {
-        const { ship, systems, location } = this.props;
+        const { ship, systems, location, inStack } = this.props;
 
         const structure = getStructure(systems);
 
         return (
-            <ShipSectionContainer location={location}>
+            <ShipSectionContainer location={location} $inStack={inStack}>
                 {orderSystems(systems, location).map(system => (<SystemIcon scs key={`system-scs-${location}-${ship.id}-${system.id}`} system={system} ship={ship} />))}
 
                 {structure && <StructureContainer $health={getStructureLeft(ship, structure)} $criticals={hasCriticals(structure)}>

@@ -1259,7 +1259,7 @@ body {
     #phaseheader {
         width: auto;
         min-width: 220px;
-        max-width: 55vw;
+        max-width: 72vw;
         height: 22px;
         padding-top: 2px;
         padding-right: 45px;
@@ -1272,13 +1272,27 @@ body {
         overflow: hidden;
         text-overflow: ellipsis;
         display: inline-block;
-        /*max-width: calc(100% - 10px);*/
-        max-width: 50%;
+        /* No hard per-span cap: let the phase name use the available header
+           width; ellipsis stays as a last-resort fallback for tiny screens. */
+        max-width: none;
         vertical-align: bottom;
     }
 
     #phaseheader .value.activeship {
         margin-left: 5px;
+    }
+
+    /* Narrowest phones: nudge the font down so long phase names
+       ("MOVEMENT PHASE") fit without clipping. */
+    @media only screen and (max-width: 420px) {
+        #phaseheader .value {
+            font-size: 11px;
+            margin-left: 4px;
+        }
+
+        #phaseheader .value.activeship {
+            margin-left: 4px;
+        }
     }
 
     #phaseheader .finished,
@@ -1370,6 +1384,163 @@ body {
         left: 0px !important;
     }
 
+
+    .iniOrder {
+        font-size: 12px;
+    }
+
+    .iniName {
+        font-size: 10px !important;
+    }
+
+    .iniClass {
+        font-size: 9px !important;
+    }
+
+    .iniImage img {
+        width: 25px;
+        height: 25px;
+    }
+
+    .iniImage.flight img {
+        width: 15px;
+        height: 15px;
+        padding-left: 5px;
+    }
+
+    #iniTopic {
+        font-size: 13px;
+        margin-left: 55px;
+        opacity: 0.8;
+    }
+}
+
+/* ─── Landscape phones ─────────────────────────────────────────────────────────
+   A phone turned sideways reports a viewport WIDTH above the 765px mobile
+   breakpoint, so the desktop log (always-visible, height:150px) would take over
+   and eat ~40% of the short screen. Key off the short viewport HEIGHT instead so
+   the log stays collapsed to its tabs until the user taps "Click!" (#expandBotPanel,
+   which toggles .large), matching portrait behaviour. */
+@media only screen and (max-height: 500px) and (orientation: landscape) {
+    /* Phase header — mirror the portrait mobile sizing (shorter bar, smaller
+       fonts, hidden finished/notlogged, scaled OK/Cancel/Surrender) so it
+       doesn't render at full desktop size in landscape. */
+    #phaseheader {
+        width: auto;
+        min-width: 220px;
+        max-width: 72vw;
+        height: 22px;
+        padding-top: 2px;
+        padding-right: 45px;
+    }
+
+    #phaseheader .value {
+        font-size: 12px;
+        margin-left: 5px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: inline-block;
+        max-width: none;
+        vertical-align: bottom;
+    }
+
+    #phaseheader .value.activeship {
+        margin-left: 5px;
+    }
+
+    #phaseheader .finished,
+    #phaseheader .notlogged {
+        display: none;
+    }
+
+    #phaseheader .uitable {
+        top: 2px;
+        right: 5px;
+    }
+
+    #phaseheader .ok,
+    #phaseheader .cancel,
+    #phaseheader .surrender {
+        width: 18px;
+        height: 18px;
+        background-size: cover;
+    }
+
+    #logUI {
+        display: flex;
+        flex-direction: row;
+    }
+
+    #logcontainer.large #logUI .logUiEntry {
+        width: 15%;
+        display: block;
+    }
+
+    #logUI .logUiEntry {
+        width: 15%;
+        display: none;
+    }
+
+    #logUI #infoTab {
+        left: 15%;
+    }
+
+    #logUI #chatTab {
+        left: 30%;
+        width: 15%;
+    }
+
+    #logUI #globalChatTab {
+        left: 45%;
+        width: 15%;
+    }
+
+    #logUI #declarationsTab {
+        left: 60%;
+        width: 15%;
+    }
+
+    #logUI #expandBotPanel {
+        right: 0px;
+        left: auto;
+    }
+
+    #logcontainer {
+        height: 0;
+        width: 100%;
+        max-width: none;
+    }
+
+    #logcontainer.large {
+        height: 300px;
+        max-height: 65vh;
+    }
+
+    /* iniGui / initiative list — same shrink as portrait so it doesn't
+       swamp the short landscape viewport. Reserve less vertical space than
+       portrait (174px vs 250px) so the list runs taller — landscape phones
+       are short, so the extra height is worth reclaiming. (250→210 gave ~30%
+       more than portrait; 210→174 adds a further ~20% on a ~390px viewport.) */
+    #iniGui {
+        max-height: calc(100vh - 174px);
+        width: 200px;
+        margin-top: 35px;
+    }
+
+    #iniGui.closed {
+        display: none;
+    }
+
+    #backDiv {
+        left: 200px !important;
+        margin-left: 0px !important;
+        margin-top: 50px;
+    }
+
+    #backDiv.closed {
+        left: 0px !important;
+    }
 
     .iniOrder {
         font-size: 12px;

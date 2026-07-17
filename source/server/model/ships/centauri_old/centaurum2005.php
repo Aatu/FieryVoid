@@ -7,7 +7,7 @@ class Centaurum2005 extends BaseShip{
 		$this->pointCost = 850;
         $this->faction = "Centauri Republic (WotCR)";
         $this->phpclass = "Centaurum2005";
-        $this->imagePath = "img/ships/Centaurum.png";
+        $this->imagePath = "img/ships/CentauriCentaurum.png";
         $this->shipClass = "Centaurum Battleship (2005)";
         $this->variantOf = "Centaurum Battleship";
         $this->shipSizeClass = 3;

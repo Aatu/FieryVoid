@@ -5,7 +5,10 @@
 
 ob_start("ob_gzhandler"); 	
 define('IN_STATIC_GENERATION', true);
-include_once './source/public/global.php';
+// __DIR__-based so the script is CWD-independent: a docker exec without
+// -w /usr/src/current would otherwise silently write into the container-local
+// throwaway tree (see AUTOLOAD_GENERATOR_PLAN.md section 1c).
+include_once __DIR__ . '/source/public/global.php';
 
 /**
  * Strip default/empty values from a ship's JSON representation before writing
@@ -33,7 +36,8 @@ function compactSystemForStaticJson(array $system): array {
     // Boolean false defaults
     $falseKeys = ['destroyed','jsClass','boostable','canOffLine','fighter','preFires',
                   'primary','isPrimaryTargetable','forceCriticalRoll',
-                  'advancedArmor','hardAdvancedArmor','fixedPower'];
+                  'advancedArmor','hardAdvancedArmor','fixedPower',
+                  'stowed','outputDoubled'];
     foreach ($falseKeys as $key) {
         if (isset($system[$key]) && $system[$key] === false) {
             unset($system[$key]);
@@ -48,7 +52,9 @@ function compactSystemForStaticJson(array $system): array {
     }
     // Null / empty-string defaults
     $nullEmptyKeys = ['outputDisplay','specialAbilityValue','imagePath','iconPath',
-                      'individualNotesTransfer','outputType'];
+                      'individualNotesTransfer','outputType',
+                      'stowedArcStart','stowedArcEnd','repairRestrictedTo','linkedOrbital',
+                      'structureHomeLocation'];
     foreach ($nullEmptyKeys as $key) {
         if (array_key_exists($key, $system) && ($system[$key] === null || $system[$key] === '')) {
             unset($system[$key]);
@@ -91,7 +97,7 @@ function encodeCompactFactionData(array $data, int $flags = 0): string {
 ini_set('memory_limit', '-1'); 
 set_time_limit(300);
 
-$fileBase = './source/public/static/ships';
+$fileBase = __DIR__ . '/source/public/static/ships';
 $combinedFile = $fileBase . 'Combined.js';
 file_put_contents($combinedFile, 'window.staticShips = {};' . PHP_EOL);
 
@@ -108,7 +114,7 @@ if (is_dir($cacheDir)) {
 }
 
 // Ensure JSON directory exists
-$jsonDir = './source/public/static/json';
+$jsonDir = __DIR__ . '/source/public/static/json';
 if (!is_dir($jsonDir)) {
     mkdir($jsonDir, 0777, true);
 }

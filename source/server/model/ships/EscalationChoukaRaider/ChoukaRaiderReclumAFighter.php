@@ -10,6 +10,8 @@ class ChoukaRaiderReclumAFighter extends FighterFlight{
         $this->shipClass = "Reclum-A Light flight";
         $this->imagePath = "img/ships/EscalationWars/ChoukaRaiderReclum.png";
 		$this->unofficial = true;
+		$this->variantOf = 'OBSOLETE';	        
+        
 		
         $this->isd = 1890;
         

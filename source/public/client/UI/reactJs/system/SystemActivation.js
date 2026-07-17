@@ -141,11 +141,79 @@ class SystemActivation extends Component {
         }
     }
 
+    //RMB: activate every same-type system on this ship that currently canActivate().
+    //Mirrors allChangeFiringMode - matches by displayName, and each system is still
+    //individually gated by its own canActivate(), so systems that can't/shouldn't
+    //activate right now are simply skipped.
+    handleActivateAll(e) {
+        e.preventDefault();
+        const { ship, system } = this.props;
+
+        //fighter flights hold their systems one level down (per fighter); flatten if needed
+        let allSystems = [];
+        if (ship.flight) {
+            allSystems = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, systems) => all.concat(systems), []);
+        } else {
+            allSystems = ship.systems;
+        }
+
+        //Match by name (the phpclass key), NOT displayName: activatable systems like Kirishiac
+        //Orbitals carry a per-instance displayName suffix ('Orbital A', 'Orbital B', ...) so a
+        //displayName match only ever hits the clicked system. name is shared across instances of
+        //the same class. Each candidate is still gated by its own canActivate().
+        let activatedAny = false;
+        allSystems.forEach(candidate => {
+            if (!candidate.name || candidate.name !== system.name) return;
+            if (!(candidate.canActivate && typeof candidate.canActivate === 'function' && candidate.canActivate())) return;
+            candidate.doActivate();
+            activatedAny = true;
+        });
+
+        if (activatedAny) {
+            this.forceUpdate();
+            webglScene.customEvent('SystemDataChanged', { ship, system });
+        }
+    }
+
     handleDeactivate() {
         if (this.canDeactivate()) {
             this.props.system.doDeactivate();
             this.forceUpdate();
             webglScene.customEvent('SystemDataChanged', { ship: this.props.ship, system: this.props.system });
+        }
+    }
+
+    //RMB: deactivate every same-type system on this ship that currently canDeactivate().
+    //Symmetric with handleActivateAll - matches by displayName, each system still gated
+    //by its own canDeactivate(), so systems that can't/shouldn't deactivate are skipped.
+    handleDeactivateAll(e) {
+        e.preventDefault();
+        const { ship, system } = this.props;
+
+        //fighter flights hold their systems one level down (per fighter); flatten if needed
+        let allSystems = [];
+        if (ship.flight) {
+            allSystems = ship.systems
+                .map(fighter => fighter.systems)
+                .reduce((all, systems) => all.concat(systems), []);
+        } else {
+            allSystems = ship.systems;
+        }
+
+        //Match by name (see handleActivateAll) - displayName carries a per-instance suffix.
+        let deactivatedAny = false;
+        allSystems.forEach(candidate => {
+            if (!candidate.name || candidate.name !== system.name) return;
+            if (!(candidate.canDeactivate && typeof candidate.canDeactivate === 'function' && candidate.canDeactivate())) return;
+            candidate.doDeactivate();
+            deactivatedAny = true;
+        });
+
+        if (deactivatedAny) {
+            this.forceUpdate();
+            webglScene.customEvent('SystemDataChanged', { ship, system });
         }
     }
 
@@ -163,17 +231,29 @@ class SystemActivation extends Component {
         // Robust detection of active state
         const isActive = system.active || (system.weapon && weaponManager.hasFiringOrder(ship, system));
 
-        const activateLabel = system.weapon ? "Fire" : "Activate";
-        const deactivateLabel = system.weapon ? "Don't Fire" : "Deactivate";
+        //systems may supply their own button labels (e.g. Kirishiac Orbital: Dock / Deploy)
+        const customActivate = typeof system.getActivateLabel === 'function' ? system.getActivateLabel() : null;
+        const customDeactivate = typeof system.getDeactivateLabel === 'function' ? system.getDeactivateLabel() : null;
+        const activateLabel = customActivate || (system.weapon ? "Fire" : "Activate");
+        const deactivateLabel = customDeactivate || (system.weapon ? "Don't Fire" : "Deactivate");
+
+        //singleActivationButton (Kirishiac Orbital): show only the currently applicable
+        //action - "Dock" while deployed, "Deploy" while docked - instead of both buttons
+        //with one disabled.
+        const single = Boolean(system.singleActivationButton);
+        const showActivate = !single || this.canActivate();
+        const showDeactivate = !system.weapon && (!single || this.canDeactivate());
 
         return (
             <Container $isWeapon={system.weapon}>
                 <Header $isWeapon={system.weapon}>{system.displayName}</Header>
                 <Row>
                     <Controls>
-                        <ActionButton onClick={() => this.handleActivate()} disabled={!this.canActivate()} $active={isActive} $variant="activate" $isWeapon={system.weapon}>{activateLabel}</ActionButton>
-                        {!system.weapon && (
-                            <ActionButton onClick={() => this.handleDeactivate()} disabled={!this.canDeactivate()} $active={!isActive} $variant="deactivate">{deactivateLabel}</ActionButton>
+                        {showActivate && (
+                            <ActionButton onClick={() => this.handleActivate()} onContextMenu={(e) => this.handleActivateAll(e)} disabled={!this.canActivate()} $active={isActive} $variant="activate" $isWeapon={system.weapon}>{activateLabel}</ActionButton>
+                        )}
+                        {showDeactivate && (
+                            <ActionButton onClick={() => this.handleDeactivate()} onContextMenu={(e) => this.handleDeactivateAll(e)} disabled={!this.canDeactivate()} $active={!isActive} $variant="deactivate">{deactivateLabel}</ActionButton>
                         )}
                     </Controls>
                 </Row>

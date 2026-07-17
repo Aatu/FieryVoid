@@ -12,6 +12,7 @@ class CraytanSoren extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Soren Auxiliary Cruiser";
 		$this->unofficial = true;
         $this->isd = 2082;
+		$this->variantOf = 'NONE';	//In development? 	        
 
         $this->fighters = array("assault shuttles"=>2);
 		

@@ -8,6 +8,7 @@ class testMine extends MineClass{
         $this->phpclass = "testMine";
         $this->shipClass = "Test Mine";
         $this->imagePath = "img/ships/UsuuthDovarum.png";
+		$this->variantOf = 'OBSOLETE';	         
         
 		$this->isd = 1950;
        

@@ -11,7 +11,7 @@ class Lakara extends BaseShip{
         $this->shipClass = "Lakara Cruiser";
         $this->shipSizeClass = 3;
 
-	$this->isd = 2230;
+		$this->isd = 2230;
         
         $this->forwardDefense = 18;
         $this->sideDefense = 16;

@@ -17,9 +17,8 @@ class Malaka extends BaseShip{
         $this->accelcost = 4;
         $this->rollcost = 3;
         $this->pivotcost = 6;
-        $this->variantOf = 'Mafka Transport Cruiser';
-        $this->occurence = "common";
         $this->iniativebonus -20;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 
 		$this->enhancementOptionsEnabled[] = 'MARK_FERV'; //To activate Religious Fervor attributes.   
         

@@ -26,7 +26,15 @@ const Divider = styled.div`
 `;
 
 const CRIT_DESCRIPTIONS = {
-    MissileLost: "A missile was lost to damage"
+    MissileLost: "A missile was lost to damage",
+    //OrbitalRepairing: "REGENERATING - orbital and weapon fully restored after 5 docked turns"
+};
+
+//Crits whose effect magnitude is carried in each crit's `param` (one crit per hit, amount in param).
+//These are shown as a single line with the SUMMED reduction (e.g. "Damage reduction reduced by 15")
+//rather than a "(N x)" count, since it's the total that matters. Builder gets the summed param.
+const PARAM_SUM_CRIT_DESCRIPTIONS = {
+    DamageReductionReduced: (total) => `Damage reduction reduced by ${total}`,
 };
 
 export const Entry = styled(TooltipEntry)`
@@ -89,7 +97,7 @@ class SystemInfo extends React.Component {
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship);
 			}else{
 				displayOffensiveBonus -= window.ew.getDetectMEW(ship) * 2;
-			}	
+			}
         }
 
         var systemDisplayName = system.displayName;
@@ -125,13 +133,13 @@ class SystemInfo extends React.Component {
 
                 {!ship.flight && !isUnrevealedMine && getEntry('Structure', system.maxhealth - damageManager.getDamage(ship, system) + '/' + system.maxhealth)}
                 {!ship.flight && !isUnrevealedMine && getEntry('Armor', shipManager.systems.getArmour(ship, system))}
-                {ship.flight && !isUnrevealedMine && getEntry('Offensive bonus', displayOffensiveBonus * 5)}
+                {ship.flight && !isUnrevealedMine && getEntry('Offensive bonus', adjustObDisplay(system, displayOffensiveBonus * 5))}
 
                 {system.firingModes && !isUnrevealedMine && getEntry('Firing mode', firingModeDisplay)}
 
                 {system.missileArray && Object.keys(system.missileArray).length > 0 && !isUnrevealedMine && getEntry('Ammo Amount', system.missileArray[system.firingMode].amount)}
 
-                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, system.data[key], 'data' + i)))}
+                {!isUnrevealedMine && Object.keys(system.data).map((key, i) => (key != specialName && !(key === 'Ammunition' && (system.name === 'GrapplingClaw' || system.name === 'Marines')) && getEntry(key, adjustDataDisplay(system, key), 'data' + i)))}
 
                 {shadowBombAvailable !== null && getEntry('Fighters available', shadowBombAvailable)}
 
@@ -219,6 +227,7 @@ const getCriticals = (system) => {
     ].concat(
         critKeys.map(phpClass => {
             let noOfCrits = 0;
+            let paramTotal = 0; //sum of `param` across in-effect crits of this type (param-sum crits)
             var endEffectMin = 0;
             var endEffectMax = 0;
             var infinitePresent = false;
@@ -234,6 +243,7 @@ const getCriticals = (system) => {
                         && ((system.criticals[j].turnend == 0) || (system.criticals[j].turnend >= gamedata.turn))
                     ) {
                         noOfCrits++;
+                        paramTotal += parseInt(system.criticals[j].param, 10) || 0;
                         if (noOfCrits == 1) {
                             endEffectMin = system.criticals[j].turnend;
                             endEffectMax = system.criticals[j].turnend;
@@ -257,6 +267,12 @@ const getCriticals = (system) => {
                 wearsOffText = wearsOffText + ")";
             }
 
+            //Param-sum crits (e.g. DamageReductionReduced): one line showing the TOTAL reduction, no "(N x)".
+            if (noOfCrits >= 1 && PARAM_SUM_CRIT_DESCRIPTIONS[phpClass]) {
+                const description = PARAM_SUM_CRIT_DESCRIPTIONS[phpClass](paramTotal);
+                return (<Entry key={`critical-${phpClass}`}>{description} {wearsOffText}</Entry>);
+            }
+
             const description = system.critData[phpClass] || CRIT_DESCRIPTIONS[phpClass] || phpClass;
 
             if (noOfCrits > 1) {
@@ -268,6 +284,18 @@ const getCriticals = (system) => {
         })
     );
 };
+
+//Let a weapon fold live state into its displayed stats (e.g. Minor Thought Pulsar's thrust
+//allocation). Weapons opt in by defining the method; everything else shows the base value.
+const adjustObDisplay = (system, baseObPercent) =>
+    (typeof system.adjustOffensiveBonusDisplay === 'function')
+        ? system.adjustOffensiveBonusDisplay(baseObPercent)
+        : baseObPercent;
+
+const adjustDataDisplay = (system, key) =>
+    (typeof system.adjustDataValueDisplay === 'function')
+        ? system.adjustDataValueDisplay(key, system.data[key])
+        : system.data[key];
 
 const getEntry = (header, value, key) => {
     if (typeof value === 'string' && value.indexOf('<br>') !== -1) {

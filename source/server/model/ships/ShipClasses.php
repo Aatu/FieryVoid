@@ -39,6 +39,7 @@ class BaseShip {
     public $removedTurn = null; //Turn the ship docked into a hangar. Lets replay show the flight up to and including this turn.
     public $dockCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight dock coalescer (no-split docking). Not persisted/serialized — fresh false each load; first non-catapult hangar's criticalPhaseEffects runs the coalescer, the rest skip it.
     public $launchCoalesceDone = false; //Hangar Ops Stage 21: transient once-per-carrier guard for the whole-flight launch coalescer. Same lifetime as dockCoalesceDone.
+    public $dockRegenSweepDone = false; //Kirishiac Warrior regeneration: transient once-per-carrier guard for HangarOps::applyDockedRegeneration. Same lifetime as dockCoalesceDone.
     public $faction = null;
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
     public $isd = 0; 
@@ -401,9 +402,11 @@ class BaseShip {
 			foreach ($this->systems as $system) if($system->getCountForCombatValue()) { //skip technical systems
 				$systemCurr = 0;
 				$systemDmg = 0;
-				$systemMax =  $system->maxhealth;				
-				if (!$system->isDestroyed()) {				
-					$systemCurr = $system->getRemainingHealth();
+				$systemMax =  $system->maxhealth;
+				$bump = ($system instanceOf Structure) ? $system->orbitalBump : 0; //docked Kirishiac Orbital boxes merged into this block - already counted on the orbital system itself
+				$systemMax -= $bump;
+				if (!$system->isDestroyed()) {
+					$systemCurr = max(0, $system->getRemainingHealth() - $bump); //bump boxes are pristine (they belong to the orbital) - damage comes off the base pool
 					$systemDmg = $systemMax - $systemCurr;
 				}
 
@@ -946,7 +949,7 @@ class BaseShip {
 	                    && (!$ship->isDestroyed())){
 	                        $alivePolarenShips++;
 	                }
-					$mod = floor(($alivePolarenShips)/3); //Divide by four and round down
+					$mod = floor(($alivePolarenShips)/3); //Divide by three and round down
 					if ($mod > 10) $mod = 10;
 	            }
 	                
@@ -1054,8 +1057,22 @@ class BaseShip {
             if ($hasHangar) {
                 $this->saveIndividualNotes($dbManager);
             }
+
+            //Kirishiac Orbitals: persist the player's dock/deploy orders (given via the
+            //Dock/Deploy buttons in the Firing Phase; carried in individualNotesTransfer,
+            //stashed during ship reconstruction). Takes effect next turn.
+            $hasOrbital = false;
+            foreach ($this->systems as $sys) {
+                if ($sys instanceof KirishiacOrbital) {
+                    $sys->generateIndividualNotes($gameData, $dbManager);
+                    $hasOrbital = true;
+                }
+            }
+            if ($hasOrbital) {
+                $this->saveIndividualNotes($dbManager);
+            }
         }
-    }                
+    }
 	
 	/*calls systems to act on notes just loaded if necessary*/
 	public function onIndividualNotesLoaded($gamedata) {
@@ -1158,7 +1175,7 @@ class BaseShip {
                 //still legitimately want the pre-fire phase, so treat it as manually-fireable in that case.
                 $manuallyFireable = !$system->autoFireOnly
                     || (!empty($system->autoFireOnlyArray) && in_array(false, $system->autoFireOnlyArray, true));
-                if($system->preFires && ($system->turnsloaded >= $system->loadingtime) && $manuallyFireable){ //ready to fire!
+                if($system->preFires && ($system->turnsloaded >= $system->loadingtime) && $manuallyFireable && !$system->stowed){ //ready to fire!
                     //Separate check for Prox Mines here.              
                     if($system instanceof ProximityMine){
                         if($this->commandControl && !$system->checkForPreFiringTargets($this, $gamedata)) continue; //No targets in range, don't trigger preFire phase.
@@ -1194,12 +1211,16 @@ class BaseShip {
 			$this->structures[$loc] = $system->id;
 		}else if(($system->startArc ==0)&&($system->endArc ==0) && !($system instanceof Bulkhead)){ //20.01.2025 - add arc equal to section arc, if not set explicitly. Bulkheads protect by location only - giving them a section arc makes the arc gate in getSystemProtectingFromDamage falsely filter them out for shots from outside that arc.
 			//if arc is not set - copy from location!
-			if($loc==0){ //PRIMARY
+			//systems belonging to ANOTHER section's structure block (structureHomeLocation -
+			//Kirishiac orbitals displayed on the L/R sections) take their HOME block's arc:
+			//they can only be hit from the same directions as their associated structure
+			$arcLoc = $system->getStructureLocation();
+			if($arcLoc==0){ //PRIMARY
 				$system->startArc = 0;
 				$system->endArc = 360;
 			} else {
 				$locations = $this->getLocations();
-				foreach($locations as $line) if ($line["loc"]==$loc){
+				foreach($locations as $line) if ($line["loc"]==$arcLoc){
 					if( ($system->startArc == 0) && ($system->endArc == 0) ){ //for initial values - accept anything
 						$system->startArc = $line["min"];
 						$system->endArc = $line["max"];
@@ -1577,7 +1598,7 @@ class BaseShip {
                 foreach ($this->systems as $system){
 			//change to case ignoring:
                     //if ( ($system->displayName == $name) && ($system->location == $location) ){
-		    if ( (STRCASECMP($system->displayName, $name)==0) && ($system->location == $location) ){
+		    if ( ( (STRCASECMP($system->displayName, $name)==0) || (($system->hitChartName !== null) && (STRCASECMP($system->hitChartName, $name)==0)) ) && ($system->location == $location) ){
                         if( ($acceptDestroyed == true) || (!$system->isDestroyed()) ){
                             $returnTab[] = $system;
                         }
@@ -2453,6 +2474,9 @@ public function getAllEWExceptDEW($turn){
         else {
             $system = $this->getHitSystemByDice($shooter, $fireOrder, $weapon, $location, $sourceOverride);
         }
+        if ($system !== null){ //system may redirect the hit (own sub-chart roll, or divert to Structure while stowed) - Kirishiac Orbitals
+            $system = $system->resolveSubHitChart();
+        }
         return $system;
     }
 
@@ -3008,6 +3032,20 @@ class HeavyCombatVessel extends BaseShip{
     function __construct($id, $userid, $name, $slot){
         parent::__construct($id, $userid, $name,$slot);
     }
+
+    protected function addLeftFrontSystem($system){
+        $this->addSystem($system, 31);
+    }
+    protected function addLeftAftSystem($system){
+        $this->addSystem($system, 32);
+    }
+    protected function addRightFrontSystem($system){
+        $this->addSystem($system, 41);
+    }
+    protected function addRightAftSystem($system){
+        $this->addSystem($system, 42);
+    }
+
     public function getLocations(){
         $locs = array();
 
@@ -3614,6 +3652,31 @@ class SixSidedShip extends BaseShip{
     } 
     		
 } //end of SixSidedShip
+
+
+class SixSidedHCV extends SixSidedShip{
+    public $shipSizeClass = 2;
+
+    function __construct($id, $userid, $name, $slot){
+        parent::__construct($id, $userid, $name,$slot);
+    }
+
+    //Locations are same as HCV, because we use setStructureHome() to assign front and aft location to any system place on 31, 32, 41, 42 etc.
+    public function getLocations(){
+        $locs = array();
+
+        $locs[] = array("loc" => 1, "min" => 330, "max" => 30, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 1, "min" => 30, "max" => 90, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 90, "max" => 150, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 2, "min" => 150, "max" => 210, "profile" => $this->forwardDefense);
+        $locs[] = array("loc" => 2, "min" => 210, "max" => 270, "profile" => $this->sideDefense);
+        $locs[] = array("loc" => 1, "min" => 270, "max" => 330, "profile" => $this->sideDefense);
+
+        return $locs;
+    }
+    
+}
+
 
 //Vorlon Capital Ships are made using 6-sided layout - with side-aft being actual sides, and side-front a pseudo-section to fit Lightning Cannons that do not fall off
 class VorlonCapitalShip extends SixSidedShip{	

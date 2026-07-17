@@ -10,6 +10,7 @@ class MakarTolmor extends FighterFlight{
         $this->shipClass = "Tol Mor Armed Drone";
         $this->imagePath = "img/ships/Nexus/makar_tolmor.png";
 		$this->unofficial = true;
+		$this->variantOf = 'NONE';	//In development? 	        
 
         $this->isd = 1925;
         

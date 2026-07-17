@@ -16,7 +16,7 @@ class ParagonAM extends BaseShip{
 	    $this->isd = 2007;
 	    
         $this->shipSizeClass = 3;
-        $this->fighters = array("light"=>12, "medium"=>18, "assault shuttles"=>6);
+        $this->fighters = array("light"=>12, "Hunter-Killers"=>18, "assault shuttles"=>6);
 		
         $this->forwardDefense = 19;
         $this->sideDefense = 19;

@@ -13,6 +13,7 @@ class VariableHangarSize extends BaseShip{
 		$this->canvasSize = 140; //img has 140px per side
 //		$this->unlimited 
 		$this->unofficial = true;
+		$this->variantOf = 'NONE';	//In development? 		
 
         $this->fighters = array("Vipers"=>12, "heavy"=>6, "superheavy"=>6);
 		$this->customFighter = array("Python"=>6);

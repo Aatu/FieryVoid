@@ -142,6 +142,18 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                         }
                     }
                 }
+                //Category-declared default shuttles (yacht / lifeboats / medical /
+                //presidential — see HangarOps::shuttlePhpclassForCategory): these
+                //auto-populate into the carrier's hangar but are NOT in the faction
+                //shuttle map, so the faction-shuttle preload below misses them.
+                //Without preloading them, launching one leaves the client unable to
+                //resolve its phpclass -> blueprint (shows "undefined" in the ini GUI).
+                if (!empty($blueprint->fighters) && is_array($blueprint->fighters)) {
+                    foreach ($blueprint->fighters as $category => $count) {
+                        $shuttleClass = HangarOps::shuttlePhpclassForCategory($category, $blueprint);
+                        if ($shuttleClass !== null) $spawnableClasses[] = $shuttleClass;
+                    }
+                }
             }
         }
 		foreach (array_keys($factionsWithHangars) as $faction) {
@@ -309,6 +321,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/renderer/animationStrategy/animation/effects/ShipJumpPoint.js"></script>
     <script defer src="client/renderer/animationStrategy/animation/effects/ImpactSparksEffect.js"></script>
 
+    <script defer src="client/hangarShared.js"></script>
     <script defer src="client/renderer/phaseStrategy/PhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/DeploymentPhaseStrategy.js"></script>
     <script defer src="client/renderer/phaseStrategy/MineDeployment.js"></script>

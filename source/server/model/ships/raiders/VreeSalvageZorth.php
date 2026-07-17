@@ -5,14 +5,14 @@ class VreeSalvageZorth extends FighterFlight{
         parent::__construct($id, $userid, $name,  $slot);
         
         $this->pointCost = 35*6;
-		$this->faction = "Vree Conglomerate";
-		$this->phpclass = "ZFtrZorth";
+		$this->faction = "Raiders";
+		$this->phpclass = "VreeSalvageZorth";
         $this->shipClass = "Zorth Light Fighters";
         $this->imagePath = "img/ships/VreeSalvageZorth.png";
         
-        $this->faction = "Vree Conglomerate";
 	    $this->isd = 2162;
-        $this->notes = 'Each hangar space on a ship can stack two Zorth fighters.';	    
+        $this->notes = 'Used only by the Vree Salvage Guild';	         
+        $this->notes .= 'Each hangar space on a ship can stack two Zorth fighters.';	    
 
         $this->forwardDefense = 6;
         $this->sideDefense = 6;

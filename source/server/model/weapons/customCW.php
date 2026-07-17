@@ -651,6 +651,7 @@ class CWIonCannon extends Weapon{
 				$system->critRollMod += 4;
 			}
 		}
+		parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);        
 	}		
 
         function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){

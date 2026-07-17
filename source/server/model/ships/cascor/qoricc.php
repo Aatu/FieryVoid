@@ -39,7 +39,7 @@ class Qoricc extends BaseShip{
         $this->addAftSystem(new Thruster(4, 13, 0, 3, 2));
 		$this->addAftSystem(new Thruster(4, 13, 0, 3, 2));
         $this->addAftSystem(new Thruster(4, 13, 0, 3, 2));
-        $this->addAftSystem(new Hangar(4, 6));
+        $this->addAftSystem(new Hangar(4, 6, 6, 0, 'ultralight', array(), true)); //aft bay reserved for ultralight fighters only (5th arg); excluded from default-shuttle auto-fill (7th arg) so it stays free for them
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 300));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 60, 240));
                 

@@ -7,6 +7,12 @@ class TacGamedata {
     public static $currentGameID;
     public static $safeGameID = 3730; //gameID that is safe for adding new features
     public static $lastFiringResolutionNo = 0; //firing resolution to be used
+    //viewer context for per-recipient JSON pruning (gamedata is built and cached PER PLAYER):
+    //the player this load is being prepared for, and their team (set once slots are known).
+    //ONLY for stripForJson-level masking of hidden orders (Kirishiac Orbital dock/deploy,
+    //Shading Field) - never use for game logic; null = no viewer (server processing) = reveal.
+    public static $currentForPlayer = null;
+    public static $currentForPlayerTeam = null;
 
     public $id, $turn, $phase, $activeship, $name, $status, $points, $background, $creator, $gamespace, $description;
     public $ships = array();
@@ -110,6 +116,7 @@ class TacGamedata {
     }
 
     public function onConstructed(){
+        self::$currentForPlayerTeam = $this->getPlayerTeam(); //viewer context (slots are loaded by now) - teammates see each other's hidden orders
         $this->setBlockedHexes();
         $this->waitingForThisPlayer = $this->getIsWaitingForThisPlayer();
         $this->doSortShips();
@@ -412,7 +419,7 @@ class TacGamedata {
     
     private function setForPlayer($player){
         $this->forPlayer = $player;
-        
+        self::$currentForPlayer = $player;
     }
     
     public function getActiveships() {
@@ -792,7 +799,13 @@ class TacGamedata {
             }
 
             foreach ($ship->movement as $i => $move) {
-                if ($move->turn == $this->turn && $move->type !== "deploy" && $move->type !== "start") {
+                //Never hide a forced move (Gravitic Augmenter's free jinks are marked forced=true):
+                //they are a REVEALED committed effect (declared in Initial Orders alongside the visible
+                //stat buffs), not the enemy's secret in-progress plot. Hiding it made the opponent lose
+                //the +3 jink (and the -15% to-hit it grants against the Warrior) during the Movement phase.
+                //Server-side the only forced movement is that transient jink; persisted moves never carry
+                //forced (no DB column), so this can't leak a normal manoeuvre.
+                if ($move->turn == $this->turn && $move->type !== "deploy" && $move->type !== "start" && empty($move->forced)) {
                     $toDelete[] = $i;
                 }
             }

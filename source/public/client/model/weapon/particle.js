@@ -893,10 +893,128 @@ TelekineticCutter.prototype.checkFinished = function () {
 
 var MinorThoughtPulsar = function MinorThoughtPulsar(json, ship) {
     Particle.call(this, json, ship);
+    //Free thrust allocation (replaces the old firing-mode presets). Each unit below costs
+    //THRUST_PER_STEP (3) of spare movement thrust:
+    //  hitBoost5 : the % bonus shown in the menu, in multiples of 5. Each +5 = one 3-thrust
+    //              step = +2 OB (~+10% to hit) applied server-side. So OB steps = hitBoost5 / 5.
+    //  shotBoost : extra shots, +1 per step.
+    //  dmgBoost5 : extra damage, in multiples of 5. Each +5 = one 3-thrust step = +5 damage.
+    //These are set by the React menu (MinorThoughtPulsarMenu) and encoded into fireOrder.notes
+    //as "MTP|<hitBoost5>|<shotBoost>|<dmgBoost5>" so the server can read them (see getBoostNotes).
+    if (typeof this.hitBoost5 === 'undefined') this.hitBoost5 = 0;
+    if (typeof this.shotBoost === 'undefined') this.shotBoost = 0;
+    if (typeof this.dmgBoost5 === 'undefined') this.dmgBoost5 = 0;
+
+    //A gamedata poll rebuilds this weapon object from JSON, resetting the fields above to 0.
+    //But a fire order already declared this turn survives (in this.fireOrders) with its notes
+    //payload intact, so restore the allocation from it — keeps the React menu in sync with the
+    //committed order after every poll.
+    this.restoreBoostsFromOrder();
 };
 MinorThoughtPulsar.prototype = Object.create(Particle.prototype);
 MinorThoughtPulsar.prototype.constructor = MinorThoughtPulsar;
 
+//Each allocation step costs this much spare thrust and buys +1 shot, +5 damage, OR +2 OB.
+MinorThoughtPulsar.THRUST_PER_STEP = 3;
+
+//Parse "MTP|<hit5>|<shots>|<dmg5>" from this turn's normal order (if any) back into the fields.
+MinorThoughtPulsar.prototype.restoreBoostsFromOrder = function () {
+    for (var i in this.fireOrders) {
+        var fo = this.fireOrders[i];
+        if (fo.weaponid != this.id || fo.turn != gamedata.turn || fo.type != 'normal') continue;
+        if (!fo.notes || fo.notes.indexOf('MTP') !== 0) continue;
+        var segs = fo.notes.split('|');
+        this.hitBoost5 = parseInt(segs[1], 10) || 0;
+        this.shotBoost = parseInt(segs[2], 10) || 0;
+        this.dmgBoost5 = parseInt(segs[3], 10) || 0;
+        return;
+    }
+};
+
+//Total spare-thrust steps this weapon is currently trying to spend (one step per +1 shot,
+//per +5 damage, and per +5 hit-shown). Used by the menu + client display to enforce the budget.
+MinorThoughtPulsar.prototype.getAllocatedSteps = function () {
+    return (this.hitBoost5 / 5) + this.shotBoost + (this.dmgBoost5 / 5);
+};
+
+//Spare thrust available for boosts = remaining engine thrust after movement (== server getSpareThrust).
+MinorThoughtPulsar.prototype.getSpareThrust = function (shooter) {
+    return shipManager.movement.getRemainingEngineThrust(shooter);
+};
+
+//Max whole steps the spare thrust can pay for (floor(spare / 3)). Matches server noOfBoosts.
+MinorThoughtPulsar.prototype.getMaxSteps = function (shooter) {
+    return Math.floor(this.getSpareThrust(shooter) / MinorThoughtPulsar.THRUST_PER_STEP);
+};
+
+/* Encode the current allocation into the fire order's notes as "MTP|<hit5>|<shots>|<dmg5>",
+ * mirroring the Gravitic Augmenter "GA|dir|amt" pattern. The server (beforeFiringOrderResolution)
+ * parses this before calculateHitBase overwrites the field. */
+MinorThoughtPulsar.prototype.getBoostNotes = function () {
+    return "MTP|" + (this.hitBoost5 | 0) + "|" + (this.shotBoost | 0) + "|" + (this.dmgBoost5 | 0);
+};
+
+/* Keep any already-declared normal order's notes in sync after the menu changes the allocation. */
+MinorThoughtPulsar.prototype.updateBoostNotes = function () {
+    for (var i in this.fireOrders) {
+        var fo = this.fireOrders[i];
+        if (fo.weaponid == this.id && fo.turn == gamedata.turn && fo.type == 'normal') {
+            fo.notes = this.getBoostNotes();
+        }
+    }
+};
+
+/* Stamp the allocation onto the order at creation time (weaponManager targetShip hook). */
+MinorThoughtPulsar.prototype.onFireOrderCreated = function (fire) {
+    if (fire) fire.notes = this.getBoostNotes();
+    return fire;
+};
+
+//Displayed hit-chance modifier so the menu/target preview matches what the server rolls.
+//Each +5 in the menu = +2 OB. (Server: fireControl += (hitBoost5 / 5) * 2.)
+MinorThoughtPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
+    var obSteps = (this.hitBoost5 | 0) / 5;
+    return obSteps * 2;
+};
+
+/* --- Info-panel display adjustments (SystemInfo.js calls these so it doesn't need to know about
+ *     this weapon's internals). The weapon's server-cached data[] strings hold only the BASE
+ *     values, so we fold the player's live thrust allocation into what the tooltip shows. --- */
+
+//Adjust the shown Offensive Bonus (the flight's OB * 5). Each hit step (+5 in the menu) adds +2 OB,
+//and the panel shows OB * 5, so +5 stored => +10 shown. Returns the adjusted OB-percent number.
+MinorThoughtPulsar.prototype.adjustOffensiveBonusDisplay = function (baseObPercent) {
+    return baseObPercent + (this.hitBoost5 | 0) * 2;
+};
+
+//Adjust a data[] value for the tooltip so it shows the effective (allocated) figure directly.
+//Damage boosts a SINGLE shot by +5 each and is NOT cumulative, so we can't just shift the whole
+//range — instead we summarise how many shots are boosted, e.g. "6-11 (2 shots at 11-16)". The
+//number of boosted shots is capped at the shots fired (base guns + extra shots). "Number of guns"
+//becomes the total shots fired this turn. Other keys / no allocation return the base untouched.
+MinorThoughtPulsar.prototype.adjustDataValueDisplay = function (key, baseValue) {
+    if (key === 'Damage' && (this.dmgBoost5 | 0) > 0) {
+        var parts = String(baseValue).split('-');
+        var lo = parseInt(parts[0], 10);
+        var hi = parseInt(parts.length > 1 ? parts[1] : parts[0], 10);
+        if (isNaN(lo)) return baseValue; //non-numeric (e.g. "Special") - leave alone
+        if (isNaN(hi)) hi = lo;
+
+        var totalShots = (this.guns | 0) + (this.shotBoost | 0);
+        var boostedShots = Math.min((this.dmgBoost5 | 0) / 5, totalShots);
+        if (boostedShots <= 0) return baseValue;
+
+        var boostedRange = (lo + 5) + '-' + (hi + 5);
+        var shotWord = (boostedShots === 1) ? 'shot' : 'shots';
+        return baseValue + ' (' + boostedShots + ' ' + shotWord + ' at ' + boostedRange + ')';
+    }
+    if (key === 'Number of guns' && (this.shotBoost | 0) > 0) {
+        return (this.guns | 0) + (this.shotBoost | 0);
+    }
+    return baseValue;
+};
+
+/* --- OLD firing-mode preset logic (replaced by free thrust allocation, kept for reference) ---
 MinorThoughtPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, target, calledid) {
     var mod = 0;
     var thrust = shipManager.movement.getRemainingEngineThrust(shooter);
@@ -943,3 +1061,4 @@ MinorThoughtPulsar.prototype.calculateSpecialHitChanceMod = function (shooter, t
 
     return mod;
 };
+--- end OLD firing-mode preset logic --- */

@@ -8,7 +8,8 @@ const Title = styled.span`
     padding: 10px;
     font-weight: bold;
 
-    @media (max-width: 765px) {
+    /* Portrait phones OR short landscape phones (wider than 765px). */
+    @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         padding: 5px 10px;
         font-size: 14px;
     }

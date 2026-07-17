@@ -12,6 +12,7 @@ class CylonHeavyRaider extends FighterFlight{
 		$this->unofficial = true;
 	    $this->isd = 2041;
         $this->canvasSize = 100;
+		$this->variantOf = 'NONE';	//In development?         
 
         $this->forwardDefense = 8;
         $this->sideDefense = 10;

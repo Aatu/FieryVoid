@@ -12,6 +12,7 @@ class QomYominAuxDestroyerAlt extends HeavyCombatVesselLeftRight{
         $this->shipClass = "Srea Tormal Auxiliary Destroyer (Alternate)";
 		$this->unofficial = true;
         $this->isd = 1928;
+		$this->variantOf = 'NONE';	//In development? 	        
 
 	    $this->notes = '<br>Unreliable Ship:';
  	    $this->notes .= '<br> - Sluggish';

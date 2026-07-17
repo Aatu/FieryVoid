@@ -1,6 +1,20 @@
 <?php
     class Movement{
-        
+
+        /*
+         * Rollout safety switch for server-side thrust validation (validateThrustPayment).
+         *
+         * false (LOG-ONLY, default): the validator DETECTS illegal maneuvers and logs
+         *   them, but returns the submitted movement UNCHANGED - it cannot alter or break
+         *   any live game. Run in this mode first and watch the logs; a legal game should
+         *   produce zero "would reject" lines.
+         *
+         * true  (ENFORCE): illegal maneuvers are actually dropped and the tail rebuilt as
+         *   straight-line movement. Flip this to true only once log-only mode has proven
+         *   silent on real, in-progress games.
+         */
+        public static $enforceThrustValidation = false;
+
         private static function checkIsNewMove($gamedata, $ship, $move){
             
             
@@ -44,10 +58,163 @@
             }
             
             return true;
-            
+
         }
 
-     
+        /*
+         * Server-side thrust validation for a submitted movement array.
+         *
+         * The client is the only place that normally enforces "a maneuver must be
+         * fully paid before it can be committed" (doneAssignThrust). The server has
+         * historically trusted whatever movement the client POSTs, so a tampered or
+         * buggy client could submit an illegal maneuver - e.g. a turn paid with less
+         * than the required directional thrust, or paid through thrusters that are
+         * destroyed (game 6790: a Tinashi turned using only 3 of the 7 required thrust
+         * because its rear thrusters were gone). This is the authoritative backstop.
+         *
+         * For each COMMITTED maneuver move (turn/pivot/roll/slip) that carries a real
+         * required-thrust array, we recompute calculateThrustStillReq in STRICT mode
+         * (the same math the client uses, but counting only surviving thrusters - thrust
+         * routed through a destroyed thruster does not count). If any requirement is
+         * still unpaid, the maneuver is illegal.
+         *
+         * An illegal maneuver invalidates every later move this turn (their positions
+         * were plotted assuming the maneuver happened), so we drop the maneuver and
+         * everything after it. A ship MUST still travel its full speed in hexes, so we
+         * do not simply stop it short: instead we rebuild the tail as straight-line
+         * "move" steps along the ship's last legal heading until it has covered its full
+         * speed, then a final "end". The ship keeps its pre-maneuver heading/facing and
+         * coasts straight for the rest of the turn.
+         *
+         * Returns the (possibly rebuilt) movement array. Flights pay through the "any"
+         * slot and validate the same way. Server-generated types (start/end/sync/
+         * attached) and non-thrust moves (plain move, jink, speedchange, halfPhase,
+         * contract, detach) carry no directional requirement and pass through.
+         */
+        public static function validateThrustPayment($ship, $turn){
+            if (!is_array($ship->movement))
+                return $ship->movement;
+
+            $maneuverTypes = array(
+                "turnleft" => true, "turnright" => true,
+                "pivotleft" => true, "pivotright" => true,
+                "roll" => true, "slipleft" => true, "slipright" => true,
+            );
+
+            $hexTypes = array("move" => true, "slipleft" => true, "slipright" => true);
+
+            $sanitised = array();
+            $lastLegal = null;      // last move we accepted
+            $hexesUsed = 0;         // hexes of speed already spent in the legal prefix
+            $truncated = false;
+            $illegalType = null;
+
+            foreach ($ship->movement as $move){
+                // Preturn/forced moves are generated server-side (rollovers, forced
+                // pivots) and are trusted; other-turn moves are history. Keep as-is.
+                if ($move->turn != $turn || $move->preturn || !empty($move->forced)){
+                    $sanitised[] = $move;
+                    $lastLegal = $move;
+                    if (isset($hexTypes[$move->type])) $hexesUsed++;
+                    continue;
+                }
+
+                // Note: $move->commit is not carried through the POST (it defaults to
+                // true server-side), so every submitted maneuver is validated - which is
+                // exactly the strict behaviour we want.
+                $isManeuver = isset($maneuverTypes[$move->type]);
+                $needsCheck = $isManeuver
+                    && is_array($move->requiredThrust)
+                    && self::requiresThrust($move->requiredThrust);
+
+                if ($needsCheck){
+                    // excludeDestroyed=true: thrust routed through destroyed thrusters
+                    // does not count, so a dead-thruster maneuver is correctly rejected.
+                    $stillReq = self::calculateThrustStillReq($ship, $move, true);
+                    $unpaid = false;
+                    foreach ($stillReq as $req){
+                        if ($req > 0){ $unpaid = true; break; }
+                    }
+
+                    if ($unpaid){
+                        // Illegal maneuver: drop it and everything after it this turn.
+                        $truncated = true;
+                        $illegalType = $move->type;
+                        break;
+                    }
+                }
+
+                $sanitised[] = $move;
+                $lastLegal = $move;
+                if (isset($hexTypes[$move->type])) $hexesUsed++;
+            }
+
+            if (!$truncated)
+                return $ship->movement;
+
+            // LOG-ONLY rollout mode: an illegal maneuver was detected, but we do NOT
+            // modify the movement - just record what we WOULD have done. This makes the
+            // check incapable of altering a live game while we confirm (via the logs)
+            // that it never fires on legitimate play. Flip $enforceThrustValidation to
+            // true only once these lines have proven absent for legal games.
+            if (!self::$enforceThrustValidation){
+                error_log("validateThrustPayment[LOG-ONLY]: WOULD reject illegal '"
+                    . $illegalType . "' maneuver for ship " . $ship->id . " turn " . $turn
+                    . " (unpaid required thrust). Movement left UNCHANGED.");
+                return $ship->movement;
+            }
+
+            // Rebuild the tail: the ship must still cover its full speed in hexes, so
+            // coast straight along its last legal heading for the remaining hexes, then
+            // end. Anchor on the last accepted move (its pre-maneuver position/heading/
+            // facing/speed); fall back to the ship's last committed move if nothing this
+            // turn was accepted (illegal maneuver was the very first move).
+            $anchor = $lastLegal ?: $ship->getLastMovement();
+            if ($anchor){
+                $speed   = (int)$anchor->speed;
+                $heading = (int)$anchor->heading;
+                $facing  = (int)$anchor->facing;
+                // Ensure a real OffsetCoordinate so moveToDirection() is available even if
+                // the anchor arrived from POST as an array/stdClass position.
+                $pos     = new OffsetCoordinate($anchor->position);
+
+                // One straight "move" per remaining hex of speed.
+                for ($h = $hexesUsed; $h < $speed; $h++){
+                    $pos = $pos->moveToDirection($heading);
+                    $straight = new MovementOrder(
+                        null, "move", $pos, 0, 0,
+                        $speed, $heading, $facing,
+                        false, $turn, 0, 0
+                    );
+                    $straight->requiredThrust = array(null, null, null, null, null);
+                    $straight->assignedThrust = array();
+                    $sanitised[] = $straight;
+                }
+
+                $sanitised[] = new MovementOrder(
+                    null, "end", $pos, 0, 0,
+                    $speed, $heading, $facing,
+                    false, $turn, 0, 0
+                );
+            }
+
+            debug::log("validateThrustPayment: rejected illegal '" . $illegalType
+                . "' maneuver for ship " . $ship->id . " turn " . $turn
+                . " (unpaid required thrust); rebuilt straight-line movement to full speed ("
+                . ($anchor ? (int)$anchor->speed : 0) . " hexes).");
+
+            return $sanitised;
+        }
+
+        /* True if a requiredThrust array asks for any positive amount of thrust. */
+        private static function requiresThrust($requiredThrust){
+            foreach ($requiredThrust as $req){
+                if ($req > 0) return true;
+            }
+            return false;
+        }
+
+
         public static function isPivoting($ship, $turn, $gamedata = null){
 			if ($ship->agile || $ship instanceof FighterFlight)
 				return 0;
@@ -281,8 +448,8 @@
 
         }
         
-        public static function calculateThrustStillReq($ship, $move){
-            $assignedarray = self::calculateAssignedThrust($ship, $move);
+        public static function calculateThrustStillReq($ship, $move, $excludeDestroyed = false){
+            $assignedarray = self::calculateAssignedThrust($ship, $move, $excludeDestroyed);
             $requiredThrust = $move->requiredThrust;
             $stillReq = $requiredThrust;
             $any = 0;
@@ -340,11 +507,11 @@
         
         }
         
-        public static function calculateAssignedThrust($ship, $move){
+        public static function calculateAssignedThrust($ship, $move, $excludeDestroyed = false){
             $assignedarray = array(0,0,0,0,0);
-            
-             
-            
+
+
+
             foreach ($move->assignedThrust as $i=>$value){
 				if (empty($value))
 					continue;
@@ -364,6 +531,20 @@
 					// at load. Skip such orphaned allocations instead of crashing.
 					$system = $ship->systems[$i] ?? null;
 					if ($system === null || !($system instanceof Thruster)) {
+						continue;
+					}
+					// Strict (server thrust validation) only: a destroyed thruster cannot
+					// provide thrust, so a tampered client that routes required thrust
+					// through a dead thruster must not pass. The default path leaves
+					// existing (turn-delay) callers untouched.
+					// CRITICAL: check destruction as of the PREVIOUS turn, not the current one.
+						// Movement is plotted in phase 2; damage lands in the fire phase (4). A
+						// thruster destroyed during turn T's combat was still alive when turn T's
+						// movement was paid, so that payment was LEGAL. Using the current turn here
+						// wrongly rejects it (verified: game 4031 turn 2, Demos paid rear thrust
+						// through a thruster only destroyed later that same turn). AS OF T-1 = gone
+						// before this turn's movement.
+						if ($excludeDestroyed && $system->isDestroyed(TacGamedata::$currentTurn - 1)) {
 						continue;
 					}
 					$direction = $system->direction;

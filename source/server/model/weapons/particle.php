@@ -1203,6 +1203,7 @@
 				}               
 				$this->doRepeatDamageOnStructure($fireOrder,$target,$system,$damage, $gamedata);
 			}
+			parent::onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fireOrder);            
 		}//endof onDamagedSystem
 		
 		//overkill should return damaged system itself, even if it is destroyed! - necessary for redefined doDamage to work properly
@@ -2598,144 +2599,206 @@ class MinorThoughtPulsar extends LinkedWeapon{
 				}    			
 				
         if($originalFireOrder==null) return; //no appropriate fire order, end of work
-	
+
 		$ship = $this->getUnit();
 		$target = $gamedata->getShipById($originalFireOrder->targetid);
-		
-		$freeThrust = $ship->freethrust; //Should be 16.	
-		$thrustUsed = $this->getSpareThrust($ship, $gamedata);	//16 - used	
-		$thrustForBoost = $freeThrust - $thrustUsed;	
-		if($thrustForBoost < 3) return; //Not enough spare thrust to do anything, no boosts.		
-		$noOfBoosts = floor($thrustForBoost/3);	//Divide remaining thurst by 3, rounded down.
-	
+
+		$freeThrust = $ship->freethrust; //Should be 16.
+		$thrustUsed = $this->getSpareThrust($ship, $gamedata);	//16 - used
+		$thrustForBoost = $freeThrust - $thrustUsed;
+		if($thrustForBoost < 3) return; //Not enough spare thrust to do anything, no boosts.
+		$noOfBoosts = (int)floor($thrustForBoost/3);	//Divide remaining thrust by 3, rounded down = max steps affordable.
+
+		//NEW: free thrust allocation. The client React menu (MinorThoughtPulsarMenu) encodes the
+		//player's chosen allocation into the order's notes as "MTP|<hit5>|<shots>|<dmg5>" where
+		//  hit5  = the % bonus shown in the menu, in multiples of 5; each 5 = one 3-thrust step = +2 OB
+		//  shots = extra shots, +1 per step
+		//  dmg5  = extra damage in multiples of 5; each 5 = one 3-thrust step = +5 damage
+		//Each step costs 3 spare thrust. The server is authoritative: we re-derive the affordable
+		//step budget ($noOfBoosts) from real spare thrust and CLAMP the requested allocation to it,
+		//dropping damage first, then shots, then hit chance if the client over-allocated (tampering
+		//or thrust that changed after the allocation was set).
+		$alloc = $this->parseBoostNotes($originalFireOrder->notes);
+
+		$hitSteps  = intdiv($alloc['hit5'], 5);   //each = +2 OB
+		$shotSteps = $alloc['shots'];             //each = +1 shot
+		$dmgSteps  = intdiv($alloc['dmg5'], 5);   //each = +5 damage (via bonusDamageShots)
+
+		//Clamp to the affordable budget: drop hit chance, then damage, then shots.
+		$requested = $hitSteps + $shotSteps + $dmgSteps;
+		if($requested > $noOfBoosts){
+			$overspend = $requested - $noOfBoosts;
+			$trim = min($overspend, $hitSteps);  $hitSteps  -= $trim; $overspend -= $trim;
+			$trim = min($overspend, $dmgSteps);  $dmgSteps  -= $trim; $overspend -= $trim;
+			$trim = min($overspend, $shotSteps); $shotSteps -= $trim; $overspend -= $trim;
+			error_log("MinorThoughtPulsar: allocation trimmed to fit thrust budget (had $requested steps, budget $noOfBoosts) on ship {$ship->id} weapon {$this->id}.");
+		}
+
+		//Damage boosts a SINGLE shot by +5 each and is NOT cumulative, so the number of damage
+		//steps cannot exceed the number of shots that will actually fire (base guns + extra shots).
+		//The client caps this too; this is the authoritative backstop.
+		$totalShots = $this->guns + $shotSteps;
+		if($dmgSteps > $totalShots) $dmgSteps = $totalShots;
+
+		//Apply hit chance: +2 OB per step (matches the old per-boost hit value).
+		$OBBoost = $hitSteps * 2;
+		$this->fireControl[0] += $OBBoost;
+		$this->fireControl[1] += $OBBoost;
+		$this->fireControl[2] += $OBBoost;
+
+		//Apply extra shots: one cloned fire order per step.
+		for($i = 0; $i < $shotSteps; $i++){
+			$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
+		}
+
+		//Apply extra damage: +5 per step, consumed one-per-shot in getDamage().
+		$this->bonusDamageShots += $dmgSteps;
+
+	}//endof beforeFiringOrderResolution
+
+	/* Parse the client's "MTP|<hit5>|<shots>|<dmg5>" notes payload into an allocation array.
+	 * Returns zeroed allocation if the notes are absent/foreign (e.g. an old client). */
+	private function parseBoostNotes($notes){
+		$out = array('hit5' => 0, 'shots' => 0, 'dmg5' => 0);
+		if(!is_string($notes) || strpos($notes, 'MTP') !== 0) return $out;
+		$segs = explode('|', $notes);
+		$out['hit5']  = isset($segs[1]) ? max(0, (int)$segs[1]) : 0;
+		$out['shots'] = isset($segs[2]) ? max(0, (int)$segs[2]) : 0;
+		$out['dmg5']  = isset($segs[3]) ? max(0, (int)$segs[3]) : 0;
+		return $out;
+	}
+
+	/* --- OLD firing-mode preset distribution (replaced by free thrust allocation above,
+	 *     kept for reference). Distributed $noOfBoosts across shots/damage/hitchance using
+	 *     preset priorities selected via the firingMode. Superseded by the MTP notes payload.
+
 		$this->changeFiringMode($originalFireOrder->firingMode);//Change Firing Mode, just in case.
-			
+
 			switch($this->firingMode){
-				
+
 				case 1: //Prioritise RoF then hitchance
-				
+
 					if($noOfBoosts < 3){
 						$newShots = $noOfBoosts;
 						for($i = 0; $i < $newShots; $i++){
 							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
-						}																	
-					}else{	
+						}
+					}else{
 						$newShots = 2;//Create extra two shots to max 4.
 						for($i = 0; $i < $newShots; $i++){
 							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
-						}								
-													
-						$OBBoost = max(0, $noOfBoosts-$newShots) * 2;//Dump any remaining into hitchance, ensure not a minus.					
+						}
+
+						$OBBoost = max(0, $noOfBoosts-$newShots) * 2;//Dump any remaining into hitchance, ensure not a minus.
 						$this->fireControl[0] += $OBBoost;
 						$this->fireControl[1] += $OBBoost;
-						$this->fireControl[2] += $OBBoost;	
+						$this->fireControl[2] += $OBBoost;
 					}
 					break;
-						
-						
+
+
 				case 2: //Priortise Damage then hitchance
-				
+
 					if($noOfBoosts < 3){
-						$this->bonusDamageShots += $noOfBoosts; //First two boosts go into Damage.						
+						$this->bonusDamageShots += $noOfBoosts; //First two boosts go into Damage.
 					}else{
-						$this->bonusDamageShots += 2; //First two boosts go into Damage.							
+						$this->bonusDamageShots += 2; //First two boosts go into Damage.
 						$OBBoost = max(0, $noOfBoosts-2) * 2;//Dump any remaining into hitchance, ensure not a minus.
-							
+
 						$this->fireControl[0] += $OBBoost;
 						$this->fireControl[1] += $OBBoost;
-						$this->fireControl[2] += $OBBoost;	
+						$this->fireControl[2] += $OBBoost;
 					}
 					break;
-				
-				
+
+
 				case 3: //Prioritise only Hitchance
-				
+
 					$OBBoost = $noOfBoosts * 2;//Dump all into hitchance.
-						
+
 						$this->fireControl[0] += $OBBoost;
 						$this->fireControl[1] += $OBBoost;
-						$this->fireControl[2] += $OBBoost;	
-						
+						$this->fireControl[2] += $OBBoost;
+
 					break;
 
 
 				case 4://Prioritise Damage, Shots then Hitchance
 
 					if($noOfBoosts <= 1){//1 boost
-						$this->bonusDamageShots += 1; //Boost damage of first shot.						
+						$this->bonusDamageShots += 1; //Boost damage of first shot.
 					}else if($noOfBoosts == 2){//2 boosts
-						$this->bonusDamageShots += 1; //Split first two boosts go into damage and an extra shot.							
+						$this->bonusDamageShots += 1; //Split first two boosts go into damage and an extra shot.
 						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Then add extra shot
 					}else if($noOfBoosts == 3){//3 boosts
-						$this->bonusDamageShots += 2; //First two boosts go into damage.							
+						$this->bonusDamageShots += 2; //First two boosts go into damage.
 						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Then add extra shot(3)
 					}else if($noOfBoosts == 4){//4 boosts
 						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Add extra shot(3)
-						$this->bonusDamageShots += 3; //Then three boosts into damage.							
+						$this->bonusDamageShots += 3; //Then three boosts into damage.
 					}else{//5 or more Boosts
 						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);//Add extra shot
 						$this->bonusDamageShots += 3; //Then three boosts into damage.
-						$OBBoost = 1*2;//Dump remaining into hitchance, ensure not a minus.						
-								
+						$OBBoost = 1*2;//Dump remaining into hitchance, ensure not a minus.
+
 						$this->fireControl[0] += $OBBoost;
 						$this->fireControl[1] += $OBBoost;
-						$this->fireControl[2] += $OBBoost;	
+						$this->fireControl[2] += $OBBoost;
 					}
 					break;
-					
-					
+
+
 				case 5://Prioritise Shots, and Damage equally.
-				
+
 					if($noOfBoosts <= 1){//1 boost - extra shot(3)
-						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);			
+						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
 					}else if($noOfBoosts == 2){//2 boosts
-						$this->bonusDamageShots += 1; //Split first two boosts into damage and an extra shot.							
+						$this->bonusDamageShots += 1; //Split first two boosts into damage and an extra shot.
 						$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
 					}else if($noOfBoosts == 3){//3 boosts
-						$this->bonusDamageShots += 1; //First boosts goes into damage.							
+						$this->bonusDamageShots += 1; //First boosts goes into damage.
 						$newShots = 2; //Then create two extra shots
 						for($i = 0; $i < $newShots; $i++){
 							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
 						}
 					}else if($noOfBoosts == 4){//4 boosts
-						$this->bonusDamageShots += 2; //Two boosts go into damage.							
+						$this->bonusDamageShots += 2; //Two boosts go into damage.
 						$newShots = 2;//Then create two extra shots
 						for($i = 0; $i < $newShots; $i++){
 							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
-						}						
+						}
 					}else{//5 of more Boosts
-						$this->bonusDamageShots += 3; //Three boosts go into damage.							
+						$this->bonusDamageShots += 3; //Three boosts go into damage.
 						$newShots = 2;//Then create two extra shots
 						for($i = 0; $i < $newShots; $i++){
 							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
-						}	
+						}
 					}
 					break;
 
-				
+
 				default://Same as Case 1.
 					if($noOfBoosts < 3){
 						// Create a new FireOrders
 						$newShots = $noOfBoosts;
 						for($i = 0; $i < $newShots; $i++){
 							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
-						}																	
-					}else{	
+						}
+					}else{
 						$newShots = 2;
 						for($i = 0; $i < $newShots; $i++){
 							$this->createNewFireOrder($ship, $target, $gamedata, $originalFireOrder);
-						}								
-													
-						$OBBoost = max(0, $noOfBoosts-$newShots) * 2;//Dump any remaining into hitchance, ensure not a minus.					
+						}
+
+						$OBBoost = max(0, $noOfBoosts-$newShots) * 2;//Dump any remaining into hitchance, ensure not a minus.
 						$this->fireControl[0] += $OBBoost;
 						$this->fireControl[1] += $OBBoost;
-						$this->fireControl[2] += $OBBoost;	
+						$this->fireControl[2] += $OBBoost;
 					}
 					break;
-													
-			}    	
-	
-	}//endof beforeFiringOrderResolution	
+
+			}
+	--- end OLD firing-mode preset distribution --- */
 
 	public function createNewFireOrder($ship, $target, $gamedata, $originalFireOrder){
 		
@@ -2751,26 +2814,25 @@ class MinorThoughtPulsar extends LinkedWeapon{
 	}
 
         
-    public function setSystemDataWindow($turn){          
+    public function setSystemDataWindow($turn){
             parent::setSystemDataWindow($turn);
-			$this->data["Special"] = "Can be improved for each 3 points of remaining Thrust after Movement.";  
-			$this->data["Special"] .= "<br>Select type of bonus using Firing Modes as follow:";
-			$this->data["Special"] .= "<br> - Rate of Fire - Prioritises extra shots this turn (+1 per 3 Thrust).";
-			$this->data["Special"] .= "<br> - Damage - Prioritises extra Damage this turn (+5 per shot per 3 Thrust).";
-			$this->data["Special"] .= "<br> - Hit Chance - Uses all thrust to improve hit chance (+10% per 3 Thrust).";				
-			$this->data["Special"] .= "<br> - Combo 1 - Prioritises Damage then shots, then Hitchance.";	
-			$this->data["Special"] .= "<br> - Combo 2 - Prioritises Shots and Damage equally.";				
+			$this->data["Special"] = "Can be improved by spending remaining Thrust after Movement (3 Thrust per step).";
+			$this->data["Special"] .= "<br>Freely allocate spare Thrust in the firing menu:";
+			$this->data["Special"] .= "<br> - Hit Chance - +2 OB (~+10% to hit) per 3 Thrust.";            
+			$this->data["Special"] .= "<br> - Shots - +1 shot per 3 Thrust.";     
+			$this->data["Special"] .= "<br> - Damage - +5 damage to one shot for 3 Thrust (limited by shots fired).";                   
+			$this->data["Special"] .= "<br>Use 'Propagate to flight' to copy the allocation to every Minor Thought Pulsar in the flight.";
     }
 
-    public function getDamage($fireOrder){         
+    public function getDamage($fireOrder){
 		$damage = Dice::d(6,1)+ 5;
-		  	    
-	    if($this->bonusDamageShots > 0){    	
+
+	    if($this->bonusDamageShots > 0){
 	    	$damage +=5;
-	    	$this->bonusDamageShots -= 1;	
-	    }   
-	    
-	    return $damage;    
+	    	$this->bonusDamageShots -= 1;
+	    }
+
+	    return $damage;
     }
     
     public function setMinDamage(){     $this->minDamage = 6 ;      }

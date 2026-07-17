@@ -1,0 +1,109 @@
+<?php
+class BrakiriTransport extends BaseShip{
+    function __construct($id, $userid, $name,  $slot){
+        parent::__construct($id, $userid, $name,  $slot);
+        
+        $this->pointCost = 230;
+        $this->faction = "Civilians";
+        $this->phpclass = "BrakiriTransport";
+        $this->imagePath = "img/ships/BrakiriTransport.png";
+        $this->shipClass = "Enbrak Transport";
+		$this->canvasSize = 200; 
+        $this->shipSizeClass = 3;
+        $this->gravitic = true;
+	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
+		$this->fighters = array("cargo shuttles"=>4);         
+
+	    $this->isd = 2199;
+		
+		
+        $this->notes = 'Atmospheric Capable.';
+		$this->notes .= 'Tor-Sikar';//Corporation producing the design        
+
+        $this->forwardDefense = 15;
+        $this->sideDefense = 13;
+        
+        $this->turncost = 1;
+        $this->turndelaycost = 1;
+        $this->accelcost = 6;
+        $this->rollcost = 999;
+        $this->pivotcost = 999;
+        $this->iniativebonus = -30;
+         
+        $this->addPrimarySystem(new Reactor(3, 11, 0, 0));
+        $this->addPrimarySystem(new CnC(4, 12, 0, 0));
+        $this->addPrimarySystem(new Scanner(3, 16, 2, 3));
+        $this->addPrimarySystem(new Engine(5, 16, 0, 6, 4));
+        $this->addPrimarySystem(new Hangar(2, 4, 1));
+  
+        $this->addFrontSystem(new GraviticThruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new GraviticThruster(4, 10, 0, 3, 1));
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 240, 60));
+        $this->addFrontSystem(new GraviticBolt(3, 5, 2, 300, 120));
+
+		
+		
+        $this->addRightSystem(new GraviticThruster(3, 13, 0, 3, 4));
+        $this->addRightSystem(new CargoBay(1, 40));
+
+
+        
+        $this->addLeftSystem(new GraviticThruster(3, 13, 0, 3, 3));
+        $this->addLeftSystem(new CargoBay(1, 40));
+
+
+        $this->addAftSystem(new GraviticThruster(3, 10, 0, 3, 2));
+        $this->addAftSystem(new GraviticThruster(3, 10, 0, 3, 2));
+        $this->addLeftSystem(new CargoBay(1, 30));
+        $this->addLeftSystem(new CargoBay(1, 30));
+        $this->addAftSystem(new GraviticBolt(3, 5, 2, 120, 300));
+        $this->addAftSystem(new GraviticBolt(3, 5, 2, 60, 240));
+		
+		
+        //0:primary, 1:front, 2:rear, 3:left, 4:right;
+        $this->addFrontSystem(new Structure( 4, 32));
+        $this->addAftSystem(new Structure( 5, 32));
+        $this->addLeftSystem(new Structure( 4, 40));
+        $this->addRightSystem(new Structure( 4, 40));
+        $this->addPrimarySystem(new Structure( 4, 64));       
+        
+        $this->hitChart = array(
+        		0=> array(
+        				12 => "Structure",
+        				13 => "Scanner",
+        				15 => "Engine",
+        				17 => "Hangar",
+        				19 => "Reactor",
+        				20 => "C&C",
+        		),
+        		1=> array(
+        				4 => "Gravitic Bolt",
+        				14 => "Thruster",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		2=> array(
+        				4 => "Gravitic Bolt",
+        				8 => "Cargo",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		3=> array(
+        				3 => "1: Thruster",
+        				6 => "Port Thruster",
+        				8 => "2: Thruster",
+        				13 => "Cargo Bay",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        		4=> array(
+        				3 => "1: Thruster",
+        				6 => "Port Thruster",
+        				8 => "2: Thruster",
+        				13 => "Cargo Bay",
+        				18 => "Structure",
+        				20 => "Primary",
+        		),
+        );
+    }
+}

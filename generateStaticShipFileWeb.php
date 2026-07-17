@@ -19,8 +19,77 @@ if (!headers_sent() && !ini_get('zlib.output_compression')) {
 // ----------------------
 // High Resource Limits for Generator
 // ----------------------
-ini_set('memory_limit', '-1'); // Unlimited memory
+// NOTE: memory_limit is deliberately FINITE, not '-1'.
+//
+// This host runs LiteSpeed, whose persistent lsphp workers have their own Memory
+// Hard Limit (configured in the LiteSpeed/panel config, NOT php.ini). With
+// memory_limit='-1' PHP will happily balloon past that limit, at which point LSWS
+// kills the worker mid-request and the browser gets an opaque 503. A finite limit
+// makes PHP fail first, with a real, readable "allowed memory exhausted" error and
+// a line number, instead of the process being SIGKILLed out from under us.
+ini_set('memory_limit', '1024M');
 set_time_limit(300); // 5 minutes
+
+// ----------------------
+// Progress + memory log (survives a worker kill) — DISABLED by default
+// ----------------------
+// Diagnostic instrumentation from the 2026-07 intermittent-503 investigation. It is
+// OFF; flip GEN_MEMORY_LOG to true to turn it back on. Leave it off in normal use —
+// it writes a file on every deploy and we don't need it once the generator is healthy.
+//
+// Turn it ON if the 503 (or any mid-run death) ever returns. If LiteSpeed kills the
+// lsphp worker on its memory hard limit, the response is discarded and any echo'd
+// diagnostics are lost with it — so this appends progress to a file instead. After a
+// failure, read source/public/static/generator-log.txt: the LAST line tells you which
+// faction was being processed and how much memory was in use when the process died,
+// and the 'boot' line's rss= of a SECOND consecutive run tells you whether the worker
+// came in already bloated from the previous run (the original root cause).
+define('GEN_MEMORY_LOG', false);
+
+$genLogFile = __DIR__ . '/source/public/static/generator-log.txt';
+$genLogStart = microtime(true);
+
+// Process RSS as the OS sees it. THIS is the figure LiteSpeed's lsphp Memory Hard
+// Limit is checked against — not php.ini's memory_limit, and not memory_get_usage(),
+// which only reports PHP's own arena and is reset per request. On a persistent lsphp
+// worker the RSS is what carries over between runs, so if the 'boot' line of a run
+// already shows a high rss=, the worker is bloated from the PREVIOUS run and is a
+// prime candidate to be killed (→ 503) partway through this one.
+$genRss = static function (): float {
+    if (!@is_readable('/proc/self/status')) {
+        return -1.0; // non-Linux (e.g. Windows dev box)
+    }
+    $status = @file_get_contents('/proc/self/status');
+    if ($status !== false && preg_match('/^VmRSS:\s+(\d+)\s+kB/mi', $status, $m)) {
+        return ((float)$m[1]) / 1024.0; // kB -> MB
+    }
+    return -1.0;
+};
+
+$genLog = function (string $msg) use ($genLogFile, $genLogStart, $genRss): void {
+    if (!GEN_MEMORY_LOG) {
+        return; // instrumentation disabled — all $genLog() call sites become no-ops
+    }
+    $rss = $genRss();
+    $line = sprintf(
+        "[%s] +%05.1fs  rss=%s  cur=%6.1fMB  peak=%6.1fMB  %s\n",
+        date('Y-m-d H:i:s'),
+        microtime(true) - $genLogStart,
+        $rss < 0 ? '   n/a  ' : sprintf('%6.1fMB', $rss),
+        memory_get_usage(true) / 1048576,
+        memory_get_peak_usage(true) / 1048576,
+        $msg
+    );
+    file_put_contents($genLogFile, $line, FILE_APPEND | LOCK_EX);
+};
+
+// Append (do NOT truncate): when enabled we want to compare a FIRST run against a
+// SECOND run in the same lsphp worker — the second run's boot rss= is the whole
+// diagnosis. A run marker keeps them apart.
+if (GEN_MEMORY_LOG) {
+    file_put_contents($genLogFile, "\n=== generator run started (pid " . getmypid() . ") ===\n", FILE_APPEND | LOCK_EX);
+}
+$genLog('boot (before includes)');
 
 //// ─── Includes ──────────────────────────────────────────────────────
 define('IN_STATIC_GENERATION', true);
@@ -87,74 +156,157 @@ function compactShipForStaticJson(array $ship): array {
     return $ship;
 }
 
-/**
- * Encode a faction's ship data with default-value stripping applied.
- * $data is keyed by phpclass => ship object.
- */
-function encodeCompactFactionData(array $data, int $flags = 0): string {
-    $compacted = [];
-    foreach ($data as $phpclass => $ship) {
-        $shipArray = json_decode(json_encode($ship, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE), true);
-        if (is_array($shipArray)) {
-            $compacted[$phpclass] = compactShipForStaticJson($shipArray);
-        } else {
-            $compacted[$phpclass] = $ship; // fallback
-        }
-    }
-    return json_encode($compacted, $flags | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE);
-}
-
 //// ─── Config ────────────────────────────────────────────────────────
 $fileBase = __DIR__ . '/source/public/static/ships';
 $combinedFile = $fileBase . 'Combined.js';
 
-// ----------------------
-// OPTIMIZATION: Fetch ALL ships at once O(N) instead of O(N*M)
-// ----------------------
-$shipsByFaction = ShipLoader::getAllShipsStatic(null);
-
-if (!$shipsByFaction) {
-    exit("<b>Error:</b> No ships found.");
-}
-
-// Initialize combined file with empty object
-file_put_contents($combinedFile, 'window.staticShips = {};' . PHP_EOL);
-
-// Ensure JSON directory exists
 $jsonDir = __DIR__ . '/source/public/static/json';
 if (!is_dir($jsonDir)) {
     mkdir($jsonDir, 0777, true);
 }
 
-//// ─── Generate Per-Faction JS Files ──────────────────────────────────
-foreach ($shipsByFaction as $factionName => $shipsOfFaction) {
-    $data = [];
-    
-    echo "<br/><br/><strong>$factionName</strong>:<br/>\n";
+$encodeFlags = JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE;
 
-    foreach ($shipsOfFaction as $ship) {
-        if ($ship && $ship instanceof BaseShip) {
-            // Debug output
-            echo " &nbsp; - {$ship->phpclass}<br/>\n";
+//// ─── STREAMING GENERATION ──────────────────────────────────────────
+//
+// We deliberately do NOT call ShipLoader::getAllShipsStatic(null) here any more.
+//
+// That helper instantiates every ship class in the game (~2700 ships, each with its
+// full system list, beforeTurn(), enhancement options and notesFill()) and returns
+// them ALL at once. Measured, that single call allocates ~350MB and the script peaks
+// near 385MB — and PHP's allocator does not hand that memory back to the OS, so a
+// persistent LiteSpeed lsphp worker stays bloated after the run. On the NEXT run that
+// warm worker allocates on top of the residue, crosses LiteSpeed's lsphp Memory Hard
+// Limit, and LSWS kills it mid-request → the intermittent 503 on every second run.
+//
+// Nothing here needs all the ships simultaneously — only one ship at a time, long
+// enough to encode it. So we stream: instantiate → encode → discard. Only the compact
+// JSON text is retained, spooled to a per-faction temp fragment on disk, which keeps
+// peak memory flat regardless of how many ships exist.
+//
+// This replicates getAllShipsStatic()'s semantics EXACTLY so the output is unchanged:
+//   - same class-name iteration order (getShipClassnamesStatic)
+//   - $count incremented once per existing class, and used as the ship id
+//   - same construction args, beforeTurn() on every system, setEnhancementOptions(),
+//     notesFill()
+//   - factions keyed in first-seen order
+$genLog('streaming generation: start');
 
-            // Store only what is needed for the static cache
-            $data[$ship->phpclass] = $ship;
-        }
+$names = ShipLoader::getShipClassnamesStatic();
+if (!$names) {
+    exit("<b>Error:</b> No ships found.");
+}
+
+// Per-faction fragment spool. One open handle per faction (~90), not per ship.
+$fragDir = sys_get_temp_dir() . '/fv_shipgen_' . getmypid();
+if (!is_dir($fragDir)) {
+    mkdir($fragDir, 0777, true);
+}
+
+$factionOrder = [];   // faction names, in first-seen order (mirrors old array key order)
+$fragHandles  = [];   // faction => resource
+$fragPaths    = [];   // faction => path
+$factionFirst = [];   // faction => bool, is the next ship the first of this faction?
+$shipCount    = 0;
+$count        = 0;    // MUST mirror getAllShipsStatic()'s $count — it becomes the ship id
+
+foreach ($names as $name) {
+    if (!class_exists($name)) {
+        continue;
+    }
+    $count++;
+
+    $ship = new $name($count, 0, "", 0, 0, false, false, array());
+    if (!($ship instanceof BaseShip)) {
+        unset($ship);
+        continue;
     }
 
-    // Append this faction to the combined file
-    // Use compact encoding to strip default/empty values (Optimisation #4)
-    $compactJson = encodeCompactFactionData($data, JSON_NUMERIC_CHECK);
-    $chunk = 'window.staticShips["' . $factionName . '"]=' . $compactJson . ';' . PHP_EOL;
-    file_put_contents($combinedFile, $chunk, FILE_APPEND);
+    foreach ($ship->systems as $system) {
+        $system->beforeTurn($ship, 0, 0);
+    }
+    Enhancements::setEnhancementOptions($ship); // enhancements (for fleet selection)
+    $ship->notesFill();
 
-    // Save pure JSON for server-side caching (Game Lobby)
-    $jsonPath = $jsonDir . '/' . $factionName . '.json';
-    $jsonPayload = [$factionName => json_decode($compactJson, true)];
-    file_put_contents($jsonPath, json_encode($jsonPayload, JSON_NUMERIC_CHECK | JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE));
-    
-    unset($data); // Free memory
+    $faction = $ship->faction;
+
+    if (!isset($fragHandles[$faction])) {
+        $factionOrder[] = $faction;
+        $fragPaths[$faction]    = $fragDir . '/' . md5($faction) . '.frag';
+        $fragHandles[$faction]  = fopen($fragPaths[$faction], 'wb');
+        $factionFirst[$faction] = true;
+
+        echo "<br/><br/><strong>$faction</strong>:<br/>\n";
+    }
+
+    echo " &nbsp; - {$ship->phpclass}<br/>\n";
+
+    // Encode this one ship, exactly as encodeCompactFactionData() used to per-ship.
+    $shipArray = json_decode(json_encode($ship, JSON_PARTIAL_OUTPUT_ON_ERROR | JSON_UNESCAPED_UNICODE), true);
+    $shipJson  = is_array($shipArray)
+        ? json_encode(compactShipForStaticJson($shipArray), $encodeFlags)
+        : json_encode($ship, $encodeFlags); // fallback, mirrors the old code path
+
+    // Write "phpclass":{...} — assembling the object map by hand, comma-separated.
+    // Key encoding uses the same flags as before, so escaping is identical.
+    fwrite(
+        $fragHandles[$faction],
+        ($factionFirst[$faction] ? '' : ',')
+        . json_encode((string)$ship->phpclass, JSON_UNESCAPED_UNICODE)
+        . ':' . $shipJson
+    );
+    $factionFirst[$faction] = false;
+    $shipCount++;
+
+    // Drop everything for this ship before moving to the next one. This is the whole
+    // point: at no moment do we hold more than a single ship's object graph.
+    unset($ship, $shipArray, $shipJson, $system);
+
+    // Periodic memory sample. A FLAT curve here means we are holding only one ship at
+    // a time as intended (the residual footprint is just the ~2500 loaded ship CLASS
+    // definitions, which is unavoidable). A curve that keeps CLIMBING with ship count
+    // would mean something is retaining ships and is a real leak worth chasing.
+    if ($shipCount % 250 === 0) {
+        $genLog("  ..progress: {$shipCount} ships");
+    }
 }
+
+$genLog("streamed {$shipCount} ships across " . count($factionOrder) . ' factions');
+
+// ─── Assemble the output files from the fragments ───
+// Fragments are copied through in chunks (stream_copy_to_stream), so even a large
+// faction is never fully resident in PHP memory.
+$combinedHandle = fopen($combinedFile, 'wb');
+fwrite($combinedHandle, 'window.staticShips = {};' . PHP_EOL);
+
+foreach ($factionOrder as $factionName) {
+    fclose($fragHandles[$factionName]);
+    $fragPath = $fragPaths[$factionName];
+
+    // shipsCombined.js: window.staticShips["Faction"]={ ...fragment... };
+    fwrite($combinedHandle, 'window.staticShips["' . $factionName . '"]={');
+    $in = fopen($fragPath, 'rb');
+    stream_copy_to_stream($in, $combinedHandle);
+    fclose($in);
+    fwrite($combinedHandle, '};' . PHP_EOL);
+
+    // Per-faction JSON for server-side caching (Game Lobby): {"Faction":{ ...fragment... }}
+    $jsonPath   = $jsonDir . '/' . $factionName . '.json';
+    $jsonHandle = fopen($jsonPath, 'wb');
+    fwrite($jsonHandle, '{' . json_encode((string)$factionName, JSON_UNESCAPED_UNICODE) . ':{');
+    $in = fopen($fragPath, 'rb');
+    stream_copy_to_stream($in, $jsonHandle);
+    fclose($in);
+    fwrite($jsonHandle, '}}');
+    fclose($jsonHandle);
+
+    unlink($fragPath);
+}
+
+fclose($combinedHandle);
+@rmdir($fragDir);
+
+$genLog('all factions written');
 
 //// ─── Base Files ─────────────────────────────────────────────────────
 
@@ -182,19 +334,38 @@ if (function_exists('apcu_clear_cache')) {
     echo "<br/>APCu not available — cache clear skipped.<br/>\n";
 }
 
-// OPcache = cached compiled PHP BYTECODE. Independent of APCu. On shared hosting
-// with conservative validate_timestamps/revalidate_freq, freshly-uploaded .php
-// files can keep executing the OLD compiled code for a while — producing the same
-// old-shape gamedata symptom even after APCu is cleared. Resetting here forces a
-// recompile of the patched sources on the next request.
-if (function_exists('opcache_reset')) {
-    $opcacheReset = opcache_reset();
-    echo $opcacheReset
-        ? "<br/>OPcache reset.<br/>\n"
-        : "<br/><strong>Warning:</strong> opcache_reset() returned false (may be disabled or restricted).<br/>\n";
-} else {
-    echo "<br/>OPcache not available — reset skipped.<br/>\n";
-}
+// OPcache = cached compiled PHP BYTECODE. Independent of APCu.
+//
+// We deliberately DO NOT call opcache_reset() here.
+//
+// This host runs LiteSpeed (SAPI: litespeed) with opcache.validate_timestamps=On
+// and revalidate_freq=30s. That means freshly-uploaded .php files are auto-detected
+// and lazily recompiled per-file within the revalidate window — no manual reset is
+// needed to pick up a patch.
+//
+// A blanket opcache_reset() from inside a live web request on LiteSpeed empties the
+// entire shared-SHM bytecode cache (~2500 scripts) at once, forcing the lsphp worker
+// pool to recompile the whole codebase simultaneously. That recompile storm can
+// exhaust the pool / trip a worker limit, and LiteSpeed responds with an intermittent
+// 503 to whichever request lands in the window (fixed by an lsphp pool restart, e.g.
+// re-saving PHP settings in the host panel). Since validate_timestamps already gives
+// us correct pickup for free, the reset is pure downside here and is intentionally
+// omitted. If instant (sub-30s) pickup is ever required, lower revalidate_freq at the
+// host level instead of resetting from a web request.
+echo "<br/>OPcache reset skipped by design (validate_timestamps=On handles pickup; "
+   . "reset would risk a LiteSpeed recompile-storm 503).<br/>\n";
+
+// --- Original blanket reset, disabled (kept for reference / quick restore). ---
+// Re-enable ONLY if validate_timestamps is turned Off at the host level, and be
+// aware it can cause the intermittent LiteSpeed 503 documented above.
+// if (function_exists('opcache_reset')) {
+//     $opcacheReset = opcache_reset();
+//     echo $opcacheReset
+//         ? "<br/>OPcache reset.<br/>\n"
+//         : "<br/><strong>Warning:</strong> opcache_reset() returned false (may be disabled or restricted).<br/>\n";
+// } else {
+//     echo "<br/>OPcache not available — reset skipped.<br/>\n";
+// }
 
 // ─── OPcache diagnostics ───
 // One-time-per-deploy readout so we can confirm empirically (rather than guess)
@@ -248,6 +419,18 @@ if (function_exists('opcache_get_status') && function_exists('opcache_get_config
 } else {
     echo " &nbsp; - opcache_get_status()/get_configuration() not available.<br/>\n";
 }
+
+//// ─── Memory report ─────────────────────────────────────────────────
+// The number that matters for the intermittent 503: if PEAK approaches the
+// LiteSpeed lsphp Memory Hard Limit, a warm (already-bloated) worker on a second
+// consecutive run will cross it and be killed → 503. Compare this figure against
+// the host's LiteSpeed memory limit, not against php.ini's memory_limit.
+$genLog('run complete');
+$peakMb = memory_get_peak_usage(true) / 1048576;
+echo "<br/><strong>Peak memory:</strong> " . number_format($peakMb, 1) . " MB"
+   . " &nbsp;(php.ini memory_limit: " . htmlspecialchars((string)ini_get('memory_limit')) . ")<br/>\n";
+echo " &nbsp; <em>Compare this against the LiteSpeed lsphp Memory Hard Limit — if it is "
+   . "close, a warm worker on a repeat run will be killed and you get a 503.</em><br/>\n";
 
 //// ─── Output Result ─────────────────────────────────────────────────
 echo "<br/><br/><big>Ships generated (Bundled)!</big><br/>\n";

@@ -11,7 +11,7 @@ class EarthforceOne  extends BaseShip{
         $this->shipClass = "EarthForce One (Delta)";
         $this->shipSizeClass = 3;
         $this->canvasSize = 180;
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>12, "presidential shuttle"=> 2);
 		$this->customFighter = array("Thunderbolt"=>12);
         $this->occurence = "unique";
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup 

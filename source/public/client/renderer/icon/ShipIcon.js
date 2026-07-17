@@ -264,15 +264,16 @@ window.ShipIcon = function () {
         // an empty hex would reveal all their facing/heading arrows at once.
     };
 
-    // Selection/side circle args. Participants get the friend/foe type; observers
-    // (not in the game) get a per-team key + colour so the filled side circle matches
-    // the team-coloured ship overlay. Terrain is unaffected.
+    // Selection/side circle args, matching getShipOverlayColor. 2-team
+    // participants get the friend/foe type; observers AND 3+-team participants
+    // get a per-team key + colour so the filled side circle matches the
+    // team-coloured ship overlay. Terrain is unaffected.
     ShipIcon.prototype.getSideSpriteArgs = function (ship) {
         if (this.terrain) {
             return { type: 'terrain', teamColor: null };
         }
 
-        if (!gamedata.isPlayerInGame()) {
+        if (!gamedata.isPlayerInGame() || gamedata.getDistinctTeamCount() !== 2) {
             return { type: 'team' + ship.team, teamColor: gamedata.getTeamColorRGB(ship.team) };
         }
 
@@ -559,6 +560,7 @@ window.ShipIcon = function () {
 
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
         if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
+        if(weapon.stowed && weapon.stowedArcStart == null) return null; //stowed weapon with no stowed arc (Kirishiac Orbital docked) - non-operational, no arc to show. A stowed arc set (Heavy Orbital) keeps the weapon live: draw its current (reduced) arc.
 
         var hexDistance = window.coordinateConverter.getHexDistance();
 
@@ -836,7 +838,7 @@ window.ShipIcon = function () {
     // fixed 20-hex BDEW blanket. Uses a single base colour (#5e338a) for all ships.
     ShipIcon.prototype.showMDEW = function () {
         var MDEW = ew.getDetectMEW(this.ship);
-        if (!MDEW || this.MDEWSprite) {
+        if (!MDEW || !gamedata.areMinesPresent || this.MDEWSprite) {
             return;
         }
 

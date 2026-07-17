@@ -11,6 +11,7 @@ class Enbrak extends BaseShip{
         $this->shipClass = "Brakiri Enbrak Transport";
         $this->shipSizeClass = 3;
 		$this->isd = 2199;
+		$this->variantOf = 'OBSOLETE';	         
         
 		$this->notes = 'Tor-Sikar';//Corporation producing the design
 		

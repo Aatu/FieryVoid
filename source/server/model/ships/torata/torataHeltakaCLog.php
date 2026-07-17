@@ -43,7 +43,7 @@ class TorataHeltakaCLog extends BaseShip{
 		
 		$this->addAftSystem(new PentagonArray(3, 8, 5, 120, 300));
 		$this->addAftSystem(new PentagonArray(3, 8, 5, 60, 240));
-		$this->addAftSystem(new Thruster(4, 14, 0, 3, 2));
+		$this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
 		$this->addAftSystem(new Thruster(4, 14, 0, 6, 2));
 
 		$this->addLeftSystem(new Thruster(4, 15, 0, 6, 3));

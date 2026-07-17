@@ -10,6 +10,8 @@ class MedViper extends FighterFlight{
         $this->shipClass = "Viper Mk7 Medium Flight";
         $this->imagePath = "img/ships/BSG/viperMk7.png";
 		$this->unofficial = true;
+		$this->variantOf = 'NONE';	//In development?            
+        
 
         $this->isd = 1948;
 

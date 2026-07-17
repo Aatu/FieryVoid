@@ -510,7 +510,7 @@ window.shipWindowManager = {
 					} else if (i == "superheavy" || i == "heavy" || i == "medium" || i == "light" || i == "ultralight") {
 						//fighters with description
 						notes.push("&nbsp;&nbsp;&nbsp;" + amount + " " + capitalizedType + " Fighters");
-					} else if (i == "shuttles" || i == "minesweeping shuttles" || i == "cargo shuttles" || i == "medical shuttles" || i == "lifeboats") {
+					} else if (i == "shuttles" || i == "minesweeping shuttles" || i == "cargo shuttles" || i == "lifeboats" || i == "medical shuttles" || i == "presidential shuttle" || i == "yacht") {
 						//Auto-populated free shuttles — listed via getDefaultShuttleComposition below.
 						continue;
 					} else {
@@ -755,7 +755,7 @@ window.shipWindowManager = {
 			list = Array();
 		}
 
-		if (!structDone) {
+		if (!structDone && structure) { //a side section may hold systems without its own structure block (Kirishiac Conqueror orbitals)
 			grouped.push(Array(structure));
 		}
 

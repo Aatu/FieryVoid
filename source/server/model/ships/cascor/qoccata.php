@@ -29,8 +29,7 @@ class Qoccata extends BaseShip{
         $this->addPrimarySystem(new CnC(5, 24, 0, 0));
         $this->addPrimarySystem(new Scanner(5, 20, 5, 8));
         $this->addPrimarySystem(new Engine(5, 30, 0, 16, 9));
-		$this->addPrimarySystem(new Hangar(5, 26));
-		
+		$this->addPrimarySystem(new Hangar(5, 26, 12, 0, 'heavy')); //primary bay reserved for heavy fighters and shuttles only;
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new Thruster(4, 15, 0, 4, 1));
         $this->addFrontSystem(new DualIonBolter(2, 4, 4, 240, 60));
@@ -44,8 +43,8 @@ class Qoccata extends BaseShip{
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new Thruster(4, 12, 0, 4, 2));
         $this->addAftSystem(new JumpEngine(4, 16, 4, 24));
-        $this->addAftSystem(new Hangar(4, 12));
-        $this->addAftSystem(new Hangar(4, 12));
+        $this->addAftSystem(new Hangar(4, 12, 6, 0, 'medium', array(), true)); //aft bay reserved for medium fighters only (5th arg); excluded from default-shuttle auto-fill (7th arg) so it stays free for them));));
+        $this->addAftSystem(new Hangar(4, 12, 6, 0, 'medium', array(), true)); //aft bay reserved for medium fighters only (5th arg); excluded from default-shuttle auto-fill (7th arg) so it stays free for them));));
         $this->addAftSystem(new IonCannon(3, 6, 4, 180, 300));
         $this->addAftSystem(new IonCannon(3, 6, 4, 60, 180));
         $this->addAftSystem(new DualIonBolter(2, 4, 4, 120, 300));
@@ -56,14 +55,14 @@ class Qoccata extends BaseShip{
 		$this->addLeftSystem(new IonTorpedo(3, 5, 4, 240, 360));
         $this->addLeftSystem(new DualIonBolter(2, 4, 4, 180, 360));
 		$this->addLeftSystem(new Thruster(4, 20, 0, 8, 3));
-		$this->addLeftSystem(new Hangar(4, 6));
+		$this->addLeftSystem(new Hangar(4, 6, 6, 0, 'ultralight', array(), true)); //reserved for ultralight fighters only (5th arg); excluded from default-shuttle auto-fill (7th arg) so it stays free for them));
         
 		$this->addRightSystem(new IonCannon(3, 6, 4, 0, 120));
 		$this->addRightSystem(new IonCannon(3, 6, 4, 0, 120));
 		$this->addRightSystem(new IonTorpedo(3, 5, 4, 0, 120));
 		$this->addRightSystem(new DualIonBolter(2, 4, 4, 0, 180));
 		$this->addRightSystem(new Thruster(4, 20, 0, 8, 4));
-		$this->addRightSystem(new Hangar(4, 6));
+		$this->addRightSystem(new Hangar(4, 6, 6, 0, 'ultralight', array(), true)); //reserved for ultralight fighters only (5th arg); excluded from default-shuttle auto-fill (7th arg) so it stays free for them));
 		
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 50));

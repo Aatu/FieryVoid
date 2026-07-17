@@ -257,13 +257,15 @@ window.gamedata = {
         }
     },
 
-    // Base team colours (sRGB 0-255), team 1..8. Teams 2-3 match the enemy/ally
-    // colours used for participants so the two views stay consistent. Team 1 uses
-    // CSS limegreen (== combat-log FIRE: "mine" green); note the participant
-    // "mine" ship-icon overlay in getShipOverlayColor is intentionally a lighter
-    // green ([160,250,100]) and is NOT kept in sync with this.
+    // Base team colours (sRGB 0-255), team 1..8. Teams 1-3 match the
+    // mine/enemy/ally colours used for participants so the two views stay
+    // consistent. Team 1 uses CSS limegreen (== combat-log FIRE: "mine" green);
+    // note the participant "mine" ship-icon overlay in getShipOverlayColor is
+    // intentionally a lighter green ([160,250,100]) and is NOT kept in sync.
+    // Team 3 is the SAME blue as the participant "ally" (user preference — a
+    // deeper/steel blue was tried but read too dark).
     teamBaseColors: [
-        [50, 205, 50],   // 1 Green  (CSS limegreen)
+        [50, 205, 50],   // 1 Green  (== "mine")
         [255, 80, 80],   // 2 Red    (== "enemy")
         [51, 173, 255],  // 3 Blue   (== "ally")
         [255, 150, 40],  // 4 Orange
@@ -338,15 +340,16 @@ window.gamedata = {
         return new THREE.Color(rgb[0] / 255, rgb[1] / 255, rgb[2] / 255).convertSRGBToLinear();
     },
 
-    // Overlay colour for a ship icon. Participants see the familiar mine/ally/enemy
-    // scheme; observers (not in the game) see a distinct colour per team instead of
-    // everything being red.
+    // Overlay colour for a ship icon. Mirrors the fleetList / combat-log scheme:
+    // 2-team participants see the familiar relative mine/ally/enemy scheme;
+    // observers AND 3+-team participants see a distinct colour per team instead
+    // (a single "ally" colour is ambiguous once there are several teams).
     getShipOverlayColor: function getShipOverlayColor(ship, mine, ally, terrain) {
         if (terrain) {
             return new THREE.Color(0xBE / 255, 0xBE / 255, 0xBE / 255).convertSRGBToLinear(); // Off-white
         }
 
-        if (!gamedata.isPlayerInGame()) {
+        if (!gamedata.isPlayerInGame() || gamedata.getDistinctTeamCount() !== 2) {
             return gamedata.getTeamColor(ship.team);
         }
 
@@ -357,6 +360,35 @@ window.gamedata = {
             return new THREE.Color(51 / 255, 173 / 255, 255 / 255).convertSRGBToLinear(); // Light blue
         }
         return new THREE.Color(255 / 255, 40 / 255, 40 / 255).convertSRGBToLinear(); // Red
+    },
+
+    // CSS "color:rgb(...)" string for a FLEET-LIST header (team number + player
+    // name), keyed on a player SLOT. Mirrors the combat-log colour scheme:
+    //   - Observer (not a player in this game): absolute per-team palette, so
+    //     every distinct team is identifiable (no "ally" — nobody is your ally).
+    //   - Participant in a 2-team game: relative mine=green / ally=blue /
+    //     enemy=red, matching the FIRE-header scheme so your own fleet reads
+    //     green even if you're team 2.
+    //   - Participant in a 3+-team game: fall back to the absolute per-team
+    //     palette (same as observer) — with several teams a single "ally" blue
+    //     is ambiguous, so each team gets its own colour instead.
+    // Returns a raw "rgb(r,g,b)" string (no "color:" prefix) so callers can drop
+    // it straight into a style attribute.
+    getFleetHeaderColorRGB: function getFleetHeaderColorRGB(slot) {
+        var rgb;
+        if (gamedata.isPlayerInGame() && gamedata.getDistinctTeamCount() === 2) {
+            if (parseInt(slot.playerid, 10) === parseInt(gamedata.thisplayer, 10)) {
+                rgb = [50, 205, 50];    // green (mine)
+            } else if (parseInt(slot.team, 10) === parseInt(gamedata.getPlayerTeam(), 10)) {
+                rgb = [51, 173, 255];   // blue (ally)
+            } else {
+                rgb = [255, 80, 80];    // red (enemy)
+            }
+        } else {
+            // Observer, or 3+-team participant: absolute per-team palette.
+            rgb = gamedata.getTeamColorRGB(slot.team);
+        }
+        return "rgb(" + Math.round(rgb[0]) + "," + Math.round(rgb[1]) + "," + Math.round(rgb[2]) + ")";
     },
 
     isPlayerInGame: function isPlayerInGame() {
@@ -386,7 +418,7 @@ window.gamedata = {
     //and the default-shuttle pool hangarTypes.
     isDefaultShuttleEntry: function isDefaultShuttleEntry(entry) {
         if (!entry) return false;
-        var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "MedicalShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1, "lifeboats":1 };
+        var shuttleClasses = { "Shuttle": 1, "MinesweepingShuttle": 1, "CargoShuttle": 1, "Flyer": 1, "FlyerProtectorate": 1, "Lifeboat":1, "MedicalShuttle": 1, "PresidentialShuttle": 1, "EmperorsYacht": 1 };
         if (entry.phpclass && shuttleClasses[entry.phpclass]) return true;
         var t = String(entry.hangarType || "").toLowerCase().trim();
         if (t === "shuttles" || t === "minesweeping shuttles") return true;
@@ -608,7 +640,7 @@ window.gamedata = {
                                 break;
                             }
                             if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
-                                && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon)) //check for ammo (if relevant - GTS
+                                && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon, true)) //check for ammo (if relevant - GTS
                             ) { //non-ballistic weapon ready to fire
                                 hasReadyLaunchers = true;
                             }
@@ -638,7 +670,7 @@ window.gamedata = {
                                             hasReadyLaunchers = true;
                                         }*/
                                         if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i]))
-                                            && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon)) //check for ammo (if relevant
+                                            && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon, true)) //check for ammo (if relevant
                                         ) { //non-ballistic weapon ready to fire
                                             hasReadyLaunchers = true;
                                         }
@@ -843,7 +875,7 @@ window.gamedata = {
                                     break;
                                 }
                                 if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
-                                    && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon)) //check for ammo (if relevant - GTS
+                                    && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon, true)) //check for ammo (if relevant - GTS
                                 ) { //non-ballistic weapon ready to fire
                                     hasReadyGuns = true;
                                 }
@@ -869,7 +901,7 @@ window.gamedata = {
                                                 break;
                                             }
                                             if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i]))
-                                                && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon)) //check for ammo (if relevant											
+                                                && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon, true)) //check for ammo (if relevant											
                                             ) { //non-ballistic weapon ready to fire
                                                 hasReadyGuns = true;
                                             }
@@ -955,7 +987,7 @@ window.gamedata = {
                                 break;
                             }
                             if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], currWeapon))
-                                && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon)) //check for ammo (if relevant - GTS
+                                && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon, true)) //check for ammo (if relevant - GTS
                             ) { //non-ballistic weapon ready to fire
                                 hasReadyGuns = true;
                             }
@@ -979,7 +1011,7 @@ window.gamedata = {
                                             break;
                                         }
                                         if (weaponManager.isLoaded(currWeapon) && (!shipManager.systems.isDestroyed(myShips[ship], myShips[ship].systems[i]))
-                                            && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon)) //check for ammo (if relevant											
+                                            && (!weaponManager.checkOutOfAmmo(myShips[ship], currWeapon, true)) //check for ammo (if relevant											
                                         ) { //non-ballistic weapon ready to fire
                                             hasReadyGuns = true;
                                         }
@@ -1133,7 +1165,7 @@ window.gamedata = {
                     for (var mi = 0; mi < mustDockNames.length; mi++) {
                         hangarDeployError += '<span class="ship-name">- ' + mustDockNames[mi] + '</span><br>';
                     }
-                    hangarDeployError += "<br>Dock them into a carrier's hangar before committing yor orders.";
+                    hangarDeployError += "<br>Dock them into a carrier's hangar before committing your orders.";
                     window.confirm.error(hangarDeployError, function () { });
                     return false;
                 }
@@ -1727,11 +1759,16 @@ getActiveShipName: function getActiveShipName() {
 
             //var categoryIndex = window.SimultaneousMovementRule.getShipCategoryIndex(ships[i]);
 
-            // Observers (not in the game) colour the initiative number by team
-            // instead of the mine/ally/enemy scheme. Use the IniGUI-darkened
-            // palette so it isn't brighter than the muted CSS participant colours.
+            // Colour the initiative number by team (per-team palette) instead of
+            // the relative mine/ally/enemy scheme for observers AND 3+-team
+            // participants, matching the fleetList / combat-log / ship-icon rule
+            // (a single "ally" colour is ambiguous once there are several teams).
+            // Use the IniGUI-darkened palette so it isn't brighter than the muted
+            // CSS participant colours. When teamColorCss is set, the active-mover
+            // box below also switches to the per-team style, so the whole row
+            // follows one scheme.
             var teamColorCss = "";
-            if (!gamedata.isPlayerInGame()) {
+            if (!gamedata.isPlayerInGame() || gamedata.getDistinctTeamCount() !== 2) {
                 var iniRgb = gamedata.getIniTeamColorRGB(ships[i].team);
                 teamColorCss = "color:rgb(" + iniRgb[0] + "," + iniRgb[1] + "," + iniRgb[2] + ");";
             }

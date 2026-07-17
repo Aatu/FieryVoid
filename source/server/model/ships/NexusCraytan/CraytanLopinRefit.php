@@ -13,6 +13,7 @@ class CraytanLopinRefit extends BaseShip{
 		$this->canvasSize = 160; 
 		$this->unofficial = true;
         $this->limited = 10;
+			$this->variantOf = 'NONE';	//In development? 		
 
         $this->fighters = array("assault shuttles"=>6);
 

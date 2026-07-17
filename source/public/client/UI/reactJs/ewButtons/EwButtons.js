@@ -202,7 +202,9 @@ const Container = styled.div`
     top: 60px;
     z-index: 4;
 
-    @media (max-width: 765px) {
+    /* Narrow phones (portrait) OR short landscape phones: nudge up.
+       Landscape phones report width > 765px, so key off short height too. */
+    @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         top: 50px;
     }
 
@@ -221,7 +223,9 @@ const MainButton = styled(ContainerRoundedRightSide)`
     background-size: cover;
     ${Clickable}
 
-    @media (max-width: 765px) {
+    /* Shrink on narrow phones (portrait) AND short landscape phones — a phone
+       held sideways is wider than 765px, so also match on short viewport height. */
+    @media (max-width: 765px), (max-height: 500px) and (orientation: landscape) {
         width: 30px;
         height: 30px;
         font-size: 20px;

@@ -10,6 +10,7 @@ class LtViper extends FighterFlight{
         $this->shipClass = "Viper Mk2 Light Flight";
         $this->imagePath = "img/ships/BSG/viperMk2.png";
 		$this->unofficial = true;
+		$this->variantOf = 'NONE';	//In development?        
 
 //        $this->isd = 1948;
 

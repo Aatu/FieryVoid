@@ -8,6 +8,7 @@ class MCmine extends MineClass{
         $this->phpclass = "MCmine";
         $this->shipClass = "Matter Cannon Mine";
         $this->imagePath = "img/ships/mine.png";
+		$this->variantOf = 'OBSOLETE';	         
         
 //		$this->isd = 1950;
        

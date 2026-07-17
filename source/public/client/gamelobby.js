@@ -164,6 +164,9 @@ window.gamedata = {
 			case 'Terrain':
 				powerRating = 'Tier Other';
 				break;
+			case 'The System':
+				powerRating = 'Tier Ancients, Custom faction, Playtest';
+				break;
 			case 'Thirdspace':
 				powerRating = 'Tier Ancients, Custom faction';
 				break;
@@ -955,13 +958,14 @@ window.gamedata = {
 							breachingPodsList.push({ id: lship.id });
 						}
 					} else if (smallCraftSize == "heavy") {
-						totalFtrH += lship.flightSize / lship.unitSize;
+						totalFtrH += lship.flightSize / lship.unitSize;		
 					} else if (smallCraftSize == "medium") {
 						totalFtrM += lship.flightSize / lship.unitSize;
 					} else if (smallCraftSize == "light") {
 						totalFtrL += lship.flightSize / lship.unitSize;
 					} else if (smallCraftSize == "ultralight") {
-						totalFtrXL += lship.flightSize / lship.unitSize;
+						//totalFtrXL += lship.flightSize / lship.unitSize;
+						totalFtrXL += lship.flightSize; //Ultralight should show 1 usage in their own row.						
 					} else if (smallCraftSize == "assault shuttles") {
 						totalFtrAS += lship.flightSize / lship.unitSize;
 					} else { //something other than standard fighters
@@ -1299,7 +1303,7 @@ window.gamedata = {
 		var totalHangarCurr = 0;
 
 		checkResult += "<br><b><u>Fighters:</u></b><br>";
-		checkResult += "<br> Total Fighters: " + totalFtrPresent;
+		checkResult += "<br> Total Hangar Usage: " + totalFtrPresent;
 		checkResult += " (select between " + minFtrRequired + " and " + totalHangarAvailable + ")";
 		if ((totalFtrXL > 0) || (totalHangarXL > 0)) { //add disclaimer because sums will not add up straight
 			checkResult += " <i>[Note - Ultralights only use half a hangar slot]</i>";
@@ -1850,6 +1854,12 @@ window.gamedata = {
 			"Custom Factions": []
 		};
 
+		// Custom factions whose power rating also names a tier keyword (e.g. "Tier Ancients")
+		// would be grouped by that keyword instead of as customs. List them here to force
+		// them into Custom Factions while keeping their tier for the tier filter. Factions
+		// NOT listed here keep the keyword grouping (Thirdspace stays under Ancients).
+		const forceCustomGroup = ["The System"];
+
 		for (let faction of jsonFactions) {
 			const powerRating = gamedata.getPowerRating(faction);
 			const lowerPower = powerRating.toLowerCase();
@@ -1857,7 +1867,8 @@ window.gamedata = {
 
 			// ✅ Grouping prioritizes Minor > Major > Ancients > Other > Custom
 			let groupName = "Other Factions";
-			if (lowerPower.includes("minor")) groupName = "Minor Factions";
+			if (isCustom && forceCustomGroup.includes(faction)) groupName = "Custom Factions";
+			else if (lowerPower.includes("minor")) groupName = "Minor Factions";
 			else if (lowerPower.includes("major")) groupName = "Major Factions";
 			else if (lowerPower.includes("league")) groupName = "League of Non-Aligned Worlds";
 			else if (lowerPower.includes("ancients")) groupName = "Ancients";
@@ -2175,7 +2186,7 @@ window.gamedata = {
 
 				//display header
 				var isCollapsible = true; // All categories are collapsible now
-				var startClosed = ((categoryIndex === 1 && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace" && ship.faction !== "Usuuth Coalition" && ship.faction !== "Civilians") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
+				var startClosed = ((categoryIndex === 1 && ship.faction !== "Deneth Tribes" && ship.faction !== "Thirdspace" && ship.faction !== "Usuuth Coalition" && ship.faction !== "Civilians" && ship.faction !== "Barada Imperium") || categoryIndex === 5 || categoryIndex === 6); // 1 = LCVs, 5 = Immobile Structures, 6 = Mines
 				if (faction === "Terrain") {
 					startClosed = false;
 				}

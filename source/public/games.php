@@ -135,11 +135,12 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — July 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->    
-        <li><strong>HK Control Nodes</strong> - Hunker-Kiler drones which don't have a control node will not become 'Uncontrolled'. Uncontrolled HKs will now attempt to avoid Terrain.</li>      
-        <li><strong>HK Jamming</strong> - ELINT vessels can use EW to try and jam Orieni Hunter-Killer drones.  More details available in the the new EW section of FAQ.</li>  
-        <li><strong>Shadow Fighter Bomb</strong> - Shadow fighters are now purchased as enhancements, and can launch and be re-absorbed by their carrier ships.</li>                                         
-        <li><strong>Fleet Selection</strong> -  The ‘Show Custom’ checkbox is now ticked by default in Fleet Builder screens, and games where Custom Factions are marked as ‘Allowed’.</li>                                                                                       
-        <li><strong>New Critical</strong> - Quad and Twin Arrays can be affected by the 'Gun Lost' critical.</li>  
+        <li><strong>THE KIRISHIAC LORDS</strong> - A brand-new Ancient faction has been added to Fiery Void!</li>      
+        <li><strong>Civilians and Raiders</strong> - A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li> 
+        <li><strong>Hangar Refinements</strong> - Hangars allowance have increased specificity and can split launch shuttles.</li>   
+        <li><strong>Sh'lassan and Mentaban</strong> - Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>                                                        
+        <li><strong>Minor Thought Pulsar </strong> - New menu added to give full control over spending unused thrust</li>                                                                                       
+        <li><strong>Team Colours</strong> - Improved team colours for games which feature more than two teams.</li>        
         <li><strong>General Fixes</strong> - Many other small bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

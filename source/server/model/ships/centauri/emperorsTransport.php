@@ -10,7 +10,7 @@ class EmperorsTransport extends BaseShip{
         $this->shipClass = "Emperor's Transport";
 	    $this->variantOf = "Primus Battlecruiser";
         $this->occurence = "special";
-        $this->fighters = array("normal"=>12);
+        $this->fighters = array("normal"=>12, "yacht"=>1);
 	    $this->isd = 2202;
 	    $this->isCombatUnit = false; //not a combat unit, it will never be present in a regular battlegroup
 	    
