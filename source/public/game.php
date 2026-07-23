@@ -67,7 +67,10 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/game.legacy.bundle.js'); ?>" as="script">
     <?php endif; ?>
     
-    <link href="styles/tactical.css" rel="stylesheet" type="text/css">
+    <!-- ?v=mtime: .htaccess serves CSS with "access plus 1 month", so without a
+         cache-buster a stylesheet edit can take up to a month to reach returning
+         players. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/tactical.css'); ?>" rel="stylesheet" type="text/css">
     <!-- STAGE4-RETIRED legacy ship-window stylesheet (ship-window redesign Stage 4) - delete once the redesign is stable on live
     <link href="styles/shipwindow.css" rel="stylesheet" type="text/css"> -->
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
