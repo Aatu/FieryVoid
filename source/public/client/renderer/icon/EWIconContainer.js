@@ -101,6 +101,40 @@ window.EWIconContainer = function () {
         }, this);
     };
 
+    //Ship-window EW strip hover (SHIPWINDOW_REDESIGN_PLAN.md Stage 1e): emphasise the
+    //line sprite between shooter and hovered target - wider line, full opacity - and
+    //restore it (including its previous visibility) on mouse-out. A hidden target has
+    //no sprite at all (createOrUpdateOEW skips it), so this silently no-ops and never
+    //leaks a stealthed/undeployed ship's position.
+    EWIconContainer.prototype.highlightForTarget = function (shipId, targetId, type, active) {
+        this.ewIcons.forEach(function (icon) {
+            if (icon.shipId !== shipId || icon.targetId !== targetId) return;
+            if (type && icon.type !== type) return;
+
+            if (active) {
+                if (icon.highlighted) return;
+                icon.highlighted = true;
+                icon.preHighlightVisible = icon.sprite.mesh.visible;
+                icon.sprite.setStartAndEnd(icon.shipIcon.getPosition(), icon.targetIcon.getPosition());
+                icon.sprite.setLineWidth(Math.max(getOEWLineWidth.call(this, icon.amount) * 2, 2));
+                icon.sprite.multiplyOpacity(2);
+                icon.sprite.show();
+            } else {
+                if (!icon.highlighted) return;
+                icon.highlighted = false;
+                icon.sprite.setLineWidth(getOEWLineWidth.call(this, icon.amount));
+                icon.sprite.multiplyOpacity(1);
+                if (!icon.preHighlightVisible) {
+                    icon.sprite.hide();
+                }
+            }
+        }, this);
+    };
+
+    EWIconContainer.prototype.onEwTargetHighlight = function (payload) {
+        this.highlightForTarget(payload.shipId, payload.targetId, payload.type, payload.active);
+    };
+
     EWIconContainer.prototype.onEvent = function (name, payload) {
         var target = this['on' + name];
         if (target && typeof target == 'function') {

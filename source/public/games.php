@@ -101,7 +101,9 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
   <div class="top-right-row">
     <a href="reg.php">Register new account</a>
     <span>|</span>
-    <a href="chpass.php">Change password</a>    
+    <a href="chpass.php">Change password</a>
+    <span>|</span>
+    <a href="profile.php">Set-Up Discord Notifications</a>
     <a href="logout.php" class="btn btn-primary">Logout</a>
   </div>
 </header>
@@ -135,12 +137,11 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — July 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->    
-        <li><strong>THE KIRISHIAC LORDS</strong> - A brand-new Ancient faction has been added to Fiery Void!</li>      
-        <li><strong>Civilians and Raiders</strong> - A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li> 
-        <li><strong>Hangar Refinements</strong> - Hangars allowance have increased specificity and can split launch shuttles.</li>   
-        <li><strong>Sh'lassan and Mentaban</strong> - Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>                                                        
-        <li><strong>Minor Thought Pulsar </strong> - New menu added to give full control over spending unused thrust</li>                                                                                       
-        <li><strong>Team Colours</strong> - Improved team colours for games which feature more than two teams.</li>        
+        <li><strong>KIRISHIAC LORDS</strong> - A brand-new Ancient faction has been added to Fiery Void!</li>  
+        <li><strong>Ship Window Revamp</strong> - Ship windows (SCS) have been updated in Game and Fleet Selection screens to improve appearance and functionality.</li> 
+        <li><strong>Discord Notifications</strong> - You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>           
+        <li><strong>Civilians and Raiders</strong> - A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li>          
+        <li><strong>Sh'lassan and Mentaban</strong> - Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>                                                              
         <li><strong>General Fixes</strong> - Many other small bug fixes/updates. Thanks for the reports!</li>           
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>

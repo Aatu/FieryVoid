@@ -1061,7 +1061,13 @@ public function onDamagedSystem($ship, $system, $damage, $armour, $gamedata, $fi
         // for the base value (base armour ignores class; Matter-zeroing lives in weapon.php),
         // so passing $weaponClass is fine and the old "Particle trick" was never necessary.
         // Estimation-only path: excludes ArmorReduced crits / advanced-armour / raking mods - intentional here.
-        $armour = $system->getArmourComplete($ship, $warrior, $this->weaponClass);
+        // The 2nd arg is the SHOOTER and must be the firing SHIP, not $warrior (the Fighter
+        // *system*): when the target is a fighter flight, Fighter::getArmourBase resolves armour
+        // by bearing (doGetHitSection -> getCompassHeadingOfShip -> shooter->getCoPos()), which
+        // a Fighter system lacks -> fatal "undefined method Fighter::getCoPos()". Use the actual
+        // shooter ship, exactly as the standard damage path (getSystemArmourBase) does.
+        $shooterShip = $gamedata->getShipById($fireOrder->shooterid);
+        $armour = $system->getArmourComplete($ship, $shooterShip, $this->weaponClass);
 
         //Warrior only takes recoil if the system it hit survived.
         if ($warrior !== null && !$system->isDestroyed($gamedata->turn)){

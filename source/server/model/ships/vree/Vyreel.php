@@ -38,10 +38,22 @@ class Vyreel extends MediumShip{
 		$this->addPrimarySystem(new Hangar(3, 2, 1, 0, "shuttles"));		
 		$this->addPrimarySystem(new Hangar(3, 6, 6, 0, "fighters"));
 		$this->addPrimarySystem(new CargoBay(3, 20));		
-		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 3));
-        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 1)); 
-        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 2));   
-        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 4));                    
+		$thrust = new GraviticThruster(3, 12, 0, 6, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$this->addPrimarySystem($thrust);
+        $thrust = new GraviticThruster(3, 12, 0, 6, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addPrimarySystem($thrust); 
+        $thrust = new GraviticThruster(3, 12, 0, 6, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addPrimarySystem($thrust);   
+        $thrust = new GraviticThruster(3, 12, 0, 6, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$this->addPrimarySystem($thrust);                    
         $this->addPrimarySystem(new AntiprotonGun(2, 0, 0, 0, 360));
         $this->addPrimarySystem(new AntiprotonGun(2, 0, 0, 0, 360));
 		        

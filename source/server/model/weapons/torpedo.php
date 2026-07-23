@@ -397,6 +397,7 @@
 			//parent (BallisticTorpedo) already appends the Saturation-Mode + fighter-targeting lines;
 			//only add the paired-Orbital specifics here.
 			parent::setSystemDataWindow($turn);
+				$this->data["Special"] .= "<br>Ignores damage reduction effects of non-Ancient shields, and each torpedo hit reduces any shields damage reduction by 1d10.";			
 			if ($this->linkedOrbital !== null){
 				$this->data["Special"] .= "<br>Mounted on " . $this->linkedOrbital->displayName . ": cannot be targeted by called shots; overkill passes to the Orbital.";
 				if ($this->stowedArcStart !== null){
@@ -488,9 +489,8 @@
 			$shield->criticals[] = $crit;
 		}
 
-//        public function getDamage($fireOrder){        return Dice::d(10,2);   }
-        public function getDamage($fireOrder){        return 20;   } //flat 20 per torpedo for this test run
-        public function setMinDamage(){     $this->minDamage = 20;   } //match flat getDamage (was 2, for Dice::d(10,2))
+        public function getDamage($fireOrder){        return Dice::d(10,2);   }
+        public function setMinDamage(){     $this->minDamage = 2;   } 
         public function setMaxDamage(){     $this->maxDamage = 20;     }
     
 		public function stripForJson()

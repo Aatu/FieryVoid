@@ -77,7 +77,10 @@ class ZShadowXonn extends VreeCapital{
           $diffuser->addTendril($tendril);
           $this->addFrontSystem($tendril);
         $this->addFrontSystem($diffuser);		
-        $this->addFrontSystem(new GraviticThruster(5, 20, 0, 10, 1));
+        $thrust = new GraviticThruster(5, 20, 0, 10, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addFrontSystem($thrust);
 		$weapon = new MultiphasedCutterL(3, 0, 0, 300, 60);
 		$weapon->addTag("Weapon");
 		$this->addFrontSystem($weapon);	
@@ -94,7 +97,10 @@ class ZShadowXonn extends VreeCapital{
           $diffuser->addTendril($tendril);
           $this->addAftSystem($tendril);
         $this->addAftSystem($diffuser);		
-        $this->addAftSystem(new GraviticThruster(5, 20, 0, 10, 2));   
+        $thrust = new GraviticThruster(5, 20, 0, 10, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addAftSystem($thrust);   
 		$weapon = new MultiphasedCutterL(3, 0, 0, 120, 240);
 		$weapon->addTag("Weapon");
 		$this->addAftSystem($weapon);	
@@ -128,7 +134,11 @@ class ZShadowXonn extends VreeCapital{
           $diffuser->addTendril($tendril);
           $this->addLeftAftSystem($tendril);
         $this->addLeftAftSystem($diffuser);	
-		$this->addLeftAftSystem(new GraviticThruster(5, 20, 0, 10, 3));
+		$thrust = new GraviticThruster(5, 20, 0, 10, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
+		$this->addLeftSystem($thrust);
 		$weapon = new MultiphasedCutterL(3, 0, 0, 180, 300);
 		$weapon->addTag("Weapon");
 		$this->addLeftAftSystem($weapon);
@@ -161,7 +171,11 @@ class ZShadowXonn extends VreeCapital{
           $diffuser->addTendril($tendril);
           $this->addRightAftSystem($tendril);
         $this->addRightAftSystem($diffuser);	
-		$this->addRightAftSystem(new GraviticThruster(5, 20, 0, 10, 4));		
+		$thrust = new GraviticThruster(5, 20, 0, 10, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
+		$this->addRightSystem($thrust);		
 		$weapon = new MultiphasedCutterL(3, 0, 0, 60, 180);
 		$weapon->addTag("Weapon");
 		$this->addRightAftSystem($weapon);

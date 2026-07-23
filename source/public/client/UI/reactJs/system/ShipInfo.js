@@ -1,14 +1,33 @@
 import * as React from "react";
 import styled from "styled-components"
 import { Header, Entry } from './SystemInfo';
+import buildHitChart from "../helpers/buildHitChart";
 
-const InfoContainer = styled.div``;
+//$tightBottom (ship window Notes popup, feedback 2026-07-19): drop the trailing
+//blank separator Entry so the popup's small bottom padding sets the gap under the
+//last line, instead of a full empty text row plus padding.
+const InfoContainer = styled.div`
+    ${props => props.$tightBottom ? '& > *:last-child { display: none; }' : ''}
+`;
 
 class ShipInfo extends React.Component {
 
 
 	render() {
-		const { ship } = this.props;
+		//hideHitChart: the ship window's Notes popup reuses this block but has its own
+		//dedicated HitChartPanel, so it suppresses the chart lines here.
+		const { ship, hideHitChart, tightBottom } = this.props;
+
+		//Purchased enhancements are surfaced in the always-visible gold Enhancements box
+		//for full grid ship windows, so they are NOT repeated inline here for those ships
+		//(2026-07-19). Mines, fighters and terrain have no gold box (compact / flight
+		//variants), so they keep the inline listing. Decided here (from ship type) rather
+		//than via a caller prop, so every consumer - the Notes popup AND the ship-info
+		//popup, game and lobby - follows the same rule. Mirrors ShipWindow's variant pick.
+		const isTerrainOrMine = Boolean(ship.mine)
+			|| (window.gamedata && typeof gamedata.isTerrain === 'function'
+				&& gamedata.isTerrain(ship.shipSizeClass, ship.userid));
+		const showEnhancements = Boolean(ship.flight) || isTerrainOrMine;
 		var notes = new Array;
 		var hitChart = new Array;
 		var enhArray = new Array;
@@ -17,50 +36,14 @@ class ShipInfo extends React.Component {
 			notes = ship.notes.split("<br>");
 		}
 
-		if (ship.hitChart) {
-			var names = ["Primary", "Front", "Aft", "Port", "Starboard"];
-			var hitChartLine = "";
-			var name = "";
-			var current = 0;
-			var hitChance = 0;
-
-			var toDo = 5;
-			if ((ship.base && !ship.smallBase)) {
-				names[1] = "Sections";
-				toDo = 2;
-			}
-			else if ((ship.SixSidedShip)) {
-				names[0] = "Primary";
-				names[1] = "Front";
-				names[2] = "Aft";
-				names[31] = "Port Front";
-				names[32] = "Port Aft";
-				names[41] = "Starboard Front";
-				names[42] = "Starboard Aft";
-				toDo = 43;
-			}
-			else {
-				toDo = 5; //(almost) always try to show all 5 sections, there may be holes
-			}
-			for (var i = 0; i < toDo; i++) {
-				if (ship.hitChart[i] === undefined) {
-					continue; //no appropriate entry, skip it
-				}
-				hitChartLine = "";
-				current = 0;
-				for (var entryKey in ship.hitChart[i]) {
-					hitChance = Math.floor((entryKey - current) / 20 * 100);
-					current = entryKey;
-					name = ship.hitChart[i][entryKey];
-					var n = name.indexOf(":");
-					if (n > 0) {//hide retargeting to different section
-						name = name.substring(n + 1);
-					}
-					if (hitChartLine != "") hitChartLine = hitChartLine + ', ';
-					hitChartLine = hitChartLine + name + " " + hitChance + '%';
-				}
-				hitChart[names[i]] = hitChartLine;
-			}
+		if (ship.hitChart && !hideHitChart) {
+			//shared builder (helpers/buildHitChart) so this text view and the ship
+			//window's HitChartPanel flyout can never drift apart
+			buildHitChart(ship).forEach(function (section) {
+				hitChart[section.name] = section.entries
+					.map(function (entry) { return entry.name + " " + entry.chance + "%"; })
+					.join(", ");
+			});
 		}
 
 		if (ship.enhancementTooltip != '') {
@@ -113,7 +96,7 @@ class ShipInfo extends React.Component {
 		}
 
 		return (
-			<InfoContainer>
+			<InfoContainer $tightBottom={tightBottom}>
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{displayOffensiveBonus * 5}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Thrust per turn: </Header>{ship.freethrust}</Entry>}
@@ -137,11 +120,11 @@ class ShipInfo extends React.Component {
 				}
 				{Object.keys(attachedSummary).length > 0 && <Entry key={reactKey++}>&nbsp;</Entry>}
 
-				{ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}><Header>ENHANCEMENTS:</Header>&nbsp;</Entry>}
-				{ship.enhancementTooltip != '' && isRevealed &&
+				{showEnhancements && ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}><Header>ENHANCEMENTS:</Header>&nbsp;</Entry>}
+				{showEnhancements && ship.enhancementTooltip != '' && isRevealed &&
 					Object.keys(enhArray).map(i => <Entry key={reactKey++}>{enhArray[i]}</Entry>)
 				}
-				{ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
+				{showEnhancements && ship.enhancementTooltip != '' && isRevealed && <Entry key={reactKey++}>&nbsp;</Entry>}
 
 			</InfoContainer>
 		);

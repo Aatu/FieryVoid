@@ -15,7 +15,13 @@ rsync -a --delete --exclude-from /usr/src/current/.dockerignore /usr/src/current
 # source/autoload.php here: the committed map is authoritative, so local
 # testing exercises exactly what will be deployed. Regenerate explicitly
 # with ./autoload.sh (or scripts\fvbuild.ps1) - see AUTOLOAD_GENERATOR_PLAN.md.
-bash -c "php composer.phar selfupdate; php composer.phar install --no-progress --no-suggest" &
+#
+# No selfupdate: the Dockerfile already ships the current composer.phar, and a
+# boot-time selfupdate REWRITES this phar in the background. autoload.sh reads
+# the same phar (php /usr/src/fieryvoid/composer.phar install) when fvbuild runs
+# right after boot, so the rewrite tore the phar mid-read -> "Class
+# GithubActionError not found" garbage, needing a second run. See start.sh race.
+bash -c "php composer.phar install --no-progress --no-suggest" &
 
 php-fpm &
 

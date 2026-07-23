@@ -28,6 +28,9 @@ class kirishiacLordship extends BaseShip{
         $this->pivotcost = 2;
 		$this->iniativebonus = 10;
 	
+		/*Kirishiac use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'KirshiacShip');  
+        
         $this->addPrimarySystem(new Reactor(7, 35, 0, 0));
         $this->addPrimarySystem(new CnC(8, 24, 0, 0));
 		$scanner = new Scanner(7, 24, 0, 14);

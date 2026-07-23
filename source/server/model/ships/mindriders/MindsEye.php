@@ -97,7 +97,10 @@ class MindsEye extends SixSidedShip{
 		$tCutter = new TelekineticCutter(6, 0, 0, 240, 60);
 		$tCutter->addTag("Telekinetic Cutter");
 		$this->addLeftFrontSystem($tCutter);  		           
-        $this->addLeftFrontSystem(new MindriderThruster(6, 35, 0, 12, 3)); 
+        //$this->addLeftFrontSystem(new MindriderThruster(6, 35, 0, 12, 3)); 
+        $thrust = new MindriderThruster(6, 35, 0, 12, 3);
+		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
+		$this->addLeftSystem($thrust); 		
 					 	
 
 		$this->addRightFrontSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
@@ -107,8 +110,10 @@ class MindsEye extends SixSidedShip{
 		$tCutter = new TelekineticCutter(6, 0, 0, 300, 120);
 		$tCutter->addTag("Telekinetic Cutter");
 		$this->addRightFrontSystem($tCutter);  		           
-        $this->addRightFrontSystem(new MindriderThruster(6, 35, 0, 12, 4));        
-
+        //$this->addRightFrontSystem(new MindriderThruster(6, 35, 0, 12, 4));        
+		$thrust = new MindriderThruster(6, 35, 0, 12, 4);
+		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
+		$this->addRightSystem($thrust);  
             
 		$this->addLeftAftSystem(new SelfRepair(6, 6, 3)); //armor, structure, output 
 		$tPulsar = new TriopticPulsar(6, 0, 0, 120, 300);

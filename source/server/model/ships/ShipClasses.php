@@ -2652,6 +2652,16 @@ public function getAllEWExceptDEW($turn){
             }
 		}
 
+        // Exterior-first: when a tag pool mixes Primary-mounted weapons (location 0) with
+        // hull-section weapons (TAG:Weapon on Vree etc.), spare the Primary ones - they are
+        // only hit when no non-Primary weapon of the same tag is in arc, matching the B5W
+        // principle that Primary systems stay protected until the exterior is stripped.
+        if ($systems[0] instanceof Weapon) {
+            $nonPrimaryWeapons = array();
+            foreach ($systems as $sys) if ($sys->location != 0) $nonPrimaryWeapons[] = $sys;
+            if (sizeof($nonPrimaryWeapons) > 0) $systems = $nonPrimaryWeapons;
+        }
+
         // Prefer destroying weapons that need the longest to recharge:
         //   tier 1: weapons that fired this turn (turnsloaded resets to 1 next turn)
         //   tier 2: weapons recharging and not ready next turn either

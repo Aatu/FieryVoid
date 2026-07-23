@@ -38,10 +38,14 @@ shipManager.systems = {
             return parentSystem.destroyed;
         }
 
-
-        if (ship.flight && !(system instanceof Fighter)) {
+        //Fighter detection duck-types on .systems (only the fighter units of a flight
+        //carry a subsystem array), not just instanceof: lobby fleet ships are
+        //jQuery.extend clones without the prototype chain, so a bought flight's
+        //fighter failed instanceof Fighter, was treated as a SUBSYSTEM, and
+        //getFighterForSystem returned undefined -> crash on .destroyed.
+        if (ship.flight && !(system instanceof Fighter) && !Array.isArray(system.systems)) {
             var fighter = shipManager.systems.getFighterForSystem(ship, system);
-            if (fighter.destroyed) {
+            if (fighter && fighter.destroyed) {
                 return true;
             }
         }

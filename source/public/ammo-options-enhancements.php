@@ -141,14 +141,14 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: 2</li>
         </ul>      
       </li>
-      <li><strong>Extra Ordnance Reserve</strong>
+      <li><strong>Ordnance Reserve</strong>
         <ul class="circle-list">
             <li>A pool of points used to re-stock missile and torpedo allocations to docked fighters</li>
             <li>Points Cost: Up to 200pts can be bought, and the cost of missiles to restock docked fighters will be drawn from this reserve.</li>
             <li>Limit: 200pts</li>
         </ul>
       </li>
-      <li><strong>Extra Marine Contingents</strong>
+      <li><strong>Extra Marines</strong>
         <ul class="circle-list">
             <li>A pool of additional marine units used to re-stock the Marines weapon on Breaching Pods that dock back into the carrier (1 marine per pod per turn while docked).</li>
             <li>Points Cost: 10pts per contingent — each contingent is a single marine unit.</li>
@@ -162,7 +162,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: Equal to the number of assault shuttle/fighter slots</li>
         </ul>      
       </li>
-      <li><strong>Shuttle to Breaching Pod Slot Conversion</strong>
+      <li><strong>Shuttle to Breaching Pod Conversion</strong>
         <ul class="circle-list">
             <li>Converts one of a ship's default shuttle slots to a hangar slot that can accommodate a Breaching Pod unit (replacing the shuttle in process).</li>
             <li>Points Cost: 10pts per slot converted</li>
@@ -176,7 +176,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: Equal to the number of default shuttles.</li>
         </ul>      
       </li>              
-    <li><strong>Identify Friend or Foe (IFF) System</strong>
+    <li><strong>Identify Friend or Foe (IFF)</strong>
         <ul class="circle-list">
             <li>Effect: Prevent ballistic mines from attacking friendly units</li>
             <li>Points Cost: 4 pts per Ballistic Mine Launcher</li>
@@ -198,7 +198,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Limit: 1</li>
         </ul>      
       </li> 
-      <li><strong>Improved Sensor Array</strong>
+      <li><strong>Improved Sensors</strong>
         <ul class="circle-list">
             <li>Effect: +1 Scanner rating</li>
             <li>Points Cost: New Scanner rating * 5 (doubled for Elint Sensors / Advanced Sensors)</li>
@@ -311,7 +311,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             <li>Notes: Only available to DEW mines which have more than one weapon.</li>
         </ul>      
       </li>       
-      <li><strong>Identify Friend or Foe (IFF) System</strong>
+      <li><strong>Identify Friend or Foe (IFF)</strong>
         <ul class="circle-list">
             <li>Effect: Prevent mines from attacking friendly units</li>
             <li>Points Cost: 10%</li>
@@ -450,7 +450,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h4 id="shadows" style="margin-top: 15px;">Shadow Association:</h4>
       <ul>
-        <li><strong>Increased Diffuser Capability</strong>
+        <li><strong>Increased Diffusers</strong>
             <ul class="circle-list">
                 <li>Effect: +1 rating, for every Diffuser on ship</li>
                 <li>Points Cost: Total diffuser capacity * 2.5 (further steps are increased by 2.5 points for each Diffuser)</li>
@@ -483,7 +483,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 
     <h4 id="vorlons" style="margin-top: 15px;">Vorlon Empire:</h4>
       <ul>
-        <li><strong>Amethyst Skin Coloring</strong>
+        <li><strong>Amethyst Skin</strong>
             <ul class="circle-list">
                 <li>Effect: +1 Adaptive Armor (AA) point, AA allowance per weapon type and AA pre-assigned amount are increased on every even total.</li>
                 <li>Points Cost: 20% of new AA total multiplied by total structure of ship</li>
@@ -492,7 +492,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>      
           </li> 
 
-        <li><strong>Azure Skin Coloring</strong>
+        <li><strong>Azure Skin</strong>
             <ul class="circle-list">
                 <li>Effect: 1 Shield rating, for all EM shields.</li>
                 <li>Points Cost: Unit 'size factor' (see below) multiplied by new EM Shield rating multiplied by number of shield emitters</li>
@@ -501,7 +501,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             </ul>      
           </li>  
 
-        <li><strong>Crimson Skin Coloring</strong>
+        <li><strong>Crimson Skin</strong>
             <ul class="circle-list">
                 <li>Effect: Power Capacitor gains +2 storage points and +1 recharge point</li>
                 <li>Points Cost: 20 * new Capacitor recharge rate</li>

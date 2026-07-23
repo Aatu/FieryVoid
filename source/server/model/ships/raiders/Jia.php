@@ -53,27 +53,40 @@ class Jia extends VreeCapital{
 		$this->addPrimarySystem(new TractorBeam(4, 4, 0, 0));		
 
         $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 300, 60));
-		$this->addFrontSystem(new GraviticThruster(4, 14, 0, 6, 1));   
+		$thrust = new GraviticThruster(4, 14, 0, 6, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addFrontSystem($thrust);   
 		$this->addFrontSystem(new CargoBay(3, 15));        
      	
         $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 120, 240));
-		$this->addAftSystem(new GraviticThruster(4, 14, 0, 6, 2)); 
+		$thrust = new GraviticThruster(4, 14, 0, 6, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addAftSystem($thrust); 
 		$this->addAftSystem(new CargoBay(3, 15));        
      
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new CargoBay(3, 15));		
 				
-		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 6, 3));
+		$thrust = new GraviticThruster(4, 14, 0, 6, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$this->addLeftAftSystem($thrust);
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new CargoBay(3, 15));		
 		
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new CargoBay(3, 15));					
 	
-		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 6, 4));	
+		$thrust = new GraviticThruster(4, 14, 0, 6, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$this->addRightAftSystem($thrust);	
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new CargoBay(3, 15));
        
+		/*
         //0:primary, 1:front, 2:rear, 3:left, 4:right;
         $this->addFrontSystem(new Structure( 4, 45, true));
         $this->addAftSystem(new Structure( 4, 45, true));
@@ -82,7 +95,48 @@ class Jia extends VreeCapital{
         $this->addRightFrontSystem(new Structure( 4, 45, true));
         $this->addRightAftSystem(new Structure( 4, 45, true));      
         $this->addPrimarySystem(new Structure( 5, 63));
-	    
+		*/
+		$structArmor = 4;
+		$structHP = 45;
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 300;
+		$struct->endArc = 60;
+        $this->addFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 120;
+		$struct->endArc = 240;
+        $this->addAftSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 240;
+		$struct->endArc = 0;
+        $this->addLeftFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 180;
+		$struct->endArc = 300;
+        $this->addLeftAftSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 0;
+		$struct->endArc = 120;
+        $this->addRightFrontSystem($struct);
+		
+		$struct = new Structure( $structArmor, $structHP, true);
+		$struct->addTag("Outer Structure");
+		$struct->startArc = 60;
+		$struct->endArc = 180;
+        $this->addRightAftSystem($struct);  
+		
+        $this->addPrimarySystem(new Structure( 5, 63));		
+
 	//d20 hit chart
         $this->hitChart = array(
 
@@ -96,44 +150,44 @@ class Jia extends VreeCapital{
                     20 => "C&C",
            		 ),
             1=> array(
-                    4 => "Thruster",
+                    4 => "TAG:Thruster",
                     6 => "Cargo Bay",
-                    7 => "Antiproton Defender",                    
+                    7 => "TAG:Weapon",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             2=> array(
-                    4 => "Thruster",
+                    4 => "TAG:Thruster",
                     6 => "Cargo Bay",
-                    7 => "Antiproton Defender",                    
+                    7 => "TAG:Weapon",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             31=> array(
-                    4 => "32:Thruster",
+                    4 => "TAG:Thruster",
                     6 => "Cargo Bay",
-                    7 => "Antiproton Defender",                    
+                    7 => "TAG:Weapon",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             32=> array(
-                    4 => "Thruster",
+                    4 => "TAG:Thruster",
                     6 => "Cargo Bay",
-                    7 => "Antiproton Defender",                    
+                    7 => "TAG:Weapon",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
             41=> array(
-                    4 => "42:Thruster",
+                    4 => "TAG:Thruster",
                     6 => "Cargo Bay",
-                    7 => "Antiproton Defender",                    
+                    7 => "TAG:Weapon",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),
        		42=> array(
-                    4 => "Thruster",
+                    4 => "TAG:Thruster",
                     6 => "Cargo Bay",
-                    7 => "Antiproton Defender",                    
+                    7 => "TAG:Weapon",                    
                     17 => "Structure",
                     20 => "Primary",
            		 ),

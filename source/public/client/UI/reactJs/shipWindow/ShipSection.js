@@ -1,98 +1,152 @@
 import * as React from "react";
 import styled from "styled-components"
 import SystemIcon from "../system/SystemIcon"
+import theme from "../styled/theme";
+
+/*SCS-style section panel (SHIPWINDOW_REDESIGN_PLAN.md Stage 1a): dotted panel with a
+  header line reading "PORT 54/60 A6" whose background fill IS the structure health bar
+  (same colour semantics as the old bottom bar: green, orange when criticals). The panel
+  background is translucent so the window's watermark hull art reads through the gaps.
+
+  Grid placement (grid-area / vertical alignment / width class) is decided by ShipWindow
+  and passed in via props; outside the grid (terrain / mine compact windows) those props
+  are simply omitted. `displayLocation` is the location whose *visual side* this section
+  is drawn on - it differs from `location` only for rolled ships (port/starboard swap)
+  and only affects the icon mirroring, never the section name.*/
+
+const SECTION_NAMES = {
+    0: "Primary",
+    1: "Forward",
+    2: "Aft",
+    3: "Port",
+    4: "Starboard",
+    5: "",
+    31: "Port Fwd",
+    32: "Port Aft",
+    41: "Stbd Fwd",
+    42: "Stbd Aft"
+};
 
 const ShipSectionContainer = styled.div`
+    position: relative;
+    z-index: 1; /*above the watermark + ship-hover underlay*/
+    box-sizing: border-box;
     display: flex;
-    flex-wrap: wrap-reverse;
+    flex-direction: column;
+    background-color: ${theme.colors.panelBgGlass};
+    ${props => props.$area ? `grid-area: ${props.$area};` : ''}
+    ${props => props.$valign ? `align-self: ${props.$valign};` : ''}
+    ${props => props.$justify ? `justify-self: ${props.$justify};` : ''}
     width: ${props => {
         if (props.$isTerrain) return '125px';
-        //inside a six-sided SideStack the stack owns the 30% column width; the section
-        //fills it (width auto + default flex stretch)
-        if (props.$inStack) return 'auto';
-        switch (props.location) {
-            case 1:
-            case 0:
-            case 2:
-                return '40%';
-            default:
-                return '30%'
-        }
+        //fixed widths keep the icon rows at 4-wide (centre column) and 3-wide (side
+        //columns) - the pick/pickOuter symmetric grouping assumes those row lengths.
+        //Side columns are 128px, not the bare 120px the three 32px icons need: the extra
+        //room lets the header line fit 3-figure structure text ("STARBOARD 540/600 A8")
+        //without clipping. 128 is the ceiling that still holds 3-wide rows - at 130px a
+        //4th 32px icon (zero horizontal margin) would fit and break the symmetric layout.
+        return props.$wide ? '156px' : '128px';
     }};
-    align-items: end;	
-    justify-content: space-around;
-    overflow: hidden;
-    box-sizing: border-box;
-    margin: 2px;
+    ${props => props.$minHeight ? `min-height: ${props.$minHeight}px;` : ''}
+    margin: ${props => props.$area ? '0' : '2px'};
 
     -webkit-user-select: none;
     -webkit-touch-callout: none;
     user-select: none;
 
     border: ${props => {
-        switch (props.location) {
+        switch (props.$location) {
             case 0:
-                return '2px solid #6089c1';
+                //Primary keeps the heavier solid border for emphasis, in the shared line colour
+                return `1px solid ${theme.colors.line}`;
             default:
-                return '2px dotted #496791';
+                return `1px dotted ${theme.colors.line}`;
         }
     }};
-`
-
-const StructureText = styled.div`
-    z-index: 1;
 `;
 
-const StructureContainer = styled.div`
+const SectionHeader = styled.div`
     position: relative;
+    height: 15px;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    width: calc(100% - 4px);
-    height: 16px;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 0 4px;
     box-sizing: border-box;
     background-color: black;
-    color: ${props => props.$health === 0 ? 'transparent' : 'white'};
-    font-family: arial;
-    font-size: 11px;
-    text-shadow: black 0 0 6px, black 0 0 6px;
-    border: 1px solid #496791;
-    margin: 2px;
-    filter: ${props => props.$health === 0 ? 'blur(1px)' : 'none'};
+    border-bottom: 1px solid ${theme.colors.healthOk};
+    overflow: hidden;
 
-    -webkit-user-select: none;
-    -webkit-touch-callout: none;
-    user-select: none;
-
+    /*structure health fill - the header line doubles as the section's health bar*/
     &::before {
-        box-sizing: border-box;
         content: "";
-        position:absolute;
-        width:  ${props => props.$health}%;
-        height: 100%;
+        position: absolute;
+        top: 0;
         left: 0;
         bottom: 0;
-        z-index: 0;
-        background-color: ${props => props.$criticals ? '#ed6738' : '#427231'};
-        border: 1px solid black;
+        width: ${props => props.$health}%;
+        background-color: ${props => props.$criticals ? theme.colors.healthCrit : theme.colors.healthOk};
     }
+`;
 
+const SectionName = styled.span`
+    position: relative;
+    z-index: 1;
+    font-size: 8px;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: ${theme.colors.text};
+    text-shadow: black 0 0 4px, black 0 0 4px;
+`;
+
+const StructureText = styled.span`
+    position: relative;
+    z-index: 1;
+    font-family: ${theme.fonts.mono};
+    font-size: 10px;
+    white-space: nowrap;
+    color: ${props => props.$destroyed ? 'transparent' : theme.colors.text};
+    filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
+    text-shadow: black 0 0 6px, black 0 0 6px;
+`;
+
+const IconArea = styled.div`
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-content: flex-start;
+    flex-grow: 1;
+    padding: 1px 0 2px;
 `;
 
 class ShipSection extends React.Component {
     render() {
-        const { ship, systems, location, inStack } = this.props;
+        const { ship, systems, location, displayLocation, area, valign, justify, wide, isTerrain, minHeight, nameOverride } = this.props;
 
         const structure = getStructure(systems);
+        const health = structure ? getStructureLeft(ship, structure) : 0;
+        const orderLocation = displayLocation !== undefined ? displayLocation : location;
+        //rolled ship: this section is drawn on the opposite side - flip the icon art
+        //horizontally so weapon/thruster facings match the drawn side
+        const mirrored = displayLocation !== undefined && displayLocation !== location;
 
         return (
-            <ShipSectionContainer location={location} $inStack={inStack}>
-                {orderSystems(systems, location).map(system => (<SystemIcon scs key={`system-scs-${location}-${ship.id}-${system.id}`} system={system} ship={ship} />))}
-
-                {structure && <StructureContainer $health={getStructureLeft(ship, structure)} $criticals={hasCriticals(structure)}>
-                    <StructureText>{structure.maxhealth - damageManager.getDamage(ship, structure)} / {structure.maxhealth} A {shipManager.systems.getArmour(ship, structure)}</StructureText>
-                </StructureContainer>}
+            <ShipSectionContainer $location={location} $area={area} $valign={valign} $justify={justify} $wide={wide} $isTerrain={isTerrain} $minHeight={minHeight}>
+                {/*sections without structure exist purely for icon placement - no header*/}
+                {/*nameOverride: ships with a single side structure spread over both
+                   quarter sections read plain "Port"/"Starboard" (set by ShipWindow)*/}
+                {structure && <SectionHeader $health={health} $criticals={hasCriticals(structure)}>
+                    <SectionName>{nameOverride || SECTION_NAMES[location] || ""}</SectionName>
+                    <StructureText $destroyed={health === 0}>
+                        {structure.maxhealth - damageManager.getDamage(ship, structure)}/{structure.maxhealth} A{shipManager.systems.getArmour(ship, structure)}
+                    </StructureText>
+                </SectionHeader>}
+                <IconArea>
+                    {orderSystems(systems, orderLocation, wide).map(system => (<SystemIcon scs mirror={mirrored} key={`system-scs-${location}-${ship.id}-${system.id}`} system={system} ship={ship} />))}
+                </IconArea>
             </ShipSectionContainer>
         )
     }
@@ -102,12 +156,25 @@ const getStructureLeft = (ship, system) => (system.maxhealth - damageManager.get
 
 const hasCriticals = (system) => shipManager.criticals.hasCriticals(system)
 
-const getStructure = systems => systems.find(system => system instanceof Structure)
+/*name check, NOT instanceof (matches systems.js getStructureSystem): lobby fleet
+  ships are jQuery.extend clones of the blueprint whose systems lose their prototype
+  chain - instanceof Structure was false for them, so bought-ship sections rendered
+  headerless (no health bar) and the structure leaked into the icon grid as a "0".*/
+const isStructure = system => system.name === 'structure';
 
-const filterStructure = systems => systems.filter(system => !(system instanceof Structure))
+const getStructure = systems => systems.find(isStructure)
 
-const orderSystems = (systems, location) => {
+const filterStructure = systems => systems.filter(system => !isStructure(system))
+
+const orderSystems = (systems, location, wide) => {
     systems = filterStructure(systems);
+
+    //a section rendered at centre-column width (156px) fits 4 icons per row - used for
+    //big-base quarter sections so their many systems spread wide instead of stacking
+    //tall. pickOuter rows are symmetric by construction, so no mirroring is needed.
+    if (wide) {
+        return orderSystemsFourWide(systems);
+    }
 
     if ([4, 41, 42].includes(location)) {
         return orderSystemsThreeWide(systems);

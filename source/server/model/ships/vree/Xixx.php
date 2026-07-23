@@ -37,10 +37,22 @@ class Xixx extends VreeHCV{
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));				
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
 		
-		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 3));
-		$this->addFrontSystem(new GraviticThruster(3, 12, 0, 7, 1));		
-        $this->addAftSystem(new GraviticThruster(3, 12, 0, 7, 2));	
-		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 7, 4));					
+		$thrust = new GraviticThruster(3, 12, 0, 7, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$this->addPrimarySystem($thrust);
+		$thrust = new GraviticThruster(3, 12, 0, 7, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addFrontSystem($thrust);		
+        $thrust = new GraviticThruster(3, 12, 0, 7, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addAftSystem($thrust);	
+		$thrust = new GraviticThruster(3, 12, 0, 7, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$this->addPrimarySystem($thrust);					
 
 		$this->addFrontSystem(new AntimatterTorpedo(2, 0, 0, 240, 0));
 		$this->addFrontSystem(new AntimatterTorpedo(2, 0, 0, 300, 60)); 

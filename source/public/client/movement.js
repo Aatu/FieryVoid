@@ -321,7 +321,7 @@ shipManager.movement = {
                 value: accel
             };
             if (!ship.flight) {
-                shipWindowManager.assignThrust(ship);
+                shipManager.movement.updateAssignThrust(ship);
             }
         }
     },
@@ -400,7 +400,7 @@ shipManager.movement = {
             forced: false,
             value: 'thisTurn'
         };
-        shipWindowManager.assignThrust(ship);
+        shipManager.movement.updateAssignThrust(ship);
         ship.rolling = true;
 
     },
@@ -431,7 +431,7 @@ shipManager.movement = {
             forced: false,
             value: 'emergencyRoll'
         };
-        shipWindowManager.assignThrust(ship);
+        shipManager.movement.updateAssignThrust(ship);
         ship.rolling = true;
 
     },
@@ -693,7 +693,7 @@ shipManager.movement = {
 
         if (!ship.flight) {
             shipManager.movement.autoAssignThrust(ship);
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
 
@@ -915,7 +915,7 @@ shipManager.movement = {
         };
 
         if (!ship.flight) {
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
 
@@ -1104,7 +1104,7 @@ shipManager.movement = {
 
         if (!ship.flight) {
             shipManager.movement.autoAssignThrust(ship);
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
     },
 
@@ -1205,7 +1205,7 @@ shipManager.movement = {
                 value: value
             };
 
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
     },
@@ -1349,7 +1349,7 @@ shipManager.movement = {
         };
 
         if (!ship.flight) {
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
 
@@ -1582,7 +1582,7 @@ shipManager.movement = {
 
         if (!ship.flight) {
             shipManager.movement.autoAssignThrust(ship);
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
 
@@ -1902,6 +1902,65 @@ shipManager.movement = {
         return system.thrustwasted;
     },
 
+    /* ── Ship-window redesign Stage 2b (SHIPWINDOW_REDESIGN_PLAN.md §4.3) ──
+       The four functions below moved here from the legacy shipWindowManager
+       (UI/shipwindow.js, originals left there commented out until the Stage 4
+       retirement sweep): they are movement logic, not window styling — they
+       mutate ship.movement and drive the React ShipThrust panel through the
+       "AssignThrust" custom event. The legacy-DOM styling the originals also
+       performed (thruster/assignThrust classes on the legacy window DOM,
+       setData refreshes) is dropped: that DOM is never built in game.php.
+       Event names and payloads are byte-identical to the originals.
+       shipWindowManager.assignThrust(ship) became updateAssignThrust(ship)
+       because the per-system assignThrust(ship, system) name was taken. */
+
+    updateAssignThrust: function updateAssignThrust(ship) {
+        var movement = ship.movement[ship.movement.length - 1];
+
+        if (movement.commit) return false;
+
+        var requiredThrust = movement.requiredThrust;
+        var stillReq = shipManager.movement.calculateThrustStillReq(ship, movement);
+
+        window.webglScene.customEvent("AssignThrust", { ship: ship, totalRequired: requiredThrust, remainginRequired: stillReq, movement: movement })
+    },
+
+    doneAssignThrust: function doneAssignThrust(ship) {
+        var movement = ship.movement[ship.movement.length - 1];
+        var stillReq = shipManager.movement.calculateThrustStillReq(ship, movement);
+
+        var done = true;
+        for (var i in stillReq) {
+            if (stillReq[i] > 0) done = false;
+        }
+
+        if (done) {
+            movement.commit = true;
+            webglScene.customEvent("ShipMovementChanged", { ship: ship });
+            window.webglScene.customEvent("AssignThrust", false)
+
+            //For Contraction, need to amend level for first order.
+            if (movement.type == "contract") shipManager.movement.amendContractValue(ship, movement.value);
+        }
+    },
+
+    cancelAssignThrustEvent: function cancelAssignThrustEvent(ship) {
+        shipManager.movement.cancelAssignThrust(ship);
+        webglScene.customEvent("ShipMovementChanged", { ship: ship });
+    },
+
+    cancelAssignThrust: function cancelAssignThrust(ship) {
+        if (!ship) {
+            throw new Error("This requires ship")
+        }
+
+        shipManager.movement.revertAutoThrust(ship);
+
+        ship.movement.splice(ship.movement.length - 1, 1);
+
+        window.webglScene.customEvent("AssignThrust", false)
+    },
+
     assignThrust: function assignThrust(ship, system) {
         if (shipManager.isDestroyed(ship) || shipManager.isAdrift(ship)) return false;
         if (shipManager.systems.isEngineDestroyed(ship)) return false;
@@ -1957,8 +2016,8 @@ shipManager.movement = {
 
         system.thrustwasted += wasted;
 
-        shipWindowManager.setDataForSystem(ship, system);
-        shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
 
         return true;
     },
@@ -2015,8 +2074,8 @@ shipManager.movement = {
 
         system.thrustwasted -= wasted;
 
-        shipWindowManager.setDataForSystem(ship, system);
-        shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "engine"));
 
         return true;
     },
@@ -2182,7 +2241,7 @@ shipManager.movement = {
 
         if (!ship.flight) {
             shipManager.movement.autoAssignThrust(ship);
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
 
@@ -2311,7 +2370,7 @@ shipManager.movement = {
                         toDo--;
                     }
 
-                    shipWindowManager.setDataForSystem(ship, thrusters[j]);
+                    //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, thrusters[j]);
                     if (toDo < 1) {
                         break;
                     }

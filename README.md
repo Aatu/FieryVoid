@@ -171,6 +171,13 @@ throwaway copy and the output never reaches your repo):
 (Running these from `/usr/src/current#` in Docker Desktop's Exec tab is
 exactly equivalent and stays fine.)
 
+Your php container is only called `fieryvoid-php-1` if your checkout lives in
+a directory called `FieryVoid` — compose names the project after the folder,
+so a checkout in `fieryvoid8` gets `fieryvoid8-php-1`. Substitute your own
+name above; `docker compose ps` lists it. `fvbuild.ps1` needs no such edit —
+it asks compose for the name, and takes `-Container <name>` or
+`$env:FV_PHP_CONTAINER` if you run php outside compose.
+
 ### Before deploying (or any time you're suspicious)
 
     .\FieryVoid\scripts\fvbuild.ps1 -Check

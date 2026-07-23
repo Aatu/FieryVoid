@@ -136,27 +136,29 @@ class ShipThrust extends React.Component {
         super(props);
     }
 
+    //Stage 2b (SHIPWINDOW_REDESIGN_PLAN.md §4.3): the assign-thrust logic moved from the
+    //legacy shipWindowManager to shipManager.movement. The old shipWindowManager.setData
+    //calls were a legacy-window refresh — a no-op with that DOM never built — so they
+    //are dropped here rather than carried over.
     ready() {
-        window.shipWindowManager.doneAssignThrust(this.props.ship)
+        window.shipManager.movement.doneAssignThrust(this.props.ship)
     };
 
     cancel() {
-        window.shipWindowManager.cancelAssignThrustEvent(this.props.ship)
+        window.shipManager.movement.cancelAssignThrustEvent(this.props.ship)
     };
 
     resetThrust() {
         const ship = this.props.ship;
         window.shipManager.movement.revertAutoThrust(ship);
-        window.shipWindowManager.setData(ship)
-        window.shipWindowManager.assignThrust(ship);
+        window.shipManager.movement.updateAssignThrust(ship);
     }
 
     autoAssign() {
         const ship = this.props.ship;
         window.shipManager.movement.revertAutoThrust(ship);
         window.shipManager.movement.autoAssignThrust(ship);
-        window.shipWindowManager.setData(ship)
-        window.shipWindowManager.assignThrust(ship);
+        window.shipManager.movement.updateAssignThrust(ship);
     }
 
     render() {
@@ -257,13 +259,13 @@ const getThrusters = (ship, direction, totalRequired, movement) => {
 
         const assignThrust = () => {
             shipManager.movement.assignThrust(ship, thruster);
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
         const unAssignThrust = (e) => {
             e.preventDefault();
             shipManager.movement.unAssignThrust(ship, thruster);
-            shipWindowManager.assignThrust(ship);
+            shipManager.movement.updateAssignThrust(ship);
         }
 
         let crits = shipManager.criticals.hasCritical(thruster, "HalfEfficiency") ? 10 : 0;

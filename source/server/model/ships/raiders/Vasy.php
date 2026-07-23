@@ -33,10 +33,22 @@ class Vasy extends MediumShip{
         $this->addPrimarySystem(new Engine(3, 9, 0, 6, 2));
 		$this->addPrimarySystem(new Hangar(3, 2));
 		$this->addPrimarySystem(new HeavyPlasma(2, 8, 5, 0, 360));			
-		$this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 3));
-        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 4));        
-        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 1));
-        $this->addPrimarySystem(new GraviticThruster(3, 12, 0, 6, 2)); 
+		$thrust = new GraviticThruster(3, 12, 0, 6, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$this->addPrimarySystem($thrust);      
+        $thrust = new GraviticThruster(3, 12, 0, 6, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addPrimarySystem($thrust);
+        $thrust = new GraviticThruster(3, 12, 0, 6, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addPrimarySystem($thrust); 
+        $thrust = new GraviticThruster(3, 12, 0, 6, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$this->addPrimarySystem($thrust);  		
         		        
         $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 240, 0));
         $this->addFrontSystem(new AntiprotonDefender(2, 0, 0, 0, 120));

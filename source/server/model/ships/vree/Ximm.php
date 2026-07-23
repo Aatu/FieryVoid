@@ -38,9 +38,15 @@ class Ximm extends VreeCapital{
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
 
-        $this->addFrontSystem(new GraviticThruster(4, 14, 0, 8, 1));
+        $thrust = new GraviticThruster(4, 14, 0, 8, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addFrontSystem($thrust);
 	
-		$this->addAftSystem(new GraviticThruster(4, 14, 0, 8, 2));
+		$thrust = new GraviticThruster(4, 14, 0, 8, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addAftSystem($thrust);
     
     	$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0));
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 0)); 
@@ -50,11 +56,19 @@ class Ximm extends VreeCapital{
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120)); 						        
 //		$this->addRightFrontSystem(new StructureTechnical(0, 0, 0, 0));
 		
-		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 8, 3));
+		$thrust = new GraviticThruster(4, 14, 0, 8, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
+		$this->addLeftSystem($thrust);
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		 
-		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 8, 4));
+		$thrust = new GraviticThruster(4, 14, 0, 8, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
+		$this->addRightSystem($thrust);
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));  
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180)); 		
        

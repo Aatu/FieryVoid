@@ -1436,8 +1436,8 @@ class GraviticAugmenter extends Weapon  implements SpecialAbility{
     public function setSystemDataWindow($turn){
         parent::setSystemDataWindow($turn);
 		$this->data["Special"] = "May use one of the three Firing modes listed below per turn:";
-		$this->data["Special"] .= "<br> - Matter Weapon Enhancement (Initial Orders): Boosts fire control of friendly matter weapons in arc/range by +3, and of ALL friendly ballistic weapons by +6; degrades enemy matter/ballistic weapons by the same amount. Cumulative.";
-		$this->data["Special"] .= "<br> - Warrior Enhancement (Initial Orders): Grants a Warrior flight +3 free thrust, +3 offensive bonus, -4 dropout, and 3 free jink levels. Not cumulative.";
+		$this->data["Special"] .= "<br> - Matter Weapon Enhancement (Initial Orders): Boosts fire control of friendly matter weapons in arc/range by +15%, and of ALL friendly ballistic weapons by +30%; degrades enemy matter/ballistic weapons by the same amount. Cumulative.";
+		$this->data["Special"] .= "<br> - Warrior Enhancement (Initial Orders): Grants a Warrior flight +3 free thrust, +15 offensive bonus, -4 dropout, and 3 free jink levels. Not cumulative.";
 		$this->data["Special"] .= "<br> - Gravity Shifting (Pre-Firing): Rotates a target ship's facing up to 120 degrees (60 degrees max against Gravtiic targets). Only ONE Augmenter may shift a given ship per turn. No effect on Enormous units or Mines.";
 		if ($this->linkedOrbital !== null){
 			$this->data["Special"] .= "<br>Mounted on " . $this->linkedOrbital->displayName . ": cannot be targeted by called shots; overkill passes to the Orbital.";
@@ -1485,6 +1485,20 @@ class GraviticAugmenter extends Weapon  implements SpecialAbility{
 		if ($this->stowed) return; //docked with its Orbital - Modes 1 & 2 buffs must not apply while stowed
 		$ship = $this->getUnit();
 		if($ship->getTurnDeployed($gamedata) > $gamedata->turn) return;
+
+		/*Initial Orders masking: while phase 1 is still open, a pending Mode 1/2 order is the
+		owner's secret. This hook runs on EVERY gamedata build - including one prepared for an
+		ENEMY viewer - and its effects all serialize to the client (Warrior stat buff + forced
+		jink, matter FC mods stamped isModified on BOTH fleets' weapons), so applying them here
+		let the opponent see the augmentation the moment the owner committed, before committing
+		themselves. Skip application when this build is for an enemy/spectator viewer during
+		phase 1. Can't use isRevealedToCurrentViewer(): notes load BEFORE TacGamedata::
+		onConstructed sets the viewer-team static, so read viewer + team off $gamedata directly.
+		Server-side resolution is unaffected: every load that CONSUMES the buffs (movement
+		validation, pre-firing, firing) happens at phase 2/5/3/4, where this gate is inactive.*/
+		if ($gamedata->phase == 1
+			&& $ship->userid != $gamedata->forPlayer
+			&& $ship->team != $gamedata->getPlayerTeam()) return;
 
 		$weaponFiringOrders = $this->getFireOrders($gamedata->turn);
 		if (empty($weaponFiringOrders)) return; // No fire orders

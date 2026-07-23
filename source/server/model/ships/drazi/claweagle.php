@@ -65,7 +65,7 @@ class Claweagle extends MediumShipLeftRight{
         				17=> "0:Structure",        				
         				20 => "Primary",
         		),
-        		3=> array(
+        		4=> array(
         				5 => "Thruster",
         				7 => "Standard Particle Beam",        				
         				9 => "Grappling Claw",

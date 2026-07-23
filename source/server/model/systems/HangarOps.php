@@ -4408,6 +4408,12 @@ class HangarOps {
 		//sustained (even destroyed), so the destroyed-hangar gate is skipped for it.
 		$isCatapult = !empty($hangar->isCatapult);
 		if (!$isCatapult && $hangar->isDestroyed()) { $reason = 'hangar destroyed'; return false; }
+		//Stage S: a Shadow carrier that HALF-PHASED this turn cannot reabsorb its
+		//integrated fighters — they can't merge back into a partly-phased hull (B5W).
+		//Only ShadowHangar (integrated) bays are gated; ordinary bays are unaffected.
+		if (!empty($hangar->isShadowHangar) && Movement::isHalfPhased($carrier, $gamedata->turn)) {
+			$reason = 'carrier half-phased — cannot reabsorb integrated fighters'; return false;
+		}
 		//Jump-sequencing exception: a carrier killed this turn by its own jump
 		//(HyperspaceJump damage class) or jump failure (JumpFailure damage class)
 		//can still receive a dock — the fighter completes its dock mid-jump and
@@ -5269,6 +5275,10 @@ class HangarOps {
 		//corrupt the bay's held pool). ShadowHangars keep $name='hangar' so they'd
 		//otherwise pass hangarAcceptsCategory like any medium bay.
 		$flightIsIntegrated = ($flight->phpclass === 'ShadowMediumFighterFlight');
+		//A carrier that half-phased this turn cannot reabsorb its integrated fighters —
+		//every ShadowHangar bay is skipped, so a pure-Shadow hull yields no bays and the
+		//dock fails with a note (canShipReceive rejects the same case for the jump path).
+		$carrierHalfPhased = Movement::isHalfPhased($carrier, $gamedata->turn);
 
 		$bays = array();
 		$boxesAvail = 0;
@@ -5276,6 +5286,7 @@ class HangarOps {
 			if (!empty($h->isCatapult)) continue;
 			if ($h->isDestroyed()) continue;
 			if (!empty($h->isShadowHangar) && !$flightIsIntegrated) continue;   //integrated-only bay
+			if (!empty($h->isShadowHangar) && $carrierHalfPhased) continue;    //half-phased: cannot reabsorb integrated fighters
 			if (!self::hangarAcceptsCategory($h, $category, $carrier)) continue;
 			if (!self::hangarAcceptsFighterClass($h, $flight)) continue;   //per-bay class allow-list
 			$free = self::freeBoxesByCategory($h, $category, $carrier);

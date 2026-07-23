@@ -3012,7 +3012,7 @@ class RammingAttack extends Weapon{
 			$fireOrder->calledid = -1; //just in case!
 			$this->setAlreadyRammed($fireOrder->targetid); //prevent repeating			
 		}
-Debug::log("fireOrder->chosenLocation4 " . $fireOrder->chosenLocation);		
+		//Debug::log("fireOrder->chosenLocation4 " . $fireOrder->chosenLocation);		
 	} //endof function fire
 
 	
@@ -3712,7 +3712,7 @@ class ShadowFighterBomb extends Weapon{
 		$this->data["Special"]  = "Used to launch integrated fighters at a target hex.";
 		$this->data["Special"] .= "<br>Targets a hex within range; fighters deploy there at the carrier's heading and speed next turn.";
         $this->data["Special"] .= "<br>Technical system, cannot be damaged or destroyed.";			
-		//$this->data["Special"] .= "<br>This is the integrated hangar's ONLY way to launch fighters — it draws from the bay's held pool. If the bay is empty, the bomb cannot fire.";
+		$this->data["Special"] .= "<br>Cannot be used when ship is Half-Phased.";
 	}
 
 	public function getDamage($fireOrder){ return 0; }
@@ -3757,6 +3757,16 @@ class ShadowFighterBomb extends Weapon{
 
 		$shooter = $gamedata->getShipById($fireOrder->shooterid);
 		if (!$shooter) return;
+
+		//A carrier that HALF-PHASED this turn is partly shifted into hyperspace and
+		//cannot form/expel its integrated fighters (B5W): the Fighter Bomb does not
+		//launch. rolled is already set above so the guarded fire() never re-runs on
+		//replay; we simply spawn nothing and note why. The client mirrors this in
+		//weaponManager.queueShadowFighterBombOrder.
+		if (Movement::isHalfPhased($shooter, $gamedata->turn)){
+			$fireOrder->pubnotes .= " Fighter Bomb: carrier half-phased — integrated fighters cannot launch.";
+			return;
+		}
 
 		//$fireOrder->shots carries the player's chosen launch count (set by the
 		//client hex-target count picker, clamped there to the held pool). 0/absent
@@ -8641,12 +8651,13 @@ class SecondSight extends Weapon{
     public $useOEW = false;
 	public $noLockPenalty = false;
     
-    public $doNotIntercept = true; 		    		          
+    public $doNotIntercept = true;
     public $uninterceptable = true;
    	public $ignoreJinking = true;//weapon ignores jinking completely.
-        
-    public $rangePenalty = 0; 
-    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals 
+	protected $hideFireOrdersFromEnemies = true; //psychic activation - invisible to enemies until it resolves (no launch hex/icon)
+
+    public $rangePenalty = 0;
+    public $fireControl = array(null, null, null); // fighters, <mediums, <capitals
 
 	public $damageType = "Standard"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Electromagnetic"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 
@@ -8816,12 +8827,12 @@ class ThoughtWave extends Plasma{
     public $useOEW = false;
 	public $noLockPenalty = false;
     
-    public $doNotIntercept = true; 		    		          
+    public $doNotIntercept = true;
     public $uninterceptable = true;
    	public $ignoreJinking = true;//weapon ignores jinking completely.
-        
-    public $rangePenalty = 0.33; 
-    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals 
+
+    public $rangePenalty = 0.33;
+    public $fireControl = array(0, 0, 0); // fighters, <mediums, <capitals
 
 	public $damageType = "Flash"; //(first letter upcase) actual mode of dealing damage (Standard, Flash, Raking, Pulse...) - overrides $this->data["Damage type"] if set!   
 	public $weaponClass = "Plasma"; //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set! 

@@ -20,6 +20,9 @@ window.FlightIcon = function () {
         this.fighters = consumeFighters.call(this, ship);
     };
 
+    /* STAGE4-RETIRED legacy flight-window re-link (see the matching comment in
+       ShipIcon.js; its consumeShipdata no longer calls createShipWindow at all).
+       Delete once the redesign is stable on live.
     FlightIcon.prototype.createShipWindow = function (ship) {
         // Lazy: build the flight status window only when first opened. See the matching
         // comment on ShipIcon.prototype.createShipWindow. Until then shipStatusWindow is
@@ -33,6 +36,7 @@ window.FlightIcon = function () {
             ship.shipStatusWindow = null;
         }
     };
+    */
 
     FlightIcon.prototype.hideDestroyedFighters = function () {
         this.fighterSprites.forEach(function (sprite) {

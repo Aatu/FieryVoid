@@ -1,3 +1,8 @@
+/* STAGE4-RETIRED (ship-window redesign Stage 4, 2026-07-18): this stylesheet is no
+   longer linked by any page (game.php / gamelobby.php links commented out) — the React
+   ShipWindow styles itself via styled-components. DELETE this file once the redesign
+   is stable on live. */
+
 .shipwindow {
     border: 1px solid #496791;
     background-color: #0a3340;

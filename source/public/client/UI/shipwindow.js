@@ -1,5 +1,11 @@
 "use strict";
 
+/* STAGE4-RETIRED (ship-window redesign Stage 4, 2026-07-18): this file is no longer
+   loaded by any page — the script tags in game.php and gamelobby.php are commented
+   out, so it is also excluded from the legacy bundles. Both pages run the React
+   ShipWindow stack (client/UI/reactJs/shipWindow/). DELETE this file once the
+   redesign is stable on live. */
+
 jQuery(function () {
 	$(".system .on").on("contextmenu", function (e) {
 		e.preventDefault();
@@ -1429,6 +1435,11 @@ window.shipWindowManager = {
 		}
 	},
 
+	/* Ship-window redesign Stage 2b (SHIPWINDOW_REDESIGN_PLAN.md §4.3): the real
+	   movement logic moved to shipManager.movement.updateAssignThrust (movement.js);
+	   only the legacy-DOM styling half stayed behind, commented out (not deleted)
+	   until the Stage 4 retirement sweep. doneAssignThrust / cancelAssignThrustEvent
+	   / cancelAssignThrust below moved the same way, keeping their names.
 	assignThrust: function assignThrust(ship) {
 		var movement = ship.movement[ship.movement.length - 1];
 
@@ -1459,6 +1470,7 @@ window.shipWindowManager = {
 
 		window.webglScene.customEvent("AssignThrust", { ship: ship, totalRequired: requiredThrust, remainginRequired: stillReq, movement: movement })
 	},
+	*/
 
 	selectAllGuns: function selectAllGuns(e) {
 		e.stopPropagation();
@@ -1517,7 +1529,7 @@ window.shipWindowManager = {
 
 		if (gamedata.gamephase == 2 && shipwindow.hasClass("assignThrust") && system.name == "thruster") {
 			shipManager.movement.assignThrust(ship, system);
-			shipWindowManager.assignThrust(ship);
+			shipManager.movement.updateAssignThrust(ship); //Stage 2b: moved out of this file
 		}
 
 		if (system.weapon && system.canChangeShots && (system.ballistic && gamedata.gamephase == 1 || !system.ballistic && gamedata.gamephase == 3)) {
@@ -1540,7 +1552,7 @@ window.shipWindowManager = {
 
 		if (gamedata.gamephase == 2 && shipwindow.hasClass("assignThrust") && system.name == "thruster") {
 			shipManager.movement.unAssignThrust(ship, system);
-			shipWindowManager.assignThrust(ship);
+			shipManager.movement.updateAssignThrust(ship); //Stage 2b: moved out of this file
 		}
 
 		if (system.weapon && system.canChangeShots && (system.ballistic && gamedata.gamephase == 1 || !system.ballistic && gamedata.gamephase == 3)) {
@@ -1550,6 +1562,9 @@ window.shipWindowManager = {
 		}
 	},
 
+	/* Ship-window redesign Stage 2b (SHIPWINDOW_REDESIGN_PLAN.md §4.3): moved to
+	   shipManager.movement (movement.js) minus the legacy-DOM styling; kept here
+	   commented out until the Stage 4 retirement sweep.
 	doneAssignThrust: function doneAssignThrust(ship) {
 
 		var shipwindow;
@@ -1624,6 +1639,7 @@ window.shipWindowManager = {
 		shipWindowManager.setData(ship);
 		window.webglScene.customEvent("AssignThrust", false)
 	},
+	*/
 
 	onModeClicked: function onModeClicked(e) {
 		e.stopPropagation();

@@ -256,28 +256,29 @@ window.BallisticIconContainer = function () {
 		// Mode-specific icon logic
 		if (modeName) {
 			const modeMap = {
-				'Z - Antimine': { type: 'hexRed', text: 'Antimine', color: '#e6140a' },
-				'Shredder': { type: 'hexBlue', text: 'Shredder', color: '#00b8e6' },
-				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },
-				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
-				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
-				'Anti-Fighter Sand Caster': { type: 'hexYellow', text: 'Sand', color: '#787800' },				
-				'Psychic Field': { type: 'hexRed', text: 'Psychic', color: '#e6140a' },
-				'Second Sight': { type: 'hexPurple', text: 'Second Sight', color: '#7f00ff' },
-				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },
-				'Ion Storm': { type: 'hexPurple', text: 'Ion Field', color: '#7f00ff' },
-				'Jammer': { type: 'hexPurple', text: 'Jammer', color: '#7f00ff' },
-				'Proximity Launcher': { type: 'hexRed', text: 'Proximity Laser', color: '#e6140a' },
-				'Proximity Laser': { type: 'hexRed', text: 'Proximity Laser', color: '#e6140a' },
-				'Thought Wave': { type: 'hexPurple', text: 'Thought Wave', color: '#bc3782' },
 				'1-Blanket Shield': { type: 'hexGreen', text: 'Shade Modulator', color: '#008000' },
 				'3-Blanket Shade': { type: 'hexYellow', text: 'Shade Modulator', color: '#787800' },
-				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
-				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },
-				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },
+				'Anti-Fighter Plasma Web': { type: 'hexGreen', text: 'Plasma', color: '#787800' },
+				'Anti-Fighter Sand Caster': { type: 'hexYellow', text: 'Sand', color: '#787800' },
+				'Basic Mine': { type: 'hexRed', text: 'Basic', color: '#e6140a' },				
+				'Defensive Plasma Web': { type: 'hexGreen', color: '', color: '#787800' },								
+				'Defensive Sand Caster': { type: 'hexYellow', color: '', color: '#787800' },
+				'Energy Mine': { type: 'hexRed', text: 'Energy Mine', color: '#e6140a' },					
+				'Fighter Bomb': { type: 'hexBlue', text: 'Fighter Bomb', color: '#00b8e6' },
+				'Gravitic Mine': { type: 'hexGreen', text: 'Gravitic Mine', color: '#008000' },											
+				'Ion Storm': { type: 'hexPurple', text: 'Ion Field', color: '#7f00ff' },
+				'Jammer': { type: 'hexPurple', text: 'Jammer', color: '#7f00ff' },
 				'Priority - GN': { type: 'hexGreen', text: 'Gravity Net PRIORITY', color: '#787800' },
-				'Gravitic Mine': { type: 'hexGreen', text: 'Gravitic Mine', color: '#008000' },
-				'Fighter Bomb': { type: 'hexBlue', text: 'Fighter Bomb', color: '#00b8e6' },			
+				'Proximity Laser': { type: 'hexRed', text: 'Proximity Laser', color: '#e6140a' },
+				'Proximity Launcher': { type: 'hexRed', text: 'Proximity Laser', color: '#e6140a' },					
+				'Psychic Field': { type: 'hexRed', text: 'Psychic', color: '#e6140a' },
+				'Second Sight': { type: 'hexPurple', text: 'Second Sight', color: '#7f00ff' },							
+				'Shredder': { type: 'hexBlue', text: 'Shredder', color: '#00b8e6' },	
+				'Standard - GN': { type: 'hexGreen', text: 'Gravity Net Standard', color: '#008000' },							
+				'Thought Wave': { type: 'hexPurple', text: 'Thought Wave', color: '#bc3782' },				
+				'Transverse Jump': { type: 'hexBlue', text: 'Transverse Jump', color: '#787800' },
+				'Warp Jump': { type: 'hexBlue', text: 'Warp Jump', color: '#787800' },	
+				'Z - Antimine': { type: 'hexRed', text: 'Antimine', color: '#e6140a' },						
 			};
 
 			if (modeName == 'Transverse Jump' && !gamedata.isMyorMyTeamShip(shooter)) {
@@ -334,10 +335,20 @@ window.BallisticIconContainer = function () {
 					}
 				}
 			}
+			
+			// Damage class-based override logic.
+			// A few hex-targeted launchers (mines) rely on their fire order carrying
+			// damageclass 'MultiModeHex' so the icon prints the firing-mode (mine type) name.
+			// That flag is stamped lazily by the weapon's initializationUpdate (via
+			// initializeSystem), which for a freshly-declared targeting order hasn't run yet -
+			// and even then only ever tags fireOrders[0]. Honour a stable weapon-level flag
+			// instead, so the name shows the moment the hex is targeted and on every mine order.
+			const effectiveDamageClass = (weapon && weapon.multiModeHexIcon && modeName)
+				? 'MultiModeHex'
+				: ballistic.damageclass;
 
-			// Damage class-based override logic
-			if (ballistic.damageclass && modeName) {
-				switch (ballistic.damageclass) {
+			if (effectiveDamageClass && modeName) {
+				switch (effectiveDamageClass) {
 					case 'MultiModeHex':
 						const isFriendly = gamedata.isMyOrTeamOneShip(shooter);
 						var modeText = isFriendly ? modeName : weapon.getModeNameForEnemy();

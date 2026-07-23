@@ -1110,8 +1110,8 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
 <li>These are the most unique system used by the Kirishiac. These are small segments of the ship that float over the hull and mount various weapons and systems. There are three types described below.
             <ul class="circle-list">
-                <li>Basic functionality (all orbitals): Orbitals can be in one of two states; docked or deployed. There is no penalty to the ship or orbital for docking or deploying. The Kirishiac player may
-                choose either state for the start of a match. If the associated ship structure block is destroyed, all associated orbitals are lost.</li>
+                <li>Basic functionality (all orbitals): Orbitals can be in one of two states; docked or deployed. There is no penalty to the ship or orbital for docking or deploying. 
+                    Orbitals can be docked or deployed at the start of a match, and afterwards their state can be toggled by clickng on the system icon during Firing Phase, with any change taking effect at the very end of the turn e.g. after firing is resolved. If the associated ship structure block is destroyed, all associated orbitals are lost.</li>
                 <li>Docked:
                     <ul class="circle-list">
                         <li>The orbital's structure is merged with the structure block it is associated with.</li>
@@ -1307,7 +1307,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
         <ul>
         <li>Shadow fighters are semi-autonomous slivers made from the hull material of their carriers.</li>             
         <li>Some Shadow carriers form their fighters internally and keep them held within the hull rather than parked in space. These integrated fighters are bought as an enhancement on the carrier, and the carrier can carry no more than its listed hangar capacity.</li>
-        <li>Such a carrier does not launch its fighters in the usual way. Instead it deploys them with a Fighter Bomb - a forward-arc weapon, selected and fired during the Firing Phase at a target hex within range. The held fighters deploy at that hex the following turn, sharing the carrier's heading and speed.</li>
+        <li>Such a carrier does not launch its fighters in the usual way. Instead it deploys them with a Fighter Bomb - a forward-arc weapon, selected and fired during the Firing Phase at a target hex within range. The held fighters deploy at that hex the following turn, sharing the carrier's heading and speed. Note - Fighters cannot be launched (or recovered) if the Shadow ship is Half-Phased.</li>
         <li>You choose how many fighters to commit per shot, up to the number currently held. If you launch more than a single flight can hold, the bomb forms several flights at the target hex. By default these are split for you (largest flights first), but you can instead set each flight's size by hand, and add extra flights so a large launch can be broken into smaller groups if you prefer.</li>
         <li>Unlike an ordinary fighter launch, firing the Fighter Bomb carries no initiative penalty - neither on the launched fighters nor on the carrier. (Note - Recovering fighters still incurs the usual hangar-operations penalty.)</li>
         <li>Integrated fighters return by landing on the carrier as normal, where they are reabsorbed back into the hull: their damage is repaired by the ship but this, plus any energy held in their diffusers, is drawn back into one of the carrier's own Energy Diffusers (with any excess penetrating to a random system), and they are ready to be lanched again from the following turn. An empty hangar - whether the fighters were spent or lost - leaves the Fighter Bomb with nothing to launch.</li>

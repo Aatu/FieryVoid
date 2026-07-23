@@ -418,7 +418,10 @@ var ChoukaMineLauncher = function ChoukaMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
 ChoukaMineLauncher.prototype = Object.create(Weapon.prototype);
-ChoukaMineLauncher.prototype.constructor = ChoukaMineLauncher; 
+ChoukaMineLauncher.prototype.constructor = ChoukaMineLauncher;
+
+//See BallisticMineLauncher.multiModeHexIcon - shows the mine-type name on the ballistic icon.
+ChoukaMineLauncher.prototype.multiModeHexIcon = true;
 
 ChoukaMineLauncher.prototype.initializationUpdate = function() {
 	var ship = this.ship;	

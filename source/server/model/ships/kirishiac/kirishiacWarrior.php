@@ -31,6 +31,10 @@ class kirishiacWarrior extends FighterFlight{
 		$this->dockRegeneration = 5;
 
 		$this->iniativebonus = 90;
+
+		/*Kirishiac use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'KirshiacFighter');  
+
         $this->populate();
     }
 

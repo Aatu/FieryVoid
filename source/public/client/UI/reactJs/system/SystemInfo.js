@@ -61,7 +61,10 @@ class SystemInfo extends React.Component {
     render() {
         const { ship, selectedShip, system, boundingBox } = this.props;
 
-        if (system instanceof Ship) {
+        //`system === ship` matters in the lobby: bought fleet ships are jQuery.extend
+        //clones without the Ship prototype, so instanceof alone missed their
+        //ship-level events and the render fell into the system branch and crashed
+        if (system instanceof Ship || system === ship) {
             var unitName = ship.shipClass;
             var shipName = ship.name;
             if (system.flight) { //display fighter name instead of flight name!
