@@ -38,10 +38,10 @@ window.ShipEWSprite = function () {
             return;
         }
 
-        var a = 0.5;
+        var a = 0.4;
 
         if (DEW < 3) {
-            a = 0.6;
+            a = 0.5;
         }
 
         context.strokeStyle = "rgba(20,80,128,0)";
