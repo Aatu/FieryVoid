@@ -36,15 +36,22 @@ class Xorr extends VreeCapital{
 		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
 		//this). The group tag doubles as the turret's display name shown in the system window.
 		//The third cannon is unturreted.
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30 - and because a turret is one mount,
+		//a jam on either linked weapon restricts both. See Weapon::testArcRestriction.
 		$turretCannonA = new AntimatterCannon(3, 0, 0, 0, 360);
 		$turretCannonA->linkedFiringGroup = 'Turret 1';
 		$turretCannonA->linkedFiringSpread = 60;
+		$turretCannonA->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretCannonA);
 		$turretCannonB = new AntimatterCannon(3, 0, 0, 0, 360);
 		$turretCannonB->linkedFiringGroup = 'Turret 1';
 		$turretCannonB->linkedFiringSpread = 60;
+		$turretCannonB->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretCannonB);
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		$cannon = new AntimatterCannon(3, 0, 0, 0, 360);
+		$cannon->setArcRestriction(330, 30);
+		$this->addPrimarySystem($cannon);
 
 		$thrust = new GraviticThruster(4, 14, 0, 8, 1);
 		$thrust->startArc = 300;

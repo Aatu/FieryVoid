@@ -34,8 +34,14 @@ class Xurr extends VreeCapital{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 9, 8));
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
-		$this->addPrimarySystem(new AntimatterConverter(3, 7, 5, 0, 360));
-		$this->addPrimarySystem(new AntimatterConverter(3, 7, 5, 0, 360));	
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30. See Weapon::testArcRestriction.
+		$converter = new AntimatterConverter(3, 7, 5, 0, 360);
+		$converter->setArcRestriction(330, 30);
+		$this->addPrimarySystem($converter);
+		$converter = new AntimatterConverter(3, 7, 5, 0, 360);
+		$converter->setArcRestriction(330, 30);
+		$this->addPrimarySystem($converter);
 
         $thrust = new GraviticThruster(4, 14, 0, 8, 1);
 		$thrust->startArc = 300;

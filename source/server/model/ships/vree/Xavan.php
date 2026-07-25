@@ -37,21 +37,28 @@ class Xavan extends VreeCapital{
 		//Turret mounts: the two weapons sharing a turret have their fire linked, so their targets must
 		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
 		//this). The group tag doubles as the turret's display name shown in the system window.
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30 - and because a turret is one mount,
+		//a jam on either linked weapon restricts both. See Weapon::testArcRestriction.
 		$turretGunA = new AntiprotonGun(3, 0, 0, 0, 360);
 		$turretGunA->linkedFiringGroup = 'Turret 1';
 		$turretGunA->linkedFiringSpread = 60;
+		$turretGunA->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretGunA);
 		$turretGunB = new AntiprotonGun(3, 0, 0, 0, 360);
 		$turretGunB->linkedFiringGroup = 'Turret 1';
 		$turretGunB->linkedFiringSpread = 60;
+		$turretGunB->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretGunB);
 		$turretGunC = new AntiprotonGun(3, 0, 0, 0, 360);
 		$turretGunC->linkedFiringGroup = 'Turret 2';
 		$turretGunC->linkedFiringSpread = 60;
+		$turretGunC->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretGunC);
 		$turretGunD = new AntiprotonGun(3, 0, 0, 0, 360);
 		$turretGunD->linkedFiringGroup = 'Turret 2';
 		$turretGunD->linkedFiringSpread = 60;
+		$turretGunD->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretGunD);
 			
         $thrust = new GraviticThruster(4, 12, 0, 7, 1);

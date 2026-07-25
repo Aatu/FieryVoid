@@ -34,17 +34,24 @@ class Ximm extends VreeCapital{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 9, 8));
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		//setArcRestriction: every primary-mounted Vree weapon can JAM. Whenever it is damaged it rolls
+		//a separate d20 (17+) and locks to the forward 330..30 - and because a turret is one mount,
+		//a jam on either linked weapon restricts both. See Weapon::testArcRestriction.
+		$cannon = new AntimatterCannon(3, 0, 0, 0, 360);
+		$cannon->setArcRestriction(330, 30);
+		$this->addPrimarySystem($cannon);
 		//Turret mount: these two share a single turret, so their fire is linked and their targets must
 		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
 		//this). The group tag doubles as the turret's display name shown in the system window.
 		$turretDefenderA = new AntiprotonDefender(3, 0, 0, 0, 360);
 		$turretDefenderA->linkedFiringGroup = 'Turret 1';
 		$turretDefenderA->linkedFiringSpread = 60;
+		$turretDefenderA->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretDefenderA);
 		$turretDefenderB = new AntiprotonDefender(3, 0, 0, 0, 360);
 		$turretDefenderB->linkedFiringGroup = 'Turret 1';
 		$turretDefenderB->linkedFiringSpread = 60;
+		$turretDefenderB->setArcRestriction(330, 30);
 		$this->addPrimarySystem($turretDefenderB);
 
         $thrust = new GraviticThruster(4, 14, 0, 8, 1);
