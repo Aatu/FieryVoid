@@ -38,7 +38,7 @@ window.ShipEWSprite = function () {
             return;
         }
 
-        var a = 0.55;
+        var a = 0.5;
 
         if (DEW < 3) {
             a = 0.6;
