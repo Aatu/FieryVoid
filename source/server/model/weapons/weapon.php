@@ -223,8 +223,30 @@ class Weapon extends ShipSystem
         $this->endArc = $this->stowed ? $this->stowedArcEnd : $this->deployedArcEnd;
     }
 
+    /*restricted firing arcs (TURRET JAM - Vree saucer turrets). Non-null means this MOUNT can jam:
+    every turn it is damaged it rolls its own d20 (see testArcRestriction) and on
+    $arcRestrictionThreshold+ it takes a ReducedArcs critical that locks it to this arc for good
+    (until repaired). Declared per weapon INSTANCE from the ship blueprint - the same weapon class
+    is used both on 360-degree primary mounts and on ordinary sectional mounts, so this can never
+    live on the class. The jam is applied in changeFiringMode (via $arcRestricted) rather than
+    directly on $startArc, so a per-mode arc array or a mid-game firing-mode switch cannot restore
+    the full mount arc.
+    PROTECTED deliberately: the client needs none of this - it learns the jam from the live
+    startArc/endArc in stripForJson and the "Turret Mount" tooltip line - and a public property with
+    a non-null default would be serialised onto every weapon in the static ship blueprint.*/
+    protected $reducedArcStart = null;
+    protected $reducedArcEnd = null;
+    protected $arcRestrictionThreshold = 17; //d20 result needed to jam the mount
+    protected $arcRestricted = false; //true once a ReducedArcs crit is in effect (set in effectCriticals)
+
+    public function setArcRestriction($startArc, $endArc, $threshold = 17){
+        $this->reducedArcStart = (int)$startArc;
+        $this->reducedArcEnd = (int)$endArc;
+        $this->arcRestrictionThreshold = (int)$threshold;
+    }
+
     public $useOEW = true;
-    public $useOEWArray = array();    
+    public $useOEWArray = array();
     public $calledShotMod = -8;
 	public $calledShotModArray = array();     
 	public $factionAge = 1; //1 - Young, 2 - Middleborn, 3 - Ancient, 4 - Primordial
@@ -428,6 +450,14 @@ class Weapon extends ShipSystem
             $strippedSystem->isModified = $this->isModified;
         }
 
+        //Turret jam (ReducedArcs crit): the static blueprint still carries the mount's FULL arc, so
+        //the live reduced arc has to travel with the payload - the client merges JSON over the
+        //blueprint, and every arc consumer (targeting, "Not In Arc", the hover arc) reads these.
+        if ($this->arcRestricted) {
+            $strippedSystem->startArc = $this->startArc;
+            $strippedSystem->endArc = $this->endArc;
+        }
+
 		}
         return $strippedSystem;
     }
@@ -592,9 +622,68 @@ class Weapon extends ShipSystem
             $rp--;
         }
 
+        //Turret jam: a ReducedArcs critical locks this mount to its restricted arc. Only a flag is
+        //set here - changeFiringMode below does the actual swap, so a per-mode arc array can't win.
+        if ($this->reducedArcStart !== null && $this->hasCritical("ReducedArcs", false)) {
+            $this->arcRestricted = true;
+        }
+
         //make sure data from table is transferred to current variables
         $this->changeFiringMode($this->firingMode);
     } //endof function effectCriticals
+
+    public function criticalPhaseEffects($ship, $gamedata)
+    {
+        parent::criticalPhaseEffects($ship, $gamedata);
+        //Deliberately OUTSIDE the parent's isDestroyed() early return: the turret mount was hit even
+        //if this particular gun died, and its surviving turret mate still jams.
+        $this->testArcRestriction($ship, $gamedata);
+    }
+
+    /* TURRET JAM. A SEPARATE d20, rolled independently of the weapon critical chart: any turn an
+       arc-restrictable mount takes damage it rolls, and on $arcRestrictionThreshold+ the turret jams
+       to its restricted arc (Vree: 17+, forward 330..30). Because a turret is ONE physical mount, the
+       ReducedArcs crit is stamped on every weapon sharing this weapon's linkedFiringGroup, not just
+       the gun that was hit.
+
+       Rolled here (crit phase, Pass 2) rather than in testCritical for two reasons: the rule is
+       explicitly independent of the crit chart, and several subclasses (missile racks) conditionally
+       SKIP parent::testCritical when their ammo explodes, which would silently swallow the roll.
+
+       Once jammed, further hits don't roll again - a turret already locked forward cannot jam harder,
+       and this also keeps the crit from being duplicated when both guns on a turret are hit the same
+       turn. Crits are flagged updated so getUpdatedCriticals/submitCriticals persists them. */
+    protected function testArcRestriction($ship, $gamedata)
+    {
+        if ($this->reducedArcStart === null) return; //mount cannot jam
+        if (!$this->isDamagedOnTurn($gamedata->turn)) return; //only a hit this turn triggers the roll
+        if ($this->hasCritical("ReducedArcs", false)) return; //already jammed
+
+        if (Dice::d(20) < $this->arcRestrictionThreshold) return;
+
+        foreach ($this->getTurretMates($ship) as $mate){
+            if ($mate->hasCritical("ReducedArcs", false)) continue; //don't double up on a mate already jammed
+            $crit = new ReducedArcs(-1, $ship->id, $mate->id, "ReducedArcs", $gamedata->turn);
+            $crit->updated = true;
+            $mate->setCritical($crit);
+        }
+    }
+
+    /* This weapon plus every other weapon sharing its turret - same non-null linkedFiringGroup on the
+       same unit. An unlinked mount is a turret of one. */
+    protected function getTurretMates($ship)
+    {
+        $mates = array($this);
+        if ($this->linkedFiringGroup === null) return $mates;
+
+        foreach ($ship->systems as $system){
+            if ($system === $this) continue;
+            if (!($system instanceof Weapon)) continue;
+            if ($system->linkedFiringGroup !== $this->linkedFiringGroup) continue;
+            $mates[] = $system;
+        }
+        return $mates;
+    }
 
     public function effectCriticalDamgeReductions($dp, $repeat = false){
         //damage penalty: 20% of variance or straight 2, whichever is bigger; hold that as a fraction, however! - low rolls should be affected lefss than high ones, after all        
@@ -782,6 +871,14 @@ class Weapon extends ShipSystem
 		//group tag doubles as the turret's display name here. See weaponManager.getLinkedFiringBlock.
 		if ($this->linkedFiringGroup !== null && $this->linkedFiringSpread !== null) {
 			$this->data["Firing Link"] = "Mounted on " . $this->linkedFiringGroup;
+		}
+		//Turret jam - tell the player the mount can lock up before it happens, and confirm it after.
+		//The "Arc" line (set by the parent call below) always shows the arc currently in effect.
+		if ($this->reducedArcStart !== null) {
+			$this->data["Turret Mount"] = $this->arcRestricted
+				? "JAMMED - locked to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
+				: "Whole turret May jam to " . $this->reducedArcStart . ".." . $this->reducedArcEnd
+					. " on a " . $this->arcRestrictionThreshold . "+ (d20) whenever damaged";
 		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
 
@@ -2582,8 +2679,15 @@ full Advanced Armor effects (by rules) for reference:
         
 		if (isset($this->canSplitShotsArray[$i])) $this->canSplitShots = $this->canSplitShotsArray[$i];  // DK
 		if (isset($this->autoFireOnlyArray[$i])) $this->autoFireOnly = $this->autoFireOnlyArray[$i];  // DK  
-		if (isset($this->canTargetAlliesArray[$i])) $this->canTargetAllies = $this->canTargetAlliesArray[$i];  // DK                          
-											    
+		if (isset($this->canTargetAlliesArray[$i])) $this->canTargetAllies = $this->canTargetAlliesArray[$i];  // DK
+
+		//Turret jam (ReducedArcs critical) - applied LAST, after every per-mode arc assignment above,
+		//so neither a startArcArray entry nor a mid-game firing-mode switch can restore the full arc.
+		if ($this->arcRestricted){
+			$this->startArc = $this->reducedArcStart;
+			$this->endArc = $this->reducedArcEnd;
+		}
+
     }//endof function changeFiringMode
 
 

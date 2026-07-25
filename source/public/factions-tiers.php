@@ -824,7 +824,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
 <h5>Turrets</h5>
             <ul>
 <li>Some Vree weapons located on the primary section of Vree ships are grouped into turrets, 
-                which have the limitation that all weapons in one turret must engage targets within 60 degrees of each other.
+                which have the limitation that all weapons in one turret must engage targets within 60 degrees of each other.  Additionally, whenever a turret weapon takes damage it rolls a d20 and on a roll of 17+ the whole turret becomes jammed to 60 degrees forward arc.
                 </li>                                                 
     </ul>
 <a class="back-to-top" href="#top">↩ Back to Top</a>

@@ -268,8 +268,43 @@ window.weaponManager = {
     getBearingSeparation: function getBearingSeparation(observer, unitA, unitB) {
         var a = mathlib.getCompassHeadingOfShip(observer, unitA);
         var b = mathlib.getCompassHeadingOfShip(observer, unitB);
+        return weaponManager.getHeadingSeparation(a, b);
+    },
+
+    //Smallest angular separation (0-180 deg) between two compass headings.
+    getHeadingSeparation: function getHeadingSeparation(a, b) {
         var diff = Math.abs(a - b) % 360;
         return diff > 180 ? 360 - diff : diff;
+    },
+
+    //Compass heading, as seen from $firingUnit, of whatever a fire order is AIMED AT — a target
+    //ship (targetid > 0) or the target HEX of a hex-targeted order (targetid -1 with x/y set,
+    //e.g. Antimatter Shredder mode 1). Null if the order aims at neither (self-intercept, or a
+    //target ship that is no longer in gamedata).
+    //
+    //This is what lets the firing-link rule treat a hex order like any other: a turret is one
+    //mount, so where its hex-targeting weapon is pointed constrains its mate exactly as a ship
+    //target would, and vice versa. Before this, hex orders were skipped entirely and a Vree
+    //turret's Shredder and Cannon could point in completely opposite directions.
+    getFireOrderBearing: function getFireOrderBearing(firingUnit, fo) {
+        if (!fo) return null;
+        if (fo.targetid > 0) {
+            var target = gamedata.getShip(fo.targetid);
+            return target ? mathlib.getCompassHeadingOfShip(firingUnit, target) : null;
+        }
+        if (fo.x !== undefined && fo.x !== null && fo.y !== undefined && fo.y !== null) {
+            return mathlib.getCompassHeadingOfPoint(
+                shipManager.getShipPosition(firingUnit), new hexagon.Offset(fo.x, fo.y));
+        }
+        return null;
+    },
+
+    //Human-readable name for what a fire order is aimed at, for the "blocked" message.
+    getFireOrderAimLabel: function getFireOrderAimLabel(fo) {
+        if (!fo) return 'its paired target';
+        if (fo.targetid > 0) return (gamedata.getShip(fo.targetid) || {}).name || 'its paired target';
+        if (fo.x !== undefined && fo.y !== undefined) return 'the hex at ' + fo.x + ',' + fo.y;
+        return 'its paired target';
     },
 
     //Firing-link ("linkedFiringGroup") enforcement, evaluated AT TARGETING TIME (not at commit).
@@ -282,10 +317,19 @@ window.weaponManager = {
     //                                 unit (Vree linked primaries = 60; their 360-degree turrets
     //                                 mean weapon arcs can't express this restriction themselves).
     //Scope is per-fighter for flights (each fighter's group is independent, so different fighters in
-    //a flight may pick different targets) and whole-ship otherwise. Only ship targets constrain
-    //(targetid > 0); hex/self-intercept orders are ignored. The FIRST member to declare is always
-    //free. Returns null when `candidateTarget` is allowed, or an HTML reason string when blocked.
-    getLinkedFiringBlock: function getLinkedFiringBlock(firingUnit, weapon, candidateTarget) {
+    //a flight may pick different targets) and whole-ship otherwise. The FIRST member to declare is
+    //always free.
+    //
+    //HEX ORDERS COUNT, in both directions (angular-spread groups only): a hex-targeted weapon on the
+    //turret (Antimatter Shredder mode 1) both CONSTRAINS its mate and IS CONSTRAINED by it — the
+    //turret is one physical mount, so it can only point one way. Pass `candidateHex` (a hexagon
+    //Offset) instead of `candidateTarget` when the candidate is a hex. Self-intercept orders, and
+    //orders whose target ship has vanished, still never constrain (no resolvable bearing).
+    //The same-unit rule (spread == null, Thunderbolt twin racks) is deliberately left ship-only —
+    //those groups contain no hex weapons and "same target UNIT" has no meaning for a hex.
+    //
+    //Returns null when the candidate is allowed, or an HTML reason string when blocked.
+    getLinkedFiringBlock: function getLinkedFiringBlock(firingUnit, weapon, candidateTarget, candidateHex) {
         if (!weapon.linkedFiringGroup) return null;
 
         var siblings;
@@ -297,6 +341,16 @@ window.weaponManager = {
         }
 
         var spread = weapon.linkedFiringSpread;
+        var byHex = (candidateHex !== undefined && candidateHex !== null);
+
+        //Bearing of the candidate aim point, measured from the firing unit — the common currency
+        //the spread rule compares in, whether the candidate is a ship or a hex.
+        var candidateBearing = null;
+        if (spread != null) {
+            candidateBearing = byHex
+                ? mathlib.getCompassHeadingOfPoint(shipManager.getShipPosition(firingUnit), candidateHex)
+                : mathlib.getCompassHeadingOfShip(firingUnit, candidateTarget);
+        }
 
         for (var i in siblings) {
             var sib = siblings[i];
@@ -305,50 +359,61 @@ window.weaponManager = {
 
             for (var j in sib.fireOrders) {
                 var fo = sib.fireOrders[j];
-                if (fo.turn != gamedata.turn || fo.rolled || !(fo.targetid > 0)) continue;
-                if (fo.targetid == candidateTarget.id) continue; //same unit is always allowed
+                if (fo.turn != gamedata.turn || fo.rolled) continue;
 
                 if (spread == null || spread === undefined) {
-                    var lockedName = (gamedata.getShip(fo.targetid) || {}).name || 'its paired target';
+                    //Same-target-UNIT rule: ship orders only, and only a ship candidate can satisfy
+                    //or violate it — "the same target UNIT" is meaningless for a hex, so a hex
+                    //candidate is left unconstrained here rather than blocked outright. (No such
+                    //group contains a hex weapon today; this just keeps the rule honest.)
+                    if (byHex || !(fo.targetid > 0)) continue;
+                    if (fo.targetid == candidateTarget.id) continue; //same unit is always allowed
+                    var lockedName = weaponManager.getFireOrderAimLabel(fo);
                     return "<b>" + weapon.displayName + "</b> must fire at the same target as its paired weapon (<b>" + lockedName + "</b>).";
-                } else {
-                    var sibTarget = gamedata.getShip(fo.targetid);
-                    if (!sibTarget) continue;
-                    var sep = weaponManager.getBearingSeparation(firingUnit, candidateTarget, sibTarget);
-                    if (sep > spread) {
-                        return "<b>" + weapon.displayName + "</b>'s target must be within " + spread + "° of its paired weapon’s target (<b>" + sibTarget.name + "</b>).";
-                    }
+                }
+
+                //Angular-spread rule: any order with a resolvable bearing constrains, hex included.
+                if (!byHex && fo.targetid == candidateTarget.id) continue; //same unit is always allowed
+                var sibBearing = weaponManager.getFireOrderBearing(firingUnit, fo);
+                if (sibBearing === null || candidateBearing === null) continue;
+
+                if (weaponManager.getHeadingSeparation(candidateBearing, sibBearing) > spread) {
+                    var aimLabel = weaponManager.getFireOrderAimLabel(fo);
+                    return "<b>" + weapon.displayName + "</b>" + (byHex ? "'s target hex" : "'s target")
+                        + " must be within " + spread + "° of its paired weapon’s target (<b>" + aimLabel + "</b>).";
                 }
             }
         }
         return null;
     },
 
-    //First live ship target (declared this turn, not rolled, targetid>0) among a system's fire
-    //orders, resolved to a ship. Null if the system has no such order.
-    getFirstLiveShipTarget: function getFirstLiveShipTarget(system) {
+    //Bearing (from $firingUnit) of the first live order declared this turn by a system — ship
+    //target OR target hex. Null if the system has no such order.
+    getFirstLiveOrderBearing: function getFirstLiveOrderBearing(firingUnit, system) {
         if (!system || !system.fireOrders) return null;
         for (var j in system.fireOrders) {
             var fo = system.fireOrders[j];
-            if (fo.turn == gamedata.turn && !fo.rolled && fo.targetid > 0) {
-                return gamedata.getShip(fo.targetid) || null;
-            }
+            if (fo.turn != gamedata.turn || fo.rolled) continue;
+            var bearing = weaponManager.getFireOrderBearing(firingUnit, fo);
+            if (bearing !== null) return bearing;
         }
         return null;
     },
 
-    //The target ship this weapon's linked group is committed to this turn — from THIS weapon's own
+    //The BEARING this weapon's linked group is committed to this turn — from THIS weapon's own
     //declared order if it has one, otherwise from a sibling's (same linkedFiringGroup, same parent
     //unit). Null if no member has declared. For an angular-spread group this is the centre of the
     //weapon's reduced allowed arc. Used by ShipIcon.showWeaponArc to draw the reduced arc on hover -
     //both for a sibling-locked weapon AND for a weapon that has itself locked a firing order. (Groups
     //are two-weapon turrets in practice, so the first committed member is the relevant one.)
-    getLinkedGroupDeclaredTarget: function getLinkedGroupDeclaredTarget(firingUnit, weapon) {
+    //A bearing rather than a target ship, so a hex-targeted order (Antimatter Shredder mode 1)
+    //centres the wedge just as a ship target does.
+    getLinkedGroupDeclaredBearing: function getLinkedGroupDeclaredBearing(firingUnit, weapon) {
         if (!weapon.linkedFiringGroup) return null;
 
-        //Prefer this weapon's own committed target, so a locked weapon shows the wedge on its own order.
-        var own = weaponManager.getFirstLiveShipTarget(weapon);
-        if (own) return own;
+        //Prefer this weapon's own committed order, so a locked weapon shows the wedge on its own aim.
+        var own = weaponManager.getFirstLiveOrderBearing(firingUnit, weapon);
+        if (own !== null) return own;
 
         var siblings;
         if (firingUnit.flight) {
@@ -362,8 +427,8 @@ window.weaponManager = {
             var sib = siblings[i];
             if (!sib || sib.id == weapon.id) continue;
             if (sib.linkedFiringGroup !== weapon.linkedFiringGroup) continue;
-            var t = weaponManager.getFirstLiveShipTarget(sib);
-            if (t) return t;
+            var b = weaponManager.getFirstLiveOrderBearing(firingUnit, sib);
+            if (b !== null) return b;
         }
         return null;
     },
@@ -2785,10 +2850,11 @@ window.weaponManager = {
     targetHex: function targetHex(selectedShip, hexpos) {
         if (shipManager.isDestroyed(selectedShip)) return;
         if (!selectedShip.flight && shipManager.isDisabled(selectedShip)) return;
-        var hidden = weaponManager.isHidden(selectedShip); //Block invisible ships from firing where appropriate.        
+        var hidden = weaponManager.isHidden(selectedShip); //Block invisible ships from firing where appropriate.
 
         var toUnselect = Array();
         var splitTargeted = [];
+        var linkedWarned = {}; //one firing-link warning per group, not per weapon
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -2830,6 +2896,21 @@ window.weaponManager = {
             }
 
             if (weaponManager.checkConflictingFireOrder(selectedShip, weapon)) {
+                continue;
+            }
+
+            //Firing-link guard for HEX targeting — the mirror of the one in targetShip. A turret is
+            //one mount, so a hex-targeting weapon (Antimatter Shredder mode 1) must aim within its
+            //group's spread of whatever its mate has already declared, ship or hex alike. Without
+            //this a jammed Vree turret could shell a hex behind the ship while its cannon fired
+            //forward. Placed after the phase/conflict guards and before the arc test so we only
+            //nag about weapons that were otherwise eligible.
+            var linkBlock = weaponManager.getLinkedFiringBlock(selectedShip, weapon, null, hexpos);
+            if (linkBlock) {
+                if (!linkedWarned[weapon.linkedFiringGroup]) {
+                    linkedWarned[weapon.linkedFiringGroup] = true;
+                    confirm.warning(linkBlock);
+                }
                 continue;
             }
 

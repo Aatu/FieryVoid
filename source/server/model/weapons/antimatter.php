@@ -42,13 +42,11 @@
             parent::setSystemDataWindow($turn);
 			$this->data["Range brackets"] = 'No penalty up to ' . $this->rngNoPenalty . ' / Normal penalty up to ' . $this->rngNormalPenalty . ' / Double therafter ' ;
 			$this->data["X-dependent damage"] = $this->dmgEquation . ' ( max X = ' . $this->maxX . ')';
-            $this->data["Special"] = "Damage is dependent on how good a hit is - it's not randomized. Quality of hit is called X, and equals difference between actual and needed to-hit roll divided by 5.";
-			//$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
-			//$this->data["Special"] .= '<br><br>This weapon suffers no range penalty up to ' . $this->rngNoPenalty . ' hexes, regular penalty up to ' . $this->rngNormalPenalty . ' hexes, and double penalty for remaining distance.';
+            $this->data["Special"] = "Damage is dependent on hit roll, denoted as 'X', and equals difference between actual and needed to-hit roll divided by 5.";
 			$this->data["Special"] .= "<br>In case of no lock-on the range itself is doubled, not calculated penalty.";
-			if ($this->linkedFiringGroup !== null && $this->linkedFiringSpread !== null) {
+			if ($this->linkedFiringGroup !== null) {
 				$this->data["Special"] .= "<br>Mounted on " . $this->linkedFiringGroup;
-				$this->data["Special"] .= "<br>Turret weapons must fire at target within 60 degrees of each other.";	
+				if($this->linkedFiringGroup !== null) $this->data["Special"] .= "<br>Turret weapons must fire at target within 60 degrees of each other.";	
 			}			
         }
 		
@@ -566,10 +564,10 @@ class AntiprotonGun extends AntimatterWeapon{
 			}else{
 				$this->data["Special"] .= '<br>';
 			}
-			$this->data["Range brackets"] = 'For Antimatter Cannon modes: No penalty up to ' . $this->rngNoPenaltyArray[2] . ' / Normal penalty up to ' . $this->rngNormalPenaltyArray[2] . ' / Double therafter ' ;	
-			$this->data["Special"] .= 'Shredder mode is aimed at hex, and affects all units within 1 hex of target point (not beyond 10 hexes though, and will never hit firing unit itself).';
-			$this->data["Special"] .= '<br>Shredder will roll to hit separately for each attack. Attack will suffer no range penalty of any kind, will ignore any EW and jinking.';
-			$this->data["Special"] .= '<br>Each fighter will suffer 1 attack, LCVs/MCVs/HCVs d3 attacks, Capital ships d6 and Enormous units d6+3.';
+			$this->data["Range brackets"] = 'Antimatter Cannon modes: No penalty up to ' . $this->rngNoPenaltyArray[2] . ' / Normal penalty up to ' . $this->rngNormalPenaltyArray[2] . ' / Double therafter ' ;	
+			$this->data["Special"] .= 'Shredder mode targets hex, and attacks all units within 1 hex of target hex. Will never hit firing unit itself.';
+			$this->data["Special"] .= '<br>Shredder rolls to hit for each attack, suffering no range penalty of any kind, and ignoring EW and jinking.';
+			$this->data["Special"] .= '<br>Fighter each suffer 1 attack, LCVs/MCVs/HCVs d3 attacks, Capital ships d6 and Enormous units d6+3.';
 			$this->data["Special"] .= '<br>Multiple Shredders are NOT cumulative. Shredder fire is not interceptable.'; //uninterceptability is due to technical reasons - with no fire order ID, interception will not be applied properly
 			$this->data["Special"] .= '<br>Remaining two modes are equal to Antimatter Cannon, without special features.';
         }

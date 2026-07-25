@@ -562,6 +562,24 @@ window.ShipIcon = function () {
     };
 
 
+    /* Overlap of two circular arcs, or null if they don't overlap. Used to combine a jammed turret's
+       restricted arc (ReducedArcs critical) with its firing-link wedge - a weapon under both may only
+       bear where the two agree.
+
+       Assumes the two arcs together span less than 360 degrees, which is what makes the result a
+       single contiguous piece: two arcs can only overlap at BOTH ends (two separate pieces) when
+       their lengths sum past a full circle. Every mount this is used for is far below that (a 60
+       degree jam arc plus a 120 degree spread wedge), so the single-piece result is exact. */
+    function intersectArcs(a, b) {
+        var start = mathlib.isInArc(b.start, a.start, a.end) ? b.start
+                  : (mathlib.isInArc(a.start, b.start, b.end) ? a.start : null);
+        var end = mathlib.isInArc(b.end, a.start, a.end) ? b.end
+                : (mathlib.isInArc(a.end, b.start, b.end) ? a.end : null);
+
+        if (start === null || end === null) return null;
+        return { start: start, end: end };
+    }
+
     ShipIcon.prototype.showWeaponArc = function (ship, weapon) {
         if (!(weapon instanceof Weapon) && !(weapon instanceof Thruster) && !(weapon instanceof Shield)) return null; // Only show arcs for weapons
         if(weapon.stowed && weapon.stowedArcStart == null) return null; //stowed weapon with no stowed arc (Kirishiac Orbital docked) - non-operational, no arc to show. A stowed arc set (Heavy Orbital) keeps the weapon live: draw its current (reduced) arc.
@@ -605,17 +623,27 @@ window.ShipIcon = function () {
             //Firing-link reduced arc (e.g. Vree turret): if this weapon shares an angular-spread
             //group and any member has declared fire this turn (a sibling, OR this weapon itself once
             //its own order is locked), it can now only bear within linkedFiringSpread degrees of that
-            //target. On a full-circle mount, replace the drawn arc with that reduced wedge (in a
-            //distinct amber colour) so the restriction is visible on hover. The wedge is centred on
-            //the target's bearing and expressed in the same ship-frame as getArcs(), so the existing
-            //rotation maths below renders it correctly.
+            //target. Draw that reduced wedge in a distinct amber colour so the restriction is visible
+            //on hover. The wedge is centred on the target's bearing and expressed in the same
+            //ship-frame as getArcs(), so the existing rotation maths below renders it correctly.
+            //
+            //A weapon can be under BOTH restrictions at once: a turret that has JAMMED (ReducedArcs
+            //critical - the server sends the reduced startArc/endArc) is no longer a full circle, and
+            //the link wedge still applies on top. Then only the OVERLAP can actually be fired into, so
+            //that is what gets drawn - and an empty overlap means the weapon cannot bear at all this
+            //turn, so no arc is shown. (For the Vree numbers the jam arc is 60 degrees and the spread
+            //is 60, so the overlap is always the whole jam arc; the intersection matters for any
+            //future mount whose restricted arc is wider than its spread.)
             var baseArcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
-            if (baseArcLength >= 360 && weapon.linkedFiringSpread != null) {
-                var centreTarget = weaponManager.getLinkedGroupDeclaredTarget(ship, weapon);
-                if (centreTarget) {
+            if (weapon.linkedFiringSpread != null) {
+                //A bearing, not a ship - the committed order may be on a HEX (Shredder mode 1).
+                var centreBearing = weaponManager.getLinkedGroupDeclaredBearing(ship, weapon);
+                if (centreBearing !== null) {
                     var spread = weapon.linkedFiringSpread;
-                    var centreRel = mathlib.addToDirection(mathlib.getCompassHeadingOfShip(ship, centreTarget), -this.getFacing());
-                    arcs = { start: mathlib.addToDirection(centreRel, -spread), end: mathlib.addToDirection(centreRel, spread) };
+                    var centreRel = mathlib.addToDirection(centreBearing, -this.getFacing());
+                    var wedge = { start: mathlib.addToDirection(centreRel, -spread), end: mathlib.addToDirection(centreRel, spread) };
+                    arcs = baseArcLength >= 360 ? wedge : intersectArcs(arcs, wedge);
+                    if (!arcs) return null; //restricted arc and link wedge don't overlap - nothing can be fired at
                     arcColour = "rgb(170,95,25)"; //amber: reduced (linked) arc
                 }
             }
