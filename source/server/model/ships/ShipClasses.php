@@ -1684,6 +1684,10 @@ class BaseShip {
 		$chosenSystem = null;
 		$chosenValue=0;
 		if($this instanceOf FighterFlight){ //only subsystems of a particular fighter
+			//a flight keeps its defensive systems on the individual craft, so without a craft there is no
+			//list to search - callers that ask before a craft has been picked simply get no protector
+			//(rather than a fatal on $systemhit->systems)
+			if($systemhit === null) return null;
 			$listOfPotentialSystems = $systemhit->systems;
 		}else{ //all systems of a ship
 			$listOfPotentialSystems = $this->systems;
