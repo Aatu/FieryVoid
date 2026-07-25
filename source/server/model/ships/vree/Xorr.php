@@ -32,8 +32,18 @@ class Xorr extends VreeCapital{
 		$this->addPrimarySystem(new CnC(5, 12, 0, 0));
 		$this->addPrimarySystem(new Scanner(5, 12, 9, 8));
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
+		//Turret mount: these two share a single turret, so their fire is linked and their targets must
+		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
+		//this). The group tag doubles as the turret's display name shown in the system window.
+		//The third cannon is unturreted.
+		$turretCannonA = new AntimatterCannon(3, 0, 0, 0, 360);
+		$turretCannonA->linkedFiringGroup = 'Turret 1';
+		$turretCannonA->linkedFiringSpread = 60;
+		$this->addPrimarySystem($turretCannonA);
+		$turretCannonB = new AntimatterCannon(3, 0, 0, 0, 360);
+		$turretCannonB->linkedFiringGroup = 'Turret 1';
+		$turretCannonB->linkedFiringSpread = 60;
+		$this->addPrimarySystem($turretCannonB);
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
 
 		$thrust = new GraviticThruster(4, 14, 0, 8, 1);

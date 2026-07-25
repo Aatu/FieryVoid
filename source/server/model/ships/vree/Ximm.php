@@ -35,8 +35,17 @@ class Ximm extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(5, 12, 9, 8));
         $this->addPrimarySystem(new Engine(5, 12, 0, 8, 2));			
 		$this->addPrimarySystem(new AntimatterCannon(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
-		$this->addPrimarySystem(new AntiprotonDefender(3, 0, 0, 0, 360));
+		//Turret mount: these two share a single turret, so their fire is linked and their targets must
+		//be within 60 degrees of each other (they are 360-degree mounts, so weapon arcs can't express
+		//this). The group tag doubles as the turret's display name shown in the system window.
+		$turretDefenderA = new AntiprotonDefender(3, 0, 0, 0, 360);
+		$turretDefenderA->linkedFiringGroup = 'Turret 1';
+		$turretDefenderA->linkedFiringSpread = 60;
+		$this->addPrimarySystem($turretDefenderA);
+		$turretDefenderB = new AntiprotonDefender(3, 0, 0, 0, 360);
+		$turretDefenderB->linkedFiringGroup = 'Turret 1';
+		$turretDefenderB->linkedFiringSpread = 60;
+		$this->addPrimarySystem($turretDefenderB);
 
         $thrust = new GraviticThruster(4, 14, 0, 8, 1);
 		$thrust->startArc = 300;
