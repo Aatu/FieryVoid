@@ -46,6 +46,10 @@
 			//$this->data["Special"] .= "<br>This weapon does " . $this->dmgEquation .' damage, with maximum X being ' . $this->maxX . '.';
 			//$this->data["Special"] .= '<br><br>This weapon suffers no range penalty up to ' . $this->rngNoPenalty . ' hexes, regular penalty up to ' . $this->rngNormalPenalty . ' hexes, and double penalty for remaining distance.';
 			$this->data["Special"] .= "<br>In case of no lock-on the range itself is doubled, not calculated penalty.";
+			if ($this->linkedFiringGroup !== null && $this->linkedFiringSpread !== null) {
+				$this->data["Special"] .= "<br>Mounted on " . $this->linkedFiringGroup;
+				$this->data["Special"] .= "<br>Turret weapons must fire at target within 60 degrees of each other.";	
+			}			
         }
 		
 		public function getX($fireOrder){

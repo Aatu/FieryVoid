@@ -600,12 +600,32 @@ window.ShipIcon = function () {
             if (isNaN(dis) || !isFinite(dis)) dis = hexDistance; // Fallback for non-weapon systems without rangePenalty
             if (weapon.range > 0 && dis > hexDistance * weapon.range) dis = hexDistance * weapon.range;
             var arcs = shipManager.systems.getArcs(ship, weapon);
+            var arcColour = "rgb(20,80,128)";
+
+            //Firing-link reduced arc (e.g. Vree turret): if this weapon shares an angular-spread
+            //group and any member has declared fire this turn (a sibling, OR this weapon itself once
+            //its own order is locked), it can now only bear within linkedFiringSpread degrees of that
+            //target. On a full-circle mount, replace the drawn arc with that reduced wedge (in a
+            //distinct amber colour) so the restriction is visible on hover. The wedge is centred on
+            //the target's bearing and expressed in the same ship-frame as getArcs(), so the existing
+            //rotation maths below renders it correctly.
+            var baseArcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
+            if (baseArcLength >= 360 && weapon.linkedFiringSpread != null) {
+                var centreTarget = weaponManager.getLinkedGroupDeclaredTarget(ship, weapon);
+                if (centreTarget) {
+                    var spread = weapon.linkedFiringSpread;
+                    var centreRel = mathlib.addToDirection(mathlib.getCompassHeadingOfShip(ship, centreTarget), -this.getFacing());
+                    arcs = { start: mathlib.addToDirection(centreRel, -spread), end: mathlib.addToDirection(centreRel, spread) };
+                    arcColour = "rgb(170,95,25)"; //amber: reduced (linked) arc
+                }
+            }
+
             var arcLength = arcs.start === arcs.end ? 360 : mathlib.getArcLength(arcs.start, arcs.end);
             var arcStart = mathlib.addToDirection(0, arcLength * -0.5);
             var arcFacing = mathlib.addToDirection(arcs.end, arcLength * -0.5);
 
             var geometry = new THREE.CircleGeometry(dis, 32, mathlib.degreeToRadian(arcStart), mathlib.degreeToRadian(arcLength));
-            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color("rgb(20,80,128)"), opacity: 0.5, transparent: true });
+            var material = new THREE.MeshBasicMaterial({ color: new THREE.Color(arcColour), opacity: 0.5, transparent: true });
             var circle = new THREE.Mesh(geometry, material);
             circle.rotation.z = mathlib.degreeToRadian(-mathlib.addToDirection(arcFacing, -this.getFacing()));
             circle.position.z = -1;

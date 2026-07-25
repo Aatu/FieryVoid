@@ -155,6 +155,20 @@ class Weapon extends ShipSystem
 
     //damage type-related variables
     public $isLinked = false; //for linked weapons - they will all hit the exact same system!
+    //Front-end firing-link: weapons sharing the same non-null tag ON THE SAME PARENT UNIT are
+    //constrained, at targeting time, by any sibling in the group that has already declared fire.
+    //Enforced client-side in weaponManager.getLinkedFiringBlock (called from targetShip and the
+    //targeting tooltip). Distinct from $isLinked (which is about damage all landing on one SYSTEM,
+    //not about sharing a target UNIT). Null = not link-grouped; pruned from the static blueprint
+    //when null (see the static generators).
+    public $linkedFiringGroup = null;
+    //How the group is constrained:
+    //  null   -> all members must fire at the SAME target unit (e.g. Thunderbolt's twin racks).
+    //  number -> each member's target must lie within this many DEGREES of every already-targeted
+    //            sibling's target, measured from the firing unit (e.g. Vree linked primaries = 60;
+    //            their turrets are 360 deg so weapon arcs can't express this on their own).
+    //Only meaningful alongside a non-null $linkedFiringGroup. Pruned from the static blueprint when null.
+    public $linkedFiringSpread = null;
     public $noOverkill = false; //this will let simplify entire Matter line enormously!
     protected $noOverkillArray = array();
     public $doOverkill = false; //opposite of $noOverkill - allows Piercing shots to overkill (eg. Shadow Heavy Molecular Slicer Beam has such ability)
@@ -762,6 +776,12 @@ class Weapon extends ShipSystem
 		
 		if($this->exclusive){
 			$this->data["Exclusive"] = 'Yes';
+		}
+		//Firing-linked weapons that share a turret (an angular-spread group) note which turret they
+		//are mounted on, so the player sees their fire is tied to the turret's other weapon(s). The
+		//group tag doubles as the turret's display name here. See weaponManager.getLinkedFiringBlock.
+		if ($this->linkedFiringGroup !== null && $this->linkedFiringSpread !== null) {
+			$this->data["Firing Link"] = "Mounted on " . $this->linkedFiringGroup;
 		}
         $this->data["Resolution Priority (ship/fighter)"] = $this->priority . '/' . $this->priorityAF;
 

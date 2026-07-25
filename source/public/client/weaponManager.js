@@ -263,6 +263,111 @@ window.weaponManager = {
         return false;
     },
 
+    //Smallest angular separation (0-180 deg) between two units as seen from a common observer.
+    //Used by the firing-link "within N degrees" rule (Vree linked primaries).
+    getBearingSeparation: function getBearingSeparation(observer, unitA, unitB) {
+        var a = mathlib.getCompassHeadingOfShip(observer, unitA);
+        var b = mathlib.getCompassHeadingOfShip(observer, unitB);
+        var diff = Math.abs(a - b) % 360;
+        return diff > 180 ? 360 - diff : diff;
+    },
+
+    //Firing-link ("linkedFiringGroup") enforcement, evaluated AT TARGETING TIME (not at commit).
+    //Weapons sharing a non-null linkedFiringGroup ON THE SAME PARENT UNIT constrain each other:
+    //once a sibling in the group has declared a fire order this turn, the others are limited by it.
+    //  - linkedFiringSpread == null : all members must fire at the SAME target unit (Thunderbolt's
+    //                                 twin missile racks).
+    //  - linkedFiringSpread == N    : each member's target must lie within N degrees of every
+    //                                 already-targeted sibling's target, measured from the firing
+    //                                 unit (Vree linked primaries = 60; their 360-degree turrets
+    //                                 mean weapon arcs can't express this restriction themselves).
+    //Scope is per-fighter for flights (each fighter's group is independent, so different fighters in
+    //a flight may pick different targets) and whole-ship otherwise. Only ship targets constrain
+    //(targetid > 0); hex/self-intercept orders are ignored. The FIRST member to declare is always
+    //free. Returns null when `candidateTarget` is allowed, or an HTML reason string when blocked.
+    getLinkedFiringBlock: function getLinkedFiringBlock(firingUnit, weapon, candidateTarget) {
+        if (!weapon.linkedFiringGroup) return null;
+
+        var siblings;
+        if (firingUnit.flight) {
+            var fighter = shipManager.systems.getFighterBySystem(firingUnit, weapon.id);
+            siblings = fighter ? fighter.systems : [];
+        } else {
+            siblings = firingUnit.systems;
+        }
+
+        var spread = weapon.linkedFiringSpread;
+
+        for (var i in siblings) {
+            var sib = siblings[i];
+            if (!sib || sib.id == weapon.id) continue; //can't link to itself
+            if (sib.linkedFiringGroup !== weapon.linkedFiringGroup) continue;
+
+            for (var j in sib.fireOrders) {
+                var fo = sib.fireOrders[j];
+                if (fo.turn != gamedata.turn || fo.rolled || !(fo.targetid > 0)) continue;
+                if (fo.targetid == candidateTarget.id) continue; //same unit is always allowed
+
+                if (spread == null || spread === undefined) {
+                    var lockedName = (gamedata.getShip(fo.targetid) || {}).name || 'its paired target';
+                    return "<b>" + weapon.displayName + "</b> must fire at the same target as its paired weapon (<b>" + lockedName + "</b>).";
+                } else {
+                    var sibTarget = gamedata.getShip(fo.targetid);
+                    if (!sibTarget) continue;
+                    var sep = weaponManager.getBearingSeparation(firingUnit, candidateTarget, sibTarget);
+                    if (sep > spread) {
+                        return "<b>" + weapon.displayName + "</b>'s target must be within " + spread + "° of its paired weapon’s target (<b>" + sibTarget.name + "</b>).";
+                    }
+                }
+            }
+        }
+        return null;
+    },
+
+    //First live ship target (declared this turn, not rolled, targetid>0) among a system's fire
+    //orders, resolved to a ship. Null if the system has no such order.
+    getFirstLiveShipTarget: function getFirstLiveShipTarget(system) {
+        if (!system || !system.fireOrders) return null;
+        for (var j in system.fireOrders) {
+            var fo = system.fireOrders[j];
+            if (fo.turn == gamedata.turn && !fo.rolled && fo.targetid > 0) {
+                return gamedata.getShip(fo.targetid) || null;
+            }
+        }
+        return null;
+    },
+
+    //The target ship this weapon's linked group is committed to this turn — from THIS weapon's own
+    //declared order if it has one, otherwise from a sibling's (same linkedFiringGroup, same parent
+    //unit). Null if no member has declared. For an angular-spread group this is the centre of the
+    //weapon's reduced allowed arc. Used by ShipIcon.showWeaponArc to draw the reduced arc on hover -
+    //both for a sibling-locked weapon AND for a weapon that has itself locked a firing order. (Groups
+    //are two-weapon turrets in practice, so the first committed member is the relevant one.)
+    getLinkedGroupDeclaredTarget: function getLinkedGroupDeclaredTarget(firingUnit, weapon) {
+        if (!weapon.linkedFiringGroup) return null;
+
+        //Prefer this weapon's own committed target, so a locked weapon shows the wedge on its own order.
+        var own = weaponManager.getFirstLiveShipTarget(weapon);
+        if (own) return own;
+
+        var siblings;
+        if (firingUnit.flight) {
+            var fighter = shipManager.systems.getFighterBySystem(firingUnit, weapon.id);
+            siblings = fighter ? fighter.systems : [];
+        } else {
+            siblings = firingUnit.systems;
+        }
+
+        for (var i in siblings) {
+            var sib = siblings[i];
+            if (!sib || sib.id == weapon.id) continue;
+            if (sib.linkedFiringGroup !== weapon.linkedFiringGroup) continue;
+            var t = weaponManager.getFirstLiveShipTarget(sib);
+            if (t) return t;
+        }
+        return null;
+    },
+
     //Is this firing mode actually fireable? A mode whose entire fireControlArray
     //entry is null (e.g. AMMO_DUM Dummy Missiles) can never fire, so it must not
     //count as live ammo. Detect by null FC rather than by mode name so any future
@@ -709,6 +814,12 @@ window.weaponManager = {
                     } else if (weapon.hextarget) {
                         // Don't show hit chance if targeting the hex.
                         $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="hexTargeted"> Hex Targeted</span></div>').appendTo(f);
+                    } else if (weaponManager.getLinkedFiringBlock(selectedShip, weapon, ship) != null) {
+                        // Firing-linked weapon: this target is disallowed by a sibling's existing order
+                        // (a different unit, or outside the group's angular spread). Shown while aiming
+                        // so the restriction is visible before the click; the click itself is blocked
+                        // with the full reason in targetShip.
+                        $('<div><span class="weapon">' + weapon.displayName + ':</span><span class="cannotTarget"> Linked Firing</span></div>').appendTo(f);
                     } else {
                         // LOS is not blocked, not hex targeted, show normal hit chance info, check Sweeping weapons first.
                         if (calledid != null && !weaponManager.canWeaponCall(weapon)) {
@@ -2383,6 +2494,7 @@ window.weaponManager = {
 
         var toUnselect = [];
         var splitTargeted = [];
+        var linkedWarned = {}; //firing-link groups already warned about this click (one popup per group)
         for (var i in gamedata.selectedSystems) {
             var weapon = gamedata.selectedSystems[i];
 
@@ -2495,6 +2607,21 @@ window.weaponManager = {
                 debug && console.log("is on arc");
                 if (weaponManager.checkIsInRange(selectedShip, ship, weapon)) {
                     debug && console.log("is in range");
+
+                    //Firing-link guard: a linked weapon's target is constrained by any sibling in its
+                    //group that has already declared (same target for Thunderbolt; within N degrees
+                    //for Vree). Placed here - after the arc/range pass - so we never nag when this
+                    //weapon couldn't have fired at the clicked unit anyway. The same-pass select-all
+                    //case is fine: the first sibling declares, the rest are then measured against it.
+                    var linkBlock = weaponManager.getLinkedFiringBlock(selectedShip, weapon, ship);
+                    if (linkBlock) {
+                        if (!linkedWarned[weapon.linkedFiringGroup]) {
+                            linkedWarned[weapon.linkedFiringGroup] = true;
+                            confirm.warning(linkBlock);
+                        }
+                        continue;
+                    }
+
                     if (weapon.hasSpecialTargeting) {
                         //Weapons that need a bespoke targeting flow (e.g. Hypergraviton Blaster's
                         //transfer-target ordering window) handle their own fire-order creation in
