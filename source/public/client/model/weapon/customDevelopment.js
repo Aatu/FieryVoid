@@ -154,6 +154,24 @@ NeutronBlaster.prototype.checkFinished = function () {
     return false;
 };
 
+var NeutronBlasterFtr = function NeutronBlasterFtr(json, ship) {
+    Weapon.call(this, json, ship);
+};
+NeutronBlasterFtr.prototype = Object.create(Weapon.prototype);
+NeutronBlasterFtr.prototype.constructor = NeutronBlasterFtr;
+
+var FusionBomb = function  FusionBomb(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+FusionBomb.prototype = Object.create(Weapon.prototype);
+FusionBomb.prototype.constructor =  FusionBomb;
+
+var SeekerTorp = function  SeekerTorp(json, ship) {
+    Torpedo.call(this, json, ship);
+};
+SeekerTorp.prototype = Object.create(Weapon.prototype);
+SeekerTorp.prototype.constructor =  SeekerTorp;
+
 var PlasmaDriver = function PlasmaDriver(json, ship) {
     Weapon.call(this, json, ship);
 };

@@ -410,6 +410,9 @@ window.findEligibleCarriersForDock = function (flight) {
             // integrated fighters — never offer it as a dock target for a foreign /
             // non-integrated flight (mirrors the server buildDockBays guard).
             if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
+            // Stage S: a carrier that half-phased this turn cannot reabsorb its
+            // integrated fighters (mirrors the server canShipReceive/buildDockBays gate).
+            if (sys.isShadowHangar && shipManager.movement.isHalfPhased(ship)) return;
 
             // Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
             if (!hangarAcceptsFighterClass(sys, flight)) return;
@@ -713,6 +716,9 @@ window.findEligibleFlightsForDocking = function (carrier) {
             // Stage S: ShadowHangars only recover their own integrated fighters (mirrors
             // the server buildDockBays guard) — never a foreign / non-integrated flight.
             if (sys.isShadowHangar && flight.phpclass !== 'ShadowMediumFighterFlight') return;
+            // Stage S: a carrier that half-phased this turn cannot reabsorb its
+            // integrated fighters (mirrors the server canShipReceive/buildDockBays gate).
+            if (sys.isShadowHangar && shipManager.movement.isHalfPhased(ship)) return;
             // Per-bay fighter-class allow-list (e.g. Reska-only Suom bay).
             if (!hangarAcceptsFighterClassRecover(sys, flight)) return;
             if (!hangarAcceptsCategoryRecover(sys.hangarType, category, ship)) return;

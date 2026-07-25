@@ -32,10 +32,22 @@ class HybridSaucer extends MediumShip{
         $this->addPrimarySystem(new Scanner(3, 8, 6, 6));
 		$this->addPrimarySystem(new Hangar(3, 2, 1));
 		$this->addPrimarySystem(new CargoBay(3, 36));		
-		$this->addPrimarySystem(new Thruster(3, 12, 0, 6, 3));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 4));
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 1)); 
-        $this->addPrimarySystem(new Thruster(3, 12, 0, 6, 2));                        
+		$thrust = new Thruster(3, 12, 0, 6, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$this->addPrimarySystem($thrust);
+        $thrust = new Thruster(3, 12, 0, 6, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addPrimarySystem($thrust); 
+        $thrust = new Thruster(3, 12, 0, 6, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addPrimarySystem($thrust);  
+        $thrust = new Thruster(3, 12, 0, 6, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$this->addPrimarySystem($thrust);		                      
         $this->addPrimarySystem(new MediumLaser(2, 6, 5, 0, 360));
 		        
         $this->addFrontSystem(new StdParticleBeam(2, 4, 1, 240, 0));

@@ -104,7 +104,15 @@ class Weapon extends ShipSystem
     public $freeinterceptspecial = false;  //has its own routine for handling decision whether it's capable of interception - for freeintercept only?
     public $hidetarget = false;
 	public $hidetargetArray = array();  //for weapons that do not show their target
-	protected $alwaysHideFireOrders = false; //To not show animtaiton in replay, e.g. for launched mines.    
+	protected $alwaysHideFireOrders = false; //To not show animtaiton in replay, e.g. for launched mines.
+	/*true = this weapon's use is completely invisible to enemies until it resolves: its pending
+	current-turn fire orders are stripped from enemy/spectator gamedata in every live phase
+	(TacGamedata::hideSystemFireOrders via the getter below), not just the declaration phase -
+	no launch hex, no icon. For activation-style weapons with no physical launch (Thought Wave,
+	Second Sight). Owner and teammates still see the order; the resolved order is public next
+	turn (replay/log intact). PROTECTED like $alwaysHideFireOrders so raw-embedded weapon
+	objects (e.g. a launcher's missileArray) don't serialize it into the payload.*/
+	protected $hideFireOrdersFromEnemies = false;
     public $canChangeShots = false;
     public $isPrimaryTargetable = true; //can this system be targeted by called shot if it's on PRIMARY?
 	public $isRammingAttack = false; //true means hit chance calculations are completely different, relying on speed
@@ -425,6 +433,10 @@ class Weapon extends ShipSystem
 
 	public function getAlwaysHideFireOrders(){
 		return $this->alwaysHideFireOrders;
+	}
+
+	public function getHideFireOrdersFromEnemies(){
+		return $this->hideFireOrdersFromEnemies;
 	}
 
     public function getRange($fireOrder)
@@ -1967,17 +1979,21 @@ public function getStartLoading()
             $okSystem = $target->getHitSystem($shooter, $fireOrder, $this, $gamedata, $location); //for Flash it won't return destroyed system other than PRIMARY Structure
         }
 
-        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //destroyed system may redirect its overkill (Kirishiac Orbital rules)
+        if ($this->overkillTargetInvalid($okSystem)) { //destroyed system may redirect its overkill (Kirishiac Orbital rules)
             $redirect = $system->getOverkillDestination($target);
             if ($redirect === false) return null; //overkill is lost entirely (deployed Orbital killed - excess dissipates)
             if ($redirect !== null) $okSystem = $redirect; //e.g. Antigravity Beam -> its Orbital's structure
         }
 
-        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //overkill to Structure system is mounted on
-            $okSystem = $target->getStructureSystem($system->location);
+        if ($this->overkillTargetInvalid($okSystem)) { //arc-aware routing for display-only side sections (Vree/Mindrider side thrusters)
+            $okSystem = $this->getArcOverkillStructure($target, $shooter, $system, $fireOrder);
         }
 
-        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //overkill to PRIMARY Structure
+        if ($this->overkillTargetInvalid($okSystem)) { //overkill to the Structure block this system belongs to (structureHomeLocation-aware, so systems shown apart from their block spill into the home block - Orbitals already redirect earlier via getOverkillDestination)
+            $okSystem = $target->getStructureSystem($system->getStructureLocation());
+        }
+
+        if ($this->overkillTargetInvalid($okSystem)) { //overkill to PRIMARY Structure
             if ($this->damageType == 'Piercing') { //Piercing does not overkill to PRIMARY
                 return null;
             } else {
@@ -1985,12 +2001,48 @@ public function getStartLoading()
             }
         }
 
-        if (($okSystem == null) || $okSystem->isDestroyed() || ($okSystem->getRemainingHealth() == 0)) { //nowhere to overkill to
-            return null;
-        }
+        if ($this->overkillTargetInvalid($okSystem)) return null; //nowhere to overkill to
 
         return $okSystem;
     }//endof function getOverkillSystem
+
+    /*true when an overkill target candidate cannot absorb damage - missing, destroyed, or already
+    at 0 health - so getOverkillSystem should fall through to the next source in the chain.*/
+    protected function overkillTargetInvalid($sys)
+    {
+        return ($sys == null) || $sys->isDestroyed() || ($sys->getRemainingHealth() == 0);
+    }
+
+    /*Side systems mounted on a display-only Port/Stbd section (loc 3/4) that has no Structure of
+    its own declare $overkillArcStructures - the adjacent quarter sections (e.g. 31/32 for Port).
+    Overkill spills into whichever of those quarter Structures is in the arc of the incoming shot,
+    chosen at random if more than one, rather than dropping straight through to PRIMARY. Returns
+    null (normal flow) when the system opts out, or when no live quarter Structure is in arc.*/
+    protected function getArcOverkillStructure($target, $shooter, $system, $fireOrder)
+    {
+        if (empty($system->overkillArcStructures)) return null;
+
+        //bearing of the incoming shot - same derivation the hit chart uses (getHitSystemByTable)
+        if ($this->ballistic){
+            $movement = $shooter->getLastTurnMovement($fireOrder->turn);
+            $bearing = $target->getBearingOnPos(mathlib::hexCoToPixel($movement->position));
+        } else {
+            $bearing = $target->getBearingOnUnit($shooter);
+        }
+
+        $candidates = array();
+        foreach ($system->overkillArcStructures as $structLoc){
+            $struct = $target->getStructureSystem($structLoc);
+            //getStructureSystem falls back to PRIMARY when a section carries no Structure - reject that
+            //if (($struct == null) || ($struct->location != $structLoc)) continue; //It's actually fine if we transfer to Primary Structure if the exterior structure is already destroyed!
+            if (($struct == null)) continue;            
+            if ($struct->isDestroyed() || ($struct->getRemainingHealth() == 0)) continue;
+            if (mathlib::isInArc($bearing, $struct->startArc, $struct->endArc)) $candidates[] = $struct;
+        }
+        if (sizeof($candidates) == 0) return null; //none live and in arc - fall through to normal flow
+
+        return $candidates[Dice::d(sizeof($candidates)) - 1];
+    }//endof function getArcOverkillStructure
 
 
     /*collateral damage from a Flash explosion (if any), called from function damage*/

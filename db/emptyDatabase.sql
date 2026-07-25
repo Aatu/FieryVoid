@@ -67,7 +67,13 @@ CREATE TABLE `player` (
   `username` varchar(45) NOT NULL,
   `password` varchar(400) NOT NULL,
   `accesslevel` int(11) NOT NULL DEFAULT '1',
-  PRIMARY KEY (`id`)
+  `discord_id` varchar(32) DEFAULT NULL,
+  `dm_channel_id` varchar(32) DEFAULT NULL,
+  `discord_verify_id` varchar(32) DEFAULT NULL,
+  `discord_verify_code` varchar(10) DEFAULT NULL,
+  `discord_verify_expires` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniq_discord_id` (`discord_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=210 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -78,7 +84,7 @@ CREATE TABLE `player` (
 
 LOCK TABLES `player` WRITE;
 /*!40000 ALTER TABLE `player` DISABLE KEYS */;
-INSERT INTO `player` VALUES (3,'player1','*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19',0),(4,'player2','*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19',0);
+INSERT INTO `player` (`id`,`username`,`password`,`accesslevel`) VALUES (3,'player1','*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19',0),(4,'player2','*2470C0C06DEE42FD1618BB99005ADCA2EC9D1E19',0);
 /*!40000 ALTER TABLE `player` ENABLE KEYS */;
 UNLOCK TABLES;
 

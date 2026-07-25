@@ -42,24 +42,38 @@ class Xaarix extends VreeCapital{
 		$this->addPrimarySystem(new Quarters(4, 12));
 
         $this->addFrontSystem(new AntiprotonGun(3, 0, 0, 300, 60));
-		$this->addFrontSystem(new GraviticThruster(4, 14, 0, 6, 1));   
+		$thrust = new GraviticThruster(4, 14, 0, 6, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addFrontSystem($thrust);   
 		$this->addFrontSystem(new Hangar(3, 3));        
      	
         $this->addAftSystem(new AntiprotonGun(3, 0, 0, 120, 240));
-		$this->addAftSystem(new GraviticThruster(4, 14, 0, 6, 2)); 
+		$thrust = new GraviticThruster(4, 14, 0, 6, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addAftSystem($thrust); 
 		$this->addAftSystem(new Hangar(3, 3));       
      
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));
 		$this->addLeftFrontSystem(new Hangar(3, 3));	
 				
-		$this->addLeftAftSystem(new GraviticThruster(4, 14, 0, 6, 3));
+		$thrust = new GraviticThruster(4, 14, 0, 6, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
+		$this->addLeftSystem($thrust);
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 		$this->addLeftAftSystem(new Hangar(3, 3));		
 		
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 		$this->addRightFrontSystem(new Hangar(3, 3));					
 	
-		$this->addRightAftSystem(new GraviticThruster(4, 14, 0, 6, 4));	
+		$thrust = new GraviticThruster(4, 14, 0, 6, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
+		$this->addRightSystem($thrust);	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		$this->addRightAftSystem(new Hangar(3, 3));
        

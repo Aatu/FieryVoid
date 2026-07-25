@@ -1,8 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&display=swap');
 
+/* STAGE4-RETIRED legacy ship-window override (ship-window redesign Stage 4; the React
+   windows position themselves inside the fixed #shipWindowsReact wrapper instead).
+   Delete once the redesign is stable on live.
 .shipwindow {
     position: fixed !important;
 }
+*/
 
 .team-header {
     font-size: 16px;
@@ -282,9 +286,9 @@
     border-radius: 4px;
     padding: 3px;
     margin-bottom: 1px;
-    margin-left: 5px;
+    margin-left: 2px;
     /* Aligns with store ships */
-    margin-right: 5px;
+    margin-right: 2px;
 }
 
 .shipname {

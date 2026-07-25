@@ -1387,6 +1387,204 @@ class NeutronBlaster extends Weapon{
 
 
 
+class NeutronBlasterFtr extends Weapon{ 
+
+		public $name = "NeutronBlasterFtr";
+		public $displayName = "Light Neutron Blaster";
+		public $iconPath = "NeutronBlaster.png";
+	
+		//visual display 
+		public $animationArray = array(1=>'laser', 2=>'laser', 3=>'laser');
+		public $animationColorArray = array(1=>array(98, 127, 82), 2=>array(98, 127, 82), 3=>array(98, 127, 82));
+	
+		public $factionAge = 3; //Ancient
+	
+		//actual weapons data
+		public $priorityArray = array(1=>7, 2=>5, 3=>3);
+		public $uninterceptableArray = array(1=>true, 2=>true, 3=>true);
+		public $defaultShotsArray = array(1=>1, 2=>1, 3=>2); 
+	
+		public $loadingtimeArray = array(1=>3, 2=>2, 3=>1); //mode 1 should be the one with longest loading time
+		public $rangePenaltyArray = array(1=>1, 2=>1.5, 3=>2);
+		public $fireControlArray = array( 1=>array(null, 0, 0), 2=>array(-2, 0, 0), 3=>array(0, 0, 0) ); // fighters, <mediums, <capitals 
+	
+		public $firingModes = array(1=>'Heavy', 2=>'Medium', 3=>'Rapid');
+		public $damageTypeArray = array(1=>'Standard', 2=>'Standard', 3=>'Standard'); //indicates that this weapon does damage in Pulse mode
+		public $weaponClassArray = array(1=>'Electromagnetic', 2=>'Electromagnetic', 3=>'Electromagnetic'); //(first letter upcase) weapon class - overrides $this->data["Weapon type"] if set!	
+	
+		public $intercept = 2; //technically only Pulse Cannon can intercept, but entire weapon is fired anyway - so it affects visuals only, and mode 1 should be the one with interception for technical reasons
+	
+        function __construct($startArc, $endArc){
+            parent::__construct(0, 1, 0, $startArc, $endArc);
+        }
+	
+        public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			$this->data["Special"] = 'Can fire in three modes depending on the turns charged. ';
+			$this->data["Special"] .= "<br>Rapid Fire: 1 turn, 2 shots of 1d6+6 damage, -2 per hex";  
+			$this->data["Special"] .= "<br>Medium Charge: 2 turns, 1 shot of 2d6+9 damage, -3 per 2 hexes";  
+			$this->data["Special"] .= "<br>Heavy Charge: 3 turns, 1 shot of 4d6+12 damage, -1 per hex";  
+        }
+	
+        public function getDamage($fireOrder){ 
+		switch($this->firingMode){
+			case 1:
+				return Dice::d(6, 4)+12; //Heavy Charge
+				break;
+			case 2:
+				return Dice::d(6, 2)+9; //Medium Charge
+				break;
+			case 3:
+				return Dice::d(6, 1)+6; //Rapid Fire
+				break;
+		}
+	}
+        public function setMinDamage(){ 
+		switch($this->firingMode){
+			case 1:
+				$this->minDamage = 16; //Heavy Charge
+				break;
+			case 2:
+				$this->minDamage = 11; //Medium charge
+				break;	
+			case 3:
+				$this->minDamage = 7; //Rapid Fire
+				break;
+		}
+		$this->minDamageArray[$this->firingMode] = $this->minDamage;
+	}
+        public function setMaxDamage(){
+		switch($this->firingMode){
+			case 1:
+				$this->maxDamage = 36; //Heavy Charge
+				break;
+			case 2:
+				$this->maxDamage = 21; //Medium charge
+				break;	
+			case 3:
+				$this->maxDamage = 12; //Rapid Fire
+				break;
+		}
+		$this->maxDamageArray[$this->firingMode] = $this->maxDamage;
+	}
+	
+} //endof class NeutronBlasterFtr
+
+
+
+    class FusionBomb extends Torpedo{
+        public $name = "FusionBomb";
+        public $displayName = "Fusion Bomb";
+        public $iconPath = "EWNuclearTorpedo.png";
+        public $range = 10;
+        public $distanceRange = 20;
+        public $loadingtime = 3;
+
+		public $factionAge = 3; //Ancient
+        
+        public $weaponClass = "Plasma"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Flash"; 
+        
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(206, 32, 41);
+        public $animation = "trail";
+        public $animationColor = array(206, 32, 41);
+        public $animationExplosionScale = 0.7;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 1; //Flash! should strike first (?)
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 9;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    //ignores half armor (as a Plasma weapon should!) - now handled by standard routines
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+			$this->data["Special"] .= "Ignores half of armor.";
+		}
+        
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 4) + 20;   }
+        public function setMinDamage(){     $this->minDamage = 24;      }
+        public function setMaxDamage(){     $this->maxDamage = 60;      }
+    
+    }//endof class FusionBomb
+
+
+    class SeekerTorp extends Torpedo{
+        public $name = "SeekerTorp";
+        public $displayName = "Seeker Torpedo";
+        public $iconPath = "TrekPhotonicTorpedo.png";
+        public $range = 50;
+        public $distanceRange = 65;
+        public $loadingtime = 2;
+
+		public $factionAge = 3; //Ancient
+        
+        public $weaponClass = "Ballistic"; //deals Plasma, not Ballistic, damage. Should be Ballistic(Plasma), but I had to choose ;)
+        public $damageType = "Standard"; 
+        
+        public $fireControl = array(null, 2, 3); // fighters, <mediums, <capitals 
+        
+        public $trailColor = array(98, 127, 82);
+        public $animation = "ball";
+        public $animationColor = array(98, 127, 82);
+        public $animationExplosionScale = 0.7;
+        public $projectilespeed = 11;
+        public $animationWidth = 10;
+        public $trailLength = 10;
+        public $priority = 4; 
+        
+        function __construct($armour, $maxhealth, $powerReq, $startArc, $endArc){
+            //maxhealth and power reqirement are fixed; left option to override with hand-written values
+            if ( $maxhealth == 0 ){
+                $maxhealth = 6;
+            }
+            if ( $powerReq == 0 ){
+                $powerReq = 5;
+            }
+            parent::__construct($armour, $maxhealth, $powerReq, $startArc, $endArc);
+        }
+        
+	    //ignores half armor (as a Plasma weapon should!) - now handled by standard routines
+    	
+		public function setSystemDataWindow($turn){
+			parent::setSystemDataWindow($turn);
+			if (!isset($this->data["Special"])) {
+				$this->data["Special"] = '';
+			}else{
+				$this->data["Special"] .= '<br>';
+			}
+
+		}
+        
+        
+        public function getDamage($fireOrder){        return Dice::d(10, 2);   }
+        public function setMinDamage(){     $this->minDamage = 2;      }
+        public function setMaxDamage(){     $this->maxDamage = 20;      }
+    
+    }//endof class Seeker
+
+
+
+
+
 class PlasmaDriver extends Pulse{
         public $name = "PlasmaDriver";
         public $displayName = "Plasma Driver";
@@ -1436,6 +1634,9 @@ class PlasmaDriver extends Pulse{
         public function getDamage($fireOrder){        return 22;   }
 		
     }  // end of class PlasmaDriver
+
+
+
 
 
 

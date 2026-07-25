@@ -2,6 +2,11 @@ import * as React from "react";
 import styled from "styled-components"
 import SystemIcon from "../system/SystemIcon"
 
+//gamelobby.php is the only page whose gamedata reports gamephase -2 (buy phase);
+//mirrors ShipWindow.js's local isLobby(). Used to suppress the fighter-image
+//hover tooltip in the lobby only (still wanted in game.php).
+const isLobby = () => Boolean(window.gamedata) && window.gamedata.gamephase === -2;
+
 
 /* Outer card frame: holds the border + dimensions but does NOT apply the
  * destroyed fade. The fade is applied on the inner FadedContent so the
@@ -127,6 +132,9 @@ const HealthText = styled.div`
 class FighterIcon extends React.Component {
 
     onSystemMouseOver(event) {
+        //SHIPWINDOW_REDESIGN: suppress the fighter-image hover tooltip in the
+        //gamelobby screen only — it stays useful in game.php.
+        if (isLobby()) return;
         if (this.touchActive) return;
         if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
 
@@ -140,7 +148,7 @@ class FighterIcon extends React.Component {
 
         let { ship } = this.props;
 
-        webglScene.customEvent('SystemMouseOver', {
+        window.uiEvents.relay('SystemMouseOver', {
             ship: ship,
             system: ship,
             element: event.target
@@ -148,13 +156,21 @@ class FighterIcon extends React.Component {
     }
 
     onSystemMouseOut() {
+        //Paired with onSystemMouseOver's lobby guard — no fighter-image tooltip
+        //is created in the lobby, so there is nothing to hide here either.
+        if (isLobby()) return;
         if (this.touchActive) return;
         if (window.lastTouchActiveTime && Date.now() - window.lastTouchActiveTime < 1000) return;
 
-        webglScene.customEvent('SystemMouseOut');
+        window.uiEvents.relay('SystemMouseOut');
     }
 
     onFighterTouchStart(event) {
+        //Lobby: no fighter-image info popup on touch long-press either (the info
+        //is already visible without it). Skipping the arm is safe — the other
+        //touch handlers degrade to no-ops when longPressTimer/touchActive are
+        //unset, and the mouse-over shield they feed is itself lobby-gated above.
+        if (isLobby()) return;
         this.touchActive = true;
         this.ignoreNextClick = false;
         window.lastTouchActiveTime = Date.now();
@@ -173,7 +189,7 @@ class FighterIcon extends React.Component {
             let { ship } = this.props;
 
             // Long Press -> generic tooltip
-            webglScene.customEvent('SystemMouseOver', {
+            window.uiEvents.relay('SystemMouseOver', {
                 ship: ship,
                 system: ship,
                 element: target,
@@ -204,7 +220,7 @@ class FighterIcon extends React.Component {
             this.longPressTimer = null;
         }
         this.touchActive = false;
-        webglScene.customEvent('SystemMouseOut');
+        window.uiEvents.relay('SystemMouseOut');
     }
 
     onFighterTouchEnd(event) {
@@ -214,7 +230,7 @@ class FighterIcon extends React.Component {
             this.longPressTimer = null;
         } else {
             // Timer already fired (long press). Hide info on release.
-            webglScene.customEvent('SystemMouseOut');
+            window.uiEvents.relay('SystemMouseOut');
         }
 
         setTimeout(() => {

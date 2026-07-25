@@ -74,7 +74,9 @@ const System = styled.div`
         } else if (props.$loading && props.$loadedAlternate) { //weapon not ready in current mode, but  alternate mode is ready
             return '#CD9E9E'; //pale red
         } else {
-            return 'black';
+            //slightly translucent so the ship-window watermark ghosts through idle
+            //icons; state colours above stay fully opaque for readability
+            return 'rgba(0, 0, 0, 0.7)';
         }
     }};
     box-shadow: ${props => {
@@ -90,8 +92,26 @@ const System = styled.div`
             return 'none';
         }
     }};
-    background-image: ${props => `url(${props.$background})`};
+    /*$mirror (rolled ship, port/starboard drawn swapped): the icon ART is flipped
+      horizontally on an ::after layer so its facing matches the drawn side, while
+      text, health bar and state overlays stay unflipped and readable*/
+    background-image: ${props => props.$mirror ? 'none' : `url(${props.$background})`};
     background-size: cover;
+    ${props => props.$mirror ? 'z-index: 0;' : ''} /*own stacking context keeps the z:-1 art layer inside this icon*/
+    ${props => props.$mirror ? `
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url(${props.$background});
+        background-size: cover;
+        transform: scaleX(-1);
+        z-index: -1;
+    }
+    ` : ''}
     filter: ${props => props.$destroyed ? 'blur(1px)' : 'none'};
     cursor: pointer;
     -webkit-user-select: none;
@@ -175,7 +195,7 @@ class SystemIcon extends React.Component {
             if (gamedata.isMyShip(ship)) {
                 var selectedSystem = gamedata.selectedSystems.length > 0 ? gamedata.selectedSystems[0] : null;
                 if (selectedSystem && selectedSystem.ship.id != ship.id && !weaponManager.isSelectedWeapon(system)) {
-                    webglScene.customEvent('SystemTargeted', { ship: ship, system: system });
+                    window.uiEvents.relay('SystemTargeted', { ship: ship, system: system });
                     return;
                 }
             }
@@ -258,9 +278,9 @@ class SystemIcon extends React.Component {
         }
 
         if (gamedata.isMyShip(ship)) {
-            webglScene.customEvent('SystemClicked', { ship: ship, system: system, element: e.currentTarget, showMenu: true });
+            window.uiEvents.relay('SystemClicked', { ship: ship, system: system, element: e.currentTarget, showMenu: true });
         } else {
-            webglScene.customEvent('SystemTargeted', { ship: ship, system: system });
+            window.uiEvents.relay('SystemTargeted', { ship: ship, system: system });
         }
     }
 
@@ -274,7 +294,7 @@ class SystemIcon extends React.Component {
         let { system, ship } = this.props;
         system = shipManager.systems.initializeSystem(system);
 
-        webglScene.customEvent('SystemMouseOver', {
+        window.uiEvents.relay('SystemMouseOver', {
             ship: ship,
             system: system,
             element: event.currentTarget,
@@ -289,7 +309,7 @@ class SystemIcon extends React.Component {
 
         event.stopPropagation();
         event.preventDefault();
-        webglScene.customEvent('SystemMouseOut');
+        window.uiEvents.relay('SystemMouseOut');
     }
 
     onTouchStart(event) {
@@ -313,7 +333,7 @@ class SystemIcon extends React.Component {
             system = shipManager.systems.initializeSystem(system);
 
             // Long Press -> generic tooltip
-            webglScene.customEvent('SystemMouseOver', {
+            window.uiEvents.relay('SystemMouseOver', {
                 ship: ship,
                 system: system,
                 element: target,
@@ -346,7 +366,7 @@ class SystemIcon extends React.Component {
             this.longPressTimer = null;
         }
         this.touchActive = false;
-        webglScene.customEvent('SystemMouseOut');
+        window.uiEvents.relay('SystemMouseOut');
     }
 
     onTouchEnd(event) {
@@ -358,7 +378,7 @@ class SystemIcon extends React.Component {
             // Short tap should not show arcs, clickSystem will handle selection and showing Action Menu.
         } else {
             // Timer already fired (long press). Hide info on release.
-            webglScene.customEvent('SystemMouseOut');
+            window.uiEvents.relay('SystemMouseOut');
         }
 
         setTimeout(() => {
@@ -385,7 +405,7 @@ class SystemIcon extends React.Component {
     }
 
     render() {
-        let { system, ship, scs, fighter, destroyed } = this.props;
+        let { system, ship, scs, fighter, destroyed, mirror } = this.props;
 
         system = shipManager.systems.initializeSystem(system);
 
@@ -404,7 +424,7 @@ class SystemIcon extends React.Component {
         //destroyed orbital can still be recovered (docked) for regeneration
         if ((getDestroyed(ship, system) || destroyed) && !system.clickableWhenDestroyed) {
             return (
-                <System $background={getBackgroundImage(system)} $destroyed><HealthBar $health="0" /></System>
+                <System $background={getBackgroundImage(system)} $destroyed $mirror={mirror}><HealthBar $health="0" /></System>
             )
         }
 
@@ -422,6 +442,7 @@ class SystemIcon extends React.Component {
                 onTouchCancel={this.onTouchCancel.bind(this)}
                 onContextMenu={this.onContextMenu.bind(this)}
                 $background={getBackgroundImage(system)}
+                $mirror={mirror}
                 $offline={isOffline(ship, system)}
                 $loading={isLoading(system)}
                 $loadedAlternate={isLoadedAlternate(system)} //alternate mode ready while primary is not
@@ -515,7 +536,14 @@ const hasBorderHighlight = (ship, system) => shipManager.systems.hasBorderHighli
 const isSelected = (system) => weaponManager.isSelectedWeapon(system)
 
 const getText = (ship, system) => {
-    if (system.outputDisplay != '') { //some systems have very specific visual output, rather than generic
+    /*some systems have very specific visual output, rather than generic. The
+      undefined/null guard matters in the LOBBY: game.php's inline staticShips carry
+      outputDisplay for every system, but the lobby's default-stripped faction JSONs
+      omit it, and `undefined != ''` is true - every generic system would return
+      undefined here and render a blank icon. Loose `!= ''` on the last check is
+      deliberate: systems that set a numeric 0 keep falling through to the generic
+      display, exactly as before.*/
+    if (system.outputDisplay !== undefined && system.outputDisplay !== null && system.outputDisplay != '') {
         return system.outputDisplay;
     } else if (system.weapon) {
 

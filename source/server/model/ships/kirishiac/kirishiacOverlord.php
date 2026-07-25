@@ -40,6 +40,9 @@ class kirishiacOverlord extends BaseShip{
             20 => "Orbital"
             );
 
+		/*Kirishiac use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'KirshiacShip');  
+
         $this->addPrimarySystem(new Reactor(7, 35, 0, 0));
         $this->addPrimarySystem(new FlagBridge(8, 24, 0, 1, 'Kirishiac Command Bonus', 30,  true, true, true, false));
 		$scanner = new Scanner(7, 24, 0, 14);

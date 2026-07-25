@@ -46,7 +46,7 @@ window.shipManager = {
                 } else {
                     ship.shipStatusWindow = shipWindowManager.createShipWindow(ship);
                 }
-    
+
                 shipWindowManager.setData(ship);
                 $("canvas.hexshipcanvas", e).attr("id", "shipcanvas_");
                 e.attr("id", "hexship_");
@@ -411,12 +411,12 @@ window.shipManager = {
         if (shipManager.isDestroyed(ship)) return;
 
         if (ship.userid == gamedata.thisplayer && (gamedata.gamephase == 1 || gamedata.gamephase > 2)) {
-            shipWindowManager.open(ship);
+            //STAGE4-RETIRED shipWindowManager.open(ship);
             gamedata.selectShip(ship, false);
             gamedata.shipStatusChanged(ship);
             drawEntities();
         } else {
-            shipWindowManager.open(ship);
+            //STAGE4-RETIRED shipWindowManager.open(ship);
         }
         return false;
     },

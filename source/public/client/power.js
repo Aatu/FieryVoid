@@ -272,13 +272,46 @@ shipManager.power = {
 			var deployTurn = shipManager.getTurnDeployed(ship);
 			if (deployTurn > gamedata.turn) continue;  //Don't bother checking for ships that haven't deployed yet.
 
-			if (shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor")) < 0) {
+			//A reactor output-reduction crit forces the player to power systems down until
+			//the reactor balance is non-negative. Some systems draw reactor power yet CANNOT
+			//be voluntarily powered down (deployed Kirishiac orbital beams: powerLocked, and
+			//copyLastTurnPower forces them back online) — their draw is real and stays counted
+			//in getReactorPower. So the rule is: block while there is still a deficit AND the
+			//player has at least one eligible system left to switch off. Once every switchable
+			//system is already off, the residual deficit is unavoidable (locked draw only) and
+			//the commit is allowed — the player is not blocked with no legal move.
+			var reactorPower = shipManager.power.getReactorPower(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+
+			if (reactorPower < 0 && shipManager.power.getRemainingFreeablePower(ship) > 0) {
 				shipNames[counter] = ship.name;
 				counter++;
 			}
 		}
 
 		return shipNames;
+	},
+
+	//Total reactor power the player could still free by voluntarily powering systems down
+	//RIGHT NOW — the powerReq of every system that is currently drawing power and is still
+	//eligible for the phase-1 Off toggle. Mirrors the client Off-button gate
+	//(SystemPowerSettings / SystemInfoButtons): a system is switchable when it draws power
+	//(powerReq > 0), is NOT powerLocked (deployed orbital beams are — they draw power but
+	//can't be switched off), is not already offline, is not destroyed, and has no firing
+	//order. getShipsNegativePower uses this to tell "you still have load to shed" (> 0, keep
+	//blocking) from "everything switchable is already off" (0, allow the residual deficit).
+	getRemainingFreeablePower: function getRemainingFreeablePower(ship) {
+		var freeable = 0;
+		for (var i in ship.systems) {
+			var system = ship.systems[i];
+			if (system.name == "reactor") continue;
+			if (!(system.powerReq > 0)) continue;            //nothing to free by switching it off
+			if (system.powerLocked) continue;                //deployed orbital beam etc. — draws power but cannot be switched off
+			if (shipManager.systems.isDestroyed(ship, system)) continue;
+			if (shipManager.power.isOfflineOnTurn(ship, system, gamedata.turn)) continue;  //already off
+			if (weaponManager.hasFiringOrder(ship, system)) continue;  //locked on by a declared fire order
+			freeable += system.powerReq;
+		}
+		return freeable;
 	},
 
 	//like getShipsNegativePower BUT only looks for PowerCapacitor-equipped ships
@@ -949,8 +982,8 @@ shipManager.power = {
 
 		shipManager.power.setBoost(ship, system);
 		system.onBoostIncrease(); //To apply conditions/effects when a system is actually boosted.		
-		shipWindowManager.setDataForSystem(ship, system);
-		if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
+		//STAGE4-RETIRED if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -985,8 +1018,8 @@ shipManager.power = {
 		*/
 		shipManager.power.unsetBoost(ship, system);
 		system.onBoostDecrease();
-		shipWindowManager.setDataForSystem(ship, system);
-		if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
+		//STAGE4-RETIRED if (!ship.flight) shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -1013,8 +1046,8 @@ shipManager.power = {
 			array[i].power.push({ id: null, shipid: ship.id, systemid: array[i].id, type: 1, turn: gamedata.turn, amount: 0 });
 
 			shipManager.power.stopOverloading(ship, array[i]);
-			shipWindowManager.setDataForSystem(ship, array[i]);
-			shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+			//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, array[i]);
+			//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		}
 
 		webglScene.customEvent('SystemDataChanged', { ship: ship });
@@ -1060,8 +1093,8 @@ shipManager.power = {
 		if (system.overloadshots == 0) { //To prevent stop overload AFTER an initial sustained shot is fired.
 			shipManager.power.stopOverloading(ship, system);
 		}
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 
 		if (system.weapon) {
 			weaponManager.unSelectWeapon(ship, system);
@@ -1106,8 +1139,8 @@ shipManager.power = {
 				continue; //cooldown crit — cannot be re-enabled by the player
 			} else if (shipManager.power.isOffline(ship, array[i])) {
 				shipManager.power.setOnline(ship, array[i]);
-				shipWindowManager.setDataForSystem(ship, array[i]);
-				shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+				//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, array[i]);
+				//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 			}
 		}
 
@@ -1133,13 +1166,13 @@ shipManager.power = {
 		if (shipManager.power.isForcedOffline(ship, system)) return;
 
 		shipManager.power.setOnline(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
 
 		if (system.name == "shieldGenerator" || system instanceof ThirdspaceShieldGenerator) {
 			system.onTurnOn(ship);
 		}
 
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -1155,8 +1188,8 @@ shipManager.power = {
 		console.log("I am boosting!")
 
 		shipManager.power.setOverloading(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	},
 
@@ -1173,8 +1206,8 @@ shipManager.power = {
 		if (system.overloadshots < system.extraoverloadshots && system.overloadshots !== 0) return; //To prevent stop overload AFTER an initial sustained shot is fired.
 
 		shipManager.power.stopOverloading(ship, system);
-		shipWindowManager.setDataForSystem(ship, system);
-		shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
+		//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, shipManager.systems.getSystemByName(ship, "reactor"));
 		webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 	}
 

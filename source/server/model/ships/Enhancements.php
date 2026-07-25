@@ -267,7 +267,7 @@ class Enhancements{
 	  if (array_key_exists("assault shuttles", $ship->fighters)) { //Only add if ship has Assault Shuttle hangar space! 	  
 	    $enhID = 'HANG_F';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Assault Shuttle to Fighter slot';
+				$enhName = 'Assault Shuttle to Fighter';
 				$enhLimit = $ship->fighters["assault shuttles"]; //The number of assault shuttle slots ship has is max conversion amount.
 				$enhPrice = 5; //Flat 5 pts per slot converted	  
 				$enhPriceStep = 0; //flat rate
@@ -282,7 +282,7 @@ class Enhancements{
 	  if ($totalCount > 0) {
 	    $enhID = 'HANG_AS';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Fighter to Assault Shuttle slot';
+				$enhName = 'Fighter to Assault Shuttle';
 				$enhLimit = $totalCount; //The number of assault shuttle slots ship has is max conversion amount.
 				$enhPrice = 5; //Flat 5 pts per slot converted
 				$enhPriceStep = 0; //flat rate
@@ -304,8 +304,8 @@ class Enhancements{
 	    $enhID = 'HANG_BP';
 		if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
 				$enhName = ($defaultShuttles['key'] === 'minesweeping shuttles')
-					? 'Shuttle to Breaching Pod slot' //Can add a specific minesweeping shuttle reference, but brevity is better in Confirm window for now.
-					: 'Shuttle to Breaching Pod slot';
+					? 'Shuttle to Breaching Pod' //Can add a specific minesweeping shuttle reference, but brevity is better in Confirm window for now.
+					: 'Shuttle to Breaching Pod';
 				$enhLimit = $defaultShuttles['count']; //leftover hangar capacity = default shuttle pool
 				$enhPrice = 10; //Flat 10 pts per slot converted
 				$enhPriceStep = 0; //flat rate
@@ -318,7 +318,7 @@ class Enhancements{
 	    if ($defaultShuttles['key'] === 'shuttles') {
 	      $enhID = 'HANG_MSW';
 		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Shuttle to Minesweeping Shuttle';
+				$enhName = 'Shuttle to Minesweeper';
 				$enhLimit = $defaultShuttles['count'];
 				//Per B5W: 10pts or 20% of MinesweepingShuttle cost, whichever is higher.
 				//MinesweepingShuttle auto-populates with pointCost=0, so floor of 10 currently wins.
@@ -358,7 +358,7 @@ class Enhancements{
 	  if ($hasFighters && in_array($ship->faction, $missileFactionWhitelist, true)) {
 		  $enhID = 'HANG_ORD';
 		  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //Check option is also not disabled.
-				$enhName = 'Ballistic Ordnance Reserve';
+				$enhName = 'Ordnance Reserve';
 				$enhLimit = 2000;            //practical ceiling — six AMMO_FH heavies (8 PV ea) on a 6-fighter heavy missile flight
 				$enhPrice = 1;             //1 CP = 1 reload point
 				$enhPriceStep = 0;         //flat rate
@@ -377,7 +377,7 @@ class Enhancements{
 	  //Limit: 1% of ship's base point cost, rounded up.
 	  $enhID = 'MAR_CONT';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){
-		  $enhName = 'Extra Marine Contingents';
+		  $enhName = 'Extra Marines';
 		  $enhLimit = max(1, (int)ceil($ship->pointCost / 100));   //1% of PV, rounded up; minimum 1
 		  $enhPrice = 10;            //10 CP per marine
 		  $enhPriceStep = 0;         //flat rate
@@ -386,7 +386,7 @@ class Enhancements{
 
 	  $enhID = 'IFF_SYS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Identify Friend or Foe (IFF) System';
+		  $enhName = 'Identify Friend or Foe (IFF)';
 		  $enhLimit = 1; //Only ever need 1
 		  $enhPrice = 0; //fixed.		  
 		  foreach ($ship->systems as $system){
@@ -425,7 +425,7 @@ class Enhancements{
 	  //Improved PSychic Field for Thirdspace	
 	  $enhID = 'IMPR_PSY';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
-		  $enhName = 'Improved Psychic Field (+1 range)';
+		  $enhName = 'Improved Psychic Field';
 		  //count Psychic Fields
 		  $count = 0;	 
 		  foreach ($ship->systems as $system){
@@ -476,7 +476,7 @@ class Enhancements{
 	  //Improved Sensors : +1 Sensors, cost: new rating *5 (double for ElInt, double for Advanced Sensors), limit: 1
 	  $enhID = 'IMPR_SENS';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
-		  $enhName = 'Improved Sensor Array';
+		  $enhName = 'Improved Sensors';
 		  $enhLimit = 1;	  
 		  //find strongest sensors... which don't need to be called Sensors!
 		  $strongestValue = -1;	  
@@ -527,7 +527,7 @@ class Enhancements{
 	  //Improved Thirdspace Shield		    
 	  $enhID = 'IMPR_THSD';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Improved Thirdspace Shield';
+		  $enhName = 'Improved Shields';
 		  $enhLimit = 5; //Maximum 5 upgrades.
 		  $shields = 0;
 		  $rating = 0;		  
@@ -545,7 +545,7 @@ class Enhancements{
 	  //Improved Thought Shield for Mindriders		    
 	  $enhID = 'IMPR_TS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Improved Thought Shield';
+		  $enhName = 'Improved Shields';
 		  $enhLimit = 5; //Maximum 5 upgrades.
 		  $shields = 0;
 		  $rating = 0;		  
@@ -583,7 +583,7 @@ class Enhancements{
 	  //Markab-specific - Enables 'Religious Fervor' refit to selected vessel which comes with some bonus and some penalties.
 	  $enhID = 'MARK_FERV';	  
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option needs to be specifically enabled
-		  $enhName = 'Religious Fervor - Only if Desperate Rules apply';
+		  $enhName = 'Religious Fervor';
 		  $enhLimit = 1;	
 		  $enhPrice = 0;
 		  $enhPriceStep = 0;
@@ -704,7 +704,7 @@ class Enhancements{
 	  //Increased Diffuser Capability: +1 output for every Energy Diffuser; cost: 2.5x new capability, step: 2.5x number of diffusers
 	  $enhID = 'SHAD_DIFF';
 	  if(!in_array($enhID, $ship->enhancementOptionsDisabled)){ //option is not disabled
-		  $enhName = 'Increased Diffuser Capability';
+		  $enhName = 'Increased Diffusers';
 		  //find number and output of Diffusers
 		  $count = 0;	
 		  $output = 0;
@@ -792,7 +792,7 @@ class Enhancements{
 	//cost: ramming value (let's simplify to total structure) x number of point / 5; max. +50%
 	  $enhID = 'VOR_AMETHS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
-		  $enhName = 'Amethyst Skin Coloring';
+		  $enhName = 'Amethyst Skin';
 		  //find AA controller and count Structure boxes while at it		  
 		  $AActrl = $ship->getSystemByName("AdaptiveArmorController");
 		  if($AActrl){
@@ -817,7 +817,7 @@ class Enhancements{
 	*/
 	  $enhID = 'VOR_AZURS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is not disabled
-		  $enhName = 'Azure Skin Coloring';
+		  $enhName = 'Azure Skin';
 		  $count = 0;	
 		  $rating = 0;
 		  foreach ($ship->systems as $system){
@@ -845,7 +845,7 @@ class Enhancements{
 	Limit: 6*/
 	  $enhID = 'VOR_CRIMS';
 	  if(in_array($enhID, $ship->enhancementOptionsEnabled)){ //option is enabled
-		  $enhName = 'Crimson Skin Coloring';
+		  $enhName = 'Crimson Skin';
 		  $capacitor = $ship->getSystemByName("PowerCapacitor");//find Power Capacitor
 		  if($capacitor){
 			  $enhPrice = ($capacitor->output+1) *20;	
@@ -1801,6 +1801,22 @@ class Enhancements{
 	} //endof function setEnhancements
   
   
+	/*Consumable ammunition enhancements (missiles, railgun shells, launcher-loaded
+	  mines) load an AmmoMagazine via addAmmoEntry, so their counts already appear in
+	  the AmmoMagazine system tooltip. They are kept OUT of enhancementTooltip so the
+	  ship window's Enhancements box does not duplicate that (2026-07-19 shipwindow
+	  refinement). Prefix-matched so new AMMO_/SHELL_ types are covered automatically;
+	  launcher-loaded mines share the MINE_ prefix with the mine-SHIP enhancements
+	  (MINE_ACC/ARM/DMG/...), which are NOT ammo, so they are listed explicitly.
+	  To restore ammo in the list, drop the isAmmoEnhancement() guards in
+	  setEnhancementsFighter / setEnhancementsShip.*/
+	private static function isAmmoEnhancement($enhID){
+		if(strpos($enhID, 'AMMO_') === 0) return true;   //ship + fighter missiles
+		if(strpos($enhID, 'SHELL_') === 0) return true;  //direct-fire railgun shells
+		static $launcherMines = array('MINE_BLB','MINE_BLH','MINE_BLW','MINE_MLB','MINE_MLW','MINE_AML','MINE_BML','MINE_CML');
+		return in_array($enhID, $launcherMines, true);
+	}
+
 	/*enhancements for fighters - actual applying of chosen enhancements
 	*/
 	private static function setEnhancementsFighter($flight){
@@ -1810,14 +1826,16 @@ class Enhancements{
 			$enhCount = $entry[2];
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
+				if(!self::isAmmoEnhancement($enhID)){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($flight->enhancementTooltip != "") $flight->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY' && $enhCount > 1){ //Special type of Enhancement, clarify what it means.
-				//	$flight->enhancementTooltip .= "Flight deploys on Turn $enhCount";						
-				//}else{				
+				//	$flight->enhancementTooltip .= "Flight deploys on Turn $enhCount";
+				//}else{
 				$flight->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $flight->enhancementTooltip .= " (x$enhCount)";
 				//}
-				switch ($enhID) { 
+				}
+				switch ($enhID) {
 					
 					case 'DEPLOY':
 						//Amend value of turn that ship deploys on.
@@ -1960,15 +1978,17 @@ class Enhancements{
 			$enhCount = $entry[2];
 			$enhDescription = $entry[1];
 			if($enhCount > 0) {
+				if(!self::isAmmoEnhancement($enhID)){ //ammo already shows in the AmmoMagazine tooltip - keep it out of the Enhancements box
 				if($ship->enhancementTooltip != "") $ship->enhancementTooltip .= "<br>";
 				//if($enhID == 'DEPLOY'){ //Special type of Enhancement, clarify what it means.
-				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";						
+				//	$ship->enhancementTooltip .= "Ship deploys on Turn $enhCount";
 				//}else{
 				$ship->enhancementTooltip .= "$enhDescription";
 				if ($enhCount>1) $ship->enhancementTooltip .= " (x$enhCount)";
-				//}		
+				//}
+				}
 
-			        switch ($enhID) {	
+			        switch ($enhID) {
 
 					case 'DEPLOY':
 						//Amend value of turn that ship deploys on.

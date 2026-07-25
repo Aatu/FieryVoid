@@ -37,6 +37,7 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
                 <li><a href="#boarding">Boarding Actions</a></li>
                 <li><a href="#called">Called Shots</a></li>
                 <li><a href="#delayed">Delayed Deployment</a></li>
+                <li><a href="#notifications">Discord Turn Notifications</a></li>
                 <li><a href="#elint">ELINT &amp; Electronic Warfare</a></li>
                 <li><a href="#enormous">Enormous Units</a></li>
                 <li><a href="#escorts">Fighter Escorts</a></li>
@@ -253,6 +254,65 @@ if (!isset($_SESSION["user"]) || $_SESSION["user"] == false) {
             Ships cannot jump into hexes occupied by terrain or Enormous units, so make sure you make the Deployment Zone large enough!</li>
             <li>Ships which would normally have to set systems on Turn 1 and choose to deploy later (e.g. Hyach Specialists, Vorlon Adaptive Armor) will set these systems on the turn they deploy instead.</li>
             <li>Terrain, Bases, and OSATS cannot deploy later in the game and will always deploy on Turn 1 even if the slot is set to deploy later.</li>
+        </ul>
+        <a class="back-to-top" href="#top">↩ Back to Top</a>
+
+        <h3 id="notifications" >Discord Turn Notifications</h3>
+        <ul>
+            <li>Fiery Void games are often played out over days or weeks, so it is easy to miss the moment a game starts waiting on you.
+                If you'd like, the <b>Fiery Void bot</b> can send you a <b>direct message on Discord</b> whenever one of your games needs your input.
+                This is completely <b>opt-in</b> — nothing is ever sent unless you link your Discord account, and you can unlink again at any time.</li>
+            <br>
+
+            <li><b>Before you start</b> — two things must be true, or the bot cannot reach you:
+                <ul class="circle-list">
+                    <li>You must be a member of the <a href="https://discord.gg/4jXarWusp4" target="_blank" rel="noopener noreferrer">Fiery Void Discord server</a>.  Discord only lets a bot message people who share a server with it.</li>
+                    <li>You must allow DMs from that server: right-click the Fiery Void server icon &rarr; <b>Privacy Settings</b> &rarr; turn on <b>Allow direct messages from server members</b>.</li>
+                    <li>Don't worry that the bot always shows as <i>offline</i> in the member list — that is normal.  It only sends messages; it never logs in or reads your chat.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Setting it up (a one-off, takes a minute):</b>
+                <ul class="circle-list">
+                    <li><b>1. Find your Discord user ID.</b> In Discord go to <b>User Settings &rarr; Developer</b> and turn on <b>Developer Mode</b>.  Then right-click your own name (in a chat or the member list) and choose <b>Copy User ID</b>.  This is a long number of 17&ndash;20 digits — it is <em>not</em> your username.</li>
+                    <li><b>2. Paste it into Fiery Void.</b> From the FV Main Page click, <b>Set-Up Discord Notifications</b> in the top-right corner, paste your Discord User ID into the box, and click <b>Send verification code</b>.</li>
+                    <li><b>3. Check your Discord DMs.</b> The Fiery Void bot will message you a <b>6-digit code</b>, valid for <b>10 minutes</b>.</li>
+                    <li><b>4. Enter that code</b> back on the notifications page and click <b>Verify</b>.  You're linked.</li>
+                    <li><b>5. Optionally you can then click 'Send test ping'</b> to prove a DM reaches you.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Why is there a code?</b>  Your Discord user ID is not a secret — anyone who shares a server with you can copy it.
+                Without a check, somebody could type <em>your</em> ID into <em>their</em> Fiery Void account and have the bot send you reminders for their games.
+                Because the code is only ever DM'd to the true owner of the ID, only you can finish the link.  A Discord account can be linked to <b>one</b> Fiery Void account at a time.</li>
+            <br>
+
+            <li><b>How it works in practice:</b>
+                <ul class="circle-list">
+                    <li>You are messaged when a game <b>needs something from you</b> — exactly the same condition that highlights a game in your lobby list.  That covers every phase, including Fleet Selection, Deployment, Initial Orders, Movement and Firing.</li>
+                    <li>The DM names the <b>game, the turn number and the phase</b>, and includes a link straight to the game.</li>
+                    <li>You get <b>one DM each time a game becomes blocked on you</b> — not one per phase.  Once a game is waiting on you nothing further can happen until you act, so you will not be spammed.</li>
+                    <li>You are <b>never pinged for your own moves</b>, and you are <b>not pinged while you are actively playing</b>: if the game has seen you in the last 5 minutes it assumes you are already there.  Two players trading moves in real time receive no DMs at all.</li>
+                    <li>Nothing is sent for games that have finished or been surrendered.</li>
+                </ul>
+            </li>
+            <br>
+
+            <li><b>Turning it off, or moving to another Discord account:</b> go back to <b>Set-Up Turn Notifications</b> and click <b>Unlink</b> — pings stop immediately.
+                To use a different Discord account, Unlink first and then verify the new ID.</li>
+            <br>
+
+            <li><b>Troubleshooting:</b>
+                <ul class="circle-list">
+                    <li><b>No code arrived.</b>  Nearly always your DM privacy setting, or you are not in the Fiery Void Discord server.  Fix those (see <i>Before you start</i>) and request another code.</li>
+                    <li><b>"Incorrect code".</b>  Make sure you are using the newest code.  After a few wrong attempts the code is cancelled for safety — simply request a fresh one.</li>
+                    <li><b>"That code has expired".</b>  Codes last 10 minutes; request another.</li>
+                    <li><b>"Please wait a few seconds".</b>  There is a short cooldown between code requests, to stop the feature being abused to spam someone.</li>
+                    <li>If your DMs are closed, a test ping may instead show up as a mention in the <b>#turn-pings</b> channel, where that fallback has been set up.  Opening your DMs is the better fix.</li>
+                </ul>
+            </li>
         </ul>
         <a class="back-to-top" href="#top">↩ Back to Top</a>
 

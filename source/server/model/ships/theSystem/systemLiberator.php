@@ -42,6 +42,7 @@ class systemLiberator extends BaseShip{
 		$this->addPrimarySystem(new Engine(5, 12, 0, 14, 4));
 		$this->addPrimarySystem(new Hangar(5, 4, 2));
 		$this->addPrimarySystem(new ThirdspaceShieldGenerator(6, 20, 0, 40, 3, 8)); //$armor, $maxhealth, $power used, output, maxBoost, boostEfficiency
+        $this->addPrimarySystem(new FusionBomb(5, 9, 5, 0, 360));
         $this->addPrimarySystem(new SelfRepair(6, 8, 4)); //armor, structure, output
         $this->addPrimarySystem(new SelfRepair(6, 8, 4)); //armor, structure, output
 
@@ -49,6 +50,7 @@ class systemLiberator extends BaseShip{
 		$this->addFrontSystem(new GraviticThruster(5, 15, 0, 5, 1));
 		$this->addFrontSystem(new GraviticThruster(5, 12, 0, 3, 1));
         $this->addFrontSystem(new NeutronBlaster(5, 15, 8, 300, 60));
+        $this->addFrontSystem(new SeekerTorp(5, 6, 5, 270, 90));
         $this->addFrontSystem(new PlasmaDriver(5, 6, 6, 300, 60));
 		$this->addFrontSystem(new ThirdspaceShield(0, 200, 100, 330, 30, 'F'));	
 
@@ -56,6 +58,7 @@ class systemLiberator extends BaseShip{
 		$this->addAftSystem(new GraviticThruster(5, 20, 0, 6, 2));
 		$this->addAftSystem(new GraviticThruster(5, 15, 0, 4, 2));
         $this->addAftSystem(new PlasmaDriver(5, 6, 6, 120, 240));
+        $this->addAftSystem(new SeekerTorp(5, 6, 5, 90, 270));
 		$this->addAftSystem(new ThirdspaceShield(0, 160, 80, 150, 210, 'A'));		
 		$this->addAftSystem(new JumpEngine(6, 25, 6, 8));        
 		
@@ -79,8 +82,9 @@ class systemLiberator extends BaseShip{
 		
 		$this->hitChart = array(
                 0=> array(
-                        9 => "Structure",
-                        10 => "Shield Generator",
+                        8 => "Structure",
+                        9 => "Shield Generator",
+						10 => "Fusion Bomb",
 						12 => "Self Repair",
                         14 => "Scanner",
                         16 => "Engine",
@@ -92,6 +96,7 @@ class systemLiberator extends BaseShip{
                         5 => "Thruster",
                         8 => "Neutron Blaster",
 						10 => "Plasma Driver",
+						12 => "Seeker Torpedo",
                         18 => "Structure",
                         20 => "Primary",
                 ),
@@ -99,6 +104,7 @@ class systemLiberator extends BaseShip{
                         6 => "Thruster",
 						8 => "Jump Engine",
                         10 => "Plasma Driver",
+						12 => "Seeker Torpedo",
                         18 => "Structure",
                         20 => "Primary",
                 ),

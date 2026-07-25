@@ -39,18 +39,32 @@ class Xavan extends VreeCapital{
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
 		$this->addPrimarySystem(new AntiprotonGun(3, 0, 0, 0, 360));
 			
-        $this->addFrontSystem(new GraviticThruster(4, 12, 0, 7, 1));
+        $thrust = new GraviticThruster(4, 12, 0, 7, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addFrontSystem($thrust);
 		
-        $this->addAftSystem(new GraviticThruster(4, 12, 0, 7, 2));
+        $thrust = new GraviticThruster(4, 12, 0, 7, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addAftSystem($thrust);
         
 		$this->addLeftFrontSystem(new AntiprotonGun(3, 0, 0, 240, 360));				
 				
-		$this->addLeftAftSystem(new GraviticThruster(4, 12, 0, 7, 3));	
+		$thrust = new GraviticThruster(4, 12, 0, 7, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
+		$this->addLeftSystem($thrust);	
 		$this->addLeftAftSystem(new AntiprotonGun(3, 0, 0, 180, 300));
 	
 		$this->addRightFrontSystem(new AntiprotonGun(3, 0, 0, 0, 120));
 
-		$this->addRightAftSystem(new GraviticThruster(4, 12, 0, 7, 4));	
+		$thrust = new GraviticThruster(4, 12, 0, 7, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
+		$this->addRightSystem($thrust);	
 		$this->addRightAftSystem(new AntiprotonGun(3, 0, 0, 60, 180));
 		
        

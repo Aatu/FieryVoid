@@ -62,8 +62,14 @@ window.botPanel = {
 		botPanel.updateCallback = null;
 	},
 
+	/* Ship-window redesign Stage 2c (SHIPWINDOW_REDESIGN_PLAN.md §4.4): dead code —
+	   nothing anywhere calls setEW (or onShipStatusChanged), and game.php has no
+	   #botPanel element for addEW to fill, so the planned ew.js helper replacement
+	   was unnecessary. Commented out (not deleted) until the Stage 4 retirement
+	   sweep; this was the last legacy-shipWindowManager reference in this file.
 	setEW: function setEW(ship) {
 		botPanel.updateCallback = botPanel.setEW;
 		shipWindowManager.addEW(ship, $("#botPanel"));
 	},
+	*/
 };

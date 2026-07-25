@@ -1319,6 +1319,10 @@ class DBManager
 */    
     public function setPlayerWaitingStatus($playerid, $gameid, $waiting)
     {
+        // Discord turn notifications: record the flip in-memory, sent after commit
+        // (DiscordNotifier::flush). class_exists guard so a stale autoload map
+        // degrades to no-pings instead of a fatal.
+        if (class_exists('DiscordNotifier')) DiscordNotifier::recordWaiting($gameid, $playerid, $waiting);
         try {
             if ($stmt = $this->connection->prepare(
                 "UPDATE 
@@ -1341,6 +1345,7 @@ class DBManager
 
     public function setPlayersWaitingStatusInGame($gameid, $waiting)
     {
+        if (class_exists('DiscordNotifier')) DiscordNotifier::recordWaiting($gameid, 'ALL', $waiting);
         try {
             if ($stmt = $this->connection->prepare(
                 "UPDATE 
@@ -1359,6 +1364,146 @@ class DBManager
             throw $e;
         }
 
+    }
+
+    // --- Discord turn notifications (DiscordNotifier / profile.php) ---
+
+    // Returns discord_id (verified/bound), dm_channel_id, and the pending
+    // verification fields. discord_verify_code is included — callers that hand
+    // this to a page (Manager::getPlayerDiscordRow) must strip it first.
+    public function getPlayerDiscordRow($playerid)
+    {
+        $row = null;
+        if ($stmt = $this->connection->prepare(
+            "SELECT discord_id, dm_channel_id, discord_verify_id, discord_verify_code, discord_verify_expires
+               FROM player WHERE id = ?"
+        )) {
+            $stmt->bind_param('i', $playerid);
+            $stmt->execute();
+            $stmt->bind_result($discordId, $dmChannelId, $verifyId, $verifyCode, $verifyExpires);
+            if ($stmt->fetch()) {
+                $row = new stdClass();
+                $row->discord_id = $discordId;
+                $row->dm_channel_id = $dmChannelId;
+                $row->discord_verify_id = $verifyId;
+                $row->discord_verify_code = $verifyCode;
+                $row->discord_verify_expires = $verifyExpires;
+            }
+            $stmt->close();
+        }
+        return $row;
+    }
+
+    // Store a pending challenge (does NOT touch discord_id — binding only happens
+    // on successful verify). Overwrites any prior pending challenge.
+    public function setPlayerDiscordVerification($playerid, $verifyId, $code, $expires)
+    {
+        if ($stmt = $this->connection->prepare(
+            "UPDATE player
+                SET discord_verify_id = ?, discord_verify_code = ?, discord_verify_expires = ?
+              WHERE id = ?"
+        )) {
+            $stmt->bind_param('ssii', $verifyId, $code, $expires, $playerid);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
+    // Bind a verified Discord ID. The caller has proven ownership, so we transfer
+    // the ID off any other account first (uniqueness recovery), then set it here
+    // and clear the pending challenge. One transaction so the unique index never
+    // transiently conflicts.
+    public function bindVerifiedDiscordId($playerid, $discordId)
+    {
+        $this->startTransaction();
+        try {
+            if ($stmt = $this->connection->prepare(
+                "UPDATE player SET discord_id = NULL, dm_channel_id = NULL
+                  WHERE discord_id = ? AND id <> ?"
+            )) {
+                $stmt->bind_param('si', $discordId, $playerid);
+                $stmt->execute();
+                $stmt->close();
+            }
+            if ($stmt = $this->connection->prepare(
+                "UPDATE player
+                    SET discord_id = ?, dm_channel_id = NULL,
+                        discord_verify_id = NULL, discord_verify_code = NULL, discord_verify_expires = NULL
+                  WHERE id = ?"
+            )) {
+                $stmt->bind_param('si', $discordId, $playerid);
+                $stmt->execute();
+                $stmt->close();
+            }
+            $this->endTransaction(false, true);   // force commit even in testMode
+        } catch (Exception $e) {
+            $this->endTransaction(true);
+            throw $e;
+        }
+    }
+
+    // Clear only the pending challenge (keeps any existing verified binding).
+    public function clearPlayerDiscordVerification($playerid)
+    {
+        if ($stmt = $this->connection->prepare(
+            "UPDATE player
+                SET discord_verify_id = NULL, discord_verify_code = NULL, discord_verify_expires = NULL
+              WHERE id = ?"
+        )) {
+            $stmt->bind_param('i', $playerid);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
+    // Full opt-out / reset: drop the binding, the DM cache and any pending challenge.
+    public function clearPlayerDiscord($playerid)
+    {
+        if ($stmt = $this->connection->prepare(
+            "UPDATE player
+                SET discord_id = NULL, dm_channel_id = NULL,
+                    discord_verify_id = NULL, discord_verify_code = NULL, discord_verify_expires = NULL
+              WHERE id = ?"
+        )) {
+            $stmt->bind_param('i', $playerid);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
+    public function setPlayerDmChannelId($playerid, $channelId)
+    {
+        if ($stmt = $this->connection->prepare(
+            "UPDATE player SET dm_channel_id = ? WHERE id = ?"
+        )) {
+            $stmt->bind_param('si', $channelId, $playerid);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+
+    // playerid => row{discord_id, dm_channel_id} for every player in the game.
+    public function getDiscordIdsInGame($gameid)
+    {
+        $players = array();
+        if ($stmt = $this->connection->prepare(
+            "SELECT DISTINCT p.id, p.discord_id, p.dm_channel_id
+               FROM player p
+               JOIN tac_playeringame pig ON pig.playerid = p.id
+              WHERE pig.gameid = ?"
+        )) {
+            $stmt->bind_param('i', $gameid);
+            $stmt->execute();
+            $stmt->bind_result($id, $discordId, $dmChannelId);
+            while ($stmt->fetch()) {
+                $row = new stdClass();
+                $row->discord_id = $discordId;
+                $row->dm_channel_id = $dmChannelId;
+                $players[$id] = $row;
+            }
+            $stmt->close();
+        }
+        return $players;
     }
 
     public function updateGamedata($gamedata)

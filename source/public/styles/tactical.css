@@ -519,15 +519,49 @@ body {
 
 .logUiEntry span {}
 
-.logUiEntry.newMessage {
-    color: #DEEBFF;
-}
-
 .logUiEntry.selected {
     top: -25px;
     background-color: #04161C;
     color: #DEEBFF;
     font-weight: bold;
+}
+
+/* Unread chat — the old rule only lifted the text colour by one shade
+   (#deebffb6 -> #DEEBFF), which players kept missing. Light the whole tab
+   instead: amber fill, glowing border and a slow pulse, so it registers from
+   the corner of the eye while the player is looking at the map. Never applies
+   to the selected tab (chat.php only tags unselected tabs anyway). */
+.logUiEntry.newMessage:not(.selected) {
+    color: #FFE9CB;
+    font-weight: bold;
+    background-color: #5A2B0D;
+    border-color: #E08A3C;
+    text-shadow: 0 0 6px rgba(255, 176, 92, 0.8);
+    box-shadow: 0 0 8px 1px rgba(224, 138, 60, 0.6);
+    /*animation: chatTabUnreadPulse 1.6s ease-in-out infinite;*/
+}
+
+@keyframes chatTabUnreadPulse {
+
+    0%,
+    100% {
+        background-color: #5A2B0D;
+        box-shadow: 0 0 6px 0 rgba(224, 138, 60, 0.45);
+    }
+
+    50% {
+        background-color: #97490F;
+        box-shadow: 0 0 15px 3px rgba(255, 176, 92, 0.95);
+    }
+}
+
+/* Keep the highlight loud but hold it still for motion-sensitive players. */
+@media (prefers-reduced-motion: reduce) {
+    .logUiEntry.newMessage:not(.selected) {
+        animation: none;
+        background-color: #8A4413;
+        box-shadow: 0 0 12px 2px rgba(255, 176, 92, 0.85);
+    }
 }
 
 #logTab.logUiEntry {
@@ -738,6 +772,31 @@ body {
     width: 40px;
     color: white;
 
+}
+
+/* On phones the tabs are display:none until the panel is expanded (see the two
+   mobile media queries below), so an unread chat tab would light up somewhere
+   the player cannot see. Carry the glow onto the "Click!" expand button while
+   the panel is collapsed — on those viewports it is the only tab-strip element
+   on screen. Desktop is excluded: there the tab itself is always visible, so
+   glowing both would just be noise. */
+@media only screen and (max-width: 765px),
+only screen and (max-height: 500px) and (orientation: landscape) {
+    #logcontainer:not(.large):has(.logUiEntry.newMessage) #expandBotPanel {
+        background-color: #5A2B0D;
+        border-color: #E08A3C;
+        color: #FFE9CB;
+        font-weight: bold;
+        box-shadow: 0 0 8px 1px rgba(224, 138, 60, 0.6);
+        /*animation: chatTabUnreadPulse 1.6s ease-in-out infinite;*/
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    #logcontainer:not(.large):has(.logUiEntry.newMessage) #expandBotPanel {
+        animation: none;
+    }
 }
 
 #gameinfo.logPanelEntry {

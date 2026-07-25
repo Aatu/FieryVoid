@@ -22,6 +22,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' &&
     }
 }
 
+// Discord turn notifications: stamp "this player is actively watching this game"
+// so DiscordNotifier::seenRecently() can suppress pings to players who are
+// polling right now. MUST sit ABOVE the fast-poll exit below — on cache hits
+// that path exits before Manager ever runs (see arch_gamedata_polling_cache).
+// Key is deliberately NOT deploy-versioned: presence info survives deploys.
+if (function_exists('apcu_store') && $playerid && isset($_GET['gameid'])) {
+    apcu_store("{$database_name}_seen_" . (int)$_GET['gameid'] . '_' . (int)$playerid, time(), 900);
+}
+
 // APCu Fast Poll: Check if we can exit early without touching DB.
 // Must use the SAME prefix Manager writes last_update under (Manager::getCachePrefix(),
 // which includes the deploy-version suffix) — otherwise after a deploy this reads a

@@ -840,7 +840,7 @@ window.ajaxInterface = {
             var ship = tidyships[i];
             ship.htmlContainer = null;
             ship.shipclickableContainer = null;
-            ship.shipStatusWindow = null;
+            //STAGE4-RETIRED ship.shipStatusWindow = null;
             if (gamedata.isMyShip(ship)) {
                 for (var a = ship.movement.length - 1; a >= 0; a--) {
                     var move = ship.movement[a];

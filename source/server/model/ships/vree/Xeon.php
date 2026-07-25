@@ -36,20 +36,34 @@ class Xeon extends VreeCapital{
 		$this->addPrimarySystem(new Scanner(5, 10, 7, 7));
         $this->addPrimarySystem(new Engine(5, 11, 0, 7, 2));
 
-        $this->addFrontSystem(new GraviticThruster(4, 12, 0, 7, 1));
+        $thrust = new GraviticThruster(4, 12, 0, 7, 1);
+		$thrust->startArc = 300;
+		$thrust->endArc = 60;
+		$this->addFrontSystem($thrust);
         $this->addFrontSystem(new AntiprotonDefender(3, 0, 0, 300, 60));
 		
-        $this->addAftSystem(new GraviticThruster(4, 12, 0, 7, 2));
+        $thrust = new GraviticThruster(4, 12, 0, 7, 2);
+		$thrust->startArc = 120;
+		$thrust->endArc = 240;
+		$this->addAftSystem($thrust);
         $this->addAftSystem(new AntiprotonDefender(3, 0, 0, 120, 240));
         
 		$this->addLeftFrontSystem(new AntiprotonDefender(3, 0, 0, 240, 360));
 				
-		$this->addLeftAftSystem(new GraviticThruster(4, 12, 0, 7, 3));
+		$thrust = new GraviticThruster(4, 12, 0, 7, 3);
+		$thrust->startArc = 240;
+		$thrust->endArc = 300;
+		$thrust->overkillArcStructures = array(31, 32); //overkill spills to whichever Port quarter is in arc
+		$this->addLeftSystem($thrust);
 		$this->addLeftAftSystem(new AntiprotonDefender(3, 0, 0, 180, 300));
 		
 		$this->addRightFrontSystem(new AntiprotonDefender(3, 0, 0, 0, 120));			
 
-		$this->addRightAftSystem(new GraviticThruster(4, 12, 0, 7, 4));  
+		$thrust = new GraviticThruster(4, 12, 0, 7, 4);
+		$thrust->startArc = 60;
+		$thrust->endArc = 120;
+		$thrust->overkillArcStructures = array(41, 42); //overkill spills to whichever Stbd quarter is in arc
+		$this->addRightSystem($thrust);  
 		$this->addRightAftSystem(new AntiprotonDefender(3, 0, 0, 60, 180));	
        
         //0:primary, 1:front, 2:rear, 3:left, 4:right;

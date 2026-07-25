@@ -68,7 +68,15 @@ class ShipSystem {
 	(Kirishiac orbitals shown on the L/R sections while docking to the front/aft blocks). Default null = own
 	location. Drives structureSystem assignment (destruction coupling) and SelfRepair's block check.*/
 	public $structureHomeLocation = null;
-	
+
+	/*additive: side systems shown on a display-only Port/Stbd section (loc 3/4) that carries no
+	Structure of its own (Vree/Mindrider side thrusters). Holds the adjacent quarter-structure
+	section locations, e.g. array(31,32) for Port. On overkill the excess spills into whichever of
+	those quarter Structures lies in the arc of the incoming shot (random if several) instead of
+	dropping straight through to PRIMARY. Default null = normal flow. Consumed in
+	Weapon::getArcOverkillStructure.*/
+	public $overkillArcStructures = null;
+
 	protected $calledShotBonus = 0;//Some systems, like Aegis Sensor Pod are easier to hit with called shots.
 	protected $active = false;	//Needs to be passed to front end in stripForJson.  Denotes a system being active for any number of purposes / show as boosted	
 	protected $initializeOnLoad	= false; //Runs initialisationUpdate() immediately on page loading, useful for updating tooltips immediately.  Needs passed in strpForJson().

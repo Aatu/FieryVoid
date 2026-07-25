@@ -52,9 +52,11 @@ window.ShipIcon = function () {
         this.ship = ship;
         this.consumeMovement(ship.movement);
         this.consumeEW(ship);
-        this.createShipWindow(ship);
+        //STAGE4-RETIRED this.createShipWindow(ship);
     };
 
+    /* STAGE4-RETIRED legacy status-window re-link (the legacy window DOM no longer
+       exists on any page). Delete once the redesign is stable on live.
     ShipIcon.prototype.createShipWindow = function (ship) {
         // Lazy: build the (expensive) legacy DOM status window only when it is first
         // opened (shipWindowManager.open / ensureShipWindow). At load and on each turn
@@ -70,6 +72,7 @@ window.ShipIcon = function () {
             ship.shipStatusWindow = null;
         }
     };
+    */
 
     ShipIcon.prototype.setPosition = function (position) {
         this.mesh.position.x = position.x;

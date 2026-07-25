@@ -778,7 +778,7 @@ window.PhaseStrategy = function () {
         this.shipIconContainer.getByShip(ship).consumeEW(ship);
         this.ewIconContainer.updateForShip(ship);
         this.shipWindowManager.update();
-        window.shipWindowManager.addEW(ship)
+        //STAGE4-RETIRED window.shipWindowManager.addEW(ship)
     };
 
     PhaseStrategy.prototype.onShipMovementChanged = function (payload) {

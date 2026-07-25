@@ -67,8 +67,12 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/game.legacy.bundle.js'); ?>" as="script">
     <?php endif; ?>
     
-    <link href="styles/tactical.css" rel="stylesheet" type="text/css">
-    <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
+    <!-- ?v=mtime: .htaccess serves CSS with "access plus 1 month", so without a
+         cache-buster a stylesheet edit can take up to a month to reach returning
+         players. -->
+    <link href="<?php echo AssetLoader::getAssetUrl('styles/tactical.css'); ?>" rel="stylesheet" type="text/css">
+    <!-- STAGE4-RETIRED legacy ship-window stylesheet (ship-window redesign Stage 4) - delete once the redesign is stable on live
+    <link href="styles/shipwindow.css" rel="stylesheet" type="text/css"> -->
 	<link href="styles/confirm.css" rel="stylesheet" type="text/css">
     <link href="styles/replay.css" rel="stylesheet" type="text/css">
     <link href="styles/shipTooltip.css" rel="stylesheet" type="text/css">
@@ -259,6 +263,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     <script defer src="client/lib/HexagonMath.js"></script>
     <script defer src="client/lib/AbstractCanvas.js"></script>
     <script defer src="client/Settings.js"></script>
+    <script defer src="client/uiEventRelay.js"></script>
     <script defer src="client/renderer/webglHexGridRenderer.js"></script>
     <script defer src="client/renderer/canvasHexGridRenderer.js"></script>
     <script defer src="client/renderer/webglScene.js"></script>
@@ -374,11 +379,13 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 	<script defer src="client/power.js"></script>
     <script defer src="client/UI/shipMovement.js"></script>
     <script defer src="client/UI/infowindow.js"></script>
-	<script defer src="client/UI/systemInfo.js"></script>
-    <script defer src="client/UI/shipwindow.js"></script>
+	<!-- STAGE4-RETIRED legacy ship-window scripts (ship-window redesign Stage 4) - single-line
+	     comments so bundle-legacy.js skips them; delete once the redesign is stable on live -->
+	<!-- STAGE4-RETIRED <script defer src="client/UI/systemInfo.js"></script> -->
+    <!-- STAGE4-RETIRED <script defer src="client/UI/shipwindow.js"></script> -->
     <script defer src="client/UI/fleetList.js"></script>
 	<script defer src="client/UI/gameInfo.js"></script>
-    <script defer src="client/UI/flightwindow.js"></script>
+    <!-- STAGE4-RETIRED <script defer src="client/UI/flightwindow.js"></script> -->
 	<script defer src="client/UI/confirm.js"></script>
 	<script defer src="client/model/ship.js"></script>
     <script defer src="client/model/shipSystem.js"></script>
@@ -543,8 +550,11 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
     
 </div>
 
+<?php /* STAGE4-RETIRED legacy ship-window HTML templates (ship-window redesign Stage 4).
+         Never emitted (if false); delete this whole block once the redesign is stable on live. */
+if (false): ?>
 <div id="shipwindowtemplatecontainer" style="display:none;">
-    
+
     <div class="shipwindow ship">
         <div class="topbar">
             <span class="valueheader name">Name:</span><span class="value name">name here</span>
@@ -702,8 +712,9 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
                         </tr>
                 </table>
     </div>
-    
+
 </div>
+<?php endif; /* STAGE4-RETIRED legacy ship-window templates */ ?>
 
 <div id="shipWindowsReact"></div>
 <div id="systemInfoReact"></div>

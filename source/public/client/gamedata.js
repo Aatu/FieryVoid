@@ -404,7 +404,7 @@ window.gamedata = {
     },
 
     shipStatusChanged: function shipStatusChanged(ship) {
-        shipWindowManager.setData(ship);
+        //STAGE4-RETIRED shipWindowManager.setData(ship);
         gamedata.checkGameStatus();
         window.webglScene.receiveGamedata(this);
     },
@@ -496,17 +496,21 @@ window.gamedata = {
             var mines = [];
             var html = '';
 
+            // Mine ranges can only be set on the turn the mine first deploys; once deployed
+            // on an earlier turn the ranges are locked in. Only warn about mines deploying THIS
+            // turn - otherwise a later (delayed) deployment phase re-lists already-deployed mines
+            // whose transient mineSet flag was reset on page reload.
             var playerHasMines = gamedata.ships.some(function (ship) {
                 return ship.mine &&
                     ship.userid == gamedata.thisplayer &&
                     !shipManager.isDestroyed(ship) &&
-                    shipManager.getTurnDeployed(ship) <= gamedata.turn;
+                    shipManager.getTurnDeployed(ship) == gamedata.turn;
             });
             if (playerHasMines) {
                 for (var i in gamedata.ships) {
                     var ship = gamedata.ships[i];
                     if (ship.userid == gamedata.thisplayer) {
-                        if (ship.mine) {
+                        if (ship.mine && shipManager.getTurnDeployed(ship) == gamedata.turn) {
                             mines.push(ship);
                         }
                     }

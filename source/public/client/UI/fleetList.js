@@ -589,19 +589,29 @@ window.fleetListManager = {
         var shipId = shipNameEntry.dataset["shipid"];
         var ship = gamedata.getShip(shipId);
 
-        if (shipManager.shouldBeHidden(ship)) { //Enemy, stealth equipped and undetected, or not deployed yet.
-            return; //Do not scroll to Stealthed ships
-        }
-
         //Hangar Ops Stage 9.1: a docked flight isn't on the board, so a
         //scroll-to-ship event has nothing to find. Open its status window
         //directly instead so the player can inspect the docked fighters
         //(DOCKED label in cyan over the faded icons).
+        //Ship-window redesign Stage 2d (SHIPWINDOW_REDESIGN_PLAN.md §4.5): opens
+        //the React ship window via the OpenShipWindowFor event PhaseStrategy
+        //already handles — this was the last visible legacy window in game.php.
+        //This branch must sit ABOVE the shouldBeHidden guard: shouldBeHidden
+        //treats every removed flight as destroyed (ships.js isDestroyed check),
+        //so below the guard it was unreachable and the 9.1 feature never fired.
+        //Safe here — opening a window reveals no board position, which is what
+        //the guard exists to protect.
         if (ship.removed && ship.flight) {
-            if (typeof flightWindowManager !== 'undefined' && flightWindowManager.open) {
-                flightWindowManager.open(ship);
-            }
+            window.webglScene.customEvent('OpenShipWindowFor', { ship: ship });
+            //Legacy flight window, kept commented until the Stage 4 retirement sweep:
+            //if (typeof flightWindowManager !== 'undefined' && flightWindowManager.open) {
+            //    flightWindowManager.open(ship);
+            //}
             return;
+        }
+
+        if (shipManager.shouldBeHidden(ship)) { //Enemy, stealth equipped and undetected, or not deployed yet.
+            return; //Do not scroll to Stealthed ships
         }
 
         window.webglScene.customEvent('ScrollToShip', { shipId: shipId });
@@ -651,9 +661,9 @@ window.fleetListManager = {
                 if (ship.removed) {
                     //Docked flight: same isDestroyed=true filtering, but not
                     //actually destroyed. Keep .clickable so the player can
-                    //open the flight window (doScrollToShip routes removed
-                    //flights to flightWindowManager.open directly since
-                    //they're not on the board).
+                    //open the flight window (doScrollToShip opens the React
+                    //ship window via OpenShipWindowFor for removed flights
+                    //since they're not on the board).
                     if (jumpedDockedFlightIds[ship.id]) {
                         //Carrier jumped to hyperspace and took the flight with
                         //it: it kept its combat value but is no longer in play,

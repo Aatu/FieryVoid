@@ -1,5 +1,10 @@
 "use strict";
 
+/* STAGE4-RETIRED (ship-window redesign Stage 4, 2026-07-18): this file is no longer
+   loaded by any page — the script tags in game.php and gamelobby.php are commented
+   out, so it is also excluded from the legacy bundles. The lobby now uses the React
+   SystemInfo via uiEvents. DELETE this file once the redesign is stable on live. */
+
 window.systemInfo = {
 			//THIS FILE IS USED ONLY IN FLEET SELECTION - in game, see SystemInfo.js in reactJs instead
 

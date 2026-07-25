@@ -150,7 +150,7 @@ ShieldGenerator.prototype.onTurnOff = function (ship) {
 				turn: gamedata.turn,
 				amount: 0
 			});
-			shipWindowManager.setDataForSystem(ship, system);
+			//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
 		}
 	}
 };
@@ -161,7 +161,7 @@ ShieldGenerator.prototype.onTurnOn = function (ship) {
 		if (system.name == 'graviticShield') {
 			// Turn it all on.
 			shipManager.power.setOnline(ship, system);
-			shipWindowManager.setDataForSystem(ship, system);
+			//STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
 		}
 	}
 };

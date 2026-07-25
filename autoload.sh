@@ -50,6 +50,16 @@ if [ ! -x vendor/bin/phpab ]; then
     else
         php composer.phar install --no-progress --no-interaction
     fi
+
+    # Guard: a composer install can fail partway (e.g. a torn phar read if the
+    # boot-time install/selfupdate is racing this one) yet still exit 0-ish and
+    # leave no phpab. Fail here with a clear message instead of the next line
+    # blowing up on a missing binary.
+    if [ ! -x vendor/bin/phpab ]; then
+        echo "autoload.sh: composer install finished but vendor/bin/phpab is still missing." >&2
+        echo "autoload.sh: this is usually transient - re-run. If it persists, run 'php composer.phar install' by hand to see the real error." >&2
+        exit 1
+    fi
 fi
 
 vendor/bin/phpab \

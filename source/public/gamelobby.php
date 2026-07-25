@@ -97,16 +97,18 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 		<?php if (!$debug): ?>
 		<link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/gamelobby.legacy.bundle.js'); ?>" as="script">
 		<?php endif; ?>
+		<link rel="preload" href="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>" as="script">
 
 		<link href="styles/base.css" rel="stylesheet" type="text/css">
 		<link href="styles/lobby.css" rel="stylesheet" type="text/css">
 		<link href="styles/confirm.css" rel="stylesheet" type="text/css">
-        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">          
-        <link href="styles/shipwindow.css" rel="stylesheet" type="text/css">
+        <link href="styles/gamesNew.css" rel="stylesheet" type="text/css">
+        <!-- STAGE4-RETIRED legacy ship-window stylesheet (ship-window redesign Stage 4) - delete once the redesign is stable on live
+        <link href="styles/shipwindow.css" rel="stylesheet" type="text/css"> -->
         <!-- jQuery + jQuery-UI self-hosted (same-origin HTTP/2 + cache-control, no 3rd-party
-             TLS). Both kept SYNCHRONOUS: the lobby's synchronous client/*.js scripts (and
-             debug-mode shipwindow.js) run during parse and expect $.fn.draggable present,
-             so jQuery-UI must not defer here. assetManager.js has no jQuery dep, so it defers. -->
+             TLS). Both kept SYNCHRONOUS: the lobby's synchronous client/*.js scripts run
+             during parse and expect $.fn.draggable present, so jQuery-UI must not defer
+             here. assetManager.js has no jQuery dep, so it defers. -->
         <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-4.0.0.min.js'); ?>"></script>
         <!-- Deploy-version cache-buster for images (see AssetManager.appendVersion). Plain
              inline <script> runs at parse time, before the deferred assetManager.js, so the
@@ -114,7 +116,10 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script>window.assetVersion = "<?php echo AssetLoader::getDeployVersion(); ?>";</script>
         <script defer src="<?php echo AssetLoader::getAssetUrl('client/assetManager.js'); ?>"></script>
         <script src="<?php echo AssetLoader::getAssetUrl('client/lib/jquery-ui-1.14.2.min.js'); ?>"></script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">        
+        <!-- React UI bundle (ship window + system info) — ship-window redesign Stage 3.
+             AssetLoader tag, so bundle-legacy.js skips it (same as game.php). -->
+        <script defer src="<?php echo AssetLoader::getAssetUrl('client/UI/reactJs/UI.bundle.js'); ?>"></script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 		
 		<!-- replaced by php include below
         <script src="static/ships.js"></script>
@@ -129,7 +134,9 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
     <?php if ($debug): ?>
     <script src="client/gamelobby.js"></script>
 		<script src="client/ajaxInterface.js"></script>
-		<script src="client/lobbyEnhancements.js"></script>        
+		<script src="client/lobbyEnhancements.js"></script>
+		<script src="client/uiEventRelay.js"></script>
+		<script src="client/renderer/shipWindowManager.js"></script>
 		<script src="client/player.js"></script>
         <script src="client/ships.js"></script>
         <script src="client/criticals.js"></script>
@@ -140,11 +147,13 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
         <script src="client/mathlib.js"></script>
 		<script src="client/hangarShared.js"></script>
 		<script src="client/UI/confirm.js"></script>
-        <script src="client/UI/shipwindow.js"></script>
+        <!-- STAGE4-RETIRED legacy ship-window scripts (ship-window redesign Stage 4) - single-line
+             comments so bundle-legacy.js skips them; delete once the redesign is stable on live -->
+        <!-- STAGE4-RETIRED <script src="client/UI/shipwindow.js"></script> -->
         <script src="client/UI/fleetList.js"></script>
         <script src="client/UI/gameInfo.js"></script>
-        <script src="client/UI/flightwindow.js"></script>
-        <script src="client/UI/systemInfo.js"></script>
+        <!-- STAGE4-RETIRED <script src="client/UI/flightwindow.js"></script> -->
+        <!-- STAGE4-RETIRED <script src="client/UI/systemInfo.js"></script> -->
         <script src="client/model/ship.js"></script>
         <script src="client/model/shipSystem.js"></script>
         <script src="client/model/systemFactory.js"></script>
@@ -180,9 +189,33 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
     <?php endif; ?>		
 		<script>
 			
-            window.weaponManager = 
+            /* Lobby weaponManager stub: predicate/data functions the React
+               SystemIcon + SystemInfo render paths call. The lobby is read-only,
+               so everything reads as idle/unloaded-order and the action functions
+               are no-ops (SystemIcon's action branches are additionally gated off
+               by gamephase -2 / gamedata.waiting). */
+            window.weaponManager =
             {
-                
+                hasFiringOrder: function(){return false},
+                isLoaded: function(){return true},
+                isLoadedAlternate: function(){return false},
+                isSelectedWeapon: function(){return false},
+                getFiringOrder: function(){return null},
+                getCalledShotInfo: function(){return null},
+                selectAllWeapons: function(){}, //right-click select-all: nothing to select pre-game
+                getWeaponCurrentLoading: function(weapon)
+                {
+                    /* Weapons enter the game fully loaded, so the icon load counter
+                       shows the ready state ("1/1", or "2/2" for normalload weapons).
+                       Plain normalload (the old stub) read "0/1" on standard weapons. */
+                    return weapon.normalload > 0 ? weapon.normalload : weapon.loadingtime;
+                },
+            }
+
+            /* Stage 3c — legacy ship-window hover glue (fed UI/systemInfo.js from
+               the old DOM windows), superseded by the React SystemIcon →
+               window.uiEvents → React SystemInfo path. Delete in Stage 4.
+
                 mouseoverTimer: null,
                 mouseOutTimer: null,
                 mouseoverSystem: null,
@@ -190,7 +223,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
                 onWeaponMouseover: function(e){
 
                     if (weaponManager.mouseOutTimer != null){
-                        clearTimeout(weaponManager.mouseOutTimer); 
+                        clearTimeout(weaponManager.mouseOutTimer);
                         weaponManager.mouseOutTimer = null;
                     }
 
@@ -203,7 +236,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
                 onWeaponMouseOut: function(e){
                     if (weaponManager.mouseoverTimer != null){
-                        clearTimeout(weaponManager.mouseoverTimer); 
+                        clearTimeout(weaponManager.mouseoverTimer);
                         weaponManager.mouseoverTimer = null;
                     }
 
@@ -212,7 +245,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
                 doWeaponMouseOver: function(e){
                     if (weaponManager.mouseoverTimer != null){
-                        clearTimeout(weaponManager.mouseoverTimer); 
+                        clearTimeout(weaponManager.mouseoverTimer);
                         weaponManager.mouseoverTimer = null;
                     }
 
@@ -222,7 +255,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
                     var id = t.data("shipid");
 
-                    //Added button to view actual details of purchased ships, so need ot make sure right ship is called for correct tooltip info - DK 30.3.25 
+                    //Added button to view actual details of purchased ships, so need ot make sure right ship is called for correct tooltip info - DK 30.3.25
                     if(gamedata.fleetWindowOpen){
                         var ship = gamedata.getFleetShipById(id);
                     }else{
@@ -242,7 +275,7 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
                 doWeaponMouseout: function(){
                     if (weaponManager.mouseOutTimer != null){
-                        clearTimeout(weaponManager.mouseOutTimer); 
+                        clearTimeout(weaponManager.mouseOutTimer);
                         weaponManager.mouseOutTimer = null;
                     }
 
@@ -250,26 +283,32 @@ if (isset($_GET["leave"]) && isset($_GET["gameid"])){
 
                     weaponManager.mouseoverSystem = null;
                 },
-                hasFiringOrder: function(){return false},
-                isLoaded: function(){return true},
-                isSelectedWeapon: function(){return false},
-                getWeaponCurrentLoading: function(weapon)
-                {
-                    return weapon.normalload;
-                },
-            }
-            
+            */
+
             $(function(){
                 window.shipManager.movement.isRolled = function(ship)
                 {
                     return false;
                 }
             });
-            
-            
+
+
+            /* STAGE4-RETIRED (ship-window redesign Stage 4): the legacy
+               window.shipWindowManager no longer exists (UI/shipwindow.js not
+               loaded), so this stub would throw. Delete once stable on live.
             $(function(){
-                window.shipWindowManager.addEW = function(){}; 
-            });            
+                window.shipWindowManager.addEW = function(){};
+            });
+            */
+
+            $(function(){
+                /* Lobby: your own purchased mines are always identified — there is
+                   no reveal mechanic pre-game, and blueprint ships have no .team so
+                   the game-side check would render every mine as an unknown "?". */
+                if (window.MineStealth) {
+                    MineStealth.prototype.isMineRevealed = function () { return true; };
+                }
+            });
 
         
         jQuery(function($){            
@@ -945,10 +984,20 @@ $optionsUsed = '';
         ?>
         </div>-->
                     
+    <!-- React mounts (ship-window redesign Stage 3). Fixed full-viewport wrappers so
+         the absolutely-positioned windows/tooltips anchor to the VIEWPORT on this
+         scrolling page (the legacy equivalent was lobby.css forcing .shipwindow to
+         position: fixed). pointer-events is re-enabled inside the components
+         (ShipWindowContainer); the info tooltip stays click-through by design. -->
+    <div id="shipWindowsReact" style="position:fixed; inset:0; pointer-events:none; z-index:10001;"></div>
+    <div id="systemInfoReact" style="position:fixed; inset:0; pointer-events:none; z-index:20000;"></div>
+
+    <!-- STAGE4-RETIRED legacy UI/systemInfo.js tooltip container (ship-window redesign
+         Stage 4; the React SystemInfo mounts in #systemInfoReact above) - delete once stable on live
     <div id="systemInfo">
 		<div class="name"><span class="name header">test</span></div>
 		<div class="datacontainer"></div>
-	</div>
+	</div> -->
                     
     <div id="lobbyTeamTemplate" style="display:none;">
         <div class="team-section" data-team-id="">
@@ -1071,6 +1120,9 @@ $optionsUsed = '';
         
     </div>
 
+    <?php /* STAGE4-RETIRED legacy ship-window HTML templates (ship-window redesign Stage 4).
+             Never emitted (if false); delete this whole block once the redesign is stable on live. */
+    if (false): ?>
     <div id="shipwindowtemplatecontainer" style="display:none;">
         <div class="shipwindow ship">
             <div class="topbar">
@@ -1256,9 +1308,10 @@ $optionsUsed = '';
                             </tr>
                     </table>
         </div>
-        
+
     </div>
-                                    
+    <?php endif; /* STAGE4-RETIRED legacy ship-window templates */ ?>
+
     <div class="missileSelectItem" style="display:none">
         <span>
             <span class="selectText"></span>

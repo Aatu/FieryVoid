@@ -482,6 +482,11 @@ var BallisticMineLauncher = function BallisticMineLauncher(json, ship) {
 BallisticMineLauncher.prototype = Object.create(Weapon.prototype);
 BallisticMineLauncher.prototype.constructor = BallisticMineLauncher;
 
+//Ballistic-icon flag: BallisticIconContainer reads this directly to render the firing-mode
+//(mine type) name as the hex label, so it shows the instant the hex is targeted rather than
+//only after the lazy initializationUpdate stamps the fire order.
+BallisticMineLauncher.prototype.multiModeHexIcon = true;
+
 //Needed for Ballistic Icon to display properly
 BallisticMineLauncher.prototype.initializationUpdate = function() {
 	var ship = this.ship;	
@@ -500,7 +505,10 @@ var AbbaiMineLauncher = function AbbaiMineLauncher(json, ship) {
     Weapon.call(this, json, ship);
 };
 AbbaiMineLauncher.prototype = Object.create(Weapon.prototype);
-AbbaiMineLauncher.prototype.constructor = AbbaiMineLauncher; 
+AbbaiMineLauncher.prototype.constructor = AbbaiMineLauncher;
+
+//See BallisticMineLauncher.multiModeHexIcon - shows the mine-type name on the ballistic icon.
+AbbaiMineLauncher.prototype.multiModeHexIcon = true;
 
 AbbaiMineLauncher.prototype.initializationUpdate = function() {
 	var ship = this.ship;	

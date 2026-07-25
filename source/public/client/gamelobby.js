@@ -3027,12 +3027,24 @@ window.gamedata = {
 		ship.notes = baseShip.notes; //reset notes to default to default values
 		ship.forwardDefense = baseShip.forwardDefense;
 		ship.sideDefense = baseShip.sideDefense;
+		//Stage 3 lobbyEnhancements review: EVERY enhancement-mutated ship-level stat
+		//must return to its blueprint value before re-applying, or enhancements kept
+		//through an edit compound on each pass (ELITE_CREW ini/crit/to-hit, IPSH_EETH
+		//turn delay, MINE_SIGN signature, ELITE_SW pivot, ... were never reset).
+		ship.iniativebonus = baseShip.iniativebonus;
+		ship.critRollMod = baseShip.critRollMod;
+		ship.toHitBonus = baseShip.toHitBonus;
+		ship.turncost = baseShip.turncost;
+		ship.turndelaycost = baseShip.turndelaycost;
+		ship.pivotcost = baseShip.pivotcost;
+		ship.signature = baseShip.signature;
+		ship.detectedSignature = baseShip.detectedSignature;
+		ship.IFFSystem = baseShip.IFFSystem;
 
 		//Now clear enhancements markers, so these get updated again when ship window next opened.
 		if (ship.flight) {
 			ship.freethrust = baseShip.freethrust;
 			ship.hasNavigator = baseShip.hasNavigator;
-			ship.iniativebonus = baseShip.iniativebonus;
 			ship.offensivebonus = baseShip.offensivebonus;
 			lobbyEnhancements.resetEnhancementMarkersFighter(ship);
 		} else {
@@ -3130,12 +3142,24 @@ window.gamedata = {
 			} else { }
 		}
 
+		//Stage 3: single enhancement entry point (markers + apply flag were reset
+		//above, so this re-applies the kept/changed enhancements to the rebuilt ship)
+		lobbyEnhancements.apply(ship);
+		/* superseded by lobbyEnhancements.apply above - delete in Stage 4:
 		if (ship.flight) {
 			lobbyEnhancements.setEnhancementsFighter(ship);
 		} else {
 			lobbyEnhancements.setEnhancementsShip(ship);
 		}
+		*/
 
+		//The React window renders from this same mutated ship object, so no
+		//destroy/rebuild dance is needed - just re-render if it is open.
+		var wasVisible = window.shipWindowManagerReact
+			&& window.shipWindowManagerReact.ships.indexOf(ship) !== -1;
+
+		/* Stage 3c - legacy window destroy/rebuild, superseded by the React
+		   re-render below. Delete in Stage 4.
 		// Systems were replaced with fresh baseShip clones, so the old window DOM
 		// references stale objects. Destroy it and null the reference so that
 		// it can be recreated correctly with the new ship.id that updateFleet assigns.
@@ -3145,14 +3169,20 @@ window.gamedata = {
 			ship.shipStatusWindow.remove();
 			ship.shipStatusWindow = null;
 		}
+		*/
 
 		$(".confirm").remove();
 		gamedata.updateFleet(ship);
 
 		if (wasVisible) {
+			window.shipWindowManagerReact.update();
+		}
+		/* Stage 3c - legacy re-open, superseded above. Delete in Stage 4.
+		if (wasVisible) {
 			gamedata.onShipContextMenu(ship.phpclass, ship.faction, ship.id, true);
 		}
-		//gamedata.populateFleetDropdown();		
+		*/
+		//gamedata.populateFleetDropdown();
 	},
 
 
@@ -3651,13 +3681,28 @@ window.gamedata = {
 	onShipContextMenu: function onShipContextMenu(phpclass, faction, id, fleetList) {
 		var ship;
 
-		//Ship object depends on whether it's generic window based on phpclass, or whether it's from player's fleet list.	
+		//Ship object depends on whether it's generic window based on phpclass, or whether it's from player's fleet list.
 		if (fleetList) {
 			ship = gamedata.getFleetShipById(id);
 		} else {
 			ship = gamedata.getShip(phpclass, faction);
 		}
 
+		gamedata.fleetWindowOpen = Boolean(fleetList);
+
+		//Fleet ships show their purchased enhancements; apply() is one-shot per ship
+		//build (see lobbyEnhancements.js) so repeated opens are safe. Store blueprints
+		//are the SHARED gamedata.allShips objects and never have enhancements taken -
+		//don't run the mutator over them at all.
+		if (fleetList) {
+			lobbyEnhancements.apply(ship);
+		}
+
+		//Ship-window redesign Stage 3: the React window (same stack as game.php).
+		window.shipWindowManagerReact.open(ship);
+		return false;
+
+		/* Stage 3c - superseded legacy window path. Delete in Stage 4.
 		//Create ship window the first time it is requested ship window
 		if (!ship.shipStatusWindow) {
 			if (ship.flight) {
@@ -3691,6 +3736,7 @@ window.gamedata = {
 
 		shipWindowManager.open(ship);
 		return false;
+		*/
 	},
 
 
@@ -4894,3 +4940,67 @@ window.gamedata = {
 window.animation = {
 	animateWaiting: function animateWaiting() { }
 };
+
+/*==========================================================================
+  Ship-window redesign Stage 3a (SHIPWINDOW_REDESIGN_PLAN.md §4.2): React
+  ship-window + system-info bootstrap for the lobby.
+
+  The lobby has no webglScene/PhaseDirector, so the React components' UI events
+  (relayed page-agnostically through window.uiEvents, Stage 2a) are consumed by
+  the small handler below instead: system hover/click shows the same React
+  SystemInfo popup players see in game, window ✕ closes the window, and every
+  action-flavoured event (weapon selection, hangar dialogs, thrust...) is simply
+  ignored - the lobby is read-only by construction (gamedata.waiting is true and
+  gamephase is -2, so SystemIcon's action branches never fire anyway).
+
+  Runs at DOM-ready: all deferred bundles (UI.bundle defines window.UIManager,
+  the legacy bundle defines window.ShipWindowManager + window.uiEvents) have
+  executed by then.
+  ==========================================================================*/
+jQuery(function () {
+	if (!window.UIManager || !window.ShipWindowManager || !window.uiEvents) {
+		console.error("Lobby React bootstrap: UI bundle or relay missing - ship windows disabled.");
+		return;
+	}
+
+	var uiManager = new window.UIManager($("body")[0]);
+	window.shipWindowManagerReact = new window.ShipWindowManager(uiManager);
+
+	var getBoundingBox = function (element) {
+		if (!element) return { top: 0, left: 0, right: 0, bottom: 0, width: 0, height: 0 };
+		if (element.getBoundingClientRect) return element.getBoundingClientRect();
+		return $(element)[0].getBoundingClientRect(); //jQuery-wrapped element
+	};
+
+	var showInfo = function (payload) {
+		uiManager.showSystemInfo({
+			ship: payload.ship,
+			selectedShip: null,
+			system: payload.system,
+			boundingBox: getBoundingBox(payload.element)
+		});
+	};
+
+	window.uiEvents.setHandler(function (name, payload) {
+		switch (name) {
+			case 'SystemMouseOver':
+				if (payload.showInfo === false) {
+					uiManager.hideSystemInfo();
+				} else {
+					showInfo(payload);
+				}
+				break;
+			case 'SystemClicked': //tap/click = show info too (the touch path relies on it)
+				showInfo(payload);
+				break;
+			case 'SystemMouseOut':
+			case 'CloseSystemInfo':
+				uiManager.hideSystemInfo();
+				break;
+			case 'CloseShipWindow':
+				window.shipWindowManagerReact.close(payload.ship);
+				break;
+			//everything else: game-only events with no meaning in the lobby
+		}
+	});
+});

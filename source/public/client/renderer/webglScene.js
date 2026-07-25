@@ -583,3 +583,15 @@ window.webglScene = function () {
 
     return new webglScene();
 }();
+
+// Ship-window redesign Stage 2a (SHIPWINDOW_REDESIGN_PLAN.md §4.1): the React
+// UI raises its events through the page-agnostic window.uiEvents relay. On
+// pages with a WebGL map every UI event funnels INTO webglScene.customEvent,
+// so the PhaseDirector relay chain and the render request (idle render-loop
+// gating) behave exactly as before. gamelobby.php never loads this file and
+// installs its own handler instead.
+if (window.uiEvents) {
+    window.uiEvents.setHandler(function (name, payload) {
+        window.webglScene.customEvent(name, payload);
+    });
+}

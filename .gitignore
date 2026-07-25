@@ -16,3 +16,6 @@ nano*
 /node_modules
 /source/public/static
 .claude
+
+# Local-only Discord secrets for the docker dev container (never commit)
+docker/php/varconfig.local.php

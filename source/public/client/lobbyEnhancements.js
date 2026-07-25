@@ -2,6 +2,45 @@
 
 window.lobbyEnhancements = {
 
+	/*Single entry point (ship-window redesign Stage 3): apply purchased enhancements
+	  to a fleet ship/flight exactly ONCE per ship build. The stat changes below are
+	  cumulative mutations (`+=`), so re-running them would compound - previously that
+	  was held off by the per-enhancement `*Enh` marker flags while the window-open
+	  path called setEnhancements* on every open. Those markers stay as a second line
+	  of defence, but callers should now only ever use apply():
+
+	  - gamelobby.js onShipContextMenu: apply on window open (no-op after the first).
+	  - gamelobby.js edit-confirm: resetEnhancementMarkers* first (systems were reset
+	    to blueprint values, markers and this flag cleared), then apply() re-applies.
+
+	  The enhancement tooltip is rebuilt from scratch here rather than appended inside
+	  setEnhancements* - the old append ran on EVERY window open (it sat outside the
+	  marker guards) so tooltips duplicated, and its line separator was written to
+	  `this` instead of the ship so the lines ran together. Building fresh from
+	  enhancementOptions fixes both.*/
+	apply: function apply(ship) {
+		if (!ship || !ship.enhancementOptions) return;
+		if (ship.enhancementsApplied) return;
+		ship.enhancementsApplied = true;
+
+		var tooltipParts = [];
+		for (let entry of ship.enhancementOptions) {
+			// ID, readableName, numberTaken, limit, price, priceStep
+			if (entry[2] > 0) {
+				var line = entry[1];
+				if (entry[2] > 1) line += " (" + entry[2] + ")"; //count in plain brackets, no "x"
+				tooltipParts.push(line);
+			}
+		}
+		ship.enhancementTooltip = tooltipParts.join("<br>");
+
+		if (ship.flight) {
+			this.setEnhancementsFighter(ship);
+		} else {
+			this.setEnhancementsShip(ship);
+		}
+	},
+
 	setEnhancementsShip: function setEnhancementsShip(ship) {
 
 		// Ammo magazine is necessary for some options
@@ -21,9 +60,11 @@ window.lobbyEnhancements = {
 			let enhCount = entry[2];
 			let enhDescription = entry[1];
 			if (enhCount > 0) {
-				if (ship.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
-				ship.enhancementTooltip += enhDescription;
-				if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;
+				//tooltip now built fresh in apply() - the append here ran on every
+				//window open (unguarded by the markers) and duplicated lines:
+				//if (ship.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
+				//ship.enhancementTooltip += enhDescription;
+				//if (enhCount > 1) ship.enhancementTooltip += ` (x${enhCount})`;
 
 				switch (enhID) {
 					/*case 'DEPLOY': // Delayed
@@ -93,7 +134,7 @@ window.lobbyEnhancements = {
 									system.output += enhCount;
 								}
 							}
-							ship.notes += "<br>Elite Crew (" + enhCount + ")";
+							//ship.notes += "<br>Elite Crew (" + enhCount + ")";
 						}
 						ship.eliteEnh = true;
 						break;
@@ -124,21 +165,21 @@ window.lobbyEnhancements = {
 
 					case 'GUNSIGHT'://Gunsights: allows Particle Repeaters to split their shots.  
 						if (!ship.gunsightEnh) {
-							ship.notes += "<br>Repeater Gunsights";
+							//ship.notes += "<br>Repeater Gunsights";
 						}
 						ship.gunsightEnh = true;
 						break;
 
 					case 'HANG_F'://Hangar Conversion to Fighter slot, no actual need to change anything here.
 						if (!ship.hangFEnh) {
-							ship.notes += "<br>Fighter Conversion (" + enhCount + ")";
+							//ship.notes += "<br>Fighter Conversion (" + enhCount + ")";
 						}
 						ship.hangFEnh = true;
 						break;
 
 					case 'HANG_AS'://Hangar Conversion to Assault Shuttle slot, no actual need to change anything here.
 						if (!ship.hangASEnh) {
-							ship.notes += "<br>Shuttle Conversion (" + enhCount + ")";
+							//ship.notes += "<br>Shuttle Conversion (" + enhCount + ")";
 						}
 						ship.hangASEnh = true;
 						break;
@@ -166,14 +207,14 @@ window.lobbyEnhancements = {
 
 					case 'HANG_ORD'://Stage 15: Extra Ordnance Reserve (carrier missile reload pool)
 						if (!ship.hangOrdEnh) {
-							ship.notes += "<br>Extra Ordnance Reserve (" + enhCount + " pts)";
+							//ship.notes += "<br>Extra Ordnance Reserve (" + enhCount + " pts)";
 						}
 						ship.hangOrdEnh = true;
 						break;
 
 					case 'MAR_CONT'://Stage 17 ext: Extra Marine Contingents (ship-level marine pool)
 						if (!ship.marContEnh) {
-							ship.notes += "<br>Extra Marine Contingents (" + enhCount + ")";
+							//ship.notes += "<br>Extra Marine Contingents (" + enhCount + ")";
 						}
 						ship.marContEnh = true;
 						break;
@@ -182,7 +223,7 @@ window.lobbyEnhancements = {
 					case 'IFF_SYS':
 						if (!ship.iffEnh) {
 							ship.IFFSystem = true;
-							ship.notes += "<br>IFF System";
+							//ship.notes += "<br>IFF System";
 						}
 						ship.iffEnh = true;
 						break;
@@ -316,7 +357,7 @@ window.lobbyEnhancements = {
 									system.critRollMod += 4;
 								}
 							}
-							ship.notes += "<br>Eethan Refit";
+							//ship.notes += "<br>Eethan Refit";
 						}
 						ship.eethEnh = true;
 						break;
@@ -335,7 +376,7 @@ window.lobbyEnhancements = {
 									if (system.armour < 5) system.armour += 1;
 								}
 							}
-							ship.notes += "<br>Essan Refit";
+							//ship.notes += "<br>Essan Refit";
 						}
 						ship.essanEnh = true;
 						break;
@@ -347,7 +388,7 @@ window.lobbyEnhancements = {
 							ship.forwardDefense += enhCount * 2;
 							ship.sideDefense += enhCount * 2;
 							ship.fervEnh = true;
-							ship.notes += "<br>Markab Fervor";
+							//ship.notes += "<br>Markab Fervor";
 						}
 						break;
 
@@ -360,7 +401,7 @@ window.lobbyEnhancements = {
 									if(system.fireControl[2] !== null) system.fireControl[2] += 1;
 								}																	
 							}*/
-							ship.notes += "<br>Improved Accuracy";
+							//ship.notes += "<br>Improved Accuracy";
 						}
 						ship.mineAccEnh = true;
 						break;
@@ -372,7 +413,7 @@ window.lobbyEnhancements = {
 									system.armour += enhCount;
 								}
 							}
-							ship.notes += "<br>Improved Armour";
+							//ship.notes += "<br>Improved Armour";
 						}
 						ship.mineArmEnh = true;
 						break;
@@ -392,7 +433,7 @@ window.lobbyEnhancements = {
 									}
 								}
 							}
-							ship.notes += "<br>Improved Damage";
+							//ship.notes += "<br>Improved Damage";
 						}
 						ship.mineDmgEnh = true;
 						break;
@@ -412,7 +453,7 @@ window.lobbyEnhancements = {
 									}
 								}
 							}
-							ship.notes += "<br>Improved Range";
+							//ship.notes += "<br>Improved Range";
 						}
 						ship.mineRangEnh = true;
 						break;
@@ -478,7 +519,7 @@ window.lobbyEnhancements = {
 							if (strongestPReact != null) {
 								strongestPReact.output -= enhCount;
 							}
-							ship.notes += "<br>Poor Crew (" + enhCount + ")";
+							//ship.notes += "<br>Poor Crew (" + enhCount + ")";
 						}
 						ship.poorEnh = true;
 						break;
@@ -505,12 +546,12 @@ window.lobbyEnhancements = {
 								(s) => s && s.name == "hangar" && s.isShadowHangar
 							);
 							if (hasShadowHangar) {
-								ship.notes += "<br>" + enhCount + " integrated fighter(s)";
+								//ship.notes += "<br>" + enhCount + " integrated fighter(s)";
 							} else {
 								let struct = shipManager.systems.getStructureSystem(ship, 0);
 								if (struct) {
 									struct.maxhealth -= enhCount;
-									ship.notes += "<br>" + enhCount + " fighter(s) spawned";
+									//ship.notes += "<br>" + enhCount + " fighter(s) spawned";
 								}
 							}
 						}
@@ -525,7 +566,7 @@ window.lobbyEnhancements = {
 									system.data["Spark Curtain"] = "Yes";
 								}
 							}
-							ship.notes += "<br>Spark Curtain";
+							//ship.notes += "<br>Spark Curtain";
 						}
 						ship.sparkEnh = true;
 						break;
@@ -533,7 +574,7 @@ window.lobbyEnhancements = {
 					case 'SLUGGISH':
 						if (!ship.slugEnh) {
 							ship.iniativebonus -= enhCount * 5;
-							ship.notes += "<br>Sluggish (" + enhCount + ")";
+							//ship.notes += "<br>Sluggish (" + enhCount + ")";
 						}
 						ship.slugEnh = true;
 						break;
@@ -555,7 +596,7 @@ window.lobbyEnhancements = {
 								AActrl.data[" - per weapon type"] = Math.floor(AActrl.AAtotal / 2);
 								AActrl.data[" - preassigned"] = 0 + "/" + Math.floor(AActrl.AAtotal / 2);
 							}
-							ship.notes += "<br>Amethyst skin";
+							//ship.notes += "<br>Amethyst skin";
 						}
 						ship.amethsEnh = true;
 						break;
@@ -567,7 +608,7 @@ window.lobbyEnhancements = {
 									system.output += enhCount;
 								}
 							}
-							ship.notes += "<br>Azure skin";
+							//ship.notes += "<br>Azure skin";
 						}
 						ship.azursEnh = true;
 						break;
@@ -586,7 +627,7 @@ window.lobbyEnhancements = {
 								capacitor.output += enhCount;
 								capacitor.data["Power stored/max"] = capacitor.powerMax + (2 * enhCount);
 							}
-							ship.notes += "<br>Crimson skin";
+							//ship.notes += "<br>Crimson skin";
 						}
 						ship.crimsEnh = true;
 						break;
@@ -594,7 +635,7 @@ window.lobbyEnhancements = {
 					case 'VULN_CRIT': // Vulnerable to Criticals: +1 Crit roll mod
 						if (!ship.vulnEnh) {
 							ship.critRollMod += enhCount;
-							ship.notes += "<br>Vulnerable to Criticals (" + enhCount + ")";
+							//ship.notes += "<br>Vulnerable to Criticals (" + enhCount + ")";
 						}
 						ship.vulnEnh = true;
 						break;
@@ -1090,9 +1131,10 @@ window.lobbyEnhancements = {
 
 			if (enhCount > 0) {
 
-				if (flight.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
-				flight.enhancementTooltip += enhDescription;
-				if (enhCount > 1) flight.enhancementTooltip += ` (x${enhCount})`;
+				//tooltip now built fresh in apply() (see setEnhancementsShip):
+				//if (flight.enhancementTooltip !== "") this.enhancementTooltip += "<br>";
+				//flight.enhancementTooltip += enhDescription;
+				//if (enhCount > 1) flight.enhancementTooltip += ` (x${enhCount})`;
 
 				switch (enhID) {
 					/*
@@ -1399,6 +1441,10 @@ window.lobbyEnhancements = {
 
 	resetEnhancementMarkersShip: function resetEnhancementMarkersShip(ship) {
 
+		//let apply() run again (systems/stats are being reset to blueprint values)
+		ship.enhancementsApplied = false;
+		ship.enhancementTooltip = "";
+
 		for (let entry of ship.enhancementOptions) {
 			let enhID = entry[0];
 			//We're just finding the relevant enh and reseting update marker, as during Edit process all systems stats will be reset to defaults.
@@ -1682,6 +1728,10 @@ window.lobbyEnhancements = {
 	},
 
 	resetEnhancementMarkersFighter: function resetEnhancementMarkersFighter(flight) {
+
+		//let apply() run again (systems/stats are being reset to blueprint values)
+		flight.enhancementsApplied = false;
+		flight.enhancementTooltip = "";
 
 		for (let entry of flight.enhancementOptions) {
 			// ID, readableName, numberTaken, limit, price, priceStep

@@ -370,14 +370,151 @@ class Manager{
         try {
             self::initDBManager();
             $ret =  self::$dbManager->authenticatePlayer($username, $password);
-                      
+
             return $ret;
         }
         catch(exception $e) {
             Debug::error($e);
             return false;
         }
-        
+
+    }
+
+    // --- Discord turn notifications: profile.php backend ---
+
+    private static $discordVerifyMaxAttempts = 5;
+
+    // Page-safe row: never expose the pending verification CODE to the client.
+    public static function getPlayerDiscordRow($playerid) {
+        try {
+            self::initDBManager();
+            $row = self::$dbManager->getPlayerDiscordRow($playerid);
+            if ($row) unset($row->discord_verify_code);
+            return $row;
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return null;
+        }
+    }
+
+    // Begin ownership verification: DM a one-time code to the entered Discord ID.
+    // Binding only happens once that code is returned (verifyDiscordCode), so a
+    // player can never claim a Discord ID they don't control.
+    // Returns 'sent' | 'invalid' | 'cooldown' | 'dm_failed' | false.
+    public static function startDiscordVerification($playerid, $discordId) {
+        try {
+            if (!class_exists('DiscordNotifier')) return false;
+            $discordId = trim($discordId);
+            if (!preg_match('/^\d{17,20}$/', $discordId)) return 'invalid';
+            self::initDBManager();
+
+            // Per-account cooldown so the code sender can't be looped to DM-bomb a
+            // target ID. Best-effort (APCu); absent APCu just means no cooldown.
+            if (function_exists('apcu_enabled') && apcu_enabled()) {
+                global $database_name;
+                $cdKey = ($database_name ?? 'default') . '_dverify_cd_' . (int)$playerid;
+                if (!apcu_add($cdKey, 1, 30)) return 'cooldown';
+                apcu_delete(($database_name ?? 'default') . '_dverify_att_' . (int)$playerid); // fresh code, reset attempts
+            }
+
+            $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+            $expires = time() + 600;   // 10 minutes
+            self::$dbManager->setPlayerDiscordVerification($playerid, $discordId, $code, $expires);
+
+            if (!DiscordNotifier::sendVerificationCode($discordId, $code)) {
+                return 'dm_failed';
+            }
+            return 'sent';
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return false;
+        }
+    }
+
+    // Complete verification. Returns 'verified' | 'expired' | 'mismatch' | 'none' | false.
+    public static function verifyDiscordCode($playerid, $code) {
+        try {
+            self::initDBManager();
+            $code = trim($code);
+            $row = self::$dbManager->getPlayerDiscordRow($playerid);
+            if (!$row || empty($row->discord_verify_id) || empty($row->discord_verify_code)) return 'none';
+
+            if ($row->discord_verify_expires === null || (int)$row->discord_verify_expires < time()) {
+                self::$dbManager->clearPlayerDiscordVerification($playerid);
+                return 'expired';
+            }
+
+            if (!hash_equals((string)$row->discord_verify_code, (string)$code)) {
+                // Bound-attempt limiter: a wrong guess can't be repeated forever
+                // against one code (brute-force defence). Clear the challenge after
+                // a few failures; no APCu -> clear immediately.
+                $tooMany = true;
+                if (function_exists('apcu_enabled') && apcu_enabled()) {
+                    global $database_name;
+                    $attKey = ($database_name ?? 'default') . '_dverify_att_' . (int)$playerid;
+                    $ok = false;
+                    $n = apcu_inc($attKey, 1, $ok, 900);
+                    $tooMany = ($n >= self::$discordVerifyMaxAttempts);
+                }
+                if ($tooMany) self::$dbManager->clearPlayerDiscordVerification($playerid);
+                return 'mismatch';
+            }
+
+            // Proven ownership — bind (transfers off any other account) + clear challenge.
+            self::$dbManager->bindVerifiedDiscordId($playerid, $row->discord_verify_id);
+            if (function_exists('apcu_enabled') && apcu_enabled()) {
+                global $database_name;
+                apcu_delete(($database_name ?? 'default') . '_dverify_att_' . (int)$playerid);
+            }
+            return 'verified';
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return false;
+        }
+    }
+
+    // Cancel a pending challenge (keeps any existing verified binding).
+    public static function cancelDiscordVerification($playerid) {
+        try {
+            self::initDBManager();
+            self::$dbManager->clearPlayerDiscordVerification($playerid);
+            return true;
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return false;
+        }
+    }
+
+    // Full opt-out: unlink the Discord account entirely.
+    public static function unlinkDiscord($playerid) {
+        try {
+            self::initDBManager();
+            self::$dbManager->clearPlayerDiscord($playerid);
+            return true;
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return false;
+        }
+    }
+
+    // Post-verification connectivity test. Returns 'dm', 'channel', or false.
+    public static function sendDiscordTestPing($playerid) {
+        try {
+            if (!class_exists('DiscordNotifier')) return false;   // autoload map not regenerated yet
+            self::initDBManager();
+            $row = self::$dbManager->getPlayerDiscordRow($playerid);
+            if (!$row || empty($row->discord_id)) return false;
+            return DiscordNotifier::sendTestPing(self::$dbManager, $playerid, $row);
+        }
+        catch(exception $e) {
+            Debug::error($e);
+            return false;
+        }
     }
     
     public static function getTacGamedata($gameid, $userid, $turn, $phase, $activeship){
@@ -939,6 +1076,9 @@ class Manager{
                 // Step 4: End game if one or zero teams remain
                 if ($aliveCount <= 1) {
                     self::$dbManager->updateGameStatus($gameid, "SURRENDERED");
+                    // In-memory $gdS->status still holds the old value — flag the
+                    // game explicitly so DiscordNotifier never pings a dead game.
+                    if (class_exists('DiscordNotifier')) DiscordNotifier::suppressGame($gameid);
 
                     // --- LADDER LOGIC START ---
                     // Only process ladder results if it's NOT Turn 1 (prevents recording early surrenders/setup errors)
@@ -1021,13 +1161,18 @@ class Manager{
             
             self::touchGame($gameid);
 
+            // Discord turn notifications — strictly after commit + cache touch.
+            // Catches movement hand-offs too (setNextActiveShip ran inside process()).
+            if (class_exists('DiscordNotifier')) DiscordNotifier::flush(self::$dbManager, $gdS, $userid);
+
             $endtime = time();
             //Debug::log("SUBMITTING GAMEDATA - GAME: $gameid Time: " . ($endtime - $starttime) . " seconds.");
             return '{}';
-            
+
         }catch(exception $e) {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releasePlayerSubmitLock($gameid, $userid);
+            if (class_exists('DiscordNotifier')) DiscordNotifier::clear();   // rolled-back state must not ping
             $logid = Debug::error($e);
             return '{"error": "' .$e->getMessage() . '", "code":"'.$e->getCode().'", "logid":"'.$logid.'"}';
         }
@@ -1173,13 +1318,21 @@ class Manager{
             }
             self::$dbManager->endTransaction(false);
             self::$dbManager->releaseGameSubmitLock($gameid);
-            
+
             self::touchGame($gameid); // Ensure APCu knows about the advance
+
+            // Discord turn notifications — strictly after commit. Catches all
+            // phase/turn boundaries incl. the multi-phase while-loop above (the
+            // ops replay collapses it to one ping per player with the final state).
+            // $playerid is the poller whose request performed the advance — online
+            // by definition, and excluded as the triggering user.
+            if (class_exists('DiscordNotifier')) DiscordNotifier::flush(self::$dbManager, $gamedata, $playerid);
         }
         catch(Exception $e)
         {
             self::$dbManager->endTransaction(true);
             self::$dbManager->releaseGameSubmitLock($gameid);
+            if (class_exists('DiscordNotifier')) DiscordNotifier::clear();   // rolled-back state must not ping
             throw $e;
         }
     }

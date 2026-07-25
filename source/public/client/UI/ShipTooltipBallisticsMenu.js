@@ -89,8 +89,7 @@ window.ShipTooltipBallisticsMenu = function () {
             // of how the chance was derived at launch).
             var ballTarget = gamedata.getShip(ball.fireOrder.targetid);
             var hitChanceResult = weaponManager.calculateHitChange(ball.shooter, ballTarget, ball.weapon, undefined);
-            var tooltipText = weaponManager.buildHitChanceTooltipText(hitChanceResult);
-        
+
             // Build hitchance list manually, based on number of ballistics.
             /*let hitchanceList = [];
             for (let i = 0; i < ballistics.length; i++) {
@@ -130,7 +129,56 @@ window.ShipTooltipBallisticsMenu = function () {
             const maxHitchance = list.length > 0 ? Math.max(...list) : null;
             //const minHitchance = Math.min(...hitchanceList);
             //const maxHitchance = Math.max(...hitchanceList);
-            
+
+            // Direct-fire split weapons (Molecular / Shadow Slicer) add a cumulative -5% per
+            // shot after the first. The live breakdown bakes in the penalty for the NEXT
+            // (uncommitted) shot, over-stating what the locked shots actually took. Re-anchor
+            // it to the locked shots: the header uses the best (first) shot's stored chance
+            // and the split penalty is spelled out as the range incurred - 0% for the first
+            // shot down to the worst locked shot (minHitchance). Geometry/EW are locked this
+            // turn, so only the split penalty differs between shots; everything else is constant.
+            if (ball.fireOrder.type === 'normal' && ball.weapon.specialHitChanceCalculation
+                    && hitChanceResult && hitChanceResult.modifiers) {
+                // The split penalty is bundled into 'Other'; peel the live (next-shot)
+                // contribution out so 'Other' keeps only the constant, non-split components.
+                var liveSplitD20 = 0;
+                if (hitChanceResult._otherDetail) {
+                    for (var d = 0; d < hitChanceResult._otherDetail.length; d++) {
+                        if (hitChanceResult._otherDetail[d].label === 'Weapon Special') {
+                            liveSplitD20 = hitChanceResult._otherDetail[d].value;
+                            break;
+                        }
+                    }
+                }
+                var otherMod = null;
+                for (var mI = 0; mI < hitChanceResult.modifiers.length; mI++) {
+                    if (hitChanceResult.modifiers[mI].key === 'other') { otherMod = hitChanceResult.modifiers[mI]; break; }
+                }
+                var nonSplitD20 = (otherMod ? otherMod.value : 0) - liveSplitD20;
+
+                // worstSplit is <= 0 (best shot took none); single-shot rows collapse it to 0.
+                var worstSplitD20 = (minHitchance != null) ? (minHitchance - hitchanceNormalMode) / 5 : 0;
+                var otherHigh = nonSplitD20;                // best/first locked shot: no split penalty
+                var otherLow = nonSplitD20 + worstSplitD20; // worst locked shot
+
+                hitChanceResult.hitChance = hitchanceNormalMode; // header matches the row's headline (best shot)
+
+                if (otherHigh === 0 && otherLow === 0) {
+                    // nothing but the removed next-shot penalty was in 'Other' - drop the line
+                    if (otherMod) hitChanceResult.modifiers.splice(hitChanceResult.modifiers.indexOf(otherMod), 1);
+                } else {
+                    if (!otherMod) {
+                        otherMod = { key: 'other', label: 'Other' };
+                        hitChanceResult.modifiers.push(otherMod);
+                    }
+                    otherMod.value = otherHigh;
+                    otherMod.valueHigh = otherHigh;
+                    otherMod.valueLow = otherLow;
+                }
+            }
+
+            var tooltipText = weaponManager.buildHitChanceTooltipText(hitChanceResult);
+
             if(ball.weapon.data["Offensive Dice"]){ //New block to show how many dice Shadow use for each split shot
                 if(amount == 1){
                     jQuery(".hitchange", ballElement).html('- Between: ' + minHitchance + '% - ' + hitchanceNormalMode + '% (' + ball.fireOrder.shots + ' dice)');

@@ -6,6 +6,16 @@ $database_password='Kiiski';
 $database_host = 'localhost';
 $secret_phrase='molecular pulsar';
 
+// Discord turn notifications (see TURN_NOTIFICATIONS_PLAN.md / DiscordNotifier.php).
+// Both empty = feature disabled entirely — the local Docker, replay harness and
+// testInstance stay inert by default. Set the real bot token ONLY in the live
+// varconfig: it is a full bot credential — treat like the DB password, never
+// commit it to the public repo (Reset Token in the Discord dev portal if it leaks).
+$discord_bot_token = '';                          // primary transport: bot DMs
+$discord_webhook_url = '';                        // optional fallback: #turn-pings mention when a DM fails
+$game_base_url = 'https://fieryvoid.eu/game/';    // used to build game links in pings
+$discord_notify_idle_secs = 300;                  // don't ping players seen polling within this window
+
 // APCu debug logging toggle. When true, the gamedata cache paths error_log()
 // their hits/misses/fast-poll exits/touches so you can watch APCu working
 // (see Manager::apcuLog()). Leave FALSE normally — at true it logs on EVERY poll

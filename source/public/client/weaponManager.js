@@ -27,7 +27,7 @@ window.weaponManager = {
         if (gamedata.isMyShip(ship)) {
 
             system.changeFiringMode();
-            shipWindowManager.setDataForSystem(ship, system);
+            //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
 
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
 
@@ -47,7 +47,7 @@ window.weaponManager = {
 
         if (gamedata.isMyShip(ship)) {
             system.setFiringMode(mode);
-            shipWindowManager.setDataForSystem(ship, system);
+            //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
             webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
         }
     },
@@ -99,48 +99,55 @@ window.weaponManager = {
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 
-    onHoldfireClicked: function onHoldfireClicked(e) {
-        e.stopPropagation();
-        var shipwindow = $(".shipwindow").has($(this));
-        var systemwindow = $(".system").has($(this));
-        var ship = gamedata.getShip(shipwindow.data("ship"));
-        var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
-
-        if (gamedata.gamephase != 3 && !system.ballistic) return;
-
-        if (gamedata.gamephase != 1 && system.ballistic) return;
-
-        if (gamedata.gamephase != 5 && system.preFires) return;
-
-        if (ship.userid == gamedata.thisplayer) {
-            weaponManager.cancelFire(ship, system);
-        }
-        /* Cleaned 19.8.25 - DK		            
-        if (ship.userid == gamedata.thisplayer) {
-            if (!system.duoWeapon) {
-                weaponManager.cancelFire(ship, system);
-            } else {
-                systemwindow.removeClass("duofiring");
-
-                for (var i in system.weapons) {
-                    var duoweapon = system.weapons[i];
-
-                    if (weaponManager.hasFiringOrder(ship, duoweapon)) {
-                        weaponManager.cancelFire(ship, duoweapon);
-                    }
-                }
-            }
-        }
-        */
-    },
+    //STAGE4-RETIRED dead legacy-DOM handler: only ever bound by UI/shipwindow.js
+    //(no longer loaded). Line comments because of the inner block comment.
+    //Delete once the redesign is stable on live.
+    //onHoldfireClicked: function onHoldfireClicked(e) {
+    //    e.stopPropagation();
+    //    var shipwindow = $(".shipwindow").has($(this));
+    //    var systemwindow = $(".system").has($(this));
+    //    var ship = gamedata.getShip(shipwindow.data("ship"));
+    //    var system = shipManager.systems.getSystem(ship, systemwindow.data("id"));
+    //
+    //    if (gamedata.gamephase != 3 && !system.ballistic) return;
+    //
+    //    if (gamedata.gamephase != 1 && system.ballistic) return;
+    //
+    //    if (gamedata.gamephase != 5 && system.preFires) return;
+    //
+    //    if (ship.userid == gamedata.thisplayer) {
+    //        weaponManager.cancelFire(ship, system);
+    //    }
+    //    /* Cleaned 19.8.25 - DK
+    //    if (ship.userid == gamedata.thisplayer) {
+    //        if (!system.duoWeapon) {
+    //            weaponManager.cancelFire(ship, system);
+    //        } else {
+    //            systemwindow.removeClass("duofiring");
+    //
+    //            for (var i in system.weapons) {
+    //                var duoweapon = system.weapons[i];
+    //
+    //                if (weaponManager.hasFiringOrder(ship, duoweapon)) {
+    //                    weaponManager.cancelFire(ship, duoweapon);
+    //                }
+    //            }
+    //        }
+    //    }
+    //    */
+    //},
 
     cancelFire: function cancelFire(ship, system) {
         weaponManager.removeFiringOrder(ship, system);
         ballistics.updateList();
-        shipWindowManager.setDataForSystem(ship, system);
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
         gamedata.shipStatusChanged(ship);
     },
 
+    /* STAGE4-RETIRED dead legacy-DOM hover glue: these handlers were only ever bound
+       by UI/shipwindow.js / UI/flightwindow.js (no longer loaded), and doWeaponMouseOver/
+       doWeaponMouseout reference the retired legacy systemInfo. The React SystemIcon →
+       uiEvents path replaced all of it. Delete once the redesign is stable on live.
     onWeaponMouseover: function onWeaponMouseover(e) {
         if (weaponManager.mouseOutTimer != null) {
             clearTimeout(weaponManager.mouseOutTimer);
@@ -212,6 +219,7 @@ window.weaponManager = {
         weaponManager.mouseoverSystem = null;
         webglScene.customEvent('SystemMouseOut');
     },
+    STAGE4-RETIRED end */
 
     unSelectWeapon: function unSelectWeapon(ship, weapon) {
         for (var i = gamedata.selectedSystems.length - 1; i >= 0; i--) {
@@ -229,7 +237,7 @@ window.weaponManager = {
             */
         }
 
-        shipWindowManager.setDataForSystem(ship, weapon);
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, weapon);
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: weapon });
     },
 
@@ -406,12 +414,12 @@ window.weaponManager = {
                             ship: ship,
                             weapon: ship.systems[i].systems[b].weapon
                         });
-                        shipWindowManager.setDataForSystem(ship, ship.systems[i].systems[b].weapon);
+                        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, ship.systems[i].systems[b].weapon);
                     }
                 }
             }
         }
-        shipWindowManager.setDataForSystem(ship, weapon);
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, weapon);
         webglScene.customEvent('WeaponSelected', { ship: ship, weapon: weapon });
         //Moved to AFTER onWeaponSelected() in Fire phase strategy, to prevent prevent error when selecting a weapon and friendly fighter flight is selected unit - DK 6.25        
         gamedata.selectedSystems.push(weapon);
@@ -521,12 +529,21 @@ window.weaponManager = {
         if (!result) return '';
         if (result.breakdownReason) return result.breakdownReason;
         if (!result.modifiers || result.modifiers.length === 0) return '';
+        function fmtPct(value, key) {
+            var pct = Math.round(value * 5 * 10) / 10; //one-decimal %, trailing .0 dropped by toString
+            var sign = (pct > 0 && key !== 'base') ? '+' : ''; //base is the starting value, not a modifier; +0 shown as 0
+            return sign + pct + '%';
+        }
         var lines = ['Hit chance: ' + result.hitChance + '%'];
         for (var i = 0; i < result.modifiers.length; i++) {
             var m = result.modifiers[i];
-            var pct = Math.round(m.value * 5 * 10) / 10; //one-decimal %, trailing .0 dropped by toString
-            var sign = (pct >= 0 && m.key !== 'base') ? '+' : ''; //base is the starting value, not a modifier
-            lines.push('• ' + m.label + ': ' + sign + pct + '%');
+            //A modifier may carry a value range (valueHigh/valueLow, d20 units) - e.g. the
+            //cumulative split penalty spread across already-locked shots - rendered "high to low".
+            if (typeof m.valueHigh === 'number' && typeof m.valueLow === 'number' && m.valueHigh !== m.valueLow) {
+                lines.push('• ' + m.label + ': ' + fmtPct(m.valueHigh, m.key) + ' to ' + fmtPct(m.valueLow, m.key));
+            } else {
+                lines.push('• ' + m.label + ': ' + fmtPct(m.value, m.key));
+            }
         }
         return lines.join('\n');
     },
@@ -2873,6 +2890,13 @@ window.weaponManager = {
     //   - MANUAL (checkbox off): ONE fire order PER chosen flight, shots = that size.
     // The combat log groups the same-hex orders into one "Fighter Bomb" entry.
     queueShadowFighterBombOrder: function queueShadowFighterBombOrder(carrier, weapon, hexpos, type) {
+        //A carrier that half-phased this turn is partly in hyperspace and cannot
+        //form/expel its integrated fighters — the server (ShadowFighterBomb::fire)
+        //rejects the launch too, so block the order here for immediate feedback.
+        if (shipManager.movement.isHalfPhased(carrier)) {
+            confirm.warning("Half-phased ships cannot launch fighters with the Fighter Bomb.");
+            return;
+        }
         //Multi-bay: scope the offered pool to THIS bomb's bay (weapon.bombHangarIndex).
         var pool = weaponManager.shadowFighterBombPool(carrier, weapon);
         if (pool <= 0) {
@@ -3379,7 +3403,7 @@ window.weaponManager = {
             }
         }
 
-        shipWindowManager.setDataForSystem(ship, system);
+        //STAGE4-RETIRED shipWindowManager.setDataForSystem(ship, system);
         webglScene.customEvent('SystemDataChanged', { ship: ship, system: system });
     },
 

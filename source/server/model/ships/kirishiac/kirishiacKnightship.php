@@ -44,6 +44,9 @@ class KirishiacKnightship extends HeavyCombatVessel{
             20 => "Orbital"
             );			
 
+		/*Kirishiac use their own enhancement set */		
+		Enhancements::nonstandardEnhancementSet($this, 'KirshiacShip');  
+
         $this->addPrimarySystem(new CnC(7, 12, 0, 0));
 		$scanner = new Scanner(6, 20, 0, 12);
 		$scanner->markAdvanced();
