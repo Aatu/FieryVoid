@@ -50,7 +50,7 @@ a:hover {
 .news-panel,
 .chat-panel {
   background: rgba(23, 39, 54, 0.9);
-  padding: 0px 30px 5px 30px;
+  padding: 0px 30px 10px 30px;
   border-radius: 5px;
   margin-bottom: 10px;
   border: 1px solid #215a7a;
@@ -371,7 +371,7 @@ a:hover {
 
 .updates-list {
   list-style: disc inside;
-  margin-left: -20px;
+  margin-left: -30px;
   margin-bottom: 10px;
   margin-top: 5px;
   font-size: 14px;
@@ -651,6 +651,7 @@ a:hover {
 
 .top-right-row .btn {
   margin-left: 0px;
+  color: #DEEBFF;  
 }
 
 .gamecontainer.found .notfound {
