@@ -1,13 +1,31 @@
 import * as React from "react";
 import styled from "styled-components"
 import { Header, Entry } from './SystemInfo';
+import theme from "../styled/theme";
 import buildHitChart from "../helpers/buildHitChart";
 
 //$tightBottom (ship window Notes popup, feedback 2026-07-19): drop the trailing
 //blank separator Entry so the popup's small bottom padding sets the gap under the
 //last line, instead of a full empty text row plus padding.
+/*$compactText (ship window Notes popup, user request 2026-07-26): match the Ship Stats
+  popup's type, so the two popups dropping from adjacent buttons read as one datasheet -
+  10px body in the notes blue (ShipNotesPanel's StatLabel) and 10px upright white headings
+  (its StatValue colour), replacing the 12px body / 11px italic heading the tooltip stack
+  uses. Applied here via component selectors rather than by editing the shared
+  Entry/Header (SystemInfo.js), which the system tooltips also render.*/
 const InfoContainer = styled.div`
     ${props => props.$tightBottom ? '& > *:last-child { display: none; }' : ''}
+    ${props => props.$compactText ? `
+    ${Entry} {
+        font-size: 10px;
+        line-height: 1.4;
+        color: ${theme.colors.textAccent};
+    }
+    ${Header} {
+        font-size: 10px;
+        font-style: normal;
+        color: ${theme.colors.text};
+    }` : ''}
 `;
 
 class ShipInfo extends React.Component {
@@ -16,7 +34,7 @@ class ShipInfo extends React.Component {
 	render() {
 		//hideHitChart: the ship window's Notes popup reuses this block but has its own
 		//dedicated HitChartPanel, so it suppresses the chart lines here.
-		const { ship, hideHitChart, tightBottom } = this.props;
+		const { ship, hideHitChart, tightBottom, compactText } = this.props;
 
 		//Purchased enhancements are surfaced in the always-visible gold Enhancements box
 		//for full grid ship windows, so they are NOT repeated inline here for those ships
@@ -96,7 +114,7 @@ class ShipInfo extends React.Component {
 		}
 
 		return (
-			<InfoContainer $tightBottom={tightBottom}>
+			<InfoContainer $tightBottom={tightBottom} $compactText={compactText}>
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Offensive bonus: </Header>{displayOffensiveBonus * 5}</Entry>}
 				{ship.flight && isRevealed && <Entry key={reactKey++}><Header>Armor (F/S/A): </Header>{shipManager.systems.getFlightArmour(ship)}</Entry>}
 				{/*profile, same base numbers the ship window's stat panels show (user request

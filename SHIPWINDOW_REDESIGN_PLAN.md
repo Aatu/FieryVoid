@@ -507,6 +507,137 @@ the screen to be practical"):**
    (`isUnrevealedMine`, its own earlier branch) render no controls and stay at 0.
    Verified: esbuild JSX parse ×2. UI.bundle only — needs `yarn build`.
 
+**Post-Stage-4 improvements round 14 (2026-07-26) — BUILT, awaiting user test
+(UI.bundle only; one user request, game.php only):**
+1. **"Ship Stats" action button in the game.php ship window** (`ShipWindow.js` +
+   `ShipNotesPanel.js`), sitting **between Hit Chart and Ship Art** in the top-left
+   control stack and opening the lobby's Ship Stats block as a **click popup**, exactly
+   the way Hit Chart does. The popup body is the **existing `ManoeuvreStats` component
+   verbatim** — same "SHIP STATS" header bar, same CSS bar-graph `StatsIcon` glyph, same
+   rows (Turn cost / Turn delay / Accel-decel / Pivot / Roll / Profile F-S / Initiative,
+   with the `!ship.base` gate that leaves bases showing only Profile) — so the game and
+   lobby readouts cannot drift. `StatsIcon` is now **exported** from `ShipNotesPanel.js`
+   and reused directly by the button, for the same reason.
+   - **Wiring**: `openPanel` gained a third value `'shipstats'` (`null | 'hitchart' |
+     'shipstats' | 'notes'`) driving `renderStatsButton` + a new `renderPopup` branch;
+     `togglePanel` / the document-pointerdown outside-close / the `$active` button fill
+     are all generic and needed no change. The popup uses `$fit` (the stats panel is a
+     fixed 150px box, so it shrink-wraps) and the same `getAnchorBelow(this.controlsRef)`
+     anchor as game.php's Hit Chart — it drops below the whole button stack.
+   - **Where it appears**: new `statsAvailable(ship)` helper next to `artAvailable` —
+     `!isLobby() && !ship.flight && !ship.mine && !gamedata.isTerrain(...)`. The **lobby is
+     excluded because it already shows the identical block always-visible** under the Hit
+     Chart button (a button there would duplicate it); mines/terrain are excluded because
+     manoeuvre stats are meaningless for them (the lobby likewise hides the block for
+     mines), and game flight windows render no control block at all. `renderControls`'
+     all-empty null guard and the popup branch both consult the same helper, so a stale
+     `openPanel` can't render an orphan popup.
+2. **Live per-turn costs in that popup, blueprint deltas in yellow** (same-day follow-up;
+   the first cut showed the blueprint rates and the user asked for the movement engine's
+   live figures instead). `ManoeuvreStats` gained a **`live` prop** — passed only by
+   game.php's popup, so **the lobby block is untouched** (no game state there) — and a new
+   `liveManoeuvreStats(ship)` helper in `ShipNotesPanel.js`.
+   - **Turn cost / Turn delay** now read `THRUST (rate)`, e.g. `5 (1.00)`: the actual cost
+     to turn this turn. Arithmetic copied from the ship tooltip
+     ([UI/ShipTooltip.js:359-372], itself movement.js `calculateRequiredThrust`) so the two
+     readouts can't disagree — `ceil(speed × rate)`, a turn never below 1, plus a flat +1
+     per docked LCV (`getDockedLcvTurnSurcharge`); the rate comes from
+     `shipManager.movement.getTurnCost/getTurnDelayCost`, which already fold in **attached
+     ships**; a **reversing submarine** pays ×1.33 on the turn (not the delay), applied in
+     the tooltip's exact operand order so no float rounding can flip a `ceil` between them.
+     One deliberate divergence: the parenthesised turn rate is the EFFECTIVE (post-1.33)
+     one so the row's own arithmetic reads straight — the tooltip prints the unmodified
+     rate next to the modified thrust.
+   - **Yellow (`theme.colors.custom`) marks a moved cost**: new `$changed` prop on
+     `StatValue`, set when the live cost differs from the same figure recomputed from the
+     hull's OWN rate (`ship.turncost`/`turndelaycost`, no attachments/LCVs/sub penalty).
+     Speed cancels out of that comparison, so speed alone never lights it up; a rate the
+     SERVER already modified (crits) isn't flagged either, correctly — that IS the ship's
+     current stat.
+   - **Accel/decel, Pivot, Roll stay as sent**: they are flat thrust costs the client
+     engine doesn't modify for ships. Combat pivot (×1.5) exists only in the firing phase,
+     which only flights may pivot in (`canPivot`), and game flight windows render no
+     control block — so there is nothing live to show.
+   - Guards: the turn/delay block is skipped (→ blueprint fallback) when
+     `shipManager.movement` is absent or the ship has no movement history, since every
+     figure there derives from the last committed move. Mines/terrain were already excluded
+     by `statsAvailable`, keeping the popup strictly inside the set the tooltip already
+     proves safe for these calls.
+3. **Profile and Initiative given the same live treatment** (second follow-up the same
+   day). The helper is now `liveShipStats(ship)` (renamed from `liveManoeuvreStats`) and
+   returns a `*Changed` flag per stat; every row falls back to its blueprint figure on its
+   own if the live one can't be worked out.
+   - **Profile — deliberately EW-FREE, per the user**: only things that move the hull's own
+     profile count. That is the **`ProfileIncreased` critical** (marine sabotage via Wreak
+     Havoc, and scanner/computer loss), which rides the **CnC** and is worth **+1 to every
+     hit-location profile** (= +5% displayed) — mirroring what
+     [weapon.php:1802-1807] does at resolution time
+     (`$defence += $targetCnC->hasCritical("ProfileIncreased")`), since
+     `getHitSectionProfile` hands back raw `forwardDefense`/`sideDefense`
+     ([ShipClasses.php:2318-2321]). Read client-side with
+     `shipManager.criticals.hasCritical(cnc, "ProfileIncreased")` (counts crits in effect
+     this turn). Defensive EW stays out: it is a per-shot modifier applied on top, not a
+     change to the profile — the map tooltip's "Defence (F/S)"
+     (`weaponManager.calculateBaseHitChange`) remains the EW-modified readout.
+   - **Initiative — nothing to recompute**: the server already ships the delta.
+     `ship.iniativeadded` is `(this turn's bonus + common modifiers) − blueprint bonus`,
+     filled in by `ShipClasses::onConstructed` ([ShipClasses.php:1113-1116]) expressly
+     "for display to player", and covers the sub-speed-5 penalty
+     (`getCommonIniModifiers`: −10 per point under speed 5), the CnC criticals (comms
+     disrupted, reduced initiative, tractor-held, hangar ops, LCV launched) and per-hull
+     rules alike. Row shows `iniativebonus + iniativeadded`, yellow when the mod is
+     non-zero — **which is most ships most turns**, since the speed penalty alone fires
+     below speed 5. That is accurate, not a bug; flag it if it reads as noisy.
+   - Neither row carries a parenthesised second figure: unlike turn cost (where the *rate*
+     would otherwise vanish from the panel) these are in the same units as the blueprint
+     value, so the yellow alone carries the "modified" signal.
+4. **Popup renders the block `bare`** (third follow-up): rows only — no "SHIP STATS" title
+   bar, no dotted panel frame. Both were saying it twice, since the popup already has
+   `PopupHolder`'s frame and drops from a button labelled "Ship Stats". New `bare` prop on
+   `ManoeuvreStats` skips `StatsTitle` and switches `StatsPanel` to a `$bare` variant
+   (padding 0, no border/background); the 150px width is KEPT so the label/value columns
+   sit exactly where they do in the lobby block, and `StatLabel`/`StatValue`'s own 5px side
+   margins supply the inset the panel padding used to. The **lobby block is untouched** —
+   it passes neither `live` nor `bare`.
+5. **Button order swapped + Ship Stats hover-peeks** (fourth follow-up). Game stack is now
+   **Hit Chart → Ship Art → Ship Stats → Notes** (the two new buttons traded places; the
+   lobby, which renders no Ship Stats button, is unaffected). The Notes button's hover-peek
+   was **generalised to any panel** rather than duplicated: state `hoverNotes` (bool) →
+   **`hoverPanel`** (same vocabulary as `openPanel`), `onNotesHoverStart/End` →
+   **`onPanelHoverStart(name)`/`onPanelHoverEnd()`**, timer `notesHoverTimer` →
+   `panelHoverTimer`; both the Ship Stats button and its popup now carry the handlers, so
+   the pointer can cross from button into popup within the same 150ms grace. `renderPopup`
+   simplifies to `const shown = openPanel || hoverPanel` — only a rendered button can set
+   `hoverPanel` and every branch re-checks its own availability, so the old
+   `hoverNotes && withNotes` guard is redundant. Click still pins, a clicked panel still
+   wins, and `$active` still tracks `openPanel` only (hovering doesn't light the button) —
+   all exactly as Notes behaved.
+   Verified: esbuild JSX parse + bundle-resolve ×2 (ShipWindow.js, ShipNotesPanel.js),
+   plus a grep sweep confirming no `hoverNotes`/`notesHoverTimer`/`onNotesHover` references
+   survive.
+6. **Notes popup takes the Ship Stats popup's type** (fifth follow-up): 10px body in the
+   notes blue (`theme.colors.textAccent`, = `StatLabel`) and **10px upright** white
+   headings (= `StatValue`), replacing the tooltip stack's 12px body / 11px italic heading —
+   so the two popups dropping from adjacent buttons read as one datasheet. New
+   `compactText` prop on `ShipInfo`, applied as **component selectors** (`${Entry}` /
+   `${Header}`) inside `InfoContainer` rather than by editing the shared `Entry`/`Header`
+   in `SystemInfo.js`, which the system tooltips also render. Specificity works out on its
+   own (container class + component class beats the component's own single-class rule).
+   **Scope note**: only the Notes popup passes it. `SystemInfo`'s ship-level info popup
+   renders the same `ShipInfo` at the old 12px — extend by passing `compactText` there too
+   if that reads as inconsistent.
+7. **Fix: an attachment-raised turn rate could change the row without colouring it**
+   (user report, game 4072 — a Primus with an attached claw ship showed corrected Turn
+   cost / Turn delay in plain white). The highlight test compared only the **ceil'd thrust**,
+   but the row renders `thrust (rate)`: a rate raised from e.g. 1.33 to 1.83 by
+   `getTurnCost`'s attached-ship sum still ceils to the same thrust at low speed, so a
+   visibly changed row tested as unchanged. Both rows now compare the **whole rendered
+   string** against the one the hull's own rate alone would produce (new `costText(thrust,
+   rate)` helper builds both), so anything visible in the row can light it up. Speed is
+   still common to both sides, so speed alone still never does.
+   Verified: esbuild JSX parse + bundle-resolve ×3 (ShipWindow.js, ShipNotesPanel.js,
+   ShipInfo.js). UI.bundle only — needs `yarn build`.
+
 **Stage 3 (2026-07-17) — COMPLETE (user-accepted after feedback rounds 1–5).** Two user riders (2026-07-17)
 refine §3.2: (1) the Hit Chart button sits in the same top-left position as
 game.php with the manoeuvre stats (TC/TD, Acc/Pivot/Roll, Profile, Ini, Agile)

@@ -7,7 +7,7 @@ import ShipSection from "./ShipSection";
 import ShipWindowEw from "./ShipWindowEw";
 import FighterList from "./FighterList";
 import HitChartPanel from "./HitChartPanel";
-import ShipNotesPanel, { ManoeuvreStats, EnhancementsPanel } from "./ShipNotesPanel";
+import ShipNotesPanel, { ManoeuvreStats, EnhancementsPanel, StatsIcon } from "./ShipNotesPanel";
 import ShipInfo from "../system/ShipInfo";
 
 /*"Digital SCS" ship window (SHIPWINDOW_REDESIGN_PLAN.md Stage 1): sections arranged
@@ -508,11 +508,12 @@ class ShipWindow extends React.Component {
         //top-left control block; measuring the button rather than the whole block keeps the
         //lobby popup attached to it, above the Ship Stats panel)
         this.hitChartBtnRef = React.createRef();
-        //openPanel: clicked open (sticky until click-outside); hoverNotes: desktop
-        //hover peek on the Notes button/popup, hides shortly after mouse-out; showArt:
-        //Ship Art toggle - hides the sections and shows the hull art in full colour
-        this.state = { openPanel: null, hoverNotes: false, showArt: false }; //openPanel: null | 'hitchart' | 'notes'
-        this.notesHoverTimer = null;
+        //openPanel: clicked open (sticky until click-outside); hoverPanel: desktop
+        //hover peek on a button/popup, hides shortly after mouse-out (Notes, and Ship
+        //Stats since 2026-07-26); showArt: Ship Art toggle - hides the sections and
+        //shows the hull art in full colour
+        this.state = { openPanel: null, hoverPanel: null, showArt: false }; //both panels: null | 'hitchart' | 'shipstats' | 'notes'
+        this.panelHoverTimer = null;
         this.onDocumentPointerDown = this.onDocumentPointerDown.bind(this);
         this.onDragStart = this.onDragStart.bind(this);
         this.onDragMove = this.onDragMove.bind(this);
@@ -939,23 +940,25 @@ class ShipWindow extends React.Component {
         this.stopDragListening();
         this.stopTouchDragListening();
         this.dragStart = null;
-        if (this.notesHoverTimer) clearTimeout(this.notesHoverTimer);
+        if (this.panelHoverTimer) clearTimeout(this.panelHoverTimer);
     }
 
-    onNotesHoverStart() {
-        if (this.notesHoverTimer) {
-            clearTimeout(this.notesHoverTimer);
-            this.notesHoverTimer = null;
+    //desktop hover peek, shared by the Notes and Ship Stats buttons (and their popups):
+    //hovering shows the panel, a click still pins it, and a clicked panel always wins
+    onPanelHoverStart(name) {
+        if (this.panelHoverTimer) {
+            clearTimeout(this.panelHoverTimer);
+            this.panelHoverTimer = null;
         }
-        if (!this.state.hoverNotes) this.setState({ hoverNotes: true });
+        if (this.state.hoverPanel !== name) this.setState({ hoverPanel: name });
     }
 
     //short grace period so the pointer can cross from the button into the popup
-    onNotesHoverEnd() {
-        if (this.notesHoverTimer) clearTimeout(this.notesHoverTimer);
-        this.notesHoverTimer = setTimeout(() => {
-            this.notesHoverTimer = null;
-            this.setState({ hoverNotes: false });
+    onPanelHoverEnd() {
+        if (this.panelHoverTimer) clearTimeout(this.panelHoverTimer);
+        this.panelHoverTimer = setTimeout(() => {
+            this.panelHoverTimer = null;
+            this.setState({ hoverPanel: null });
         }, 150);
     }
 
@@ -1006,6 +1009,25 @@ class ShipWindow extends React.Component {
         );
     }
 
+    /*Ship Stats button (game.php only, user request 2026-07-26): opens the lobby's
+      Ship Stats block as a popup. Same StatsIcon glyph as the lobby block, imported from
+      ShipNotesPanel so the two can't drift. Hover-peeks like the Notes button and pins on
+      click (user request 2026-07-26) - stats are a glance-at stat, not a read-through one.*/
+    renderStatsButton(wide) {
+        const { openPanel } = this.state;
+        return (
+            <CtrlButton
+                $wide={wide}
+                $active={openPanel === 'shipstats'}
+                onClick={this.togglePanel.bind(this, 'shipstats')}
+                onMouseEnter={this.onPanelHoverStart.bind(this, 'shipstats')}
+                onMouseLeave={this.onPanelHoverEnd.bind(this)}
+            >
+                <StatsIcon><i /><i /><i /></StatsIcon>Ship Stats
+            </CtrlButton>
+        );
+    }
+
     renderArtButton(wide) {
         return (
             <CtrlButton $wide={wide} $active={this.state.showArt} onClick={this.toggleArt.bind(this)}>
@@ -1021,8 +1043,8 @@ class ShipWindow extends React.Component {
                 $wide={wide}
                 $active={openPanel === 'notes'}
                 onClick={this.togglePanel.bind(this, 'notes')}
-                onMouseEnter={this.onNotesHoverStart.bind(this)}
-                onMouseLeave={this.onNotesHoverEnd.bind(this)}
+                onMouseEnter={this.onPanelHoverStart.bind(this, 'notes')}
+                onMouseLeave={this.onPanelHoverEnd.bind(this)}
             >
                 <CtrlIcon>✎</CtrlIcon>Notes
             </CtrlButton>
@@ -1030,14 +1052,16 @@ class ShipWindow extends React.Component {
     }
 
     /*Top-left control block, identical in structure on both pages (2026-07-23): Hit Chart,
-      then Ship Art, then game.php's Notes button / the lobby's manoeuvre stats. The lobby's
-      round-8/9 bottom-left `artbtn` grid cell is gone - the two toggles now always read as
-      one stack. Compact windows (mines/terrain) render the same block as a centred row.*/
+      then Ship Art, then game.php's Ship Stats button (2026-07-26), then game.php's Notes
+      button / the lobby's manoeuvre stats. The lobby's round-8/9 bottom-left `artbtn` grid
+      cell is gone - the two toggles now always read as one stack. Compact windows
+      (mines/terrain) render the same block as a centred row.*/
     renderControls(withHitChart, withNotes, compact, withStats) {
         const lobby = isLobby();
         const artHere = artAvailable(this.props.ship);
+        const statsBtnHere = statsAvailable(this.props.ship);
 
-        if (!withHitChart && !withNotes && !withStats && !artHere) return null;
+        if (!withHitChart && !withNotes && !withStats && !artHere && !statsBtnHere) return null;
 
         const wide = lobby; //150px datasheet panels in the lobby, 130px in game
 
@@ -1045,6 +1069,7 @@ class ShipWindow extends React.Component {
             <ControlsArea ref={this.controlsRef} $compact={compact}>
                 {withHitChart && this.renderHitChartButton(wide)}
                 {artHere && this.renderArtButton(wide)}
+                {statsBtnHere && this.renderStatsButton(wide)}
                 {withNotes && this.renderNotesButton(wide)}
                 {/*lobby: manoeuvre stats live under the buttons (user layout
                    decision 2026-07-17)*/}
@@ -1096,16 +1121,18 @@ class ShipWindow extends React.Component {
 
     renderPopup(withHitChart, withNotes, top) {
         const { ship } = this.props;
-        const { openPanel, hoverNotes } = this.state;
+        const { openPanel, hoverPanel } = this.state;
 
-        //clicked panel wins; otherwise a desktop hover on the Notes button peeks the notes
-        const shown = openPanel || (hoverNotes && withNotes ? 'notes' : null);
+        //clicked panel wins; otherwise a desktop hover on the Notes / Ship Stats button
+        //peeks that panel. Only a rendered button can set hoverPanel, and each branch
+        //below re-checks its own availability, so no validation is needed here.
+        const shown = openPanel || hoverPanel;
         if (!shown) return null;
 
         //the lobby stacks Hit Chart + the tall Ship Stats panel in the control block, so
         //its Hit Chart popup drops from the BUTTON (staying attached to it, over Ship Stats)
         //rather than the whole block; game.php / Notes / compact drop below the whole block
-        //(keeps the popup clear of the buttons now that game.php stacks three of them).
+        //(keeps the popup clear of the buttons now that game.php stacks up to four).
         const anchorRef = (shown === 'hitchart' && isLobby()) ? this.hitChartBtnRef : this.controlsRef;
         const { top: anchorTop, left } = this.getAnchorBelow(anchorRef, top);
 
@@ -1113,6 +1140,27 @@ class ShipWindow extends React.Component {
             //$fit (feedback 2026-07-17, supersedes round 5's full-width span): the
             //geographic columns size themselves, so the popup shrink-wraps them
             return <PopupHolder ref={this.popupRef} $top={anchorTop} $left={left} $fit><HitChartPanel ship={ship} /></PopupHolder>;
+        }
+        if (shown === 'shipstats' && statsAvailable(ship)) {
+            /*the lobby's Ship Stats block (user request 2026-07-26) - a fixed-width panel,
+              so $fit shrink-wraps the popup around it. `live`: the rows read the game
+              state for THIS turn (turn costs as thrust with the rate in parens, profile
+              incl. the ProfileIncreased crit, initiative incl. its modifiers) and go
+              yellow where that has moved them off the hull's own figure. `bare`: rows
+              only - this popup's own frame and the button it drops from already say
+              "Ship Stats", so the block's title bar and border would say it twice.*/
+            return (
+                <PopupHolder
+                    ref={this.popupRef}
+                    $top={anchorTop}
+                    $left={left}
+                    $fit
+                    onMouseEnter={this.onPanelHoverStart.bind(this, 'shipstats')}
+                    onMouseLeave={this.onPanelHoverEnd.bind(this)}
+                >
+                    <ManoeuvreStats ship={ship} live bare />
+                </PopupHolder>
+            );
         }
         if (shown === 'notes' && withNotes) {
             return (
@@ -1122,15 +1170,16 @@ class ShipWindow extends React.Component {
                     $left={left}
                     $fit
                     $notes
-                    onMouseEnter={this.onNotesHoverStart.bind(this)}
-                    onMouseLeave={this.onNotesHoverEnd.bind(this)}
+                    onMouseEnter={this.onPanelHoverStart.bind(this, 'notes')}
+                    onMouseLeave={this.onPanelHoverEnd.bind(this)}
                 >
                     {/*ShipInfo itself decides whether to list enhancements inline: hidden
                        for full grid ships (they have the gold Enhancements box), shown for
                        mines / fighters / terrain (no box) - so no flag is needed here.
                        tightBottom drops its trailing blank line so PopupHolder's 5px
-                       bottom padding sets the gap under the last note.*/}
-                    <ShipInfo ship={ship} hideHitChart tightBottom />
+                       bottom padding sets the gap under the last note; compactText matches
+                       the Ship Stats popup's type (user request 2026-07-26).*/}
+                    <ShipInfo ship={ship} hideHitChart tightBottom compactText />
                 </PopupHolder>
             );
         }
@@ -1409,6 +1458,14 @@ const hasHitChart = (ship) => Boolean(ship.hitChart) && Object.keys(ship.hitChar
 //the Ship Art toggle (item 4) needs hull art to display and is meaningless for flight
 //windows (they show their fighters, not a single hull)
 const artAvailable = (ship) => Boolean(ship && ship.imagePath) && !ship.flight;
+
+/*Ship Stats popup button - game.php ONLY (user request 2026-07-26). The lobby already
+  shows the very same ManoeuvreStats block always-visible under the Hit Chart button, so
+  a button there would just duplicate it. Manoeuvre stats are meaningless for mines and
+  terrain (which is why the lobby hides the block for mines too), and game flight windows
+  render no control block at all, so both are excluded rather than shown empty.*/
+const statsAvailable = (ship) => Boolean(ship) && !isLobby() && !ship.flight && !ship.mine
+    && !window.gamedata.isTerrain(ship.shipSizeClass, ship.userid);
 
 const hasNotes = (ship) => Boolean(ship.notes)
     || Boolean(ship.enhancementTooltip)
