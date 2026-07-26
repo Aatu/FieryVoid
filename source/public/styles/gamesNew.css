@@ -334,7 +334,7 @@ a:hover {
 }
 
 .resources {
-  margin-bottom: 10px;
+  margin-bottom: 12px;
   font-size: 16px;
 }
 
@@ -371,7 +371,7 @@ a:hover {
 
 .updates-list {
   list-style: disc inside;
-  margin-left: -30px;
+  margin-left: -35px;
   margin-bottom: 10px;
   margin-top: 5px;
   font-size: 14px;
