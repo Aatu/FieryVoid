@@ -358,6 +358,10 @@ a:hover {
   color: #8bcaf2
 }
 
+.resources a:hover {
+  text-decoration: underline;
+}
+
 .links a {
   margin-right: 5px;
   margin-left: 5px;
@@ -370,12 +374,28 @@ a:hover {
   font-size: 14px;
 }
 
+.links a:hover {
+  text-decoration: underline;
+}
+
+
 .updates-list {
   list-style: disc inside;
   margin-left: -35px;
   margin-bottom: 10px;
   margin-top: 5px;
   font-size: 14px;
+}
+
+
+
+/* Headline colour for one update. Defaults to the page accent; an individual <li>
+   overrides it by setting --update-colour (the tokens live in gamesPanel.css :root).
+   The colour goes on the <strong> and not the <li> because list-style: inside draws
+   the disc marker in the li's colour, and the markers should stay uniform. */
+.update-title {
+  color: var(--update-colour, var(--fv-accent));
+  /*  color: #8bcaf2;  */
 }
 
 .noteGames {

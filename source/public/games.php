@@ -132,12 +132,13 @@ $defaultGameName = ucfirst($playerName) . "'s Game";
       <h3>Latest Updates — July 2026</h3>
       <ul class="updates-list">
         <!--<li style="color: #cc0000ff;"><strong>Merry Christmas from Fiery Void!</strong></li>-->    
-        <li><strong>KIRISHIAC LORDS</strong> - A brand-new Ancient faction has been added to Fiery Void!</li>  
-        <li><strong>Ship Window Revamp</strong> - Ship windows (SCS) have been updated in Game and Fleet Selection screens to improve appearance and functionality.</li> 
-        <li><strong>Discord Notifications</strong> - You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>           
-        <li><strong>Civilians and Raiders</strong> - A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li>          
-        <li><strong>Sh'lassan and Mentaban</strong> - Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>                                                              
-        <li><strong>General Fixes</strong> - Many other small bug fixes/updates. Thanks for the reports!</li>           
+        <li><span class="update-title">KIRISHIAC LORDS</span> - A brand-new Ancient faction has been added to Fiery Void!</li>  
+        <li><span class="update-title">Ship Window Revamp</span> - Ship windows (SCS) have been updated in Game and Fleet Selection screens to improve appearance and functionality.</li> 
+        <li><span class="update-title">Discord Notifications</span> - You can now add your Discord account details in 'Set-Up Discord Notifications' to get a message when it's your turn. See Fiery Void FAQ for details!</li>           
+        <li><span class="update-title">Civilians and Raiders</span> - A plethora of official and custom Civilian ships added for a huge number of factions (thanks to Lunara).</li>          
+        <li><span class="update-title">Sh'lassan and Mentaban</span> - Added these two Small Race factions which utilise exported EA hulls (thanks to Lunara).</li>                                                              
+        <li><span class="update-title">General Fixes</span> - Many other small bug fixes/updates. Thanks for the reports!</li>
+        <!--<li style="--update-colour: var(--fv-text-dim)"><strong>General Fixes</strong> - Many other small bug fixes/updates. Thanks for the reports!</li>-->                     
         <!--<li><strong>6 Jun</strong> - Overlay colors, deployment zone tweaks, UI fixes. Pulsar mine fixed, tooltip/text readability improved.</li>-->
       </ul>
     </div>
