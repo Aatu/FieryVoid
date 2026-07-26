@@ -99,9 +99,9 @@ a:hover {
 }
 
 .faq-panel a {
-  margin-right: 5px;
-  margin-left: 5px;
-  font-size: 12px;
+  margin-right: 2px;
+  margin-left: 2px;
+  font-size: 13px;
   color: #8bcaf2
 }
 
@@ -639,7 +639,7 @@ a:hover {
 }
 
 .top-right-row a {
-  color: #8bcaf2;
+  color: #DEEBFF;
   /* was `8bcaf2` — no #, so the declaration was invalid and these links silently fell
      back to the generic `a` colour on all 12 pages linking this file */
   text-decoration: none;
