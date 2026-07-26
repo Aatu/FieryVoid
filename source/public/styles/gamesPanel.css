@@ -163,17 +163,19 @@
 }
 
 /* The list container. Rounded like the panel (the site's feel), holding square
-   readouts (the game's feel). min-height keeps the two columns level when one is
-   empty — the old markup had no min-height and an unstyled placeholder, so an empty
-   column collapsed to a single line and the row read as broken. */
+   readouts (the game's feel).
+
+   NO min-height: a well with three cards in it hugs those three cards. The floor that
+   stops an EMPTY column collapsing to a single line now lives on .fv-empty instead, which
+   is the only case that ever needed it — as a min-height here it also applied to short
+   lists, leaving a strip of dead well under the last card (user 2026-07-26). */
 .fv-well {
   background: var(--fv-well);
   border: 1px solid var(--fv-line-soft);
   border-radius: 5px;
   padding: 6px;
-  /* Taller than the first cut (was 132/340): the scrollbar was doing too much of the work
-     and only ~6 cards were visible at a time. ~9 now. */
-  min-height: 176px;
+  /* Taller than the first cut (was 340): the scrollbar was doing too much of the work
+     and only ~6 cards were visible at a time. */
   max-height: 520px;
   overflow-y: auto;
   display: flex;
@@ -389,8 +391,16 @@
   --rail: var(--fv-ladder);
 }
 
+/* Carries the height that used to be .fv-well's min-height: 164 + the well's 6px padding
+   top and bottom is the same 176px an empty column stood at before, so nothing about the
+   empty state changed — but a well holding cards is no longer padded out to match it.
+   Centres its own text rather than relying on margin:auto, which needs free space in the
+   flex container to do anything and no longer has any. */
 .fv-empty {
-  margin: auto;
+  min-height: 164px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 22px 10px;
   text-align: center;
   font-family: var(--fv-mono);
